@@ -174,7 +174,7 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 				document= new Document(sc.getSource());
 			}
 		} catch (CoreException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		}
 		if (document == null || configuration == null)
 			return null;

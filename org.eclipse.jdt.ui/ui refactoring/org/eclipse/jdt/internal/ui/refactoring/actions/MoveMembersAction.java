@@ -20,6 +20,8 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -108,8 +110,10 @@ public class MoveMembersAction extends SelectionDispatchAction{
 		try{
 			fRefactoring= createNewRefactoringInstance(elements);
 			return fRefactoring.checkPreactivation().isOK();
-		} catch (JavaModelException e){
-			JavaPlugin.logIgnoringNotPresentException(e); //this happen on selection changes in viewers - do not show ui if fails, just log
+		} catch (JavaModelException e) {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
 			return false;
 		}	
 	}

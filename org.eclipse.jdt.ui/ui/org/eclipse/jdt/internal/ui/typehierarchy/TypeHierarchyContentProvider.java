@@ -172,7 +172,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				}
 			}		
 		} catch (JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		}
 	}
 		
@@ -184,7 +184,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				}
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		}
 	}
 	

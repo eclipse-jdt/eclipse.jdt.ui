@@ -244,7 +244,7 @@ public class JarWriter {
 						containingFolder.refreshLocal(IResource.DEPTH_ONE, null);
 				} catch (CoreException ex) {
 					// don't refresh the folder but log the problem
-					JavaPlugin.logIgnoringNotPresentException(ex);
+					JavaPlugin.log(ex);
 				} finally {
 					return;
 				}

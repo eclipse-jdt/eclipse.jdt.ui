@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -105,7 +107,9 @@ public class PullUpAction extends SelectionDispatchAction{
 			fRefactoring= createNewRefactoringInstance(elements);
 			return fRefactoring.checkPreactivation().isOK();
 		} catch (JavaModelException e){
-			JavaPlugin.logIgnoringNotPresentException(e); //this happen on selection changes in viewers - do not show ui if fails, just log
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
 			return false;
 		}	
 	}

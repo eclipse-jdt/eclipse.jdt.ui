@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
@@ -155,7 +156,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 				return getErrorTicksFromMarkers((IResource) obj, IResource.DEPTH_INFINITE, null);
 			}
 		} catch (CoreException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
 		}
 		return 0;
 	}

@@ -131,7 +131,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				try {
 					contents= JavaCompareUtilities.readString(sca.getContents());
 				} catch (CoreException ex) {
-					JavaPlugin.logIgnoringNotPresentException(ex);
+					JavaPlugin.log(ex);
 					return null;
 				}			
 			}
@@ -224,7 +224,7 @@ public class JavaStructureCreator implements IStructureCreator {
 		try {
 			content= JavaCompareUtilities.readString(sca.getContents());
 		} catch (CoreException ex) {
-			JavaPlugin.logIgnoringNotPresentException(ex);
+			JavaPlugin.log(ex);
 			return null;
 		}
 				

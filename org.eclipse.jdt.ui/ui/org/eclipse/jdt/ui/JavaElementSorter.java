@@ -129,7 +129,7 @@ public class JavaElementSorter extends ViewerSorter {
 				}
 			
 			} catch (JavaModelException e) {
-				JavaPlugin.logIgnoringNotPresentException(e);
+				JavaPlugin.log(e);
 			}
 			return JAVAELEMENTS;
 		} else if (element instanceof IFile) {

@@ -149,7 +149,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					}
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.logIgnoringNotPresentException(e);
+				JavaPlugin.log(e);
 			}
 		}
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);

@@ -154,12 +154,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		log(multi);
 	}
 	
-	public static void logIgnoringNotPresentException(Throwable e) {
-		if (e instanceof JavaModelException && ((JavaModelException)e).isDoesNotExist())
-			return;
-		log(e);
-	}
-	
 	public static void log(Throwable e) {
 		log(new Status(IStatus.ERROR, getPluginId(), JavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.getString("JavaPlugin.internal_error"), e)); //$NON-NLS-1$
 	}

@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -85,10 +86,12 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	private static boolean canRename(IRefactoringRenameSupport refactoringSupport, Object element){
 		if (refactoringSupport == null)
 			return false;
-		try{	
+		try{
 			return refactoringSupport.canRename(element);
-		} catch (JavaModelException e){
-			JavaPlugin.logIgnoringNotPresentException(e);
+		} catch (JavaModelException e) {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
 			return false;
 		}	
 	}

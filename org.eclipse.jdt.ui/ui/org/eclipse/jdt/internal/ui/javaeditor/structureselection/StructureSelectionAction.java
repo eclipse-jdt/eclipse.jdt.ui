@@ -77,7 +77,7 @@ public abstract class StructureSelectionAction extends Action {
 			root.accept(selAnalyzer);
 			return internalGetNewSelectionRange(oldSourceRange, cu, selAnalyzer);
 	 	}	catch (JavaModelException e){
-	 		JavaPlugin.logIgnoringNotPresentException(e); //dialog would be too heavy here
+	 		JavaPlugin.log(e); //dialog would be too heavy here
 	 		return new SourceRange(oldSourceRange.getOffset(), oldSourceRange.getLength());
 	 	}
 	}

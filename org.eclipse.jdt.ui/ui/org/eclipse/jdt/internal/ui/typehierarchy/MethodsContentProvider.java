@@ -107,7 +107,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 					addAll(type.getFields(), res);
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.logIgnoringNotPresentException(e);
+				JavaPlugin.log(e);
 			}
 			return res.toArray();
 		}

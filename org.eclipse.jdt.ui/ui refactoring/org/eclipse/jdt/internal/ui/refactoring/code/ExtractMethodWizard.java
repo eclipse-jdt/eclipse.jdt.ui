@@ -32,7 +32,7 @@ public class ExtractMethodWizard extends RefactoringWizard {
 		try {
 			return getRefactoring().createChange(new NullProgressMonitor());
 		} catch (JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 			return null;
 		}	
 	}

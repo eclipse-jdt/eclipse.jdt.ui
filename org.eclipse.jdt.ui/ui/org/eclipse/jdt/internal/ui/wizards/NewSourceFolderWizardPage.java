@@ -449,7 +449,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		try {
 			projects= JavaCore.create(fWorkspaceRoot).getJavaProjects();
 		} catch (JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 			projects= new IJavaProject[0];
 		}
 		
@@ -476,7 +476,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 				res.add(container);
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		}	
 		
 		for (int i= 0; i < fEntries.length; i++) {

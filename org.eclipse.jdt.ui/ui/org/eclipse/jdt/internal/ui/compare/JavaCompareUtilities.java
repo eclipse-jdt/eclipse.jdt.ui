@@ -88,7 +88,7 @@ class JavaCompareUtilities {
 			try {
 				return getTypeImageDescriptor(type.isClass());
 			} catch (CoreException e) {
-				JavaPlugin.logIgnoringNotPresentException(e);
+				JavaPlugin.log(e);
 				return JavaPluginImages.DESC_OBJS_GHOST;
 			}
 		}

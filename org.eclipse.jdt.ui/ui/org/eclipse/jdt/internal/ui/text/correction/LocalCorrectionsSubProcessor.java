@@ -275,7 +275,7 @@ public class LocalCorrectionsSubProcessor {
 					String dialogTitle= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.dialog.title"); //$NON-NLS-1$
 					new RefactoringStarter().activate(refactoring, wizard, dialogTitle, true);
 				} catch (JavaModelException e) {
-					JavaPlugin.logIgnoringNotPresentException(e);
+					JavaPlugin.log(e);
 				}
 			}
 		};

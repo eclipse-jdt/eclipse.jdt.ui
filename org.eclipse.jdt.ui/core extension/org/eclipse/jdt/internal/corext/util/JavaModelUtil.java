@@ -5,11 +5,11 @@
 package org.eclipse.jdt.internal.corext.util;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
@@ -515,5 +514,28 @@ public class JavaModelUtil {
 		return type;
 	}	
 	
-	
+	/*
+	 * http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+	 * 
+	 * Reconciling happens in a separate thread. This can cause a situation where the
+	 * Java element gets disposed after an exists test has been done. So we should not
+	 * log not present exceptions when they happen in working copies.
+	 */
+	public static boolean filterNotPresentException(CoreException exception) {
+		if (!(exception instanceof JavaModelException))
+			return true;
+		JavaModelException je= (JavaModelException)exception;
+		if (!je.isDoesNotExist())
+			return true;
+		IJavaElement[] elements= je.getJavaModelStatus().getElements();
+		for (int i= 0; i < elements.length; i++) {
+			IJavaElement element= elements[i];
+			ICompilationUnit unit= (ICompilationUnit)element.getAncestor(IJavaElement.COMPILATION_UNIT);
+			if (unit == null)
+				return true;
+			if (!unit.isWorkingCopy())
+				return true;
+		}
+		return false;		
+	}
 }

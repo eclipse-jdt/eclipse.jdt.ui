@@ -91,7 +91,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 			}
 			
 		} catch(CoreException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		}
 		return buf.toString();
 	}

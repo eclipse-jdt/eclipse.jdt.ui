@@ -57,7 +57,7 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 						return false;
 					}
 				} catch (CoreException e) {
-					JavaPlugin.logIgnoringNotPresentException(e);
+					JavaPlugin.log(e);
 					return false;
 				}
 			}

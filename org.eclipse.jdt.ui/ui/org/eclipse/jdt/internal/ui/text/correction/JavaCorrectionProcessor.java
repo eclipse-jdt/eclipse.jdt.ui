@@ -207,7 +207,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					 //proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch (CoreException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		}
 	}
 

@@ -122,7 +122,7 @@ class ClipboardActionUtil {
 				} catch (JavaModelException e) {
 					if (!e.isDoesNotExist()) {
 						//do not show error dialogs in a loop
-						JavaPlugin.logIgnoringNotPresentException(e);
+						JavaPlugin.log(e);
 					}
 				}
 			}

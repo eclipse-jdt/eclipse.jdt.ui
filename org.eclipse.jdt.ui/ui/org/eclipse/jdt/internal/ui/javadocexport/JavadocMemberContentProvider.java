@@ -57,7 +57,7 @@ public class JavadocMemberContentProvider implements ITreeContentProvider {
 				return cu;
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		}
 		return new Object[0];
 	}

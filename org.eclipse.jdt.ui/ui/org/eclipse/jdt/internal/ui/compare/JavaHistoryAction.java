@@ -97,7 +97,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		try {
 			file= (IFile) cu.getUnderlyingResource();
 		} catch (JavaModelException ex) {
-			JavaPlugin.logIgnoringNotPresentException(ex);
+			JavaPlugin.log(ex);
 		}
 		
 		if (file != null && file.exists())
@@ -113,7 +113,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		try {
 			states= file.getHistory(null);
 		} catch (CoreException ex) {
-			JavaPlugin.logIgnoringNotPresentException(ex);
+			JavaPlugin.log(ex);
 		}
 		
 		int count= 1;

@@ -99,7 +99,7 @@ public class JavaUIHelp {
 
 				WorkbenchHelp.displayHelp(context);
 			} catch (CoreException ex) {
-				JavaPlugin.logIgnoringNotPresentException(ex);
+				JavaPlugin.log(ex);
 			}
 		}
 	}

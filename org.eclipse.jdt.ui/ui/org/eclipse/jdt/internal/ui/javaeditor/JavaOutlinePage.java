@@ -210,7 +210,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 						try {
 							return filter(c.getChildren());
 						} catch (JavaModelException x) {
-							JavaPlugin.logIgnoringNotPresentException(x); //$NON-NLS-1$
+							JavaPlugin.log(x); //$NON-NLS-1$
 						}
 					}
 					return new Object[0];
@@ -235,7 +235,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 							IJavaElement[] children= filter(c.getChildren());
 							return (children != null && children.length > 0);
 						} catch (JavaModelException x) {
-							JavaPlugin.logIgnoringNotPresentException(x);
+							JavaPlugin.log(x);
 						}
 					}
 					return false;

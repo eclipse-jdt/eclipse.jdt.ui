@@ -74,7 +74,9 @@ public abstract class SourceReferenceAction extends SelectionDispatchAction {
 			}
 			return true;
 		} catch (JavaModelException e){
-			JavaPlugin.logIgnoringNotPresentException(e);
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
 			return false;
 		}	
 	}
@@ -154,7 +156,7 @@ public abstract class SourceReferenceAction extends SelectionDispatchAction {
 					if (wcElement != null && wcElement.exists())
 						wcList.add(wcElement);
 				} catch(JavaModelException e) {
-					JavaPlugin.logIgnoringNotPresentException(e); //cannot show dialog here
+					JavaPlugin.log(e); //cannot show dialog here
 					//do nothing - do not add to selection (?)
 				}
 			}	

@@ -253,7 +253,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		} catch (PartInitException e) {
 			JavaPlugin.log(e);
 		} catch (CoreException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		}		
 	}
 

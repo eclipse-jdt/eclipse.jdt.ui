@@ -457,7 +457,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 								typeRefsFound.add(curr);
 							}
 						} catch (JavaModelException e) {
-							JavaPlugin.logIgnoringNotPresentException(e);
+							JavaPlugin.log(e);
 						}
 						namesFound.add(fullyQualifiedName);
 					}

@@ -107,7 +107,7 @@ public class ProposalInfo {
 				}
 			}	
 		} catch (JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		} catch (IOException e) {
 			JavaPlugin.log(e);
 		}

@@ -34,7 +34,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 				return getPackageFragments((IPackageFragmentRoot) parentElement);
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		}
 		return new Object[0];
 	}
@@ -58,7 +58,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 					}
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.logIgnoringNotPresentException(e);
+				JavaPlugin.log(e);
 			}
 			return list.toArray();
 		}

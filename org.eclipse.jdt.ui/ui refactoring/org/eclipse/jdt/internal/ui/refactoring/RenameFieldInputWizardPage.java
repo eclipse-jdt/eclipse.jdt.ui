@@ -79,7 +79,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 			String getterSig= 	JavaElementUtil.createMethodSignature(getter);
 			return RefactoringMessages.getFormattedString("RenameFiledInputWizardPage.rename_getter_to", new String[]{getterSig, createNewGetterName()}); //$NON-NLS-1$
 		} catch(JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 			return defaultLabel;			
 		}
 	}
@@ -99,7 +99,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 			String setterSig= 	JavaElementUtil.createMethodSignature(setter);
 			return RefactoringMessages.getFormattedString("RenameFiledInputWizardPage.rename_setter_to", new String[]{setterSig, createNewSetterName()});//$NON-NLS-1$
 		} catch(JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 			return defaultLabel;			
 		}
 	}
@@ -112,7 +112,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 		try {
 			return getRenameFieldRefactoring().canEnableGetterRenaming();
 		} catch(JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 			return false;
 		}
 	}
@@ -121,7 +121,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 		try {
 			return getRenameFieldRefactoring().canEnableSetterRenaming();
 		} catch(JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 			return false;
 		}
 	}

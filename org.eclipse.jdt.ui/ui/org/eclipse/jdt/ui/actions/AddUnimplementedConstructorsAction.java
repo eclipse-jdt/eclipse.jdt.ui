@@ -94,6 +94,9 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			IType selected= getSelectedType(selection);
 			enabled= (selected != null) && JavaModelUtil.isEditable(selected.getCompilationUnit());
 		} catch (JavaModelException e) {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);			
 		}
 		setEnabled(enabled);
 	}

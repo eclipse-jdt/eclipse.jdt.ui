@@ -90,7 +90,7 @@ public class ClasspathContainerDescriptor {
 						containers.add(curr);
 					}
 				} catch (CoreException e) {
-					JavaPlugin.logIgnoringNotPresentException(e);
+					JavaPlugin.log(e);
 				}
 			}
 			if (defaultPageName != null && containers.isEmpty()) {

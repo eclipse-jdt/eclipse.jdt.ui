@@ -63,7 +63,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		try {
 			processDelta(event.getDelta());
 		} catch(JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		}
 	}
 	

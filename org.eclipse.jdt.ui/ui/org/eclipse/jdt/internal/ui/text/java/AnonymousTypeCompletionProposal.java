@@ -58,7 +58,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 					imageName= JavaPluginImages.IMG_OBJS_INTERFACE;
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.logIgnoringNotPresentException(e);
+				JavaPlugin.log(e);
 			}
 		}
 		return JavaPluginImages.get(imageName);
@@ -68,7 +68,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		try {
 			return project.findType(typeName);
 		} catch (JavaModelException e) {
-			JavaPlugin.logIgnoringNotPresentException(e);
+			JavaPlugin.log(e);
 		}
 		return null;
 	}
