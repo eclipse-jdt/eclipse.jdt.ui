@@ -364,8 +364,15 @@ public class ResultCollector extends CompletionRequestor {
 		typeName.append(declaringTypeName);
 
 		String[] paramTypes= new String[parameterTypeNames.length];
-		for (int i= 0; i < parameterTypeNames.length; i++) {
-			paramTypes[i]= String.valueOf(parameterPackageNames[i]) + "." + String.valueOf(parameterTypeNames[i]); //$NON-NLS-1$
+		String packageName= null;
+		String className= null;
+		for (int index= 0; index < parameterTypeNames.length; index++) {
+			packageName= String.valueOf(parameterPackageNames[index]);
+			className= String.valueOf(parameterTypeNames[index]);
+			if (packageName.length() > 0)
+				paramTypes[index]= packageName + "." + className; //$NON-NLS-1$
+			else
+				paramTypes[index]= className;
 		}
 
 		JavaCompletionProposal proposal= new OverrideCompletionProposal(fJavaProject, fCompilationUnit, String.valueOf(name), paramTypes, start, getLength(start, end), displayString.toString(), String.valueOf(completionName));
