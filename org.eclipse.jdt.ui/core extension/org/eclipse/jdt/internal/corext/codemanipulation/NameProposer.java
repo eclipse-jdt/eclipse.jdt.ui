@@ -20,6 +20,10 @@ public class NameProposer {
 		fNameSuffixes= suffixes;
 	}
 	
+	public NameProposer() {
+		this(new String[0], new String[0]);
+	}
+	
 	public String proposeGetterName(String fieldName){
 		return GETTER_NAME + proposeAccessorName(fieldName);
 	}
@@ -48,11 +52,37 @@ public class NameProposer {
 				name= String.valueOf(Character.toLowerCase(firstLetter)) + name.substring(1);
 			}
 			if (!JavaConventions.validateFieldName(name).isOK()) {
-				name= "arg";
+				name= String.valueOf(name.charAt(0));
 			}
 		}
 		return name;
 	}
+	
+	public String[] proposeParameterNames(String[] paramTypes) {
+		String[] res= new String[paramTypes.length];
+		for (int i= 0; i < paramTypes.length; i++) {
+			String name= paramTypes[i];
+			
+			char firstLetter= name.charAt(0);
+			if (Character.isUpperCase(firstLetter)) {
+				name= String.valueOf(Character.toLowerCase(firstLetter)) + name.substring(1);
+				if (!JavaConventions.validateFieldName(name).isOK()) {
+					name= String.valueOf(Character.toLowerCase(firstLetter));
+				}	
+			} else {
+				name= String.valueOf(firstLetter);
+			}
+			for (int k= 0; k < i; k++) {
+				if (res[k].equals(name)) {
+					res[k]= res[k] + k;
+					name= name + i;
+				}
+			}
+			res[i]= name;
+		}
+		return res;
+	}
+	
 	
 	private String removePrefixAndSuffix(String fieldname) {
 		String name= fieldname;

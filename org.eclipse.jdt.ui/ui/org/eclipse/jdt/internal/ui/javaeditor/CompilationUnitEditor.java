@@ -11,24 +11,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.swt.custom.LineBackgroundEvent;
-import org.eclipse.swt.custom.LineBackgroundListener;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.StyledTextContent;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
@@ -40,6 +22,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.Dialog;
@@ -48,27 +35,17 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.BadPositionCategoryException;
-import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IPositionUpdater;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextInputListener;
-import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -113,7 +90,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelect
 import org.eclipse.jdt.internal.ui.refactoring.actions.SurroundWithTryCatchAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
-import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 
 
 /**
@@ -127,12 +104,12 @@ public class CompilationUnitEditor extends JavaEditor {
 	};
 	
 	
-	class InternalSourceViewer extends SourceViewer {
+	class InternalSourceViewer extends JavaCorrectionSourceViewer {
 		
 		private List fTextConverters;
 		
 		public InternalSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-			super(parent, ruler, styles);
+			super(parent, ruler, styles, CompilationUnitEditor.this);
 		}
 		
 		public IContentAssistant getContentAssistant() {
@@ -308,6 +285,9 @@ public class CompilationUnitEditor extends JavaEditor {
 	protected void createActions() {
 		
 		super.createActions();
+
+		setAction("CorrectionAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, JavaCorrectionSourceViewer.CORRECTIONASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$
+
 		
 		setAction("ContentAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("ContentAssistContextInformation", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION));			 //$NON-NLS-1$ //$NON-NLS-2$
@@ -380,6 +360,9 @@ public class CompilationUnitEditor extends JavaEditor {
 //		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "ContentAssistProposal"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "AddImportOnSelection"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "OrganizeImports"); //$NON-NLS-1$
+
+		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "CorrectionAssistProposal"); //$NON-NLS-1$
+
 		
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "SurroundWithTryCatch"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Comment"); //$NON-NLS-1$

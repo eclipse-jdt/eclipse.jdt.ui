@@ -81,18 +81,19 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 				fOperationTarget.doOperation(fOperationCode);
 		}
 	};	
-	
 	protected RetargetTextEditorAction fContentAssist;	
-	protected RetargetTextEditorAction fContextInformation;	
+	protected RetargetTextEditorAction fContextInformation;
+	protected RetargetTextEditorAction fCorrectionAssist;		
 	protected SelectionAction fShiftRight;
 	protected SelectionAction fShiftLeft;
 	
 	
 	public BasicEditorActionContributor() {
 		super();
-		
+
 		fContentAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal."); //$NON-NLS-1$
 		fContextInformation= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation."); //$NON-NLS-1$
+		fCorrectionAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal."); //$NON-NLS-1$
 		fShiftRight= new SelectionAction("ShiftRight.", ITextOperationTarget.SHIFT_RIGHT);		 //$NON-NLS-1$
 		fShiftLeft= new SelectionAction("ShiftLeft.", ITextOperationTarget.SHIFT_LEFT); //$NON-NLS-1$
 		
@@ -121,6 +122,7 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContentAssist);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContextInformation);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCorrectionAssist);
 		}
 		
 	}
@@ -142,6 +144,7 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 			
 		fContentAssist.setAction(getAction(textEditor, "ContentAssistProposal")); //$NON-NLS-1$
 		fContextInformation.setAction(getAction(textEditor, "ContentAssistContextInformation")); //$NON-NLS-1$
+		fCorrectionAssist.setAction(getAction(textEditor, "CorrectionAssistProposal")); //$NON-NLS-1$
 		fShiftRight.setEditor(textEditor);
 		fShiftLeft.setEditor(textEditor);
 	}
