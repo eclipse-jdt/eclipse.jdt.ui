@@ -15,8 +15,8 @@ import java.util.*;
 
 import org.eclipse.jface.text.*;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.*;
@@ -203,9 +203,19 @@ public class JavaStructureCreator implements IStructureCreator {
 			IDocument document= ((JavaNode)node).getDocument();
 			IEditableContent bca= (IEditableContent) input;
 			String contents= document.get();
+			String encoding= null;
+			if (input instanceof IEncodedStreamContentAccessor) {
+				try {
+					encoding= ((IEncodedStreamContentAccessor)input).getCharset();
+				} catch (CoreException e1) {
+					// ignore
+				}
+			}
+			if (encoding == null)
+				encoding= ResourcesPlugin.getEncoding();
 			byte[] bytes;				
 			try {
-				bytes= contents.getBytes(ResourcesPlugin.getEncoding());
+				bytes= contents.getBytes(encoding);
 			} catch (UnsupportedEncodingException e) {
 				bytes= contents.getBytes();	
 			}

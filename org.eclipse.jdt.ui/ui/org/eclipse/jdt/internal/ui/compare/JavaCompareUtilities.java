@@ -24,12 +24,12 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.EncodingSupport;
 import org.eclipse.jdt.internal.ui.*;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -289,9 +289,15 @@ class JavaCompareUtilities {
 		InputStream is= sa.getContents();
 		if (is != null) {
 			String encoding= null;
-			if (sa instanceof IEncodedStreamContentAccessor)
-				encoding= ((IEncodedStreamContentAccessor)sa).getCharset();
-			return readString(is, EncodingSupport.verifyCharset(encoding));
+			if (sa instanceof IEncodedStreamContentAccessor) {
+				try {
+					encoding= ((IEncodedStreamContentAccessor) sa).getCharset();
+				} catch (Exception e) {
+				}
+			}
+			if (encoding == null)
+				encoding= ResourcesPlugin.getEncoding();
+			return readString(is, encoding);
 		}
 		return null;
 	}
