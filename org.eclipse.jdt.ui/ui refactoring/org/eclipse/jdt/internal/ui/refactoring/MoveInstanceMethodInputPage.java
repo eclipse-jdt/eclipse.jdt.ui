@@ -101,7 +101,7 @@ public class MoveInstanceMethodInputPage extends UserInputWizardPage {
 
 		Table table= new Table(layouter, SWT.SINGLE | SWT.BORDER);
 		table.setHeaderVisible(true);
-		table.setLinesVisible(true);		
+		table.setLinesVisible(false);		
 
 		TableColumn column0= new TableColumn(table, SWT.NONE);		
 		column0.setText("Name");
