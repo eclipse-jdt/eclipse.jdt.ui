@@ -830,6 +830,11 @@ public class ExtractTempRefactoring extends Refactoring {
 			ASTNode associatedNode= getSelectedExpression().getAssociatedNode();
 			if (associatedNode instanceof MethodInvocation) {
 				proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) associatedNode, excludedVariableNames));
+			} else if (associatedNode instanceof CastExpression) {
+				Expression expression= ((CastExpression) associatedNode).getExpression();
+				if (expression instanceof MethodInvocation) {
+					proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) expression, excludedVariableNames));
+				}
 			}
 			if (associatedNode instanceof Expression) {
 				proposals.addAll(guessTempNamesFromExpression((Expression) associatedNode, excludedVariableNames));
