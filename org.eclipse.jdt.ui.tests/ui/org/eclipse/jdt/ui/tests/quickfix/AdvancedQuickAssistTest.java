@@ -48,9 +48,6 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
-	private static final boolean BUG_82220= true;
-
-
 	public AdvancedQuickAssistTest(String name) {
 		super(name);
 	}
@@ -1195,11 +1192,6 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 	
 	public void testInverseVariable2b() throws Exception {
-		if (BUG_82220) {
-			return;
-		}
-		
-		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1264,9 +1256,6 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	
 	
 	public void testInverseVariable4() throws Exception {
-		if (BUG_82220) {
-			return;
-		}
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1289,7 +1278,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(boolean b) {\n");
-		buf.append("        boolean notVar= false;\n");
+		buf.append("        boolean notVar= true;\n");
 		buf.append("        notVar &= !b;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
