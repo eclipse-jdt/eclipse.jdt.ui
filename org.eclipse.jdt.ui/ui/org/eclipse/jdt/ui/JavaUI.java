@@ -21,6 +21,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.IJavaElement;
@@ -459,5 +460,14 @@ public final class JavaUI {
 		return null;
 	}
 
+	/**
+	 * Returns the DocumentProvider used for Java compilation units.
+	 *
+	 * @return the DocumentProvider for Java compilation units.
+	 * @see org.eclpipse.ui.texteditor.IDocumentProvider
+	 */
+	public static IDocumentProvider getDocumentProvider() {
+		return JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+	}
 
 }
