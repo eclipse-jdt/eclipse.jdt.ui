@@ -12,23 +12,24 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.text.ITextSelection;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 public class RenameTempAction extends SelectionDispatchAction {
 
@@ -50,7 +51,9 @@ public class RenameTempAction extends SelectionDispatchAction {
 		String message= RefactoringMessages.getString("RenameTempAction.choose_new_name"); //$NON-NLS-1$
 		String wizardPageHelp= IJavaHelpContextIds.RENAME_TEMP_WIZARD_PAGE; 
 		String pageTitle= RefactoringMessages.getString("RenameTempAction.rename_Local_Variable");//$NON-NLS-1$
-		return new RenameRefactoringWizard(refactoring, pageTitle, message, wizardPageHelp);
+		RenameRefactoringWizard result= new RenameRefactoringWizard(pageTitle, message, null, wizardPageHelp);
+		result.initialize(refactoring);
+		return result;
 	}
 	
 	public void selectionChanged(ITextSelection selection) {

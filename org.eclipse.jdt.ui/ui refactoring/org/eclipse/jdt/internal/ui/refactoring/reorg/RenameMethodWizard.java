@@ -14,7 +14,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-public class RenameMethodWizard extends RenameRefactoringWizard2 {
+public class RenameMethodWizard extends RenameRefactoringWizard {
 	public RenameMethodWizard() {
 		super(
 			RefactoringMessages.getString("RenameMethodWizard.defaultPageTitle"), //$NON-NLS-1$

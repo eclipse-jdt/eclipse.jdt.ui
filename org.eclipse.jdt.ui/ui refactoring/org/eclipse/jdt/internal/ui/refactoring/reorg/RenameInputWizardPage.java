@@ -25,7 +25,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
-abstract class RenameInputWizardPage2 extends TextInputWizardPage {
+abstract class RenameInputWizardPage extends TextInputWizardPage {
 
 	private String fHelpContextID;
 	private QualifiedNameComponent fQualifiedNameComponent;
@@ -45,7 +45,7 @@ abstract class RenameInputWizardPage2 extends TextInputWizardPage {
 	 *  user input page. Otherwise <code>false</code>.
 	 * @param initialSetting the initialSetting.
 	 */
-	public RenameInputWizardPage2(String description, String contextHelpId, boolean isLastUserPage, String initialValue) {
+	public RenameInputWizardPage(String description, String contextHelpId, boolean isLastUserPage, String initialValue) {
 		super(description, isLastUserPage, initialValue);
 		fHelpContextID= contextHelpId;
 	}
@@ -100,8 +100,7 @@ abstract class RenameInputWizardPage2 extends TextInputWizardPage {
 	}
 	
 	private void addOptionalUpdateCommentsAndStringCheckboxes(Composite result, RowLayouter layouter) {
-		RenameRefactoring rr= (RenameRefactoring)getRefactoring();		
-		ITextUpdating refactoring= (ITextUpdating)rr.getAdapter(ITextUpdating.class);
+		ITextUpdating refactoring= (ITextUpdating)getRefactoring().getAdapter(ITextUpdating.class);
 		
 		if (refactoring == null || !refactoring.canEnableTextUpdating())
 			return;
@@ -112,8 +111,7 @@ abstract class RenameInputWizardPage2 extends TextInputWizardPage {
 	}
 
 	private void addOptionalUpdateReferencesCheckbox(Composite result, RowLayouter layouter) {
-		RenameRefactoring rr= (RenameRefactoring)getRefactoring();
-		final IReferenceUpdating ref= (IReferenceUpdating)rr.getAdapter(IReferenceUpdating.class);
+		final IReferenceUpdating ref= (IReferenceUpdating)getRefactoring().getAdapter(IReferenceUpdating.class);
 		if (ref == null || !ref.canEnableUpdateReferences())	
 			return;
 		String title= RefactoringMessages.getString("RenameInputWizardPage.update_references"); //$NON-NLS-1$
@@ -167,8 +165,7 @@ abstract class RenameInputWizardPage2 extends TextInputWizardPage {
 	}
 		
 	private void addOptionalUpdateQualifiedNameComponent(Composite parent, RowLayouter layouter, int marginWidth) {
-		RenameRefactoring rr= (RenameRefactoring)getRefactoring();
-		final IQualifiedNameUpdating ref= (IQualifiedNameUpdating)rr.getAdapter(IQualifiedNameUpdating.class);
+		final IQualifiedNameUpdating ref= (IQualifiedNameUpdating)getRefactoring().getAdapter(IQualifiedNameUpdating.class);
 		if (ref == null || !ref.canEnableQualifiedNameUpdating())
 			return;
 		Button checkbox= new Button(parent, SWT.CHECK);
@@ -207,7 +204,7 @@ abstract class RenameInputWizardPage2 extends TextInputWizardPage {
 	
 	private void updateForcePreview() {
 		boolean forcePreview= false;
-		RenameRefactoring refactoring= (RenameRefactoring)getRefactoring();
+		Refactoring refactoring= getRefactoring();
 		ITextUpdating tu= (ITextUpdating)refactoring.getAdapter(ITextUpdating.class);
 		IQualifiedNameUpdating qu= (IQualifiedNameUpdating)refactoring.getAdapter(IQualifiedNameUpdating.class);
 		if (tu != null) {

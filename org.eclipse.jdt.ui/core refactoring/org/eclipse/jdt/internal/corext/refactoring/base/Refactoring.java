@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -25,7 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.UndoManager;
  * this early stage to solicit feedback from pioneering adopters on the understanding that any 
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
-public abstract class Refactoring implements IRefactoring {
+public abstract class Refactoring implements IRefactoring, IAdaptable {
 
 	private static IUndoManager fgUndoManager= new UndoManager();
 	
@@ -80,6 +81,12 @@ public abstract class Refactoring implements IRefactoring {
 		return result;
 	}
 		
-		
-		
-	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+	 */
+	public Object getAdapter(Class adapter) {
+		if (adapter.isInstance(this))
+			return this;
+		return null;
+	}		
+}

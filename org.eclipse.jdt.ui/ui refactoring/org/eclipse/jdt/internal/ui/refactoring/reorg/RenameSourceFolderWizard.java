@@ -14,7 +14,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-public class RenameSourceFolderWizard extends RenameRefactoringWizard2 {
+public class RenameSourceFolderWizard extends RenameRefactoringWizard {
 	public RenameSourceFolderWizard() {
 		super(
 			RefactoringMessages.getString("RenameSourceFolder.defaultPageTitle"), //$NON-NLS-1$

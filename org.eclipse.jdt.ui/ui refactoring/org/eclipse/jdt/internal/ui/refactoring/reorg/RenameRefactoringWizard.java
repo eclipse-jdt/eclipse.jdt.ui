@@ -21,13 +21,13 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
-public class RenameRefactoringWizard2 extends RefactoringWizard {
+public class RenameRefactoringWizard extends RefactoringWizard {
 	
 	private final String fInputPageDescription;
 	private final String fPageContextHelpId;
 	private final ImageDescriptor fInputPageImageDescriptor;
 	
-	public RenameRefactoringWizard2(String defaultPageTitle, String inputPageDescription, 
+	public RenameRefactoringWizard(String defaultPageTitle, String inputPageDescription, 
 			ImageDescriptor inputPageImageDescriptor, String pageContextHelpId) {
 		super();
 		setDefaultPageTitle(defaultPageTitle);
@@ -41,7 +41,7 @@ public class RenameRefactoringWizard2 extends RefactoringWizard {
 	 */ 
 	protected void addUserInputPages() {
 		String initialSetting= getRenameRefactoring().getCurrentName();
-		RenameInputWizardPage2 inputPage= createInputPage(fInputPageDescription, initialSetting);
+		RenameInputWizardPage inputPage= createInputPage(fInputPageDescription, initialSetting);
 		inputPage.setImageDescriptor(fInputPageImageDescriptor);
 		addPage(inputPage);
 	}
@@ -50,8 +50,8 @@ public class RenameRefactoringWizard2 extends RefactoringWizard {
 		return (IRenameRefactoring)getRefactoring();	
 	}
 	
-	protected RenameInputWizardPage2 createInputPage(String message, String initialSetting) {
-		return new RenameInputWizardPage2(message, fPageContextHelpId, true, initialSetting) {
+	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
+		return new RenameInputWizardPage(message, fPageContextHelpId, true, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
 			}	

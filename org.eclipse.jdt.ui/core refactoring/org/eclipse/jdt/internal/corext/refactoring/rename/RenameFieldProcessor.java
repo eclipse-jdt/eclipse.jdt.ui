@@ -568,7 +568,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	}
 	
 	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
-		TextMatchFinder2.findTextMatches(pm, createRefactoringScope(), this, manager);
+		TextMatchFinder.findTextMatches(pm, createRefactoringScope(), this, manager);
 	}	
 	
 	private void addOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {

@@ -464,7 +464,7 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 	}
 	
 	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
-		TextMatchFinder2.findTextMatches(pm, createRefactoringScope(), this, manager);
+		TextMatchFinder.findTextMatches(pm, createRefactoringScope(), this, manager);
 	}
 	
 	private TextEdit createTextChange(SearchResult searchResult) {

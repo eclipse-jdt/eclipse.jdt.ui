@@ -50,6 +50,8 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 	}
 		
 	public Object getAdapter(Class clazz) {
+		if (clazz.isInstance(this))
+			return this;
 		if (clazz.isInstance(fProcessor))
 			return fProcessor;
 		return null;

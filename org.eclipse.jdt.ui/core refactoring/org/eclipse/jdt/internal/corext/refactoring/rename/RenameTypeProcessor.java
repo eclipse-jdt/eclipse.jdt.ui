@@ -685,7 +685,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	}
 	
 	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
-		TextMatchFinder2.findTextMatches(pm, createRefactoringScope(), this, manager);
+		TextMatchFinder.findTextMatches(pm, createRefactoringScope(), this, manager);
 	}
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {

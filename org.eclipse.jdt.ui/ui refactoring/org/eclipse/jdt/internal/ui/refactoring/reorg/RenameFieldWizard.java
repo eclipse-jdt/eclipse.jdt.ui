@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-public class RenameFieldWizard extends RenameRefactoringWizard2 {
+public class RenameFieldWizard extends RenameRefactoringWizard {
 
 	public RenameFieldWizard() {
 		super(RefactoringMessages.getString("RenameFieldWizard.defaultPageTitle"),  //$NON-NLS-1$
@@ -44,7 +44,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard2 {
 			IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE);
 	}
 
-	protected RenameInputWizardPage2 createInputPage(String message, String initialSetting) {
+	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
 		return new RenameFieldInputWizardPage(message, IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				RefactoringStatus result= validateNewName(text);
@@ -54,7 +54,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard2 {
 		};
 	}
 
-	private static class RenameFieldInputWizardPage extends RenameInputWizardPage2 {
+	private static class RenameFieldInputWizardPage extends RenameInputWizardPage {
 
 		private Button fRenameGetter;
 		private Button fRenameSetter;
