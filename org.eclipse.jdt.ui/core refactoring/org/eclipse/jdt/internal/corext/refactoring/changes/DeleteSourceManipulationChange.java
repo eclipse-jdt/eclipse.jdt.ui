@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
@@ -104,14 +103,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	}
 	
 	private static void saveCUnitIfNeeded(ICompilationUnit unit, IProgressMonitor pm) throws CoreException {
-		ITextFileBuffer buffer= RefactoringFileBuffers.getTextFileBuffer(unit);
-		if (buffer != null && buffer.isDirty() &&  buffer.isStateValidated() && buffer.isSynchronized()) {
-			buffer.commit(pm, false);
-		} else {
-			pm.beginTask("", 1); //$NON-NLS-1$
-			pm.worked(1);
-			pm.done();
-		}
+		saveFileIfNeeded((IFile)unit.getResource(), pm);
 	}
 }
 

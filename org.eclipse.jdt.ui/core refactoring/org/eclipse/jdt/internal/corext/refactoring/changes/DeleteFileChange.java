@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -40,7 +41,7 @@ public class DeleteFileChange extends AbstractDeleteChange {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, false, true);
+		return super.isValid(pm, false, false);
 	}
 
 	/* non java-doc
@@ -57,25 +58,10 @@ public class DeleteFileChange extends AbstractDeleteChange {
 		IFile file= getFile();
 		Assert.isNotNull(file);
 		Assert.isTrue(file.exists());
-		try {
-			file.delete(false, true, pm);
-		} catch (CoreException e) {
-			// the problem is that there isn't any implementation of IReorgExceptionHandler.
-			// So the code got never executed. Have to check what to do here.
-			
-//			if (! (context.getExceptionHandler() instanceof IReorgExceptionHandler))
-//				throw e;
-//			IReorgExceptionHandler handler= (IReorgExceptionHandler)context.getExceptionHandler();
-//			IStatus[] children= e.getStatus().getChildren();
-//			if (children.length == 1 && children[0].getCode() == IResourceStatus.OUT_OF_SYNC_LOCAL){
-//				if (handler.forceDeletingResourceOutOfSynch(file.getName(), e)){
-//					file.delete(true, true, pm);
-//					return;
-//				}	else
-//						return; //do not rethrow in this case
-//			} else
-			throw e;
-		}
+		pm.beginTask("", 2); //$NON-NLS-1$
+		saveFileIfNeeded(file, new SubProgressMonitor(pm, 1));
+		file.delete(false, true, new SubProgressMonitor(pm, 1));
+		pm.done();
 	}
 }
 

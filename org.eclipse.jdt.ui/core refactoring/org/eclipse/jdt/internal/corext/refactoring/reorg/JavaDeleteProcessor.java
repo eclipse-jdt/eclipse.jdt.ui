@@ -28,7 +28,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 
+import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -52,7 +54,6 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Resources;
@@ -361,6 +362,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 			TextChangeManager manager= new TextChangeManager();
 			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements, getProcessorName());
 			checkDirtyCompilationUnits(result);
+			checkDirtyResources(result);
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
 			IFile[] classPathFiles= getClassPathFiles();
 			checker.addFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits()));
@@ -396,16 +398,38 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	
 	private void checkDirtyCompilationUnit(RefactoringStatus result, ICompilationUnit cunit) {
 		IResource resource= cunit.getResource();
-		ITextFileBuffer buffer= RefactoringFileBuffers.getTextFileBuffer(cunit);
-		if (buffer != null && buffer.isDirty() && resource != null && resource.exists()) {
+		if (resource == null || resource.getType() != IResource.FILE)
+			return;
+		checkDirtyFile(result, (IFile)resource);
+	}
+
+	private void checkDirtyResources(final RefactoringStatus result) throws CoreException {
+		for (int i= 0; i < fResources.length; i++) {
+			IResource resource= fResources[i];
+			resource.accept(new IResourceVisitor() {
+				public boolean visit(IResource resource) throws CoreException {
+					if (resource instanceof IFile) {
+						checkDirtyFile(result, (IFile)resource);
+					}
+					return true;
+				}
+			}, IResource.DEPTH_INFINITE, false);
+		}
+	}
+	
+	private void checkDirtyFile(RefactoringStatus result, IFile file) {
+		if (file == null || !file.exists())
+			return;
+		ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath());
+		if (buffer != null && buffer.isDirty()) {
 			if (buffer.isStateValidated() && buffer.isSynchronized()) {
 				result.addWarning(RefactoringCoreMessages.getFormattedString(
 					"JavaDeleteProcessor.unsaved_changes", //$NON-NLS-1$
-					resource.getFullPath().toString()));
+					file.getFullPath().toString()));
 			} else {
 				result.addFatalError(RefactoringCoreMessages.getFormattedString(
 					"JavaDeleteProcessor.unsaved_changes", //$NON-NLS-1$
-					resource.getFullPath().toString()));
+					file.getFullPath().toString()));
 			}
 		}
 	}

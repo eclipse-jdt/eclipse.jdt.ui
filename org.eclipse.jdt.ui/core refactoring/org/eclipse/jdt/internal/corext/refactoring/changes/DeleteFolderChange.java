@@ -13,9 +13,13 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -51,13 +55,25 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, false, true);
+		return super.isValid(pm, false, false);
 	}
 
 	protected void doDelete(IProgressMonitor pm) throws CoreException{
 		IFolder folder= getFolder(fPath);
 		Assert.isTrue(folder.exists());
+		pm.beginTask("", 2); //$NON-NLS-1$
+		folder.accept(new IResourceVisitor() {
+			public boolean visit(IResource resource) throws CoreException {
+				if (resource instanceof IFile) {
+					// progress is covered outside.
+					saveFileIfNeeded((IFile)resource, new NullProgressMonitor());
+				}
+				return true;
+			}
+		}, IResource.DEPTH_INFINITE, false);
+		pm.worked(1);
 		folder.delete(false, true, new SubProgressMonitor(pm, 1));
+		pm.done();
 	}
 }
 
