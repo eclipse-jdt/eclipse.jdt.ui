@@ -112,18 +112,6 @@ public class RefactoringAnalyzeUtil {
 		return ((MethodDeclaration)ASTNodes.getParent(decl, MethodDeclaration.class));
 	}
 
-	public static RefactoringStatus analyzeIntroducedCompileErrors(String wcSource, CompilationUnit newCUNode, CompilationUnit oldCuNode) {
-		RefactoringStatus subResult= new RefactoringStatus();				
-		Set oldErrorMessages= getOldErrorMessages(oldCuNode);
-		Message[] newErrorMessages= ASTNodes.getMessages(newCUNode, ASTNodes.INCLUDE_ALL_PARENTS);
-		for (int i= 0; i < newErrorMessages.length; i++) {
-			if (! oldErrorMessages.contains(newErrorMessages[i].getMessage())){
-				Context context= new StringContext(wcSource, new SourceRange(newErrorMessages[i].getStartPosition(), newErrorMessages[i].getLength()));
-				subResult.addError(newErrorMessages[i].getMessage(), context);
-			}	
-		}
-		return subResult;
-	}
 	
 	public static IProblem[] getIntroducedCompileProblems(String wcSource, CompilationUnit newCUNode, CompilationUnit oldCuNode) {
 		Set subResult= new HashSet();				
@@ -149,7 +137,7 @@ public class RefactoringAnalyzeUtil {
 	private static boolean isCorresponding(IProblem oldProblem, IProblem iProblem) {
 		if (oldProblem.getID() != iProblem.getID())		
 			return false;
-		if (oldProblem.getMessage().equals(iProblem.getMessage()))	
+		if (! oldProblem.getMessage().equals(iProblem.getMessage()))	
 			return false;
 		return true;
 	}
