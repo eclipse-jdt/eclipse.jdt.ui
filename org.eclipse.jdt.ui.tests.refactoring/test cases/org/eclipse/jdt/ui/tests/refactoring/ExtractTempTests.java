@@ -198,6 +198,12 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(4, 17, 4, 22, true, false, "temp");
 	}
 	
+	public void test26() throws Exception{
+		printTestDisabledMessage("incorrect temp placement - must fix");
+//		helper1(5, 19, 5, 23, true, false, "temp");
+	}
+	
+	
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
 		failHelper1(5, 16, 5, 17, false, false, "temp");
