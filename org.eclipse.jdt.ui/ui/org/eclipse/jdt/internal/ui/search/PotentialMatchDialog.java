@@ -21,7 +21,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 class PotentialMatchDialog extends MessageDialog {
 	
 	// String constants for widgets
-	private static String TITLE= SearchMessages.getString("Search.potentialMatchDialog.title"); //$NON-NLS-1$
 	private static String MESSAGE= SearchMessages.getString("Search.potentialMatchDialog.message"); //$NON-NLS-1$
 	private static String CHECKBOX_TEXT= SearchMessages.getString("Search.potentialMatchDialog.dontShowAgain"); //$NON-NLS-1$
 
@@ -33,12 +32,19 @@ class PotentialMatchDialog extends MessageDialog {
 	
 	private Button fHideDialogCheckBox;
 		
-	PotentialMatchDialog(Shell parentShell) {
-		super(parentShell, TITLE, null, MESSAGE, INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0);
+	PotentialMatchDialog(Shell parentShell, int potentialMatchCount) {
+		super(
+			parentShell,
+			createTitle(potentialMatchCount),
+			null,
+			MESSAGE,
+			INFORMATION,
+			new String[] { IDialogConstants.OK_LABEL },
+			0);
 	}
 
-	static void open(Shell parentShell) {
-		new PotentialMatchDialog(parentShell).open();
+	static void open(Shell parentShell, int potentialMatchCount) {
+		new PotentialMatchDialog(parentShell, potentialMatchCount).open();
 	}
 
 	protected Control createCustomArea(Composite parent) {
@@ -84,5 +90,12 @@ class PotentialMatchDialog extends MessageDialog {
 	private void storeSetting(boolean hideDialog) {
 		IDialogSettings settings= getDialogSettings();
 		settings.put(STORE_HIDE_POTENTIAL_MATCH_DIALOG, hideDialog);
+	}
+
+	private static String createTitle(int potentialMatchCount) {
+		if (potentialMatchCount == 1)
+			return new String(SearchMessages.getString("Search.potentialMatchDialog.title.foundPotentialMatch")); //$NON-NLS-1$
+		else
+			return new String(SearchMessages.getFormattedString("Search.potentialMatchDialog.title.foundPotentialMatches", "" + potentialMatchCount)); //$NON-NLS-1$
 	}
 }
