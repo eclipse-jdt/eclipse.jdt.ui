@@ -12,7 +12,6 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,7 +25,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -40,7 +38,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -72,7 +69,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
@@ -970,37 +966,15 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		IFile file= workspaceRoot.getFile(filePath);
 		final IEditorInput newInput= new FileEditorInput(file);
 		
-		ISchedulingRule scheduleRule= file.getParent();
-		
-//      Cannot yet release: this operation calls a nested operation
-//		which wants to lock the whole workspace.
-//		if (scheduleRule == null)
-			scheduleRule= workspaceRoot;
-		
-		WorkspaceModifyOperation op= new WorkspaceModifyOperation(scheduleRule) {
-			public void execute(final IProgressMonitor monitor) throws CoreException {
-				getDocumentProvider().saveDocument(monitor, newInput, getDocumentProvider().getDocument(getEditorInput()), true);
-			}
-		};
-		
 		boolean success= false;
 		try {
 			
 			provider.aboutToChange(newInput);
-			new ProgressMonitorDialog(shell).run(false, true, op);
+			getDocumentProvider().saveDocument(progressMonitor, newInput, getDocumentProvider().getDocument(getEditorInput()), true);
 			success= true;
 			
-		} catch (InterruptedException x) {
-		} catch (InvocationTargetException x) {
-			
-			Throwable t= x.getTargetException();
-			if (t instanceof CoreException) {
-				CoreException cx= (CoreException) t;
-				ErrorDialog.openError(shell, JavaEditorMessages.getString("CompilationUnitEditor.error.saving.title2"), JavaEditorMessages.getString("CompilationUnitEditor.error.saving.message2"), cx.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
-			} else {
-				MessageDialog.openError(shell, JavaEditorMessages.getString("CompilationUnitEditor.error.saving.title3"), JavaEditorMessages.getString("CompilationUnitEditor.error.saving.message3") + t.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-						
+		} catch (CoreException x) {
+			ErrorDialog.openError(shell, JavaEditorMessages.getString("CompilationUnitEditor.error.saving.title2"), JavaEditorMessages.getString("CompilationUnitEditor.error.saving.message2"), x.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 		} finally {
 			provider.changed(newInput);
 			if (success)
