@@ -1,10 +1,9 @@
 package p;
 
-
 /** typecomment template*/
 public interface I {
 
-	public abstract void x()   ;
+	public abstract void x();
 
 	//	 TestRunListener implementation
 	public abstract void y() /* nasty */;
@@ -12,19 +11,17 @@ public interface I {
 	public abstract void z() // xx
 	;
 
-	/** Javadoc*/abstract public void a () /**post-Javadoc*/;
+	/** Javadoc*/
+	abstract public void a() /**post-Javadoc*/
+	;
 
 	/**JD*/
-	
+
 	//abstract
-	
 	public abstract void b();
 
 	//destruct
-	public
-	abstract
-	void c
-	()
+	public abstract void c()
 	/* Comments*/
 	/** en */
 	// gros!
