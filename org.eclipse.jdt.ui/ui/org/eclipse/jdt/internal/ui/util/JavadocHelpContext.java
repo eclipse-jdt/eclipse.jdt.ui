@@ -190,7 +190,7 @@ public class JavadocHelpContext implements IContext2 {
 
 	public String getCategory(IHelpResource topic) {
 		if (topic instanceof JavaUIHelpResource)
-			return JavaUIMessages.getString("JavaUIHelpContext.javaHelpSection.label"); //$NON-NLS-1$
+			return JavaUIMessages.getString("JavaUIHelpContext.javaHelpCategory.label"); //$NON-NLS-1$
 
 		return null;
 	}
