@@ -18,7 +18,7 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-public final class CopySourceEdit extends AbstractTransferEdit {
+public class CopySourceEdit extends AbstractTransferEdit {
 
 	private String fContent;
 	private CopyTargetEdit fTarget;
@@ -61,8 +61,7 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 	}
 	
 	public void perform(TextBuffer buffer) throws CoreException {
-		TextRange range= getTextRange();
-		fContent= buffer.getContent(range.getOffset(), range.getLength());
+		fContent= computeContent(buffer);
 		TextRange targetRange= fTarget.getTextRange();
 		if (++fCounter == 2 && !targetRange.isDeleted()) {
 			try {
@@ -71,6 +70,11 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 				clearContent();
 			}
 		}
+	}
+
+	protected String computeContent(TextBuffer buffer) {
+		TextRange range= getTextRange();
+		return buffer.getContent(range.getOffset(), range.getLength());
 	}
 	
 	/* package */ void updateTextRange(int delta, List executedEdits) {

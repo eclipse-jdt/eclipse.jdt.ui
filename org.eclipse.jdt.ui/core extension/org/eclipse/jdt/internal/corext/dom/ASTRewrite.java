@@ -336,8 +336,8 @@ public class ASTRewrite {
 	}
 	
 	
-	/* package */ final CopySourceEdit getCopySourceEdit(ASTNode node) {
-		return (CopySourceEdit) node.getProperty(COPYSOURCEKEY);
+	/* package */ final Object getCopySourceEdit(ASTNode node) {
+		return  node.getProperty(COPYSOURCEKEY);
 	}
 
 	private static final class ASTCopySource {

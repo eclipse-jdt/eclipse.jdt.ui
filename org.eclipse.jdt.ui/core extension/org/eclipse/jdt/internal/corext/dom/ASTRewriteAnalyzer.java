@@ -21,12 +21,11 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.CopySourceEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.CopyTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -70,7 +69,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	public static Object createSourceCopy(int offset, int length) {
-		return new CopySourceEdit(offset, length);
+		return new CopyIndentedSourceEdit(offset, length);
 	}
 	
 	private boolean isChanged(ASTNode node) {
@@ -162,12 +161,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 		
 	private TextEdit doTextCopy(ASTNode copiedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, String description) {
-		CopySourceEdit sourceEdit= fRewrite.getCopySourceEdit(copiedNode);
+		CopyIndentedSourceEdit sourceEdit= (CopyIndentedSourceEdit)fRewrite.getCopySourceEdit(copiedNode);
 		if (sourceEdit == null) {
 			Assert.isTrue(false, "Copy source not annotated" + copiedNode.toString());
 		}
+		sourceEdit.initialize(sourceIndentLevel, destIndentString, tabWidth);
 		
-		CopyIndentedTargetEdit targetEdit= new CopyIndentedTargetEdit(destOffset, sourceIndentLevel, destIndentString, tabWidth);
+		CopyTargetEdit targetEdit= new CopyTargetEdit(destOffset);
 		targetEdit.setSourceEdit(sourceEdit);
 		
 		fCurrentEdit.add(targetEdit);
@@ -676,7 +676,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
-		TextEdit edit= fRewrite.getCopySourceEdit(node);
+		TextEdit edit= (TextEdit) fRewrite.getCopySourceEdit(node);
 		if (edit != null) {
 			int endPos= node.getStartPosition() + node.getLength();
 			if (edit.getTextRange().getExclusiveEnd() == endPos) {
@@ -689,7 +689,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 	 */
 	public void preVisit(ASTNode node) {
-		TextEdit edit= fRewrite.getCopySourceEdit(node);
+		TextEdit edit= (TextEdit) fRewrite.getCopySourceEdit(node);
 		if (edit != null && edit.getTextRange().getOffset() == node.getStartPosition()) {
 			fCurrentEdit.add(edit);
 			fCurrentEdit= edit;
