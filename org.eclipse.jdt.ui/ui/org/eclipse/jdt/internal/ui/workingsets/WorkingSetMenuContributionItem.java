@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
 import org.eclipse.jface.action.ContributionItem;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IWorkingSet;
@@ -58,8 +59,11 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	public void fill(Menu menu, int index) {
 		MenuItem mi= new MenuItem(menu, SWT.RADIO, index);
 		mi.setText("&" + fId + " " + fWorkingSet.getName());  //$NON-NLS-1$  //$NON-NLS-2$
-		if (fImage == null)
-			fImage= fWorkingSet.getImage().createImage();
+		if (fImage == null) {
+			ImageDescriptor imageDescriptor= fWorkingSet.getImage();
+			if (imageDescriptor != null)
+				fImage= imageDescriptor.createImage();
+		}
 		mi.setImage(fImage);
 		mi.setSelection(fWorkingSet.equals(fActionGroup.getWorkingSet()));
 		mi.addSelectionListener(new SelectionAdapter() {
