@@ -1,44 +1,102 @@
-Description of package "org.eclipse.jdt.junit.internal":
---------------------------------------------------------
+Description of package "org.eclipse.junit.internal":
+----------------------------------------------------
 
-- JUnitUIPlugin
-	- Extension of AbstractUIPlugin.
-	- Provides only: getDefault(), getActiveShell() and getPluginID().
+- ApplicationWizard
+	- The wizard specified by the Launcher to designate the elements to launch
+
+- ApplicationWizardPage
+	- The main page in a JUnitApplicationWizard. Presents the
+		user with a list of launchable elements - from which the user must choose. 
+
+- BaseLauncher
+	- Abstract base implementation of the test launcher.
+	- Extended classes have to override: 
+		VMRunnerConfiguration configureVM(IType[] testTypes, int port)
+
+- BaseLauncherUtil
+	- Static utilities for the BaseLauncher.
+
+- CounterPanel
+	- Panel that informs the user about number of tests to run,
+		of test that are finished, of errors and failures.
+		there is also a progressbar that informs the user.
+
+- FailureDetailView
+	- View that shows the stack trace of failed tests.
+
+- FailureRunView
+	- RunView that implements ITestRunView.
+	- Shows the failed tests.
+
+- HierarchyRunView
+	- RunView that implements ITestRunView.
+	- Shows the test hierarchy as a tree.
+
+- IRunViewContext
+	- interface that specifies what a RunView implementing ITestRunView
+		knows about the TestRunnerUI.
+
+- ITestRunListener
+	- String/Int based interface for Listeners that want 
+		register at 'org.eclipse.junit.internal.TestRunner'
+
+- ITestRunView
+	- interface that specifies what a TestRunView can do.
+
+- JUnitPlugin
+	- extension of AbstractUIPlugin
+	- provides only: getDefault(), getActiveShell() and getPluginID()
 
 - Launcher
-	- Concrete implementation of the BaseLauncher.
-	- Implements 'configureVM(...)'.
+	- concrete implementation of the BaseLauncher
+	- implements 'configureVM(...)'
 
 - LauncherUtil
-	- Includes a lot of static utility methods for the Launcher.
-	- This methods construct the classPath and the '.plugins-path' file 
-		for the VMRunnerConfiguration that is constructed in the Launcher.
+	- includes only one static utility method for the Launcher
+	- this method constructs the classPath for the VMRunnerConfiguration 
+		that is constructed in the Launcher
 
-- TestUIApplication
-	- An extension of the application 'org.eclipse.ui.workbench'.
-	- It overrides the method 'runEventLoop()'; 
-		First all events are dispatched and then the TestRunner is started
-		and all tests are executed, at last the workbench is closed.
+- MessagesIds
+	- IDs of the protocol that is used in the ITestRunListener
+	- TestRunner and TestRunnerUI are talking with this IDs over a socket connection
 
-- TestApplication
-	- This application only starts a workspace. 
-	- It is an extension of an IPlatformRunnable.
-	- You can test plugins that do not need the ui infra.
-	- In the run(...) method a org.eclipse.junit.internal.TestRunner is started 
-		and all tests are executed.
+- SearchEngine
+	- extension for the SearchEngine that is looking for Test classes and for 
+		Classes that provide a static Test suite() method
 
+- SearchUtil
+	- Static utility methods for the SearchEngine
+
+- SocketUtil
+	- Static Helper class for finding a local unused port
+
+- TabFolerLayout
+	- copy of  org.eclipse.jdt.internal.ui.util.TabFolderLayout
+		that fixes a layout PR with TabFolders under linux
+
+- TestInfo
+ 	- Util for storing information of tests that were run
 
 - TestRunner
-	- Implementation of a TestRunner that extends org.eclipse.junit.internal.TestRunner. 
-	- It overrides the method 'getClassLoader' because the pluginClassLoader has to be used;
-		therefore this TestRunner needs an additional argument -testPluginName.
+	- Implementation of a TestRunner. 
+	- If an argument '-port portNr' is specified the Runner sends all messages to
+		that port.
+	- Additional ITestRunListeners and junit.framework.TestListeners can register at TestRunner
 
-- PreferencePage
-	- Here the information is collected where to find plugins and startup.jar.
-		This information is used to create the plugins-path file and the classPath
-	- TBD here: 
-		- Option for turning on/off -debugging
-		- Option for configureing the standard UIMain args
-		- Possibility to add ftp, http ... locations of plugin.xml files
+- TestRunnerUI
+	- An extension of 'org.eclipse.ui.part.ViewPart' - the view of the plugin.
+	- Implements ITestRunListener; the messages are sendet by the TestRunner.
+
+- TestRunnerUIutils
+	- Static utility methods for the UI
+
+- TextTestListener
+	- text listener implementing the ITestRunListener interface
+	- default listener if no port and no listener are specified
+		when calling org.eclipse.junit.internal.TestRunner
 		
+- Preference Page
+	- here you can turn off/on, configure the filtering of the stack trace
+		that is shown in the FailureDetailView
 		
+

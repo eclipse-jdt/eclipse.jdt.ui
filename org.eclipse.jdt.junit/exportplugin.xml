@@ -1,9 +1,9 @@
 <!-- build script to create JUnit Plugin -->
-<project name="org.eclipse.jdt.junit" default="export" basedir="./">
+<project name="org.eclipse.junit" default="export" basedir="./">
 	<target name="init">
 		<tstamp/>
 		<property name="destdir" value="./../../export" />
-		<property name="plugin"  value="org.eclipse.jdt.junit" />
+		<property name="plugin"  value="org.eclipse.junit" />
 		<property name="dest"  value="${destdir}/${plugin}" />
 	</target>
 
@@ -17,25 +17,30 @@
 		<mkdir dir="${dest}" />
 		
 		<jar 
-			jarfile="${dest}/eclipsejdtjunit.jar"
+			jarfile="${dest}/junitsupport.jar"
 			basedir="bin"
 		/>
 
 		<jar 
-			jarfile="./eclipsejdtjunit.jar"
+			jarfile="./junitsupport.jar"
 			basedir="bin"
 		/>
 				
 		<jar 		
-			jarfile="${dest}/srceclipsejdtjunit.jar"
+			jarfile="${dest}/srcjunitsupport.jar"
 			basedir="Eclipse JUnit"
 		/>
+		
+		<copy file="startup.jar" todir="${dest}"/>
 
 		<copy file="plugin.xml" todir="${dest}"/>
 		<copy file="plugin.properties" todir="${dest}"/>
+		<copy todir="${dest}/icons">
+			<fileset dir="icons" />
+		</copy>
 		<copy todir="${dest}/doc">
 			<fileset dir="doc" />
 		</copy>
-				
+		
 	</target>
 </project>
