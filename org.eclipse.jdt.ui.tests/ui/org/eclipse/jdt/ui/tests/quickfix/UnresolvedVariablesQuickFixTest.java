@@ -321,7 +321,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 6);
 		assertCorrectLabels(proposals);
 
-		boolean doField= true, doParam= true, doLocal= true, doInterface= false, doClass= false, doChange= true;
+		boolean doField= true, doParam= true, doLocal= true, doInterface= true, doClass= true, doChange= true;
 		for (int i= 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
 			if (curr instanceof NewVariableCompletionProposal) {

@@ -597,18 +597,8 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("    double vec= 1.0;\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-		
+				
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		preview= proposal.getCompilationUnitChange().getPreviewContent();
-		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    Float vec= 1.0;\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-		
-		proposal= (CUCorrectionProposal) proposals.get(2);
 		preview= proposal.getCompilationUnitChange().getPreviewContent();
 		
 		buf= new StringBuffer();
@@ -617,6 +607,17 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("    float vec= 1.0;\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    Float vec= 1.0;\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
 		newCUWizard.setShowDialog(false);

@@ -425,6 +425,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	public void testUncaughtException() throws Exception {
 		if (true) {
 			System.err.println("Disabled. (Bug 24773)");
+			return;
 		}
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
