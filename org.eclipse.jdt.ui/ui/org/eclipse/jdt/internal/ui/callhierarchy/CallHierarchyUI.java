@@ -39,6 +39,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -123,21 +124,36 @@ public class CallHierarchyUI {
 
     public static void openInEditor(Object element, Shell shell, String title) {
         CallLocation callLocation= CallHierarchy.getCallLocation(element);
-
-        if (callLocation == null) {
-            return;
-        }
-
+        
         try {
+	        IMember enclosingMember;
+	        int selectionStart;
+			int selectionLength;
+			
+	        if (callLocation != null) {
+				enclosingMember= callLocation.getMember();
+				selectionStart= callLocation.getStart();
+				selectionLength= callLocation.getEnd() - selectionStart;
+	        } else if (element instanceof MethodWrapper) {
+	        	enclosingMember= ((MethodWrapper) element).getMember();
+	        	ISourceRange selectionRange= enclosingMember.getNameRange();
+	        	if (selectionRange == null)
+	        		selectionRange= enclosingMember.getSourceRange();
+	        	if (selectionRange == null)
+	        		return;
+	        	selectionStart= selectionRange.getOffset();
+	        	selectionLength= selectionRange.getLength();
+	        } else {
+	            return;
+	        }
+	
             boolean activateOnOpen = OpenStrategy.activateOnOpen();
 
-            IEditorPart methodEditor = EditorUtility.openInEditor(callLocation.getMember(),
-                    activateOnOpen);
+			IEditorPart methodEditor = EditorUtility.openInEditor(enclosingMember, activateOnOpen);
 
             if (methodEditor instanceof ITextEditor) {
                 ITextEditor editor = (ITextEditor) methodEditor;
-                editor.selectAndReveal(callLocation.getStart(),
-                    (callLocation.getEnd() - callLocation.getStart()));
+				editor.selectAndReveal(selectionStart, selectionLength);
             }
         } catch (JavaModelException e) {
             JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
@@ -150,7 +166,13 @@ public class CallHierarchyUI {
                     "CallHierarchyUI.open_in_editor.error.message"), //$NON-NLS-1$
                 e.getStatus());
         } catch (PartInitException x) {
-            String name = callLocation.getCalledMember().getElementName();
+            String name;
+        	if (callLocation != null)
+        		name= callLocation.getCalledMember().getElementName();
+        	else if (element instanceof MethodWrapper)
+        		name= ((MethodWrapper) element).getName();
+        	else
+        		name= "";  //$NON-NLS-1$
             MessageDialog.openError(shell, title,
                 CallHierarchyMessages.getFormattedString(
                     "CallHierarchyUI.open_in_editor.error.messageArgs", //$NON-NLS-1$
