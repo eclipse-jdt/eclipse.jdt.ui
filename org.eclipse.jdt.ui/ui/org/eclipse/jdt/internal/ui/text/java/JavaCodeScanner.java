@@ -40,7 +40,83 @@ import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
  * A Java code scanner.
  */
 public final class JavaCodeScanner extends AbstractJavaScanner {
-	
+
+	/**
+	 * Word rule to detect java method names.
+	 * 
+	 * @since 3.0
+	 */
+	protected class MethodNameRule implements IRule {
+
+		/** Token to return for this rule */
+		private final IToken fToken;
+		/** Detector to determine the method names */
+		private final IWordDetector fDetector;
+
+		/**
+		 * Creates a new method name rule.
+		 * 
+		 * @param detector Detector to detect the method names
+		 * @param token Token to use for this rule
+		 */
+		public MethodNameRule(IWordDetector detector, IToken token) {
+			fDetector= detector;
+			fToken= token;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.rules.IRule#evaluate(org.eclipse.jface.text.rules.ICharacterScanner)
+		 */
+		public IToken evaluate(ICharacterScanner scanner) {
+
+			int count= 1;
+			IToken token= Token.UNDEFINED;
+			int character= scanner.read();
+			final StringBuffer buffer= new StringBuffer(32); // Average word length?
+
+			// Scan for valid word start
+			if (fDetector.isWordStart((char) character)) {
+
+				do {
+					buffer.append((char) character);
+					character= scanner.read();
+					++count;
+				} while (fDetector.isWordPart((char) character));
+
+				boolean isKeyword= false;
+				final String word= buffer.toString();
+
+				// Check for keywords
+				for (int index= 0; index < JavaCodeScanner.fgKeywords.length; index++) {
+					if (JavaCodeScanner.fgKeywords[index].equals(word)) {
+						isKeyword= true;
+						break;
+					}
+				}
+
+				if (!isKeyword) {
+					// Ignore trailing whitespaces
+					while (Character.isWhitespace((char) character)) {
+						character= scanner.read();
+						++count;
+					}
+
+					// Check for matching parenthesis
+					if (character == '(') {
+						scanner.unread();
+						return fToken;
+					}
+				}
+			}
+
+			// Unwind scanner in case of detection failure
+			for (int index= 0; index < count; index++)
+				scanner.unread();
+
+			return token;
+		}
+	}
+
 	private static class VersionedWordRule extends WordRule {
 
 		private final IToken fDefaultToken;
@@ -71,9 +147,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			if (fEnable) {
 				if (fCurrentVersion.equals(fVersion) || token.isUndefined())
 					return token;
-//
 				return fDefaultToken;
-
 			} else {
 				if (fCurrentVersion.equals(fVersion))
 					return Token.UNDEFINED;
@@ -113,7 +187,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	private static String[] fgTokenProperties= {
 		IJavaColorConstants.JAVA_KEYWORD,
 		IJavaColorConstants.JAVA_STRING,
-		IJavaColorConstants.JAVA_DEFAULT
+		IJavaColorConstants.JAVA_DEFAULT,
+		IJavaColorConstants.JAVA_METHOD_NAME
 	};
 	
 	private VersionedWordRule fVersionedWordRule;
@@ -168,6 +243,9 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			rules.add(fVersionedWordRule);
 		}
 		
+		// Add word rule for method names.
+		token= getToken(IJavaColorConstants.JAVA_METHOD_NAME);
+		rules.add(new MethodNameRule(new JavaWordDetector(), token));
 		
 		// Add word rule for keywords, types, and constants.
 		token= getToken(IJavaColorConstants.JAVA_DEFAULT);

@@ -51,6 +51,13 @@ public interface IJavaColorConstants {
 	 */
 	String JAVA_STRING= "java_string"; //$NON-NLS-1$
 
+	/** The color key for method names in Java code
+	 * (value <code>"java_method_name"</code>).
+	 * 
+	 * @since 3.0
+	 */
+	String JAVA_METHOD_NAME= "java_method_name"; //$NON-NLS-1$
+
 	/**
 	 * The color key for everthing in Java code for which no other color is specified
 	 * (value <code>"java_default"</code>).
