@@ -1,15 +1,9 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -28,9 +22,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -38,7 +30,6 @@ import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -46,7 +37,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
@@ -55,24 +45,22 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class MoveMembersRefactoring extends Refactoring {
 	
-	private final CodeGenerationSettings fPreferenceSettings;
 	private IMember[] fMembers;
 	private IType fDestinationType;
 	private String fDestinationTypeName;
 	private TextChangeManager fChangeManager;
-	
-	private Map fImportEdits;
+	private final ImportEditManager fImportManager;
 
 	public MoveMembersRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
 		Assert.isNotNull(elements);
 		Assert.isNotNull(preferenceSettings);
 		fMembers= (IMember[])SourceReferenceUtil.sortByOffset(elements);
-		fPreferenceSettings= preferenceSettings;
-		fImportEdits= new HashMap();
+		fImportManager= new ImportEditManager(preferenceSettings);
 	}
 	
 	/*
@@ -515,7 +503,7 @@ public class MoveMembersRefactoring extends Refactoring {
 
 			addModifyReferencesToMovedMembers(new SubProgressMonitor(pm, 1), manager);
 
-			addImports(manager);
+			fImportManager.fill(manager);
 			
 			return manager;
 		} finally{
@@ -523,15 +511,6 @@ public class MoveMembersRefactoring extends Refactoring {
 		}	
 	}
 	
-	private void addImports(TextChangeManager manager) throws CoreException{
-		for (Iterator iter= fImportEdits.keySet().iterator(); iter.hasNext();) {
-			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit) iter.next());
-			ImportEdit edit= (ImportEdit)fImportEdits.get(cu);
-			if (edit != null && ! edit.isEmpty())
-				manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("MoveMembersRefactoring.update_imports"), edit); //$NON-NLS-1$
-		}
-	}
-
 	private boolean destinationCUNeedsAddedImports() {
 		return ! getDeclaringType().getCompilationUnit().equals(fDestinationType.getCompilationUnit());
 	}
@@ -549,46 +528,18 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private void addCopyMemberChange(TextChangeManager manager, IMember member, IProgressMonitor pm) throws CoreException {
-		String source= computeNewSource(member, pm);
+		String source= MemberMoveUtil.computeNewSource(member, pm, fImportManager, fMembers);
 		String changeName= RefactoringCoreMessages.getString("MoveMembersRefactoring.Copy") + member.getElementName();								 //$NON-NLS-1$
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fDestinationType.getCompilationUnit());
 		manager.get(cu).addTextEdit(changeName, createAddMemberEdit(source, member.getElementType()));
 	}
 	
-	private String computeNewSource(IMember member, IProgressMonitor pm) throws JavaModelException {
-		String originalSource= SourceReferenceSourceRangeComputer.computeSource(member);
-		StringBuffer modifiedSource= new StringBuffer(originalSource);
-		
-		//ISourceRange -> String (new source)
-		Map accessModifications= getStaticMemberAccessesInMovedMember(member, pm);
-		ISourceRange[] ranges= (ISourceRange[]) accessModifications.keySet().toArray(new ISourceRange[accessModifications.keySet().size()]);
-		ISourceRange[] sortedRanges= SourceRange.reverseSortByOffset(ranges);
-		
-		ISourceRange originalRange= SourceReferenceSourceRangeComputer.computeSourceRange(member, member.getCompilationUnit().getSource());
-		
-		for (int i= 0; i < sortedRanges.length; i++) {
-			int start= sortedRanges[i].getOffset() - originalRange.getOffset();
-			int end= start + sortedRanges[i].getLength();
-			modifiedSource.replace(start, end, (String)accessModifications.get(sortedRanges[i]));
-		}
-		return modifiedSource.toString();
-	}
-	
-	private Map getStaticMemberAccessesInMovedMember(IMember member, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 3); //$NON-NLS-1$
-		Map resultMap= new HashMap();
-		resultMap.putAll(getFieldAccessModificationsInMovedMember(member, new SubProgressMonitor(pm, 1)));
-		resultMap.putAll(getMethodSendsInMovedMember(member, new SubProgressMonitor(pm, 1)));
-		resultMap.putAll(getTypeReferencesInMovedMember(member, new SubProgressMonitor(pm, 1)));
-		pm.done();
-		return resultMap;
-	}
 	
 	private TextEdit createAddMemberEdit(String source, int memberType) throws JavaModelException {
 		IMember sibling= getLastMember(fDestinationType, memberType);
 		if (sibling != null)
-			return new MemberEdit(sibling, MemberEdit.INSERT_AFTER, new String[]{ source}, getTabWidth());
-		return new MemberEdit(fDestinationType, MemberEdit.ADD_AT_END, new String[]{ source}, getTabWidth());
+			return new MemberEdit(sibling, MemberEdit.INSERT_AFTER, new String[]{ source}, CodeFormatterUtil.getTabWidth());
+		return new MemberEdit(fDestinationType, MemberEdit.ADD_AT_END, new String[]{ source}, CodeFormatterUtil.getTabWidth());
 	}
 	
 	private void addDeleteMembersChange(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
@@ -602,27 +553,18 @@ public class MoveMembersRefactoring extends Refactoring {
 		}
 		pm.done();
 	}
-	
-	private ImportEdit getImportEdit(ICompilationUnit cu){
-		if (fImportEdits.containsKey(cu))
-			return (ImportEdit)fImportEdits.get(cu);
 		
-		ImportEdit edit= new ImportEdit(cu, fPreferenceSettings);	
-		fImportEdits.put(cu, edit);	
-		return edit;
-	}
-	
 	private void addImportsToDestinationCu(IProgressMonitor pm) throws CoreException {
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fDestinationType.getCompilationUnit());		
 		IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(fMembers, pm);
 		for (int i= 0; i < referencedTypes.length; i++) {
-			addImportTo(referencedTypes[i], cu);
+			fImportManager.addImportTo(referencedTypes[i], cu);
 		}
 	}
 	
 	private void addImportsToSourceCu() throws CoreException {
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getDeclaringType().getCompilationUnit());		
-		addImportTo(fDestinationType, cu);
+		fImportManager.addImportTo(fDestinationType, cu);
 	}
 	
 	private void addModifyReferencesToMovedMembers(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
@@ -650,7 +592,7 @@ public class MoveMembersRefactoring extends Refactoring {
 				modifiedGroup= removeReferencesEnclosedIn(fMembers, searchResultGroup);
 	
 			modifyReferencesToMovedMember(member, manager, modifiedGroup, cu);
-			addImportTo(fDestinationType, cu);
+			fImportManager.addImportTo(fDestinationType, cu);
 		}
 		pm.done();
 	}
@@ -691,109 +633,9 @@ public class MoveMembersRefactoring extends Refactoring {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
 		return RefactoringSearchEngine.search(pm, scope, pattern);
 	}
-	
-	//ISourceRange -> String (new source)
-	private Map getFieldAccessModificationsInMovedMember(IMember member, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2); //$NON-NLS-1$
-		Map result= new HashMap();
-		IField[] fields= ReferenceFinderUtil.getFieldsReferencedIn(new IMember[]{member}, new SubProgressMonitor(pm, 1));
-		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getDeclaringType().getCompilationUnit());
-		IMember[] interestingFields= getMembersThatNeedReferenceConversion(fields);
-		for (int i= 0; i < interestingFields.length; i++) {
-			IField field= (IField)interestingFields[i];
-			//XX side effect
-			addImportTo(field.getDeclaringType(), cu);
-			String newSource= field.getDeclaringType().getElementName() + "." + field.getElementName(); //$NON-NLS-1$
-			SearchResult[] searchResults= findReferencesInMember(member, field, new SubProgressMonitor(pm, 1));
-			ISourceRange[] ranges= FieldReferenceFinder.findFieldReferenceRanges(searchResults, cu);
-			putAllToMap(result, newSource, ranges);		
-		}
-		return result;
-	}
-
-	//ISourceRange -> String (new source)
-	private Map getMethodSendsInMovedMember(IMember member, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2); //$NON-NLS-1$
-		Map result= new HashMap();
-		IMethod[] methods= ReferenceFinderUtil.getMethodsReferencedIn(new IMember[]{member}, new SubProgressMonitor(pm, 1));
-		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getDeclaringType().getCompilationUnit());
-		IMember[] interestingMethods= getMembersThatNeedReferenceConversion(methods);
-		for (int i= 0; i < interestingMethods.length; i++) {
-			IMethod method= (IMethod)interestingMethods[i];
-			//XX side effect
-			addImportTo(method.getDeclaringType(), cu);
-			String newSource= method.getDeclaringType().getElementName() + "." + method.getElementName(); //$NON-NLS-1$
-			SearchResult[] searchResults= findReferencesInMember(member, method, new SubProgressMonitor(pm, 1));
-			ISourceRange[] ranges= MethodInvocationFinder.findMessageSendRanges(searchResults, cu);
-			putAllToMap(result, newSource, ranges);
-		}
-		return result;
-	}
-	
-	//ISourceRange -> String (new source)
-	private Map getTypeReferencesInMovedMember(IMember member, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2); //$NON-NLS-1$
-		Map result= new HashMap();
-		IType[] types= ReferenceFinderUtil.getTypesReferencedIn(new IMember[]{member}, new SubProgressMonitor(pm, 1));
-		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getDeclaringType().getCompilationUnit());
-		IMember[] interestingMethods= getMembersThatNeedReferenceConversion(types);
-		for (int i= 0; i < interestingMethods.length; i++) {
-			IType type= (IType)interestingMethods[i];
-			//XX side effect
-			addImportTo(type.getDeclaringType(), cu);
-			String newSource= type.getDeclaringType().getElementName() + "." + type.getElementName(); //$NON-NLS-1$
-			SearchResult[] searchResults= findReferencesInMember(member, type, new SubProgressMonitor(pm, 1));
-			ISourceRange[] ranges= TypeReferenceFinder.findTypeReferenceRanges(searchResults, cu);
-			putAllToMap(result, newSource, ranges);
-		}
-		return result;
-	}
-	
-	private void addImportTo(IType type, ICompilationUnit cu){
-		getImportEdit(cu).addImport(JavaModelUtil.getFullyQualifiedName(type));
-	}
-
-	private static void putAllToMap(Map result, String newSource, ISourceRange[] ranges) {
-		for (int j= 0; j < ranges.length; j++) {
-			result.put(ranges[j], newSource);
-		}
-	}
-	
-	private static SearchResult[] findReferencesInMember(IMember scopeMember, IMember referenceMember, IProgressMonitor pm) throws JavaModelException {
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[]{scopeMember});
-		SearchResultCollector collector= new SearchResultCollector(pm);
-		new SearchEngine().search(ResourcesPlugin.getWorkspace(), referenceMember, IJavaSearchConstants.REFERENCES, scope, collector);
-		List results= collector.getResults();
-		SearchResult[] searchResults= (SearchResult[]) results.toArray(new SearchResult[results.size()]);
-		return searchResults;
-	}
-		
-	private IMember[] getMembersThatNeedReferenceConversion(IMember[] members) throws JavaModelException{
-		Set memberSet= new HashSet(); //using set to remove dups
-		for (int i= 0; i < members.length; i++) {
-			if (willNeedToConvertReferenceTo(members[i]))
-				memberSet.add(members[i]);
-		}
-		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-	}
-	
-	private boolean willNeedToConvertReferenceTo(IMember member) throws JavaModelException{
-		if (! member.exists())
-			return false;
-		List memberList= Arrays.asList(fMembers);
-		if (memberList.contains(member))
-			return false;
-		if (! JdtFlags.isStatic(member)) //convert all static references
-			return false;
-		return true;		
-	}
-	
+			
 	//--- helpers
 
-	private static int getTabWidth() {
-		return Integer.parseInt((String)JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE));
-	}
-	
 	private static IMember getLastMember(IType type, int elementType) throws JavaModelException {
 		if (elementType == IJavaElement.METHOD)
 			return getLastMethod(type);
