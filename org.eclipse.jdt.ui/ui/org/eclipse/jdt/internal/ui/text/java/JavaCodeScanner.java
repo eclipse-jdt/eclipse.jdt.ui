@@ -43,14 +43,16 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	
 	private static class VersionedWordRule extends WordRule {
 
+		private final IToken fDefaultToken;
 		private final String fVersion;
 		private final boolean fEnable;
 		
 		private String fCurrentVersion;
 
-		public VersionedWordRule(IWordDetector detector, String version, boolean enable, String currentVersion) {
+		public VersionedWordRule(IWordDetector detector, IToken defaultToken, String version, boolean enable, String currentVersion) {
 			super(detector);
 
+			fDefaultToken= defaultToken;
 			fVersion= version;
 			fEnable= enable;
 			fCurrentVersion= currentVersion;
@@ -67,10 +69,10 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			IToken token= super.evaluate(scanner);
 
 			if (fEnable) {
-				if (fCurrentVersion.equals(fVersion))
+				if (fCurrentVersion.equals(fVersion) || token.isUndefined())
 					return token;
-					
-				return Token.UNDEFINED;
+//
+				return fDefaultToken;
 
 			} else {
 				if (fCurrentVersion.equals(fVersion))
@@ -156,7 +158,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		}
 		
 		if (version instanceof String) {
-			fVersionedWordRule= new VersionedWordRule(new JavaWordDetector(), "1.4", true, (String) version); //$NON-NLS-1$
+			token= getToken(IJavaColorConstants.JAVA_DEFAULT);
+			fVersionedWordRule= new VersionedWordRule(new JavaWordDetector(), token, "1.4", true, (String) version); //$NON-NLS-1$
 			
 			token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 			for (int i=0; i<fgNewKeywords.length; i++)
