@@ -19,6 +19,7 @@ import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.Block;
 import org.eclipse.jdt.internal.compiler.ast.DoStatement;
+import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
@@ -120,6 +121,9 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (analyzeSelection().getSelectedNodes() == null || analyzeSelection().getSelectedNodes().length != 1)
 			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
 		
+		if (isUsedInExplicitConstructorCall())
+			return RefactoringStatus.createFatalErrorStatus("Code from explicit constructor calls cannot be extracted to a variable.");
+			
 		if (getSelectedMethodNode() == null)
 			return RefactoringStatus.createFatalErrorStatus("An expression used in a method must be selected to activate this refactoring.");			
 			
@@ -143,7 +147,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private void initializeAST() throws JavaModelException {
 		fAST= new AST(fCu);
 	}
-	
+
 	public RefactoringStatus checkTempName(String newName) {
 		RefactoringStatus result= Checks.checkFieldName(newName);
 		if (! Checks.startsWithLowerCase(newName))
@@ -167,7 +171,16 @@ public class ExtractTempRefactoring extends Refactoring {
 			pm.done();
 		}	
 	}
-
+	
+	private boolean isUsedInExplicitConstructorCall() throws JavaModelException{
+		AstNode[] parents= analyzeSelection().getParents();
+		for (int i= parents.length - 1; i >= 0; i--) {
+			if (parents[i] instanceof ExplicitConstructorCall)
+				return true;
+		}
+		return false;
+	}
+	
 	private boolean isSelectionUsedAsExpression() throws JavaModelException {		
 		Expression expression= getSelectedExpression();
 		Selection selection= Selection.createFromStartEnd(ASTUtil.getSourceStart(expression), ASTUtil.getSourceEnd(expression));

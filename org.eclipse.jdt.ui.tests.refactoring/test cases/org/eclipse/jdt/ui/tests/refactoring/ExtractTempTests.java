@@ -222,5 +222,13 @@ public class ExtractTempTests extends RefactoringTest {
 	public void testFail5() throws Exception{
 		failHelper1(3, 12, 3, 15, false, false, "temp");
 	}	
+
+	public void testFail6() throws Exception{
+		failHelper1(4, 14, 4, 19, false, false, "temp");
+	}	
+
+	public void testFail7() throws Exception{
+		failHelper1(4, 15, 4, 20, false, false, "temp");
+	}	
 	
 }
