@@ -150,6 +150,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				LinkedUIControl editor= new LinkedUIControl(environment, fViewer);
 				editor.setExitPosition(fViewer, baseOffset + replacementString.length(), 0, true);
 				editor.setCyclingMode(LinkedUIControl.CYCLE_WHEN_NO_PARENT);
+				editor.setDoContextInfo(true);
 				editor.enter();
 				fSelectedRegion= editor.getSelectedRegion();
 				

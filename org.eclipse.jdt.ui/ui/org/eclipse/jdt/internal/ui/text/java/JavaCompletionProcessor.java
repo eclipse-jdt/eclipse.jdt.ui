@@ -97,6 +97,16 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		public void setContextInformationPosition(int position) {
 			fPosition= position;	
 		}
+		
+		/*
+		 * @see org.eclipse.jface.text.contentassist.IContextInformation#equals(java.lang.Object)
+		 */
+		public boolean equals(Object object) {
+			if (object instanceof ContextInformationWrapper)
+				return fContextInformation.equals(((ContextInformationWrapper) object).fContextInformation);
+			else
+				return fContextInformation.equals(object);
+		}
 	}
 	
 	

@@ -32,6 +32,7 @@ import org.eclipse.jface.text.IDocumentExtension;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IDocumentExtension.IReplace;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -78,6 +79,19 @@ public class LinkedEnvironment {
 	 */
 	public static void closeEnvironment(IDocument document) {
 		LinkedManager.cancelManager(document);
+	}
+
+	/**
+	 * @param document
+	 * @param documentOffset
+	 * @return
+	 */
+	public static LinkedEnvironment getEnvironment(IDocument document, int documentOffset) {
+		LinkedManager mgr= LinkedManager.getLinkedManager(new IDocument[] {document}, false);
+		if (mgr != null)
+			return mgr.getTopEnvironment();
+		else
+			return null;
 	}
 
 	/**
@@ -663,6 +677,21 @@ public class LinkedEnvironment {
 			if (group.contains(position))
 				return group;
 		}
+		return null;
+	}
+
+	/**
+	 * @param documentOffset
+	 */
+	public ICompletionProposal[] getCompletions(IDocument document, int documentOffset) {
+		LinkedPosition toFind= new LinkedPosition(document, documentOffset, 0, LinkedPositionGroup.NO_STOP);
+		LinkedPositionGroup group= getGroupForPosition(toFind);
+		if (group != null) {
+			LinkedPosition position= group.getPosition(toFind);
+			if (position instanceof ProposalPosition)
+				return ((ProposalPosition) position).getChoices();
+		}
+		
 		return null;
 	}
 }

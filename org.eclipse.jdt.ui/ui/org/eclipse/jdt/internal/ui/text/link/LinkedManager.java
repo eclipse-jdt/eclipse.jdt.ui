@@ -219,4 +219,14 @@ class LinkedManager {
     		Assert.isTrue(fEnvironments.size() > 0);
     	}
     }
+
+	/**
+	 * @return
+	 */
+	public LinkedEnvironment getTopEnvironment() {
+		if (fEnvironments.isEmpty())
+			return null;
+		else
+			return (LinkedEnvironment) fEnvironments.peek();
+	}
 }

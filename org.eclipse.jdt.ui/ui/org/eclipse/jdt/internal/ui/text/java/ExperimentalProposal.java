@@ -63,12 +63,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 		int replacementOffset= getReplacementOffset();
 		String replacementString= getReplacementString();
 
-		if (LinkedEnvironment.hasEnvironment(document)) {
-			fSelectedRegion= (fPositionOffsets.length == 0)
-				? new Region(replacementOffset + replacementString.length(), 0)
-				: new Region(replacementOffset + fPositionOffsets[0], fPositionLengths[0]);
-			
-		} else if (fPositionOffsets.length > 0) {
+		if (fPositionOffsets.length > 0) {
 			try {
 				LinkedEnvironment env= new LinkedEnvironment();
 				for (int i= 0; i != fPositionOffsets.length; i++) {
@@ -81,6 +76,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 				
 				LinkedUIControl ui= new LinkedUIControl(env, fViewer);
 				ui.setExitPosition(fViewer, replacementOffset + replacementString.length(), 0, true);
+				ui.setDoContextInfo(true);
 				ui.enter();
 	
 				fSelectedRegion= ui.getSelectedRegion();

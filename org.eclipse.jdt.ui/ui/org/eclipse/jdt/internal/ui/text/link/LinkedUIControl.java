@@ -40,6 +40,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.IRewriteTarget;
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
@@ -47,6 +48,7 @@ import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -133,6 +135,9 @@ public class LinkedUIControl {
 		
 		/** The cached shell - same reason as fWidget. */
 		Shell fShell;
+		
+		/** The registered listener, or <code>null</code>. */
+		LinkedUIKeyListener fKeyListener;
 	}
 
 	private static final class EmptyTarget extends LinkedUITarget {
@@ -303,7 +308,7 @@ public class LinkedUIControl {
 		}
 
 		public void shellDeactivated(ShellEvent e) {
-// 			TODO reenable after debugging 
+// 			T ODO reenable after debugging 
 //			if (true) return;
 			
 			// from LinkedPositionUI:
@@ -352,9 +357,11 @@ public class LinkedUIControl {
 	 */
 	private class LinkedUIKeyListener implements VerifyKeyListener {
 
+		private boolean fIsEnabled= true;
+
 		public void verifyKey(VerifyEvent event) {
 
-			if (!event.doit)
+			if (!event.doit || !fIsEnabled)
 				return;
 
 			Point selection= fCurrentTarget.getViewer().getSelectedRange();
@@ -446,6 +453,13 @@ public class LinkedUIControl {
 			return fPreviousPosition != null;
 		}
 
+		/**
+		 * @param b
+		 */
+		public void setEnabled(boolean enabled) {
+			fIsEnabled= enabled;
+		}
+
 	}
 
 	/**
@@ -471,7 +485,7 @@ public class LinkedUIControl {
 							LinkedPosition find= new LinkedPosition(doc, offset, length, LinkedPositionGroup.NO_STOP);
 							LinkedPosition pos= fEnvironment.findPosition(find);
 							if (pos != null)
-								switchPosition(pos, false);
+								switchPosition(pos, false, false);
 						}
 					}
 				}
@@ -492,8 +506,6 @@ public class LinkedUIControl {
 	/* Our team of event listeners */
 	/** The shell listener. */
 	private LinkedUICloser fCloser= new LinkedUICloser();
-	/** The key listener. */
-	private LinkedUIKeyListener fKeyListener= new LinkedUIKeyListener();
 	/** The linked listener. */
 	private ILinkedListener fLinkedListener= new ExitListener();
 	/** The selection listener. */
@@ -524,6 +536,7 @@ public class LinkedUIControl {
 	/** State indicator to prevent multiple invocation of leave. */
 	private boolean fIsActive= false;
 	private IPositionUpdater fPositionUpdater= new DefaultPositionUpdater(getCategory());
+	private boolean fDoContextInfo= false;
 
 	/**
 	 * Creates a new UI on the given model (environment) and the set of
@@ -675,7 +688,7 @@ public class LinkedUIControl {
 
 	void next() {
 		if (fIterator.hasNext(fFramePosition)) {
-			switchPosition(fIterator.next(fFramePosition), true);
+			switchPosition(fIterator.next(fFramePosition), true, true);
 			return;
 		} else
 			leave(ILinkedListener.UPDATE_CARET);
@@ -683,10 +696,18 @@ public class LinkedUIControl {
 
 	void previous() {
 		if (fIterator.hasPrevious(fFramePosition)) {
-			switchPosition(fIterator.previous(fFramePosition), true);
+			switchPosition(fIterator.previous(fFramePosition), true, true);
 		} else
 			// dont't update caret, but rather select the current frame
 			leave(ILinkedListener.SELECT);
+	}
+	
+	private void triggerContextInfo() {
+		ITextOperationTarget target= fCurrentTarget.getViewer().getTextOperationTarget();
+		if (target != null) {
+			if (target.canDoOperation(ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION))
+				target.doOperation(ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);
+		}
 	}
 
 	/** Trigger content assist on choice positions */
@@ -701,7 +722,7 @@ public class LinkedUIControl {
 		}
 	}
 
-	private void switchPosition(LinkedPosition pos, boolean select) {
+	private void switchPosition(LinkedPosition pos, boolean select, boolean showProposals) {
 		Assert.isNotNull(pos);
 		if (pos.equals(fFramePosition))
 			return;
@@ -732,7 +753,10 @@ public class LinkedUIControl {
 		else {
 			redraw();
 		}
-		triggerContentAssist();
+		if (showProposals)
+			triggerContentAssist();
+		if (fFramePosition != fExitPosition && fDoContextInfo)
+			triggerContextInfo();
 	}
 
 	private void switchViewer(IDocument oldDoc, IDocument newDoc) {
@@ -784,7 +808,12 @@ public class LinkedUIControl {
 		if (fCurrentTarget.fWidget == null)
 			leave(ILinkedListener.EXIT_ALL);
 
-		((ITextViewerExtension) viewer).prependVerifyKeyListener(fKeyListener);
+		if (fCurrentTarget.fKeyListener == null) {
+			fCurrentTarget.fKeyListener= new LinkedUIKeyListener();
+			((ITextViewerExtension) viewer).prependVerifyKeyListener(fCurrentTarget.fKeyListener);
+		} else
+			fCurrentTarget.fKeyListener.setEnabled(true);
+		
 		((IPostSelectionProvider) viewer).addPostSelectionChangedListener(fSelectionListener);
 
 		fPainter.setViewer(viewer);
@@ -813,17 +842,19 @@ public class LinkedUIControl {
 		
 		Shell shell= fCurrentTarget.fShell;
 		fCurrentTarget.fShell= null;
+		
 		if (shell != null)
 			shell.removeShellListener(fCloser);
 		
 		if (text != null) {
 			text.removeModifyListener(fCaretListener);
 			text.removeVerifyListener(fCaretListener);
-			text.removeVerifyKeyListener(fKeyListener);
 			text.removePaintListener(fPainter);
 		}
 
-		((ITextViewerExtension) viewer).removeVerifyKeyListener(fKeyListener);
+		// don't remove the verify key listener to let it keep its position
+		// in the listener queue
+		fCurrentTarget.fKeyListener.setEnabled(false);
 		((IPostSelectionProvider) viewer).removePostSelectionChangedListener(fSelectionListener);
 
 		redraw();
@@ -843,12 +874,19 @@ public class LinkedUIControl {
 		fPainter.dispose();
 		disconnect();
 		redraw();
-
+		
+		for (int i= 0; i < fTargets.length; i++) {
+			if (fCurrentTarget.fKeyListener != null) {
+				((ITextViewerExtension) fTargets[i].getViewer()).removeVerifyKeyListener(fCurrentTarget.fKeyListener);
+				fCurrentTarget.fKeyListener= null;
+			}
+		}
+		
 		if (fExitPosition != null)
 			fExitPosition.getDocument().removePosition(fExitPosition);
 
 		if ((flags & ILinkedListener.UPDATE_CARET) != 0 && fExitPosition != null && fFramePosition != fExitPosition)
-			switchPosition(fExitPosition, true);
+			switchPosition(fExitPosition, true, false);
 
 		for (int i= 0; i < fTargets.length; i++) {
 			IDocument doc= fTargets[i].getViewer().getDocument();
@@ -993,4 +1031,14 @@ public class LinkedUIControl {
 		return toString();
 	}
 
+	/**
+	 * Sets the context info property. If set to <code>true</code>, context
+	 * info will be invoked on the current target's viewer whenever a position
+	 * is switched.
+	 * 
+	 * @param doContextInfo The doContextInfo to set.
+	 */
+	public void setDoContextInfo(boolean doContextInfo) {
+		fDoContextInfo= doContextInfo;
+	}
 }
