@@ -58,17 +58,16 @@ public class TemplateEngine {
 	 * @param completionPosition the context position in the document of the text viewer
 	 * @param unit               the compilation unit (may be <code>null</code>)
 	 */
-	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit sourceUnit,
-		IEditorPart editor) throws JavaModelException
+	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit sourceUnit)
+		throws JavaModelException
 	{
 		Assert.isNotNull(viewer);
-		Assert.isNotNull(editor);
 
 		// disallow recursion
 		if (!fEnabled)
 			return;
 		
-		TemplateContext context= new TemplateContext(viewer, completionPosition, sourceUnit, editor, fContextType);
+		TemplateContext context= new TemplateContext(viewer, completionPosition, sourceUnit, fContextType);
 		Template[] templates= TemplateSet.getInstance().getMatchingTemplates(context);
 
 		for (int i= 0; i != templates.length; i++) {

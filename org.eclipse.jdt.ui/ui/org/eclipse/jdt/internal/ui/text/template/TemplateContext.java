@@ -8,10 +8,8 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.core.Assert;
@@ -47,13 +45,12 @@ public class TemplateContext implements VariableEvaluator {
 	private String fKey;
 	private String fType;
 	private ICompilationUnit fUnit;
-	private IEditorPart fEditor;
 
 	/**
 	 * compilation unit can be null.
 	 */
 	public TemplateContext(ITextViewer viewer, int completionPosition, ICompilationUnit unit,
-	    IEditorPart editor, String contextType)
+	    String contextType)
 	{
 		Assert.isNotNull(viewer);
 		Assert.isTrue(completionPosition >= 0);
@@ -61,7 +58,6 @@ public class TemplateContext implements VariableEvaluator {
 		fViewer= viewer;
 		fEnd= completionPosition;
 		fUnit= unit;
-		fEditor= editor;
 		fType= contextType;
 		
 		String source= fViewer.getDocument().get();
@@ -79,10 +75,6 @@ public class TemplateContext implements VariableEvaluator {
 	
 	public ITextViewer getViewer() {
 		return fViewer;
-	}
-	
-	public IEditorPart getEditor() {		
-		return fEditor;
 	}
 	
 	public String getKey() {

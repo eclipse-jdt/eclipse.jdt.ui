@@ -111,7 +111,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 
 		try {
 			fTemplateEngine.reset();
-			fTemplateEngine.complete(viewer, offset, unit, fEditor);
+			fTemplateEngine.complete(viewer, offset, unit);
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();
 			ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
