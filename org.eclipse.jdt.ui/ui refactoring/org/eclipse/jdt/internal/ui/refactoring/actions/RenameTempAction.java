@@ -56,6 +56,9 @@ class RenameTempAction extends TextSelectionBasedRefactoringAction{
 		if (!(selection instanceof ITextSelection))
 			return false;
 		
+		if (getCompilationUnit() == null)
+			return false;
+			
 		//must check it here - see bug 12590
 		//if it's not a local variable - we will try to resolve the symbol as a IJavaElement in rename action
 		Refactoring renameTempRefactoring= createRefactoring(getCompilationUnit(), (ITextSelection)selection);
