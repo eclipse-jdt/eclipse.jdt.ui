@@ -8,6 +8,7 @@ public class A_test605 {
 			foo();
 		foo();	
 	}
+
 	protected boolean extracted(int i) {
 		return i <= 10;
 	}	

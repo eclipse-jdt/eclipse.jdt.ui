@@ -56,7 +56,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class ExtractTempRefactoring extends Refactoring {
 	
@@ -432,7 +432,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		try{
 			buffer= TextBuffer.acquire(getFile());
 			int startLine= buffer.getLineOfOffset(insertBefore.getStartPosition());
-			return TextUtil.createIndentString(buffer.getLineIndent(startLine, getTabSize()));	
+			return CodeFormatterUtil.createIndentString(buffer.getLineIndent(startLine, getTabSize()));	
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);

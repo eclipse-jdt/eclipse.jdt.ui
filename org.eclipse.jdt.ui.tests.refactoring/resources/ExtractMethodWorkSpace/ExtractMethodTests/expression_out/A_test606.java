@@ -9,6 +9,7 @@ public class A_test606 {
 			foo();
 		} while (/*]*/extracted(i)/*[*/);
 	}
+
 	protected boolean extracted(int i) {
 		return i <= 10;
 	}	

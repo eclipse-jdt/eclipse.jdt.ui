@@ -5,7 +5,7 @@ public class A_test560 {
 	public void foo() {
 		int x= 0;
 		while (x < 10) {
-			/*]*/x= extracted();/*[*/
+			/*]*/x = extracted();/*[*/
 		}
 	}
 	protected int extracted() {

@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class SurroundWithTryCatchRefactoring extends Refactoring {
 
@@ -153,7 +153,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			// to acquire it here.
 			buffer= TextBuffer.acquire(getFile());
 			int start= buffer.getLineOfOffset(fAnalyzer.getFirstSelectedNode().getStartPosition());
-			String indent= TextUtil.createIndentString(buffer.getLineIndent(start, fTabWidth));
+			String indent= CodeFormatterUtil.createIndentString(buffer.getLineIndent(start, fTabWidth));
 			String delimiter= buffer.getLineDelimiter(start);
 			addEdits(result, buffer, delimiter, indent);
 			return result;

@@ -25,8 +25,6 @@ public class ExtractMethodAction extends TextSelectionRefactoringAction {
 		return new ExtractMethodRefactoring(
 			cunit, 
 			selection.getOffset(), selection.getLength(),
-			CodeFormatterPreferencePage.isCompactingAssignment(),
-			CodeFormatterPreferencePage.getTabSize(),
 			JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 

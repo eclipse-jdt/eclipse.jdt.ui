@@ -110,12 +110,12 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 				change.performed();
 				IChange undo= change.getUndoChange();
 				assertNotNull(undo);
-				assertTrue(compareSource(unit.getSource(), out));
+				compareSource(unit.getSource(), out);
 				context= new ChangeContext(new TestExceptionHandler());
 				undo.aboutToPerform(context, pm);
 				undo.perform(context, pm);
 				undo.performed();
-				assertTrue(compareSource(unit.getSource(), original));
+				compareSource(unit.getSource(), original);
 				break;		
 		}
 	}	

@@ -71,7 +71,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		int[] selection= getSelection(source);
 		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(
 			unit, selection[0], selection[1],
-			true, 4, JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaPreferencesSettings.getCodeGenerationSettings());
 		refactoring.setMethodName("extracted");
 		refactoring.setVisibility("protected");
 		String out= null;

@@ -3,7 +3,7 @@ package locals_out;
 	public void foo() {
 		int y= 10;
 		
-		/*]*/int x= extracted(y);/*[*/
+		/*]*/int x = extracted(y);/*[*/
 		
 		x++;
 	}

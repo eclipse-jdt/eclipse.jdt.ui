@@ -10,7 +10,7 @@ public class A_test526 {
 	
 	protected void foo() {
 		int i= 10;
-		/*]*/i= extracted(i);/*[*/
+		/*]*/i = extracted(i);/*[*/
 		read(i);
 	}
 

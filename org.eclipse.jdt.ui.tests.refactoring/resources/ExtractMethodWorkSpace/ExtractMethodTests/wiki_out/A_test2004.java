@@ -8,7 +8,7 @@ public class A_test2004 {
 		int i= 0;
 		while (field < 2) {
 			field++;
-			/*]*/i= extracted(i);/*[*/
+			/*]*/i = extracted(i);/*[*/
 		}
 	}
 

@@ -6,6 +6,7 @@ public class A_test607 {
 		for (int i= 0;extracted(i); i++)
 			foo();
 	}
+
 	protected boolean extracted(int i) {
 		return /*[*/ i < 10/*]*/;
 	}	

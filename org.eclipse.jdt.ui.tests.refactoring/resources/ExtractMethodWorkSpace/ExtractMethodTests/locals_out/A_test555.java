@@ -6,7 +6,7 @@ public class A_test555 {
 		int x= 0;
 		while (true) {
 			for (int y= x; true; ) {
-				/*]*/x= extracted();/*[*/
+				/*]*/x = extracted();/*[*/
 			}
 		}
 	}

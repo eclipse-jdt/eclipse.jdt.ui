@@ -14,6 +14,8 @@ import junit.framework.TestCase;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 
+import org.eclipse.jdt.internal.corext.util.Strings;
+
 public abstract class AbstractCUTestCase extends TestCase {
 
 	public AbstractCUTestCase(String name) {
@@ -76,12 +78,15 @@ public abstract class AbstractCUTestCase extends TestCase {
 	
 	//---- helper to compare two file without considering the package statement
 	
-	protected static boolean compareSource(String refactored, String proofed) {
+	protected static void compareSource(String refactored, String proofed) {
 		int index= refactored.indexOf(';');
-		refactored= refactored.substring(index);
+		String[] refactoredCode= Strings.convertIntoLines(refactored.substring(index));
 		index= proofed.indexOf(';');
-		proofed= proofed.substring(index);
-		return refactored.equals(proofed);
+		String[] proofedCode= Strings.convertIntoLines(proofed.substring(index));
+		assertEquals("Length difference", proofedCode.length, refactoredCode.length);
+		for (int i= 0; i < proofedCode.length; i++) {
+			assertEquals("Line difference", proofedCode[i], refactoredCode[i]);
+		}
 	}		
 }
 

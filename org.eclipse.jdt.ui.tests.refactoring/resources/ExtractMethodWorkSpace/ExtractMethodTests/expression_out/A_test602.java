@@ -7,6 +7,7 @@ public class A_test602 {
 		if (/*]*/extracted(i)/*[*/)
 			foo();
 	}
+
 	protected boolean extracted(int i) {
 		return i < 10 || i < 20;
 	}	

@@ -231,6 +231,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		if (fViewer != null)
 			fViewer.removeTreeListener(fExpansionListener);
+			
+		fActionSet.dispose();
 		super.dispose();	
 	}
 	/**

@@ -71,7 +71,7 @@ public class SefTests extends AbstractSelectionTestCase {
 		assertNotNull(change.getUndoChange());
 		String source= unit.getSource();
 		String out= getProofedContent(outputFolder, id);
-		assertTrue(compareSource(source, out));
+		compareSource(source, out);
 	}
 	
 	protected void performInvalidTest(IPackageFragment packageFragment, String id, String fieldName) throws Exception {

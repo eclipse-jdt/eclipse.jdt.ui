@@ -6,6 +6,7 @@ public class A_test753 {
 	public void foo() {
 		/*]*/extracted();/*[*/
 	}
+
 	protected void extracted() {
 		while (flag) {
 			if (flag)

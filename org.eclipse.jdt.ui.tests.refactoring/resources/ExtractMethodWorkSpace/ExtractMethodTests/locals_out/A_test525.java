@@ -11,7 +11,7 @@ public class A_test525 {
 	protected void foo() {
 		int i= 10;
 		try {
-			/*]*/i= extracted();/*[*/
+			/*]*/i = extracted();/*[*/
 		} catch (Exception2 e) {
 		}
 		read(i);

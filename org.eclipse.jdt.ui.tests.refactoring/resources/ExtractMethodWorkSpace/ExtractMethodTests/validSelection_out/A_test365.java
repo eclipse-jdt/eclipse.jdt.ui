@@ -7,6 +7,7 @@ public class A_test365 {
 	protected void foo() {
 		/*]*/extracted();/*[*/
 	}
+
 	protected void extracted() {
 		bar();
 	}

@@ -24,14 +24,15 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class MemberEdit extends SimpleTextEdit {
 	
-	public static final int INSERT_BEFORE= 0;	// fMember is sibling
-	public static final int INSERT_AFTER= 1;		// fMember is sibling
-	public static final int ADD_AT_BEGINNING= 2;	// fMember is parent
-	public static final int ADD_AT_END= 3;		// fMember is parent
-	public static final int REPLACE= 4;			// fMember is element to be replace
+	public static final int INSERT_BEFORE= 0;			// fMember is sibling
+	public static final int INSERT_AFTER= 1;				// fMember is sibling
+	public static final int ADD_AT_BEGINNING= 2;		// fMember is parent
+	public static final int ADD_AT_END= 3;				// fMember is parent
+	public static final int REPLACE= 4;						// fMember is element to be replace
 	
 	private IJavaElement fMember;
 	private int fInsertionKind;
@@ -64,12 +65,17 @@ public class MemberEdit extends SimpleTextEdit {
 		fAddLineSeparators= addLineSeparators;
 	}
 	
+	public void setEmptyLinesBetweenMembers(int value) {
+		fEmptyLinesBetweenMembers= value;
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#getCopy
 	 */
 	public TextEdit copy() {
 		MemberEdit result= new MemberEdit(fMember, fInsertionKind, fSource, fTabWidth);
 		result.setUseFormatter(fUseFormatter);
+		result.setEmptyLinesBetweenMembers(fEmptyLinesBetweenMembers);
 		return result;
 	}
 	
@@ -264,12 +270,15 @@ public class MemberEdit extends SimpleTextEdit {
 		StringBuffer buffer= new StringBuffer();
 		int last= fSource.length-1;
 		
-		removeIndentation(fSource);
+		CodeFormatterUtil.removeIndentation(fSource, fTabWidth);
 		
+		String indent= ""; //$NON-NLS-1$
+		if (!fUseFormatter)
+			indent= CodeFormatterUtil.createIndentString(initialIndentationLevel);
 		for (int i= 0; i < fSource.length; i++) {
 			if (! fUseFormatter) {
 				if (i > 0 || (i == 0 && indentFirstLine))
-					fill(buffer, initialIndentationLevel, "\t"); //$NON-NLS-1$
+					buffer.append(indent);
 			}
 			buffer.append(fSource[i]);
 			if (i < last && fAddLineSeparators)
@@ -277,25 +286,10 @@ public class MemberEdit extends SimpleTextEdit {
 		}		
 
 		if (fUseFormatter) {
-			ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
+			ICodeFormatter formatter= ToolFactory.createCodeFormatter();
 			return formatter.format(buffer.toString(), initialIndentationLevel, null, lineDelimiter);
 		}
 		return buffer.toString();
-	}
-	
-	private void removeIndentation(String[] lines) {
-		int l;
-		// find indentation common to all lines
-		int minIndent= 1000; // very large
-		for (l= 0; l < lines.length; l++) {
-			int indent= TextBuffer.getIndent(lines[l], fTabWidth);
-			if (indent < minIndent)
-				minIndent= indent;
-		}
-		if (minIndent > 0)
-			// remove this indent from all lines
-			for (l= 0; l < lines.length; l++)
-				lines[l]= TextBuffer.removeIndent(lines[l], minIndent, fTabWidth);
 	}
 	
 	/**

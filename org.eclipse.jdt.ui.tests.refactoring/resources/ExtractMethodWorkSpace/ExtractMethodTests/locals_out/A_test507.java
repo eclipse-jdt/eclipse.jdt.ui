@@ -4,7 +4,7 @@ public class A_test507 {
 	public void foo() {
 		int x= 0;
 		
-		/*]*/x= extracted();/*[*/
+		/*]*/x = extracted();/*[*/
 		
 		int y= x;
 	}

@@ -5,7 +5,7 @@ public class A_test508 {
 		int x= 0;
 		int y= 0;
 		
-		/*]*/x= extracted();/*[*/
+		/*]*/x = extracted();/*[*/
 		
 		y= x;
 	}

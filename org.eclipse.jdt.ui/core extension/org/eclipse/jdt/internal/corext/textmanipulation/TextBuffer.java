@@ -4,6 +4,9 @@
  */
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultLineTracker;
@@ -20,6 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
@@ -156,7 +160,7 @@ public class TextBuffer {
 	 * @return the line indent for the given line number of <code>-1</code>
 	 */
 	public int getLineIndent(int lineNumber, int tabWidth) {
-		return getIndent(getLineContent(lineNumber), tabWidth);
+		return CodeFormatterUtil.getIndent(getLineContent(lineNumber), tabWidth);
 	}
 	
 	/**
@@ -234,18 +238,21 @@ public class TextBuffer {
 	 * @return the text converted into an array of strings. Returns <code>null</code> if the 
 	 *  region lies outside the source. 
 	 */
-	public String[] convertIntoLines(int offset, int length) {
+	public String[] convertIntoLines(int offset, int length, boolean lastNewLineCreateEmptyLine) {
 		try {
 			String text= fDocument.get(offset, length);
 			ILineTracker tracker= new DefaultLineTracker();
 			tracker.set(text);
 			int size= tracker.getNumberOfLines();
-			String result[]= new String[size];
+			int lastLine= size - 1;
+			List result= new ArrayList(size);
 			for (int i= 0; i < size; i++) {
 				IRegion region= tracker.getLineInformation(i);
-				result[i]= getContent(offset + region.getOffset(), region.getLength());
+				String line= getContent(offset + region.getOffset(), region.getLength());
+				if (i < lastLine || !"".equals(line) || lastNewLineCreateEmptyLine)
+					result.add(line);
 			}
-			return result;
+			return (String[]) result.toArray(new String[result.size()]);
 		} catch (BadLocationException e) {
 			return null;
 		}
@@ -290,80 +297,7 @@ public class TextBuffer {
 	/* package */ void unregisterUpdater(IDocumentListener listener) {
 		fDocument.removeDocumentListener(listener);
 	}
-	
-	//---- Utility methods
-	
-	/**
-	 * Returns the indent for the given line.
-	 * If line is <code>null</code>, <code>-1</code> is returned.
-	 * 
-	 * @param line the line for which the indent is determined
-	 * @return the line indent for the given line number or <code>-1</code>
-	 */
-	public static int getIndent(String line, int tabWidth) {
-		if (line == null)
-			return -1;
-		int indent= 0;
-		int blanks= 0;
-		int size= line.length();
-		for (int i= 0; i < size; i++) {
-			switch (line.charAt(i)) {
-				case '\t':
-					indent++;
-					blanks= 0;
-					continue;
-				case ' ':
-					blanks++;
-					if (blanks == tabWidth) {
-						indent++;
-						blanks= 0;
-					}
-					continue;
-				default:
-					break;
-			}
-			break;
-		}
-		return indent;			
-	}
-	
-	/**
-	 * Returns a copy of the line with the given number of identations
-	 * removed from the beginning.
-	 * If the count is zero, the line is returned.
-	 */
-	public static String removeIndent(String line, int indentsToRemove, int tabWidth) {
-		if (line != null) {
-			int indent= 0;
-			int blanks= 0;
-			int size= line.length();
-			for (int i= 0; i < size; i++) {
-				
-				if (indent >= indentsToRemove) {
-					line= line.substring(i);
-					break;
-				}
-				
-				switch (line.charAt(i)) {
-				case '\t':
-					indent++;
-					blanks= 0;
-					continue;
-				case ' ':
-					blanks++;
-					if (blanks == tabWidth) {
-						indent++;
-						blanks= 0;
-					}
-					continue;
-				default:
-					break;
-				}
-			}
-		}
-		return line;
-	}
-	
+		
 	//---- Factory methods ----------------------------------------------------------------
 	
 	/**
@@ -425,13 +359,12 @@ public class TextBuffer {
 	/**
 	 * Creates a new <code>TextBuffer</code> for the string. The returned
 	 * buffer will not be managed. Any subsequent call to <code>create</code>
-	 * with the same string will return a different text buffer.
+	 * with the identical string will return a different text buffer.
 	 * 
 	 * @param content the text buffer's content
 	 * @return a new unmanaged text buffer
-	 * @exception CoreException if it was not possible to create the text buffer
 	 */
-	public static TextBuffer create(String content) throws CoreException {
+	public static TextBuffer create(String content) {
 		return fgFactory.create(content);
 	}
 	

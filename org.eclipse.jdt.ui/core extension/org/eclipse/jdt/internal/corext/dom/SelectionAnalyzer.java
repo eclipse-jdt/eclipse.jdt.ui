@@ -10,6 +10,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
  * Maps a selection to a set of AST nodes.
@@ -54,6 +55,14 @@ public class SelectionAnalyzer extends GenericVisitor {
 		if (!hasSelectedNodes())
 			return false;
 		return fSelectedNodes.get(0) instanceof Expression;
+	}
+	
+	public TextRange getSelectedNodeRange() {
+		if (fSelectedNodes == null || fSelectedNodes.isEmpty())
+			return null;
+		ASTNode firstNode= (ASTNode)fSelectedNodes.get(0);
+		ASTNode lastNode= (ASTNode)fSelectedNodes.get(fSelectedNodes.size() - 1);
+		return TextRange.createFromStartAndExclusiveEnd(firstNode.getStartPosition(), lastNode.getStartPosition() + lastNode.getLength());
 	}
 	
 	protected Selection getSelection() {

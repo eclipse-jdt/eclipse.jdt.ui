@@ -3,7 +3,7 @@ package locals_out;
 	public void foo() {
 		final int i= 10;
 		
-		/*]*/Runnable run= extracted(i);/*[*/
+		/*]*/Runnable run = extracted(i);/*[*/
 		
 		run.run();
 	}

@@ -4,7 +4,7 @@ package locals_out;
 		int i= 0;
 		int[] array= new int[10];
 		
-		/*]*/i= extracted(i, array);/*[*/
+		/*]*/i = extracted(i, array);/*[*/
 		
 		i++;
 	}

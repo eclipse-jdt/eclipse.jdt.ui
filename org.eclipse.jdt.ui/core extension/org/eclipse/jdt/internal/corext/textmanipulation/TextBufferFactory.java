@@ -158,7 +158,7 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 		}
 	}
 	
-	public TextBuffer create(String content) throws CoreException {
+	public TextBuffer create(String content) {
 		return new TextBuffer(new Document(content));
 	}
 	

@@ -22,7 +22,8 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
 
 /**
@@ -112,7 +113,7 @@ public class JavaFormatter implements ITemplateEditor {
 
 		String string= templateBuffer.getString();
 		TemplatePosition[] variables= templateBuffer.getVariables();
-   		String indentation= TextUtil.createIndentString(indentationLevel);   		
+   		String indentation= CodeFormatterUtil.createIndentString(indentationLevel);   		
 
 		MultiTextEdit positions= variablesToPositions(variables);
 		MultiTextEdit multiEdit= new MultiTextEdit();

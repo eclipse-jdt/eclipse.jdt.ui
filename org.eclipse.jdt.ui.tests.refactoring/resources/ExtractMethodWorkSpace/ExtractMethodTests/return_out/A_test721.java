@@ -5,7 +5,7 @@ public class A_test721 {
 	
 	public void foo() {
 		int i;
-		/*]*/i= extracted();/*[*/
+		/*]*/i = extracted();/*[*/
 		if (flag)
 			i= 20;
 		i--;

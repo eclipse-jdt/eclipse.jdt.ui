@@ -6,7 +6,7 @@ public class A_test724 {
 		int j= 1;
 		switch (j) {
 			case 1 :
-				i= extracted();
+				i = extracted();
 				break;
 			default :
 				i= -1;

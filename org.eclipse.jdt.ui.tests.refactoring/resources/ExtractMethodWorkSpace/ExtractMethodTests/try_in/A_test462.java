@@ -11,5 +11,4 @@ public class A_test462 {
 			throw new IOException();
 		}/*]*/
 	}
-
 }

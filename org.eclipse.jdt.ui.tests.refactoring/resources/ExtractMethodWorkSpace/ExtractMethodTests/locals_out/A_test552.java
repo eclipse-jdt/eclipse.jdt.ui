@@ -5,9 +5,10 @@ public class A_test552 {
 	public void foo() {
 		int i= 0;
 		for (;true;) {
-			/*]*/i= extracted(i);/*[*/
+			/*]*/i = extracted(i);/*[*/
 		}
 	}
+
 	protected int extracted(int i) {
 		i++;
 		return i;

@@ -7,6 +7,7 @@ public class A_test604 {
 		if (/*]*/extracted(o)/*[*/)
 			foo();
 	}
+
 	protected boolean extracted(Object o) {
 		return o == o;
 	}	

@@ -28,7 +28,8 @@ import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 
@@ -114,15 +115,10 @@ public class JavaContext extends CompilationUnitContext {
 		String string= getString();
 		int start= getStart();
 
-	    try {
-	        TextBuffer textBuffer= TextBuffer.create(string);
-	        String lineContent= textBuffer.getLineContentOfOffset(start);
+		TextBuffer textBuffer= TextBuffer.create(string);
+	    String lineContent= textBuffer.getLineContentOfOffset(start);
 
-			return TextUtil.getIndent(lineContent, CodeFormatterPreferencePage.getTabSize());
-
-	    } catch (CoreException e) {
-	     	return 0;   
-	    }
+		return CodeFormatterUtil.getIndent(lineContent, CodeFormatterPreferencePage.getTabSize());
 	}
 
 	private CompilationUnitCompletion guessVariableNames() {

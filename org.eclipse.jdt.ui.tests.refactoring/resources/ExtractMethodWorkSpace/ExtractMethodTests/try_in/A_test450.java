@@ -7,6 +7,5 @@ public class A_test450 {
 		} catch (java.io.IOException e) {
 		}
 	}
-	
 	public void g() throws java.io.IOException {
 	}}

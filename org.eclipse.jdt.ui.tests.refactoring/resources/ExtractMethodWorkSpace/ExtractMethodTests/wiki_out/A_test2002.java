@@ -5,7 +5,7 @@ public class A_test2002 {
 	int field= 0;
 	void fun() {
 		int i= 0;
-		/*]*/i= extracted(i);/*[*/
+		/*]*/i = extracted(i);/*[*/
 		System.out.println("i == " + i);
 	}
 	protected int extracted(int i) {

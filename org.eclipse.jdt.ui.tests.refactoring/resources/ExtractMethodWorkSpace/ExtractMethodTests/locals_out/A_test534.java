@@ -12,6 +12,7 @@ public class A_test534 {
 		
 		int y= inner.x;
 	}
+
 	protected void extracted(Inner inner) {
 		inner.x= 10;
 	}

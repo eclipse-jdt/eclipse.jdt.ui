@@ -6,10 +6,11 @@ public class A_test533 {
 	}
 	
 	public void foo() {
-		/*]*/Inner inner= extracted();/*[*/
+		/*]*/Inner inner = extracted();/*[*/
 
 		Inner inner2= inner;		
 	}
+
 	protected Inner extracted() {
 		Inner inner= new Inner();
 		return inner;

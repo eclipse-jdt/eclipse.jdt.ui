@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class StubUtility {
@@ -500,7 +500,7 @@ public class StubUtility {
 					}
 				}
 				
-				return TextUtil.getIndent(buf.getText(i, offset - i), tabWidth);
+				return CodeFormatterUtil.getIndent(buf.getText(i, offset - i), tabWidth);
 			}
 		}
 		return 0;

@@ -41,7 +41,8 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -93,7 +94,7 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 					}	
 					offset= statement.getStartPosition();
 					int startLine= buffer.getLineOfOffset(offset);
-					String indentString= TextUtil.createIndentString(buffer.getLineIndent(startLine, fTabSize));
+					String indentString= CodeFormatterUtil.createIndentString(buffer.getLineIndent(startLine, fTabSize));
 					String lineDelim= buffer.getLineDelimiter();
 					insertString= StubUtility.codeFormat(fContent, 0, lineDelim) +  indentString;
 				}

@@ -10,6 +10,7 @@ public class A_test531 {
 		
 		/*]*/extracted(inner);/*[*/
 	}
+
 	protected void extracted(Inner inner) {
 		inner.x= 10;
 	}

@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -94,10 +94,10 @@ public class MethodStubCompletionProposal extends JavaCompletionProposal {
 					String lineDelim= StubUtility.getLineDelimiterFor(document);
 					IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 					int lineStart= region.getOffset();
-					int indent= TextUtil.getIndent(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth);
+					int indent= CodeFormatterUtil.getIndent(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth);
 					
 					String replacement= StubUtility.codeFormat(stub, indent, lineDelim);
-					replacement= TextUtil.removeLeadingWhiteSpaces(replacement);
+					replacement= CodeFormatterUtil.removeLeadingWhiteSpaces(replacement);
 					
 					setReplacementString(replacement);
 					setCursorPosition(replacement.length());

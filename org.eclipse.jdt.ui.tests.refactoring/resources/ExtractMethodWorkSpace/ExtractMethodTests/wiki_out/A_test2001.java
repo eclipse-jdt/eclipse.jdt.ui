@@ -8,6 +8,7 @@ public class A_test2001 {
 		int i;
 		/*]*/extracted();/*[*/
 	}
+
 	protected void extracted() {
 		int i;
 		

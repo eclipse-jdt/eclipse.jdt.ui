@@ -6,7 +6,7 @@ public class A_test524 {
 	protected void foo() {
 		int i= 0;
 		try {
-			/*]*/i= extracted();/*[*/
+			/*]*/i = extracted();/*[*/
 		} catch (Exception e) {
 		}
 		read(i);

@@ -9,10 +9,8 @@ public class A_test450 {
 		} catch (java.io.IOException e) {
 		}
 	}
-
 	protected void extracted() throws IOException {
 		g();
 	}
-	
 	public void g() throws java.io.IOException {
 	}}

@@ -4,11 +4,18 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -24,6 +31,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
@@ -36,12 +44,16 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 /**
  * Extracts a method in a compilation unit based on a text selection range.
@@ -58,8 +70,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private int fSelectionStart;
 	private int fSelectionLength;
 	private int fSelectionEnd;
-	private String fAssignment;
-	private int fTabWidth;
 	private boolean fCallOnDeclarationLine= true;
 	
 	private AST fAST;
@@ -77,52 +87,13 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private static final String COMMA_BLANK= ", "; //$NON-NLS-1$
 	private static final String STATIC= "static"; //$NON-NLS-1$
 	
-	private class InsertNewMethod extends SimpleTextEdit {
-		private int fMethodStart;
-		private int fMethodEnd;
-		public InsertNewMethod(int offset, int methodStart, int methodEnd) {
-			super(offset, 0, ""); //$NON-NLS-1$
-			fMethodStart= methodStart;
-			fMethodEnd= methodEnd;
-		}
-		public void connect(TextBufferEditor editor) {
-			TextBuffer buffer= editor.getTextBuffer();
-			int startLine= buffer.getLineOfOffset(fMethodStart);
-			int endLine= buffer.getLineOfOffset(fMethodEnd);
-			String delimiter= buffer.getLineDelimiter(startLine);
-			int indent= TextUtil.getIndent(buffer.getLineContentOfOffset(fMethodStart), fTabWidth);	
-			setText(computeNewMethod(buffer, endLine, TextUtil.createIndentString(indent), delimiter));
-		}
-		public TextEdit copy() {
-			return new InsertNewMethod(getTextRange().getOffset(), fMethodStart, fMethodEnd);
-		}
-	}
-	
-	private class ReplaceCall extends SimpleTextEdit {
-		private int fMethodStart;
-		public ReplaceCall(int offset, int length, int methodStart) {
-			super(offset, length, ""); //$NON-NLS-1$
-			fMethodStart= methodStart;
-		}
-		public void connect(TextBufferEditor editor) {
-			TextBuffer buffer= editor.getTextBuffer();
-			String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(fMethodStart));
-			setText(computeCall(buffer, delimiter));
-		}
-		public TextEdit copy() {
-			TextRange range= getTextRange();
-			return new ReplaceCall(range.getOffset(), range.getLength(), fMethodStart);
-		}
-	}
-	
 	/**
 	 * Creates a new extract method refactoring.
 	 *
 	 * @param cu the compilation unit which is going to be modified.
 	 * @param accessor a callback object to access the source this refactoring is working on.
 	 */
-	public ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, boolean asymetricAssignment, int tabWidth,
-			CodeGenerationSettings settings) {
+	public ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		Assert.isNotNull(cu);
 		Assert.isNotNull(settings);
 		fCUnit= cu;
@@ -131,11 +102,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fSelectionEnd= fSelectionStart + fSelectionLength - 1;
-		if (asymetricAssignment)
-			fAssignment= "= "; //$NON-NLS-1$
-		else
-			fAssignment= " = "; //$NON-NLS-1$
-		fTabWidth= tabWidth;
 	}
 	
 	/* (non-Javadoc)
@@ -292,35 +258,39 @@ public class ExtractMethodRefactoring extends Refactoring {
 			result= new CompilationUnitChange(
 				RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.change_name", new String[]{fMethodName, sourceMethodName}),  //$NON-NLS-1$
 				fCUnit);
+		
+			ITypeBinding[] exceptions= fAnalyzer.getExceptions(fThrowRuntimeExceptions, fAST);
+			for (int i= 0; i < exceptions.length; i++) {
+				ITypeBinding exception= exceptions[i];
+				fImportEdit.addImport(Bindings.getFullyQualifiedImportName(exception));
+			}
+			
+			if (fAnalyzer.generateImport()) {
+				fImportEdit.addImport(ASTNodes.asString(fAnalyzer.getReturnType()));
+			}
+		
+			if (!fImportEdit.isEmpty())
+				result.addTextEdit(RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), fImportEdit); //$NON-NLS-1$
+			
+			TextBuffer buffer= null;
+			try {
+				// This is cheap since the compilation unit is already open in a editor.
+				buffer= TextBuffer.create((IFile)WorkingCopyUtil.getOriginal(fCUnit).getCorrespondingResource());
+				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(method.getStartPosition()));
+				// Inserting the new method
+				result.addTextEdit(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName), //$NON-NLS-1$
+					createNewMethodEdit(buffer, delimiter));
+			
+				// Replacing the old statements with the new method call.
+				result.addTextEdit(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName), //$NON-NLS-1$
+					SimpleTextEdit.createReplace(fSelectionStart, fSelectionLength, createCall(buffer, delimiter)));
+			} finally {
+				TextBuffer.release(buffer);
+			}
+			
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}
-		
-		final int methodStart= method.getStartPosition();
-		final int insertPosition= methodStart + method.getLength();
-		final int methodEnd= insertPosition - 1;
-
-		ITypeBinding[] exceptions= fAnalyzer.getExceptions(fThrowRuntimeExceptions, fAST);
-		for (int i= 0; i < exceptions.length; i++) {
-			ITypeBinding exception= exceptions[i];
-			fImportEdit.addImport(Bindings.getFullyQualifiedImportName(exception));
-		}
-		
-		if (fAnalyzer.generateImport()) {
-			fImportEdit.addImport(ASTNodes.asString(fAnalyzer.getReturnType()));
-		}
-	
-		if (!fImportEdit.isEmpty())
-			result.addTextEdit(RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), fImportEdit); //$NON-NLS-1$
-		
-		// Inserting the new method
-		result.addTextEdit(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName), //$NON-NLS-1$
-			new InsertNewMethod(insertPosition, methodStart, methodEnd));
-		
-		// Replacing the old statements with the new method call.
-		result.addTextEdit(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName), //$NON-NLS-1$
-			new ReplaceCall(fSelectionStart, fSelectionLength, methodStart));
-			
 		return result;
 	}
 	
@@ -373,126 +343,89 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return status;	
 	}
 	
-	private String computeNewMethod(TextBuffer buffer, int lineNumber, String indent, String delimiter) {
-		StringBuffer result= new StringBuffer();
-		result.append(delimiter);
-		if (insertNewLineAfterMethodBody(buffer, lineNumber))
-			result.append(delimiter);
-		result.append(indent);
-		result.append(getSignature());
-		result.append(" {"); //$NON-NLS-1$
-		result.append(delimiter);
-		result.append(computeSource(buffer, indent + '\t', delimiter)); //$NON-NLS-1$
-		result.append(indent);
-		result.append("}"); //$NON-NLS-1$
-		return result.toString();
+	private TextEdit createNewMethodEdit(TextBuffer buffer, String delimiter) {
+		MethodDeclaration method= fAnalyzer.getEnclosingMethod();
+		final int methodStart= method.getStartPosition();
+		final int spacing= CodeFormatterUtil.probeMethodSpacing(buffer, method);
+		StringBuffer code= new StringBuffer();
+		// +1 (e.g <=) for an extra newline since we insert the new code at
+		// the end of a method declaration (e.g. right after the closing }
+		for (int i= 0; i <= spacing; i++)
+			code.append(delimiter);
+		String[] lines= Strings.convertIntoLines(CodeFormatterUtil.createMethodDeclaration(getSignature(), createMethodBody(buffer), delimiter));
+		String indent= CodeFormatterUtil.createIndentString(buffer.getLineContentOfOffset(methodStart));
+		for (int i= 0, lastLine= lines.length - 1; i < lines.length; i++) {
+			code.append(indent);
+			code.append(lines[i]);
+			if (i != lastLine)
+				code.append(delimiter);
+		} 
+		TextEdit result= SimpleTextEdit.createInsert(methodStart + method.getLength(), code.toString());
+		return result;
 	}
 	
-	private boolean insertNewLineAfterMethodBody(TextBuffer buffer, int lineNumber) {
-		String line= buffer.getLineContent(lineNumber + 1);
-		if (line != null) {
-			return TextUtil.containsOnlyWhiteSpaces(line);
-		}
-		return true;
-	}
-	
-	private String computeSource(TextBuffer buffer, String indent, String delimiter) {
-		final String EMPTY_LINE= EMPTY;
+	private String[] createMethodBody(TextBuffer buffer) {
+		String[] lines= buffer.convertIntoLines(fSelectionStart, fSelectionLength, false);
 		
-		String[] lines= buffer.convertIntoLines(fSelectionStart, fSelectionLength);
+		List result= new ArrayList(lines.length);
 		
-		// Format the first line with the right indent.
-		String firstLine= buffer.getLineContentOfOffset(fSelectionStart);
-		int firstLineIndent= TextUtil.getIndent(firstLine, fTabWidth);
-		if (lines.length > 0)
-			lines[0]= TextUtil.createIndentString(firstLineIndent) + TextUtil.removeLeadingIndents(lines[0], fTabWidth);
-		
-		// Compute the minimal indent.	
-		int minIndent= Integer.MAX_VALUE;
-		for (int i= 0; i < lines.length; i++) {
-			String line= lines[i];
-			if (line.length() == 0 && i + 1 == lines.length) {
-				lines[i]= null;
-			} else if (!TextUtil.containsOnlyWhiteSpaces(lines[i])) {
-				minIndent= Math.min(TextUtil.getIndent(lines[i], fTabWidth), minIndent);
-			} else {
-				lines[i]= EMPTY_LINE;
-			}	
-			
-		}
-		
-		// Remove the indent.
-		if (minIndent > 0) {
-			for (int i= 0; i < lines.length; i++) {
-				String line= lines[i];
-				if (line != null && line != EMPTY_LINE)
-					lines[i]= TextUtil.removeIndent(minIndent, line, fTabWidth);
-			}
-		}
-		
-		StringBuffer result= new StringBuffer();
+		String standardIndent= CodeFormatterUtil.createIndentString(buffer.getLineContentOfOffset(fAnalyzer.getSelectedNodeRange().getOffset()));
 		
 		// Locals that are not passed as an arguments since the extracted method only
 		// writes to them
 		IVariableBinding[] methodLocals= fAnalyzer.getMethodLocals();
 		for (int i= 0; i < methodLocals.length; i++) {
 			if (methodLocals[i] != null)
-				appendLocalDeclaration(result, indent, methodLocals[i], delimiter);
+				result.add(standardIndent + getLocalDeclaration(methodLocals[i]));
+		}
+
+		String prefix= ""; //$NON-NLS-1$
+		int offset= buffer.getLineInformationOfOffset(fSelectionStart).getOffset();
+		if (offset < fSelectionStart) {
+			String tmp= buffer.getContent(offset, fSelectionStart - offset);
+			if (CodeFormatterUtil.containsOnlyWhiteSpaces(tmp)) {
+				prefix= tmp;
+			} else {
+				prefix= CodeFormatterUtil.createIndentString(CodeFormatterUtil.getIndent(tmp));
+			}
 		}
 		
 		// We extract an expression
 		boolean extractsExpression= fAnalyzer.isExpressionSelected();
 		if (extractsExpression) {
-			result.append(indent);
 			ITypeBinding binding= fAnalyzer.getExpressionBinding();
 			if (binding != null && (!binding.isPrimitive() || !"void".equals(binding.getName()))) //$NON-NLS-1$
-				result.append(RETURN_BLANK);
+				prefix= prefix + RETURN_BLANK;
 		}
 		
 		// Reformat and add to buffer
-		boolean isFirstLine= true;
+		int lastLine= lines.length - 1;
 		for (int i= 0; i < lines.length; i++) {
 			String line= lines[i];
-			if (line != null) {
-				if (!isFirstLine) {
-					result.append(delimiter);
-					result.append(indent);
-				} else {
-					isFirstLine= false;
-					if (!extractsExpression)
-						result.append(indent);
-				}
-				result.append(line);
+			if (i == lastLine && sourceNeedsSemicolon())
+				line= line + SEMICOLON;
+			if (i == 0) {
+				result.add(prefix + line);
+			} else {
+				result.add(line);	
 			}
 		}
-		if (sourceNeedsSemicolon())
-			result.append(SEMICOLON);
-		result.append(delimiter);
-		
 		IVariableBinding returnValue= fAnalyzer.getReturnValue();
 		if (returnValue != null) {
-			result.append(indent);
-			result.append(RETURN_BLANK);
-			result.append(returnValue.getName());
-			result.append(SEMICOLON);
-			result.append(delimiter);
+			result.add(standardIndent + RETURN_BLANK + returnValue.getName() + SEMICOLON);
 		}
-		return result.toString();
+		return (String[]) result.toArray(new String[result.size()]);
 	}
 	
-	private String computeCall(TextBuffer buffer, String delimiter) {
-		String[] lines= buffer.convertIntoLines(fSelectionStart, fSelectionLength);
-		String firstLineIndent= TextUtil.createIndentString(
-			TextUtil.getIndent(buffer.getLineContentOfOffset(fSelectionStart), fTabWidth));
-		StringBuffer result= new StringBuffer(TextUtil.createIndentString(TextUtil.getIndent(lines[0], fTabWidth)));
-		
+	private String createCall(TextBuffer buffer, String delimiter) {
+		int firstLineIndent= CodeFormatterUtil.getIndent(buffer.getLineContentOfOffset(fSelectionStart));
+		StringBuffer code= new StringBuffer();
 		
 		IVariableBinding[] locals= fAnalyzer.getCallerLocals();
 		for (int i= 0; i < locals.length; i++) {
-			appendLocalDeclaration(result, locals[i]);
-			result.append(SEMICOLON);
-			result.append(delimiter);
-			result.append(firstLineIndent);
+			appendLocalDeclaration(code, locals[i]);
+			code.append(SEMICOLON);
+			code.append(delimiter);
 		}
 				
 		int returnKind= fAnalyzer.getReturnKind();
@@ -500,56 +433,49 @@ public class ExtractMethodRefactoring extends Refactoring {
 			case ExtractMethodAnalyzer.ACCESS_TO_LOCAL:
 				IVariableBinding binding= fAnalyzer.getReturnLocal();
 				if (binding != null) {
-					appendLocalDeclaration(result, binding);
-					result.append(fAssignment);
+					appendLocalDeclaration(code, binding);
 				} else {
 					binding= fAnalyzer.getReturnValue();
-					result.append(binding.getName());
-					result.append(fAssignment);
+					code.append(binding.getName());
 				}
+				code.append(" = ");
 				break;
 			case ExtractMethodAnalyzer.RETURN_STATEMENT_VALUE:
 				// We return a value. So the code must look like "return extracted();"
-				result.append(RETURN_BLANK);
+				code.append(RETURN_BLANK);
 				break;
 		}
 		
 		IVariableBinding[] arguments= fAnalyzer.getArguments();
-		result.append(fMethodName);
-		result.append("("); //$NON-NLS-1$
+		code.append(fMethodName);
+		code.append("("); //$NON-NLS-1$
 		for (int i= 0; i < arguments.length; i++) {
 			if (arguments[i] == null)
 				continue;
 			if (i > 0)
-				result.append(COMMA_BLANK);
-			result.append(arguments[i].getName());
+				code.append(COMMA_BLANK);
+			code.append(arguments[i].getName());
 		}		
-		result.append(")"); //$NON-NLS-1$
+		code.append(")"); //$NON-NLS-1$
 						
 		if (callNeedsSemicolon())
-			result.append(SEMICOLON);
+			code.append(SEMICOLON);
 			
 		// We have a void return statement. The code looks like
 		// extracted();
 		// return;	
 		if (returnKind == ExtractMethodAnalyzer.RETURN_STATEMENT_VOID) {
-			result.append(delimiter);
-			result.append(firstLineIndent);
-			result.append(RETURN);
-			result.append(SEMICOLON);
-		}	
-		if (endsSelectionWithLineDelimiter(lines))
-			result.append(delimiter);
-			
-		return result.toString();
+			code.append(delimiter);
+			code.append(RETURN);
+			code.append(SEMICOLON);
+		}
+		
+		ICodeFormatter formatter= ToolFactory.createCodeFormatter();
+		String result= formatter.format(code.toString(), firstLineIndent, null, delimiter);
+		return CodeFormatterUtil.removeLeadingIndents(result);
 	}
 
 
-	private boolean endsSelectionWithLineDelimiter(String[] lines) {
-		return lines[lines.length - 1].length() == 0;
-	}
-	
-	
 	private boolean callNeedsSemicolon() {
 		ASTNode node= fAnalyzer.getLastSelectedNode();
 		return node instanceof Statement;
@@ -607,5 +533,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 		appendLocalDeclaration(buffer, local);
 		buffer.append(SEMICOLON);
 		buffer.append(delimiter);
-	}	
+	}
+	
+	private String getLocalDeclaration(IVariableBinding local) {
+		StringBuffer buffer= new StringBuffer();
+		appendLocalDeclaration(buffer, local);
+		buffer.append(SEMICOLON);
+		return buffer.toString();
+	}
 }

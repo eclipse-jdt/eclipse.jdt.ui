@@ -2,7 +2,7 @@ package locals_out;
 
 public class A_test516 {
 	public void foo() {
-		/*]*/int j= extracted();/*[*/
+		/*]*/int j = extracted();/*[*/
 		
 		j++;
 	}

@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -113,10 +113,10 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 			String lineDelim= StubUtility.getLineDelimiterFor(document);
 			int tabWidth= CodeFormatterPreferencePage.getTabSize();
 			IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
-			int indent= TextUtil.getIndent(document.get(region.getOffset(), region.getLength()), tabWidth);
+			int indent= CodeFormatterUtil.getIndent(document.get(region.getOffset(), region.getLength()), tabWidth);
 			
 			String replacement= StubUtility.codeFormat(buf.toString(), indent, lineDelim);
-			replacement= TextUtil.removeLeadingWhiteSpaces(replacement);
+			replacement= CodeFormatterUtil.removeLeadingWhiteSpaces(replacement);
 			
 			setReplacementString(replacement);
 		} catch (BadLocationException e) {

@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.Hashtable;
+
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
@@ -14,6 +16,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -50,6 +54,7 @@ public class ExtractMethodTestSetup extends TestSetup {
 		
 	protected void setUp() throws Exception {
 		super.setUp();
+		
 		fJavaProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(fJavaProject);
 		fRoot= JavaProjectHelper.addSourceContainer(fJavaProject, CONTAINER);

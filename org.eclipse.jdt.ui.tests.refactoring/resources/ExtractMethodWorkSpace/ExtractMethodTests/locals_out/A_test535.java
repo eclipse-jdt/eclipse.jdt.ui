@@ -7,6 +7,7 @@ import java.util.ArrayList;import java.util.Iterator;import java.util.List;p
 
 		/*]*/extracted(allElements, iter);/*[*/
 	}
+
 	protected void extracted(List allElements, Iterator iter) {
 		while (iter.hasNext()) {
 			allElements.add(iter.next());
