@@ -3,6 +3,10 @@ public class A {
 		bar();
 	}
 	int bar() {
-		return 1;
+		return baz();
+	}
+	
+	int baz() {
+		return 10;
 	}
 }
