@@ -21,7 +21,7 @@
   </target>
 
   <!-- This target defines the tests that need to be run. -->
-  <target name="suite">
+  <target name="suite" unless="performance">
     <property name="jdt-text-folder" 
               value="${eclipse-home}/jdt_text_folder"/>
     <delete dir="${jdt-text-folder}" quiet="true"/>
@@ -53,6 +53,12 @@
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.text.tests.performance.OpenTextEditorTest"/>
+    </ant>
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="data-dir" value="${jdt-text-performance-folder}"/>
+      <property name="plugin-name" value="${plugin-name}"/>
+      <property name="classname" 
+                value="org.eclipse.jdt.text.tests.performance.EventDrivenTestSuite"/>
     </ant>
   </target>
 
