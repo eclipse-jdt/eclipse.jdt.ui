@@ -5,24 +5,20 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.util.ResourceBundle;
-
+import org.eclipse.jdt.internal.debug.ui.display.DisplayAction;
+import org.eclipse.jdt.internal.debug.ui.display.DisplayView;
+import org.eclipse.jdt.internal.debug.ui.display.IDataDisplay;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.dialogs.MessageDialog;
-
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.debug.ui.display.DisplayAction;
-import org.eclipse.jdt.internal.debug.ui.display.DisplayView;
-import org.eclipse.jdt.internal.debug.ui.display.IDataDisplay;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 /**
- * Displays the result of an evaluation in the java editor
+ * Displays the result of an evaluation in the Java editor
  */
 public class EditorDisplayAction extends DisplayAction {
 
@@ -34,16 +30,24 @@ public class EditorDisplayAction extends DisplayAction {
 	protected IDataDisplay getDataDisplay() {
 		
 		IWorkbenchPage page= JavaPlugin.getDefault().getActivePage();
-		try {
-			
-			IViewPart view= view= page.showView(DisplayView.ID_DISPLAY_VIEW);
-			if (view != null) {
-				Object value= view.getAdapter(IDataDisplay.class);
-				if (value instanceof IDataDisplay)
-					return (IDataDisplay) value;
-			}			
-		} catch (PartInitException e) {
-			MessageDialog.openError(getShell(), JavaEditorMessages.getString("EditorDisplay.error.title1"), e.getMessage()); //$NON-NLS-1$
+		IWorkbenchPart activePart= page.getActivePart();
+		IViewPart view= page.findView(DisplayView.ID_DISPLAY_VIEW);
+		if (view == null) {
+			try {
+				view= page.showView(DisplayView.ID_DISPLAY_VIEW);		
+			} catch (PartInitException e) {
+				MessageDialog.openError(getShell(), JavaEditorMessages.getString("EditorDisplay.error.title1"), e.getMessage()); //$NON-NLS-1$
+			} finally {
+				page.activate(activePart);
+			}
+		}
+		
+		if (view != null) {
+			page.bringToTop(view);
+			Object value= view.getAdapter(IDataDisplay.class);
+			if (value instanceof IDataDisplay) {
+				return (IDataDisplay) value;
+			}	
 		}
 		
 		return null;
