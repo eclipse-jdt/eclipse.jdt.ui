@@ -116,7 +116,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 		final JavaPlugin plugin= JavaPlugin.getDefault();
 		if (plugin != null)
-			return new URL(plugin.getDescriptor().getInstallURL(), DICTIONARY_LOCATION);
+			return plugin.getBundle().getEntry("/" + DICTIONARY_LOCATION); //$NON-NLS-1$
 
 		return null;
 	}

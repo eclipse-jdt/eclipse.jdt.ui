@@ -20,7 +20,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IPluginRegistry;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -34,6 +34,7 @@ import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.osgi.framework.Bundle;
 
 /**
  * Describes a Java editor text hover.
@@ -65,7 +66,7 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 	 * Returns all Java editor text hovers contributed to the workbench.
 	 */
 	public static JavaEditorTextHoverDescriptor[] getContributedHovers() {
-		IPluginRegistry registry= Platform.getPluginRegistry();
+		IExtensionRegistry registry= Platform.getExtensionRegistry();
 		IConfigurationElement[] elements= registry.getConfigurationElementsFor(JAVA_EDITOR_TEXT_HOVER_EXTENSION_POINT);
 		JavaEditorTextHoverDescriptor[] hoverDescs= createDescriptors(elements);
 		initializeFromPreferences(hoverDescs);
@@ -108,7 +109,8 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 	 * Creates the Java editor text hover.
 	 */
 	public IJavaEditorTextHover createTextHover() {
-		boolean isHoversPlugInActivated= fElement.getDeclaringExtension().getDeclaringPluginDescriptor().isPluginActivated();
+ 		String pluginId = fElement.getDeclaringExtension().getNamespace();
+		boolean isHoversPlugInActivated= Platform.getBundle(pluginId).getState() == Bundle.ACTIVE;
 		if (isHoversPlugInActivated || canActivatePlugIn()) {
 			try {
 				return (IJavaEditorTextHover)fElement.createExecutableExtension(CLASS_ATTRIBUTE);

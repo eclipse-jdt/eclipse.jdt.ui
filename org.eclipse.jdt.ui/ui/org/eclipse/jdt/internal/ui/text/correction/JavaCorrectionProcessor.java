@@ -82,7 +82,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	private static String fErrorMessage;
 	
 	private static ContributedProcessorDescriptor[] getProcessorDescriptors(String contributionId) {
-		IConfigurationElement[] elements= Platform.getPluginRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, contributionId);
+		IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, contributionId);
 		ArrayList res= new ArrayList(elements.length);
 		
 		for (int i= 0; i < elements.length; i++) {

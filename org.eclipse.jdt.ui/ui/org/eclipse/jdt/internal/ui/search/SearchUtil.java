@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.osgi.framework.Bundle;
 
 /**
  * This class contains some utility methods for J Search.
@@ -123,7 +124,7 @@ public class SearchUtil {
 	}
 
 	public static boolean isSearchPlugInActivated() {
-		return Platform.getPluginRegistry().getPluginDescriptor("org.eclipse.search").isPluginActivated(); //$NON-NLS-1$
+		return Platform.getBundle("org.eclipse.search").getState() == Bundle.ACTIVE; //$NON-NLS-1$
 	}
 
 	public static boolean isISearchResultViewEntry(Object object) {

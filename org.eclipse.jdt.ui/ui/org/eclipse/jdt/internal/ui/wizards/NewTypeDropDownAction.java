@@ -98,7 +98,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	public static Action[] getActionFromDescriptors() {
 		ArrayList containers= new ArrayList();
 		
-		IExtensionPoint extensionPoint = Platform.getPluginRegistry().getExtensionPoint(PlatformUI.PLUGIN_ID, IWorkbenchConstants.PL_NEW);
+		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(PlatformUI.PLUGIN_ID, IWorkbenchConstants.PL_NEW);
 		if (extensionPoint != null) {
 			IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
 			for (int i = 0; i < elements.length; i++) {

@@ -212,7 +212,7 @@ class JavaCompareUtilities {
 
 		URL installURL= null;
 		if (plugin != null)
-			installURL= plugin.getDescriptor().getInstallURL();
+			installURL= plugin.getBundle().getEntry("/");  //$NON-NLS-1$
 					
 		if (installURL != null) {
 			try {

@@ -24,7 +24,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginDescriptor;
@@ -71,6 +70,7 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -96,6 +96,7 @@ import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
+import org.osgi.framework.BundleContext;
 
 /**
  * Represents the java plug-in. It provides a series of convenience methods such as
@@ -272,7 +273,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	public static String getPluginId() {
-		return getDefault().getDescriptor().getUniqueIdentifier();
+		return JavaUI.ID_PLUGIN;
 	}
 
 	public static void log(IStatus status) {
@@ -305,6 +306,18 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return getDefault().internalGetImageDescriptorRegistry();
 	}
 	
+	/**
+	 * Creates a new instance.
+	 * <p>
+	 * Note that this plug-in still depends on
+	 * org.eclipse.core.runtime.compatibility.
+	 * Its startup and shutdown methods have been converted
+	 * into start and stop methods. However, there is at least one place
+	 * ({@link org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#isNavigationTarget(Annotation)})
+	 * that still depends on it.
+	 * </p>
+	 * @deprecated
+	 */
 	public JavaPlugin(IPluginDescriptor descriptor) {
 		super(descriptor);
 		fgJavaPlugin= this;
@@ -313,8 +326,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/* (non - Javadoc)
 	 * Method declared in Plugin
 	 */
-	public void startup() throws CoreException {
-		super.startup();
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
 		registerAdapters();
 		
 		if (USE_WORKING_COPY_OWNERS) {
@@ -423,44 +436,45 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 
 	/*
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#shutdown()
+	 * @see org.eclipse.core.runtime.Plugin#stop
 	 */
-	public void shutdown() throws CoreException {
-		
-		AllTypesCache.terminate();
-
-		if (fImageDescriptorRegistry != null)
-			fImageDescriptorRegistry.dispose();
-		
-		unregisterAdapters();
-
-		if (fASTProvider != null) {
-			fASTProvider.dispose();
-			fASTProvider= null;
+	public void stop(BundleContext context) throws Exception {
+		try {
+			AllTypesCache.terminate();
+	
+			if (fImageDescriptorRegistry != null)
+				fImageDescriptorRegistry.dispose();
+			
+			unregisterAdapters();
+	
+			if (fASTProvider != null) {
+				fASTProvider.dispose();
+				fASTProvider= null;
+			}
+			
+			if (fWorkingCopyManager != null) {
+				fWorkingCopyManager.shutdown();
+				fWorkingCopyManager= null;
+			}
+			
+			if (fCompilationUnitDocumentProvider != null) {
+				fCompilationUnitDocumentProvider.shutdown();
+				fCompilationUnitDocumentProvider= null;
+			}
+					
+			if (fJavaTextTools != null) {
+				fJavaTextTools.dispose();
+				fJavaTextTools= null;
+			}
+			
+			JavaDocLocations.shutdownJavadocLocations();
+			
+			uninstallPreferenceStoreBackwardsCompatibility();
+			
+			RefactoringCore.getUndoManager().shutdown();
+		} finally {	
+			super.stop(context);
 		}
-		
-		if (fWorkingCopyManager != null) {
-			fWorkingCopyManager.shutdown();
-			fWorkingCopyManager= null;
-		}
-		
-		if (fCompilationUnitDocumentProvider != null) {
-			fCompilationUnitDocumentProvider.shutdown();
-			fCompilationUnitDocumentProvider= null;
-		}
-				
-		if (fJavaTextTools != null) {
-			fJavaTextTools.dispose();
-			fJavaTextTools= null;
-		}
-		
-		JavaDocLocations.shutdownJavadocLocations();
-		
-		uninstallPreferenceStoreBackwardsCompatibility();
-		
-		RefactoringCore.getUndoManager().shutdown();
-		
-		super.shutdown();
 	}
 		
 	private IWorkbenchPage internalGetActivePage() {

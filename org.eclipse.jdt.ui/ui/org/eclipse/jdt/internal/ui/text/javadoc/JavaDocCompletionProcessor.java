@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IPluginRegistry;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.graphics.Point;
@@ -77,7 +77,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	private IJavadocCompletionProcessor[] getContributedProcessors() {
 		if (fSubProcessors == null) {
 			try {
-				IPluginRegistry registry= Platform.getPluginRegistry();
+				IExtensionRegistry registry= Platform.getExtensionRegistry();
 				IConfigurationElement[] elements=	registry.getConfigurationElementsFor(JavaUI.ID_PLUGIN, PROCESSOR_CONTRIBUTION_ID);
 				IJavadocCompletionProcessor[] result= new IJavadocCompletionProcessor[elements.length];
 				for (int i= 0; i < elements.length; i++) {

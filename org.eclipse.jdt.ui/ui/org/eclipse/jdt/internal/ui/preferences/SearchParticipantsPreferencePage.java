@@ -73,7 +73,7 @@ public class SearchParticipantsPreferencePage extends PreferencePage implements 
 	}
 
 	private void initialize(Map activeParticipants) {
-		fParticipantList.setElements(Arrays.asList(Platform.getPluginRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT)));
+		fParticipantList.setElements(Arrays.asList(Platform.getExtensionRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT)));
 		fParticipantList.setCheckedElements(activeParticipants.values());
 	}
 
@@ -120,14 +120,14 @@ public class SearchParticipantsPreferencePage extends PreferencePage implements 
 	}
 	
 	public static boolean hasAnyParticipants() {
-		return Platform.getPluginRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT).length > 0;
+		return Platform.getExtensionRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT).length > 0;
 	}
 
 	private static Map createActiveParticipants(String idList) {
 		String[] ids= unpackOrderList(idList);
 		HashMap activeParticipants= new HashMap();
 		if (ids != null) {
-			IConfigurationElement[] allParticipants= Platform.getPluginRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT);
+			IConfigurationElement[] allParticipants= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT);
 			for (int i= 0; i < allParticipants.length; i++) {
 				for (int j= 0; j < ids.length; j++) {
 					if (ids[j].equals(allParticipants[i].getAttribute("id"))) //$NON-NLS-1$

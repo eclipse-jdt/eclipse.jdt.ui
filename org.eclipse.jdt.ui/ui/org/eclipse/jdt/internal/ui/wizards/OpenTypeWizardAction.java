@@ -15,6 +15,7 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.Wizard;
@@ -53,7 +54,7 @@ public class OpenTypeWizardAction extends AbstractOpenWizardAction {
 		try {
 			String iconName = config.getAttribute(ATT_ICON);
 			if (iconName != null) {
-				URL pluginInstallUrl = config.getDeclaringExtension().getDeclaringPluginDescriptor().getInstallURL();			
+				URL pluginInstallUrl = Platform.getBundle(config.getDeclaringExtension().getNamespace()).getEntry("/"); //$NON-NLS-1$			
 				return ImageDescriptor.createFromURL(new URL(pluginInstallUrl, iconName));
 			}
 			return null;

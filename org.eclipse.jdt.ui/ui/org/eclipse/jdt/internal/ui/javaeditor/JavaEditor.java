@@ -4006,6 +4006,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	private boolean isNavigationTarget(Annotation annotation) {
+		// TODO - this reference relies on core runtime compatibility layer
+		// in order to remove it, the org.eclipse.ui.editors plug-in will need
+		// to provide a way for org.eclipse.jdt.ui to access either 
+		// its preferences or its Plugin.
 		Preferences preferences= Platform.getPlugin(EditorsUI.PLUGIN_ID).getPluginPreferences();
 		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
 //		See bug 41689

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IPluginRegistry;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
 
@@ -69,7 +69,7 @@ public class FilterDescriptor implements Comparable {
 	 */
 	public static FilterDescriptor[] getFilterDescriptors() {
 		if (fgFilterDescriptors == null) {
-			IPluginRegistry registry= Platform.getPluginRegistry();
+			IExtensionRegistry registry= Platform.getExtensionRegistry();
 			IConfigurationElement[] elements= registry.getConfigurationElementsFor(JavaUI.ID_PLUGIN, EXTENSION_POINT_NAME);
 			fgFilterDescriptors= createFilterDescriptors(elements);
 		}	

@@ -105,7 +105,7 @@ public class ClasspathContainerDescriptor {
 	public static ClasspathContainerDescriptor[] getDescriptors() {
 		ArrayList containers= new ArrayList();
 		
-		IExtensionPoint extensionPoint = Platform.getPluginRegistry().getExtensionPoint(JavaUI.ID_PLUGIN, ATT_EXTENSION);
+		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(JavaUI.ID_PLUGIN, ATT_EXTENSION);
 		if (extensionPoint != null) {
 			ClasspathContainerDescriptor defaultPage= null;
 			String defaultPageName= ClasspathContainerDefaultPage.class.getName();

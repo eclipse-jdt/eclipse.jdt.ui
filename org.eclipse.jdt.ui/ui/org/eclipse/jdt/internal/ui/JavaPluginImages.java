@@ -35,12 +35,7 @@ public class JavaPluginImages {
 	// Determine display depth. If depth > 4 then we use high color images. Otherwise low color
 	// images are used
 	static {
-		String pathSuffix= "icons/full/"; //$NON-NLS-1$
-		try {
-			fgIconBaseURL= new URL(JavaPlugin.getDefault().getDescriptor().getInstallURL(), pathSuffix);
-		} catch (MalformedURLException e) {
-			// do nothing
-		}
+		fgIconBaseURL= JavaPlugin.getDefault().getBundle().getEntry("/icons/full/"); //$NON-NLS-1$
 	}
 	
 	// The plug-in registry
