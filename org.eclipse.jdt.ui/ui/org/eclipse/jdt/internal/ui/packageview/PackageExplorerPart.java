@@ -1066,7 +1066,8 @@ public class PackageExplorerPart extends ViewPart
 		}
 		
 		memento.putInteger(TAG_ROOT_MODE, fRootMode);
-		fWorkingSetModel.saveState(memento);
+		if (fWorkingSetModel != null)
+			fWorkingSetModel.saveState(memento);
 		
 // disable the persisting of state which can trigger expensive operations as
 // a side effect: see bug 52474 and 53958
