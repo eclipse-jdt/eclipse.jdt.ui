@@ -33,6 +33,8 @@ public class JdtCopyAction extends ReorgDestinationAction {
 	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
 	 */
 	public boolean canOperateOn(IStructuredSelection selection) {
+		if (selection.isEmpty())
+			return false;
 		if (ClipboardActionUtil.hasOnlyProjects(selection))
 			return selection.size() == 1;
 		else
