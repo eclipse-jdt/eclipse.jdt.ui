@@ -70,6 +70,8 @@ public final class ASTProvider {
 		 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
 		 */
 		public void partClosed(IWorkbenchPartReference ref) {
+			if (isActiveEditor(ref))
+				activeJavaEditorChanged(null);
 		}
 		
 		/*
@@ -196,7 +198,10 @@ public final class ASTProvider {
 	
 	private void activeJavaEditorChanged(IWorkbenchPart editor) {
 		fActiveEditor= editor;
-		IJavaElement javaElement= ((JavaEditor)editor).getInputJavaElement();
+
+		IJavaElement javaElement= null;
+		if (editor != null)
+			javaElement= ((JavaEditor)editor).getInputJavaElement();
 		
 		if (DEBUG)
 			System.out.println(DEBUG_PREFIX + "active editor is: " + toString(javaElement)); //$NON-NLS-1$
