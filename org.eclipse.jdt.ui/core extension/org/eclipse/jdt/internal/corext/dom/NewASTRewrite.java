@@ -42,9 +42,12 @@ public class NewASTRewrite {
 	protected HashMap fGroupDescriptions;
 	protected HashSet fMoveSources;
 	
+	private EventHolder fLastEvent;
+	
 	public NewASTRewrite() {
 		fEvents= new ArrayList();
 		fMoveSources= null;
+		fLastEvent= null;
 	}
 	
 	
@@ -65,10 +68,15 @@ public class NewASTRewrite {
 			throw new IllegalArgumentException();
 		}
 		
+		if (fLastEvent != null && fLastEvent.parent == parent && fLastEvent.childProperty == property) {
+			return fLastEvent.change;
+		}
+		
 		// TODO: To optimize
 		for (int i= 0; i < fEvents.size(); i++) {
 			EventHolder event= (EventHolder) fEvents.get(i);
 			if (event.parent == parent && event.childProperty == property) {
+				fLastEvent= event;
 				return event.change;
 			}
 		}
@@ -81,6 +89,25 @@ public class NewASTRewrite {
 			return event.getOriginalValue();
 		}
 		return ASTNodeConstants.getNodeChild(parent, property);
+	}
+	
+	public Object getNewValue(ASTNode parent, int property) {
+		RewriteEvent event= getEvent(parent, property);
+		if (event != null) {
+			return event.getNewValue();
+		}
+		return ASTNodeConstants.getNodeChild(parent, property);
+	}
+	
+	public boolean hasChildrenChanges(ASTNode parent) {
+		//	TODO: To optimize
+		for (int i= 0; i < fEvents.size(); i++) {
+			EventHolder event= (EventHolder) fEvents.get(i);
+			if (event.parent == parent) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	

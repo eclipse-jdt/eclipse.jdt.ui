@@ -124,7 +124,7 @@ public final class ASTRewrite extends NewASTRewrite {
 		fMoveSources= null;
 		fTrackedNodes= null;
 		fPlaceholderNodes= null;
-		fHasASTModifications= false;
+		fHasASTModifications= false;	
 	}
 	
 	public ASTNode getRootNode() {
@@ -150,8 +150,8 @@ public final class ASTRewrite extends NewASTRewrite {
 	 */
 	public final void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit) {
 		convertOldToNewEvents();
-		
-		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(textBuffer, rootEdit, this);
+			
+		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(textBuffer, rootEdit, fRootNode, this);
 		fRootNode.accept(visitor); 
 	}
 	
@@ -216,25 +216,25 @@ public final class ASTRewrite extends NewASTRewrite {
 				ASTNode curr= (ASTNode) list.get(i);
 				ASTChange object= getChangeProperty(curr);
 				if (object instanceof ASTInsert) {
-					NodeRewriteEvent change= event.insertEntry(insertIndex, curr);
+					RewriteEvent change= event.insertEntry(insertIndex, curr);
 					setDescription(change, object.description);
 				} else {
 					insertIndex++;
 					if (object instanceof ASTRemove) {
-						NodeRewriteEvent change= event.removeEntry(curr);
+						RewriteEvent change= event.removeEntry(curr);
 						setDescription(change, object.description);
 					} else if (object instanceof ASTReplace) {
-						NodeRewriteEvent change= event.replaceEntry(curr, ((ASTReplace) object).replacingNode);
+						RewriteEvent change= event.replaceEntry(curr, ((ASTReplace) object).replacingNode);
 						setDescription(change, object.description);
 					}
 				}
 			}
-			testSame(list, event.getListEntries());
+			testSame(list, event.getChildren());
 			addEvent(parent, property, event);
 		}
 	}
 	
-	private void testSame(List list, NodeRewriteEvent[] changes) {
+	private void testSame(List list, RewriteEvent[] changes) {
 		Assert.isTrue(list.size() == changes.length);
 		for (int i= 0; i < changes.length; i++) {
 			ASTNode curr= (ASTNode) list.get(i);

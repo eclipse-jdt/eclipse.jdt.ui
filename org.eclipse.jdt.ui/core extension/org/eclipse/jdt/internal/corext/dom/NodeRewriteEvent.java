@@ -57,6 +57,7 @@ public class NodeRewriteEvent extends RewriteEvent {
 		}
 		return REPLACED;
 	}
+		
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.dom.RewriteEvent#isListRewrite()
@@ -71,6 +72,13 @@ public class NodeRewriteEvent extends RewriteEvent {
 	 */
 	/* package */ void setNewValue(ASTNode newEntry) {
 		fNewValue= newEntry;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.dom.RewriteEvent#getChildren()
+	 */
+	public RewriteEvent[] getChildren() {
+		return null;
 	}
 	
 

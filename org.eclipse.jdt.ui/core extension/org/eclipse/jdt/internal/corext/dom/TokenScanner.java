@@ -198,6 +198,24 @@ public class TokenScanner {
 	}
 	
 	/**
+	 * Reads from the given offset until a token is reached and returns the offset after the previous token.
+	 * @param token The token to be found.
+	 * @param startOffset The offset to start scanning from.
+	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
+	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
+	 */		
+	public int getPreviousTokenEndOffset(int token, int startOffset) throws CoreException {
+		setOffset(startOffset);
+		int res= startOffset;
+		int curr= readNext(false);
+		while (curr != token) {
+			res= getCurrentEndOffset();
+			curr= readNext(false);
+		}
+		return res;
+	}
+	
+	/**
 	 * Evaluates the start offset of comments directly ahead of a token specified by its start offset
 	 * 
 	 * @param lastPos An offset to before the node start offset. Can be 0 but better is the end location of the previous node. 

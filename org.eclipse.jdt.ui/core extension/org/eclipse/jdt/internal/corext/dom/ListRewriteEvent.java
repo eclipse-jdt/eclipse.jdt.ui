@@ -33,7 +33,7 @@ public class ListRewriteEvent extends RewriteEvent {
 	public int getChangeKind() {
 		if (fListEntries != null) {
 			for (int i= 0; i < fListEntries.size(); i++) {
-				NodeRewriteEvent curr= (NodeRewriteEvent) fListEntries.get(i);
+				RewriteEvent curr= (RewriteEvent) fListEntries.get(i);
 				if (curr.getChangeKind() != UNCHANGED) {
 					return CHILDREN_CHANGED;
 				}
@@ -49,11 +49,11 @@ public class ListRewriteEvent extends RewriteEvent {
 		return true;
 	}	
 	
-	public NodeRewriteEvent removeEntry(ASTNode originalEntry) {
+	public RewriteEvent removeEntry(ASTNode originalEntry) {
 		return replaceEntry(originalEntry, null);
 	}
 	
-	public NodeRewriteEvent replaceEntry(ASTNode originalEntry, ASTNode newEntry) {
+	public RewriteEvent replaceEntry(ASTNode originalEntry, ASTNode newEntry) {
 		if (originalEntry == null) {
 			throw new IllegalArgumentException();
 		}
@@ -82,13 +82,13 @@ public class ListRewriteEvent extends RewriteEvent {
 		return fListEntries;
 	}
 
-	public NodeRewriteEvent insertEntry(int insertIndex, ASTNode newEntry) {
+	public RewriteEvent insertEntry(int insertIndex, ASTNode newEntry) {
 		int currIndex= 0;
 		
 		List listEntries= getEntries();
 		int nEntries= listEntries.size();
 		for (int i= 0; i < nEntries; i++) {
-			NodeRewriteEvent curr= (NodeRewriteEvent) listEntries.get(i);
+			RewriteEvent curr= (RewriteEvent) listEntries.get(i);
 			if (curr.getOriginalValue() != null) {
 				if (insertIndex == currIndex) {
 					NodeRewriteEvent change= new NodeRewriteEvent(null, newEntry);
@@ -106,9 +106,9 @@ public class ListRewriteEvent extends RewriteEvent {
 		throw new IndexOutOfBoundsException();
 	}
 		
-	public NodeRewriteEvent[] getListEntries() {
+	public RewriteEvent[] getChildren() {
 		List listEntries= getEntries();
-		return (NodeRewriteEvent[]) listEntries.toArray(new NodeRewriteEvent[listEntries.size()]);
+		return (RewriteEvent[]) listEntries.toArray(new RewriteEvent[listEntries.size()]);
 	}
 
 	/* (non-Javadoc)
@@ -118,8 +118,20 @@ public class ListRewriteEvent extends RewriteEvent {
 		return fOriginalNodes;
 	}
 
-
-	
-	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.dom.RewriteEvent#getNewValue()
+	 */
+	public Object getNewValue() {
+		List listEntries= getEntries();
+		ArrayList res= new ArrayList(listEntries.size());
+		for (int i= 0; i < listEntries.size(); i++) {
+			RewriteEvent curr= (RewriteEvent) listEntries.get(i);
+			Object newVal= curr.getNewValue();
+			if (newVal != null) {
+				res.add(newVal);
+			}
+		}
+		return res;
+	}
 	
 }

@@ -575,6 +575,33 @@ public class ASTNodes {
 		}
 	}
 	
+	public static final String NODE_RANGE_PROPERTY= "noderange"; //$NON-NLS-1$
+	
+	public static void annotateExtraRanges(ASTNode node, TokenScanner scanner) {
+		ISourceRange range= ASTNodes.getNodeRangeWithComments(node, 0, -1, scanner);
+		node.setProperty(NODE_RANGE_PROPERTY, range);
+		doExtraRangesForChildren(node, scanner);
+	}
+	
+	private static void doExtraRangesForChildren(ASTNode node, TokenScanner scanner) {
+		List children= ASTNodes.getChildren(node);
+		
+		int lastChild= children.size() - 1;
+		int lastPos= node.getStartPosition() + node.getLength();
+		
+		int prev= node.getStartPosition();
+		for (int i= 0; i <= lastChild; i++) {
+			ASTNode curr= (ASTNode) children.get(i);
+			int next= (i < lastChild) ? ((ASTNode) children.get(i + 1)).getStartPosition() : lastPos;
+			ISourceRange range= ASTNodes.getNodeRangeWithComments(curr, prev, next, scanner);
+			curr.setProperty(NODE_RANGE_PROPERTY, range);
+			doExtraRangesForChildren(curr, scanner);
+			prev= range.getOffset() + range.getLength();
+		}
+	}
+		
+	
+	
 	public static ISourceRange getNodeRangeWithComments(ASTNode node, TokenScanner scanner) {
 		int tokenStart= node.getStartPosition();
 		int lastPos= 0;

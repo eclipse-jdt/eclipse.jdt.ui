@@ -25,6 +25,10 @@ public abstract class RewriteEvent {
 	
 	public abstract boolean isListRewrite();
 	public abstract int getChangeKind();
+	
 	public abstract Object getOriginalValue();
+	public abstract Object getNewValue();
+	
+	public abstract RewriteEvent[] getChildren();
 	
 }

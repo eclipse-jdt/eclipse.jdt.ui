@@ -59,7 +59,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	
 	private TextEdit fCurrentEdit;
 	private TokenScanner fTokenScanner; // shared scanner
-	private HashMap fNodeRanges;
 	private HashMap fCopySources;
 	private HashMap fMoveSources;
 	
@@ -71,16 +70,19 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	/**
 	 * Constructor for ASTChangeAnalyzer.
 	 */
-	public ASTRewriteAnalyzer(TextBuffer textBuffer, TextEdit rootEdit, ASTRewrite rewrite) {
+	public ASTRewriteAnalyzer(TextBuffer textBuffer, TextEdit rootEdit, ASTNode rootNode, ASTRewrite rewrite) {
 		fTextBuffer= textBuffer;
 		fTokenScanner= null;
-		fNodeRanges= null;
 		fRewrite= rewrite;
 		fCurrentEdit= rootEdit;
 		fCopySources= new HashMap();
 		fMoveSources= new HashMap();
 		
 		fFormatter= new ASTRewriteFormatter(rewrite, textBuffer.getLineDelimiter());
+		
+		if (rootNode.getProperty(ASTNodes.NODE_RANGE_PROPERTY) == null) {
+			ASTNodes.annotateExtraRanges(rootNode, getScanner());
+		}
 	}
 	
 	final ListRewriter getDefaultRewriter() {
@@ -94,34 +96,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return fTokenScanner;
 	}
 	
-	final ISourceRange getNodeRange(ASTNode node, int prevNodePos) {
-		if (fNodeRanges == null) {
-			fNodeRanges= new HashMap();
-		} else {
-			ISourceRange range= (ISourceRange) fNodeRanges.get(node);
-			if (range != null) {
-				return range;
-			}
-		}
-		if (prevNodePos == -1) {
-			ASTNode parent= node.getParent();
-			if (parent == null || isInserted(parent)) {
-				prevNodePos= 0;
-			} else {
-				List siblings= ASTNodes.getChildren(parent);
-				ASTNode res= findPreviousExistingNode(siblings, node);
-				if (res != null) {
-					prevNodePos= res.getStartPosition() + res.getLength();
-				} else {
-					prevNodePos= parent.getStartPosition();
-				}
-			}
-		}
-		ISourceRange range= ASTNodes.getNodeRangeWithComments(node, prevNodePos, -1, getScanner());
-		fNodeRanges.put(node, range);
-		return range;
+	final ISourceRange getNodeRange(ASTNode node) {
+		return (ISourceRange) node.getProperty(ASTNodes.NODE_RANGE_PROPERTY);
 	}
-	
+			
 	final private CopySourceEdit[] getCopySources(ASTNode node) {
 		int count= fRewrite.getCopyCount(node);
 		if (count == 0) {
@@ -130,7 +108,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		CopySourceEdit[] edits= (CopySourceEdit[]) fCopySources.get(node);
 		if (edits == null) {
 			edits= new CopySourceEdit[count];
-			ISourceRange range= getNodeRange(node, -1);
+			ISourceRange range= getNodeRange(node);
 			for (int i= 0; i < count; i++) {
 				edits[i]= new CopySourceEdit(range.getOffset(), range.getLength());
 			}
@@ -143,7 +121,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		if (isMoveSource(node)) {
 			MoveSourceEdit edit= (MoveSourceEdit) fMoveSources.get(node);
 			if (edit == null) {
-				ISourceRange range= getNodeRange(node, -1);
+				ISourceRange range= getNodeRange(node);
 				edit= new MoveSourceEdit(range.getOffset(), range.getLength());
 			}
 			fMoveSources.put(node, edit);
@@ -152,10 +130,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return null;
 	}
 	
-	private final int getChangeKind(ASTNode node) {
-		return fRewrite.getChangeKind(node);
-	}
-
 	private final int getChangeKind(ASTNode node, int property) {
 		RewriteEvent event= getEvent(node, property);
 		if (event != null) {
@@ -164,9 +138,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return RewriteEvent.UNCHANGED;
 	}
 	
-	private final boolean isChanged(ASTNode node) {
-		int kind= getChangeKind(node);
-		return kind != ASTRewrite.UNCHANGED;
+	private final boolean hasChildrenChanges(ASTNode node) {
+		return fRewrite.hasChildrenChanges(node);
 	}
 		
 	private final  boolean isChanged(ASTNode node, int property) {
@@ -177,45 +150,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return false;
 	}
 	
-	private final boolean isInserted(ASTNode node) {
-		return fRewrite.isInserted(node);
-	}
-	
 	private final boolean isInsertBoundToPrevious(ASTNode node) {
 		return fRewrite.isInsertBoundToPrevious(node);
 	}	
-	
-	private final boolean isReplaced(ASTNode node) {
-		return fRewrite.isReplaced(node);
-	}
-	
-	private final boolean isRemoved(ASTNode node) {
-		return fRewrite.isRemoved(node);
-	}	
-	
-	private final boolean isModified(ASTNode node) {
-		return fRewrite.isModified(node);
-	}
-	
+		
 	private final boolean isMoveSource(ASTNode node) {
 		return fRewrite.isMoveSource(node);
 	}	
 		
-	private final ASTNode getModifiedNode(ASTNode node) {
-		return fRewrite.getModifiedNode(node);
-	}
-
-	private final ASTNode getReplacingNode(ASTNode node) {
-		return fRewrite.getReplacingNode(node);
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	private final GroupDescription getDescription(ASTNode node) {
-		return fRewrite.getDescription(node);
-	}
-	
 	private final GroupDescription getDescription(ASTNode parent, int property) {
 		RewriteEvent event= getEvent(parent, property);
 		if (event != null) {
@@ -233,11 +175,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return fRewrite.getDescription(change);
 	}
 	
-	private final Object getOriginalNode(ASTNode parent, int property) {
+	private final Object getOriginalValue(ASTNode parent, int property) {
 		return fRewrite.getOriginalValue(parent, property);
 	}
 	
-	
+	private final Object getNewValue(ASTNode parent, int property) {
+		return fRewrite.getNewValue(parent, property);
+	}	
 	
 	private final void addEdit(TextEdit edit) {
 		fCurrentEdit.addChild(edit);
@@ -290,7 +234,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	private final int doVisit(ASTNode parent, int property, int offset) {
-		Object node= getOriginalNode(parent, property);
+		Object node= getOriginalValue(parent, property);
 		if (node instanceof ASTNode) {
 			return doVisit((ASTNode) node);
 		} else if (node instanceof List) {
@@ -364,22 +308,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}	
 	
 			
-	private int getPosBeforeSpaces(int pos) {
-		while (pos > 0 && Strings.isIndentChar(fTextBuffer.getChar(pos - 1))) {
-			pos--;
-		}
-		return pos;
-	}	
-	
-	private void checkNoModification(ASTNode node) {
-		if (isModified(node)) {
-			Assert.isTrue(false, "Can not modify " + node.getClass().getName()); //$NON-NLS-1$
-		}
-	}
-	
 	private void checkNoChange(ASTNode node) {
-		if (isChanged(node)) {
-			Assert.isTrue(false, "Can not insert or replace node in " + node.getParent().getClass().getName()); //$NON-NLS-1$
+		if (hasChildrenChanges(node)) {
+			Assert.isTrue(false, "Change not supported in " + node.getClass().getName()); //$NON-NLS-1$
 		}
 	}
 	
@@ -388,7 +319,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		protected String fContantSeparator;
 		protected int fStartPos;
 		
-		protected NodeRewriteEvent[] fList;
+		protected RewriteEvent[] fList;
 		
 		protected final ASTNode getOriginalNode(int index) {
 			return (ASTNode) fList[index].getOriginalValue();
@@ -417,25 +348,33 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 		
 		protected int getStartOfNextNode(int nextIndex, int defaultPos) {
-			return getNextExistingStartPos(fList, nextIndex, defaultPos);
+			for (int i= nextIndex; i < fList.length; i++) {
+				RewriteEvent elem= fList[i];
+				if (elem.getChangeKind() != RewriteEvent.INSERTED) {
+					ASTNode node= (ASTNode) elem.getOriginalValue();
+					ISourceRange range= getNodeRange(node);
+					return range.getOffset();
+				}
+			}
+			return defaultPos;
 		}
 		
 		protected int getEndOfNode(ASTNode node) {
-			ISourceRange range= getNodeRange(node, -1);
+			ISourceRange range= getNodeRange(node);
 			return range.getOffset() + range.getLength();
 		}		
 		
-		public int rewriteList(ListRewriteEvent listEvent, int startPos, String keyword, String separator) {
+		public final int rewriteList(RewriteEvent[] listEvents, int startPos, String keyword, String separator) {
 			fContantSeparator= separator;
-			return rewriteList(listEvent, startPos, keyword);
+			return rewriteList(listEvents, startPos, keyword);
 		}
 		
 		private boolean insertAfterSeparator(ASTNode node) {
 			return !isInsertBoundToPrevious(node);
 		}
 		
-		public int rewriteList(ListRewriteEvent listEvent, int startPos, String keyword) {
-			fList= listEvent.getListEntries();
+		public final int rewriteList(RewriteEvent[] listEvents, int startPos, String keyword) {
+			fList= listEvents;
 			fStartPos= startPos;
 			
 			int total= fList.length;
@@ -454,7 +393,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					lastNonInsert= i;
 					if (currPos == -1) {
 						ASTNode elem= (ASTNode) fList[i].getOriginalValue();
-						currPos= getNodeRange(elem, startPos).getOffset();
+						currPos= getNodeRange(elem).getOffset();
 					}
 				}
 				if (currMark != RewriteEvent.REMOVED) {
@@ -479,7 +418,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			int separatorState= NEW;
 
 			for (int i= 0; i < total; i++) {
-				NodeRewriteEvent currEvent= fList[i];
+				RewriteEvent currEvent= fList[i];
 				int currMark= currEvent.getChangeKind();
 				int nextIndex= i + 1;
 
@@ -561,11 +500,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 				
 	private int rewriteRequiredNode(ASTNode parent, int property) {
-		NodeRewriteEvent event= (NodeRewriteEvent) getEvent(parent, property);
+		RewriteEvent event= getEvent(parent, property);
 		if (event != null && event.getChangeKind() == RewriteEvent.REPLACED) {
 			ASTNode node= (ASTNode) event.getOriginalValue();
 			GroupDescription description= getDescription(event);
-			ISourceRange range= getNodeRange(node, -1);
+			ISourceRange range= getNodeRange(node);
 			int offset= range.getOffset();
 			int length= range.getLength();
 			doTextRemoveAndVisit(offset, length, node, description);
@@ -576,7 +515,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 		
 	private int rewriteNode(ASTNode parent, int property, int offset, Prefix prefix) {
-		NodeRewriteEvent event= (NodeRewriteEvent) getEvent(parent, property);
+		RewriteEvent event= getEvent(parent, property);
 		if (event != null) {
 			switch (event.getChangeKind()) {
 				case RewriteEvent.INSERTED: {
@@ -591,7 +530,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					ASTNode node= (ASTNode) event.getOriginalValue();
 					GroupDescription description= getDescription(event);
 					
-					ISourceRange range= getNodeRange(node, -1);
+					ISourceRange range= getNodeRange(node);
 					int nodeOffset= range.getOffset();
 					int nodeLen= range.getLength();		
 					// if there is a prefix, remove the prefix as well
@@ -602,7 +541,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				case RewriteEvent.REPLACED: {
 					ASTNode node= (ASTNode) event.getOriginalValue();
 					GroupDescription description= getDescription(event);
-					ISourceRange range= getNodeRange(node, -1);
+					ISourceRange range= getNodeRange(node);
 					int nodeOffset= range.getOffset();
 					int nodeLen= range.getLength();				
 					doTextRemoveAndVisit(nodeOffset, nodeLen, node, description);
@@ -614,8 +553,12 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return doVisit(parent, property, offset);
 	}	
 	
+	
+	/**
+	 * endpos can be -1 -> 
+	 */
 	private int rewriteBodyNode(ASTNode parent, int property, int offset, int endPos, int indent, BlockContext context) {
-		NodeRewriteEvent event= (NodeRewriteEvent) getEvent(parent, property);
+		RewriteEvent event= getEvent(parent, property);
 		if (event != null) {
 			switch (event.getChangeKind()) {
 				case RewriteEvent.INSERTED: {
@@ -631,6 +574,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				}
 				case RewriteEvent.REMOVED: {
 					ASTNode node= (ASTNode) event.getOriginalValue();
+					if (endPos == -1) {
+						ISourceRange range= getNodeRange(node);
+						endPos= range.getOffset() + range.getLength();
+					}
+					
 					GroupDescription description= getDescription(event);
 					// if there is a prefix, remove the prefix as well
 					int len= endPos - offset;
@@ -639,6 +587,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				}
 				case RewriteEvent.REPLACED: {
 					ASTNode node= (ASTNode) event.getOriginalValue();
+					if (endPos == -1) {
+						ISourceRange range= getNodeRange(node);
+						endPos= range.getOffset() + range.getLength();
+					}
 					GroupDescription description= getDescription(event);
 					int nodeLen= endPos - offset; 
 					
@@ -663,7 +615,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	private int rewriteOptionalQualifier(ASTNode parent, int property, int startPos) {
-		NodeRewriteEvent event= (NodeRewriteEvent) getEvent(parent, property);
+		RewriteEvent event= getEvent(parent, property);
 		if (event != null) {
 			switch (event.getChangeKind()) {
 				case RewriteEvent.INSERTED: {
@@ -688,7 +640,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				case RewriteEvent.REPLACED: {
 					ASTNode node= (ASTNode) event.getOriginalValue();
 					GroupDescription description= getDescription(event);
-					ISourceRange range= getNodeRange(node, startPos);
+					ISourceRange range= getNodeRange(node);
 					doTextRemoveAndVisit(range.getOffset(), range.getLength(), node, description);
 					doTextInsert(range.getOffset(), (ASTNode) event.getNewValue(), getIndent(startPos), true, description);
 					return range.getOffset() + range.getLength();
@@ -778,12 +730,12 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 		
 	private int rewriteParagraphList(ASTNode parent, int property, int insertPos, int insertIndent, int separator, int lead) {
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(parent, property);
+		RewriteEvent event= getEvent(parent, property);
 		if (event == null || event.getChangeKind() == ASTRewrite.UNCHANGED) {
 			return doVisit(parent, property, insertPos);
 		}
 		
-		NodeRewriteEvent[] events= event.getListEntries();
+		RewriteEvent[] events= event.getChildren();
 		boolean hasExisting= false;
 		for (int i= 0; i < events.length; i++) {
 			int changeKind= events[i].getChangeKind();
@@ -798,11 +750,19 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			}
 			leadString.append(CodeFormatterUtil.createIndentString(insertIndent));
 		}
-		return listRewriter.rewriteList(event, insertPos, leadString.toString());
+		return listRewriter.rewriteList(event.getChildren(), insertPos, leadString.toString());
+	}
+	
+	private int rewriteNodeList(ASTNode parent, int property, int pos, String keyword, String separator) {
+		RewriteEvent event= getEvent(parent, property);
+		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
+			return getDefaultRewriter().rewriteList(event.getChildren(), pos, keyword, separator);
+		}
+		return doVisit(parent, property, pos);
 	}
 	
 	private void rewriteMethodBody(MethodDeclaration parent, int startPos) { 
-		NodeRewriteEvent event= (NodeRewriteEvent) getEvent(parent, ASTNodeConstants.BODY);
+		RewriteEvent event= getEvent(parent, ASTNodeConstants.BODY);
 		if (event != null) {
 			switch (event.getChangeKind()) {
 				case RewriteEvent.INSERTED: {
@@ -836,7 +796,23 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		doVisit(parent, ASTNodeConstants.BODY, startPos);
 	}
 	
+	private int rewriteExtraDimensions(ASTNode parent, int property, int pos) {
+		RewriteEvent event= getEvent(parent, property);
+		if (event == null || event.getChangeKind() == RewriteEvent.UNCHANGED) {
+			return ((Integer) getOriginalValue(parent, property)).intValue();
+		}
+		int oldDim= ((Integer) event.getOriginalValue()).intValue();
+		int newDim= ((Integer) event.getNewValue()).intValue();
+		
+		if (oldDim != newDim) {
+			GroupDescription description= getDescription(event);
+			rewriteExtraDimensions(oldDim, newDim, pos, description);
+		}
+		return oldDim;
+	}
+	
 	private void rewriteExtraDimensions(int oldDim, int newDim, int pos, GroupDescription description) {
+			
 		if (oldDim < newDim) {
 			for (int i= oldDim; i < newDim; i++) {
 				doTextInsert(pos, "[]", description); //$NON-NLS-1$
@@ -853,52 +829,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			}
 		}
 	}	
-	
-	private final int getNextExistingStartPos(List list, int listStartIndex, int defaultOffset) {
-		for (int i= listStartIndex; i < list.size(); i++) {
-			ASTNode elem= (ASTNode) list.get(i);
-			if (!isInserted(elem)) {
-				ISourceRange range= getNodeRange(elem, defaultOffset);
-				return range.getOffset();
-			}
-		}
-		return defaultOffset;
-	}
-	
-	private final int getNextExistingStartPos(NodeRewriteEvent[] list, int listStartIndex, int defaultOffset) {
-		for (int i= listStartIndex; i < list.length; i++) {
-			NodeRewriteEvent elem= list[i];
-			if (elem.getChangeKind() != RewriteEvent.INSERTED) {
-				ASTNode node= (ASTNode) elem.getOriginalValue();
-				ISourceRange range= getNodeRange(node, defaultOffset);
-				return range.getOffset();
-			}
-		}
-		return defaultOffset;
-	}
-	
-	private final ASTNode findPreviousExistingNode(List list, ASTNode node) {
-		ASTNode res= null;
-		for (int i= 0; i < list.size(); i++) {
-			ASTNode elem= (ASTNode) list.get(i);
-			if (elem == node) {
-				return res;
-			}
-			if (!isInserted(elem)) {
-				res= elem;
-			}
-		}
-		return null;		
-	}
-					
-	private boolean isAllRemoved(NodeRewriteEvent[] list) {
-		for (int i= 0; i < list.length; i++) {
-			if (list[i].getChangeKind() != RewriteEvent.REMOVED) {
-				return false;
-			}
-		}
-		return true;
-	}		
 		
 	/*
 	 * Next token is a left brace. Returns the offset after the brace. For incomplete code, return the start offset.  
@@ -995,7 +925,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 
 	private void rewriteModifiers(ASTNode parent, int property, int offset) {
 		
-		NodeRewriteEvent event= (NodeRewriteEvent) getEvent(parent, property);
+		RewriteEvent event= getEvent(parent, property);
 		if (event == null || event.getChangeKind() != RewriteEvent.REPLACED) {
 			return;
 		}
@@ -1052,6 +982,29 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}		
 	}
 	
+	private void replaceOperation(int posBeforeOperation, String newOperation, GroupDescription description) {
+		try {
+			getScanner().readNext(posBeforeOperation, true);
+			doTextReplace(getScanner().getCurrentStartOffset(), getScanner().getCurrentLength(), newOperation, description);
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+	}
+	
+	private void rewriteOperation(ASTNode parent, int property, int posBeforeOperation) {
+		RewriteEvent event= getEvent(parent, property);
+		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
+			try {
+				String newOperation= event.getNewValue().toString();
+				GroupDescription description= getDescription(event);
+				getScanner().readNext(posBeforeOperation, true);
+				doTextReplace(getScanner().getCurrentStartOffset(), getScanner().getCurrentLength(), newOperation, description);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
@@ -1090,7 +1043,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 		GroupDescription data= fRewrite.getTrackedNodeData(node);
 		if (data != null) {
-			ISourceRange range= getNodeRange(node, -1);
+			ISourceRange range= getNodeRange(node);
 			TextEdit edit= new RangeMarker(range.getOffset(), range.getLength());
 			addDescription(data, edit);
 			addEdit(edit);
@@ -1117,33 +1070,34 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(TypeDeclaration)
 	 */
-	public boolean visit(TypeDeclaration typeDecl) {
+	public boolean visit(TypeDeclaration node) {
 		
-		rewriteModifiers(typeDecl, ASTNodeConstants.MODIFIERS, typeDecl.getStartPosition());
+		rewriteModifiers(node, ASTNodeConstants.MODIFIERS, node.getStartPosition());
 		
+		boolean isInterface= ((Boolean) getOriginalValue(node, ASTNodeConstants.IS_INTERFACE)).booleanValue();
 		// modifiers & class/interface
-		boolean invertType= isChanged(typeDecl, ASTNodeConstants.IS_INTERFACE);
+		boolean invertType= isChanged(node, ASTNodeConstants.IS_INTERFACE);
 		if (invertType) {
 			try {
-				int typeToken= typeDecl.isInterface() ? ITerminalSymbols.TokenNameinterface : ITerminalSymbols.TokenNameclass;
-				getScanner().readToToken(typeToken, typeDecl.getStartPosition());
+				int typeToken= isInterface ? ITerminalSymbols.TokenNameinterface : ITerminalSymbols.TokenNameclass;
+				getScanner().readToToken(typeToken, node.getStartPosition());
 				
-				String str= typeDecl.isInterface() ? "class" : "interface"; //$NON-NLS-1$ //$NON-NLS-2$
+				String str= isInterface ? "class" : "interface"; //$NON-NLS-1$ //$NON-NLS-2$
 				int start= getScanner().getCurrentStartOffset();
 				int end= getScanner().getCurrentEndOffset();
 				
-				doTextReplace(start, end - start, str, getDescription(typeDecl, ASTNodeConstants.IS_INTERFACE));
+				doTextReplace(start, end - start, str, getDescription(node, ASTNodeConstants.IS_INTERFACE));
 			} catch (CoreException e) {
 				// ignore
 			}			
 		}
 		
 		// name
-		int pos= rewriteRequiredNode(typeDecl, ASTNodeConstants.NAME);
+		int pos= rewriteRequiredNode(node, ASTNodeConstants.NAME);
 		
 		// superclass
-		if (!typeDecl.isInterface() || invertType) {
-			NodeRewriteEvent superClassEvent= (NodeRewriteEvent) getEvent(typeDecl, ASTNodeConstants.SUPERCLASS);
+		if (!isInterface || invertType) {
+			RewriteEvent superClassEvent= getEvent(node, ASTNodeConstants.SUPERCLASS);
 			int changeKind= superClassEvent != null ? superClassEvent.getChangeKind() : RewriteEvent.UNCHANGED;
 			switch (changeKind) {
 				case RewriteEvent.INSERTED: {
@@ -1154,7 +1108,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				}
 				case RewriteEvent.REMOVED: {
 					ASTNode superClass= (ASTNode) superClassEvent.getOriginalValue();
-					ISourceRange range= getNodeRange(superClass, pos);
+					ISourceRange range= getNodeRange(superClass);
 					int endPos= range.getOffset() + range.getLength();
 					doTextRemoveAndVisit(pos, endPos - pos, superClass, getDescription(superClassEvent));
 					pos= endPos;
@@ -1162,48 +1116,52 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				}
 				case RewriteEvent.REPLACED: {
 					ASTNode superClass= (ASTNode) superClassEvent.getOriginalValue();
-					ISourceRange range= getNodeRange(superClass, pos);
+					ISourceRange range= getNodeRange(superClass);
 					doTextRemoveAndVisit(range.getOffset(), range.getLength(), superClass, getDescription(superClassEvent));
 					doTextInsert(range.getOffset(), (ASTNode) superClassEvent.getNewValue(), 0, false, getDescription(superClassEvent));
 					pos= range.getOffset() + range.getLength();
 					break;
 				}
 				case RewriteEvent.UNCHANGED: {
-					pos= doVisit(typeDecl, ASTNodeConstants.SUPERCLASS, pos);
+					pos= doVisit(node, ASTNodeConstants.SUPERCLASS, pos);
 				}
 			}
 		}
 		// extended interfaces
-		ListRewriteEvent interfaceEvent= (ListRewriteEvent) getEvent(typeDecl, ASTNodeConstants.SUPER_INTERFACES);
+		RewriteEvent interfaceEvent= getEvent(node, ASTNodeConstants.SUPER_INTERFACES);
 		if (interfaceEvent == null || interfaceEvent.getChangeKind() == RewriteEvent.UNCHANGED) {
 			if (invertType) {
-				List originalNodes= (List) getOriginalNode(typeDecl, ASTNodeConstants.SUPER_INTERFACES);
+				List originalNodes= (List) getOriginalValue(node, ASTNodeConstants.SUPER_INTERFACES);
 				if (!originalNodes.isEmpty()) {
-					String keyword= typeDecl.isInterface() ? " implements " : " extends "; //$NON-NLS-1$ //$NON-NLS-2$
+					String keyword= isInterface ? " implements " : " extends "; //$NON-NLS-1$ //$NON-NLS-2$
 					ASTNode firstNode= (ASTNode) originalNodes.get(0);
-					doTextReplace(pos, firstNode.getStartPosition() - pos, keyword, getDescription(typeDecl, ASTNodeConstants.IS_INTERFACE));
+					doTextReplace(pos, firstNode.getStartPosition() - pos, keyword, getDescription(node, ASTNodeConstants.IS_INTERFACE));
 				}
 			}
-			pos= doVisit(typeDecl, ASTNodeConstants.SUPER_INTERFACES, pos);
+			pos= doVisit(node, ASTNodeConstants.SUPER_INTERFACES, pos);
 		} else {
-			String keyword= (typeDecl.isInterface() == invertType) ? " implements " : " extends "; //$NON-NLS-1$ //$NON-NLS-2$
+			String keyword= (isInterface == invertType) ? " implements " : " extends "; //$NON-NLS-1$ //$NON-NLS-2$
 			if (invertType) {
-				NodeRewriteEvent[] events= interfaceEvent.getListEntries();
-				if (!isAllRemoved(events)) {
-					int firstStart= getNextExistingStartPos(events, 0, pos);
-					doTextReplace(pos, firstStart - pos, keyword, getDescription(typeDecl, ASTNodeConstants.IS_INTERFACE));
+				List newNodes= (List) getNewValue(node, ASTNodeConstants.SUPER_INTERFACES);
+				if (!newNodes.isEmpty()) {
+					List origNodes= (List) getOriginalValue(node, ASTNodeConstants.SUPER_INTERFACES);
+					int firstStart= pos;
+					if (!origNodes.isEmpty()) {
+						firstStart= ((ASTNode) origNodes.get(0)).getStartPosition();
+					}
+					doTextReplace(pos, firstStart - pos, keyword, getDescription(node, ASTNodeConstants.IS_INTERFACE));
 					keyword= ""; //$NON-NLS-1$
 					pos= firstStart;
 				}
 			}
-			pos= getDefaultRewriter().rewriteList(interfaceEvent, pos, keyword, ", "); //$NON-NLS-1$
+			pos= rewriteNodeList(node, ASTNodeConstants.SUPER_INTERFACES, pos, keyword, ", "); //$NON-NLS-1$
 		}
 		
 		// type members
 		// startPos : find position after left brace of type, be aware that bracket might be missing
-		int startIndent= getIndent(typeDecl.getStartPosition()) + 1;
+		int startIndent= getIndent(node.getStartPosition()) + 1;
 		int startPos= getPosAfterLeftBrace(pos);
-		rewriteParagraphList(typeDecl, ASTNodeConstants.BODY_DECLARATIONS, startPos, startIndent, -1, 2);
+		rewriteParagraphList(node, ASTNodeConstants.BODY_DECLARATIONS, startPos, startIndent, -1, 2);
 		return false;
 	}
 
@@ -1211,16 +1169,16 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(MethodDeclaration)
 	 */
-	public boolean visit(MethodDeclaration methodDecl) {
-		rewriteModifiers(methodDecl, ASTNodeConstants.MODIFIERS, methodDecl.getStartPosition());
+	public boolean visit(MethodDeclaration node) {
+		rewriteModifiers(node, ASTNodeConstants.MODIFIERS, node.getStartPosition());
 		
-		boolean willBeConstructor= !methodDecl.isConstructor() && isChanged(methodDecl, ASTNodeConstants.IS_CONSTRUCTOR);
-		
+		boolean willBeConstructor= ((Boolean) getNewValue(node, ASTNodeConstants.IS_CONSTRUCTOR)).booleanValue();
+	
 		// return type
-		int returnChangeKind= getChangeKind(methodDecl, ASTNodeConstants.RETURN_TYPE);
+		int returnChangeKind= getChangeKind(node, ASTNodeConstants.RETURN_TYPE);
 		if (!willBeConstructor || returnChangeKind == RewriteEvent.REMOVED) {
 			try {
-				int startPos= methodDecl.getStartPosition();
+				int startPos= node.getStartPosition();
 				if (returnChangeKind == RewriteEvent.REMOVED || returnChangeKind == RewriteEvent.INSERTED) {
 					getScanner().setOffset(startPos);
 					int token= getScanner().readNext(true);
@@ -1229,60 +1187,49 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 						token= getScanner().readNext(true);
 					}
 				}
-				if (startPos == methodDecl.getName().getStartPosition()) {
-					rewriteNode(methodDecl, ASTNodeConstants.RETURN_TYPE, startPos, ASTRewriteFormatter.NONE); //$NON-NLS-1$
+				ASTNode nameNode= (ASTNode) getOriginalValue(node, ASTNodeConstants.NAME);
+				if (startPos == nameNode.getStartPosition()) {
+					rewriteNode(node, ASTNodeConstants.RETURN_TYPE, startPos, ASTRewriteFormatter.NONE); //$NON-NLS-1$
 					if (returnChangeKind == RewriteEvent.INSERTED) {
-						doTextInsert(startPos, " ", getDescription(methodDecl, ASTNodeConstants.RETURN_TYPE)); //$NON-NLS-1$
+						doTextInsert(startPos, " ", getDescription(node, ASTNodeConstants.RETURN_TYPE)); //$NON-NLS-1$
 					}
 				} else {
-					rewriteNode(methodDecl, ASTNodeConstants.RETURN_TYPE, startPos, ASTRewriteFormatter.SPACE); //$NON-NLS-1$
+					rewriteNode(node, ASTNodeConstants.RETURN_TYPE, startPos, ASTRewriteFormatter.SPACE); //$NON-NLS-1$
 				}
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
 		}
 		// method name
-		int pos= rewriteRequiredNode(methodDecl, ASTNodeConstants.NAME);
+		int pos= rewriteRequiredNode(node, ASTNodeConstants.NAME);
 		
 		// parameters
 		try {
-			ListRewriteEvent event= (ListRewriteEvent) getEvent(methodDecl, ASTNodeConstants.PARAMETERS);
-			if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
+			if (isChanged(node, ASTNodeConstants.PARAMETERS)) {
 				pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameLPAREN, pos);
-				pos= getDefaultRewriter().rewriteList(event, pos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+				pos= rewriteNodeList(node, ASTNodeConstants.PARAMETERS, pos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
-				pos= doVisit(methodDecl, ASTNodeConstants.PARAMETERS, pos);
+				pos= doVisit(node, ASTNodeConstants.PARAMETERS, pos);
 			}
 			
-			if (isModified(methodDecl)) {
-				MethodDeclaration modifedNode= (MethodDeclaration) getModifiedNode(methodDecl);
-				int oldDim= methodDecl.getExtraDimensions();
-				int newDim= modifedNode.getExtraDimensions();
-				if (oldDim != newDim) {
-					int offset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRPAREN, pos);
-					rewriteExtraDimensions(oldDim, newDim, offset, getDescription(methodDecl));
-				}
-			}				
+			pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRPAREN, pos);
 			
-			boolean hasExceptionChanges= isChanged(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS);
+			int extraDims= rewriteExtraDimensions(node, ASTNodeConstants.EXTRA_DIMENSIONS, pos);
 			
-			int bodyChangeKind= getChangeKind(methodDecl, ASTNodeConstants.BODY);
+			boolean hasExceptionChanges= isChanged(node, ASTNodeConstants.THROWN_EXCEPTIONS);
 			
-			if (hasExceptionChanges || bodyChangeKind == RewriteEvent.INSERTED || bodyChangeKind == RewriteEvent.REMOVED) {
-				pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRPAREN, pos);
-				int dim= methodDecl.getExtraDimensions();
+			int bodyChangeKind= getChangeKind(node, ASTNodeConstants.BODY);
+			
+			if ((extraDims > 0) && (hasExceptionChanges || bodyChangeKind == RewriteEvent.INSERTED || bodyChangeKind == RewriteEvent.REMOVED)) {
+				int dim= ((Integer) getOriginalValue(node, ASTNodeConstants.EXTRA_DIMENSIONS)).intValue();
 				while (dim > 0) {
 					pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRBRACKET, pos);
 					dim--;
 				}
-			}		
-			if (hasExceptionChanges) {
-				ListRewriteEvent exceptionEvent= (ListRewriteEvent) getEvent(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS);
-				pos= getDefaultRewriter().rewriteList(exceptionEvent, pos, " throws ", ", "); //$NON-NLS-1$ //$NON-NLS-2$
-			} else {
-				pos= doVisit(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS, pos);
 			}
-			rewriteMethodBody(methodDecl, pos);
+			
+			pos= rewriteNodeList(node, ASTNodeConstants.THROWN_EXCEPTIONS, pos, " throws ", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+			rewriteMethodBody(node, pos);
 		} catch (CoreException e) {
 			// ignore
 		}
@@ -1296,7 +1243,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		List collapsedChildren= fRewrite.getCollapsedNodes(block);
 		int startPos;
 		if (collapsedChildren != null) {
-			startPos= getNextExistingStartPos(collapsedChildren, 0, block.getStartPosition());
+			startPos= block.getStartPosition();
 		} else {
 			startPos= getPosAfterLeftBrace(block.getStartPosition());
 		}
@@ -1309,18 +1256,15 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ReturnStatement)
 	 */
 	public boolean visit(ReturnStatement node) {
-		Expression expression= node.getExpression();
-		if (expression != null) {
-			if (isChanged(expression)) {
-				try {
-					int offset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNamereturn, node.getStartPosition());
-					rewriteNode(node, ASTNodeConstants.EXPRESSION, offset, ASTRewriteFormatter.SPACE); //$NON-NLS-1$
-				} catch (CoreException e) {
-					JavaPlugin.log(e);
-				}
-			} else {
-				doVisit(expression);
+		if (isChanged(node, ASTNodeConstants.EXPRESSION)) {
+			try {
+				int offset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNamereturn, node.getStartPosition());
+				rewriteNode(node, ASTNodeConstants.EXPRESSION, offset, ASTRewriteFormatter.SPACE); //$NON-NLS-1$
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
 			}
+		} else {
+			doVisit(node, ASTNodeConstants.EXPRESSION, 0);
 		}
 		return false;
 	}		
@@ -1349,23 +1293,23 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayCreation)
 	 */
 	public boolean visit(ArrayCreation node) {
-		ArrayType arrayType= (ArrayType) getOriginalNode(node, ASTNodeConstants.TYPE);
-		int nOldBrackets= arrayType.getDimensions(); // number of total brackets
+		ArrayType arrayType= (ArrayType) getOriginalValue(node, ASTNodeConstants.TYPE);
+		int nOldBrackets= getDimensions(arrayType); // number of total brackets
 		int nNewBrackets= nOldBrackets;
 		
 		GroupDescription description= null;
-		NodeRewriteEvent typeEvent= (NodeRewriteEvent) getEvent(node, ASTNodeConstants.TYPE);
+		RewriteEvent typeEvent= getEvent(node, ASTNodeConstants.TYPE);
 		if (typeEvent != null && typeEvent.getChangeKind() == RewriteEvent.REPLACED) { // changed arraytype can have different dimension or type name
 			ArrayType replacingType= (ArrayType) typeEvent.getNewValue();
 			description= getDescription(typeEvent);
 			Type newType= replacingType.getElementType();
-			Type oldType= arrayType.getElementType();
+			Type oldType= getElementType(arrayType);
 			if (!newType.equals(oldType)) {
-				ISourceRange range= getNodeRange(oldType, node.getStartPosition());
+				ISourceRange range= getNodeRange(oldType);
 				doTextRemove(range.getOffset(), range.getLength(), description);
 				doTextInsert(range.getOffset(), newType, 0, false, description);
 			}
-			nNewBrackets= replacingType.getDimensions();
+			nNewBrackets= replacingType.getDimensions(); // is replaced type
 		}
 		doVisit(arrayType);
 		
@@ -1373,13 +1317,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		try {
 			int offset= getScanner().getTokenStartOffset(ITerminalSymbols.TokenNameLBRACKET, arrayType.getStartPosition());
 			// dimension node with expressions
-			ListRewriteEvent dimEvent= (ListRewriteEvent) getEvent(node, ASTNodeConstants.DIMENSIONS);
+			RewriteEvent dimEvent= getEvent(node, ASTNodeConstants.DIMENSIONS);
 			boolean hasDimensionChanges= (dimEvent != null && dimEvent.getChangeKind() != RewriteEvent.UNCHANGED);
 			if (hasDimensionChanges) {
-				NodeRewriteEvent[] events= dimEvent.getListEntries();
+				RewriteEvent[] events= dimEvent.getChildren();
 				// offset on first opening brace
 				for (int i= 0; i < events.length; i++) {
-					NodeRewriteEvent event= events[i];
+					RewriteEvent event= events[i];
 					int changeKind= event.getChangeKind();
 					if (changeKind == RewriteEvent.INSERTED) { // insert new dimension
 						description= getDescription(event);
@@ -1396,7 +1340,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 							doTextRemoveAndVisit(offset, endPos - offset, elem, description);
 						} else if (changeKind == RewriteEvent.REPLACED) {
 							description= getDescription(event);
-							ISourceRange range= getNodeRange(elem, offset);
+							ISourceRange range= getNodeRange(elem);
 							doTextRemoveAndVisit(range.getOffset(), range.getLength(), elem, description);
 							doTextInsert(range.getOffset(), (ASTNode) event.getNewValue(), 0, false, description);
 							nNewBrackets--;
@@ -1418,28 +1362,44 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				rewriteExtraDimensions(nOldBrackets, nNewBrackets, offset, description);
 			}
 				
-			ArrayInitializer initializer= node.getInitializer();
-			if (initializer != null) {
-				int pos= node.getStartPosition() + node.getLength(); // insert pos
-				if (isRemoved(initializer)) {
-					pos= getPosBeforeSpaces(initializer.getStartPosition()); // remove pos
-				}
-				rewriteNode(node, ASTNodeConstants.INITIALIZER, pos, ASTRewriteFormatter.SPACE); //$NON-NLS-1$
+			int kind= getChangeKind(node, ASTNodeConstants.INITIALIZER);
+			if (kind == RewriteEvent.REMOVED) {
+				offset= getScanner().getPreviousTokenEndOffset(ITerminalSymbols.TokenNameLBRACE, offset);
+			} else {
+				offset= node.getStartPosition() + node.getLength(); // insert pos
 			}
+			rewriteNode(node, ASTNodeConstants.INITIALIZER, offset, ASTRewriteFormatter.SPACE); //$NON-NLS-1$
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}		
 		return false;
 	}
+	
+	private Type getElementType(ArrayType parent) {
+		Type t = (Type) getOriginalValue(parent, ASTNodeConstants.COMPONENT_TYPE);
+		while (t.isArrayType()) {
+			t = (Type) getOriginalValue(t, ASTNodeConstants.COMPONENT_TYPE);
+		}
+		return t;
+	}
+	
+	private int getDimensions(ArrayType parent) {
+		Type t = (Type) getOriginalValue(parent, ASTNodeConstants.COMPONENT_TYPE);
+		int dimensions = 1; // always include this array type
+		while (t.isArrayType()) {
+			dimensions++;
+			t = (Type) getOriginalValue(t, ASTNodeConstants.COMPONENT_TYPE);
+		}
+		return dimensions;
+	}	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayInitializer)
 	 */
 	public boolean visit(ArrayInitializer node) {
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.EXPRESSIONS);
-		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
+		if (isChanged(node, ASTNodeConstants.EXPRESSIONS)) {
 			int startPos= getPosAfterLeftBrace(node.getStartPosition());
-			getDefaultRewriter().rewriteList(event, startPos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+			rewriteNodeList(node, ASTNodeConstants.EXPRESSIONS, startPos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
 			doVisit(node, ASTNodeConstants.EXPRESSIONS, 0);
 		}
@@ -1468,17 +1428,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 */
 	public boolean visit(Assignment node) {
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.LEFT_HAND_SIDE);
-		
-		if (isModified(node)) {
-			try {
-				getScanner().readNext(pos, true);
-				Assignment.Operator modifiedOp= ((Assignment) getModifiedNode(node)).getOperator();
-				doTextReplace(getScanner().getCurrentStartOffset(), getScanner().getCurrentLength(), modifiedOp.toString(), getDescription(node));
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
-			}
-		}
-			
+		rewriteOperation(node, ASTNodeConstants.OPERATOR, pos);
 		rewriteRequiredNode(node, ASTNodeConstants.RIGHT_HAND_SIDE);
 		return false;
 	}
@@ -1487,7 +1437,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(BooleanLiteral)
 	 */
 	public boolean visit(BooleanLiteral node) {
-		checkNoModification(node); // no modification possible
+		checkNoChange(node); // no modification possible
 		return false;
 	}
 
@@ -1495,18 +1445,15 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(BreakStatement)
 	 */
 	public boolean visit(BreakStatement node) {
-		ASTNode label= node.getLabel();
-		if (label != null) {
-			if (isChanged(label)) {
-				try {
-					int offset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNamebreak, node.getStartPosition());
-					rewriteNode(node, ASTNodeConstants.LABEL, offset, ASTRewriteFormatter.SPACE); // space between break and label //$NON-NLS-1$
-				} catch (CoreException e) {
-					JavaPlugin.log(e);
-				}
-			} else {
-				doVisit(label);
+		if (isChanged(node, ASTNodeConstants.LABEL)) {
+			try {
+				int offset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNamebreak, node.getStartPosition());
+				rewriteNode(node, ASTNodeConstants.LABEL, offset, ASTRewriteFormatter.SPACE); // space between break and label //$NON-NLS-1$
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
 			}
+		} else {
+			doVisit(node, ASTNodeConstants.LABEL, 0);
 		}
 		return false;		
 	}
@@ -1533,7 +1480,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(CharacterLiteral)
 	 */
 	public boolean visit(CharacterLiteral node) {
-		checkNoModification(node); // no modification possible
+		checkNoChange(node); // no modification possible
 		return false;
 	}
 
@@ -1545,11 +1492,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.NAME);
 
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.ARGUMENTS);
-		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
+		if (isChanged(node, ASTNodeConstants.ARGUMENTS)) {
 			try {
 				int startpos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameLPAREN, pos);
-				getDefaultRewriter().rewriteList(event, startpos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+				rewriteNodeList(node, ASTNodeConstants.ARGUMENTS, startpos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
@@ -1557,14 +1503,17 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			doVisit(node, ASTNodeConstants.ARGUMENTS, 0);
 		}
 		
-		AnonymousClassDeclaration decl= node.getAnonymousClassDeclaration();
-		if (decl != null) {
-			pos= node.getStartPosition() + node.getLength(); // for insert
-			if (isRemoved(decl)) {
-				pos= getPosBeforeSpaces(decl.getStartPosition()); // for remove
+		int kind= getChangeKind(node, ASTNodeConstants.ANONYMOUS_CLASS_DECLARATION);
+		if (kind == RewriteEvent.REMOVED) {
+			try {
+				pos= getScanner().getPreviousTokenEndOffset(ITerminalSymbols.TokenNameLBRACE, pos);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
 			}
-			rewriteNode(node, ASTNodeConstants.ANONYMOUS_CLASS_DECLARATION, pos, ASTRewriteFormatter.SPACE); //$NON-NLS-1$
+		} else {
+			pos= node.getStartPosition() + node.getLength(); // insert pos
 		}
+		rewriteNode(node, ASTNodeConstants.ANONYMOUS_CLASS_DECLARATION, pos, ASTRewriteFormatter.SPACE); //$NON-NLS-1$
 		return false;
 	}
 
@@ -1582,11 +1531,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ConstructorInvocation)
 	 */
 	public boolean visit(ConstructorInvocation node) {
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.ARGUMENTS);
-		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
+		if (isChanged(node, ASTNodeConstants.ARGUMENTS)) {
 			try {
 				int startpos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameLPAREN, node.getStartPosition());
-				getDefaultRewriter().rewriteList(event, startpos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+				rewriteNodeList(node, ASTNodeConstants.ARGUMENTS, startpos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
@@ -1600,18 +1548,15 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ContinueStatement)
 	 */
 	public boolean visit(ContinueStatement node) {
-		ASTNode label= node.getLabel();
-		if (label != null) {
-			if (isChanged(label)) {
-				try {
-					int offset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNamecontinue, node.getStartPosition());
-					rewriteNode(node, ASTNodeConstants.LABEL, offset, ASTRewriteFormatter.SPACE); // space between continue and label //$NON-NLS-1$
-				} catch (CoreException e) {
-					JavaPlugin.log(e);
-				}
-			} else {
-				doVisit(label);
+		if (isChanged(node, ASTNodeConstants.LABEL)) {
+			try {
+				int offset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNamecontinue, node.getStartPosition());
+				rewriteNode(node, ASTNodeConstants.LABEL, offset, ASTRewriteFormatter.SPACE); // space between continue and label //$NON-NLS-1$
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
 			}
+		} else {
+			doVisit(node, ASTNodeConstants.LABEL, 0);
 		}
 		return false;
 	}
@@ -1625,7 +1570,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			RewriteEvent event= getEvent(node, ASTNodeConstants.BODY);
 			if (event != null && event.getChangeKind() == RewriteEvent.REPLACED) {
 				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNamedo, pos);
-				ASTNode body= (ASTNode) ((NodeRewriteEvent) event).getOriginalValue();
+				ASTNode body= (ASTNode) event.getOriginalValue();
 				int bodyEnd= body.getStartPosition() + body.getLength();
 				int endPos= getScanner().getTokenStartOffset(ITerminalSymbols.TokenNamewhile, bodyEnd);
 				rewriteBodyNode(node, ASTNodeConstants.BODY, startOffset, endPos, getIndent(node.getStartPosition()), ASTRewriteFormatter.DO_BLOCK); // body
@@ -1644,7 +1589,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(EmptyStatement)
 	 */
 	public boolean visit(EmptyStatement node) {
-		checkNoModification(node); // no modification possible
+		checkNoChange(node); // no modification possible
 		return false;		
 	}
 
@@ -1669,18 +1614,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(FieldDeclaration)
 	 */
 	public boolean visit(FieldDeclaration node) { //{ Modifier } Type VariableDeclarationFragment { ',' VariableDeclarationFragment } ';'
-		
 		rewriteModifiers(node, ASTNodeConstants.MODIFIERS, node.getStartPosition());
-		
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.TYPE);
-		
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.FRAGMENTS);
-		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
-			int startPos= getNextExistingStartPos(event.getListEntries(), 0, pos);
-			getDefaultRewriter().rewriteList(event, startPos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
-		} else {
-			doVisit(node, ASTNodeConstants.FRAGMENTS, 0);
-		}
+		rewriteNodeList(node, ASTNodeConstants.FRAGMENTS, pos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 		return false;
 	}
 
@@ -1691,11 +1627,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		try {
 			int pos= node.getStartPosition();
 			
-			ListRewriteEvent initializerEvent= (ListRewriteEvent) getEvent(node, ASTNodeConstants.INITIALIZERS);
-			if (initializerEvent != null && initializerEvent.getChangeKind() != RewriteEvent.UNCHANGED) {
+			if (isChanged(node, ASTNodeConstants.INITIALIZERS)) {
 				// position after opening parent
 				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameLPAREN, pos);
-				pos= getDefaultRewriter().rewriteList(initializerEvent, startOffset, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+				pos= rewriteNodeList(node, ASTNodeConstants.INITIALIZERS, startOffset, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
 				pos= doVisit(node, ASTNodeConstants.INITIALIZERS, pos);
 			}
@@ -1703,26 +1638,19 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			// position after first semicolon
 			pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameSEMICOLON, pos);
 			
-			Expression expression= node.getExpression();
-			if (expression != null) {
-				pos= rewriteNode(node, ASTNodeConstants.EXPRESSION, pos, ASTRewriteFormatter.NONE); //$NON-NLS-1$
-			}
+			pos= rewriteNode(node, ASTNodeConstants.EXPRESSION, pos, ASTRewriteFormatter.NONE);
 			
-			ListRewriteEvent updatersEvent= (ListRewriteEvent) getEvent(node, ASTNodeConstants.UPDATERS);
-			if (updatersEvent != null && updatersEvent.getChangeKind() != RewriteEvent.UNCHANGED) {
+			if (isChanged(node, ASTNodeConstants.UPDATERS)) {
 				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameSEMICOLON, pos);
-				pos= getDefaultRewriter().rewriteList(updatersEvent, startOffset, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+				pos= rewriteNodeList(node, ASTNodeConstants.UPDATERS, startOffset, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
 				pos= doVisit(node, ASTNodeConstants.UPDATERS, pos);
 			}
 
 			RewriteEvent bodyEvent= getEvent(node, ASTNodeConstants.BODY);
 			if (bodyEvent != null && bodyEvent.getChangeKind() == RewriteEvent.REPLACED) {
-				ASTNode body= (ASTNode) bodyEvent.getOriginalValue();
 				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRPAREN, pos);
-				ISourceRange range= getNodeRange(body, startOffset - 1);
-				int endPos= range.getOffset() + range.getLength();
-				rewriteBodyNode(node, ASTNodeConstants.BODY, startOffset, endPos, getIndent(node.getStartPosition()), ASTRewriteFormatter.WHILE_BLOCK); // body
+				rewriteBodyNode(node, ASTNodeConstants.BODY, startOffset, -1, getIndent(node.getStartPosition()), ASTRewriteFormatter.WHILE_BLOCK); // body
 			} else {
 				doVisit(node, ASTNodeConstants.BODY, 0);
 			}
@@ -1741,20 +1669,20 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	public boolean visit(IfStatement node) {
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.EXPRESSION); // statement
 		
-		Statement thenStatement= node.getThenStatement();
-		Statement elseStatement= node.getElseStatement();
-		ASTNode newThenStatement= thenStatement;
-		if (isReplaced(thenStatement)) {
+		int thenChange= getChangeKind(node, ASTNodeConstants.THEN_STATEMENT);
+		int elseChange= getChangeKind(node, ASTNodeConstants.ELSE_STATEMENT);
+
+		if (thenChange != RewriteEvent.UNCHANGED) {
 			try {
 				pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRPAREN, pos); // after the closing parent
 				int indent= getIndent(node.getStartPosition());
 				
-				ISourceRange range= getNodeRange(thenStatement, pos - 1);
-				int endPos= range.getOffset() + range.getLength();
-				if (elseStatement != null && !isInserted(elseStatement)) {
+				int endPos= -1;
+				Object elseStatement= getOriginalValue(node, ASTNodeConstants.ELSE_STATEMENT);
+				if (elseStatement != null) {
 					endPos= getScanner().getTokenStartOffset(ITerminalSymbols.TokenNameelse, pos); // else keyword
 				}
-				if (elseStatement == null || isChanged(elseStatement)) {
+				if ((elseChange != RewriteEvent.UNCHANGED) || (elseStatement == null)) {
 					pos= rewriteBodyNode(node, ASTNodeConstants.THEN_STATEMENT, pos, endPos, indent, ASTRewriteFormatter.IF_BLOCK_NO_ELSE); 
 				} else {
 					pos= rewriteBodyNode(node, ASTNodeConstants.THEN_STATEMENT, pos, endPos, indent, ASTRewriteFormatter.IF_BLOCK_WITH_ELSE); 
@@ -1762,24 +1690,20 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
-			newThenStatement= getReplacingNode(thenStatement);
 		} else {
-			pos= doVisit(thenStatement);
+			pos= doVisit(node, ASTNodeConstants.THEN_STATEMENT, pos);
 		}
 
-		if (elseStatement != null) {
-			if (isChanged(elseStatement)) {
-				int indent= getIndent(node.getStartPosition());
-				ISourceRange range= getNodeRange(elseStatement, pos);
-				int endPos= range.getOffset() + range.getLength();
-				if (newThenStatement.getNodeType() == ASTNode.BLOCK) {
-					rewriteBodyNode(node, ASTNodeConstants.ELSE_STATEMENT, pos, endPos, indent, ASTRewriteFormatter.ELSE_AFTER_BLOCK);
-				} else {
-					rewriteBodyNode(node, ASTNodeConstants.ELSE_STATEMENT, pos, endPos, indent, ASTRewriteFormatter.ELSE_AFTER_STATEMENT);
-				}
+		if (elseChange != RewriteEvent.UNCHANGED) {
+			int indent= getIndent(node.getStartPosition());
+			Object newThen= getNewValue(node, ASTNodeConstants.THEN_STATEMENT);
+			if (newThen instanceof Block) {
+				rewriteBodyNode(node, ASTNodeConstants.ELSE_STATEMENT, pos, -1, indent, ASTRewriteFormatter.ELSE_AFTER_BLOCK);
 			} else {
-				doVisit(elseStatement);
+				rewriteBodyNode(node, ASTNodeConstants.ELSE_STATEMENT, pos, -1, indent, ASTRewriteFormatter.ELSE_AFTER_STATEMENT);
 			}
+		} else {
+			pos= doVisit(node, ASTNodeConstants.ELSE_STATEMENT, pos);
 		}
 		return false;
 	}
@@ -1788,18 +1712,17 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ImportDeclaration)
 	 */
 	public boolean visit(ImportDeclaration node) {
-		rewriteRequiredNode(node, ASTNodeConstants.NAME); // statement
+		int pos= rewriteRequiredNode(node, ASTNodeConstants.NAME);
 		
-		Name name= node.getName();
-		if (isModified(node)) {
-			ImportDeclaration modifiedNode= (ImportDeclaration) getModifiedNode(node);
-			if (!node.isOnDemand() && modifiedNode.isOnDemand()) {
-				doTextInsert(name.getStartPosition() + name.getLength(), ".*", getDescription(node)); //$NON-NLS-1$
-			} else if (node.isOnDemand() && !modifiedNode.isOnDemand()) {
+		RewriteEvent event= getEvent(node, ASTNodeConstants.IS_ON_DEMAND);
+		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
+			boolean isOnDemand= ((Boolean) event.getOriginalValue()).booleanValue();
+			if (!isOnDemand) {
+				doTextInsert(pos, ".*", getDescription(event)); //$NON-NLS-1$
+			} else {
 				try {
-					int startPos= name.getStartPosition() + name.getLength();
-					int endPos= getScanner().getTokenStartOffset(ITerminalSymbols.TokenNameSEMICOLON, startPos);
-					doTextRemove(startPos, endPos - startPos, getDescription(node));
+					int endPos= getScanner().getTokenStartOffset(ITerminalSymbols.TokenNameSEMICOLON, pos);
+					doTextRemove(pos, endPos - pos, getDescription(event));
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
 				}
@@ -1808,14 +1731,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return false;
 	}
 	
-	private void replaceOperation(int posBeforeOperation, String newOperation, GroupDescription description) {
-		try {
-			getScanner().readNext(posBeforeOperation, true);
-			doTextReplace(getScanner().getCurrentStartOffset(), getScanner().getCurrentLength(), newOperation, description);
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		}
-	}
+
 	
 
 	/* (non-Javadoc)
@@ -1824,21 +1740,15 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	public boolean visit(InfixExpression node) {
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.LEFT_OPERAND);
 		
-		String operation= node.getOperator().toString();
-		boolean needsNewOperation= false;
-		if (isModified(node)) {
-			InfixExpression.Operator modifiedOp= ((InfixExpression) getModifiedNode(node)).getOperator();
-			String newOperation= modifiedOp.toString();
-			if (!newOperation.equals(operation)) {
-				operation= newOperation;
-				needsNewOperation= true;
-				replaceOperation(pos, operation, getDescription(node));
-			}
+		boolean needsNewOperation= isChanged(node, ASTNodeConstants.OPERATOR);
+		String operation= getNewValue(node, ASTNodeConstants.OPERATOR).toString();
+		if (needsNewOperation) {
+			replaceOperation(pos, operation, getDescription(node, ASTNodeConstants.OPERATOR));
 		}
 			
 		pos= rewriteRequiredNode(node, ASTNodeConstants.RIGHT_OPERAND);
 		
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.EXTENDED_OPERANDS);
+		RewriteEvent event= getEvent(node, ASTNodeConstants.EXTENDED_OPERANDS);
 		String prefixString= ' ' + operation + ' ';
 		
 		if (needsNewOperation) {
@@ -1846,9 +1756,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			GroupDescription description= getDescription(node, ASTNodeConstants.OPERATOR);
 			
 			if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
-				NodeRewriteEvent[] extendedOperands= event.getListEntries();
+				RewriteEvent[] extendedOperands= event.getChildren();
 				for (int i= 0; i < extendedOperands.length; i++) {
-					NodeRewriteEvent curr= extendedOperands[i];
+					RewriteEvent curr= extendedOperands[i];
 					ASTNode elem= (ASTNode) curr.getOriginalValue();
 					if (elem != null) {
 						if (curr.getChangeKind() != RewriteEvent.REPLACED) {
@@ -1858,7 +1768,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					}
 				}
 			} else {
-				List extendedOperands= (List) getOriginalNode(node, ASTNodeConstants.EXTENDED_OPERANDS);
+				List extendedOperands= (List) getOriginalValue(node, ASTNodeConstants.EXTENDED_OPERANDS);
 				for (int i= 0; i < extendedOperands.size(); i++) {
 					ASTNode elem= (ASTNode) extendedOperands.get(i);
 					replaceOperation(startPos, operation, description);
@@ -1866,13 +1776,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				}				
 			}
 		}
-		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
-			getDefaultRewriter().rewriteList(event, pos, prefixString, prefixString);
-		} else {
-			doVisit(node, ASTNodeConstants.EXTENDED_OPERANDS, 0);
-		}
-		
-		
+		rewriteNodeList(node, ASTNodeConstants.EXTENDED_OPERANDS, pos, prefixString, prefixString);
 		return false;
 	}
 
@@ -1920,12 +1824,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.NAME);
 		
 		
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.ARGUMENTS);
-		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
+		if (isChanged(node, ASTNodeConstants.ARGUMENTS)) {
 			// eval position after opening parent
 			try {
 				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameLPAREN, pos);
-				getDefaultRewriter().rewriteList(event, startOffset, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+				rewriteNodeList(node, ASTNodeConstants.ARGUMENTS, startOffset, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
@@ -1939,7 +1842,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(NullLiteral)
 	 */
 	public boolean visit(NullLiteral node) {
-		checkNoModification(node);
+		checkNoChange(node);
 		return false;
 	}
 
@@ -1947,7 +1850,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(NumberLiteral)
 	 */
 	public boolean visit(NumberLiteral node) {
-		checkNoModification(node);
+		checkNoChange(node);
 		return false;
 	}
 
@@ -1972,15 +1875,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 */
 	public boolean visit(PostfixExpression node) {
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.OPERAND);
-
-		if (isModified(node)) {
-			PostfixExpression.Operator modifiedOp= ((PostfixExpression) getModifiedNode(node)).getOperator();
-			String newOperation= modifiedOp.toString();
-			String oldOperation= node.getOperator().toString();
-			if (!newOperation.equals(oldOperation)) {
-				replaceOperation(pos, newOperation, getDescription(node));
-			}
-		}
+		rewriteOperation(node, ASTNodeConstants.OPERATOR, pos);
 		return false;		
 	}
 
@@ -1988,14 +1883,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(PrefixExpression)
 	 */
 	public boolean visit(PrefixExpression node) {
-		if (isModified(node)) {
-			PrefixExpression.Operator modifiedOp= ((PrefixExpression) getModifiedNode(node)).getOperator();
-			String newOperation= modifiedOp.toString();
-			String oldOperation= node.getOperator().toString();
-			if (!newOperation.equals(oldOperation)) {
-				replaceOperation(node.getStartPosition(), newOperation, getDescription(node));
-			}
-		}
+		rewriteOperation(node, ASTNodeConstants.OPERATOR, node.getStartPosition());
 		rewriteRequiredNode(node, ASTNodeConstants.OPERAND);
 		return false;	
 	}
@@ -2004,7 +1892,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(PrimitiveType)
 	 */
 	public boolean visit(PrimitiveType node) {
-		checkNoModification(node);
+		checkNoChange(node);
 		return false;
 	}
 
@@ -2021,7 +1909,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SimpleName)
 	 */
 	public boolean visit(SimpleName node) {
-		checkNoModification(node);
+		checkNoChange(node);
 		return false;
 	}
 
@@ -2040,11 +1928,20 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		rewriteModifiers(node, ASTNodeConstants.MODIFIERS, node.getStartPosition());
 		rewriteRequiredNode(node, ASTNodeConstants.TYPE);
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.NAME);
-		if (isModified(node)) {
-			GroupDescription description= getDescription(node);
-			SingleVariableDeclaration modifedNode= (SingleVariableDeclaration) getModifiedNode(node);
-			rewriteExtraDimensions(node.getExtraDimensions(), modifedNode.getExtraDimensions(), pos, description);
-		}			
+		int extraDims= rewriteExtraDimensions(node, ASTNodeConstants.EXTRA_DIMENSIONS, pos);
+		
+		if (extraDims > 0) {
+			int kind= getChangeKind(node, ASTNodeConstants.INITIALIZER);
+			if (kind == RewriteEvent.REMOVED) {
+				try {
+					pos= getScanner().getPreviousTokenEndOffset(ITerminalSymbols.TokenNameLBRACE, pos);
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+				}
+			} else {
+				pos= node.getStartPosition() + node.getLength(); // insert pos
+			}
+		}
 		
 		rewriteNode(node, ASTNodeConstants.INITIALIZER, pos, ASTRewriteFormatter.VAR_INITIALIZER);
 		return false;
@@ -2054,7 +1951,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(StringLiteral)
 	 */
 	public boolean visit(StringLiteral node) {
-		checkNoModification(node);
+		checkNoChange(node);
 		return false;
 	}
 
@@ -2062,15 +1959,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SuperConstructorInvocation)
 	 */
 	public boolean visit(SuperConstructorInvocation node) {
-		int pos= node.getStartPosition();
-		pos= rewriteOptionalQualifier(node, ASTNodeConstants.EXPRESSION, node.getStartPosition());
+		int pos= rewriteOptionalQualifier(node, ASTNodeConstants.EXPRESSION, node.getStartPosition());
 
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.ARGUMENTS);
-		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
+		if (isChanged(node, ASTNodeConstants.ARGUMENTS)) {
 			// eval position after opening parent
 			try {
 				pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameLPAREN, pos);
-				getDefaultRewriter().rewriteList(event, pos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+				rewriteNodeList(node, ASTNodeConstants.ARGUMENTS, pos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
@@ -2097,12 +1992,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.NAME);
 		
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.ARGUMENTS);
-		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
+		if (isChanged(node, ASTNodeConstants.ARGUMENTS)) {
 			// eval position after opening parent
 			try {
 				pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameLPAREN, pos);
-				getDefaultRewriter().rewriteList(event, pos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+				rewriteNodeList(node, ASTNodeConstants.ARGUMENTS, pos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
@@ -2146,7 +2040,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	public boolean visit(SwitchStatement node) {
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.EXPRESSION);
 		
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.STATEMENTS);
+		RewriteEvent event= getEvent(node, ASTNodeConstants.STATEMENTS);
 		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
 			try {
 				pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameLBRACE, pos);
@@ -2156,7 +2050,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				StringBuffer leadString= new StringBuffer();
 				leadString.append(getLineDelimiter());
 				leadString.append(CodeFormatterUtil.createIndentString(insertIndent));
-				listRewriter.rewriteList(event, pos, leadString.toString());				
+				listRewriter.rewriteList(event.getChildren(), pos, leadString.toString());				
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
@@ -2197,17 +2091,18 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	public boolean visit(TryStatement node) {
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.BODY);
 		
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.CATCH_CLAUSES);
-		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
+		if (isChanged(node, ASTNodeConstants.CATCH_CLAUSES)) {
 			int indent= getIndent(node.getStartPosition());
 			String prefix= ASTRewriteFormatter.CATCH_BLOCK.getPrefix(indent, getLineDelimiter());
-			pos= getDefaultRewriter().rewriteList(event, pos, prefix, prefix); //$NON-NLS-1$ //$NON-NLS-2$
+			pos= rewriteNodeList(node, ASTNodeConstants.CATCH_CLAUSES, pos, prefix, prefix);
 		} else {
 			pos= doVisit(node, ASTNodeConstants.CATCH_CLAUSES, pos);
 		}
-		rewriteNode(node, ASTNodeConstants.FINALLY, pos, ASTRewriteFormatter.FINALLY_BLOCK); //$NON-NLS-1$
+		rewriteNode(node, ASTNodeConstants.FINALLY, pos, ASTRewriteFormatter.FINALLY_BLOCK);
 		return false;
 	}
+
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(TypeDeclarationStatement)
@@ -2230,17 +2125,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 */
 	public boolean visit(VariableDeclarationExpression node) {
 		// same code as FieldDeclaration
-		rewriteModifiers(node, ASTNodeConstants.MODIFIERS, node.getStartPosition());
-		
+		rewriteModifiers(node, ASTNodeConstants.MODIFIERS, node.getStartPosition());		
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.TYPE);
-		
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.FRAGMENTS);
-		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
-			int startPos= getNextExistingStartPos(event.getListEntries(), 0, pos);
-			getDefaultRewriter().rewriteList(event, startPos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
-		} else {
-			doVisit(node, ASTNodeConstants.FRAGMENTS, 0);
-		}
+		rewriteNodeList(node, ASTNodeConstants.FRAGMENTS, pos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 		return false;
 	}
 
@@ -2249,30 +2136,22 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 */
 	public boolean visit(VariableDeclarationFragment node) {
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.NAME);
+	
+		int extraDims= rewriteExtraDimensions(node, ASTNodeConstants.EXTRA_DIMENSIONS, pos);
 		
-		if (isModified(node)) {
-			GroupDescription description= getDescription(node);
-			VariableDeclarationFragment modifedNode= (VariableDeclarationFragment) getModifiedNode(node);
-			rewriteExtraDimensions(node.getExtraDimensions(), modifedNode.getExtraDimensions(), pos, description);
-		}			
-		Expression initializer= node.getInitializer();
-		if (initializer != null) {
-			if (isRemoved(initializer)) {
-				int dim= node.getExtraDimensions();
-				if (dim > 0) {
-					try {
-						for (int i= 0; i < dim; i++) {
-							pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRBRACKET, pos);
-						}
-					} catch (CoreException e) {
-						JavaPlugin.log(e);
-					}
+		if (extraDims > 0) {
+			int kind= getChangeKind(node, ASTNodeConstants.INITIALIZER);
+			if (kind == RewriteEvent.REMOVED) {
+				try {
+					pos= getScanner().getPreviousTokenEndOffset(ITerminalSymbols.TokenNameLBRACE, pos);
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
 				}
 			} else {
 				pos= node.getStartPosition() + node.getLength(); // insert pos
 			}
-			rewriteNode(node, ASTNodeConstants.INITIALIZER, pos, ASTRewriteFormatter.VAR_INITIALIZER);
 		}
+		rewriteNode(node, ASTNodeConstants.INITIALIZER, pos, ASTRewriteFormatter.VAR_INITIALIZER);
 		return false;
 	}
 
@@ -2284,13 +2163,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		rewriteModifiers(node, ASTNodeConstants.MODIFIERS, node.getStartPosition());
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.TYPE);
 		
-		ListRewriteEvent event= (ListRewriteEvent) getEvent(node, ASTNodeConstants.FRAGMENTS);
-		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
-			int startPos= getNextExistingStartPos(event.getListEntries(), 0, pos);
-			getDefaultRewriter().rewriteList(event, startPos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
-		} else {
-			doVisit(node, ASTNodeConstants.FRAGMENTS, 0);
-		}
+		rewriteNodeList(node, ASTNodeConstants.FRAGMENTS, pos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 		return false;
 	}
 
@@ -2301,13 +2174,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.EXPRESSION);
 		
 		try {
-			RewriteEvent event= getEvent(node, ASTNodeConstants.BODY);
-			if (event != null && event.getChangeKind() == RewriteEvent.REPLACED) {
-				ASTNode body= (ASTNode) event.getOriginalValue();
+			if (isChanged(node, ASTNodeConstants.BODY)) {
 				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRPAREN, pos);
-				ISourceRange range= getNodeRange(body, startOffset - 1);
-				int endPos= range.getOffset() + range.getLength();
-				rewriteBodyNode(node, ASTNodeConstants.BODY, startOffset, endPos, getIndent(node.getStartPosition()), ASTRewriteFormatter.WHILE_BLOCK); // body
+				rewriteBodyNode(node, ASTNodeConstants.BODY, startOffset, -1, getIndent(node.getStartPosition()), ASTRewriteFormatter.WHILE_BLOCK); // body
 			} else {
 				doVisit(node, ASTNodeConstants.BODY, 0);
 			}
