@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -135,6 +136,13 @@ public class AugmentRawContainerClientsAnalyzer {
 		parser.setResolveBindings(true);
 		parser.setProject(project);
 		parser.createASTs(cus, containerKeys, new ASTRequestor() {
+			public void acceptAST(ASTNode node) {
+				//TODO: not used any more
+			}
+			public ICompilationUnit[] getSources() {
+				//TODO: not used any more
+				return new ICompilationUnit[] {};
+			}
 			public void acceptAST(CompilationUnit ast, ICompilationUnit source) {
 				if (DEBUG)
 					System.out.println("ASTRequestor#acceptAST(" + source.getElementName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
