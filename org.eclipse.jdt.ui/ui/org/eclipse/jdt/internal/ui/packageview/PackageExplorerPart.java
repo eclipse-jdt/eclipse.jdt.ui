@@ -993,7 +993,7 @@ public class PackageExplorerPart extends ViewPart
 
 	private void restoreFilterAndSorter() {
 		fViewer.addFilter(new OutputFolderFilter());
-		fViewer.setSorter(new JavaElementSorter());
+		setSorter();
 		if (fMemento != null)	
 			fActionSet.restoreFilterAndSorterState(fMemento);
 	}
@@ -1506,6 +1506,7 @@ public class PackageExplorerPart extends ViewPart
 		fViewer.getControl().setRedraw(false);
 		fViewer.setInput(null);
 		setProviders();
+		setSorter();
 		fViewer.setInput(findInputElement());
 		fViewer.setSelection(selection, true);
 		fViewer.getControl().setRedraw(true);
@@ -1525,5 +1526,13 @@ public class PackageExplorerPart extends ViewPart
 	
 	private boolean showWorkingSets() {
 		return fRootMode == ViewActionGroup.SHOW_WORKING_SETS;
+	}
+	
+	private void setSorter() {
+		if (showWorkingSets()) {
+			fViewer.setSorter(new WorkingSetAwareJavaElementSorter());
+		} else {
+			fViewer.setSorter(new JavaElementSorter());
+		}
 	}
 }
