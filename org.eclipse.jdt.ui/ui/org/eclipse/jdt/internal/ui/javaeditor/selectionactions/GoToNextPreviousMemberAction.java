@@ -8,11 +8,14 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.texteditor.IUpdate;
+
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
@@ -21,34 +24,35 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
-public class GoToNextPreviousMemberAction extends Action {
+public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 
 	public static final String NEXT_MEMBER= "GoToNextMember"; //$NON-NLS-1$
 	public static final String PREVIOUS_MEMBER= "GoToPreviousMember"; //$NON-NLS-1$
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	private boolean fIsGotoNext;
 
-	public static GoToNextPreviousMemberAction newGoToNextMemberAction(CompilationUnitEditor editor) {
+	public static GoToNextPreviousMemberAction newGoToNextMemberAction(JavaEditor editor) {
 		String text= JavaEditorMessages.getString("GotoNextMember.label");//$NON-NLS-1$
 		return new GoToNextPreviousMemberAction(editor, text, true);
 	}
 
-	public static GoToNextPreviousMemberAction newGoToPreviousMemberAction(CompilationUnitEditor editor) {
+	public static GoToNextPreviousMemberAction newGoToPreviousMemberAction(JavaEditor editor) {
 		String text= JavaEditorMessages.getString("GotoPreviousMember.label");//$NON-NLS-1$
 		return new GoToNextPreviousMemberAction(editor, text, false);
 	}
 	
-	private GoToNextPreviousMemberAction(CompilationUnitEditor editor, String text, boolean isGotoNext) {
+	private GoToNextPreviousMemberAction(JavaEditor editor, String text, boolean isGotoNext) {
 		super(text);
 		Assert.isNotNull(editor);
 		fEditor= editor;
 		fIsGotoNext= isGotoNext;
-		setEnabled(null != SelectionConverter.getInputAsCompilationUnit(fEditor));
+		update();
 	}
 	
 	/*
@@ -57,31 +61,61 @@ public class GoToNextPreviousMemberAction extends Action {
 	public GoToNextPreviousMemberAction(boolean isSelectNext) {
 		super(""); //$NON-NLS-1$
 		fIsGotoNext= isSelectNext;
+		update();
 	}
 	
+	public void update() {
+		boolean enabled= false;
+		ISourceReference ref= getSourceReference();
+		if (ref != null) {
+			ISourceRange range;
+			try {
+				range= ref.getSourceRange();
+				enabled= range != null && range.getLength() > 0;
+			} catch (JavaModelException e) {
+				// enabled= false;
+			}
+		}
+		setEnabled(enabled);
+	}
+
 	/* (non-JavaDoc)
 	 * Method declared in IAction.
 	 */
 	public final  void run() {
 		ITextSelection selection= getTextSelection();
-		ISourceRange newRange= getNewSelectionRange(createSourceRange(selection), getCompilationUnit());
+		ISourceRange newRange= getNewSelectionRange(createSourceRange(selection));
 		// Check if new selection differs from current selection
 		if (selection.getOffset() == newRange.getOffset() && selection.getLength() == newRange.getLength())
 			return;
 		fEditor.selectAndReveal(newRange.getOffset(), newRange.getLength());
 	}
 
-	private ICompilationUnit getCompilationUnit() {
-		return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
+	private IType[] getTypes() throws JavaModelException {
+		IEditorInput input= fEditor.getEditorInput();
+		if (input instanceof IClassFileEditorInput) {
+			return new IType[] { ((IClassFileEditorInput)input).getClassFile().getType() };
+		} else {
+			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input).getTypes();
+		}
+	}
+	
+	private ISourceReference getSourceReference() {
+		IEditorInput input= fEditor.getEditorInput();
+		if (input instanceof IClassFileEditorInput) {
+			return ((IClassFileEditorInput)input).getClassFile();
+		} else {
+			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input);
+		}		
 	}
 	
 	private ITextSelection getTextSelection() {
 		return (ITextSelection)fEditor.getSelectionProvider().getSelection();
 	}
 	
-	public ISourceRange getNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu){
+	public ISourceRange getNewSelectionRange(ISourceRange oldSourceRange) {
 		try{
-			Integer[] offsetArray= createOffsetArray(cu);
+			Integer[] offsetArray= createOffsetArray(getTypes());
 			if (offsetArray.length == 0)
 				return oldSourceRange;
 			Arrays.sort(offsetArray);
@@ -138,23 +172,22 @@ public class GoToNextPreviousMemberAction extends Action {
 		return new SourceRange(offset.intValue(), 0);
 	}
 
-	private static Integer[] createOffsetArray(ICompilationUnit cu) throws JavaModelException {
+	private static Integer[] createOffsetArray(IType[] types) throws JavaModelException {
 		List result= new ArrayList();
-		IType[] types= cu.getAllTypes();
 		for (int i= 0; i < types.length; i++) {
 			IType iType= types[i];
-			result.add(new Integer(iType.getNameRange().getOffset()));
-			result.add(new Integer(iType.getSourceRange().getOffset() + iType.getSourceRange().getLength()));
-			addMemberOffsetList(iType.getMethods(), result);
-			addMemberOffsetList(iType.getFields(), result);
-			addMemberOffsetList(iType.getInitializers(), result);
+			addOffset(result, iType.getNameRange().getOffset());
+			addOffset(result, iType.getSourceRange().getOffset() + iType.getSourceRange().getLength());
+			addMemberOffsetList(result, iType.getMethods());
+			addMemberOffsetList(result, iType.getFields());
+			addMemberOffsetList(result, iType.getInitializers());
 		}
 		return (Integer[]) result.toArray(new Integer[result.size()]);
 	}
 
-	private static void addMemberOffsetList(IMember[] members, List result) throws JavaModelException {
+	private static void addMemberOffsetList(List result, IMember[] members) throws JavaModelException {
 		for (int i= 0; i < members.length; i++) {
-			result.add(new Integer(getOffset(members[i])));
+			addOffset(result, getOffset(members[i]));
 		}
 	}
 
@@ -187,5 +220,10 @@ public class GoToNextPreviousMemberAction extends Action {
 	
 	private static ISourceRange createSourceRange(ITextSelection ts){
 		return new SourceRange(ts.getOffset(), ts.getLength());
+	}
+	
+	private static void addOffset(List result, int offset) {
+		if (offset >= 0)
+			result.add(new Integer(offset));
 	}
 }

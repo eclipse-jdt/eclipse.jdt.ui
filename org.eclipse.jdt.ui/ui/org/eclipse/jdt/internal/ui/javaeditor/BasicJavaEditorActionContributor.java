@@ -34,13 +34,14 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
+
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
-import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
 
 /**
  * Common base class for action contributors for Java editors.
@@ -137,6 +138,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private RetargetTextEditorAction fStructureSelectPreviousAction;
 	private RetargetTextEditorAction fStructureSelectHistoryAction;	
 
+	private RetargetTextEditorAction fGotoNextMemberAction;	
+	private RetargetTextEditorAction fGotoPreviousMemberAction;	
+	
 	public BasicJavaEditorActionContributor() {
 		super();
 		
@@ -198,6 +202,11 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fStructureSelectPreviousAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_PREVIOUS);
 		fStructureSelectHistoryAction= new RetargetTextEditorAction(b, "StructureSelectHistory."); //$NON-NLS-1$
 		fStructureSelectHistoryAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_LAST);
+		
+		fGotoNextMemberAction= new RetargetTextEditorAction(b, "GotoNextMember."); //$NON-NLS-1$
+		fGotoNextMemberAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
+		fGotoPreviousMemberAction= new RetargetTextEditorAction(b, "GotoPreviousMember."); //$NON-NLS-1$
+		fGotoPreviousMemberAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);		
 	}
 	
 	protected final void markAsPartListener(RetargetAction action) {
@@ -239,17 +248,21 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
 			
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoMatchingBracket);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fShowOutline);
 			editMenu.appendToGroup(IWorkbenchActionConstants.FIND_EXT, fShowReferencesAction);
 
-			MenuManager structureSelection= new MenuManager(JavaEditorMessages.getString("ExpandSelectionMenu.label")); //$NON-NLS-1$
+			MenuManager structureSelection= new MenuManager(JavaEditorMessages.getString("ExpandSelectionMenu.label"), "expandSelection"); //$NON-NLS-1$
 			structureSelection.add(fStructureSelectEnclosingAction);
 			structureSelection.add(fStructureSelectNextAction);
 			structureSelection.add(fStructureSelectPreviousAction);
 			structureSelection.add(fStructureSelectHistoryAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
+			
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoPreviousMemberAction);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoNextMemberAction);			
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoMatchingBracket);
+
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fShowOutline);
 		}
 
 //		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
@@ -299,6 +312,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fStructureSelectPreviousAction.setAction(getAction(textEditor, StructureSelectionAction.PREVIOUS));
 		fStructureSelectHistoryAction.setAction(getAction(textEditor, StructureSelectionAction.HISTORY));
 				
+		fGotoNextMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.NEXT_MEMBER));
+		fGotoPreviousMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.PREVIOUS_MEMBER));
+		
 		if (part instanceof JavaEditor) {
 			JavaEditor javaEditor= (JavaEditor) part;
 			javaEditor.getActionGroup().fillActionBars(getActionBars());

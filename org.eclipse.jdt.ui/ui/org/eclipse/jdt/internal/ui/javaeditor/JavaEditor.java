@@ -142,6 +142,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHistoryAction;
@@ -1591,6 +1592,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		setAction(StructureSelectionAction.HISTORY, historyAction);
 		fSelectionHistory.setHistoryAction(historyAction);
 				
+		action= GoToNextPreviousMemberAction.newGoToNextMemberAction(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_NEXT_MEMBER);				
+		setAction(GoToNextPreviousMemberAction.NEXT_MEMBER, action);
+
+		action= GoToNextPreviousMemberAction.newGoToPreviousMemberAction(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);				
+		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
+		
 		if (fMouseListener == null) {
 			fMouseListener= new MouseClickListener();
 			fMouseListener.install();	
