@@ -237,7 +237,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 			Object[] fragments= dialog.getResult();
 			String[] res= new String[fragments.length];
 			for (int i= 0; i < res.length; i++) {
-				res[i]= ((IPackageFragment) fragments[i]).getElementName() + "*"; //$NON-NLS-1$
+				res[i]= ((IPackageFragment) fragments[i]).getElementName() + ".*"; //$NON-NLS-1$
 			}
 			return res;
 		}
