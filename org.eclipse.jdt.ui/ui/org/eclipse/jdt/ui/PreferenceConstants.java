@@ -40,7 +40,7 @@ public class PreferenceConstants {
 	 * are rendered
 	 * </p>
 	 */
-	public static final String APPEARANCE_METHOD_RETURNTYPE= "org.eclipse.jdt.ui" + ".methodreturntype";
+	public static final String APPEARANCE_METHOD_RETURNTYPE= "org.eclipse.jdt.ui.methodreturntype";
 
 	/**
 	 * A named preference that controls if override indicators are rendered in the UI.
@@ -49,7 +49,7 @@ public class PreferenceConstants {
 	 * indicators are rendered
 	 * </p>
 	 */
-	public static final String APPEARANCE_OVERRIDE_INDICATOR= "org.eclipse.jdt.ui" + ".overrideindicator";
+	public static final String APPEARANCE_OVERRIDE_INDICATOR= "org.eclipse.jdt.ui.overrideindicator";
 
 	/**
 	 * A named preference that defines the pattern used for package name compression.
@@ -68,7 +68,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW
 	 */	
-	public static final String APPEARANCE_COMPRESS_PACKAGE_NAMES= "org.eclipse.jdt.ui" + ".compresspackagenames";
+	public static final String APPEARANCE_COMPRESS_PACKAGE_NAMES= "org.eclipse.jdt.ui.compresspackagenames";
 
 	/**
 	 * A named preference that controls if empty inner packages are folded in
@@ -78,7 +78,7 @@ public class PreferenceConstants {
 	 * inner packages are folded.
 	 * </p>
 	 */
-	public static final String APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= "org.eclipse.jdt.ui" + ".flatPackagesInPackageExplorer";
+	public static final String APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= "org.eclipse.jdt.ui.flatPackagesInPackageExplorer";
 
 
 	/**
@@ -87,7 +87,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */	
-	public static final String CODEGEN_USE_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui" + ".gettersetter.prefix.enable";
+	public static final String CODEGEN_USE_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.enable";
 
 	/**
 	 * A named preference that holds a list of prefixes to be removed from a local variable to compute setter 
@@ -98,7 +98,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #CODEGEN_USE_GETTERSETTER_PREFIX
 	 */	
-	public static final String CODEGEN_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui" + ".gettersetter.prefix.list";
+	public static final String CODEGEN_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.list";
 
 	/**
 	 * A named preference that controls if suffix removal during setter/getter generation is turned on or off.
@@ -106,7 +106,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */	
-	public static final String CODEGEN_USE_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui" + ".gettersetter.suffix.enable";
+	public static final String CODEGEN_USE_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.enable";
 
 	/**
 	 * A named preference that holds a list of suffixes to be removed from a local variable to compute setter 
@@ -117,7 +117,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #CODEGEN_USE_GETTERSETTER_SUFFIX
 	 */	
-	public static final String CODEGEN_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui" + ".gettersetter.suffix.list";
+	public static final String CODEGEN_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.list";
 
 	/**
 	 * A name preference that controls if a JavaDoc stub gets added to newly created types and methods.
@@ -125,7 +125,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String CODEGEN__JAVADOC_STUBS= "org.eclipse.jdt.ui" + ".javadoc";
+	public static final String CODEGEN__JAVADOC_STUBS= "org.eclipse.jdt.ui.javadoc";
 
 	/**
 	 * A named preference that controls if a non-javadoc comment gets added to methods generated via the 
@@ -134,7 +134,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String CODEGEN__NON_JAVADOC_COMMENTS= "org.eclipse.jdt.ui" + ".seecomments";
+	public static final String CODEGEN__NON_JAVADOC_COMMENTS= "org.eclipse.jdt.ui.seecomments";
 
 	/**
 	 * A named preference that controls if a file comment gets added to newly created files.
@@ -142,7 +142,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String CODEGEN__FILE_COMMENTS= "org.eclipse.jdt.ui" + ".filecomments";
+	public static final String CODEGEN__FILE_COMMENTS= "org.eclipse.jdt.ui.filecomments";
 	
 	/**
 	 * A named preference that holds a list of comma separated package names. The list specifies the import order used by
@@ -151,7 +151,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>: comma separated list of package names
 	 * </p>
 	 */
-	public static final String ORGIMPORTS_IMPORTORDER= "org.eclipse.jdt.ui" + ".importorder";
+	public static final String ORGIMPORTS_IMPORTORDER= "org.eclipse.jdt.ui.importorder";
 	
 	/**
 	 * A named preference that specifies the number of imports added before a star-import declaration is used.
@@ -159,7 +159,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Int</code>: positive value specifing the number of non star-import is used
 	 * </p>
 	 */
-	public static final String ORGIMPORTS_ONDEMANDTHRESHOLD= "org.eclipse.jdt.ui" + ".ondemandthreshold";
+	public static final String ORGIMPORTS_ONDEMANDTHRESHOLD= "org.eclipse.jdt.ui.ondemandthreshold";
 
 	/**
 	 * A named preferences that controls if types that start with a lower case letters get added by the
@@ -176,7 +176,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String SHOW_CU_CHILDREN= "org.eclipse.jdt.ui" + ".packages.cuchildren";
+	public static final String SHOW_CU_CHILDREN= "org.eclipse.jdt.ui.packages.cuchildren";
 
 	/**
 	 * A named preference that controls whether the package explorer's selection is linked to the active editor.
