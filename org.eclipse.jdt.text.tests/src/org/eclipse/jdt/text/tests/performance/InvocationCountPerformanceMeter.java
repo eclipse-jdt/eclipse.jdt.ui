@@ -12,6 +12,8 @@
 package org.eclipse.jdt.text.tests.performance;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -86,7 +88,14 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		public void start() {
 			fThread= new Thread(this);
 			fThread.setDaemon(true);
-			fThread.start();
+			synchronized (fThread) {
+				try {
+					fThread.start();
+					fThread.wait();
+				} catch (InterruptedException x) {
+					x.printStackTrace();
+				}
+			}
 		}
 		
 		/**
@@ -94,8 +103,15 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		 */
 		public void stop() {
 			fIsStopping= true;
-			if (fThread != null)
-				fThread.interrupt();
+			if (fThread != null) {
+				try {
+					fThread.interrupt();
+					fThread.join();
+					fThread= null;
+				} catch (InterruptedException x) {
+					x.printStackTrace();
+				}
+			}
 		}
 		
 		/**
@@ -103,31 +119,55 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		 * the event queue.
 		 */
 		public void run() {
-			while (!fIsStopping) {
-				try {
-					EventSet eventSet= fEventQueue.remove();
-					
-					EventIterator iterator= eventSet.eventIterator();
-					while (iterator.hasNext()) {
-						Event event= iterator.nextEvent();
-						if (event instanceof BreakpointEvent)
-							handleBreakpointEvent((BreakpointEvent) event);
-						if (event instanceof VMDeathEvent)
-							stop();
-					}
-					
-					eventSet.resume();
-				} catch (InterruptedException e) {
-					if (!fIsStopping)
-						System.out.println("Event reader loop unexpectedly interrupted"); //$NON-NLS-1$
-					return;
-				} catch (VMDisconnectedException e) {
-					System.out.println("VM unexpectedly disconnected"); //$NON-NLS-1$
-					return;
+			try {
+				synchronized (fThread) {
+					enableBreakpoints();
+					fThread.notifyAll();
 				}
+				while (!fIsStopping) {
+					try {
+						EventSet eventSet= fEventQueue.remove();
+						
+						EventIterator iterator= eventSet.eventIterator();
+						while (iterator.hasNext()) {
+							Event event= iterator.nextEvent();
+							if (event instanceof BreakpointEvent)
+								handleBreakpointEvent((BreakpointEvent) event);
+							if (event instanceof VMDeathEvent)
+								stop();
+						}
+						
+						eventSet.resume();
+					} catch (InterruptedException e) {
+						if (fIsStopping)
+							return;
+						System.out.println("Event reader loop unexpectedly interrupted"); //$NON-NLS-1$
+					} catch (VMDisconnectedException e) {
+						System.out.println("VM unexpectedly disconnected"); //$NON-NLS-1$
+						return;
+					}
+				}
+			} finally {
+				disableBreakpoints();
 			}
 		}
-		
+
+		/**
+		 * Enables all breakpoint request.
+		 */
+		private void enableBreakpoints() {
+			for (int i= 0; i < fBreakpointRequests.length; i++)
+				fBreakpointRequests[i].enable();
+		}
+
+		/**
+		 * Disables all breakpoint request.
+		 */
+		private void disableBreakpoints() {
+			for (int i= 0; i < fBreakpointRequests.length; i++)
+				fBreakpointRequests[i].disable();
+		}
+
 		/**
 		 * Handles the given breakpoint event.
 		 * 
@@ -215,6 +255,12 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	/** Debugging port */
 	private static final int PORT= intValueOf(System.getProperty(DEBUG_PORT_PROPERTY), DEBUG_PORT_DEFAULT);
 	
+	/** Empty array of methods */
+	private static final java.lang.reflect.Method[] NO_METHODS= new java.lang.reflect.Method[0];
+	
+	/** Empty array of constructors */
+	private static final Constructor[] NO_CONSTRUCTORS= new Constructor[0];
+	
 	/** Results */
 	private Results fResults= new Results();
 	
@@ -226,12 +272,33 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	
 	/** Methods from which to count the invocations */
 	private java.lang.reflect.Method[] fMethods;
+
+	/** Constructors from which to count the invocations */
+	private Constructor[] fConstructors;
 	
 	/** Timestamp */
 	private long fStartTime;
 	
 	/** Total number of invocations */
 	private long fInvocationCount;
+
+	/** All breakpoint requests */
+	private BreakpointRequest[] fBreakpointRequests;
+	
+	/**
+	 * Initialize the performance meter to count the number of invocation of
+	 * the given methods and constructors.
+	 * 
+	 * @param scenarioId the scenario id
+	 * @param methods the methods
+	 * @param constructors the constructors
+	 */
+	public InvocationCountPerformanceMeter(String scenarioId, java.lang.reflect.Method[] methods, Constructor[] constructors) {
+		super(scenarioId);
+		fMethods= methods;
+		fConstructors= constructors;
+		fStartTime= System.currentTimeMillis();
+	}
 	
 	/**
 	 * Initialize the performance meter to count the number of invocation of
@@ -241,9 +308,18 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @param methods the methods
 	 */
 	public InvocationCountPerformanceMeter(String scenarioId, java.lang.reflect.Method[] methods) {
-		super(scenarioId);
-		fMethods= methods;
-		fStartTime= System.currentTimeMillis();
+		this(scenarioId, methods, NO_CONSTRUCTORS);
+	}
+	
+	/**
+	 * Initialize the performance meter to count the number of invocation of
+	 * the given constructors.
+	 * 
+	 * @param scenarioId the scenario id
+	 * @param constructors the constructors
+	 */
+	public InvocationCountPerformanceMeter(String scenarioId, Constructor[] constructors) {
+		this(scenarioId, NO_METHODS, constructors);
 	}
 	
 	/*
@@ -252,8 +328,13 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	public void start() {
 		try {
 			attach("localhost", PORT); //$NON-NLS-1$
+			
+			List requests= new ArrayList();
 			for (int i= 0; i < fMethods.length; i++)
-				createBreakpointRequest(fMethods[i]);
+				requests.add(createBreakpointRequest(fMethods[i]));
+			for (int i= 0; i < fConstructors.length; i++)
+				requests.add(createBreakpointRequest(fConstructors[i]));
+			fBreakpointRequests= (BreakpointRequest[]) requests.toArray(new BreakpointRequest[requests.size()]);
 			
 			fEventReader= new EventReader(fVM.eventQueue());
 			fEventReader.start();
@@ -268,15 +349,15 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @see org.eclipse.test.performance.PerformanceMeter#stop()
 	 */
 	public void stop() {
-		if (fVM == null)
-			return;
+		if (fEventReader != null) {
+			fEventReader.stop();
+			fEventReader= null;
+		}
 		
-		fEventReader.stop();
-		deleteBreakpointRequests();
-		detach();
-		
-		fVM= null;
-		fEventReader= null;
+		if (fVM != null) {
+			deleteBreakpointRequests();
+			detach();
+		}
 	}
 	
 	/*
@@ -295,10 +376,11 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public void dispose() {
 		super.dispose();
-		if (fVM != null)
+		if (fVM != null || fEventReader != null)
 			stop();
 		fResults= null;
 		fMethods= null;
+		fConstructors= null;
 	}
 	
 	/*
@@ -334,6 +416,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	private void detach() {
 		fVM.dispose();
+		fVM= null;
 	}
 	
 	/**
@@ -343,13 +426,31 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @return the breakpoint request
 	 */
 	private BreakpointRequest createBreakpointRequest(java.lang.reflect.Method method) {
-		Method jdiMethod= getMethod(method.getDeclaringClass().getName(), method.getName(), getJNISignature(method));
-		BreakpointRequest request= fVM.eventRequestManager().createBreakpointRequest(jdiMethod.location());
-		request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-		request.enable();
-		return request;
+		return createBreakpointRequest(getMethod(method.getDeclaringClass().getName(), method.getName(), getJNISignature(method)));
 	}
 	
+	/**
+	 * Creates a breakpoint request on entry of the given constructor.
+	 * 
+	 * @param constructor the method
+	 * @return the breakpoint request
+	 */
+	private BreakpointRequest createBreakpointRequest(Constructor constructor) {
+		return createBreakpointRequest(getMethod(constructor.getDeclaringClass().getName(), "<init>", getJNISignature(constructor)));
+	}
+	
+	/**
+	 * Creates a breakpoint request on entry of the given method.
+	 * 
+	 * @param method the method
+	 * @return the breakpoint request
+	 */
+	private BreakpointRequest createBreakpointRequest(Method method) {
+		BreakpointRequest request= fVM.eventRequestManager().createBreakpointRequest(method.location());
+		request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+		return request;
+	}
+
 	/**
 	 * Returns the JDI method for the given class, name and signature.
 	 * 
@@ -360,6 +461,11 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	private Method getMethod(String className, String name, String signature) {
 		ClassType type= (ClassType) fVM.classesByName(className).get(0);
+		List list= type.allMethods();
+		for (Iterator iter= list.iterator(); iter.hasNext();) {
+			Method element= (Method) iter.next();
+			System.out.println(element + " " + element.signature());
+		}
 		return type.concreteMethodByName(name, signature);
 	}
 	
@@ -378,16 +484,36 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @return the JNI style signature
 	 */
 	private String getJNISignature(java.lang.reflect.Method method) {
+		return getJNISignature(method.getParameterTypes()) + getJNISignature(method.getReturnType());
+	}
+	
+	/**
+	 * Returns the JNI-style signature of the given constructor. See
+	 * http://java.sun.com/j2se/1.4.2/docs/guide/jpda/jdi/com/sun/jdi/doc-files/signature.html
+	 * 
+	 * @param constructor the constructor
+	 * @return the JNI style signature
+	 */
+	private String getJNISignature(Constructor constructor) {
+		return getJNISignature(constructor.getParameterTypes()) + "V";
+	}
+	
+	/**
+	 * Returns the JNI-style signature of the given parameter types. See
+	 * http://java.sun.com/j2se/1.4.2/docs/guide/jpda/jdi/com/sun/jdi/doc-files/signature.html
+	 * 
+	 * @param paramTypes the parameter types
+	 * @return the JNI style signature
+	 */
+	private String getJNISignature(Class[] paramTypes) {
 		StringBuffer signature= new StringBuffer();
 		signature.append('(');
-		Class[] paramTypes= method.getParameterTypes();
 		for (int i = 0; i < paramTypes.length; ++i)
 			signature.append(getJNISignature(paramTypes[i]));
 		signature.append(')');
-		signature.append(getJNISignature(method.getReturnType()));
 		return signature.toString();
 	}
-	
+
 	/**
 	 * Returns the JNI-style signature of the given class. See
 	 * http://java.sun.com/j2se/1.4.2/docs/guide/jpda/jdi/com/sun/jdi/doc-files/signature.html

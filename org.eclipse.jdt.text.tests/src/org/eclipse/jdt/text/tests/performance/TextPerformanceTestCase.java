@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -274,6 +275,34 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(String subScenarioId, Method[] methods) {
 		InvocationCountPerformanceMeter performanceMeter= new InvocationCountPerformanceMeter(getBaseScenarioId() + subScenarioId, methods);
+		addPerformanceMeter(performanceMeter);
+		return performanceMeter;
+	}
+
+	/**
+	 * Create an invocation counting performance meter that will count the
+	 * number of invocations of the given constructors. The performance meter
+	 * will be disposed on {@link #tearDown()}.
+	 * 
+	 * @param constructors the constructors whose invocations will be counted
+	 * @return the created performance meter
+	 */
+	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(Constructor[] constructors) {
+		return createInvocationCountPerformanceMeter("", constructors);
+	}
+
+	/**
+	 * Create an invocation counting performance meter with the given
+	 * sub-scenario id. The performance meter will count the number of
+	 * invocations of the given constructors. The performance meter will be
+	 * disposed on {@link #tearDown()}.
+	 * 
+	 * @param subScenarioId the sub-scenario id
+	 * @param constructors the constructors whose invocations will be counted
+	 * @return the created performance meter
+	 */
+	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(String subScenarioId, Constructor[] constructors) {
+		InvocationCountPerformanceMeter performanceMeter= new InvocationCountPerformanceMeter(getBaseScenarioId() + subScenarioId, constructors);
 		addPerformanceMeter(performanceMeter);
 		return performanceMeter;
 	}
