@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -260,7 +259,7 @@ public class PreferencesTest extends TestCase {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(jproject, "src");
 		IPackageFragment pack= root.createPackageFragment("org.eclipse.jdt.internal.ui.wizards.dummy", true, null);
 		ICompilationUnit cu= pack.getCompilationUnit("DummyCompilationUnitWizard.java");
-		IType type= cu.createType("public class DummyCompilationUnitWizard {\n\n}\n", null, true, null);	
+		cu.createType("public class DummyCompilationUnitWizard {\n\n}\n", null, true, null);	
 		
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.InfoPage", cu);
 		assertDialog(dialog, this);
@@ -273,7 +272,7 @@ public class PreferencesTest extends TestCase {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(jproject, "src");
 		IPackageFragment pack= root.createPackageFragment("org.eclipse.jdt.internal.ui.hello", true, null);
 		ICompilationUnit cu= pack.getCompilationUnit("HelloWorld.java");
-		IType type= cu.createType("public class HelloWorld {\n\n}\n", null, true, null);	
+		cu.createType("public class HelloWorld {\n\n}\n", null, true, null);	
 	
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.ExecutionArgsPage", cu);
 		assertDialog(dialog, this);
@@ -286,7 +285,7 @@ public class PreferencesTest extends TestCase {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(jproject, "src");
 		IPackageFragment pack= root.createPackageFragment("org.eclipse.jdt.internal.ui.hello", true, null);
 		ICompilationUnit cu= pack.getCompilationUnit("HelloWorld.java");
-		IType type= cu.createType("public class HelloWorld {\npublic static void main(String[] args) {}\n}\n", null, true, null);	
+		cu.createType("public class HelloWorld {\npublic static void main(String[] args) {}\n}\n", null, true, null);	
 	
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.ExecutionArgsPage", cu);
 		assertDialog(dialog, this);

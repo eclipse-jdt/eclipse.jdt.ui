@@ -50,7 +50,7 @@ public class TypeHierarchyTest extends TestCase {
 		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
 		
 		ICompilationUnit cu1= pack1.getCompilationUnit("A.java");
-		IType type1= cu1.createType("public class A {\n}\n", null, true, null);
+		cu1.createType("public class A {\n}\n", null, true, null);
 		
 		JavaProjectHelper.addRTJar(fJavaProject2);
 		JavaProjectHelper.addRequiredProject(fJavaProject2, fJavaProject1);

@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DialogCheck;
@@ -155,7 +154,7 @@ public class WizardsTest extends TestCase {
 		JavaProjectHelper.addRTJar(jproject);
 		IPackageFragment pack= root.createPackageFragment("org.eclipse.jdt.internal.ui.hello", true, null);
 		ICompilationUnit cu= pack.getCompilationUnit("HelloWorld.java");
-		IType type= cu.createType("public class HelloWorld {\npublic static void main(String[] args) {}\n}\n", null, true, null);	
+		cu.createType("public class HelloWorld {\npublic static void main(String[] args) {}\n}\n", null, true, null);	
 	
 		JarPackageWizard wizard = new JarPackageWizard();
 		wizard.init(getWorkbench(), new StructuredSelection(root));

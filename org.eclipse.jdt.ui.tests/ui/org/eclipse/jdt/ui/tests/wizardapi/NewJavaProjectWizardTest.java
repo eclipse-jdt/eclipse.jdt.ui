@@ -273,8 +273,6 @@ public class NewJavaProjectWizardTest extends TestCase {
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(fWizardPage.getRunnable());
 		op.run(null);
 	
-		IProject proj= fWizardPage.getNewJavaProject().getProject();
-	
 		IPath folderPath= project.getFolder("dbin").getFullPath();
 		IClasspathEntry[] entries= new IClasspathEntry[] {
 			JavaCore.newSourceEntry(project.getFolder("dsrc1").getFullPath()),

@@ -20,9 +20,9 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DialogCheck;
-import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
@@ -57,7 +57,7 @@ public class DialogsTest2 extends TestCase {
 		JavaProjectHelper.addSourceContainer(jproject2, "src1");
 		JavaProjectHelper.addSourceContainer(jproject2, "src2");
 
-		JavaElementContentProvider provider= new JavaElementContentProvider();
+		StandardJavaElementContentProvider provider= new StandardJavaElementContentProvider();
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT); 
 		CheckedTreeSelectionDialog dialog= new CheckedTreeSelectionDialog(getShell(), labelProvider, provider);
 		dialog.setSorter(new JavaElementSorter());

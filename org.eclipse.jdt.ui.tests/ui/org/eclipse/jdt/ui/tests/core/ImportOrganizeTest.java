@@ -99,8 +99,7 @@ public class ImportOrganizeTest extends TestCase {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
-
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/BaseTestRunner.java"));
 		assertNotNull("BaseTestRunner.java", cu);
@@ -141,8 +140,7 @@ public class ImportOrganizeTest extends TestCase {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
-
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/LoadingTestCollector.java"));
 		assertNotNull("LoadingTestCollector.java", cu);
@@ -166,7 +164,7 @@ public class ImportOrganizeTest extends TestCase {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/TestCaseClassLoader.java"));
 		assertNotNull("TestCaseClassLoader.java", cu);
@@ -190,7 +188,7 @@ public class ImportOrganizeTest extends TestCase {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/textui/TestRunner.java"));
 		assertNotNull("TestRunner.java", cu);
@@ -280,8 +278,7 @@ public class ImportOrganizeTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("  }\n");
 		buf.append("}\n");	
-		ICompilationUnit cu1= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
-		
+		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		
 		IPackageFragment pack2= sourceFolder.createPackageFragment("test2", false, null);
 				

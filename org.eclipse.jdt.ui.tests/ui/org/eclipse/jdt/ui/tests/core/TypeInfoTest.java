@@ -75,7 +75,7 @@ public class TypeInfoTest extends TestCase {
 		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= root1.createPackageFragment("com.oti", true, null);
 		ICompilationUnit cu1= pack1.getCompilationUnit("V.java");
-		IType type1= cu1.createType("public class V {\n static class VInner {\n}\n}\n", null, true, null);
+		cu1.createType("public class V {\n static class VInner {\n}\n}\n", null, true, null);
 
 		// proj1 has proj2 as prerequisit
 		JavaProjectHelper.addRequiredProject(fJProject1, fJProject2);

@@ -75,7 +75,7 @@ public class JavaModelUtilTest extends TestCase {
 		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
 		
 		ICompilationUnit cu1= pack1.getCompilationUnit("ReqProjType.java");
-		IType type1= cu1.createType("public class ReqProjType { static class Inner { static class InnerInner {} }\n}\n", null, true, null);
+		cu1.createType("public class ReqProjType { static class Inner { static class InnerInner {} }\n}\n", null, true, null);
 
 		JavaProjectHelper.addRequiredProject(fJProject1, fJProject2);
 	}

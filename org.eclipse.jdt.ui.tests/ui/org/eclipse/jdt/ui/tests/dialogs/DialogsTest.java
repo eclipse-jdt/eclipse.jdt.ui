@@ -10,8 +10,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
@@ -33,9 +31,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DialogCheck;
-import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
@@ -75,8 +73,6 @@ public class DialogsTest extends TestCase {
 		JavaProjectHelper.addSourceContainer(jproject, "src1");
 		JavaProjectHelper.addRTJar(jproject);
 		
-		IProject project= jproject.getProject();
-
 		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(getShell(), new ProgressMonitorDialog(getShell()), 
 			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
 	
@@ -104,7 +100,6 @@ public class DialogsTest extends TestCase {
 		ILabelProvider labelProvider= new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED);
 
 		ArrayList list= new ArrayList(200);
-		IProject project= jproject.getProject();
 
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { jproject });		
 		AllTypesCache.getTypes(searchScope, IJavaSearchConstants.TYPE, null, list);
@@ -133,7 +128,7 @@ public class DialogsTest extends TestCase {
 		JavaProjectHelper.addSourceContainer(jproject2, "src1");
 		JavaProjectHelper.addSourceContainer(jproject2, "src2");
 
-		JavaElementContentProvider provider= new JavaElementContentProvider();
+		StandardJavaElementContentProvider provider= new StandardJavaElementContentProvider();
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT); 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, provider);
 		dialog.setSorter(new JavaElementSorter());

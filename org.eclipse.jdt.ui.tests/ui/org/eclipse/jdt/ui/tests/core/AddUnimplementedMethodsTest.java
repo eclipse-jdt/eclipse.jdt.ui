@@ -164,6 +164,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		checkMethods(new String[] { "c", "e" }, methods);
 		
 		IImportDeclaration[] imports= cu.getImports();
+		checkImports(new String[] { "java.util.Hashtable", "java.util.NoSuchElementException" }, imports);
 	}
 	
 	private void checkMethods(String[] expected, IMethod[] methods) {
