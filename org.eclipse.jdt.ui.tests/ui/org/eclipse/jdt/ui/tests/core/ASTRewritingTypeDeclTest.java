@@ -49,7 +49,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	public static Test suite() {
 		return new TestSuite(THIS);
 //		TestSuite suite= new TestSuite();
-//		suite.addTest(new ASTRewritingTest("testListCombinations"));
+//		suite.addTest(new ASTRewritingTypeDeclTest("testTypeDeclInserts"));
 //		return suite;
 	}
 

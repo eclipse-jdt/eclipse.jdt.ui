@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.WhileStatement;
+
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -51,7 +53,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 	public static Test suite() {
 		return new TestSuite(THIS);
 //		TestSuite suite= new TestSuite();
-//		suite.addTest(new ASTRewritingTest("testListCombinations"));
+//		suite.addTest(new ASTRewritingMoveCodeTest("testMoveDeclDifferentLevel"));
 //		return suite;
 	}
 
@@ -188,7 +190,95 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	public void testMoveDeclDifferentLevel() throws Exception {
+		ICompilationUnit cu= fCU_E;
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		AST ast= astRoot.getAST();
+		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
+		
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		
+		{
+			List members= type.bodyDeclarations();
+			assertTrue("Has declarations", !members.isEmpty());
+			
+			assertTrue("Cannot find inner class", members.get(0) instanceof TypeDeclaration);
+			TypeDeclaration innerType= (TypeDeclaration) members.get(0);
+			
+			List innerMembers= innerType.bodyDeclarations();
+			assertTrue("Not expected number of inner members", innerMembers.size() == 1);
+			
+			{ // move outer as inner of inner.
+				TypeDeclaration outerType= findTypeDeclaration(astRoot, "G");
+				assertTrue("G not found", outerType != null);
+				
+				ASTRewriteAnalyzer.markAsReplaced(outerType, null);
+				
+				ASTNode insertNodeForCopy= ASTRewriteAnalyzer.getInsertNodeForExisting(outerType);
+				innerMembers.add(insertNodeForCopy);
+			}
+			{ // copy method of inner to main type
+				MethodDeclaration methodDecl= (MethodDeclaration) innerMembers.get(0);
+				ASTNode insertNodeForMove= ASTRewriteAnalyzer.getInsertNodeForExisting(methodDecl);
+				members.add(insertNodeForMove);
+			}
+			{ // nest body of constructor in a while statement
+				MethodDeclaration methodDecl= findMethodDeclaration(type, "E");
+				assertTrue("Cannot find Constructor E", methodDecl != null);
 
+				Block body= methodDecl.getBody();
+
+				WhileStatement whileStatement= ast.newWhileStatement();
+				whileStatement.setExpression(ast.newBooleanLiteral(true));
+				
+				Statement insertNodeForCopy= (Statement) ASTRewriteAnalyzer.getInsertNodeForExisting(body);
+				
+				whileStatement.setBody(insertNodeForCopy); // set existing body
+
+				Block newBody= ast.newBlock();
+				List newStatements= newBody.statements();				
+				newStatements.add(whileStatement);
+				
+				ASTRewriteAnalyzer.markAsReplaced(body, newBody);
+			}			
+		}	
+					
+
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends Exception implements Runnable, Serializable {\n");
+		buf.append("    public static class EInner {\n");
+		buf.append("        public void xee() {\n");
+		buf.append("            /* does nothing */\n");
+		buf.append("        }\n");			
+		buf.append("        interface G {\n");
+		buf.append("        }\n");				
+		buf.append("    }\n");		
+		buf.append("    private /* inner comment */ int i;\n");
+		buf.append("    private int k;\n");
+		buf.append("    public E() {\n");
+		buf.append("        while (true) {\n");		
+		buf.append("            super();\n");
+		buf.append("            i= 0;\n");
+		buf.append("            k= 9;\n");
+		buf.append("            if (System.out == null) {\n");
+		buf.append("                gee(); // cool\n");
+		buf.append("            }\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("    public void gee() {\n");
+		buf.append("    }\n");
+		buf.append("    public void xee() {\n");
+		buf.append("        /* does nothing */\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 	
 	
 }

@@ -25,6 +25,7 @@ public class ASTRewritingTest extends TestCase {
 		suite.addTest(ASTRewritingMethodDeclTest.suite());
 		suite.addTest(ASTRewritingStatementsTest.suite());
 		suite.addTest(ASTRewritingTypeDeclTest.suite());
+		suite.addTest(ASTRewritingMoveCodeTest.suite());
 		return suite;
 	}
 
@@ -32,6 +33,9 @@ public class ASTRewritingTest extends TestCase {
 	public ASTRewritingTest(String name) {
 		super(name);
 	}
+	
+	private static final int printRange= 6;
+	
 	public static void assertEqualString(String str1, String str2) {	
 		int len1= Math.min(str1.length(), str2.length());
 		
@@ -42,9 +46,12 @@ public class ASTRewritingTest extends TestCase {
 				break;
 			}
 		}
+		if (str1.length() != str2.length()) {
+			diffPos= len1;
+		}
 		if (diffPos != -1) {
-			int diffAhead= Math.max(0, diffPos - 3);
-			int diffAfter= Math.min(str1.length(), diffPos + 3);
+			int diffAhead= Math.max(0, diffPos - printRange);
+			int diffAfter= Math.min(str1.length(), diffPos + printRange);
 			
 			String diffStr= str1.substring(diffAhead, diffPos) + '^' + str1.substring(diffPos, diffAfter);
 			
