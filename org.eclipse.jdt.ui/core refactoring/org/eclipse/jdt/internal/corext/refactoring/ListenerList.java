@@ -8,11 +8,11 @@ package org.eclipse.jdt.internal.corext.refactoring;
  * Local copy of org.eclipse.jface.ListenerList
  */
 public class ListenerList {
-	
+
 	static {
 		//XXX: 1GCQD0A: ITPVCM:WIN2000 - ListenerList should be part of a core project
 	}
-		
+	
 	/**
 	 * The initial capacity of the list. Always >= 1.
 	 */
@@ -29,13 +29,13 @@ public class ListenerList {
 	 * to an array of size capacity the first time a listener is added.
 	 * Maintains invariant: listeners != null IFF size != 0
 	 */
-	private Object[] listeners = null;
+	private Object[] listeners= null;
 
 	/**
 	 * The empty array singleton instance, returned by getListeners()
 	 * when size == 0.
 	 */
-	private static final Object[] EmptyArray = new Object[0];
+	private static final Object[] EmptyArray= new Object[0];
 	
 	/**
 	 * Creates a listener list with an initial capacity of 3.
@@ -43,6 +43,7 @@ public class ListenerList {
 	public ListenerList() {
 		this(3);
 	}
+	
 	/**
 	 * Creates a listener list with the given initial capacity.
 	 *
@@ -51,8 +52,9 @@ public class ListenerList {
 	 */
 	public ListenerList(int capacity) {
 		Assert.isTrue(capacity >= 1);
-		this.capacity = capacity;
+		this.capacity= capacity;
 	}
+	
 	/**
 	 * Adds the given listener to this list. Has no effect if an identical listener
 	 * is already registered.
@@ -62,21 +64,22 @@ public class ListenerList {
 	public void add(Object listener) {
 		Assert.isNotNull(listener);
 		if (size == 0) {
-			listeners = new Object[capacity];
+			listeners= new Object[capacity];
 		} else {
-		    // check for duplicates using identity
-			for (int i = 0; i < size; ++i) {
+			// check for duplicates using identity
+			for (int i= 0; i < size; ++i) {
 				if (listeners[i] == listener) {
 					return;
 				}
 			}
 			// grow array if necessary
 			if (size == listeners.length) {
-				System.arraycopy(listeners, 0, listeners = new Object[size * 2 + 1], 0, size);
+				System.arraycopy(listeners, 0, listeners= new Object[size * 2 + 1], 0, size);
 			}
 		}
-		listeners[size++] = listener;
+		listeners[size++]= listener;
 	}
+	
 	/**
 	 * Returns an array containing all the registered listeners.
 	 * The resulting array is unaffected by subsequent adds or removes.
@@ -91,10 +94,11 @@ public class ListenerList {
 	public Object[] getListeners() {
 		if (size == 0)
 			return EmptyArray;
-		Object[] result = new Object[size];
+		Object[] result= new Object[size];
 		System.arraycopy(listeners, 0, result, 0, size);
 		return result;
 	}
+	
 	/**
 	 * Returns whether this listener list is empty.
 	 *
@@ -104,6 +108,7 @@ public class ListenerList {
 	public boolean isEmpty() {
 		return size == 0;
 	}
+	
 	/**
 	 * Removes the given listener from this list. Has no effect if an identical
 	 * listener was not already registered.
@@ -112,20 +117,21 @@ public class ListenerList {
 	 */
 	public void remove(Object listener) {
 		Assert.isNotNull(listener);
-		for (int i = 0; i < size; ++i) {
+		for (int i= 0; i < size; ++i) {
 			if (listeners[i] == listener) {
-				if (size == 1) {
-					listeners = null;
-					size = 0;
-				}
-				else {
-					System.arraycopy(listeners, i + 1, listeners, i, --size - i);
-					listeners[size] = null;
+				if (--size == 0) {
+					listeners= new Object[1];
+				} else {
+					if (i < size) {
+						listeners[i]= listeners[size];
+					}
+					listeners[size]= null;
 				}
 				return;
 			}
 		}
 	}
+	
 	/**
 	 * Returns the number of registered listeners.
 	 *
