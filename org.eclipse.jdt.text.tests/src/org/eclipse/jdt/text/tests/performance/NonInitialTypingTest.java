@@ -23,6 +23,10 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+/**
+ * Measures the time to type in one single method into a large Java class
+ * @since 3.1
+ */
 public class NonInitialTypingTest extends TestCase {
 	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
@@ -35,11 +39,22 @@ public class NonInitialTypingTest extends TestCase {
 			"return 42;\r" +
 			"}\r").toCharArray();
 
+	private PerformanceMeter fMeter;
+
+	private KeyboardProbe fKeyboardProbe;
+
 	protected void setUp() throws PartInitException, BadLocationException {
 		EditorTestHelper.runEventQueue();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(EditorTestHelper.findFile(FILE), true);
 		// dirty editor to avoid initial dirtying / validate edit costs
 		dirtyEditor();
+		fMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
+		fKeyboardProbe= new KeyboardProbe();
+
+		int offset= getInsertPosition();
+		fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
+		EditorTestHelper.runEventQueue();
+		sleep(1000);
 	}
 	
 	private void dirtyEditor() {
@@ -48,34 +63,27 @@ public class NonInitialTypingTest extends TestCase {
 		sleep(1000);
 		
 		Display display= SWTEventHelper.getActiveDisplay();
-		SWTEventHelper.pressCharacter(display, '{');
+		fKeyboardProbe.pressChar('{', display);
 		SWTEventHelper.pressKeyCode(display, SWT.BS);
-		
+		sleep(1000);
 	}
 
 	protected void tearDown() throws Exception {
+		sleep(1000);
+		EditorTestHelper.revertEditor(fEditor, true);
 		EditorTestHelper.closeAllEditors();
+		
+		fMeter.commit();
 	}
 
-	public void testTypeAMethod() throws BadLocationException {
-		PerformanceMeter meter= fPerformanceMeterFactory.createPerformanceMeter(this);
-		try {
-			Display display= SWTEventHelper.getActiveDisplay();
-			int offset= getInsertPosition();
-			fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
-			EditorTestHelper.runEventQueue();
-			sleep(1000);
-			
-			meter.start();
-			for (int i= 0; i < METHOD.length; i++) {
-				SWTEventHelper.pressCharacter(display, METHOD[i]);
-			}
-			meter.stop();
-			
-		} finally {
-			EditorTestHelper.revertEditor(fEditor, true);
-			meter.commit();
+	public void testTypeAMethod() {
+		Display display= SWTEventHelper.getActiveDisplay();
+		
+		fMeter.start();
+		for (int i= 0; i < METHOD.length; i++) {
+			fKeyboardProbe.pressChar(METHOD[i], display);
 		}
+		fMeter.stop();
 	}
 
 	private synchronized void sleep(int time) {
