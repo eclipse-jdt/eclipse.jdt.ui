@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
  */
 public class NLSHolder {
 
+    private static final char[] HEX_DIGITS = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 	private static final char SUBSTITUTE_CHAR= '_';	
 	private static final char[] UNWANTED_CHARS= new char[]{' ', ':', '"', '\\', '\'', '?', '='};
 	public static final String[] UNWANTED_STRINGS= {" ", ":", "\"", "\\", "'", "?", "="}; //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
@@ -121,9 +122,23 @@ public class NLSHolder {
 			case '\\' :
 				return "\\\\";//$NON-NLS-1$
 			default: 
-				return String.valueOf(c);
+				if (((c < 0x0020) || (c > 0x007e))){
+					return new StringBuffer()
+						.append('\\')
+                    	.append('u')
+                    	.append(toHex((c >> 12) & 0xF))
+                    	.append(toHex((c >>  8) & 0xF))
+                    	.append(toHex((c >>  4) & 0xF))
+                    	.append(toHex( c        & 0xF)).toString();
+					
+				} else
+					return String.valueOf(c);
 		}		
 	}
+
+    private static char toHex(int halfByte) {
+        return HEX_DIGITS[(halfByte & 0xF)];
+    }
 	
 	private static String createKey(NLSElement element, int counter){
 		String result= NLSRefactoring.removeQuotes(element.getValue());
