@@ -13,21 +13,21 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jface.action.Action;
 
 
-public class SortAction extends Action {
-	private int fSortOrder;
+public class GroupAction extends Action {
+	private int fGrouping;
 	private JavaSearchResultPage fPage;
 	
-	public SortAction(String label, JavaSearchResultPage page, int sortOrder) {
+	public GroupAction(String label, JavaSearchResultPage page, int grouping) {
 		super(label);
 		fPage= page;
-		fSortOrder= sortOrder;
+		fGrouping= grouping;
 	}
 
 	public void run() {
-		fPage.setSortOrder(fSortOrder);
+		fPage.setGrouping(fGrouping);
 	}
 
-	public int getSortOrder() {
-		return fSortOrder;
+	public int getGrouping() {
+		return fGrouping;
 	}
 }

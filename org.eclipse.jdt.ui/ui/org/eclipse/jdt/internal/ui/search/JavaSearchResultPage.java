@@ -21,6 +21,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
@@ -40,23 +41,31 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
-/**
- * @author Thomas Mäder
- *
- */
 public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	private NewSearchViewActionGroup fActionGroup;
 	private JavaSearchContentProvider fContentProvider;
-	private SortAction fCurrentSortAction;
+	private int fCurrentSortOrder;
 	private SortAction fSortByNameAction;
 	private SortAction fSortByParentName;
 	private SortAction fSortByPathAction;
+	
+	private GroupAction fGroupTypeAction;
+	private GroupAction fGroupFileAction;
+	private GroupAction fGroupPackageAction;
+	private GroupAction fGroupProjectAction;
+	private int fCurrentGrouping;
 	
 	public JavaSearchResultPage() {
 		fSortByNameAction= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByName"), this, JavaSearchResultLabelProvider.SHOW_ELEMENT_CONTAINER); //$NON-NLS-1$
 		fSortByPathAction= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByPath"), this, JavaSearchResultLabelProvider.SHOW_PATH); //$NON-NLS-1$
 		fSortByParentName= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByParentName"), this, JavaSearchResultLabelProvider.SHOW_CONTAINER_ELEMENT); //$NON-NLS-1$
-		fCurrentSortAction= fSortByNameAction;
+		fCurrentSortOrder=  JavaSearchResultLabelProvider.SHOW_ELEMENT_CONTAINER;
+
+		fGroupProjectAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_project"), this, LevelTreeContentProvider.LEVEL_PROJECT); //$NON-NLS-1$
+		fGroupPackageAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_package"), this, LevelTreeContentProvider.LEVEL_PACKAGE); //$NON-NLS-1$
+		fGroupFileAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_file"), this, LevelTreeContentProvider.LEVEL_FILE); //$NON-NLS-1$
+		fGroupTypeAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_type"), this, LevelTreeContentProvider.LEVEL_TYPE); //$NON-NLS-1$
+		fCurrentGrouping= LevelTreeContentProvider.LEVEL_PACKAGE;
 	}
 
 	public void setViewPart(ISearchResultViewPart part) {
@@ -107,6 +116,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	protected void fillContextMenu(IMenuManager mgr) {
 		super.fillContextMenu(mgr);
 		addSortActions(mgr);
+		addGroupActions(mgr);
 		fActionGroup.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
 		fActionGroup.fillContextMenu(mgr);
 	}
@@ -119,12 +129,30 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		sortMenu.add(fSortByPathAction);
 		sortMenu.add(fSortByParentName);
 		
-		fSortByNameAction.setChecked(fCurrentSortAction == fSortByNameAction);
-		fSortByPathAction.setChecked(fCurrentSortAction == fSortByPathAction);
-		fSortByParentName.setChecked(fCurrentSortAction == fSortByParentName);
+		fSortByNameAction.setChecked(fCurrentSortOrder == fSortByNameAction.getSortOrder());
+		fSortByPathAction.setChecked(fCurrentSortOrder == fSortByPathAction.getSortOrder());
+		fSortByParentName.setChecked(fCurrentSortOrder == fSortByParentName.getSortOrder());
 		
 		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, sortMenu);
 	}
+	
+	private void addGroupActions(IMenuManager mgr) {
+		if (isFlatLayout())
+			return;
+		MenuManager groupMenu= new MenuManager(SearchMessages.getString("JavaSearchResultPage.groupyby_label")); //$NON-NLS-1$
+		groupMenu.add(fGroupProjectAction);
+		groupMenu.add(fGroupPackageAction);
+		groupMenu.add(fGroupFileAction);
+		groupMenu.add(fGroupTypeAction);
+		
+		fGroupProjectAction.setChecked(fCurrentGrouping == LevelTreeContentProvider.LEVEL_PROJECT);
+		fGroupPackageAction.setChecked(fCurrentGrouping == LevelTreeContentProvider.LEVEL_PACKAGE);
+		fGroupFileAction.setChecked(fCurrentGrouping == LevelTreeContentProvider.LEVEL_FILE);
+		fGroupTypeAction.setChecked(fCurrentGrouping == LevelTreeContentProvider.LEVEL_TYPE);
+		
+		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, groupMenu);
+	}
+
 
 	public void dispose() {
 		fActionGroup.dispose();
@@ -142,25 +170,27 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 
 	protected void configureViewer(StructuredViewer viewer) {
-		viewer.setLabelProvider(new DelegatingLabelProvider(this, new JavaSearchResultLabelProvider()));
 		if (viewer instanceof TreeViewer) {
-			fContentProvider= new JavaSearchTreeContentProvider((TreeViewer) viewer);
+			viewer.setSorter(new ViewerSorter());
+			viewer.setLabelProvider(new PostfixLabelProvider(this));
+			fContentProvider= new LevelTreeContentProvider((TreeViewer) viewer, fCurrentGrouping);
 			viewer.setContentProvider(fContentProvider);
 		} else {
+			viewer.setLabelProvider(new DelegatingLabelProvider(this, new JavaSearchResultLabelProvider()));
 			fContentProvider=new JavaSearchTableContentProvider((TableViewer) viewer);
 			viewer.setContentProvider(fContentProvider);
-			setSortOrder(fCurrentSortAction);
+			setSortOrder(fCurrentSortOrder);
 		}
 	}
 
-	public void setSortOrder(SortAction action) {
-		fCurrentSortAction= action;
+	void setSortOrder(int order) {
+		fCurrentSortOrder= order;
 		StructuredViewer viewer= getViewer();
 		DelegatingLabelProvider lpWrapper= (DelegatingLabelProvider) viewer.getLabelProvider();
-		((JavaSearchResultLabelProvider)lpWrapper.getLabelProvider()).setOrder(action.getSortOrder());
-		if (action.getSortOrder() == JavaSearchResultLabelProvider.SHOW_ELEMENT_CONTAINER) {
+		((JavaSearchResultLabelProvider)lpWrapper.getLabelProvider()).setOrder(order);
+		if (order == JavaSearchResultLabelProvider.SHOW_ELEMENT_CONTAINER) {
 			viewer.setSorter(new NameSorter());
-		} else if (action.getSortOrder() == JavaSearchResultLabelProvider.SHOW_PATH) {
+		} else if (order == JavaSearchResultLabelProvider.SHOW_PATH) {
 			viewer.setSorter(new PathSorter());
 		} else
 			viewer.setSorter(new ParentSorter());
@@ -169,5 +199,21 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	public void init(IPageSite site) {
 		super.init(site);
 		fActionGroup.fillActionBars(site.getActionBars());
+	}
+
+	/**
+	 * Precondition here: the viewer must be shwing a tree with a LevelContentProvider.
+	 * @param order
+	 */
+	void setGrouping(int grouping) {
+		fCurrentGrouping= grouping;
+		StructuredViewer viewer= getViewer();
+		LevelTreeContentProvider cp= (LevelTreeContentProvider) viewer.getContentProvider();
+		cp.setLevel(grouping);
+	}
+	
+	protected StructuredViewer getViewer() {
+		// override so that it's visible in the package.
+		return super.getViewer();
 	}
 }
