@@ -93,7 +93,7 @@ public class ClassFileEditor extends JavaEditor {
 		if (getEditorInput() instanceof IClassFileEditorInput) {
 			IClassFileEditorInput input= (IClassFileEditorInput) getEditorInput();
 			IJavaElement parent= JavaModelUtil.findParentOfKind(element, IJavaElement.CLASS_FILE);
-			if (input.getClassFile() == parent)
+			if (input.getClassFile().equals(parent))
 				return element;
 		}
 		return null;
