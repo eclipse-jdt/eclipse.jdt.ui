@@ -30,5 +30,8 @@
 		<copy file="plugin.xml" todir="${dest}"/>
 		<copy file="plugin.properties" todir="${dest}"/>
 		<copy file="about.html" todir="${dest}"/>
+		<copy todir= "${dest}/META-INF">
+			<fileset dir="META-INF"/>
+		</copy>		
 	</target>
 </project>

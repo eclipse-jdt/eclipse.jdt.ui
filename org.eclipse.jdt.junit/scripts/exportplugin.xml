@@ -32,6 +32,9 @@
 		<copy file="about.html" todir="${dest}"/>
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
+		</copy>
+		<copy todir= "${dest}/META-INF">
+			<fileset dir="META-INF"/>
 		</copy>		
 	</target>
 </project>

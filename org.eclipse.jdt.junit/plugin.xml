@@ -1,40 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<plugin
-   id="org.eclipse.jdt.junit"
-   name="%pluginName"
-   version="3.1.0"
-   provider-name="%providerName"
-   class="org.eclipse.jdt.internal.junit.ui.JUnitPlugin">
-
-   <runtime>
-      <library name="junitsupport.jar">
-         <export name="*"/>
-      </library>
-   </runtime>
-   <requires>
-      <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="org.eclipse.ui.views"/>
-      <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.expressions"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.core.runtime.compatibility"/>
-      <import plugin="org.eclipse.debug.core"/>
-      <import plugin="org.eclipse.debug.ui"/>
-      <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.jdt.ui"/>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.jdt.launching"/>
-      <import plugin="org.eclipse.jdt.debug.ui"/>
-      <import plugin="org.eclipse.jdt.junit.runtime"/>
-      <import plugin="org.eclipse.compare"/>
-      <import plugin="org.eclipse.ltk.core.refactoring"/>
-      <import plugin="org.eclipse.core.variables"/>
-   </requires>
-
+<plugin>
 
    <extension-point id="testRunListeners" name="%testRunListeners.name" schema="schema/testRunListeners.exsd"/>
    <extension-point id="junitLaunchConfigs" name="%junitLaunchConfigs.name" schema="schema/junitLaunchConfigs.exsd"/>
