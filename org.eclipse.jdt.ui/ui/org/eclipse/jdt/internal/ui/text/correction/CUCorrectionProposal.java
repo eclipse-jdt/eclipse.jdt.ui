@@ -261,15 +261,18 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				}
 			}
 		}
-		int cursorPosition= viewer.getSelectedRange().x;
-		if (cursorPosition != 0) {
-			editor.setFinalCaretOffset(cursorPosition);
-		} else if (selection != null) {
+			
+		if (selection != null) {
 			TextRange range= change.getNewTextRange(selection.getTextEdits());
 			if (range != null && range.isValid()) {
-				editor.setFinalCaretOffset(range.getOffset());
+				editor.setFinalCaretOffset(range.getOffset() + range.getLength());
 			}					
-		}		
+		} else {
+			int cursorPosition= viewer.getSelectedRange().x;
+			if (cursorPosition != 0) {
+				editor.setFinalCaretOffset(cursorPosition);
+			}
+		}	
 		editor.enter();
 		
 		IRegion region= editor.getSelectedRegion();

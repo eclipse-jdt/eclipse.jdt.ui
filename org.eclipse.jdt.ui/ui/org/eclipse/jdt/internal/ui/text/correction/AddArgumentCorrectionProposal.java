@@ -62,7 +62,6 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 			
 			markAsLinked(rewrite, newArg, i == 0, key); 
 		}
-		markAsSelection(rewrite, fNameNode.getParent());
 		return rewrite;
 	}
 	

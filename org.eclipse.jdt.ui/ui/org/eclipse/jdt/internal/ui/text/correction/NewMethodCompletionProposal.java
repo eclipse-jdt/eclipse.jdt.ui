@@ -86,11 +86,10 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			rewrite.markAsInserted(newStub);
 
 			if (!fIsInDifferentCU) {
-				markAsSelection(rewrite, fNode);
 				Name invocationName= getInvocationName();
 				if (invocationName != null) {
 					markAsLinked(rewrite, invocationName, true, KEY_NAME);
-				}
+				}				
 			}
 			markAsLinked(rewrite, newStub.getName(), false, KEY_NAME);  //$NON-NLS-1$
 			if (!newStub.isConstructor()) {

@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	
@@ -111,12 +110,6 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	}
 	
 	private void modifySignature(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
-		GroupDescription selectionDescription= null;
-		if (isInDifferentCU) {
-			selectionDescription= new GroupDescription("selection"); //$NON-NLS-1$
-			setSelectionDescription(selectionDescription);
-		}
-		
 		List parameters= methodDecl.parameters();
 		// create a copy to not loose the indexes
 		SingleVariableDeclaration[] oldParameters= (SingleVariableDeclaration[]) parameters.toArray(new SingleVariableDeclaration[parameters.size()]);
@@ -145,11 +138,11 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				desc.resultingNode= newNode;
 				hasCreatedVariables= true;
 				
-				rewrite.markAsInserted(newNode, selectionDescription);
+				rewrite.markAsInserted(newNode);
 				parameters.add(i, newNode);
 					
 			} else if (curr instanceof RemoveDescription) {
-				rewrite.markAsRemoved(oldParameters[k], selectionDescription);
+				rewrite.markAsRemoved(oldParameters[k]);
 				k++;
 			} else if (curr instanceof EditDescription) {
 				EditDescription desc= (EditDescription) curr;
@@ -169,8 +162,8 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				SingleVariableDeclaration decl1= oldParameters[k];
 				SingleVariableDeclaration decl2= oldParameters[((SwapDescription) curr).index];
 				
-				rewrite.markAsReplaced(decl1, rewrite.createCopy(decl2), selectionDescription);
-				rewrite.markAsReplaced(decl2, rewrite.createCopy(decl1), selectionDescription);
+				rewrite.markAsReplaced(decl1, rewrite.createCopy(decl2));
+				rewrite.markAsReplaced(decl2, rewrite.createCopy(decl1));
 				
 				usedNames.add(decl1.getName().getIdentifier());
 				k++;	
@@ -189,10 +182,10 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			}
 		}
 		
-		fixupNames(rewrite, usedNames);
+		fixupNames(rewrite, usedNames, isInDifferentCU);
 	}
 
-	private void fixupNames(ASTRewrite rewrite, ArrayList usedNames) {
+	private void fixupNames(ASTRewrite rewrite, ArrayList usedNames, boolean isInDifferentCU) {
 		AST ast= rewrite.getRootNode().getAST();
 		// set names for new parameters
 		for (int i= 0; i < fParameterChanges.length; i++) {
@@ -239,6 +232,8 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				markAsLinked(rewrite, var.getName(), false, nameKey); //$NON-NLS-1$			
 			}
 		}
-		markAsSelection(rewrite, fNameNode.getParent());
+		if (isInDifferentCU) {
+			markAsSelection(rewrite, fNameNode.getParent());
+		}
 	}
 }
