@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class TypeHandleFactory {
 
+	private final static TypeHandle[] EMPTY= { };
+	
 	HashMap/*<String, TypeHandle>*/ fKeyToTypeHandle; // WeakHashMap wouldn't work if TypeHandle holds a reference to key
 	
 	public TypeHandleFactory() {
@@ -30,17 +32,45 @@ public class TypeHandleFactory {
 		if (stored != null)
 			return stored;
 		
-		//TODO: create supertype, array component, and type parameter TypeHandles
-		stored= new TypeHandle(key, typeBinding.getQualifiedName());
+		//TODO: special cases with Object, Cloneable, Serializable, ...; array components; type parameters; ...
+		if ((typeBinding.isClass() || typeBinding.isInterface())
+				&& ! typeBinding.isArray()) {
+			TypeHandle[] directSupertypes= getDirectSuperTypes(typeBinding);
+			// Have to check again, since type could have been stored in the meantime!
+			stored= (TypeHandle) fKeyToTypeHandle.get(key);
+			if (stored != null)
+				return stored;
+			stored= new TypeHandle(key, typeBinding.getQualifiedName(), directSupertypes);
+		} else {
+			stored= new TypeHandle(key, typeBinding.getQualifiedName(), EMPTY);
+		}
 		fKeyToTypeHandle.put(key, stored);
 		return stored;
 	}
 
-//	public boolean isSubtype(TypeHandle subtype, TypeHandle supertype) {
-//		if (subtype == supertype)
-//			return true;
-//		
-//		
-//	}
+	private TypeHandle[] getDirectSuperTypes(ITypeBinding typeBinding) {
+		ITypeBinding superclass= typeBinding.getSuperclass();
+		ITypeBinding[] interfaces= typeBinding.getInterfaces();
+		if (superclass == null) {
+			if (interfaces.length == 0) {
+				return EMPTY;
+			} else {
+				TypeHandle[] result= new TypeHandle[interfaces.length];
+				for (int i= 0; i < interfaces.length; i++)
+					result[i]= getTypeHandle(interfaces[i]);
+				return result;
+			}
+		} else {
+			if (interfaces.length == 0) {
+				return new TypeHandle[] { getTypeHandle(superclass) };
+			} else {
+				TypeHandle[] result= new TypeHandle[interfaces.length + 1];
+				result[0]= getTypeHandle(superclass);
+				for (int i= 0; i < interfaces.length; i++)
+					result[i + 1]= getTypeHandle(interfaces[i]);
+				return result;
+			}
+		}
+	}
 
 }

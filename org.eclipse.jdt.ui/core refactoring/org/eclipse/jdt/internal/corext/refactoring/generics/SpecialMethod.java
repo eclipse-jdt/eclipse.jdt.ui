@@ -9,13 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
+package org.eclipse.jdt.internal.corext.refactoring.generics;
 
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 
-public interface IUpdatableConstraintVariable {
 
-	public void setCompilationUnitRange(CompilationUnitRange range);
+public class SpecialMethod {
 
-	public CompilationUnitRange getCompilationUnitRange();
 }

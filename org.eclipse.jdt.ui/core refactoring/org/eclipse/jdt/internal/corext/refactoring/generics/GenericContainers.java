@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.corext.refactoring.genericize;
+package org.eclipse.jdt.internal.corext.refactoring.generics;
 
 import java.util.ArrayList;
 import java.util.Arrays;

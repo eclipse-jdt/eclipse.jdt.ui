@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -64,12 +65,17 @@ public class TypeConstraintFactory2 {
 	protected CustomHashtable/*<ConstraintVariable2, Object>*/ fConstraintVariables;
 	protected TypeHandleFactory fTypeHandleFactory;
 	protected boolean fStoreToString;
+	private Collection fNewTypeConstraints;
+	private Collection fNewConstraintVariables;
 	
 	public TypeConstraintFactory2() {
 		fTypeConstraints= new CustomHashtable(new TypeConstraintComparer());
 		fConstraintVariables= new CustomHashtable(new ConstraintVariableComparer());
 		fTypeHandleFactory= new TypeHandleFactory();
 		fStoreToString= DEBUG;
+		
+		fNewTypeConstraints= new ArrayList();
+		fNewConstraintVariables= new ArrayList();
 	}
 	
 	public List getUsedIn(ConstraintVariable2 cv) {
@@ -81,6 +87,28 @@ public class TypeConstraintFactory2 {
 		else
 			throw new IllegalStateException("Unknown constraint variable: " + cv); //$NON-NLS-1$
 	}
+	
+	/**
+	 * Resets the accumulators for {@link #getNewConstraintVariables()} and
+	 * {@link #getNewTypeConstraints()}.
+	 */
+	public void newCu() {
+		fNewTypeConstraints.clear();
+		//TODO: prune unused CVs for local variable declarations
+		fNewConstraintVariables.clear();
+	}
+	
+	public ConstraintVariable2[] getNewConstraintVariables() {
+		return (ConstraintVariable2[]) fNewConstraintVariables.toArray(new ConstraintVariable2[fNewConstraintVariables.size()]);
+	}
+	
+	public ITypeConstraint2[] getNewTypeConstraints() {
+		return (ITypeConstraint2[]) fNewTypeConstraints.toArray(new ITypeConstraint2[fNewTypeConstraints.size()]);
+	}
+	
+//	public Set getAllTypeConstraints() {
+//		fTypeConstraints.keys();
+//	}
 	
 	/**
 	 * Allows for avoiding the creation of SimpleTypeConstraints based on properties of
@@ -106,8 +134,7 @@ public class TypeConstraintFactory2 {
 	
 	/**
 	 * Controls calculation and storage of information for more readable toString() messages.
-	 * 
-	 * Warning: This method is for testing purposes only and should not be called except from unit tests!
+	 * <p><em>Warning: This method is for testing purposes only and should not be called except from unit tests.</em></p>
 	 * 
 	 * @param store <code>true</code> iff information for toString() should be stored 
 	 */
@@ -147,6 +174,7 @@ public class TypeConstraintFactory2 {
 		Object storedTc= fTypeConstraints.getKey(typeConstraint);
 		if (storedTc == null) {
 			fTypeConstraints.put(typeConstraint, NULL); //TODO: should be a CustomHashset?
+			fNewTypeConstraints.add(typeConstraint);
 		} else {
 			typeConstraint= (SimpleTypeConstraint2) storedTc;
 		}
@@ -160,6 +188,7 @@ public class TypeConstraintFactory2 {
 		if (storedCv == null) {
 			// new CV -> directly store TC:
 			fConstraintVariables.put(cv, typeConstraint);
+			fNewConstraintVariables.add(cv);
 		} else {
 			// existing stored CV:
 			//TODO: could avoid call to get() if there was a method HashMapEntry getEntry(Object key) 
@@ -249,9 +278,9 @@ public class TypeConstraintFactory2 {
 		return fieldVariable;
 	}
 
-	public VariableVariable2 makeVariableVariable(IVariableBinding variableBinding, Type variableType) {
+	public VariableVariable2 makeDeclaredVariableVariable(IVariableBinding variableBinding, ICompilationUnit cu) {
 		VariableVariable2 cv= makeVariableVariable(variableBinding);
-		return (VariableVariable2) registerDeclaredTypeReference(cv, variableType);
+		return (VariableVariable2) registerDeclaredVariable(cv, cu);
 	}
 	
 	public TypeVariable2 makeTypeVariable(Type type) {
@@ -300,25 +329,27 @@ public class TypeConstraintFactory2 {
 	/**
 	 * Make a ParameterTypeVariable2 from a method declaration.
 	 * The constraint variable is always stored if it passes the type filter.
+	 * @param methodBinding
+	 * @param parameterIndex
+	 * @param cu
 	 * @return the ParameterTypeVariable2, or <code>null</code> 
 	 */
-	public ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, Type parameterType) {
+	public ParameterTypeVariable2 makeDeclaredParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, ICompilationUnit cu) {
 		ParameterTypeVariable2 cv= makeParameterTypeVariable(methodBinding, parameterIndex);
-		return (ParameterTypeVariable2) registerDeclaredTypeReference(cv, parameterType);
+		return (ParameterTypeVariable2) registerDeclaredVariable(cv, cu);
 	}
 
-	private IUpdatableConstraintVariable registerDeclaredTypeReference(IUpdatableConstraintVariable cv, Type typeReference) {
+	private IDeclaredConstraintVariable registerDeclaredVariable(IDeclaredConstraintVariable cv, ICompilationUnit unit) {
 		if (cv == null)
 			return null;
 		
-		IUpdatableConstraintVariable storedCv= (IUpdatableConstraintVariable) fConstraintVariables.getKey(cv);
+		IDeclaredConstraintVariable storedCv= (IDeclaredConstraintVariable) fConstraintVariables.getKey(cv);
 		if (storedCv == null) {
 			storedCv= cv;
 			fConstraintVariables.put(cv, new ArrayList(0));
+			fNewConstraintVariables.add(cv);
 		}
-		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(typeReference);
-		CompilationUnitRange range= new CompilationUnitRange(cu, typeReference);
-		storedCv.setCompilationUnitRange(range);
+		storedCv.setCompilationUnit(unit);
 		return storedCv;
 	}
 
@@ -332,9 +363,9 @@ public class TypeConstraintFactory2 {
 		return cv;
 	}
 
-	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding, Type returnType) {
+	public ReturnTypeVariable2 makeDeclaredReturnTypeVariable(IMethodBinding methodBinding, ICompilationUnit unit) {
 		ReturnTypeVariable2 cv= makeReturnTypeVariable(methodBinding);
-		return (ReturnTypeVariable2) registerDeclaredTypeReference(cv, returnType);
+		return (ReturnTypeVariable2) registerDeclaredVariable(cv, unit);
 	}
 	
 //	public DeclaringTypeVariable2 makeDeclaringTypeVariable(IMethodBinding methodBinding) {

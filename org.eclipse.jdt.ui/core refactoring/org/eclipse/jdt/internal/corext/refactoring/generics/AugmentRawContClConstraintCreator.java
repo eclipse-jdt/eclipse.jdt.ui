@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.corext.refactoring.genericize;
+package org.eclipse.jdt.internal.corext.refactoring.generics;
 
 import java.util.List;
 
@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -30,29 +32,38 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintCreator2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintFactory2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class AugmentRawTypesConstraintCreator2 extends ConstraintCreator2 {
+public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * Property in <code>ASTNode</code>s that holds the node's <code>ConstraintVariable</code>.
 	 */
 	private static final String CV_PROP= "org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CONSTRAINT_VARIABLE"; //$NON-NLS-1$
 	
-	private TypeConstraintFactory2 fTCFactory;
+	private AugmentRawContainerClientsTCFactory fTCFactory;
+	private ContainerMethods fContainerMethods;
+	private ICompilationUnit fCU;
+	
 
-	public AugmentRawTypesConstraintCreator2(TypeConstraintFactory2 factory) {
+	public AugmentRawContClConstraintCreator(AugmentRawContainerClientsTCFactory factory) {
 		fTCFactory= factory;
+		fContainerMethods= new ContainerMethods(fTCFactory);
+	}
+	
+	public boolean visit(CompilationUnit node) {
+		fTCFactory.newCu();
+		fCU= RefactoringASTParser.getCompilationUnit(node);
+		return super.visit(node);
 	}
 	
 	public boolean visit(Javadoc node) {
@@ -75,7 +86,7 @@ public class AugmentRawTypesConstraintCreator2 extends ConstraintCreator2 {
 				TypeRules.isJavaLangObject(lhs.resolveTypeBinding())) {
 			//Special handling for automatic String conversion: do nothing; the RHS can be anything.
 		} else {
-			addConstraints(fTCFactory.createSubtypeConstraint(right, left)); // left= right;  -->  [right] <= [left]
+			fTCFactory.createSubtypeConstraint(right, left); // left= right;  -->  [right] <= [left]
 		}
 		//TODO: other implicit conversions: numeric promotion, autoboxing?
 		
@@ -85,12 +96,17 @@ public class AugmentRawTypesConstraintCreator2 extends ConstraintCreator2 {
 	public boolean visit(CatchClause node) {
 		SingleVariableDeclaration exception= node.getException();
 		IVariableBinding variableBinding= exception.resolveBinding();
-		Type exceptionType= exception.getType();
-		VariableVariable2 cv= fTCFactory.makeVariableVariable(variableBinding, exceptionType);
+		VariableVariable2 cv= fTCFactory.makeDeclaredVariableVariable(variableBinding, fCU);
 		setConstraintVariable(exception, cv);
 		return true;
 	}
 	
+	public boolean visit(ClassInstanceCreation node) {
+		//TODO: arguments, class body
+		PlainTypeVariable2 cv= fTCFactory.makePlainTypeVariable(node.resolveTypeBinding());
+		setConstraintVariable(node, cv);
+		return true;
+	}
 	public boolean visit(MethodDeclaration node) {
 		IMethodBinding methodBinding= node.resolveBinding();
 
@@ -100,8 +116,8 @@ public class AugmentRawTypesConstraintCreator2 extends ConstraintCreator2 {
 		for (int i= 0, n= node.parameters().size(); i < n; i++) {
 			SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) node.parameters().get(i);
 			//parameterTypeVariable currently not used, but need to register in order to store source range
-			ConstraintVariable2 parameterTypeVariable= fTCFactory.makeParameterTypeVariable(methodBinding, i, paramDecl.getType());
-			setConstraintVariable(node, parameterTypeVariable);
+			ConstraintVariable2 parameterTypeVariable= fTCFactory.makeDeclaredParameterTypeVariable(methodBinding, i, fCU);
+			setConstraintVariable(paramDecl, parameterTypeVariable);
 		}
 		
 		//TODO: Who needs declaring type constraints?
@@ -113,7 +129,7 @@ public class AugmentRawTypesConstraintCreator2 extends ConstraintCreator2 {
 //		addConstraints(declaring);
 
 		if (! methodBinding.isConstructor()){
-			ConstraintVariable2 returnTypeBindingVariable= fTCFactory.makeReturnTypeVariable(methodBinding, node.getReturnType());
+			ConstraintVariable2 returnTypeBindingVariable= fTCFactory.makeDeclaredReturnTypeVariable(methodBinding, fCU);
 //			ConstraintVariable2 returnTypeVariable= getConstraintVariable(node.getReturnType2());
 //			returnTypeBindingVariable.setRepresentative(returnTypeVariable);
 			//TODO: how to ensure that returnTypeBindingVariable is stored when it is not used in a TC?
@@ -128,13 +144,28 @@ public class AugmentRawTypesConstraintCreator2 extends ConstraintCreator2 {
 		return true;
 	}
 	
-	public boolean visit(MethodInvocation node) {
-		//TODO
+	public void endvisit(MethodInvocation node) {
+		IMethodBinding methodBinding= node.resolveMethodBinding();
 		
-		return true;
+		SpecialMethod specialMethod= fContainerMethods.getSpecialMethodFor(methodBinding);
+		if (specialMethod != null) {
+			visitContainerMethodInvocation(node, specialMethod);
+			return;
+		}
+		//TODO: normal method invocation
+		
+		return;
 	}
 	
-	
+	private void visitContainerMethodInvocation(MethodInvocation node, SpecialMethod specialMethod) {
+		Expression expression= node.getExpression();
+		//TODO: expression can be null when visiting a non-special method in a subclass of a container type.
+		ConstraintVariable2 expressionCv= getConstraintVariable(expression);
+		
+		// TODO Auto-generated method stub
+		
+	}
+
 	public void endVisit(FieldDeclaration node) {
 		// No need to tie the VariableDeclarationFragments together.
 		// The FieldDeclaration can be split up when fragments get different types.
@@ -228,13 +259,14 @@ public class AugmentRawTypesConstraintCreator2 extends ConstraintCreator2 {
 		ConstraintVariable2 initializerCv= getConstraintVariable(initializer);
 		ConstraintVariable2 nameCv= getConstraintVariable(node);
 		//TODO: check: property has been set in visit(CatchClause), visit(MethodDeclaration), visit(EnhancedForStatament)
-		ITypeConstraint2[] initializerTc= fTCFactory.createSubtypeConstraint(initializerCv, nameCv);
-		addConstraints(initializerTc);
+		fTCFactory.createSubtypeConstraint(initializerCv, nameCv);
 	}
 	
 	public void endVisit(VariableDeclarationFragment node) {
-		ConstraintVariable2 nameCv= getConstraintVariable(node.getName());
-		setConstraintVariable(node, nameCv);
+		VariableVariable2 cv= fTCFactory.makeDeclaredVariableVariable(node.resolveBinding(), fCU);
+		setConstraintVariable(node, cv);
+		
+		//TODO: prune unused CV for local variables (but not fields)
 		
 		Expression initializer= node.getInitializer();
 		if (initializer == null)
@@ -242,8 +274,7 @@ public class AugmentRawTypesConstraintCreator2 extends ConstraintCreator2 {
 		
 		ConstraintVariable2 initializerCv= getConstraintVariable(initializer);
 		// name= initializer  -->  [initializer] <= [name]
-		ITypeConstraint2[] tc= fTCFactory.createSubtypeConstraint(initializerCv, nameCv);
-		addConstraints(tc);
+		fTCFactory.createSubtypeConstraint(initializerCv, cv);
 	}
 	
 	//--------- private helpers ----------------//

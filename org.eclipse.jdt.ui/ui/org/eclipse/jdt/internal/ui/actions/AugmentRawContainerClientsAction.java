@@ -24,12 +24,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.jdt.internal.corext.refactoring.genericize.GenericizeContainerClientsRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.generics.AugmentRawContainerClientsRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.refactoring.GenericizeContainerClientsWizard;
+import org.eclipse.jdt.internal.ui.refactoring.AugmentRawContainerClientsWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -44,32 +44,32 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
  *  
  * @since 3.1
  */
-public class GenericizeContainerClientsAction extends SelectionDispatchAction {
+public class AugmentRawContainerClientsAction extends SelectionDispatchAction {
 
-	public static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/GenericizeContainerClientsAction")); //$NON-NLS-1$//$NON-NLS-2$
+	public static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/AugmentRawContainerClientsAction")); //$NON-NLS-1$//$NON-NLS-2$
 	
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("GenericizeContainerClientsAction.dialog_title");//$NON-NLS-1$
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("AugmentRawContainerClientsAction.dialog_title");//$NON-NLS-1$
 	private CompilationUnitEditor fEditor;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
-	public GenericizeContainerClientsAction(CompilationUnitEditor editor) {
+	public AugmentRawContainerClientsAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
 	/**
-	 * Creates a new {@link GenericizeContainerClientsAction}. The action requires
+	 * Creates a new {@link AugmentRawContainerClientsAction}. The action requires
 	 * that the selection provided by the site's selection provider is of type 
 	 * {@link org.eclipse.jface.viewers.IStructuredSelection}.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public GenericizeContainerClientsAction(IWorkbenchSite site) {
+	public AugmentRawContainerClientsAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.getString("GenericizeContainerClientsAction.label")); //$NON-NLS-1$
+		setText(RefactoringMessages.getString("AugmentRawContainerClientsAction.label")); //$NON-NLS-1$
 	}
 	
 	/*
@@ -102,7 +102,7 @@ public class GenericizeContainerClientsAction extends SelectionDispatchAction {
 			if (canEnable(elements)) {
 				startRefactoring(elements);
 			} else {
-				String unavailable= RefactoringMessages.getString("GenericizeContainerClientsAction.unavailable"); //$NON-NLS-1$;
+				String unavailable= RefactoringMessages.getString("AugmentRawContainerClientsAction.unavailable"); //$NON-NLS-1$;
 				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
 			}
 		} catch (JavaModelException e) {
@@ -122,7 +122,7 @@ public class GenericizeContainerClientsAction extends SelectionDispatchAction {
 			if (element != null && canEnable(array)){
 				startRefactoring(array);	
 			} else {
-				String unavailable= RefactoringMessages.getString("GenericizeContainerClientsAction.unavailable"); //$NON-NLS-1$;
+				String unavailable= RefactoringMessages.getString("AugmentRawContainerClientsAction.unavailable"); //$NON-NLS-1$;
 				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
 			}
 		} catch (JavaModelException e) {
@@ -145,12 +145,12 @@ public class GenericizeContainerClientsAction extends SelectionDispatchAction {
 
 	private static boolean canEnable(IJavaElement[] elements) throws JavaModelException {
 		//TODO: LogicalPackages?
-		return GenericizeContainerClientsRefactoring.isAvailable(elements);
+		return AugmentRawContainerClientsRefactoring.isAvailable(elements);
 	}
 	
 	private void startRefactoring(IJavaElement[] elements) {
 		try {
-			GenericizeContainerClientsRefactoring refactoring= GenericizeContainerClientsRefactoring.create(elements);
+			AugmentRawContainerClientsRefactoring refactoring= AugmentRawContainerClientsRefactoring.create(elements);
 			if (refactoring == null)
 				return;
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, true);
@@ -159,7 +159,7 @@ public class GenericizeContainerClientsAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static RefactoringWizard createWizard(GenericizeContainerClientsRefactoring refactoring) {
-		return new GenericizeContainerClientsWizard(refactoring);
+	private static RefactoringWizard createWizard(AugmentRawContainerClientsRefactoring refactoring) {
+		return new AugmentRawContainerClientsWizard(refactoring);
 	}
 }

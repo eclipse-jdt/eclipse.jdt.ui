@@ -10,20 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 
 /**
  * A ParameterTypeVariable is a ConstraintVariable which stands for
  * the type of a method parameter.
  */
-public class ParameterTypeVariable2 extends ConstraintVariable2 implements IUpdatableConstraintVariable {
+public class ParameterTypeVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
 
 	private final int fParameterIndex;
 	private final String fMethodBindingKey;
-	private CompilationUnitRange fCompilationUnitRange;
+	private ICompilationUnit fCompilationUnit;
 	
 	public ParameterTypeVariable2(TypeHandle parameterTypeHandle, int parameterIndex, IMethodBinding methodBinding) {
 		super(parameterTypeHandle);
@@ -34,12 +34,12 @@ public class ParameterTypeVariable2 extends ConstraintVariable2 implements IUpda
 		fMethodBindingKey= methodBinding.getKey();
 	}
 	
-	public void setCompilationUnitRange(CompilationUnitRange range) {
-		fCompilationUnitRange= range;
+	public void setCompilationUnit(ICompilationUnit cu) {
+		fCompilationUnit= cu;
 	}
 	
-	public CompilationUnitRange getCompilationUnitRange() {
-		return fCompilationUnitRange;
+	public ICompilationUnit getCompilationUnit() {
+		return fCompilationUnit;
 	}
 
 	public int getParameterIndex() {

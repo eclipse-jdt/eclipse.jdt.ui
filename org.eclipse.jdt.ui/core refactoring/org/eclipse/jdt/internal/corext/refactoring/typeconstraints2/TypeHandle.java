@@ -16,11 +16,13 @@ public class TypeHandle {
 	
 	private String fTypeKey;
 	private final String fQualifiedName;
+	private final TypeHandle[] fDirectSupertypes;
 	//TODO: type parameters, array component types
 	
-	TypeHandle(String typeKey, String qualifiedName) {
+	/*package*/ TypeHandle(String typeKey, String qualifiedName, TypeHandle[] directDupertypes) {
 		fTypeKey= typeKey;
 		fQualifiedName= qualifiedName;
+		fDirectSupertypes= directDupertypes;
 	}
 	
 	public String getTypeKey() {
@@ -40,5 +42,16 @@ public class TypeHandle {
 	
 	public String toString() {
 		return fQualifiedName;
+	}
+	
+	public boolean canAssign(TypeHandle targetTypeCandidate) {
+		if (this == targetTypeCandidate)
+			return true;
+
+		for (int i= 0; i < fDirectSupertypes.length; i++)
+			if (fDirectSupertypes[i].canAssign(targetTypeCandidate))
+				return true;
+
+		return false;
 	}
 }

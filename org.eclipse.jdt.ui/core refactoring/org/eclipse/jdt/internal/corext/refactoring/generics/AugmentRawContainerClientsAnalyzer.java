@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.corext.refactoring.genericize;
+package org.eclipse.jdt.internal.corext.refactoring.generics;
 
 import java.util.HashSet;
 
@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintCreator2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -42,13 +41,13 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 
-public class GenericizeContainerClientsAnalyzer {
+public class AugmentRawContainerClientsAnalyzer {
 	
 	private final IJavaElement[] fElements;
 	private HashSet fProcessedCus;
-	private AugmentRawTypesTCFactory fTypeConstraintFactory;
+	private AugmentRawContainerClientsTCFactory fTypeConstraintFactory;
 
-	public GenericizeContainerClientsAnalyzer(IJavaElement[] elements) {
+	public AugmentRawContainerClientsAnalyzer(IJavaElement[] elements) {
 		fElements= elements;
 		fProcessedCus= new HashSet();
 	}
@@ -57,7 +56,7 @@ public class GenericizeContainerClientsAnalyzer {
 		pm.beginTask("", 10); //$NON-NLS-1$
 		
 		IJavaProject project= fElements[0].getJavaProject();
-		fTypeConstraintFactory= new AugmentRawTypesTCFactory(project);
+		fTypeConstraintFactory= new AugmentRawContainerClientsTCFactory(project);
 		
 		GenericContainers genericContainers= GenericContainers.create(project, new SubProgressMonitor(pm, 1));
 		IType[] containerTypes= genericContainers.getContainerTypes();
@@ -89,11 +88,10 @@ public class GenericizeContainerClientsAnalyzer {
 	}
 
 	protected void analyzeCU(ICompilationUnit cu) {
-		
-		ConstraintCreator2 unitCollector= new AugmentRawTypesConstraintCreator2(fTypeConstraintFactory);
+		AugmentRawContClConstraintCreator unitCollector= new AugmentRawContClConstraintCreator(fTypeConstraintFactory);
 		CompilationUnit unitAST= new RefactoringASTParser(AST.JLS3).parse(cu, true);
 		unitAST.accept(unitCollector);
-		ITypeConstraint2[] unitConstraints= unitCollector.getConstraints();
+		ITypeConstraint2[] unitConstraints= fTypeConstraintFactory.getNewTypeConstraints();
 		//TODO: add required methods/cus to "toscan" list
 		
 		fProcessedCus.add(cu);

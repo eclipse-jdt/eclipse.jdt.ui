@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.corext.refactoring.genericize;
+package org.eclipse.jdt.internal.corext.refactoring.generics;
 
 import java.util.HashMap;
 
@@ -33,13 +33,13 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-public class GenericizeContainerClientsRefactoring extends Refactoring {
+public class AugmentRawContainerClientsRefactoring extends Refactoring {
 
 	private TextChangeManager fChangeManager;
 	private final IJavaElement[] fElements;
-	private GenericizeContainerClientsAnalyzer fAnalyzer;
+	private AugmentRawContainerClientsAnalyzer fAnalyzer;
 	
-	private GenericizeContainerClientsRefactoring(IJavaElement[] elements) {
+	private AugmentRawContainerClientsRefactoring(IJavaElement[] elements) {
 		fElements= elements;
 	}
 	
@@ -47,9 +47,9 @@ public class GenericizeContainerClientsRefactoring extends Refactoring {
 		return elements.length > 0;
 	}
 
-	public static GenericizeContainerClientsRefactoring create(IJavaElement[] elements) {
+	public static AugmentRawContainerClientsRefactoring create(IJavaElement[] elements) {
 		if (isAvailable(elements)) {
-			return new GenericizeContainerClientsRefactoring(elements);
+			return new AugmentRawContainerClientsRefactoring(elements);
 		}
 		return null;
 	}
@@ -58,7 +58,7 @@ public class GenericizeContainerClientsRefactoring extends Refactoring {
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("GenericizeContainerClientsRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.getString("AugmentRawContainerClientsRefactoring.name"); //$NON-NLS-1$
 	}
 	
 	/*
@@ -73,10 +73,10 @@ public class GenericizeContainerClientsRefactoring extends Refactoring {
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		pm.beginTask(RefactoringCoreMessages.getString("GenericizeContainerClientsRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.getString("AugmentRawContainerClientsRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
 		try {
 			RefactoringStatus result= check15();
-			fAnalyzer= new GenericizeContainerClientsAnalyzer(fElements);
+			fAnalyzer= new AugmentRawContainerClientsAnalyzer(fElements);
 			fAnalyzer.analyzeContainerReferences(pm, result);
 			
 //			result.merge(performAnalysis(pm));
@@ -117,7 +117,7 @@ public class GenericizeContainerClientsRefactoring extends Refactoring {
 //	 * @return RefactoringStatus
 //	 */
 //	private RefactoringStatus performAnalysis(IProgressMonitor pm) {
-//		GenericizeCollectionClientAnalyzer analyzer= new GenericizeCollectionClientAnalyzer(fOwningClass, fAffectedUnits, fConstraintOptimizations, fDebugMessages);
+//		AugmentRawContainerClientsAnalyzer analyzer= new AugmentRawContainerClientsAnalyzer(fOwningClass, fAffectedUnits, fConstraintOptimizations, fDebugMessages);
 //	
 //		analyzer.setModifyPublicMembers(fModifyPublicMembers);
 //		analyzer.setInferMethodTypeParms(fInferMethodTypeParms);

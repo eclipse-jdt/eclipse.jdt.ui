@@ -25,9 +25,6 @@ public abstract class ConstraintVariable2 {
 	
 	private Object[] fDatas;
 
-	private ConstraintVariable2 fUpdatableConstraintVariable;
-
-	
 	/**
 	 * @param typeHandle the type binding TODO: allow null?
 	 */
@@ -82,22 +79,19 @@ public abstract class ConstraintVariable2 {
 	}
 	
 	public String toString() {
-		if (fTypeHandle == null)
-			return "<NULL TYPE HANDLE>"; //$NON-NLS-1$
-		String toString= (String) getData(TO_STRING);
-		return toString == null ? fTypeHandle.getTypeKey() : toString;
+		String name= getClass().getName();
+		int dot= name.lastIndexOf('.');
+		return name.substring(dot + 1) + ": " //$NON-NLS-1$
+				+ (fTypeHandle == null ? "<NULL TYPE HANDLE>" : fTypeHandle.getQualifiedName()); //$NON-NLS-1$
+		//TODO:
+//		if (fTypeHandle == null)
+//			return "<NULL TYPE HANDLE>"; //$NON-NLS-1$
+//		String toString= (String) getData(TO_STRING);
+//		return toString == null ? fTypeHandle.getTypeKey() : toString;
 	}
 	
 	protected abstract int getHash();
 	
 	protected abstract boolean isSameAs(ConstraintVariable2 other);
 
-	/**
-	 * @param updatableConstraintVariable
-	 * 		the updatable ConstraintVariable for <code>this</code>'s equivalence group
-	 */
-	public void setRepresentative(ConstraintVariable2 updatableConstraintVariable) {
-		Assert.isTrue(fUpdatableConstraintVariable == null);
-		fUpdatableConstraintVariable= updatableConstraintVariable;
-	}
 }

@@ -11,31 +11,30 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 
 /**
  * A VariableVariable is a ConstraintVariable which stands for
  * the type of a variable, namely a field or a local variable
  * Use {@link ParameterTypeVariable2} for method parameters).
  */
-public class VariableVariable2 extends ConstraintVariable2 implements IUpdatableConstraintVariable {
+public class VariableVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
 
 	private String fVariableBindingKey;
-	private CompilationUnitRange fCompilationUnitRange;
+	private ICompilationUnit fCompilationUnit;
 	
 	public VariableVariable2(TypeHandle typeHandle, IVariableBinding variableBinding) {
 		super(typeHandle);
 		fVariableBindingKey= variableBinding.getKey();
 	}
 
-	public void setCompilationUnitRange(CompilationUnitRange range) {
-		fCompilationUnitRange= range;
+	public void setCompilationUnit(ICompilationUnit cu) {
+		fCompilationUnit= cu;
 	}
 	
-	public CompilationUnitRange getCompilationUnitRange() {
-		return fCompilationUnitRange;
+	public ICompilationUnit getCompilationUnit() {
+		return fCompilationUnit;
 	}
 
 	private Object getVariableBindingKey() {

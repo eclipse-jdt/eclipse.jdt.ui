@@ -43,7 +43,7 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.actions.GenericizeContainerClientsAction;
+import org.eclipse.jdt.internal.ui.actions.AugmentRawContainerClientsAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -64,7 +64,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
  */
 public class RefactorActionGroup extends ActionGroup {
 	
-	private static final String GENERICIZE_CONTAINER_CLIENTS_ACTION= "org.eclipse.jdt.ui.edit.text.java.genericize.container.clients"; //TODO: publish in IJavaEditorActionDefinitionIds
+	private static final String AUGMENT_RAW_CONTAINER_CLIENTS_ACTION= "org.eclipse.jdt.ui.edit.text.java.augment.raw.container.clients"; //TODO: publish in IJavaEditorActionDefinitionIds
 	
 	/**
 	 * Pop-up menu: id of the refactor sub menu (value <code>org.eclipse.jdt.ui.refactoring.menu</code>).
@@ -112,7 +112,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractInterfaceAction;
 	private SelectionDispatchAction fChangeTypeAction;
 	private SelectionDispatchAction fUseSupertypeAction;
-	private SelectionDispatchAction fGenericizeContainerClients;
+	private SelectionDispatchAction fAugmentRawContainerClients;
 	
 	private SelectionDispatchAction fInlineAction;
 	private SelectionDispatchAction fExtractMethodAction;
@@ -240,12 +240,12 @@ public class RefactorActionGroup extends ActionGroup {
 		editor.setAction("UseSupertype", fUseSupertypeAction); //$NON-NLS-1$
 		fEditorActions.add(fUseSupertypeAction);
 		
-		if (GenericizeContainerClientsAction.DEBUG) {
-			fGenericizeContainerClients= new GenericizeContainerClientsAction(editor);
-//			fGenericizeContainerClients.setActionDefinitionId(GENERICIZE_CONTAINER_CLIENTS_ACTION);
-			fGenericizeContainerClients.update(selection);
-			editor.setAction("GenericizeContainerClients", fGenericizeContainerClients); //$NON-NLS-1$
-			fEditorActions.add(fGenericizeContainerClients);
+		if (AugmentRawContainerClientsAction.DEBUG) {
+			fAugmentRawContainerClients= new AugmentRawContainerClientsAction(editor);
+//			fAugmentRawContainerClients.setActionDefinitionId(AUGMENT_RAW_CONTAINER_CLIENTS_ACTION);
+			fAugmentRawContainerClients.update(selection);
+			editor.setAction("AugmentRawContainerClients", fAugmentRawContainerClients); //$NON-NLS-1$
+			fEditorActions.add(fAugmentRawContainerClients);
 		}
 		
 		fInlineAction= new InlineAction(editor);
@@ -346,10 +346,10 @@ public class RefactorActionGroup extends ActionGroup {
 		fUseSupertypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
 		initAction(fUseSupertypeAction, provider, selection);
 		
-		if (GenericizeContainerClientsAction.DEBUG) {
-			fGenericizeContainerClients= new GenericizeContainerClientsAction(fSite);
-//			fGenericizeContainerClients.setActionDefinitionId(GENERICIZE_CONTAINER_CLIENTS_ACTION);
-			initAction(fGenericizeContainerClients, provider, selection);
+		if (AugmentRawContainerClientsAction.DEBUG) {
+			fAugmentRawContainerClients= new AugmentRawContainerClientsAction(fSite);
+//			fAugmentRawContainerClients.setActionDefinitionId(AUGMENT_RAW_CONTAINER_CLIENTS_ACTION);
+			initAction(fAugmentRawContainerClients, provider, selection);
 		}
 		
 		fInlineAction= new InlineAction(fSite);
@@ -397,7 +397,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.CHANGE_TYPE, fChangeTypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_NESTED_TO_TOP, fConvertNestedToTopAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
-//TODO		actionBars.setGlobalActionHandler(JdtActionConstants.GENERICIZE_CONTAINER_CLIENTS, fGenericizeContainerClients);
+//TODO		actionBars.setGlobalActionHandler(JdtActionConstants.AUGMENT_RAW_CONTAINER_CLIENTS, fAugmentRawContainerClients);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_LOCAL_TO_FIELD, fConvertLocalToFieldAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_ANONYMOUS_TO_NESTED, fConvertAnonymousToNestedAction);
 	}
@@ -493,8 +493,8 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fExtractInterfaceAction);
 		added+= addAction(refactorSubmenu, fChangeTypeAction);
 		added+= addAction(refactorSubmenu, fUseSupertypeAction);
-		if (GenericizeContainerClientsAction.DEBUG) {
-			added+= addAction(refactorSubmenu, fGenericizeContainerClients);
+		if (AugmentRawContainerClientsAction.DEBUG) {
+			added+= addAction(refactorSubmenu, fAugmentRawContainerClients);
 		}
 		refactorSubmenu.add(new Separator(GROUP_CODING));
 		added+= addAction(refactorSubmenu, fInlineAction);
