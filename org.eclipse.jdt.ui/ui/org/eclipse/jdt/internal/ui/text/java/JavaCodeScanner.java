@@ -115,8 +115,8 @@ public class JavaCodeScanner extends RuleBasedScanner {
 		if (token instanceof Token) 
 			((Token) token).setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_DEFAULT)));
 		
-		fKeyword.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_KEYWORD)));
-		fType.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_TYPE)));
+		fKeyword.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_KEYWORD), null, SWT.BOLD));
+		fType.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_TYPE), null, SWT.BOLD));
 		fString.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_STRING)));
 		fComment.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT)));
 	}

@@ -63,6 +63,23 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
  */
 public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
+	
+	private class DynamicToken extends Token {
+		
+		private String fKey;
+		
+		public DynamicToken(String key) {
+			super(null);
+			fKey= key;
+		}
+		
+		public Object getData() {
+			Color c= getColorManager().getColor(fKey);
+			return new TextAttribute(c);
+		}
+	};
+	
+	
 	private JavaTextTools fJavaTextTools;
 	private ITextEditor fTextEditor;
 	
@@ -131,13 +148,13 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_DOC);
 
 		RuleBasedScanner scanner= new RuleBasedScanner();
-		scanner.setDefaultReturnToken(new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT))));
+		scanner.setDefaultReturnToken(new DynamicToken(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT));
 		dr= new RuleBasedDamagerRepairer(scanner);		
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
 
 		scanner= new RuleBasedScanner();
-		scanner.setDefaultReturnToken(new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT))));
+		scanner.setDefaultReturnToken(new DynamicToken(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT));
 		dr= new RuleBasedDamagerRepairer(scanner);		
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);

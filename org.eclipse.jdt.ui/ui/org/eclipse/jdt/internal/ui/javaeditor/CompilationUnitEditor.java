@@ -49,9 +49,11 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextInputListener;
+import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -102,7 +104,7 @@ public class CompilationUnitEditor extends JavaEditor {
 	/**
 	 * Responsible for highlighting matching pairs of brackets.
 	 */
-	class BracketHighlighter implements KeyListener, MouseListener {		
+	class BracketHighlighter implements KeyListener, MouseListener, ISelectionChangedListener, ITextListener {		
 		
 		/**
 		 * Highlights the brackets.
@@ -131,20 +133,26 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 			public void run() {
 				
-				int offset= fSourceViewer.getSelectedRange().x;
-				IRegion pair= fMatcher.match(fSourceViewer.getDocument(), offset);
-				
+				Point selection= fSourceViewer.getSelectedRange();
+				if (selection.y > 0) {
+					removeStyles();
+					return;
+				}
+					
+				IRegion pair= fMatcher.match(fSourceViewer.getDocument(), selection.x);
 				if (pair == null) {
 					removeStyles();
 				} else {
 					
-					if (pair.getOffset() != fBracketPosition.getOffset() || pair.getLength() != fBracketPosition.getLength())
+					if (pair.getOffset() != fBracketPosition.getOffset() || pair.getLength() != fBracketPosition.getLength()) {
+						
 						removeStyles();
 						
-					fBracketPosition.offset= pair.getOffset();
-					fBracketPosition.length= pair.getLength();
-					fBracketPosition.isDeleted= false;
-					
+						fBracketPosition.offset= pair.getOffset();
+						fBracketPosition.length= pair.getLength();
+						fBracketPosition.isDeleted= false;
+					}
+										
 					applyStyles();
 				}
 			}
@@ -181,9 +189,11 @@ public class CompilationUnitEditor extends JavaEditor {
 			}
 						
 			private void removeStyles() {
-				fHooked= false;
-				fTextWidget.removePaintListener(this);
-				handleDrawRequest(null);
+				if (fHooked) {
+					fHooked= false;
+					fTextWidget.removePaintListener(this);
+					handleDrawRequest(null);
+				}
 			}
 			
 			private void applyStyles() {
@@ -269,6 +279,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		
 		private ISourceViewer fSourceViewer;
 		private HighlightBrackets fHighlightBrackets;
+		private boolean fTextChanged= false;
 
 		public BracketHighlighter(ISourceViewer sourceViewer) {
 			fSourceViewer= sourceViewer;
@@ -278,6 +289,11 @@ public class CompilationUnitEditor extends JavaEditor {
 		public void install() {
 			
 			fManager.install();
+			
+			ISelectionProvider provider= fSourceViewer.getSelectionProvider();
+			provider.addSelectionChangedListener(this);
+			
+			fSourceViewer.addTextListener(this);
 			
 			StyledText text= fSourceViewer.getTextWidget();
 			text.addKeyListener(this);
@@ -298,6 +314,11 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 			if (fSourceViewer != null && fBracketHighlighter != null) {
 				
+				ISelectionProvider provider= fSourceViewer.getSelectionProvider();
+				provider.removeSelectionChangedListener(this);
+				
+				fSourceViewer.removeTextListener(this);
+				
 				StyledText text= fSourceViewer.getTextWidget();
 				if (text != null && !text.isDisposed()) {
 					text.removeKeyListener(fBracketHighlighter);
@@ -312,13 +333,15 @@ public class CompilationUnitEditor extends JavaEditor {
 		 * @see KeyListener#keyPressed(KeyEvent)
 		 */
 		public void keyPressed(KeyEvent e) {
+			fTextChanged= false;
 		}
 
 		/*
 		 * @see KeyListener#keyReleased(KeyEvent)
 		 */
 		public void keyReleased(KeyEvent e) {
-			fHighlightBrackets.run();
+			if (!fTextChanged)
+				fHighlightBrackets.run();
 		}
 
 		/*
@@ -338,6 +361,21 @@ public class CompilationUnitEditor extends JavaEditor {
 		 */
 		public void mouseUp(MouseEvent e) {
 			fHighlightBrackets.run();
+		}
+		
+		/*
+		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
+		 */
+		public void selectionChanged(SelectionChangedEvent event) {
+			fHighlightBrackets.run();
+		}
+		
+		/*
+		 * @see ITextListener#textChanged(TextEvent)
+		 */
+		public void textChanged(TextEvent event) {
+			fHighlightBrackets.run();
+			fTextChanged= true;
 		}
 	};
 	
