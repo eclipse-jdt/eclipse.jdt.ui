@@ -44,7 +44,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Collection result) throws CoreException {
 		IMethod[] methods= type.getMethods();
 		String constructorName= type.getElementName();
-		if (constructorName.startsWith(prefix) && !hasMethod(methods, constructorName)) {
+		if (constructorName.length() > 0 && constructorName.startsWith(prefix) && !hasMethod(methods, constructorName)) {
 			result.add(new MethodCompletionProposal(type, constructorName, null, offset, length, relevance));
 		}
 		
