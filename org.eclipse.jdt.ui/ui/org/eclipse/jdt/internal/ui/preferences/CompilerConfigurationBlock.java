@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -162,6 +163,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private Composite fJavadocComposite;
 	
 	private String[] fRememberedUserCompliance;
+	
+	private static final int IDX_ASSERT_AS_IDENTIFIER= 0;
+	private static final int IDX_SOURCE_COMPATIBILITY= 1;
+	private static final int IDX_CODEGEN_TARGET_PLATFORM= 2;
+	private static final int IDX_COMPLIANCE= 3;
+	private static final int IDX_INLINE_JSR_BYTECODE= 4;
 
 	private IStatus fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus;
 
@@ -183,6 +190,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			(String) fWorkingValues.get(PREF_SOURCE_COMPATIBILITY),
 			(String) fWorkingValues.get(PREF_CODEGEN_TARGET_PLATFORM),
 			(String) fWorkingValues.get(PREF_COMPLIANCE),
+			(String) fWorkingValues.get(PREF_CODEGEN_INLINE_JSR_BYTECODE),
 		};
 	}
 	
@@ -687,10 +695,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
 		Control[] otherChildren= group.getChildren();	
 				
-		String[] values14, values14Labels;
+		String[] versions, versionsLabels;
 		if (JavaModelUtil.isJDTCore_1_5()) {
-			values14= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5 };
-			values14Labels= new String[] {
+			versions= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5 };
+			versionsLabels= new String[] {
 				PreferencesMessages.getString("CompilerConfigurationBlock.version11"),  //$NON-NLS-1$
 				PreferencesMessages.getString("CompilerConfigurationBlock.version12"), //$NON-NLS-1$
 				PreferencesMessages.getString("CompilerConfigurationBlock.version13"), //$NON-NLS-1$
@@ -698,8 +706,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.getString("CompilerConfigurationBlock.version15") //$NON-NLS-1$
 			};
 		} else {
-			values14= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4 };
-			values14Labels= new String[] {
+			versions= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4 };
+			versionsLabels= new String[] {
 				PreferencesMessages.getString("CompilerConfigurationBlock.version11"),  //$NON-NLS-1$
 				PreferencesMessages.getString("CompilerConfigurationBlock.version12"), //$NON-NLS-1$
 				PreferencesMessages.getString("CompilerConfigurationBlock.version13"), //$NON-NLS-1$
@@ -708,7 +716,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.codegen_targetplatform.label"); //$NON-NLS-1$
-		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, values14, values14Labels, indent);	
+		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, versions, versionsLabels, indent);	
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.source_compatibility.label"); //$NON-NLS-1$
 		addComboBox(group, label, PREF_SOURCE_COMPATIBILITY, values34, values34Labels, indent);	
@@ -815,6 +823,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			} else if (PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey) ||
 					PREF_PB_ASSERT_AS_IDENTIFIER.equals(changedKey)) {
 				fComplianceStatus= validateCompliance();
+				updateInlineJSREnableState();
 			} else if (PREF_PB_MAX_PER_UNIT.equals(changedKey)) {
 				fMaxNumberProblemsStatus= validateMaxNumberProblems();
 			} else if (PREF_RESOURCE_FILTER.equals(changedKey)) {
@@ -838,6 +847,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			updateEnableStates();
 			updateComplianceEnableState();
 			updateAssertAsIdentifierEnableState();
+			updateInlineJSREnableState();
 			fComplianceStatus= validateCompliance();
 			fMaxNumberProblemsStatus= validateMaxNumberProblems();
 			fResourceFilterStatus= validateResourceFilters();
@@ -973,14 +983,36 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				if (!ERROR.equals(val)) {
 					fWorkingValues.put(PREF_PB_ASSERT_AS_IDENTIFIER, ERROR);
 					updateCombo(combo);
-					fRememberedUserCompliance[0]= val;
+					fRememberedUserCompliance[IDX_ASSERT_AS_IDENTIFIER]= val;
 				}
 			} else {
-				String val= fRememberedUserCompliance[0];
+				String val= fRememberedUserCompliance[IDX_ASSERT_AS_IDENTIFIER];
 				if (!ERROR.equals(val)) {
 					fWorkingValues.put(PREF_PB_ASSERT_AS_IDENTIFIER, val);
 					updateCombo(combo);
 				}
+			}
+		}
+	}
+	
+	private void updateInlineJSREnableState() {
+		boolean enabled= !checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_5);
+		Button checkBox= getCheckBox(PREF_CODEGEN_INLINE_JSR_BYTECODE);
+		checkBox.setEnabled(enabled);
+		
+		if (!enabled) {
+			String val= (String) fWorkingValues.get(PREF_CODEGEN_INLINE_JSR_BYTECODE);
+			fRememberedUserCompliance[IDX_INLINE_JSR_BYTECODE]= val;
+			
+			if (!ENABLED.equals(val)) {
+				fWorkingValues.put(PREF_CODEGEN_INLINE_JSR_BYTECODE, ENABLED);
+				updateCheckBox(checkBox);
+			}
+		} else {
+			String val= fRememberedUserCompliance[IDX_INLINE_JSR_BYTECODE];
+			if (!ENABLED.equals(val)) {
+				fWorkingValues.put(PREF_CODEGEN_INLINE_JSR_BYTECODE, val);
+				updateCheckBox(checkBox);
 			}
 		}
 	}
@@ -995,10 +1027,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		
 		if (isDefault) {
 			if (rememberOld) {
-				fRememberedUserCompliance[0]= (String) fWorkingValues.get(PREF_PB_ASSERT_AS_IDENTIFIER);
-				fRememberedUserCompliance[1]= (String) fWorkingValues.get(PREF_SOURCE_COMPATIBILITY);
-				fRememberedUserCompliance[2]= (String) fWorkingValues.get(PREF_CODEGEN_TARGET_PLATFORM);
-				fRememberedUserCompliance[3]= complianceLevel;
+				fRememberedUserCompliance[IDX_ASSERT_AS_IDENTIFIER]= (String) fWorkingValues.get(PREF_PB_ASSERT_AS_IDENTIFIER);
+				fRememberedUserCompliance[IDX_SOURCE_COMPATIBILITY]= (String) fWorkingValues.get(PREF_SOURCE_COMPATIBILITY);
+				fRememberedUserCompliance[IDX_CODEGEN_TARGET_PLATFORM]= (String) fWorkingValues.get(PREF_CODEGEN_TARGET_PLATFORM);
+				fRememberedUserCompliance[IDX_COMPLIANCE]= complianceLevel;
 			}
 
 			if (VERSION_1_4.equals(complianceLevel)) {
@@ -1015,10 +1047,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				target= VERSION_1_1;
 			}
 		} else {
-			if (rememberOld && complianceLevel.equals(fRememberedUserCompliance[3])) {
-				assertAsId= fRememberedUserCompliance[0];
-				source= fRememberedUserCompliance[1];
-				target= fRememberedUserCompliance[2];
+			if (rememberOld && complianceLevel.equals(fRememberedUserCompliance[IDX_COMPLIANCE])) {
+				assertAsId= fRememberedUserCompliance[IDX_ASSERT_AS_IDENTIFIER];
+				source= fRememberedUserCompliance[IDX_SOURCE_COMPATIBILITY];
+				target= fRememberedUserCompliance[IDX_CODEGEN_TARGET_PLATFORM];
 			} else {
 				return;
 			}
@@ -1027,6 +1059,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		fWorkingValues.put(PREF_SOURCE_COMPATIBILITY, source);
 		fWorkingValues.put(PREF_CODEGEN_TARGET_PLATFORM, target);
 		updateControls();
+		updateInlineJSREnableState();
 	}
 	
 	/*
@@ -1041,7 +1074,11 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			|| (VERSION_1_4.equals(complianceLevel)
 				&& WARNING.equals(map.get(PREF_PB_ASSERT_AS_IDENTIFIER))
 				&& VERSION_1_3.equals(map.get(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_2.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))) {
+				&& VERSION_1_2.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))
+			|| (VERSION_1_5.equals(complianceLevel)
+				&& ERROR.equals(map.get(PREF_PB_ASSERT_AS_IDENTIFIER))
+				&& VERSION_1_5.equals(map.get(PREF_SOURCE_COMPATIBILITY))
+				&& VERSION_1_5.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))) {
 			return DEFAULT_CONF;
 		}
 		return USER_CONF;
