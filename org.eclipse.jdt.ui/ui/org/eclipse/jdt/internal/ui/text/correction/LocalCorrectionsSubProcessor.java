@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -87,12 +88,23 @@ public class LocalCorrectionsSubProcessor {
 		
 		if (selectedNode != null && selectedNode.getParent() instanceof VariableDeclarationFragment) {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) selectedNode.getParent();
-			VariableDeclarationStatement statement= (VariableDeclarationStatement) fragment.getParent();
-			if (statement.fragments().size() == 1) {
+			ASTNode parent= fragment.getParent();
+			Type type= null;
+			if (parent instanceof VariableDeclarationStatement) {
+				VariableDeclarationStatement stmt= (VariableDeclarationStatement) parent;
+				if (stmt.fragments().size() == 1) {
+					type= stmt.getType();
+				}
+			} else if (parent instanceof FieldDeclaration) {
+				FieldDeclaration decl= (FieldDeclaration) parent;
+				if (decl.fragments().size() == 1) {
+					type= decl.getType();
+				}
+			}			
+			if (type != null) {
 				String castType= args[0];
 				String simpleCastType= Signature.getSimpleName(castType);
-				
-				Type type= statement.getType();
+
 				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast_var.description", simpleCastType); //$NON-NLS-1$
 				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, type.getStartPosition(), type.getLength(), simpleCastType, 1);
 				edit= new ImportEdit(cu, settings);
