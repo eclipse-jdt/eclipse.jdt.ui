@@ -62,6 +62,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -401,7 +402,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		
 		IType[] types= new IType[0];
 		try {
-			types= TestSearchEngine.findTests(getLaunchConfigurationDialog(), new Object[] {javaProject}); 
+			// fix for 66922 Wrong radio behaviour when switching  
+			types= TestSearchEngine.findTests(PlatformUI.getWorkbench().getProgressService(), new Object[] {javaProject}); 
 		} catch (InterruptedException e) {
 			setErrorMessage(e.getMessage());
 			return;
