@@ -418,13 +418,14 @@ public class StubUtility {
 		return document.get();
 	}
 
-
-
 	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
 		ITypeBinding[] typeBindings= binding.getParameterTypes();
 		String[] result= new String[typeBindings.length];
 		for (int i= 0; i < result.length; i++) {
-			result[i]= typeBindings[i].getErasure().getQualifiedName();
+			if (typeBindings[i].isTypeVariable())
+				result[i]= typeBindings[i].getName();
+			else
+				result[i]= typeBindings[i].getGenericType().getQualifiedName();
 		}
 		return result;
 	}
@@ -633,7 +634,7 @@ public class StubUtility {
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
 		if (overridden != null) {
-			overridden= overridden.getErasure();
+			overridden= overridden.getGenericMethod();
 			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
 			String[] parameterTypesQualifiedNames= getParameterTypesQualifiedNames(overridden);			
 			return getMethodComment(cu, typeName, decl, true, overridden.isDeprecated(), declaringClassQualifiedName, parameterTypesQualifiedNames, lineDelimiter);
