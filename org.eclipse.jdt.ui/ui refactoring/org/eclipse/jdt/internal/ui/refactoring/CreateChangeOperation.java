@@ -38,8 +38,9 @@ public class CreateChangeOperation implements IRunnableWithProgress {
 	
 	/**
 	 * Creates a new instance with the given refactoring.
-	 * @param refactoring the refactoring. Parameter must not be <code>null</code>.
-	 * @param style style to define which conditions to check.
+	 *
+	 * @param refactoring the refactoring. Parameter must not be <code>null</code>
+	 * @param style style to define which conditions to check
 	 */
 	public CreateChangeOperation(Refactoring refactoring, int style) {
 		Assert.isNotNull(refactoring);
@@ -47,6 +48,23 @@ public class CreateChangeOperation implements IRunnableWithProgress {
 		fStyle= style;
 		Assert.isTrue(checkStyle(fStyle));
 		fCheckPassedSeverity= RefactoringStatus.ERROR;
+	}
+	
+	/**
+	 * Creates a new instance with the given refactoring.
+	 * 
+	 * @param refactoring the refactoring. Parameter must not be <code>null</code>
+	 * @param style style to define which conditions to check
+	 * @param checkPassedSeverity the severity below which the check is considered
+	 *  to be passed
+	 * @see #setCheckPassedSeverity()
+	 */
+	public CreateChangeOperation(Refactoring refactoring, int style, int checkPassedSeverity) {
+		Assert.isNotNull(refactoring);
+		fRefactoring= refactoring;
+		fStyle= style;
+		Assert.isTrue(checkStyle(fStyle));
+		setCheckPassedSeverity(checkPassedSeverity);
 	}
 	
 	/**
@@ -91,6 +109,8 @@ public class CreateChangeOperation implements IRunnableWithProgress {
 	/**
 	 * Returns the outcome of the operation or <code>null</code> if an exception 
 	 * occured when performing the operation.
+	 * 
+	 * @return the outcome of the operation
 	 */
 	public IChange getChange() {
 		return fChange;
@@ -99,6 +119,8 @@ public class CreateChangeOperation implements IRunnableWithProgress {
 	/**
 	 * Returns the status of the condition cheking. Returns <code>null</code> if an
 	 * exception occured when performing the operation.
+	 * 
+	 * @return the condition checking's status
 	 */
 	public RefactoringStatus getStatus() {
 		return fStatus;

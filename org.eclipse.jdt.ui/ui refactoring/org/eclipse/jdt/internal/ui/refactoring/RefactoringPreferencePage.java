@@ -36,7 +36,7 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 		Composite parent= getFieldEditorParent();
 		
 		{
-			String prefix= "RefactroingPreferencePage.errorPage.severity.";
+			String prefix= "RefactoringPreferencePage.errorPage.severity.";
 			RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
 				RefactoringPreferences.PREF_ERROR_PAGE_SEVERITY_THRESHOLD,
 				getResourceString(prefix + "label"),

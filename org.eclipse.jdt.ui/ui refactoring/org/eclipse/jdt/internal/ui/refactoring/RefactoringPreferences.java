@@ -22,7 +22,7 @@ public class RefactoringPreferences {
 	public static final String PREF_ERROR_PAGE_SEVERITY_THRESHOLD= "Refactoring.ErrorPage.severityThreshold";
 	public static final String PREF_JAVA_STYLE_GUIDE_CONFORM= "Refactoring.javaStyleGuideConform";
 
-	static int getCheckPassedSeverity() {	
+	static public int getCheckPassedSeverity() {	
 		String value= JavaPlugin.getDefault().getPreferenceStore().getString(PREF_ERROR_PAGE_SEVERITY_THRESHOLD);
 		int threshold= RefactoringStatus.ERROR;
 		try {
@@ -32,7 +32,7 @@ public class RefactoringPreferences {
 		return threshold;
 	}
 	
-	static boolean getCodeIsJavaStyleGuideConform() {
+	static public boolean getCodeIsJavaStyleGuideConform() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(PREF_JAVA_STYLE_GUIDE_CONFORM);
 	}

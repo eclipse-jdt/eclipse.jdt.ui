@@ -43,7 +43,7 @@ public class RefactoringWizard extends Wizard {
 	}
 	
 	/**
-	 * Initializes the wizard with the given selection and refactoring.
+	 * Initializes the wizard with the given refactoring.
 	 */
 	public void init(Refactoring refactoring) {
 		fRefactoring= refactoring;
