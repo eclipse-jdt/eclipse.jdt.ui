@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.browsing;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -29,7 +31,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecorator;
 
 /**
- * XXX: not yet reviewed - part of experimental logical packages view
+ * Label provider for the Packages view.
  */
 class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	
@@ -142,8 +144,20 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		if (fragment.isDefaultPackage()) {
 			return super.getText(fragment);
 		}
-		String name= fragment.getResource().getName();
-		return decorateText(name, fragment);
+		IResource res= fragment.getResource(); 
+		if(res != null && !(res.getType() == IResource.FILE))
+			return decorateText(res.getName(), fragment);
+		else
+			return decorateText(calculateName(fragment), fragment);
+	}
+	
+	private String calculateName(IPackageFragment fragment) {
+		
+		String name= fragment.getElementName();
+		if (name.indexOf(".") != -1) //$NON-NLS-1$
+			name= name.substring(name.lastIndexOf(".") + 1); //$NON-NLS-1$
+		return name;
+
 	}
 	
 	private String decorateText(String name, Object element) {
