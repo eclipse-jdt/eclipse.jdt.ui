@@ -8,9 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.correction;
+package org.eclipse.jdt.ui.text.java;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 /**
  *
@@ -46,12 +47,12 @@ public interface IProblemLocation {
 	/**
 	 * Returns the node that covers the location of the problem
 	 */
-	public ASTNode getCoveringNode(IAssistContext context);
+	public ASTNode getCoveringNode(CompilationUnit astRoot);
 
 	/**
 	 * Returns the node that is covered by the location of the problem
 	 */	
-	public ASTNode getCoveredNode(IAssistContext context);
+	public ASTNode getCoveredNode(CompilationUnit astRoot);
 	
 
 }

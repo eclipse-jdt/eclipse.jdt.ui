@@ -41,6 +41,7 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.text.java.*;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
@@ -51,8 +52,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
-	private static final String QUICKFIX_PROCESSOR_CONTRIBUTION_ID= "quickFixProcessor"; //$NON-NLS-1$
-	private static final String QUICKASSIST_PROCESSOR_CONTRIBUTION_ID= "quickAssistProcessor"; //$NON-NLS-1$
+	private static final String QUICKFIX_PROCESSOR_CONTRIBUTION_ID= "quickFixProcessors"; //$NON-NLS-1$
+	private static final String QUICKASSIST_PROCESSOR_CONTRIBUTION_ID= "quickAssistProcessors"; //$NON-NLS-1$
 
 
 	private static class CorrectionsComparator implements Comparator {
@@ -112,7 +113,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		ContributedProcessorDescriptor[] processors= getCorrectionProcessors();
 		for (int i= 0; i < processors.length; i++) {
 			try {
-				ICorrectionProcessor processor= (ICorrectionProcessor) processors[i].getProcessor(cu);
+				IQuickFixProcessor processor= (IQuickFixProcessor) processors[i].getProcessor(cu);
 				if (processor != null && processor.hasCorrections(cu, problemId)) {
 					return true;
 				}
@@ -122,7 +123,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		}
 		return false;
 	}
-
+	
 	public static boolean hasCorrections(IJavaAnnotation annotation) {
 		int problemId= annotation.getId();
 		if (problemId == -1) {
@@ -146,11 +147,11 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		return registry != null && registry.hasResolutions(marker);
 	}
 	
-	public static boolean hasAssists(IAssistContext context) {
+	public static boolean hasAssists(IInvocationContext context) {
 		ContributedProcessorDescriptor[] processors= getAssistProcessors();
 		for (int i= 0; i < processors.length; i++) {
 			try {
-				IAssistProcessor processor= (IAssistProcessor) processors[i].getProcessor(context.getCompilationUnit());
+				IQuickAssistProcessor processor= (IQuickAssistProcessor) processors[i].getProcessor(context.getCompilationUnit());
 				if (processor != null && processor.hasAssists(context)) {
 					return true;
 				}				
@@ -199,7 +200,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	}
 	
 
-	private void processProblemAnnotations(IAssistContext context, IAnnotationModel model, ArrayList proposals) {
+	private void processProblemAnnotations(IInvocationContext context, IAnnotationModel model, ArrayList proposals) {
 		int offset= context.getSelectionOffset();
 		
 		ArrayList problems= new ArrayList();
@@ -229,11 +230,11 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		collectAssists(context, problemLocations, proposals);
 	}
 
-	public static void collectCorrections(IAssistContext context, IProblemLocation[] locations, ArrayList proposals) {
+	public static void collectCorrections(IInvocationContext context, IProblemLocation[] locations, ArrayList proposals) {
 		ContributedProcessorDescriptor[] processors= getCorrectionProcessors();
 		for (int i= 0; i < processors.length; i++) {
 			try {
-				ICorrectionProcessor curr= (ICorrectionProcessor) processors[i].getProcessor(context.getCompilationUnit());
+				IQuickFixProcessor curr= (IQuickFixProcessor) processors[i].getProcessor(context.getCompilationUnit());
 				if (curr != null) {
 					IJavaCompletionProposal[] res= curr.getCorrections(context, locations);
 					if (res != null) {
@@ -249,11 +250,11 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		}
 	}
 	
-	public static void collectAssists(IAssistContext context, IProblemLocation[] locations, ArrayList proposals) {
+	public static void collectAssists(IInvocationContext context, IProblemLocation[] locations, ArrayList proposals) {
 		ContributedProcessorDescriptor[] processors= getAssistProcessors();
 		for (int i= 0; i < processors.length; i++) {
 			try {
-				IAssistProcessor curr= (IAssistProcessor) processors[i].getProcessor(context.getCompilationUnit());
+				IQuickAssistProcessor curr= (IQuickAssistProcessor) processors[i].getProcessor(context.getCompilationUnit());
 				if (curr != null) {
 					IJavaCompletionProposal[] res= curr.getAssists(context, locations);
 					if (res != null) {

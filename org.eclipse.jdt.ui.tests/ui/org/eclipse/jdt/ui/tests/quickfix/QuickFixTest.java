@@ -32,9 +32,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
-import org.eclipse.jdt.internal.ui.text.correction.IAssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
@@ -74,7 +74,7 @@ public class QuickFixTest extends TestCase {
 		}
 	}
 	
-	public static void assertCorrectContext(IAssistContext context, ProblemLocation problem) {
+	public static void assertCorrectContext(IInvocationContext context, ProblemLocation problem) {
 		if (problem.getProblemId() != 0) {
 			assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getCompilationUnit(), problem.getProblemId()));
 		}

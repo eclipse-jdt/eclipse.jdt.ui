@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.text.java.*;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.core.Util;
@@ -130,7 +131,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					IProblemLocation location= findProblemLocation(input, marker);
 					if (location != null) {
 						
-						IAssistContext context= new AssistContext(JavaModelUtil.toWorkingCopy(cu),  location.getOffset(), location.getLength());
+						IInvocationContext context= new AssistContext(JavaModelUtil.toWorkingCopy(cu),  location.getOffset(), location.getLength());
 						ArrayList proposals= new ArrayList();
 						JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
 						int nProposals= proposals.size();

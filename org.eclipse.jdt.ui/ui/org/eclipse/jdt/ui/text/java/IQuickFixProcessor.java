@@ -7,21 +7,26 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ * 
+ * This API is work in progress and may change at anytime.
+ * 
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.correction;
+package org.eclipse.jdt.ui.text.java;
 
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 /**
-  */
-public interface ICorrectionProcessor {
+ * Interface to be implemented by contributors to the extension point
+ * <code>org.eclipse.jdt.ui.quickFixProcessors</code>.
+ * This API is work in progress and may change at anytime.
+ */
+public interface IQuickFixProcessor {
 
 	/**
-	 * Returns true if the processor has propsals for the given problem. This test should be an
+	 * Returns true if the processor has proposals for the given problem. This test should be an
 	 * optimistic guess and be extremly cheap. 
 	 */
 	boolean hasCorrections(ICompilationUnit unit, int problemId);
@@ -33,6 +38,6 @@ public interface ICorrectionProcessor {
 	 * @return Returns the correction applicable at the location or <code>null</code> if no proposals
 	 * can be offered.
 	 */
-	IJavaCompletionProposal[] getCorrections(IAssistContext context, IProblemLocation[] locations) throws CoreException;
+	IJavaCompletionProposal[] getCorrections(IInvocationContext context, IProblemLocation[] locations) throws CoreException;
 	
 }

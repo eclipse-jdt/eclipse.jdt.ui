@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import org.eclipse.jdt.ui.text.java.*;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
@@ -69,21 +72,23 @@ public class ProblemLocation implements IProblemLocation {
 		return fOffset;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IProblemLocation#getCoveringNode(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IProblemLocation#getCoveringNode(org.eclipse.jdt.core.dom.CompilationUnit)
 	 */
-	public ASTNode getCoveringNode(IAssistContext context) {
+	public ASTNode getCoveringNode(CompilationUnit astRoot) {
 		NodeFinder finder= new NodeFinder(fOffset, fLength);
-		context.getASTRoot().accept(finder);
+		astRoot.accept(finder);
 		return finder.getCoveringNode();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IProblemLocation#getCoveredNode(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IProblemLocation#getCoveredNode(org.eclipse.jdt.core.dom.CompilationUnit)
 	 */
-	public ASTNode getCoveredNode(IAssistContext context) {
+	public ASTNode getCoveredNode(CompilationUnit astRoot) {
 		NodeFinder finder= new NodeFinder(fOffset, fLength);
-		context.getASTRoot().accept(finder);
+		astRoot.accept(finder);
 		return finder.getCoveredNode();
 	}
 	

@@ -31,8 +31,8 @@
 <extension-point name="%elementFiltersName" id="javaElementFilters" schema="schema/javaElementFilters.exsd"/>
 <extension-point name="%javaEditorTextHoversName" id="javaEditorTextHovers" schema="schema/javaEditorTextHovers.exsd"/>
 <extension-point name="%javadocCompletionProcessor" id="javadocCompletionProcessor" schema="schema/javadocCompletionProcessor.exsd"/>
-<extension-point name="%quickFixProcessor" id="quickFixProcessor" schema="schema/quickFixProcessor.exsd"/>
-<extension-point name="%quickAssistProcessor" id="quickAssistProcessor" schema="schema/quickAssistProcessor.exsd"/>
+<extension-point name="%quickFixProcessorExtensionPoint" id="quickFixProcessors" schema="schema/quickFixProcessors.exsd"/>
+<extension-point name="%quickAssistProcessorExtensionPoint" id="quickAssistProcessors" schema="schema/quickAssistProcessors.exsd"/>
 <extension-point name="%classpathContainerPageExtensionPoint" id="classpathContainerPage" schema="schema/classpathContainerPage.exsd"/>
 
 <extension
@@ -54,7 +54,7 @@
 </extension>
 
 <extension
-      point="org.eclipse.jdt.ui.quickFixProcessor">
+      point="org.eclipse.jdt.ui.quickFixProcessors">
    <quickFixProcessor
          id= "org.eclipse.jdt.ui.text.correction.QuickFixProcessor"
          class="org.eclipse.jdt.internal.ui.text.correction.QuickFixProcessor"
@@ -63,7 +63,7 @@
 </extension>
 
 <extension
-      point="org.eclipse.jdt.ui.quickAssistProcessor">
+      point="org.eclipse.jdt.ui.quickAssistProcessors">
    <quickAssistProcessor
          id= "org.eclipse.jdt.ui.text.correction.QuickAssistProcessor"
          class="org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor"
@@ -72,7 +72,7 @@
 </extension>
 
 <extension
-      point="org.eclipse.jdt.ui.quickAssistProcessor">
+      point="org.eclipse.jdt.ui.quickAssistProcessors">
    <quickAssistProcessor
          id= "org.eclipse.jdt.ui.text.correction.QuickTemplateProcessor"
          class="org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor"

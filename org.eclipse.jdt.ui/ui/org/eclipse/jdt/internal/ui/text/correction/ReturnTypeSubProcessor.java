@@ -23,6 +23,8 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.ui.text.java.*;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -79,10 +81,10 @@ public class ReturnTypeSubProcessor {
 	}	
 	
 	
-	public static void addMethodWithConstrNameProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addMethodWithConstrNameProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 	
-		ASTNode selectedNode= problem.getCoveringNode(context);
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode instanceof MethodDeclaration) {
 			MethodDeclaration declaration= (MethodDeclaration) selectedNode;
 			
@@ -98,11 +100,11 @@ public class ReturnTypeSubProcessor {
 	
 	}
 	
-	public static void addVoidMethodReturnsProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addVoidMethodReturnsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= problem.getCoveringNode(context);
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
 			return;
 		}
@@ -161,11 +163,11 @@ public class ReturnTypeSubProcessor {
 	
 
 	
-	public static void addMissingReturnTypeProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addMissingReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= problem.getCoveringNode(context);
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
 			return;
 		}
@@ -228,10 +230,10 @@ public class ReturnTypeSubProcessor {
 		}
 	}
 
-	public static void addMissingReturnStatementProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addMissingReturnStatementProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
-		ASTNode selectedNode= problem.getCoveringNode(context);
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode == null) {
 			return;
 		}

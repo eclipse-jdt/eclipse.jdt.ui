@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.ui.text.java.*;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -35,10 +37,10 @@ public class ModifierCorrectionSubProcessor {
 	public static final int TO_NON_PRIVATE= 3;
 	public static final int TO_NON_STATIC= 4;
 	
-	public static void addNonAccessibleMemberProposal(IAssistContext context, IProblemLocation problem, Collection proposals, int kind, int relevance) throws JavaModelException {
+	public static void addNonAccessibleMemberProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind, int relevance) throws JavaModelException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
-		ASTNode selectedNode= problem.getCoveringNode(context);
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode == null) {
 			return;
 		}
@@ -117,10 +119,10 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 	
-	public static void addNonFinalLocalProposal(IAssistContext context, IProblemLocation problem, Collection proposals) {
+	public static void addNonFinalLocalProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
-		ASTNode selectedNode= problem.getCoveringNode(context);
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
@@ -159,12 +161,12 @@ public class ModifierCorrectionSubProcessor {
 		return Modifier.PUBLIC;
 	}
 
-	public static void addAbstractMethodProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addAbstractMethodProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
 
-		ASTNode selectedNode= problem.getCoveringNode(context);
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
 			return;
 		}
@@ -233,12 +235,12 @@ public class ModifierCorrectionSubProcessor {
 		
 	}
 	
-	public static void addNativeMethodProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addNativeMethodProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
 
-		ASTNode selectedNode= problem.getCoveringNode(context);
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
 			return;
 		}
@@ -309,11 +311,11 @@ public class ModifierCorrectionSubProcessor {
 		return proposal;
 	}
 
-	public static void addMethodRequiresBodyProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addMethodRequiresBodyProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		AST ast= context.getASTRoot().getAST();
 		
-		ASTNode selectedNode= problem.getCoveringNode(context);
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (!(selectedNode instanceof MethodDeclaration)) {
 			return;
 		}
@@ -350,10 +352,10 @@ public class ModifierCorrectionSubProcessor {
 	}
 	
 
-	public static void addNeedToEmulateProposal(IAssistContext context, IProblemLocation problem, Collection proposals) {
+	public static void addNeedToEmulateProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
-		ASTNode selectedNode= problem.getCoveringNode(context);
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}

@@ -3,17 +3,17 @@
 <schema targetNamespace="org.eclipse.jdt.ui">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.jdt.ui" id="quickAssistProcessor" name="Quick Assist Processor"/>
+         <meta.schema plugin="org.eclipse.jdt.ui" id="quickAssistProcessors" name="Quick Assist Processor"/>
       </appInfo>
       <documentation>
-         This extension point allows to add a Quick Assist processor to e.g. offer new Quick Assists on Java problems.
+         This extension point allows to add a Quick Assist processor to offer new Quick Assists in the Java editor.
       </documentation>
    </annotation>
 
    <element name="extension">
       <complexType>
          <sequence>
-            <element ref="quickAssistProcessor" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="quickAssistProcessors" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -39,7 +39,7 @@
       </complexType>
    </element>
 
-   <element name="quickAssistProcessor">
+   <element name="quickAssistProcessors">
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
@@ -77,12 +77,12 @@ with a public 0-argument constructor.
 
 &lt;p&gt;
 &lt;pre&gt;
- &lt;extension point=&quot;org.eclipse.jdt.ui.quickAssistProcessor&quot;&gt;
-  &lt;quickAssistProcessor
+ &lt;extension point=&quot;org.eclipse.jdt.ui.quickAssistProcessors&quot;&gt;
+  &lt;quickAssistProcessors
    id=&quot;AdvancedQuickAssistProcessor&quot;
    name=&quot;Advanced Quick Assist Processor&quot;
    class=&quot;com.example.AdvancedQuickAssistProcessor&quot;&gt;
-  &lt;/quickAssistProcessor&gt;
+  &lt;/quickAssistProcessors&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;
 &lt;/p&gt;
@@ -94,7 +94,7 @@ with a public 0-argument constructor.
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         
+         The contributed class must implement &lt;code&gt;org.eclipse.jdt.ui.text.java.IQuickAssistProcessor&lt;/code&gt;
       </documentation>
    </annotation>
 

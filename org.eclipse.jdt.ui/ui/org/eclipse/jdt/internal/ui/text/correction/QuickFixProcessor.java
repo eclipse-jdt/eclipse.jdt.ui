@@ -21,11 +21,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
+import org.eclipse.jdt.ui.text.java.*;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 /**
   */
-public class QuickFixProcessor implements ICorrectionProcessor {
+public class QuickFixProcessor implements IQuickFixProcessor {
 
 	public boolean hasCorrections(ICompilationUnit cu, int problemId) {
 		switch (problemId) {
@@ -125,7 +126,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 	/* (non-Javadoc)
 	 * @see IAssistProcessor#getCorrections(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
 	 */
-	public IJavaCompletionProposal[] getCorrections(IAssistContext context, IProblemLocation[] locations) throws CoreException {
+	public IJavaCompletionProposal[] getCorrections(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
 		if (locations == null || locations.length == 0) {
 			return null;
 		}
@@ -142,7 +143,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 		return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 	}
 	
-	private void process(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	private void process(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		int id= problem.getProblemId();
 		if (id == 0) { // no proposals for none-problem locations
 			return;

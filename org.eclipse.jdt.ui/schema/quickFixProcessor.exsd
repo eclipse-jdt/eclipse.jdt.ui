@@ -3,17 +3,17 @@
 <schema targetNamespace="org.eclipse.jdt.ui">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.jdt.ui" id="quickFixProcessor" name="Quick Fix Processor"/>
+         <meta.schema plugin="org.eclipse.jdt.ui" id="quickFixProcessors" name="Quick Fix Processor"/>
       </appInfo>
       <documentation>
-         This extension point allows to add a Quick Fix processor to e.g. offer new Quick Fixes on Java problems.
+         This extension point allows to add a Quick Fix processor to offer new Quick Fixes on Java problems.
       </documentation>
    </annotation>
 
    <element name="extension">
       <complexType>
          <sequence>
-            <element ref="quickFixProcessor" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="quickFixProcessors" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -39,7 +39,7 @@
       </complexType>
    </element>
 
-   <element name="quickFixProcessor">
+   <element name="quickFixProcessors">
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
@@ -77,7 +77,7 @@ with a public 0-argument constructor.
 
 &lt;p&gt;
 &lt;pre&gt;
- &lt;extension point=&quot;org.eclipse.jdt.ui.quickFixProcessor&quot;&gt;
+ &lt;extension point=&quot;org.eclipse.jdt.ui.quickFixProcessors&quot;&gt;
   &lt;quickFixProcessor
    id=&quot;AdvancedQuickFixProcessor&quot;
    name=&quot;Advanced Quick Fix Processor&quot;
@@ -94,7 +94,7 @@ with a public 0-argument constructor.
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         
+         The contributed class must implement &lt;code&gt;org.eclipse.jdt.ui.text.java.IQuickFixProcessor&lt;/code&gt;
       </documentation>
    </annotation>
 

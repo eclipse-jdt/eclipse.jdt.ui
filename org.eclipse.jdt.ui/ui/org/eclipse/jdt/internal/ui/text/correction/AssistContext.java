@@ -14,9 +14,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.ui.text.java.*;
+
 /**
   */
-public class AssistContext implements IAssistContext {
+public class AssistContext implements IInvocationContext {
 	
 	private ICompilationUnit fCompilationUnit;
 	private int fOffset;

@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.text.java.*;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
@@ -47,7 +48,7 @@ import org.eclipse.jdt.internal.ui.text.template.TemplateProposal;
 /**
  * Quick template processor.
  */
-public class QuickTemplateProcessor implements IAssistProcessor {
+public class QuickTemplateProcessor implements IQuickAssistProcessor {
 	
 	private static final String $_LINE_SELECTION= "${" + GlobalVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -57,7 +58,7 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#hasAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
 	 */
-	public boolean hasAssists(IAssistContext context) throws CoreException {
+	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		IDocument document= getDocument(cu);
 			
@@ -77,7 +78,7 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#getAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
 	 */
-	public IJavaCompletionProposal[] getAssists(IAssistContext context, IProblemLocation[] locations) throws CoreException {
+	public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
 		try {
 			ICompilationUnit cu= context.getCompilationUnit();
 			IDocument document= getDocument(cu);

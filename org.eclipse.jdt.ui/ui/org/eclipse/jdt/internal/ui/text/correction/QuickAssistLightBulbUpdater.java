@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.*;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -195,7 +196,7 @@ public class QuickAssistLightBulbUpdater {
 			}
 			return;			
 		}
-		final IAssistContext context= new AssistContext(cu, offset, length);
+		final IInvocationContext context= new AssistContext(cu, offset, length);
 		calculateLightBulb(model, context);
 		//Runnable runnable= new Runnable() {
 		//	public void run() {
@@ -206,7 +207,7 @@ public class QuickAssistLightBulbUpdater {
 	}
 		
 	
-	private void calculateLightBulb(IAnnotationModel model, IAssistContext context) {
+	private void calculateLightBulb(IAnnotationModel model, IInvocationContext context) {
 		boolean needsAnnotation= JavaCorrectionProcessor.hasAssists(context);
 		if (fIsAnnotationShown) {
 			model.removeAnnotation(fAnnotation);

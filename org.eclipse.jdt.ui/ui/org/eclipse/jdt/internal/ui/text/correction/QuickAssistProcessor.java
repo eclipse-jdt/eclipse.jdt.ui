@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.ui.text.java.*;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -30,7 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
   */
-public class QuickAssistProcessor implements IAssistProcessor {
+public class QuickAssistProcessor implements IQuickAssistProcessor {
 	
 	public QuickAssistProcessor() {
 		super();
@@ -39,7 +40,7 @@ public class QuickAssistProcessor implements IAssistProcessor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#hasAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
 	 */
-	public boolean hasAssists(IAssistContext context) throws CoreException {
+	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ASTNode coveringNode= getCoveringNode(context);
 		if (coveringNode != null) {
 			return getCatchClauseToThrowsProposals(context, coveringNode, null) 
@@ -54,7 +55,7 @@ public class QuickAssistProcessor implements IAssistProcessor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#getAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
 	 */
-	public IJavaCompletionProposal[] getAssists(IAssistContext context, IProblemLocation[] locations) throws CoreException {
+	public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
 		ASTNode coveringNode= getCoveringNode(context);
 		if (coveringNode != null) {
 			ArrayList resultingCollections= new ArrayList();
@@ -71,14 +72,14 @@ public class QuickAssistProcessor implements IAssistProcessor {
 		return null;
 	}
 	
-	private ASTNode getCoveringNode(IAssistContext context) {
+	private ASTNode getCoveringNode(IInvocationContext context) {
 		NodeFinder finder= new NodeFinder(context.getSelectionOffset(), context.getSelectionLength());
 		context.getASTRoot().accept(finder);
 		return finder.getCoveringNode();	
 	}
 	
 	
-	private boolean getAssignToVariableProposals(IAssistContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+	private boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof ExpressionStatement)) {
 			return false;
@@ -112,7 +113,7 @@ public class QuickAssistProcessor implements IAssistProcessor {
 		return true;				
 	}
 	
-	private boolean getCatchClauseToThrowsProposals(IAssistContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+	private boolean getCatchClauseToThrowsProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(node, ASTNode.CATCH_CLAUSE);
 		if (catchClause == null) {
 			return false;
@@ -178,7 +179,7 @@ public class QuickAssistProcessor implements IAssistProcessor {
 	}
 	
 	
-	private boolean getRenameLocalProposals(IAssistContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+	private boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		if (!(node instanceof SimpleName)) {
 			return false;
 		}
@@ -214,7 +215,7 @@ public class QuickAssistProcessor implements IAssistProcessor {
 	}
 	
 	
-	private boolean getUnWrapProposals(IAssistContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+	private boolean getUnWrapProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		ASTNode outer= node;
 			
 		Block block= null;

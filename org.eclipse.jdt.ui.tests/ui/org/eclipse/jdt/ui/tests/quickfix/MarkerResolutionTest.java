@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.ui.IEditorPart;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
 public class MarkerResolutionTest extends QuickFixTest {
@@ -117,10 +119,11 @@ public class MarkerResolutionTest extends QuickFixTest {
 		createMarker(cu, 0, 0, 7);
 		
 		IEditorPart part= EditorUtility.openInEditor(cu);
+		ITextViewer viewer= ((JavaEditor) part).getViewer();
 		
 		try {
 			JavaCorrectionProcessor processor= new JavaCorrectionProcessor(part);
-			ICompletionProposal[] proposals= processor.computeCompletionProposals(null, 0);
+			ICompletionProposal[] proposals= processor.computeCompletionProposals(viewer, 0);
 			
 			assertNumberOf("proposals", proposals.length, 1);
 			assertCorrectLabels(Arrays.asList(proposals));

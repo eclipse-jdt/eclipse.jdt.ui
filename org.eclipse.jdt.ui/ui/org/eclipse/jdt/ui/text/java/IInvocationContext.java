@@ -8,13 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.correction;
+package org.eclipse.jdt.ui.text.java;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 /**
   */
-public interface IAssistContext {
+public interface IInvocationContext {
 
 	/**
 	 * Returns the current compilation unit
