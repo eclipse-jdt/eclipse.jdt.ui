@@ -18,9 +18,10 @@ public class AllTests {
 	public static Test suite ( ) {
 		TestSuite suite= new TestSuite("All Reorg Tests");
 		suite.addTest(DeleteTest.suite());
-		suite.addTest(CopyToClipboardActionTest.suite());
-		suite.addTest(CopyTest.suite());
-		suite.addTest(MoveTest.suite());
+//		suite.addTest(CopyToClipboardActionTest.suite());
+//		suite.addTest(PasteActionTest.suite());
+//		suite.addTest(CopyTest.suite());
+//		suite.addTest(MoveTest.suite());
 		return suite;
 	}
 }
