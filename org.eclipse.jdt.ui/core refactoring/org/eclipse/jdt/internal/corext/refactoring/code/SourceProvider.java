@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -118,7 +119,36 @@ public class SourceProvider {
 	public boolean isExecutionFlowInterrupted() {
 		return fAnalyzer.isExecutionFlowInterrupted();
 	}
-	
+
+	static class VariableReferenceFinder extends ASTVisitor {
+		private boolean fResult;
+		private IVariableBinding fBinding;
+		public VariableReferenceFinder(IVariableBinding binding) {
+			fBinding= binding;
+		}
+		public boolean getResult() {
+			return fResult;
+		}
+		public boolean visit(SimpleName node) {
+			if(!fResult) {
+				fResult= Bindings.equals(fBinding, node.resolveBinding()); 
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Checks whether variable is referenced by the method declaration or not.
+	 * 
+	 * @param binding binding of variable to check.
+	 * @return <code>true</code> if variable is referenced by the method, otherwise <code>false</code>
+	 */
+	public boolean isVariableReferenced(IVariableBinding binding) {
+		VariableReferenceFinder finder= new VariableReferenceFinder(binding);
+		fDeclaration.accept(finder);
+		return finder.getResult();
+	}
+
 	public boolean hasReturnValue() {
 		IMethodBinding binding= fDeclaration.resolveBinding();
 		return binding.getReturnType() != fDeclaration.getAST().resolveWellKnownType("void"); //$NON-NLS-1$

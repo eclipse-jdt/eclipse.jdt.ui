@@ -300,6 +300,14 @@ public class CallInliner {
 					RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
 				return;
 			}
+			// verify that the field is not referenced by the initializer method 
+			VariableDeclarationFragment variable= (VariableDeclarationFragment)ASTNodes.getParent(fInvocation, ASTNode.VARIABLE_DECLARATION_FRAGMENT);
+			if(fSourceProvider.isVariableReferenced(variable.resolveBinding())) {
+				addEntry(result,
+					RefactoringCoreMessages.getString("CallInliner.field_initialize_self_reference"), //$NON-NLS-1$
+					RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
+				return;
+			}
 		}
 		else if (fSourceProvider.isExecutionFlowInterrupted()) {
 			VariableDeclaration vDecl= (VariableDeclaration)ASTNodes.getParent(fInvocation, VariableDeclaration.class);
