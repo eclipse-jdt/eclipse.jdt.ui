@@ -16,7 +16,7 @@ import org.eclipse.compare.rangedifferencer.IRangeComparator;
 /**
  * A comparator for Java tokens.
  */
-class JavaTokenComparator implements ITokenComparator {
+public class JavaTokenComparator implements ITokenComparator {
 		
 	private String fText;
 	private boolean fShouldEscape= true;
