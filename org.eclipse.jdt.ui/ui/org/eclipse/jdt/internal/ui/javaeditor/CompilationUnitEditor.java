@@ -329,6 +329,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 		
 		private int insertTabString(StringBuffer buffer, int offsetInLine) {
+			
+			if (fTabRatio == 0)
+				return 0;
+				
 			int remainder= offsetInLine % fTabRatio;
 			remainder= fTabRatio - remainder;
 			for (int i= 0; i < remainder; i++)
@@ -967,7 +971,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return store.getBoolean(CURRENT_LINE);
 	}
 	
-	private void startShowingPrintMargin() {
+	private void showPrintMargin() {
 		if (fPrintMarginPainter == null) {
 			fPrintMarginPainter= new PrintMarginPainter(getSourceViewer());
 			fPrintMarginPainter.setMarginRulerColor(getColor(PRINT_MARGIN_COLOR));
@@ -976,7 +980,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 	
-	private void stopShowingPrintMargin() {
+	private void hidePrintMargin() {
 		if (fPrintMarginPainter != null) {
 			fPaintManager.removePainter(fPrintMarginPainter);
 			fPrintMarginPainter.deactivate(true);
@@ -985,7 +989,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 	
-	private boolean isShowingPrintMarginEnabled() {
+	private boolean isPrintMarginVisible() {
 		IPreferenceStore store= getPreferenceStore();
 		return store.getBoolean(PRINT_MARGIN);
 	}
@@ -1045,17 +1049,17 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return store.getBoolean(SPACES_FOR_TABS);
 	}
 	
-	private void startShowingOverviewRuler() {
+	private void showOverviewRuler() {
 		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 		asv.showOverviewRuler();
 	}
 	
-	private void stopShowingOverviewRuler() {
+	private void hideOverviewRuler() {
 		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 		asv.hideOverviewRuler();
 	}
 	
-	private boolean isShowingOverviewRuler() {
+	private boolean isOverviewRulerVisible() {
 		IPreferenceStore store= getPreferenceStore();
 		return store.getBoolean(OVERVIEW_RULER);
 	}
@@ -1105,14 +1109,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			startBracketHighlighting();
 		if (isLineHighlightingEnabled())
 			startLineHighlighting();
-		if (isShowingPrintMarginEnabled())
-			startShowingPrintMargin();
+		if (isPrintMarginVisible())
+			showPrintMargin();
 		if (isProblemIndicationEnabled())
 			startProblemIndication();
 		if (isTabConversionEnabled())
 			startTabConversion();
-		if (isShowingOverviewRuler())
-			startShowingOverviewRuler();
+		if (isOverviewRulerVisible())
+			showOverviewRuler();
 	}
 	
 	/*
@@ -1175,10 +1179,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				}
 				
 				if (PRINT_MARGIN.equals(p)) {
-					if (isShowingPrintMarginEnabled())
-						startShowingPrintMargin();
+					if (isPrintMarginVisible())
+						showPrintMargin();
 					else
-						stopShowingPrintMargin();
+						hidePrintMargin();
 					return;
 				}
 				
@@ -1209,10 +1213,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				}
 				
 				if (OVERVIEW_RULER.equals(p))  {
-					if (isShowingOverviewRuler())
-						startShowingOverviewRuler();
+					if (isOverviewRulerVisible())
+						showOverviewRuler();
 					else
-						stopShowingOverviewRuler();
+						hideOverviewRuler();
 					return;
 				}
 				
