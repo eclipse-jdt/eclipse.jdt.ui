@@ -12,6 +12,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceManager;
 
 public class WorkingCopyUtil {
 
+	//no instances
 	private WorkingCopyUtil(){
 	}
 	
