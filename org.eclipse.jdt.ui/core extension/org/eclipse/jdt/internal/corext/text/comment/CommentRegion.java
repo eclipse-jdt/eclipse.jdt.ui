@@ -38,9 +38,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
  */
 public class CommentRegion extends TypedPosition implements IHtmlTagConstants, IBorderAttributes, ICommentAttributes {
 
-	/** Infer initial indentation from context */
-	public static final int INFER_INDENTATION= -1;
-	
 	/** Default comment range delimiter */
 	protected static final String COMMENT_RANGE_DELIMITER= " "; //$NON-NLS-1$
 
@@ -198,17 +195,11 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Formats the comment region with the given indentation level.
 	 * 
-	 * @param indentationLevel the indentation level, {@link CommentRegion#INFER_INDENTATION} lets the region infer it from its context
+	 * @param indentationLevel the indentation level
 	 * @return the resulting text edit of the formatting process
 	 * @since 3.1
 	 */
 	public final TextEdit format(int indentationLevel) {
-		String indentation;
-		if (indentationLevel == INFER_INDENTATION)
-			indentation= inferIndentation();
-		else
-			indentation= computeIndentation(indentationLevel);
-		
 		fResult= new MultiTextEdit();
 
 		final String probe= getText(0, CommentLine.NON_FORMAT_START_PREFIX.length());
@@ -220,6 +211,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			} catch (Exception exception) {
 				// Do nothing
 			}
+			String indentation= computeIndentation(indentationLevel);
 			margin= Math.max(COMMENT_PREFIX_LENGTH + 1, margin - stringToLength(indentation) - COMMENT_PREFIX_LENGTH);
 
 			tokenizeRegion();
@@ -512,30 +504,6 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 		for (int i= 0; i < n; i++)
 			buffer.append(string);
 		return buffer.toString();
-	}
-
-	/**
-	 * Returns the indentation of this region from its context.
-	 * 
-	 * @return the indentation of this region
-	 * @since 3.1
-	 */
-	private String inferIndentation() {
-		String result= ""; //$NON-NLS-1$
-		
-		try {
-		
-			final IRegion line= getDocument().getLineInformationOfOffset(getOffset());
-		
-			final int begin= line.getOffset();
-			final int end= Math.min(getOffset(), line.getOffset() + line.getLength());
-		
-			result= stringToIndent(getDocument().get(begin, end - begin), fUseTab);
-		
-		} catch (BadLocationException exception) {
-			// Ignore and return empty
-		}
-		return result;
 	}
 
 	/**

@@ -80,7 +80,7 @@ public class CommentFormatter extends CodeFormatter {
 	 * 
 	 * @param document the document
 	 * @param partition the partition
-	 * @param indentationLevel the indentation level, {@link CommentRegion#INFER_INDENTATION} for inferring it automatically from the context
+	 * @param indentationLevel the indentation level
 	 * @param lineDelimiter the line delimiter
 	 * @return the text edit for formatting
 	 * @since 3.1
