@@ -27,10 +27,9 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVa
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IDeclaredConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.OrOrSubTypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CompositeSubTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeSet;
 
 /**
  * Type constraint solver to solve supertype constraint models.
@@ -75,8 +74,8 @@ public final class SuperTypeConstraintsSolver {
 		Assert.isNotNull(variable);
 		final TType type= variable.getType();
 		if (variable instanceof PlainTypeVariable2 || !type.equals(fModel.getSubType()))
-			return TypeSet.create(type);
-		return TypeSet.create(new TType[] { type, fModel.getSuperType()});
+			return SuperTypeSet.createTypeSet(type);
+		return SuperTypeSet.createTypeSet(type, fModel.getSuperType());
 	}
 
 	/**
@@ -124,7 +123,7 @@ public final class SuperTypeConstraintsSolver {
 				ITypeSet estimate= variable.getTypeEstimate();
 				if (estimate == null) {
 					final ConstraintVariable2[] contributing= set.getContributingVariables();
-					estimate= TypeSet.getTypeUniverse();
+					estimate= SuperTypeSet.getUniverse();
 					for (int index= 0; index < contributing.length; index++)
 						estimate= estimate.restrictedTo(computeInitialTypeEstimate(contributing[index]));
 					set.setTypeEstimate(estimate);
@@ -204,15 +203,16 @@ public final class SuperTypeConstraintsSolver {
 			constraint= (ITypeConstraint2) iterator.next();
 			final ConstraintVariable2 leftVariable= constraint.getLeft();
 			final ConstraintVariable2 rightVariable= constraint.getRight();
-			if (constraint instanceof OrOrSubTypeConstraint2) {
+			if (constraint instanceof CompositeSubTypeConstraint2) {
 
 				// TODO implement
 
 			} else {
-				final TypeEquivalenceSet set= rightVariable.getTypeEquivalenceSet();
 				final ITypeSet rightEstimate= rightVariable.getTypeEstimate();
-				final ITypeSet newEstimate= rightEstimate.restrictedTo(leftVariable.getTypeEstimate());
-				if (rightEstimate != newEstimate) {
+				final ITypeSet leftEstimate= leftVariable.getTypeEstimate();
+				final TypeEquivalenceSet set= leftVariable.getTypeEquivalenceSet();
+				final ITypeSet newEstimate= leftEstimate.restrictedTo(rightEstimate);
+				if (leftEstimate != newEstimate) {
 					set.setTypeEstimate(newEstimate);
 					fProcessable.addAll(Arrays.asList(set.getContributingVariables()));
 				}
