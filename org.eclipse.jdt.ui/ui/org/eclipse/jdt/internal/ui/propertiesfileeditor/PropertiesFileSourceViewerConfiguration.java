@@ -19,6 +19,7 @@ import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
@@ -41,6 +42,20 @@ import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
  * @since 3.1
  */
 public class PropertiesFileSourceViewerConfiguration extends SourceViewerConfiguration {
+	
+	/**
+	 * A no-op implementation of <code>IAnnotationHover</code> that will trigger the text editor
+	 * to set up annotation hover support.
+	 */
+	private static class NullHover implements IAnnotationHover {
+
+		/*
+		 * @see org.eclipse.jface.text.source.IAnnotationHover#getHoverInfo(org.eclipse.jface.text.source.ISourceViewer, int)
+		 */
+		public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
+			return null;
+		}
+	}
 	
 	/** 
 	 * Preference key for inserting spaces rather than tabs.
@@ -198,6 +213,13 @@ public class PropertiesFileSourceViewerConfiguration extends SourceViewerConfigu
 		if (fDocumentPartitioning != null)
 			return fDocumentPartitioning;
 		return super.getConfiguredDocumentPartitioning(sourceViewer);
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAnnotationHover(org.eclipse.jface.text.source.ISourceViewer)
+	 */
+	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+		return new NullHover();
 	}
 	
 	/**
