@@ -162,7 +162,7 @@ public class JavaApplicationWizardPage extends WizardPage {
 		fPatternText= new Text(root, SWT.BORDER);
 		fPatternText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
-		fElementsList= new TableViewer(root) {
+		fElementsList= new TableViewer(root, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER) {
 			protected void handleDoubleSelect(SelectionEvent event) {
 				updateSelection(getSelection());
 				if (getWizard().performFinish()) {
