@@ -32,7 +32,7 @@ public class ReturnTypeVariable extends ConstraintVariable{
 		fMethodBinding= methodBinding;
 	}
 	
-	private static MethodDeclaration getMethod(ReturnStatement returnStatement) {
+	public static MethodDeclaration getMethod(ReturnStatement returnStatement) {
 		return (MethodDeclaration)ASTNodes.getParent(returnStatement, MethodDeclaration.class);
 	}
 
@@ -41,25 +41,6 @@ public class ReturnTypeVariable extends ConstraintVariable{
 	 */
 	public String toString() {
 		return "[" + Bindings.asString(fMethodBinding) + "]_returnType"; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	public boolean equals(Object obj) {
-		if (! super.equals(obj))
-			return false;
-		if (! (obj instanceof ReturnTypeVariable))
-			return false;
-		ReturnTypeVariable other= (ReturnTypeVariable)obj;
-		return Bindings.equals(fMethodBinding, other.fMethodBinding);
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	public int hashCode() {
-		return super.hashCode() ^ Bindings.hashCode(fMethodBinding);
 	}
 	
 	public IMethodBinding getMethodBinding() {

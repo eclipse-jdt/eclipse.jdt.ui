@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -78,7 +79,6 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompositeOrTypeConstraint;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCollector;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVariable;
@@ -214,6 +214,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 	public static final short SUPERTYPES_ONLY= 1;
 	public static final short SUPERTYPES_AND_SUBTYPES= 2;
 	private ConstraintVariable fCv;
+	private IBinding fSelectionBinding;
+	private ConstraintCollector fCollector;
 	
 	public static boolean isAvailable(IJavaElement element) throws JavaModelException {
 		if (element == null || ! element.exists())
@@ -283,6 +285,12 @@ public class ChangeTypeRefactoring extends Refactoring {
 		return checkSelection(new SubProgressMonitor(pm, 1));
 	}
 
+	private void setSelectionRanges(SimpleName name){
+		fEffectiveSelectionStart= name.getStartPosition();
+		fEffectiveSelectionLength= name.getLength();
+		fSelectionBinding= ExpressionVariable.resolveBinding(name);
+	}
+	
 	/**
 	 * Check if the right type of AST Node is selected. Create the TypeHierarchy needed to
 	 * bring up the wizard.
@@ -303,6 +311,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 				System.out.println("node= " + node + ", type= " + node.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 
+			fCollector = new ConstraintCollector(new FullConstraintCreator());
+			
 			String selectionValid= determineSelection(node);
 			if (selectionValid != null){
 				if (DEBUG){
@@ -437,17 +447,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		pm.done();
 		return result;
 	}
-
 // TODO: do sanity check somewhere if the refactoring changes any files.
-//
-//	private IFile[] getAllFilesToModify(){
-//		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
-//	}
-//	
-//	private RefactoringStatus validateModifiesFiles(){
-//		return Checks.validateModifiesFiles(getAllFilesToModify());
-//	}
-
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -495,21 +495,15 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 
 	private void updateCu(CompilationUnit unit, Set vars, CompilationUnitChange unitChange, 
-						  ASTRewrite unitRewriter, String typeName) throws JavaModelException {
+			ASTRewrite unitRewriter, String typeName) throws JavaModelException {
 		for (Iterator it=vars.iterator(); it.hasNext(); ){
 			ConstraintVariable cv = (ConstraintVariable)it.next();
 			ASTNode decl= findDeclaration(unit, cv);
 			if (decl instanceof SimpleName && cv instanceof ExpressionVariable) {
 				ASTNode gp= decl.getParent().getParent();
-				if (gp.getNodeType() == ASTNode.METHOD_DECLARATION){ // method parameter
-					if (decl.getParent().getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
-						updateType(unit, getType(decl.getParent()), unitChange, unitRewriter, typeName);
-					}
-				} else{ 
-					updateType(unit, getType(gp), unitChange, unitRewriter, typeName); // local variable, field
-				}
-			} else if (decl instanceof MethodDeclaration) {
-				updateType(unit, getType(decl), unitChange, unitRewriter, typeName); // method return
+				updateType(unit, getType(gp), unitChange, unitRewriter, typeName);   // local variable or parameter
+			} else if (decl instanceof MethodDeclaration || decl instanceof FieldDeclaration) {
+				updateType(unit, getType(decl), unitChange, unitRewriter, typeName); // method return or field type
 			}
 		}	
 	}
@@ -552,6 +546,12 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 
 	private ASTNode findDeclaration(CompilationUnit root, ConstraintVariable cv) throws JavaModelException {
+
+		if (fFieldBinding != null){
+			IField f= Bindings.findField(fFieldBinding, fCu.getJavaProject());
+			return ASTNodeSearchUtil.getFieldDeclarationNode(f, root);
+		}
+		
 		if (cv instanceof ExpressionVariable){
 			for (Iterator iter= fAllConstraints.iterator(); iter.hasNext();) {
 				ITypeConstraint constraint= (ITypeConstraint) iter.next();
@@ -636,9 +636,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 	  * The selection corresponds to a SingleVariableDeclaration
 	  */
 	private String singleVariableDeclarationSelected(SingleVariableDeclaration svd) {
-		fEffectiveSelectionStart= svd.getName().getStartPosition();
-		fEffectiveSelectionLength= svd.getName().getLength();
-		return simpleNameSelected(svd.getName());
+		SimpleName name = svd.getName();
+		setSelectionRanges(name);
+		return simpleNameSelected(name);
 	}
 
 	/**
@@ -648,16 +648,11 @@ public class ChangeTypeRefactoring extends Refactoring {
 		if (vds.fragments().size() != 1) {
 			return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
 		} else {
-			ASTNode elem= (ASTNode) vds.fragments().iterator().next();
-			if (elem.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-				simpleNameSelected(((VariableDeclarationFragment) elem).getName());
-				fEffectiveSelectionStart= ((VariableDeclarationFragment) elem).getName().getStartPosition(); 
-				fEffectiveSelectionLength= ((VariableDeclarationFragment) elem).getName().getLength();
-			} else{
-				return nodeTypeNotSupported();
-			}
+			VariableDeclarationFragment elem= (VariableDeclarationFragment) vds.fragments().iterator().next();
+			SimpleName name= elem.getName();
+			setSelectionRanges(name);
+			return simpleNameSelected(name);
 		}
-		return null;
 	}
 
 	/**
@@ -668,23 +663,18 @@ public class ChangeTypeRefactoring extends Refactoring {
 			return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
 		} else {
 			VariableDeclarationFragment elem= (VariableDeclarationFragment) fieldDeclaration.fragments().iterator().next();
+			fFieldBinding= elem.resolveBinding();
 			SimpleName name= elem.getName();
-			if (elem.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-				fFieldBinding= elem.resolveBinding();
-				fEffectiveSelectionStart= name.getStartPosition();
-				fEffectiveSelectionLength= name.getLength(); 
-				return simpleNameSelected(name);
-			} else{
-				return nodeTypeNotSupported();
-			}
+			setSelectionRanges(name);
+			return simpleNameSelected(name);
 		}
 	}
 
 	/**
 	 * The selection corresponds to a SimpleName
 	 */
-	private String simpleNameSelected(SimpleName node) {
-		ASTNode parent= node.getParent();
+	private String simpleNameSelected(SimpleName simpleName) {
+		ASTNode parent= simpleName.getParent();
 		ASTNode grandParent= parent.getParent();
 		
 		if (DEBUG) System.out.println("parent nodeType= " + parent.getClass().getName()); //$NON-NLS-1$
@@ -701,14 +691,15 @@ public class ChangeTypeRefactoring extends Refactoring {
 				if (vds.fragments().size() > 1){
 					return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
 				}	
-				fEffectiveSelectionStart= node.getStartPosition();
-				fEffectiveSelectionLength= node.getLength();
+				setSelectionRanges(simpleName);
 			} else if (grandParent.getNodeType() == ASTNode.FIELD_DECLARATION) {
 				FieldDeclaration fd= (FieldDeclaration)grandParent;
-				fFieldBinding= ((VariableDeclarationFragment)parent).resolveBinding();
 				if (fd.fragments().size() > 1){
 					return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
 				}
+				VariableDeclarationFragment fragment = (VariableDeclarationFragment)parent;
+				fFieldBinding= fragment.resolveBinding();
+				setSelectionRanges(fragment.getName());
 			}					
 		} else if (parent.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION || parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			if ((grandParent.getNodeType() == ASTNode.METHOD_DECLARATION)) {
@@ -721,33 +712,34 @@ public class ChangeTypeRefactoring extends Refactoring {
 				fMethodBinding= ((MethodDeclaration)greatGrandParent).resolveBinding();
 				fParamIndex= ((MethodDeclaration)greatGrandParent).parameters().indexOf(grandParent);
 			}
-			fEffectiveSelectionStart= node.getStartPosition();
-			fEffectiveSelectionLength= node.getLength();
+			setSelectionRanges(simpleName);
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && grandParent.getNodeType() == ASTNode.METHOD_DECLARATION) {
 			fMethodBinding= ((MethodDeclaration)grandParent).resolveBinding();
 			fParamIndex= -1;
 		} else if (parent.getNodeType() == ASTNode.METHOD_DECLARATION && 
-				   grandParent.getNodeType() == ASTNode.TYPE_DECLARATION) {
+				grandParent.getNodeType() == ASTNode.TYPE_DECLARATION) {
 			MethodDeclaration methodDeclaration= (MethodDeclaration)parent;
-			if (methodDeclaration.getName().equals(node)){
+			if (methodDeclaration.getName().equals(simpleName)){
 				return RefactoringCoreMessages.getString("ChangeTypeRefactoring.notSupportedOnNodeType"); //$NON-NLS-1$
 			}
 			fMethodBinding= ((MethodDeclaration)parent).resolveBinding();
 			fParamIndex= -1;
 		} else if (
-			parent.getNodeType() == ASTNode.SIMPLE_TYPE && (grandParent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT)) {
+				parent.getNodeType() == ASTNode.SIMPLE_TYPE && (grandParent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT)) {
 			return variableDeclarationStatementSelected((VariableDeclarationStatement) grandParent);
 		} else if (parent.getNodeType() == ASTNode.CAST_EXPRESSION) {
 			ASTNode decl= findDeclaration(parent.getRoot(), fSelectionStart, fSelectionLength+1);
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment)decl;
-			fEffectiveSelectionStart= fragment.getName().getStartPosition(); 
-			fEffectiveSelectionLength= fragment.getName().getLength();
+			SimpleName name = fragment.getName();
+			setSelectionRanges(name);
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && 
-			       grandParent.getNodeType() == ASTNode.FIELD_DECLARATION) {
+				grandParent.getNodeType() == ASTNode.FIELD_DECLARATION) {
 			return fieldDeclarationSelected((FieldDeclaration) grandParent);
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && 
-			       grandParent.getNodeType() == ASTNode.ARRAY_TYPE){
+				grandParent.getNodeType() == ASTNode.ARRAY_TYPE){
 			return RefactoringCoreMessages.getString("ChangeTypeRefactoring.arraysNotSupported"); //$NON-NLS-1$
+		} else if (parent.getNodeType() == ASTNode.QUALIFIED_NAME){
+			setSelectionRanges(simpleName);
 		} else {
 			return RefactoringCoreMessages.getString("ChangeTypeRefactoring.notSupportedOnNodeType"); //$NON-NLS-1$
 		}
@@ -797,12 +789,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private boolean matchesSelection(ConstraintVariable cv){
 		if (cv instanceof ExpressionVariable){
-			ExpressionVariable eLeft= (ExpressionVariable)cv;
-			CompilationUnitRange cRange= eLeft.getCompilationUnitRange();
-			if (cRange.getSourceRange().getOffset() == fEffectiveSelectionStart &&
-				cRange.getSourceRange().getLength() == fEffectiveSelectionLength){
-				return true;
-			}
+			ExpressionVariable ev= (ExpressionVariable)cv;
+			return (fSelectionBinding != null && Bindings.equals(fSelectionBinding, ev.getExpressionBinding()));
 		} else if (cv instanceof ParameterTypeVariable){
 			ParameterTypeVariable ptv = (ParameterTypeVariable)cv;
 			if (fMethodBinding != null && Bindings.equals(ptv.getMethodBinding(), fMethodBinding) &&
@@ -1081,7 +1069,6 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private List/*<ITypeConstraint>*/ getConstraints(ICompilationUnit unit) {
 		if (fConstraintCache.containsKey(unit))
 			return (List) fConstraintCache.get(unit);
-		ConstraintCollector collector= new ConstraintCollector(new FullConstraintCreator());
 		
 		CompilationUnit cu= ASTCreator.createAST(unit, null);
 		
@@ -1098,13 +1085,13 @@ public class ChangeTypeRefactoring extends Refactoring {
 						n = n.getParent();
 					}
 					MethodDeclaration md = (MethodDeclaration)n;
-					md.accept(collector);
+					md.accept(fCollector);
 				}
 			}
 		} else {
-			cu.accept(collector);
+			cu.accept(fCollector);
 		}
-		List/*<ITypeConstraint>*/ constraints= Arrays.asList(collector.getConstraints());
+		List/*<ITypeConstraint>*/ constraints= Arrays.asList(fCollector.getConstraints());
 		fConstraintCache.put(unit, constraints);
 		return constraints;
 	}

@@ -36,25 +36,6 @@ public class ParameterTypeVariable extends ConstraintVariable {
 		return "[Parameter(" + fParameterIndex + "," + Bindings.asString(fMethodBinding) + ")]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	public boolean equals(Object obj) {
-		if (! super.equals(obj))
-			return false;
-		if (! (obj instanceof ParameterTypeVariable))
-			return false;
-		ParameterTypeVariable other= (ParameterTypeVariable)obj;
-		return Bindings.equals(fMethodBinding, other.fMethodBinding) && fParameterIndex == other.fParameterIndex;
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	public int hashCode() {
-		return super.hashCode() ^ Bindings.hashCode(fMethodBinding) ^ fParameterIndex;
-	}
-
 	public IMethodBinding getMethodBinding() {
 		return fMethodBinding;
 	}

@@ -44,23 +44,4 @@ public class DeclaringTypeVariable extends ConstraintVariable{
 	public String toString() {
 		return "Decl(" + Bindings.asString(fBinding) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	public boolean equals(Object obj) {
-		if (! super.equals(obj))
-			return false;
-		if (! (obj instanceof DeclaringTypeVariable))
-			return false;
-		DeclaringTypeVariable other= (DeclaringTypeVariable)obj;
-		return Bindings.equals(fBinding, other.fBinding);
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	public int hashCode() {
-		return super.hashCode() ^ fBinding.hashCode();
-	}
 }

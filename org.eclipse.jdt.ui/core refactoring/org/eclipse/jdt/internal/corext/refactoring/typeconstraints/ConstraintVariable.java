@@ -12,8 +12,6 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import org.eclipse.jdt.internal.corext.dom.Bindings;
-
 public abstract class ConstraintVariable {
 	private final ITypeBinding fBinding;
 
@@ -47,26 +45,7 @@ public abstract class ConstraintVariable {
 	public String toString() {
 		return TypeBindings.toString(fBinding);
 	}
-	
-	/* (non-Javadoc)
-	* @see java.lang.Object#equals(java.lang.Object)
-	*/
-	public boolean equals(Object obj) {
-		if (!(obj instanceof ConstraintVariable))
-			return false;
-		ConstraintVariable other= (ConstraintVariable) obj;
-		return TypeBindings.isEqualTo(fBinding, other.fBinding);
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	public int hashCode() {
-		if (fBinding == null)
-			return super.hashCode();
-		return Bindings.hashCode(fBinding);
-	}
-	
+		
 	/**
 	 * can be <code>null</code>.
 	 */
@@ -74,4 +53,17 @@ public abstract class ConstraintVariable {
 		return fBinding;
 	}
 
+	/**
+	 * For storing additional information associated with constraint variables. 
+	 * Added in anticipation of the generics-related refactorings.
+	 */
+	private Object fData;
+	
+	public Object getData(){
+		return fData;
+	}
+	
+	public void setData(Object data){
+		fData= data;
+	}
 }

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -28,36 +29,18 @@ public final class TypeVariable extends ConstraintVariable {
 		Assert.isNotNull(cu);
 		fTypeRange= new CompilationUnitRange(cu, ASTNodes.getElementType(type));
 	}
+
+	public TypeVariable(ITypeBinding binding, String source, CompilationUnitRange range){
+		super(binding);
+		fSource= source;
+		fTypeRange= range;
+	}	
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
 		return fSource;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	public boolean equals(Object obj) {
-		if (obj == this)
-			return true;
-		if (! super.equals(obj))
-			return false;
-		if (! (obj instanceof TypeVariable))
-			return false;
-		TypeVariable other= (TypeVariable)obj;
-		//cannot compare bindings here
-		return fTypeRange.equals(other.fTypeRange);
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	public int hashCode() {
-		if (super.getBinding() == null)
-			return super.hashCode();
-		return (29 * super.hashCode()) ^ fTypeRange.hashCode();
 	}
 
 	public CompilationUnitRange getCompilationUnitRange() {

@@ -108,6 +108,7 @@ class ExtractInterfaceUtil {
 	private final ICompilationUnit fInputTypeWorkingCopy;
 	private final ICompilationUnit fSupertypeWorkingCopy;//can be null
 	private final WorkingCopyOwner fWorkingCopyOwner;
+	private static ICompilationUnit fCu;
 	
 	private ExtractInterfaceUtil(ICompilationUnit inputTypeWorkingCopy, ICompilationUnit supertypeWorkingCopy, WorkingCopyOwner workingCopyOwner){
 		Assert.isNotNull(inputTypeWorkingCopy);
@@ -169,6 +170,11 @@ class ExtractInterfaceUtil {
 
 	private static ITypeBinding getSuperTypeBinding(ITypeBinding typeBinding, IType superType) {
 		Set setOfAll= TypeBindings.getSuperTypes(typeBinding);
+		
+		// otherwise does not contain java.lang.Object
+		setOfAll.add(ASTCreator.createAST(fCu, null).getAST().resolveWellKnownType("java.lang.Object")); //$NON-NLS-1$
+		
+		
 		ITypeBinding[] all= (ITypeBinding[]) setOfAll.toArray(new ITypeBinding[setOfAll.size()]);
 		for (int i= 0; i < all.length; i++) {
 			ITypeBinding superTypeBinding= all[i];
@@ -193,6 +199,7 @@ class ExtractInterfaceUtil {
 
 	public static CompilationUnitRange[] updateReferences(TextChangeManager manager, IType inputType, IType supertypeToUse, WorkingCopyOwner workingCopyOwner, boolean updateInputTypeCu, IProgressMonitor pm, RefactoringStatus status, CodeGenerationSettings settings) throws CoreException{
 		ICompilationUnit typeWorkingCopy= inputType.getCompilationUnit();
+		fCu= typeWorkingCopy;
 		ExtractInterfaceUtil inst= new ExtractInterfaceUtil(typeWorkingCopy, supertypeToUse.getCompilationUnit(), workingCopyOwner);
 		ITypeBinding inputTypeBinding= getTypeBinding(inputType, workingCopyOwner);
 		ConstraintVariable[] updatableVars= inst.getUpdatableVariables(inputTypeBinding, inputType, supertypeToUse, pm, status);
@@ -294,7 +301,7 @@ class ExtractInterfaceUtil {
 	private static boolean canAddLeftSideToInitialBadSet(SimpleTypeConstraint sc, Set setOfAll, ConstraintVariable interfaceVariable) {
 		ConstraintVariable left= sc.getLeft();
 		ConstraintVariable right= sc.getRight();
-		if (! (left instanceof ExpressionVariable))
+		if (! (left instanceof ExpressionVariable) && ! (left instanceof TypeVariable))
 			return false;
 		else if (! setOfAll.contains(left))	
 			return false;
@@ -687,8 +694,8 @@ class ExtractInterfaceUtil {
 		 */
 		// TODO check implementation
 		public ITypeConstraint[] create(ArrayCreation node) {
-			ConstraintVariable arrayCreationVar= new ExpressionVariable(node);
-			ConstraintVariable typeVar= new TypeVariable(node.getType());
+			ConstraintVariable arrayCreationVar= getFactory().makeExpressionOrTypeVariable(node, getContext());
+			ConstraintVariable typeVar= getFactory().makeTypeVariable(node.getType());
 			ITypeConstraint equals= SimpleTypeConstraint.createEqualsConstraint(arrayCreationVar, typeVar);
 			return new ITypeConstraint[]{equals};
 		}
@@ -699,7 +706,7 @@ class ExtractInterfaceUtil {
 		 // TODO check implementation
 		public ITypeConstraint[] create(ArrayAccess node) {
 			Expression expression= node.getArray();
-			ITypeConstraint equals= SimpleTypeConstraint.createEqualsConstraint(new ExpressionVariable(node), new ExpressionVariable(expression));
+			ITypeConstraint equals= SimpleTypeConstraint.createEqualsConstraint(getFactory().makeExpressionOrTypeVariable(node, getContext()), getFactory().makeExpressionOrTypeVariable(expression, getContext()));
 			return new ITypeConstraint[]{equals};
 		}
 	
@@ -708,8 +715,8 @@ class ExtractInterfaceUtil {
 		 */
 		// TODO check implementation
 		public ITypeConstraint[] create(ArrayType node) {
-			ConstraintVariable component= new TypeVariable(node.getComponentType());
-			ITypeConstraint equals= SimpleTypeConstraint.createEqualsConstraint(new TypeVariable(node), component);
+			ConstraintVariable component= getFactory().makeTypeVariable(node.getComponentType());
+			ITypeConstraint equals= SimpleTypeConstraint.createEqualsConstraint(getFactory().makeTypeVariable(node), component);
 			return new ITypeConstraint[]{equals};
 		}
 	}

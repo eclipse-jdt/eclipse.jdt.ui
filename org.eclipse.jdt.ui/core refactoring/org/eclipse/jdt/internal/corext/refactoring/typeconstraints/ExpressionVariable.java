@@ -16,15 +16,12 @@ import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 public final class ExpressionVariable extends ConstraintVariable {
 	
@@ -49,41 +46,6 @@ public final class ExpressionVariable extends ConstraintVariable {
 	public String toString() {
 		return "[" + fSource + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	public boolean equals(Object obj) {
-		if (obj == this)
-			return true;
-		if (! super.equals(obj))
-			return false;
-		if (! (obj instanceof ExpressionVariable))
-			return false;
-		ExpressionVariable other= (ExpressionVariable)obj;
-
-		if (fRange.equals(other.fRange))
-			return true;
-			
-		if (fExpressionBinding instanceof ITypeBinding){
-			//if the expression resolves to a type binding, then the expressions should be the same
-			//we checked already that they are not, so false
-			return false;
-		}
-		if (fExpressionBinding == null)
-			return false;
-		return Bindings.equals(fExpressionBinding, other.fExpressionBinding);
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	public int hashCode() {
-		if (fExpressionBinding != null)
-			return super.hashCode() ^ Bindings.hashCode(fExpressionBinding);
-		else
-			return super.hashCode() ^ fRange.hashCode();
-	}
 	
 	public CompilationUnitRange getCompilationUnitRange() {
 		return fRange;
@@ -97,7 +59,7 @@ public final class ExpressionVariable extends ConstraintVariable {
 		return fExpressionBinding;
 	}
 	
-	private static IBinding resolveBinding(Expression expression){
+	public static IBinding resolveBinding(Expression expression){
 		if (expression instanceof Name)
 			return ((Name)expression).resolveBinding();
 		if (expression instanceof ParenthesizedExpression)
@@ -116,4 +78,5 @@ public final class ExpressionVariable extends ConstraintVariable {
 			return resolveBinding(((ConditionalExpression)expression).getThenExpression());
 		return null;
 	}
+	
 }
