@@ -28,7 +28,7 @@ public class ExternalizeWizard extends RefactoringWizard {
 	 */ 
 	protected void addUserInputPages(){
 		NLSRefactoring ref= (NLSRefactoring)getRefactoring();
-		setPageTitle(getPageTitle() + NLSUIMessages.getString("wizard.in")+ "\"" + ref.getCu().getElementName() + "\""); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		setPageTitle(NLSUIMessages.getFormattedString("wizard.page.title", ref.getCu().getElementName())); //$NON-NLS-1$
 		ExternalizeWizardPage page= new ExternalizeWizardPage();
 		page.setMessage(NLSUIMessages.getString("wizard.select")); //$NON-NLS-1$
 		addPage(page);
