@@ -165,6 +165,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			updateClassesInSuiteTable();
 		} else if (fieldName.equals(CLASSES_IN_SUITE)) {
 			fClassesInSuiteStatus= classesInSuiteChanged();
+			fSuiteNameStatus= testSuiteChanged(); //must check this one too
 			updateSelectedClassesLabel();
 		} else if (fieldName.equals(SUITE_NAME)) {
 			fSuiteNameStatus= testSuiteChanged();
@@ -183,7 +184,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			fClassesInSuiteStatus			
 		};
 		
-		// the mode severe status will be displayed and the ok button enabled/disabled.
+		// the most severe status will be displayed and the ok button enabled/disabled.
 		updateStatus(status);
 	}
 
@@ -195,7 +196,15 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		if (visible) {
 			setFocus();		
 			updateClassesInSuiteTable();
+			handleAllFieldsChanged();
 		}
+	}
+
+	private void handleAllFieldsChanged() {
+		handleFieldChanged(PACKAGE);
+		handleFieldChanged(CONTAINER);
+		handleFieldChanged(CLASSES_IN_SUITE);
+		handleFieldChanged(SUITE_NAME);
 	}
 
 	protected void updateClassesInSuiteTable() {
@@ -557,8 +566,12 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		} else if (val.getSeverity() == IStatus.WARNING) {
 			status.setWarning(WizardMessages.getString("NewTestSuiteWizPage.typeName.error.name.name_discouraged")+val.getMessage()); //$NON-NLS-1$
 			// continue checking
-		}		
-
+		}
+		
+		JUnitStatus recursiveSuiteInclusionStatus= checkRecursiveTestSuiteInclusion();
+		if (! recursiveSuiteInclusionStatus.isOK())
+			return recursiveSuiteInclusionStatus;
+			
 		IPackageFragment pack= getPackageFragment();
 		if (pack != null) {
 			ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
@@ -570,6 +583,22 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		}
 		fMethodStubsButtons.setEnabled(true);
 		return status;
+	}
+	
+	private JUnitStatus checkRecursiveTestSuiteInclusion(){
+		if (fClassesInSuiteTable == null)
+			return new JUnitStatus();
+		String typeName= getTypeName();
+		JUnitStatus status= new JUnitStatus();
+		Object[] checkedClasses= fClassesInSuiteTable.getCheckedElements();
+		for (int i= 0; i < checkedClasses.length; i++) {
+			IType checkedClass= (IType)checkedClasses[i];
+			if (checkedClass.getElementName().equals(typeName)){
+				status.setWarning(WizardMessages.getString("NewTestSuiteCreationWizardPage.infinite_recursion")); //$NON-NLS-1$
+				return status;
+			}
+		}
+		return new JUnitStatus();
 	}
 
 	/**
