@@ -1289,6 +1289,220 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 	
 	
+	public void testPushNegationDown1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i, int j, int k) {\n");
+		buf.append("        boolean b= (i > 1) || !(j < 2 || k < 3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("!(");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i, int j, int k) {\n");
+		buf.append("        boolean b= (i > 1) || j >= 2 && k >= 3;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+
+	}
+	
+	
+	public void testPushNegationDown2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i, int j, int k) {\n");
+		buf.append("        boolean b= (i > 1) && !(j < 2 && k < 3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("!(");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i, int j, int k) {\n");
+		buf.append("        boolean b= (i > 1) && (j >= 2 || k >= 3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+
+	}
+	
+	
+	public void testPullNegationUp() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i, int j, int k, int m, int n) {\n");
+		buf.append("        boolean b = i > 1 || j >= 2 && k >= 3 || m > 4 || n > 5;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset1= buf.toString().indexOf("j >= 2");
+		int offset2= buf.toString().indexOf(" || m > 4");
+		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i, int j, int k, int m, int n) {\n");
+		buf.append("        boolean b = i > 1 || !(j < 2 || k < 3) || m > 4 || n > 5;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+
+	}
+	
+	
+	public void testJoinIfListInIfElseIf() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b) {\n");
+		buf.append("        if (a == 1)\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        if (a == 2)\n");
+		buf.append("            if (b > 0)\n");
+		buf.append("                System.out.println(2);\n");
+		buf.append("        if (a == 3)\n");
+		buf.append("            if (b > 0)\n");
+		buf.append("                System.out.println(3);\n");
+		buf.append("            else\n");
+		buf.append("                System.out.println(-3);\n");
+		buf.append("        if (a == 4)\n");
+		buf.append("            System.out.println(4);\n");
+		buf.append("        int stop;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset1= buf.toString().indexOf("if (a == 1)");
+		int offset2= buf.toString().indexOf("int stop;");
+		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, int b) {\n");
+		buf.append("        if (a == 1)\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        else if (a == 2) {\n");
+		buf.append("            if (b > 0)\n");
+		buf.append("                System.out.println(2);\n");
+		buf.append("        } else if (a == 3)\n");
+		buf.append("            if (b > 0)\n");
+		buf.append("                System.out.println(3);\n");
+		buf.append("            else\n");
+		buf.append("                System.out.println(-3); else if (a == 4)\n");
+		buf.append("                System.out.println(4);\n");
+		buf.append("        int stop;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+
+	}
+	
+	
+	public void testConvertSwitchToIf() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a) {\n");
+		buf.append("        switch (a) {\n");
+		buf.append("            case 1:\n");
+		buf.append("                {\n");
+		buf.append("                    System.out.println(1);\n");
+		buf.append("                    break;\n");
+		buf.append("                }\n");
+		buf.append("            case 2:\n");
+		buf.append("            case 3:\n");
+		buf.append("                System.out.println(2);\n");
+		buf.append("                break;\n");
+		buf.append("            case 4:\n");
+		buf.append("                System.out.println(4);\n");
+		buf.append("                return;\n");
+		buf.append("            default:\n");
+		buf.append("                System.out.println(-1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("switch");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a) {\n");
+		buf.append("        if (a == 1) {\n");
+		buf.append("            {\n");
+		buf.append("                System.out.println(1);\n");
+		buf.append("            }\n");
+		buf.append("        } else if (a == 2 || a == 3) {\n");
+		buf.append("            System.out.println(2);\n");
+		buf.append("        } else if (a == 4) {\n");
+		buf.append("            System.out.println(4);\n");
+		buf.append("            return;\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println(-1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+
+	}
 	
 	
 	

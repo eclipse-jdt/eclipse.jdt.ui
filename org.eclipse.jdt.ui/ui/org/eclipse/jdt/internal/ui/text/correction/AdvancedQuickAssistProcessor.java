@@ -2013,8 +2013,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			newIfStatement.setExpression((Expression) rewrite.createMoveTarget(ifStatement.getExpression()));
 			// prepare 'then' statement and convert into block if needed
 			Statement thenStatement= (Statement) rewrite.createMoveTarget(ifStatement.getThenStatement());
-			if (thenStatement instanceof IfStatement) {
-				IfStatement ifBodyStatement= (IfStatement) thenStatement;
+			if (ifStatement.getThenStatement() instanceof IfStatement) {
+				IfStatement ifBodyStatement= (IfStatement) ifStatement.getThenStatement();
 				if (ifBodyStatement.getElseStatement() == null) {
 					Block thenBlock= ast.newBlock();
 					thenBlock.statements().add(thenStatement);

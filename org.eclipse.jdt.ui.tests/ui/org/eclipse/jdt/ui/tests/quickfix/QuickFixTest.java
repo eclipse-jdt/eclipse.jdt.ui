@@ -126,11 +126,14 @@ public class QuickFixTest extends TestCase {
 	
 	
 	public static void assertExpectedExistInProposals(List actualProposals, String[] expecteds) throws CoreException {
-		String[] actuals= new String[actualProposals.size()];
+		ArrayList actuals= new ArrayList(actualProposals.size());
 		for (int i= 0; i < actualProposals.size(); i++) {
-			actuals[i]= getPreviewContent((CUCorrectionProposal) actualProposals.get(i));
+			Object curr= actualProposals.get(i);
+			if (curr instanceof CUCorrectionProposal) {
+				actuals.add(getPreviewContent((CUCorrectionProposal) curr));
+			}
 		}
-		StringAsserts.assertExpectedExistInProposals(actuals, expecteds);
+		StringAsserts.assertExpectedExistInProposals((String[]) actuals.toArray(new String[actuals.size()]), expecteds);
 	}
 	
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
