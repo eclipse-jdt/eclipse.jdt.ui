@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaBuilderPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.RefactoringPreferencePage;
@@ -321,6 +322,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		TemplatePreferencePage.initDefaults(store);		
 		CodeGenerationPreferencePage.initDefaults(store);
 		JavadocPreferencePage.initDefaults(store);
+		JavaBuilderPreferencePage.initDefaults(store);
 		
 		WorkInProgressPreferencePage.initDefaults(store);
 		JavaBrowsingPreferencePage.initDefaults(store);
