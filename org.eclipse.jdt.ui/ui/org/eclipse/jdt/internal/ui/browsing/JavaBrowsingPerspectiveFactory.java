@@ -17,8 +17,8 @@ import org.eclipse.search.ui.SearchUI;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 
 public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 	
@@ -35,11 +35,11 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 	}
 
 	public void createInitialLayout(IPageLayout layout) {
-		if (AppearancePreferencePage.stackBrowsingViewsHorizontally())
-			createHorizontalLayout(layout);
-		else
+		if (stackBrowsingViewsVertically())
 			createVerticalLayout(layout);
-
+		else
+			createHorizontalLayout(layout);
+		
 		// action sets
 		layout.addActionSet(IDebugUIConstants.LAUNCH_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
@@ -136,6 +136,10 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 			return true;
 		int type= fgJavaElementFromAction.getElementType();
 		return type == IJavaElement.JAVA_MODEL || type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT;
+	}
+
+	private boolean stackBrowsingViewsVertically() {
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.BROWSING_STACK_VERTICALLY);
 	}
 
 	/*

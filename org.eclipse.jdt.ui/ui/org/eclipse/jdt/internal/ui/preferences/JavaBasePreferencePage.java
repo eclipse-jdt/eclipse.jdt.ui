@@ -58,21 +58,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private static final String UPDATE_ON_SAVE= PreferenceConstants.UPDATE_ON_SAVE;
 	private static final String UPDATE_WHILE_EDITING= PreferenceConstants.UPDATE_WHILE_EDITING;
 
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */		
-	public static boolean linkPackageSelectionToEditor() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_PACKAGES_TO_EDITOR);
-	}
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */	
-	public static boolean linkTypeHierarchySelectionToEditor() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR);
-	}	
-
 	/**
 	 * @deprecated Inline to avoid reference to preference page
 	 */	
@@ -97,12 +82,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		//return PreferenceConstants.getPreferenceStore().getBoolean(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE);
 	}
 
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */	
-	public static boolean doubleClickGoesInto() {
-		return PreferenceConstants.DOUBLE_CLICK_GOES_INTO.equals(PreferenceConstants.getPreferenceStore().getString(DOUBLE_CLICK));
-	}
 
 	private ArrayList fCheckBoxes;
 	private ArrayList fRadioButtons;
