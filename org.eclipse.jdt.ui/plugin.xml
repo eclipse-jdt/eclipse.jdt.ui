@@ -1643,6 +1643,17 @@ JavaStructureDiffViewerCreator
 		enabled= "false">
 	</filter>
 
+	<!-- Types view -->
+	<filter
+		id= "org.eclipse.jdt.ui.TypesView.NonPublicTypeFilter"
+		name= "%HideNonPublicType.label"
+		description= "%HideNonPublicType.description"
+		viewId= "org.eclipse.jdt.ui.TypesView"
+		class= "org.eclipse.jdt.internal.ui.filters.NonPublicTypeFilter"
+		enabled= "false">
+	</filter>
+
+
 	<!-- Packages view -->
 	<filter
 		id= "org.eclipse.jdt.internal.ui.PackagesView.EmptyPackageFilter"
