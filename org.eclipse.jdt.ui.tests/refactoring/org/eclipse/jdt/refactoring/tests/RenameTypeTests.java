@@ -813,8 +813,8 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void test40() throws Exception { 
-		printTestDisabledMessage("search engine bug");
-		//helper2("A", "B");		
+		//printTestDisabledMessage("search engine bug");
+		helper2("A", "B");		
 	}
 	
 	public void test41() throws Exception { 
@@ -888,8 +888,8 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void test52() throws Exception {
-		printTestDisabledMessage("1GJY2XN: ITPJUI:WIN2000 - rename type: error when with reference");
-		//helper2("A", "B");		
+		//printTestDisabledMessage("1GJY2XN: ITPJUI:WIN2000 - rename type: error when with reference");
+		helper2("A", "B");		
 	}
 
 	public void test53() throws Exception { 

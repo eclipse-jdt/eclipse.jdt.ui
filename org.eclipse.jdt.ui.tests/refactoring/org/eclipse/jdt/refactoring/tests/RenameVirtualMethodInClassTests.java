@@ -255,7 +255,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public void testFail38() throws Exception{
-		printTestDisabledMessage("needs fixing");
+		printTestDisabledMessage("must fix - nested type");
 		//helper1();
 	}
 	
@@ -292,7 +292,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}		
 	
 	public void test17() throws Exception{
-		printTestDisabledMessage("");
+		printTestDisabledMessage("overloading");
 		//helper2_0("m", "kk", new String[]{Signature.SIG_INT});
 	}		
 	
@@ -339,8 +339,8 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}		
 	
 	public void test25() throws Exception{
-		printTestDisabledMessage("waiting for 1GIIBC3: ITPJCORE:WINNT - search for method references - missing matches");
-		//helper2();
+		//printTestDisabledMessage("waiting for 1GIIBC3: ITPJCORE:WINNT - search for method references - missing matches");
+		helper2();
 	}		
 	
 	public void test26() throws Exception{
@@ -377,7 +377,8 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	//anonymous inner class
 	public void testAnon0() throws Exception{
-		helper2_fail();
+		//helper2_fail();
+		helper2();
 	}		
 	
 }

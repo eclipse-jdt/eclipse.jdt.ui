@@ -180,8 +180,8 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void testFail7() throws Exception{
-		printTestDisabledMessage("1GK90H4: ITPJCORE:WIN2000 - search: missing package reference");
-		//helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+		//printTestDisabledMessage("1GK90H4: ITPJCORE:WIN2000 - search: missing package reference");
+		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
 	public void testFail8() throws Exception{

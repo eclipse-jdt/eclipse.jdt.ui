@@ -225,7 +225,7 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;public class RenameParame
 	}	
 	
 	public void test32() throws Exception{
-		printTestDisabledMessage("needs revisiting");
+		printTestDisabledMessage("must do - constructor params");
 	}
 	
 	public void test33() throws Exception{

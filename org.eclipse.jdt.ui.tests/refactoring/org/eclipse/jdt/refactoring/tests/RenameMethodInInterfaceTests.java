@@ -349,11 +349,13 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	//anonymous inner class
 	public void test31() throws Exception{
-		helper2_fail();
+		//helper2_fail();
+		helper2();
 	}
 	//anonymous inner class
 	public void test32() throws Exception{
-		helper2_fail();
+		//helper2_fail();
+		helper2();
 	}
 	public void test33() throws Exception{
 		helper2();
