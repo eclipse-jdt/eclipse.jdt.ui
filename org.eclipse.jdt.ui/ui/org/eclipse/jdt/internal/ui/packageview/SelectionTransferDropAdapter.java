@@ -27,23 +27,21 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
-import org.eclipse.jdt.internal.ui.reorg.JdtCopyAction;
-import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
+import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.reorg.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -96,21 +94,16 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			fElements= ((IStructuredSelection)s).toList();
 		}	
 
-		boolean success= false;
-
 		try {
 			if (operation == DND.DROP_COPY) {
-				success= handleValidateCopy(target, event);
+				event.detail= handleValidateCopy(target, event);
 			} else if (operation == DND.DROP_MOVE) {
-				success= handleValidateMove(target, event);
+				event.detail= handleValidateMove(target, event);
 			}
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, PackagesMessages.getString("SelectionTransferDropAdapter.error.title"), PackagesMessages.getString("SelectionTransferDropAdapter.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
-			success= false;
+			event.detail= DND.DROP_NONE;
 		}	
-		
-		if (success)
-			event.detail= operation;
 	}	
 
 	public void drop(Object target, DropTargetEvent event) {
@@ -140,21 +133,24 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		}	
 	}
 	
-	private boolean handleValidateMove(Object target, DropTargetEvent event) throws JavaModelException{
+	private int handleValidateMove(Object target, DropTargetEvent event) throws JavaModelException{
 		if (target == null)
-			return false;
+			return DND.DROP_NONE;
 		
 		if (canPasteSourceReferences(target, event))
-			return true;
+			return DND.DROP_COPY; //XXX for now
 		
 		if (fMoveRefactoring == null){
 			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings());
 		}	
 		
 		if (!canMoveElements())
-			return false;	
+			return DND.DROP_NONE;	
 		
-		return fMoveRefactoring.isValidDestination(target);
+		if (fMoveRefactoring.isValidDestination(target))
+			return DND.DROP_MOVE;
+		else
+			return DND.DROP_NONE;	
 	}
 	
 	private boolean canMoveElements() {
@@ -195,17 +191,20 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		return;
 	}
 	
-	private boolean handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
+	private int handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
 		if (canPasteSourceReferences(target, event))
-			return true;
+			return DND.DROP_COPY;
 		
 		if (fCopyRefactoring == null)
 			fCopyRefactoring= new CopyRefactoring(fElements);
 		
 		if (!canCopyElements())
-			return false;	
+			return DND.DROP_NONE;	
 
-		return fCopyRefactoring.isValidDestination(target);
+		if (fCopyRefactoring.isValidDestination(target))
+			return DND.DROP_COPY;
+		else
+			return DND.DROP_NONE;					
 	}
 
 	private boolean canPasteSourceReferences(Object target, DropTargetEvent event) throws JavaModelException{
