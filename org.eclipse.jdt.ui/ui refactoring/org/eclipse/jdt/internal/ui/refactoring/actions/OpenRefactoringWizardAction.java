@@ -33,12 +33,26 @@ public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
 	 */
 	public boolean canOperateOn(IStructuredSelection selection){
+		if (selection.isEmpty())
+			return canOperateOnEmptySelection();
+		
+		if (selection.size() > 1 && !canOperateOnMultiSelection())	
+			return false;
+			
 		for  (Iterator iter= selection.iterator(); iter.hasNext(); ) {
 			Object obj= iter.next();
 			if (!fActivationType.isInstance(obj) || !shouldAcceptElement(obj))
 				return false;
 		}
 		return true;
+	}
+
+	protected boolean canOperateOnMultiSelection(){
+		return false;
+	}
+	
+	protected boolean canOperateOnEmptySelection(){
+		return false;
 	}
 		
 	/* non java-doc
