@@ -33,17 +33,16 @@ import org.eclipse.compare.contentmergeviewer.IDocumentRange;
 public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.ReplaceWithEditionAction";
-
-	/**
-	 * 
-	 */
+	
 	private class DocumentNode implements ITypedElement, IStreamContentAccessor {
 	
 		private IDocument fDocument;
+		private String fName;
 		private String fType;
 		
-		DocumentNode(IDocument document, String type) {
+		DocumentNode(IDocument document, String name, String type) {
 			fDocument= document;
+			fName= name;
 			fType= type;
 		}
 	
@@ -56,7 +55,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		}
 		
 		public String getName() {
-			return "name??";
+			return fName;
 		}
 		
 		public InputStream getContents() {
@@ -96,6 +95,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		try {
 			file= (IFile) cu.getUnderlyingResource();
 		} catch (JavaModelException ex) {
+			//ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "ReplaceWithEdition.Error.getUnderlyingResource.");
 		}
 		if (file == null) {
 			MessageDialog.openError(parent, fTitle, errorMessage);
@@ -110,6 +110,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		try {
 			states= file.getHistory(null);
 		} catch (CoreException ex) {
+			//ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "ReplaceWithEdition.Error.getUnderlyingResource.");
 		}
 		
 		if (states != null)
@@ -124,7 +125,8 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		DocumentManager docManager= null;
 		try {
 			docManager= new DocumentManager(cu);
-		} catch(JavaModelException ex) {
+		} catch (JavaModelException ex) {
+			//ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "ReplaceWithEdition.Error.getUnderlyingResource.");
 			MessageDialog.openError(parent, fTitle, errorMessage);
 			return;
 		}
@@ -136,7 +138,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			
 			IDocument document= docManager.getDocument();
 			String type= file.getFileExtension();
-			ITypedElement ti= d.selectEdition(new DocumentNode(document, type), editions, input);
+			ITypedElement ti= d.selectEdition(new DocumentNode(document, cu.getElementName(), type), editions, input);
 						
 			if (ti instanceof IStreamContentAccessor) {
 				IStreamContentAccessor sca= (IStreamContentAccessor) ti;				
@@ -156,8 +158,10 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			}
 
 		} catch(BadLocationException ex) {
+			//ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "ReplaceWithEdition.Error.getUnderlyingResource.");
 			MessageDialog.openError(parent, fTitle, errorMessage);
 		} catch(CoreException ex) {
+			//ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "ReplaceWithEdition.Error.getUnderlyingResource.");
 			MessageDialog.openError(parent, fTitle, errorMessage);
 		} finally {
 			docManager.disconnect();
