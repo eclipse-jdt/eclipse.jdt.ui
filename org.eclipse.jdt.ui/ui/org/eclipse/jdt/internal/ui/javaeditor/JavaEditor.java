@@ -2027,8 +2027,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	}
 
 	/*
-	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.
-	 * widgets.Composite)
+	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
