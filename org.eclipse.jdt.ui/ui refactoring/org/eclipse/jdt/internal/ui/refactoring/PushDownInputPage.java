@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring
 
 class PushDownInputPage extends UserInputWizardPage {
 	
-	private class PullUpCellModifier implements ICellModifier {
+	private class PushDownCellModifier implements ICellModifier {
 		/*
 		 * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object, java.lang.String)
 		 */
@@ -104,6 +104,8 @@ class PushDownInputPage extends UserInputWizardPage {
 				mac= (MemberActionInfo)((Item)element).getData();
 			} else
 				mac= (MemberActionInfo)element;
+			if (! canModify(mac, property))
+				return;
 			mac.setAction(action);
 			PushDownInputPage.this.updateUIElements(null);
 		}
@@ -318,7 +320,7 @@ class PushDownInputPage extends UserInputWizardPage {
 			}
 		});
 		
-		ICellModifier cellModifier = new PullUpCellModifier();
+		ICellModifier cellModifier = new PushDownCellModifier();
 		fTableViewer.setCellModifier(cellModifier);
 		fTableViewer.setColumnProperties(new String[] {MEMBER_PROPERTY, ACTION_PROPERTY});
 	}
