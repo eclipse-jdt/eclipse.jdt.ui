@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.core.runtime.content.IContentTypeManager;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -33,7 +34,7 @@ import org.eclipse.ui.texteditor.spelling.SpellingContext;
 public class DefaultSpellingEngine implements ISpellingEngine {
 	
 	/** Text content type */
-	private static final IContentType TEXT_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.text"); //$NON-NLS-1$
+	private static final IContentType TEXT_CONTENT_TYPE= Platform.getContentTypeManager().getContentType(IContentTypeManager.CT_TEXT);
 
 	/** Java source content type */
 	private static final IContentType JAVA_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaSource"); //$NON-NLS-1$
