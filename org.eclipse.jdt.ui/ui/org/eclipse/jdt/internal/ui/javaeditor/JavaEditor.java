@@ -2716,6 +2716,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					return;
 				
 				FindOccurrencesEngine engine= FindOccurrencesEngine.create(getInputJavaElement());
+				if (engine == null)
+					return;
+				
 				List matches= new ArrayList();
 				try {
 					IBinding newTarget= engine.resolveTarget(fSelection.getOffset(), fSelection.getLength());
