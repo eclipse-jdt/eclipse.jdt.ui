@@ -117,6 +117,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performSimpleTest();
 	}	
 
+	public void testInitializer() throws Exception {
+		performSimpleTest();
+	}	
+
 	/************************ Argument Tests ********************************/
 		
 	private void performArgumentTest() throws Exception {
@@ -206,6 +210,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 
 	public void testSwitchStatement() throws Exception {
+		performNameConflictTest();
+	}
+
+	public void testBlocks() throws Exception {
 		performNameConflictTest();
 	}
 
