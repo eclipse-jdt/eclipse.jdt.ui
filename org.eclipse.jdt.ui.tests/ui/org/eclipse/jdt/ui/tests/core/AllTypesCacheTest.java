@@ -55,6 +55,8 @@ public class AllTypesCacheTest extends TestCase {
 	
 	private IPackageFragmentRoot fLibrary;
 	private IPackageFragmentRoot fSourceFolder;
+
+	private boolean fWasAutobuild;
 	
 	public AllTypesCacheTest(String name) {
 		super(name);
@@ -76,7 +78,7 @@ public class AllTypesCacheTest extends TestCase {
 
 
 	protected void setUp() throws Exception {
-		// fWasAutobuild= JavaProjectHelper.setAutoBuilding(false);
+		fWasAutobuild= JavaProjectHelper.setAutoBuilding(false);
 		
 		fJProject1= ProjectTestSetup.getProject();
 		
@@ -99,7 +101,7 @@ public class AllTypesCacheTest extends TestCase {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 		JavaProjectHelper.delete(fJProject2);		
-		// JavaProjectHelper.setAutoBuilding(fWasAutobuild);
+		JavaProjectHelper.setAutoBuilding(fWasAutobuild);
 	}
 
 	public void testDifferentScopes() throws Exception {
