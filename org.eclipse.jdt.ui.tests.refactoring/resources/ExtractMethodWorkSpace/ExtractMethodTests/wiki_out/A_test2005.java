@@ -1,8 +1,10 @@
 package wiki_out;
 
+import java.io.IOException;
+
 public class A_test2005 {
 
-	static void fun() throws ArithmeticException {
+	static void fun() throws IOException {
 	}
 
 	public static void main(String args[]) {
@@ -12,7 +14,7 @@ public class A_test2005 {
 		}
 	}
 
-	protected static void extracted() throws ArithmeticException {
+	protected static void extracted() throws IOException {
 		
 		fun();
 		
