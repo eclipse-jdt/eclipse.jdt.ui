@@ -25,6 +25,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -100,7 +101,8 @@ public class SourceAttachmentBlock {
 	private IStatusChangeListener fContext;
 	
 	private StringButtonDialogField fFileNameField;
-	private SelectionButtonDialogField fInternalButtonField;
+	private SelectionButtonDialogField fWorkspaceButton;
+	private SelectionButtonDialogField fExternalFolderButton;
 	
 	private IStatus fNameStatus;
 	
@@ -171,12 +173,15 @@ public class SourceAttachmentBlock {
 			fFileNameField= new StringButtonDialogField(adapter);
 			fFileNameField.setDialogFieldListener(adapter);
 			fFileNameField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.label")); //$NON-NLS-1$
-			fFileNameField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.filename.external.button")); //$NON-NLS-1$
+			fFileNameField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.filename.externalfile.button")); //$NON-NLS-1$
 		
-			fInternalButtonField= new SelectionButtonDialogField(SWT.PUSH);
-			fInternalButtonField.setDialogFieldListener(adapter);
-			fInternalButtonField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.internal.button")); //$NON-NLS-1$
-			
+			fWorkspaceButton= new SelectionButtonDialogField(SWT.PUSH);
+			fWorkspaceButton.setDialogFieldListener(adapter);
+			fWorkspaceButton.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.internal.button")); //$NON-NLS-1$
+
+			fExternalFolderButton= new SelectionButtonDialogField(SWT.PUSH);
+			fExternalFolderButton.setDialogFieldListener(adapter);
+			fExternalFolderButton.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.externalfolder.button")); //$NON-NLS-1$
 		}	
 	
 		// set the old settings
@@ -231,17 +236,17 @@ public class SourceAttachmentBlock {
 		layout.numColumns= 4;		
 		composite.setLayout(layout);
 		
-		int widthHint= converter.convertWidthInCharsToPixels(isVariableEntry() ? 50 : 60);
 		
-		
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 4;
-		
-		Label message= new Label(composite, SWT.LEFT);
-		message.setLayoutData(gd);
-		message.setText(NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fEntry.getPath().lastSegment())); //$NON-NLS-1$
-				
 		if (isVariableEntry()) {
+			int widthHint= converter.convertWidthInCharsToPixels(50);
+			
+			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			gd.horizontalSpan= 4;
+
+			Label message= new Label(composite, SWT.LEFT);
+			message.setLayoutData(gd);
+			message.setText(NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fEntry.getPath().lastSegment())); //$NON-NLS-1$
+			
 			DialogField.createEmptySpace(composite, 1);
 			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 			gd.widthHint= widthHint;
@@ -250,25 +255,41 @@ public class SourceAttachmentBlock {
 			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.filename.description")); //$NON-NLS-1$
 			desc.setLayoutData(gd);
 			DialogField.createEmptySpace(composite, 1);
-		}
-		// archive name field
-		fFileNameField.doFillIntoGrid(composite, 4);
-		LayoutUtil.setWidthHint(fFileNameField.getTextControl(null), widthHint);
-		LayoutUtil.setHorizontalGrabbing(fFileNameField.getTextControl(null));
-		
-		if (!isVariableEntry()) {
-			// aditional 'browse workspace' button for normal jars
-			DialogField.createEmptySpace(composite, 3);	
-			fInternalButtonField.doFillIntoGrid(composite, 1);
-		} else {
+			
+			fFileNameField.doFillIntoGrid(composite, 4);
+			LayoutUtil.setWidthHint(fFileNameField.getTextControl(null), widthHint);
+
 			// label that shows the resolved path for variable jars
 			DialogField.createEmptySpace(composite, 1);	
 			fFullPathResolvedLabel= new CLabel(composite, SWT.LEFT);
 			fFullPathResolvedLabel.setText(getResolvedLabelString(fFileNameField.getText(), true));
 			fFullPathResolvedLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-			DialogField.createEmptySpace(composite, 2);			
+			DialogField.createEmptySpace(composite, 2);
+			
+			LayoutUtil.setHorizontalGrabbing(fFileNameField.getTextControl(null));
+		} else {
+			int widthHint= converter.convertWidthInCharsToPixels(60);
+			
+			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			gd.horizontalSpan= 3;
+
+			Label message= new Label(composite, SWT.LEFT);
+			message.setLayoutData(gd);
+			message.setText(NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fEntry.getPath().lastSegment())); //$NON-NLS-1$
+			
+			fWorkspaceButton.doFillIntoGrid(composite, 1);
+			
+			// archive name field
+			fFileNameField.doFillIntoGrid(composite, 4);
+			LayoutUtil.setWidthHint(fFileNameField.getTextControl(null), widthHint);
+			LayoutUtil.setHorizontalGrabbing(fFileNameField.getTextControl(null));
+
+			// aditional 'browse workspace' button for normal jars
+			DialogField.createEmptySpace(composite, 3);
+			
+			fExternalFolderButton.doFillIntoGrid(composite, 1);
 		}
-		
+				
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
 				
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK);
@@ -291,7 +312,7 @@ public class SourceAttachmentBlock {
 	
 	private void attachmentChangeControlPressed(DialogField field) {
 		if (field == fFileNameField) {
-			IPath jarFilePath= chooseExtJarFile();
+			IPath jarFilePath= isVariableEntry() ? chooseExtension() : chooseExtJarFile();
 			if (jarFilePath != null) {
 				fFileNameField.setText(jarFilePath.toString());
 			}
@@ -303,10 +324,16 @@ public class SourceAttachmentBlock {
 	private void attachmentDialogFieldChanged(DialogField field) {
 		if (field == fFileNameField) {
 			fNameStatus= updateFileNameStatus();
-		} else if (field == fInternalButtonField) {
+		} else if (field == fWorkspaceButton) {
 			IPath jarFilePath= chooseInternalJarFile();
 			if (jarFilePath != null) {
 				fFileNameField.setText(jarFilePath.toString());
+			}
+			return;
+		} else if (field == fExternalFolderButton) {
+			IPath folderPath= chooseExtFolder();
+			if (folderPath != null) {
+				fFileNameField.setText(folderPath.toString());
 			}
 			return;
 		}
@@ -424,6 +451,29 @@ public class SourceAttachmentBlock {
 		return status;
 	}
 	
+	private IPath chooseExtension() {
+		IPath currPath= new Path(fFileNameField.getText());
+		if (currPath.isEmpty()) {
+			currPath= fEntry.getPath();
+		}		
+	
+		IPath resolvedPath= getResolvedPath(currPath);
+		File initialSelection= resolvedPath != null ? resolvedPath.toFile() : null;
+			
+		String currVariable= currPath.segment(0);
+		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false, true);
+		dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.description")); //$NON-NLS-1$
+		dialog.setInput(fFileVariablePath.toFile());
+		dialog.setInitialSelection(initialSelection);
+		if (dialog.open() == JARFileSelectionDialog.OK) {
+			File result= (File) dialog.getResult()[0];
+			IPath returnPath= new Path(result.getPath()).makeAbsolute();
+			return modifyPath(returnPath, currVariable);
+		}
+		return null;
+	}
+	
 	/*
 	 * Opens a dialog to choose a jar from the file system.
 	 */
@@ -432,38 +482,42 @@ public class SourceAttachmentBlock {
 		if (currPath.isEmpty()) {
 			currPath= fEntry.getPath();
 		}		
-		if (isVariableEntry()) {
-			IPath resolvedPath= getResolvedPath(currPath);
-			File initialSelection= resolvedPath != null ? resolvedPath.toFile() : null;
 			
-			String currVariable= currPath.segment(0);
-			JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false, true);
-			dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.title")); //$NON-NLS-1$
-			dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.description")); //$NON-NLS-1$
-			dialog.setInput(fFileVariablePath.toFile());
-			dialog.setInitialSelection(initialSelection);
-			if (dialog.open() == JARFileSelectionDialog.OK) {
-				File result= (File) dialog.getResult()[0];
-				IPath returnPath= new Path(result.getPath()).makeAbsolute();
-				return modifyPath(returnPath, currVariable);
-			}
-		} else {
-			
-			if (ArchiveFileFilter.isArchivePath(currPath)) {
-				currPath= currPath.removeLastSegments(1);
-			}
-		
-			FileDialog dialog= new FileDialog(getShell());
-			dialog.setText(NewWizardMessages.getString("SourceAttachmentBlock.extjardialog.text")); //$NON-NLS-1$
-			dialog.setFilterExtensions(new String[] {"*.jar;*.zip"}); //$NON-NLS-1$
-			dialog.setFilterPath(currPath.toOSString());
-			String res= dialog.open();
-			if (res != null) {
-				return new Path(res).makeAbsolute();
-			}
+		if (ArchiveFileFilter.isArchivePath(currPath)) {
+			currPath= currPath.removeLastSegments(1);
+		}
+	
+		FileDialog dialog= new FileDialog(getShell());
+		dialog.setText(NewWizardMessages.getString("SourceAttachmentBlock.extjardialog.text")); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"}); //$NON-NLS-1$
+		dialog.setFilterPath(currPath.toOSString());
+		String res= dialog.open();
+		if (res != null) {
+			return new Path(res).makeAbsolute();
 		}
 		return null;
 	}
+	
+	private IPath chooseExtFolder() {
+		IPath currPath= new Path(fFileNameField.getText());
+		if (currPath.isEmpty()) {
+			currPath= fEntry.getPath();
+		}
+		if (ArchiveFileFilter.isArchivePath(currPath)) {
+			currPath= currPath.removeLastSegments(1);
+		}
+	
+		DirectoryDialog dialog= new DirectoryDialog(getShell());
+		dialog.setText(NewWizardMessages.getString("SourceAttachmentBlock.extfolderdialog.text")); //$NON-NLS-1$
+		dialog.setFilterPath(currPath.toOSString());
+		String res= dialog.open();
+		if (res != null) {
+			return new Path(res).makeAbsolute();
+		}
+		return null;
+	}	
+	
+	
 
 	/*
 	 * Opens a dialog to choose an internal jar.
