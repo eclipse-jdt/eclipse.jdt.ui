@@ -530,7 +530,7 @@ public class JavaModelUtil {
 	
 	/**
 	 * Returns the original if the given member. If the member is already
-	 * an original the input is returned. The returned member must not exist
+	 * an original the input is returned. The returned member might not exist
 	 */
 	public static IMember toOriginal(IMember member) {
 		if (member instanceof IMethod)
@@ -570,7 +570,7 @@ public class JavaModelUtil {
 
 	/**
 	 * Returns the original cu if the given cu. If the cu is already
-	 * an original the input cu is returned. The returned cu must not exist
+	 * an original the input cu is returned. The returned cu might not exist
 	 */
 	public static ICompilationUnit toOriginal(ICompilationUnit cu) {
 		if (cu != null && cu.isWorkingCopy())
