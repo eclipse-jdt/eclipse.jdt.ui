@@ -165,11 +165,11 @@ public class TypeConstraintTests extends RefactoringTest {
 		String[] strings= {"Decl(A:f()) =^= p.A", "[a] =^= A", "[x] =^= boolean", "[a instanceof A] <= [x]", "[null] <= [a]", "[a] <= A or A <= [a]"};
 		testConstraints(strings);
 	}	
-//
-//	public void testConstraints10() throws Exception{
-//		String[] strings= {};
-//		testConstraints(strings);
-//	}	
+
+	public void testConstraints10() throws Exception{
+		String[] strings= {"[null] <= [A:f1()]_returnType", "Decl(A:f1()) =^= p.A", "[A:f1()]_returnType =^= A[]"};
+		testConstraints(strings);
+	}	
 //
 //	public void testConstraints11() throws Exception{
 //		String[] strings= {};
@@ -218,6 +218,16 @@ public class TypeConstraintTests extends RefactoringTest {
 
 	public void testConstraints20() throws Exception{
 		String[] strings= {"Decl(B:aField) =^= p.B", "Decl(A:aField) =^= p.A", "Decl(B:aField) < Decl(A:aField)", "[aField] =^= A", "[aField] =^= A"};
+		testConstraints(strings);
+	}	
+
+	public void testConstraints21() throws Exception{
+		String[] strings= {"Decl(A:f2(A[])) =^= p.A", "[Parameter(0,A:f2(A[]))] =^= [as]"};
+		testConstraints(strings);
+	}	
+
+	public void testConstraints22() throws Exception{
+		String[] strings= {"[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]", "[Parameter(1,A:f(A, Object))] =^= [a1]", "[A:f(A, Object)]_returnType =^= A", "Decl(A:f(A, Object)) =^= p.A"};
 		testConstraints(strings);
 	}	
 	
