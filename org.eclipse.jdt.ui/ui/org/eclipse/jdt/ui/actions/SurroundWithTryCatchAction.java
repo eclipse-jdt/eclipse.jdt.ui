@@ -12,6 +12,8 @@ package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -68,7 +70,15 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 				RefactoringMessages.getString("SurroundWithTryCatchAction.no_exceptions"), //$NON-NLS-1$
 				MessageDialog.QUESTION, 
 				new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 
-				1); 
+				1) {
+					// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=18303
+					protected void createButtonsForButtonBar(Composite parent) {
+						super.createButtonsForButtonBar(parent);
+						Button button= getButton(1);
+						if (button != null)
+							button.setFocus();
+					}
+			};
 			return dialog.open() == 0; // yes selected
 		}
 	}
