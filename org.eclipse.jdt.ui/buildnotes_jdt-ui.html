@@ -19,22 +19,31 @@ What's new in this drop</h2>
 Added "Edit Working Set..." to JDT view menus</li>
 
 <li>
-Inline Call - new refactoring to inline a method call. To activate the
-refactoring select a method invocation in a compilation unit editor and
-select <i>Inline Call</i> from the refactoring menu. Current limitations
-are:</li>
-
-<ul>
-<li>
-only one single call can be inlined</li>
-
-<li>
-a call can only be inlined if the call and the actual declaration resides
-in the same compilation unit</li>
+Inline Method - new refactoring. To activate the
+refactoring, select a method invocation in a compilation unit editor and
+select <i>Inline Method</i> from the refactoring menu. Alternatively, select 
+a method declaration in the editor. You can also select a method in the 
+Outline, Package Explorer or Members view. <br>
+You can choose between inlining only the selected method call or inlining all calls 
+(in which case you can also deleted the method).
+<br>Note that currently no checking is done if method to be inlined is reimplemented in subclasses.
+</li>
 
 <li>
-no checking is done if method to be inlined is reimplemented in subclasses.</li>
-</ul>
+Change Signature refactoring: Modify Parameters refactoring has been enhanced to
+add and remove parameters. Also, the parameter types and the method return type can be changed.
+The declaration of the method, declarations of methods overriding/implementing it and 
+all invocations are updated accordingly.<br>
+Currently, to change the method's name Rename refactoring should be used. 
+This will change in a future release - Change Signature will allow renaming the method too.<br>
+To activate - select a method or constructor and choose <i>Change Signature..</i> from the <i>Refactor</i> menu.
+</li>
+
+<li>
+Use Supertype Where Possible refactoring: new refactoring that replaces usages of a type with one of its supertypes.<br>
+It computes the largest set of references that can be updated.<br>
+To activate, select a type and choose <i>Use Supertype Where Possible...</i>.
+</li>
 
 <li>
 New Quick fixes</li>
