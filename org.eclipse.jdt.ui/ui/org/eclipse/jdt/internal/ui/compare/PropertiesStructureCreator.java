@@ -14,13 +14,22 @@ import java.io.IOException;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.text.*;
+import org.eclipse.compare.CompareUI;
+import org.eclipse.compare.IEditableContent;
+import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
+import org.eclipse.compare.structuremergeviewer.IStructureComparator;
+import org.eclipse.compare.structuremergeviewer.IStructureCreator;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.compare.*;
-import org.eclipse.compare.structuremergeviewer.*;
-import org.eclipse.core.runtime.CoreException;
 
 
 public class PropertiesStructureCreator implements IStructureCreator {
@@ -61,7 +70,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		 * see ITypedElement#getType
 		 */
 		public String getType() {
-			return "txt"; //$NON-NLS-1$
+			return "properties2"; //$NON-NLS-1$
 		}
 		
 		/* (non Java doc)
@@ -124,6 +133,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		}
 			
 		Document doc= new Document(content != null ? content : ""); //$NON-NLS-1$
+		JavaCompareUtilities.setupPropertiesFileDocument(doc);
 				
 		boolean isEditable= false;
 		if (input instanceof IEditableContent)

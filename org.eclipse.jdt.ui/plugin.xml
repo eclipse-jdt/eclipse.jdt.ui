@@ -1171,6 +1171,18 @@
 	  </contentTypeBinding>
    </extension>
    <extension
+         point="org.eclipse.compare.contentViewers">
+      <viewer
+            extensions="properties,properties2"
+            class="org.eclipse.jdt.internal.ui.compare.PropertiesFileViewerCreator"
+            id="org.eclipse.jdt.internal.ui.compare.PropertiesFileViewerCreator">
+      </viewer>
+      <contentTypeBinding
+			contentTypeId="org.eclipse.jdt.core.javaProperties"
+            contentViewerId="org.eclipse.jdt.internal.ui.compare.PropertiesFileViewerCreator">
+	  </contentTypeBinding>
+   </extension>
+   <extension
          point="org.eclipse.compare.contentMergeViewers">
       <viewer
             extensions="java,java2"
@@ -1178,12 +1190,20 @@
             id="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator">
       </viewer>
       <contentTypeBinding
-			contentTypeId="org.eclipse.jdt.core.javaProperties"
-            contentMergeViewerId="org.eclipse.compare.TextMergeViewerCreator">
-	  </contentTypeBinding>
-      <contentTypeBinding
 			contentTypeId="org.eclipse.jdt.core.javaSource"
             contentMergeViewerId="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator">
+	  </contentTypeBinding>
+   </extension>
+   <extension
+         point="org.eclipse.compare.contentMergeViewers">
+      <viewer
+            extensions="properties,properties2"
+            class="org.eclipse.jdt.internal.ui.compare.PropertiesFileMergeViewerCreator"
+            id="org.eclipse.jdt.internal.ui.compare.PropertiesFileMergeViewerCreator">
+      </viewer>
+      <contentTypeBinding
+			contentTypeId="org.eclipse.jdt.core.javaProperties"
+            contentMergeViewerId="org.eclipse.jdt.internal.ui.compare.PropertiesFileMergeViewerCreator">
 	  </contentTypeBinding>
    </extension>
    <extension

@@ -16,23 +16,34 @@ import java.util.*;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.IEncodedStreamContentAccessor;
+import org.eclipse.compare.IStreamContentAccessor;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.text.rules.DefaultPartitioner;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.ui.*;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFilePartitionScanner;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.ui.text.JavaTextTools;
 
 
 class JavaCompareUtilities {
@@ -248,6 +259,12 @@ class JavaCompareUtilities {
 		JavaTextTools tools= getJavaTextTools();
 		if (tools != null)
 			tools.setupJavaDocumentPartitioner(document);
+	}
+	
+	static void setupPropertiesFileDocument(IDocument document) {
+		IDocumentPartitioner partitioner= new DefaultPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
+		document.setDocumentPartitioner(partitioner);
+		partitioner.connect(document);
 	}
 
 	/**
