@@ -655,18 +655,34 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		 * Remember current selection.
 		 */
 		public void remember() {
-			IRegion selection= getSignedSelection(getSourceViewer());
-			int startOffset= selection.getOffset();
-			int endOffset= startOffset + selection.getLength();
-			
-			fStartOffset.setOffset(startOffset);
-			fEndOffset.setOffset(endOffset);
+			/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=52257
+			 * This method may be called inside an async call posted
+			 * to the UI thread, so protect against intermediate disposal
+			 * of the editor.
+			 */
+			ISourceViewer viewer= getSourceViewer();
+			if (viewer != null) {
+				IRegion selection= getSignedSelection(viewer);
+				int startOffset= selection.getOffset();
+				int endOffset= startOffset + selection.getLength();
+				
+				fStartOffset.setOffset(startOffset);
+				fEndOffset.setOffset(endOffset);
+			}
 		}
 
 		/**
 		 * Restore remembered selection.
 		 */
 		public void restore() {
+			/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=52257
+			 * This method may be called inside an async call posted
+			 * to the UI thread, so protect against intermediate disposal
+			 * of the editor.
+			 */
+			if (getSourceViewer() == null)
+				return;
+			
 			try {
 				
 				int startOffset= fStartOffset.getOffset();
