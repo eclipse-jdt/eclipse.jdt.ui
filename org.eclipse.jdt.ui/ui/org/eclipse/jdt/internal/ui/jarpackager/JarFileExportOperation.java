@@ -341,6 +341,14 @@ public class JarFileExportOperation implements IJarExportRunnable {
 	}
 
 	private void exportResource(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, boolean isInJavaProject, IResource resource, IPath destinationPath, boolean isInOutputFolder) {
+
+		// Handle case were META-INF/MANIFEST.MF is part of the exported files
+		if (fJarPackage.areClassFilesExported() && destinationPath.toString().equals("META-INF/MANIFEST.MF")) {//$NON-NLS-1$
+			if (fJarPackage.isManifestGenerated())
+				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.didNotAddManifestToJar", resource.getFullPath()), null); //$NON-NLS-1$
+			return;
+		}
+
 		boolean isNonJavaResource= !isInJavaProject || pkgRoot == null;
 		boolean isInClassFolder= false;
 		try {
