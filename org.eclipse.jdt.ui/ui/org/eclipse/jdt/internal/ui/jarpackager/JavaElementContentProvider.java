@@ -135,15 +135,17 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 					 * XXX: Workaround for 1GFM3J3: ITPJUI:WINNT - JAR Packager: Reports duplicate entries for default package 
 					 * 		Use the commented line once the PR is fixed
 					 */
-//					return (IJavaProject)element).getNonJavaResources();
+//					return ((IJavaProject)element).getNonJavaResources();
 					return getNonJavaResources((IJavaProject)element);
-					
 				else
 					return getNonProjectPackageFragmentRoots((IJavaProject)element);
 			}
-			if (element instanceof IPackageFragmentRoot && !fFilterPackages) 
-				return getPackageFragments((IPackageFragmentRoot)element);
-			
+			if (element instanceof IPackageFragmentRoot) {
+				if (fFilterPackages)
+					return ((IPackageFragmentRoot)element).getNonJavaResources();
+				else
+					return getPackageFragments((IPackageFragmentRoot)element);
+			}
 			if (element instanceof IPackageFragment && fShowPackageContent)
 				return getPackageContents((IPackageFragment)element);
 				
@@ -430,9 +432,7 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 //				System.out.println("Root doesn't have children");
 			}
 		}
-		if (projectIsRoot || !fShowPackageContent)
-			return list.toArray();
-		return ArrayUtility.merge(list.toArray(), project.getNonJavaResources());
+		return ArrayUtility.merge(list.toArray(), getNonJavaResources(project));
 	}
 
 	private Object[] getJavaProjects(IJavaModel jm) throws JavaModelException {
@@ -544,7 +544,8 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 			List nonJavaResources= new ArrayList();
 			for (int i= 0; i < members.length; i++) {
 				Object o= members[i];
-				if (!(o instanceof IFile && ("java".equals(((IFile)o).getFileExtension()) || "class".equals(((IFile)o).getFileExtension()))))
+				if ((fShowPackageContent && !((o instanceof IFile && ("java".equals(((IFile)o).getFileExtension()) || "class".equals(((IFile)o).getFileExtension()))) || o instanceof IFolder))
+				|| (!fShowPackageContent && o instanceof IFolder))
 					nonJavaResources.add(o);
 			}
 			return nonJavaResources.toArray();
