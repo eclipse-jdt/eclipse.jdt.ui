@@ -4,12 +4,12 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.util.Iterator;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRunnable;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.internal.IHelpContextIds;import org.eclipse.ui.internal.WorkbenchMessages;import org.eclipse.ui.internal.WorkbenchPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;
-
+import java.util.Iterator;import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRunnable;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.internal.IHelpContextIds;import org.eclipse.ui.internal.WorkbenchMessages;import org.eclipse.ui.internal.WorkbenchPlugin;
 /*
  * XXX This class is a copy of org.eclipse.ui.actions.AddBookmarkAction
  */
-public class AddBookmarkAction extends JavaUIAction {
+public class AddBookmarkAction extends Action {
 
 	/**
 	 * The id of this action.
