@@ -60,9 +60,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
 	public static Test suite() {
 		return new TestSuite(THIS);
-//		TestSuite suite= new TestSuite();
-//		suite.addTest(new ASTRewritingTest("testListCombinations"));
-//		return suite;
+/*		TestSuite suite= new TestSuite();
+		suite.addTest(new ASTRewritingStatementsTest("testContinueStatement"));
+		return suite;*/
 	}
 
 
@@ -921,5 +921,81 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}		
 	
+	public void testReturnStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        return;\n");
+		buf.append("        return 1;\n");
+		buf.append("        return 1;\n");
+		buf.append("        return 1 + 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+		{ // insert expression
+			ReturnStatement statement= (ReturnStatement) statements.get(0);
+			assertTrue("Has expression", statement.getExpression() == null);
+			
+			SimpleName newExpression= ast.newSimpleName("x");	
+			statement.setExpression(newExpression);
+			
+			ASTRewriteAnalyzer.markAsInserted(newExpression);
+		}
+		{ // replace expression
+			ReturnStatement statement= (ReturnStatement) statements.get(1);
+			
+			Expression expression= statement.getExpression();
+			assertTrue("Has no label", expression != null);
+			
+			SimpleName newExpression= ast.newSimpleName("x");
+
+			ASTRewriteAnalyzer.markAsReplaced(expression, newExpression);
+		}
+		{ // remove expression
+			ReturnStatement statement= (ReturnStatement) statements.get(2);
+			
+			Expression expression= statement.getExpression();
+			assertTrue("Has no label", expression != null);
+			
+			ASTRewriteAnalyzer.markAsRemoved(expression);
+		}
+		{ // modify in expression (no change)
+			ReturnStatement statement= (ReturnStatement) statements.get(3);
+			
+			InfixExpression expression= (InfixExpression) statement.getExpression();
+			ASTRewriteAnalyzer.markAsReplaced(expression.getLeftOperand(), ast.newNumberLiteral("9"));
+		}		
+		
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        return x;\n");
+		buf.append("        return x;\n");
+		buf.append("        return;\n");
+		buf.append("        return 9 + 2;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 	
 }

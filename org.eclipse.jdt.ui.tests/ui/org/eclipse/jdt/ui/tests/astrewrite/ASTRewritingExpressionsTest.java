@@ -614,7 +614,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        new NewInner(\"Hello\", \"World\"){\n");
+		buf.append("        new NewInner(\"Hello\", \"World\") {\n");
 		buf.append("            private void newMethod(String str) {\n");
 		buf.append("            }\n");
 		buf.append("        };\n");

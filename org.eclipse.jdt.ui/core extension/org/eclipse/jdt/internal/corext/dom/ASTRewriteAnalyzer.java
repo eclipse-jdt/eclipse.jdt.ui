@@ -52,6 +52,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 
 	public static void markAsInserted(ASTNode node) {
+		Assert.isTrue(node.getStartPosition() == -1, "Tries to mark existing node as inserted");
 		node.setSourceRange(-1, 0);
 	}
 	
@@ -74,6 +75,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	
 	/* package */ static boolean isInsertOrReplace(ASTNode node) {
 		return isInserted(node) || isReplaced(node);
+	}
+	
+	/* package */ static boolean isInsertOrRemove(ASTNode node) {
+		return isInserted(node) || isRemoved(node);
 	}
 	
 	/* package */ static boolean isInserted(ASTNode node) {
@@ -183,54 +188,40 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	private int rewriteRequiredNode(ASTNode node) {
 		// disabled (bug 22161) checkNoInsert(node);
 		if (isReplaced(node)) {
-			replaceNode(node, getReplacingNode(node));
+			int offset= node.getStartPosition();
+			addGenerated(offset, node.getLength(), getReplacingNode(node), getIndent(offset), true);
 		} else {
 			node.accept(this);
 		}
 		return node.getStartPosition() + node.getLength();
-	}	
+	}
 	
-	private int rewriteNode(ASTNode node, int offset) {
+	private int rewriteNode(ASTNode node, int offset, String prefix) {
 		if (isInserted(node)) {
-			insertNode(node, offset);
+			addInsert(offset, prefix, "Insert prefix");
+			addGenerated(offset, 0, node, getIndent(offset), true);
 			return offset;
-		}
-		if (isReplaced(node)) {
-			replaceNode(node, getReplacingNode(node));
+		} else if (isReplaced(node)) {
+			ASTNode replacing= getReplacingNode(node);
+			if (replacing == null) {
+				// if there is a prefix, delete the prefix as well
+				int len= node.getStartPosition() + node.getLength() - offset;
+				addDelete(offset, len, "Remove Node");
+			} else {
+				addGenerated(node.getStartPosition(), node.getLength(), replacing, getIndent(offset), true);
+			}
 		} else {
 			node.accept(this);
 		}
 		return node.getStartPosition() + node.getLength();
-	}
+	}		
+
 	
-	private void insertNode(ASTNode inserted, int offset) {
-		if (offset > 0 && Character.isLetterOrDigit(fTextBuffer.getChar(offset - 1))) {
-			addInsert(offset, " ", "Add Space before");
+	private int getPosBeforeSpaces(int pos) {
+		while (pos > 0 && Strings.isIndentChar(fTextBuffer.getChar(pos - 1))) {
+			pos--;
 		}
-		addGenerated(offset, 0, inserted, getIndent(offset), true);
-		if (Character.isLetterOrDigit(fTextBuffer.getChar(offset))) {
-			addInsert(offset, " ", "Add Space after");
-		}
-	}
-			
-	private void replaceNode(ASTNode old, ASTNode modified) {
-		int offset= old.getStartPosition();
-		int len= old.getLength();
-		if (modified == null) {
-			// remove spaces before node if is not the ident.
-			int pos= offset;
-			while (pos > 0 && Strings.isIndentChar(fTextBuffer.getChar(pos - 1))) {
-				pos--;
-			}
-			if (pos == 0 || !Character.isWhitespace(fTextBuffer.getChar(pos - 1))) {
-				// is not line delim -> not the indent
-				len= len + offset - pos;
-				offset= pos;
-			}
-			addDelete(offset, len, "Remove Node");
-		} else {
-			addGenerated(offset, len, modified, getIndent(offset), true);
-		}
+		return pos;
 	}
 	
 	private int rewriteOptionalQualifier(ASTNode node, int startPos) {
@@ -706,20 +697,18 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 		
 		Type returnType= methodDecl.getReturnType();
-		if (isReplaced(returnType)) {
-			replaceNode(returnType, getReplacingNode(returnType));
-		} else if (isInserted(returnType)) {
-			if (!willBeConstructor) {
-				try {
-					int startPos= methodDecl.getStartPosition();
-					int offset= ASTResolving.getPositionAfter(getScanner(startPos), startPos, MODIFIERS);
-					insertNode(returnType, offset);
-				} catch (InvalidInputException e) {
-					JavaPlugin.log(e);
-				}
+		try {
+			int startPos= methodDecl.getStartPosition();
+			if (isInsertOrRemove(returnType)) {
+				startPos= ASTResolving.getPositionAfter(getScanner(startPos), startPos, MODIFIERS);
 			}
+			if (!willBeConstructor || !isInserted(returnType)) {
+				rewriteNode(returnType, startPos, " ");
+			}
+		} catch (InvalidInputException e) {
+			JavaPlugin.log(e);
 		}
-		
+	
 		SimpleName simpleName= methodDecl.getName();
 		rewriteRequiredNode(simpleName);
 		
@@ -775,15 +764,16 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	public boolean visit(ReturnStatement node) {
 		Expression expression= node.getExpression();
 		if (expression != null) {
-			int offset= node.getStartPosition();
-			if (isInserted(expression)) {
+			if (isInsertOrReplace(expression)) {
 				try {
-					offset= ASTResolving.getPositionAfter(getScanner(offset), ITerminalSymbols.TokenNamereturn);
+					int offset= ASTResolving.getPositionAfter(getScanner(node.getStartPosition()), ITerminalSymbols.TokenNamereturn);
+					rewriteNode(expression, offset, " ");
 				} catch (InvalidInputException e) {
 					JavaPlugin.log(e);
 				}
+			} else {
+				expression.accept(this);
 			}
-			rewriteNode(expression, offset);
 		}
 		return false;
 	}		
@@ -818,10 +808,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		int nNewBrackets= nOldBrackets;
 		if (isReplaced(arrayType)) { // changed arraytype can have different dimension or type name
 			ArrayType replacingType= (ArrayType) getReplacingNode(arrayType);
-			Type newElementType= replacingType.getElementType();
-			Type oldElementType= arrayType.getElementType();
-			if (!newElementType.equals(oldElementType)) {
-				replaceNode(oldElementType, newElementType);
+			Assert.isTrue(replacingType != null, "Cant remove array type in ArrayCreation");
+			Type newType= replacingType.getElementType();
+			Type oldType= arrayType.getElementType();
+			if (!newType.equals(oldType)) {
+				addGenerated(oldType.getStartPosition(), oldType.getLength(), newType, 0, false);
 			}
 			nNewBrackets= replacingType.getDimensions();
 		}
@@ -844,7 +835,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 						if (replacing == null) { // remove includes open and closing brace
 							addDelete(offset, endPos - offset, "Remove dimension");
 						} else {
-							replaceNode(elem, replacing);
+							addGenerated(elem.getStartPosition(), elem.getLength(), replacing, 0, false);
 							nNewBrackets--;
 						}
 					} else {
@@ -869,7 +860,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			
 			ArrayInitializer initializer= node.getInitializer();
 			if (initializer != null) {
-				rewriteNode(initializer, node.getStartPosition() + node.getLength());
+				int pos= node.getStartPosition() + node.getLength(); // insert pos
+				if (isRemoved(initializer)) {
+					pos= getPosBeforeSpaces(initializer.getStartPosition()); // remove pos
+				}
+				rewriteNode(initializer, pos, " ");
 			}
 		} catch (InvalidInputException e) {
 			JavaPlugin.log(e);
@@ -940,8 +935,20 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(BreakStatement)
 	 */
 	public boolean visit(BreakStatement node) {
-		rewriteNode(node.getLabel(), node.getStartPosition() + node.getLength());
-		return false;
+		ASTNode label= node.getLabel();
+		if (label != null) {
+			if (isInsertOrReplace(label)) {
+				try {
+					int offset= ASTResolving.getPositionAfter(getScanner(node.getStartPosition()), ITerminalSymbols.TokenNamebreak);
+					rewriteNode(label, offset, " "); // space between break and label
+				} catch (InvalidInputException e) {
+					JavaPlugin.log(e);
+				}
+			} else {
+				label.accept(this);
+			}
+		}
+		return false;		
 	}
 
 	/* (non-Javadoc)
@@ -996,7 +1003,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		AnonymousClassDeclaration decl= node.getAnonymousClassDeclaration();
 		if (decl != null) {
-			rewriteNode(decl, node.getStartPosition() + node.getLength());
+			pos= node.getStartPosition() + node.getLength(); // for insert
+			if (isRemoved(decl)) {
+				pos= getPosBeforeSpaces(decl.getStartPosition()); // for remove
+			}
+			rewriteNode(decl, pos, " ");
 		}
 		return false;
 	}
@@ -1033,7 +1044,19 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ContinueStatement)
 	 */
 	public boolean visit(ContinueStatement node) {
-		rewriteNode(node.getLabel(), node.getStartPosition() + node.getLength());
+		ASTNode label= node.getLabel();
+		if (label != null) {
+			if (isInsertOrReplace(label)) {
+				try {
+					int offset= ASTResolving.getPositionAfter(getScanner(node.getStartPosition()), ITerminalSymbols.TokenNamecontinue);
+					rewriteNode(label, offset, " "); // space between continue and label
+				} catch (InvalidInputException e) {
+					JavaPlugin.log(e);
+				}
+			} else {
+				label.accept(this);
+			}
+		}
 		return false;
 	}
 
@@ -1110,7 +1133,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			
 			Expression expression= node.getExpression();
 			if (expression != null) {
-				rewriteNode(expression, pos);
+				rewriteNode(expression, pos, "");
 			}
 			
 			List updaters= node.updaters();
@@ -1140,18 +1163,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		Statement elseStatement= node.getElseStatement();
 		if (elseStatement != null) {
 			int startPos= thenStatement.getStartPosition() + thenStatement.getLength();
-			if (isInserted(elseStatement)) {
-				addInsert(startPos, " else ", "Insert else");
-				insertNode(elseStatement, startPos);
-			} else if (isReplaced(elseStatement)) {
-				ASTNode replacingNode= getReplacingNode(elseStatement);
-				if (replacingNode == null) {
-					int endPos= elseStatement.getStartPosition() + elseStatement.getLength();
-					addDelete(startPos, endPos - startPos, "Remove else statement");
-				} else {
-					replaceNode(elseStatement, replacingNode);
-				}
-			}
+			rewriteNode(elseStatement, startPos, " else ");
 		}
 		return false;
 	}
@@ -1215,26 +1227,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		List extendedOperands= node.extendedOperands();
 		if (needsNewOperation || hasChanges(extendedOperands)) {
+			String prefixString= ' ' + operation + ' ';
 			for (int i= 0; i < extendedOperands.size(); i++) {
 				ASTNode elem= (ASTNode) extendedOperands.get(i);
-				if (isInserted(elem)) {
-					addInsert(pos, " " + operation + " ", "Add operation");
-					addGenerated(pos, 0, elem, getIndent(pos), true);
-				} else {
-					if (needsNewOperation && !isRemoved(elem)) {
-						replaceOperation(pos, operation);
-					}
-					int endPos= elem.getStartPosition() + elem.getLength();
-					if (isReplaced(elem)) {
-						ASTNode replacingNode= getReplacingNode(elem);
-						if (replacingNode == null) {
-							addDelete(pos, endPos - pos, "Delete node");
-						} else {
-							addGenerated(elem.getStartPosition(), elem.getLength(), replacingNode, getIndent(elem.getStartPosition()), true);
-						}
-					}
-					pos= endPos;
+				if (needsNewOperation && !isRemoved(elem) && !isInserted(elem)) {
+					replaceOperation(pos, operation);
 				}
+				pos= rewriteNode(elem, pos, prefixString);
 			}
 		} else {
 			visitList(extendedOperands, 0);
@@ -1367,7 +1366,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				replaceOperation(node.getStartPosition(), newOperation);
 			}
 		}
-		
 		rewriteRequiredNode(node.getOperand());
 		return false;	
 	}
@@ -1410,7 +1408,18 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SingleVariableDeclaration)
 	 */
 	public boolean visit(SingleVariableDeclaration node) {
-		return super.visit(node);
+		if (isModified(node)) {
+			SingleVariableDeclaration modifedNode= (SingleVariableDeclaration) getModifiedNode(node);
+			rewriteModifiers(node.getStartPosition(), node.getModifiers(), modifedNode.getModifiers());
+		}
+		rewriteRequiredNode(node.getType());
+		int pos= rewriteRequiredNode(node.getName());
+		
+		Expression initializer= node.getInitializer();
+		if (initializer != null) {
+			rewriteNode(node, pos, " = ");
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
