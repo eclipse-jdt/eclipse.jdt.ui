@@ -62,9 +62,8 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	
 	/**
 	 * Constructs a multi-page list selection dialog.
-	 * @param renderer           the label renderer.
-	 * @param ignoreCase         specifies if sorting and filtering ignores cases.
-	 * @param multipleSelection  specifies if multiple selection is allowed.
+	 * @param parent The parent shell
+	 * @param renderer the label renderer.
 	 */
 	public MultiElementListSelectionDialog(Shell parent, ILabelProvider renderer) {
 		super(parent, renderer);
