@@ -32,7 +32,7 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 		RowLayouter layouter= new RowLayouter(2);
 		
 		Label label= new Label(result, SWT.NONE);
-		label.setText("Enter a name for the local variable:");
+		label.setText("&Enter a name for the local variable:");
 		
 		Text text= createTextInputField(result);
 		text.selectAll();
@@ -46,7 +46,7 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 	}
 	
 	private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
-		String title= "Replace all occurrences of the selected expression with references to the local variable";
+		String title= "&Replace all occurrences of the selected expression with references to the local variable";
 		boolean defaultValue= getExtractTempRefactoring().replaceAllOccurrences();
 		final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 		getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
@@ -58,7 +58,7 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 	}
 	
 	private void addDeclareFinalCheckbox(Composite result, RowLayouter layouter) {
-		String title= "Declare the local variable as 'final'";
+		String title= "&Declare the local variable as 'final'";
 		boolean defaultValue= getExtractTempRefactoring().declareFinal();
 		final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 		getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
