@@ -65,6 +65,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -352,12 +353,16 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		toolBar.add(fUpAction);
 		actionBars.updateActionBars();
 	
-		IMenuManager menu = actionBars.getMenuManager();
+		IMenuManager menu= actionBars.getMenuManager();
 		menu.add(fFilterAction);
+		
 		menu.add(fShowLibrariesAction);  
 		//menu.add(fShowBinariesAction);
 		menu.add(fFilterWorkingSetAction); 
 		menu.add(fRemoveWorkingSetAction); 
+
+		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$
 	}
 		
 	private Object findInputElement() {
