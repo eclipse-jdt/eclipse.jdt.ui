@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
  * @since 3.0
  */
 public class IndentAction extends TextEditorAction {
-
+	
 	/**
 	 * Creates a new instance.
 	 * 
@@ -68,7 +68,7 @@ public class IndentAction extends TextEditorAction {
 	public IndentAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
 		super(bundle, prefix, editor);
 	}
-
+	
 	/*
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
@@ -76,82 +76,82 @@ public class IndentAction extends TextEditorAction {
 		// update has been called by the framework
 		if (!isEnabled())
 			return;
-			
+		
 		ITextSelection selection= getSelection();
 		final IDocument document= getDocument();
-
+		
 		if (document != null) {
 			
-				final int offset= selection.getOffset();
-				final int length= selection.getLength();
-				final Position end= new Position(offset + length);
-				final int firstLine, nLines;
-
-				try {
-					document.addPosition(end);
-					firstLine= document.getLineOfOffset(offset);
-					// check for marginal (zero-length) lines
-					int minusOne= length == 0 ? 0 : 1;
-					nLines= document.getLineOfOffset(offset + length - minusOne) - firstLine + 1;
-				} catch (BadLocationException e) {
-					// will only happen on concurrent modification
-					JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, null, e));
-					return;
-				}
-
-				Runnable runnable= new Runnable() {
-					public void run() {
-						IRewriteTarget target= (IRewriteTarget)getTextEditor().getAdapter(IRewriteTarget.class);
-						if (target != null) {
-							target.beginCompoundChange();
-							target.setRedraw(false);
+			final int offset= selection.getOffset();
+			final int length= selection.getLength();
+			final Position end= new Position(offset + length);
+			final int firstLine, nLines;
+			
+			try {
+				document.addPosition(end);
+				firstLine= document.getLineOfOffset(offset);
+				// check for marginal (zero-length) lines
+				int minusOne= length == 0 ? 0 : 1;
+				nLines= document.getLineOfOffset(offset + length - minusOne) - firstLine + 1;
+			} catch (BadLocationException e) {
+				// will only happen on concurrent modification
+				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, null, e));
+				return;
+			}
+			
+			Runnable runnable= new Runnable() {
+				public void run() {
+					IRewriteTarget target= (IRewriteTarget)getTextEditor().getAdapter(IRewriteTarget.class);
+					if (target != null) {
+						target.beginCompoundChange();
+						target.setRedraw(false);
+					}
+					
+					try {
+						JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
+						JavaIndenter indenter= new JavaIndenter(document, scanner);
+						int newOffset= offset;
+						for (int i= 0; i < nLines; i++) {
+							newOffset= indentLine(document, firstLine + i, indenter, scanner);
 						}
 						
-						try {
-							JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
-							JavaIndenter indenter= new JavaIndenter(document, scanner);
-							int newOffset= offset;
-							for (int i= 0; i < nLines; i++) {
-								newOffset= indentLine(document, firstLine + i, indenter, scanner);
-							}
-							
-							// update caret position: move to new position when indenting just one line
-							// keep selection when indenting multiple
-							int newLength= 0;
-							if (nLines > 1) {
-								newOffset= offset;
-								newLength= end.getOffset() - offset;
-							}
-							
-							Assert.isTrue(newLength >= 0);
-							Assert.isTrue(newOffset >= 0);
-							
-							// only change the selection if it really changes
-							if (offset != newOffset || length != newLength)
-								// TODO: be less intrusive than selectAndReveal
-								getTextEditor().selectAndReveal(newOffset, newLength);
-							
-							document.removePosition(end);
-						} catch (BadLocationException e) {
-							// will only happen on concurrent modification
-							JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, null, e));
-							
-						} finally {
-							
-							if (target != null) {
-								target.endCompoundChange();
-								target.setRedraw(true);
-							}
+						// update caret position: move to new position when indenting just one line
+						// keep selection when indenting multiple
+						int newLength= 0;
+						if (nLines > 1) {
+							newOffset= offset;
+							newLength= end.getOffset() - offset;
+						}
+						
+						Assert.isTrue(newLength >= 0);
+						Assert.isTrue(newOffset >= 0);
+						
+						// only change the selection if it really changes
+						if (offset != newOffset || length != newLength)
+							// TODO: be less intrusive than selectAndReveal
+							getTextEditor().selectAndReveal(newOffset, newLength);
+						
+						document.removePosition(end);
+					} catch (BadLocationException e) {
+						// will only happen on concurrent modification
+						JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, null, e));
+						
+					} finally {
+						
+						if (target != null) {
+							target.endCompoundChange();
+							target.setRedraw(true);
 						}
 					}
-				};
-				
-				if (nLines > 50) {
-					Display display= getTextEditor().getEditorSite().getWorkbenchWindow().getShell().getDisplay();
-					BusyIndicator.showWhile(display, runnable);
-				} else
-					runnable.run();
-				
+				}
+			};
+			
+			if (nLines > 50) {
+				Display display= getTextEditor().getEditorSite().getWorkbenchWindow().getShell().getDisplay();
+				BusyIndicator.showWhile(display, runnable);
+			} else
+				runnable.run();
+			
 		}
 	}
 	
@@ -177,14 +177,14 @@ public class IndentAction extends TextEditorAction {
 			if (partition.getOffset() < offset
 					&& type.equals(IJavaPartitions.JAVA_DOC)
 					|| type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
-						
+				
 				// TODO this is a hack
 				// what I want to do
 //				new JavaDocAutoIndentStrategy().indentLineAtOffset(document, offset);
 //				return;
-
+				
 				IRegion previousLine= document.getLineInformation(line - 1);
-						
+				
 				DocumentCommand command= new DocumentCommand() {
 				};
 				command.text= "\n"; //$NON-NLS-1$
@@ -201,7 +201,7 @@ public class IndentAction extends TextEditorAction {
 		// standard java indentation
 		if (indent == null)
 			indent= indenter.computeIndentation(offset);
-			
+		
 		// default is no indentation
 		if (indent == null)
 			indent= new String();
@@ -222,7 +222,7 @@ public class IndentAction extends TextEditorAction {
 		
 		return offset + indent.length();
 	}
-
+	
 	/**
 	 * Returns the editor's selection provider.
 	 * 
@@ -235,7 +235,7 @@ public class IndentAction extends TextEditorAction {
 		}
 		return null;
 	}
-
+	
 	/*
 	 * @see org.eclipse.ui.texteditor.IUpdate#update()
 	 */
@@ -263,7 +263,7 @@ public class IndentAction extends TextEditorAction {
 		IDocument document= getDocument();
 		if (document == null)
 			return false;
-			
+		
 		try {
 			IRegion firstLine= document.getLineInformationOfOffset(offset);
 			int lineOffset= firstLine.getOffset();
@@ -274,13 +274,13 @@ public class IndentAction extends TextEditorAction {
 				return document.get(lineOffset, offset - lineOffset).trim().length() == 0;
 			else
 				return lineOffset + firstLine.getLength() < offset + length;
-				 
+			
 		} catch (BadLocationException e) {
 		}
 		
 		return false;
 	}
-
+	
 	/**
 	 * Returns the smart preference state.
 	 * 
@@ -288,13 +288,13 @@ public class IndentAction extends TextEditorAction {
 	 */
 	private boolean isSmartMode() {
 		ITextEditor editor= getTextEditor();
-
+		
 		if (editor instanceof ITextEditorExtension3)
 			return ((ITextEditorExtension3) editor).getInsertMode() == ITextEditorExtension3.SMART_INSERT;
-
+		
 		return false;
 	}
-
+	
 	/**
 	 * Returns the document currently displayed in the editor, or <code>null</code> if none can be 
 	 * obtained.
@@ -302,19 +302,19 @@ public class IndentAction extends TextEditorAction {
 	 * @return the current document or <code>null</code>
 	 */
 	private IDocument getDocument() {
-
+		
 		ITextEditor editor= getTextEditor();
 		if (editor != null) {
-
+			
 			IDocumentProvider provider= editor.getDocumentProvider();
 			IEditorInput input= editor.getEditorInput();
 			if (provider != null && input != null)
 				return provider.getDocument(input);
-
+			
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Returns the selection on the editor or an invalid selection if none can be obtained. Returns
 	 * never <code>null</code>.
@@ -324,7 +324,7 @@ public class IndentAction extends TextEditorAction {
 	private ITextSelection getSelection() {
 		ISelectionProvider provider= getSelectionProvider();
 		if (provider != null) {
-		
+			
 			ISelection selection= provider.getSelection();
 			if (selection instanceof ITextSelection)
 				return (ITextSelection) selection;
@@ -333,5 +333,5 @@ public class IndentAction extends TextEditorAction {
 		// null object
 		return TextSelection.emptySelection();
 	}
-
+	
 }

@@ -352,13 +352,19 @@ public class JavaIndenter {
 					
 					nextToken();
 					break;
+				
 				case Symbols.TokenCOLON: // switch statements and labels
-					if (!searchCaseGotoDefault())
-						return JavaHeuristicScanner.NOT_FOUND;
-					else {
-						fIndent++;
-						return fPosition;
+					if (searchCaseGotoDefault()) {
+							fIndent++;
+							return fPosition;
 					}
+					break;
+					
+				case Symbols.TokenQUESTIONMARK: // ternary expressions
+					if (takeNextExit)
+						fAlign= fPosition;
+					nextToken();
+					break;
 				
 				// When we find a semi or lbrace, we have found a hoist point
 				// Take the first start to the right from it. If there is only whitespace
@@ -434,6 +440,8 @@ public class JavaIndenter {
 				case Symbols.TokenLBRACKET:
 					if (found)
 						fAlign= fScanner.findNonWhitespaceForward(fPreviousPos, position);
+					
+					fIndent+= 2;
 						
 					nextToken();
 					break;

@@ -48,8 +48,10 @@ public class JavaHeuristicScanner implements Symbols {
 	private static final char RPAREN= ')';
 	private static final char SEMICOLON= ';';
 	private static final char COLON= ':';
+	private static final char COMMA= ',';
 	private static final char LBRACKET= '[';
 	private static final char RBRACKET= ']';
+	private static final char QUESTIONMARK= '?';
 
 	/**
 	 * Specifies the stop condition, upon which the <code>scanXXX</code> methods will decide whether
@@ -236,6 +238,10 @@ public class JavaHeuristicScanner implements Symbols {
 				return TokenRPAREN;
 			case SEMICOLON:
 				return TokenSEMICOLON;
+			case COMMA:
+				return TokenCOMMA;
+			case QUESTIONMARK:
+				return TokenQUESTIONMARK;
 		}
 		
 		// else
@@ -298,6 +304,10 @@ public class JavaHeuristicScanner implements Symbols {
 				return TokenSEMICOLON;
 			case COLON:
 				return TokenCOLON;
+			case COMMA:
+				return TokenCOMMA;
+			case QUESTIONMARK:
+				return TokenQUESTIONMARK;
 		}
 		
 		// else
