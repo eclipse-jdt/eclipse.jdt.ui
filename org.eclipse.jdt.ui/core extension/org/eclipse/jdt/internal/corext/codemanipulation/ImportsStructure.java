@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
+import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -779,9 +780,11 @@ public final class ImportsStructure implements IImportsStructure {
 			document= aquireDocument(new SubProgressMonitor(monitor, 1));
 			MultiTextEdit edit= getResultingEdits(document, new SubProgressMonitor(monitor, 1));
 			if (edit.hasChildren()) {
-				edit.apply(document);
+
 				if (save) {
-					commitDocument(document, new SubProgressMonitor(monitor, 1));
+					commitDocument(document, edit, new SubProgressMonitor(monitor, 1));
+				} else {
+					edit.apply(document);
 				}
 			}
 		} catch (BadLocationException e) {
@@ -821,7 +824,7 @@ public final class ImportsStructure implements IImportsStructure {
 		monitor.done();
 	}
 	
-	private void commitDocument(IDocument document, IProgressMonitor monitor) throws CoreException {
+	private void commitDocument(IDocument document, MultiTextEdit edit, IProgressMonitor monitor) throws CoreException, MalformedTreeException, BadLocationException {
 		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
 			IFile file= (IFile) fCompilationUnit.getResource();
 			if (file.exists()) {
@@ -829,10 +832,15 @@ public final class ImportsStructure implements IImportsStructure {
 				if (!status.isOK()) {
 					throw new ValidateEditException(status);
 				}
+				edit.apply(document); // apply after file is commitable
+				
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 				bufferManager.getTextFileBuffer(file.getFullPath()).commit(monitor, true);
+				return;
 			}
 		}
+		// no commit possible, make sure changes are in
+		edit.apply(document);
 	}
 		
 	private IRegion evaluateReplaceRange(IDocument document) throws JavaModelException, BadLocationException {
