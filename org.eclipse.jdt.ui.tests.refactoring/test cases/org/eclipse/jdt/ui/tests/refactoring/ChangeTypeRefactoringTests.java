@@ -45,6 +45,10 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 
+	public static Test setUpTest(Test test) {
+		return new MySetup(test);
+	}
+	
 	private String getSimpleTestFileName(boolean input) {
 		String fileName= "A_" + getName() + (input ? "_in" : "_out") + ".java";
 
