@@ -478,7 +478,7 @@ public class RemoteTestRunner implements TestListener {
 				exception= e;
 			}
 			try {
-				Thread.currentThread().sleep(2000);
+				Thread.sleep(2000);
 			} catch(InterruptedException e) {
 			}
 		}

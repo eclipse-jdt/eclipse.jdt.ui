@@ -285,7 +285,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			}
 		});
 		gd= new GridData();
-		gd.horizontalAlignment= gd.FILL;
+		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= true;
 		gd.horizontalSpan= nColumns - 2;
 		fClassToTestText.setLayoutData(gd);
@@ -302,7 +302,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			}
 		});	
 		gd= new GridData();
-		gd.horizontalAlignment= gd.FILL;
+		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalSpan= 1;
 		gd.heightHint = SWTUtil.getButtonHeigthHint(fClassToTestButton);
@@ -720,7 +720,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			}
 		});
 		gd= new GridData();
-		gd.horizontalAlignment= gd.FILL;
+		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= true;
 		gd.horizontalSpan= nColumns - 2;
 		fTestClassText.setLayoutData(gd);

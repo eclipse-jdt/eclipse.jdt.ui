@@ -500,7 +500,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			}
 		});
 		gd= new GridData();
-		gd.horizontalAlignment= gd.FILL;
+		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= true;
 		gd.horizontalSpan= nColumns - 2;
 		fSuiteNameText.setLayoutData(gd);

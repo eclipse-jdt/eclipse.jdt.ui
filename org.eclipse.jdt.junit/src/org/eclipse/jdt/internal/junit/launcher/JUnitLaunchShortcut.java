@@ -142,7 +142,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			dialog.setMessage(JUnitMessages.getString("LaunchTestAction.message.selectTestToDebug")); //$NON-NLS-1$
 		}
 		dialog.setMultipleSelection(false);
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == ElementListSelectionDialog.OK) {
 			return (IType)dialog.getFirstResult();
 		}
 		return null;
@@ -206,7 +206,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		dialog.setMultipleSelection(false);
 		int result= dialog.open();
 		labelProvider.dispose();
-		if (result == dialog.OK) {
+		if (result == ElementListSelectionDialog.OK) {
 			return (ILaunchConfiguration)dialog.getFirstResult();
 		}
 		return null;		

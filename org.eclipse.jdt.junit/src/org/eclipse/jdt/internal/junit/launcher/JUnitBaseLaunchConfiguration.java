@@ -108,7 +108,6 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 
 	private IType[] findTestsInContainer(IJavaProject javaProject, String containerHandle, IProgressMonitor pm) {
 		IJavaElement container= JavaCore.create(containerHandle);
-		IType[] types= new IType[0];
 		Set result= new HashSet();
 		try {
 			TestSearchEngine.doFindTests(new Object[]{container}, result, pm);

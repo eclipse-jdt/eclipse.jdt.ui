@@ -337,7 +337,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		SelectionDialog dialog = new TestSelectionDialog(shell, new ProgressMonitorDialog(shell), javaProject);
 		dialog.setTitle(JUnitMessages.getString("JUnitMainTab.testdialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JUnitMessages.getString("JUnitMainTab.testdialog.message")); //$NON-NLS-1$
-		if (dialog.open() == dialog.CANCEL) {
+		if (dialog.open() == SelectionDialog.CANCEL) {
 			return;
 		}
 		
@@ -392,7 +392,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		if (javaProject != null) {
 			dialog.setInitialSelections(new Object[] { javaProject });
 		}
-		if (dialog.open() == dialog.OK) {			
+		if (dialog.open() == ElementListSelectionDialog.OK) {			
 			return (IJavaProject) dialog.getFirstResult();
 		}			
 		return null;		
@@ -571,7 +571,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		dialog.setInitialSelection(initElement);
 		dialog.setAllowMultiple(false);
 		
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			Object element= dialog.getFirstResult();
 			return (IJavaElement)element;
 		}

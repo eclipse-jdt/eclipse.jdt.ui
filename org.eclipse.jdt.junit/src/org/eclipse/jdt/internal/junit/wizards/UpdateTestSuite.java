@@ -105,7 +105,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 					dialog.setInitialSelections(cprovider.getElements(fPack));
 					dialog.setSize(60, 25);
 					dialog.setInput(fPack);
-					if (dialog.open() == dialog.OK) {
+					if (dialog.open() == CheckedTableSelectionDialog.OK) {
 						fSelectedTestCases= dialog.getResult();
 						ProgressMonitorDialog progressDialog= new ProgressMonitorDialog(fShell);
 						try {

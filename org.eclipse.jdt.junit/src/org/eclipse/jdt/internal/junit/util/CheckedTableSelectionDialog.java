@@ -188,8 +188,8 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	public void create() {
 		super.create();
 
-		List initialSelections= getInitialSelections();
-		if (initialSelections != null) {
+		List initialSelections= getInitialElementSelections();
+		if (initialSelections.size() > 0) {
 			fViewer.setCheckedElements(initialSelections.toArray());			
 		}
 			
