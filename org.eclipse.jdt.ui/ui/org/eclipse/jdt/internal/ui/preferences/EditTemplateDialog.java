@@ -461,7 +461,8 @@ public class EditTemplateDialog extends StatusDialog {
 		
 		viewer.addTextListener(new ITextListener() {
 			public void textChanged(TextEvent event) {
-				doSourceChanged(event.getDocumentEvent().getDocument());
+				if (event .getDocumentEvent() != null)
+					doSourceChanged(event.getDocumentEvent().getDocument());
 			}
 		});
 
