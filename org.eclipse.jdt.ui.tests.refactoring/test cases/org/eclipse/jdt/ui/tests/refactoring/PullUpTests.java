@@ -420,6 +420,15 @@ public class PullUpTests extends RefactoringTest {
 	public void test23() throws Exception{
 		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
 	}
+
+	public void test24() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
+	}
+
+	public void test25() throws Exception{
+//		printTestDisabledMessage("bug in ASTRewrite - extra dimentions 29553");
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
+	}
 	
 	public void testFail0() throws Exception{
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");
