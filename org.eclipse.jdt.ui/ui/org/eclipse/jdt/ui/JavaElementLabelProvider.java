@@ -54,7 +54,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	/**
 	 * Flag (bit mask) indicating that the label of a member should include the container.
 	 * For example, include the name of the type enclosing a field.
-	 * @deprecated Use SHOW_QUALIFIED ot SHOW_ROOT instead
+	 * @deprecated Use SHOW_QUALIFIED or SHOW_ROOT instead
 	 */
 	public final static int SHOW_CONTAINER=				0x004;
 
