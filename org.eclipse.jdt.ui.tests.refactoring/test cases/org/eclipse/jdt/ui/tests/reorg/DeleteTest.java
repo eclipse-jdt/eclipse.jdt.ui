@@ -528,6 +528,16 @@ public class DeleteTest extends RefactoringTest{
 
 		checkDelete(elems, false);
 	}
+
+	public void testDeleteWithinCu21() throws Exception{
+//		printTestDisabledMessage("regression test for bug 39195");
+		
+		loadFileSetup();
+		IJavaElement elem0= fCuA.getType("A").getField("var11");
+		IJavaElement[] elems= new IJavaElement[]{elem0};
+
+		checkDelete(elems, false);
+	}
 	
 	public void testDeleteFile() throws Exception{
 		IFolder folder= (IFolder)getPackageP().getResource();
