@@ -47,12 +47,11 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 /**
  * Central access point to execute rename refactorings.
@@ -139,7 +138,7 @@ public class RenameSupport {
 			throw new InvocationTargetException(e);
 		}
 		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(fRefactoring,
-			RefactoringUI.getConditionCheckingFailedSeverity(), true, parent, context);
+			RefactoringCore.getConditionCheckingFailedSeverity(), true, parent, context);
 		helper.perform();
 	}
 	

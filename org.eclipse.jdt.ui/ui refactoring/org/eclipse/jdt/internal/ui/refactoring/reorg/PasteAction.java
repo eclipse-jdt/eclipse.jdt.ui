@@ -85,9 +85,9 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
-import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 public class PasteAction extends SelectionDispatchAction{
 
@@ -510,7 +510,7 @@ public class PasteAction extends SelectionDispatchAction{
 
 			public void run(Shell parent) throws InterruptedException, InvocationTargetException {
 				IRunnableContext context= new ProgressMonitorDialog(parent);
-				new RefactoringExecutionHelper(fPasteRefactoring, RefactoringUI.getConditionCheckingFailedSeverity(), false, parent, context).perform();
+				new RefactoringExecutionHelper(fPasteRefactoring, RefactoringCore.getConditionCheckingFailedSeverity(), false, parent, context).perform();
 			}
 		}
 		private static class PasteTypedSourcesRefactoring extends Refactoring{

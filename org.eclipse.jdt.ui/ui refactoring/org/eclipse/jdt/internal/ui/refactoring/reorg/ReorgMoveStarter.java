@@ -31,8 +31,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
-import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 
@@ -74,7 +74,7 @@ public class ReorgMoveStarter {
 			if (fMoveProcessor.hasAllInputSet()) {
 				IRunnableContext context= new ProgressMonitorDialog(parent);
 				fMoveProcessor.setReorgQueries(new ReorgQueries(parent));
-				new RefactoringExecutionHelper(ref, RefactoringUI.getConditionCheckingFailedSeverity(), true, parent, context).perform();
+				new RefactoringExecutionHelper(ref, RefactoringCore.getConditionCheckingFailedSeverity(), true, parent, context).perform();
 			} else  {
 				RefactoringWizard wizard= new ReorgMoveWizard(ref);
 				/*

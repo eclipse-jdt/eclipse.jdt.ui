@@ -50,7 +50,6 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
-
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -62,8 +61,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.eclipse.ui.texteditor.ConfigurationElementSorter;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.ConfigurationElementSorter;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
@@ -94,7 +93,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 /**
  * Represents the java plug-in. It provides a series of convenience methods such as
@@ -397,7 +395,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 		 * Backward compatibility for the refactoring preference key. 
 		 */
 		getPreferenceStore().setValue(
-			PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, RefactoringUI.getConditionCheckingFailedSeverity());
+			PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, 
+			RefactoringCore.getConditionCheckingFailedSeverity());
 	}
 	
 	/**

@@ -170,7 +170,7 @@ public abstract class RefactoringTest extends TestCase {
 		IUndoManager undoManager= getUndoManager();
 		CreateChangeOperation create= new CreateChangeOperation(
 			new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
-			RefactoringStatus.ERROR);
+			RefactoringStatus.FATAL);
 		PerformChangeOperation perform= new PerformChangeOperation(create);
 		perform.setUndoManager(undoManager, ref.getName());
 		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
@@ -192,7 +192,7 @@ public abstract class RefactoringTest extends TestCase {
 		performDummySearch();
 		CreateChangeOperation create= new CreateChangeOperation(
 			new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
-			RefactoringStatus.ERROR);
+			RefactoringStatus.FATAL);
 		PerformChangeOperation perform= new PerformChangeOperation(create);
 		perform.setUndoManager(RefactoringCore.getUndoManager(), ref.getName());
 		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());

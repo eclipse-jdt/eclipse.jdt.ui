@@ -116,8 +116,9 @@ public class UndoManagerTests extends RefactoringTest {
 		checkState(true, true, 1, 1);
 	}	
 	
-	public void test8() throws Exception{	
-		int limit= 10;
+	public void test8() throws Exception{
+		// limit is 6 since the stack is limited to 6 entries
+		int limit= 6;
 		for (int i= 0; i < limit; i++){
 			checkState(i, i != 0, false, i, 0);			
 			performRefactoring(new NullRefactoring());

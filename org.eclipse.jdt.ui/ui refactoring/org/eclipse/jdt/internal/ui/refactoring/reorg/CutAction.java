@@ -41,8 +41,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
-import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 public class CutAction extends SelectionDispatchAction{
 
@@ -133,7 +133,7 @@ public class CutAction extends SelectionDispatchAction{
 		JavaDeleteProcessor processor= (JavaDeleteProcessor)refactoring.getAdapter(JavaDeleteProcessor.class);
 		if (processor != null)
 			processor.setQueries(new ReorgQueries(getShell()));
-		new RefactoringExecutionHelper(refactoring, RefactoringUI.getConditionCheckingFailedSeverity(), false, getShell(), context).perform();
+		new RefactoringExecutionHelper(refactoring, RefactoringCore.getConditionCheckingFailedSeverity(), false, getShell(), context).perform();
 	}
 
 	private DeleteRefactoring createRefactoring(Object[] elements) throws CoreException {
