@@ -373,7 +373,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			
 			TemplateProposal[] templateResults= fTemplateEngine.getResults();
 			
-			// update relavance of template proposals that match with a keyword
+			// update relevance of template proposals that match with a keyword
 			JavaCompletionProposal[] keyWordResults= collector.getKeywordCompletions();
 			for (int i= 0; i < keyWordResults.length; i++) {
 				String keyword= keyWordResults[i].getReplacementString();
