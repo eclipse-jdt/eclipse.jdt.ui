@@ -173,7 +173,14 @@ public class JavaDocLocations {
 		if (root == null) {
 			return null;
 		}
-		URL baseLocation= getJavadocLocation(root.getPath());
+		IPath path;
+		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
+			path= root.getPath();
+		} else {
+			path= root.getJavaProject().getProject().getFullPath();
+		}
+		
+		URL baseLocation= getJavadocLocation(path);
 		if (baseLocation == null) {
 			return null;
 		}
