@@ -4,8 +4,11 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.code.flow;
 
+import java.util.Iterator;
+import java.util.List;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
+import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -21,20 +24,25 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 		fSelection= selection;
 	}
 	
-	public FlowInfo analyse(AbstractMethodDeclaration method, ClassScope scope) {
+	public FlowInfo analyse(List selectedNodes, BlockScope scope) {
 		FlowContext context= getFlowContext();
-		method.traverse(this, scope);
-		return getFlowInfo(method);
+		GenericSequentialFlowInfo result= createSequential();
+		for (Iterator iter= selectedNodes.iterator(); iter.hasNext(); ) {
+			AstNode node= (AstNode)iter.next();
+			node.traverse(this, scope);
+			result.merge(getFlowInfo(node), context);
+		}
+		return result;
 	}
 	
 	protected boolean traverseRange(int start, int end) {
-		return fSelection.coveredBy(start, end) || fSelection.covers(start, end);
+		// we are only traversing the selected nodes.
+		return true;
 	}
 	
 	protected boolean createReturnFlowInfo(ReturnStatement node) {
-		// Make sure that the whole return statement is selected. There can be cases like
-		// return i + [x + 10] * 10; In this case we must not create a return info node.		
-		return fSelection.covers(node);
+		// we are only traversing selected nodes.
+		return true;
 	}
 }
 

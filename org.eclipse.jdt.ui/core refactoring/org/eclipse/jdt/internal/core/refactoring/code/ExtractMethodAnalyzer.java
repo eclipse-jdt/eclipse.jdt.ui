@@ -174,7 +174,7 @@ public class ExtractMethodAnalyzer extends StatementAnalyzer {
 		flowContext.setComputeMode(FlowContext.ARGUMENTS);
 		
 		InOutFlowAnalyzer flowAnalyzer= new InOutFlowAnalyzer(flowContext, fSelection);
-		FlowInfo flowInfo= flowAnalyzer.analyse(getEnclosingMethod(), fClassScope);
+		FlowInfo flowInfo= flowAnalyzer.analyse(fTopNodes, (BlockScope)getEnclosingScope());
 		
 		if (flowInfo.branches()) {
 			status.addFatalError("Selection contains branch statement but corresponding branch target isn't selected.");
@@ -230,7 +230,7 @@ public class ExtractMethodAnalyzer extends StatementAnalyzer {
 		flowContext.setConsiderExecutionFlow(false);
 		flowContext.setConsiderAccessMode(true);
 		flowContext.setComputeMode(FlowContext.RETURN_VALUES);
-		FlowInfo flowInfo= new InOutFlowAnalyzer(flowContext, fSelection).analyse(getEnclosingMethod(), fClassScope);
+		FlowInfo flowInfo= new InOutFlowAnalyzer(flowContext, fSelection).analyse(fTopNodes, (BlockScope)getEnclosingScope());
 		LocalVariableBinding[] returnValues= flowInfo.getReturnValues(flowContext);
 		
 		flowContext.setComputeMode(FlowContext.ARGUMENTS);

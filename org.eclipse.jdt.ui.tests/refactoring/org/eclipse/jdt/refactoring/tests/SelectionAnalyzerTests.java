@@ -4,134 +4,49 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.code.ExtractMethodRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.util.SelectionAnalyzer;
 
-import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
-import org.eclipse.jdt.refactoring.tests.infra.TextBufferChangeCreator;
-import org.eclipse.jdt.testplugin.AbstractCUTestCase;
-import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
-public class ExtractMethodTests extends AbstractCUTestCase {
+public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 
-	private static final String SQUARE_BRACKET_OPEN= "/*[*/";
-	private static final int    SQUARE_BRACKET_OPEN_LENGTH= SQUARE_BRACKET_OPEN.length();
-	private static final String SQUARE_BRACKET_CLOSE=   "/*]*/";
-	private static final int    SQUARE_BRACKET_CLOSE_LENGTH= SQUARE_BRACKET_CLOSE.length();
-
-	private static ExtractMethodTestSetup fgTestSetup;
+	private static SelectionAnalyzerTestSetup fgTestSetup;
 	
 	private static final int VALID_SELECTION=     1;
 	private static final int INVALID_SELECTION=   2;
-	private static final int COMPARE_WITH_OUTPUT= 3;
 	
-	public ExtractMethodTests(String name) {
+	public SelectionAnalyzerTests(String name) {
 		super(name);
 	}
 	
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), ExtractMethodTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), SelectionAnalyzerTests.class, args);
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
-		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
-	}
-
-	public static Test noSetupSuite() {
-		fgTestSetup= new ExtractMethodTestSetup(new TestSuite(ExtractMethodTests.class));
+		fgTestSetup= new SelectionAnalyzerTestSetup(new TestSuite(SelectionAnalyzerTests.class));
 		return fgTestSetup;
 	}
-	
+
 	protected IPackageFragmentRoot getRoot() {
 		return fgTestSetup.getRoot();
 	}
 	
 	protected String getResourceLocation() {
-		return "ExtractMethodWorkSpace/ExtractMethodTests/";
-	}
-	
-	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, String id) throws Exception {
-		return createCU(pack, createCUName(id), getFileContents(pack, id));
-	}
-	
-	private String getTestFileName(String packageName, String id) {
-		String result= getResourceLocation() + packageName + "/" + id + "_" + name() + ".java";
-		return result;
-	}
-	
-	private String getFileContents(IPackageFragment pack, String id) throws IOException {
-		return getFileContents(getFileInputStream(getTestFileName(pack.getElementName(), id)));
-	}
-	
-	private InputStream getFileInputStream(String fileName) throws IOException {
-		IPluginDescriptor plugin= Platform.getPluginRegistry().getPluginDescriptors("Refactoring Tests Resources")[0];
-		URL url= new URL(plugin.getInstallURL().toString() + fileName);
-		return url.openStream();
-	}	
-	
-	private String createCUName(String id) {
-		return id + "_" + name() + ".java";
-	}
-
-	protected int[] getSelection(String source) {
-		int start= -1;
-		int end= -1;
-		int includingStart= source.indexOf(SQUARE_BRACKET_OPEN);
-		int excludingStart= source.indexOf(SQUARE_BRACKET_CLOSE);
-		int includingEnd= source.lastIndexOf(SQUARE_BRACKET_CLOSE);
-		int excludingEnd= source.lastIndexOf(SQUARE_BRACKET_OPEN);
-
-		if (includingStart > excludingStart && excludingStart != -1) {
-			includingStart= -1;
-		} else if (excludingStart > includingStart && includingStart != -1) {
-			excludingStart= -1;
-		}
-		
-		if (includingEnd < excludingEnd) {
-			includingEnd= -1;
-		} else if (excludingEnd < includingEnd) {
-			excludingEnd= -1;
-		}
-		
-		if (includingStart != -1) {
-			start= includingStart;
-		} else {
-			start= excludingStart + SQUARE_BRACKET_CLOSE_LENGTH;
-		}
-		
-		if (excludingEnd != -1) {
-			end= excludingEnd;
-		} else {
-			end= includingEnd + SQUARE_BRACKET_CLOSE_LENGTH;
-		}
-		
-		assert("Selection invalid", start >= 0 && end >= 0 && end >= start);
-		
-		int[] result= new int[] { start, end - start }; 
-		// System.out.println("|"+ source.substring(result[0], result[0] + result[1]) + "|");
-		return result;
+		return "SelectionAnalyzerWorkSpace/SelectionAnalyzerTests/";
 	}
 	
 	protected void selectionTest(int start, int length) throws Exception{
@@ -151,44 +66,19 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 		ICompilationUnit unit= createCUfromTestFile(packageFragment, id);
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
-		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(
-			unit, new TextBufferChangeCreator(), selection[0], selection[1],
-			true, 4);
-		refactoring.setMethodName("extracted");
-		RefactoringStatus status= refactoring.checkPreconditions(pm);
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(unit.getBuffer(), selection[0], selection[1]);
+		((CompilationUnit)unit).accept(analyzer.getParentTracker());
+		RefactoringStatus status= analyzer.getStatus();
 		switch (mode) {
 			case VALID_SELECTION:
-				// System.out.println(status);
-				assert(status.isOK());
+				System.out.println(status);
+				assertTrue(status.isOK());
 				break;
 			case INVALID_SELECTION:
-				// System.out.println(status);
-				assert(!status.isOK());
+				System.out.println(status);
+				assertTrue(!status.isOK());
 				break;
-			case COMPARE_WITH_OUTPUT:
-				assert(!status.hasFatalError());
-				IChange change= refactoring.createChange(pm);
-				assertNotNull(change);
-				ChangeContext context= new ChangeContext(new TestExceptionHandler());
-				change.aboutToPerform(context, new NullProgressMonitor());
-				change.perform(context, pm);
-				change.performed();
-				assertNotNull(change.getUndoChange());
-				source= unit.getSource();
-				String out= getFileContents(getFileInputStream(getTestFileName(outputFolder, id)));
-				assert(compareSource(source, out));
-				break;		
 		}
-	}
-	
-	private boolean compareSource(String refactored, String proofed) {
-		int index= refactored.indexOf(';');
-		refactored= refactored.substring(index);
-		index= proofed.indexOf(';');
-		proofed= proofed.substring(index);
-		// System.out.println(refactored);
-		// System.out.println(proofed);
-		return refactored.equals(proofed);
 	}
 	
 	protected void invalidSelectionTest() throws Exception {
@@ -198,35 +88,7 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 	protected void validSelectionTest() throws Exception {
 		performTest(fgTestSetup.getValidSelectionPackage(), "A", VALID_SELECTION, null);
 	}
-	
-	protected void semicolonTest() throws Exception {
-		performTest(fgTestSetup.getSemicolonPackage(), "A", COMPARE_WITH_OUTPUT, "semicolon_out");
-	}
-	
-	protected void tryTest() throws Exception {
-		performTest(fgTestSetup.getTryPackage(), "A", COMPARE_WITH_OUTPUT, "try_out");
-	}
-	
-	protected void localsTest() throws Exception {
-		performTest(fgTestSetup.getLocalsPackage(), "A", COMPARE_WITH_OUTPUT, "locals_out");
-	}
-	
-	protected void expressionTest() throws Exception {
-		performTest(fgTestSetup.getExpressionPackage(), "A", COMPARE_WITH_OUTPUT, "expression_out");
-	}
-	
-	protected void nestedTest() throws Exception {
-		performTest(fgTestSetup.getNestedPackage(), "A", COMPARE_WITH_OUTPUT, "nested_out");
-	}
-	
-	protected void returnTest() throws Exception {
-		performTest(fgTestSetup.getReturnPackage(), "A", COMPARE_WITH_OUTPUT, "return_out");
-	}
-	
-	protected void wikiTest() throws Exception {
-		performTest(fgTestSetup.getWikiPackage(), "A", COMPARE_WITH_OUTPUT, "wiki_out");
-	}
-	
+		
 	//=====================================================================================
 	// Testing selections
 	//=====================================================================================
@@ -887,502 +749,5 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 	
 	public void test353() throws Exception {
 		validSelectionTest();
-	}
-	
-	//====================================================================================
-	// Testing Extracted result
-	//====================================================================================
-
-	//---- Test semicolon
-	
-	public void test400() throws Exception {
-		semicolonTest();
-	}
-	
-	public void test401() throws Exception {
-		semicolonTest();
-	}
-	
-	public void test402() throws Exception {
-		semicolonTest();
-	}
-	
-	public void test403() throws Exception {
-		semicolonTest();
-	}	
-	
-	public void test404() throws Exception {
-		System.out.println("\n404 disabled since it fails. See 1GF089K");
-		// semicolonTest();
-	}	
-	
-	public void test405() throws Exception {
-		System.out.println("\n405 disabled since it fails. See 1GF089K");
-		// semicolonTest();
-	}	
-	
-	public void test406() throws Exception {
-		semicolonTest();
-	}	
-	
-	public void test407() throws Exception {
-		semicolonTest();
-	}	
-	
-	public void test408() throws Exception {
-		semicolonTest();
-	}	
-	
-	public void test409() throws Exception {
-		System.out.println("\n409 disabled since it fails. See 1GIRHRP");
-		// semicolonTest();
-	}	
-	
-	//---- Test Try / catch block
-
-	public void test450() throws Exception {
-		tryTest();
-	}
-	
-	public void test451() throws Exception {
-		tryTest();
-	}
-	
-	public void test452() throws Exception {
-		tryTest();
-	}
-	
-	public void test453() throws Exception {
-		tryTest();
-	}
-	
-	public void test454() throws Exception {
-		tryTest();
-	}
-	
-	public void test455() throws Exception {
-		tryTest();
-	}
-	
-	public void test456() throws Exception {
-		tryTest();
-	}
-	
-	public void test457() throws Exception {
-		tryTest();
-	}
-	
-	public void test458() throws Exception {
-		tryTest();
-	}
-	
-	public void test459() throws Exception {
-		System.out.println("\n459 disabled since it fails. See 1GIRQFW");
-		// tryTest();
-	}
-	
-	//---- Test local vars and types
-	
-	public void test500() throws Exception {
-		localsTest();
-	}
-	
-	public void test501() throws Exception {
-		localsTest();
-	}
-	
-	public void test502() throws Exception {
-		localsTest();
-	}
-	
-	public void test503() throws Exception {
-		localsTest();
-	}
-	
-	public void test504() throws Exception {
-		localsTest();
-	}
-	
-	public void test505() throws Exception {
-		localsTest();
-	}
-	
-	public void test506() throws Exception {
-		localsTest();
-	}
-	
-	public void test507() throws Exception {
-		localsTest();
-	}
-	
-	public void test508() throws Exception {
-		localsTest();
-	}
-	
-	public void test509() throws Exception {
-		localsTest();
-	}
-	
-	public void test510() throws Exception {
-		localsTest();
-	}
-	
-	public void test511() throws Exception {
-		localsTest();
-	}
-		
-	public void test512() throws Exception {
-		localsTest();
-	}
-	
-	public void test513() throws Exception {
-		localsTest();
-	}
-	
-	public void test514() throws Exception {
-		System.out.println("\n514 disabled since it fails. See 1GITCCY");
-		// localsTest();
-	}
-	
-	public void test515() throws Exception {
-		localsTest();
-	}
-	
-	public void test516() throws Exception {
-		System.out.println("\n516 disabled since it fails. See 1GITCCY");
-		// localsTest();
-	}
-	
-	public void test517() throws Exception {
-		localsTest();
-	}
-	
-	public void test518() throws Exception {
-		localsTest();
-	}
-	
-	public void test519() throws Exception {
-		localsTest();
-	}
-	
-	public void test520() throws Exception {
-		localsTest();
-	}
-	
-	public void test530() throws Exception {
-		localsTest();
-	}
-	
-	public void test531() throws Exception {
-		localsTest();
-	}
-	
-	public void test532() throws Exception {
-		localsTest();
-	}
-	
-	public void test533() throws Exception {
-		localsTest();
-	}
-	
-	public void test534() throws Exception {
-		localsTest();
-	}
-	
-	public void test535() throws Exception {
-		localsTest();
-	}
-	
-	public void test536() throws Exception {
-		localsTest();
-	}
-	
-	public void test537() throws Exception {
-		System.out.println("\n537 disabled since it fails. See 1GIRQFW");
-		// localsTest();
-	}
-	
-	public void test538() throws Exception {
-		localsTest();
-	}
-	
-	public void test539() throws Exception {
-		localsTest();
-	}
-	
-	public void test540() throws Exception {
-		localsTest();
-	}
-	
-	public void test541() throws Exception {
-		localsTest();
-	}
-	
-	public void test542() throws Exception {
-		localsTest();
-	}
-	
-	public void test543() throws Exception {
-		localsTest();
-	}
-	
-	public void test550() throws Exception {
-		localsTest();
-	}
-	
-	public void test551() throws Exception {
-		localsTest();
-	}
-	
-	public void test552() throws Exception {
-		localsTest();
-	}
-	
-	public void test553() throws Exception {
-		localsTest();
-	}
-	
-	public void test554() throws Exception {
-		localsTest();
-	}
-	
-	public void test555() throws Exception {
-		localsTest();
-	}
-	
-	public void test556() throws Exception {
-		localsTest();
-	}
-	
-	public void test557() throws Exception {
-		localsTest();
-	}
-	
-	public void test558() throws Exception {
-		localsTest();
-	}
-	
-	public void test559() throws Exception {
-		localsTest();
-	}
-	
-	public void test560() throws Exception {
-		localsTest();
-	}
-	
-	public void test561() throws Exception {
-		localsTest();
-	}
-	
-	public void test562() throws Exception {
-		localsTest();
-	}
-	
-	public void test563() throws Exception {
-		localsTest();
-	}
-	
-	//---- Test expressions
-	
-	public void test600() throws Exception {
-		expressionTest();
-	}
-	
-	public void test601() throws Exception {
-		expressionTest();
-	}
-	
-	public void test602() throws Exception {
-		expressionTest();
-	}
-	
-	public void test603() throws Exception {
-		expressionTest();
-	}
-	
-	public void test604() throws Exception {
-		expressionTest();
-	}
-	
-	public void test605() throws Exception {
-		expressionTest();
-	}
-	
-	public void test606() throws Exception {
-		expressionTest();
-	}
-	
-	public void test607() throws Exception {
-		expressionTest();
-	}
-	
-	public void test608() throws Exception {
-		expressionTest();
-	}
-	
-	public void test609() throws Exception {
-		expressionTest();
-	}
-	
-	public void test610() throws Exception {
-		expressionTest();
-	}
-	
-	public void test611() throws Exception {
-		expressionTest();
-	}
-	
-	public void test612() throws Exception {
-		expressionTest();
-	}
-	
-	public void test613() throws Exception {
-		expressionTest();
-	}
-	
-	public void test614() throws Exception {
-		expressionTest();
-	}
-	
-	public void test615() throws Exception {
-		expressionTest();
-	}
-	
-	public void test616() throws Exception {
-		expressionTest();
-	}
-	
-	public void test617() throws Exception {
-		expressionTest();
-	}
-	
-	public void test618() throws Exception {
-		expressionTest();
-	}
-	
-	//---- Test nested methods and constructor
-	
-	public void test650() throws Exception {
-		nestedTest();
-	}
-	
-	public void test651() throws Exception {
-		nestedTest();
-	}
-	
-	public void test652() throws Exception {
-		nestedTest();
-	}
-
-	public void test653() throws Exception {
-		nestedTest();
-	}
-	
-	//---- Extracting method containing a return statement.
-	
-	public void test700() throws Exception {
-		returnTest();
-	}	
-	
-	public void test701() throws Exception {
-		returnTest();
-	}	
-	
-	public void test702() throws Exception {
-		returnTest();
-	}	
-	
-	public void test703() throws Exception {
-		returnTest();
-	}	
-	
-	public void test704() throws Exception {
-		returnTest();
-	}	
-	
-	public void test705() throws Exception {
-		returnTest();
-	}	
-	
-	public void test706() throws Exception {
-		returnTest();
-	}	
-	
-	public void test707() throws Exception {
-		returnTest();
-	}
-		
-	public void test708() throws Exception {
-		returnTest();
-	}	
-	
-	public void test709() throws Exception {
-		returnTest();
-	}	
-	
-	public void test710() throws Exception {
-		returnTest();
-	}	
-	
-	public void test711() throws Exception {
-		returnTest();
-	}	
-	
-	public void test712() throws Exception {
-		returnTest();
-	}	
-	
-	public void test713() throws Exception {
-		returnTest();
-	}	
-	
-	public void test714() throws Exception {
-		returnTest();
-	}	
-	
-	public void test715() throws Exception {
-		returnTest();
-	}	
-	
-	public void test716() throws Exception {
-		returnTest();
-	}	
-	
-	public void test717() throws Exception {
-		returnTest();
-	}	
-	
-	public void test718() throws Exception {
-		returnTest();
-	}	
-	
-	public void test719() throws Exception {
-		returnTest();
-	}
-	
-	public void test720() throws Exception {
-		returnTest();
-	}
-	
-	//---- Test copied from http://c2.com/cgi/wiki?RefactoringBenchmarksForExtractMethod
-	
-	public void test2001() throws Exception {
-		wikiTest();
-	}	
-	
-	public void test2002() throws Exception {
-		wikiTest();
-	}	
-	
-	public void test2003() throws Exception {
-		wikiTest();
-	}	
-	
-	public void test2004() throws Exception {
-		wikiTest();
-	}	
-	
-	public void test2005() throws Exception {
-		wikiTest();
 	}	
 }
