@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -65,10 +67,12 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class RenameTypeRefactoring extends Refactoring implements IRenameRefactoring, ITextUpdatingRefactoring, IReferenceUpdatingRefactoring{
-
+	
 	private IType fType;
 	private String fNewName;
 	private SearchResultGroup[] fReferences;
+	private TextChangeManager fChangeManager;
+	
 	private boolean fUpdateReferences;
 	
 	private boolean fUpdateJavaDoc;
@@ -251,7 +255,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		Assert.isNotNull(fNewName, "newName"); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		try{
-			pm.beginTask("", 74); //$NON-NLS-1$
+			pm.beginTask("", 110); //$NON-NLS-1$
 			pm.subTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.checking")); //$NON-NLS-1$
 			result.merge(checkNewName(fNewName));
 			if (result.hasFatalError())
@@ -306,16 +310,26 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			if (result.hasFatalError())
 				return result;
 			
-			if (! fUpdateReferences)
-				return result;
-										
-			result.merge(Checks.checkAffectedResourcesAvailability(getReferences(new SubProgressMonitor(pm, 35))));
+			fReferences= null;
+			if (fUpdateReferences)
+				fReferences= getReferences(new SubProgressMonitor(pm, 35));
+			else
+				pm.worked(35);
+			
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			
-			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 25)));
+			if (fUpdateReferences)
+				result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 25)));
+			else
+				pm.worked(25);
 			
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 35));
+			
+			result.merge(validateModifiesFiles());
 			return result;
+		} catch (CoreException e){
+			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
@@ -441,8 +455,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	
 	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws JavaModelException{
 		pm.subTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.searching"));	 //$NON-NLS-1$
-		fReferences= RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
-		return fReferences;
+		return RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
 	}
 	
 	private RefactoringStatus checkForMethodsWithConstructorNames()  throws JavaModelException{
@@ -568,6 +581,14 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		}
 	}
 	
+	private IFile[] getAllFilesToModify() throws CoreException{
+		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
+	}
+	
+	private RefactoringStatus validateModifiesFiles() throws CoreException{
+		return Checks.validateModifiesFiles(getAllFilesToModify());
+	}
+	
 	/*
 	 * Analyzes all compilation units in which type is referenced
 	 */
@@ -583,7 +604,6 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		result.merge(checkConflictingTypes(pm));
 		return result;
 	}
-	
 	
 	private RefactoringStatus checkConflictingTypes(IProgressMonitor pm) throws JavaModelException{
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
@@ -660,7 +680,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.creating_change"), 4); //$NON-NLS-1$
 			CompositeChange builder= new CompositeChange();
-			addOccurrences(new SubProgressMonitor(pm, 2), builder);
+			builder.addAll(fChangeManager.getAllChanges());
 			if (willRenameCU())
 				builder.add(new RenameResourceChange(getResource(fType), fNewName + ".java")); //$NON-NLS-1$
 			pm.worked(1);	
@@ -694,7 +714,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		TextMatchFinder.findTextMatches(pm, createRefactoringScope(), this, manager);
 	}
 	
-	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws CoreException{
+	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		pm.beginTask("", 6);
 		TextChangeManager manager= new TextChangeManager();
 				
@@ -711,9 +731,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		
 		pm.subTask("searching for text matches...");
 		addTextMatches(manager, new SubProgressMonitor(pm, 1));
-
-		//putting it together
-		builder.addAll(manager.getAllChanges());
+		
+		return manager;
 	}
 	
 	private void addTypeDeclarationUpdate(TextChangeManager manager) throws CoreException{
