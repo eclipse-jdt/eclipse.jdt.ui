@@ -29,8 +29,8 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
-import org.eclipse.jdt.internal.ui.reorg.CopyResourcesToClipboardAction;
-import org.eclipse.jdt.internal.ui.reorg.PasteResourcesFromClipboardAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
+import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 
 public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 
@@ -142,7 +142,7 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	private void doCopy(Object[] copySelection) {
 		if (copySelection == null)
 			return; 
-		CopyResourcesToClipboardAction copyAction= new CopyResourcesToClipboardAction(new FakeSelectionProvider(copySelection));
+		IRefactoringAction copyAction= ReorgGroup.createCopyAction(new FakeSelectionProvider(copySelection));
 		copyAction.update();
 		assertTrue("copy not enabled", copyAction.isEnabled());
 		copyAction.run();
@@ -150,14 +150,14 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 
 	private void checkEnabled(Object[] copySelection, Object[] pasteSelection) {
 		doCopy(copySelection);		
-		PasteResourcesFromClipboardAction pasteAction= new PasteResourcesFromClipboardAction(new FakeSelectionProvider(pasteSelection));
+		IRefactoringAction pasteAction= ReorgGroup.createPasteAction(new FakeSelectionProvider(pasteSelection));
 		pasteAction.update();
 		assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 	}
 	
 	private void checkDisabled(Object[] copySelection, Object[] pasteSelection) {
 		doCopy(copySelection);		
-		PasteResourcesFromClipboardAction pasteAction= new PasteResourcesFromClipboardAction(new FakeSelectionProvider(pasteSelection));
+		IRefactoringAction pasteAction= ReorgGroup.createPasteAction(new FakeSelectionProvider(pasteSelection));
 		pasteAction.update();
 		assertTrue("paste incorrectly enabled", ! pasteAction.isEnabled());
 	}

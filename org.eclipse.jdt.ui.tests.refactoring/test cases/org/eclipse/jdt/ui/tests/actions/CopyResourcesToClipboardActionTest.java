@@ -19,7 +19,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
-import org.eclipse.jdt.internal.ui.reorg.CopyResourcesToClipboardAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
+import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 
 public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 
@@ -98,13 +99,13 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	}
 
 	private void checkEnabled(Object[] elements) {
-		CopyResourcesToClipboardAction copyAction= new CopyResourcesToClipboardAction(new FakeSelectionProvider(elements));
+		IRefactoringAction copyAction= ReorgGroup.createCopyAction(new FakeSelectionProvider(elements));
 		copyAction.update();
 		assertTrue("action should be enabled", copyAction.isEnabled());
 	}
 	
 	private void checkDisabled(Object[] elements) {
-		CopyResourcesToClipboardAction copyAction= new CopyResourcesToClipboardAction(new FakeSelectionProvider(elements));
+		IRefactoringAction copyAction= ReorgGroup.createCopyAction(new FakeSelectionProvider(elements));
 		copyAction.update();
 		assertTrue("action should not be enabled", ! copyAction.isEnabled());
 	}

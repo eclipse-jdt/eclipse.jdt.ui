@@ -23,9 +23,7 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.reorg.CopySourceReferencesToClipboardAction;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
-import org.eclipse.jdt.internal.ui.reorg.PasteSourceReferencesAction;
 
 public class PasteSourceReferenceActionTests extends RefactoringTest {
 

@@ -6,10 +6,9 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.ui.reorg.CopySourceReferencesToClipboardAction;
-import org.eclipse.jdt.internal.ui.reorg.CutSourceReferencesToClipboardAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
-import org.eclipse.jdt.internal.ui.reorg.PasteSourceReferencesAction;
+import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 
 class SourceReferenceTestUtil {
 	
@@ -44,7 +43,7 @@ class SourceReferenceTestUtil {
 
 	static void copy(Object[] elems) {
 		ISelectionProvider provider= new FakeSelectionProvider(elems);
-		CopySourceReferencesToClipboardAction copyAction= new CopySourceReferencesToClipboardAction(provider);
+		IRefactoringAction copyAction= ReorgGroup.createCopyAction(provider);
 		copyAction.update();
 		Assert.assertTrue("copy enabled", copyAction.isEnabled());
 		copyAction.run();
@@ -52,7 +51,7 @@ class SourceReferenceTestUtil {
 
 	static void paste(Object[] elems) {
 		ISelectionProvider provider1= new FakeSelectionProvider(elems);
-		PasteSourceReferencesAction pasteAction= new PasteSourceReferencesAction(provider1);
+		IRefactoringAction pasteAction= ReorgGroup.createPasteAction(provider1);
 		pasteAction.update();
 		Assert.assertTrue("paste enabled", pasteAction.isEnabled());
 		pasteAction.run();
