@@ -167,22 +167,22 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		try {
 			if (element instanceof IMethod) {
 				IMethod method= (IMethod) element;
-				if (method.exists()) {
-					int flags= method.getFlags();
-					if (!Flags.isStatic(flags) && !Flags.isPrivate(flags)) {
-						IType declaringType= method.getDeclaringType();
-						// if possible, make a check. don't care about working copies ect. In doubt, the action will be enabled.
-						if (SuperTypeHierarchyCache.hasInCache(declaringType)) {
-							if (findSuperImplementation(declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor()) == null) {
-								return null;
-							}
+				int flags= method.getFlags();
+				if (!Flags.isStatic(flags) && !Flags.isPrivate(flags)) {
+					IType declaringType= method.getDeclaringType();
+					// if possible, make a check. don't care about working copies ect. In doubt, the action will be enabled.
+					if (SuperTypeHierarchyCache.hasInCache(declaringType)) {
+						if (findSuperImplementation(declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor()) == null) {
+							return null;
 						}
-						return method;
 					}
+					return method;
 				}
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			if (!e.isDoesNotExist()) {
+				JavaPlugin.log(e);
+			}
 		}
 		return null;
 	}
