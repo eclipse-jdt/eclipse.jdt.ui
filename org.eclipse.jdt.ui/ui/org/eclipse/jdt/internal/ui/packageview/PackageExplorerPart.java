@@ -55,6 +55,8 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.framelist.FrameAction;
+import org.eclipse.ui.views.framelist.FrameList;
+import org.eclipse.ui.views.framelist.TreeFrame;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -128,6 +130,7 @@ public class PackageExplorerPart extends ViewPart
 	static final String TAG_FILTERS = "filters"; //$NON-NLS-1$
 	static final String TAG_FILTER = "filter"; //$NON-NLS-1$
 	static final String TAG_LAYOUT= "layout"; //$NON-NLS-1$
+	static final String TAG_CURRENT_FRAME= "currentFramge"; //$NON-NLS-1$
 	
 
 	private PackageExplorerContentProvider fContentProvider;
@@ -737,6 +740,7 @@ public class PackageExplorerPart extends ViewPart
 				memento.putMemento(fMemento);
 			return;
 		}
+		saveCurrentFrame(memento);
 		saveExpansionState(memento);
 		saveSelectionState(memento);
 		saveLayoutState(memento);
@@ -746,6 +750,17 @@ public class PackageExplorerPart extends ViewPart
 		fActionSet.saveFilterAndSorterState(memento);
 	}
 	
+	private void saveCurrentFrame(IMemento memento) {
+        FrameAction action = fActionSet.getUpAction();
+        FrameList frameList= action.getFrameList();
+
+		if (frameList.getCurrentIndex() > 0) {
+			TreeFrame currentFrame = (TreeFrame) frameList.getCurrentFrame();
+			IMemento frameMemento = memento.createChild(TAG_CURRENT_FRAME);
+			currentFrame.saveState(frameMemento);
+		}
+	}
+
 	private void saveLinkingEnabled(IMemento memento) {
 		memento.putInteger(PreferenceConstants.LINK_PACKAGES_TO_EDITOR, fLinkingEnabled ? 1 : 0);
 	}
@@ -820,10 +835,25 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	private void restoreUIState(IMemento memento) {
+		restoreCurrentFrame(memento);
 		restoreExpansionState(memento);
 		restoreSelectionState(memento);
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
 		//restoreScrollState(memento, fViewer.getTree());
+	}
+
+	private void restoreCurrentFrame(IMemento memento) {
+		IMemento frameMemento = memento.getChild(TAG_CURRENT_FRAME);
+		
+		if (frameMemento != null) {
+	        FrameAction action = fActionSet.getUpAction();
+	        FrameList frameList= action.getFrameList();
+			TreeFrame frame = new TreeFrame(fViewer);
+			frame.restoreState(frameMemento);
+			frame.setName(getFrameName(frame.getInput()));
+			frame.setToolTipText(getToolTipText(frame.getInput()));
+			frameList.gotoFrame(frame);
+		}
 	}
 
 	private void restoreLinkingEnabled(IMemento memento) {
