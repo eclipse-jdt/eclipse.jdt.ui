@@ -27,7 +27,7 @@
    </requires>
 
 
-   <extension-point id="testRunListeners" name="Test Run Listeners" schema="schema/testRunListeners.exsd"/>
+   <extension-point id="testRunListeners" name="testRunListeners.name" schema="schema/testRunListeners.exsd"/>
 
    <extension
          point="org.eclipse.ui.views">
