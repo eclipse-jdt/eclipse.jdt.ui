@@ -22,7 +22,9 @@ public class ExtractTempTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "ExtractTemp/";
 
 	private static final String PREF_STYLE_COMPACT_ASSIGNEMENT= "org.eclipse.jdt.core.formatter.style.assignment";	 //$NON-NLS-1$
-	private static final String COMPACT= "compact"; //$NON-NLS-1$
+	private static final String COMPACT= "compact";
+
+	private Object fCompactPref; 
 		
 	public ExtractTempTests(String name) {
 		super(name);
@@ -63,8 +65,16 @@ public class ExtractTempTests extends RefactoringTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 		Hashtable options= JavaCore.getOptions();
+		fCompactPref= options.get(PREF_STYLE_COMPACT_ASSIGNEMENT);
 		options.put(PREF_STYLE_COMPACT_ASSIGNEMENT, COMPACT);
 		JavaCore.setOptions(options);
+	}
+	
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		Hashtable options= JavaCore.getOptions();
+		options.put(PREF_STYLE_COMPACT_ASSIGNEMENT, fCompactPref);
+		JavaCore.setOptions(options);	
 	}
 
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName) throws Exception{
