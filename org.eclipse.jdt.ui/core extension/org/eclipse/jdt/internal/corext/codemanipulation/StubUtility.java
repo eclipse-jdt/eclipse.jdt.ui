@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.Template;
@@ -283,19 +284,27 @@ public class StubUtility {
 		return str;
 	}
 
-	private static String getSeeTag(IMethodBinding binding) {
+	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
+		ITypeBinding[] typeBindings= binding.getParameterTypes();
+		String[] result= new String[typeBindings.length];
+		for (int i= 0; i < result.length; i++) {
+			result[i]= typeBindings[i].getQualifiedName();
+		}
+		return result;
+	}
+
+	private static String getSeeTag(String declaringClassQualifiedName, String methodName, String[] parameterTypesQualifiedNames) {
 		StringBuffer buf= new StringBuffer();
 		buf.append("@see "); //$NON-NLS-1$
-		buf.append(binding.getDeclaringClass().getQualifiedName());
+		buf.append(declaringClassQualifiedName);
 		buf.append('#'); 
-		buf.append(binding.getName());
+		buf.append(methodName);
 		buf.append('(');
-		ITypeBinding[] typeBindings= binding.getParameterTypes();
-		for (int i= 0; i < typeBindings.length; i++) {
+		for (int i= 0; i < parameterTypesQualifiedNames.length; i++) {
 			if (i > 0) {
 				buf.append(", "); //$NON-NLS-1$
 			}
-			buf.append(typeBindings[i].getQualifiedName());
+			buf.append(parameterTypesQualifiedNames[i]);
 		}
 		buf.append(')');
 		return buf.toString();
@@ -404,10 +413,39 @@ public class StubUtility {
 	 * @throws CoreException
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden) throws CoreException {
+		boolean isOverridden= overridden != null;
+		boolean isDeprecated= overridden != null && overridden.isDeprecated();
+		String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
+		String[] parameterTypesQualifiedNames= getParameterTypesQualifiedNames(overridden);
+		return getMethodComment(cu, typeName, decl, isOverridden, isDeprecated, declaringClassQualifiedName, parameterTypesQualifiedNames);
+	}
+
+	/**
+	 * Returns the comment for a method using the comment code templates.
+	 * <code>null</code> is returned if the template is empty.
+	 * @param cu The compilation unit to which the method belongs
+	 * @param typeName Name of the type to which the method belongs.
+	 * @param decl The AST MethodDeclaration node that will be added as new
+	 * method.
+	 * @param isOverridden <code>true</code> iff decl overrides another method
+	 * @param isOverridingDeprecated <code>true</code> iff the method that decl overrides is deprecated.
+	 * Note: it must not be <code>true</code> if isOverridden is <code>false</code>.
+	 * @param declaringClassQualifiedName Fully qualified name of the type in which the overriddden 
+	 * method (if any exists) in declared. If isOverridden is <code>false</code>, this is ignored.
+	 * @param parameterTypesQualifiedNames Fully qualified names of parameter types of the type in which the overriddden 
+	 * method (if any exists) in declared. If isOverridden is <code>false</code>, this is ignored.
+	 * @return String Returns the method comment or <code>null</code> if the
+	 * configured template is empty. The string uses \\n as line delimiter
+	 * (formatting required)
+	 * @throws CoreException
+	 */
+	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isOverridden, boolean isDeprecated, String declaringClassQualifiedName, String[] parameterTypesQualifiedNames) throws CoreException {
+		if (! isOverridden)
+			Assert.isTrue(! isDeprecated);
 		String templateName= CodeTemplates.METHODCOMMENT;
 		if (decl.isConstructor()) {
 			templateName= CodeTemplates.CONSTRUCTORCOMMENT;
-		} else if (overridden != null) {
+		} else if (isOverridden) {
 			templateName= CodeTemplates.OVERRIDECOMMENT;
 		}
 		Template template= CodeTemplates.getCodeTemplate(templateName);
@@ -421,8 +459,9 @@ public class StubUtility {
 		if (!decl.isConstructor()) {
 			context.setVariable(CodeTemplateContextType.RETURN_TYPE, ASTNodes.asString(decl.getReturnType()));
 		}
-		if (overridden != null) {
-			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overridden));
+		if (isOverridden) {
+			String methodName= decl.getName().getIdentifier();
+			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(declaringClassQualifiedName, methodName, parameterTypesQualifiedNames));
 		}
 		TemplateBuffer buffer= context.evaluate(template);
 		String str= buffer.getString();
@@ -447,7 +486,6 @@ public class StubUtility {
 			exceptionNames[i]= ASTResolving.getSimpleName((Name) exceptions.get(i));
 		}
 		String returnType= !decl.isConstructor() ? ASTNodes.asString(decl.getReturnType()) : null;
-		boolean isDeprecated= overridden != null && overridden.isDeprecated();
 		int[] tagOffsets= position.getOffsets();
 		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
 			insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, isDeprecated);
@@ -525,62 +563,7 @@ public class StubUtility {
 		}
 		return Signature.toString(refTypeSig);
 	}
-	
-	/**
-	 * Generates a default JavaDoc comment stub for a method.
-	 * @deprecated Use getMethodComment instead
-	 */
-	public static void genJavaDocStub(String descr, String[] paramNames, String retTypeSig, String[] excTypeSigs, StringBuffer buf) {
-		buf.append("/**\n"); //$NON-NLS-1$
-		buf.append(" * "); buf.append(descr); buf.append(".\n"); //$NON-NLS-2$ //$NON-NLS-1$
-		for (int i= 0; i < paramNames.length; i++) {
-			buf.append(" * @param "); buf.append(paramNames[i]); buf.append('\n'); //$NON-NLS-1$
-		}
-		if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
-			String simpleName= Signature.getSimpleName(Signature.toString(retTypeSig));
-			buf.append(" * @return "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
-		}
-		if (excTypeSigs != null) {
-			for (int i= 0; i < excTypeSigs.length; i++) {
-				String simpleName= Signature.getSimpleName(Signature.toString(excTypeSigs[i]));
-				buf.append(" * @throws "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
-			}
-		}
-		buf.append(" */"); //$NON-NLS-1$
-	}
 		
-	/**
-	 * Generates a '@see' tag to the defined method.
-	 * @deprecated Use getMethodComment instead
-	 */
-	public static void genJavaDocSeeTag(String fullyQualifiedTypeName, String methodName, String[] fullParamTypeNames, boolean nonJavaDocComment, boolean isDeprecated, StringBuffer buf) throws JavaModelException {
-		// create a @see link
-		buf.append("/*"); //$NON-NLS-1$
-		if (!nonJavaDocComment) {
-			buf.append('*');
-		} else {
-			buf.append(" (non-Javadoc)"); //$NON-NLS-1$
-		}
-		buf.append("\n * @see "); //$NON-NLS-1$
-		buf.append(fullyQualifiedTypeName);
-		buf.append('#'); 
-		buf.append(methodName);
-		buf.append('(');
-		for (int i= 0; i < fullParamTypeNames.length; i++) {
-			if (i > 0) {
-				buf.append(", "); //$NON-NLS-1$
-			}
-			buf.append(fullParamTypeNames[i]);
-		}
-		buf.append(")\n"); //$NON-NLS-1$
-		if (isDeprecated) {
-			buf.append(" * @deprecated\n"); //$NON-NLS-1$
-		}
-		buf.append(" */"); //$NON-NLS-1$
-	}	
-	
-	
-
 	/**
 	 * Finds a method in a list of methods.
 	 * @return The found method or null, if nothing found
