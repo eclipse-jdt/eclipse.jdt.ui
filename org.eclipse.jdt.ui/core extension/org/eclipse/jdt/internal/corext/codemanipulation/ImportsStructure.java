@@ -527,17 +527,28 @@ public class ImportsStructure implements IImportsStructure {
 			}		
 		} finally {
 			if (buffer != null) {
-				TextBuffer.release(buffer);
+				releaseTextBuffer(buffer);
 			}
 			monitor.done();
 		}
 	}
-	
+		
 	private TextBuffer aquireTextBuffer() throws CoreException {
 		IFile file= (IFile) JavaModelUtil.toOriginal(fCompilationUnit).getResource();
-		return TextBuffer.acquire(file);
+		if (file.exists()) {
+			return TextBuffer.acquire(file);
+		} else {
+			return TextBuffer.create(fCompilationUnit.getSource());
+		}
 	}
 	
+	private void releaseTextBuffer(TextBuffer buffer) throws CoreException {
+		IFile file= (IFile) JavaModelUtil.toOriginal(fCompilationUnit).getResource();
+		if (!file.exists()) {
+			fCompilationUnit.getBuffer().setContents(buffer.getContent());
+		}	
+		TextBuffer.release(buffer);
+	}
 		
 	/**
 	 * Get the replace positons.
