@@ -56,6 +56,7 @@ public class MockClipboard extends Clipboard{
 		if (data == null || dataTypes == null || data.length != dataTypes.length) {
 			DND.error(SWT.ERROR_INVALID_ARGUMENT);
 		}
+		fContents.clear();
 		for (int i= 0; i < dataTypes.length; i++) {
 			fContents.put(dataTypes[i], data[i]);
 		}
