@@ -145,4 +145,10 @@ class SearchJob implements IJob {
 			monitor.exitRead(); // finished reading
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.core.search.processing.IJob#ensureReadyToRun()
+	 */
+	public void ensureReadyToRun() {
+	}
 }
