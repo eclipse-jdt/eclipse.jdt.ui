@@ -122,15 +122,15 @@ public class ReturnTypeSubProcessor {
 				}
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;   
 				
-				ASTRewrite rewrite= ASTRewrite.create(methodDeclaration.getAST());
+				AST ast= astRoot.getAST();
+				ASTRewrite rewrite= ASTRewrite.create(ast);
 					
 				String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.voidmethodreturns.description", binding.getName()); //$NON-NLS-1$	
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
 				
 				String returnTypeName= proposal.getImportRewrite().addImport(binding);
-
-				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
+				Type newReturnType= ASTNodeFactory.newType(ast, returnTypeName);
 				
 				if (methodDeclaration.isConstructor()) {
 					rewrite.set(methodDeclaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.FALSE, null);
@@ -140,11 +140,17 @@ public class ReturnTypeSubProcessor {
 				}
 				String key= "return_type"; //$NON-NLS-1$
 				proposal.addLinkedPosition(rewrite.track(newReturnType), true, key);
-				ITypeBinding[] bindings= ASTResolving.getRelaxingTypes(astRoot.getAST(), binding);
+				ITypeBinding[] bindings= ASTResolving.getRelaxingTypes(ast, binding);
 				for (int i= 0; i < bindings.length; i++) {
 					proposal.addLinkedPositionProposal(key, bindings[i]);
 				}
-
+				
+				Javadoc javadoc= methodDeclaration.getJavadoc();
+				if (javadoc != null) {
+					TagElement newTag= ast.newTagElement();
+					newTag.setTagName(TagElement.TAG_RETURN);
+					JavadocTagsSubProcessor.insertTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), newTag, null);
+				}
 				proposals.add(proposal);
 			}
 			ASTRewrite rewrite= ASTRewrite.create(decl.getAST());
@@ -193,6 +199,13 @@ public class ReturnTypeSubProcessor {
 			rewrite.set(methodDeclaration, MethodDeclaration.RETURN_TYPE_PROPERTY, type, null);
 			rewrite.set(methodDeclaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.FALSE, null);
 
+			Javadoc javadoc= methodDeclaration.getJavadoc();
+			if (javadoc != null && typeBinding != null) {
+				TagElement newTag= ast.newTagElement();
+				newTag.setTagName(TagElement.TAG_RETURN);
+				JavadocTagsSubProcessor.insertTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), newTag, null);
+			}
+			
 			String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.missingreturntype.description", typeName); //$NON-NLS-1$		
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
@@ -245,6 +258,13 @@ public class ReturnTypeSubProcessor {
 				AST ast= methodDecl.getAST();
 				ASTRewrite rewrite= ASTRewrite.create(ast);
 				rewrite.replace(returnType, ast.newPrimitiveType(PrimitiveType.VOID), null);
+				Javadoc javadoc= methodDecl.getJavadoc();
+				if (javadoc != null) {
+					TagElement tagElement= JavadocTagsSubProcessor.findTag(javadoc, TagElement.TAG_RETURN, null);
+					if (tagElement != null) {
+						rewrite.remove(tagElement, null);
+					}
+				}
 
 				String label= CorrectionMessages.getString("ReturnTypeSubProcessor.changetovoid.description"); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
