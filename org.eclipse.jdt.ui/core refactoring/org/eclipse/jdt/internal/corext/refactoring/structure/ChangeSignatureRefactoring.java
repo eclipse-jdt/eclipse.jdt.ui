@@ -1823,12 +1823,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 
 		public void updateNode() {
-			changeParamguments();
-			
+			if (fNode instanceof MethodRef) {
+				changeParamguments();
+				reshuffleElements();
+			}
 			if (canChangeNameAndReturnType())
 				changeMethodName();
-					
-			reshuffleElements();
 		}
 		
 		protected ASTNode createNewParamgument(ParameterInfo info) {
