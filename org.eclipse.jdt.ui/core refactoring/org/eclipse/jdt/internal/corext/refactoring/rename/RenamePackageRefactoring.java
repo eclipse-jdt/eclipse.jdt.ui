@@ -280,19 +280,20 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 				}	
 			}				
 				
-			if (!fUpdateReferences)
-				return result;
+			if (fUpdateReferences){
+				pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching"));	 //$NON-NLS-1$
+				fOccurrences= getReferences(new SubProgressMonitor(pm, 6));	
+				pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
+				result.merge(analyzeAffectedCompilationUnits());
+				result.merge(checkPackageName(fNewName));
+				pm.worked(1);
+				if (result.hasFatalError())
+					return result;
 			
-			pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching"));	 //$NON-NLS-1$
-			fOccurrences= getReferences(new SubProgressMonitor(pm, 6));	
-			pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
-			result.merge(analyzeAffectedCompilationUnits());
-			result.merge(checkPackageName(fNewName));
-			pm.worked(1);
-			if (result.hasFatalError())
-				return result;
-			
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
+				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
+			} else {
+				pm.worked(9);
+			}
 			
 			if (fUpdateQualifiedNames)			
 				computeQualifiedNameMatches(new SubProgressMonitor(pm, 1));
@@ -450,7 +451,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	private IFile[] getAllFilesToModify() throws CoreException{
 		//cannot use Arrays.asList to create this temp - addAll is not supported on list created by Arrays.asList
 		List combined= new ArrayList();
-		combined.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
+		if (fChangeManager != null)
+			combined.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 		combined.addAll(Arrays.asList(getAllCusInPackageAsFiles()));
 		if (fQualifiedNameSearchResult != null)
 			combined.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
