@@ -77,6 +77,10 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UnusedPrivateField:
 			case IProblem.UnusedPrivateType:
 			case IProblem.MethodRequiresBody:
+			case IProblem.NeedToEmulateFieldReadAccess:
+			case IProblem.NeedToEmulateFieldWriteAccess:
+			case IProblem.NeedToEmulateMethodAccess:
+			case IProblem.NeedToEmulateConstructorAccess:			
 				return true;
 			default:
 				return false;
@@ -170,7 +174,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.NonStaticFieldFromStaticInvocation:
 			case IProblem.InstanceMethodDuringConstructorInvocation:
 			case IProblem.InstanceFieldDuringConstructorInvocation:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, proposals, false); 
+				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, proposals, ModifierCorrectionSubProcessor.TO_STATIC); 
 				break;				
 			case IProblem.NotVisibleMethod:
 			case IProblem.NotVisibleConstructor:
@@ -183,7 +187,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.ExceptionTypeNotVisible:
 			case IProblem.NotVisibleField:
 			case IProblem.ImportNotVisible:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, proposals, true); 
+				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE); 
 				break;
 			case IProblem.BodyForAbstractMethod:
 			case IProblem.AbstractMethodInAbstractClass:
@@ -215,7 +219,12 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UnusedPrivateType:				
 				LocalCorrectionsSubProcessor.addUnusedMemberProposal(context, proposals);
 				break;
-					
+			case IProblem.NeedToEmulateFieldReadAccess:
+			case IProblem.NeedToEmulateFieldWriteAccess:
+			case IProblem.NeedToEmulateMethodAccess:
+			case IProblem.NeedToEmulateConstructorAccess:
+				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, proposals, ModifierCorrectionSubProcessor.TO_NON_PRIVATE);
+				break;
 			default:
 		}
 	}

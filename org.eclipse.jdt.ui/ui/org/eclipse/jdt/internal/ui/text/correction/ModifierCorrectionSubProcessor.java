@@ -18,8 +18,12 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 /**
   */
 public class ModifierCorrectionSubProcessor {
+	
+	public static final int TO_STATIC= 1;
+	public static final int TO_VISIBLE= 2;
+	public static final int TO_NON_PRIVATE= 3;
 
-	public static void addNonAccessibleMemberProposal(ICorrectionContext context, List proposals, boolean visibilityChange) throws JavaModelException {
+	public static void addNonAccessibleMemberProposal(ICorrectionContext context, List proposals, int kind) throws JavaModelException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= context.getCoveringNode();
@@ -74,13 +78,19 @@ public class ModifierCorrectionSubProcessor {
 			int includedModifiers= 0;
 			int excludedModifiers= 0;
 			String label;
-			if (visibilityChange) {
+			if (kind == TO_VISIBLE) {
 				excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
 				includedModifiers= getNeededVisibility(selectedNode, typeBinding);
 				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changevisibility.description", new String[] { name, getVisibilityString(includedModifiers) }); //$NON-NLS-1$
-			} else {				
+			} else if (kind == TO_STATIC) {			
 				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertostatic.description", name); //$NON-NLS-1$
 				includedModifiers= Modifier.STATIC;
+			} else if (kind == TO_NON_PRIVATE) {			
+				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertoprotected.description", name); //$NON-NLS-1$
+				excludedModifiers= Modifier.PRIVATE;
+				includedModifiers= Modifier.PROTECTED;
+			} else {
+				return;
 			}
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding);
 			if (targetCU != null && JavaModelUtil.isEditable(targetCU)) {
@@ -315,5 +325,25 @@ public class ModifierCorrectionSubProcessor {
 		proposals.add(proposal);
 	}
 	
+
+	public static void addNeedToEmulateProposal(ICorrectionContext context, List proposals) {
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		ASTNode selectedNode= context.getCoveringNode();
+		
+		
+		
+		
+		if (!(selectedNode instanceof SimpleName)) {
+			return;
+		}
+		
+		IBinding binding= ((SimpleName) selectedNode).resolveBinding();
+		if (binding instanceof IVariableBinding) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertofinal.description", binding.getName()); //$NON-NLS-1$
+			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 0, image));
+		}
+	}
 
 }
