@@ -295,7 +295,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				if (element instanceof IClassFile) {
 					postAdd(parent, ((IClassFile)element).getType());
 				} else if (element instanceof ICompilationUnit && !((ICompilationUnit)element).isWorkingCopy()) {
-						postAdd(parent, ((ICompilationUnit)element).getAllTypes());
+						postAdd(parent, ((ICompilationUnit)element).getTypes());
 				} else if (parent instanceof ICompilationUnit && getProvideWorkingCopy() && !((ICompilationUnit)parent).isWorkingCopy()) {
 					//	do nothing
 				} else if (element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
