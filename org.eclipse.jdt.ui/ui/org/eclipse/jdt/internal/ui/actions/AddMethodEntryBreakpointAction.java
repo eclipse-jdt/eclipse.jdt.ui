@@ -73,7 +73,7 @@ public class AddMethodEntryBreakpointAction extends Action implements IUpdate {
 	
 	public void update() {
 		fMethod= getMethod();
-		if (fMethod != null) {
+		if (fMethod != null && fMethod.isBinary()) { // only add to class files
 			setEnabled(true);
 			fBreakpoint= getBreakpoint(fMethod);
 			setText(fBreakpoint == null ? fAddText : fRemoveText);
