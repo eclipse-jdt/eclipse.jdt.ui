@@ -2,6 +2,8 @@ package org.eclipse.jdt.ui.tests.refactoring.infra;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.PlatformObject;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -14,7 +16,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class MockWorkbenchSite implements IWorkbenchSite {
+public class MockWorkbenchSite extends PlatformObject implements IWorkbenchSite {
 	
 	private ISelectionProvider fProvider;
 	
