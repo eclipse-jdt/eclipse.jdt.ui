@@ -116,9 +116,19 @@ public abstract class SourceReferenceAction extends SelectionDispatchAction {
 			IMember member= (IMember)elem;
 			if (member.isBinary() && (member.getSourceRange() == null || fgUnknownRange.equals(member.getSourceRange())))
 				return false;
-		}	
-			
-		if (isDeletedFromEditor((ISourceReference)elem))	
+		}
+		
+		if (elem instanceof IMember){
+			/* feature in jdt core - initializers from class files are not binary but have no cus
+			 * see bug 37199
+			 * we just say 'no' to them
+			 */
+			IMember member= (IMember)elem;
+			if (! member.isBinary() && SourceReferenceUtil.getCompilationUnit(member) == null)
+				return false;					
+		}
+		
+		if (isDeletedFromEditor((ISourceReference)elem))
 			return false;			
 			
 		if (elem instanceof IMember) //binary excluded before
