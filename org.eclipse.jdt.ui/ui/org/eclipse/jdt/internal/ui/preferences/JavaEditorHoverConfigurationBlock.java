@@ -191,7 +191,8 @@ class JavaEditorHoverConfigurationBlock {
 					else
 						insertString= Action.findModifierString(e.stateMask);
 
-					fModifierEditor.insert(insertString);
+					if (insertString != null)
+						fModifierEditor.insert(insertString);
 				}
 			}
 		});
