@@ -1695,7 +1695,7 @@ class ReorgPolicyFactory {
 		}
 		
 		public IJavaElement[] getActualJavaElementsToReorg() throws JavaModelException {
-			Set result= new HashSet();
+			List result= new ArrayList();
 			for (int i= 0; i < fJavaElements.length; i++) {
 				IJavaElement element= fJavaElements[i];
 				if (element == null)
@@ -1706,11 +1706,11 @@ class ReorgPolicyFactory {
 				if (element instanceof IType) {
 					IType type= (IType)element;
 					ICompilationUnit cu= type.getCompilationUnit();
-					if (cu != null && type.getDeclaringType() == null && cu.exists() && cu.getTypes().length == 1)
+					if (cu != null && type.getDeclaringType() == null && cu.exists() && cu.getTypes().length == 1 && ! result.contains(cu))
 						result.add(cu);
-					else
+					else if (! result.contains(type))
 						result.add(type);
-				} else  {
+				} else if (! result.contains(element)){
 					result.add(element);
 				}
 			}
@@ -1719,13 +1719,14 @@ class ReorgPolicyFactory {
 		
 		public IResource[] getActualResourcesToReorg() {
 			Set javaElementSet= new HashSet(Arrays.asList(fJavaElements));	
-			Set result= new HashSet();
+			List result= new ArrayList();
 			for (int i= 0; i < fResources.length; i++) {
 				if (fResources[i] == null)
 					continue;
 				IJavaElement element= JavaCore.create(fResources[i]);
 				if (element == null || ! element.exists() || ! javaElementSet.contains(element))
-					result.add(fResources[i]);
+					if (! result.contains(fResources[i]))
+							result.add(fResources[i]);
 			}
 			return (IResource[]) result.toArray(new IResource[result.size()]);
 
