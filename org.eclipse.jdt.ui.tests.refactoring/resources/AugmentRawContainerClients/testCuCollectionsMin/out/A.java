@@ -11,7 +11,7 @@ class A {
 	public List<String> getNames() {
 		ArrayList<String> result= new ArrayList<String>();
 		result.add("Zwyssig");
-		result.add("Abächerli");
+		result.add("Abaecherli");
 		return result;
 	}
 }
