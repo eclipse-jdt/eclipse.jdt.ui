@@ -75,6 +75,7 @@ class JavaCompareUtilities {
 				try {
 					reader.close();
 				} catch (IOException ex) {
+					JavaPlugin.log(ex);
 				}
 			}
 		}

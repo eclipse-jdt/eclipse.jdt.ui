@@ -100,6 +100,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		try {
 			file= (IFile) cu.getUnderlyingResource();
 		} catch (JavaModelException ex) {
+			JavaPlugin.log(ex);
 		}
 		if (file == null) {
 			MessageDialog.openError(shell, errorTitle, errorMessage);
@@ -114,6 +115,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		try {
 			states= file.getHistory(null);
 		} catch (CoreException ex) {
+			JavaPlugin.log(ex);
 		}
 		
 		if (states != null)
@@ -129,6 +131,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		try {
 			docManager= new DocumentManager(cu);
 		} catch (JavaModelException ex) {
+			JavaPlugin.log(ex);
 			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
@@ -160,8 +163,10 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			}
 
 		} catch(BadLocationException ex) {
+			JavaPlugin.log(ex);
 			MessageDialog.openError(shell, errorTitle, errorMessage);
 		} catch(CoreException ex) {
+			JavaPlugin.log(ex);
 			MessageDialog.openError(shell, errorTitle, errorMessage);
 		} finally {
 			docManager.disconnect();

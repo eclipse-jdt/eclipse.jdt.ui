@@ -2,6 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
+// AW
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.Iterator;

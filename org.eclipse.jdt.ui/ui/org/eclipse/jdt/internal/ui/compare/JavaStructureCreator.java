@@ -15,16 +15,23 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.*;
 import org.eclipse.compare.structuremergeviewer.*;
+
+import org.eclipse.jdt.internal.compiler.parser.Scanner;
+import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
+import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 
 
 public class JavaStructureCreator implements IStructureCreator {
 	
 	private static JavaTextLabelProvider fgLabelProvider= null;
 
-
+	/**
+	 * Used to bail out from ProblemFactory.
+	 * */
 	private static class ParseError extends Error {
 	}
 	
@@ -107,22 +114,23 @@ public class JavaStructureCreator implements IStructureCreator {
 	
 	public IStructureComparator getStructure(final Object input) {
 		
-		String s= null;
-		
+		String contents= null;
 		if (input instanceof IStreamContentAccessor) {
 			IStreamContentAccessor sca= (IStreamContentAccessor) input;			
 			try {
-				s= JavaCompareUtilities.readString(sca.getContents());
+				contents= JavaCompareUtilities.readString(sca.getContents());
 			} catch (CoreException ex) {
+				JavaPlugin.log(ex);
+				return null;
 			}			
 		}
 		
-		if (s != null) {
-			int n= s.length();
+		if (contents != null) {
+			int n= contents.length();
 			char[] buffer= new char[n];
-			s.getChars(0, n, buffer, 0);
+			contents.getChars(0, n, buffer, 0);
 			
-			final Document doc= new Document(s);
+			Document doc= new Document(contents);
 			IDocumentPartitioner dp= JavaCompareUtilities.createJavaPartitioner();
 			doc.setDocumentPartitioner(dp);
 			dp.connect(doc);
@@ -157,8 +165,8 @@ public class JavaStructureCreator implements IStructureCreator {
 		if (input instanceof IEditableContent && structure instanceof JavaNode) {
 			IDocument doc= ((JavaNode)structure).getDocument();
 			IEditableContent bca= (IEditableContent) input;
-			String c= doc.get();
-			bca.setContent(c.getBytes());
+			String contents= doc.get();
+			bca.setContent(contents.getBytes());
 		}
 	}
 	
@@ -166,77 +174,35 @@ public class JavaStructureCreator implements IStructureCreator {
 		
 		if (! (node instanceof IStreamContentAccessor))
 			return null;
+			
 		IStreamContentAccessor sca= (IStreamContentAccessor) node;
-		String s= null;
+		String content= null;
 		try {
-			s= JavaCompareUtilities.readString(sca.getContents());
+			content= JavaCompareUtilities.readString(sca.getContents());
 		} catch (CoreException ex) {
+			JavaPlugin.log(ex);
+			return null;
 		}
 				
-		if (ignoreWhiteSpace) { 	// we copy everything but java whitespace
+		if (ignoreWhiteSpace) { 	// we return everything but Java whitespace
 			
 			StringBuffer buf= new StringBuffer();
-			int i= 0;
-			int l= s.length();
-			while (i < l) {
-				char c= s.charAt(i++);
-				switch (c) {
-				case '/':	// comment ?
-					if (i < l) {
-						c= s.charAt(i);
-						if (c == '/') {	// line comment
-							i++;
-							while (i < l) {
-								c= s.charAt(i++);
-								if (c == '\n')
-									break;
-							}
-						} else if (c == '*') {	// multi line comment
-							i++;
-							while (i < l) {
-								c= s.charAt(i++);
-								if (c == '*' && i < l) {
-									c= s.charAt(i);
-									if (c == '/') {
-										i++;
-										break;
-									}
-								}
-							}
-						} else
-							;	// no comment
-					} else
-						buf.append((char)c);	
-					break;
-				case '"':
-					buf.append((char)c);
-					// don't ignore white space within strings
-					while (i < l) {
-						c= s.charAt(i++);
-						buf.append((char)c);
-						if (c == '"')
-							break;
-					}
-					break;
-				case '\'':
-					buf.append((char)c);
-					// don't ignore white space within character constants
-					while (i < l) {
-						c= s.charAt(i++);
-						buf.append((char)c);
-						if (c == '\'')
-							break;
-					}
-					break;
-				default:
-					if (!Character.isWhitespace(c))
-						buf.append((char)c);	
-					break;
-				}
+			
+			// to avoid the trouble when dealing with Unicode
+			// we use the Java scanner to extract non-whitespace and non-comment tokens
+			Scanner scanner= new Scanner(false, false);	// no whitespace, no comments
+			scanner.setSourceBuffer(content.toCharArray());
+			try {
+				while (scanner.getNextToken() != TerminalSymbols.TokenNameEOF)
+					buf.append(content.substring(scanner.startPosition, scanner.currentPosition));
+			} catch (InvalidInputException ex) {
+				JavaPlugin.log(ex);
+				return null;
 			}
-			s= buf.toString();
+
+			content= buf.toString();
 		}
-		return s;
+		return content;
 	}
 	
 	public boolean canRewriteTree() {
@@ -260,6 +226,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				continue;
 			int type= jn.getTypeCode();
 			
+			// we can only deal with methods or constructors
 			if (type == JavaNode.METHOD || type == JavaNode.CONSTRUCTOR) {
 				
 				String name= jn.getMethodName();

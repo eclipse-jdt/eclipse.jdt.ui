@@ -33,21 +33,21 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 	}
 		
 	//---- ICompilationUnit
-	/**
+	/* (non Java doc)
 	 * @see ICompilationUnit#getContents
 	 */
 	public char[] getContents() {
 		return fBuffer;
 	}
 	
-	/**
+	/* (non Java doc)
 	 * @see ICompilationUnit#getFileName
 	 */
 	public char[] getFileName() {
 		return new char[0];
 	}
 	
-	/**
+	/* (non Java doc)
 	 * @see ICompilationUnit#getMainTypeName
 	 */
 	public char[] getMainTypeName() {

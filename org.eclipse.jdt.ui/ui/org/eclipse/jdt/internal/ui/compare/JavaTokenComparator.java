@@ -4,11 +4,18 @@
  */
 package org.eclipse.jdt.internal.ui.compare;
 
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
+import org.eclipse.jdt.internal.compiler.parser.Scanner;
+import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
+
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.rangedifferencer.IRangeComparator;
 
+
 /**
- * A range comparator for Java tokens.
+ * A comparator for Java tokens.
  */
 class JavaTokenComparator implements ITokenComparator {
 		
@@ -19,100 +26,29 @@ class JavaTokenComparator implements ITokenComparator {
 	private int[] fLengths;
 
 	/**
-	 * Creates a TokenComparator for the given string 
+	 * Creates a TokenComparator for the given string.
 	 */
-	public JavaTokenComparator(String s, boolean shouldEscape) {
-		if (s != null)
-			fText= s;
-		else
-			fText= ""; //$NON-NLS-1$
+	public JavaTokenComparator(String text, boolean shouldEscape) {
+		
+		Assert.isNotNull(text);
+		
+		fText= text;
 		fShouldEscape= shouldEscape;
-
-		fStarts= new int[fText.length()];
-		fLengths= new int[fText.length()];
+		
+		int length= fText.length();
+		fStarts= new int[length];
+		fLengths= new int[length];
 		fCount= 0;
 		
-		for (int ix= 0; ix < fText.length();) {
-			
-			fStarts[fCount]= ix;
-			
-			try {
-				char c= fText.charAt(ix++);
-				switch (c) {
-				
-				case '/':
-					c= fText.charAt(ix++);
-					if (c != '/' && c != '*')
-						ix--;
-					break;
-					
-				case '=':
-					c= fText.charAt(ix++);
-					if (c != '=')
-						ix--;
-					break;
-					
-				case '!':
-					c= fText.charAt(ix++);
-					if (c != '=')
-						ix--;
-					break;
-					
-				case '<':
-					c= fText.charAt(ix++);
-					if (c != '=' && c != '<')
-						ix--;
-					break;
-					
-				case '>':
-					c= fText.charAt(ix++);
-					if (c != '=' && c != '>')
-						ix--;
-					break;
-					
-				case '&':
-					c= fText.charAt(ix++);
-					if (c != '=' && c != '&')
-						ix--;
-					break;
-					
-				case '|':
-					c= fText.charAt(ix++);
-					if (c != '=' && c != '|')
-						ix--;
-					break;
-													
-				case '0': case '1': case '2': case '3': case '4':
-				case '5': case '6': case '7': case '8': case '9':
-					do {
-						c= c= fText.charAt(ix++);
-					} while(Character.isDigit((char)c));
-					ix--;
-					break;
-	
-				default:
-					if (Character.isWhitespace(c) && (c != '\n')) {
-						do {
-							c= c= fText.charAt(ix++);
-						} while (Character.isWhitespace(c) && (c != '\n'));
-						ix--;
-					} else if (Character.isJavaIdentifierStart((char)c)) {
-						do {
-							c= c= fText.charAt(ix++);
-						} while (Character.isJavaIdentifierPart((char)c));
-						ix--;
-					} else {
-						// single character token
-					}
-					break;
-				}
-			} catch (StringIndexOutOfBoundsException ex) {
-			}
-			
-			if (ix > fStarts[fCount]) {
-				fLengths[fCount]= ix-fStarts[fCount];
+		Scanner scanner= new Scanner(true, true);	// returns comments & whitespace
+		scanner.setSourceBuffer(fText.toCharArray());
+		try {
+			while (scanner.getNextToken() != TerminalSymbols.TokenNameEOF) {
+				fStarts[fCount]= scanner.startPosition;
+				fLengths[fCount]= scanner.currentPosition - fStarts[fCount];
 				fCount++;
 			}
+		} catch (InvalidInputException ex) {
 		}
 	}	
 
@@ -154,7 +90,7 @@ class JavaTokenComparator implements ITokenComparator {
 	 */
 	public boolean rangesEqual(int thisIndex, IRangeComparator other, int otherIndex) {
 		if (other != null && getClass() == other.getClass()) {
-			JavaTokenComparator tc= (JavaTokenComparator) other;
+			JavaTokenComparator tc= (JavaTokenComparator) other;	// safe cast
 			int thisLen= getTokenLength(thisIndex);
 			int otherLen= tc.getTokenLength(otherIndex);
 			if (thisLen == otherLen)
@@ -192,8 +128,8 @@ class JavaTokenComparator implements ITokenComparator {
 	}
 	
 //	public static void main(String args[]) {
-//		//String in= "private static boolean isWhitespace(char c) {";
-//		String in= "for (int j= 0; j < l-1; j++) {";
+//		String in= "private static boolean isWhitespace(char c) {";
+//		//String in= "for (int j= 0; j < l-1; j++) {";
 //		//String in= "abc";
 //		ITokenComparator tc= new JavaTokenComparator(in, false);
 //		

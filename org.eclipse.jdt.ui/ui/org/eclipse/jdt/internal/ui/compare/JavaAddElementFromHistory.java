@@ -102,6 +102,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		try {
 			file= (IFile) cu.getUnderlyingResource();
 		} catch (JavaModelException ex) {
+			JavaPlugin.log(ex);
 		}
 		if (file == null) {
 			MessageDialog.openError(shell, errorTitle, errorMessage);
@@ -113,6 +114,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		try {
 			states= file.getHistory(null);
 		} catch (CoreException ex) {
+			JavaPlugin.log(ex);
 		}	
 		if (states == null || states.length <= 0) {
 			MessageDialog.openInformation(shell, errorTitle, CompareMessages.getString("AddFromHistory.noHistoryMessage")); //$NON-NLS-1$
@@ -128,6 +130,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		try {
 			docManager= new DocumentManager(cu);
 		} catch(JavaModelException ex) {
+			JavaPlugin.log(ex);
 			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
@@ -159,8 +162,10 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			}
 
 		} catch(BadLocationException ex) {
+			JavaPlugin.log(ex);
 			MessageDialog.openError(shell, errorTitle, errorMessage);
 		} catch(CoreException ex) {
+			JavaPlugin.log(ex);
 			MessageDialog.openError(shell, errorTitle, errorMessage);
 		} finally {
 			docManager.disconnect();
@@ -180,6 +185,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 				// the end of the selected method
 				return range.getOffset() + range.getLength();
 			} catch(JavaModelException ex) {
+				JavaPlugin.log(ex);
 			}
 		}
 						
@@ -204,6 +210,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 						// the start of the first child
 						return range.getOffset();
 					} catch(JavaModelException ex) {
+						JavaPlugin.log(ex);
 					}
 				}
 			}
@@ -226,7 +233,9 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 					}
 					return pos;
 				} catch(JavaModelException ex) {
+					JavaPlugin.log(ex);
 				} catch(BadLocationException ex) {
+					JavaPlugin.log(ex);
 				}
 				break;
 			case IJavaElement.COMPILATION_UNIT:

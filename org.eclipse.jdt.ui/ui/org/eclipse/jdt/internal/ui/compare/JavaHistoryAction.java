@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.text.MessageFormat;
 
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.*;
 
@@ -14,7 +15,10 @@ import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.ui.texteditor.IUpdate;
 
-
+/**
+ * Base class for the "Replace with local history"
+ * and "Add from local history" actions.
+ */
 public abstract class JavaHistoryAction extends Action implements ISelectionChangedListener, IUpdate {
 	
 	protected ISelectionProvider fSelectionProvider;
@@ -22,22 +26,26 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 	
 	public JavaHistoryAction(ISelectionProvider sp) {			
 		fSelectionProvider= sp;
+		Assert.isNotNull(fSelectionProvider);
 	}
 		
-	/**
+	/* (non Java doc)
 	 * @see IUpdate#update
 	 */
 	public void update() {
 		updateLabel(fSelectionProvider.getSelection());
 	}
 	
-	/**
+	/* (non Java doc)
 	 * @see ISelectionAction#selectionChanged
 	 */	
 	public final void selectionChanged(SelectionChangedEvent e) {
 		updateLabel(e.getSelection());
 	}
 		
+	/**
+	 * Returns an IMember or null.
+	 */
 	IMember getEditionElement(ISelection selection) {
 		
 		if (selection instanceof IStructuredSelection) {
@@ -55,6 +63,9 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 		setEnabled(getLabelName(selection) != null);
 	}
 	
+	/**
+	 * Subclasses may override.
+	 */
 	protected String getLabelName(ISelection selection) {
 		return null;
 	}

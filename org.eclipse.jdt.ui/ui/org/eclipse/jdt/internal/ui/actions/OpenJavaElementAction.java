@@ -2,33 +2,30 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
+// AW
 package org.eclipse.jdt.internal.ui.actions;
-
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.resource.ImageDescriptor;
-
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+
+import org.eclipse.jface.action.Action;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 
 /**
- * Provides the means to open a Java element in the specified editor. Subclasses must overwrite
- * IAction.actionPerformed and knit the methods together.
+ * Opens a Java element in the specified editor. Subclasses must overwrite
+ * <code>IAction.run</code> and knit the methods together.
  */
 public abstract class OpenJavaElementAction extends Action {
 	
@@ -58,12 +55,11 @@ public abstract class OpenJavaElementAction extends Action {
 			if (codeResolveResults[i] instanceof ISourceReference)
 				refs.add(codeResolveResults[i]);
 		}
-		
 		return refs;
 	}
 						
 	/**
-	 * Shows a dialog to selecting an ambigous source reference.
+	 * Shows a dialog for resolving an ambigous source reference.
 	 * Utility method that can be called by subclassers.
 	 */
 	protected ISourceReference selectSourceReference(List sourceReferences, Shell shell, String title, String message) {
@@ -72,17 +68,18 @@ public abstract class OpenJavaElementAction extends Action {
 		
 		if (nResults == 0)
 			return null;
-		else if (nResults == 1)
+		
+		if (nResults == 1)
 			return (ISourceReference) sourceReferences.get(0);
 		
-		int flags= (JavaElementLabelProvider.SHOW_DEFAULT | 
-						JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION | 
-						JavaElementLabelProvider.SHOW_ROOT);
+		int flags= JavaElementLabelProvider.SHOW_DEFAULT
+						| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION
+							| JavaElementLabelProvider.SHOW_ROOT;
 						
-		ElementListSelectionDialog d= new ElementListSelectionDialog(shell, title, null, new JavaElementLabelProvider(flags), true, false);
-		d.setMessage(message);
-		if (d.open(sourceReferences, null) == d.OK) {
-			Object[] elements= d.getResult();
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, title, null, new JavaElementLabelProvider(flags), true, false);
+		dialog.setMessage(message);
+		if (dialog.open(sourceReferences, null) == dialog.OK) {
+			Object[] elements= dialog.getResult();
 			if (elements != null && elements.length > 0) {
 				nResults= elements.length;
 				for (int i= 0; i < nResults; i++) {

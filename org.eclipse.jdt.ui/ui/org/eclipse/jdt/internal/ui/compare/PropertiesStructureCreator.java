@@ -10,6 +10,8 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.*;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.compare.*;
 import org.eclipse.compare.structuremergeviewer.*;
 import org.eclipse.core.runtime.CoreException;
@@ -17,11 +19,17 @@ import org.eclipse.core.runtime.CoreException;
 
 public class PropertiesStructureCreator implements IStructureCreator {
 	
+	/**
+	 * A PropertyNode represents a key/value pair of a Java property file.
+	 * The text range of a ley/value pair starts with an optional
+	 * comment and ends right after the value.
+	 */
 	static class PropertyNode extends DocumentRangeNode implements ITypedElement {
 		
 		private String fValue;
 		private boolean fIsEditable;
 		private PropertyNode fParent;
+		
 		
 		public PropertyNode(PropertyNode parent, int type, String id, String value, IDocument doc, int start, int length) {
 			super(type, id, doc, start, length);
@@ -29,7 +37,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 			fValue= value;
 			if (parent != null) {
 				parent.addChild(this);
-				fIsEditable= parent.isEditable();
+				fIsEditable= parent.isEditable();	// propagate editability
 			}
 		}
 						
@@ -39,28 +47,28 @@ public class PropertiesStructureCreator implements IStructureCreator {
 			fIsEditable= editable;
 		}
 				
-		/**
-		 * @see ITypedElement#getName
+		/* (non Java doc)
+		 * see ITypedElement#getName
 		 */
 		public String getName() {
 			return this.getId();
 		}
 
-		/**
-		 * @see ITypedElement#getType
+		/* (non Java doc)
+		 * see ITypedElement#getType
 		 */
 		public String getType() {
 			return "txt"; //$NON-NLS-1$
 		}
 		
-		/**
-		 * @see ITypedElement#getImage
+		/* (non Java doc)
+		 * see ITypedElement#getImage
 		 */
 		public Image getImage() {
 			return CompareUI.getImage(getType());
 		}
 		
-		/* (non Javadoc)
+		/* (non Java doc)
 		 * see IEditableContent.isEditable
 		 */
 		public boolean isEditable() {
@@ -98,15 +106,16 @@ public class PropertiesStructureCreator implements IStructureCreator {
 
 	public IStructureComparator getStructure(final Object input) {
 		
-		String s= null;
+		String content= null;
 		if (input instanceof IStreamContentAccessor) {
 			try {
-				s= JavaCompareUtilities.readString(((IStreamContentAccessor) input).getContents());
+				content= JavaCompareUtilities.readString(((IStreamContentAccessor) input).getContents());
 			} catch(CoreException ex) {
+				JavaPlugin.log(ex);
 			}
 		}
 			
-		Document doc= new Document(s != null ? s : ""); //$NON-NLS-1$
+		Document doc= new Document(content != null ? content : ""); //$NON-NLS-1$
 				
 		boolean isEditable= false;
 		if (input instanceof IEditableContent)
@@ -121,6 +130,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		try {
 			parsePropertyFile(root, doc);
 		} catch (IOException ex) {
+			JavaPlugin.log(ex);
 		}
 		
 		return root;
@@ -134,8 +144,8 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		if (input instanceof IEditableContent && structure instanceof PropertyNode) {
 			IDocument doc= ((PropertyNode)structure).getDocument();
 			IEditableContent bca= (IEditableContent) input;
-			String c= doc.get();
-			bca.setContent(c.getBytes());
+			String content= doc.get();
+			bca.setContent(content.getBytes());
 		}
 	}
 		
@@ -148,6 +158,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 	}
 	
 	public void rewriteTree(Differencer differencer, IDiffContainer root) {
+		// empty implementation
 	}
 	
 	public String getContents(Object node, boolean ignoreWhitespace) {
@@ -156,6 +167,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 			try {
 				return JavaCompareUtilities.readString(sca.getContents());
 			} catch (CoreException ex) {
+				JavaPlugin.log(ex);
 			}
 		}
 		return null;

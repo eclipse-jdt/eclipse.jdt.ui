@@ -2,8 +2,8 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
+// AW
 package org.eclipse.jdt.internal.ui.actions;
-
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -14,6 +14,9 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
+/**
+ * @deprecated Use Action instead
+ */
 public abstract class JavaUIAction extends Action {
 	
 	private static final String LABEL_KEY= "label"; //$NON-NLS-1$
@@ -22,6 +25,7 @@ public abstract class JavaUIAction extends Action {
 
 	/**
 	 * Creates a new action with the given label.
+	 * @deprecated Use Action(String) instead.
 	 */
 	public JavaUIAction(String label) {
 		super(label);
@@ -29,6 +33,7 @@ public abstract class JavaUIAction extends Action {
 
 	/**
 	 * Creates a new action with the given label and image.
+	 * @deprecated Use Action(String, ImageDescriptor) instead.
 	 */
 	public JavaUIAction(String label, ImageDescriptor image) {
 		super(label, image);
@@ -44,7 +49,7 @@ public abstract class JavaUIAction extends Action {
 	 *  <li> tooltip: for the action's tooltip text.
 	 * </ul>
 	 * 
-	 * @deprecated Use JavaUIAction(String, ImageDescriptor) or JavaUIAction(String) instead
+	 * @deprecated Use Action(String, ImageDescriptor) or Action(String) instead.
 	 */
 	public JavaUIAction(ResourceBundle bundle, String prefix) {
 		this(bundle.getString(prefix + LABEL_KEY));
@@ -62,6 +67,9 @@ public abstract class JavaUIAction extends Action {
 	public final void actionPerformed(Window window) {
 	}
 	
+	/**
+	 * @deprecated Use JavaPluginImages.setImageDescriptors(...) instead
+	 */
 	public void setImageDescriptors(String type, String name) {
 		JavaPluginImages.setImageDescriptors(this, type, name);
 	}
