@@ -478,13 +478,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return;		
 		
 		int key= event.keyCode;
-		IAction action;
 		if (key == SWT.F5) {
-			action= fBuildActionGroup.getRefreshAction();
-			if (action.isEnabled())
-				action.run();
-		} if (event.character == SWT.DEL) {
-			action= fCCPActionGroup.getDeleteAction();
+			IAction action= fBuildActionGroup.getRefreshAction();
 			if (action.isEnabled())
 				action.run();
 		}

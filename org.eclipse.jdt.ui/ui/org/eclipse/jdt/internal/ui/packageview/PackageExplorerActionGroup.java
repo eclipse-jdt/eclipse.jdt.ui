@@ -334,14 +334,11 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		if (event.stateMask != 0) 
 			return;		
 		
-		if (event.character == SWT.DEL) {
-			IAction delete= fCCPActionGroup.getDeleteAction();
-			if (delete != null && delete.isEnabled())
-				delete.run();
-		}
-		else if (event.keyCode == SWT.BS) {
-			if (fUpAction != null && fUpAction.isEnabled()) 
+		if (event.keyCode == SWT.BS) {
+			if (fUpAction != null && fUpAction.isEnabled()) {
 				fUpAction.run();
+				event.doit= false;
+			}
 		}
 	}
 	

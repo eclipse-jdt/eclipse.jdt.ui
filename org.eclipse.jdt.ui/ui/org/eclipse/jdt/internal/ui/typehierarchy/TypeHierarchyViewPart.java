@@ -202,7 +202,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private FocusOnTypeAction fFocusOnTypeAction;
 	private FocusOnSelectionAction fFocusOnSelectionAction;
 	private CompositeActionGroup fActionGroups;
-	private CCPActionGroup fCCPActionGroup;
 	private SelectAllAction fSelectAllAction;
 	
 	private WorkingSetFilterActionGroup fWorkingSetActionGroup;
@@ -621,10 +620,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 						}
 						updateHierarchyViewer(false);
 						return;
-					} else if (event.character == SWT.DEL) {
-						if (fCCPActionGroup.getDeleteAction().isEnabled())
-							fCCPActionGroup.getDeleteAction().run();
-						return;	
 					}
  				}
 			}
@@ -821,7 +816,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				new NewWizardsActionGroup(this.getSite()),
 				new OpenEditorActionGroup(this), 
 				new OpenViewActionGroup(this), 
-				fCCPActionGroup= new CCPActionGroup(this), 
+				new CCPActionGroup(this), 
 				new GenerateActionGroup(this),
 				new RefactorActionGroup(this),
 				new JavaSearchActionGroup(this)

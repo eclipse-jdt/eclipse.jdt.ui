@@ -23,8 +23,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -1055,11 +1053,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		registerToolbarActions();
 				
 		fOutlineViewer.setInput(fInput);	
-		fOutlineViewer.getControl().addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
-				handleKeyReleased(e);
-			}
-		});
 	}
 
 	public void dispose() {
@@ -1222,23 +1215,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		}
 		
 		return false;		
-	}
-	
-	/**
- 	 * Handles key events in viewer.
- 	 */
-	private void handleKeyReleased(KeyEvent event) {
-		
-		if (event.stateMask != 0)
-			return;
-		
-		IAction action= null;
-		if (event.character == SWT.DEL) {
-			action= fCCPActionGroup.getDeleteAction();
-		}
-			
-		if (action != null && action.isEnabled())
-			action.run();
 	}
 	
 	/**
