@@ -1171,9 +1171,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private IJavaSearchScope createRefactoringScope()  throws JavaModelException{
-		if (fRippleMethods.length == 1)	
-			return RefactoringScopeFactory.create(fRippleMethods[0]);
-		return SearchEngine.createWorkspaceScope();
+		return RefactoringScopeFactory.create(fMethod);
 	}
 	
 	private ASTNode[] findOccurrenceNodes(IProgressMonitor pm) throws JavaModelException{
