@@ -46,9 +46,6 @@ public class SelectWorkingSetAction extends Action {
 		Assert.isNotNull(actionGroup);
 		setToolTipText(WorkingSetMessages.getString("SelectWorkingSetAction.toolTip")); //$NON-NLS-1$
 		
-		// XXX
-//		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SELECT_WORKING_SET_ACTION);
-
 		fShell= shell;
 		fActionGroup= actionGroup;
 	}
