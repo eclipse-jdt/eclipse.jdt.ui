@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
 
@@ -87,7 +86,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		
@@ -136,7 +135,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		
@@ -186,7 +185,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		
@@ -237,7 +236,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		
@@ -254,7 +253,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			assertTrue("Has fragments", !fragments.isEmpty());
 			
 			MemberRef ref= (MemberRef) fragments.get(0);
-			rewrite.markAsInsert(ref, ASTNodeConstants.QUALIFIER, ast.newSimpleName("E"), null);
+			rewrite.markAsInsert(ref, MemberRef.QUALIFIER_PROPERTY, ast.newSimpleName("E"), null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -287,7 +286,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		
@@ -307,7 +306,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			MethodRefParameter param= ast.newMethodRefParameter();
 			param.setName(ast.newSimpleName("arg"));
 			param.setType(ast.newPrimitiveType(PrimitiveType.INT));
-			rewrite.getListRewrite(ref, ASTNodeConstants.PARAMETERS).insertLast(param, null);
+			rewrite.getListRewrite(ref, MethodRef.PARAMETERS_PROPERTY).insertLast(param, null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -340,7 +339,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		
@@ -364,7 +363,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			MethodRefParameter param= ast.newMethodRefParameter();
 			param.setName(ast.newSimpleName("arg"));
 			param.setType(ast.newPrimitiveType(PrimitiveType.INT));
-			rewrite.getListRewrite(ref, ASTNodeConstants.PARAMETERS).insertLast(param, null);
+			rewrite.getListRewrite(ref, MethodRef.PARAMETERS_PROPERTY).insertLast(param, null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -397,7 +396,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		
@@ -416,7 +415,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			text.setText("Thrown for no reason.");
 			newTag.fragments().add(text);
 
-			rewrite.getListRewrite(javadoc, ASTNodeConstants.TAGS).insertLast(newTag, null);
+			rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY).insertLast(newTag, null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -450,7 +449,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		
@@ -469,7 +468,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			ref.setName(ast.newSimpleName("size"));
 			newTag.fragments().add(ref);
 			
-			rewrite.getListRewrite(javadoc, ASTNodeConstants.TAGS).insertFirst(newTag, null);
+			rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY).insertFirst(newTag, null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -502,7 +501,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		
@@ -535,7 +534,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			textNested.setText("Link");
 			nested.fragments().add(textNested);
 
-			rewrite.getListRewrite(javadoc, ASTNodeConstants.TAGS).insertFirst(newTag, null);
+			rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY).insertFirst(newTag, null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -567,7 +566,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		
 		{  // insert method at first position
@@ -611,7 +610,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 	
 		{  // insert method at first position
@@ -656,7 +655,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 	
@@ -701,7 +700,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 	
@@ -713,7 +712,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			List tags= javadoc.tags();
 			assertTrue("Has one tag", tags.size() == 2);
 			
-			ListRewriter listRewrite= rewrite.getListRewrite(javadoc, ASTNodeConstants.TAGS);
+			ListRewriter listRewrite= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 			listRewrite.remove((ASTNode) tags.get(1), null);
 			
 			AST ast= astRoot.getAST();
@@ -755,7 +754,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
@@ -773,7 +772,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			element.fragments().add(textElement);
 			javadoc.tags().add(element);
 			
-			rewrite.markAsInsert(methodDecl, ASTNodeConstants.JAVADOC, javadoc, null);
+			rewrite.markAsInsert(methodDecl, MethodDeclaration.JAVADOC_PROPERTY, javadoc, null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -802,14 +801,14 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 	
 		{  // insert method at first position
 			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
-			FieldDeclaration methodDecl= type.getFields()[0];
+			FieldDeclaration fieldDecl= type.getFields()[0];
 			
 			Javadoc javadoc= ast.newJavadoc();
 			TagElement element= ast.newTagElement();
@@ -820,7 +819,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 			element.fragments().add(textElement);
 			javadoc.tags().add(element);
 			
-			rewrite.markAsInsert(methodDecl, ASTNodeConstants.JAVADOC, javadoc, null);
+			rewrite.markAsInsert(fieldDecl, FieldDeclaration.JAVADOC_PROPERTY, javadoc, null);
 		}
 
 		String preview= evaluateRewrite(cu, rewrite);
@@ -852,7 +851,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 	
 		{  // insert method at first position
@@ -885,7 +884,7 @@ public class ASTRewritingJavadocTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		
 		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 	

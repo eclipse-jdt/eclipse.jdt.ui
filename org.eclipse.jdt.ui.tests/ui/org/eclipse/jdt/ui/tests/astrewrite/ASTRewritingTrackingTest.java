@@ -35,7 +35,6 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
 
 public class ASTRewritingTrackingTest extends ASTRewritingTest {
@@ -104,7 +103,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("}\n");		
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		
@@ -167,7 +166,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
 		NewASTRewrite rewrite= new NewASTRewrite(ast);
@@ -191,7 +190,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		newFrag.setName(ast.newSimpleName("newVariable"));
 		newFrag.setExtraDimensions(2);
 
-		rewrite.getListRewrite(field, ASTNodeConstants.FRAGMENTS).insertFirst(newFrag, null);
+		rewrite.getListRewrite(field, FieldDeclaration.FRAGMENTS_PROPERTY).insertFirst(newFrag, null);
 
 						
 		String preview= evaluateRewrite(cu, rewrite);
@@ -233,7 +232,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
 		NewASTRewrite rewrite= new NewASTRewrite(ast);
@@ -262,7 +261,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		// change modifier
 		int newModifiers= Modifier.STATIC | Modifier.TRANSIENT | Modifier.PRIVATE;
-		rewrite.markAsReplaced(field, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+		rewrite.markAsReplaced(field, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 								
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -303,7 +302,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		
@@ -329,7 +328,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 
 		// move method before field
 		ASTNode placeHolder= rewrite.createMovePlaceholder(method);
-		rewrite.getListRewrite(typeC, ASTNodeConstants.BODY_DECLARATIONS).insertFirst(placeHolder, null);
+		rewrite.getListRewrite(typeC, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertFirst(placeHolder, null);
 								
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -367,7 +366,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		
@@ -431,7 +430,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		
@@ -449,7 +448,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		// move method before field
 		ASTNode placeHolder= rewrite.createMovePlaceholder(method);
 		
-		rewrite.getListRewrite(typeC, ASTNodeConstants.BODY_DECLARATIONS).insertFirst(placeHolder, null);
+		rewrite.getListRewrite(typeC, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertFirst(placeHolder, null);
 								
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -481,7 +480,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		

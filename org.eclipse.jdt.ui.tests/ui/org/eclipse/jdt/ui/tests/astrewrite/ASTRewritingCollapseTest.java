@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
@@ -98,7 +97,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
@@ -116,7 +115,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		Block placeholder= rewrite.getCollapseTargetPlaceholder(new Statement[] { st1, st2 });
 		rewrite.markAsReplaced(returnStatement, placeholder);
 			
-		String preview= evaluateRewrite(cu, rewrite);
+		String preview= evaluateRewrite(cu, rewrite); 
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -145,7 +144,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
@@ -197,7 +196,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -212,7 +211,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 			ASTNode placeholder= rewrite.createCopyPlaceholder(collapsed);
 			rewrite.markAsRemoved(collapsed);
 			
-			rewrite.getListRewrite(methodDecl.getBody(), ASTNodeConstants.STATEMENTS).insertLast(placeholder, null);
+			rewrite.getListRewrite(methodDecl.getBody(), Block.STATEMENTS_PROPERTY).insertLast(placeholder, null);
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);
@@ -247,7 +246,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -260,7 +259,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 			ASTNode collapsed= rewrite.collapseNodes(ifStatementBody, 0, ifStatementBody.size());
 			
 			ASTNode placeholder= rewrite.createMovePlaceholder(collapsed);
-			rewrite.getListRewrite(methodDecl.getBody(), ASTNodeConstants.STATEMENTS).insertLast(placeholder, null);
+			rewrite.getListRewrite(methodDecl.getBody(), Block.STATEMENTS_PROPERTY).insertLast(placeholder, null);
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);
@@ -295,7 +294,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);

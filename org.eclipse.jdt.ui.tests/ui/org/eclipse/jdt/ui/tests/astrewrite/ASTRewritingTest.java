@@ -24,6 +24,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -60,6 +61,13 @@ public class ASTRewritingTest extends TestCase {
 	
 	public ASTRewritingTest(String name) {
 		super(name);
+	}
+	
+	protected CompilationUnit createAST(ICompilationUnit cu) {
+		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		parser.setSource(cu);
+		parser.setResolveBindings(false);
+		return (CompilationUnit) parser.createAST(null);
 	}
 	
 	/**
