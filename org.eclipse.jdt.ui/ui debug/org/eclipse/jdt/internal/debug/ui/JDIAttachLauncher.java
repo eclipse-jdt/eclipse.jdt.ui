@@ -8,16 +8,19 @@ import org.eclipse.debug.core.*;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.ILauncherDelegate;
 import org.eclipse.debug.core.model.ISourceLocator;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdi.Bootstrap;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.launching.WorkspaceSourceLocator;
+import org.eclipse.jdt.launching.ProjectSourceLocator;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -63,6 +66,9 @@ public class JDIAttachLauncher implements ILauncherDelegate {
 		if (res != null) {
 			element= res.getProject();
 		}
+		if (!(element instanceof IProject)) {
+			return false;
+		}
 
 		if (connector != null) {
 			Map map= connector.defaultArguments();
@@ -79,7 +85,8 @@ public class JDIAttachLauncher implements ILauncherDelegate {
 				vmLabel.append(fPort);
 				vmLabel.append(']');
 				IDebugTarget target= JDIDebugModel.newDebugTarget(vm, vmLabel.toString(), null, fAllowTerminate, true);
-				ISourceLocator sl= new WorkspaceSourceLocator(ResourcesPlugin.getWorkspace());
+				IJavaProject javaProject= JavaCore.create((IProject)element);
+				ISourceLocator sl= new ProjectSourceLocator(javaProject);
 				ILaunch launch= new Launch(launcher, ILaunchManager.DEBUG_MODE, element, sl, null, target);
 				DebugPlugin.getDefault().getLaunchManager().registerLaunch(launch);
 				return true;
