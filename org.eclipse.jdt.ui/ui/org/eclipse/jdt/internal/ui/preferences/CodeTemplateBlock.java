@@ -7,6 +7,8 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -64,11 +66,7 @@ public class CodeTemplateBlock {
 		public void customButtonPressed(TreeListDialogField field, int index) {
 			doButtonPressed(index, field.getSelectedElements());
 		}
-		
-		private boolean canEdit(List selected) {
-			return selected.size() == 1 && (selected.get(0) instanceof Template);
-		}
-		
+			
 		public void selectionChanged(TreeListDialogField field) {
 			List selected= field.getSelectedElements();
 			field.enableButton(IDX_EDIT, canEdit(selected));
@@ -218,6 +216,7 @@ public class CodeTemplateBlock {
 		fCodeTemplateTree.setLabelText(PreferencesMessages.getString("CodeTemplateBlock.templates.label")); //$NON-NLS-1$
 
 		fCodeTemplateTree.enableButton(IDX_EXPORT, false);
+		fCodeTemplateTree.enableButton(IDX_EDIT, false);
 		
 		fCodeTemplateTree.addElement(COMMENT_NODE);
 		fCodeTemplateTree.addElement(CODE_NODE);
@@ -225,6 +224,7 @@ public class CodeTemplateBlock {
 		fCreateJavaDocComments= new SelectionButtonDialogField(SWT.CHECK);
 		fCreateJavaDocComments.setLabelText(PreferencesMessages.getString("CodeTemplateBlock.createcomment.label")); //$NON-NLS-1$
 		
+		fCodeTemplateTree.selectFirstElement();	
 	}
 	
 	protected Control createContents(Composite parent) {
@@ -274,6 +274,11 @@ public class CodeTemplateBlock {
 		viewer.setEditable(false);
 		viewer.setDocument(document);
 		viewer.getTextWidget().setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		viewer.getTextWidget().addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				doKeyInSourcePressed();
+			}
+		});
 	
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
@@ -299,6 +304,9 @@ public class CodeTemplateBlock {
 		return (Template[]) res.toArray(new Template[res.size()]);
 	}
 	
+	protected static boolean canEdit(List selected) {
+		return selected.size() == 1 && (selected.get(0) instanceof Template);
+	}	
 	
 	protected void updateSourceViewerInput(List selection) {
 		if (fPatternViewer == null || fPatternViewer.getTextWidget().isDisposed()) {
@@ -311,6 +319,14 @@ public class CodeTemplateBlock {
 			fPatternViewer.getDocument().set(""); //$NON-NLS-1$
 		}		
 	}
+	
+	protected void doKeyInSourcePressed() {
+		List selected= fCodeTemplateTree.getSelectedElements();
+		if (canEdit(selected)) {
+			doButtonPressed(IDX_EDIT, selected);
+		}
+	}
+	
 	
 	protected void doButtonPressed(int buttonIndex, List selected) {
 		if (buttonIndex == IDX_EDIT) {
