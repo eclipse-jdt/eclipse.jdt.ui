@@ -103,7 +103,7 @@ public class MethodChecks {
 				ITypeHierarchy superTypes= classes[i].newSupertypeHierarchy(new SubProgressMonitor(subPm, 1));
 				IType[] superinterfaces= superTypes.getAllSuperInterfaces(classes[i]);
 				for (int j= 0; j < superinterfaces.length; j++) {
-					IMethod found= Checks.findMethod(method, superinterfaces[j]);
+					IMethod found= Checks.findSimilarMethod(method, superinterfaces[j]);
 					if (found != null && !found.equals(method))
 						return found;
 				}

@@ -384,9 +384,9 @@ public class Checks {
 	}
 	
 	/**
-	 * Finds a method in a type
-	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * Finds a method in a type.
+	 * Searches for a method with the same name and the same parameter count.
+	 * Parameter types are <b>not</b> compared.
 	 * @return The first found method or null, if nothing found
 	 */
 	public static IMethod findMethod(IMethod method, IType type) throws JavaModelException {
@@ -394,9 +394,9 @@ public class Checks {
 	}
 
 	/**
-	 * Finds a method in an array of methods
-	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * Finds a method in an array of methods.
+	 * Searches for a method with the same name and the same parameter count.
+	 * Parameter types are <b>not</b> compared.
 	 * @return The first found method or null, if nothing found
 	 */
 	public static IMethod findMethod(IMethod method, IMethod[] methods) throws JavaModelException {
@@ -417,10 +417,22 @@ public class Checks {
 		return null;
 	}
 
+	/**
+	 * Finds a method in a type.
+	 * This searches for a method with the same name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * @return The first found method or null, if nothing found
+	 */
 	public static IMethod findSimilarMethod(IMethod method, IType type) throws JavaModelException {
 		return findSimilarMethod(method, type.getMethods());
 	}
 
+	/**
+	 * Finds a method in an array of methods.
+	 * This searches for a method with the same name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * @return The first found method or null, if nothing found
+	 */
 	public static IMethod findSimilarMethod(IMethod method, IMethod[] methods) throws JavaModelException {
 		boolean isConstructor= method.isConstructor();
 		for (int i= 0; i < methods.length; i++) {
