@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Reconciling Pipes</title></head><body>
+<h1 align="center">Reconciling Pipes</h1>
+This document is a collection of findings while developing the JSP Editor example.<br>
+
+
+
+<ul>
+  <li>JSR-045 specifies a line-oriented mapping between several input files
+(translated-source) and one output file (translated-source or
+final-source). The output file can either be the final-source or
+multiple output files (translated-source)  can serve as input for a
+next mapping (e.g. MyCustomFormat -&gt; JSP -&gt; Java). Each step
+(language-translator) produces a SMAP file (.smap). The mapping cannot be used to exactly map positions inside a line.</li>
+  <li>The compiler aborts compilation if it hits some severe errors.
+Because a JSP line sequence is not necessarily the same as in the
+intermediate Java file it might happen that the compiler stops very
+early on an error that corresponds to a JSP line which is at the very
+end of the file.<br>
+</li>
+
+  <li>An annotation position reported on the Java file can correspond to<br>
+  </li>
+  <ul>
+    <li>an annotation in the JSP file with adapted offset and length</li>
+    <li>several annotation in the JSP file either distributed in the same Java partition or over several partitions</li>
+    <li>no annotation at all, e.g. if the error is caused by the translator or by a wrong Java build path</li>
+  </ul>
+  <li>A JSP file can <span style="font-style: italic;">include</span> other JSP files. If an SMAP based approach is used and one of the included
+JSP files is opened in the editor then we need to find the correct SMAP file.</li>
+  <li>For
+most of the tags in the JSP file it is not possible to
+provide a generic parsing and mapping. This has to be defined for each
+tag. The generated Java code and the mapping are tightly coupled and
+should be kept in a single class that we call tag handler. A tag handler might handle more than one tag. </li>
+  <li>Special tags are needed to handle non-tagged sections like HTML in a JSP file.<br>
+</li><li>The default implementation of the tag handler must be extensible in order to allow tag lib providers to extend the handler.</li>
+  <li>Even if we decide to use an existing translator we will have to
+provide tag handlers that can map positions in a translated line back
+to the position in the corresponding source line.</li>
+  <li>Unless we don't build a fully generic editor which can handle
+several file types (e.g. XML, Java and JSP) there's no need to have
+global tag handler factory which manages different languages.</li>
+  <li>Currently only the source line is passed to the tag handler. If JSP
+allows that tag (lib) attributes span multiple lines then we must
+change the interface and pass sourceLineStart and sourceLineEnd.<br>
+  </li>
+
+</ul>
+<br>
+
+
+<br>
+Last edited: 14.07.2003, Daniel Megert<br>
+</body></html>
