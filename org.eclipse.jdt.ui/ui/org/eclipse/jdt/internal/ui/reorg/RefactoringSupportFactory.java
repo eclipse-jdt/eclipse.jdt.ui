@@ -4,9 +4,10 @@
  */
 package org.eclipse.jdt.internal.ui.reorg;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.cus.RenameCompilationUnitRefactoring;import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageRefactoring;import org.eclipse.jdt.internal.core.refactoring.packages.RenameProjectRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.packages.RenameSourceFolderRefactoring;
+import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.cus.RenameCompilationUnitRefactoring;import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageRefactoring;import org.eclipse.jdt.internal.core.refactoring.projects.RenameProjectRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.packageroots.RenameSourceFolderRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
+
 
 public class RefactoringSupportFactory {
 
