@@ -1425,10 +1425,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					position= position - buffer.length() + offset - 1;
 					character= document.getChar(position);
 
-					if (!Character.isUpperCase(character)) {
-						setCaretPosition(position + 1);
-						return;
-					}
+					while (position >= 0 && Character.isUpperCase(character))
+						character= document.getChar(--position);
+
+					setCaretPosition(position + 1);
+					return;
 				}
 			} catch (BadLocationException exception) {
 				// Use default behavior
