@@ -106,10 +106,12 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 					// will show up in hierarchy order 
 					for (int i= allSupertypes.length - 1; i >= 0; i--) {
 						addAll(allSupertypes[i].getMethods(), res);
+						addAll(allSupertypes[i].getInitializers(), res);
 						addAll(allSupertypes[i].getFields(), res);
 					}
 				}
 				addAll(type.getMethods(), res);
+				addAll(type.getInitializers(), res);
 				addAll(type.getFields(), res);				
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e.getStatus());

@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -124,13 +125,19 @@ public class JavaModelUtility {
 		} else {
 			IType declaringType= findTypeInCompilationUnit(cu, getTypeQualifiedName(member.getDeclaringType()));
 			if (declaringType != null) {
-				IMember result;
-				if (member.getElementType() == IJavaElement.FIELD) {
+				IMember result= null;
+				switch (member.getElementType()) {
+				case IJavaElement.FIELD:
 					result= declaringType.getField(member.getElementName());
-				} else {
+					break;
+				case IJavaElement.METHOD:
 					result= StubUtility.findMethod((IMethod)member, declaringType);
+					break;
+				case IJavaElement.INITIALIZER:
+					result= declaringType.getInitializer(0);
+					break;					
 				}
-				if (result.exists()) {
+				if (result != null && result.exists()) {
 					return result;
 				}
 			}
@@ -326,25 +333,29 @@ public class JavaModelUtility {
 	}
 	
 	/**
-	 * Returns true if the element is on the build path
+	 * Returns true if the element is on the build path of the given project
+	 */	
+	public static boolean isOnBuildPath(IJavaElement element, IJavaProject jproject) throws JavaModelException {
+		IPath rootPath;
+		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
+			rootPath= ((IJavaProject)element).getProject().getFullPath();
+		} else {
+			IPackageFragmentRoot root= getPackageFragmentRoot(element);
+			if (root == null) {
+				return false;
+			}
+			rootPath= root.getPath();
+		}
+		return jproject.findPackageFragmentRoot(rootPath) != null;
+	}
+	
+	/**
+	 * Returns true if the element is on the build path of its project
+	 * Not correct in general.
 	 */	
 	public static boolean isOnBuildPath(IJavaElement element) throws JavaModelException {
-		IJavaProject jproject= element.getJavaProject();
-		if (jproject != null) {			
-			IPath rootPath;
-			if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
-				rootPath= jproject.getProject().getFullPath();
-			} else {
-				IPackageFragmentRoot root= getPackageFragmentRoot(element);
-				if (root == null) {
-					return false;
-				}
-				rootPath= root.getPath();
-			}
-			return jproject.findPackageFragmentRoot(rootPath) != null;
-		}
-		return false;
-	}	
+		return isOnBuildPath(element, element.getJavaProject());
+	}
 	
 	/**
 	 * Returns the package fragment root of <code>IJavaElement</code>. If the given

@@ -190,7 +190,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 						status.setWarning(NewWizardMessages.getString("ContainerPage.warning.NotAJavaProject")); //$NON-NLS-1$
 					}
 					try {
-						if (!JavaModelUtility.isOnBuildPath(fCurrRoot)) {
+						if (!JavaModelUtility.isOnBuildPath(fCurrRoot, jproject)) {
 							status.setWarning(NewWizardMessages.getFormattedString("ContainerPage.warning.NotOnClassPath", str)); //$NON-NLS-1$
 						}		
 					} catch (JavaModelException e) {
