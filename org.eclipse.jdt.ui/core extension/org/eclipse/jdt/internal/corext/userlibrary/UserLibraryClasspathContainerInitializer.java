@@ -29,14 +29,12 @@ public class UserLibraryClasspathContainerInitializer extends ClasspathContainer
 	public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
 		if (isUserLibraryContainer(containerPath)) {
 			String userLibName= containerPath.segment(1);
-			
-			UserLibraryClasspathContainer container= null;
-			
+						
 			UserLibrary entries= UserLibraryManager.getUserLibrary(userLibName);
 			if (entries != null) {
-				container= new UserLibraryClasspathContainer(userLibName);
+				UserLibraryClasspathContainer container= new UserLibraryClasspathContainer(userLibName);
+				JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { project }, 	new IClasspathContainer[] { container }, null);
 			}
-			JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { project }, 	new IClasspathContainer[] { container }, null);
 		}
 	}
 	
