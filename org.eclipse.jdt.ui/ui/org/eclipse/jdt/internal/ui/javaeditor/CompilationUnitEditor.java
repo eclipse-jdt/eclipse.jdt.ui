@@ -801,6 +801,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return -1;
 
 				int newLine= fLine + newElementLine - fElementLine;
+				if (newLine < 0 || newLine >= document.getNumberOfLines())
+					return -1;
 				int maxColumn= document.getLineLength(newLine);
 				String lineDelimiter= document.getLineDelimiter(newLine);
 				if (lineDelimiter != null)
