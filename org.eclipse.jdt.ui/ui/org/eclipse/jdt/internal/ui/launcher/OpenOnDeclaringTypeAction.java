@@ -6,7 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import org.eclipse.debug.core.model.IDebugElement;
+import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.model.IDebugElement;
 
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
 
@@ -16,7 +16,7 @@ import org.eclipse.jdt.debug.core.IJavaStackFrame;
  */
 public class OpenOnDeclaringTypeAction extends StackFrameAction {
 	
-	protected String getTypeNameToOpen(IDebugElement frame) {
+	protected String getTypeNameToOpen(IDebugElement frame) throws DebugException {
 		return ((IJavaStackFrame)frame).getDeclaringTypeName();
 	}
 }

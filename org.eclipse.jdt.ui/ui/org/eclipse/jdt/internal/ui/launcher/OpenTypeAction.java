@@ -23,7 +23,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.WorkbenchException;
 
-import org.eclipse.debug.core.model.IDebugElement;
+import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.model.IDebugElement;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -53,10 +53,13 @@ public abstract class OpenTypeAction implements IViewActionDelegate {
 	public void run(IAction action) {
 		Iterator enum= getStructuredSelection().iterator();
 		//selectionChanged has already checked for correct selection
-
-		while (enum.hasNext()) {
-			Object element= enum.next();
-			doAction(element);
+		try {
+			while (enum.hasNext()) {
+				Object element= enum.next();
+				doAction(element);
+			}
+		} catch(DebugException e) {
+			JavaPlugin.log(e.getStatus());
 		}
 	}
 	
@@ -77,10 +80,10 @@ public abstract class OpenTypeAction implements IViewActionDelegate {
 	}
 	
 	protected abstract IDebugElement getDebugElement(IAdaptable element);
-	protected abstract String getTypeNameToOpen(IDebugElement element);
+	protected abstract String getTypeNameToOpen(IDebugElement element) throws DebugException;
 	public abstract boolean isEnabledFor(Object element);
 	
-	protected void doAction(Object e) {
+	protected void doAction(Object e) throws DebugException {
 		IAdaptable element= (IAdaptable) e;
 		IDebugElement dbgElement= getDebugElement(element);
 		if (dbgElement != null) {

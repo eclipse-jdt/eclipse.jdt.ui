@@ -13,9 +13,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.debug.core.model.IValue;
+import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.model.IValue;
 
-import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
+import org.eclipse.jdt.debug.core.IJavaEvaluationResult;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Displays the result of an evaluation in the java editor
@@ -42,8 +42,13 @@ public class DisplayAction extends EvaluateAction {
 		String resultString = null;
 		if (value == null)
 			resultString= "(No explicit return value)";
-		else
-			resultString= " (" + value.getReferenceTypeName() + ") " + value.getValueString();
+		else {
+			try {
+				resultString= " (" + value.getReferenceTypeName() + ") " + value.getValueString();
+			} catch(DebugException e) {
+				ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), "Error", "");
+			}
+		}
 		int start= fSelection.getOffset();
 		int end= start + fSelection.getLength();
 		IDocument document= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());

@@ -113,9 +113,9 @@ public class JDIAttachLauncher implements ILauncherDelegate {
 	protected void setHost(String host) {
 		fHost= host;
 	}
-
+	
 	protected void setAllowTerminate(boolean allow) {
-		fAllowTerminate= allow;
+		fAllowTerminate = allow;
 	}
 
 	protected void errorDialog(String prefix, int code, Throwable exception) {

@@ -70,7 +70,7 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		getPreferenceValues();
-
+		
 		// create a 2 column layout for the other controls
 		Composite pageGroup= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -185,13 +185,13 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	protected void createTerminateGroup(Composite parent) {
 		// add empty label
 		Label l= new Label(parent, SWT.NONE);
-
+		
 		// add terminate check box
 		fAllowTerminateButton= new Button(parent, SWT.CHECK);
 		fAllowTerminateButton.setText(DebugUIUtils.getResourceString(ALLOW_TERMINATE));
 		fAllowTerminateButton.setSelection(fAllowTerminate);
 	}
-
+	
 	/**
 	 * @see Listener
 	 */
@@ -247,5 +247,5 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	protected boolean getAllowTerminate() {
 		return fAllowTerminateButton.getSelection();
 	}
-
+	
 }

@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.debug.ui;
  */
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.internal.debug.core.DebugJavaUtils;
 
 /**
@@ -15,7 +16,7 @@ import org.eclipse.jdt.internal.debug.core.DebugJavaUtils;
 
 public class ExceptionUncaughtToggleAction extends ExceptionAction {
 
-	public void doAction(IMarker exception) {
+	public void doAction(IMarker exception) throws CoreException {
 		DebugJavaUtils.setUncaught(exception, !DebugJavaUtils.isUncaught(exception));
 	}
 

@@ -348,16 +348,16 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	
 	public void displayResult(IJavaValue result) {
 		String resultString= null;
-		if (result.getSignature() == null)
-			resultString= "(No explicit return value)";
-		else {
-			try {
+		try {
+			if (result.getSignature() == null) 
+				resultString= "(No explicit return value)";
+			else 
 				resultString= " ("+result.getReferenceTypeName()+") "+result.evaluateToString();
-			} catch(DebugException e) {
-				ErrorDialog.openError(getShell(), "Problems evaluating toString of expression", null, e.getStatus());
-			}
+		} catch(DebugException e) {
+			ErrorDialog.openError(getShell(), "Problems evaluating toString of expression", null, e.getStatus());
+		}
 			
-		} try {
+		try {
 			getSourceViewer().getDocument().replace(fSnippetEnd, 0, resultString);
 		} catch (BadLocationException e) {
 		}
@@ -458,18 +458,23 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 	
 	protected IJavaThread getThread() {
-		if (fThread == null) {
-			IDebugElement[] threads = fVM.getChildren();
-			for (int i = 0; i < threads.length; i++) {
-				IJavaThread thread = (IJavaThread)threads[i];
-				if (thread.isSuspended() && thread.getChildren().length == 1) {
-					IJavaStackFrame frame = (IJavaStackFrame)thread.getTopStackFrame();
-					if (frame.getMethodName().equals("main")) {
-						fThread = thread;
-						break;
+		try {
+			if (fThread == null) {
+				IDebugElement[] threads = fVM.getChildren();
+				for (int i = 0; i < threads.length; i++) {
+					IJavaThread thread = (IJavaThread)threads[i];
+					if (thread.isSuspended() && thread.getChildren().length == 1) {
+						IJavaStackFrame frame = (IJavaStackFrame)thread.getTopStackFrame();
+						if (frame.getMethodName().equals("main")) {
+							fThread = thread;
+							break;
+						}
 					}
 				}
 			}
+		} catch(DebugException e) {
+			JavaPlugin.log(e.getStatus());
+			return null;
 		}
 		return fThread;
 	}

@@ -22,7 +22,7 @@
   <import plugin="org.eclipse.search"/>
   <import plugin="org.eclipse.debug.core"/>
   <import plugin="org.eclipse.debug.ui"/> 
-  <import plugin="org.eclipse.jdt.debug.core"/>
+  <import plugin="org.eclipse.jdt.debug"/>
   <import plugin="org.eclipse.jdt.launching"/>
   <import plugin="org.eclipse.compare"/>
 </requires>
@@ -595,7 +595,7 @@
 	
 	<objectContribution
 		id="org.eclipse.jdt.ui.OpenOnVariableActions"
-		objectClass="org.eclipse.jdt.debug.core.IJavaVariable">
+		objectClass="org.eclipse.jdt.debug.IJavaVariable">
 		<action
 			id="org.eclipse.jdt.ui.actions.OpenOnVariableType"
 			label="Open Declared Type"
@@ -616,7 +616,7 @@
 		</action>
 	</objectContribution>
 	<viewerContribution
-		id="org.eclipse.jdt.debug.core.BreakpointHitCountActions"
+		id="org.eclipse.jdt.debug.BreakpointHitCountActions"
 		targetID="org.eclipse.debug.ui.BreakpointView">
 		<action
 			id="org.eclipse.jdt.ui.actions.BreakpointHitCount"
@@ -628,7 +628,7 @@
 		</action>
 	</viewerContribution>	
 	<viewerContribution
-		id="org.eclipse.jdt.debug.core.ExceptionCaughtToggleActions"
+		id="org.eclipse.jdt.debug.ExceptionCaughtToggleActions"
 		targetID="org.eclipse.debug.ui.BreakpointView">
 		<action
 			id="org.eclipse.jdt.ui.actions.CaughtToggle"
@@ -641,7 +641,7 @@
 		</action>
 	</viewerContribution>
 	<viewerContribution
-		id="org.eclipse.jdt.debug.core.ExceptionUncaughtToggleActions"
+		id="org.eclipse.jdt.debug.ExceptionUncaughtToggleActions"
 		targetID="org.eclipse.debug.ui.BreakpointView">
 		<action
 			id="org.eclipse.jdt.ui.actions.UncaughtToggle"
@@ -654,7 +654,7 @@
 		</action>
 	</viewerContribution>
 	<viewerContribution
-		id="org.eclipse.jdt.debug.core.DropToFrameActions"
+		id="org.eclipse.jdt.debug.DropToFrameActions"
 		targetID="org.eclipse.debug.ui.DebugView">
 		<action
 			id="org.eclipse.jdt.ui.actions.DropToFrame"
@@ -672,7 +672,7 @@
 <extension point = "org.eclipse.debug.ui.debugModelPresentations"> 
          <debugModelPresentation
              class = "org.eclipse.jdt.internal.debug.ui.JDIModelPresentation"
-             id = "org.eclipse.jdt.debug.core">
+             id = "org.eclipse.jdt.debug">
           </debugModelPresentation> 
 </extension>
 
@@ -707,7 +707,7 @@
 </extension> 
 
 <extension id="snippetSupportLineBreakpoint" point="org.eclipse.core.resources.markers">
-	<super type="org.eclipse.jdt.debug.core.javaLineBreakpoint"/>
+	<super type="org.eclipse.jdt.debug.javaLineBreakpoint"/>
 	<persistent value="false"/>
 </extension>	
 

@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.debug.ui;
  */
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.jdt.debug.core.IJavaVariable;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -39,7 +40,11 @@ public class ShowStaticFieldsAction extends ToggleFilterAction {
 						//never filter out the root
 						return true;
 					}
-					return !var.isStatic();
+					try {
+						return !var.isStatic();
+					} catch (DebugException e) {
+						return true;
+					}
 				}
 			}
 			return true;

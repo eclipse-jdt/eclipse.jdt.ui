@@ -6,15 +6,16 @@ package org.eclipse.jdt.internal.debug.ui;
  * (c) Copyright IBM Corp 2001
  */
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IBreakpointManager;
-import org.eclipse.debug.core.model.*;
+import org.eclipse.debug.core.model.IStackFrame;
+import org.eclipse.debug.core.model.ITerminate;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -26,6 +27,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.OverlayIconManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.IEditorInput;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,6 +63,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 
 	private static final String PREFIX= "jdi_label_provider.";
 	private static final String TERMINATED= "terminated";
+	private static final String NOT_RESPSPONDING= PREFIX + "not_responding";
 	private static final String LINE= "line";
 	private static final String HITCOUNT= "hitCount";
 
@@ -79,36 +82,40 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	 * Returns a label for the item
 	 */
 	public String getText(Object item) {
-		boolean showQualified= isShowQualifiedNames();
-		if (item instanceof IJavaVariable) {
-			return getVariableText((IJavaVariable) item);
-		} else if (item instanceof IStackFrame) {
-			return getStackFrameText((IStackFrame) item);
-		} else if (item instanceof IMarker) {
-			return getMarkerText((IMarker) item);
-		} else {
-			String label= null;
-			if (item instanceof IJavaThread) {
-				label= getThreadText((IJavaThread) item, showQualified);
-			} else if (item instanceof IJavaDebugTarget) {
-				label= getDebugTargetText((IJavaDebugTarget) item, showQualified);
-			} else if (item instanceof IJavaValue) {
-				label= getValueText((IJavaValue) item);
-			}
-			if (item instanceof ITerminate) {
-				if (((ITerminate) item).isTerminated()) {
-					label= DebugUIUtils.getResourceString(PREFIX + TERMINATED) + label;
-					return label;
+		try {
+			boolean showQualified= isShowQualifiedNames();
+			if (item instanceof IJavaVariable) {
+				return getVariableText((IJavaVariable) item);
+			} else if (item instanceof IStackFrame) {
+				return getStackFrameText((IStackFrame) item);
+			} else if (item instanceof IMarker) {
+				return getMarkerText((IMarker) item);
+			} else {
+				String label= null;
+				if (item instanceof IJavaThread) {
+					label= getThreadText((IJavaThread) item, showQualified);
+				} else if (item instanceof IJavaDebugTarget) {
+					label= getDebugTargetText((IJavaDebugTarget) item, showQualified);
+				} else if (item instanceof IJavaValue) {
+					label= getValueText((IJavaValue) item);
 				}
+				if (item instanceof ITerminate) {
+					if (((ITerminate) item).isTerminated()) {
+						label= DebugUIUtils.getResourceString(PREFIX + TERMINATED) + label;
+						return label;
+					}
+				}
+				return label;
 			}
-			return label;
+		} catch (DebugException e) {
+			return getResourceString(NOT_RESPSPONDING);
 		}
 	}
 
 	/**
 	 * Build the text for an IJavaThread.
 	 */
-	protected String getThreadText(IJavaThread thread, boolean qualified) {
+	protected String getThreadText(IJavaThread thread, boolean qualified) throws DebugException {
 		if (thread.isTerminated()) {
 			if (thread.isSystemThread()) {
 				return getFormattedString(TERMINATED_SYS, thread.getName());
@@ -169,7 +176,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	/**
 	 * Build the text for an IJavaThread.
 	 */
-	protected String getDebugTargetText(IJavaDebugTarget debugTarget, boolean qualified) {
+	protected String getDebugTargetText(IJavaDebugTarget debugTarget, boolean qualified) throws DebugException {
 		String labelString= debugTarget.getName();
 		if (!qualified) {
 			int index= labelString.lastIndexOf('.');
@@ -183,7 +190,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	/**
 	 * Build the text for an IJavaValue.
 	 */
-	protected String getValueText(IJavaValue value) {
+	protected String getValueText(IJavaValue value) throws DebugException {
 		String refTypeName= value.getReferenceTypeName();
 		String valueString= value.getValueString();
 		boolean isString= refTypeName.equals(fgStringName);
@@ -300,13 +307,15 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	protected Image getVariableImage(IAdaptable element) {
 		IJavaVariable javaVariable= (IJavaVariable) element.getAdapter(IJavaVariable.class);
 		if (javaVariable != null) {
-			if (javaVariable.isPublic())
-				return fIconManager.getIcon(JavaPluginImages.IMG_MISC_PUBLIC, element);
-			if (javaVariable.isProtected())
-				return fIconManager.getIcon(JavaPluginImages.IMG_MISC_PROTECTED, element);
-			if (javaVariable.isPrivate())
-				return fIconManager.getIcon(JavaPluginImages.IMG_MISC_PRIVATE, element);
-
+			try {
+				if (javaVariable.isPublic())
+					return fIconManager.getIcon(JavaPluginImages.IMG_MISC_PUBLIC, element);
+				if (javaVariable.isProtected())
+					return fIconManager.getIcon(JavaPluginImages.IMG_MISC_PROTECTED, element);
+				if (javaVariable.isPrivate())
+					return fIconManager.getIcon(JavaPluginImages.IMG_MISC_PRIVATE, element);
+			} catch (DebugException e) {
+			}
 			return fIconManager.getIcon(JavaPluginImages.IMG_MISC_DEFAULT, element);
 		}
 		return null;
@@ -362,7 +371,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		return show.booleanValue();
 	}
 
-	protected String getVariableText(IJavaVariable var) {
+	protected String getVariableText(IJavaVariable var) throws DebugException {
 		String varLabel= var.getName();
 		if (varLabel != null) {
 			boolean showTypes= isShowVariableTypeNames();
@@ -425,7 +434,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		return buffer.toString();
 	}
 
-	protected String getValueHexText(IJavaValue value) {
+	protected String getValueHexText(IJavaValue value) throws DebugException {
 		String sig= value.getSignature();
 		if (sig == null || sig.length() > 1) {
 			return null;
@@ -547,7 +556,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 
 	}
 
-	protected String getStackFrameText(IStackFrame stackFrame) {
+	protected String getStackFrameText(IStackFrame stackFrame) throws DebugException {
 		IJavaStackFrame frame= (IJavaStackFrame) stackFrame.getAdapter(IJavaStackFrame.class);
 		if (frame != null) {
 			StringBuffer label= new StringBuffer();
@@ -619,6 +628,13 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	public static String getFormattedString(String key, String[] args) {
 		String string= DebugUIUtils.getResourceString(key);
 		return MessageFormat.format(string, args);
+	}
+	
+	/**
+	 * Convenience method to get a resource string
+	 */
+	public static String getResourceString(String key) {
+		return DebugUIUtils.getResourceString(key);
 	}
 
 }

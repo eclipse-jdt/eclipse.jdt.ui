@@ -12,10 +12,10 @@ import java.util.Vector;
 /**
  * The FiltersContentProvider provides the elements for use by the list dialog
  * for selecting the patterns to apply.
- */
+ */ 
 class FiltersContentProvider implements IStructuredContentProvider {
 
-	private JavaElementPatternFilter fJavaFilter;
+	private JavaElementPatternFilter fJavaFilter; 
 	
 	/**
 	 * Create a FiltersContentProvider using the selections from the suppliec
@@ -33,7 +33,7 @@ class FiltersContentProvider implements IStructuredContentProvider {
 	/**
 	 * Returns the filters currently defined for the workbench. 
 	 */
-	public static Vector getDefinedFilters() {
+	public static Vector getDefinedFilters() { 
 		JavaPlugin plugin= JavaPlugin.getDefault();
 	
 		IExtensionPoint extension = plugin.getDescriptor().getExtensionPoint(JavaElementPatternFilter.FILTERS_TAG);

@@ -197,7 +197,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 				try {
 					fMagicBreakpoint = resource.createMarker("org.eclipse.jdt.ui.snippetSupportLineBreakpoint");
 				} catch (CoreException e) {
-					fDebugException = new DebugException(e);
+					fDebugException = new DebugException(e.getStatus());
 					return;
 				}
 
@@ -205,7 +205,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 				try {
 					DebugPlugin.getDefault().getBreakpointManager().configureLineBreakpoint(fMagicBreakpoint, JDIDebugModel.getPluginIdentifier(), true, lineNumber, charStart, charEnd);
 				} catch (CoreException e) {
-					fDebugException= new DebugException(e);
+					fDebugException= new DebugException(e.getStatus());
 					return;
 				}
 
@@ -229,7 +229,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 			ResourcesPlugin.getWorkspace().run(wr, null);
 		} catch (CoreException e) {
 			if (fDebugException == null) {
-				fDebugException = new DebugException(e);
+				fDebugException = new DebugException(e.getStatus());
 			}
 		}
 

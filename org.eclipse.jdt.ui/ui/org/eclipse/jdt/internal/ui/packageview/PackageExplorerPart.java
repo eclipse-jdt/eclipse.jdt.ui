@@ -743,7 +743,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * to be the editor's input, if linking is enabled.
 	 */
 	void editorActivated(IEditorPart editor) {
-		if (!isLinkingEnabled())
+		if (!isLinkingEnabled())  
 			return;
 		Object input= getElementOfInput(editor.getEditorInput());
 		// we only activate IFiles, revealing class files is 

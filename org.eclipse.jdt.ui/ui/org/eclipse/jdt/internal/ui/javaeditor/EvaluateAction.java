@@ -29,7 +29,7 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.debug.core.IJavaEvaluationListener;
-import org.eclipse.jdt.debug.core.IJavaStackFrame;
+import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -61,12 +61,16 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 	 */
 	protected IStackFrame getContextFromDebugTarget(IDebugTarget dt) {
 		if (!dt.isTerminated()) {
-			IDebugElement[] threads= dt.getChildren();
-			for (int i= 0; i < threads.length; i++) {
-				IThread thread= (IThread)threads[i];
-				if (thread.isSuspended()) {
-					return thread.getTopStackFrame();
+			try {
+				IDebugElement[] threads= dt.getChildren();
+				for (int i= 0; i < threads.length; i++) {
+					IThread thread= (IThread)threads[i];
+					if (thread.isSuspended()) {
+						return thread.getTopStackFrame();
+					}
 				}
+			} catch(DebugException e) {
+				JavaPlugin.log(e.getStatus());
 			}
 		}
 		return null;
@@ -89,8 +93,12 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 	 * Resolves a stack frame context from the model
 	 */
 	protected IStackFrame getContextFromThread(IThread thread) {
-		if (thread.isSuspended()) {
-			return thread.getTopStackFrame();
+		try {
+			if (thread.isSuspended()) {
+				return thread.getTopStackFrame();
+			}
+		} catch(DebugException e) {
+			JavaPlugin.log(e.getStatus());
 		}
 		return null;
 	}

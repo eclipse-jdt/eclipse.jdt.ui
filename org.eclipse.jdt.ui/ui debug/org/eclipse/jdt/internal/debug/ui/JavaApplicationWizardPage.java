@@ -73,13 +73,6 @@ public class JavaApplicationWizardPage extends WizardPage {
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
-		public Object getElementAt(Object row, int column) {
-			if (column == 0) {
-				return row;
-			}
-			return null;
-		}
-
 		public void dispose() {
 		}
 
@@ -120,7 +113,7 @@ public class JavaApplicationWizardPage extends WizardPage {
 
 	class SimpleSorter extends ViewerSorter {
 		/**
-		 * @seeViewerSorter#isSorterProperty(Object, Object)
+		 * @see ViewerSorter#isSorterProperty(Object, Object)
 		 */
 		public boolean isSorterProperty(Object element, Object property) {
 			return true;
@@ -204,17 +197,13 @@ public class JavaApplicationWizardPage extends WizardPage {
 				fElementsList.refresh();
 				if (fFilteredElements.length == 1) {
 					fElementsList.setSelection(new StructuredSelection(fFilteredElements[0]), true);
-					setMessage(null);
 					setPageComplete(true);
 				} else {
 					fElementsList.setSelection(null);
 					// this should get done in the selection changed callback -  but it does not work
 					if (fFilteredElements.length == 0) {
 						setErrorMessage(DebugUIUtils.getResourceString(SELECT_ERROR_ELEMENTS));
-					} else {
-						setMessage(DebugUIUtils.getResourceString(SELECT_ELEMENTS));
-					}
-
+					} 
 					setPageComplete(false);
 				}
 			}
@@ -223,12 +212,10 @@ public class JavaApplicationWizardPage extends WizardPage {
 		fElementsList.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent e) {
 				if (e.getSelection().isEmpty()) {
-					setMessage(DebugUIUtils.getResourceString(SELECT_ELEMENTS));
 					setPageComplete(false);
 				} else if (e.getSelection() instanceof IStructuredSelection) {
 					IStructuredSelection ss= (IStructuredSelection) e.getSelection();
 					if (!ss.isEmpty()) {
-						setMessage(null);
 						setPageComplete(true);
 					}
 				}
@@ -283,7 +270,7 @@ public class JavaApplicationWizardPage extends WizardPage {
 			public void run() {
 				if (fElements.length == 1) {
 					fElementsList.setSelection(new StructuredSelection(fElements[0]), true);
-					setMessage(null);
+					setMessage(DebugUIUtils.getResourceString(SELECT_ELEMENTS));
 					setPageComplete(true);
 				} else if (fElements.length > 0) {
 					setMessage(DebugUIUtils.getResourceString(SELECT_ELEMENTS));
@@ -299,5 +286,4 @@ public class JavaApplicationWizardPage extends WizardPage {
 
 		Display.getCurrent().asyncExec(runnable);
 	}
-
 }

@@ -9,13 +9,13 @@
     <classpathentry kind="lib" path="\org.apache.xerces\xerces.jar"/>
     <classpathentry kind="lib" path="\org.eclipse.core.runtime\runtime.jar"/>
     <classpathentry kind="lib" path="\org.eclipse.help\help.jar"/>
-    <classpathentry kind="src" path="\org.eclipse.jdt.core"/>
     <classpathentry kind="src" path="\org.eclipse.search"/>
     <classpathentry kind="src" path="\org.eclipse.debug.core"/>
     <classpathentry kind="src" path="\org.eclipse.debug.ui"/>
     <classpathentry kind="src" path="\org.eclipse.jdt.launching"/>
     <classpathentry kind="src" path="\org.eclipse.compare"/>
-    <classpathentry kind="lib" path="C:\Java\jdk1.2.2\jre\lib\rt.jar"/>
+    <classpathentry kind="lib" path="c:\Java\jdk1.2.2\jre\lib\rt.jar"/>
     <classpathentry kind="src" path="\org.eclipse.jdt.debug"/>
+    <classpathentry kind="src" path="\org.eclipse.jdt.core"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>

@@ -8,7 +8,7 @@ package org.eclipse.jdt.internal.ui.launcher;
 
 import org.eclipse.core.runtime.IAdaptable;
 
-import org.eclipse.jdt.debug.core.IJavaModifiers;
+import org.eclipse.debug.core.DebugException;import org.eclipse.jdt.debug.core.IJavaModifiers;
 
 import org.eclipse.jdt.internal.ui.viewsupport.IOverlayDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.IOverlayDescriptorFactory;
@@ -24,18 +24,21 @@ public class DebugOverlayDescriptorFactory implements IOverlayDescriptorFactory 
 			int flags= 0;
 			IAdaptable element= (IAdaptable)item;
 			IJavaModifiers javaProperties= (IJavaModifiers)element.getAdapter(IJavaModifiers.class);
-			if (javaProperties != null) {
-				if (javaProperties.isFinal()) {
-					flags |= JavaOverlayDescriptor.FINAL;
+			try {
+				if (javaProperties != null) {
+					if (javaProperties.isFinal()) {
+						flags |= JavaOverlayDescriptor.FINAL;
+					}
+					if (javaProperties.isStatic()) {
+						flags |= JavaOverlayDescriptor.STATIC;
+					}
+					return new JavaOverlayDescriptor(base, flags);
 				}
-				if (javaProperties.isStatic()) {
-					flags |= JavaOverlayDescriptor.STATIC;
-				}
-				return new JavaOverlayDescriptor(base, flags);
+			} catch(DebugException e) {
+				// fall through
 			}
 		}
 		return new JavaOverlayDescriptor(base, 0);
-
 	}
 
 }

@@ -66,9 +66,9 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 		while (enum.hasNext()) {
 			IMarker breakpoint= (IMarker) enum.next();
 			int newHitCount= hitCountDialog(breakpoint);
-			if (newHitCount != -1) {
-				JDIDebugModel.setHitCount(breakpoint, newHitCount);
+			if (newHitCount != -1) {				
 				try {
+					JDIDebugModel.setHitCount(breakpoint, newHitCount);
 					getBreakpointManager().setEnabled(breakpoint, true);
 				} catch (CoreException e) {
 				}

@@ -6,16 +6,17 @@ package org.eclipse.jdt.internal.debug.ui;
  * (c) Copyright IBM Corp 2000
  */
 
+import java.util.Iterator;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.ui.IViewActionDelegate;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import java.util.Iterator;
+import org.eclipse.ui.IViewActionDelegate;
+import org.eclipse.ui.IViewPart;
 /**
  * Toggles the caught/uncaught state of an exception breakpoint 
  */
@@ -37,7 +38,11 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 		//Get the selected marker
 		Iterator enum= selection.iterator();
 		while (enum.hasNext()) {
-			doAction((IMarker) enum.next());
+			try {
+				doAction((IMarker) enum.next());
+			} catch (CoreException e) {
+				DebugUIUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(),"exception_action.error.", e.getStatus());
+			}
 		}
 	}
 
@@ -48,7 +53,7 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 		run(null);
 	}
 
-	public abstract void doAction(IMarker exception);
+	public abstract void doAction(IMarker exception) throws CoreException;
 
 	/**
 	 * @see IActionDelegate

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
 
-import org.eclipse.debug.core.model.IDebugElement;
+import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.model.IDebugElement;
 
 import org.eclipse.jdt.debug.core.IJavaVariable;
 
@@ -18,7 +18,7 @@ public class OpenOnVariableAction extends OpenTypeAction {
 		return (IDebugElement)element.getAdapter(IJavaVariable.class);
 	}
 	
-	protected String getTypeNameToOpen(IDebugElement element) {
+	protected String getTypeNameToOpen(IDebugElement element) throws DebugException {
 		String refType= ((IJavaVariable)element).getReferenceTypeName();
 		refType= removeArray(refType);
 		if (fPrimitiveTypes.contains(refType))
@@ -39,9 +39,13 @@ public class OpenOnVariableAction extends OpenTypeAction {
 		if (!(o instanceof IAdaptable))
 			return false;
 		IJavaVariable element= (IJavaVariable)getDebugElement((IAdaptable)o);
-		if (element != null) {
-			return getTypeNameToOpen(element) != null;
-		}
+		try {
+			if (element != null) {
+				return getTypeNameToOpen(element) != null;
+			}
+		} catch(DebugException e) {
+			// fall through
+		}	
 		return false;
 	}
 
