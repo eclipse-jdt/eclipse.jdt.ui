@@ -52,6 +52,8 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 	public void setVisible(boolean visible) {
 		if (visible) {
 			changeToNewProject();
+		} else {
+			removeProject();
 		}
 		super.setVisible(visible);
 	}
@@ -59,15 +61,13 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 	private void changeToNewProject() {
 		IProject newProjectHandle= fMainPage.getProjectHandle();
 		IPath newProjectLocation= fMainPage.getLocationPath();
-		
-		if (newProjectHandle.equals(fCurrProject) && newProjectLocation.equals(fCurrProjectLocation)) {
-			return; // no changes
-		}		
+				
+		final boolean initialize= !(newProjectHandle.equals(fCurrProject) && newProjectLocation.equals(fCurrProjectLocation));
 		
 		IRunnableWithProgress op= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
-					updateProject(monitor);
+					updateProject(initialize, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				} 
@@ -85,38 +85,34 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		}
 	}
 	
-	protected void updateProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
-		if (monitor == null) {
+	protected void updateProject(boolean initialize, IProgressMonitor monitor) throws CoreException, InterruptedException {
+		fCurrProject= fMainPage.getProjectHandle();
+		fCurrProjectLocation= fMainPage.getLocationPath();
+		boolean noProgressMonitor= !initialize && !fCurrProjectLocation.toFile().exists();
+		
+		if (monitor == null || noProgressMonitor ) {
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.desc"), 3);				 //$NON-NLS-1$
-				
-			if (fCurrProject != null) { // remove existing project
-				fCurrProject.delete(false, false, new SubProgressMonitor(monitor, 1));
-			} else {
-				monitor.worked(1);
-			}
-			fCurrProject= fMainPage.getProjectHandle();
-			fCurrProjectLocation= fMainPage.getLocationPath();			
-				
-			createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 1));
+			monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.desc"), 2);				 //$NON-NLS-1$
 			
-			IClasspathEntry[] entries= null;
-			IPath outputLocation= null;
-
-			if (fCurrProjectLocation.toFile().exists() && !Platform.getLocation().equals(fCurrProjectLocation)) {
-				// detect classpath
-				if (!fCurrProject.getFile(".classpath").exists()) { //$NON-NLS-1$
-					// if .classpath exists noneed to look for files
-					ClassPathDetector detector= new ClassPathDetector(fCurrProject);
-					entries= detector.getClasspath();
-					outputLocation= detector.getOutputLocation();
-				}
-			}				
-			init(JavaCore.create(fCurrProject), outputLocation, entries, false);
+			createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 1));
+			if (initialize) {
+				IClasspathEntry[] entries= null;
+				IPath outputLocation= null;
+		
+				if (fCurrProjectLocation.toFile().exists() && !Platform.getLocation().equals(fCurrProjectLocation)) {
+					// detect classpath
+					if (!fCurrProject.getFile(".classpath").exists()) { //$NON-NLS-1$
+						// if .classpath exists noneed to look for files
+						ClassPathDetector detector= new ClassPathDetector(fCurrProject);
+						entries= detector.getClasspath();
+						outputLocation= detector.getOutputLocation();
+					}
+				}				
+				init(JavaCore.create(fCurrProject), outputLocation, entries, false);
+			}
 			monitor.worked(1);
-	
 		} finally {
 			monitor.done();
 		}
@@ -129,27 +125,52 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		try {
 			monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.createproject.desc"), 3);				 //$NON-NLS-1$
 			if (fCurrProject == null) {
-				updateProject(new SubProgressMonitor(monitor, 1));
+				updateProject(true, new SubProgressMonitor(monitor, 1));
 			}
 			configureJavaProject(new SubProgressMonitor(monitor, 2));
 		} finally {
 			monitor.done();
 		}
 	}
-	
+
+	private void removeProject() {
+		if (fCurrProject == null || !fCurrProject.exists()) {
+			return;
+		}
 		
+		IRunnableWithProgress op= new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				boolean noProgressMonitor= Platform.getLocation().equals(fCurrProjectLocation);
+				if (monitor == null || noProgressMonitor) {
+					monitor= new NullProgressMonitor();
+				}
+				monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.removeproject.desc"), 3);				 //$NON-NLS-1$
+
+				try {
+					fCurrProject.delete(false, false, monitor);
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				} finally {
+					monitor.done();
+				}
+			}
+		};
+	
+		try {
+			getContainer().run(false, true, op);
+		} catch (InvocationTargetException e) {
+			String title= NewWizardMessages.getString("NewProjectCreationWizardPage.op_error.title"); //$NON-NLS-1$
+			String message= NewWizardMessages.getString("NewProjectCreationWizardPage.op_error_remove.message");			 //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), title, message);		
+		} catch  (InterruptedException e) {
+			// cancel pressed
+		}
+	}		
+			
 	/**
 	 * Called from the wizard on cancel.
 	 */
 	public void performCancel() {
-		if (fCurrProject != null) {
-			try {
-				fCurrProject.delete(false, false, null);
-			} catch (CoreException e) {
-				String title= NewWizardMessages.getString("NewProjectCreationWizardPage.op_error.title"); //$NON-NLS-1$
-				String message= NewWizardMessages.getString("NewProjectCreationWizardPage.op_error_remove.message");			 //$NON-NLS-1$
-				ExceptionHandler.handle(e, getShell(), title, message);				
-			}
-		}
+		removeProject();
 	}
 }
