@@ -46,8 +46,8 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		super();
 		setPreferenceStore(JUnitUIPlugin.getDefault().getPreferenceStore());
 		fgDirectoryDialog= new DirectoryDialog(JUnitUIPlugin.getActiveShell());
-		fgDirectoryDialog.setMessage("Please select the directories where Eclipse plugins can be found. " 
-			+ "Required plugins are collect top - down.");
+		fgDirectoryDialog.setText("Please select the directories where Eclipse plugins can be found. " 
+			+ "Required plugins are collect top - down in the list.");
 	}
 	/**
 	 * @see PreferencePage#createControl(Composite)
@@ -137,7 +137,7 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		fTestPluginCheckBox.setSelection(store.getBoolean(TESTPLUGIN_FROM_WS));
 
 		Label label= new Label(checkPanel, SWT.NONE);
-		label.setText("Take the tested plugin form the current workspace");
+		label.setText("Take the tested plugin form the current workspace.");
 		gridData= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gridData);
 	}
@@ -151,7 +151,7 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		fStartupJarCheckBox.setSelection(store.getBoolean(CHECK_ALL_FOR_STARTUPJAR));
 		
 		Label label= new Label(checkPanel, SWT.NONE);
-		label.setText("Search for startup.jar relative to all directories, also if unchecked");
+		label.setText("Search for startup.jar relative to all directories, also if they are unchecked in the list.");
 		gridData= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gridData);	
 	}

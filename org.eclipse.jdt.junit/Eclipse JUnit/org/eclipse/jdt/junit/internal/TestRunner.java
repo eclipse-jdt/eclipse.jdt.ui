@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.Platform;
  */
 public class TestRunner extends org.eclipse.junit.internal.TestRunner {
 
-	public static String fgTestPluginName= null;
+	public String fTestPluginName= null;
 	public static void main(String[] args) throws InvocationTargetException{
 		TestRunner testRunServer= new TestRunner();
 		testRunServer.init(args);
@@ -22,20 +22,20 @@ public class TestRunner extends org.eclipse.junit.internal.TestRunner {
 	 * Returns the ClassLoader for loading the tests
 	 */
 	public ClassLoader getClassLoader() throws InvocationTargetException {
-		if (Platform.getPluginRegistry().getPluginDescriptor(fgTestPluginName) != null)
-			return Platform.getPluginRegistry().getPluginDescriptor(fgTestPluginName).getPluginClassLoader();	
+		if (Platform.getPluginRegistry().getPluginDescriptor(fTestPluginName) != null)
+			return Platform.getPluginRegistry().getPluginDescriptor(fTestPluginName).getPluginClassLoader();	
 		else
-			throw new InvocationTargetException(new Exception("error: no ClassLoader found for testplugin: " + fgTestPluginName));
+			throw new InvocationTargetException(new Exception("error: no ClassLoader found for testplugin: " + fTestPluginName));
 	}
 	public void init(String[] args) throws InvocationTargetException{
 		defaultInit(args);
 		setTestPluginName(args);
 	}
 
-	private void setTestPluginName(String[] args) throws InvocationTargetException{
+	protected void setTestPluginName(String[] args) throws InvocationTargetException{
 		for(int i= 0; i < args.length; i++) {
 			if(args[i].toLowerCase().equals("-testpluginname")) {
-				fgTestPluginName= args[i + 1];
+				fTestPluginName= args[i + 1];
 				return;
 			}
 		}

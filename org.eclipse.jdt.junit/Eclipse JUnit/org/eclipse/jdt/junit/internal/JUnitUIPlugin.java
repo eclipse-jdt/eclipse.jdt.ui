@@ -8,8 +8,7 @@ import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 /**
  * The plug-in runtime class for the JUnitUI plug-in.
  */
