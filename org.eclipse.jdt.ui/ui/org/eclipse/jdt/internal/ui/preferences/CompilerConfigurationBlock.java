@@ -83,6 +83,7 @@ public class CompilerConfigurationBlock {
 	private static final String PREF_PB_MAX_PER_UNIT= JavaCore.COMPILER_PB_MAX_PER_UNIT;
 	private static final String PREF_PB_UNUSED_IMPORT= JavaCore.COMPILER_PB_UNUSED_IMPORT;
 	private static final String PREF_PB_STATIC_ACCESS_RECEIVER= JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER;
+	private static final String PREF_PB_NO_EFFECT_ASSIGNMENT= JavaCore.COMPILER_PB_NO_EFFECT_ASSIGNMENT;
 
 	private static final String PREF_SOURCE_COMPATIBILITY= JavaCore.COMPILER_SOURCE;
 	private static final String PREF_COMPLIANCE= JavaCore.COMPILER_COMPLIANCE;
@@ -134,7 +135,7 @@ public class CompilerConfigurationBlock {
 			PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_UNUSED_IMPORT, PREF_PB_MAX_PER_UNIT, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, 
 			PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_INCOMPLETE_BUILDPATH,
 			PREF_PB_CIRCULAR_BUILDPATH, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE,
-			PREF_COMPILER_TASK_TAGS, PREF_COMPILER_TASK_PRIORITIES, PREF_PB_DUPLICATE_RESOURCE
+			PREF_COMPILER_TASK_TAGS, PREF_COMPILER_TASK_PRIORITIES, PREF_PB_DUPLICATE_RESOURCE, PREF_PB_NO_EFFECT_ASSIGNMENT
 		};	
 	}
 
@@ -550,6 +551,9 @@ public class CompilerConfigurationBlock {
 		
 		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_synth_access_emul.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_SYNTHETIC_ACCESS_EMULATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_no_effect_assignment.label"); //$NON-NLS-1$
+		addComboBox(warningsComposite, label, PREF_PB_NO_EFFECT_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= JavaUIMessages.getString("CompilerConfigurationBlock.pb_max_per_unit.label"); //$NON-NLS-1$
 		Text text= addTextField(warningsComposite, label, PREF_PB_MAX_PER_UNIT);
