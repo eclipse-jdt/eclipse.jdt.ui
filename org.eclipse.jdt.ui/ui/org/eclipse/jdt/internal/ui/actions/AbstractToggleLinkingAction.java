@@ -16,7 +16,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 /**
@@ -31,9 +30,9 @@ public abstract class AbstractToggleLinkingAction extends Action {
 	 * Constructs a new action.
 	 */
 	public AbstractToggleLinkingAction() {
-		super(JavaUIMessages.getString("ToggleLinkingAction.label")); //$NON-NLS-1$
-		setDescription(JavaUIMessages.getString("ToggleLinkingAction.description")); //$NON-NLS-1$
-		setToolTipText(JavaUIMessages.getString("ToggleLinkingAction.tooltip")); //$NON-NLS-1$
+		super(ActionMessages.getString("ToggleLinkingAction.label")); //$NON-NLS-1$
+		setDescription(ActionMessages.getString("ToggleLinkingAction.description")); //$NON-NLS-1$
+		setToolTipText(ActionMessages.getString("ToggleLinkingAction.tooltip")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(this, "synced.gif"); //$NON-NLS-1$		
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.LINK_EDITOR_ACTION);
 	}
