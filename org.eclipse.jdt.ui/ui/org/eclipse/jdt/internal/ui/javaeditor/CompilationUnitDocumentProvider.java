@@ -676,10 +676,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		protected static class PartiallySynchronizedDocument extends Document {
 			
 			/*
-			 * @see IDocumentExtension#startSequentialRewrite()
+			 * @see IDocumentExtension#startSequentialRewrite(boolean)
 			 */
-			synchronized public void startSequentialRewrite() {
-				super.startSequentialRewrite();
+			synchronized public void startSequentialRewrite(boolean normalized) {
+				super.startSequentialRewrite(normalized);
 		}
 		
 			/*
