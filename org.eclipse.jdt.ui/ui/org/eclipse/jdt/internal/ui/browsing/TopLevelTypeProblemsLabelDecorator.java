@@ -45,6 +45,15 @@ class TopLevelTypeProblemsLabelDecorator extends ProblemsLabelDecorator {
 		if (types.length < 1)
 			return false;
 		ISourceRange range= types[0].getSourceRange();
-		return pos < range.getOffset();
+		if (range == null)
+			return false;
+		return pos < range.getOffset() || isInside(pos, cu.getSourceRange());
+	}
+	
+	private boolean isInside(int pos, ISourceRange range) {
+		if (range == null)
+			return false;
+		int offset= range.getOffset();
+		return offset <= pos && pos < offset + range.getLength();
 	}
 }
