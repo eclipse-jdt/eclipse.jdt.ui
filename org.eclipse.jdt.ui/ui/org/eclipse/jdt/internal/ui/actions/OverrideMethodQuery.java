@@ -122,8 +122,10 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 						return 1;
 					}	
 				}
+				return 0;
+			} else {
+				return super.compare(viewer, e1, e2);
 			}
-			return 0;
 		}
 
 	}
