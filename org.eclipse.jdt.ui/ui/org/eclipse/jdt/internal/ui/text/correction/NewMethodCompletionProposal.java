@@ -60,17 +60,15 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		ASTNode newTypeDecl= null;
 		if (typeDecl != null) {
 			fIsLocalChange= true;
-			ASTCloner cloner= new ASTCloner(new AST(), astRoot);
-			CompilationUnit newRoot= (CompilationUnit) cloner.getClonedRoot();
-			rewrite= new ASTRewrite(newRoot);
-			
-			newTypeDecl= cloner.getCloned(typeDecl);
+			rewrite= new ASTRewrite(astRoot);
+			newTypeDecl= typeDecl;
 		} else {
 			fIsLocalChange= false;
 			CompilationUnit newRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
 			rewrite= new ASTRewrite(newRoot);
 			
-			newTypeDecl= ASTResolving.findTypeDeclaration(newRoot, fSenderBinding);
+			newTypeDecl= newRoot.findDeclaringNode(fSenderBinding.getKey());
+			//ASTResolving.findTypeDeclaration(newRoot, fSenderBinding.getKey());
 		}
 		if (newTypeDecl != null) {
 			List methods;
@@ -120,23 +118,23 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			params.add(param);
 		}
 		
-		if (fSenderBinding.isInterface()) {
-			decl.setBody(null);
-		} else {
-			Block body= ast.newBlock();
-			if (!isConstructor()) {
-				Type returnType= evaluateMethodType(ast);
-				if (returnType == null) {
-					decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
-				} else {
-					decl.setReturnType(returnType);
+		Block body= null;
+		if (!isConstructor()) {
+			Type returnType= evaluateMethodType(ast);
+			if (returnType == null) {
+				decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
+				body= ast.newBlock();
+			} else {
+				decl.setReturnType(returnType);
+				if (!fSenderBinding.isInterface()) {
+					body= ast.newBlock();
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(ASTResolving.getInitExpression(returnType));
 					body.statements().add(returnStatement);
 				}
 			}
-			decl.setBody(body);
 		}
+		decl.setBody(body);
 
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		if (settings.createComments && !fSenderBinding.isAnonymous()) {
