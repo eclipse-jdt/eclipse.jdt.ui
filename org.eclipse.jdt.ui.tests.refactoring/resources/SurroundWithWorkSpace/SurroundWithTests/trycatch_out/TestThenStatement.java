@@ -5,7 +5,7 @@ public class TestThenStatement {
  void foo() {
    TestThenStatement bar= null;
    if (bar != null)
-	 try {
+	try {
 		/*]*/bar.run();/*[*/
 	} catch (InterruptedException e) {
 	}

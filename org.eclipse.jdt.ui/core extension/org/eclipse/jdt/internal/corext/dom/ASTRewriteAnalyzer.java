@@ -588,14 +588,21 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			String[] strings= context.getPrefixAndSuffix(indent, fTextBuffer.getLineDelimiter(), replacingNode);
 			GroupDescription description= getDescription(node);
 			doTextRemoveAndVisit(offset, nodeLen, node);
-			doTextInsert(offset, strings[0], description);
+			
+			String prefix= strings[0];
+			doTextInsert(offset, prefix, description);
+			String lineInPrefix= getCurrentLine(prefix, prefix.length());
+			if (prefix.length() != lineInPrefix.length()) {
+				// prefix contains a new line: update the indent to the one used in the prefix
+				indent= Strings.computeIndent(lineInPrefix, CodeFormatterUtil.getTabWidth());
+			}
 			doTextInsert(offset, replacingNode, indent, true, description);
 			doTextInsert(offset, strings[1], description);
 			return endPos;
 		} else {
 			return doVisit(node);
 		}
-	}		
+	}
 
 	private int rewriteOptionalQualifier(ASTNode node, int startPos) {
 		int changeKind= getChangeKind(node);
