@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 public abstract class ConstraintVariable2 {
@@ -55,9 +56,8 @@ public abstract class ConstraintVariable2 {
 	}
 
 	public ITypeSet getTypeEstimate() {
-		if (fTypeEquivalenceSet != null)
-			return fTypeEquivalenceSet.getTypeEstimate();
-		return TypeSet.getEmptySet();
+		Assert.isNotNull(fTypeEquivalenceSet);
+		return fTypeEquivalenceSet.getTypeEstimate();
 	}
 
 	public void setData(String name, Object data) {
