@@ -87,6 +87,12 @@ public final class ASTRewrite {
 	public static final int VAR_DECLARATION_FRAGMENT= 8;
 	public static final int TYPE_DECLARATION= 9;
 	
+	/** Constant used to describe the kind of the change */
+	public static final int INSERTED= 1;
+	public static final int REMOVED= 2;
+	public static final int REPLACED= 3;
+	public static final int UNCHANGED= 4;
+	
 	private static final String COMPOUND_CHILDREN= "collapsed"; //$NON-NLS-1$
 	
 	private ASTNode fRootNode;
@@ -346,9 +352,10 @@ public final class ASTRewrite {
 	/**
 	 * Creates a target node for a source string to be inserted without being formatted. A target node can
 	 * be inserted or used to replace at the target position.
-	 * @param code String that will be inserted. The string must have no extra indent.
+	 * @param code String that will be inserted. The string must not have extra indent.
 	 * @param nodeType the type of the place holder. Valid values are <code>BODY_DECLARATION</code>,
-	 * <code>BLOCK</code>, <code>STATEMENT</code>, <code>SINGLEVAR_DECLARATION</code>,
+	 * <code>TYPE_DECLARATION</code>, <code>BLOCK</code>, <code>STATEMENT</code>,
+	 *  <code>SINGLEVAR_DECLARATION</code>,<code> VAR_DECLARATION_FRAGMENT</code>,
 	 * <code>TYPE</code>, <code>EXPRESSION</code> and <code>JAVADOC</code> .
 	 * @return the place holder node
 	 */
@@ -388,6 +395,21 @@ public final class ASTRewrite {
 			return UNKNOWN;
 		}
 	}
+	
+	public final int getChangeKind(ASTNode node) {
+		Object object= getChangeProperty(node);
+		if (object == null) {
+			return UNCHANGED;
+		}
+		if (object instanceof ASTInsert) {
+			return INSERTED;
+		} else if (object instanceof ASTReplace) {
+			return REPLACED;
+		} else if (object instanceof ASTRemove) {
+			return REMOVED;
+		}
+		return UNCHANGED;
+	}	
 			
 	public final boolean isInserted(ASTNode node) {
 		return getChangeProperty(node) instanceof ASTInsert;
@@ -464,6 +486,7 @@ public final class ASTRewrite {
 
 	private static class ASTChange {
 		String description;
+		int kind;
 	}		
 	
 	private static final class ASTInsert extends ASTChange {
