@@ -54,6 +54,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= JavaCore.COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD;
 	private static final String PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME= JavaCore.COMPILER_PB_METHOD_WITH_CONSTRUCTOR_NAME;
 	private static final String PREF_PB_DEPRECATION= JavaCore.COMPILER_PB_DEPRECATION;
+	private static final String PREF_PB_DEPRECATION_WHEN_OVERRIDING= JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD;
+	
 	private static final String PREF_PB_HIDDEN_CATCH_BLOCK= JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK;
 	private static final String PREF_PB_UNUSED_LOCAL= JavaCore.COMPILER_PB_UNUSED_LOCAL;
 	private static final String PREF_PB_UNUSED_PARAMETER= JavaCore.COMPILER_PB_UNUSED_PARAMETER;
@@ -170,7 +172,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_PB_INDIRECT_STATIC_ACCESS,
 		PREF_PB_SUPERFLUOUS_SEMICOLON, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT,
 		PREF_PB_UNNECESSARY_TYPE_CHECK, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, PREF_PB_UNQUALIFIED_FIELD_ACCESS,
-		PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, 
+		PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, PREF_PB_DEPRECATION_WHEN_OVERRIDING,
 
 		PREF_PB_INVALID_JAVADOC, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY,
 		PREF_PB_MISSING_JAVADOC_TAGS, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING,
@@ -409,6 +411,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
 		addCheckBox(composite, label, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, indent);		
 	
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_when_overriding.label"); //$NON-NLS-1$
+		addCheckBox(composite, label, PREF_PB_DEPRECATION_WHEN_OVERRIDING, enabledDisabled, indent);
+		
+		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_superfluous_semicolon.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_SUPERFLUOUS_SEMICOLON, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 	
@@ -743,6 +749,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		
 		boolean enableDeprecation= !checkValue(PREF_PB_DEPRECATION, IGNORE);
 		getCheckBox(PREF_PB_DEPRECATION_IN_DEPRECATED_CODE).setEnabled(enableDeprecation);
+		getCheckBox(PREF_PB_DEPRECATION_WHEN_OVERRIDING).setEnabled(enableDeprecation);
 		
 		boolean enableHiding= !checkValue(PREF_PB_LOCAL_VARIABLE_HIDING, IGNORE);
 		getCheckBox(PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD).setEnabled(enableHiding);
