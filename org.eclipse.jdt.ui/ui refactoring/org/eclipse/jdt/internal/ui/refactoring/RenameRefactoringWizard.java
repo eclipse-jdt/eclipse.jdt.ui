@@ -20,9 +20,9 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	protected void addUserInputPages(){
 		String initialSetting= getRenameRefactoring().getCurrentName();
 		setPageTitle(getPageTitle() + ": "+ initialSetting);
-		addPage( new TextInputWizardPage(true, initialSetting) {
-			protected RefactoringStatus validatePage() {
-				return validateNewName(getNewName());
+		addPage( new RenameInputWizardPage(true, initialSetting) {
+			protected RefactoringStatus validateTextField(String text) {
+				return validateNewName(text);
 			}	
 		});
 	}

@@ -26,8 +26,8 @@ public class MoveCompilationUnitWizard extends RefactoringWizard {
 		MoveCompilationUnitRefactoring ref= getMoveCompilationUnitRefactoring();
 		setPageTitle(getPageTitle() + ": " + ref.getCompilationUnit().getElementName());
 		addPage( new MoveCompilationUnitWizardPage(true){
-			protected RefactoringStatus validatePage() {
-				return validateUserInput(getNewName());
+			protected RefactoringStatus validateTextField(String text) {
+				return validateUserInput(text);
 			}	
 		}
 		);

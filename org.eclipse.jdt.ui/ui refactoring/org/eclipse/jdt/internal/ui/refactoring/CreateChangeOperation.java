@@ -87,10 +87,10 @@ public class CreateChangeOperation implements IRunnableWithProgress {
 		try {
 			fChange= null;
 			if (fStyle != CHECK_NONE) {
-				pm.beginTask("", 5);
+				pm.beginTask("", 21);
 				pm.subTask("");
 				CheckConditionsOperation op= new CheckConditionsOperation(fRefactoring, fStyle);
-				op.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+				op.run(new SubProgressMonitor(pm, 20, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				fStatus= op.getStatus();
 				if (fStatus != null && fStatus.getSeverity() <= fCheckPassedSeverity) {
 					fChange= fRefactoring.createChange(

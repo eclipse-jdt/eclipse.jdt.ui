@@ -47,10 +47,9 @@ public class RefactoringWizard extends Wizard {
 	 
 	/**
 	 * Hook to add user input pages to the wizard. This default implementation 
-	 * adds an <code>EditorSavingWizardPage</code> to the wizard.
+	 * adds nothing.
 	 */
 	protected void addUserInputPages(){
-		//addPage(new EditorSavingWizardPage(true));
 	}
 	
 	/**
