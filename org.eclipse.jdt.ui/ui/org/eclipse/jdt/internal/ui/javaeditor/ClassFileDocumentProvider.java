@@ -22,9 +22,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
+import org.eclipse.ui.editors.text.FileDocumentProvider;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
@@ -34,6 +35,8 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IResourceLocator;
@@ -292,6 +295,26 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document) throws CoreException {
 	}
 	
+
+	/*
+	 * @see org.eclipse.ui.texteditor.IDocumentProviderExtension3#isSynchronized(java.lang.Object)
+	 * @since 3.0
+	 */
+	public boolean isSynchronized(Object element) {
+		Object elementInfo= getElementInfo(element);
+		if (elementInfo instanceof ClassFileInfo) {
+			IClassFileEditorInput input= (IClassFileEditorInput)element;
+			IResource resource;
+			try {
+				resource= input.getClassFile().getUnderlyingResource();
+			} catch (JavaModelException e) {
+				return true;
+			}
+			return resource == null || resource.isSynchronized(IResource.DEPTH_ZERO);
+		}
+		return false;
+	}
+
 	/**
 	 * Handles the deletion of the element underlying the given class file editor input.
 	 * @param input the editor input
