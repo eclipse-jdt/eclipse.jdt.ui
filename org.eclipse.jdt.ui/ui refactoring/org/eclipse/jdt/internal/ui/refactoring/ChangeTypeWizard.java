@@ -46,8 +46,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactori
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
@@ -321,14 +319,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		 */
 		public boolean performFinish(){
 			initializeRefactoring();
-			boolean superFinish= super.performFinish();
-			if (! superFinish)
-				return false;				
-			Change c= getRefactoringWizard().getChange();
-			if (c instanceof CompositeChange && ((CompositeChange)c).getChildren().length == 0) {
-				return false;
-			}
-			return superFinish;
+			return super.performFinish();
 		}
 
 		private void initializeRefactoring() {
