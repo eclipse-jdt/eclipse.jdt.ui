@@ -96,6 +96,7 @@ public interface IJavaHelpContextIds {
 	public static final String COPY_ACTION= PREFIX + "copy_action"; //$NON-NLS-1$	
 	public static final String PASTE_ACTION= PREFIX + "paste_action"; //$NON-NLS-1$	
 	public static final String DELETE_ACTION= PREFIX + "delete_action"; //$NON-NLS-1$	
+	public static final String OPEN_TYPE_HIERARCHY_ACTION= PREFIX + "open_type_hierarchy_action"; //$NON-NLS-1$	
 		
 	// Dialogs
 	public static final String MAINTYPE_SELECTION_DIALOG= PREFIX + "maintype_selection_dialog_context"; //$NON-NLS-1$
