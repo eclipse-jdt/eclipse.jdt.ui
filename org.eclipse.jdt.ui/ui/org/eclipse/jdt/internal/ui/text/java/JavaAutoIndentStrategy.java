@@ -241,8 +241,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 			// format
 			String prefix= document.get(lineOffset, offset - lineOffset);
-			String blockIndent= getIndent(document, command);
-			String indent= blockIndent == null ? "" : blockIndent + createIndent(1); //$NON-NLS-1$ // add one indent level
+			String indent= getIndent(document, command);
 			boolean formatFirstLine= prefix.trim().length() == 0;
 			String formattedParagraph= format(strippedParagraph, indent, lineDelimiter, formatFirstLine);
 
@@ -277,25 +276,55 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return column;
 	}
 
-	private String getIndent(IDocument d, DocumentCommand c) {
-		if (c.offset < 0 || d.getLength() == 0)
-			return null;
+	private static boolean isLineEmpty(IDocument document, int line) throws BadLocationException {
+		IRegion region= document.getLineInformation(line);
+		String string= document.get(region.getOffset(), region.getLength());
+		return string.trim().length() == 0;
+	}
+
+	private String getIndent(IDocument document, DocumentCommand command) {
+
+		StringBuffer buf= new StringBuffer();
+
+		int docLength= document.getLength();
+		if (command.offset == -1 || docLength == 0)
+			return buf.toString();
 
 		try {
-			int p= (c.offset == d.getLength() ? c.offset - 1 : c.offset);
-			int line= d.getLineOfOffset(p);
+			
+			int p= (command.offset == docLength ? command.offset - 1 : command.offset);
+			int line= document.getLineOfOffset(p);
 
-			// evaluate the line with the opening bracket that matches out closing bracket
-			int indLine= findMatchingOpenBracket(d, line, c.offset, 1);
-			if (indLine != -1 && indLine != line)
-				// take the indent of the found line
-				return getIndentOfLine(d, indLine);
+			IRegion region= document.getLineInformation(line);
+			String string= document.get(region.getOffset(), command.offset - region.getOffset());
+			if (line != 0 && string.trim().length() == 0)
+				--line;
+			
+			while (line != 0 && isLineEmpty(document, line))
+				--line;
+
+			int start= document.getLineOffset(line);
+			
+			// if line is at end of a javadoc comment, take the indent from the comment's begin line
+			IDocumentPartitioner partitioner= document.getDocumentPartitioner();
+			if (partitioner != null) {
+				ITypedRegion typedRegion= partitioner.getPartition(start);
+				if (JavaPartitionScanner.JAVA_DOC.equals(typedRegion.getType()))
+					start= document.getLineInformationOfOffset(typedRegion.getOffset()).getOffset();
+			}
+			int whiteend= findEndOfWhiteSpace(document, start, command.offset);
+			buf.append(document.get(start, whiteend - start));
+			if (getBracketCount(document, start, command.offset, true) > 0) {
+				buf.append(getOneIndentLevel());
+			}
 
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
-		return null;
+		
+		return buf.toString();
 	}
+	
 
 	private static final class LineIterator implements Iterator {
 		/** The document to iterator over. */
@@ -496,4 +525,5 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	private static boolean useSpaces() {
 		return JavaCore.SPACE.equals(JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_CHAR));
 	}
+
 }
