@@ -300,9 +300,7 @@ class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListen
 	}
 	
 	private class ElementImageProvider extends JavaElementImageProvider{
-		/**
-		 * Constructor for JensStupidJavaElementImageProvider.
-		 */
+		
 		public ElementImageProvider() {
 			super();
 		}
