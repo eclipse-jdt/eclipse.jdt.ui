@@ -476,7 +476,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private KeyListener createKeyListener() {
 		return new KeyAdapter() {
-			public void keyPressed(KeyEvent event) {
+			public void keyReleased(KeyEvent event) {
 				if (event.stateMask == 0) {
 					if (event.keyCode == SWT.F4) {
 						OpenTypeHierarchyUtil.open(getSite().getSelectionProvider().getSelection(), getSite().getWorkbenchWindow());

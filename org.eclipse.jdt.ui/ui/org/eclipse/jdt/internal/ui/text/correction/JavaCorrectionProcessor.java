@@ -75,9 +75,18 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					break;
 				case IProblem.PackageIsNotExpectedPackage:
 					ReorgEvaluator.getWrongPackageDeclNameProposals(cu, problemPos, proposals);
-					break;					
+					break;
+				case IProblem.UndefinedType:
+					UnknownTypeEvaluator.getTypeProposals(cu, problemPos, proposals);
+					break;
+				case IProblem.SuperclassNotFound:
+				case IProblem.InterfaceNotFound:
+				case IProblem.FieldTypeNotFound:
+				case IProblem.ArgumentTypeNotFound:
+				case IProblem.ExceptionTypeNotFound:
+				case IProblem.ReturnTypeNotFound:		
 				default:
-					proposals.add(new NoCorrectionProposal(problemPos));
+					//proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch(CoreException e) {
 			JavaPlugin.log(e);

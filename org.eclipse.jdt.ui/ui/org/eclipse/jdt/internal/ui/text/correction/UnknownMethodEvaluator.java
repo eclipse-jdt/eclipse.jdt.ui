@@ -48,7 +48,7 @@ public class UnknownMethodEvaluator {
 	public static void getProposals(ICompilationUnit cu, ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		IProblem problem= problemPos.getProblem();
 		String[] args= problem.getArguments();
-		if (args.length < 2) {
+		if (args.length < 3) {
 			return;
 		}
 		
