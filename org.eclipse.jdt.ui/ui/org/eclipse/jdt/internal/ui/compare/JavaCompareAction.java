@@ -35,7 +35,7 @@ import org.eclipse.compare.structuremergeviewer.DiffNode;
 
 public class JavaCompareAction implements IActionDelegate {
 	
-	class TypedElement implements ITypedElement, IStreamContentAccessor {
+	class TypedElement implements ITypedElement, IStreamContentAccessorExtension2 {
 		
 		private ISourceReference fSource;
 		private String fContents;
@@ -58,8 +58,18 @@ public class JavaCompareAction implements IActionDelegate {
 		}
 		
 		public InputStream getContents() throws CoreException {
-			return new ByteArrayInputStream(fContents.getBytes());
-		}	
+			byte[] bytes;
+			try {
+				bytes= fContents.getBytes("UTF-16");
+			} catch (UnsupportedEncodingException e) {
+				bytes= fContents.getBytes();
+			}
+			return new ByteArrayInputStream(bytes);
+		}
+		
+		public String getCharset() {
+			return "UTF-16";
+		}
 	}
 	
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.CompareAction"; //$NON-NLS-1$

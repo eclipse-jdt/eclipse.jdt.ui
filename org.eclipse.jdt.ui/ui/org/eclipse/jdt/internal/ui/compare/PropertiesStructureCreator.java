@@ -112,7 +112,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		String content= null;
 		if (input instanceof IStreamContentAccessor) {
 			try {
-				content= JavaCompareUtilities.readString(((IStreamContentAccessor) input).getContents());
+				content= JavaCompareUtilities.readString(((IStreamContentAccessor) input));
 			} catch(CoreException ex) {
 				JavaPlugin.log(ex);
 			}
@@ -170,7 +170,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		if (node instanceof IStreamContentAccessor) {
 			IStreamContentAccessor sca= (IStreamContentAccessor) node;
 			try {
-				return JavaCompareUtilities.readString(sca.getContents());
+				return JavaCompareUtilities.readString(sca);
 			} catch (CoreException ex) {
 				JavaPlugin.log(ex);
 			}

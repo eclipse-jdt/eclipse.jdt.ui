@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ResourceBundle;
 
@@ -108,8 +107,8 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 						
 			if (ti instanceof IStreamContentAccessor) {
 				
-				InputStream is= ((IStreamContentAccessor)ti).getContents();
-				String newContent= trimTextBlock(is, buffer.getLineDelimiter());
+				String content= JavaCompareUtilities.readString((IStreamContentAccessor)ti);
+				String newContent= trimTextBlock(content, buffer.getLineDelimiter());
 				if (newContent == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);
 					return;

@@ -17,7 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.text.edits.MultiTextEdit;
 
 import org.eclipse.compare.HistoryItem;
-import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.IStreamContentAccessorExtension2;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.ResourceNode;
 
@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -75,7 +74,7 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 	 * Implements the IStreamContentAccessor and ITypedElement protocols
 	 * for a TextBuffer.
 	 */
-	class JavaTextBufferNode implements ITypedElement, IStreamContentAccessor {
+	class JavaTextBufferNode implements ITypedElement, IStreamContentAccessorExtension2 {
 		
 		private TextBuffer fBuffer;
 		private boolean fInEditor;
@@ -100,7 +99,11 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 		}
 		
 		public InputStream getContents() {
-			return new ByteArrayInputStream(JavaCompareUtilities.getBytes(fBuffer.getContent()));
+			return new ByteArrayInputStream(JavaCompareUtilities.getBytes(fBuffer.getContent(), "UTF-16"));
+		}
+		
+		public String getCharset() {
+			return "UTF-16";
 		}
 	}
 
@@ -262,8 +265,7 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 		}
 	}
 
-	static String trimTextBlock(InputStream is, String delimiter) {
-		String content= JavaCompareUtilities.readString(is);
+	static String trimTextBlock(String content, String delimiter) {
 		if (content != null) {
 			String[] lines= Strings.convertIntoLines(content);
 			if (lines != null) {

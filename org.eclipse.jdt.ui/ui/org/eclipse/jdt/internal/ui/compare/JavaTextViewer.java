@@ -80,7 +80,7 @@ public class JavaTextViewer extends Viewer {
 		if (input instanceof IStreamContentAccessor) {
 			IStreamContentAccessor sca= (IStreamContentAccessor) input;
 			try {
-				return JavaCompareUtilities.readString(sca.getContents());
+				return JavaCompareUtilities.readString(sca);
 			} catch (CoreException ex) {
 				JavaPlugin.log(ex);
 			}

@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.List;
 import java.util.ResourceBundle;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -203,9 +202,9 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	 */
 	private ASTNode createASTNode(ASTRewrite rewriter, ITypedElement element, String delimiter) throws CoreException {
 		if (element instanceof IStreamContentAccessor) {
-			InputStream is= ((IStreamContentAccessor)element).getContents();
-			if (is != null) {
-				String content= trimTextBlock(is, delimiter);
+			String content= JavaCompareUtilities.readString((IStreamContentAccessor)element);
+			if (content != null) {
+				content= trimTextBlock(content, delimiter);
 				if (content != null)
 					return rewriter.createPlaceholder(content, getPlaceHolderType(element));
 			}

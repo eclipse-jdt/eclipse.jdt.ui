@@ -16,14 +16,15 @@ import java.util.*;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-
+import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.IStreamContentAccessorExtension2;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.*;
@@ -255,7 +256,7 @@ class JavaCompareUtilities {
 	 * (<code>ResourcesPlugin.getEncoding()</code>).
 	 * Returns null if an error occurred.
 	 */
-	static String readString(InputStream is) {
+	private static String readString(InputStream is, String encoding) {
 		if (is == null)
 			return null;
 		BufferedReader reader= null;
@@ -263,7 +264,7 @@ class JavaCompareUtilities {
 			StringBuffer buffer= new StringBuffer();
 			char[] part= new char[2048];
 			int read= 0;
-			reader= new BufferedReader(new InputStreamReader(is, ResourcesPlugin.getEncoding()));
+			reader= new BufferedReader(new InputStreamReader(is, encoding));
 
 			while ((read= reader.read(part)) != -1)
 				buffer.append(part, 0, read);
@@ -284,13 +285,26 @@ class JavaCompareUtilities {
 		return null;
 	}
 	
+	public static String readString(IStreamContentAccessor sa) throws CoreException {
+		InputStream is= sa.getContents();
+		if (is != null) {
+			String encoding= null;
+			if (sa instanceof IStreamContentAccessorExtension2)
+				encoding= ((IStreamContentAccessorExtension2)sa).getCharset();
+			if (encoding == null)
+				encoding= ResourcesPlugin.getEncoding();
+			return readString(is, encoding);
+		}
+		return null;
+	}
+
 	/**
 	 * Returns the contents of the given string as an array of bytes 
 	 * in the platform's default encoding.
 	 */
-	static byte[] getBytes(String s) {
+	static byte[] getBytes(String s, String encoding) {
 		try {
-			return s.getBytes(ResourcesPlugin.getEncoding());
+			return s.getBytes(encoding);
 		} catch (UnsupportedEncodingException e) {
 			return s.getBytes();
 		}
@@ -302,11 +316,11 @@ class JavaCompareUtilities {
 	 * (<code>ResourcesPlugin.getEncoding()</code>).
 	 * Returns null if an error occurred.
 	 */
-	static String[] readLines(InputStream is2) {
+	static String[] readLines(InputStream is2, String encoding) {
 		
 		BufferedReader reader= null;
 		try {
-			reader= new BufferedReader(new InputStreamReader(is2, ResourcesPlugin.getEncoding()));
+			reader= new BufferedReader(new InputStreamReader(is2, encoding));
 			StringBuffer sb= new StringBuffer();
 			List list= new ArrayList();
 			while (true) {

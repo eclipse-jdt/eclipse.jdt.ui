@@ -140,7 +140,7 @@ public class JavaStructureCreator implements IStructureCreator {
 			if (input instanceof IStreamContentAccessor) {
 				IStreamContentAccessor sca= (IStreamContentAccessor) input;			
 				try {
-					contents= JavaCompareUtilities.readString(sca.getContents());
+					contents= JavaCompareUtilities.readString(sca);
 				} catch (CoreException ex) {
 					JavaPlugin.log(ex);
 					return null;
@@ -229,7 +229,7 @@ public class JavaStructureCreator implements IStructureCreator {
 		IStreamContentAccessor sca= (IStreamContentAccessor) node;
 		String content= null;
 		try {
-			content= JavaCompareUtilities.readString(sca.getContents());
+			content= JavaCompareUtilities.readString(sca);
 		} catch (CoreException ex) {
 			JavaPlugin.log(ex);
 			return null;
