@@ -606,15 +606,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		return super.performCancel();
 	}
 	
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */
-	public static boolean useCodeFormatter() {
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		return prefs.getBoolean(PREF_FORMAT_TEMPLATES);
-	}
-
 	private void openReadErrorDialog(CoreException e) {
 		ErrorDialog.openError(getShell(),
 			TemplateMessages.getString("TemplatePreferencePage.error.read.title"), //$NON-NLS-1$
