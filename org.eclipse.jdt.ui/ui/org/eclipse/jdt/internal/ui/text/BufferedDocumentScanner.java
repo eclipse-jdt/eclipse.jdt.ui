@@ -58,16 +58,10 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 
 		fBufferOffset= offset;
 		
-		if (fRangeLength != fDocument.getLength()) {
-			fBufferLength= fBuffer.length > fRangeLength ? fRangeLength : fBuffer.length;
-		} else {
-			// intermediate code to achieve compatibility
-			// to be removed
-			if (fBufferOffset + fBuffer.length > fRangeLength)
-				fBufferLength= fRangeLength - fBufferOffset;
-			else
-				fBufferLength= fBuffer.length;
-		}
+		if (fBufferOffset + fBuffer.length > fRangeOffset + fRangeLength)
+			fBufferLength= fRangeLength - (fBufferOffset - fRangeOffset);
+		else
+			fBufferLength= fBuffer.length;
 
 		try {
 			final String content= fDocument.get(fBufferOffset, fBufferLength);
