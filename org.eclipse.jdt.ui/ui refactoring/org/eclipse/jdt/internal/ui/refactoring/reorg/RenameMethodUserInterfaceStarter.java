@@ -51,9 +51,13 @@ public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter
 							new String[]{
 								JavaElementUtil.createMethodSignature(method), 
 								JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())});
-					}						
-					message= message + "\n\nOK to perform the operation on this method?";
-					if (!MessageDialog.openQuestion(parent, "Rename Refactoring", message)) {
+					}
+					message= ReorgMessages.getFormattedString(
+						"RenameMethodUserInterfaceStarter.message",  //$NON-NLS-1$
+						message);
+					if (!MessageDialog.openQuestion(parent, 
+							ReorgMessages.getString("RenameMethodUserInterfaceStarter.name"),  //$NON-NLS-1$
+							message)) {
 						return;
 					}
 				}

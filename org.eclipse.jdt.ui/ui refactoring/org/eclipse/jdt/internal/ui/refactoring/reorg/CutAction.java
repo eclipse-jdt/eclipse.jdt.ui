@@ -50,7 +50,7 @@ public class CutAction extends SelectionDispatchAction{
 
 	public CutAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
 		super(site);
-		setText("Cu&t");
+		setText(RefactoringMessages.getString("CutAction.text")); //$NON-NLS-1$
 		fCopyToClipboardAction= new CopyToClipboardAction(site, clipboard, pasteAction);
 
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
