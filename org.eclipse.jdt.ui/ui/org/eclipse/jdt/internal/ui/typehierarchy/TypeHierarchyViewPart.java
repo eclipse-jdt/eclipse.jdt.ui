@@ -1245,7 +1245,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					if (changedTypes.length == 1) {
 						getCurrentViewer().refresh(changedTypes[0]);
 					} else {
-						updateHierarchyViewer();
+						updateHierarchyViewer(false);
 					}
 				} else {
 					getCurrentViewer().update(changedTypes, new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE } );
