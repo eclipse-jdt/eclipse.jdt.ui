@@ -34,7 +34,9 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.ListenerList;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -98,6 +100,7 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -635,6 +638,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	
 	private CompositeActionGroup fActionGroups;
 	private CCPActionGroup fCCPActionGroup;
+
+	private IPropertyChangeListener fPropertyChangeListener;
 	
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
@@ -657,7 +662,14 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fTogglePresentation.setEditor(editor);
 		fToggleTextHover.setEditor(editor);
 		fPreviousError.setEditor(editor);
-		fNextError.setEditor(editor);		
+		fNextError.setEditor(editor);	
+		
+		fPropertyChangeListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				doPropertyChange(event);
+			}
+		};
+		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 	}
 	
 	/* (non-Javadoc)
@@ -666,6 +678,15 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	public void init(IPageSite pageSite) {
 		super.init(pageSite);
 	}
+	
+	private void doPropertyChange(PropertyChangeEvent event) {
+		if (fOutlineViewer != null) {
+			if (MembersOrderPreferencePage.PREF_OUTLINE_SORT_OPTION.equals(event.getProperty())) {
+				fOutlineViewer.refresh();
+			}
+		}
+	}	
+	
 	/*
 	 * @see ISelectionProvider#addSelectionChangedListener(ISelectionChangedListener)
 	 */
@@ -808,6 +829,11 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		for (int i= 0; i < listeners.length; i++)
 			fSelectionChangedListeners.remove(listeners[i]);
 		fSelectionChangedListeners= null;
+
+		if (fPropertyChangeListener != null) {
+			JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
+			fPropertyChangeListener= null;
+		}
 		
 		if (fMenu != null && !fMenu.isDisposed()) {
 			fMenu.dispose();

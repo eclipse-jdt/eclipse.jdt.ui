@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
+
 
 /**
  * Sorter for Java elements. Ordered by element category, then by element name. 
@@ -61,18 +63,13 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int PACKAGE_DECL=	10;
 	private static final int IMPORT_CONTAINER= 11;
 	private static final int IMPORT_DECLARATION= 12;
-	private static final int TYPES= 13;
-	private static final int STATIC_INIT= 14;
-	private static final int STATIC_FIELDS= 15;	
-	private static final int STATIC_METHODS= 16;	
-
-	private static final int FIELDS= 17;	
-	private static final int CONSTRUCTORS=	18;
-	private static final int INIT= 19;
-	private static final int METHODS= 20;
 	
-	private static final int JAVAELEMENTS= 21;	
-	private static final int OTHERS= 22;	
+	// Includes all categories ordered using the OutlineSortOrderPage:
+	// types, initializers, methods & fields
+	private static final int MEMBERSOFFSET= 13;
+	
+	private static final int JAVAELEMENTS= 50;
+	private static final int OTHERS= 51;	
 	
 	public JavaElementSorter() {
 	}
@@ -80,47 +77,44 @@ public class JavaElementSorter extends ViewerSorter {
 	/**
 	 * @deprecated Bug 22518. Method never used: does not override ViewerSorter#isSorterProperty(Object, String).
 	 * Method could be removed, but kept for API compatibility.
-	 */		
+	 */	
 	public boolean isSorterProperty(Object element, Object property) {
 		return true;
 	}
 
 	/*
 	 * @see ViewerSorter#category
-	 */	
+	 */
 	public int category(Object element) {
 		if (element instanceof IJavaElement) {
 			try {
 				IJavaElement je= (IJavaElement) element;
-				
+
 				switch (je.getElementType()) {
 					case IJavaElement.METHOD: {
-						IMethod method= (IMethod) je;
-						if (method.isConstructor())
-							return CONSTRUCTORS;
-							
-						int flags= method.getFlags();
-						return Flags.isStatic(flags) ? STATIC_METHODS : METHODS;
-					}
-					
+							IMethod method= (IMethod) je;
+							if (method.isConstructor()) {
+								return MEMBERSOFFSET + MembersOrderPreferencePage.getConstructorOffset();
+							}
+							int flags= method.getFlags();
+							return MEMBERSOFFSET + MembersOrderPreferencePage.getMethodOffset(Flags.isStatic(flags));
+						}
 					case IJavaElement.FIELD: {
-						int flags= ((IField) je).getFlags();
-						return Flags.isStatic(flags) ? STATIC_FIELDS : FIELDS;
-					}
-					
+							int flags= ((IField) je).getFlags();
+							return MEMBERSOFFSET + MembersOrderPreferencePage.getFieldOffset(Flags.isStatic(flags));
+						}
 					case IJavaElement.INITIALIZER: {
-						int flags= ((IInitializer) je).getFlags();
-						return Flags.isStatic(flags) ? STATIC_INIT : INIT;
-					}
-					
-					case IJavaElement.TYPE:
-						return TYPES;
+							int flags= ((IInitializer) je).getFlags();
+							return MEMBERSOFFSET + MembersOrderPreferencePage.getInitOffset(Flags.isStatic(flags));
+						}
+					case IJavaElement.TYPE :
+						return MEMBERSOFFSET + MembersOrderPreferencePage.getTypeOffset();
 					case IJavaElement.PACKAGE_DECLARATION:
 						return PACKAGE_DECL;
 					case IJavaElement.IMPORT_CONTAINER:
 						return IMPORT_CONTAINER;
 					case IJavaElement.IMPORT_DECLARATION:
-						return IMPORT_DECLARATION;						
+						return IMPORT_DECLARATION;
 					case IJavaElement.PACKAGE_FRAGMENT:
 						IPackageFragment pack= (IPackageFragment) je;
 						if (pack.getParent().getUnderlyingResource() instanceof IProject) {
@@ -137,26 +131,23 @@ public class JavaElementSorter extends ViewerSorter {
 					case IJavaElement.CLASS_FILE:
 						return CLASSFILES;
 					case IJavaElement.COMPILATION_UNIT:
-						return COMPILATIONUNITS;				
+						return COMPILATIONUNITS;
 				}
-			
+
 			} catch (JavaModelException e) {
-				if (!e.isDoesNotExist()) {
-					JavaPlugin.log(e);
-				}
-				// let none existing elements pass: name can be retrieved without existence
+				JavaPlugin.log(e);
 			}
 			return JAVAELEMENTS;
 		} else if (element instanceof IFile) {
 			return RESOURCES;
 		} else if (element instanceof IContainer) {
-			return RESOURCEFOLDERS;	
+			return RESOURCEFOLDERS;
 		} else if (element instanceof IStorage) {
 			return STORAGE;
-		}			
+		}
 		return OTHERS;
 	}
-	
+
 	/*
 	 * @see ViewerSorter#compare
 	 */
@@ -192,7 +183,7 @@ public class JavaElementSorter extends ViewerSorter {
 			return cmp;
 		}
 		
-		if (cat1 == METHODS || cat1 == STATIC_METHODS || cat1 == CONSTRUCTORS) {
+		if (e1 instanceof IMethod) {
 			String[] params1= ((IMethod) e1).getParameterTypes();
 			String[] params2= ((IMethod) e2).getParameterTypes();
 			int len= Math.min(params1.length, params2.length);
@@ -208,7 +199,7 @@ public class JavaElementSorter extends ViewerSorter {
 	}
 	
 	private int compareWithLabelProvider(Viewer viewer, Object e1, Object e2) {
-		if (viewer instanceof ContentViewer) {
+		if (viewer == null || !(viewer instanceof ContentViewer)) {
 			IBaseLabelProvider prov = ((ContentViewer) viewer).getLabelProvider();
 			if (prov instanceof ILabelProvider) {
 				ILabelProvider lprov= (ILabelProvider) prov;

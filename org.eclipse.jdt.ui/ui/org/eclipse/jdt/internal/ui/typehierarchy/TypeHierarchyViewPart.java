@@ -40,6 +40,8 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.ISelection;
@@ -96,6 +98,7 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -139,6 +142,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private TypeHierarchyLifeCycle fHierarchyLifeCycle;
 	private ITypeHierarchyLifeCycleListener fTypeHierarchyLifeCycleListener;
+	
+	private IPropertyChangeListener fPropertyChangeListener;
 		
 	private MethodsViewer fMethodsViewer;
 			
@@ -195,6 +200,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		};
 		fHierarchyLifeCycle.addChangedListener(fTypeHierarchyLifeCycleListener);
 		
+		fPropertyChangeListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				doPropertyChange(event);
+			}
+		};
+		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
+
+		
 		fIsEnableMemberFilter= false;
 		
 		fInputHistory= new ArrayList();
@@ -243,7 +256,20 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		};
 		
-	}	
+	}
+
+	/**
+	 * Method doPropertyChange.
+	 * @param event
+	 */
+	private void doPropertyChange(PropertyChangeEvent event) {
+		if (fMethodsViewer != null) {
+			if (MembersOrderPreferencePage.PREF_OUTLINE_SORT_OPTION.equals(event.getProperty())) {
+				fMethodsViewer.refresh();
+			}
+		}
+	}
+	
 		
 	/**
 	 * Adds the entry if new. Inserted at the beginning of the history entries list.
@@ -453,6 +479,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fHierarchyLifeCycle.freeHierarchy();
 		fHierarchyLifeCycle.removeChangedListener(fTypeHierarchyLifeCycleListener);
 		fPaneLabelProvider.dispose();
+		
+		if (fPropertyChangeListener != null) {
+			JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
+			fPropertyChangeListener= null;
+		}
+		
 		getSite().getPage().removePartListener(fPartListener);
 
 		if (fActionGroups != null)
@@ -1339,5 +1371,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	public Object getViewPartInput() {
 		return fInputElement;
 	}
+	
+	
+	
 
 }

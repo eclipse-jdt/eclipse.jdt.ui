@@ -141,6 +141,7 @@ public interface IJavaHelpContextIds {
 
 	// Preference/Property pages
 	public static final String APPEARANCE_PREFERENCE_PAGE= 			PREFIX + "appearance_preference_page_context"; //$NON-NLS-1$
+	public static final String SORT_ORDER_PREFERENCE_PAGE=		    PREFIX + "sort_order_preference_page_context"; //$NON-NLS-1$
 	public static final String BUILD_PATH_PROPERTY_PAGE= 				PREFIX + "build_path_property_page_context"; //$NON-NLS-1$
 	public static final String CP_VARIABLES_PREFERENCE_PAGE= 		PREFIX + "cp_variables_preference_page_context"; //$NON-NLS-1$
 	public static final String CODEFORMATTER_PREFERENCE_PAGE= 	PREFIX + "codeformatter_preference_page_context"; //$NON-NLS-1$

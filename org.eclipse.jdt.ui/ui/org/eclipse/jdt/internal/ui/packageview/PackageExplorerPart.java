@@ -104,6 +104,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
@@ -893,6 +894,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			boolean showCUChildren= AppearancePreferencePage.showCompilationUnitChildren();
 			((StandardJavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(showCUChildren);
 			
+			refreshViewer= true;
+		} else if (MembersOrderPreferencePage.PREF_OUTLINE_SORT_OPTION.equals(event.getProperty())) {
 			refreshViewer= true;
 		}
 

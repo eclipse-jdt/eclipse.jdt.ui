@@ -387,6 +387,11 @@
 		id = "org.eclipse.jdt.ui.preferences.NewJavaProjectPreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>
+	<page name="%memberSortPrefName"
+		id = "org.eclipse.jdt.ui.preferences.MembersOrderPreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage"
+		category= "org.eclipse.jdt.ui.preferences.AppearancePreferencePage">
 	</page>	
 </extension>
 
