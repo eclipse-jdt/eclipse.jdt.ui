@@ -2674,6 +2674,126 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 	
 	/**
+	 * Finds and marks occurrence annotations.
+	 * 
+	 * @since 3.0
+	 */
+	class OccurrencesFinder implements Runnable, IDocumentListener {
+		
+		private int fCount;
+		private IDocument fDocument;
+		private ITextSelection fSelection;
+		private boolean fCancelled= false;
+		
+		public OccurrencesFinder(int count, IDocument document, ITextSelection selection) {
+			fCount= count;
+			fDocument= document;
+			fSelection= selection;
+			fDocument.addDocumentListener(this);
+		}
+		
+		private boolean isCancelled() {
+			return fCount != fComputeCount || fCancelled;
+		}
+		
+		/*
+		 * @see java.lang.Runnable#run()
+		 */
+		public void run() {
+			
+			try {
+				
+				if (isCancelled())
+					return;
+				
+				// Find occurrences
+				FindOccurrencesEngine engine= FindOccurrencesEngine.create(getInputJavaElement());
+				List matches= new ArrayList();
+				try {
+					matches= engine.findOccurrences(fSelection.getOffset(), fSelection.getLength());
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+					return;
+				}
+
+				if (matches == null || matches.isEmpty())
+					return;
+				
+				if (isCancelled())
+					return;
+				
+				removeOccurrenceAnnotations();
+				
+				if (isCancelled())
+					return;
+				
+				ITextViewer textViewer= getViewer(); 
+				if (textViewer == null)
+					return;
+				
+				IDocument document= textViewer.getDocument();
+				if (document == null)
+					return;
+				
+				IDocumentProvider documentProvider= getDocumentProvider();
+				if (documentProvider == null)
+					return;
+				
+				IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
+				if (annotationModel == null)
+					return;
+				
+				// Add occurrence annotations
+				ArrayList annotations= new ArrayList();
+				ArrayList positions= new ArrayList();
+				for (Iterator each= matches.iterator(); each.hasNext();) {
+					
+					if (isCancelled())
+						return; 
+					
+					ASTNode node= (ASTNode) each.next();
+					if (node == null)
+						continue;
+					
+					String message;
+					// Create & add annotation
+					try {
+						message= document.get(node.getStartPosition(), node.getLength());
+					} catch (BadLocationException ex) {
+						// Skip this match
+						continue;
+					}
+					annotations.add(new DefaultAnnotation(SearchUI.SEARCH_MARKER, IMarker.SEVERITY_INFO, true, message));
+					positions.add(new Position(node.getStartPosition(), node.getLength()));
+				}
+				
+				if (isCancelled())
+					return;
+				
+				synchronized (annotationModel) {
+					fOccurrenceAnnotations= annotations;
+					for (int i= 0, size= annotations.size(); i < size; i++)
+						annotationModel.addAnnotation((Annotation) annotations.get(i), (Position) positions.get(i));
+				}
+				
+			} finally {
+				fDocument.removeDocumentListener(this);
+			}
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
+		 */
+		public void documentAboutToBeChanged(DocumentEvent event) {
+			fCancelled= true;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
+		 */
+		public void documentChanged(DocumentEvent event) {
+		}
+	}	/**
 	 * Updates the occurrences annotations based
 	 * on the current selection.
 	 *
@@ -2684,84 +2804,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		if (!fMarkOccurrenceAnnotations)
 			return;
 		
-		final int currentCount= ++fComputeCount;
-		final ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
-		
-		Thread thread= new Thread("Occurrences Marker") { //$NON-NLS-1$
-			public void run() {
-				if (currentCount != fComputeCount)
-					return;
-			
-				// Find occurrences
-				FindOccurrencesEngine engine= FindOccurrencesEngine.create(getInputJavaElement());
-				List matches= new ArrayList();
-				try {
-					matches= engine.findOccurrences(selection.getOffset(), selection.getLength());
-					if (matches == null || matches.isEmpty()) {
-						return;
-					}
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-					return;
-				}
+		IDocument document= getSourceViewer().getDocument();
+			if (document == null)
+				return;
 				
-				if (currentCount != fComputeCount)
-					return;
-				
-				
-				removeOccurrenceAnnotations();
-	
-				if (currentCount != fComputeCount)
-					return;
-
-				ITextViewer textViewer= getViewer(); 
-				if (textViewer == null)
-					return;
-				
-				IDocument document= textViewer.getDocument();
-				if (document == null)
-					return;
-
-				IDocumentProvider documentProvider= getDocumentProvider();
-				if (documentProvider == null)
-					return;
-				
-				IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
-				if (annotationModel == null)
-					return;
-				
-				// Add occurrence annotations
-				synchronized (fOccurrenceAnnotations) {
-					if (currentCount != fComputeCount)
-						return;
-					for (Iterator each= matches.iterator(); each.hasNext();) {
-						if (currentCount != fComputeCount)
-							return; 
-						
-						ASTNode node= (ASTNode)each.next();
-						if (node == null)
-							continue;
-						
-						String message;
-						// Create & add annotation
-						try {
-							message= document.get(node.getStartPosition(), node.getLength());
-						} catch (BadLocationException ex) {
-							// Skip this match
-							continue;
-						}
-						Annotation annotation= new DefaultAnnotation(SearchUI.SEARCH_MARKER, IMarker.SEVERITY_INFO, true, message);
-						Position pos= new Position(node.getStartPosition(), node.getLength());
-						annotationModel.addAnnotation(annotation, pos);
-						fOccurrenceAnnotations.add(annotation);
-					}
-				}
-			}
-		};
-		
+		OccurrencesFinder finder= new OccurrencesFinder(++fComputeCount, document, (ITextSelection) getSelectionProvider().getSelection());
+		Thread thread= new Thread(finder, "Occurrences Marker"); //$NON-NLS-1$
 		thread.setDaemon(true);
 		thread.start();
-		
 	}
 	
 	void removeOccurrenceAnnotations() {
@@ -2773,7 +2823,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		if (annotationModel == null)
 			return;
 
-		synchronized (fOccurrenceAnnotations) {
+		synchronized (annotationModel) {
 			for (int i= 0, size= fOccurrenceAnnotations.size(); i < size; i++)
 				annotationModel.removeAnnotation((Annotation)fOccurrenceAnnotations.get(i));
 			fOccurrenceAnnotations.clear();
