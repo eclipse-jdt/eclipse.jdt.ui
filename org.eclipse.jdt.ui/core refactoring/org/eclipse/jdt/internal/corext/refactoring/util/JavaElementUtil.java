@@ -3,7 +3,6 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
@@ -37,7 +36,7 @@ public class JavaElementUtil {
 	public static String createInitializerSignature(IInitializer initializer){
 		String label= "initializer in " + initializer.getDeclaringType().getFullyQualifiedName();
 		try {
-			if (Flags.isStatic(initializer.getFlags()))
+			if (JdtFlags.isStatic(initializer))
 				return "static " + label;
 			else 
 				return label;
