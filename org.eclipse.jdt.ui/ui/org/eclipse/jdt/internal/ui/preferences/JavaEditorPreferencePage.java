@@ -333,11 +333,18 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 			}
 			
 			text= (String) tokens[i];
-			StringTokenizer tokenizer= new StringTokenizer(text);
+			StringTokenizer tokenizer= new StringTokenizer(text, " ", true); //$NON-NLS-1$
+			boolean addSpace= false;
 			while (tokenizer.hasMoreTokens()) {
-				Label label= new Label(description, SWT.NONE);
 				String token= tokenizer.nextToken();
-				label.setText(token + " "); //$NON-NLS-1$
+				if (token.trim().length() == 0 && tokenizer.hasMoreTokens()) {
+					addSpace= true;
+					continue;
+				}
+					
+				Label label= new Label(description, SWT.NONE);
+				label.setText((addSpace ? " " : "") + token); //$NON-NLS-1$ //$NON-NLS-2$
+				addSpace= false;
 			}
 		}
 		
