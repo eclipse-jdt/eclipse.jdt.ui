@@ -54,7 +54,11 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
-  */
+ * Abstract options configuration block providing a general implementation for setting up
+ * an options configuration page.
+ * 
+ * @since 2.1
+ */
 public abstract class OptionsConfigurationBlock {
 
 	protected static class ControlData {
