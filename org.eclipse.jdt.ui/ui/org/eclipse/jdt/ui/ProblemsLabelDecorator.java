@@ -144,7 +144,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 		return image;
 	}
 
-	private int computeAdornmentFlags(Object obj) {
+	protected int computeAdornmentFlags(Object obj) {
 		try {
 			if (obj instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement) obj;
@@ -213,10 +213,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 
 	private boolean isMarkerInRange(IMarker marker, ISourceReference sourceElement) throws CoreException {
 		if (marker.isSubtypeOf(IMarker.TEXT)) {
-			ISourceRange range= sourceElement.getSourceRange();
 			int pos= marker.getAttribute(IMarker.CHAR_START, -1);
-			int offset= range.getOffset();
-			return (offset <= pos && offset + range.getLength() > pos);
+			return isInside(pos, sourceElement);
 		}
 		return false;
 	}
@@ -252,15 +250,22 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 		if (annot instanceof MarkerAnnotation) {
 			IMarker marker= ((MarkerAnnotation) annot).getMarker();
 			if (marker.exists() && marker.isSubtypeOf(IMarker.PROBLEM)) {
-				ISourceRange range= sourceElement.getSourceRange();
 				Position pos= model.getPosition(annot);
-				if (pos.overlapsWith(range.getOffset(), range.getLength())) {
+				if (isInside(pos.getOffset(), sourceElement)) {
 					return marker;
 				}
 			}
 		}
 		return null;
 	}
+	
+	/**
+	 * Tests if a position is inside the source range of an element.	 * @param pos Position to be tested.	 * @param sourceElement Source element (must be a IJavaElement)	 * @return boolean Return <code>true</code> if position is located inside the source element.	 * @throws CoreException Exception thrown if element range could not be accessed.	 */
+	protected boolean isInside(int pos, ISourceReference sourceElement) throws CoreException {
+		ISourceRange range= sourceElement.getSourceRange();
+		int rangeOffset= range.getOffset();
+		return (rangeOffset <= pos && rangeOffset + range.getLength() > pos);
+	}	
 	
 	/* (non-Javadoc)
 	 * @see IBaseLabelProvider#dispose()
