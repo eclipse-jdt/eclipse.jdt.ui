@@ -264,13 +264,10 @@ public class DeleteRefactoring extends Refactoring {
 
 	private IChange createDeleteChange(IPackageFragmentRoot root) throws JavaModelException {
 		CompositeChange composite= new CompositeChange("Delete package fragment root", 2);
-		//FIX ME: ??
-		//if (isClasspathDelete(root)) {
+		if (ReorgUtils.isClasspathDelete(root))
 			composite.addChange(new DeleteFromClasspathChange(root));
-		//}
-		composite.addChange(createDeleteChange(getResourceToDelete(root)));
-		if (composite.getChildren().length == 1)
-			return composite.getChildren()[0];
+		else 
+			composite.addChange(createDeleteChange(getResourceToDelete(root)));
 		return composite;
 	}
 	
