@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public class PlainTypeVariable2 extends TypeConstraintVariable2 {
 
-	protected PlainTypeVariable2(TType type) {
+	public PlainTypeVariable2(TType type) {
 		super(type);
 		Assert.isTrue(! type.isWildcardType());
 		Assert.isTrue(! type.isTypeVariable());

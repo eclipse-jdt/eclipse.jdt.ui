@@ -26,7 +26,7 @@ public class ReturnTypeVariable2 extends TypeConstraintVariable2 implements IDec
 	private String fMethodBindingKey;
 	private ICompilationUnit fCompilationUnit;
 
-	protected ReturnTypeVariable2(TType returnType, IMethodBinding methodBinding) {
+	public ReturnTypeVariable2(TType returnType, IMethodBinding methodBinding) {
 		super(returnType);
 		fMethodBindingKey= methodBinding.getKey();
 	}
