@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text.comment;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -111,7 +112,10 @@ public class CommentFormattingContext extends FormattingContext {
 		 * @see java.util.Map#putAll(java.util.Map)
 		 */
 		public void putAll(Map t) {
-			throw new UnsupportedOperationException();
+			for (Iterator iter= t.entrySet().iterator(); iter.hasNext();) {
+				Entry entry= (Entry) iter.next();
+				put(entry.getKey(), entry.getValue());
+			}
 		}
 
 		/*
@@ -216,8 +220,8 @@ public class CommentFormattingContext extends FormattingContext {
 	 * TODO: remove after migrating comment formatter preferences to
 	 * JDT/Core preference store
 	 * </p><p>
-	 * NOTE: the returned Map might not support <code>entrySet()</code>,
-	 * <code>keySet()</code> and <code>putAll(Map)</code>
+	 * NOTE: the returned Map might not support <code>entrySet()</code>
+	 * and <code>keySet()</code>
 	 * </p>
 	 * 
 	 * @param preferences the JDT/Text preferences
