@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
@@ -18,6 +20,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
@@ -33,6 +36,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		fList= list;
 		// to restore the content of the dialog field if the dialog is canceled
 		fOldContent= fList.getElements(); 
+		setStatusLineAboveButtons(true);
 	}
 
 	/*
@@ -71,8 +75,12 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		
 	private void addSelectedInterface(){
 		Object ref= getLowerSelectedElement();
-		if (ref instanceof TypeInfo)
-			fList.addElement(((TypeInfo)ref).getFullyQualifiedName());
+		if (ref instanceof TypeInfo) {
+			String qualifiedName= ((TypeInfo) ref).getFullyQualifiedName();
+			fList.addElement(qualifiedName);
+			String message= NewWizardMessages.getFormattedString("SuperInterfaceSelectionDialog.interfaceadded.info", qualifiedName);
+			updateStatus(new StatusInfo(IStatus.INFO, message));
+		}
 	}
 	
 	private static IJavaSearchScope createSearchScope(IJavaProject p) {
