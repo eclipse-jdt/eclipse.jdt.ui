@@ -490,7 +490,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		
 		String content= loadPreviewContentFromFile("PropertiesFileEditorColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
-		new PropertiesFileDocumentSetupParticipant().setup(document);
+		PropertiesFileDocumentSetupParticipant.setupDocument(document);
 		fPreviewViewer.setDocument(document);
 
 		return fPreviewViewer.getControl();

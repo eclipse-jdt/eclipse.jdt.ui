@@ -24,13 +24,17 @@ import org.eclipse.jface.text.rules.DefaultPartitioner;
  */
 public class PropertiesFileDocumentSetupParticipant  implements IDocumentSetupParticipant {
 
-	public PropertiesFileDocumentSetupParticipant() {
-	}
-	
 	/*
 	 * @see org.eclipse.core.filebuffers.IDocumentSetupParticipant#setup(org.eclipse.jface.text.IDocument)
 	 */
 	public void setup(IDocument document) {
+		setupDocument(document);
+	}
+	
+	/**
+	 * @see org.eclipse.core.filebuffers.IDocumentSetupParticipant#setup(org.eclipse.jface.text.IDocument)
+	 */
+	public static void setupDocument(IDocument document) {
 		IDocumentPartitioner partitioner= createDocumentPartitioner();
 		if (document instanceof IDocumentExtension3) {
 			IDocumentExtension3 extension3= (IDocumentExtension3) document;
@@ -47,7 +51,7 @@ public class PropertiesFileDocumentSetupParticipant  implements IDocumentSetupPa
 	 *
 	 * @return a newly created properties file document partitioner
 	 */
-	private IDocumentPartitioner createDocumentPartitioner() {
+	private static IDocumentPartitioner createDocumentPartitioner() {
 		return new DefaultPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
 	}
 }
