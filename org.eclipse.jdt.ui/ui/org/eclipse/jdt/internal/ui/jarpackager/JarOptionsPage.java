@@ -236,7 +236,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 3;
 		fDescriptionFileGroup.setLayout(layout);
-		fDescriptionFileGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL));
+		fDescriptionFileGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL));
 
 		fDescriptionFileLabel= new Label(fDescriptionFileGroup, SWT.NONE);
 		fDescriptionFileLabel.setText(JarPackagerMessages.getString("JarOptionsPage.descriptionFile.label")); //$NON-NLS-1$
