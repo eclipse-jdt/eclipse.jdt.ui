@@ -30,6 +30,7 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.Match;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
 
@@ -146,7 +147,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult {
 	 * @see org.eclipse.search.ui.ISearchResult#getImageDescriptor()
 	 */
 	public ImageDescriptor getImageDescriptor() {
-		return fQuery.getImageDescriptor();
+		return JavaPluginImages.DESC_OBJS_SEARCH_REF;
 	}
 
 	/*

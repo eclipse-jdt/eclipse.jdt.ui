@@ -17,14 +17,11 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 public class OccurrencesSearchQuery implements ISearchQuery {
@@ -67,11 +64,11 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		return fJobLabel;
 	}
 	
-	public String getSingularLabel() {
+	String getSingularLabel() {
 		return fSingularLabel;
 	}
 	
-	public String getPluralLabelPattern() {
+	String getPluralLabelPattern() {
 		return fPluralLabelPattern;
 	}
 	
@@ -96,13 +93,5 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		if (fResult == null)
 			fResult= new OccurrencesSearchResult(this);
 		return fResult;
-	}
-	
-	IJavaElement getJavaElement() {
-		return fElement;
-	}
-
-	public ImageDescriptor getImageDescriptor() {
-		return JavaPluginImages.DESC_OBJS_SEARCH_REF;
 	}
 }
