@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -44,14 +43,13 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
@@ -88,25 +86,7 @@ class ConstructorReferenceFinder {
 				return new SearchResultGroup[0];
 			return getImplicitConstructorReferences(pm, status);	
 		}	
-		//workaround for bug 77388:
-		CollectingSearchRequestor collector= new CollectingSearchRequestor() {
-			public void acceptSearchMatch(SearchMatch match) throws CoreException {
-				ICompilationUnit cu= SearchUtils.getCompilationUnit(match);
-				if (cu != null && cu.getBuffer() != null) {
-					int len= match.getLength();
-					String text= cu.getBuffer().getText(match.getOffset(), len);
-					for (int i= text.length() - 1; i >= 0; i--) {
-						if (Character.isWhitespace(text.charAt(i)))
-							len--;
-						else
-							break;
-					}
-					match.setLength(len);
-				}
-				super.acceptSearchMatch(match);
-			}
-		};
-		return removeUnrealReferences(RefactoringSearchEngine.search(pattern, scope, collector, pm, status));
+		return removeUnrealReferences(RefactoringSearchEngine.search(pattern, scope, pm, status));
 	}
 	
 	//XXX this method is a workaround for jdt core bug 27236

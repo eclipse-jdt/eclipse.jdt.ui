@@ -1201,23 +1201,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			List newNodes= new ArrayList();
 			for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
 				ParameterInfo info= (ParameterInfo) iter.next();
-				//XXX: logging for bugs 74035, 71662:
-				if (nodes.size() <= info.getOldIndex()) {
-					ICompilationUnit cu= fCuRewrite.getCu();
-					String msg= "Problems reshuffling argument list. Please post error log entry to bug 74035." + //$NON-NLS-1$
-							" CU: " + cu.getElementName() + "; info: " + info.toString(); //$NON-NLS-1$ //$NON-NLS-2$
-					ASTNode occurrence= ((ASTNode) listRewrite.getOriginalList().get(0)).getParent();
-					fResult.addError(msg, JavaStatusContext.create(cu, occurrence));
-					int start= occurrence.getStartPosition();
-					int end= start + occurrence.getLength();
-					try {
-						JavaPlugin.logErrorMessage(msg + "\n" + cu.getSource().substring(start, end)); //$NON-NLS-1$
-					} catch (JavaModelException e) {
-						JavaPlugin.logErrorMessage(msg + "\n[" + start + ", " + end + "]"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-					}
-					return;
-				}
-				
 				if (info.isDeleted()) {
 					getImportRemover().registerRemovedNode((ASTNode) nodes.get(info.getOldIndex()));
 					continue;
