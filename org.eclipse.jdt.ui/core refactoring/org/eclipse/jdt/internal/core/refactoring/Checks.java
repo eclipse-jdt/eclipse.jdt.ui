@@ -410,6 +410,9 @@ public class Checks {
 				status.addError(RefactoringCoreMessages.getFormattedString("Checks.not_saved", resource.getFullPath().toString())); //$NON-NLS-1$
 				continue; //removed, go to the next one
 			}
+			IJavaElement element= JavaCore.create(resource);
+			if (! (element instanceof ICompilationUnit))
+				continue;
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
 			if (! cu.isStructureKnown()){
 				String path= AbstractRefactoringASTAnalyzer.getFullPath(cu);
