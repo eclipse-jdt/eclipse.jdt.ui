@@ -559,9 +559,10 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				methodName.append(Integer.toString(suffix));
 			}
 			newMethodsNames.add(methodName.toString());
+			newMethod.append("public ");//$NON-NLS-1$ 
 			if (fPage2.getCreateFinalMethodStubsButtonSelection())
 				newMethod.append("final "); //$NON-NLS-1$
-			newMethod.append("public void ");//$NON-NLS-1$ 
+			newMethod.append("void ");//$NON-NLS-1$ 
 			newMethod.append(methodName.toString());
 			newMethod.append("()");//$NON-NLS-1$ 
 			appendTestMethodBody(newMethod, testedMethod);
