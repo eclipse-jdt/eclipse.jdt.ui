@@ -38,10 +38,10 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 class JavaElementContentProvider extends BaseJavaElementContentProvider implements IElementChangedListener {
@@ -55,6 +55,7 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 		super(provideMembers, false);
 		fBrowsingPart= browsingPart;
 		fViewer= fBrowsingPart.getViewer();
+		JavaCore.addElementChangedListener(this);
 	}
 
 	public Object[] getChildren(Object element) {
@@ -172,10 +173,14 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 	 */
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, newInput);
-		if (oldInput == null && newInput != null) {
-			JavaCore.addElementChangedListener(this); 
-		} else if (oldInput != null && newInput == null) {
-			JavaCore.removeElementChangedListener(this); 
+
+		if (newInput instanceof Collection) {
+			// Get a template object from the collection
+			Collection col= (Collection)newInput;
+			if (!col.isEmpty())
+				newInput= col.iterator().next();
+			else
+				newInput= null;
 		}
 		fInput= newInput;
 	}
@@ -212,7 +217,7 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 		if (!getProvideWorkingCopy() && element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
 			return;
 		}
-			 
+
 		// handle open and closing of a solution or project
 		if (((flags & IJavaElementDelta.F_CLOSED) != 0) || ((flags & IJavaElementDelta.F_OPENED) != 0)) {
 			postRefresh(element);
@@ -241,8 +246,11 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 			}  
 			
 			// XXX: Instance check for MembersView will go away once we have a content provider for each view
-			if (element instanceof ICompilationUnit && fBrowsingPart instanceof MembersView)
-				postRefresh(null);
+//			if (element instanceof ICompilationUnit && fBrowsingPart instanceof MembersView)
+//				postRefresh(null);
+				
+			if (fBrowsingPart.isAncestorOf(element, fInput))
+				postAdjustInputAndSetSelection(null);
 			
 			return;
 		}
@@ -274,6 +282,12 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 					//	do nothing
 				} else
 					postAdd(parent, element);
+			
+			if (fInput == null) {
+				IJavaElement newInput= fBrowsingPart.findInputForJavaElement(element);
+				if (newInput != null)
+					postAdjustInputAndSetSelection(element);
+			}
 		}
 
 		if (element instanceof IType && fBrowsingPart.isValidInput(element))
@@ -337,6 +351,9 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 	}
 		
 	private void postAdd(final Object parent, final Object[] elements) {
+		if (elements.length <= 0)
+			return;
+		
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
@@ -367,6 +384,9 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 	}
 
 	private void postRemove(final Object[] elements) {
+		if (elements.length <= 0)
+			return;
+		
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
@@ -378,6 +398,19 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 						((ListViewer)fViewer).remove(elements);
 					else if (fViewer instanceof TableViewer)
 						((TableViewer)fViewer).remove(elements);
+					ctrl.setRedraw(true);
+				}
+			}
+		});
+	}
+
+	private void postAdjustInputAndSetSelection(final Object element) {
+		postRunnable(new Runnable() {
+			public void run() {
+				Control ctrl= fViewer.getControl();
+				if (ctrl != null && !ctrl.isDisposed()) {
+					ctrl.setRedraw(false);
+					fBrowsingPart.adjustInputAndSetSelection((IJavaElement)element);
 					ctrl.setRedraw(true);
 				}
 			}
