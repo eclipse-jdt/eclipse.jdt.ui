@@ -113,7 +113,14 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 	 */
 	public void setMemberFilter(IMember[] memberFilter) {
 		getHierarchyContentProvider().setMemberFilter(memberFilter);
-	}	
+	}
+
+	/**
+	 * Returns if method filtering is enabled.
+	 */	
+	public boolean isMethodFiltering() {
+		return getHierarchyContentProvider().getMemberFilter() != null;
+	}
 		
 	/**
 	 * Returns true if the hierarchy contains elements.
@@ -152,4 +159,5 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 	protected TypeHierarchyContentProvider getHierarchyContentProvider() {
 		return (TypeHierarchyContentProvider)getContentProvider();
 	}
+	
 }

@@ -27,7 +27,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	 * @see TypeHierarchyViewer#getTitle
 	 */	
 	public String getTitle() {
-		if (getHierarchyContentProvider().getMemberFilter() != null) {
+		if (isMethodFiltering()) {
 			return TypeHierarchyMessages.getString("TraditionalHierarchyViewer.filtered.title"); //$NON-NLS-1$
 		} else {
 			return TypeHierarchyMessages.getString("TraditionalHierarchyViewer.title"); //$NON-NLS-1$
@@ -39,7 +39,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	 */		
 	public void updateContent() {
 		refresh();
-		if (getHierarchyContentProvider().getMemberFilter() == null) {
+		if (isMethodFiltering()) {
 			expandToLevel(((TraditionalHierarchyContentProvider)getContentProvider()).getExpandLevel());
 		} else {
 			expandAll();
@@ -127,8 +127,8 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 		/*
 		 * @see ITypeHierarchyLifeCycleListener#typeHierarchyChanged(TypeHierarchyLifeCycle)
 		 */
-		public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchyProvider) {
-			fUpdateNeeded= true;
+		public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchyProvider, IType[] changedTypes) {
+			fUpdateNeeded= (changedTypes == null);
 		}
 
 	}

@@ -38,6 +38,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -162,8 +163,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		fHierarchyLifeCycle= new TypeHierarchyLifeCycle();
 		fTypeHierarchyLifeCycleListener= new ITypeHierarchyLifeCycleListener() {
-			public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchy) {
-				doTypeHierarchyChanged(typeHierarchy);
+			public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchy, IType[] changedTypes) {
+				doTypeHierarchyChanged(typeHierarchy, changedTypes);
 			}
 		};
 		fHierarchyLifeCycle.addChangedListener(fTypeHierarchyLifeCycleListener);
@@ -842,34 +843,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 	}
 	
-
-	
-	/**
-	 * Called from ITypeHierarchyLifeCycleListener.
-	 * Can be called from any thread
-	 */
-	private void doTypeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchy) {
-		Display display= getDisplay();
-		if (display != null) {
-			display.syncExec(new Runnable() {
-				public void run() {
-					if (!fHierarchyLifeCycle.getHierarchy().exists()) {
-						clearInput();
-					} else {
-						try {
-							fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInput);
-						} catch (JavaModelException e) {
-							JavaPlugin.log(e.getStatus());
-							clearInput();
-							return;
-						}
-						updateHierarchyViewer();
-					}
-				}
-			});
-		}
-	}	
-	
 	private Display getDisplay() {
 		if (fPagebook != null && !fPagebook.isDisposed()) {
 			return fPagebook.getDisplay();
@@ -972,6 +945,50 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		fEnableMemberFilterAction.setChecked(on);
 	}
+	
+	/**
+	 * Called from ITypeHierarchyLifeCycleListener.
+	 * Can be called from any thread
+	 */
+	private void doTypeHierarchyChanged(final TypeHierarchyLifeCycle typeHierarchy, final IType[] changedTypes) {
+		Display display= getDisplay();
+		if (display != null) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					doTypeHierarchyChangedOnViewers(changedTypes);
+				}
+			});
+		}
+	}
+	
+	private void doTypeHierarchyChangedOnViewers(IType[] changedTypes) {
+		if (changedTypes == null) {
+			// hierarchy change
+			if (!fHierarchyLifeCycle.getHierarchy().exists()) {
+				clearInput();
+			} else {
+				try {
+					fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInput);
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e.getStatus());
+					clearInput();
+					return;
+				}
+				updateHierarchyViewer();
+			}
+		} else {
+			// elements in hierarchy modified
+			if (getCurrentViewer().isMethodFiltering()) {
+				if (changedTypes.length == 1) {
+					getCurrentViewer().refresh(changedTypes[0]);
+				} else {
+					updateHierarchyViewer();
+				}
+			} else {
+				getCurrentViewer().update(changedTypes, new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE } );
+			}
+		}	
+	}	
 	
 
 	

@@ -4,6 +4,9 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import org.eclipse.jdt.core.IType;
+
+
 /**
  * Used by the TypeHierarchyLifeCycle to inform listeners about a change in the
  * type hierarchy
@@ -11,8 +14,8 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 public interface ITypeHierarchyLifeCycleListener {
 	
 	/**
-	 * The type hierarchy changed.
+	 * A Java element changed. 
 	 */
-	void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchyProvider);
+	void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchyProvider, IType[] changedTypes);
 
 }

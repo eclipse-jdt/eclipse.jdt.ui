@@ -33,9 +33,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
  * Implementors must override 'getTypesInHierarchy'.
  * Java delta processing is also performed by the content provider
  */
-public abstract class TypeHierarchyContentProvider implements ITreeContentProvider, IElementChangedListener {
-
-	protected static final String[] UNSTRUCTURED= new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE };
+public abstract class TypeHierarchyContentProvider implements ITreeContentProvider {
 	protected static final Object[] NO_ELEMENTS= new Object[0];
 
 	protected TypeHierarchyLifeCycle fTypeHierarchy;
@@ -219,20 +217,12 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	public void inputChanged(Viewer part, Object oldInput, Object newInput) {
 		Assert.isTrue(part instanceof TreeViewer);
 		fViewer= (TreeViewer)part;
-
-		if (oldInput == null && newInput != null) {
-			JavaCore.addElementChangedListener(this); 
-		} else if (oldInput != null && newInput == null) {
-			JavaCore.removeElementChangedListener(this); 
-		}
 	}
 	
 	/*
 	 * @see IContentProvider#dispose
 	 */	
 	public void dispose() {
-		// just to be sure
-		JavaCore.removeElementChangedListener(this);
 	}	
 
 	/*
@@ -241,80 +231,4 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	public Object getParent(Object element) {
 		return null;
 	}
-	
-	/*
-	 * @see IElementChangedListener#elementChanged
-	 */
-	public void elementChanged(ElementChangedEvent event) {
-		if (getHierarchy() != null) {
-			try {
-				processDelta(event.getDelta());
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
-			}
-		}
-	}
-	
-	/*
-	 * Returns true if the problem has been completly handled
-	 */					
-	private boolean processDelta(IJavaElementDelta delta) throws JavaModelException {
-		IJavaElement element= delta.getElement();
-		switch (element.getElementType()) {
-			case IJavaElement.JAVA_PROJECT:
-				if (!getInputType().getJavaProject().equals(element)) {
-					return false;
-				}
-				break;
-			case IJavaElement.COMPILATION_UNIT:
-				if (((ICompilationUnit)element).isWorkingCopy()) {
-					return false;
-				}
-				break;
-			case IJavaElement.TYPE:
-				if (getHierarchy().contains((IType)element)) {
-					return processChangeOnType(delta);
-				}
-				return false;
-		}
-		IJavaElementDelta[] children= delta.getAffectedChildren();
-		for (int i= 0; i < children.length; i++) {
-			if (processDelta(children[i])) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/*
-	 * Returns true if the problem has been completly handled
-	 */	
-	private boolean processChangeOnType(IJavaElementDelta delta) throws JavaModelException {
-		IType type= (IType)delta.getElement();
-		switch (delta.getKind()) {
-			case IJavaElementDelta.REMOVED:
-			case IJavaElementDelta.ADDED:
-				// type hierarchy change listener
-				fViewer.refresh();
-				return true;
-			case IJavaElementDelta.CHANGED:
-				int flags= delta.getFlags();
-				if ((flags & IJavaElementDelta.F_CHILDREN) != 0) {
-					if (fMemberFilter != null) {
-						int nAffected= delta.getAffectedChildren().length;
-						int nChanged= delta.getChangedChildren().length;
-						if (nAffected - nChanged > 0) {
-							fViewer.refresh();
-							return false;
-						} else {
-							fViewer.update(type, UNSTRUCTURED);
-						}
-					} 
-				} else {
-					fViewer.update(type, UNSTRUCTURED);
-				}
-		}
-		return false;
-	}
-	
 }

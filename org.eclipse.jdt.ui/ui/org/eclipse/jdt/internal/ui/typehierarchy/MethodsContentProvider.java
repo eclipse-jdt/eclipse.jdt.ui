@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Content provider used for the method view.
  * Allows also seeing methods inherited from base classes.
  */
-public class MethodsContentProvider implements IStructuredContentProvider, IElementChangedListener, ITypeHierarchyLifeCycleListener {
+public class MethodsContentProvider implements IStructuredContentProvider, ITypeHierarchyLifeCycleListener {
 	
 	private static final String[] UNSTRUCTURED= new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE };
 	private static final Object[] NO_ELEMENTS = new Object[0];
@@ -129,23 +129,16 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 	
 		fViewer= (TableViewer)part;
 		
-		if (oldInput == null && newInput != null) {
-			JavaCore.addElementChangedListener(this); 
-		} else if (oldInput != null && newInput == null) {
-			JavaCore.removeElementChangedListener(this); 
-		}
 		if (newInput instanceof IType) {
 			fInputType= (IType) newInput;
 		} else {
 			fInputType= null;
 		}	
-		if (fShowInheritedMethods) {
-			try {
-				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputType);
-			} catch (JavaModelException e) {
-				fInputType= null;
-				JavaPlugin.log(e.getStatus());
-			}
+		try {
+			fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputType);
+		} catch (JavaModelException e) {
+			fInputType= null;
+			JavaPlugin.log(e.getStatus());
 		}		
 	}
 	
@@ -156,172 +149,45 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 		// just to get sure that everything gets released
 		fHierarchyLifeCycle.freeHierarchy();
 		fHierarchyLifeCycle.removeChangedListener(this);
-		JavaCore.removeElementChangedListener(this);
 	}	
-
-	/*
-	 * @see IElementChangedListener#elementChanged
-	 */
-	public void elementChanged(ElementChangedEvent event) {
-		if (fInputType != null && fViewer != null) {
-			try {
-				if (fShowInheritedMethods) {
-					if (fHierarchyLifeCycle.getHierarchy() != null) {
-						processDeltaWithHierarchy(event.getDelta());
-					}
-				} else {
-					processDeltaWithoutHierarchy(event.getDelta());
-				}
-			} catch(JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
-			}
-		}
-	}
-
-	/*
-	 * handle deltas when fShowInheritedMethods is disabled
-	 * returns true if the problem has been completly handled
-	 * fViewer != null
-	 */		
-	private boolean processDeltaWithoutHierarchy(IJavaElementDelta delta) throws JavaModelException {
-		IJavaElement element= delta.getElement();
-		// try to limit the recursive search
-		switch (element.getElementType()) {
-			case IJavaElement.JAVA_PROJECT:
-				if (!fInputType.getJavaProject().equals(element)) {
-					return false;
-				}
-				break;
-			case IJavaElement.PACKAGE_FRAGMENT:
-				if (!fInputType.getPackageFragment().equals(element)) {
-					return false;
-				} 
-				break;
-			case IJavaElement.COMPILATION_UNIT:
-				ICompilationUnit cu= fInputType.getCompilationUnit();
-				if (cu == null || !cu.equals(element)) {
-					return false;
-				}
-				break;
-			case IJavaElement.CLASS_FILE:
-				IClassFile cf= fInputType.getClassFile();
-				if (cf == null || !cf.equals(element)) {
-					return false;
-				}
-				break;
-			case IJavaElement.TYPE:
-				if (fInputType.equals(element)) {
-					return processChangeOnInput(delta);
-				}
-				return false;
-		}
-		IJavaElementDelta[] children= delta.getAffectedChildren();
-		for (int i= 0; i < children.length; i++) {
-			if (processDeltaWithoutHierarchy(children[i])) {
-				return true;
-			}	
-		}
-		return false;
-	}
-		
-	/*
-	 * handle deltas when fShowInheritedMethods is enabled	
-	 * returns true if the problem has been completly handled
-	 * fViewer != null
-	 */					
-	private boolean processDeltaWithHierarchy(IJavaElementDelta delta) throws JavaModelException {
-		IJavaElement element= delta.getElement();
-		switch (element.getElementType()) {
-			case IJavaElement.JAVA_PROJECT:
-				if (!fHierarchyLifeCycle.getHierarchy().getType().getJavaProject().equals(element)) {
-					return false;
-				}
-				break;	
-			case IJavaElement.TYPE:
-				if (fHierarchyLifeCycle.getHierarchy().contains((IType)element)) {
-					return processChangeOnInput(delta);
-				}
-				return false;
-		}
-		IJavaElementDelta[] children= delta.getAffectedChildren();
-		for (int i= 0; i < children.length; i++) {
-			if (processDeltaWithHierarchy(children[i])) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/*
-	 * returns true if the problem has been completly handled
-	 * fViewer != null
-	 */	
-	private boolean processChangeOnInput(IJavaElementDelta delta) throws JavaModelException {
-		IType type= (IType)delta.getElement();
-		switch (delta.getKind()) {
-			case IJavaElementDelta.REMOVED:
-			case IJavaElementDelta.ADDED:
-				fViewer.refresh();
-				return true;
-			case IJavaElementDelta.CHANGED:
-				int flags= delta.getFlags();
-				if ((flags & IJavaElementDelta.F_CHILDREN) != 0) {
-					int nChildren= delta.getAffectedChildren().length;
-					IJavaElementDelta[] added= delta.getAddedChildren();
-					if (added.length > 0) {
-						fViewer.add(collectElements(added));
-						nChildren-= added.length;
-					}
-					IJavaElementDelta[] removed= delta.getRemovedChildren();
-					if (removed.length > 0) {
-						fViewer.remove(collectElements(removed));
-						nChildren-= removed.length;
-					}
-					if (nChildren > 0) {
-						fViewer.update(collectElements(delta.getChangedChildren()), UNSTRUCTURED);
-					}
-					return false;
-				}
-				fViewer.update(type, UNSTRUCTURED);
-				return false;
-	
-		}
-		return false;
-	}
-		
-	private Object[] collectElements(IJavaElementDelta[] deltas) {
-		int nElements= deltas.length;
-		Object[] elements= new Object[nElements];
-		for (int i= 0; i < nElements; i++) {
-			elements[i]= deltas[i].getElement();
-		}
-		return elements;
-	}		
 
 	/*
 	 * @see ITypeHierarchyChangedListener#typeHierarchyChanged
 	 */
-	public void typeHierarchyChanged(TypeHierarchyLifeCycle th) {
-		checkedSyncExec(new Runnable() {
-			public void run() {
-				try {
-				 	fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputType);
-				 	if (fViewer != null) {
-				 		fViewer.refresh();
-				 	}
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e.getStatus());
-				}
-			}
-		});
-	}
-	
-	private void checkedSyncExec(Runnable r) {
+	public void typeHierarchyChanged(final TypeHierarchyLifeCycle lifeCycle, final IType[] changedTypes) {
 		if (fViewer != null && !fViewer.getControl().isDisposed()) {
 			Display d= fViewer.getControl().getDisplay();
 			if (d != null) {
-				d.syncExec(r);
+				d.asyncExec(new Runnable() {
+					public void run() {
+						doTypeHierarchyChanged(lifeCycle, changedTypes);
+					}
+				});
 			}
 		}
-	}			
+	}
+	
+	private void doTypeHierarchyChanged(TypeHierarchyLifeCycle lifeCycle, IType[] changedTypes) {
+		try {
+			if (changedTypes == null) {
+			 	fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputType);
+		 		if (fViewer != null) {
+		 			fViewer.refresh();
+		 		}
+			} else {
+				if (fShowInheritedMethods) {
+					fViewer.refresh();
+				} else {
+					for (int i= 0; i < changedTypes.length; i++) {
+						if (changedTypes[i].equals(fInputType)) {
+							fViewer.refresh();
+							return;
+						}
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
+		}
+	}	
 }

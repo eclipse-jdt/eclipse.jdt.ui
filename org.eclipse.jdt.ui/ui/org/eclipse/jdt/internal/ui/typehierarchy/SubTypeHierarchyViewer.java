@@ -26,7 +26,7 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 	 * @see TypeHierarchyViewer#getTitle
 	 */	
 	public String getTitle() {
-		if (getHierarchyContentProvider().getMemberFilter() != null) {
+		if (isMethodFiltering()) {
 			return TypeHierarchyMessages.getString("SubTypeHierarchyViewer.filtered.title"); //$NON-NLS-1$
 		} else {
 			return TypeHierarchyMessages.getString("SubTypeHierarchyViewer.title"); //$NON-NLS-1$
@@ -38,7 +38,7 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 	 */
 	public void updateContent() {
 		refresh();
-		if (getHierarchyContentProvider().getMemberFilter() == null) {
+		if (isMethodFiltering()) {
 			expandToLevel(2);
 		} else {
 			expandAll();
