@@ -15,11 +15,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.internal.corext.SourceRange;
+
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
-import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
 /**
  * Creates various differing kinds of IASTFragments, all through
@@ -75,17 +76,20 @@ public class ASTFragmentFactory {
 		SelectionAnalyzer sa= new SelectionAnalyzer(Selection.createFromStartLength(range.getOffset(), range.getLength()), false);
 		scope.accept(sa);
 
-		return isSingleNodeSelected(sa, range, cu) ?
-				ASTFragmentFactory.createFragmentForFullSubtree(sa.getFirstSelectedNode())
-				:
-				ASTFragmentFactory.createFragmentForSubPartBySourceRange(sa.getLastCoveringNode(), range, cu);
+		if (isSingleNodeSelected(sa, range, cu))
+			return ASTFragmentFactory.createFragmentForFullSubtree(sa.getFirstSelectedNode());
+		if (isEmptySelectionCoveredByANode(range, sa))
+			return ASTFragmentFactory.createFragmentForFullSubtree(sa.getLastCoveringNode());
+		return ASTFragmentFactory.createFragmentForSubPartBySourceRange(sa.getLastCoveringNode(), range, cu);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
 	
+	private static boolean isEmptySelectionCoveredByANode(SourceRange range, SelectionAnalyzer sa) {
+		return range.getLength() == 0 && sa.getFirstSelectedNode() == null && sa.getLastCoveringNode() != null;
+	}
+
 	private static boolean isSingleNodeSelected(SelectionAnalyzer sa, SourceRange range, ICompilationUnit cu) throws JavaModelException {
 		return sa.getSelectedNodes().length == 1 && !rangeIncludesNonWhitespaceOutsideNode(range, sa.getFirstSelectedNode(), cu);
 	}
@@ -107,7 +111,6 @@ public class ASTFragmentFactory {
 		public static IASTFragment createFragmentFor(ASTNode node) {
 			return new FragmentForFullSubtreeFactory().createFragment(node);
 		} 
-
 
 		public boolean visit(InfixExpression node) {
 			/* Try creating an associative infix expression fragment
