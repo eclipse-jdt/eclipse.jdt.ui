@@ -26,7 +26,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 public class ExtractMethodTestSetup extends TestSetup {
@@ -64,11 +67,12 @@ public class ExtractMethodTestSetup extends TestSetup {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		Hashtable options= JavaCore.getDefaultOptions();
+		Hashtable options= TestOptions.getDefault();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);
+		JavaPlugin.getDefault().getCodeTemplateStore().restoreDefaults();		
 		
 		fJavaProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(fJavaProject);

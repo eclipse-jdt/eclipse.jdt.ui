@@ -19,6 +19,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -80,7 +81,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 
 	protected void setUp() throws Exception {
-		Hashtable options= JavaCore.getDefaultOptions();
+		Hashtable options= TestOptions.getDefault();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.ERROR);

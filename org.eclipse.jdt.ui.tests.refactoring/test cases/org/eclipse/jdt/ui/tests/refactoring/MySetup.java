@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 public class MySetup extends TestSetup {
 	
@@ -66,11 +67,12 @@ public class MySetup extends TestSetup {
 		fgPackageP= fgRoot.createPackageFragment("p", true, null);
 		
 
-		Hashtable options= JavaCore.getDefaultOptions();
+		Hashtable options= TestOptions.getDefault();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);
+		JavaPlugin.getDefault().getCodeTemplateStore().restoreDefaults();		
 		
 		StringBuffer comment= new StringBuffer();
 		comment.append("/**\n");

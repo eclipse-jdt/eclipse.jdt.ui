@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.TestOptionsSetup;
+
 import org.eclipse.jdt.ui.tests.astrewrite.ASTRewritingTest;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
@@ -37,7 +39,7 @@ public class AutomatedSuite extends TestSuite {
 	 * use the JUnit Launcher.
 	 */
 	public static Test suite() {
-		return new AutomatedSuite();
+		return new TestOptionsSetup(new AutomatedSuite());
 	}
 
 	/**
@@ -62,6 +64,5 @@ public class AutomatedSuite extends TestSuite {
 		
 		addTest(SearchTest.suite()); 
 	}
-	
 }
 

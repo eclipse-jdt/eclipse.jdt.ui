@@ -18,6 +18,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.Path;
 
@@ -66,7 +67,7 @@ public class ImportOrganizeTest extends CoreTests {
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 	
-		Hashtable options= JavaCore.getDefaultOptions();
+		Hashtable options= TestOptions.getDefault();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
 		JavaCore.setOptions(options);
 	}

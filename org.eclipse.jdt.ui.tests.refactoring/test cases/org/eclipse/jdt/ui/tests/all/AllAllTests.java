@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.all;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.TestOptionsSetup;
+
 public class AllAllTests {
 	public static Test suite ( ) {
 		TestSuite suite= new TestSuite("All Tests");
@@ -23,7 +25,7 @@ public class AllAllTests {
 		suite.addTest(org.eclipse.jdt.ui.tests.changes.AllTests.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.reorg.AllTests.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.typeconstraints.TypeConstraintTests.suite());
-	    return suite;
+	    return new TestOptionsSetup(suite);
 	}
 }
 

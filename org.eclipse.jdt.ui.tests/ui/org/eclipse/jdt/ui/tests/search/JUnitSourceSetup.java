@@ -22,10 +22,13 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.search.SearchParticipantRecord;
 import org.eclipse.jdt.internal.ui.search.SearchParticipantsExtensionPoint;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 /**
  */
@@ -63,6 +66,8 @@ public class JUnitSourceSetup extends TestSetup {
 		JavaProjectHelper.addToClasspath(fProject, jreLib);
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		JavaProjectHelper.addSourceContainerWithImport(fProject, SRC_CONTAINER, junitSrcArchive);
+		JavaCore.setOptions(TestOptions.getDefault());
+		JavaPlugin.getDefault().getCodeTemplateStore().restoreDefaults();		
 	}
 	
 	/* (non-Javadoc)
