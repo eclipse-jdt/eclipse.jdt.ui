@@ -14,27 +14,44 @@ import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.ltk.core.refactoring.*;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ContentStamp;
+import org.eclipse.ltk.core.refactoring.UndoTextFileChange;
 
 /* package */ class UndoCompilationUnitChange extends UndoTextFileChange {
 	
 	private ICompilationUnit fCUnit;
 
-	public UndoCompilationUnitChange(String name, ICompilationUnit unit, UndoEdit undo, ContentStamp stampToRestore, int saveMode) throws JavaModelException {
+	public UndoCompilationUnitChange(String name, ICompilationUnit unit, UndoEdit undo, ContentStamp stampToRestore, int saveMode) throws CoreException {
 		super(name, getFile(unit), undo, stampToRestore, saveMode);
 		fCUnit= unit;
 	}
 
-	private static IFile getFile(ICompilationUnit cunit) throws JavaModelException {
-		return (IFile)cunit.getCorrespondingResource();
+	private static IFile getFile(ICompilationUnit cunit) throws CoreException {
+		IFile file= (IFile)cunit.getResource();
+		if (file == null)
+			throw new CoreException(new Status(
+				IStatus.ERROR, 
+				JavaPlugin.getPluginId(), 
+				IStatus.ERROR, 
+				RefactoringCoreMessages.getFormattedString(
+					"UndoCompilationUnitChange.no_resource", //$NON-NLS-1$
+					cunit.getElementName()), 
+				null)
+			);
+		return file;
 	}
 	
 	/**
