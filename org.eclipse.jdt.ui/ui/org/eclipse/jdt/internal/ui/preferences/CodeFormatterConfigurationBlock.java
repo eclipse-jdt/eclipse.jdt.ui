@@ -215,15 +215,17 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	protected void validateSettings(String changedKey, String newValue) {
 		if (changedKey == null || PREF_LINE_SPLIT.equals(changedKey)) {
-			fLineLengthStatus= validatePositiveNumber(newValue);
+			String lineNumber= (String) fWorkingValues.get(PREF_LINE_SPLIT);
+			fLineLengthStatus= validatePositiveNumber(lineNumber);
 		}
 		if (changedKey == null || PREF_TAB_SIZE.equals(changedKey)) {
-			fTabSizeStatus= validatePositiveNumber(newValue);
+			String tabSize= (String) fWorkingValues.get(PREF_TAB_SIZE);
+			fTabSizeStatus= validatePositiveNumber(tabSize);
 			int oldTabSize= fSourceViewer.getTextWidget().getTabs();
 			if (fTabSizeStatus.matches(IStatus.ERROR)) {
 				fWorkingValues.put(PREF_TAB_SIZE, String.valueOf(oldTabSize)); // set back
 			} else {
-				fSourceViewer.getTextWidget().setTabs(getPositiveIntValue(newValue, 0));
+				fSourceViewer.getTextWidget().setTabs(getPositiveIntValue(tabSize, 0));
 			}
 		}
 		updatePreview();
