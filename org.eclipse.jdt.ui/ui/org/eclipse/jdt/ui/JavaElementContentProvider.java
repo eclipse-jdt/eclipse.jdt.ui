@@ -206,7 +206,7 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 			IResourceDelta[] rd= delta.getResourceDeltas();
 			IJavaProject project= element.getJavaProject();
 			for (int i= 0; i < rd.length; i++) {
-				processResourceDelta(rd[i], element, project.getOutputLocation());
+				processResourceDelta(rd[i], element);
 			}
 		}
 		
@@ -241,11 +241,11 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 	/**
 	 * Process resource deltas
 	 */
-	private void processResourceDelta(IResourceDelta delta, Object parent, IPath output) {
+	private void processResourceDelta(IResourceDelta delta, Object parent) {
 		int status= delta.getKind();
 		IResource resource= delta.getResource();
 		// filter out changes affecting the output folder
-		if (resource == null || output.isPrefixOf(resource.getFullPath())) 
+		if (resource == null) 
 			return;
 			
 		// this could be optimized by handling all the added children in the parent
@@ -273,7 +273,7 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 		}
 
 		for (int i= 0; i < affectedChildren.length; i++)
-			processResourceDelta(affectedChildren[i], resource, output);
+			processResourceDelta(affectedChildren[i], resource);
 	}
 	
 	private void postRefresh(final Object root) {
