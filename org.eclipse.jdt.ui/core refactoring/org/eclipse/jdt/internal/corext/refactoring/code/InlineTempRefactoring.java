@@ -51,7 +51,6 @@ public class InlineTempRefactoring extends Refactoring {
 	//the following fields are set after the construction
 	private VariableDeclaration fTempDeclaration;
 	private CompilationUnit fCompilationUnitNode;
-	private boolean fSaveChanges;
 
 	public InlineTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
@@ -60,12 +59,8 @@ public class InlineTempRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
-		fSaveChanges= true;//XX
 	}
 	
-	public void setSaveChanges(boolean save){
-		fSaveChanges= save;
-	}
 	/*
 	 * @see IRefactoring#getName()
 	 */
@@ -90,9 +85,7 @@ public class InlineTempRefactoring extends Refactoring {
 				
 			if (! fCu.isStructureKnown())		
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.syntax_errors")); //$NON-NLS-1$
-				
-			initializeAST();
-				
+								
 			result.merge(checkSelection());
 			if (result.hasFatalError())
 				return result;
@@ -129,20 +122,30 @@ public class InlineTempRefactoring extends Refactoring {
 		}	
 	}
 
-	private void initializeAST() throws JavaModelException {
+	private void initializeAST() {
 		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
 	}
 	
-	private RefactoringStatus checkSelection() throws JavaModelException {
+	public RefactoringStatus checkIfTempSelectedSelected(){
+		initializeAST();
+
 		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
-		
+
 		if (fTempDeclaration == null){
 			String message= RefactoringCoreMessages.getString("InlineTempRefactoring.select_temp");//$NON-NLS-1$
 			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
-		}	
+		}
 
 		if (fTempDeclaration.getParent() instanceof FieldDeclaration)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTemRefactoring.error.message.fieldsCannotBeInlined")); //$NON-NLS-1$
+		
+		return new RefactoringStatus();
+	}
+	
+	private RefactoringStatus checkSelection() throws JavaModelException {
+		RefactoringStatus rs= checkIfTempSelectedSelected();
+		if (rs != null && rs.hasFatalError())
+			return rs;
 
 		if (fTempDeclaration.getParent() instanceof MethodDeclaration)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.method_parameter")); //$NON-NLS-1$
@@ -188,7 +191,6 @@ public class InlineTempRefactoring extends Refactoring {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("InlineTempRefactoring.preview"), 2); //$NON-NLS-1$
 			CompilationUnitChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("InlineTempRefactoring.inline"), fCu); //$NON-NLS-1$
-			change.setSave(fSaveChanges);
 			inlineTemp(change, new SubProgressMonitor(pm, 1));
 			removeTemp(change);
 			return change;
