@@ -6,14 +6,16 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.util.Iterator;
 
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	
@@ -60,7 +62,7 @@ public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	public void run() {
 		Assert.isNotNull(fRefactoring);
 		try{
-			RefactoringAction.activateRefactoringWizard(fRefactoring, createWizard(fRefactoring), "Refactoring", true);
+			new RefactoringStarter().activate(fRefactoring, createWizard(fRefactoring), "Refactoring", true);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, "Refactoring", "Unexpected exception occurred. See log for details.");
 		}	

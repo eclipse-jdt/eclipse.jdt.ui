@@ -10,12 +10,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ISourceRange;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
-
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -45,7 +45,7 @@ public class SurroundWithTryCatchAction extends TextSelectionAction {
 		try {
 			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 			if (status.hasFatalError()) {
-				RefactoringAction.openErrorDialog(TITLE, status);
+				RefactoringErrorDialog.open(TITLE, status);
 				RefactoringStatusEntry entry= status.getFirstEntry(RefactoringStatus.FATAL);
 				if (entry.getContext() instanceof JavaSourceContext && getEditor() != null) {
 					JavaSourceContext context= (JavaSourceContext)entry.getContext();

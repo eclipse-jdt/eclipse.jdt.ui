@@ -13,8 +13,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.ui.refactoring.actions.TextSelectionAction;
-
 public abstract class TextSelectionBasedRefactoringAction extends TextSelectionAction{
 
 	protected TextSelectionBasedRefactoringAction(String name, String operationNonAvailableDialogTitle, String operationNonAvailableDialogMessage) {
@@ -26,8 +24,8 @@ public abstract class TextSelectionBasedRefactoringAction extends TextSelectionA
 	 */
 	public void run() {
 	try{
-			Refactoring refactoring=  createRefactoring(getCompilationUnit(), getTextSelection());
-			RefactoringAction.activateRefactoringWizard(refactoring, createWizard(refactoring), getOperationNotAvailableDialogTitle(), false);
+			Refactoring refactoring= createRefactoring(getCompilationUnit(), getTextSelection());
+			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getOperationNotAvailableDialogTitle(), false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, getText(), "Unexpected exception occurred. See log for details.");
 		}	

@@ -17,10 +17,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
 
 public class ExternalizeAction implements IWorkbenchWindowActionDelegate{
 
@@ -77,7 +75,7 @@ public class ExternalizeAction implements IWorkbenchWindowActionDelegate{
 			Refactoring refactoring= createNewRefactoringInstance(unit);
 			ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
 			String title= NLSUIMessages.getString("action.name"); //$NON-NLS-1$
-			RefactoringAction.activateRefactoringWizard(refactoring, wizard, title, true);
+			new RefactoringStarter().activate(refactoring, wizard, title, true);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, "Externalize Strings", "Unexpected exception. See log for details.");
 		}	

@@ -4,11 +4,11 @@
  */
 package org.eclipse.jdt.internal.ui.reorg;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 
 public class RefactoringSupportFactory {
 
@@ -54,10 +54,11 @@ public class RefactoringSupportFactory {
 		public void rename(Object element) throws JavaModelException{
 			Assert.isNotNull(fRefactoring);
 			RefactoringWizard wizard= createWizard(fRefactoring);
+			RefactoringStarter starter= new RefactoringStarter();
 			if (wizard != null)
-				RefactoringAction.activateRefactoringWizard((Refactoring)fRefactoring, wizard, "Rename", true);
+				starter.activate((Refactoring)fRefactoring, wizard, "Rename", true);
 			else	
-				RefactoringAction.activateRenameRefactoringDialog(fRefactoring, "Rename", getNameEntryMessage(), false, element);
+				starter.activate(fRefactoring, "Rename", getNameEntryMessage(), false, element);
 			fRefactoring= null;
 		}
 		

@@ -4,18 +4,17 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.jdt.core.IField;
-
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
-
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.actions.*;
 
 public class SelfEncapsulateFieldAction extends RefactoringAction {
 
@@ -27,7 +26,7 @@ public class SelfEncapsulateFieldAction extends RefactoringAction {
 		IField field= (IField)SelectionUtil.getSingleElement(getStructuredSelection());
 		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, CodeFormatterPreferencePage.getTabSize());
 		try  {	
-			RefactoringAction.activateRefactoringWizard(
+			new RefactoringStarter().activate(
 				refactoring, 
 				new SelfEncapsulateFieldWizard(refactoring),
 				"Self Encapsulate Field", true);
