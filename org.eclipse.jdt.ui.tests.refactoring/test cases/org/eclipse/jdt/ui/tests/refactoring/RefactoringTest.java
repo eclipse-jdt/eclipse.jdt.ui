@@ -75,8 +75,12 @@ public abstract class RefactoringTest extends TestCase {
 			IJavaElement[] kids= fPackageP.getChildren();
 			for (int i= 0; i < kids.length; i++){
 				if (kids[i] instanceof ISourceManipulation){
-					if (kids[i].exists() && ! kids[i].isReadOnly())
-						((ISourceManipulation)kids[i]).delete(true, null);
+					try{
+						if (kids[i].exists() && ! kids[i].isReadOnly())
+							((ISourceManipulation)kids[i]).delete(true, null);
+					}	catch (JavaModelException e){
+						//try to delete'em all
+					}
 				}	
 			}
 		}	
@@ -84,9 +88,13 @@ public abstract class RefactoringTest extends TestCase {
 		if (fRoot.exists()){
 			IJavaElement[] packages= fRoot.getChildren();
 			for (int i= 0; i < packages.length; i++){
-				IPackageFragment pack= (IPackageFragment)packages[i];
-				if (! pack.equals(fPackageP) && pack.exists() && ! pack.isReadOnly())
-					pack.delete(true, null);
+				try{
+					IPackageFragment pack= (IPackageFragment)packages[i];
+					if (! pack.equals(fPackageP) && pack.exists() && ! pack.isReadOnly())
+						pack.delete(true, null);
+				}	catch (JavaModelException e){
+					//try to delete'em all
+				}	
 			}
 		}
 	}
