@@ -808,7 +808,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 			fStringScanner.adaptToPreferenceChange(event);
 		if (fJavaDocScanner.affectsBehavior(event))
 			fJavaDocScanner.adaptToPreferenceChange(event);
-		if (JavaCore.COMPILER_SOURCE.equals(event.getProperty()))
+		if (fJavaDoubleClickSelector != null && JavaCore.COMPILER_SOURCE.equals(event.getProperty()))
 			if (event.getNewValue() instanceof String)
 				fJavaDoubleClickSelector.setVersion((String) event.getNewValue());
 	}
