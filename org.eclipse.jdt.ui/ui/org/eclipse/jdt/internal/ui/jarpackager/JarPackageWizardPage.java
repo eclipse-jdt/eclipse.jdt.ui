@@ -37,6 +37,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.dialogs.WizardExportResourcesPage;
@@ -517,9 +518,9 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	 * Overrides method from IJarPackageWizardPage
 	 */
 	public boolean isPageComplete() {
-		boolean complete= validateSourceGroup()
-			&& validateDestinationGroup()
-			&& validateOptionsGroup();
+		boolean complete= validateSourceGroup();
+		complete= validateDestinationGroup() && complete;
+		complete= validateOptionsGroup() && complete;
 		if (complete)
 			setErrorMessage(null);
 		return complete;
@@ -555,6 +556,8 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			// Clear error 
 			if (getErrorMessage() != null)
 				setErrorMessage(null);
+			if (getMessage() != null)
+				setMessage(null);
 			return false;
 		}
 		if (fJarPackage.getJarLocation().toString().endsWith("/")) { //$NON-NLS-1$
@@ -578,7 +581,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		String currentMessage= getMessage();
 		if (!(new File(fDestinationNamesCombo.getText()).isAbsolute())) {
 			if (currentMessage == null)
-				setErrorMessage(JarPackagerMessages.getString("JarPackageWizardPage.info.relativeExportDestination")); //$NON-NLS-1$
+				setMessage(JarPackagerMessages.getString("JarPackageWizardPage.info.relativeExportDestination"), WizardPage.INFORMATION); //$NON-NLS-1$
 		} else {
 			if (currentMessage != null)
 				setMessage(null);
