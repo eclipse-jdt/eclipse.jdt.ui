@@ -5,19 +5,19 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IViewReference;
@@ -55,6 +55,75 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
 public class RefactoringSupport {
 	/* package */ abstract static class AbstractRenameSupport implements IRefactoringRenameSupport {
+		
+		private static class SelectionState {
+			private Display fDisplay;
+			private Object fElement;
+			private List fParts;
+			private List fSelections;
+			public SelectionState(Object element) {
+				fElement= element;
+				fParts= new ArrayList();
+				fSelections= new ArrayList();
+				init();
+			}
+			private void init() {
+				IWorkbenchWindow dw = JavaPlugin.getActiveWorkbenchWindow();
+				if (dw ==  null)
+					return;
+				fDisplay= dw.getShell().getDisplay();
+				IWorkbenchPage page = dw.getActivePage();
+				if (page == null)
+					return;
+				List parts = new ArrayList();
+				IViewReference vrefs[]= page.getViewReferences();
+				for(int i= 0; i < vrefs.length; i++) {
+					consider(vrefs[i].getPart(false));
+				}
+				IEditorReference refs[]= page.getEditorReferences();
+				for(int i= 0; i < refs.length; i++) {
+					consider(refs[i].getPart(false));
+				}
+			}
+			private void consider(IWorkbenchPart part) {
+				if (part == null)
+					return;
+				ISetSelectionTarget target= null;
+				if (!(part instanceof ISetSelectionTarget)) {
+					target= (ISetSelectionTarget)part.getAdapter(ISetSelectionTarget.class);
+					if (target == null)
+						return;
+				} else {
+					target= (ISetSelectionTarget)part;
+				}
+				ISelection s= part.getSite().getSelectionProvider().getSelection();
+				if (!(s instanceof IStructuredSelection))
+					return;
+				IStructuredSelection selection= (IStructuredSelection)s;
+				if (!selection.toList().contains(fElement))
+					return;
+				fParts.add(part);
+				fSelections.add(selection);
+			}
+			public void restore(Object newElement) {
+				if (fDisplay == null)
+					return;
+				for (int i= 0; i < fParts.size(); i++) {
+					final IStructuredSelection selection= (IStructuredSelection)fSelections.get(i);
+					final ISetSelectionTarget target= (ISetSelectionTarget)fParts.get(i);
+					List l= selection.toList();
+					int index= l.indexOf(fElement);
+					if (index != -1) { 
+						l.set(index, newElement);
+						fDisplay.asyncExec(new Runnable() {
+							public void run() {
+								target.selectReveal(selection);
+							}
+						});
+					}
+				}
+			}
+		}
 
 		/* package */ IRenameRefactoring fRefactoring;
 
@@ -76,7 +145,7 @@ public class RefactoringSupport {
 			// TODO This is a workaround to create the right refactoring when renaming a virtual method.
 			// This should be moved to a factory with a call back in 2.2
 			if (fRefactoring instanceof RenameMethodRefactoring && element instanceof IMethod) {
-				fRefactoring= ((RenameMethodRefactoring)fRefactoring).clone((IMethod)element);
+				fRefactoring= RenameMethodRefactoring.createInstance((IMethod)element, (RenameMethodRefactoring)fRefactoring);
 			}
 			boolean canRename= lightCheck().isOK();
 			 if (!canRename)	
@@ -88,6 +157,7 @@ public class RefactoringSupport {
 			Assert.isNotNull(fRefactoring);
 			RefactoringWizard wizard= createWizard(fRefactoring);
 			RefactoringStarter starter= new RefactoringStarter();
+			SelectionState state= new SelectionState(element);
 			Object newElementToRename;
 			if (wizard != null)
 				newElementToRename= starter.activate((Refactoring)fRefactoring, wizard, parent, RefactoringMessages.getString("RefactoringSupportFactory.rename"), true); //$NON-NLS-1$
@@ -95,68 +165,17 @@ public class RefactoringSupport {
 				newElementToRename= starter.activate(fRefactoring, parent, RefactoringMessages.getString("RefactoringSupportFactory.rename"), getNameEntryMessage(), false, element); //$NON-NLS-1$
 			
 			if (newElementToRename == null)	{
-				selectAndReveal(fRefactoring.getNewElement());
+				state.restore(fRefactoring.getNewElement());
 				fRefactoring= null;
 			} else {
-				if (canRename(newElementToRename))
+				if (canRename(newElementToRename)) {
 					rename(parent, newElementToRename);
-				else
+				} else {
 					MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("RefactoringSupportFactory.error.title"), RefactoringMessages.getString("RefactoringSupportFactory.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}	
 		}
 		
-		/**
-		 * Checks all parts in the active page, to see if they implement <code>ISetSelectionTarget</code>,
-		 * either directly or as an adapter.  If so, tells the target to select and reveal
-		 * the given newly-added element.
-		 *
-		 * @see ISetSelectionTarget
-		 */
-		private static void selectAndReveal(Object newElement) {
-			if (newElement == null)
-				return;
-			IWorkbenchWindow dw = JavaPlugin.getActiveWorkbenchWindow();
-			if (dw ==  null)
-				return;
-			IWorkbenchPage page = dw.getActivePage();
-			if (page == null)
-				return;
-			List parts = new ArrayList();
-			IViewReference vrefs[]= page.getViewReferences();
-			for(int i= 0; i < vrefs.length; i++) {
-				IWorkbenchPart p= vrefs[i].getPart(false);
-				if (p != null)
-					parts.add(p);
-			}
-
-			IEditorReference refs[]= page.getEditorReferences();
-			for(int i= 0; i < refs.length; i++) {
-				IWorkbenchPart p= refs[i].getPart(false);
-				if (p != null)
-					parts.add(p);
-			}
-			
-			final ISelection selection = new StructuredSelection(newElement);
-		
-			for (Iterator i = parts.iterator(); i.hasNext();) {
-				final IWorkbenchPart part = (IWorkbenchPart) i.next();
-				ISetSelectionTarget target = null;
-				if (part instanceof ISetSelectionTarget) {
-					target = (ISetSelectionTarget) part;
-				}
-				else {
-					target = (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
-				}
-				if (target != null) {
-					final ISetSelectionTarget finalTarget = target;
-					JavaPlugin.getActiveWorkbenchShell().getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							finalTarget.selectReveal(selection);
-						}
-					});
-				}
-			}
-		}
 		public RefactoringWizard createWizard(IRenameRefactoring ref) {
 			return null;
 		}

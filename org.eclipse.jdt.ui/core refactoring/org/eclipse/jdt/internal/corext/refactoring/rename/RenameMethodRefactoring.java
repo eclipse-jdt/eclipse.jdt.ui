@@ -76,13 +76,15 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		 	return new RenameMethodInInterfaceRefactoring(method);	
 	}
 	
-	// TODO This is a workaround to create the right refactoring when renaming a virtual method.
-	// This should be moved to a factory with a call back in 2.2
-	public abstract RenameMethodRefactoring clone(IMethod method);
+	public static RenameMethodRefactoring createInstance(IMethod method, RenameMethodRefactoring other) throws JavaModelException {
+		RenameMethodRefactoring result= createInstance(method);
+		result.setData(other);
+		return result;
+	}
 	
 	protected void setData(RenameMethodRefactoring other) {
-		other.fUpdateReferences= fUpdateReferences;
-		other.fNewName= fNewName;
+		fUpdateReferences= other.fUpdateReferences;
+		fNewName= other.fNewName;
 	}
 	
 	public Object getNewElement(){

@@ -30,12 +30,6 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 		super(method);
 	}
 		
-	public RenameMethodRefactoring clone(IMethod method) {
-		RenameMethodRefactoring result= new RenameMethodInInterfaceRefactoring(method);
-		setData(result);
-		return result;
-	}
-	
 	//---- preconditions ---------------------------
 	
 	/* non java-doc
