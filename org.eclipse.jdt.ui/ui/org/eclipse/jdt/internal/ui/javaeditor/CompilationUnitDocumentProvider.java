@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -314,9 +315,20 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (element instanceof ICompilationUnit)
 			return (ICompilationUnit) element;
 		return null;
-	}	
-
+	}
+	
 	/**
+	 * Creates a line tracker working with the same line delimiters as the document
+	 * of the given element. Assumes the element to be managed by this document provider.
+	 * 
+	 * @param element the element serving as blue print
+	 * @return a line tracker based on the same line delimiters as the element's document
+	 */
+	public ILineTracker createLineTracker(Object element) {
+		return new DefaultLineTracker();
+	}
+
+	/*
 	 * @see AbstractDocumentProvider#createElementInfo(Object)
 	 */
 	protected ElementInfo createElementInfo(Object element) throws CoreException {
@@ -357,7 +369,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		}
 	}
 	
-	/**
+	/*
 	 * @see AbstractDocumentProvider#disposeElementInfo(Object, ElementInfo)
 	 */
 	protected void disposeElementInfo(Object element, ElementInfo info) {
@@ -370,7 +382,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		super.disposeElementInfo(element, info);
 	}
 	
-	/**
+	/*
 	 * @see AbstractDocumentProvider#doSaveDocument(IProgressMonitor, Object, IDocument, boolean)
 	 */
 	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document, boolean overwrite) throws CoreException {
@@ -439,7 +451,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		return new CompilationUnitMarkerAnnotationModel(input.getFile());
 	}
 	
-	/**
+	/*
 	 * @see AbstractDocumentProvider#resetDocument(Object)
 	 */
 	public void resetDocument(Object element) throws CoreException {
@@ -510,21 +522,21 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		return null;
 	}
 	
-	/**
+	/*
 	 * @see IWorkingCopyManager#connect(IEditorInput)
 	 */
 	public void connect(IEditorInput input) throws CoreException {
 		super.connect(input);
 	}
 	
-	/**
+	/*
 	 * @see IWorkingCopyManager#disconnect(IEditorInput)
 	 */
 	public void disconnect(IEditorInput input) {
 		super.disconnect(input);
 	}
 	
-	/**
+	/*
 	 * @see IWorkingCopyManager#getWorkingCopy(Object)
 	 */
 	public ICompilationUnit getWorkingCopy(IEditorInput element) {
@@ -538,7 +550,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		return null;
 	}
 	
-	/**
+	/*
 	 * @see IWorkingCopyManager#shutdown
 	 */
 	public void shutdown() {

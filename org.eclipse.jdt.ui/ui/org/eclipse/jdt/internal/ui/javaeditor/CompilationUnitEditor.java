@@ -30,8 +30,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ILineTracker;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
@@ -311,31 +315,71 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	
 	static class TabConverter implements ITextConverter {
 		
-		private String fTabString= "";
+		private int fTabRatio;
+		private ILineTracker fLineTracker;
+		
+		public TabConverter() {
+		} 
 		
 		public void setNumberOfSpacesPerTab(int ratio) {
-			StringBuffer buffer= new StringBuffer();
-			for (int i= 0; i < ratio; i++)
+			fTabRatio= ratio;
+		}
+		
+		public void setLineTracker(ILineTracker lineTracker) {
+			fLineTracker= lineTracker;
+		}
+		
+		private int insertTabString(StringBuffer buffer, int offsetInLine) {
+			int remainder= offsetInLine % fTabRatio;
+			remainder= fTabRatio - remainder;
+			for (int i= 0; i < remainder; i++)
 				buffer.append(' ');
-			fTabString= buffer.toString();
-		}		
+			return remainder;
+		}
 		
 		public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
 			String text= command.text;
-			if (text != null) {
-				int index= text.indexOf('\t');
-				if (index > -1) {
-					int length= text.length();
-					StringBuffer buffer= new StringBuffer();
-					buffer.append(text.substring(0, index));
-					for (int i= index; i < length; i++) {
-						char c= text.charAt(i);
-						if (c == '\t')
-							buffer.append(fTabString);
-						else
-							buffer.append(c);
-					}
-					command.text= buffer.toString();
+			if (text == null)
+				return;
+				
+			int index= text.indexOf('\t');
+			if (index > -1) {
+				
+				StringBuffer buffer= new StringBuffer();
+				
+				fLineTracker.set(command.text);
+				int lines= fLineTracker.getNumberOfLines();
+				
+				try {
+						
+						for (int i= 0; i < lines; i++) {
+							
+							int offset= fLineTracker.getLineOffset(i);
+							int endOffset= offset + fLineTracker.getLineLength(i);
+							String line= text.substring(offset, endOffset);
+							
+							int position= 0;
+							if (i == 0) {
+								IRegion firstLine= document.getLineInformationOfOffset(command.offset);
+								position= command.offset - firstLine.getOffset();	
+							}
+							
+							int length= line.length();
+							for (int j= 0; j < length; j++) {
+								char c= line.charAt(j);
+								if (c == '\t') {
+									position += insertTabString(buffer, position);
+								} else {
+									buffer.append(c);
+									++ position;
+								}
+							}
+							
+						}
+						
+						command.text= buffer.toString();
+						
+				} catch (BadLocationException x) {
 				}
 			}
 		}
@@ -887,6 +931,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
 		fJavaEditorErrorTickUpdater.setAnnotationModel(getDocumentProvider().getAnnotationModel(input));
+		configureTabConverter();
 	}
 	
 	private void startBracketHighlighting() {
@@ -980,9 +1025,20 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return store.getBoolean(PROBLEM_INDICATION);
 	}
 	
+	private void configureTabConverter() {
+		if (fTabConverter != null) {
+			IDocumentProvider provider= getDocumentProvider();
+			if (provider instanceof CompilationUnitDocumentProvider) {
+				CompilationUnitDocumentProvider cup= (CompilationUnitDocumentProvider) provider;
+				fTabConverter.setLineTracker(cup.createLineTracker(getEditorInput()));
+			}
+		}
+	}
+	
 	private void startTabConversion() {
 		if (fTabConverter == null) {
 			fTabConverter= new TabConverter();
+			configureTabConverter();
 			fTabConverter.setNumberOfSpacesPerTab(getPreferenceStore().getInt(CODE_FORMATTER_TAB_SIZE));
 			AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 			asv.addTextConverter(fTabConverter);
