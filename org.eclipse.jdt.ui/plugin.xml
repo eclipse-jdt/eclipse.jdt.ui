@@ -438,12 +438,6 @@
 			label="%CompareWithMenu.label">
 			<separator name="compareWithGroup"/>
 		</menu>
-		<menu
-			id="replaceWithMenu"
-			path="additions"
-			label="%ReplaceWithMenu.label">
-			<separator name="replaceWithGroup"/>
-		</menu>
 		<action
 			id="javaCompareFromHistory"
 			label="%JavaCompareFromHistoryAction.label"
@@ -452,6 +446,17 @@
 			enablesFor="1"
 			class="org.eclipse.jdt.internal.ui.compare.JavaCompareWithEditionAction">
 		</action>
+	</objectContribution>
+			
+	<objectContribution
+		id="org.eclipse.jdt.internal.ui.compare.JavaReplaceActions"
+		objectClass="org.eclipse.jdt.core.IMember">
+		<menu
+			id="replaceWithMenu"
+			path="additions"
+			label="%ReplaceWithMenu.label">
+			<separator name="replaceWithGroup"/>
+		</menu>
 		<action
 			id="javaReplaceFromHistory"
 			label="%JavaReplaceFromHistoryAction.label"
