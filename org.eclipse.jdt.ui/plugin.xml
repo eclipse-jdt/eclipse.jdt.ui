@@ -414,7 +414,6 @@
             %NewEnumType.description
          </description>
       </wizard>
-      <!--
       <wizard
             name="%NewAnnotationType.label"
             icon="icons/full/etool16/newannot_wiz.gif"
@@ -427,7 +426,6 @@
             %NewAnnotationType.description
          </description>
       </wizard>
-      -->
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">
