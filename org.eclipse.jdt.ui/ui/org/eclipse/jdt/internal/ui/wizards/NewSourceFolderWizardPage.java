@@ -409,8 +409,8 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	private IFolder chooseFolder(String title, String message, IPath initialPath) {	
 		Class[] acceptedClasses= new Class[] { IFolder.class };
 		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
-		Object[] notWanted= getFilteredExistingContainerEntries();
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, notWanted);	
+		//Object[] notWanted= getFilteredExistingContainerEntries();
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, null);	
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
