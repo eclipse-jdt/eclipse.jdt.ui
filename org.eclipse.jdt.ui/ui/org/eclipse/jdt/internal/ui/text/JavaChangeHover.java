@@ -10,17 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.LineChangeHover;
-
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
 
 /**
  * A line change hover for Java source code. Adds a custom information control creator returning a
