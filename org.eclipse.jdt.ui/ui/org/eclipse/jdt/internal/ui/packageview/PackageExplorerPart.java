@@ -321,8 +321,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (fShowTypeHierarchyAction.canActionBeAdded())
 			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowTypeHierarchyAction);
 			
-		if (selectionHasElements)
-			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowNavigatorAction);
+		//if (selectionHasElements)
+		//	menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowNavigatorAction);
 		
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);		
 		if (selectionHasElements) {
