@@ -297,7 +297,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	 * @see IRenameRefactoring#checkNewName
 	 */
 	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
-		Assert.isNotNull(newName, RefactoringCoreMessages.getString("RenameFieldRefactoring.assert.new_name")); //$NON-NLS-1$
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= Checks.checkFieldName(newName);
 		
 		if (isInstaceField(fField) && (! Checks.startsWithLowerCase(newName)))

@@ -27,7 +27,7 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 
 	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) throws JavaModelException{
 		this(ResourceUtil.getResource(cu).getFullPath(), cu.getElementName(), newName);
-		Assert.isTrue(!cu.isReadOnly(), RefactoringCoreMessages.getString("RenameCompilationUnitChange.assert.read_only")); //$NON-NLS-1$
+		Assert.isTrue(!cu.isReadOnly(), "cu must not be read-only"); //$NON-NLS-1$
 	}
 	
 	private RenameCompilationUnitChange(IPath resourcePath, String oldName, String newName){

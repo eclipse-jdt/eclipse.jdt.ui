@@ -243,8 +243,7 @@ public class Checks {
 		for (int i= 0; i < methods.length; i++) {
 			if (JdtFlags.isNative(methods[i])){
 				String msg= RefactoringCoreMessages.getFormattedString("Checks.method_native",  //$NON-NLS-1$
-								new String[]{JavaModelUtil.getFullyQualifiedName(methods[i].getDeclaringType()), methods[i].getElementName()})
-								+ " UnsatisfiedLinkError."; //$NON-NLS-1$
+								new String[]{JavaModelUtil.getFullyQualifiedName(methods[i].getDeclaringType()), methods[i].getElementName(), "UnsatisfiedLinkError"});//$NON-NLS-1$
 				result.addError(msg, JavaSourceContext.create(methods[i])); 
 			}				
 		}

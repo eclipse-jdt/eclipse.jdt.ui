@@ -70,7 +70,7 @@ public class RefactoringAnalyzeUtil {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problemNodes.length; i++) {
 			Context context= new StringContext(modifiedWorkingCopySource, new SourceRange(problemNodes[i]));
-			result.addError(RefactoringCoreMessages.getString("RefactoringAnalyzeUtil.name_collision") + problemNodes[i].getIdentifier(), context); //$NON-NLS-1$
+			result.addError(RefactoringCoreMessages.getFormattedString("RefactoringAnalyzeUtil.name_collision", problemNodes[i].getIdentifier()), context); //$NON-NLS-1$
 		}
 		return result;
 	}

@@ -102,8 +102,8 @@ public class RippleMethodFinder {
 			if (m.isBinary())
 				continue; 
 			IType type= m.getDeclaringType();
-			Assert.isTrue(! visitedTypes.contains(type), RefactoringCoreMessages.getString("RippleMethodFinder.assert.contain")); //$NON-NLS-1$
-			Assert.isTrue(type.isInterface() || declaresAsVirtual(type, method), RefactoringCoreMessages.getString("RippleMethodFinder.assert.second")); //$NON-NLS-1$
+			Assert.isTrue(! visitedTypes.contains(type), "! visitedTypes.contains(type)"); //$NON-NLS-1$
+			Assert.isTrue(type.isInterface() || declaresAsVirtual(type, method), "second condition"); //$NON-NLS-1$
 			
 			visitedTypes.add(type);
 			result.add(m);

@@ -32,7 +32,7 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 
 	public RenamePackageChange(IPackageFragment pack, String newName) throws JavaModelException{
 		this(pack.getPath(), pack.getElementName(), newName);
-		Assert.isTrue(!pack.isReadOnly(), RefactoringCoreMessages.getString("RenamePackageChange.assert.read_only")); //$NON-NLS-1$
+		Assert.isTrue(!pack.isReadOnly(), "package must not be read only"); //$NON-NLS-1$
 	}
 	
 	private RenamePackageChange(IPath resourcePath, String oldName, String newName){

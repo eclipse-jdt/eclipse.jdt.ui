@@ -220,7 +220,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		Assert.isNotNull(fDestination, RefactoringCoreMessages.getString("ReorgRefactoring.assert.destination")); //$NON-NLS-1$
+		Assert.isNotNull(fDestination, "destination not specified"); //$NON-NLS-1$
 		pm.beginTask("", fElements.size()); //$NON-NLS-1$
 		try{
 			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("ReorgRefactoring.reorganize_elements"), fElements.size()); //$NON-NLS-1$
@@ -250,7 +250,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 			if (o instanceof IResource)
 				return createChange(pm, (IResource)o);
 				
-			Assert.isTrue(false, RefactoringCoreMessages.getString("ReorgRefactoring.assert.whyhere"));	 //$NON-NLS-1$
+			Assert.isTrue(false);
 			return null;
 		} finally{
 			pm.done();
@@ -546,7 +546,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 			return getConflictingElementFromDestination(dest, newName);
 		}	
 
-		Assert.isTrue(false, RefactoringCoreMessages.getString("ReorgRefactoring.assert.whyhere"));	 //$NON-NLS-1$
+		Assert.isTrue(false);
 		return null;
 	}
 	

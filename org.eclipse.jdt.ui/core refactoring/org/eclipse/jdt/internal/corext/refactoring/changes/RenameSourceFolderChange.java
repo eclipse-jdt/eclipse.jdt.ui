@@ -28,8 +28,8 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
 	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) throws JavaModelException {
 		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName);
-		Assert.isTrue(!sourceFolder.isReadOnly(), RefactoringCoreMessages.getString("RenameSourceFolderChange.assert.readonly"));  //$NON-NLS-1$
-		Assert.isTrue(!sourceFolder.isArchive(), RefactoringCoreMessages.getString("RenameSourceFolderChange.assert.archive"));  //$NON-NLS-1$
+		Assert.isTrue(!sourceFolder.isReadOnly(), "should not be read only");  //$NON-NLS-1$
+		Assert.isTrue(!sourceFolder.isArchive(), "should not be an archive");  //$NON-NLS-1$
 	}
 	
 	private RenameSourceFolderChange(IPath resourcePath, String oldName, String newName){

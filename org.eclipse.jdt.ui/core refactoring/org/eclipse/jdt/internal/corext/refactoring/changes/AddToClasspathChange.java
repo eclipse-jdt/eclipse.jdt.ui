@@ -109,7 +109,7 @@ public class AddToClasspathChange extends Change {
 			case IClasspathEntry.CPE_CONTAINER:
 				return JavaCore.newContainerEntry(fPath);	
 			default:
-				Assert.isTrue(false, RefactoringCoreMessages.getString("AddToClasspathChange.assert.not_expected")); //$NON-NLS-1$
+				Assert.isTrue(false);
 				return null;	
 		}
 	}

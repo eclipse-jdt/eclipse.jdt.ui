@@ -124,7 +124,7 @@ class MoveCuUpdateCreator {
 	private void addUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws CoreException{
 		try{
 			pm.beginTask("", 3);  //$NON-NLS-1$
-		  	pm.subTask(RefactoringCoreMessages.getString("MoveCuUpdateCreator.searching") + movedUnit.getElementName()); //$NON-NLS-1$
+		  	pm.subTask(RefactoringCoreMessages.getFormattedString("MoveCuUpdateCreator.searching", movedUnit.getElementName())); //$NON-NLS-1$
 		  	
 			if (isDestinationAnotherFragmentOfSamePackage(movedUnit)){
 				pm.worked(3);
