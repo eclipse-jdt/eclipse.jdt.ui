@@ -207,12 +207,12 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         fPackageExplorer.setActionGroup(actionGroup);
         actionGroup.addListener(fHintTextGroup);
         
-        sashForm.setWeights(new int[] {60, 40});
-        adjustSashForm(sashWeight, sashForm, excomposite.isExpanded());
-        GridData gd= new GridData(GridData.FILL_BOTH);
-        PixelConverter converter= new PixelConverter(parent);
-        gd.heightHint= converter.convertHeightInCharsToPixels(25);
-        sashForm.setLayoutData(gd);
+		sashForm.setWeights(new int[] {60, 40});
+		adjustSashForm(sashWeight, sashForm, excomposite.isExpanded());
+		GridData gd= new GridData(GridData.FILL_BOTH);
+		PixelConverter converter= new PixelConverter(parent);
+		gd.heightHint= converter.convertHeightInCharsToPixels(20);
+		sashForm.setLayoutData(gd);
         
         fUseFolderOutputs.dialogFieldChanged();
         

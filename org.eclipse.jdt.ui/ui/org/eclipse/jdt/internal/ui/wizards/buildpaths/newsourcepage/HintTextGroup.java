@@ -108,8 +108,8 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         PixelConverter converter= new PixelConverter(fTopComposite);
         gridData.heightHint= converter.convertHeightInCharsToPixels(12);
         GridLayout gridLayout= new GridLayout();
-        gridLayout.marginLeft= -converter.convertWidthInCharsToPixels(2);
-        gridLayout.marginRight= -4;
+        gridLayout.marginWidth= 0;//-converter.convertWidthInCharsToPixels(2);
+        gridLayout.marginHeight= 0;//= -4;
         fTopComposite.setLayout(gridLayout);
         fTopComposite.setLayoutData(gridData);
         fTopComposite.setData(null);
@@ -177,6 +177,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
 			    formText.setText(e.getMessage(), false, false);
 			}
 			formText.marginHeight= 2;
+			formText.marginWidth= 0;
 			formText.setBackground(null);
 			formText.setLayoutData(new TableWrapData(TableWrapData.FILL_GRAB));
 			return formText;
@@ -574,7 +575,10 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         spc.getVerticalBar().setIncrement(5);
         spc.setLayoutData(new GridData(GridData.FILL_BOTH));
         childComposite= spc.getBody();
-        childComposite.setLayout(new TableWrapLayout());
+        TableWrapLayout tableWrapLayout= new TableWrapLayout();
+		tableWrapLayout.leftMargin= 0;
+		tableWrapLayout.rightMargin= 0;
+		childComposite.setLayout(tableWrapLayout);
         childComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL));
         fTopComposite.setData(childComposite);
         
