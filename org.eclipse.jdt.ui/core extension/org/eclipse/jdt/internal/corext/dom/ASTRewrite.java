@@ -329,7 +329,7 @@ public class ASTRewrite {
 		return null;
 	}
 	
-	/* package */ void clearMark(ASTNode node) {
+	public void clearMark(ASTNode node) {
 		node.setProperty(COPYSOURCEKEY, null);
 		node.setProperty(CHANGEKEY, null);
 	}
