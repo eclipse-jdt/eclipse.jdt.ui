@@ -30,12 +30,14 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.BuiltInProfile;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 public class ModifyDialog extends StatusDialog {
@@ -64,20 +66,19 @@ public class ModifyDialog extends StatusDialog {
 	private final Map fWorkingValues;
 	
 	private final IStatus fStandardStatus;
-	private final IStatus fErrorStatus;
 	
 	protected final List fTabPages;
 	
 	final IDialogSettings fDialogSettings;
 	private TabFolder fTabFolder;
+	private ProfileManager fProfileManager;
 		
-	protected ModifyDialog(Shell parentShell, Profile profile, boolean newProfile) {
+	protected ModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, boolean newProfile) {
 		super(parentShell);
+		fProfileManager= profileManager;
 		fNewProfile= newProfile;
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX );
-		
-		fErrorStatus= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "", null); //$NON-NLS-1$
-		
+				
 		fProfile= profile;
 		if (fProfile instanceof BuiltInProfile) {
 		    fStandardStatus= new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, FormatterMessages.getString("ModifyDialog.dialog.show.warning.builtin"), null); //$NON-NLS-1$
@@ -147,11 +148,7 @@ public class ModifyDialog extends StatusDialog {
 	}
 	
 	public void updateStatus(IStatus status) {
-	    super.updateStatus(status != null ? status : fStandardStatus);
-	    if (fProfile instanceof BuiltInProfile) {
-	    	updateButtonsEnableState(fErrorStatus);
-	    }
-	    
+	    super.updateStatus(status != null ? status : fStandardStatus);    
 	}
 
     protected void constrainShellSize() {
@@ -177,7 +174,6 @@ public class ModifyDialog extends StatusDialog {
     
 	public boolean close()
 	{
-		fProfile.setSettings(fWorkingValues);
 		
 		final Rectangle shell= getShell().getBounds();
 		
@@ -187,6 +183,23 @@ public class ModifyDialog extends StatusDialog {
 		fDialogSettings.put(DS_KEY_PREFERRED_Y, shell.y);
 		
 		return super.close();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
+	 */
+	protected void okPressed() {
+		 if (fProfile instanceof BuiltInProfile) {
+		 	CustomProfile newProfile= new CustomProfile("", fWorkingValues, ProfileVersioner.CURRENT_VERSION); //$NON-NLS-1$
+		 	RenameProfileDialog dialog= new RenameProfileDialog(getShell(), newProfile, fProfileManager);
+		 	if (dialog.open() != Window.OK) {
+		 		return;
+		 	}
+		 	fProfileManager.addProfile(newProfile);
+		 } else {
+		 	fProfile.setSettings(fWorkingValues);
+		 }
+		super.okPressed();
 	}
     
     

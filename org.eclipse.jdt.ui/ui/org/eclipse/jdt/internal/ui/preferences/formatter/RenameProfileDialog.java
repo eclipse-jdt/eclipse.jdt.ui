@@ -42,22 +42,19 @@ public class RenameProfileDialog extends StatusDialog {
 	private final StatusInfo fDuplicate;
 
 	private final CustomProfile fProfile;
+	private final ProfileManager fManager;
 	
 	/**
 	 * Create a new CreateProfileDialog.
 	 */
-	public RenameProfileDialog(Shell parentShell, CustomProfile profile) {
+	public RenameProfileDialog(Shell parentShell, CustomProfile profile, ProfileManager manager) {
 		super(parentShell);
+		fManager= manager;
+		setTitle(FormatterMessages.getString("RenameProfileDialog.dialog.title")); //$NON-NLS-1$
 		fProfile= profile;
 		fOk= new StatusInfo();
 		fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("RenameProfileDialog.status.message.profile_with_this_name_already_exists")); //$NON-NLS-1$
 		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("RenameProfileDialog.status.message.profile_name_empty")); //$NON-NLS-1$
-	}
-	
-	
-	public void create() {
-		super.create();
-		setTitle(FormatterMessages.getString("RenameProfileDialog.dialog.title")); //$NON-NLS-1$
 	}
 	
 	public Control createDialogArea(Composite parent) {
@@ -118,10 +115,8 @@ public class RenameProfileDialog extends StatusDialog {
 			updateStatus(fOk);
 			return;
 		}
-
-		final ProfileManager profileManager= fProfile.getManager();
 		
-		if (profileManager.containsName(name)) {
+		if (fManager.containsName(name)) {
 			updateStatus(fDuplicate);
 			return;
 		}

@@ -163,12 +163,12 @@ public class CodingStyleConfigurationBlock {
 		private void renameButtonPressed() {
 			if (!(fProfileManager.getSelected() instanceof CustomProfile)) return;
 			final CustomProfile profile= (CustomProfile)fProfileManager.getSelected();
-			final RenameProfileDialog renameDialog= new RenameProfileDialog(fComposite.getShell(), profile);
+			final RenameProfileDialog renameDialog= new RenameProfileDialog(fComposite.getShell(), profile, fProfileManager);
 			renameDialog.open();
 		}
 		
 		private void modifyButtonPressed() {
-			final ModifyDialog modifyDialog= new ModifyDialog(fComposite.getShell(), fProfileManager.getSelected(), false);
+			final ModifyDialog modifyDialog= new ModifyDialog(fComposite.getShell(), fProfileManager.getSelected(), fProfileManager, false);
 			modifyDialog.open();
 		}
 		
@@ -187,7 +187,7 @@ public class CodingStyleConfigurationBlock {
 				return;
 			if (!p.openEditDialog()) 
 				return;
-			final ModifyDialog modifyDialog= new ModifyDialog(fComposite.getShell(), p.getCreatedProfile(), true);
+			final ModifyDialog modifyDialog= new ModifyDialog(fComposite.getShell(), p.getCreatedProfile(), fProfileManager, true);
 			modifyDialog.open();
 		}
 		

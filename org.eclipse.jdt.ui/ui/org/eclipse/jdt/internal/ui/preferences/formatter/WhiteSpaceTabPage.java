@@ -124,7 +124,9 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		    fTreeViewer.setGrayedElements(new Object[0]);
 		    fTreeViewer.setCheckedElements(checked.toArray());
 		    fPreview.clear();
-		    fPreview.addAll(fLastSelected.getSnippets());
+		    if (fLastSelected != null) {
+		    	fPreview.addAll(fLastSelected.getSnippets());
+		    }
 		    doUpdatePreview();
 		}
 
@@ -264,7 +266,9 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		}
 	    
 	    public void refreshState() {
-	        innerViewerChanged(fLastSelected);	        
+	    	if (fLastSelected != null) {
+	    		innerViewerChanged(fLastSelected);
+	    	}
 	    }
 	    
 	    public void initialize() {
