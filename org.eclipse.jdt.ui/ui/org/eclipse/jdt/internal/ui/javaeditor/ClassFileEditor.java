@@ -426,8 +426,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * Removed methods isSaveOnClosedNeeded and isDirty.
 	 * Added method isEditable.
 	 */
-	/**
-	 * @see AbstractTextEditor#isEditable()
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#isEditable()
 	 */
 	public boolean isEditable() {
 		return false;

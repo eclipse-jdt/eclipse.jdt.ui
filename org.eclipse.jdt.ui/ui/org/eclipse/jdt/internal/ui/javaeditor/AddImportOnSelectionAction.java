@@ -76,8 +76,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		return manager.getWorkingCopy(fEditor.getEditorInput());
 	}
 	
-	/**
-	 * @see IAction#actionPerformed
+	/*
+	 * @see org.eclipse.jface.action.IAction#run()
 	 */
 	public void run() {
 		ICompilationUnit cu= getCompilationUnit();

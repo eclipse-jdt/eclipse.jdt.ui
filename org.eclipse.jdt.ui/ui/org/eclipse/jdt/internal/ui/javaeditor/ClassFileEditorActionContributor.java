@@ -37,8 +37,8 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		fToggleTextHover= new ToggleTextHoverAction();
 	}
 	
-	/**
-	 * @see EditorActionBarContributor#contributeToMenu(IMenuManager)
+	/*
+	 * @see org.eclipse.ui.part.EditorActionBarContributor#contributeToMenu(org.eclipse.jface.action.IMenuManager)
 	 */
 	public void contributeToMenu(IMenuManager menu) {
 		
@@ -55,7 +55,7 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		}
 	}
 	
-	/**
+	/*
 	 * @see EditorActionBarContributor#contributeToToolBar(IToolBarManager)
 	 */
 	public void contributeToToolBar(IToolBarManager tbm) {
@@ -64,8 +64,8 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		tbm.add(fToggleTextHover);
 	}
 	
-	/**
-	 * @see IEditorActionBarContributor#setActiveEditor(IEditorPart)
+	/*
+	 * @see EditorActionBarContributor#setActiveEditor(IEditorPart)
 	 */
 	public void setActiveEditor(IEditorPart part) {
 		

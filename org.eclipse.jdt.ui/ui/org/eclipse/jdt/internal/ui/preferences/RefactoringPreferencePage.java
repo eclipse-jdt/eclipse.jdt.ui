@@ -48,9 +48,6 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 		store.setDefault(PREF_SAVE_ALL_EDITORS, false);
 	}
 		
-	/**
-	 * @see PreferencePage#createControl(Composite)
-	 */
 	public void createControl(Composite parent) {
 		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
 		super.createControl(parent);
@@ -117,12 +114,8 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 		store.setValue(PREF_SAVE_ALL_EDITORS, value);
 	}	
 	
-	/*
-	 * @see IPreferencePage#performOk()
-	 */
 	public boolean performOk() {
 		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}
-
 }

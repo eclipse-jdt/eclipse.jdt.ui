@@ -41,7 +41,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	}
 
 	/**
-	 * @see IDialogPage#createControl(Composite)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		IJavaElement elem= getJavaElement();
@@ -100,7 +100,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	}
 
 	/**
-	 * @see IPreferencePage#performOk()
+	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
 		return fJavadocConfigurationBlock.performOk();

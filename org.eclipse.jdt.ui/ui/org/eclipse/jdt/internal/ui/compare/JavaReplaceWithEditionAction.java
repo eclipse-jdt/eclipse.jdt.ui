@@ -10,25 +10,36 @@ import java.util.ResourceBundle;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.*;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
+import org.eclipse.compare.EditionSelectionDialog;
+import org.eclipse.compare.HistoryItem;
+import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.ResourceNode;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFileState;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.ui.*;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 
 import org.eclipse.jdt.core.IMember;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.*;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.compare.JavaHistoryAction.JavaTextBufferNode;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
-import org.eclipse.compare.*;
-import org.eclipse.compare.internal.TimeoutContext;
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 
 
 /**
@@ -58,8 +69,8 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		return editions;
 	}
 
-	/**
-	 * @see Action#run
+	/*
+	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
 	public void run(IAction action) {
 		

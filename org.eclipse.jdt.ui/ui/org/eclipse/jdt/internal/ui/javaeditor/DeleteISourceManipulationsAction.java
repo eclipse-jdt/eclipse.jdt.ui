@@ -41,17 +41,11 @@ public class DeleteISourceManipulationsAction extends Action implements ISelecti
 		fPage= page;
 	}
 	
-	/**
-	 * @see ISelectionAction#selectionChanged
-	 */	
 	public void selectionChanged(SelectionChangedEvent e) {
 		ISelection selection= e.getSelection();
 		setEnabled((selection instanceof IStructuredSelection) && !selection.isEmpty());
 	}
 		
-	/**
-	 * @see Action#run()
-	 */
 	public void run() {
 		try {
 			ISourceManipulation[] args= getArgs(fPage.getSelection());

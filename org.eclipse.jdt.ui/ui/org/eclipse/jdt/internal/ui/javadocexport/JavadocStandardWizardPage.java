@@ -94,8 +94,8 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fStyleSheetStatus= new StatusInfo();
 		
 	}
-	/**
-	 * @see IDialogPage#createControl(Composite)
+	/*
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		

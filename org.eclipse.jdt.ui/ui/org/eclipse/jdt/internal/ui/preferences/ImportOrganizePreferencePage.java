@@ -180,7 +180,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	}
 	
 	/**
-	 * @see PreferencePage#createControl(Composite)
+	 * @see PreferencePage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
@@ -396,7 +396,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
     }
 
     /**
-     * @see IPreferencePage#performOk()
+     * @see org.eclipse.jface.preference.IPreferencePage#performOk()
      */
     public boolean performOk() {
   		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();

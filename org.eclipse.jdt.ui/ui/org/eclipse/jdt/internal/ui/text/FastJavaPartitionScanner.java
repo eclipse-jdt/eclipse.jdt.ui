@@ -71,8 +71,8 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 		new Token(JAVA_STRING)
 	};
 
-	/**
-	 * @see ITokenScanner#nextToken()
+	/*
+	 * @see org.eclipse.jface.text.rules.ITokenScanner#nextToken()
 	 */
 	public IToken nextToken() {
 		

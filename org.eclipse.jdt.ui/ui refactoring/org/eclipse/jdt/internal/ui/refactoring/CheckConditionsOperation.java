@@ -67,7 +67,7 @@ public class CheckConditionsOperation implements IRunnableWithProgress {
 	 * 
 	 * @return the <code>RefactoringStatus</code> returned from 
 	 *  <code>IRefactoring.checkPreconditions</code>.
-	 * @see IRefactoring#checkPreconditions
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#checkPreconditions(IProgressMonitor)
 	 */
 	public RefactoringStatus getStatus() {
 		return fStatus;

@@ -145,8 +145,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		return list;
 	}
 	
-	/**
-	 * @see Window#open()
+	/*
+	 * @see org.eclipse.jface.window.Window#open()
 	 */
 	public int open() {
 		final ArrayList typeList= new ArrayList();
