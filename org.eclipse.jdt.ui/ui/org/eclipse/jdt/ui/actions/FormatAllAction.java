@@ -19,6 +19,7 @@ import java.util.Map;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -30,6 +31,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
@@ -57,6 +59,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -152,10 +155,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 								break;						
 							case IJavaElement.COMPILATION_UNIT:
 								result.add(elem);
-								break;
-							case IJavaElement.IMPORT_CONTAINER:
-								result.add(elem.getParent());
-								break;							
+								break;		
 							case IJavaElement.PACKAGE_FRAGMENT:
 								collectCompilationUnits((IPackageFragment) elem, result);
 								break;
@@ -211,8 +211,6 @@ public class FormatAllAction extends SelectionDispatchAction {
 								return elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT; // for browsing perspective
 							case IJavaElement.COMPILATION_UNIT:
 								return true;
-							case IJavaElement.IMPORT_CONTAINER:
-								return true;
 							case IJavaElement.PACKAGE_FRAGMENT:
 							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 								IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -227,17 +225,6 @@ public class FormatAllAction extends SelectionDispatchAction {
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
-			}
-		}
-		return false;
-	}
-	
-	private boolean hasSourceFolders(IJavaProject project) throws JavaModelException {
-		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			IPackageFragmentRoot root= roots[i];
-			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
-				return true;
 			}
 		}
 		return false;
@@ -268,12 +255,26 @@ public class FormatAllAction extends SelectionDispatchAction {
 			if (returnCode != OptionalMessageDialog.NOT_SHOWN && 
 					returnCode != Window.OK ) return;
 		}
+				
+		IStatus status= Resources.makeCommittable(getResources(cus), getShell());
+		if (!status.isOK()) {
+			ErrorDialog.openError(getShell(), ActionMessages.getString("FormatAllAction.failedvalidateedit.title"), ActionMessages.getString("FormatAllAction.failedvalidateedit.message"), status); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
+		}
 		
 		runOnMultiple(cus);
 	}
 
+	private IResource[] getResources(ICompilationUnit[] cus) {
+		IResource[] res= new IResource[cus.length];
+		for (int i= 0; i < res.length; i++) {
+			res[i]= cus[i].getResource();
+		}
+		return res;
+	}
+
 	/**
-	 * Peform format all on the given compilertion units
+	 * Perform format all on the given compilation units
 	 */
 	public void runOnMultiple(final ICompilationUnit[] cus) {
 		try {

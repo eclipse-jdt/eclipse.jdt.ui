@@ -54,10 +54,12 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 
+import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
@@ -630,6 +632,10 @@ public final class ImportsStructure implements IImportsStructure {
 		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
 			IFile file= (IFile) fCompilationUnit.getResource();
 			if (file.exists()) {
+				IStatus status= Resources.makeCommittable(file, null);
+				if (!status.isOK()) {
+					throw new ValidateEditException(status);
+				}
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 				bufferManager.getTextFileBuffer(file.getFullPath()).commit(monitor, true);
 			}
