@@ -82,4 +82,8 @@ public class RetargetActionIDs {
 	// Refactor menu
 	
 	public static String SELF_ENCAPSULATE_FIELD= "org.eclipse.jdt.ui.actions.SelfEncapsulateField"; //$NON-NLS-1$
+	
+	public static String MODIFY_PARAMETERS= "org.eclipse.jdt.ui.actions.ModifyParameters"; //$NON-NLS-1$
+	
+	public static String PULL_UP= "org.eclipse.jdt.ui.actions.PullUp"; //$NON-NLS-1$
 }
