@@ -17,10 +17,11 @@ import java.util.StringTokenizer;
 
 import junit.framework.Assert;
 import org.eclipse.perfmsr.core.LoadValueConstants;
+import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.PerfMsrConstants;
 import org.eclipse.test.internal.performance.data.PerformanceDataModel;
 import org.eclipse.test.internal.performance.data.Sample;
-
+import org.eclipse.test.performance.PerformanceMeter;
 
 /**
  * @since 3.1
@@ -39,7 +40,8 @@ public class Evaluator implements IEvaluator {
 	private Map fFilterProperties;
 	private AssertChecker[] fCheckers;
 
-	public void evaluate(Sample session) {
+	public void evaluate(PerformanceMeter performanceMeter) {
+		Sample session= ((InternalPerformanceMeter) performanceMeter).getSample();
 		Assert.assertTrue("metering session is null", session != null); //$NON-NLS-1$
 		Sample reference= getReferenceSession(session.getProperty(PerfMsrConstants.TESTNAME_PROPERTY), session.getProperty(PerfMsrConstants.HOSTNAME_PROPERTY));
 		Assert.assertTrue("reference metering session is null", reference != null); //$NON-NLS-1$

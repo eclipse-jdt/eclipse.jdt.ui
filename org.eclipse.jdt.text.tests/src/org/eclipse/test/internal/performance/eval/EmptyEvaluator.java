@@ -11,7 +11,7 @@
 
 package org.eclipse.test.internal.performance.eval;
 
-import org.eclipse.test.internal.performance.data.Sample;
+import org.eclipse.test.performance.PerformanceMeter;
 
 /**
  * The empty evaluator. Does nothing.
@@ -19,9 +19,9 @@ import org.eclipse.test.internal.performance.data.Sample;
 public class EmptyEvaluator implements IEvaluator {
 
 	/*
-	 * @see org.eclipse.test.internal.performance.eval.IEvaluator#evaluate(org.eclipse.test.internal.performance.data.Sample)
+	 * @see org.eclipse.test.internal.performance.eval.IEvaluator#evaluate(org.eclipse.jdt.ui.tests.performance.PerformanceMeter)
 	 */
-	public void evaluate(Sample session) throws RuntimeException {
+	public void evaluate(PerformanceMeter performanceMeter) throws RuntimeException {
 	}
 
 	/*

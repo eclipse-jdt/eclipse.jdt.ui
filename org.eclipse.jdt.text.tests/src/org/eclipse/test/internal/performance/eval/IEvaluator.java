@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.eval;
 
-import org.eclipse.test.internal.performance.data.Sample;
-
+import org.eclipse.test.performance.PerformanceMeter;
 
 /**
  * @since 3.1
@@ -19,13 +18,14 @@ import org.eclipse.test.internal.performance.data.Sample;
 public interface IEvaluator {
 
 	/**
-	 * Evaluates the given metering session by comparing it against the reference
-	 * data selected with <code>setReferenceFilterProperties</code>.
+	 * Evaluates the given performance meter by comparing its measurements
+	 * against the reference data selected with
+	 * <code>setReferenceFilterProperties</code>.
 	 * 
-	 * @param session the current metering session to evaluate
+	 * @param performanceMeter the performance meter
 	 * @throws RuntimeException when the comparison does not pass
 	 */
-	void evaluate(Sample session) throws RuntimeException;
+	void evaluate(PerformanceMeter performanceMeter) throws RuntimeException;
 
 	/**
 	 * Sets the asserts that should be evaluated by the evaluator.

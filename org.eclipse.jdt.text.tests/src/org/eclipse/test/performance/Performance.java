@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.test.internal.performance.OSPerformanceMeterFactory;
 import org.eclipse.test.internal.performance.PerformanceMeterFactory;
 import org.eclipse.test.internal.performance.eval.Evaluator;
-
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 /**
@@ -61,7 +60,7 @@ public class Performance {
 	 * @throws RuntimeException if the properties do not hold
 	 */
 	public void assertPerformance(PerformanceMeter performanceMeter) {
-		Evaluator.getDefaultEvaluator().evaluate(performanceMeter.getSample());
+		Evaluator.getDefaultEvaluator().evaluate(performanceMeter);
 	}
 	
 	/**
