@@ -7,11 +7,15 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.ui.ISelectionService;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
-import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 
 /**
  * Contribute Java search specific menu elements.
@@ -58,9 +62,9 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 		return GROUP_NAME;
 	}
 	
-	public void fill(IMenuManager manager, String groupId, boolean isTextSelectionEmpty) {
-		if (isTextSelectionEmpty)
-			return;		
+	public void fill(IMenuManager manager, String groupId, ISelectionService service) {
+		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(service);
+		IStructuredSelection selection= provider.getSelection();
 
 		IMenuManager javaSearchMM;
 		if (fInline) {
@@ -71,10 +75,12 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 			javaSearchMM.add(new GroupMarker(GROUP_ID));
 		}
 		
-		for (int i= 0; i < fGroups.length; i++)
-			javaSearchMM.appendToGroup(GROUP_ID, fGroups[i].getMenuManagerForGroup(isTextSelectionEmpty));
-			
-		if (!fInline && !javaSearchMM.isEmpty())
+		for (int i= 0; i < fGroups.length; i++) {
+			IMenuManager subManager= fGroups[i].getMenuManagerForGroup(selection);
+//			if (!subManager.isEmpty())
+				javaSearchMM.appendToGroup(GROUP_ID, subManager);
+		}
+		if (!fInline)
 			manager.appendToGroup(groupId, javaSearchMM);
 	}
 }

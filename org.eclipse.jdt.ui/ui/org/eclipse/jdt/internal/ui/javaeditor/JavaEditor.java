@@ -196,7 +196,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		addGroup(menu, ITextEditorActionConstants.GROUP_EDIT, IContextMenuConstants.GROUP_GENERATE);
 		addGroup(menu, ITextEditorActionConstants.GROUP_EDIT, IContextMenuConstants.GROUP_NEW);
 		
-		new JavaSearchGroup(false).fill(menu, ITextEditorActionConstants.GROUP_FIND, isTextSelectionEmpty());
+		new JavaSearchGroup(false).fill(menu, ITextEditorActionConstants.GROUP_FIND, getSite().getWorkbenchWindow().getSelectionService());
 
 		/*
 		 * http://dev.eclipse.org/bugs/show_bug.cgi?id=8735

@@ -41,11 +41,12 @@ public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
 		if (!javaSearchMM.isEmpty())
 			manager.add(javaSearchMM);
 	}
-	public MenuManager getMenuManagerForGroup(boolean isTextSelectionEmpty) {
+	public IMenuManager getMenuManagerForGroup(IStructuredSelection selection) {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID); //$NON-NLS-1$
 		ElementSearchAction[] actions= getActions();
-		if (!isTextSelectionEmpty) {
+		if (!selection.isEmpty()) {
 			for (int i= 0; i < actions.length; i++)
+			if (actions[i].canOperateOn(selection))
 				javaSearchMM.add(actions[i]);
 		}
 		return javaSearchMM;
