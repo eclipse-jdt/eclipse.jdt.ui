@@ -253,7 +253,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		store.setDefault(SRCBIN_BINNAME, "bin"); //$NON-NLS-1$
 		
 		store.setDefault(CLASSPATH_JRELIBRARY_LIST, getDefaultJRELibraries());
-		store.setDefault(CLASSPATH_JRELIBRARY_INDEX, 0);
+		store.setDefault(CLASSPATH_JRELIBRARY_INDEX, "carbon".equals(SWT.getPlatform()) ? 1 : 0); //$NON-NLS-1$
 	}
 	
 	private static String getDefaultJRELibraries() {
