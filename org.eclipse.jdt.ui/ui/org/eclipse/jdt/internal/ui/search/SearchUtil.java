@@ -111,6 +111,10 @@ public class SearchUtil extends JavaModelUtil {
 					je= jElements[0];
 			}
 			return je;
+		} catch (JavaModelException ex) {
+			if (!ex.isDoesNotExist())
+				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			return null;
 		} catch (CoreException ex) {
 			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;
