@@ -3,13 +3,13 @@
 
 public class VariableBlock {	
 	private ListDialogField fVariablesList;
-	private Control fControl;
+	private Control fControl;		private List fSelectedElements;
 	
 	/**
 	 * Constructor for VariableBlock
 	 */
 	public VariableBlock(boolean inPreferencePage, String initSelection) {
-		
+				fSelectedElements= new ArrayList(0);		
 		String[] buttonLabels= new String[] { 
 			/* 0 */ NewWizardMessages.getString("VariableBlock.vars.add.button"), //$NON-NLS-1$			/* 1 */ NewWizardMessages.getString("VariableBlock.vars.edit.button"), //$NON-NLS-1$			/* 2 */ null,			/* 3 */ NewWizardMessages.getString("VariableBlock.vars.remove.button") //$NON-NLS-1$
 		};
@@ -86,7 +86,7 @@ public class VariableBlock {
 	}		private boolean containsReserved(List selected) {		for (int i= selected.size()-1; i >= 0; i--) {			if (((CPVariableElement)selected.get(i)).isReserved()) {				return true;			}		}		return false;	}		private static void addAll(Object[] objs, Collection dest) {		for (int i= 0; i < objs.length; i++) {			dest.add(objs[i]);		}	}
 	private void doSelectionChanged(DialogField field) {
 		List selected= fVariablesList.getSelectedElements();
-		boolean isSingleSelected= selected.size() == 1;		boolean containsReserved= containsReserved(selected);				// edit		fVariablesList.enableButton(1, isSingleSelected && !containsReserved);		// remove button		fVariablesList.enableButton(3, !containsReserved);	}
+		boolean isSingleSelected= selected.size() == 1;		boolean containsReserved= containsReserved(selected);				// edit		fVariablesList.enableButton(1, isSingleSelected && !containsReserved);		// remove button		fVariablesList.enableButton(3, !containsReserved);				fSelectedElements= selected;	}
 	
 	private void editEntries(CPVariableElement entry) {
 		List existingEntries= fVariablesList.getElements();
@@ -105,12 +105,12 @@ public class VariableBlock {
 			fVariablesList.refresh();
 		}
 		fVariablesList.selectElements(new StructuredSelection(entry));
-	}		public List getSelectedElements() {		return fVariablesList.getSelectedElements();	}	
+	}		public List getSelectedElements() {		return fSelectedElements;	}	
 	
 	public void performDefaults() {
 		fVariablesList.removeAllElements();		String[] reservedName= getReservedVariableNames();		for (int i= 0; i < reservedName.length; i++) {			CPVariableElement elem= new CPVariableElement(reservedName[i], Path.EMPTY, true);			elem.setReserved(true);			fVariablesList.addElement(elem);		}	}
 
-	public boolean performOk() {		List toRemove= new ArrayList();		toRemove.addAll(Arrays.asList(JavaCore.getClasspathVariableNames()));		// remove all unchanged		List elements= fVariablesList.getElements();		for (int i= elements.size()-1; i >= 0; i--) {			CPVariableElement curr= (CPVariableElement) elements.get(i);			if (curr.isReserved()) {				elements.remove(curr);			} else {				IPath path= curr.getPath();				IPath prevPath= JavaCore.getClasspathVariable(curr.getName());				if (prevPath != null && prevPath.equals(path)) {					elements.remove(curr);				}			}			toRemove.remove(curr.getName());		}		int steps= elements.size() + toRemove.size();		if (steps > 0) {			IRunnableWithProgress runnable= new VariableBlockRunnable(toRemove, elements);						ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());			try {				dialog.run(true, true, runnable);			} catch (InvocationTargetException e) {				ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("VariableBlock.operation_errror.title"), NewWizardMessages.getString("VariableBlock.operation_errror.message")); //$NON-NLS-1$ //$NON-NLS-2$				return false;			} catch (InterruptedException e) {				return true;			}		}		return true;	}		private class VariableBlockRunnable implements IRunnableWithProgress {		private List fToRemove;		private List fToChange;				public VariableBlockRunnable(List toRemove, List toChange) {			fToRemove= toRemove;			fToChange= toChange;		}				/*
+	public boolean performOk() {		List toRemove= new ArrayList();		toRemove.addAll(Arrays.asList(JavaCore.getClasspathVariableNames()));		// remove all unchanged		List elements= fVariablesList.getElements();		for (int i= elements.size()-1; i >= 0; i--) {			CPVariableElement curr= (CPVariableElement) elements.get(i);			if (curr.isReserved()) {				elements.remove(curr);			} else {				IPath path= curr.getPath();				IPath prevPath= JavaCore.getClasspathVariable(curr.getName());				if (prevPath != null && prevPath.equals(path)) {					elements.remove(curr);				}			}			toRemove.remove(curr.getName());		}		int steps= elements.size() + toRemove.size();		if (steps > 0) {			IRunnableWithProgress runnable= new VariableBlockRunnable(toRemove, elements);						ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());			try {				dialog.run(true, true, runnable);			} catch (InvocationTargetException e) {				ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("VariableBlock.operation_errror.title"), NewWizardMessages.getString("VariableBlock.operation_errror.message")); //$NON-NLS-1$ //$NON-NLS-2$				return false;			} catch (InterruptedException e) {				return true;			}		}						return true;	}		private class VariableBlockRunnable implements IRunnableWithProgress {		private List fToRemove;		private List fToChange;				public VariableBlockRunnable(List toRemove, List toChange) {			fToRemove= toRemove;			fToChange= toChange;		}				/*
 	 	 * @see IRunnableWithProgress#run(IProgressMonitor)
 		 */
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
