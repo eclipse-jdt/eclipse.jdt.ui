@@ -413,6 +413,14 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private void checkParameterDefaultValue(RefactoringStatus result, ParameterInfo info) {
+		if (info.isNewVarargs()) {
+			if (! isValidVarargsExpression(info.getDefaultValue())){
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_expression", new String[]{info.getDefaultValue()}); //$NON-NLS-1$
+				result.addFatalError(msg);
+			}	
+			return;
+		}
+		
 		if (info.getDefaultValue().trim().equals("")){ //$NON-NLS-1$
 			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.default_value", new String[]{info.getNewName()}); //$NON-NLS-1$
 			result.addFatalError(msg);
@@ -590,6 +598,31 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		ASTNode selected= analyzer.getFirstSelectedNode();
 		return (selected instanceof Expression) && 
 				trimmed.equals(cuBuff.substring(cu.getExtendedStartPosition(selected), cu.getExtendedStartPosition(selected) + cu.getExtendedLength(selected)));
+	}
+	
+	public static boolean isValidVarargsExpression(String string) {
+		String trimmed= string.trim();
+		if ("".equals(trimmed)) //speed up for a common case //$NON-NLS-1$
+			return true;
+		StringBuffer cuBuff= new StringBuffer();
+		cuBuff.append("class A{ {m("); //$NON-NLS-1$
+		int offset= cuBuff.length();
+		cuBuff.append(trimmed)
+			  .append(");}}"); //$NON-NLS-1$
+		ASTParser p= ASTParser.newParser(AST.JLS3);
+		p.setSource(cuBuff.toString().toCharArray());
+		CompilationUnit cu= (CompilationUnit) p.createAST(null);
+		Selection selection= Selection.createFromStartLength(offset, trimmed.length());
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
+		cu.accept(analyzer);
+		ASTNode[] selectedNodes= analyzer.getSelectedNodes();
+		if (selectedNodes.length == 0)
+			return false;
+		for (int i= 0; i < selectedNodes.length; i++) {
+			if (! (selectedNodes[i] instanceof Expression))
+				return false;
+		}
+		return true;
 	}
 
 	public StubTypeContext getStubTypeContext() {
@@ -1164,7 +1197,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		int i= 0;
 		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= (ParameterInfo) iter.next();
-			superCall.arguments().add(i, createNewExpression(rewrite, info));
+			Expression newExpression= createNewExpression(rewrite, info);
+			if (newExpression != null)
+				superCall.arguments().add(newExpression);
 		}
 	}
 	
@@ -1236,7 +1271,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	private static Expression createNewExpression(ASTRewrite rewrite, ParameterInfo info) {
-		return (Expression) rewrite.createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
+		if (info.isNewVarargs() && info.getDefaultValue().trim().length() == 0)
+			return null;
+		else
+			return (Expression) rewrite.createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
 	}
 
 	private boolean isVisibilitySameAsInitial() throws JavaModelException {
@@ -1370,7 +1408,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					}
 					
 				} else if (info.isAdded()) {
-					newNodes.add(createNewParamgument(info));
+					ASTNode newParamgument= createNewParamgument(info);
+					if (newParamgument != null)
+						newNodes.add(newParamgument);
 					
 				} else /* parameter stays */ {
 					if (oldIndex != fOldVarargIndex) {
@@ -1441,6 +1481,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			getImportRemover().registerRemovedNode(typeNode);
 		}
 	
+		/**
+		 * @param info
+		 * @return a new method parameter or argument, or <code>null</code> for an empty vararg argument
+		 */
 		protected abstract ASTNode createNewParamgument(ParameterInfo info);
 
 		protected abstract SimpleName getMethodNameNode();

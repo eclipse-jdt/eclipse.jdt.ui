@@ -1877,6 +1877,60 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 	
+	public void testVararg08() throws Exception {
+		//can add vararg parameter with empty default value
+		String[] signature= {};
+		String[] newNames= {"args"};
+		String[] newTypes= {"String ..."};
+		String[] newDefaultValues= {""};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= { };
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testVararg09() throws Exception {
+		//can add vararg parameter with one-expression default value
+		String[] signature= {};
+		String[] newNames= {"args"};
+		String[] newTypes= {"String ..."};
+		String[] newDefaultValues= {"\"Hello\""};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= { };
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testVararg10() throws Exception {
+		//can add vararg parameter with multiple-expressions default value
+		String[] signature= {};
+		String[] newNames= {"args"};
+		String[] newTypes= {"String ..."};
+		String[] newDefaultValues= {"\"Hello\", new String()"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= { };
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
 	public void testGenerics01() throws Exception {
 		if (BUG_79976_CORE_GENERIC_RippleMethodFinder) {
 			printTestDisabledMessage("BUG_79976_CORE_GENERIC_RippleMethodFinder");
