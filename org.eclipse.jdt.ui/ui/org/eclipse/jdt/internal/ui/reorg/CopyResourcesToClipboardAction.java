@@ -12,6 +12,7 @@ import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -79,7 +80,7 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 		if (! haveCommonParent(selectedResources))
 			return false;
 		
-		IRefactoringAction ca= ReorgGroup.createDnDCopyAction(selection.toList(), ClipboardActionUtil.getFirstResource(selection));
+		SelectionDispatchAction ca= ReorgActionFactory.createDnDCopyAction(selection.toList(), ClipboardActionUtil.getFirstResource(selection));
 		ca.update();
 		return ca.isEnabled();
 	}
