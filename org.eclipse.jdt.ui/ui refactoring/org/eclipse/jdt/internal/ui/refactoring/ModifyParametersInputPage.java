@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -58,7 +57,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	private static final int OLDNAME_PROP= 1; 
 	private static final int NEWNAME_PROP= 2;
 	
-	private static final int ROW_COUNT= 5; 
+	private static final int ROW_COUNT= 10; 
 	
 	private Button fUpButton;
 	private Button fDownButton;
@@ -101,7 +100,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		GridData labelGd= new GridData();
 		labelGd.horizontalSpan= 2;
 		tableLabel.setLayoutData(labelGd);
-		tableLabel.setText("&Parameters");
+		tableLabel.setText("&Parameters (click in the \'New Name\' column to edit an entry)");
 		
 		createParameterList(subComposite);
 		createButtonComposite(subComposite);
