@@ -885,14 +885,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
 		addCheckBox(composite, label, CompilationUnitEditor.SPACES_FOR_TABS, 1);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
-		Button button= addCheckBox(composite, label, CompilationUnitEditor.CLOSE_JAVADOCS, 1);
-
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeStrings"); //$NON-NLS-1$
 		addCheckBox(composite, label, CompilationUnitEditor.CLOSE_STRINGS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeBrackets"); //$NON-NLS-1$
 		addCheckBox(composite, label, CompilationUnitEditor.CLOSE_BRACKETS, 1);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
+		Button button= addCheckBox(composite, label, CompilationUnitEditor.CLOSE_JAVADOCS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
 		fAddJavaDocTagsButton= addCheckBox(composite, label, CompilationUnitEditor.ADD_JAVADOC_TAGS, 1);
