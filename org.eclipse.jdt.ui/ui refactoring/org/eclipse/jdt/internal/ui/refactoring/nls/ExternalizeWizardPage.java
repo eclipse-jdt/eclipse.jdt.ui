@@ -915,8 +915,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		if (!fNLSRefactoring.isEclipseNLS())
 			return true;
 		
+		if (substitution == null)
+			return false;
+		
 		String key= substitution.getKey();
-		if (!Character.isJavaIdentifierStart(key.charAt(0)))
+		if (key.length() == 0 || !Character.isJavaIdentifierStart(key.charAt(0)))
 			return false;
 		
 		for (int i= 1, length= key.length(); i < length; i++)
