@@ -466,7 +466,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	private void initializeDuplicates() {
 		fDuplicates= SnippetFinder.perform(
-			ASTNodes.getParent(fAnalyzer.getEnclosingMethod(), TypeDeclaration.class), 
+			(TypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingMethod(), TypeDeclaration.class), 
 			fAnalyzer.getSelectedNodes());
 		fReplaceDuplicates= fDuplicates.length > 0;
 	}
