@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.search;
@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;;
 
 public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 
-	private IWorkingSet fWorkingSet;
+	private IWorkingSet[] fWorkingSets;
 	
 	public FindReferencesInWorkingSetAction() {
 		setText(SearchMessages.getString("Search.FindReferencesInWorkingSetAction.label")); //$NON-NLS-1$
@@ -30,33 +30,33 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 		super(label, validTypes);
 	}
 
-	FindReferencesInWorkingSetAction(IWorkingSet workingSet, Class[] validTypes) {
+	FindReferencesInWorkingSetAction(IWorkingSet[] workingSets, Class[] validTypes) {
 		super("", validTypes);  //$NON-NLS-1$
-		fWorkingSet= workingSet;
+		fWorkingSets= workingSets;
 	}
 
-	public FindReferencesInWorkingSetAction(IWorkingSet workingSet) {
+	public FindReferencesInWorkingSetAction(IWorkingSet[] workingSets) {
 		this();
-		fWorkingSet= workingSet;
+		fWorkingSets= workingSets;
 	}
 
 	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		IWorkingSet workingSet= fWorkingSet;
-		if (fWorkingSet == null) {
-			workingSet= JavaSearchScopeFactory.getInstance().queryWorkingSet();
-			if (workingSet == null)
+		IWorkingSet[] workingSets= fWorkingSets;
+		if (fWorkingSets == null) {
+			workingSets= JavaSearchScopeFactory.getInstance().queryWorkingSets();
+			if (workingSets == null)
 				return null;
 		}
-		updateLRUWorkingSet(workingSet);
-		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
+		updateLRUWorkingSets(workingSets);
+		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets), getCollector());
 	};
 
-
-	private IJavaSearchScope getScope(IWorkingSet workingSet) throws JavaModelException {
-		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSet);
+	private IJavaSearchScope getScope(IWorkingSet[] workingSets) throws JavaModelException {
+		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSets);
 	}
 
-	private String getScopeDescription(IWorkingSet workingSet) {
-		return SearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()}); //$NON-NLS-1$
+	private String getScopeDescription(IWorkingSet[] workingSets) {
+		return SearchMessages.getFormattedString("WorkingSetScope", new String[] {SearchUtil.toString(workingSets)}); //$NON-NLS-1$
+
 	}
 }

@@ -16,11 +16,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 
-	private IWorkingSet fWorkingSet;
+	private IWorkingSet[] fWorkingSet;
 
-	public FindDeclarationsInWorkingSetAction(IWorkingSet workingSet) {
+	public FindDeclarationsInWorkingSetAction(IWorkingSet[] workingSets) {
 		this();
-		fWorkingSet= workingSet;
+		fWorkingSet= workingSets;
 	}
 
 	public FindDeclarationsInWorkingSetAction() {
@@ -29,32 +29,32 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 	}
 
 	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		IWorkingSet workingSet= fWorkingSet;
+		IWorkingSet[] workingSets= fWorkingSet;
 		if (fWorkingSet == null) {
-			workingSet= JavaSearchScopeFactory.getInstance().queryWorkingSet();
-			if (workingSet == null)
+			workingSets= JavaSearchScopeFactory.getInstance().queryWorkingSets();
+			if (workingSets == null)
 				return null;
 		}
-		updateLRUWorkingSet(workingSet);
+		updateLRUWorkingSets(workingSets);
 		if (element.getElementType() == IJavaElement.METHOD) {
 			IMethod method= (IMethod)element;
 			int searchFor= IJavaSearchConstants.METHOD;
 			if (method.isConstructor())
 				searchFor= IJavaSearchConstants.CONSTRUCTOR;
 			String pattern= PrettySignature.getUnqualifiedMethodSignature(method);
-			return new JavaSearchOperation(JavaPlugin.getWorkspace(), pattern, true, searchFor, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
+			return new JavaSearchOperation(JavaPlugin.getWorkspace(), pattern, true, searchFor, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets), getCollector());
 		}
 		else
-			return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
+			return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets), getCollector());
 	};
 
 
-	private IJavaSearchScope getScope(IWorkingSet workingSet) throws JavaModelException {
-		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSet);
+	private IJavaSearchScope getScope(IWorkingSet[] workingSets) throws JavaModelException {
+		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSets);
 	}
 
-	private String getScopeDescription(IWorkingSet workingSet) {
-		return SearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()}); //$NON-NLS-1$
+	private String getScopeDescription(IWorkingSet[] workingSets) {
+		return SearchMessages.getFormattedString("WorkingSetScope", new String[] {SearchUtil.toString(workingSets)}); //$NON-NLS-1$
 
 	}
 }

@@ -24,8 +24,8 @@ public class DeclarationsSearchGroup extends JavaSearchSubGroup  {
 
 		Iterator iter= ElementSearchAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
-			IWorkingSet workingSet= (IWorkingSet)iter.next();
-			actions.add(new WorkingSetAction(new FindDeclarationsInWorkingSetAction(workingSet), workingSet.getName()));
+			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
+			actions.add(new WorkingSetAction(new FindDeclarationsInWorkingSetAction(workingSets), SearchUtil.toString(workingSets)));
 		}
 		return (ElementSearchAction[])actions.toArray(new ElementSearchAction[actions.size()]);
 	}

@@ -122,20 +122,20 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		boolean		isCaseSensitive;
 		IJavaElement	javaElement;
 		int			scope;
-		IWorkingSet	 	workingSet;
+		IWorkingSet[]	 	workingSets;
 		
 		public SearchPatternData(int s, int l, String p, IJavaElement element) {
 			this(s, l, p, fIsCaseSensitive || element != null, element, ISearchPageContainer.WORKSPACE_SCOPE, null);
 		}
 		
-		public SearchPatternData(int s, int l, String p, boolean i, IJavaElement element, int scope, IWorkingSet workingSet) {
+		public SearchPatternData(int s, int l, String p, boolean i, IJavaElement element, int scope, IWorkingSet[] workingSets) {
 			searchFor= s;
 			limitTo= l;
 			pattern= p;
 			isCaseSensitive= i;
 			javaElement= element;
 			this.scope= scope;
-			this.workingSet= workingSet;
+			this.workingSets= workingSets;
 		}
 	}
 
@@ -160,13 +160,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection);
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
-				IWorkingSet workingSet= getContainer().getSelectedWorkingSet();
+				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
 				// should not happen - just to be sure
-				if (workingSet == null)
+				if (workingSets == null || workingSets.length < 1)
 					return false;
-				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()}); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSet());
-				ElementSearchAction.updateLRUWorkingSet(getContainer().getSelectedWorkingSet());
+				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(workingSets)); //$NON-NLS-1$
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets());
+				ElementSearchAction.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		}		
 		
 		JavaSearchResultCollector collector= new JavaSearchResultCollector();
@@ -272,7 +272,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 							fCaseSensitive.getSelection(),
 							fJavaElement,
 							getContainer().getSelectedScope(),
-							getContainer().getSelectedWorkingSet());
+							getContainer().getSelectedWorkingSets());
 			fgPreviousSearchPatterns.add(match);
 		}
 		else {
@@ -281,7 +281,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			match.isCaseSensitive= fCaseSensitive.getSelection();
 			match.javaElement= fJavaElement;
 			match.scope= getContainer().getSelectedScope();
-			match.workingSet= getContainer().getSelectedWorkingSet();
+			match.workingSets= getContainer().getSelectedWorkingSets();
 		};
 		return match;
 	}
@@ -429,8 +429,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fCaseSensitive.setEnabled(fJavaElement == null);
 		fCaseSensitive.setSelection(fInitialData.isCaseSensitive);
 
-		if (fInitialData.workingSet != null)
-			getContainer().setSelectedWorkingSet(fInitialData.workingSet);
+		if (fInitialData.workingSets != null)
+			getContainer().setSelectedWorkingSets(fInitialData.workingSets);
 		else
 			getContainer().setSelectedScope(fInitialData.scope);
 	}
@@ -680,19 +680,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		return StructuredSelection.EMPTY;
 	}
 	
-	/**
-	 * Returns the current active editor part.
-	 */
-	private IEditorPart getEditorPart() {
-		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
-		if (window != null) {
-			IWorkbenchPage page= window.getActivePage();
-			if (page != null)
-				return page.getActiveEditor();
-		}
-		return null;
-	}
-
 	//--------------- Configuration handling --------------
 	
 	/**

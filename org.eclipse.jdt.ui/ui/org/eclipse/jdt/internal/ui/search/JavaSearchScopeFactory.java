@@ -46,30 +46,30 @@ public class JavaSearchScopeFactory {
 		return fgInstance;
 	}
 
-	public IWorkingSet queryWorkingSet() throws JavaModelException {
+	public IWorkingSet[] queryWorkingSets() throws JavaModelException {
 		IWorkingSetSelectionDialog dialog= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSetSelectionDialog(JavaPlugin.getActiveWorkbenchShell());
 		if (dialog.open() == Window.OK) {
 			IWorkingSet[] workingSets= dialog.getSelection();
 			if (workingSets.length > 0)
-				return workingSets[0];
+				return workingSets;
 		}
 		return null;
 	}
 
-	public IJavaSearchScope createJavaSearchScope(IWorkingSet workingSet) {
-		IAdaptable[] elements= workingSet.getElements();
-		int length= elements.length;
-		if (length <= 0)
+	public IJavaSearchScope createJavaSearchScope(IWorkingSet[] workingSets) {
+		if (workingSets == null || workingSets.length < 1)
 			return EMPTY_SCOPE;
-		
-		Set javaElements= new HashSet(elements.length);
-		for (int i= 0; i < length; i++) {
-			if (elements[i] instanceof IJavaElement)
-				addJavaElements(javaElements, (IJavaElement)elements[i]);
-			else
-				addJavaElements(javaElements, elements[i]);
-		}
-		return SearchEngine.createJavaSearchScope((IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]));
+
+		Set javaElements= new HashSet(workingSets.length * 10);
+		for (int i= 0; i < workingSets.length; i++)
+			addJavaElements(javaElements, workingSets[i]);
+		return createJavaSearchScope(javaElements);
+	}
+	
+	public IJavaSearchScope createJavaSearchScope(IWorkingSet workingSet) {
+		Set javaElements= new HashSet(10);
+		addJavaElements(javaElements, workingSet);
+		return createJavaSearchScope(javaElements);
 	}
 
 	public IJavaSearchScope createJavaSearchScope(IResource[] resources) {
@@ -77,9 +77,9 @@ public class JavaSearchScopeFactory {
 			return EMPTY_SCOPE;
 		Set javaElements= new HashSet(resources.length);
 		addJavaElements(javaElements, resources);
-		return SearchEngine.createJavaSearchScope((IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]));
+		return createJavaSearchScope(javaElements);
 	}
-
+	
 	public IJavaSearchScope createJavaSearchScope(ISelection selection) {
 		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
 			Iterator iter= ((IStructuredSelection)selection).iterator();
@@ -101,9 +101,13 @@ public class JavaSearchScopeFactory {
 						addJavaElements(javaElements, resource);
 				}
 			}
-			return SearchEngine.createJavaSearchScope((IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]));
+			return createJavaSearchScope(javaElements);
 		}
 		return EMPTY_SCOPE;
+	}
+
+	private IJavaSearchScope createJavaSearchScope(Set javaElements) {
+		return SearchEngine.createJavaSearchScope((IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]));
 	}
 
 	private void addJavaElements(Set javaElements, IResource[] resources) {
@@ -151,5 +155,18 @@ public class JavaSearchScopeFactory {
 		for (int i= 0; i < roots.length; i++)
 			if (!roots[i].isExternal())
 				javaElements.add(roots[i]);
+	}
+
+	private void addJavaElements(Set javaElements, IWorkingSet workingSet) {
+		if (workingSet == null)
+			return;
+		
+		IAdaptable[] elements= workingSet.getElements();
+		for (int i= 0; i < elements.length; i++) {
+			if (elements[i] instanceof IJavaElement)
+				addJavaElements(javaElements, (IJavaElement)elements[i]);
+			else
+				addJavaElements(javaElements, elements[i]);
+		}
 	}
 }

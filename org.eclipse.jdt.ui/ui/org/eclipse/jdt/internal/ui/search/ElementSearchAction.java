@@ -2,8 +2,11 @@
  * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.search;import java.lang.reflect.InvocationTargetException;
+package org.eclipse.jdt.internal.ui.search;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.runtime.CoreException;
@@ -30,7 +33,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
- 
+
 /**
  * Abstract class for all search actions which work on java elements.
  */
@@ -38,7 +41,7 @@ public abstract class ElementSearchAction extends JavaElementAction {
 
 	// LRU working sets
 	static int LRU_WORKINGSET_LIST_SIZE= 3;
-	private static LRUWorkingSetList fgLRUWorkingSets;
+	private static LRUWorkingSetsList fgLRUWorkingSets;
 		
 	// Settings store
 	private static final String DIALOG_SETTINGS_KEY= "JavaElementSearchActions"; //$NON-NLS-1$
@@ -146,34 +149,80 @@ public abstract class ElementSearchAction extends JavaElementAction {
 		return null;
 	}
 	
-	public static void updateLRUWorkingSet(IWorkingSet workingSet) {
-		getLRUWorkingSets().add(workingSet);
-
-		// Store LRU working sets
-		String[] lruWorkingSetNames= new String[LRU_WORKINGSET_LIST_SIZE];
-		Iterator iter= fgLRUWorkingSets.iterator();
-		int i= 0;
-		while (iter.hasNext())
-			lruWorkingSetNames[i++]= ((IWorkingSet)iter.next()).getName();
-		fgSettingsStore.put(STORE_LRU_WORKING_SET_NAMES, lruWorkingSetNames);
+	public static void updateLRUWorkingSets(IWorkingSet[] workingSets) {
+		if (workingSets == null || workingSets.length < 1)
+			return;
+		
+		getLRUWorkingSets().add(workingSets);
+		saveState();
 	}
 
-	static LRUWorkingSetList getLRUWorkingSets() {
+	private static void saveState() {
+		IWorkingSet[] workingSets;
+		Iterator iter= fgLRUWorkingSets.iterator();
+		int i= 0;
+		while (iter.hasNext()) {
+			workingSets= (IWorkingSet[])iter.next();
+			String[] names= new String[workingSets.length];
+			for (int j= 0; j < workingSets.length; j++)
+				names[j]= workingSets[j].getName();
+			fgSettingsStore.put(STORE_LRU_WORKING_SET_NAMES + i, names);
+			i++;
+		}
+	}
+
+	static LRUWorkingSetsList getLRUWorkingSets() {
 		if (fgLRUWorkingSets == null) {
-			// Read LRU working sets from store
-			fgLRUWorkingSets= new LRUWorkingSetList(LRU_WORKINGSET_LIST_SIZE);
-			fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
-			if (fgSettingsStore == null)
-				fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_KEY);
-			String[] lruWorkingSetNames= fgSettingsStore.getArray(STORE_LRU_WORKING_SET_NAMES);
+			restoreState();
+		}
+		return fgLRUWorkingSets;
+	}
+
+	static void restoreState() {
+		fgLRUWorkingSets= new LRUWorkingSetsList(LRU_WORKINGSET_LIST_SIZE);
+		fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
+		if (fgSettingsStore == null)
+			fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_KEY);
+		
+		boolean foundLRU= false;
+		for (int i= LRU_WORKINGSET_LIST_SIZE - 1; i >= 0; i--) {
+			String[] lruWorkingSetNames= fgSettingsStore.getArray(STORE_LRU_WORKING_SET_NAMES + i);
 			if (lruWorkingSetNames != null) {
-				for (int i= lruWorkingSetNames.length - 1; i >= 0; i--) {
-					IWorkingSet workingSet= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(lruWorkingSetNames[i]);
-					if (workingSet != null)
-						fgLRUWorkingSets.add(workingSet);
+				Set workingSets= new HashSet(2);
+				for (int j= 0; j < lruWorkingSetNames.length; j++) {
+					IWorkingSet workingSet= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(lruWorkingSetNames[j]);
+					if (workingSet != null) {
+						workingSets.add(workingSet);
+					}
+				}
+				foundLRU= true;										
+				fgLRUWorkingSets.add((IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]));
+			}
+		}
+		if (!foundLRU)
+			// try old preference format
+			restoreFromOldFormat();
+	}
+
+	private static void restoreFromOldFormat() {
+		fgLRUWorkingSets= new LRUWorkingSetsList(LRU_WORKINGSET_LIST_SIZE);
+		fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
+		if (fgSettingsStore == null)
+			fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_KEY);
+
+		boolean foundLRU= false;
+		String[] lruWorkingSetNames= fgSettingsStore.getArray(STORE_LRU_WORKING_SET_NAMES);
+		if (lruWorkingSetNames != null) {
+			for (int i= lruWorkingSetNames.length - 1; i >= 0; i--) {
+				IWorkingSet workingSet= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(lruWorkingSetNames[i]);
+				if (workingSet != null) {
+					foundLRU= true;
+					fgLRUWorkingSets.add(new IWorkingSet[]{workingSet});
 				}
 			}
 		}
-		return fgLRUWorkingSets;
+		if (foundLRU)
+			// save in new format
+			saveState();
 	}
 }

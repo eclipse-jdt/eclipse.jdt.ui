@@ -1,10 +1,11 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +18,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -277,5 +279,23 @@ public class SearchUtil extends JavaModelUtil {
 		}
 		
 		return null;
+	}
+
+	public static String toString(IWorkingSet[] workingSets) {
+		Arrays.sort(workingSets, new WorkingSetComparator());
+		String result= ""; //$NON-NLS-1$
+		if (workingSets != null && workingSets.length > 0) {
+			boolean firstFound= false;
+			for (int i= 0; i < workingSets.length; i++) {
+				String workingSetName= workingSets[i].getName();
+				if (firstFound)
+					result= SearchMessages.getFormattedString("SearchUtil.workingSetConcatenation", new String[] {result, workingSetName}); //$NON-NLS-1$
+				else {
+					result= workingSetName;
+					firstFound= true;
+				}
+			}
+		}
+		return result;
 	}
 }

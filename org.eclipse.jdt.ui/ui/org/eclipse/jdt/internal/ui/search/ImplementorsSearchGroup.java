@@ -23,8 +23,8 @@ public class ImplementorsSearchGroup extends JavaSearchSubGroup  {
 			
 		Iterator iter= ElementSearchAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
-			IWorkingSet workingSet= (IWorkingSet)iter.next();
-			actions.add(new WorkingSetAction(new FindImplementorsInWorkingSetAction(workingSet), workingSet.getName()));
+			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
+			actions.add(new WorkingSetAction(new FindImplementorsInWorkingSetAction(workingSets), SearchUtil.toString(workingSets)));
 		}
 		return (ElementSearchAction[])actions.toArray(new ElementSearchAction[actions.size()]);
 	}

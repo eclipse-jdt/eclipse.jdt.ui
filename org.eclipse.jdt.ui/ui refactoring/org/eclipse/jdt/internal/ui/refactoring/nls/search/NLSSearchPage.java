@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -49,6 +50,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -91,6 +93,7 @@ import org.eclipse.jdt.internal.ui.search.ElementSearchAction;
 import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
+import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -116,17 +119,17 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		String			wrapperClassName;
 		IJavaElement	wrapperClass;
 		int				scope;
-		IWorkingSet		workingSet;
+		IWorkingSet[]		workingSets;
 
 		public SearchPatternData(String wrapperClassName, IJavaElement wrapperClass, String p) {
 			this(wrapperClassName, wrapperClass, p, ISearchPageContainer.WORKSPACE_SCOPE, null);
 		}
 
-		public SearchPatternData(String wrapperClassName, IJavaElement wrapperClass, String p, int scope , IWorkingSet workingSet) {
+		public SearchPatternData(String wrapperClassName, IJavaElement wrapperClass, String p, int scope , IWorkingSet[] workingSets) {
 			this.wrapperClassName= wrapperClassName;
 			this.wrapperClass= wrapperClass;
 			this.scope= scope;
-			this.workingSet= workingSet;
+			this.workingSets= workingSets;
 			propertyFileName= p;
 			if (p != null && p.length() > 0) {
 				IPath path= new Path(propertyFileName);
@@ -158,13 +161,13 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getSelection());				
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
-				IWorkingSet workingSet= getContainer().getSelectedWorkingSet();
+				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
 				// should not happen - just to be sure
-				if (workingSet == null)
+				if (workingSets == null || workingSets.length < 1)
 					return false;
-				scopeDescription= NLSSearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()}); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSet());
-				ElementSearchAction.updateLRUWorkingSet(getContainer().getSelectedWorkingSet());
+				scopeDescription= NLSSearchMessages.getFormattedString("WorkingSetScope", new String[] {SearchUtil.toString(workingSets)}); //$NON-NLS-1$
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets());
+				ElementSearchAction.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		}
 
 		NLSSearchResultCollector collector= new NLSSearchResultCollector(data.propertyFile);
@@ -230,7 +233,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 			match.wrapperClass= fWrapperClass;
 			match.propertyFileName= fPropertyFileText.getText();
 			match.scope= getContainer().getSelectedScope();
-			match.workingSet= getContainer().getSelectedWorkingSet();
+			match.workingSets= getContainer().getSelectedWorkingSets();
 			match.propertyFile= null;
 			if (match.propertyFileName != null) {
 				IPath path= new Path(match.propertyFileName);
@@ -315,8 +318,8 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				fWrapperClass= values.wrapperClass;
 				fWrapperClassCombo.setText(values.wrapperClassName);
 				fPropertyFileText.setText(values.propertyFileName);
-				if (values.workingSet != null)
-					getContainer().setSelectedWorkingSet(values.workingSet);
+				if (values.workingSets != null)
+					getContainer().setSelectedWorkingSets(values.workingSets);
 				else
 					getContainer().setSelectedScope(values.scope);
 			}
@@ -561,8 +564,21 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				pattern= PrettySignature.getMethodSignature((IMethod) element);
 				break;
 		}
-		if (searchFor == TYPE && pattern != null)
-			return new SearchPatternData(pattern, element, ""); //$NON-NLS-1$
+		if (searchFor == TYPE && pattern != null) {
+			String propertyFilePathStr= "";
+			// make suggestion for properties file
+			IResource resource;
+			try {
+				resource= element.getUnderlyingResource();
+			} catch (JavaModelException ex) {
+				resource= null;
+			}
+			if (resource != null) {
+				IPath path= resource.getFullPath().removeFileExtension().addFileExtension("properties"); //$NON-NLS-1$
+				propertyFilePathStr= path.toString();
+			}
+			return new SearchPatternData(pattern, element, propertyFilePathStr); //$NON-NLS-1$
+		}
 
 		return null;
 	}
@@ -589,8 +605,24 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 			Object o= ((IStructuredSelection) selection).getFirstElement();
 			if (o instanceof IFile && ((IFile) o).getFileExtension().equalsIgnoreCase("properties")) { //$NON-NLS-1$
 				IPath propertyFullPath= ((IFile)o).getFullPath();
-				IPath propertyFile= propertyFullPath.removeFirstSegments(propertyFullPath.segmentCount() - 1);
-				return new SearchPatternData(propertyFile.removeFileExtension().toString(), null, propertyFullPath.toString());
+				String typePathStr= null;
+
+				// try to be smarter and find a corresponding CU
+				IPath cuPath= propertyFullPath.removeFileExtension().addFileExtension("java"); //$NON-NLS-1$
+				IFile cuFile= (IFile)JavaPlugin.getWorkspace().getRoot().findMember(cuPath);
+				IType type= null;
+				if (cuFile != null && cuFile.exists()) {
+					IJavaElement  cu= JavaCore.create(cuFile);
+					if (cu != null && cu.exists() && cu.getElementType() == IJavaElement.COMPILATION_UNIT)
+						type= ((ICompilationUnit)cu).findPrimaryType();
+						if (type != null)
+							typePathStr= JavaModelUtil.getFullyQualifiedName(type);
+						else {
+							IPath propertyFile= propertyFullPath.removeFirstSegments(propertyFullPath.segmentCount() - 1);
+							typePathStr= propertyFile.removeFileExtension().toString();
+						}
+				}
+				return new SearchPatternData(typePathStr, type, propertyFullPath.toString());
 			}
 		}
 		return null;

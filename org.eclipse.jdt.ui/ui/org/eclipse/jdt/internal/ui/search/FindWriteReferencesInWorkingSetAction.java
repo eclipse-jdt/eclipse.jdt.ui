@@ -16,8 +16,8 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
 	}
 
-	public FindWriteReferencesInWorkingSetAction(IWorkingSet workingSet) {
-		super(workingSet, new Class[] {IField.class});
+	public FindWriteReferencesInWorkingSetAction(IWorkingSet[] workingSets) {
+		super(workingSets, new Class[] {IField.class});
 	}
 
 	protected int getLimitTo() {

@@ -15,11 +15,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 
-	private IWorkingSet fWorkingSet;
+	private IWorkingSet[] fWorkingSets;
 
-	public FindImplementorsInWorkingSetAction(IWorkingSet workingSet) {
+	public FindImplementorsInWorkingSetAction(IWorkingSet[] workingSet) {
 		this();
-		fWorkingSet= workingSet;
+		fWorkingSets= workingSet;
 	}
 
 	public FindImplementorsInWorkingSetAction() {
@@ -28,23 +28,23 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 	}
 
 	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		IWorkingSet workingSet= fWorkingSet;
-		if (fWorkingSet == null) {
-			workingSet= JavaSearchScopeFactory.getInstance().queryWorkingSet();
-			if (workingSet == null)
+		IWorkingSet[] workingSets= fWorkingSets;
+		if (fWorkingSets == null) {
+			workingSets= JavaSearchScopeFactory.getInstance().queryWorkingSets();
+			if (workingSets == null)
 				return null;
 		}
-		updateLRUWorkingSet(workingSet);
-		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
+		updateLRUWorkingSets(workingSets);
+		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets), getCollector());
 	};
 
 
-	private IJavaSearchScope getScope(IWorkingSet workingSet) throws JavaModelException {
-		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSet);
+	private IJavaSearchScope getScope(IWorkingSet[] workingSets) throws JavaModelException {
+		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSets);
 	}
 
-	private String getScopeDescription(IWorkingSet workingSet) {
-		return SearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()}); //$NON-NLS-1$
+	private String getScopeDescription(IWorkingSet[] workingSets) {
+		return SearchMessages.getFormattedString("WorkingSetScope", new String[] {SearchUtil.toString(workingSets)}); //$NON-NLS-1$
 
 	}
 }

@@ -24,8 +24,8 @@ public class ReferencesSearchGroup extends JavaSearchSubGroup  {
 
 		Iterator iter= ElementSearchAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
-			IWorkingSet workingSet= (IWorkingSet)iter.next();
-			actions.add(new WorkingSetAction(new FindReferencesInWorkingSetAction(workingSet), workingSet.getName()));
+			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
+			actions.add(new WorkingSetAction(new FindReferencesInWorkingSetAction(workingSets), SearchUtil.toString(workingSets)));
 		}
 		return (ElementSearchAction[])actions.toArray(new ElementSearchAction[actions.size()]);
 	}
