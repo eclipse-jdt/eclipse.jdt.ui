@@ -38,7 +38,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 			typecomments[i].setPattern("/** typecomment template*/");	
 		}
 		Template[] filecomments= Templates.getInstance().getTemplates("filecomment");
-		for (int i= 0; i < typecomments.length; i++) {
+		for (int i= 0; i < filecomments.length; i++) {
 			filecomments[i].setPattern("/** filecomment template */");	
 		}
 	}
