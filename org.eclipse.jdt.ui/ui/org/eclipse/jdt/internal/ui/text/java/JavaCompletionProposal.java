@@ -497,9 +497,12 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 
 		IDocument document= viewer.getDocument();
 
+		// don't eat if not in preferences, XOR with modifier key 1 (Ctrl)
+		// but: if there is a selection, replace it!
+		Point selection= viewer.getSelectedRange();
 		fToggleEating= (stateMask & SWT.MOD1) != 0;
 		if (insertCompletion() ^ fToggleEating)
-			fReplacementLength= offset - fReplacementOffset;
+			fReplacementLength= selection.x + selection.y - fReplacementOffset;
 		
 		apply(document, trigger, offset);
 		fToggleEating= false;

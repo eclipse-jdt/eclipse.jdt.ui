@@ -42,7 +42,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	private final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
 	private final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
 	private final static char[] TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', ' ' };
-	private final static char[] VAR_TRIGGER= new char[] { '\t', ' ', '=', ';' };
+	private final static char[] VAR_TRIGGER= new char[] { '\t', ' ', '=', ';', '.' };
 
 	protected IJavaProject fJavaProject;
 	protected ICompilationUnit fCompilationUnit; // set when imports can be added
