@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.text.link;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -30,7 +32,11 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
@@ -50,12 +56,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.TextUtilities;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -460,6 +461,9 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 				return;
 			fAssistant.setCompletions(pp.getChoices());
 			fAssistant.showPossibleCompletions();
+		} else {
+			if (fAssistant != null)
+				fAssistant.setCompletions(new ICompletionProposal[0]);
 		}
 	}
 	
@@ -511,15 +515,23 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 			break;
 
 		// ENTER
+		case 0x0A: // Ctrl+Enter
 		case 0x0D:
 			{
-				// if tab was treated as a document change, would it exceed variable range?
-				if (!LinkedPositionManager.includes(fFramePosition, offset, length)) {
+			if (fAssistant != null && fAssistant.wasProposalChosen()) {
+				next();
+				event.doit= false;
+				break;
+			}
+		
+				// if enter was treated as a document change, would it exceed variable range?
+				if (!LinkedPositionManager.includes(fFramePosition, offset, length)
+						|| (fFramePosition == fFinalCaretPosition)) {
 					leave(UNINSTALL | COMMIT);
 					return;
 				}
 			}
-		
+			
 			leave(UNINSTALL | COMMIT | UPDATE_CARET);
 			event.doit= false;
 			break;
@@ -787,8 +799,35 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 		// since there is no intrusive popup sticking out.
 		
 		// need to check first what happens on reentering based on an open action
+		// Seems to be no problem
 		
-	 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
+		// TODO check whether we can leave it or uncomment it after debugging
+		// PS: why DOCUMENT_CHANGED? We want to trigger a redraw! (Shell deactivated does not mean
+		// it is not visible any longer.
+//	 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
+		
+		// Better:
+		// Check with content assistant and only leave if its not the proposal shell that took the 
+		// focus away.
+		
+		StyledText text;
+		Display display;
+
+		if (fAssistant == null || fViewer == null || (text= fViewer.getTextWidget()) == null 
+				|| (display= text.getDisplay()) == null || display.isDisposed()) {
+		 	leave(UNINSTALL | COMMIT);
+		} else {
+			// Post in UI thread since the assistant popup will only get the focus after we lose it.
+			display.asyncExec(new Runnable() {
+				public void run() {
+					// TODO add isDisposed / isUninstalled / hasLeft check? for now: check for content type,
+					// since it gets nullified in leave()
+					if (fAssistant == null || !fAssistant.hasFocus() || fContentType == null)  {
+						leave(UNINSTALL | COMMIT);
+					}
+				}
+			});
+		}
 	}
 
 	/*

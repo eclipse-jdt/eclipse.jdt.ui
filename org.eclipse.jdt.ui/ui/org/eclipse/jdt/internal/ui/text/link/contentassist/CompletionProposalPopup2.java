@@ -47,6 +47,8 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
 
 
 /**
@@ -176,6 +178,7 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 						
 						createProposalSelector();
 						setProposals(fComputedProposals);
+						resizeProposalSelector(true);
 						displayProposals();
 					}
 				}
@@ -213,8 +216,10 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 			return;
 			
 		Control control= fViewer.getTextWidget();
+//		fProposalShell= new Shell(control.getShell(), SWT.ON_TOP);
 		fProposalShell= new Shell(control.getShell(), SWT.ON_TOP | SWT.RESIZE );
 		fProposalTable= new Table(fProposalShell, SWT.H_SCROLL | SWT.V_SCROLL);
+//		fProposalTable= new Table(fProposalShell, SWT.H_SCROLL | SWT.V_SCROLL);
 		
 		fProposalTable.setLocation(0, 0);
 		if (fAdditionalInfoController != null)
@@ -226,12 +231,16 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 		fProposalShell.setLayout(layout);		
 
 		GridData data= new GridData(GridData.FILL_BOTH);
-		data.heightHint= fProposalTable.getItemHeight() * 10;
-		data.widthHint= 300;
 		fProposalTable.setLayoutData(data);
 
 		fProposalShell.pack();
 		
+		// set location
+		Point currentLocation= fProposalShell.getLocation();
+		Point newLocation= getLocation();
+		if ((newLocation.x < currentLocation.x && newLocation.y == currentLocation.y) || newLocation.y < currentLocation.y) 
+			fProposalShell.setLocation(newLocation);
+
 		if (fAdditionalInfoController != null) {
 			fProposalShell.addControlListener(new ControlListener() {
 				
@@ -354,6 +363,8 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 				
 				fContentAssistant.showContextInformation(info, position);
 			}
+			
+			fContentAssistant.setProposalChosen(true);
 		
 		} finally {
 			if (target != null)
@@ -406,6 +417,10 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 			fProposalShell.setVisible(false);
 			fProposalShell.dispose();
 			fProposalShell= null;
+		}
+		
+		if (fAdditionalInfoController != null) {
+			fAdditionalInfoController.dispose();
 		}
 		
 		fFilteredProposals= null;
@@ -463,16 +478,30 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 				}
 			}
 
-			Point currentLocation= fProposalShell.getLocation();
-			Point newLocation= getLocation();
-			if ((newLocation.x < currentLocation.x && newLocation.y == currentLocation.y) || newLocation.y < currentLocation.y) 
-				fProposalShell.setLocation(newLocation);
+			resizeProposalSelector(false);
 
 			selectProposal(selectionIndex, false);
 			fProposalTable.setRedraw(true);
 		}
 	}
 	
+	private void resizeProposalSelector(boolean adjustWidth) {
+		// in order to fill in the table items so size computation works correctly
+		// will cause flicker, though
+		fProposalTable.setRedraw(true);
+
+		int width= adjustWidth ? SWT.DEFAULT : ((GridData)fProposalTable.getLayoutData()).widthHint;
+		Point size= fProposalTable.computeSize(width, SWT.DEFAULT, true);
+		
+		GridData data= new GridData(GridData.FILL_BOTH);
+		data.widthHint= adjustWidth ? Math.min(size.x, 300) : width;
+		data.heightHint= Math.min(SWTUtil.getTableHeightHint(fProposalTable, fProposalTable.getItemCount() - 1), SWTUtil.getTableHeightHint(fProposalTable, 9));
+		fProposalTable.setLayoutData(data);
+		
+		fProposalShell.layout(true);
+		fProposalShell.pack();
+	}
+
 	private boolean validateProposal(IDocument document, ICompletionProposal p, int offset, DocumentEvent event) {
 		// detect selected
 		if (p instanceof ICompletionProposalExtension2) {
@@ -496,6 +525,8 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 		StyledText text= fViewer.getTextWidget();
 		Point selection= text.getSelection();
 		Point p= text.getLocationAtOffset(selection.x);
+		// TODO subtract border width!
+		p.x -= fProposalShell.getBorderWidth();
 		if (p.x < 0) p.x= 0;
 		if (p.y < 0) p.y= 0;
 		p= new Point(p.x, p.y + text.getLineHeight());
@@ -608,7 +639,7 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 						
 					case '\n': // Ctrl-Enter on w2k
 					case '\r': // Enter
-						e.doit= false;
+//						e.doit= false;
 						selectProposalWithMask(e.stateMask);
 						break;
 						
@@ -623,10 +654,15 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 						if (p instanceof ICompletionProposalExtension) {
 							ICompletionProposalExtension t= (ICompletionProposalExtension) p;
 							char[] triggers= t.getTriggerCharacters();
-							if (contains(triggers, key)) {		
-								e.doit= false;
+							if (contains(triggers, key)) {
 								hide();
-								insertProposal(p, key, e.stateMask, fViewer.getSelectedRange().x);
+								if (key == ';') {		
+									e.doit= true;
+									insertProposal(p, (char) 0, e.stateMask, fViewer.getSelectedRange().x);
+								} else {
+									e.doit= false;
+									insertProposal(p, key, e.stateMask, fViewer.getSelectedRange().x);
+								}
 							}
 						}
 				}
@@ -737,9 +773,7 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 			return fComputedProposals;
 			
 		if (offset < fInvocationOffset) {
-			fInvocationOffset= offset;
-			fComputedProposals= computeProposals(fInvocationOffset);
-			return fComputedProposals;
+			return null;
 		}
 		
 		ICompletionProposal[] proposals= fComputedProposals;

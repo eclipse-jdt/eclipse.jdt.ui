@@ -30,6 +30,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -38,9 +39,14 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IEventConsumer;
+import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
@@ -58,6 +64,13 @@ import org.eclipse.jface.text.contentassist.IContentAssistantExtension;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationPresenter;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 
 
 
@@ -171,7 +184,7 @@ public class ContentAssistant2 implements IContentAssistant, IContentAssistantEx
 					if (d != null) {
 						d.asyncExec(new Runnable() {
 							public void run() {
-								if (!fProposalPopup.hasFocus() && !fContextInfoPopup.hasFocus())
+								if (!hasFocus())
 									hide();
 							}
 						});
@@ -684,6 +697,8 @@ public class ContentAssistant2 implements IContentAssistant, IContentAssistantEx
 	private int fCompletionPosition;
 	private String[] fProposalStrings;
 	private ICompletionProposal[] fProposals;
+	/** Whether a proposal was chosen the last time a proposal popup was shown. */
+	private boolean fWasChosen;
 	
 	/**
 	 * Creates a new content assistant. The content assistant is not automatically activated,
@@ -693,6 +708,46 @@ public class ContentAssistant2 implements IContentAssistant, IContentAssistantEx
 	 * is activated after a 500 ms delay. It uses the default partitioning.
 	 */	
 	public ContentAssistant2() {
+		setContextInformationPopupOrientation(CONTEXT_INFO_ABOVE);
+		setInformationControlCreator(getInformationControlCreator());
+
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		IColorManager manager= textTools.getColorManager();
+
+		IPreferenceStore store=  JavaPlugin.getDefault().getPreferenceStore();
+
+		Color c= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, manager);
+		setProposalSelectorForeground(c);
+		
+		c= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);
+		setProposalSelectorBackground(c);
+	}
+	
+	/**
+	 * Creates an <code>IInformationControlCreator</code> to be used to display context information. 
+	 * 
+	 * @return an <code>IInformationControlCreator</code> to be used to display context information
+	 */
+	private IInformationControlCreator getInformationControlCreator() {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				return new DefaultInformationControl(parent, new HTMLTextPresenter());
+			}
+		};
+	}	
+	
+	/**
+	 * Fetches the color specified by <code>key</code> from the given <code>IPreferenceStore</code>.
+	 * The color is managed by <code>manager</code> so we don't have to deal with its disposal.
+	 * 
+	 * @param store the preference store
+	 * @param key the key into <code>store</code>
+	 * @param manager the color manager for the returned color
+	 * @return a color as specified by the value for <code>key</code> in <code>store</code>, managed by <code>manager</code>
+	 */
+	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {
+		RGB rgb= PreferenceConverter.getColor(store, key);
+		return manager.getColor(rgb);
 	}
 	
 	/**
@@ -1258,6 +1313,7 @@ public class ContentAssistant2 implements IContentAssistant, IContentAssistantEx
 	 * @see IContentAssist#showPossibleCompletions
 	 */
 	public String showPossibleCompletions() {
+		setProposalChosen(false);
 		return fProposalPopup.showProposals(false);
 	}
 	
@@ -1471,6 +1527,7 @@ public class ContentAssistant2 implements IContentAssistant, IContentAssistantEx
 	 */
 	public void setCompletions(ICompletionProposal[] proposals) {
 		fProposals= proposals;
+		setProposalChosen(false);
 	}
 	
 	/*
@@ -1492,6 +1549,37 @@ public class ContentAssistant2 implements IContentAssistant, IContentAssistantEx
 	public void setFocus(IWidgetTokenOwner owner) {
 		if (fProposalPopup != null)
 			fProposalPopup.setFocus();
+	}
+
+	/**
+	 * Returns a hint whether a proposal was chosen the last time a popup selector was shown.
+	 * 
+	 * @return <code>true</code> if a proposal was chosen and inserted the last time 
+	 * {@link #showPossibleCompletions()} was called, <code>false</code> otherwise or if no proposal
+	 * has been shown so far
+	 */
+	public boolean wasProposalChosen() {
+		return fWasChosen;
+	}
+
+	/**
+	 * Sets the <code>wasChosen</code> flag which indicates whether a proposal was selected the last
+	 * time a proposal popup was shown.
+	 * 
+	 * @param wasChosen the new value of the <code>wasChosen</code> flag.
+	 */
+	protected void setProposalChosen(boolean wasChosen) {
+		fWasChosen= wasChosen;
+	}
+
+	/**
+	 * Returns whether any popups controlled by the receiver have the input focus.
+	 * 
+	 * @return <code>true</code> if any of the managed popups have the focus, <code>false</code> otherwise
+	 */
+	public boolean hasFocus() {
+		return (fProposalPopup != null && fProposalPopup.hasFocus())
+				|| (fContextInfoPopup != null && fContextInfoPopup.hasFocus());
 	}
 }
 
