@@ -15,22 +15,16 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.PreferencePage;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /*
- * The page to configure the compiler options.
+ * The page to configure the task tags
  */
-public class TodoTaskPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IStatusChangeListener {
+public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 
 	public static final String ID= "org.eclipse.jdt.ui.preferences.TodoTaskPreferencePage"; //$NON-NLS-1$
 
@@ -42,58 +36,75 @@ public class TodoTaskPreferencePage extends PreferencePage implements IWorkbench
 		
 		// only used when page is shown programatically
 		setTitle(PreferencesMessages.getString("TodoTaskPreferencePage.title")); //$NON-NLS-1$
-		
-		fConfigurationBlock= new TodoTaskConfigurationBlock(this, null);
 	}
 		
+	
 	/*
-	 * @see IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
-	 */	
-	public void init(IWorkbench workbench) {
-	}
-
-	/*
-	 * @see PreferencePage#createControl(Composite)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.TODOTASK_PREFERENCE_PAGE);
-	}	
+		if (isProjectPreferencePage()) {
+			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.TODOTASK_PROPERTY_PAGE);
+		} else {
+			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.TODOTASK_PREFERENCE_PAGE);
+		}
+	}
 
-	/*
-	 * @see PreferencePage#createContents(Composite)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#createPreferenceContent(org.eclipse.swt.widgets.Composite)
 	 */
-	protected Control createContents(Composite parent) {
-		Control result= fConfigurationBlock.createContents(parent);
-		Dialog.applyDialogFont(result);
-		return result;
+	protected Control createPreferenceContent(Composite composite) {
+		IStatusChangeListener listener= new IStatusChangeListener() {
+			public void statusChanged(IStatus status) {
+				setPreferenceContentStatus(status);
+			}
+		};		
+		fConfigurationBlock= new TodoTaskConfigurationBlock(listener, getProject());
+		return fConfigurationBlock.createContents(composite);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#hasProjectSpecificOptions()
+	 */
+	protected boolean hasProjectSpecificOptions() {
+		return fConfigurationBlock.hasProjectSpecificOptions();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#openWorkspacePreferences()
+	 */
+	protected void openWorkspacePreferences() {
+		TodoTaskPreferencePage page= new TodoTaskPreferencePage();
+		PreferencePageSupport.showPreferencePage(getShell(), ID, page);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enablePreferenceContent(boolean)
+	 */
+	protected void enablePreferenceContent(boolean enable) {
+		fConfigurationBlock.setEnabled(enable); // override default behaviour
+	}
+	
+	/*
+	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
+	 */
+	protected void performDefaults() {
+		super.performDefaults();
+		if (fConfigurationBlock != null && useProjectSettings()) {
+			fConfigurationBlock.performDefaults();
+		}
 	}
 
 	/*
-	 * @see IPreferencePage#performOk()
+	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		if (!fConfigurationBlock.performOk(true)) {
+		if (fConfigurationBlock != null && !fConfigurationBlock.performOk(useProjectSettings())) {
 			return false;
 		}	
 		return super.performOk();
 	}
-	
-	/*
-	 * @see PreferencePage#performDefaults()
-	 */
-	protected void performDefaults() {
-		fConfigurationBlock.performDefaults();
-		super.performDefaults();
-	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
-	 */
-	public void statusChanged(IStatus status) {
-		setValid(!status.matches(IStatus.ERROR));
-		StatusUtil.applyToStatusLine(this, status);		
-	}
 
 }

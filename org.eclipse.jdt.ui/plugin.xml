@@ -411,7 +411,7 @@
       <page
             objectClass="org.eclipse.core.resources.IProject"
             name="%compilerPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.CompilerPropertyPage"
+            class="org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.CompilerPropertyPage">
          <filter
                name="nature"
@@ -421,7 +421,7 @@
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%compilerPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.CompilerPropertyPage"
+            class="org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.CompilerPropertyPage">
          <filter
                name="nature"
@@ -431,7 +431,7 @@
       <page
             objectClass="org.eclipse.core.resources.IProject"
             name="%todoPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPropertyPage"
+            class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage">
          <filter
                name="nature"
@@ -441,7 +441,7 @@
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%todoPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPropertyPage"
+            class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage">
          <filter
                name="nature"

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
@@ -20,17 +21,17 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.PreferencePage;
 
-import org.eclipse.ui.dialogs.PropertyPage;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.IWorkbenchPropertyPage;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -39,20 +40,23 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 /**
  * Property page used to configure project specific compiler settings
  */
-public class CompilerPropertyPage extends PropertyPage {
-
-	private CompilerConfigurationBlock fConfigurationBlock;
+public abstract class PropertyAndPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IWorkbenchPropertyPage {
+	
 	private Control fConfigurationBlockControl;
 	private ControlEnableState fBlockEnableState;
 	private SelectionButtonDialogField fUseWorkspaceSettings;
 	private SelectionButtonDialogField fChangeWorkspaceSettings;
 	private SelectionButtonDialogField fUseProjectSettings;
 	private IStatus fBlockStatus;
+
+	
+	private IJavaProject fProject; // project or null
 	
 
-	public CompilerPropertyPage() {
+	public PropertyAndPreferencePage() {
 		fBlockStatus= new StatusInfo();
 		fBlockEnableState= null;
+		fProject= null;
 		
 		IDialogFieldListener listener= new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
@@ -75,26 +79,14 @@ public class CompilerPropertyPage extends PropertyPage {
 		fUseProjectSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useprojectsettings.label")); //$NON-NLS-1$
 	}
 
-	/*
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
-	public void createControl(Composite parent) {
-		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.COMPILER_PROPERTY_PAGE);
-	}
-
+	protected abstract Control createPreferenceContent(Composite composite);
+	
+	protected abstract boolean hasProjectSpecificOptions();
+	
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		IStatusChangeListener listener= new IStatusChangeListener() {
-			public void statusChanged(IStatus status) {
-				fBlockStatus= status;
-				doStatusChanged();
-			}
-		};		
-		fConfigurationBlock= new CompilerConfigurationBlock(listener, getProject());
-		
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -102,54 +94,75 @@ public class CompilerPropertyPage extends PropertyPage {
 		layout.numColumns= 2;
 		composite.setLayout(layout);
 		
-		fUseWorkspaceSettings.doFillIntoGrid(composite, 1);
-		LayoutUtil.setHorizontalGrabbing(fUseWorkspaceSettings.getSelectionButton(null));
-		
-		fChangeWorkspaceSettings.doFillIntoGrid(composite, 1);
-		
-		fUseProjectSettings.doFillIntoGrid(composite, 2);
-		
+		if (isProjectPreferencePage()) {
+			fUseWorkspaceSettings.doFillIntoGrid(composite, 1);
+			LayoutUtil.setHorizontalGrabbing(fUseWorkspaceSettings.getSelectionButton(null));
+			
+			fChangeWorkspaceSettings.doFillIntoGrid(composite, 1);
+			
+			fUseProjectSettings.doFillIntoGrid(composite, 2);
+		}
+			
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL );
 		data.horizontalSpan= 2;
 		
-		fConfigurationBlockControl= fConfigurationBlock.createContents(composite);
+		fConfigurationBlockControl= createPreferenceContent(composite);
 		fConfigurationBlockControl.setLayoutData(data);
-		
-		boolean useProjectSettings= fConfigurationBlock.hasProjectSpecificOptions();
-		
-		fUseProjectSettings.setSelection(useProjectSettings);
-		fUseWorkspaceSettings.setSelection(!useProjectSettings);
-		
-		updateEnableState();
+
+		if (isProjectPreferencePage()) {
+			boolean useProjectSettings= hasProjectSpecificOptions();
+			
+			fUseProjectSettings.setSelection(useProjectSettings);
+			fUseWorkspaceSettings.setSelection(!useProjectSettings);
+			enablePreferenceContent(useProjectSettings);
+		}
+
 		Dialog.applyDialogFont(composite);
 		return composite;
 	}
 	
-	private boolean useProjectSettings() {
+	protected boolean useProjectSettings() {
 		return fUseProjectSettings.isSelected();
 	}
 	
+	protected boolean isProjectPreferencePage() {
+		return fProject != null;
+	}
+	
+	protected IJavaProject getProject() {
+		return fProject;
+	}
+	
+	protected abstract void openWorkspacePreferences();
+	
 	private void doDialogFieldChanged(DialogField field) {
 		if (field == fChangeWorkspaceSettings) {
-			String id= "org.eclipse.jdt.ui.preferences.CompilerPreferencePage"; //$NON-NLS-1$
-			CompilerPreferencePage page= new CompilerPreferencePage();
-			PreferencePageSupport.showPreferencePage(getShell(), id, page);
+			openWorkspacePreferences();
 		} else {
-			updateEnableState();
+			enablePreferenceContent(useProjectSettings());
 			doStatusChanged();
 		}
 	}	
+	
+	protected void setPreferenceContentStatus(IStatus status) {
+		fBlockStatus= status;
+		doStatusChanged();
+	}
+	
+	protected IStatus getPreferenceContentStatus() {
+		return fBlockStatus;
+	}
 
-	private void doStatusChanged() {
-		updateStatus(useProjectSettings() ? fBlockStatus : new StatusInfo());
+	protected void doStatusChanged() {
+		if (!isProjectPreferencePage() || useProjectSettings()) {
+			updateStatus(fBlockStatus);
+		} else {
+			updateStatus(new StatusInfo());
+		}
 	}
-	
-	private IJavaProject getProject() {
-		return (IJavaProject) getElement().getAdapter(IJavaElement.class);		
-	}
-	
-	private void updateEnableState() {
-		if (useProjectSettings()) {
+		
+	protected void enablePreferenceContent(boolean enable) {
+		if (enable) {
 			if (fBlockEnableState != null) {
 				fBlockEnableState.restore();
 				fBlockEnableState= null;
@@ -168,21 +181,33 @@ public class CompilerPropertyPage extends PropertyPage {
 		if (useProjectSettings()) {
 			fUseProjectSettings.setSelection(false);
 			fUseWorkspaceSettings.setSelection(true);
-			fConfigurationBlock.performDefaults();
 		}
 		super.performDefaults();
 	}
 
-	/*
-	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
-	 */
-	public boolean performOk() {
-		return fConfigurationBlock.performOk(useProjectSettings());
-	}
-	
 	private void updateStatus(IStatus status) {
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
+	 */
+	public void init(IWorkbench workbench) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IWorkbenchPropertyPage#getElement()
+	 */
+	public IAdaptable getElement() {
+		return fProject;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IWorkbenchPropertyPage#setElement(org.eclipse.core.runtime.IAdaptable)
+	 */
+	public void setElement(IAdaptable element) {
+		fProject= (IJavaProject) element.getAdapter(IJavaElement.class);
 	}
 	
 }

@@ -15,22 +15,18 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.PreferencePage;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
-/*
- * The page to configure the compiler options.
+/**
+ * Page used to configure both workspace and project specific compiler settings
  */
-public class CompilerPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IStatusChangeListener {
+public class CompilerPreferencePage extends PropertyAndPreferencePage {
+
+	public static final String ID= "org.eclipse.jdt.ui.preferences.CompilerPreferencePage"; //$NON-NLS-1$
 
 	private CompilerConfigurationBlock fConfigurationBlock;
 
@@ -40,57 +36,57 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		
 		// only used when page is shown programatically
 		setTitle(PreferencesMessages.getString("CompilerPreferencePage.title"));		 //$NON-NLS-1$
-		
-		fConfigurationBlock= new CompilerConfigurationBlock(this, null);
-	}
-		
-	/*
-	 * @see IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
-	 */	
-	public void init(IWorkbench workbench) {
 	}
 
 	/*
-	 * @see PreferencePage#createControl(Composite)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.COMPILER_PREFERENCE_PAGE);
-	}	
+		if (isProjectPreferencePage()) {
+			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.COMPILER_PROPERTY_PAGE);
+		} else {
+			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.COMPILER_PREFERENCE_PAGE);
+		}
+	}
 
+	protected Control createPreferenceContent(Composite composite) {
+		IStatusChangeListener listener= new IStatusChangeListener() {
+			public void statusChanged(IStatus status) {
+				setPreferenceContentStatus(status);
+			}
+		};		
+		fConfigurationBlock= new CompilerConfigurationBlock(listener, getProject());
+		return fConfigurationBlock.createContents(composite);
+	}
+	
+	protected boolean hasProjectSpecificOptions() {
+		return fConfigurationBlock.hasProjectSpecificOptions();
+	}
+	
+	protected void openWorkspacePreferences() {
+		CompilerPreferencePage page= new CompilerPreferencePage();
+		PreferencePageSupport.showPreferencePage(getShell(), ID, page);
+	}
+	
 	/*
-	 * @see PreferencePage#createContents(Composite)
+	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
-	protected Control createContents(Composite parent) {
-		Control result= fConfigurationBlock.createContents(parent);
-		Dialog.applyDialogFont(result);
-		return result;
+	protected void performDefaults() {
+		super.performDefaults();
+		if (fConfigurationBlock != null && useProjectSettings()) {
+			fConfigurationBlock.performDefaults();
+		}
 	}
 
 	/*
-	 * @see IPreferencePage#performOk()
+	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		if (!fConfigurationBlock.performOk(true)) {
+		if (fConfigurationBlock != null && !fConfigurationBlock.performOk(useProjectSettings())) {
 			return false;
 		}	
 		return super.performOk();
 	}
 	
-	/*
-	 * @see PreferencePage#performDefaults()
-	 */
-	protected void performDefaults() {
-		fConfigurationBlock.performDefaults();
-		super.performDefaults();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
-	 */
-	public void statusChanged(IStatus status) {
-		setValid(!status.matches(IStatus.ERROR));
-		StatusUtil.applyToStatusLine(this, status);		
-	}
-
 }
