@@ -245,6 +245,12 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 	public void test34() throws Exception{
 		helper1("j");
 	}
+	
+	public void test35() throws Exception{
+		//regression test for bug#9001
+		printTestDisabledMessage("regression test for bug#9001");
+//		helper1("test2");
+	}
 
 // -----
 	public void testFail0() throws Exception{
