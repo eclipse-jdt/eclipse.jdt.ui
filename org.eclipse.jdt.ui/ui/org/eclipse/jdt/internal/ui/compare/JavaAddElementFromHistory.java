@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.compare.*;
+import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
 
 
 public class JavaAddElementFromHistory extends JavaHistoryAction {
@@ -155,27 +157,25 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 				return;					
 			}
 			
-			int pos= getIndex(input);
+			int pos= getIndex(root, input, list);
 							
 			ITypedElement[] results= d.getSelection();
 			for (int i= 0; i < results.length; i++) {
-				ITypedElement ti= results[i];
-				if (!(ti instanceof IStreamContentAccessor))
-					continue;
 								
-				InputStream is= ((IStreamContentAccessor)ti).getContents();
-				String content= trimTextBlock(is, buffer.getLineDelimiter());
-				if (content == null) {
+				ASTNode newNode= createASTNode(rewriter, results[i], buffer.getLineDelimiter());
+				if (newNode == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);
-					return;
-				}
-				
-				ASTNode n= rewriter.createPlaceholder(content, getPlaceHolderType(parent, content));
-				if (pos < 0 && pos <= list.size())
-					list.add(n);
-				else
-					list.add(pos, n);
-				rewriter.markAsInserted(n);
+					return;					
+				}			
+				if (pos < 0 || pos >= list.size()) {
+					if (newNode instanceof BodyDeclaration) {
+						pos= ASTNodes.getInsertionIndex((BodyDeclaration)newNode, list);
+						list.add(pos, newNode);
+					} else
+						list.add(newNode);
+				} else
+					list.add(pos+1, newNode);
+				rewriter.markAsInserted(newNode);
 			}
 			
 			applyChanges(rewriter, buffer, shell, inEditor);
@@ -196,6 +196,26 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	}
 	
 	/**
+	 * Creates a place holder ASTNode for the given element.
+	 * @param rewriter
+	 * @param element
+	 * @param delimiter the line delimiter
+	 * @return a ASTNode or null
+	 * @throws CoreException
+	 */
+	private ASTNode createASTNode(ASTRewrite rewriter, ITypedElement element, String delimiter) throws CoreException {
+		if (element instanceof IStreamContentAccessor) {
+			InputStream is= ((IStreamContentAccessor)element).getContents();
+			if (is != null) {
+				String content= trimTextBlock(is, delimiter);
+				if (content != null)
+					return rewriter.createPlaceholder(content, getPlaceHolderType(element));
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Finds the corresponding ASTNode for the given container and returns 
 	 * its list of children. This list can be used to add a new child nodes to the container.
 	 * @param container the container for which to return the children list
@@ -211,9 +231,11 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		if (container instanceof IType) {
 			ISourceRange sourceRange= ((IType)container).getNameRange();
 			ASTNode n= NodeFinder.perform(root, sourceRange);
-			BodyDeclaration parentNode= (BodyDeclaration)ASTNodes.getParent(n, BodyDeclaration.class);
-			if (parentNode != null)
-				return ((TypeDeclaration)parentNode).bodyDeclarations();
+			if (n != null) {
+				BodyDeclaration parentNode= (BodyDeclaration)ASTNodes.getParent(n, BodyDeclaration.class);
+				if (parentNode != null)
+					return ((TypeDeclaration)parentNode).bodyDeclarations();
+			}
 			return null;
 		}
 			
@@ -221,28 +243,57 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	}
 	
 	/**
-	 * Returns the corresponding place holder type for the given container.
-	 * If the container can accept more than one type the type is determined 
-	 * by analyzing the content.
-	 * @param container
-	 * @param container
+	 * Returns the corresponding place holder type for the given element.
 	 * @return a place holder type (see ASTRewrite)
 	 */
-	private int getPlaceHolderType(IParent container, String content) {
+	private int getPlaceHolderType(ITypedElement element) {
 		
-		if (container instanceof ICompilationUnit)
-			// since we cannot deal with import statements, the only place holder type is a TYPE_DECLARATION
-			return ASTRewrite.TYPE_DECLARATION;
-			
-		if (container instanceof IType)
-			return ASTRewrite.METHOD_DECLARATION;
+		if (element instanceof DocumentRangeNode) {
+			JavaNode jn= (JavaNode) element;
+			switch (jn.getTypeCode()) {
+				
+			case JavaNode.CLASS:
+			case JavaNode.INTERFACE:
+				return ASTRewrite.TYPE_DECLARATION;
+				
+			case JavaNode.CONSTRUCTOR:
+			case JavaNode.METHOD:
+				return ASTRewrite.METHOD_DECLARATION;
+				
+			case JavaNode.FIELD:
+				return ASTRewrite.FIELD_DECLARATION;
+				
+			case JavaNode.INIT:
+				return ASTRewrite.INITIALIZER;
+				
+			default:
+				break;				
+			}
+		}
 			
 		// cannot happen
 		Assert.isTrue(false);
 		return ASTRewrite.UNKNOWN;
 	}
 
-	private int getIndex(IMember node) {
+	/**
+	 * Returns the index of the given node within its container.
+	 * If node is null -1 is returned.
+	 * @param node
+	 * @return the index of the given node or -1 if the node couldn't be found
+	 */
+	private int getIndex(CompilationUnit root, IMember node, List container) throws JavaModelException {
+		
+		if (node != null) {
+			ISourceRange sourceRange= node.getNameRange();
+			ASTNode n= NodeFinder.perform(root, sourceRange);
+			if (n != null) {
+				MethodDeclaration parentNode= (MethodDeclaration)ASTNodes.getParent(n, MethodDeclaration.class);
+				if (parentNode != null)
+					return container.indexOf(parentNode);
+			}
+		}
+		
 		// NeedWork: not yet implemented
 		return -1;
 	}

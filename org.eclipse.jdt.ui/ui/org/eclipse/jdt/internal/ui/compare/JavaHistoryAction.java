@@ -210,6 +210,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 	}
 	
 	void applyChanges(ASTRewrite rewriter, final TextBuffer buffer, Shell shell, boolean inEditor) throws CoreException, InvocationTargetException, InterruptedException {
+
 		MultiTextEdit edit= new MultiTextEdit();
 		rewriter.rewriteNode(buffer, edit);
 										
