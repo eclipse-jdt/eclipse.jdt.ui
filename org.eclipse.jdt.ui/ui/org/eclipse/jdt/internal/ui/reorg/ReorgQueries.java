@@ -23,6 +23,7 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -46,9 +47,21 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 
 public class ReorgQueries implements ICopyQueries {
 
-	private static final String EMPTY= " "; //XXX workaround for bug#16256 //$NON-NLS-1$
+	private static final String INVALID_NAME_NO_MESSAGE= "";//$NON-NLS-1$
+	private final Wizard fWizard;
 
 	public ReorgQueries() {
+		this(null);
+	}
+	
+	public ReorgQueries(Wizard wizard) {
+		fWizard= wizard;
+	}
+
+	private Shell getShell() {
+		if (fWizard == null)
+			return JavaPlugin.getActiveWorkbenchShell();
+		return fWizard.getContainer().getShell();
 	}
 
 	private static String removeTrailingJava(String name) {
@@ -59,21 +72,21 @@ public class ReorgQueries implements ICopyQueries {
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu) {
 		String[] keys= {removeTrailingJava(cu.getElementName())};
 		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
-		return createStaticQuery(createCompilationUnitNameValidator(cu), message, removeTrailingJava(cu.getElementName()));
+		return createStaticQuery(createCompilationUnitNameValidator(cu), message, removeTrailingJava(cu.getElementName()), getShell());
 	}
 
 
 	public INewNameQuery createNewResourceNameQuery(IResource res) {
 		String[] keys= {res.getName()};
 		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
-		return createStaticQuery(createResourceNameValidator(res), message, res.getName());
+		return createStaticQuery(createResourceNameValidator(res), message, res.getName(), getShell());
 	}
 
 
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack) {
 		String[] keys= {pack.getElementName()};
 		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
-		return createStaticQuery(createPackageNameValidator(pack), message, pack.getElementName());
+		return createStaticQuery(createPackageNameValidator(pack), message, pack.getElementName(), getShell());
 	}
 
 
@@ -90,10 +103,10 @@ public class ReorgQueries implements ICopyQueries {
 		};
 	}
 
-	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial){
+	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial, final Shell shell){
 		return new INewNameQuery(){
 			public String getNewName() {
-				InputDialog dialog= new InputDialog(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("ReorgQueries.nameConflictMessage"), message, initial, validator); //$NON-NLS-1$
+				InputDialog dialog= new InputDialog(shell, ReorgMessages.getString("ReorgQueries.nameConflictMessage"), message, initial, validator); //$NON-NLS-1$
 				if (dialog.open() == Window.CANCEL)
 					throw new OperationCanceledException();
 				return dialog.getValue();
@@ -105,7 +118,7 @@ public class ReorgQueries implements ICopyQueries {
 		IInputValidator validator= new IInputValidator(){
 			public String isValid(String newText) {
 				if (newText == null || "".equals(newText) || res.getParent() == null) //$NON-NLS-1$
-					return EMPTY;
+					return INVALID_NAME_NO_MESSAGE;
 				if (res.getParent().findMember(newText) != null)
 					return ReorgMessages.getString("ReorgQueries.resourceWithThisNameAlreadyExists"); //$NON-NLS-1$
 				if (! res.getParent().getFullPath().isValidSegment(newText))
@@ -127,7 +140,7 @@ public class ReorgQueries implements ICopyQueries {
 		IInputValidator validator= new IInputValidator(){
 			public String isValid(String newText) {
 				if (newText == null || "".equals(newText)) //$NON-NLS-1$
-					return EMPTY;
+					return INVALID_NAME_NO_MESSAGE;
 				String newCuName= newText + ".java"; //$NON-NLS-1$
 				IStatus status= JavaConventions.validateCompilationUnitName(newCuName);	
 				if (status.getSeverity() == IStatus.ERROR)
@@ -136,7 +149,7 @@ public class ReorgQueries implements ICopyQueries {
 				try {
 					refStatus= Checks.checkCompilationUnitNewName(cu, newText);
 				} catch (JavaModelException e) {
-					return EMPTY;
+					return INVALID_NAME_NO_MESSAGE;
 				}
 				if (refStatus.hasFatalError())
 					return refStatus.getFirstMessage(RefactoringStatus.FATAL);
@@ -155,7 +168,7 @@ public class ReorgQueries implements ICopyQueries {
 		IInputValidator validator= new IInputValidator(){
 			public String isValid(String newText) {
 				if (newText == null || "".equals(newText)) //$NON-NLS-1$
-					return EMPTY;
+					return INVALID_NAME_NO_MESSAGE;
 				IStatus status= JavaConventions.validatePackageName(newText);
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();
@@ -167,7 +180,7 @@ public class ReorgQueries implements ICopyQueries {
 							return ReorgMessages.getString("ReorgQueries.packagewithThatNameexistsMassage");	 //$NON-NLS-1$
 					}	
 				} catch (JavaModelException e) {
-					return EMPTY;
+					return INVALID_NAME_NO_MESSAGE;
 				}
 				if (pack.getElementName().equalsIgnoreCase(newText))
 					return ReorgMessages.getString("ReorgQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
@@ -258,7 +271,7 @@ public class ReorgQueries implements ICopyQueries {
 			return false;
 		}
 	
-		public String createMessage(Object element, boolean isReadOnly) {
+		private String createMessage(Object element, boolean isReadOnly) {
 			String[] keys= {ReorgUtils.getName(element)};
 			if (isReadOnly)
 				return ReorgMessages.getFormattedString("ReorgQueries.exists_read-only", keys); //$NON-NLS-1$
