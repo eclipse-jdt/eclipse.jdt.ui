@@ -24,9 +24,9 @@ import org.eclipse.search.ui.ISearchPageScoreComputer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 
@@ -84,28 +84,33 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	}
 	
 	private IResource getResource(IJavaElement element) {
-    	/*
-    	 * Map a type to the corresponding CU.
-    	 */
-    	if (element instanceof IType) {
-    		IType type= (IType)element;
-    		IJavaElement parent= type.getParent();
-    		if (parent instanceof ICompilationUnit) {
-    			ICompilationUnit cu= (ICompilationUnit)parent;
-    			if (cu.isWorkingCopy())
-    				element= cu.getOriginalElement();
-    			else 
-    				element= cu;
-    		}
-    	}
-    	try {
-    		return element.getCorrespondingResource();
-    	} catch (JavaModelException e) {
-    		if (element instanceof ICompilationUnit)
-    			return element.getResource(); //handles compilation units outside of the classpath
-    		else	
-    			return null;	
-    	}
+		// can't use IJavaElement.getResource directly as we are interrested in the
+		// corresponding resource
+		switch (element.getElementType()) {
+			case IJavaElement.TYPE:
+				// top level types behave like the CU
+				IJavaElement parent= element.getParent();
+				if (parent instanceof ICompilationUnit) {
+					return JavaModelUtil.toOriginal((ICompilationUnit) parent).getResource();
+				}
+				return null;
+			case IJavaElement.COMPILATION_UNIT:
+				return JavaModelUtil.toOriginal((ICompilationUnit) element).getResource();
+			case IJavaElement.CLASS_FILE:
+			case IJavaElement.PACKAGE_FRAGMENT:
+				// test if in a archive
+				IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				if (!root.isArchive()) {
+					return element.getResource();
+				}
+				return null;
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+			case IJavaElement.JAVA_PROJECT:
+			case IJavaElement.JAVA_MODEL:
+				return element.getResource();
+			default:
+				return null;
+		}		
     }
 
     /*
