@@ -11,7 +11,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 /**
  * A text edit that moves text inside a text buffer.
  */
-public final class MoveTextEdit extends TextEdit {
+public class MoveTextEdit extends TextEdit {
 	
 	/* package */ static class TargetMark extends NopTextEdit {
 		private MoveTextEdit fMoveTextEdit;
@@ -117,12 +117,15 @@ public final class MoveTextEdit extends TextEdit {
 	private void internalPerform(TextBuffer buffer) throws CoreException {
 		Assert.isTrue(fPerformCounter < 2);
 		if (++fPerformCounter == 2) {
-			TextRange source= getSourceRange();
-			TextRange target= getTargetRange();
-			String current= buffer.getContent(source.fOffset, source.fLength);
-			buffer.replace(source, ""); //$NON-NLS-1$
-			buffer.replace(target, current);
+			String current= getContent(buffer);
+			buffer.replace(getSourceRange(), ""); //$NON-NLS-1$
+			buffer.replace(getTargetRange(), current);
 		}
+	}
+	
+	protected String getContent(TextBuffer buffer) {
+		TextRange source= getSourceRange();
+		return buffer.getContent(source.fOffset, source.fLength);
 	}
 	
 	/* package */ boolean isUpMove() {

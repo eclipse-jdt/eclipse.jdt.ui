@@ -15,6 +15,15 @@ import org.eclipse.jdt.internal.corext.Assert;
  * Helper class to provide String manipulation functions not available in standard JDK.
  */
 public class Strings {
+	
+	/**
+	 * Indent char is a space char but not a line delimiters.
+	 * == Character.isSpaceChar(ch) && ch != '\n' && ch != '\r'
+	 */
+	public static boolean isIndentChar(char ch) {
+		int kind= Character.getType(ch);
+		return kind == Character.SPACE_SEPARATOR || kind == Character.PARAGRAPH_SEPARATOR;
+	}
 
 	public static String removeNewLine(String message) {
 		StringBuffer result= new StringBuffer();
@@ -84,7 +93,7 @@ public class Strings {
 		int start= size;
 		for (int i= 0; i < size; i++) {
 			char c= line.charAt(i);
-			if (c != '\t' && !Character.isSpaceChar(c)) {
+			if (!isIndentChar(c)) {
 				start= i;
 				break;
 			}
@@ -102,7 +111,7 @@ public class Strings {
 		int end= size;
 		for (int i= size - 1; i >= 0; i--) {
 			char c= line.charAt(i);
-			if (c == '\t' || Character.isSpaceChar(c)) {
+			if (isIndentChar(c)) {
 				end= i;
 			} else {
 				break;
@@ -131,7 +140,7 @@ public class Strings {
 			if (c == '\t') {
 				result++;
 				blanks= 0;
-			} else if (Character.isSpaceChar(c)) {
+			} else if (isIndentChar(c)) {
 				blanks++;
 				if (blanks == tabWidth) {
 					result++;
@@ -162,7 +171,7 @@ public class Strings {
 			if (c == '\t') {
 				indents++;
 				blanks= 0;
-			} else if (Character.isSpaceChar(c)) {
+			} else if (isIndentChar(c)) {
 					blanks++;
 					if (blanks == tabWidth) {
 						indents++;
@@ -241,7 +250,7 @@ public class Strings {
 			if (c == '\t') {
 				end= i;
 				blanks= 0;
-			} else if (Character.isSpaceChar(c)) {
+			} else if (isIndentChar(c)) {
 				blanks++;
 				if (blanks == tabWidth) {
 					end= i;

@@ -135,59 +135,6 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 		}
 	}
 	
-	
-	
-	public String generateFormatted(ASTNode node, TextBuffer existingSource, int initialIndentationLevel) {
-		int tabWidth= CodeFormatterUtil.getTabWidth();
-		String lineDelimiter= existingSource.getLineDelimiter();
-		
-		node.accept(this);
-		String formatted= getFormattedResult(initialIndentationLevel, lineDelimiter);
-
-		ExistingNodeMarker[] markers= getExistingNodeMarkers();
-		
-		StringBuffer buf= new StringBuffer();
-		int currPos= 0;
-		for (int i= 0; i < markers.length; i++) {
-			int existingStartPos= markers[i].offset;
-			ASTNode existingNode= markers[i].existingNode;
-			
-			buf.append(formatted.substring(currPos, existingStartPos));
-			// createInsert(formatted.substring(currPos, existingStartPos), insertPos);
-			
-			// createMove(existingNode.getStartPosition(), existingNode.getLength(), insertPos);
-			
-			int nodeStartLine= existingSource.getLineOfOffset(existingNode.getStartPosition());
-			int nodeIndent= existingSource.getLineIndent(nodeStartLine, tabWidth);
-			String nodeContent= existingSource.getContent(existingNode.getStartPosition(), existingNode.getLength());
-			
-			String currLine= getCurrentLine(formatted, existingStartPos);
-			int currIndent= Strings.computeIndent(currLine, tabWidth);
-			
-			if (nodeIndent != currIndent) {
-				String[] lines= Strings.convertIntoLines(nodeContent);
-				String indentString= Strings.getIndentString(currLine, tabWidth);
-				for (int k= 0; k < lines.length; k++) {
-					if (k > 0) {
-						buf.append(lineDelimiter);
-						buf.append(indentString); // no indent for first line (contained in the formatted string)
-						buf.append(Strings.trimIndent(lines[k], nodeIndent, tabWidth));
-					} else {
-						buf.append(lines[k]);
-					}
-				}
-			} else {
-				buf.append(nodeContent);
-			}
-			currPos= existingStartPos + markers[i].length;
-		}
-		
-		// createInsert(formatted.substring(currPos, formatted.length()), insertPos);
-		buf.append(formatted.substring(currPos, formatted.length()));
-	
-		return buf.toString();
-	}
-
 	private String getCurrentLine(String str, int pos) {
 		for (int i= pos - 1; i>= 0; i--) {
 			char ch= str.charAt(i);
