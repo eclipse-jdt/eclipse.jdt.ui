@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -235,62 +234,15 @@ public class RippleMethodFinder2 {
 	}
 
 	private void findAllDeclarations(IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
-		//TODO: (bug 75642) check pattern for search to generic methods
-		//TODO: (bug 80264) Should search for java element, not for string pattern.
-		int searchFor= IJavaSearchConstants.METHOD;
-		if (fMethod.isConstructor())
-			searchFor= IJavaSearchConstants.CONSTRUCTOR;
-		String stringPattern= getUnqualifiedMethodSignature(fMethod);
-		int rule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
-		SearchPattern pattern= SearchPattern.createPattern(stringPattern, searchFor, IJavaSearchConstants.DECLARATIONS, rule);
+		int limitTo = IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
+		int matchRule= SearchPattern.R_ERASURE_MATCH | SearchPattern.R_CASE_SENSITIVE;
+		SearchPattern pattern= SearchPattern.createPattern(fMethod, limitTo, matchRule);
 
 		SearchParticipant[] participants= SearchUtils.getDefaultSearchParticipants();
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		MethodRequestor requestor= new MethodRequestor();
 		new SearchEngine(owner).search(pattern, participants, scope, requestor, pm);
 		fDeclarations= requestor.fMethods;
-	}
-	
-	//adapted from PrettySignature:
-	private static String getUnqualifiedMethodSignature(IMethod method) throws JavaModelException {
-		StringBuffer buffer= new StringBuffer();
-		buffer.append(method.getElementName());
-		buffer.append('(');
-		
-		IType declaringType= method.getDeclaringType();
-		String[] types= method.getParameterTypes();
-		if (types.length > 0)
-			buffer.append(getResolvedType(types[0], declaringType));
-		for (int i= 1; i < types.length; i++) {
-			buffer.append(", "); //$NON-NLS-1$
-			buffer.append(getResolvedType(types[i], declaringType));
-		}
-		
-		buffer.append(')');
-		
-		return buffer.toString();
-	}
-	
-	//adapted from JavaModelUtil:
-	private static String getResolvedType(String refTypeSig, IType declaringType) throws JavaModelException {
-		int arrayCount= Signature.getArrayCount(refTypeSig);
-		char type= refTypeSig.charAt(arrayCount);
-		if (type == Signature.C_UNRESOLVED) {
-			int semi= refTypeSig.indexOf(Signature.C_SEMICOLON, arrayCount + 1);
-			if (semi == -1) {
-				throw new IllegalArgumentException();
-			}
-			String name= refTypeSig.substring(arrayCount + 1, semi);				
-			
-			String[][] resolvedNames= declaringType.resolveType(name);
-			if (resolvedNames != null && resolvedNames.length > 0) {
-				String resolvedName= JavaModelUtil.concatenateName(resolvedNames[0][0], resolvedNames[0][1]);
-				String baseTypeSignature= Signature.createTypeSignature(resolvedName, true);
-				String arraySignature= Signature.createArraySignature(baseTypeSignature, arrayCount);
-				return Signature.toString(arraySignature);
-			}
-		}
-		return Signature.toString(refTypeSig);
 	}
 	
 	private void createHierarchyOfDeclarations(IProgressMonitor pm, WorkingCopyOwner owner) throws JavaModelException {
