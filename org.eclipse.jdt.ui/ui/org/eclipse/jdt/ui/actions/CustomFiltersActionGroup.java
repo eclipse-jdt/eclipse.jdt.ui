@@ -138,13 +138,14 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	}
 
 	private void fillViewMenu(IMenuManager viewMenu) {
-		IAction openFilterDialog=
+		IAction openFilterDialogAction=
 			new Action(FilterMessages.getString("OpenCustomFiltersDialogAction.text")) { //$NON-NLS-1$
 				public void run() {
 					openDialog();
 				}
 			};
-		viewMenu.add(openFilterDialog);
+		openFilterDialogAction.setToolTipText(FilterMessages.getString("OpenCustomFiltersDialogAction.tooltip")); //$NON-NLS-1$
+		viewMenu.add(openFilterDialogAction);
 	}
 
 	/* 
