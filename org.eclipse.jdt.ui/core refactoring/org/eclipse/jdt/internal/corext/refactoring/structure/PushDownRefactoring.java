@@ -333,7 +333,7 @@ public class PushDownRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try {
-			pm.beginTask("", 2); //$NON-NLS-1$
+			pm.beginTask("", 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			fSelectedMembers= WorkingCopyUtil.getOriginals(fSelectedMembers);
 			
