@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -35,7 +36,14 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
+import org.eclipse.jdt.internal.corext.template.CodeTemplates;
+import org.eclipse.jdt.internal.corext.template.Template;
+import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -131,6 +139,12 @@ public class LocalCorrectionsSubProcessor {
 	
 
 	private static boolean canCast(String castTarget, ITypeBinding bindingToCast) {
+		bindingToCast= ASTResolving.normalizeTypeBinding(bindingToCast);
+		if (bindingToCast == null) {
+			return false;
+		}
+		
+		
 		int arrStart= castTarget.indexOf('[');
 		if (arrStart != -1) {
 			if (!bindingToCast.isArray()) {
@@ -248,13 +262,20 @@ public class LocalCorrectionsSubProcessor {
 			AST ast= astRoot.getAST();
 			List catchClauses= surroundingTry.catchClauses();
 			for (int i= 0; i < uncaughtExceptions.length; i++) {
-				String imp= proposal.addImport(uncaughtExceptions[i]);
+				ITypeBinding excBinding= uncaughtExceptions[i];
+				String varName= "e"; //$NON-NLS-1$
+				String imp= proposal.addImport(excBinding);
 				Name name= ASTNodeFactory.newName(ast, imp);
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-				var.setName(ast.newSimpleName("e")); //$NON-NLS-1$
+				var.setName(ast.newSimpleName(varName));
 				var.setType(ast.newSimpleType(name));
 				CatchClause newClause= ast.newCatchClause();
 				newClause.setException(var);
+				String catchBody = StubUtility.getCatchBodyContent(cu, excBinding.getName(), varName);
+				if (catchBody != null) {
+					ASTNode node= rewrite.createPlaceholder(catchBody, ASTRewrite.STATEMENT);
+					newClause.getBody().statements().add(node);
+				}
 				rewrite.markAsInserted(newClause);
 				catchClauses.add(newClause);
 			}
