@@ -23,6 +23,15 @@ public class AllTests {
 		suite.addTest(CopyTest.suite());
 		suite.addTest(MoveTest.suite());
 		suite.addTest(MultiMoveTest.suite());
+		
+		//------old reorg tests
+		suite.addTest(DeleteSourceReferenceEditTests.suite());
+//		FIX ME - randomly fails on linux
+//		suite.addTest(PasteSourceReferenceActionTests.suite());
+		suite.addTest(DeleteSourceReferenceActionTests.suite());
+		suite.addTest(CopyResourcesToClipboardActionTest.suite());
+		suite.addTest(PasteResourcesFromClipboardActionTest.suite());
+
 		return suite;
 	}
 }
