@@ -92,10 +92,15 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		Object p1= proposals.get(0);
+		if (!(p1 instanceof CUCorrectionProposal)) {
+			p1= proposals.get(1);
+		}
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) p1;
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
@@ -122,10 +127,15 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		Object p1= proposals.get(0);
+		if (!(p1 instanceof CUCorrectionProposal)) {
+			p1= proposals.get(1);
+		}
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) p1;
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
@@ -156,10 +166,15 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		Object p1= proposals.get(0);
+		if (!(p1 instanceof CUCorrectionProposal)) {
+			p1= proposals.get(1);
+		}
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) p1;
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
@@ -197,10 +212,15 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		Object p1= proposals.get(0);
+		if (!(p1 instanceof CUCorrectionProposal)) {
+			p1= proposals.get(1);
+		}
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) p1;
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
