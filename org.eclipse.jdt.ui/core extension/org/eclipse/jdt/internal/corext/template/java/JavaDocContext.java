@@ -35,8 +35,9 @@ public class JavaDocContext extends CompilationUnitContext {
 	 * 
 	 * @param type   the context type.
 	 * @param document the document.
-	 * @param completionPosition the completion position within the document.
-	 * @param unit the compilation unit (may be <code>null</code>).
+	 * @param completionOffset the completion offset within the document.
+	 * @param completionLength the completion length within the document.
+	 * @param compilationUnit the compilation unit (may be <code>null</code>).
 	 */
 	public JavaDocContext(ContextType type, IDocument document, int completionOffset, int completionLength,
 		ICompilationUnit compilationUnit)

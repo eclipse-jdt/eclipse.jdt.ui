@@ -548,7 +548,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public String getIterator() {
 		CompilationUnitCompletion completion= getCompletion();		
-		String[] proposals= {"iter"}; //$NON-NLS-1$
+		String[] proposals= {"iter", "it", "it2"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		for (int i= 0; i != proposals.length; i++) {
 			String proposal = proposals[i];
