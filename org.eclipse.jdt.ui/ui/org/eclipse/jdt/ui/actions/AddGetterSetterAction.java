@@ -11,20 +11,35 @@
 package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -32,21 +47,35 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
+import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
+import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
@@ -64,6 +93,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 public class AddGetterSetterAction extends SelectionDispatchAction {
 	
 	private CompilationUnitEditor fEditor;
+	private static final String dialogTitle= ActionMessages.getString("AddGetterSetterAction.error.title"); //$NON-NLS-1$
 
 	/**
 	 * Creates a new <code>AddGetterSetterAction</code>.
@@ -97,8 +127,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
 		try {
-			IMember[] members= getSelectedFields(selection);
-			setEnabled(members != null && members.length > 0 && JavaModelUtil.isEditable(members[0].getCompilationUnit()));
+			setEnabled(canEnable(selection));
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			setEnabled(false);
@@ -109,45 +138,160 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	protected void run(IStructuredSelection selection) {
-		IField[] fields= getSelectedFields(selection);
-		if (fields == null) {
-			return;
-		}
-		
 		try {
-			ICompilationUnit cu= fields[0].getCompilationUnit();
-			// open the editor, forces the creation of a working copy
-			IEditorPart editor= EditorUtility.openInEditor(cu);
-			
-			ICompilationUnit workingCopyCU;
-			IField[] workingCopyFields;
-			if (cu.isWorkingCopy()) {
-				workingCopyCU= cu;
-				workingCopyFields= fields;
-			} else {
-				workingCopyCU= EditorUtility.getWorkingCopy(cu);
-				if (workingCopyCU == null) {
-					showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
-					return;
-				}
-				workingCopyFields= new IField[fields.length];
-				for (int i= 0; i < fields.length; i++) {
-					IField field= fields[i];
-					IField workingCopyField= (IField) JavaModelUtil.findMemberInCompilationUnit(workingCopyCU, field);
-					if (workingCopyField == null) {
-						showError(ActionMessages.getFormattedString("AddGetterSetterAction.error.fieldNotExisting", field.getElementName())); //$NON-NLS-1$
-						return;
-					}
-					workingCopyFields[i]= workingCopyField;
-				}
-			}
-			run(workingCopyFields, editor);
+			IField[] selectedFields= getSelectedFields(selection);
+			if (canEnableOn(selectedFields))
+				run(selectedFields, selectedFields);
+			else
+				run((IType)selection.getFirstElement());
 		} catch (CoreException e) {
 			JavaPlugin.log(e.getStatus());
 			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
+				
 	}
 	
+	private boolean canEnable(IStructuredSelection selection) throws JavaModelException{
+		if (canEnableOn(getSelectedFields(selection)))
+			return true;
+		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)){
+			IType type= (IType)selection.getFirstElement();
+			if (type.getFields().length == 0)
+				return false;
+			if (JavaModelUtil.isEditable(type.getCompilationUnit()))
+				return true;
+		}
+		return false;	
+	}
+
+	private static boolean canEnableOn(IField[] fields) throws JavaModelException {
+		return fields != null && fields.length > 0 && JavaModelUtil.isEditable(fields[0].getCompilationUnit());
+	}
+	
+	private void run(IType type)throws CoreException{
+		ILabelProvider lp= new AddGetterSetterLabelProvider(createNameProposer());
+		ITreeContentProvider cp= new AddGetterSetterContentProvider(type);
+		CheckedTreeSelectionDialog dialog= new CheckedTreeSelectionDialog(getShell(), lp, cp);
+		dialog.setSorter(new JavaElementSorter());
+		dialog.setTitle(dialogTitle);
+		String key= "&Select Methods to Create in Type \"{0}\":";
+		String message= MessageFormat.format(key, new Object[]{JavaElementUtil.createSignature(type)});
+		dialog.setMessage(message);
+		dialog.setValidator(createValidator());
+		dialog.setContainerMode(true);
+		dialog.setSize(60, 18);
+		dialog.setInput(type);
+		dialog.open();
+		Object[] result= dialog.getResult();
+		if (result == null)
+			return;
+		IField[] getterFields= getGetterFields(result);
+		IField[] setterFields= getSetterFields(result);
+		run(getterFields, setterFields);
+	}
+
+	private ISelectionStatusValidator createValidator() {
+		return new ISelectionStatusValidator(){
+			public IStatus validate(Object[] selection) {
+				int count= countSelectedMethods(selection);
+				if (count == 0)
+					return new StatusInfo(IStatus.ERROR, "No methods selected"); //$NON-NLS-1$
+				if (count == 1)	
+					return new StatusInfo(IStatus.INFO, "1 method selected");
+				else
+					return new StatusInfo(IStatus.INFO, count + " methods selected");
+			}
+		};
+	}
+	
+	private static int countSelectedMethods(Object[] selection){
+		int count= 0;
+		for (int i = 0; i < selection.length; i++) {
+			if (selection[i] instanceof GetterSetterEntry)
+				count++;
+		}
+		return count;
+	}
+	
+	private static IField[] getGetterFields(Object[] result){
+		Collection list= new ArrayList(0);
+		for (int i = 0; i < result.length; i++) {
+			Object each= result[i];
+			if ((each instanceof GetterSetterEntry)){ 
+				GetterSetterEntry entry= (GetterSetterEntry)each;
+				if (entry.isGetterEntry)
+					list.add(entry.field);
+			}	
+		}
+		return (IField[]) list.toArray(new IField[list.size()]);			
+	}
+	
+	private static IField[] getSetterFields(Object[] result){
+		Collection list= new ArrayList(0);
+		for (int i = 0; i < result.length; i++) {
+			Object each= result[i];
+			if ((each instanceof GetterSetterEntry)){ 
+				GetterSetterEntry entry= (GetterSetterEntry)each;
+				if (! entry.isGetterEntry)
+					list.add(entry.field);
+			}	
+		}
+		return (IField[]) list.toArray(new IField[list.size()]);			
+	}
+	
+	private static NameProposer createNameProposer(){
+		String[] prefixes= CodeGenerationPreferencePage.getGetterStetterPrefixes();
+		String[] suffixes= CodeGenerationPreferencePage.getGetterStetterSuffixes();
+		return new NameProposer(prefixes, suffixes);
+	}
+	
+	private void run(IField[] getterFields, IField[] setterFields) throws CoreException{
+		if (getterFields.length == 0 && setterFields.length == 0)
+			return;
+		
+		ICompilationUnit cu= null;
+		if (getterFields.length != 0)
+			cu= getterFields[0].getCompilationUnit();
+		else
+			cu= setterFields[0].getCompilationUnit();
+		//open the editor, forces the creation of a working copy
+		IEditorPart editor= EditorUtility.openInEditor(cu);
+		
+		IField[] workingCopyGetterFields= getWorkingCopyFields(getterFields);
+		IField[] workingCopySetterFields= getWorkingCopyFields(setterFields);
+		if (workingCopyGetterFields != null && workingCopySetterFields != null)
+			run(workingCopyGetterFields, workingCopySetterFields, editor);
+	}
+	
+	private IField[] getWorkingCopyFields(IField[] fields) throws CoreException{
+		if (fields.length == 0)
+			return new IField[0];
+		ICompilationUnit cu= fields[0].getCompilationUnit();
+		
+		ICompilationUnit workingCopyCU;
+		IField[] workingCopyFields;
+		if (cu.isWorkingCopy()) {
+			workingCopyCU= cu;
+			workingCopyFields= fields;
+		} else {
+			workingCopyCU= EditorUtility.getWorkingCopy(cu);
+			if (workingCopyCU == null) {
+				showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
+				return null;
+			}
+			workingCopyFields= new IField[fields.length];
+			for (int i= 0; i < fields.length; i++) {
+				IField field= fields[i];
+				IField workingCopyField= (IField) JavaModelUtil.findMemberInCompilationUnit(workingCopyCU, field);
+				if (workingCopyField == null) {
+					showError(ActionMessages.getFormattedString("AddGetterSetterAction.error.fieldNotExisting", field.getElementName())); //$NON-NLS-1$
+					return null;
+				}
+				workingCopyFields[i]= workingCopyField;
+			}
+		}
+		return workingCopyFields;	
+	}
 	//---- Java Editior --------------------------------------------------------------
 	
 	/* (non-Javadoc)
@@ -163,37 +307,47 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
-			if (elements.length == 0 || elements.length > 1 || !(elements[0] instanceof IField)) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), 
-					ActionMessages.getString("AddGetterSetterAction.not_applicable")); //$NON-NLS-1$
+			if (elements.length == 1 && (elements[0] instanceof IField)) {
+				IField field= (IField)elements[0];
+				if (! checkCu(field))
+					return;
+				run (new IField[] {field}, new IField[] {field}, fEditor);
 				return;
 			}
-			IField field= (IField)elements[0];
-			if (!JavaModelUtil.isEditable(field.getCompilationUnit())) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), 
-					ActionMessages.getFormattedString("AddGetterSetterAction.read_only", field.getElementName())); //$NON-NLS-1$
-				return;
-			}
-			run (new IField[] {field}, fEditor);
+			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+			if (element != null){
+				IType type= (IType)element.getAncestor(IJavaElement.TYPE);
+				if (type != null){
+					if (! checkCu(type))
+						return; //dialog already shown - just return
+					if (type.getFields().length > 0){
+						run(type);	
+						return;
+					} 
+				}
+			} 
+			MessageDialog.openInformation(getShell(), dialogTitle, 
+				ActionMessages.getString("AddGetterSetterAction.not_applicable")); //$NON-NLS-1$
 		} catch (CoreException e) {
 			JavaPlugin.log(e.getStatus());
 			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
 	}
 	
+	private boolean checkCu(IMember member) throws JavaModelException{
+		if (JavaModelUtil.isEditable(member.getCompilationUnit())) 
+			return true;
+		MessageDialog.openInformation(getShell(), dialogTitle, 
+			ActionMessages.getFormattedString("AddGetterSetterAction.read_only", member.getElementName())); //$NON-NLS-1$
+		return false;
+	}
+	
 	//---- Helpers -------------------------------------------------------------------
 	
-	private void run(IField[] fields, IEditorPart editor) {
+	private void run(IField[] getterFields, IField[] setterFields, IEditorPart editor) {
 		try{
-			IRequestQuery skipSetterForFinalQuery= skipSetterForFinalQuery();
-			IRequestQuery skipReplaceQuery= skipReplaceQuery();
-			String[] prefixes= CodeGenerationPreferencePage.getGetterStetterPrefixes();
-			String[] suffixes= CodeGenerationPreferencePage.getGetterStetterSuffixes();
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		
-			AddGetterSetterOperation op= new AddGetterSetterOperation(fields, prefixes, suffixes, settings, skipSetterForFinalQuery, skipReplaceQuery);
-			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
-			dialog.run(false, true, new WorkbenchRunnableAdapter(op));
+			AddGetterSetterOperation op= createAddGetterSetterOperation(getterFields, setterFields);
+			new ProgressMonitorDialog(getShell()).run(false, true, new WorkbenchRunnableAdapter(op));
 		
 			IMethod[] createdMethods= op.getCreatedAccessors();
 			if (createdMethods.length > 0) {
@@ -205,6 +359,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		} catch (InterruptedException e) {
 			// operation cancelled
 		}
+	}
+
+	private AddGetterSetterOperation createAddGetterSetterOperation(IField[] getterFields, IField[] setterFields) {
+		IRequestQuery skipSetterForFinalQuery= skipSetterForFinalQuery();
+		IRequestQuery skipReplaceQuery= skipReplaceQuery();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();		
+		return new AddGetterSetterOperation(getterFields, setterFields, createNameProposer(), settings, skipSetterForFinalQuery, skipReplaceQuery);
 	}
 	
 	private IRequestQuery skipSetterForFinalQuery() {
@@ -254,7 +415,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}	
 
 	private void showError(String message) {
-		MessageDialog.openError(getShell(), getDialogTitle(), message);
+		MessageDialog.openError(getShell(), dialogTitle, message);
 	}
 	
 	/*
@@ -300,9 +461,118 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			return res;
 		}
 		return null;
-	}	
+	}
 	
-	private String getDialogTitle() {
-		return ActionMessages.getString("AddGetterSetterAction.error.title"); //$NON-NLS-1$
-	}	
+	private static class GetterSetterEntry {
+		public final IField field;
+		public final boolean isGetterEntry;
+		GetterSetterEntry(IField field, boolean isGetterEntry){
+			this.field= field;
+			this.isGetterEntry= isGetterEntry;
+		}
+	}
+	
+	private static class AddGetterSetterLabelProvider extends JavaElementLabelProvider{
+		private final NameProposer fNameProposer;
+		private static final Image IMAGE= new JavaElementImageProvider().getImageLabel(new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC, 0, JavaElementImageProvider.BIG_SIZE));
+		
+		AddGetterSetterLabelProvider(NameProposer nameProposer){
+			fNameProposer= nameProposer;
+		}
+		/*
+		 * @see ILabelProvider#getText(Object)
+		 */
+		public String getText(Object element) {
+			try {
+				if (! (element instanceof GetterSetterEntry))
+					return super.getText(element);
+				GetterSetterEntry entry= (GetterSetterEntry)element;
+				if (entry.isGetterEntry)
+					return fNameProposer.proposeGetterName(entry.field);
+				else
+					return fNameProposer.proposeSetterName(entry.field.getElementName());
+			} catch (JavaModelException e) {
+				return "";
+			}
+		}
+
+		/*
+		 * @see ILabelProvider#getImage(Object)
+		 */
+		public Image getImage(Object element) {
+			if (element instanceof GetterSetterEntry)
+				return IMAGE;	
+			return super.getImage(element);
+		}
+	}
+	
+	private static class AddGetterSetterContentProvider implements ITreeContentProvider{
+		private static final Object[] EMPTY= new Object[0];
+		private Map fGetterSetterEntries;
+		public AddGetterSetterContentProvider(IType type) throws JavaModelException {
+			IField[] fields= type.getFields();
+			fGetterSetterEntries= new HashMap();
+			for (int i= 0; i < fields.length; i++) {
+				GetterSetterEntry[] entries= new GetterSetterEntry[]{
+						new GetterSetterEntry(fields[i], true),
+						new GetterSetterEntry(fields[i], false)};
+				fGetterSetterEntries.put(fields[i], entries);
+			}
+		}
+		
+		/*
+		 * @see ITreeContentProvider#getChildren(Object)
+		 */
+		public Object[] getChildren(Object parentElement) {
+			if (parentElement instanceof IField)
+				return (Object[])fGetterSetterEntries.get(parentElement);	
+			return EMPTY;
+		}
+
+		/*
+		 * @see ITreeContentProvider#getParent(Object)
+		 */
+		public Object getParent(Object element) {
+			if (element instanceof IMember) 
+				return ((IMember)element).getDeclaringType();
+			if (element instanceof GetterSetterEntry)
+				return ((GetterSetterEntry)element).field;
+			return null;
+		}
+
+		/*
+		 * @see ITreeContentProvider#hasChildren(Object)
+		 */
+		public boolean hasChildren(Object element) {
+			return getChildren(element).length > 0;
+		}
+
+		/*
+		 * @see IStructuredContentProvider#getElements(Object)
+		 */
+		public Object[] getElements(Object inputElement) {
+			try {
+				if (inputElement instanceof IType)
+					return ((IType)inputElement).getFields();
+				else return EMPTY;
+			} catch (JavaModelException e) {
+				return EMPTY;
+			}
+		}
+
+		/*
+		 * @see IContentProvider#dispose()
+		 */
+		public void dispose() {
+			fGetterSetterEntries.clear();
+			fGetterSetterEntries= null;
+		}
+
+		/*
+		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
+		 */
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		}
+		
+	}
 }
