@@ -31,6 +31,7 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(UndoTextEditorTest.suite());
 		addTest(OpenQuickOutlineTest.suite());
 		addTest(OpenJavaEditorStressTest.suite());
+		addTest(JavaSmartPasteTest.suite());
 		addTest(EventDrivenTestSuite.suite());
 		addTest(new OpenJavaEditorTest.Setup(EmptyTestCase.suite(), false)); // the actual test runs in its own workbench (see test.xml)
 	}
