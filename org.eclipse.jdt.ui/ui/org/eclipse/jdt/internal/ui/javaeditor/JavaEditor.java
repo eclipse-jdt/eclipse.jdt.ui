@@ -33,6 +33,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -89,6 +90,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
+
 
 /**
  * Java specific text editor.
@@ -334,6 +336,13 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	
 	protected void setSelection(ISourceReference reference, boolean moveCursor) {
 		
+		ISelection selection= getSelectionProvider().getSelection();
+		if (selection instanceof TextSelection) {
+			TextSelection textSelection= (TextSelection) selection;
+			if (textSelection.getOffset() != 0 || textSelection.getLength() != 0)
+				markInNavigationHistory();
+		}
+		
 		if (reference != null) {
 			
 			StyledText  textWidget= null;
@@ -404,6 +413,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		} else if (moveCursor) {
 			resetHighlightRange();
 		}
+		
+		markInNavigationHistory();
 	}
 		
 	public void setSelection(IJavaElement element) {
@@ -822,6 +833,13 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	public Object getViewPartInput() {
 		return getEditorInput().getAdapter(IJavaElement.class);
-	}	
+	}
 	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#doSetSelection(ISelection)
+	 */
+	protected void doSetSelection(ISelection selection) {
+		super.doSetSelection(selection);
+		synchronizeOutlinePageSelection();
+	}
 }
