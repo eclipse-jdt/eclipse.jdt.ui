@@ -93,7 +93,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 		
 	private void helperZeroLength(int line, int column) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
-		ISourceRange selection= new SourceRange(getOffset(cu, line, column), 0);
+		ISourceRange selection= new SourceRange(getOffset(cu, line, column), 1);
 			
 		//DebugUtils.dump(name() + ":<" + cu.getSource().substring(selection.getOffset()) + "/>");
 		
@@ -225,8 +225,8 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 	}
 	
 	public void testZeroLength0() throws Exception{
-		printTestDisabledMessage("");
-		//helperZeroLength(4, 20);
+		//printTestDisabledMessage("");
+		helperZeroLength(4, 20);
 	}
 	
 	public void testWholeCu() throws Exception{
