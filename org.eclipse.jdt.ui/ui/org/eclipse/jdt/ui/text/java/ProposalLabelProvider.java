@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * similar to the one provided by {@link org.eclipse.jdt.ui.JavaElementLabels},
  * but the based on signatures and {@link CompletionProposal}s.
  *
- * @deprecated renamed to CompletionProposalLabelProvider
+ * @deprecated renamed to CompletionProposalLabelProvider, will deleted as of I20050331-0010
  * @see Signature
  * @since 3.1
  */

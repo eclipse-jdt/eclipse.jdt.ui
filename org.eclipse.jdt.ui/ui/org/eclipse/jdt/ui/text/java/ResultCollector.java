@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
  * <p>
  * Clients may instantiate or subclass.
  * </p>
- * @deprecated renamed to CompletionProposalCollector
+ * @deprecated renamed to CompletionProposalCollector, will deleted as of I20050331-0010
  * @since 3.1
  */
 public class ResultCollector extends CompletionRequestor {
