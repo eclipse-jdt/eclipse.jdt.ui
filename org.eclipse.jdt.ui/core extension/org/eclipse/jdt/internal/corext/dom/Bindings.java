@@ -45,26 +45,30 @@ public class Bindings {
 		return result.toString();
 	}
 	
-	public static String asPackageQualifiedName(ITypeBinding type) {
-		if (type.isPrimitive())
-			return type.getName();
-		if (type.isArray())
-			return asPackageQualifiedName(type.getElementType());	
-		IPackageBinding packageBinding= type.getPackage();
-		if (packageBinding.isUnnamed())
-			return asQualifiedName(type);
-		StringBuffer buffer= new StringBuffer(packageBinding.getName());
-		buffer.append('.');
-		createName(buffer, type);
-		return buffer.toString();
-	}
-	
-	public static String asQualifiedName(ITypeBinding type) {
+	public static String getTypeQualifiedName(ITypeBinding type) {
 		if (type.isPrimitive())
 			return type.getName();
 		StringBuffer buffer= new StringBuffer();
 		createName(buffer, type);
 		return buffer.toString();
+	}
+	
+	public static String getFullyQualifiedName(ITypeBinding type) {
+		if (type.isPrimitive())
+			return type.getName();
+		StringBuffer buffer= new StringBuffer();
+		if (!type.getPackage().isUnnamed()) {
+			buffer.append(type.getPackage().getName());
+			buffer.append('.');
+		}
+		createName(buffer, type);
+		return buffer.toString();		
+	}
+	
+	public static String getFullyQualifiedImportName(ITypeBinding type) {
+		if (type.isArray())
+			type= type.getElementType();
+		return getFullyQualifiedName(type);
 	}
 	
 	public static String[] getNameComponents(ITypeBinding type) {

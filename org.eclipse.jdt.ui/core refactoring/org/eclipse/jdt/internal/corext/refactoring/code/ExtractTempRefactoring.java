@@ -273,7 +273,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			return;
 			
 		ImportEdit importEdit= new ImportEdit(fCu, fSettings);
-		importEdit.addImport(Bindings.asPackageQualifiedName(type));
+		importEdit.addImport(Bindings.getFullyQualifiedImportName(type));
 		if (!importEdit.isEmpty())
 			change.addTextEdit("Update imports", importEdit);
 	}

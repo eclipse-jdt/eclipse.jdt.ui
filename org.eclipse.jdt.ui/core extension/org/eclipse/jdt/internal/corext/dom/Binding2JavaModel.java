@@ -115,19 +115,29 @@ public class Binding2JavaModel {
 	}
 	
 	private static boolean sameParameter(ITypeBinding type, String candidate, IType scope) throws JavaModelException {
-		if (isBaseType(candidate)) {
+		if (type.getDimensions() != Signature.getArrayCount(candidate))
+			return false;
+			
+		// Normalizes types
+		if (type.isArray())
+			type= type.getElementType();
+		candidate= Signature.getElementType(candidate);
+		
+		if (isPrimitiveType(candidate)) {
 			return type.getName().equals(Signature.toString(candidate));
 		} else {
 			if (isResolvedType(candidate)) {
-				return Signature.toString(candidate).equals(Bindings.asPackageQualifiedName(type));
+				return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
 			} else {
 				String[][] qualifiedCandidates= scope.resolveType(Signature.toString(candidate));
-				if (qualifiedCandidates == null)
+				if (qualifiedCandidates == null || qualifiedCandidates.length == 0l)
 					return false;
+				String packageName= type.getPackage().getName();
+				String typeName= Bindings.getTypeQualifiedName(type);
 				for (int i= 0; i < qualifiedCandidates.length; i++) {
 					String[] qualifiedCandidate= qualifiedCandidates[i];
-					if (	qualifiedCandidate[0].equals(type.getPackage().getName()) &&
-							qualifiedCandidate[1].equals(Bindings.asQualifiedName(type)))
+					if (	qualifiedCandidate[0].equals(packageName) &&
+							qualifiedCandidate[1].equals(typeName))
 						return true;
 				}
 			}
@@ -135,9 +145,8 @@ public class Binding2JavaModel {
 		return false;
 	}
 	
-	private static boolean isBaseType(String s) {
-		int arrayCount= Signature.getArrayCount(s);
-		char c= s.charAt(arrayCount);
+	private static boolean isPrimitiveType(String s) {
+		char c= s.charAt(0);
 		return c != Signature.C_RESOLVED && c != Signature.C_UNRESOLVED;
 	}
 	

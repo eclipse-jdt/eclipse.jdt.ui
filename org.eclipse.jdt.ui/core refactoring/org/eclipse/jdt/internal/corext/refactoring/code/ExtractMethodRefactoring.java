@@ -283,7 +283,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		for (int i= 0; i < exceptions.length; i++) {
 			ITypeBinding exception= exceptions[i];
-			fImportEdit.addImport(Bindings.asPackageQualifiedName(exception));
+			fImportEdit.addImport(Bindings.getFullyQualifiedImportName(exception));
 		}
 		
 		if (fAnalyzer.generateImport()) {

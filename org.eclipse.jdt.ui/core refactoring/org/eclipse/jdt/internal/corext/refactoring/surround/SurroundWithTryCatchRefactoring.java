@@ -165,7 +165,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		for (int i= 0; i < exceptions.length; i++) {
 			ITypeBinding exception= exceptions[i];
 			change.addTextEdit(NN, SimpleTextEdit.createInsert(offset, createCatchBlock(exception, delimiter, indent)));
-			importEdit.addImport(Bindings.asPackageQualifiedName(exception));
+			importEdit.addImport(Bindings.getFullyQualifiedImportName(exception));
 		}
 		change.addTextEdit(NN, SimpleTextEdit.createInsert(offset, delimiter + indent + "}"));	
 		if (!importEdit.isEmpty())
