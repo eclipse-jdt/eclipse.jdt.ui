@@ -11,10 +11,12 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -23,6 +25,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -38,6 +41,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -45,6 +49,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
@@ -66,20 +71,23 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodRef;
+import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -89,6 +97,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -116,6 +125,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -308,55 +318,16 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		}
 
 		/*
-		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.QualifiedName)
-		 */
-		public final boolean visit(final QualifiedName node) {
-			return visitName(node);
-		}
-
-		/*
-		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.QualifiedType)
-		 */
-		public final boolean visit(final QualifiedType node) {
-			return visitType(node);
-		}
-
-		/*
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleName)
 		 */
 		public final boolean visit(final SimpleName node) {
-			return visitName(node);
-		}
-
-		/*
-		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleType)
-		 */
-		public final boolean visit(final SimpleType node) {
-			return visitType(node);
-		}
-
-		public final boolean visitName(final Name node) {
 			Assert.isNotNull(node);
 			final IBinding binding= node.resolveBinding();
 			if (binding instanceof ITypeBinding) {
 				final ITypeBinding type= (ITypeBinding) binding;
-				if (!fBindings.contains(type.getKey()) && (type.isTypeVariable() || type.isParameterizedType())) {
+				if (!fBindings.contains(type.getKey()) && type.isTypeVariable()) {
 					fResult.add(node);
-					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_generic_types"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
-					return false;
-				}
-			}
-			return true;
-		}
-
-		public final boolean visitType(final Type node) {
-			Assert.isNotNull(node);
-			final IBinding binding= node.resolveBinding();
-			if (binding instanceof ITypeBinding) {
-				final ITypeBinding type= (ITypeBinding) binding;
-				if (!fBindings.contains(type.getKey()) && (type.isTypeVariable() || type.isParameterizedType())) {
-					fResult.add(node);
-					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_generic_types"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
+					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_type_variables"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$ //$NON-NLS-2$
 					return false;
 				}
 			}
@@ -656,8 +627,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			IVariableBinding variable= null;
 			for (int index= 0; index < bindings.length; index++) {
 				variable= bindings[index];
-				if (!variable.isSynthetic())
+				if (!variable.isSynthetic() && !fFound.contains(variable.getKey())) {
+					fFound.add(variable.getKey());
 					fBindings.add(variable);
+				}
 			}
 		}
 
@@ -702,11 +675,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			Assert.isNotNull(node);
 			if (node.getExpression() instanceof ThisExpression) {
 				final IVariableBinding binding= (IVariableBinding) node.getName().resolveBinding();
-				if (binding != null)
-					if (!fFound.contains(binding.getKey())) {
-						fFound.add(binding.getKey());
+				if (binding != null) {
+					final String key= binding.getKey();
+					if (!fFound.contains(key)) {
+						fFound.add(key);
 						fBindings.add(binding);
 					}
+				}
 			}
 			return true;
 		}
@@ -730,10 +705,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final IBinding binding= node.resolveBinding();
 			if (binding != null)
 				if (isFieldAccess(node) && !isQualifiedEntity(node)) {
-					IVariableBinding binding1= (IVariableBinding) binding;
-					if (!fFound.contains(binding1.getKey())) {
-						fFound.add(binding1.getKey());
-						fBindings.add(binding1);
+					final IVariableBinding variable= (IVariableBinding) binding;
+					final String key= variable.getKey();
+					if (!fFound.contains(key)) {
+						fFound.add(key);
+						fBindings.add(variable);
 					}
 				}
 			return false;
@@ -901,7 +877,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	private IVariableBinding[] fCandidateTargets= new IVariableBinding[0];
 
 	/** The text change manager */
-	private final TextChangeManager fChangeManager= new TextChangeManager();
+	private TextChangeManager fChangeManager= null;
+
+	/** Should the delegator be deprecated? */
+	private boolean fDeprecated= false;
 
 	/** Should the delegator be inlined? */
 	private boolean fInline= false;
@@ -1007,8 +986,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(context);
 		Assert.isNotNull(fTarget);
 		final RefactoringStatus status= new RefactoringStatus();
+		fChangeManager= new TextChangeManager();
 		try {
-			monitor.beginTask("", 5); //$NON-NLS-1$
+			monitor.beginTask("", 6); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
 			status.merge(Checks.checkIfCuBroken(fMethod));
 			monitor.worked(1);
@@ -1024,12 +1004,12 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 							if (!status.hasError()) {
 								if (!type.exists() || type.isBinary() || type.isReadOnly())
 									status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_binary"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
-								checkConflictingTarget(monitor, status);
-								checkConflictingMethod(monitor, status);
+								checkConflictingTarget(new SubProgressMonitor(monitor, 1), status);
+								checkConflictingMethod(new SubProgressMonitor(monitor, 1), status);
 								status.merge(Checks.validateModifiesFiles(computeModifiedFiles(fMethod.getCompilationUnit(), type.getCompilationUnit()), null));
 								monitor.worked(1);
 								if (!status.hasFatalError())
-									createChangeManager(status, monitor);
+									fChangeManager= createChangeManager(status, new SubProgressMonitor(monitor, 1));
 							}
 						}
 					} else
@@ -1183,27 +1163,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Searches for references to the delegate method.
-	 * 
-	 * @param monitor the progress monitor to use
-	 * @param status the refactoring status to use
-	 * @return the array of search result groups
-	 * @throws CoreException if an error occurred during search
-	 */
-	protected SearchResultGroup[] computeDelegateMethodReferences(final IProgressMonitor monitor, final RefactoringStatus status) throws CoreException {
-		Assert.isNotNull(monitor);
-		Assert.isNotNull(status);
-		try {
-			monitor.beginTask("", 2); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
-			return RefactoringSearchEngine.search(RefactoringSearchEngine.createOrPattern(new IJavaElement[] { fMethod}, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(fMethod), new CollectingSearchRequestor(), new SubProgressMonitor(monitor, 1), status);
-		} finally {
-			monitor.done();
-		}
-	}
-
-	/**
-	 * Computes the modified files by this refactoring.
+	 * Computes the files that are being modified by this refactoring.
 	 * 
 	 * @param source the source compilation unit
 	 * @param target the target compilation unit
@@ -1215,6 +1175,57 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		if (source.equals(target))
 			return ResourceUtil.getFiles(new ICompilationUnit[] { source});
 		return ResourceUtil.getFiles(new ICompilationUnit[] { source, target});
+	}
+
+	/**
+	 * Searches for references to the original method.
+	 * 
+	 * @param monitor the progress monitor to use
+	 * @param status the refactoring status to use
+	 * @return the array of search result groups
+	 * @throws CoreException if an error occurred during search
+	 */
+	protected SearchResultGroup[] computeOriginalMethodReferences(final IProgressMonitor monitor, final RefactoringStatus status) throws CoreException {
+		Assert.isNotNull(monitor);
+		Assert.isNotNull(status);
+		try {
+			monitor.beginTask("", 2); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			CollectingSearchRequestor requestor= new CollectingSearchRequestor();
+			try {
+				new SearchEngine().search(RefactoringSearchEngine.createOrPattern(new IJavaElement[] { fMethod}, IJavaSearchConstants.REFERENCES), SearchUtils.getDefaultSearchParticipants(), RefactoringScopeFactory.create(fMethod), requestor, new SubProgressMonitor(monitor, 1));
+			} catch (CoreException exception) {
+				throw new JavaModelException(exception);
+			}
+			final Map grouped= new HashMap();
+			SearchMatch match= null;
+			for (final Iterator iterator= requestor.getResults().iterator(); iterator.hasNext();) {
+				match= (SearchMatch) iterator.next();
+				if (!grouped.containsKey(match.getResource()))
+					grouped.put(match.getResource(), new ArrayList(1));
+				((List) grouped.get(match.getResource())).add(match);
+			}
+			IResource resource= null;
+			IJavaElement element= null;
+			for (final Iterator iterator= grouped.keySet().iterator(); iterator.hasNext();) {
+				resource= (IResource) iterator.next();
+				element= JavaCore.create(resource);
+				if (!(element instanceof ICompilationUnit) && !(element instanceof IClassFile))
+					iterator.remove();
+			}
+			final SearchResultGroup[] result= new SearchResultGroup[grouped.keySet().size()];
+			int index= 0;
+			List matches= null;
+			for (final Iterator iterator= grouped.keySet().iterator(); iterator.hasNext();) {
+				resource= (IResource) iterator.next();
+				matches= (List) grouped.get(resource);
+				result[index]= new SearchResultGroup(resource, ((SearchMatch[]) matches.toArray(new SearchMatch[matches.size()])));
+				index++;
+			}
+			return result;
+		} finally {
+			monitor.done();
+		}
 	}
 
 	/**
@@ -1348,28 +1359,36 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 * 
 	 * @param status the refactoring status
 	 * @param monitor the progress monitor to display progress
+	 * @return the created text change manager
 	 * @throws JavaModelException if the method declaration could not be found
 	 * @throws CoreException if the changes could not be generated
 	 */
-	protected void createChangeManager(final RefactoringStatus status, final IProgressMonitor monitor) throws JavaModelException, CoreException {
+	protected TextChangeManager createChangeManager(final RefactoringStatus status, final IProgressMonitor monitor) throws JavaModelException, CoreException {
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
+		fSourceRewrite.clearASTAndImportRewrites();
+		final TextChangeManager manager= new TextChangeManager();
 		final CompilationUnitRewrite targetRewrite= fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()) ? fSourceRewrite : new CompilationUnitRewrite(getTargetType().getCompilationUnit());
 		final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
-		final boolean result= createMethodCopyChange(declaration, targetRewrite, monitor);
+		final SearchResultGroup[] references= computeOriginalMethodReferences(new SubProgressMonitor(monitor, 1), status);
+		final boolean result= createMethodCopy(declaration, targetRewrite, monitor);
+		createMethodJavadocReferences(manager, declaration, targetRewrite, references, result, status, monitor);
 		if (!fSourceRewrite.getCu().equals(targetRewrite.getCu()))
-			createMethodCopyImports(targetRewrite, monitor);
+			createMethodImports(targetRewrite, monitor);
 		boolean removable= false;
 		if (fInline) {
-			removable= createMethodInlineDelegatorChanges(declaration, targetRewrite, result, status, monitor);
-			if (fRemove && removable)
-				createOriginalMethodRemovalChange(declaration);
+			removable= createMethodDelegator(manager, declaration, targetRewrite, references, result, status, monitor);
+			if (fRemove && removable) {
+				fSourceRewrite.getASTRewrite().remove(declaration, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.remove_original_method"))); //$NON-NLS-1$
+				fSourceRewrite.getImportRemover().registerRemovedNode(declaration);
+			}
 		}
 		if (!fRemove || !removable)
-			createMethodDelegationChange(declaration, monitor);
-		fChangeManager.manage(fSourceRewrite.getCu(), fSourceRewrite.createChange());
+			createMethodDelegation(declaration, monitor);
+		manager.manage(fSourceRewrite.getCu(), fSourceRewrite.createChange());
 		if (!fSourceRewrite.getCu().equals(targetRewrite.getCu()))
-			fChangeManager.manage(targetRewrite.getCu(), targetRewrite.createChange());
+			manager.manage(targetRewrite.getCu(), targetRewrite.createChange());
+		return manager;
 	}
 
 	/**
@@ -1381,6 +1400,76 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	protected ExpressionStatement createExpressionStatement(final MethodInvocation invocation) {
 		Assert.isNotNull(invocation);
 		return invocation.getAST().newExpressionStatement(invocation);
+	}
+
+	/**
+	 * Creates the necessary change to inline a method invocation represented by a search match.
+	 * 
+	 * @param unitRewrite the current compilation unit rewrite
+	 * @param sourceDeclaration the source method declaration
+	 * @param match the search match representing the method invocation
+	 * @param targetNode <code>true</code> if a target node had to be inserted as first argument, <code>false</code> otherwise
+	 * @param status the refactoring status
+	 * @return <code>true</code> if the inline change could be performed, <code>false</code> otherwise
+	 * @throws JavaModelException if a problem occurred while creating the inlined target expression for field targets
+	 */
+	protected boolean createInlinedMethodInvocation(final CompilationUnitRewrite unitRewrite, final MethodDeclaration sourceDeclaration, final SearchMatch match, final boolean targetNode, final RefactoringStatus status) throws JavaModelException {
+		Assert.isNotNull(unitRewrite);
+		Assert.isNotNull(sourceDeclaration);
+		Assert.isNotNull(match);
+		Assert.isNotNull(status);
+		boolean result= true;
+		final ASTRewrite rewrite= unitRewrite.getASTRewrite();
+		final ASTNode node= ASTNodeSearchUtil.findNode(match, unitRewrite.getRoot());
+		final TextEditGroup group= unitRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.inline_method_invocation")); //$NON-NLS-1$
+		if (node instanceof MethodInvocation) {
+			final MethodInvocation invocation= (MethodInvocation) node;
+			final ListRewrite rewriter= rewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
+			if (fTarget.isField()) {
+				Expression target= null;
+				if (invocation.getExpression() != null) {
+					target= createInlinedTargetExpression(unitRewrite, sourceDeclaration, invocation.getExpression(), status);
+					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, target, group);
+				} else
+					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, rewrite.getAST().newSimpleName(fTarget.getName()), group);
+				if (targetNode) {
+					if (target == null || !(target instanceof FieldAccess))
+						rewriter.insertLast(rewrite.getAST().newThisExpression(), null);
+					else
+						rewriter.insertLast(rewrite.getAST().newSimpleName(fTargetName), null);
+				}
+			} else {
+				final IVariableBinding[] bindings= getParameterBindings(sourceDeclaration);
+				if (bindings.length > 0) {
+					int index= 0;
+					for (; index < bindings.length; index++)
+						if (Bindings.equals(bindings[index], fTarget))
+							break;
+					if (index < bindings.length && invocation.arguments().size() > index) {
+						final Expression argument= (Expression) invocation.arguments().get(index);
+						if (argument instanceof NullLiteral) {
+							status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.no_null_argument", Bindings.asString(sourceDeclaration.resolveBinding())), JavaStatusContext.create(unitRewrite.getCu(), invocation))); //$NON-NLS-1$
+							result= false;
+						} else {
+							if (argument instanceof ThisExpression)
+								rewrite.remove(invocation.getExpression(), null);
+							else
+								rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, rewrite.createCopyTarget(argument), group);
+							if (targetNode) {
+								if (invocation.getExpression() != null)
+									rewriter.replace(argument, rewrite.createCopyTarget(invocation.getExpression()), group);
+								else
+									rewriter.replace(argument, rewrite.getAST().newThisExpression(), group);
+							} else
+								rewriter.remove(argument, group);
+						}
+					}
+				}
+			}
+			if (result)
+				rewrite.set(invocation, MethodInvocation.NAME_PROPERTY, rewrite.getAST().newSimpleName(fMethodName), group);
+		}
+		return result;
 	}
 
 	/**
@@ -1463,33 +1552,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Creates the corresponding statement for the method invocation, based on the return type.
-	 * 
-	 * @param declaration the method declaration where the invocation statement is inserted
-	 * @param invocation the method invocation being encapsulated by the resulting statement
-	 * @return the corresponding statement
-	 */
-	protected Statement createInvocationStatement(final MethodDeclaration declaration, final MethodInvocation invocation) {
-		Assert.isNotNull(declaration);
-		Assert.isNotNull(invocation);
-		Statement statement= null;
-		final Type type= declaration.getReturnType2();
-		if (type == null)
-			statement= createExpressionStatement(invocation);
-		else {
-			if (type instanceof PrimitiveType) {
-				final PrimitiveType primitive= (PrimitiveType) type;
-				if (primitive.getPrimitiveTypeCode().equals(PrimitiveType.VOID))
-					statement= createExpressionStatement(invocation);
-				else
-					statement= createReturnStatement(invocation);
-			} else
-				statement= createReturnStatement(invocation);
-		}
-		return statement;
-	}
-
-	/**
 	 * Creates the method body for the target method declaration.
 	 * 
 	 * @param targetRewrite the target compilation unit rewrite
@@ -1502,7 +1564,131 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Creates the content of the moved method body.
+	 * Creates the method comment for the target method declaration.
+	 * 
+	 * @param targetRewrite the target compilation unit rewrite
+	 * @param sourceRewriter the source ast rewrite
+	 * @param sourceDeclaration the source method declaration
+	 * @param parameters the parameter list of the target method
+	 * @throws CoreException if the comment template could not be retrieved
+	 * @throws JavaModelException if the method properties could not be retrieved
+	 */
+	protected void createMethodComment(final CompilationUnitRewrite targetRewrite, final ASTRewrite sourceRewriter, final MethodDeclaration sourceDeclaration, final List parameters) throws CoreException, JavaModelException {
+		Assert.isNotNull(targetRewrite);
+		Assert.isNotNull(sourceRewriter);
+		Assert.isNotNull(sourceDeclaration);
+		Assert.isNotNull(parameters);
+		final Javadoc comment= sourceDeclaration.getJavadoc();
+		if (comment != null) {
+			final AST ast= sourceRewriter.getAST();
+			final Map existing= new HashMap(parameters.size());
+			final ListRewrite rewrite= sourceRewriter.getListRewrite(comment, Javadoc.TAGS_PROPERTY);
+			boolean found= true;
+			String name= null;
+			TagElement tag= null;
+			TagElement first= null;
+			TextElement text= null;
+			for (final Iterator tags= comment.tags().iterator(); tags.hasNext();) {
+				found= false;
+				tag= (TagElement) tags.next();
+				name= tag.getTagName();
+				if (name != null && name.equals(TagElement.TAG_PARAM)) {
+					final List fragments= tag.fragments();
+					if (fragments.size() > 0) {
+						final ASTNode fragment= (ASTNode) fragments.get(0);
+						if (fragment instanceof TextElement) {
+							VariableDeclaration declaration= null;
+							for (final Iterator iterator= parameters.iterator(); iterator.hasNext();) {
+								declaration= (VariableDeclaration) iterator.next();
+								text= (TextElement) fragment;
+								if (declaration.getName().getIdentifier().equals(text.getText()))
+									found= true;
+							}
+						}
+					}
+					if (!found)
+						rewrite.remove(tag, null);
+					else
+						existing.put(text.getText(), tag);
+				} else
+					first= tag;
+			}
+			tag= first;
+			TagElement element= null;
+			VariableDeclaration declaration= null;
+			for (final Iterator iterator= parameters.iterator(); iterator.hasNext();) {
+				declaration= (VariableDeclaration) iterator.next();
+				name= declaration.getName().getIdentifier();
+				if (existing.containsKey(name))
+					tag= (TagElement) existing.get(name);
+				else {
+					element= ast.newTagElement();
+					element.setTagName(TagElement.TAG_PARAM);
+					text= ast.newTextElement();
+					text.setText(name);
+					element.fragments().add(text);
+					if (tag != null)
+						rewrite.insertAfter(element, tag, null);
+					else
+						rewrite.insertFirst(element, null);
+				}
+			}
+		} else if (fSettings.createComments) {
+			final List list= new ArrayList();
+			VariableDeclaration declaration= null;
+			for (final Iterator iterator= parameters.iterator(); iterator.hasNext();) {
+				declaration= (VariableDeclaration) iterator.next();
+				list.add(declaration.getName().getIdentifier());
+			}
+			final String[] names= new String[list.size()];
+			list.toArray(names);
+			final String text= CodeGeneration.getMethodComment(targetRewrite.getCu(), getTargetType().getTypeQualifiedName('.'), fMethodName, names, fMethod.getExceptionTypes(), fMethod.getReturnType(), null, StubUtility.getLineDelimiterUsed(getTargetType()));
+			if (text != null && text.length() > 0) {
+				final Javadoc doc= (Javadoc) sourceRewriter.createStringPlaceholder(text, ASTNode.JAVADOC);
+				sourceRewriter.set(sourceDeclaration, MethodDeclaration.JAVADOC_PROPERTY, doc, null);
+			}
+		}
+	}
+
+	/**
+	 * Creates the necessary changes to create the delegate method with the original method body.
+	 * 
+	 * @param sourceDeclaration the method declaration to use as source
+	 * @param targetRewrite the target compilation unit rewrite
+	 * @param monitor the progress monitor to display progress
+	 * @throws CoreException if no buffer could be created for the source compilation unit
+	 * @return <code>true</code> if a target node had to be inserted as first argument, <code>false</code> otherwise
+	 */
+	protected boolean createMethodCopy(final MethodDeclaration sourceDeclaration, final CompilationUnitRewrite targetRewrite, final IProgressMonitor monitor) throws CoreException {
+		Assert.isNotNull(sourceDeclaration);
+		Assert.isNotNull(monitor);
+		boolean result= false;
+		final IDocument document= new Document(fMethod.getCompilationUnit().getBuffer().getContents());
+		try {
+			ASTRewrite rewrite= ASTRewrite.create(fSourceRewrite.getRoot().getAST());
+			final List parameters= new ArrayList(sourceDeclaration.parameters().size());
+			rewrite.set(sourceDeclaration, MethodDeclaration.NAME_PROPERTY, rewrite.getAST().newSimpleName(fMethodName), null);
+			result= createMethodParameters(targetRewrite, rewrite, sourceDeclaration, parameters);
+			createMethodComment(targetRewrite, rewrite, sourceDeclaration, parameters);
+			createMethodBody(targetRewrite, rewrite, sourceDeclaration);
+			final String content= createMethodDeclaration(document, sourceDeclaration, rewrite);
+			rewrite= targetRewrite.getASTRewrite();
+			final MethodDeclaration targetDeclaration= (MethodDeclaration) rewrite.createStringPlaceholder(content, ASTNode.METHOD_DECLARATION);
+			final TypeDeclaration type= ASTNodeSearchUtil.getTypeDeclarationNode(getTargetType(), targetRewrite.getRoot());
+			rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(targetDeclaration, ASTNodes.getInsertionIndex(targetDeclaration, type.bodyDeclarations()), targetRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.add_moved_method"))); //$NON-NLS-1$
+		} catch (MalformedTreeException exception) {
+			JavaPlugin.log(exception);
+		} catch (BadLocationException exception) {
+			JavaPlugin.log(exception);
+		} finally {
+			if (fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()))
+				targetRewrite.clearImportRewrites();
+		}
+		return result;
+	}
+
+	/**
+	 * Creates the method declaration of the moved method.
 	 * 
 	 * @param document the document representing the source compilation unit
 	 * @param sourceDeclaration the source method declaration
@@ -1510,7 +1696,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 * @return the string representing the moved method body
 	 * @throws BadLocationException if an offset into the document is invalid
 	 */
-	protected String createMethodBodyContent(final IDocument document, final MethodDeclaration sourceDeclaration, final ASTRewrite rewrite) throws BadLocationException {
+	protected String createMethodDeclaration(final IDocument document, final MethodDeclaration sourceDeclaration, final ASTRewrite rewrite) throws BadLocationException {
 		Assert.isNotNull(document);
 		Assert.isNotNull(sourceDeclaration);
 		Assert.isNotNull(rewrite);
@@ -1530,96 +1716,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Creates the method comment for the target method declaration.
-	 * 
-	 * @param targetRewrite the target compilation unit rewrite
-	 * @param sourceRewriter the source ast rewrite
-	 * @param sourceDeclaration the source method declaration
-	 * @param parameters the parameter list of the target method
-	 * @throws CoreException if the comment template could not be retrieved
-	 * @throws JavaModelException if the method properties could not be retrieved
-	 */
-	protected void createMethodComment(final CompilationUnitRewrite targetRewrite, final ASTRewrite sourceRewriter, final MethodDeclaration sourceDeclaration, final List parameters) throws CoreException, JavaModelException {
-		Assert.isNotNull(targetRewrite);
-		Assert.isNotNull(sourceRewriter);
-		Assert.isNotNull(sourceDeclaration);
-		Assert.isNotNull(parameters);
-		if (fSettings.createComments) {
-			final List list= new ArrayList();
-			VariableDeclaration declaration= null;
-			for (final Iterator iterator= parameters.iterator(); iterator.hasNext();) {
-				declaration= (VariableDeclaration) iterator.next();
-				list.add(declaration.getName().getIdentifier());
-			}
-			final String[] names= new String[list.size()];
-			list.toArray(names);
-			final String comment= CodeGeneration.getMethodComment(targetRewrite.getCu(), getTargetType().getTypeQualifiedName('.'), fMethodName, names, fMethod.getExceptionTypes(), fMethod.getReturnType(), null, StubUtility.getLineDelimiterUsed(getTargetType()));
-			if (comment != null && comment.length() > 0) {
-				final Javadoc doc= (Javadoc) sourceRewriter.createStringPlaceholder(comment, ASTNode.JAVADOC);
-				sourceRewriter.set(sourceDeclaration, MethodDeclaration.JAVADOC_PROPERTY, doc, null);
-			}
-		}
-	}
-
-	/**
-	 * Creates the necessary changes to create the delegate method with the original method body.
-	 * 
-	 * @param sourceDeclaration the method declaration to use as source
-	 * @param targetRewrite the target compilation unit rewrite
-	 * @param monitor the progress monitor to display progress
-	 * @throws CoreException if no buffer could be created for the source compilation unit
-	 * @return <code>true</code> if a target node had to be inserted as first argument, <code>false</code> otherwise
-	 */
-	protected boolean createMethodCopyChange(final MethodDeclaration sourceDeclaration, final CompilationUnitRewrite targetRewrite, final IProgressMonitor monitor) throws CoreException {
-		Assert.isNotNull(sourceDeclaration);
-		Assert.isNotNull(monitor);
-		boolean result= false;
-		final IDocument document= new Document(fMethod.getCompilationUnit().getBuffer().getContents());
-		try {
-			ASTRewrite rewrite= ASTRewrite.create(fSourceRewrite.getRoot().getAST());
-			final List parameters= new ArrayList(sourceDeclaration.parameters().size());
-			rewrite.set(sourceDeclaration, MethodDeclaration.NAME_PROPERTY, rewrite.getAST().newSimpleName(fMethodName), null);
-			result= createMethodParameters(targetRewrite, rewrite, sourceDeclaration, parameters);
-			createMethodComment(targetRewrite, rewrite, sourceDeclaration, parameters);
-			createMethodBody(targetRewrite, rewrite, sourceDeclaration);
-			final String content= createMethodBodyContent(document, sourceDeclaration, rewrite);
-			rewrite= targetRewrite.getASTRewrite();
-			final MethodDeclaration targetDeclaration= (MethodDeclaration) rewrite.createStringPlaceholder(content, ASTNode.METHOD_DECLARATION);
-			final TypeDeclaration type= ASTNodeSearchUtil.getTypeDeclarationNode(getTargetType(), targetRewrite.getRoot());
-			rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(targetDeclaration, ASTNodes.getInsertionIndex(targetDeclaration, type.bodyDeclarations()), targetRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.add_moved_method"))); //$NON-NLS-1$
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
-			JavaPlugin.log(exception);
-		} finally {
-			if (fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()))
-				targetRewrite.clearImportRewrites();
-		}
-		return result;
-	}
-
-	/**
-	 * Creates the necessary imports for the copied method in the target compilation unit.
-	 * 
-	 * @param targetRewrite the target compilation unit rewrite
-	 * @param monitor the progress monitor to use
-	 * @throws JavaModelException if the types referenced in the method could not be determined
-	 */
-	protected void createMethodCopyImports(final CompilationUnitRewrite targetRewrite, final IProgressMonitor monitor) throws JavaModelException {
-		Assert.isNotNull(targetRewrite);
-		Assert.isNotNull(monitor);
-		final IType[] references= ReferenceFinderUtil.getTypesReferencedIn(new IJavaElement[] { fMethod}, monitor);
-		final ImportRewrite rewrite= targetRewrite.getImportRewrite();
-		final ImportRemover remover= targetRewrite.getImportRemover();
-		String name= null;
-		for (int index= 0; index < references.length; index++) {
-			name= JavaModelUtil.getFullyQualifiedName(references[index]);
-			rewrite.addImport(name);
-			remover.registerAddedImport(name);
-		}
-	}
-
-	/**
 	 * Creates the necessary changes to replace the body of the method declaration with an expression to invoke the delegate.
 	 * 
 	 * @param declaration the method declaration to replace its body
@@ -1627,7 +1723,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 * @throws CoreException if the change could not be generated
 	 * @return <code>true</code> if a target node had to be inserted as first argument, <code>false</code> otherwise
 	 */
-	protected boolean createMethodDelegationChange(final MethodDeclaration declaration, final IProgressMonitor monitor) throws CoreException {
+	protected boolean createMethodDelegation(final MethodDeclaration declaration, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(monitor);
 		final AST ast= fSourceRewrite.getRoot().getAST();
@@ -1648,79 +1744,30 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			}
 		});
 		final Block block= ast.newBlock();
-		block.statements().add(createInvocationStatement(declaration, invocation));
+		block.statements().add(createMethodInvocation(declaration, invocation));
 		remover.registerRemovedNode(declaration.getBody());
 		rewrite.set(declaration, MethodDeclaration.BODY_PROPERTY, block, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.replace_body_with_delegation"))); //$NON-NLS-1$
+		if (fDeprecated)
+			createMethodDeprecation(declaration);
 		return result;
-	}
-
-	/**
-	 * Creates the necessary change to inline a method invocation representing in a search match.
-	 * 
-	 * @param unitRewrite the current compilation unit rewrite
-	 * @param sourceDeclaration the source method declaration
-	 * @param match the search match representing the method invocation
-	 * @param targetNode <code>true</code> if a target node had to be inserted as first argument, <code>false</code> otherwise
-	 * @param status the refactoring status
-	 * @throws JavaModelException if a problem occurred while creating the inlined target expression for field targets
-	 */
-	protected void createMethodInlineChange(final CompilationUnitRewrite unitRewrite, final MethodDeclaration sourceDeclaration, final SearchMatch match, final boolean targetNode, final RefactoringStatus status) throws JavaModelException {
-		Assert.isNotNull(unitRewrite);
-		Assert.isNotNull(sourceDeclaration);
-		Assert.isNotNull(match);
-		Assert.isNotNull(status);
-		final ASTRewrite rewrite= unitRewrite.getASTRewrite();
-		final ASTNode node= ASTNodeSearchUtil.findNode(match, unitRewrite.getRoot());
-		final TextEditGroup group= unitRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.inline_method_invocation")); //$NON-NLS-1$
-		if (node instanceof MethodInvocation) {
-			final AST ast= rewrite.getAST();
-			final MethodInvocation invocation= (MethodInvocation) node;
-			final Expression expression= invocation.getExpression();
-			final ListRewrite rewriter= rewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
-			if (fTarget.isField()) {
-				if (expression != null)
-					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, createInlinedTargetExpression(unitRewrite, sourceDeclaration, expression, status), group);
-				else
-					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, ast.newSimpleName(fTargetName), group);
-				rewriter.insertLast(ast.newSimpleName(fTargetName), null);
-			} else {
-				final IVariableBinding[] bindings= getParameterBindings(sourceDeclaration);
-				if (bindings.length > 0) {
-					int index= 0;
-					for (; index < bindings.length; index++)
-						if (Bindings.equals(bindings[index], fTarget))
-							break;
-					final List arguments= invocation.arguments();
-					if (index < bindings.length && arguments.size() > index) {
-						final ASTNode argument= (ASTNode) arguments.get(index);
-						rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, rewrite.createCopyTarget(argument), group);
-						if (targetNode) {
-							if (expression != null)
-								rewriter.replace(argument, rewrite.createCopyTarget(expression), group);
-							else
-								rewriter.replace(argument, ast.newThisExpression(), group);
-						} else
-							rewriter.remove(argument, group);
-					}
-				} else
-					Assert.isTrue(false);
-			}
-			rewrite.set(invocation, MethodInvocation.NAME_PROPERTY, ast.newSimpleName(fMethodName), group);
-		}
 	}
 
 	/**
 	 * Creates the necessary changes to inline the method invocations to the original method.
 	 * 
+	 * @param manager text change manager
 	 * @param sourceDeclaration the source method declaration
 	 * @param targetRewrite the target compilation unit rewrite
+	 * @param groups the search result groups representing all references to the moved method, including references in comments
 	 * @param targetNode <code>true</code> if a target node must be inserted as first argument, <code>false</code> otherwise
 	 * @param status the refactoring status
 	 * @param monitor the progress monitor to use
 	 * @return <code>true</code> if all method invocations to the original method declaration could be inlined, <code>false</code> otherwise
 	 */
-	protected boolean createMethodInlineDelegatorChanges(final MethodDeclaration sourceDeclaration, final CompilationUnitRewrite targetRewrite, final boolean targetNode, final RefactoringStatus status, final IProgressMonitor monitor) {
+	protected boolean createMethodDelegator(final TextChangeManager manager, final MethodDeclaration sourceDeclaration, final CompilationUnitRewrite targetRewrite, final SearchResultGroup[] groups, final boolean targetNode, final RefactoringStatus status, final IProgressMonitor monitor) {
+		Assert.isNotNull(manager);
 		Assert.isNotNull(sourceDeclaration);
+		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
 		try {
@@ -1728,7 +1775,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
 			try {
 				boolean result= true;
-				boolean binary= false;
+				boolean readonly= false;
 				boolean found= false;
 				final ITypeHierarchy hierarchy= fMethod.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(monitor, 1));
 				IType type= null;
@@ -1751,36 +1798,38 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.overridden", Bindings.asString(sourceDeclaration.resolveBinding())), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
 					result= false;
 				} else {
-					SearchResultGroup[] groups= computeDelegateMethodReferences(new SubProgressMonitor(monitor, 1), status);
 					monitor.worked(1);
 					SearchMatch match= null;
 					SearchMatch[] matches= null;
-					ICompilationUnit currentUnit= null;
-					CompilationUnitRewrite currentRewrite= null;
+					ICompilationUnit unit= null;
+					CompilationUnitRewrite rewrite= null;
 					SearchResultGroup group= null;
 					for (int index= 0; index < groups.length; index++) {
 						group= groups[index];
-						currentUnit= group.getCompilationUnit();
-						types= currentUnit.getAllTypes();
-						for (int offset= 0; offset < types.length; offset++) {
-							if (types[offset].isBinary()) {
-								binary= true;
-								break;
+						unit= group.getCompilationUnit();
+						if (unit != null) {
+							types= unit.getAllTypes();
+							for (int offset= 0; offset < types.length; offset++) {
+								if (types[offset].isReadOnly()) {
+									readonly= true;
+									break;
+								}
 							}
-						}
-						if (!binary) {
+						} else
+							readonly= true;
+						if (!readonly) {
 							matches= group.getSearchResults();
-							if (fSourceRewrite.getCu().equals(currentUnit))
-								currentRewrite= fSourceRewrite;
-							else if (targetRewrite.getCu().equals(currentUnit))
-								currentRewrite= targetRewrite;
+							if (fSourceRewrite.getCu().equals(unit))
+								rewrite= fSourceRewrite;
+							else if (targetRewrite.getCu().equals(unit))
+								rewrite= targetRewrite;
 							else
-								currentRewrite= new CompilationUnitRewrite(currentUnit);
+								rewrite= new CompilationUnitRewrite(unit);
 							for (int offset= 0; offset < matches.length; offset++) {
 								match= matches[offset];
 								if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
 									final SearchMatch context= match;
-									status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", currentUnit.getCorrespondingResource().getName()), JavaStatusContext.create(currentUnit, new ISourceRange() { //$NON-NLS-1$
+									status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new ISourceRange() { //$NON-NLS-1$
 
 												public final int getLength() {
 													return context.getLength();
@@ -1791,13 +1840,17 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 												}
 											})));
 									result= false;
-								} else
-									createMethodInlineChange(currentRewrite, sourceDeclaration, match, targetNode, status);
+								} else if (!createInlinedMethodInvocation(rewrite, sourceDeclaration, match, targetNode, status))
+									result= false;
 							}
-							if (!fSourceRewrite.getCu().equals(currentUnit) && !targetRewrite.getCu().equals(currentUnit))
-								fChangeManager.manage(currentUnit, currentRewrite.createChange());
+							if (!fSourceRewrite.getCu().equals(unit) && !targetRewrite.getCu().equals(unit))
+								manager.manage(unit, rewrite.createChange());
 						} else {
-							status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary", currentUnit.getCorrespondingResource().getName()), JavaStatusContext.create(currentUnit))); //$NON-NLS-1$
+							final IClassFile file= (IClassFile) JavaCore.create(group.getResource());
+							if (file != null && file.exists())
+								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary.type", file.getType().getFullyQualifiedName('.')))); //$NON-NLS-1$
+							else
+								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary.resource", group.getResource().getName()))); //$NON-NLS-1$
 							result= false;
 						}
 					}
@@ -1806,6 +1859,185 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			} catch (CoreException exception) {
 				status.merge(RefactoringStatus.create(exception.getStatus()));
 				return false;
+			}
+		} finally {
+			monitor.done();
+		}
+	}
+
+	/**
+	 * Creates the method deprecation message for the original method.
+	 * 
+	 * @param declaration the method declaration to create the message for
+	 */
+	protected void createMethodDeprecation(final MethodDeclaration declaration) {
+		Assert.isNotNull(declaration);
+		final AST ast= fSourceRewrite.getRoot().getAST();
+		final ASTRewrite rewrite= fSourceRewrite.getASTRewrite();
+		final String[] tokens= Strings.splitByToken(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.deprecate_delegator_message"), " "); //$NON-NLS-1$ //$NON-NLS-2$
+		final List fragments= new ArrayList(tokens.length);
+		String element= null;
+		for (int index= 0; index < tokens.length; index++) {
+			element= tokens[index];
+			if (element != null && element.length() > 0) {
+				if (element.equals("{0}")) //$NON-NLS-1$
+					fragments.add(createMethodReference(declaration, ast));
+				else {
+					final TextElement text= ast.newTextElement();
+					text.setText(element);
+					fragments.add(text);
+				}
+			}
+		}
+		final TagElement tag= ast.newTagElement();
+		tag.setTagName(TagElement.TAG_DEPRECATED);
+		tag.fragments().addAll(fragments);
+		Javadoc comment= declaration.getJavadoc();
+		if (comment == null) {
+			comment= ast.newJavadoc();
+			comment.tags().add(tag);
+			rewrite.set(declaration, MethodDeclaration.JAVADOC_PROPERTY, comment, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.deprecate_delegator_method"))); //$NON-NLS-1$
+		} else
+			rewrite.getListRewrite(comment, Javadoc.TAGS_PROPERTY).insertLast(tag, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.deprecate_delegator_method"))); //$NON-NLS-1$
+	}
+
+	/**
+	 * Creates the necessary imports for the copied method in the target compilation unit.
+	 * 
+	 * @param targetRewrite the target compilation unit rewrite
+	 * @param monitor the progress monitor to use
+	 * @throws JavaModelException if the types referenced in the method could not be determined
+	 */
+	protected void createMethodImports(final CompilationUnitRewrite targetRewrite, final IProgressMonitor monitor) throws JavaModelException {
+		Assert.isNotNull(targetRewrite);
+		Assert.isNotNull(monitor);
+		final IType[] references= ReferenceFinderUtil.getTypesReferencedIn(new IJavaElement[] { fMethod}, monitor);
+		final ImportRewrite rewrite= targetRewrite.getImportRewrite();
+		final ImportRemover remover= targetRewrite.getImportRemover();
+		String name= null;
+		for (int index= 0; index < references.length; index++) {
+			name= JavaModelUtil.getFullyQualifiedName(references[index]);
+			rewrite.addImport(name);
+			remover.registerAddedImport(name);
+		}
+	}
+
+	/**
+	 * Creates the corresponding statement for the method invocation, based on the return type.
+	 * 
+	 * @param declaration the method declaration where the invocation statement is inserted
+	 * @param invocation the method invocation being encapsulated by the resulting statement
+	 * @return the corresponding statement
+	 */
+	protected Statement createMethodInvocation(final MethodDeclaration declaration, final MethodInvocation invocation) {
+		Assert.isNotNull(declaration);
+		Assert.isNotNull(invocation);
+		Statement statement= null;
+		final Type type= declaration.getReturnType2();
+		if (type == null)
+			statement= createExpressionStatement(invocation);
+		else {
+			if (type instanceof PrimitiveType) {
+				final PrimitiveType primitive= (PrimitiveType) type;
+				if (primitive.getPrimitiveTypeCode().equals(PrimitiveType.VOID))
+					statement= createExpressionStatement(invocation);
+				else
+					statement= createReturnStatement(invocation);
+			} else
+				statement= createReturnStatement(invocation);
+		}
+		return statement;
+	}
+
+	/**
+	 * Creates the necessary change to updated a comment reference represented by a search match.
+	 * 
+	 * @param unitRewrite the current compilation unit rewrite
+	 * @param sourceDeclaration the source method declaration
+	 * @param match the search match representing the method reference
+	 * @param targetNode <code>true</code> if a target node had to be inserted as first argument, <code>false</code> otherwise
+	 * @param status the refactoring status
+	 */
+	protected void createMethodJavadocReference(final CompilationUnitRewrite unitRewrite, final MethodDeclaration sourceDeclaration, final SearchMatch match, final boolean targetNode, final RefactoringStatus status) {
+		Assert.isNotNull(unitRewrite);
+		Assert.isNotNull(sourceDeclaration);
+		Assert.isNotNull(match);
+		Assert.isNotNull(status);
+		final ASTNode node= ASTNodeSearchUtil.findNode(match, unitRewrite.getRoot());
+		if (node instanceof MethodRef) {
+			final AST ast= node.getAST();
+			final MethodRef successor= ast.newMethodRef();
+
+			unitRewrite.getASTRewrite().replace(node, successor, null);
+		}
+	}
+
+	/**
+	 * Creates the necessary changes to update tag references to the original method.
+	 * 
+	 * @param manager text change manager
+	 * @param sourceDeclaration the source method declaration
+	 * @param targetRewrite the target compilation unit rewrite
+	 * @param groups the search result groups representing all references to the moved method, including references in comments
+	 * @param targetNode <code>true</code> if a target node must be inserted as first argument, <code>false</code> otherwise
+	 * @param status the refactoring status
+	 * @param monitor the progress monitor to use
+	 */
+	protected void createMethodJavadocReferences(final TextChangeManager manager, final MethodDeclaration sourceDeclaration, final CompilationUnitRewrite targetRewrite, final SearchResultGroup[] groups, final boolean targetNode, final RefactoringStatus status, final IProgressMonitor monitor) {
+		Assert.isNotNull(manager);
+		Assert.isNotNull(sourceDeclaration);
+		Assert.isNotNull(targetRewrite);
+		Assert.isNotNull(status);
+		Assert.isNotNull(monitor);
+		try {
+			monitor.beginTask("", 3); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			try {
+				SearchMatch[] matches= null;
+				ICompilationUnit unit= null;
+				CompilationUnitRewrite rewrite= null;
+				SearchResultGroup group= null;
+				for (int index= 0; index < groups.length; index++) {
+					group= groups[index];
+					unit= group.getCompilationUnit();
+					if (unit != null) {
+						matches= group.getSearchResults();
+						if (fSourceRewrite.getCu().equals(unit))
+							rewrite= fSourceRewrite;
+						else if (targetRewrite.getCu().equals(unit))
+							rewrite= targetRewrite;
+						else
+							rewrite= new CompilationUnitRewrite(unit);
+						SearchMatch match= null;
+						for (int offset= 0; offset < matches.length; offset++) {
+							match= matches[offset];
+							if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
+								final SearchMatch context= match;
+								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new ISourceRange() { //$NON-NLS-1$
+
+											public final int getLength() {
+												return context.getLength();
+											}
+
+											public final int getOffset() {
+												return context.getOffset();
+											}
+										})));
+							} else
+								createMethodJavadocReference(rewrite, sourceDeclaration, match, targetNode, status);
+						}
+						if (!fSourceRewrite.getCu().equals(unit) && !targetRewrite.getCu().equals(unit))
+							manager.manage(unit, rewrite.createChange());
+					} else {
+						final IClassFile file= (IClassFile) JavaCore.create(group.getResource());
+						if (file != null && file.exists())
+							status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.javadoc.binary.type", file.getType().getFullyQualifiedName('.')))); //$NON-NLS-1$
+						else
+							status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.javadoc.binary.resource", group.getResource().getName()))); //$NON-NLS-1$
+					}
+				}
+			} catch (CoreException exception) {
+				status.merge(RefactoringStatus.create(exception.getStatus()));
 			}
 		} finally {
 			monitor.done();
@@ -1869,14 +2101,42 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Creates the necessary changes to remove the original method declaration.
+	 * Creates a comment method reference to the moved method
 	 * 
-	 * @param declaration the original method declaration
+	 * @param declaration the method declaration of the original method
+	 * @param ast the ast to create the method reference for
+	 * @return the created link tag to reference the method
 	 */
-	protected void createOriginalMethodRemovalChange(final MethodDeclaration declaration) {
+	protected TagElement createMethodReference(final MethodDeclaration declaration, final AST ast) {
+		Assert.isNotNull(ast);
 		Assert.isNotNull(declaration);
-		fSourceRewrite.getASTRewrite().remove(declaration, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.remove_original_method"))); //$NON-NLS-1$
-		fSourceRewrite.getImportRemover().registerRemovedNode(declaration);
+		final MethodRef reference= ast.newMethodRef();
+		reference.setName(ast.newSimpleName(fMethodName));
+		reference.setQualifier(ASTNodeFactory.newName(ast, JavaModelUtil.getFullyQualifiedName(fTargetType)));
+		createArgumentNodeList(declaration, reference.parameters(), new IArgumentFactory() {
+
+			public final ASTNode getArgumentNode(final IVariableBinding binding) {
+				Assert.isNotNull(binding);
+				final MethodRefParameter parameter= ast.newMethodRefParameter();
+				parameter.setType(ASTNodeFactory.newType(ast, binding.getType(), true));
+				return parameter;
+			}
+
+			public final ASTNode getTargetNode() {
+				final MethodRefParameter parameter= ast.newMethodRefParameter();
+				final IMethodBinding method= declaration.resolveBinding();
+				if (method != null) {
+					final ITypeBinding declaring= method.getDeclaringClass();
+					if (declaring != null)
+						parameter.setType(ASTNodeFactory.newType(ast, Bindings.getFullyQualifiedName(declaring)));
+				}
+				return parameter;
+			}
+		});
+		final TagElement element= ast.newTagElement();
+		element.setTagName(TagElement.TAG_LINK);
+		element.fragments().add(reference);
+		return element;
 	}
 
 	/**
@@ -1936,6 +2196,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		return fCandidateTargets;
 	}
 
+	/**
+	 * Should the delegator be deprecated?
+	 * 
+	 * @return <code>true</code> if the delegator should be deprecated, <code>false</code> otherwise
+	 */
+	public final boolean getDeprecated() {
+		return fDeprecated;
+	}
+
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
 	 */
@@ -1960,7 +2229,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Returns the new method name
+	 * Returns the new method name.
 	 * 
 	 * @return the name of the new method
 	 */
@@ -2019,6 +2288,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 */
 	public final RefactoringParticipant[] loadParticipants(final RefactoringStatus status, final SharableParticipants participants) throws CoreException {
 		return new RefactoringParticipant[0];
+	}
+
+	/**
+	 * Determines whether the delegator has to be deprecated.
+	 * 
+	 * @param deprecate <code>true</code> if the delegator has to be deprecated, <code>false</code> otherwise
+	 */
+	public final void setDeprecated(final boolean deprecate) {
+		fDeprecated= deprecate;
 	}
 
 	/**

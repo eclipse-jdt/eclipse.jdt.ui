@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -74,8 +75,11 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 		/** The page name */
 		protected static final String PAGE_NAME= "MoveInstanceMethodPage"; //$NON-NLS-1$
 
-		/** The inline method references button */
+		/** The create delegator button */
 		protected Button fCreateDelegator= null;
+
+		/** The deprecate delegator button */
+		protected Button fDeprecateDelegator= null;
 
 		/** The method name text field */
 		protected Text fMethodNameField= null;
@@ -227,8 +231,10 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 				}
 
 				public final void widgetSelected(final SelectionEvent event) {
-					fProcessor.setInlineDelegator(!fCreateDelegator.getSelection());
-					fProcessor.setRemoveDelegator(!fCreateDelegator.getSelection());
+					final boolean selection= fCreateDelegator.getSelection();
+					fProcessor.setInlineDelegator(!selection);
+					fProcessor.setRemoveDelegator(!selection);
+					fDeprecateDelegator.setEnabled(selection);
 				}
 			});
 
@@ -236,8 +242,29 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			data.horizontalSpan= 2;
 			fCreateDelegator.setLayoutData(data);
 
+			fDeprecateDelegator= new Button(control, SWT.CHECK);
+			fDeprecateDelegator.setSelection(DEFAULT_DEPRECATE_DELEGATOR_SETTING);
+			fDeprecateDelegator.setEnabled(DEFAULT_CREATE_DELEGATOR_SETTING);
+			fDeprecateDelegator.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Deprecate_button_name")); //$NON-NLS-1$
+			fDeprecateDelegator.addSelectionListener(new SelectionAdapter() {
+
+				public final void widgetDefaultSelected(final SelectionEvent event) {
+					widgetSelected(event);
+				}
+
+				public final void widgetSelected(final SelectionEvent event) {
+					fProcessor.setDeprecated(fDeprecateDelegator.getSelection());
+				}
+			});
+
+			data= new GridData();
+			data.horizontalSpan= 2;
+			data.horizontalIndent= IDialogConstants.INDENT;
+			fDeprecateDelegator.setLayoutData(data);
+
 			fProcessor.setInlineDelegator(!DEFAULT_CREATE_DELEGATOR_SETTING);
 			fProcessor.setRemoveDelegator(!DEFAULT_CREATE_DELEGATOR_SETTING);
+			fProcessor.setDeprecated(DEFAULT_DEPRECATE_DELEGATOR_SETTING);
 
 			Dialog.applyDialogFont(control);
 			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
@@ -321,6 +348,9 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 
 	/** The default create delegator setting */
 	protected static boolean DEFAULT_CREATE_DELEGATOR_SETTING= false;
+
+	/** The default deprecate delegator setting */
+	protected static boolean DEFAULT_DEPRECATE_DELEGATOR_SETTING= false;
 
 	/** The associated move instance method processor */
 	protected final MoveInstanceMethodProcessor fProcessor;

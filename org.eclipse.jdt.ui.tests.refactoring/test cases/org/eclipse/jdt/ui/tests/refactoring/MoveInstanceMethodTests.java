@@ -340,6 +340,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] {"p1.TR", "p1.TC", "p1.P"}, "p1.TR", 4, 20, 4, 23, PARAMETER, "test", false, false);
 	}
 
+	// extended junit case with generics (bug 77653)
+	public void test26() throws Exception {
+		helper1(new String[] {"p1.TR", "p1.TC", "p1.P"}, "p1.TR", 4, 20, 4, 23, PARAMETER, "test", false, false);
+	}
+
 	// Cannot move interface method declaration
 	public void testFail0() throws Exception {
 		failHelper1("p1.IA", 5, 17, 5, 20, PARAMETER, "b", true, true);	
