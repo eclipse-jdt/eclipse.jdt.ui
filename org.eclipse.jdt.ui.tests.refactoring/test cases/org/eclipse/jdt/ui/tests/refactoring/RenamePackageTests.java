@@ -56,11 +56,11 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
+		return new Java15Setup(new TestSuite(clazz));
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
+		return new Java15Setup(someTest);
 	}
 	
 	protected void setUp() throws Exception {
@@ -631,4 +631,19 @@ public class RenamePackageTests extends RefactoringTest {
 		}
 	}
 
+	public void testStatic1() throws Exception {
+		helper2(new String[]{"s1.j.l", "s1"}, new String[][]{{"S"},{"B"}}, "s1.java.lang");
+	}
+	
+	public void testStaticMultiRoots1() throws Exception {
+		helperProjectsPrgTest(
+			new String[][] {
+				new String[] { "p.p" }, new String[] { "p.p", "tests" }
+				},
+			"q",
+			new String[][][] {
+				new String[][] { new String[] { "A" }},
+				new String[][] { new String[] { "ATest" }, new String[] { "AllTests" }}
+		});
+	}
 }

@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -645,8 +646,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 					if (importRewrite == null)
 						importRewrite= newImportRewrite(cu);
 					IImportDeclaration importDeclaration= (IImportDeclaration) SearchUtils.getEnclosingJavaElement(result);
-					importRewrite.removeImport(importDeclaration.getElementName());
-					importRewrite.addImport(getUpdatedImport(importDeclaration));
+					String updatedImport= getUpdatedImport(importDeclaration);
+					updateImport(importRewrite, importDeclaration, updatedImport);
 				} else { // is reference 
 					TextChangeCompatibility.addTextEdit(manager.get(cu), name, createTextChange(result));
 				}
@@ -688,6 +689,16 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		pm.done();
 	}
 	
+	private static void updateImport(ImportRewrite importRewrite, IImportDeclaration importDeclaration, String updatedImport) throws JavaModelException {
+		if (Flags.isStatic(importDeclaration.getFlags())) {
+			importRewrite.removeStaticImport(importDeclaration.getElementName());
+			importRewrite.addStaticImport(updatedImport);
+		} else {
+			importRewrite.removeImport(importDeclaration.getElementName());
+			importRewrite.addImport(updatedImport);
+		}
+	}
+
 	private ImportRewrite newImportRewrite(ICompilationUnit cu) throws CoreException {
 		ImportRewrite rewrite= new ImportRewrite(cu);
 		rewrite.setFilterImplicitImports(false);
@@ -748,8 +759,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				IImportDeclaration importDeclaration= (IImportDeclaration) enclosingElement;
 				if (importRewrite == null)
 					importRewrite= newImportRewrite(typeReferences.getCompilationUnit());
-				importRewrite.removeImport(importDeclaration.getElementName());
-				importRewrite.addImport(getUpdatedImport(importDeclaration));
+				updateImport(importRewrite, importDeclaration, getUpdatedImport(importDeclaration));
 			} else {
 				String reference= getNormalizedTypeReference(result);
 				if (! reference.startsWith(fPackage.getElementName())) {
