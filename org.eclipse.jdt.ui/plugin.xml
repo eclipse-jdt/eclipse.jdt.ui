@@ -212,6 +212,12 @@
             id="org.eclipse.jdt.ui.ProblemHover">
       </hover>
       <hover
+            label="%nlsStringHover"
+            description="%nlsStringHoverDescription"
+            class="org.eclipse.jdt.internal.ui.text.java.hover.NLSStringHover"
+            id="org.eclipse.jdt.ui.NLStringHover">
+      </hover>
+      <hover
             label="%javadocHover"
             description="%javadocHoverDescription"
             class="org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover"
@@ -222,12 +228,6 @@
             description="%sourceHoverDescription"
             class="org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover"
             id="org.eclipse.jdt.ui.JavaSourceHover">
-      </hover>
-      <hover
-            label="%nlsStringHover"
-            description="%nlsStringHoverDescription"
-            class="org.eclipse.jdt.internal.ui.text.java.hover.NLSStringHover"
-            id="org.eclipse.jdt.ui.NLStringHover">
       </hover>
       <hover
             label="%annotationHover"
