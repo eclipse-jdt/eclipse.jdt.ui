@@ -48,7 +48,10 @@ class ClipboardActionUtil {
 	}
 
 	private static boolean isJavaResource(IResource resource){
-		return JavaCore.create(resource) != null;
+		IJavaElement je= JavaCore.create(resource);
+		//the exists() check  is needed in the case of compilation units outside of classpaths
+		//we want to treat them as non-java
+        return je != null && je.exists(); 
 	}
 
 	public static IJavaElement[] getJavaElements(IResource[] resources){
@@ -59,7 +62,6 @@ class ClipboardActionUtil {
 		}
 		return (IJavaElement[]) jElements.toArray(new IJavaElement[jElements.size()]);
 	}
-
 
 	public static IResource[] getNonJavaResources(IResource[] resources){
 		List nonJava= new ArrayList(resources.length);
