@@ -13,16 +13,14 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 
 import org.eclipse.core.runtime.IAdaptable;
 
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CallLocation implements IAdaptable {
     public static final int UNKNOWN_LINE_NUMBER= -1;
@@ -95,25 +93,14 @@ public class CallLocation implements IAdaptable {
     public String toString() {
         return getCallText();
     }
-
-    private ICompilationUnit getICompilationUnit() {
-        ICompilationUnit compilationUnit = fMember.getCompilationUnit();
-		compilationUnit= JavaModelUtil.toOriginal(compilationUnit);
-        return compilationUnit;
-    }
     
     public String getCallText() {
         if (fCallText == null) {
             try {
-                ICompilationUnit compilationUnit = getICompilationUnit();
-    
-                if (compilationUnit != null) {
-                    IBuffer buffer= compilationUnit.getBuffer();
-    
-                    fCallText= buffer.getText(fStart, (fEnd - fStart));
-                } else {
-                    fCallText= fMember.getOpenable().getBuffer().getText(fStart, (fEnd - fStart));
-                }
+				IOpenable openable= fMember.getOpenable();
+				if (openable == null)
+					return ""; //$NON-NLS-1$
+				fCallText= openable.getBuffer().getText(fStart, (fEnd - fStart));
             } catch (JavaModelException e) {
                 JavaPlugin.log(e);
                 return "";    //$NON-NLS-1$
