@@ -174,7 +174,8 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	
 	public void setSelectedTest(String testName) {
 		TreeItem treeItem= findFirstItem(testName);
-		fTree.setSelection(new TreeItem[]{treeItem});
+		if (treeItem != null)
+			fTree.setSelection(new TreeItem[]{treeItem});
 	}
 	
 	public void endTest(String testName) {	

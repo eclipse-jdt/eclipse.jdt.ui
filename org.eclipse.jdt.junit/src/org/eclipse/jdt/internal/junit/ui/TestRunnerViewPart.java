@@ -809,6 +809,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 	}
 
 	public TestRunInfo getTestInfo(String testName) {
+		if (testName == null)
+			return null;
 		return (TestRunInfo) fTestInfos.get(testName);
 	}
 
