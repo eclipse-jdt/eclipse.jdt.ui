@@ -1,5 +1,6 @@
 package p;
 public class Inner {
+
 	private final A a;
 
 	public Inner(A a) {

@@ -1,6 +1,8 @@
 package p;
 class Inner{
+
 	private A a;
+
 	/**
 	 * @param A
 	 */

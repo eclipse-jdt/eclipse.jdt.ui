@@ -1,7 +1,6 @@
 package p1;
 
 import p.A.Inner;
-import p.A.Inner.InnerInner;
 
 class A1{
 	p.A.Inner a;

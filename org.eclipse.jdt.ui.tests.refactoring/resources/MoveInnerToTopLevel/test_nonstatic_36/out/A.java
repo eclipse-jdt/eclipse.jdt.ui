@@ -6,5 +6,4 @@ class A
 		return "wee!";
 	}
 	public String bar3;
-	
 }

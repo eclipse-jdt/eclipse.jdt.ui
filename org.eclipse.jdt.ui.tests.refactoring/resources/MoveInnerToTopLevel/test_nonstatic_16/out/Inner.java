@@ -1,6 +1,7 @@
 package p;
 class Inner {
 	private A a;
+
 	/**
 	 * @param A
 	 */
@@ -8,6 +9,7 @@ class Inner {
 		this.a= a;
 		// TODO Auto-generated constructor stub
 	}
+
 	void f(){
 		A.i= 1;
 	}

@@ -1,6 +1,7 @@
 package p;
 public class Inner extends A.OtherInner {
 	private A a;
+
 	/**
 	 * @param A
 	 */

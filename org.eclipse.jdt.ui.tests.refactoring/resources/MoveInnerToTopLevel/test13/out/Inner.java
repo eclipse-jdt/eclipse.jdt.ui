@@ -5,6 +5,6 @@ import p.A.Inner2.Inner2Inner;
 
 class Inner{
 	void foo() {
-		A.Inner2.Inner2Inner a;
+		Inner2.Inner2Inner a;
 	}
 }

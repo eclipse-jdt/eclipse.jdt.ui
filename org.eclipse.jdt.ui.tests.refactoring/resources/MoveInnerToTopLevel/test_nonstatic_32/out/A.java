@@ -1,4 +1,4 @@
 package p;
 class A {
-    int m;
+	int m;
 }

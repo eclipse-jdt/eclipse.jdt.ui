@@ -1,5 +1,5 @@
 package p;
 class A {
-    private class I{
-    }
+	private class I{
+	}
 }

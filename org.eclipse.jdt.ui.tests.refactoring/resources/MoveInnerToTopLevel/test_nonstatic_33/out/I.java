@@ -1,6 +1,8 @@
 package p;
 class I{
+
 	private final A a;
+
 	/**
 	 * @param A
 	 */
