@@ -333,6 +333,54 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertEquals("Severity:" + result.getMessageMatchingSeverity(result.getSeverity()), expectedSeverity, result.getSeverity());		
 	}
 	
+	private void helperDoAllWithExceptions(String typeName, 
+			String methodName, 
+		  	String[] signature, 
+		  	ParameterInfo[] newParamInfos, 
+		  	int[] newIndices, 
+		  	String[] oldParamNames, 
+		  	String[] newParamNames, 
+		  	String[] newParameterTypeNames, 
+		  	int[] permutation,
+		  	int newVisibility,
+		  	int[] deleted,
+			String returnTypeName,
+			String [] removeExceptions,
+			String[] addExceptions) throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		IType classA= getType(cu, typeName);
+		IMethod method = classA.getMethod(methodName, signature);
+		assertTrue("method " + methodName +" does not exist", method.exists());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		if (returnTypeName != null)
+		ref.setNewReturnTypeName(returnTypeName);
+		markAsDeleted(ref.getParameterInfos(), deleted);	
+		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation);
+		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
+		ref.setVisibility(newVisibility);
+
+		// from RefactoringTest#performRefactoring():
+		RefactoringStatus status= ref.checkActivation(new NullProgressMonitor());
+		assertTrue("checkActivation was supposed to pass", status.isOK());
+	
+		mangleExceptions(ref.getExceptionInfos(), removeExceptions, addExceptions, method.getCompilationUnit());
+	
+		status= ref.checkInput(new NullProgressMonitor());
+		assertTrue("checkInput was supposed to pass", status.isOK());
+		Change undo= performChange(ref);
+		assertNotNull(undo);
+		// XXX: this should be done by someone else
+		Refactoring.getUndoManager().addUndo(ref.getName(), undo);
+		
+		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		String expectedFileContents= getFileContents(getTestFileName(true, false));
+		assertEqualLines(expectedFileContents, newcu.getSource());
+	}
+
+	
 	private void helperException(String[] signature, String[] removeExceptions, String[] addExceptions) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
@@ -1241,6 +1289,28 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll("A", "getList", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 	
+	public void testAll60() throws Exception{
+		String[] signature= {"I", "J"};
+		String[] newNames= {"l"};
+		String[] newTypes= {"java.util.List"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+
+		String[] oldParamNames= {"from", "to"};
+		String[] newParamNames= {"to", "tho"};
+		String[] newParameterTypeNames= {"int", "long"};
+		int[] permutation= {2, 1, 0};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= "java.util.List";
+		String[] removeExceptions= {"java.io.IOException"};
+		String[] addExceptions= {"java.lang.Exception"};
+		helperDoAllWithExceptions("I", "getList", signature, newParamInfo, newIndices,
+				oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility,
+				deletedIndices, newReturnTypeName, removeExceptions, addExceptions);
+	}
+
 	public void testAddRecursive1()throws Exception{ //bug 42100
 		String[] signature= {"I"};
 		String[] newNames= {"bool"};

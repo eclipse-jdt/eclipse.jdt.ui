@@ -16,7 +16,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public class ParameterInfo {
 	
-	private static final int INDEX_FOR_ADDED= -1;
+	public static final int INDEX_FOR_ADDED= -1;
 	private final IVariableBinding fOldBinding;
 	private final String fOldName;
 	private final String fOldTypeName;
@@ -44,8 +44,8 @@ public class ParameterInfo {
 	}
 
 	public static ParameterInfo createInfoForAddedParameter(){
-		ParameterInfo info= new ParameterInfo("int", "newParam", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
-		info.setDefaultValue("0"); //$NON-NLS-1$
+		ParameterInfo info= new ParameterInfo("Object", "newParam", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
+		info.setDefaultValue("null"); //$NON-NLS-1$
 		return info;
 	}
 	
@@ -123,4 +123,9 @@ public class ParameterInfo {
 		return !fOldTypeName.equals(fNewTypeName);
 	}
 	
+	public String toString() {
+		return fOldTypeName + " " + fOldName + " @" + fOldIndex + " -> " //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		+ fNewTypeName + " " + fNewName + ": " + fDefaultValue  //$NON-NLS-1$//$NON-NLS-2$
+		+ (fIsDeleted ? " (deleted)" : " (stays)");  //$NON-NLS-1$//$NON-NLS-2$
+	}
 }

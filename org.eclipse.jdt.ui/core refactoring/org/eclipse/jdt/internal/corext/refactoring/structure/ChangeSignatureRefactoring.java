@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,11 +22,11 @@ import java.util.Set;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -59,6 +61,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -69,9 +73,11 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -286,8 +292,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		if (fMethod.getNumberOfParameters() == 0 && fParameterInfos.isEmpty())
 			return true;
 		
-		if (areNamesSameAsInitial() && isOrderSameAsInitial() 
-				&& !areAnyParametersDeleted() && areParameterTypesSameAsInitial())
+		if (areNamesSameAsInitial() && isOrderSameAsInitial() && areParameterTypesSameAsInitial())
 			return true;
 		
 		return false;
@@ -310,15 +315,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return fMethodName.equals(getInitialMethodName());
 	}
 	
-	private boolean areAnyParametersDeleted() {
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
-			if (info.isDeleted())
-				return true;
-		}
-		return false;
-	}
-
 	private boolean areExceptionsSameAsInitial() {
 		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext();) {
 			ExceptionInfo info= (ExceptionInfo) iter.next();
@@ -582,7 +578,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		pm.beginTask("", notDeletedParams.size() + 1); //$NON-NLS-1$
 		for (Iterator iter= notDeletedParams.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
-			if (! info.isTypeNameChanged())
+			if (! info.isTypeNameChanged() && ! info.isAdded())
 				continue;
 			String typeName= getElementTypeName(info.getNewTypeName());
 			if (isPrimitiveTypeName(typeName))
@@ -817,9 +813,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		int i= 0;
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= (ParameterInfo) iter.next();
-			if (info.getOldIndex() != i)
+			if (info.getOldIndex() != i) // includes info.isAdded()
 				return false;
-			if (info.isAdded())
+			if (info.isDeleted())
 				return false;
 		}
 		return true;
@@ -1126,7 +1122,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return new DocReferenceUpdate(node.getParent(), rewrite, importRewrite, result);
 		
 		else
-			return new NullOccurrenceUpdate(node, rewrite, importRewrite, result); //TODO: potential cause: bug 53477
+			return new NullOccurrenceUpdate(node, rewrite, importRewrite, result);
 	}
 
 	private static boolean isReferenceNode(ASTNode node){
@@ -1143,7 +1139,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 
-	//TODO: make static and top-level?
 	abstract class OccurrenceUpdate {
 		protected ASTRewrite fRewrite;
 		protected ImportRewrite fImportRewrite;
@@ -1172,15 +1167,16 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			for (int i=0; i < newPermutation.length; i++) {
 				ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
 				
-				if (info.isAdded())
+				if (info.isAdded()) {
 					newPermutation[i]= createNewParamgument(info);
-				 else if (info.getOldIndex() != i)
-				 	if (fRewrite.isReplaced(nodes[info.getOldIndex()])) // if actual argument already changed ...
+				} else if (info.getOldIndex() != i) {
+					if (fRewrite.isReplaced(nodes[info.getOldIndex()])) // if actual argument already changed ...
 						newPermutation[i]= fRewrite.getReplacingNode(nodes[info.getOldIndex()]);
 				 	else
 						newPermutation[i]= fRewrite.createCopy(nodes[info.getOldIndex()]);
-				 else
-				 	newPermutation[i]= nodes[i];
+				} else {
+					newPermutation[i]= nodes[i];
+				}
 			}
 			
 			// replace changing nodes with the ones from newPermutation:
@@ -1193,6 +1189,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			for (int i= nodes.length; i < newPermutation.length; i++) {
 				ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
 				if (info.isAdded()){
+					//TODO: Bug: m() -> m(int) adds parameter twice!
 					ASTNode newElement= createNewParamgument(info);
 					paramguments.add(i, newElement);
 					fRewrite.markAsInserted(newElement);
@@ -1274,7 +1271,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	class ReferenceUpdate extends OccurrenceUpdate {
 		/** isReferenceNode(fNode) */
-		private ASTNode fNode; //XXX: IInvocation? See bug 53586.
+		private ASTNode fNode;
 
 		protected ReferenceUpdate(ASTNode node, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
 			super(rewrite, importRewrite);
@@ -1396,7 +1393,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			reshuffleElements();
 			changeExceptions();
 			
-			//TODO: update tags in javadoc: @param, @return, @exception, @throws, ...
+			changeJavadocTags();
 			
 			checkIfDeletedParametersUsed();
 		}
@@ -1429,6 +1426,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private void changeReturnType() throws JavaModelException {
 		    if (! isReturnTypeSameAsInitial())
 		        replaceTypeNode(fMethDecl.getReturnType(), fReturnTypeName);
+		    	//TODO: remove expression from return statement when changed to void?
 		}
 	
 		private void removeExtraDimensions(SingleVariableDeclaration oldParam) {
@@ -1504,6 +1502,246 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			fRewrite.markAsInserted(exNode);
 		}
 		
+		private void changeJavadocTags() throws JavaModelException {
+			//update tags in javadoc: @param, @return, @exception, @throws, ...
+			Javadoc javadoc= fMethDecl.getJavadoc();
+			if (javadoc == null)
+				return;
+
+			ITypeBinding typeBinding= Bindings.getBindingOfParentType(fMethDecl);
+			if (typeBinding == null)
+				return;
+			IMethodBinding methodBinding= fMethDecl.resolveBinding();
+			if (methodBinding == null)
+				return;
+				
+			boolean isTopOfRipple= null == Bindings.findDeclarationInHierarchy(typeBinding, methodBinding.getName(), methodBinding.getParameterTypes());
+			//add tags: only iff top of ripple; change and remove: always.
+			//TODO: should have preference for adding tags in (overriding) methods (with template: todo, inheritDoc, ...)
+			
+			List tags= javadoc.tags(); // List of TagElement
+			ListRewriter tagsRewrite= fRewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
+
+			if (! isReturnTypeSameAsInitial()) {
+				if (PrimitiveType.VOID.toString().equals(fReturnTypeName)) {
+					for (int i = 0; i < tags.size(); i++) {
+						TagElement tag= (TagElement) tags.get(i);
+						if (TagElement.TAG_RETURN.equals(tag.getTagName()))
+							fRewrite.markAsRemoved(tag);
+					}
+				} else if (isTopOfRipple && Signature.SIG_VOID.equals(fMethod.getReturnType())){
+					TagElement returnNode= createReturnTag();
+					TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_RETURN);
+					insertTag(returnNode, previousTag, tagsRewrite);
+					tags= tagsRewrite.getRewrittenList();
+				}
+			}
+			
+			if (! (areNamesSameAsInitial() && isOrderSameAsInitial())) {
+				ArrayList paramTags= new ArrayList(); // <TagElement>, only not deleted tags with simpleName
+				// delete & rename:
+				for (Iterator iter = tags.iterator(); iter.hasNext(); ) {
+					TagElement tag = (TagElement) iter.next();
+					String tagName= tag.getTagName();
+					List fragments= tag.fragments();
+					if (! (TagElement.TAG_PARAM.equals(tagName) && fragments.size() > 0 && fragments.get(0) instanceof SimpleName))
+						continue;
+					SimpleName simpleName= (SimpleName) fragments.get(0);
+					String identifier= simpleName.getIdentifier();
+					boolean removed= false;
+					for (int i= 0; i < fParameterInfos.size(); i++) {
+						ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
+						if (identifier.equals(info.getOldName())) {
+							if (info.isDeleted()) {
+								fRewrite.markAsRemoved(tag);
+								removed= true;
+							} else if (info.isRenamed()) {
+								SimpleName newName= simpleName.getAST().newSimpleName(info.getNewName());
+								fRewrite.markAsReplaced(simpleName, newName);
+							}
+							break;
+						}
+					}
+					if (! removed)
+						paramTags.add(tag);
+				}
+				tags= tagsRewrite.getRewrittenList();
+
+				if (! isOrderSameAsInitial()) {
+					// reshuffle (sort in declaration sequence) & add (only add to top of ripple):
+					TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_PARAM);
+					// reshuffle:
+					for (Iterator infoIter= fParameterInfos.iterator(); infoIter.hasNext();) {
+						ParameterInfo info= (ParameterInfo) infoIter.next();
+						String oldName= info.getOldName();
+						String newName= info.getNewName();
+						if (info.isAdded()) {
+							if (! isTopOfRipple)
+								continue;
+							TagElement paramNode= createParamTag(newName);
+							insertTag(paramNode, previousTag, tagsRewrite);
+							previousTag= paramNode;
+						} else {
+							for (Iterator tagIter= paramTags.iterator(); tagIter.hasNext();) {
+								TagElement tag= (TagElement) tagIter.next();
+								SimpleName tagName= (SimpleName) tag.fragments().get(0);
+								if (oldName.equals(tagName.getIdentifier())) {
+									tagIter.remove();
+									TagElement movedTag= (TagElement) fRewrite.createMove(tag);
+									insertTag(movedTag, previousTag, tagsRewrite);
+									previousTag= movedTag;
+								}
+							}
+						}
+					}
+					// params with bad names:
+					for (Iterator iter= paramTags.iterator(); iter.hasNext();) {
+						TagElement tag= (TagElement) iter.next();
+						TagElement movedTag= (TagElement) fRewrite.createMove(tag);
+						insertTag(movedTag, previousTag, tagsRewrite);
+						previousTag= movedTag;
+					}
+				}
+				tags= tagsRewrite.getRewrittenList();
+			}
+			
+			if (! areExceptionsSameAsInitial()) {
+				// collect exceptionTags and remove deleted:
+				ArrayList exceptionTags= new ArrayList(); // <TagElement>, only not deleted tags with name
+				for (int i= 0; i < tags.size(); i++) {
+					TagElement tag= (TagElement) tags.get(i);
+					if (! TagElement.TAG_THROWS.equals(tag.getTagName()) && ! TagElement.TAG_EXCEPTION.equals(tag.getTagName()))
+						continue;
+					if (! (tag.fragments().size() > 0 && tag.fragments().get(0) instanceof Name))
+						continue;
+					Name name= (Name) tag.fragments().get(0);
+					for (int j= 0; j < fExceptionInfos.size(); j++) {
+						ExceptionInfo info= (ExceptionInfo) fExceptionInfos.get(j);
+						if (info.isDeleted() && Bindings.equals(info.getTypeBinding(), name.resolveTypeBinding())) {
+							fRewrite.markAsRemoved(tag);
+							break;
+						}
+						exceptionTags.add(tag);
+						break;
+					}
+				}
+				// reshuffle:
+				tags= tagsRewrite.getRewrittenList();
+				TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_THROWS);
+				for (Iterator infoIter= fExceptionInfos.iterator(); infoIter.hasNext();) {
+					ExceptionInfo info= (ExceptionInfo) infoIter.next();
+					if (info.isAdded()) {
+						if (! isTopOfRipple)
+							continue;
+						TagElement excptNode= createExceptionTag(info.getType().getElementName());
+						insertTag(excptNode, previousTag, tagsRewrite);
+						previousTag= excptNode;
+					} else {
+						for (Iterator tagIter= exceptionTags.iterator(); tagIter.hasNext();) {
+							TagElement tag= (TagElement) tagIter.next();
+							Name tagName= (Name) tag.fragments().get(0);
+							if (Bindings.equals(info.getTypeBinding(), tagName.resolveTypeBinding())) {
+								tagIter.remove();
+								TagElement movedTag= (TagElement) fRewrite.createMove(tag);
+								insertTag(movedTag, previousTag, tagsRewrite);
+								previousTag= movedTag;
+							}
+						}
+					}
+				}
+				// exceptions with bad names:
+				for (Iterator iter= exceptionTags.iterator(); iter.hasNext();) {
+					TagElement tag= (TagElement) iter.next();
+					TagElement movedTag= (TagElement) fRewrite.createMove(tag);
+					insertTag(movedTag, previousTag, tagsRewrite);
+					previousTag= movedTag;
+				}
+			}
+		}
+
+		private TagElement createReturnTag() {
+			TagElement returnNode= fRewrite.getAST().newTagElement();
+			returnNode.setTagName(TagElement.TAG_RETURN);
+			
+			TextElement textElement= fRewrite.getAST().newTextElement();
+			String text= StubUtility.getTodoTaskTag(getOccurrenceCu().getJavaProject());
+			if (text != null)
+				textElement.setText(text); //TODO: use template with {@todo} ...
+			returnNode.fragments().add(textElement);
+			
+			return returnNode;
+		}
+
+		private TagElement createParamTag(String name) {
+			TagElement paramNode= fRewrite.getAST().newTagElement();
+			paramNode.setTagName(TagElement.TAG_PARAM);
+
+			SimpleName simpleName= fRewrite.getAST().newSimpleName(name);
+			paramNode.fragments().add(simpleName);
+
+			TextElement textElement= fRewrite.getAST().newTextElement();
+			String text= StubUtility.getTodoTaskTag(getOccurrenceCu().getJavaProject());
+			if (text != null)
+				textElement.setText(text); //TODO: use template with {@todo} ...
+			paramNode.fragments().add(textElement);
+			
+			return paramNode;
+		}
+
+		private TagElement createExceptionTag(String simpleName) {
+			TagElement excptNode= fRewrite.getAST().newTagElement();
+			excptNode.setTagName(TagElement.TAG_THROWS);
+
+			SimpleName nameNode= fRewrite.getAST().newSimpleName(simpleName);
+			excptNode.fragments().add(nameNode);
+
+			TextElement textElement= fRewrite.getAST().newTextElement();
+			String text= StubUtility.getTodoTaskTag(getOccurrenceCu().getJavaProject());
+			if (text != null)
+				textElement.setText(text); //TODO: use template with {@todo} ...
+			excptNode.fragments().add(textElement);
+			
+			return excptNode;
+		}
+
+		private void insertTag(TagElement tag, TagElement previousTag, ListRewriter tagsRewrite) {
+			if (previousTag == null)
+				tagsRewrite.insertFirst(tag, null);
+			else
+				tagsRewrite.insertAfter(tag, previousTag, null);
+		}
+
+		/**
+		 * @return the <code>TagElement<code> just before a new <code>TagElement</code> with name <code>tagName</code>,
+		 *   or <code>null</code>.
+		 */
+		private TagElement findTagElementToInsertAfter(List tags, String tagName) {
+			List tagOrder= Arrays.asList(new String[] {
+					TagElement.TAG_AUTHOR,
+					TagElement.TAG_VERSION,
+					TagElement.TAG_PARAM,
+					TagElement.TAG_RETURN,
+					TagElement.TAG_THROWS,
+					TagElement.TAG_EXCEPTION,
+					TagElement.TAG_SEE,
+					TagElement.TAG_SINCE,
+					TagElement.TAG_SERIAL,
+					TagElement.TAG_SERIALFIELD,
+					TagElement.TAG_SERIALDATA,
+					TagElement.TAG_DEPRECATED,
+					TagElement.TAG_VALUE
+			});
+			int goalOrdinal= tagOrder.indexOf(tagName);
+			if (goalOrdinal == -1) // unknown tag -> to end
+				return (tags.size() == 0) ? null : (TagElement) tags.get(tags.size());
+			for (int i= 0; i < tags.size(); i++) {
+				int tagOrdinal= tagOrder.indexOf(((TagElement) tags.get(i)).getTagName());
+				if (tagOrdinal >= goalOrdinal)
+					return (i == 0) ? null : (TagElement) tags.get(i-1);
+			}
+			return (tags.size() == 0) ? null : (TagElement) tags.get(tags.size()-1);
+		}
+
 		//TODO: already reported as compilation error -> don't report there?
 		private void checkIfDeletedParametersUsed() {
 			String typeName= getFullTypeName(fMethDecl);

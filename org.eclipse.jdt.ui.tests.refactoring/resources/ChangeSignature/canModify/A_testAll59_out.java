@@ -2,14 +2,15 @@ package p;
 import java.util.*;
 class A {
 	/**
-	 * @param from 1st param of {@link A#getList(boolean, int, char) me}
+	 * @param really TODO
+	 * @param f 1st param of {@link A#getList(boolean, int, char) me}
+	 * @param t
+	 * @param bogus{@link #getList}
 	 * @see getList
 	 * @see #getList(boolean, int, char)
 	 * @see #getList(int from, tho long)
 	 * @see #getList(boolean really, int f, char t)
-	 * @param to
 	 * @return list
-	 * @param bogus{@link #getList}
 	 */
 	public List getList(boolean really, int f, char t) {
 		return new ArrayList((int)t-f);
