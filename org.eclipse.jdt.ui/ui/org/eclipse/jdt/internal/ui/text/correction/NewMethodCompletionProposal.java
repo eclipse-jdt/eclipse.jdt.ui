@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -77,8 +78,8 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-	
 		ICompilationUnit changedCU= changeElement.getCompilationUnit();
+		TextEdit root= changeElement.getEdit();
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		ImportEdit importEdit= new ImportEdit(changedCU, settings);
@@ -99,9 +100,9 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		fMemberEdit.setUseFormatter(true);
 		
 		if (!importEdit.isEmpty()) {
-			changeElement.addTextEdit("Add imports", importEdit); //$NON-NLS-1$
+			root.add( importEdit); //$NON-NLS-1$
 		}
-		changeElement.addTextEdit("Add method", fMemberEdit); //$NON-NLS-1$
+		root.add( fMemberEdit); //$NON-NLS-1$
 	}
 	
 	

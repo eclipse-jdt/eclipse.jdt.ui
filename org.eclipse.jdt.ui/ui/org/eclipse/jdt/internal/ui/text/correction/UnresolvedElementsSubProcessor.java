@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -181,13 +182,13 @@ public class UnresolvedElementsSubProcessor {
 			CUCorrectionProposal proposal= new CUCorrectionProposal("", cu, 0); //$NON-NLS-1$
 			proposals.add(proposal);
 			
-			CompilationUnitChange change= proposal.getCompilationUnitChange();
+			TextEdit root= proposal.getRootTextEdit();
 			
 			if (!importEdit.isEmpty()) {
-				change.addTextEdit("import", importEdit); //$NON-NLS-1$
+				root.add(importEdit); //$NON-NLS-1$
 			}
 			if (!importOnly) {
-				change.addTextEdit("change", SimpleTextEdit.createReplace(problemPos.getOffset(), typeName.length(), replaceName)); //$NON-NLS-1$
+				root.add(SimpleTextEdit.createReplace(problemPos.getOffset(), typeName.length(), replaceName)); //$NON-NLS-1$
 				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", replaceName)); //$NON-NLS-1$
 				proposal.setRelevance(3);
 			} else {

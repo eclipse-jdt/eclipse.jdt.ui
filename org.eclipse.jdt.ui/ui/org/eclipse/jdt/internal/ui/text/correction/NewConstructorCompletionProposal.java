@@ -16,8 +16,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorPart;
@@ -28,8 +26,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -41,6 +37,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -74,8 +71,8 @@ public class NewConstructorCompletionProposal extends CUCorrectionProposal {
 	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-	
 		ICompilationUnit changedCU= changeElement.getCompilationUnit();
+		TextEdit root= changeElement.getEdit();	
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		ImportEdit importEdit= new ImportEdit(changedCU, settings);
@@ -98,9 +95,9 @@ public class NewConstructorCompletionProposal extends CUCorrectionProposal {
 		fMemberEdit.setUseFormatter(true);
 		
 		if (!importEdit.isEmpty()) {
-			changeElement.addTextEdit("Add imports", importEdit); //$NON-NLS-1$
+			root.add( importEdit); //$NON-NLS-1$
 		}
-		changeElement.addTextEdit("Add constructor", fMemberEdit); //$NON-NLS-1$
+		root.add(fMemberEdit); //$NON-NLS-1$
 	}
 	
 	

@@ -40,7 +40,7 @@ public class InsertCorrectionProposal extends CUCorrectionProposal {
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
 		TextEdit edit= SimpleTextEdit.createInsert(fOffset, fInsertionString);
-		changeElement.addTextEdit(getDisplayString(), edit);
+		changeElement.getEdit().add(edit);
 	}
 	
 	public static int moveBack(int offset, int start, String ignoreCharacters, ICompilationUnit cu) {

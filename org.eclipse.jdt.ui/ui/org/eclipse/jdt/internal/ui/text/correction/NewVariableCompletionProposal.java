@@ -32,22 +32,22 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 public final class NewVariableCompletionProposal extends CUCorrectionProposal {
 	
@@ -197,24 +197,25 @@ public final class NewVariableCompletionProposal extends CUCorrectionProposal {
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
 		ICompilationUnit cu= changeElement.getCompilationUnit();
+		TextEdit root= changeElement.getEdit();
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		ImportEdit importEdit= new ImportEdit(cu, settings);
 
 		String content= generateStub(importEdit, fNode);
 		if (!importEdit.isEmpty()) {
-			changeElement.addTextEdit("imports", importEdit); //$NON-NLS-1$
+			root.add(importEdit);
 		}		
 
 		if (fVariableKind == LOCAL) {
 			// new local variable
-			changeElement.addTextEdit("local", new AddLocalVariableEdit(fNode, content, settings.tabWidth)); //$NON-NLS-1$
+			root.add(new AddLocalVariableEdit(fNode, content, settings.tabWidth));
 		} else if (fVariableKind == FIELD) {
 			// new field
-			changeElement.addTextEdit("field", createFieldEdit(content, settings.tabWidth)); //$NON-NLS-1$
+			root.add(createFieldEdit(content, settings.tabWidth));
 		} else if (fVariableKind == PARAM) {
 			// new parameter
-			changeElement.addTextEdit("parameter", new AddParameterEdit(cu, fNode, content)); //$NON-NLS-1$
+			root.add(new AddParameterEdit(cu, fNode, content));
 		}
 	}
 	

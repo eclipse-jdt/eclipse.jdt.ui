@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -24,6 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -42,6 +41,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	 */
 	protected void addEdits(CompilationUnitChange change) throws CoreException {
 		ICompilationUnit cu= change.getCompilationUnit();
+		TextEdit root= change.getEdit();
 		
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
 		IPackageDeclaration[] decls= cu.getPackageDeclarations();
@@ -49,19 +49,19 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		if (parentPack.isDefaultPackage() && decls.length > 0) {
 			for (int i= 0; i < decls.length; i++) {
 				ISourceRange range= decls[i].getSourceRange();
-				change.addTextEdit(CorrectionMessages.getString("CorrectPackageDeclarationProposal.removeedit.label"), SimpleTextEdit.createDelete(range.getOffset(), range.getLength())); //$NON-NLS-1$
+				root.add(SimpleTextEdit.createDelete(range.getOffset(), range.getLength()));
 			}
 			return;
 		}
 		if (!parentPack.isDefaultPackage() && decls.length == 0) {
 			String lineDelim= StubUtility.getLineDelimiterUsed(cu);
 			String str= "package " + parentPack.getElementName() + ";" + lineDelim + lineDelim; //$NON-NLS-1$ //$NON-NLS-2$
-			change.addTextEdit(CorrectionMessages.getString("CorrectPackageDeclarationProposal.addedit.label"), SimpleTextEdit.createInsert(0, str)); //$NON-NLS-1$
+			root.add(SimpleTextEdit.createInsert(0, str));
 			return;
 		}
 		
 		ProblemPosition pos= fProblemPosition;
-		change.addTextEdit(CorrectionMessages.getString("CorrectPackageDeclarationProposal.changenameedit.label"), SimpleTextEdit.createReplace(pos.getOffset(), pos.getLength(), parentPack.getElementName())); //$NON-NLS-1$
+		root.add(SimpleTextEdit.createReplace(pos.getOffset(), pos.getLength(), parentPack.getElementName()));
 	}
 	
 	/*

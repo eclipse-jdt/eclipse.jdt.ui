@@ -13,17 +13,11 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.text.Position;
-
 import org.eclipse.jdt.core.ICompilationUnit;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-
-
 
 public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	
@@ -47,7 +41,7 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
 		TextEdit edit= SimpleTextEdit.createReplace(fOffset, fLength, fReplacementString);
-		changeElement.addTextEdit(changeElement.getName(), edit);
+		changeElement.getEdit().add(edit);
 	}
 	
 }

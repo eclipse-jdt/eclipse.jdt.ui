@@ -23,10 +23,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
-
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -57,6 +57,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 		CompilationUnitChange change= new CompilationUnitChange(name, cu);
 		//change.setKeepExecutedTextEdits(true);
 		change.setSave(doSave);
+		change.setEdit(new MultiTextEdit());
 		return change;
 	}
 
@@ -103,7 +104,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 					appendContent(previewConent, start, end, buf, true);
 				}
 			}			
-		} catch(CoreException e) {
+		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
 		return buf.toString();
@@ -161,5 +162,10 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 		return (CompilationUnitChange) getChange();
 	}
 
-
+	/**
+	 * @return Returns the root text edit
+	 */
+	public TextEdit getRootTextEdit() throws CoreException {
+		return getCompilationUnitChange().getEdit();
+	}
 }

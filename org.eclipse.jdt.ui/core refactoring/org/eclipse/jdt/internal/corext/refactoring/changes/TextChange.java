@@ -121,6 +121,15 @@ public abstract class TextChange extends AbstractTextChange {
 	}
 	
 	/**
+	 * Gets the root text edit.
+	 * 
+	 * @return Returns the root text edit
+	 */
+	public TextEdit getEdit() {
+		return fEdit;
+	}	
+	
+	/**
 	 * Adds a group description.
 	 * 
 	 * @param description the group description to be added

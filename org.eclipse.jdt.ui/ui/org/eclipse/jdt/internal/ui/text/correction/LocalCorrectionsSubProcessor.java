@@ -384,7 +384,7 @@ public class LocalCorrectionsSubProcessor {
     private static void addImportToProposal(ICompilationUnit cu, String typeName, CUCorrectionProposal proposal) throws CoreException {
         ImportEdit edit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
         edit.addImport(typeName);
-        proposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$  
+        proposal.getRootTextEdit().add(edit);
 	}
 
     private static Expression getQualifier(ASTNode node) {
