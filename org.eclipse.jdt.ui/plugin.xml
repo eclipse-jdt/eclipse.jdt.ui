@@ -2923,20 +2923,153 @@
             command="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
-      <!-- try -->
+
+<!-- views -->
       <command
-            name="Type Hierarchy"
-            description="Type Hierarchy"
+            name="%ViewCommand.typeHierarchy.name"
+            description="%ViewCommand.typeHierarchy.description"
             category="org.eclipse.ui.category.views"
             id="org.eclipse.jdt.ui.TypeHierarchy">
       </command>
       <keyBinding
-            string="Alt+Shift+5"
+            string="Alt+Shift+Q T"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.TypeHierarchy"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Alt+Shift+Q T"
+            scope="org.eclipse.ui.globalScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Alt+Q T"
             scope="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.ui.TypeHierarchy"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       
+      <command
+            name="%ViewCommand.packageExplorer.name"
+            description="%ViewCommand.packageExplorer.description"
+            category="org.eclipse.ui.category.views"
+            id="org.eclipse.jdt.ui.PackageExplorer">
+      </command>
+      <keyBinding
+            string="Alt+Shift+Q P"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.PackageExplorer"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Alt+Shift+Q P"
+            scope="org.eclipse.ui.globalScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Alt+Q P"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.PackageExplorer"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      
+      <command
+            name="%ViewCommand.projectsView.name"
+            description="%ViewCommand.projectsView.description"
+            category="org.eclipse.ui.category.views"
+            id="org.eclipse.jdt.ui.ProjectsView">
+      </command>
+      <keyBinding
+            string=""
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.ProjectsView"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      
+      <command
+            name="%ViewCommand.packagesView.name"
+            description="%ViewCommand.packagesView.description"
+            category="org.eclipse.ui.category.views"
+            id="org.eclipse.jdt.ui.PackagesView">
+      </command>
+      <keyBinding
+            string=""
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.PackagesView"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      
+      <command
+            name="%ViewCommand.typesView.name"
+            description="%ViewCommand.typesView.description"
+            category="org.eclipse.ui.category.views"
+            id="org.eclipse.jdt.ui.TypesView">
+      </command>
+      <keyBinding
+            string=""
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.TypesView"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+
+      <command
+            name="%ViewCommand.membersView.name"
+            description="%ViewCommand.membersView.description"
+            category="org.eclipse.ui.category.views"
+            id="org.eclipse.jdt.ui.MembersView">
+      </command>
+      <keyBinding
+            string=""
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.MembersView"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      
+      <command
+            name="%ViewCommand.sourceView.name"
+            description="%ViewCommand.sourceView.description"
+            category="org.eclipse.ui.category.views"
+            id="org.eclipse.jdt.ui.SourceView">
+      </command>
+      <keyBinding
+            string=""
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.SourceView"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      
+      <command
+            name="%ViewCommand.javadocView.name"
+            description="%ViewCommand.javadocView.description"
+            category="org.eclipse.ui.category.views"
+            id="org.eclipse.jdt.ui.JavadocView">
+      </command>
+      <keyBinding
+            string=""
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.JavadocView"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      
+      <command
+            name="%ViewCommand.callHierarchy.name"
+            description="%ViewCommand.callHierarchy.description"
+            category="org.eclipse.ui.category.views"
+            id="org.eclipse.jdt.callhierarchy.view">
+      </command>
+      <keyBinding
+            string=""
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.callhierarchy.view"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+
 <!-- refactoring -->
       <command
             name="%ActionDefinition.refactorQuickMenu.name"
