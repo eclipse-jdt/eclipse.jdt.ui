@@ -18,8 +18,20 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner;
 
-public class RefactoringScannerTests extends RefactoringTest{
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
+public class RefactoringScannerTests extends RefactoringTest{
+	
+	private static class Position {
+		private final int fLine;
+		private final int fColumn;
+		Position(int line, int column) {
+			fLine= line;
+			fColumn= column;
+		}
+	}
+	
+	
 	public RefactoringScannerTests(String name){
 		super(name);
 	}
@@ -50,13 +62,13 @@ public class RefactoringScannerTests extends RefactoringTest{
 		assertEquals("results.length", expectedMatchCount, fScanner.getMatches().size());
 	}
 	
-	private void helper2(String fileName, int[] expectedMatches)	throws Exception{
+	private void helper2(String fileName, Position[] expectedMatches)	throws Exception{
 		String text= getFileContents(getRefactoringPath() + fileName);
 		fScanner.scan(text);
 		
 		ArrayList expectedMatchesList= new ArrayList(expectedMatches.length);
 		for (int i= 0; i < expectedMatches.length; i++)
-			expectedMatchesList.add(new Integer(expectedMatches[i]));
+			expectedMatchesList.add(new Integer(TextRangeUtil.getOffset(text, expectedMatches[i].fLine, expectedMatches[i].fColumn)));
 		ArrayList matchesList= new ArrayList(fScanner.getMatches());
 		Collections.sort(matchesList);
 		assertEquals("results", expectedMatchesList, matchesList);
@@ -78,7 +90,7 @@ public class RefactoringScannerTests extends RefactoringTest{
 	}
 	
 	public void testQualifier() throws Exception{
-		helper2("C.java", new int[] { 68, 336 });
+		helper2("C.java", new Position[] { new Position(4, 21), new Position(17, 21) });
 	}
 }
 

@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.tests.refactoring.infra;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -31,12 +32,17 @@ public class TextRangeUtil {
 	}
 
 	public static int getOffset(ICompilationUnit cu, int line, int column) throws Exception{
-		IDocument document= new Document(cu.getSource());
+		String source= cu.getSource();
+		return getOffset(source, line, column) ;
+	}
+	
+	public static int getOffset(String source, int line, int column) throws BadLocationException {
+		IDocument document= new Document(source);
 		int r= document.getLineInformation(line - 1).getOffset();
 		IRegion region= document.getLineInformation(line - 1);
 		int lineTabCount= calculateTabCountInLine(document.get(region.getOffset(), region.getLength()), column);		
 		r += (column - 1) - (lineTabCount * getTabWidth()) + lineTabCount;
-		return r ;
+		return r;
 	}
 	
 	private static final int getTabWidth(){

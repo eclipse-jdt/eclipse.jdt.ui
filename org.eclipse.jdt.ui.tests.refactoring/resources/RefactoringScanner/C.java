@@ -1,8 +1,8 @@
 class B{
 	/**
 	 * org.eclipse.TestTestPattern
-	 * 	 (org.eclipse.TestPattern)
-	 * 	 borg.eclipse.TestPattern
+	 * (org.eclipse.TestPattern)
+	 * borg.eclipse.TestPattern
 	 */
 	void f(){
 	}
