@@ -26,52 +26,40 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class NLSHolderTest extends TestCase {
 
-    private IJavaProject javaProject;
+	private IJavaProject javaProject;
 
-    private IPackageFragmentRoot fSourceFolder;
-    
-    private final static String ACCESSOR_KLAZZ = 
-		"package test;\n" +
-		"public class TestMessages {\n" +
-		"	private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n" +
-		"	public static String getString(String s) {" +
-		"		return \"\";\n" +
-		"	}\n" +
-		"}\n";
+	private IPackageFragmentRoot fSourceFolder;
 
-    public NLSHolderTest(String arg) {
-        super(arg);        
-    }
-    
-    public static Test allTests() {
+	private final static String ACCESSOR_KLAZZ= "package test;\n" + "public class TestMessages {\n" + "	private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n" + "	public static String getString(String s) {" + "		return \"\";\n" + "	}\n" + "}\n";
+
+	public NLSHolderTest(String arg) {
+		super(arg);
+	}
+
+	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(NLSHolderTest.class));
 	}
-	
+
 	public static Test suite() {
-		return allTests();		
+		return allTests();
 	}
 
-    protected void setUp() throws Exception {
-        javaProject = ProjectTestSetup.getProject();
-        fSourceFolder = JavaProjectHelper.addSourceContainer(javaProject, "src");                
-    }
+	protected void setUp() throws Exception {
+		javaProject= ProjectTestSetup.getProject();
+		fSourceFolder= JavaProjectHelper.addSourceContainer(javaProject, "src");
+	}
 
-    protected void tearDown() throws Exception {        
-        JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());        
-    }
+	protected void tearDown() throws Exception {
+		JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
+	}
 
-    public void testSubstitutionWithAccessor() throws Exception {
-        String klazz =
-            "package test;\n" +
-            "public class Test {" +
-            "	private String str=TestMessages.getString(\"Key.5\");//$NON-NLS-1$\n" +
-            "}\n";
-        IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);        
-        ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
-        pack.createCompilationUnit("TestMessages.java", ACCESSOR_KLAZZ, false, null);
-        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
-        NLSSubstitution[] substitution = nlsHolder.getSubstitutions();
-        assertEquals(substitution.length, 1);
-        assertEquals(substitution[0].getKey(), "Key.5");        
-    }
+	public void testSubstitutionWithAccessor() throws Exception {
+		String klazz= "package test;\n" + "public class Test {" + "	private String str=TestMessages.getString(\"Key.5\");//$NON-NLS-1$\n" + "}\n";
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+		pack.createCompilationUnit("TestMessages.java", ACCESSOR_KLAZZ, false, null);
+		NLSSubstitution[] substitution= NLSHolder.create(cu, new NLSInfo(cu));
+		assertEquals(substitution.length, 1);
+		assertEquals(substitution[0].getKey(), "Key.5");
+	}
 }

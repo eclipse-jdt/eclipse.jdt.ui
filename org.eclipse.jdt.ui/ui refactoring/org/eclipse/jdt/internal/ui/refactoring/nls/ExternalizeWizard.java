@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.refactoring.nls;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -25,7 +24,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class ExternalizeWizard extends RefactoringWizard {
 
 	public ExternalizeWizard(NLSRefactoring refactoring) {
-		super(refactoring, CHECK_INITIAL_CONDITIONS_ON_OPEN | WIZARD_BASED_USER_INTERFACE); 
+		super(refactoring,CHECK_INITIAL_CONDITIONS_ON_OPEN | WIZARD_BASED_USER_INTERFACE);
 		setDefaultPageTitle(NLSUIMessages.getFormattedString("wizard.page.title", refactoring.getCu().getElementName())); //$NON-NLS-1$
 		setWindowTitle(NLSUIMessages.getString("wizard.name"));//$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_EXTERNALIZE_STRINGS);
@@ -36,14 +35,14 @@ public class ExternalizeWizard extends RefactoringWizard {
 	 */
 	protected void addUserInputPages() {
 
-		NLSRefactoring nlsRefac= (NLSRefactoring)getRefactoring();
+		NLSRefactoring nlsRefac= (NLSRefactoring) getRefactoring();
 		ExternalizeWizardPage page= new ExternalizeWizardPage(nlsRefac);
 		page.setMessage(NLSUIMessages.getString("wizard.select")); //$NON-NLS-1$
 		addPage(page);
 
-		ExternalizeWizardPage2 page2= new ExternalizeWizardPage2(nlsRefac);
-		page2.setMessage(NLSUIMessages.getString("wizard.select_values")); //$NON-NLS-1$
-		addPage(page2);
+		/*ExternalizeWizardPage2 page2= new ExternalizeWizardPage2(nlsRefac);
+		 page2.setMessage(NLSUIMessages.getString("wizard.select_values")); //$NON-NLS-1$
+		 addPage(page2);*/
 	}
 
 	public boolean canFinish() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,20 +10,70 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
-import java.util.HashSet;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.FontRegistry;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -38,107 +88,48 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.FontRegistry;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ColumnLayoutData;
-import org.eclipse.jface.viewers.ColumnPixelData;
-import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.ICellModifier;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IFontProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableLayout;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardPage;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private static final String[] PROPERTIES;
 	private static final String[] fgTitles;
-	private static final int STATE_PROP= 0; 
-	private static final int VAL_PROP= 1; 
-	private static final int KEY_PROP= 2; 
+	private static final int STATE_PROP= 0;
+	private static final int VAL_PROP= 1;
+	private static final int KEY_PROP= 2;
 	private static final int SIZE= 3; //column counter
 	private static final int ROW_COUNT= 5;
-	
+
 	public static final String PAGE_NAME= "NLSWizardPage1"; //$NON-NLS-1$
 	static {
 		PROPERTIES= new String[SIZE];
 		PROPERTIES[STATE_PROP]= "task"; //$NON-NLS-1$
 		PROPERTIES[KEY_PROP]= "key"; //$NON-NLS-1$
 		PROPERTIES[VAL_PROP]= "value"; //$NON-NLS-1$
-		
+
 		fgTitles= new String[SIZE];
 		fgTitles[STATE_PROP]= ""; //$NON-NLS-1$
-		fgTitles[KEY_PROP]= NLSUIMessages.getString("ExternalizeWizard.key");  //$NON-NLS-1$
-		fgTitles[VAL_PROP]= NLSUIMessages.getString("ExternalizeWizard.value");  //$NON-NLS-1$
+		fgTitles[KEY_PROP]= NLSUIMessages.getString("ExternalizeWizard.key"); //$NON-NLS-1$
+		fgTitles[VAL_PROP]= NLSUIMessages.getString("ExternalizeWizard.value"); //$NON-NLS-1$
 	}
-	
+
 	private class CellModifier implements ICellModifier {
-		
+
 		/**
 		 * @see ICellModifier#canModify(Object, String)
 		 */
-		public boolean canModify(Object element, String property) {		    
+		public boolean canModify(Object element, String property) {
 			if (property == null)
 				return false;
 
-			if (!(element instanceof NLSSubstitution))	
+			if (!(element instanceof NLSSubstitution))
 				return false;
-				
-			if (PROPERTIES[STATE_PROP].equals(property))
-				return true;
 			
-			NLSSubstitution substitution = (NLSSubstitution) element;			
-			return (substitution.getState() == NLSSubstitution.EXTERNALIZED);
+			return true;
 		}
-		
+
 		/**
 		 * @see ICellModifier#getValue(Object, String)
 		 */
@@ -148,14 +139,14 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				if (PROPERTIES[KEY_PROP].equals(property))
 					return substitution.getKeyWithoutPrefix();
 				if (PROPERTIES[VAL_PROP].equals(property))
-				    return substitution.getValue();
-				if (PROPERTIES[STATE_PROP].equals(property)){
+					return substitution.getValue();
+				if (PROPERTIES[STATE_PROP].equals(property)) {
 					return new Integer(substitution.getState());
-				}	
+				}
 			}
 			return null;
 		}
-		
+
 		/**
 		 * @see ICellModifier#modify(Object, String, Object)
 		 */
@@ -169,212 +160,208 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 						fTableViewer.refresh(true);
 						validateKeys();
 					}
-					if (PROPERTIES[VAL_PROP].equals(property)) {						
-					    substitution.setValue((String) value);
-					    validateKeys();
-						fTableViewer.update(substitution, new String[] { property });
+					if (PROPERTIES[VAL_PROP].equals(property)) {
+						substitution.setValue((String) value);
+						validateKeys();
+						fTableViewer.update(substitution, new String[]{property});
 					}
 					if (PROPERTIES[STATE_PROP].equals(property)) {
-						substitution.setState(((Integer)value).intValue());
+						substitution.setState(((Integer) value).intValue());
 						if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
-						    substitution.generateKey(fSubstitutions);
+							substitution.generateKey(fSubstitutions);
 						}
-						fTableViewer.update(substitution, new String[] { property });
+						fTableViewer.update(substitution, new String[]{property});
 					}
 				}
 			}
 		}
 	}
-	
+
 	private class NLSSubstitutionLabelProvider extends LabelProvider implements ITableLabelProvider, IFontProvider {
-	    
-	    private Font bold;
-	    private Font defaultFont;
-	    
-	    public NLSSubstitutionLabelProvider() {
-	        FontRegistry fontRegistry = 
-	            PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry();	        
-	        defaultFont = fontRegistry.defaultFont();	        
-	        bold = fontRegistry.getBold(defaultFont.getFontData()[0].getName());        
-	    }
-	    
-	    public String getColumnText(Object element, int columnIndex) {
-	        String columnText = "";
+
+		private Font bold;
+		private Font defaultFont;
+
+		public NLSSubstitutionLabelProvider() {
+			FontRegistry fontRegistry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry();
+			defaultFont= fontRegistry.defaultFont();
+			bold= fontRegistry.getBold(defaultFont.getFontData()[0].getName());
+		}
+
+		public String getColumnText(Object element, int columnIndex) {
+			String columnText= ""; //$NON-NLS-1$
 			if (element instanceof NLSSubstitution) {
 				NLSSubstitution substitution= (NLSSubstitution) element;
-				if (columnIndex == KEY_PROP){
-				    if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
-				        columnText = substitution.getKey();					    
-					}					 
-				} else if ((columnIndex == VAL_PROP) && (substitution.getValue() != null)) {			    
-				    columnText = substitution.getValue();				    
-				}
+				if (columnIndex == KEY_PROP) {
+					if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
+						columnText= substitution.getKey();
+					}
+				} else
+					if ((columnIndex == VAL_PROP) && (substitution.getValue() != null)) {
+						columnText= substitution.getValue();
+					}
 			}
-			return unwindEscapeChars(columnText); 
+			return unwindEscapeChars(columnText);
 		}
-	    
-	    private String unwindEscapeChars(String s){
-	        if (s != null) {
-	            StringBuffer sb= new StringBuffer(s.length());
-	            int length= s.length();
-	            for (int i= 0; i < length; i++){
-	                char c= s.charAt(i);
-	                sb.append(getUnwoundString(c));
-	            }
-	            return sb.toString();
-	        } 
-	        return null;
-	    }
-	    
-	    private String getUnwoundString(char c){
-	    	switch(c){
-	    		case '\b' :
-	    			return "\\b";//$NON-NLS-1$
-	    		case '\t' :
-	    			return "\\t";//$NON-NLS-1$
-	    		case '\n' :
-	    			return "\\n";//$NON-NLS-1$
-	    		case '\f' :
-	    			return "\\f";//$NON-NLS-1$	
-	    		case '\r' :
-	    			return "\\r";//$NON-NLS-1$
-	    		case '\\' :
-	    			return "\\\\";//$NON-NLS-1$
-	    	}
-	    	return String.valueOf(c);
-	    }
-		
+
+		private String unwindEscapeChars(String s) {
+			if (s != null) {
+				StringBuffer sb= new StringBuffer(s.length());
+				int length= s.length();
+				for (int i= 0; i < length; i++) {
+					char c= s.charAt(i);
+					sb.append(getUnwoundString(c));
+				}
+				return sb.toString();
+			}
+			return null;
+		}
+
+		private String getUnwoundString(char c) {
+			switch (c) {
+				case '\b' :
+					return "\\b";//$NON-NLS-1$
+				case '\t' :
+					return "\\t";//$NON-NLS-1$
+				case '\n' :
+					return "\\n";//$NON-NLS-1$
+				case '\f' :
+					return "\\f";//$NON-NLS-1$	
+				case '\r' :
+					return "\\r";//$NON-NLS-1$
+				case '\\' :
+					return "\\\\";//$NON-NLS-1$
+			}
+			return String.valueOf(c);
+		}
+
 		public Image getColumnImage(Object element, int columnIndex) {
-		    if ((columnIndex == STATE_PROP) && (element instanceof NLSSubstitution)) {
-		        return getNLSImage((NLSSubstitution) element);
-		    }
-		    
+			if ((columnIndex == STATE_PROP) && (element instanceof NLSSubstitution)) {
+				return getNLSImage((NLSSubstitution) element);
+			}
+
 			return null;
 		}
 
 		public Font getFont(Object element) {
-            if (element instanceof NLSSubstitution) {
-                NLSSubstitution substitution = (NLSSubstitution) element;
-                if (substitution.hasChanged()) {
-                    return bold;
-                }                
-            }
-            return defaultFont;
-        }
-		
-		private Image getNLSImage(NLSSubstitution sub){
-		    Image image = getNLSImage(sub.getState());
-		    if ((sub.getValue() == null) && (sub.getKey() != null)) {
-		        JavaElementImageDescriptor imageDescriptor = 
-		            new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);	        
-		        return imageDescriptor.createImage();
-		    } else if (sub.hasDuplicateKey(fSubstitutions)) {
-		        JavaElementImageDescriptor imageDescriptor = 
-		            new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE);	        
-		        return imageDescriptor.createImage();	        
-		    } else {
-		        return image;	        
-		    }	    
-		}		
-		
-		// TODO: dry ???
-		private Image getNLSImage(int task){
-			switch (task){
-				case NLSSubstitution.EXTERNALIZED:
+			if (element instanceof NLSSubstitution) {
+				NLSSubstitution substitution= (NLSSubstitution) element;
+				if (substitution.hasPropertyFileChange() || substitution.hasSourceChange()) {
+					return bold;
+				}
+			}
+			return defaultFont;
+		}
+
+		private Image getNLSImage(NLSSubstitution sub) {
+			if ((sub.getValue() == null) && (sub.getKey() != null)) {
+				JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);
+				return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
+			} else
+				if (sub.hasDuplicateKey(fSubstitutions)) {
+					JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE);
+					return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
+				} else {
+					return	getNLSImage(sub.getState());
+				}
+		}
+
+		private Image getNLSImage(int task) {
+			switch (task) {
+				case NLSSubstitution.EXTERNALIZED :
 					return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_TRANSLATE);
-				case NLSSubstitution.IGNORED:	
+				case NLSSubstitution.IGNORED :
 					return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
-				case NLSSubstitution.INTERNALIZED:
-					return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_SKIP);	
-				default:
-					Assert.isTrue(false);	
+				case NLSSubstitution.INTERNALIZED :
+					return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_SKIP);
+				default :
+					Assert.isTrue(false);
 					return null;
 			}
 		}
-		
-		// TODO: dry ???
-		private ImageDescriptor getNLSImageDescriptor(int task){
-			switch (task){
-				case NLSSubstitution.EXTERNALIZED:
+
+		private ImageDescriptor getNLSImageDescriptor(int task) {
+			switch (task) {
+				case NLSSubstitution.EXTERNALIZED :
 					return JavaPluginImages.DESC_OBJS_NLS_TRANSLATE;
-				case NLSSubstitution.IGNORED:	
+				case NLSSubstitution.IGNORED :
 					return JavaPluginImages.DESC_OBJS_NLS_NEVER_TRANSLATE;
-				case NLSSubstitution.INTERNALIZED:
-					return JavaPluginImages.DESC_OBJS_NLS_SKIP;	
-				default:
-					Assert.isTrue(false);	
+				case NLSSubstitution.INTERNALIZED :
+					return JavaPluginImages.DESC_OBJS_NLS_SKIP;
+				default :
+					Assert.isTrue(false);
 					return null;
 			}
-		}        
-	}	
-		
+		}
+	}
+
 	private class NLSInputDialog extends StatusDialog implements IDialogFieldListener {
 		private StringDialogField fKeyField;
 		private StringDialogField fValueField;
 		private DialogField fMessageField;
-		
+
 		public NLSInputDialog(Shell parent, String title, String message, NLSSubstitution substitution) {
-			super(parent);				
+			super(parent);
 			setTitle(title);
-	
+
 			fMessageField= new DialogField();
 			fMessageField.setLabelText(message);
-		
+
 			fKeyField= new StringDialogField();
 			fKeyField.setLabelText(NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Enter_key")); //$NON-NLS-1$
 			fKeyField.setDialogFieldListener(this);
-				
+
 			fValueField= new StringDialogField();
 			fValueField.setLabelText(NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Enter_value")); //$NON-NLS-1$
 			fValueField.setDialogFieldListener(this);
-			
+
 			fKeyField.setText(substitution.getKeyWithoutPrefix());
 			if (substitution.getValue() == null) {
-				fValueField.setText("");			    
+				fValueField.setText(""); //$NON-NLS-1$
 			} else {
-			    fValueField.setText(substitution.getValue());
+				fValueField.setText(substitution.getValue());
 			}
 		}
-			
+
 		public KeyValuePair getResult() {
 			KeyValuePair res= new KeyValuePair(fKeyField.getText(), fValueField.getText());
 			return res;
 		}
-					
+
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
-				
+
 			Composite inner= new Composite(composite, SWT.NONE);
 			GridLayout layout= new GridLayout();
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
 			layout.numColumns= 2;
 			inner.setLayout(layout);
-				
+
 			fMessageField.doFillIntoGrid(inner, 2);
 			fKeyField.doFillIntoGrid(inner, 2);
 			fValueField.doFillIntoGrid(inner, 2);
-				
+
 			LayoutUtil.setHorizontalGrabbing(fKeyField.getTextControl(null));
 			LayoutUtil.setWidthHint(fKeyField.getTextControl(null), convertWidthInCharsToPixels(45));
 			LayoutUtil.setWidthHint(fValueField.getTextControl(null), convertWidthInCharsToPixels(45));
-				
+
 			fKeyField.postSetFocusOnDialogField(parent.getDisplay());
-				
-			applyDialogFont(composite);		
+
+			applyDialogFont(composite);
 			return composite;
 		}
-			
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
 			IStatus keyStatus= validateIdentifiers(getTokens(fKeyField.getText(), ","), true); //$NON-NLS-1$
 			IStatus valueStatus= validateIdentifiers(getTokens(fValueField.getText(), ","), false); //$NON-NLS-1$
-				
+
 			updateStatus(StatusUtil.getMoreSevere(valueStatus, keyStatus));
-		}		
-		
+		}
+
 		protected String[] getTokens(String text, String separator) {
 			StringTokenizer tok= new StringTokenizer(text, separator); //$NON-NLS-1$
 			int nTokens= tok.countTokens();
@@ -383,8 +370,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				res[i]= tok.nextToken().trim();
 			}
 			return res;
-		}	
-			
+		}
+
 		private IStatus validateIdentifiers(String[] values, boolean isKey) {
 			for (int i= 0; i < values.length; i++) {
 				String val= values[i];
@@ -393,160 +380,262 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Error_empty_key")); //$NON-NLS-1$
 					} else {
 						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Error_empty_value")); //$NON-NLS-1$
-					}							
+					}
 				}
 				// validation so keys don't contain spaces
 				if (isKey) {
-					if (! validateKey(val))
+					if (!validateKey(val))
 						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getFormattedString("ExternalizeWizard.NLSInputDialog.Error_invalid_key", val)); //$NON-NLS-1$
 				}
 			}
 			return new StatusInfo();
-		}		
-		
+		}
+
 		private boolean validateKey(String s) {
-			for (int i= 0; i < s.length(); i++){
+			for (int i= 0; i < s.length(); i++) {
 				if (Character.isWhitespace(s.charAt(i)))
 					return false;
-			}				
+			}
 			return true;
 		}
 	}
-	
+
 	private Text fPrefixField;
 	private Table fTable;
 	private TableViewer fTableViewer;
 	private SourceViewer fSourceViewer;
-  
-    private final ICompilationUnit fCu;
-    private NLSSubstitution[] fSubstitutions;
-    private String fDefaultPrefix;
-    private Button fExternalizeButton;
-    private Button fIgnoreButton;
-    private Button fInternalizeButton;
-    private Button fRevertButton;
+
+	private final ICompilationUnit fCu;
+	private NLSSubstitution[] fSubstitutions;
+	private String fDefaultPrefix;
+	private Button fExternalizeButton;
+	private Button fIgnoreButton;
+	private Button fInternalizeButton;
+	private Button fRevertButton;
 	private Button fEditButton;
-	
+	private NLSRefactoring fNLSRefactoring;
+	private Button fRenameButton;
+	private Text fAccessorClassField;
+	private Text fPropertiesFileField;
+	private Button fFilterCheckBox;
+
 	public ExternalizeWizardPage(NLSRefactoring nlsRefactoring) {
 		super(PAGE_NAME);
-		fCu = nlsRefactoring.getCu();
-		fSubstitutions = nlsRefactoring.getSubstitutions();		
-		fDefaultPrefix = nlsRefactoring.getPrefixHint();
-		
+		fCu= nlsRefactoring.getCu();
+		fSubstitutions= nlsRefactoring.getSubstitutions();
+		fDefaultPrefix= nlsRefactoring.getPrefixHint();
+		fNLSRefactoring= nlsRefactoring;
+
 		NLSSubstitution.setPrefix(fDefaultPrefix);
-		
+
 		createDefaultExternalization(fSubstitutions, fDefaultPrefix);
-	}	
+	}
 
 	/*
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
-		
+
 		Composite supercomposite= new Composite(parent, SWT.NONE);
 		supercomposite.setLayout(new GridLayout());
-		
-		createKeyPrefixField(supercomposite);		
-		
+
+		createKeyPrefixField(supercomposite);
+
 		SashForm composite= new SashForm(supercomposite, SWT.VERTICAL);
-		
-		GridData data = new GridData(GridData.FILL_BOTH);
-		data.heightHint = 360;
+
+		GridData data= new GridData(GridData.FILL_BOTH);
+		data.heightHint= 360;
 		composite.setLayoutData(data);
-				
+
 		createTableViewer(composite);
 		createSourceViewer(composite);
-				
-		composite.setWeights(new int[]{65, 45});	
 		
+		createAccessorInfoComposite(supercomposite);
+
+		composite.setWeights(new int[]{65, 45});
+
 		validateKeys();
-		
+
 		// promote control
 		setControl(supercomposite);
 		Dialog.applyDialogFont(supercomposite);
 		WorkbenchHelp.setHelp(supercomposite, IJavaHelpContextIds.EXTERNALIZE_WIZARD_KEYVALUE_PAGE);
 	}
+
+	/**
+	 * @param supercomposite
+	 */
+	private void createAccessorInfoComposite(Composite supercomposite) {
+		Composite accessorComposite= new Composite(supercomposite, SWT.NONE);
+		accessorComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		accessorComposite.setLayout(layout);
+		
+		Composite composite= new Composite(accessorComposite, SWT.NONE);
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		layout= new GridLayout(2, true);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		composite.setLayout(layout);
+		
+		Label accessorClassLabel= new Label(composite, SWT.NONE);
+		accessorClassLabel.setText("Accessor class:");
+		accessorClassLabel.setLayoutData(new GridData());
+		
+		Label propertiesFileLabel= new Label(composite, SWT.NONE);
+		propertiesFileLabel.setText("Properties file:");
+		propertiesFileLabel.setLayoutData(new GridData());
+				
+		fAccessorClassField= new Text(composite, SWT.SINGLE | SWT.BORDER);
+		fAccessorClassField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fAccessorClassField.setEditable(false);
+		
+		fPropertiesFileField= new Text(composite, SWT.SINGLE | SWT.BORDER);
+		fPropertiesFileField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fPropertiesFileField.setEditable(false);
+		
+		//new Label(composite, SWT.NONE); // placeholder
+		
+		Button configure= new Button(accessorComposite, SWT.PUSH);
+		configure.setText("Configure...");
+		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_END);
+		data.widthHint= SWTUtil.getButtonWidthHint(configure);
+		data.heightHint= SWTUtil.getButtonHeightHint(configure);
+		configure.setLayoutData(data);
+
+		configure.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				doConfigureButtonPressed();
+			}
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+		
+		updateAccessorFieldLabels();
+		
+	}
+	
+	private void updateAccessorFieldLabels() {
+		String accessorClass= JavaModelUtil.concatenateName(fNLSRefactoring.getAccessorPackage().getElementName(), fNLSRefactoring.getAccessorClassName());
+		fAccessorClassField.setText(accessorClass);
+		fPropertiesFileField.setText(fNLSRefactoring.getPropertyFilePath().makeRelative().toString());
+	}
+	
 	
 
-    private void createTableViewer(Composite composite){
+	private void doConfigureButtonPressed() {
+		NLSAccessorConfigurationDialog dialog= new NLSAccessorConfigurationDialog(getShell(), fNLSRefactoring);
+		if (dialog.open() == Window.OK) {
+			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFile()), fNLSRefactoring.getAccessorClassName());
+			fTableViewer.refresh(true);
+			updateAccessorFieldLabels();
+		}
+	}
+
+	private Properties getProperties(IFile propertyFile) {
+		Properties props= new Properties();
+		try {
+			if (propertyFile != null) {
+				InputStream is= propertyFile.getContents();
+				props.load(is);
+				is.close();
+			}
+		} catch (Exception e) {
+			// sorry no property         
+		}
+		return props;
+	}
+
+	private void createTableViewer(Composite composite) {
 		createTableComposite(composite);
-		
+
 		/*
 		 * Feature of CellEditors - double click is ignored.
 		 * The workaround is to register my own listener and force the desired 
 		 * behavior.
 		 */
 		fTableViewer= new TableViewer(fTable) {
-				protected void hookControl(Control control) {
-					super.hookControl(control);
-					((Table) control).addMouseListener(new MouseAdapter() {
-						public void mouseDoubleClick(MouseEvent e) {
-							if (getTable().getSelection().length == 0)
+			protected void hookControl(Control control) {
+				super.hookControl(control);
+				((Table) control).addMouseListener(new MouseAdapter() {
+					public void mouseDoubleClick(MouseEvent e) {
+						if (getTable().getSelection().length == 0)
+							return;
+						TableItem item= getTable().getSelection()[0];
+						if (item.getBounds(STATE_PROP).contains(e.x, e.y)) {
+							List widgetSel= getSelectionFromWidget();
+							if (widgetSel == null || widgetSel.size() != 1)
 								return;
-							TableItem item= getTable().getSelection()[0];
-							if (item.getBounds(STATE_PROP).contains(e.x, e.y)){
-								List widgetSel= getSelectionFromWidget();
-								if (widgetSel == null || widgetSel.size() != 1)
-									return;
-								NLSSubstitution substitution= (NLSSubstitution)widgetSel.get(0);
-								Integer value= (Integer)getCellModifier().getValue(substitution, PROPERTIES[STATE_PROP]);
-								int newValue= MultiStateCellEditor.getNextValue(NLSSubstitution.STATE_COUNT, value.intValue());
-								getCellModifier().modify(item, PROPERTIES[STATE_PROP], new Integer(newValue));
-							}	
+							NLSSubstitution substitution= (NLSSubstitution) widgetSel.get(0);
+							Integer value= (Integer) getCellModifier().getValue(substitution, PROPERTIES[STATE_PROP]);
+							int newValue= MultiStateCellEditor.getNextValue(NLSSubstitution.STATE_COUNT, value.intValue());
+							getCellModifier().modify(item, PROPERTIES[STATE_PROP], new Integer(newValue));
 						}
-					});
-				}
+					}
+				});
+			}
 		};
-		
+
 		fTableViewer.setUseHashlookup(true);
-		
+
 		final CellEditor[] editors= createCellEditors();
-		fTableViewer.setCellEditors(editors);		
+		fTableViewer.setCellEditors(editors);
 		fTableViewer.setColumnProperties(PROPERTIES);
 		fTableViewer.setCellModifier(new CellModifier());
 
 		fTableViewer.setContentProvider(new IStructuredContentProvider() {
-            public Object[] getElements(Object inputElement) {
-                return fSubstitutions;
-            }
-            public void dispose() {
-            }
-            public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-            }
-        });
-		
-		fTableViewer.setLabelProvider(new NLSSubstitutionLabelProvider());
-		fTableViewer.setInput(new Object());
-		
-		fTableViewer.addDoubleClickListener(new IDoubleClickListener(){
-			public void doubleClick(DoubleClickEvent event) {
-				Set selected= getSelectedTableEntries();
-				if (selected.size() != 1)
-					return;				
-				NLSSubstitution substitution= (NLSSubstitution)selected.iterator().next();
-				if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
-					openEditButton(event.getSelection());
-				}				
+			public Object[] getElements(Object inputElement) {
+				return fSubstitutions;
+			}
+			public void dispose() {
+			}
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			}
+		});
+		fTableViewer.addFilter(new ViewerFilter() {
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				NLSSubstitution curr= (NLSSubstitution) element;
+				return !fFilterCheckBox.getSelection() || (curr.getInitialState() == NLSSubstitution.INTERNALIZED);
 			}
 		});
 		
+
+		fTableViewer.setLabelProvider(new NLSSubstitutionLabelProvider());
+		fTableViewer.setInput(new Object());
+
+		fTableViewer.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				List selected= getSelectedTableEntries();
+				if (selected.size() != 1)
+					return;
+				NLSSubstitution substitution= (NLSSubstitution) selected.iterator().next();
+				if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
+					openEditButton(event.getSelection());
+				}
+			}
+		});
+
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				ExternalizeWizardPage.this.selectionChanged(event);
 			}
 		});
 	}
-    
-    private void createDefaultExternalization(NLSSubstitution[] substitutions, String defaultPrefix) {
-	    for (int i = 0; i < substitutions.length; i++) {
-            NLSSubstitution substitution = substitutions[i];
-            if (substitution.getState() == NLSSubstitution.INTERNALIZED) {
-                substitution.setState(NLSSubstitution.EXTERNALIZED);
-                substitution.generateKey(substitutions);
-            }
-        }
-    }
-	
+
+	private void createDefaultExternalization(NLSSubstitution[] substitutions, String defaultPrefix) {
+		for (int i= 0; i < substitutions.length; i++) {
+			NLSSubstitution substitution= substitutions[i];
+			if (substitution.getState() == NLSSubstitution.INTERNALIZED) {
+				substitution.setState(NLSSubstitution.EXTERNALIZED);
+				substitution.generateKey(substitutions);
+			}
+		}
+	}
+
 	private CellEditor[] createCellEditors() {
 		final CellEditor editors[]= new CellEditor[SIZE];
 		editors[STATE_PROP]= new MultiStateCellEditor(fTable, NLSSubstitution.STATE_COUNT, NLSSubstitution.DEFAULT);
@@ -555,20 +644,20 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		return editors;
 	}
 
-	private void createSourceViewer(Composite parent){
+	private void createSourceViewer(Composite parent) {
 		Composite c= new Composite(parent, SWT.NONE);
 		c.setLayoutData(new GridData(GridData.FILL_BOTH));
 		GridLayout gl= new GridLayout();
 		gl.marginHeight= 0;
 		gl.marginWidth= 0;
-        c.setLayout(gl);
-		
+		c.setLayout(gl);
+
 		Label l= new Label(c, SWT.NONE);
 		l.setText(NLSUIMessages.getString("wizardPage.context")); //$NON-NLS-1$
 		l.setLayoutData(new GridData());
-		
+
 		// source viewer
-		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();		
+		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		int styles= SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION;
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		fSourceViewer= new JavaSourceViewer(c, null, null, false, styles, store);
@@ -576,83 +665,83 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fSourceViewer.getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 
 		try {
-			
+
 			String contents= fCu.getBuffer().getContents();
 			IDocument document= new Document(contents);
 			tools.setupJavaDocumentPartitioner(document);
-			
+
 			fSourceViewer.setDocument(document);
 			fSourceViewer.setEditable(false);
-			
+
 			GridData gd= new GridData(GridData.FILL_BOTH);
 			gd.heightHint= convertHeightInCharsToPixels(10);
 			gd.widthHint= convertWidthInCharsToPixels(40);
 			fSourceViewer.getControl().setLayoutData(gd);
-			
+
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage.title"), NLSUIMessages.getString("wizardPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
-	
-	private void createKeyPrefixField(Composite parent){
+
+	private void createKeyPrefixField(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout gl= new GridLayout();
 		gl.numColumns= 2;
 		gl.marginWidth= 0;
 		composite.setLayout(gl);
-		
+
 		Label l= new Label(composite, SWT.NONE);
 		l.setText(NLSUIMessages.getString("wizardPage.common_prefix")); //$NON-NLS-1$
 		l.setLayoutData(new GridData());
-		
+
 		fPrefixField= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fPrefixField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fPrefixField.setText(fDefaultPrefix);
 		fPrefixField.selectAll();
-		
-		fPrefixField.addModifyListener(new ModifyListener() {
-            public void modifyText(ModifyEvent e) {
-                NLSSubstitution.setPrefix(fPrefixField.getText());
-                fTableViewer.refresh(true);
-            }		    
-		});
-	}	
-	
-	private void validateKeys() {
-	    RefactoringStatus status = new RefactoringStatus();
-	    checkDuplicateKeys(status);
-	    checkMissingKeys(status);
-	    setPageComplete(status);	    
-	}
-	
-    private void checkDuplicateKeys(RefactoringStatus status) {
-        for (int i = 0; i < fSubstitutions.length; i++) {
-            NLSSubstitution substitution = fSubstitutions[i];
-            if (hasDuplicateKey(substitution)) {                
-                status.addWarning("Keys are duplicate.");
-                return;
-            }            
-        }        
-    }
-    
-    private void checkMissingKeys(RefactoringStatus status) {
-        for (int i = 0; i < fSubstitutions.length; i++) {
-            NLSSubstitution substitution = fSubstitutions[i];
-            if ((substitution.getValue() == null) && (substitution.getKey() != null)) {
-                status.addFatalError("Entry is missing in Property File.");
-                return;                
-            }            
-        }
-    }
 
-    private boolean hasDuplicateKey(NLSSubstitution substitution) {
-	    if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
-	        return substitution.hasDuplicateKey(fSubstitutions);
-	    }
-	    return false;
-	}	
-	
+		fPrefixField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				NLSSubstitution.setPrefix(fPrefixField.getText());
+				fTableViewer.refresh(true);
+			}
+		});
+	}
+
+	private void validateKeys() {
+		RefactoringStatus status= new RefactoringStatus();
+		checkDuplicateKeys(status);
+		checkMissingKeys(status);
+		setPageComplete(status);
+	}
+
+	private void checkDuplicateKeys(RefactoringStatus status) {
+		for (int i= 0; i < fSubstitutions.length; i++) {
+			NLSSubstitution substitution= fSubstitutions[i];
+			if (hasDuplicateKey(substitution)) {
+				status.addWarning("Keys are duplicate.");
+				return;
+			}
+		}
+	}
+
+	private void checkMissingKeys(RefactoringStatus status) {
+		for (int i= 0; i < fSubstitutions.length; i++) {
+			NLSSubstitution substitution= fSubstitutions[i];
+			if ((substitution.getValue() == null) && (substitution.getKey() != null)) {
+				status.addWarning("Entry is missing in Property File.");
+				return;
+			}
+		}
+	}
+
+	private boolean hasDuplicateKey(NLSSubstitution substitution) {
+		if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
+			return substitution.hasDuplicateKey(fSubstitutions);
+		}
+		return false;
+	}
+
 	private void createTableComposite(Composite parent) {
 		Composite comp= new Composite(parent, SWT.NONE);
 		comp.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -661,50 +750,90 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		gl.marginHeight= 0;
 		comp.setLayout(gl);
 		
-		Label l= new Label(comp, SWT.NONE);
-		l.setText(NLSUIMessages.getString("wizardPage.strings_to_externalize")); //$NON-NLS-1$
-		l.setLayoutData(new GridData());
+		Composite labelComp= new Composite(comp, SWT.NONE);
+		gl= new GridLayout();
+		gl.numColumns= 2;
+		gl.marginWidth= 0;
+		gl.marginHeight= 0;
+		labelComp.setLayout(gl);
+		labelComp.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		
-		createTable(comp);
+		Label l= new Label(labelComp, SWT.NONE);
+		l.setText(NLSUIMessages.getString("wizardPage.strings_to_externalize")); //$NON-NLS-1$
+		l.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		fFilterCheckBox= new Button(labelComp, SWT.CHECK);
+		fFilterCheckBox.setText("Filter all existing ignored and externalized entries");
+		fFilterCheckBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		fFilterCheckBox.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				doFilterCheckBoxPressed();
+			}
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+		fFilterCheckBox.setSelection(hasNewSubstitutions());
+
+		Control tableControl= createTable(comp);
+		tableControl.setLayoutData(new GridData(GridData.FILL_BOTH));
 	}
 	
-	private void createTable(Composite parent){
+	private boolean hasNewSubstitutions() {
+		for (int i= 0; i < fSubstitutions.length; i++) {
+			NLSSubstitution curr= fSubstitutions[i];
+			if (curr.getInitialState() == NLSSubstitution.INTERNALIZED) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 */
+	protected void doFilterCheckBoxPressed() {
+		fTableViewer.refresh();
+	}
+
+	private Control createTable(Composite parent) {
 		Composite c= new Composite(parent, SWT.NONE);
 		GridLayout gl= new GridLayout();
 		gl.numColumns= 2;
 		gl.marginWidth= 0;
 		gl.marginHeight= 0;
 		c.setLayout(gl);
-		c.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
+
 		fTable= new Table(c, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION | SWT.HIDE_SELECTION | SWT.BORDER);
 		GridData tableGD= new GridData(GridData.FILL_BOTH);
-		tableGD.heightHint= SWTUtil.getTableHeightHint(fTable, ROW_COUNT);	
+		tableGD.heightHint= SWTUtil.getTableHeightHint(fTable, ROW_COUNT);
 		//tableGD.widthHint= 40;
 		fTable.setLayoutData(tableGD);
-		
+
 		fTable.setLinesVisible(true);
-		
+
 		TableLayout layout= new TableLayout();
 		fTable.setLayout(layout);
 		fTable.setHeaderVisible(true);
-		
+
 		ColumnLayoutData[] columnLayoutData= new ColumnLayoutData[SIZE];
 		columnLayoutData[STATE_PROP]= new ColumnPixelData(20, false);
 		columnLayoutData[KEY_PROP]= new ColumnWeightData(40, true);
 		columnLayoutData[VAL_PROP]= new ColumnWeightData(40, true);
-		
+
 		for (int i= 0; i < fgTitles.length; i++) {
 			TableColumn tc= new TableColumn(fTable, SWT.NONE, i);
 			tc.setText(fgTitles[i]);
 			layout.addColumnData(columnLayoutData[i]);
 			tc.setResizable(columnLayoutData[i].resizable);
 		}
-		
-		createButtonComposite(c);	
+
+		createButtonComposite(c);
+		return c;
 	}
 
-	private void createButtonComposite(Composite parent){
+	private void createButtonComposite(Composite parent) {
 		Composite buttonComp= new Composite(parent, SWT.NONE);
 		GridLayout gl= new GridLayout();
 		gl.marginHeight= 0;
@@ -712,196 +841,208 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		buttonComp.setLayout(gl);
 		buttonComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		
-		fExternalizeButton = createTaskButton(buttonComp, "wizardPage.Externalize_Selected", new SelectionAdapter(){ //$NON-NLS-1$
-		    public void widgetSelected(SelectionEvent e) {
-		        setSelectedTasks(NLSSubstitution.EXTERNALIZED);
-		    }
-		});
-		
-		fIgnoreButton = createTaskButton(buttonComp, "wizardPage.Ignore_Selected", new SelectionAdapter(){ //$NON-NLS-1$
-		    public void widgetSelected(SelectionEvent e) {
-		        setSelectedTasks(NLSSubstitution.IGNORED);
-		    }
-		});
-		
-		fInternalizeButton = createTaskButton(buttonComp, "wizardPage.Internalize_Selected", new SelectionAdapter(){ //$NON-NLS-1$
-		    public void widgetSelected(SelectionEvent e) {
-		        setSelectedTasks(NLSSubstitution.INTERNALIZED);
-		    }
-		});
-		
-		fEditButton= createTaskButton(buttonComp, "ExternalizeWizardPage.Edit_key_and_value", new SelectionAdapter(){ //$NON-NLS-1$
-		    public void widgetSelected(SelectionEvent e) {
-		        openEditButton(fTableViewer.getSelection());
-		    }
-		});
-		
-		fRevertButton= createTaskButton(buttonComp, "wizardPage.Revert_Selected", new SelectionAdapter(){ //$NON-NLS-1$
-		    public void widgetSelected(SelectionEvent e) {
-		        revertStateOfSelection();
-		    }
+		SelectionAdapter adapter= new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleButtonPressed(e.widget);
+			}
+		};
 
-            private void revertStateOfSelection() {      
-                Set selection = getSelectedTableEntries();
-                for (Iterator iter = selection.iterator(); iter.hasNext();) {
-                    NLSSubstitution substitution = (NLSSubstitution) iter.next();
-                    substitution.revert();                                        
-                }
-                fTableViewer.refresh();
-                updateButtonStates((IStructuredSelection) fTableViewer.getSelection());
-            }
-		});
+		fExternalizeButton= createTaskButton(buttonComp, "wizardPage.Externalize_Selected", adapter); //$NON-NLS-1$
+		fIgnoreButton= createTaskButton(buttonComp, "wizardPage.Ignore_Selected", adapter); //$NON-NLS-1$
+		fInternalizeButton= createTaskButton(buttonComp, "wizardPage.Internalize_Selected", adapter); //$NON-NLS-1$
+
+		new Label(buttonComp, SWT.NONE); // separator
 		
+		fEditButton= createTaskButton(buttonComp, "ExternalizeWizardPage.Edit_key_and_value", adapter); //$NON-NLS-1$
+		fRevertButton= createTaskButton(buttonComp, "wizardPage.Revert_Selected", adapter); //$NON-NLS-1$	
+		fRenameButton= createTaskButton(buttonComp, "wizardPage.Rename_Keys", adapter); //$NON-NLS-1$
+
 		fEditButton.setEnabled(false);
+		fRenameButton.setEnabled(false);
 		buttonComp.pack();
+	}
+
+	/**
+	 * @param widget
+	 */
+	protected void handleButtonPressed(Widget widget) {
+		if (widget == fExternalizeButton) {
+			setSelectedTasks(NLSSubstitution.EXTERNALIZED);
+		} else if (widget == fIgnoreButton) {
+			setSelectedTasks(NLSSubstitution.IGNORED);
+		} else if (widget == fInternalizeButton) {
+			setSelectedTasks(NLSSubstitution.INTERNALIZED);
+		} else if (widget == fEditButton) {
+			openEditButton(fTableViewer.getSelection());
+		} else if (widget == fRevertButton) {
+			revertStateOfSelection();
+		} else if (widget == fRenameButton) {
+			openRenameDialog();
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private void openRenameDialog() {
+		IStructuredSelection sel= (IStructuredSelection) fTableViewer.getSelection();
+		List elementsToRename= getExternalizedElements(sel);
+		RenameKeysDialog dialog= new RenameKeysDialog(getShell(), elementsToRename);
+		if (dialog.open() == Window.OK) {
+			fTableViewer.refresh();
+			updateButtonStates((IStructuredSelection) fTableViewer.getSelection());
+		}
+	}
+
+	private void revertStateOfSelection() {
+		List selection= getSelectedTableEntries();
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			NLSSubstitution substitution= (NLSSubstitution) iter.next();
+			substitution.revert();
+		}
+		fTableViewer.refresh();
+		updateButtonStates((IStructuredSelection) fTableViewer.getSelection());
 	}
 	
 	private Button createTaskButton(Composite parent, String labelKey, SelectionAdapter adapter) {
-	  Button button= new Button(parent, SWT.PUSH);
-	  button.setText(NLSUIMessages.getString(labelKey)); //$NON-NLS-1$
-	  button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	  SWTUtil.setButtonDimensionHint(button);
-	  button.addSelectionListener(adapter);
-	  return button;
-	}  
-	
-	private void openEditButton(ISelection selection){
-		try{
-			Set selected= getSelectedTableEntries();
-			Assert.isTrue(selected.size() == 1);
-			NLSSubstitution substitution= (NLSSubstitution)selected.iterator().next();
-			NLSInputDialog dialog= 
-			    new NLSInputDialog(getShell(), 
-			            NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Title"),  //$NON-NLS-1$
-			            NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Label"),  //$NON-NLS-1$
-			            substitution);
+		Button button= new Button(parent, SWT.PUSH);
+		button.setText(NLSUIMessages.getString(labelKey)); //$NON-NLS-1$
+		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(button);
+		button.addSelectionListener(adapter);
+		return button;
+	}
+
+	private void openEditButton(ISelection selection) {
+		try {
+			IStructuredSelection sel= (IStructuredSelection) fTableViewer.getSelection();
+			NLSSubstitution substitution= (NLSSubstitution) sel.getFirstElement();
+			NLSInputDialog dialog= new NLSInputDialog(getShell(), NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Title"), //$NON-NLS-1$
+					NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Label"), //$NON-NLS-1$
+					substitution);
 			if (dialog.open() == Window.CANCEL)
 				return;
 			KeyValuePair kvPair= dialog.getResult();
 			substitution.setKey(kvPair.getKey());
 			substitution.setValue(kvPair.getValue());
-			fTableViewer.update(substitution, new String[] { PROPERTIES[KEY_PROP], PROPERTIES[VAL_PROP] });
+			fTableViewer.update(substitution, new String[]{PROPERTIES[KEY_PROP], PROPERTIES[VAL_PROP]});
 			validateKeys();
-		} finally{
+		} finally {
 			fTableViewer.refresh();
 			fTableViewer.getControl().setFocus();
 			fTableViewer.setSelection(selection);
 		}
 	}
-	
-	// TODO: why a set...there are no duplicate entries in selection
-	private Set getSelectedTableEntries() {
+
+	private List getSelectedTableEntries() {
 		ISelection sel= fTableViewer.getSelection();
-		if (sel instanceof IStructuredSelection) 
-			return new HashSet(((IStructuredSelection)sel).toList());
-		else		
-			return new HashSet(0);
+		if (sel instanceof IStructuredSelection)
+			return((IStructuredSelection) sel).toList();
+		else
+			return Collections.EMPTY_LIST;
 	}
-		
-	private void setSelectedTasks(int state){
-		Assert.isTrue(state == NLSSubstitution.EXTERNALIZED 
-				   || state == NLSSubstitution.IGNORED
-				   || state == NLSSubstitution.INTERNALIZED);
-		Set selected= getSelectedTableEntries();		
-		String[] props= new String[] { PROPERTIES[STATE_PROP] };
+
+	private void setSelectedTasks(int state) {
+		Assert.isTrue(state == NLSSubstitution.EXTERNALIZED || state == NLSSubstitution.IGNORED || state == NLSSubstitution.INTERNALIZED);
+		List selected= getSelectedTableEntries();
+		String[] props= new String[]{PROPERTIES[STATE_PROP]};
 		for (Iterator iter= selected.iterator(); iter.hasNext();) {
-		    NLSSubstitution substitution = (NLSSubstitution) iter.next();
+			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			substitution.setState(state);
 			if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
-			    substitution.generateKey(fSubstitutions);
+				substitution.generateKey(fSubstitutions);
 			}
 		}
-		fTableViewer.update(selected.toArray(), props);		
+		fTableViewer.update(selected.toArray(), props);
 		fTableViewer.getControl().setFocus();
 		updateButtonStates((IStructuredSelection) fTableViewer.getSelection());
 	}
-			
+
 	private void selectionChanged(SelectionChangedEvent event) {
-		ISelection s= event.getSelection();
-		if (! (s instanceof IStructuredSelection)) 
-			return;
-		IStructuredSelection selection= (IStructuredSelection) s;
-		updateButtonStates(selection);		
-		
-		updateSourceView(selection);			
+		IStructuredSelection selection= (IStructuredSelection) event.getSelection();
+		updateButtonStates(selection);
+		updateSourceView(selection);
 	}
-	
+
 	private void updateSourceView(IStructuredSelection selection) {
-        NLSSubstitution first= (NLSSubstitution) selection.getFirstElement();
-		TextRegion region= first.fNLSElement.getPosition();
+		NLSSubstitution first= (NLSSubstitution) selection.getFirstElement();
+		Region region= first.getNLSElement().getPosition();
 		fSourceViewer.setSelectedRange(region.getOffset(), region.getLength());
 		fSourceViewer.revealRange(region.getOffset(), region.getLength());
-    }
+	}
 
-    private void updateButtonStates(IStructuredSelection selection){
-	    fExternalizeButton.setEnabled(true);
-	    fIgnoreButton.setEnabled(true);
-	    fInternalizeButton.setEnabled(true);
-	    fRevertButton.setEnabled(true);
-	    
-	    if (containsOnlyElementsOfSameState(NLSSubstitution.EXTERNALIZED, selection)) {
-	        fExternalizeButton.setEnabled(false);
-	    }
-	    
-	    if (containsOnlyElementsOfSameState(NLSSubstitution.IGNORED, selection)) {
-	        fIgnoreButton.setEnabled(false);
-	    }
-	    
-	    if (containsOnlyElementsOfSameState(NLSSubstitution.INTERNALIZED, selection)) {
-	        fInternalizeButton.setEnabled(false);
-	    }
-	    
-	    if (!containsElementsWithChange(selection)) {
-	        fRevertButton.setEnabled(false);
-	    }
-	    
-	    if (selection.size() == 1){
-	        NLSSubstitution substitution= (NLSSubstitution) selection.getFirstElement();	
-	        fEditButton.setEnabled(substitution.getState() == NLSSubstitution.EXTERNALIZED);
-	        
-	    } else {	
-	        fEditButton.setEnabled(false);			
-	    }
+	private void updateButtonStates(IStructuredSelection selection) {
+		fExternalizeButton.setEnabled(true);
+		fIgnoreButton.setEnabled(true);
+		fInternalizeButton.setEnabled(true);
+		fRevertButton.setEnabled(true);
+
+		if (containsOnlyElementsOfSameState(NLSSubstitution.EXTERNALIZED, selection)) {
+			fExternalizeButton.setEnabled(false);
+		}
+
+		if (containsOnlyElementsOfSameState(NLSSubstitution.IGNORED, selection)) {
+			fIgnoreButton.setEnabled(false);
+		}
+
+		if (containsOnlyElementsOfSameState(NLSSubstitution.INTERNALIZED, selection)) {
+			fInternalizeButton.setEnabled(false);
+		}
+
+		if (!containsElementsWithChange(selection)) {
+			fRevertButton.setEnabled(false);
+		}
+		
+		fRenameButton.setEnabled(getExternalizedElements(selection).size() > 1);
+		fEditButton.setEnabled(selection.size() == 1);
 	}
 
 	private boolean containsElementsWithChange(IStructuredSelection selection) {
-	    for (Iterator iter = selection.iterator(); iter.hasNext();) {
-            NLSSubstitution	substitution = (NLSSubstitution) iter.next();
-            if (substitution.hasChanged()) {
-                return true;
-            }            
-        }
-	    return false;	    
-	}
-	
-	private boolean containsOnlyElementsOfSameState(int state, IStructuredSelection selection) {
-	    for (Iterator iter = selection.iterator(); iter.hasNext();) {
-            NLSSubstitution	substitution = (NLSSubstitution) iter.next();
-            if (substitution.getState() != state) {
-                return false;
-            }            
-        }
-	    return true;	    
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			NLSSubstitution substitution= (NLSSubstitution) iter.next();
+			if (substitution.hasPropertyFileChange() || substitution.hasSourceChange()) {
+				return true;
+			}
+		}
+		return false;
 	}
 		
-	public boolean performFinish(){
-		//when finish is pressed on the first page - we want the settings from the
-		//second page to be set to the refactoring object
-		((ExternalizeWizardPage2)getWizard().getPage(ExternalizeWizardPage2.PAGE_NAME)).updateRefactoring();
+	private List getExternalizedElements(IStructuredSelection selection) {
+		ArrayList res= new ArrayList();
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			NLSSubstitution substitution= (NLSSubstitution) iter.next();
+			if (substitution.getState() == NLSSubstitution.EXTERNALIZED && !substitution.hasStateChanged()) {
+				res.add(substitution);
+			}
+		}
+		return res;
+	}
+
+	private boolean containsOnlyElementsOfSameState(int state, IStructuredSelection selection) {
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			NLSSubstitution substitution= (NLSSubstitution) iter.next();
+			if (substitution.getState() != state) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean performFinish() {
 		return super.performFinish();
 	}
-	
-	public IWizardPage getNextPage() {		
+
+	public IWizardPage getNextPage() {
 		return super.getNextPage();
 	}
-	
-	public void dispose(){
+
+	public void dispose() {
 		//widgets will be disposed. only need to null'em		
-		fPrefixField= null;		
+		fPrefixField= null;
 		fSourceViewer= null;
-		fTable= null;		
+		fTable= null;
 		fTableViewer= null;
 		fEditButton= null;
 		super.dispose();
-	}	
+	}
 }

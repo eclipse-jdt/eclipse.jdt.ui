@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,11 +13,23 @@ package org.eclipse.jdt.internal.ui.refactoring.nls;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,22 +40,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardPage;
-
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHint;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -52,23 +54,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
-
-/**
- * validateall and the specific validate methods check the userinput when perform finish
- * is called the refactoring is updated with the given values TODO ... NLSRefactoring
- * should be such a good citizenthat it can work without settings from the ui side (e.g.
- * dont add wizardpage2)
- * 
- * initial values of the dialogfields are guessed by the refactoring and provided via the
- * nlshint class. if no hints are found the dialogsettings are used. if no dialog settings
- * are found built in defaults are used.
- */
-class ExternalizeWizardPage2 extends UserInputWizardPage {
-
-	public static final String PAGE_NAME= "NLSWizardPage2"; //$NON-NLS-1$
+public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 	private OrderedMap fErrorMap= new OrderedMap();
 
@@ -84,10 +70,15 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 
 	private boolean fCodePatternInSync;
 
-	//  private Label fSyncVisualizer;
+	private NLSRefactoring fRefactoring;
 
-	public ExternalizeWizardPage2(NLSRefactoring refactoring) {
-		super(PAGE_NAME);
+	public NLSAccessorConfigurationDialog(Shell parent, NLSRefactoring refactoring) {
+		super(parent);
+		setShellStyle(getShellStyle() | SWT.RESIZE);
+
+		fRefactoring= refactoring;
+
+		setTitle("Configure Accessor Class");
 
 		IDialogFieldListener updateListener= new IDialogFieldListener() {
 
@@ -99,67 +90,61 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		ICompilationUnit cu= refactoring.getCu();
 		IJavaProject root= cu.getJavaProject();
 
-		NLSHint hint= refactoring.getNlsHint();
-
 		fAccessorPackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.getString("wizardPage2.accessor.path"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.accessor.package"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.browse1"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.browse2"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.default_package"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.accessor.dialog.title"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.accessor.dialog.message"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.accessor.dialog.emtpyMessage"), //$NON-NLS-1$
-			cu, root, updateListener, hint.getMessageClassPackage());
+				NLSUIMessages.getString("wizardPage2.accessor.package"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.browse1"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.browse2"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.default_package"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.accessor.dialog.title"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.accessor.dialog.message"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.accessor.dialog.emtpyMessage"), //$NON-NLS-1$
+				cu, root, updateListener, refactoring.getAccessorPackage());
 
 		fAccessorClassName= createStringButtonField(NLSUIMessages.getString("wizardPage2.className"), //$NON-NLS-1$
-		        NLSUIMessages.getString("wizardPage2.browse6"), createAccessorFileBrowseAdapter()); //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.browse6"), createAccessorFileBrowseAdapter()); //$NON-NLS-1$
 		fSubstitutionPattern= createStringField(NLSUIMessages.getString("wizardPage2.substitutionPattern")); //$NON-NLS-1$
 
-		fResourceBundlePackage= new SourceFirstPackageSelectionDialogField(
-			NLSUIMessages.getString("wizardPage2.property.path"), //$NON-NLS-1$ 
-			NLSUIMessages.getString("wizardPage2.property.package"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.browse3"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.browse4"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.default_package"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.property.dialog.title"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.property.dialog.message"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.property.dialog.emptyMessage"), //$NON-NLS-1$
-			cu, root, updateListener, hint.getResourceBundlePackage());
+		fResourceBundlePackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.getString("wizardPage2.property.path"), //$NON-NLS-1$ 
+				NLSUIMessages.getString("wizardPage2.property.package"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.browse3"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.browse4"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.default_package"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.property.dialog.title"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.property.dialog.message"), //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.property.dialog.emptyMessage"), //$NON-NLS-1$
+				cu, root, updateListener, fRefactoring.getResourceBundlePackage());
 
 		fResourceBundleFile= createStringButtonField(NLSUIMessages.getString("wizardPage2.property_file_name"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.browse5"), createPropertyFileBrowseAdapter()); //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.browse5"), createPropertyFileBrowseAdapter()); //$NON-NLS-1$
 
-		initFields(refactoring, hint);
+		initFields();
 	}
 
-	private void initFields(NLSRefactoring refactoring, NLSHint hints) {
-		initAccessorClassFields(refactoring, hints);
-		String resourceBundleHint= hints.getResourceBundle();
-		fResourceBundleFile.setText(resourceBundleHint != null ? resourceBundleHint : NLSRefactoring
-			.getDefaultPropertiesFilename());
+	private void initFields() {
+		initAccessorClassFields();
+		String resourceBundleName= fRefactoring.getResourceBundleName();
+		fResourceBundleFile.setText(resourceBundleName != null ? resourceBundleName : NLSRefactoring.getDefaultPropertiesFilename());
 	}
 
-	private void initAccessorClassFields(NLSRefactoring refactoring, NLSHint hints) {
-		String accessorClassName= hints.getMessageClass();
+	private void initAccessorClassFields() {
+		String accessorClassName= fRefactoring.getAccessorClassName();
 
 		if (accessorClassName == null) {
 			accessorClassName= NLSRefactoring.DEFAULT_ACCESSOR_CLASSNAME;
 		}
 		fAccessorClassName.setText(accessorClassName);
 
-		refactoring.setAccessorClassName(accessorClassName);
-
-		fSubstitutionPattern.setText(refactoring.getDefaultSubstitutionPattern());
+		fSubstitutionPattern.setText(NLSRefactoring.getDefaultSubstitutionPattern(accessorClassName));
 	}
 
-	public void createControl(Composite ancestor) {
+	protected Control createDialogArea(Composite ancestor) {
+		Composite parent= (Composite) super.createDialogArea(ancestor);
+
 		final int nOfColumns= 4;
 
 		initializeDialogUnits(ancestor);
 
-		Composite parent= new Composite(ancestor, SWT.NONE);
-
-		GridLayout layout= new GridLayout();
+		GridLayout layout= (GridLayout) parent.getLayout();
 		layout.numColumns= nOfColumns;
 		parent.setLayout(layout);
 
@@ -170,12 +155,12 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 
 		createPropertyPart(parent, nOfColumns, convertWidthInCharsToPixels(40));
 
-		setControl(parent);
-
 		Dialog.applyDialogFont(parent);
 		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.EXTERNALIZE_WIZARD_PROPERTIES_FILE_PAGE);
 		validateAll();
+		return parent;
 	}
+
 
 	private void createAccessorPart(Composite parent, final int nOfColumns, int textWidth) {
 
@@ -190,11 +175,6 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			}
 		});
 
-		//    fSyncVisualizer = new Label(parent, SWT.NONE);
-		//    GridData gd = new GridData(GridData.FILL_BOTH);
-		//    gd.verticalSpan = 1;
-		//    fSyncVisualizer.setLayoutData(gd);
-
 		fSubstitutionPattern.doFillIntoGrid(parent, nOfColumns);
 		fSubstitutionPattern.setDialogFieldListener(new IDialogFieldListener() {
 
@@ -207,7 +187,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 
 	private void createPropertyPart(Composite parent, final int nOfColumns, final int textWidth) {
 		Separator label= new Separator(SWT.NONE);
-		((Label)label.getSeparator(parent)).setText(NLSUIMessages.getString("wizardPage2.property_location")); //$NON-NLS-1$
+		((Label) label.getSeparator(parent)).setText(NLSUIMessages.getString("wizardPage2.property_location")); //$NON-NLS-1$
 		label.doFillIntoGrid(parent, nOfColumns, 20);
 		fResourceBundlePackage.createControl(parent, nOfColumns, textWidth);
 
@@ -221,14 +201,14 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	}
 
 	private void updateSyncState() {
-		String theDefault= getNLSRefactoring().getDefaultSubstitutionPattern();
+		String theDefault= NLSRefactoring.getDefaultSubstitutionPattern(fAccessorClassName.getText());
 		String current= fSubstitutionPattern.getText();
 		fCodePatternInSync= current.equals(theDefault);
 	}
 
 	private void createLabel(Composite parent, final String text, final int N_OF_COLUMNS) {
 		Separator label= new Separator(SWT.NONE);
-		((Label)label.getSeparator(parent)).setText(text);
+		((Label) label.getSeparator(parent)).setText(text);
 		label.doFillIntoGrid(parent, N_OF_COLUMNS, 20);
 	}
 
@@ -240,13 +220,13 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		dialog.setElements(createFileListInput());
 		dialog.setFilter('*' + NLSRefactoring.PROPERTY_FILE_EXT);
 		if (dialog.open() == Window.OK) {
-			IFile selectedFile= (IFile)dialog.getFirstResult();
+			IFile selectedFile= (IFile) dialog.getFirstResult();
 			if (selectedFile != null)
 				fResourceBundleFile.setText(selectedFile.getName());
 		}
 	}
-	
-    protected void browseForAccessorClass() {
+
+	protected void browseForAccessorClass() {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider());
 		dialog.setIgnoreCase(false);
 		dialog.setTitle(NLSUIMessages.getString("wizardPage2.Accessor_Selection")); //$NON-NLS-1$
@@ -254,13 +234,13 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		dialog.setElements(createAccessorListInput());
 		dialog.setFilter(fAccessorClassName.getText());
 		if (dialog.open() == Window.OK) {
-			IType selectedType= (IType)dialog.getFirstResult();
+			IType selectedType= (IType) dialog.getFirstResult();
 			if (selectedType != null)
 				fAccessorClassName.setText(selectedType.getElementName());
 		}
 
-        
-    }
+
+	}
 
 	private Object[] createFileListInput() {
 		try {
@@ -278,11 +258,11 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage2.externalizing"), NLSUIMessages //$NON-NLS-1$
-				.getString("wizardPage2.exception")); //$NON-NLS-1$
+					.getString("wizardPage2.exception")); //$NON-NLS-1$
 			return new Object[0];
 		}
 	}
-	
+
 	private Object[] createAccessorListInput() {
 		try {
 
@@ -292,7 +272,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			List result= new ArrayList(1);
 			ICompilationUnit[] elements= fPkgFragment.getCompilationUnits();
 			for (int i= 0; i < elements.length; i++) {
-			    IType type= elements[i].findPrimaryType();
+				IType type= elements[i].findPrimaryType();
 				if ((type != null) && !type.isInterface()) {
 					result.add(type);
 				}
@@ -301,7 +281,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage2.externalizing"), NLSUIMessages //$NON-NLS-1$
-				.getString("wizardPage2.exception")); //$NON-NLS-1$
+					.getString("wizardPage2.exception")); //$NON-NLS-1$
 			return new Object[0];
 		}
 	}
@@ -309,7 +289,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	private static boolean isPropertyFile(Object o) {
 		if (!(o instanceof IFile))
 			return false;
-		IFile file= (IFile)o;
+		IFile file= (IFile) o;
 		return (NLSRefactoring.PROPERTY_FILE_EXT.equals('.' + file.getFileExtension()));
 	}
 
@@ -318,11 +298,12 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	 * update the refactoring
 	 */
 	private void validateAll() {
+		updateStatus(new StatusInfo(IStatus.INFO, "")); //$NON-NLS-1$
 		validateSubstitutionPattern();
 
 		validateAccessorClassName();
 		checkPackageFragment(fAccessorPackage, NLSUIMessages.getString("wizardPage2.accessor.package.root.invalid"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.accessor.package.invalid")); //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.accessor.package.invalid")); //$NON-NLS-1$
 
 		validatePropertyFilename();
 		validatePropertyPackage();
@@ -332,10 +313,8 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		if (fAccessorClassName != null) {
 			String className= fAccessorClassName.getText();
 
-			getNLSRefactoring().setAccessorClassName(className);
-
 			if (fCodePatternInSync == true) {
-				fSubstitutionPattern.setText(getNLSRefactoring().getSubstitutionPattern());
+				fSubstitutionPattern.setText(NLSRefactoring.getDefaultSubstitutionPattern(className));
 			} else {
 				updateSyncState();
 			}
@@ -365,7 +344,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 
 			if (!fileName.endsWith(NLSRefactoring.PROPERTY_FILE_EXT)) {
 				setInvalid(fResourceBundleFile, NLSUIMessages.getString("wizardPage2.file_name_must_end") //$NON-NLS-1$
-					+ NLSRefactoring.PROPERTY_FILE_EXT + "\"."); //$NON-NLS-1$
+						+ NLSRefactoring.PROPERTY_FILE_EXT + "\"."); //$NON-NLS-1$
 				return;
 			}
 
@@ -375,7 +354,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 
 	private void validatePropertyPackage() {
 		if (!checkPackageFragment(fResourceBundlePackage, NLSUIMessages.getString("wizardPage2.property.package.root.invalid"), //$NON-NLS-1$
-			NLSUIMessages.getString("wizardPage2.property.package.invalid"))) { //$NON-NLS-1$
+				NLSUIMessages.getString("wizardPage2.property.package.invalid"))) { //$NON-NLS-1$
 			return;
 		}
 
@@ -390,19 +369,19 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 
 		IPath pkgPath= new Path(pkgName.replace('.', IPath.SEPARATOR)).makeRelative();
 
-		IJavaProject project= getNLSRefactoring().getCu().getJavaProject();
+		IJavaProject project= fRefactoring.getCu().getJavaProject();
 		try {
 			IJavaElement element= project.findElement(pkgPath);
 			if (element == null || !element.exists()) {
 				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("wizardPage2.must_exist")); //$NON-NLS-1$
 				return;
 			}
-			IPackageFragment fPkgFragment= (IPackageFragment)element;
+			IPackageFragment fPkgFragment= (IPackageFragment) element;
 			if (!PackageBrowseAdapter.canAddPackage(fPkgFragment)) {
 				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("wizardPage2.incorrect_package")); //$NON-NLS-1$
 				return;
 			}
-			if (!PackageBrowseAdapter.canAddPackageRoot((IPackageFragmentRoot)fPkgFragment.getParent())) {
+			if (!PackageBrowseAdapter.canAddPackageRoot((IPackageFragmentRoot) fPkgFragment.getParent())) {
 				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("wizardPage2.incorrect_package")); //$NON-NLS-1$
 				return;
 			}
@@ -446,48 +425,33 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 
 	private void setValid(Object field) {
 		fErrorMap.remove(field);
-		updateErrorMessage();
 	}
 
 	private void updateErrorMessage() {
-		String msg= (String)fErrorMap.peek();
-		setPageComplete(msg == null);
-		setErrorMessage(msg);
+		String msg= (String) fErrorMap.peek();
+		updateStatus(new StatusInfo(IStatus.ERROR, msg));
 	}
 
-	private NLSRefactoring getNLSRefactoring() {
-		return (NLSRefactoring)getRefactoring();
-	}
 
-	public boolean performFinish() {
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
+	 */
+	protected void okPressed() {
 		updateRefactoring();
-		return super.performFinish();
+		super.okPressed();
 	}
 
-	public IWizardPage getNextPage() {
-		updateRefactoring();
-		return super.getNextPage();
-	}
-
-	public void dispose() {
-		// TODO why nulling them???
-		// widgets will be disposed. only need to null'em
-		fSubstitutionPattern= null;
-		fErrorMap= null;
-		fResourceBundleFile= null;
-		fResourceBundlePackage= null;
-		super.dispose();
-	}
 
 	void updateRefactoring() {
-		NLSRefactoring refac= getNLSRefactoring();
+		NLSRefactoring refactoring= fRefactoring;
 
-		refac.setPropertyFilePath(fResourceBundlePackage.getSelected().getPath().append(fResourceBundleFile.getText()));
+		refactoring.setAccessorPackage(fAccessorPackage.getSelected());
+		refactoring.setAccessorClassName(fAccessorClassName.getText());
 
-		refac.setAccessorPackage(fAccessorPackage.getSelected());
-		refac.setAccessorClassName(fAccessorClassName.getText());
+		refactoring.setResourceBundleName(fResourceBundleFile.getText());
+		refactoring.setResourceBundlePackage(fResourceBundlePackage.getSelected());
 
-		refac.setSubstitutionPattern(fSubstitutionPattern.getText());
+		refactoring.setSubstitutionPattern(fSubstitutionPattern.getText());
 	}
 
 	private StringDialogField createStringField(String label) {
@@ -511,7 +475,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			}
 		};
 	}
-	
+
 	private IStringButtonAdapter createAccessorFileBrowseAdapter() {
 		return new IStringButtonAdapter() {
 
@@ -520,4 +484,6 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			}
 		};
 	}
+
+
 }

@@ -14,17 +14,18 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 /**
  * Helper class for the nls-tests.
@@ -34,7 +35,6 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
  */
 public class NlsRefactoringTestHelper {
 
-    CodeGenerationSettings fCodeGenerationSettings;
     NullProgressMonitor fNpm;
     
     private HashMap fWorkSpaceElements = new HashMap();
@@ -43,7 +43,6 @@ public class NlsRefactoringTestHelper {
     public NlsRefactoringTestHelper(IJavaProject javaProject) throws Exception {
         fJavaProject = javaProject;
         fNpm = new NullProgressMonitor();
-        fCodeGenerationSettings = new CodeGenerationSettings();
         fWorkSpaceElements = new HashMap();
         setupTestSpace();
     }

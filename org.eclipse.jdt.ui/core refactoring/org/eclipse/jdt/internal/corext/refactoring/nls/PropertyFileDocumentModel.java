@@ -1,27 +1,30 @@
-/*****************************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others. All rights reserved. This program
- * and the accompanying materials are made available under the terms of the Common Public
- * License v1.0 which accompanies this distribution, and is available at
+/*******************************************************************************
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
  * 
- * Contributors: IBM Corporation - initial API and implementation
- ****************************************************************************************/
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 
-public class PropertyFileDocumentModell {
+import org.eclipse.jface.text.IDocument;
+
+public class PropertyFileDocumentModel {
 
     private List fKeyValuePairs;
 
-    public PropertyFileDocumentModell(IDocument document) {
+    public PropertyFileDocumentModel(IDocument document) {
         parsePropertyDocument(document);
     }
 
@@ -132,7 +135,7 @@ public class PropertyFileDocumentModell {
 
     private boolean isCommentOrWhiteSpace(String line) {
         line = line.trim();
-        return (line.length() == 0) || line.startsWith("!") || line.startsWith("#"); //$NON-NLS-1$
+        return (line.length() == 0) || line.startsWith("!") || line.startsWith("#"); //$NON-NLS-1$ //$NON-NLS-2$
     }    
     
     private class KeyValuePairModell extends KeyValuePair implements Comparable {        
@@ -176,10 +179,10 @@ public class PropertyFileDocumentModell {
               char c = string.charAt(i);
               switch (c) {
               case '!':
-                sb.append("\\!");
+                sb.append("\\!"); //$NON-NLS-1$
                 break;
               case '#':
-                sb.append("\\#");
+                sb.append("\\#"); //$NON-NLS-1$
                 break;
               default:
                 sb.append(c);

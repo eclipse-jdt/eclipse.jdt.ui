@@ -24,47 +24,47 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class NlsRefactoringCheckInitialConditionsTest extends TestCase {
 
-    private NlsRefactoringTestHelper fHelper;
-    private IJavaProject javaProject;    
+	private NlsRefactoringTestHelper fHelper;
+	private IJavaProject javaProject;
 
-    public NlsRefactoringCheckInitialConditionsTest(String name) {
-        super(name);
-    }
-    
-    public static Test allTests() {
+	public NlsRefactoringCheckInitialConditionsTest(String name) {
+		super(name);
+	}
+
+	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(NlsRefactoringCheckInitialConditionsTest.class));
 	}
-	
+
 	public static Test suite() {
-		return allTests();		
+		return allTests();
 	}
 
-    protected void setUp() throws Exception {
-        javaProject = ProjectTestSetup.getProject();        
-        fHelper = new NlsRefactoringTestHelper(javaProject);        
-    }
+	protected void setUp() throws Exception {
+		javaProject= ProjectTestSetup.getProject();
+		fHelper= new NlsRefactoringTestHelper(javaProject);
+	}
 
-    protected void tearDown() throws Exception {        
-        JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());        
-    }
+	protected void tearDown() throws Exception {
+		JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
+	}
 
-    protected String getRefactoringPath() {
-        return "nls/"; //$NON-NLS-1$
-    }    
+	protected String getRefactoringPath() {
+		return "nls/"; //$NON-NLS-1$
+	}
 
-    public void testActivationWithoutStrings() throws Exception {
-        ICompilationUnit cu = fHelper.getCu("/TestSetupProject/src1/p/WithoutStrings.java"); //$NON-NLS-1$
-        Refactoring refac = NLSRefactoring.create(cu, fHelper.fCodeGenerationSettings);
+	public void testActivationWithoutStrings() throws Exception {
+		ICompilationUnit cu= fHelper.getCu("/TestSetupProject/src1/p/WithoutStrings.java"); //$NON-NLS-1$
+		Refactoring refac= NLSRefactoring.create(cu);
 
-        RefactoringStatus res = refac.checkInitialConditions(fHelper.fNpm);
-        assertFalse("no nls needed", res.isOK()); //$NON-NLS-1$
-    }
+		RefactoringStatus res= refac.checkInitialConditions(fHelper.fNpm);
+		assertFalse("no nls needed", res.isOK()); //$NON-NLS-1$
+	}
 
-    public void testActivationWithStrings() throws Exception {
-        ICompilationUnit cu = fHelper.getCu("/TestSetupProject/src1/p/WithStrings.java"); //$NON-NLS-1$
-        Refactoring refac = NLSRefactoring.create(cu, fHelper.fCodeGenerationSettings);
+	public void testActivationWithStrings() throws Exception {
+		ICompilationUnit cu= fHelper.getCu("/TestSetupProject/src1/p/WithStrings.java"); //$NON-NLS-1$
+		Refactoring refac= NLSRefactoring.create(cu);
 
-        RefactoringStatus res = refac.checkInitialConditions(fHelper.fNpm);
-        assertTrue("nls needed", res.isOK()); //$NON-NLS-1$
-    }
+		RefactoringStatus res= refac.checkInitialConditions(fHelper.fNpm);
+		assertTrue("nls needed", res.isOK()); //$NON-NLS-1$
+	}
 }

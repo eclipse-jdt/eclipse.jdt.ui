@@ -30,189 +30,151 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 
-    private IPath fPropertyFilePath;
-    private IPackageFragment fAccessorPackage;
-    private String fAccessorClassName;
-    private String fSubstitutionPattern;
-    private NlsRefactoringTestHelper fHelper;
-    private IJavaProject javaProject;
+	private IPath fPropertyFilePath;
+	private IPackageFragment fAccessorPackage;
+	private String fAccessorClassName;
+	private String fSubstitutionPattern;
+	private NlsRefactoringTestHelper fHelper;
+	private IJavaProject javaProject;
+	private IPackageFragment fResourceBundlePackage;
+	private String fResourceBundleName;
 
-    public NlsRefactoringCheckFinalConditionsTest(String name) {
-        super(name);
-    }
-    
-    public static Test allTests() {
+	public NlsRefactoringCheckFinalConditionsTest(String name) {
+		super(name);
+	}
+
+	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(NlsRefactoringCheckFinalConditionsTest.class));
 	}
-	
+
 	public static Test suite() {
-		return allTests();		
+		return allTests();
 	}
 
-    protected void setUp() throws Exception {
-        javaProject = ProjectTestSetup.getProject();        
-        fHelper = new NlsRefactoringTestHelper(javaProject);
-    }
+	protected void setUp() throws Exception {
+		javaProject= ProjectTestSetup.getProject();
+		fHelper= new NlsRefactoringTestHelper(javaProject);
+	}
 
-    protected void tearDown() throws Exception {        
-        JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());        
-    }
+	protected void tearDown() throws Exception {
+		JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
+	}
 
-    public void testCheckInput() throws Exception {
-        ICompilationUnit cu = fHelper.getCu("/TestSetupProject/src1/p/WithStrings.java"); //$NON-NLS-1$
-        initDefaultValues(cu);
+	public void testCheckInputWithoutExistingPropertiesFile() throws Exception {
+		ICompilationUnit cu= fHelper.getCu("/TestSetupProject/src1/p/WithStrings.java");
+		IFile propertyFile= fHelper.getFile("/TestSetupProject/src2/p/test.properties");
+		propertyFile.delete(false, fHelper.fNpm);
+		initDefaultValues(cu);
 
-        // add parameters parameter by parameter
-        NLSRefactoring refac = NLSRefactoring.create(cu, fHelper.fCodeGenerationSettings);
-        NLSSubstitution[] subs = refac.getSubstitutions();
-        NLSSubstitution.setPrefix("");
-        for (int i = 0; i < subs.length; i++) {
-            subs[i].setState(NLSSubstitution.EXTERNALIZED);
-            subs[i].generateKey(subs);
-        }       
-        
-        check(refac);
+		RefactoringStatus res= createCheckInputStatus(cu);
 
-        refac.setAccessorPackage(fAccessorPackage);
-        check(refac);
+		assertFalse("should info about properties", res.isOK());
 
-        refac.setPropertyFilePath(fPropertyFilePath);
-        check(refac);
+		assertEquals("one info", 1, res.getEntries().length);
+		RefactoringStatusEntry help= res.getEntryAt(0);
+		assertEquals("info", RefactoringStatus.INFO, help.getSeverity());
+		assertEquals(NLSMessages.getFormattedString("NLSrefactoring.will_be_created", propertyFile.getFullPath().toString()), help.getMessage());
+	}
 
-        refac.setAccessorClassName(fAccessorClassName);
-        check(refac);
+	/*
+	 * no substitutions -> nothing to do
+	 */
+	public void testCheckInputWithNoSubstitutions() throws Exception {
+		ICompilationUnit cu= fHelper.getCu("/TestSetupProject/src1/p/WithoutStrings.java"); //$NON-NLS-1$
+		initDefaultValues(cu);
 
-        refac.setSubstitutionPattern(fSubstitutionPattern);
-        refac.setSubstitutionPattern("test${key}"); //$NON-NLS-1$
+		checkNothingToDo(createCheckInputStatus(cu));
+	}
 
-        RefactoringStatus res = refac.checkFinalConditions(fHelper.fNpm);
-        assertTrue("all parameters specified but checkInput not ok", res.isOK()); //$NON-NLS-1$
-    }
+	/*
+	 * substitution checks
+	 */
+	public void testCheckInputWithSubstitutionPatterns() throws Exception {
+		ICompilationUnit cu= fHelper.getCu("/TestSetupProject/src1/p/WithStrings.java"); //$NON-NLS-1$
+		initDefaultValues(cu);
 
-    public void testCheckInputWithoutExistingPropertiesFile() throws Exception {
-        ICompilationUnit cu = fHelper.getCu("/TestSetupProject/src1/p/WithStrings.java"); //$NON-NLS-1$
-        IFile propertyFile = fHelper.getFile("/TestSetupProject/src2/p/test.properties"); //$NON-NLS-1$
-        propertyFile.delete(false, fHelper.fNpm);
-        initDefaultValues(cu);
+		fSubstitutionPattern= ""; //$NON-NLS-1$
 
-        RefactoringStatus res = createCheckInputStatus(cu);
+		RefactoringStatus res= createCheckInputStatus(cu);
 
-        assertFalse("should info about properties", res.isOK()); //$NON-NLS-1$
+		RefactoringStatusEntry[] results= res.getEntries();
 
-        assertEquals("one info", 1, res.getEntries().length); //$NON-NLS-1$
-        RefactoringStatusEntry help = res.getEntryAt(0);
-        assertEquals("info", RefactoringStatus.INFO, help.getSeverity()); //$NON-NLS-1$
-        assertEquals(NLSMessages.getFormattedString("NLSrefactoring.will_be_created", //$NON-NLS-1$
-                                                    propertyFile.getFullPath().toString()), help.getMessage());
-    }
+		assertEquals("substitution pattern must be given", 2, results.length); //$NON-NLS-1$
+		assertEquals("first is fatal", RefactoringStatus.ERROR, results[0].getSeverity()); //$NON-NLS-1$
+		assertEquals("right fatal message", //$NON-NLS-1$
+				NLSMessages.getString("NLSrefactoring.pattern_empty"), //$NON-NLS-1$
+				results[0].getMessage());
 
-    /*
-     * no substitutions -> nothing to do
-     */
-    public void testCheckInputWithNoSubstitutions() throws Exception {
-        ICompilationUnit cu = fHelper.getCu("/TestSetupProject/src1/p/WithoutStrings.java"); //$NON-NLS-1$
-        initDefaultValues(cu);
+		assertEquals("warning no key given", RefactoringStatus.WARNING, //$NON-NLS-1$
+				results[1].getSeverity());
+		assertEquals("right warning message", //$NON-NLS-1$
+				NLSMessages.getFormattedString("NLSrefactoring.pattern_does_not_contain", //$NON-NLS-1$
+						"${key}"), results[1].getMessage()); //$NON-NLS-1$
 
-        checkNothingToDo(createCheckInputStatus(cu));
-    }
+		fSubstitutionPattern= "blabla${key}"; //$NON-NLS-1$
+		res= createCheckInputStatus(cu);
+		assertTrue("substitution pattern ok", res.isOK()); //$NON-NLS-1$
 
-    /*
-     * substitution checks
-     */
-    public void testCheckInputWithSubstitutionPatterns() throws Exception {
-        ICompilationUnit cu = fHelper.getCu("/TestSetupProject/src1/p/WithStrings.java"); //$NON-NLS-1$
-        initDefaultValues(cu);
+		fSubstitutionPattern= "${key}blabla${key}"; //$NON-NLS-1$
+		res= createCheckInputStatus(cu);
+		assertFalse("substitution pattern ko", res.isOK()); //$NON-NLS-1$
 
-        fSubstitutionPattern = ""; //$NON-NLS-1$
+		results= res.getEntries();
+		assertEquals("one warning", 1, results.length); //$NON-NLS-1$
+		assertEquals("warning", RefactoringStatus.WARNING, results[0].getSeverity()); //$NON-NLS-1$
+		assertEquals("warning message", //$NON-NLS-1$
+				NLSMessages.getFormattedString("NLSrefactoring.Only_the_first_occurrence_of", //$NON-NLS-1$
+						"${key}"), results[0].getMessage()); //$NON-NLS-1$
 
-        RefactoringStatus res = createCheckInputStatus(cu);
+		// check for duplicate keys????
+		// check for keys already defined
+		// check for keys
+	}
 
-        RefactoringStatusEntry[] results = res.getEntries();
+	private RefactoringStatus createCheckInputStatus(ICompilationUnit cu) throws CoreException {
+		NLSRefactoring refac= prepareRefac(cu);
+		RefactoringStatus res= refac.checkFinalConditions(fHelper.fNpm);
+		return res;
+	}
 
-        assertEquals("substitution pattern must be given", 2, results.length); //$NON-NLS-1$
-        assertEquals("first is fatal", RefactoringStatus.ERROR, results[0].getSeverity()); //$NON-NLS-1$
-        assertEquals("right fatal message", //$NON-NLS-1$
-                     NLSMessages.getString("NLSrefactoring.pattern_empty"), //$NON-NLS-1$
-                     results[0].getMessage());
+	private void initDefaultValues(ICompilationUnit cu) {
+		fPropertyFilePath= fHelper.getFile("/TestSetupProject/src2/p/test.properties").getFullPath(); //$NON-NLS-1$
+		fResourceBundlePackage= fHelper.getPackageFragment("/TestSetupProject/src2/p");
+		fResourceBundleName= "test.properties";
+		fAccessorPackage= fHelper.getPackageFragment("/TestSetupProject/src1/p"); //$NON-NLS-1$
+		fAccessorClassName= "Help"; //$NON-NLS-1$
+		fSubstitutionPattern= "${key}"; //$NON-NLS-1$
+	}
 
-        assertEquals("warning no key given", RefactoringStatus.WARNING, //$NON-NLS-1$
-                     results[1].getSeverity());
-        assertEquals("right warning message", //$NON-NLS-1$
-                     NLSMessages.getFormattedString("NLSrefactoring.pattern_does_not_contain", //$NON-NLS-1$
-                                                    "${key}"), results[1].getMessage()); //$NON-NLS-1$
+	private NLSRefactoring prepareRefac(ICompilationUnit cu) {
+		NLSRefactoring refac= NLSRefactoring.create(cu);
+		NLSSubstitution[] subs= refac.getSubstitutions();
+		NLSSubstitution.setPrefix("");
+		for (int i= 0; i < subs.length; i++) {
+			subs[i].setState(NLSSubstitution.EXTERNALIZED);
+			subs[i].generateKey(subs);
+		}
+		fillInValues(refac);
+		return refac;
+	}
 
-        fSubstitutionPattern = "blabla${key}"; //$NON-NLS-1$
-        res = createCheckInputStatus(cu);
-        assertTrue("substitution pattern ok", res.isOK()); //$NON-NLS-1$
+	private void checkNothingToDo(RefactoringStatus status) {
+		assertEquals("fatal error expected", 1, status.getEntries().length); //$NON-NLS-1$
 
-        fSubstitutionPattern = "${key}blabla${key}"; //$NON-NLS-1$
-        res = createCheckInputStatus(cu);
-        assertFalse("substitution pattern ko", res.isOK()); //$NON-NLS-1$
+		RefactoringStatusEntry fatalError= status.getEntryAt(0);
+		assertEquals("fatalerror", RefactoringStatus.FATAL, fatalError.getSeverity()); //$NON-NLS-1$
+		assertEquals("errormessage", //$NON-NLS-1$
+				NLSMessages.getString("NLSrefactoring.nothing_to_do"), //$NON-NLS-1$
+				fatalError.getMessage());
+	}
 
-        results = res.getEntries();
-        assertEquals("one warning", 1, results.length); //$NON-NLS-1$
-        assertEquals("warning", RefactoringStatus.WARNING, results[0].getSeverity()); //$NON-NLS-1$
-        assertEquals("warning message", //$NON-NLS-1$
-                     NLSMessages.getFormattedString("NLSrefactoring.Only_the_first_occurrence_of", //$NON-NLS-1$
-                                                    "${key}"), results[0].getMessage()); //$NON-NLS-1$
-
-        // check for duplicate keys????
-        // check for keys already defined
-        // check for keys
-    }
-
-    private RefactoringStatus createCheckInputStatus(ICompilationUnit cu)
-            throws CoreException {
-        NLSRefactoring refac = prepareRefac(cu);
-        RefactoringStatus res = refac.checkFinalConditions(fHelper.fNpm);
-        return res;
-    }
-
-    private void initDefaultValues(ICompilationUnit cu) {
-        fPropertyFilePath = fHelper.getFile("/TestSetupProject/src2/p/test.properties").getFullPath(); //$NON-NLS-1$
-        fAccessorPackage = fHelper.getPackageFragment("/TestSetupProject/src1/p"); //$NON-NLS-1$
-        fAccessorClassName = "Help"; //$NON-NLS-1$
-        fSubstitutionPattern = "${key}"; //$NON-NLS-1$
-    }
-
-    private void check(NLSRefactoring refac) throws Exception {
-        try {
-            refac.checkFinalConditions(fHelper.fNpm);
-            fail("not all parameters set - should throw exception"); //$NON-NLS-1$
-        } catch (Exception e) {
-            // ugly hack ... can break everytime!
-            assertEquals("org.eclipse.jdt.internal.corext.Assert$AssertionFailedException", //$NON-NLS-1$
-                         e.getClass().getName());
-        }
-    }
-
-    private NLSRefactoring prepareRefac(ICompilationUnit cu) {
-        NLSRefactoring refac = NLSRefactoring.create(cu, fHelper.fCodeGenerationSettings);
-        NLSSubstitution[] subs = refac.getSubstitutions();
-        NLSSubstitution.setPrefix("");
-        for (int i = 0; i < subs.length; i++) {
-            subs[i].setState(NLSSubstitution.EXTERNALIZED);
-            subs[i].generateKey(subs);
-        }  
-        fillInValues(refac);
-        return refac;
-    }
-
-    private void checkNothingToDo(RefactoringStatus status) {
-        assertEquals("fatal error expected", 1, status.getEntries().length); //$NON-NLS-1$
-
-        RefactoringStatusEntry fatalError = status.getEntryAt(0);
-        assertEquals("fatalerror", RefactoringStatus.FATAL, fatalError.getSeverity()); //$NON-NLS-1$
-        assertEquals("errormessage", //$NON-NLS-1$
-                     NLSMessages.getString("NLSrefactoring.nothing_to_do"), //$NON-NLS-1$
-                     fatalError.getMessage());
-    }
-
-    private void fillInValues(NLSRefactoring refac) {
-        refac.setAccessorPackage(fAccessorPackage);
-        refac.setPropertyFilePath(fPropertyFilePath);
-        refac.setAccessorClassName(fAccessorClassName);
-        refac.setSubstitutionPattern(fSubstitutionPattern);
-    }
+	private void fillInValues(NLSRefactoring refac) {
+		refac.setAccessorPackage(fAccessorPackage);
+		refac.setPropertyFilePath(fPropertyFilePath);
+		refac.setResourceBundleName(fResourceBundleName);
+		refac.setResourceBundlePackage(fResourceBundlePackage);
+		refac.setAccessorClassName(fAccessorClassName);
+		refac.setSubstitutionPattern(fSubstitutionPattern);
+	}
 
 }

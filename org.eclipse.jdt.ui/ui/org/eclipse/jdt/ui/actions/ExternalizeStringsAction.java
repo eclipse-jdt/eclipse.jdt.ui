@@ -138,7 +138,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	}
 	
 	private static NLSRefactoring createNewRefactoringInstance(ICompilationUnit cu) {
-		return NLSRefactoring.create(cu, JavaPreferencesSettings.getCodeGenerationSettings());
+		return NLSRefactoring.create(cu);
 	}
 	
 	static void openExternalizeStringsWizard(Shell parentShell, ICompilationUnit unit) throws JavaModelException {

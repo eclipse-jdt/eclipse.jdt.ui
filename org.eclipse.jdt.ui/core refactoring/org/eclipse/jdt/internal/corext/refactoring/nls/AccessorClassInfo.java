@@ -13,15 +13,23 @@ import org.eclipse.jface.text.Region;
 
 public class AccessorClassInfo {
     
-    String fName;
-    Region fRegion;
+    private String fName;
+    private Region fRegion;
     
     public AccessorClassInfo(String name, Region accessorRegion) {
         super();
         fName = name;
         fRegion = accessorRegion;
     }
-    
+
+	public String getName() {
+		return fName;
+	}
+
+	public Region getRegion() {
+		return fRegion;
+	}
+	
     public boolean equals(Object obj) {
         if (obj instanceof AccessorClassInfo) {
             AccessorClassInfo cmp = (AccessorClassInfo) obj;

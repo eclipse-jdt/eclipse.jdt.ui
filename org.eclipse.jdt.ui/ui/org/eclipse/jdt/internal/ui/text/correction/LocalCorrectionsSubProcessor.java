@@ -428,7 +428,7 @@ public class LocalCorrectionsSubProcessor {
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 			public void apply(IDocument document) {
 				try {
-					NLSRefactoring refactoring= NLSRefactoring.create(cu, JavaPreferencesSettings.getCodeGenerationSettings());
+					NLSRefactoring refactoring= NLSRefactoring.create(cu);
 					if (refactoring == null)
 						return;
 					ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
