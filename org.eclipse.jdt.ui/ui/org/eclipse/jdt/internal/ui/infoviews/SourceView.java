@@ -120,6 +120,9 @@ public class SourceView extends AbstractInfoView {
 			return false;
 		}
 		
+		if (source == null)
+			return false;
+			
 		source= removeLeadingComments(source);
 		String delim= null;
 
