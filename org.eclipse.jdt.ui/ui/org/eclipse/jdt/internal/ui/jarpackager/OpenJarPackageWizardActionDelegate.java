@@ -4,15 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.IOException;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.wizard.WizardDialog;
-
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import java.io.IOException;import org.eclipse.core.runtime.CoreException;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.IAction;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.wizard.WizardDialog;import org.xml.sax.SAXException;
 
 /**
  * This action delegate opens the JAR Package Wizard and initializes
@@ -29,19 +21,22 @@ public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate
 	public void run(IAction action) {
 		Shell parent= getShell();
 		JarPackage jarPackage= null;
+		String errorDetail= null;
 		try {
 			jarPackage= readJarPackage(getDescriptionFile(getSelection()));			
 		} catch (IOException ex) {
-			ExceptionHandler.handle(ex, parent, "Open JAR Packager Error", "Reading JAR package description from file failed");
-			return;
+			errorDetail= ex.getMessage();
 		} catch (CoreException ex) {
-			ExceptionHandler.handle(ex, parent, "Open JAR Packager Error", "Reading JAR package description from file failed");
+			errorDetail= ex.getMessage();
+		} catch (SAXException ex) {
+			errorDetail= "Bad XML format: " + ex.getMessage();
+		}
+		// Handle exceptions
+		if (jarPackage == null) {
+			MessageDialog.openError(parent, "Open JAR Packager Error", "Reading JAR package description from file failed.\n" + errorDetail);
 			return;
 		}
-		org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("show dialog");
-		if (jarPackage == null)
-			return;
-			
+
 		JarPackageWizard wizard= new JarPackageWizard();
 		wizard.init(getWorkbench(), jarPackage);
 		WizardDialog dialog= new WizardDialog(parent, wizard);

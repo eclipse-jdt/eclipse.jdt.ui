@@ -4,31 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.lang.ClassNotFoundException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;import java.io.IOException;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import java.io.IOException;import java.util.Iterator;import org.eclipse.core.resources.IFile;import org.eclipse.core.runtime.CoreException;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.IAction;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.IWorkbenchWindowActionDelegate;import org.xml.sax.SAXException;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * This abstract action delegate offers base functionality used by
@@ -90,7 +66,7 @@ public abstract class JarPackageActionDelegate implements IWorkbenchWindowAction
 	/**
 	 * Reads the JAR package spec from file.
 	 */
-	protected JarPackage readJarPackage(IFile description) throws CoreException, IOException {
+	protected JarPackage readJarPackage(IFile description) throws CoreException, IOException, SAXException {
 		Assert.isLegal(description.isAccessible());
 		Assert.isNotNull(description.getFileExtension());
 		Assert.isLegal(description.getFileExtension().equals(JarPackage.DESCRIPTION_EXTENSION));
@@ -102,8 +78,8 @@ public abstract class JarPackageActionDelegate implements IWorkbenchWindowAction
 		} finally {
 			if (reader != null)
 				reader.close();
-			return jarPackage;
 		}
+		return jarPackage;
 	}
 
 	protected IWorkbench getWorkbench() {

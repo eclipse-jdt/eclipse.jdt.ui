@@ -52,7 +52,7 @@ public class JarPackageReader extends Object {
 		fInputStream.close();
 	}
 
-	public JarPackage readXML() throws IOException {
+	public JarPackage readXML() throws IOException, SAXException {
 		Element xmlJarDesc= null;
 		JarPackage jarPackage= new JarPackage();
 	  	DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
@@ -60,17 +60,12 @@ public class JarPackageReader extends Object {
 		DocumentBuilder parser= null;
 		try {
 			parser= factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			throw new IOException(BAD_FORMAT);
-		}
-		try {			
-			xmlJarDesc= parser.parse(new InputSource(fInputStream)).getDocumentElement();
-		} catch (SAXException e) {
-			throw new IOException(BAD_FORMAT);
-		}
-		finally {
+		} catch (ParserConfigurationException ex) {
+			throw new IOException(ex.getMessage());
+		} finally {
 			// Note: Above code is ok since clients are responsible to close the stream
 		}
+		xmlJarDesc= parser.parse(new InputSource(fInputStream)).getDocumentElement();
 		if (!xmlJarDesc.getNodeName().equals("jardesc")) {
 			throw new IOException(BAD_FORMAT);
 		}
