@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.Position;
@@ -29,13 +28,9 @@ import org.eclipse.jface.text.source.IAnnotationModelExtension;
 
 import org.eclipse.ui.PartInitException;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -45,10 +40,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
@@ -101,39 +93,26 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		public void open() {
 			boolean hasLogEntry= false;
 			CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(fJavaElement, ASTProvider.WAIT_ACTIVE_ONLY, null);
-			ASTNode node= null;
-			if (ast != null)
-				node= ast.findDeclaringNode(fAstNodeKey);
-			if (node instanceof MethodDeclaration) {
-				try {
-					IMethodBinding methodBinding= ((MethodDeclaration)node).resolveBinding();
-					IMethodBinding definingMethodBinding= Bindings.findMethodDefininition(methodBinding, true);
-					if (definingMethodBinding != null) {
-						String definingTypeQualifiedName= definingMethodBinding.getDeclaringClass().getQualifiedName();
-						IType definingType= null;
-						IType type= getType(methodBinding);
-						if (type != null) {
-							ITypeHierarchy th= SuperTypeHierarchyCache.getTypeHierarchy(type);
-							IType[] superTypes= th.getAllSupertypes(type);
-							definingType= findType(superTypes, definingTypeQualifiedName);
-						} else {
-							definingType= JavaModelUtil.findType(fJavaElement.getJavaProject(), definingTypeQualifiedName);
-						}
-							
-						if (definingType != null) {
-							IMethod definingMethod= Bindings.findMethod(definingMethodBinding, definingType);
+			if (ast != null) {
+				ASTNode node= ast.findDeclaringNode(fAstNodeKey);
+				if (node instanceof MethodDeclaration) {
+					try {
+						IMethodBinding methodBinding= ((MethodDeclaration)node).resolveBinding();
+						IMethodBinding definingMethodBinding= Bindings.findMethodDefininition(methodBinding, true);
+						if (definingMethodBinding != null) {
+							IJavaElement definingMethod= definingMethodBinding.getJavaElement();
 							if (definingMethod != null) {
 								OpenActionUtil.open(definingMethod, true);
 								return;
 							}
 						}
+					} catch (JavaModelException ex) {
+						JavaPlugin.log(ex.getStatus());
+						hasLogEntry= true;
+					} catch (PartInitException ex) {
+						JavaPlugin.log(ex.getStatus());
+						hasLogEntry= true;
 					}
-				} catch (JavaModelException ex) {
-					JavaPlugin.log(ex.getStatus());
-					hasLogEntry= true;
-				} catch (PartInitException ex) {
-					JavaPlugin.log(ex.getStatus());
-					hasLogEntry= true;
 				}
 			}
 			String title= JavaEditorMessages.getString("OverrideIndicatorManager.open.error.title"); //$NON-NLS-1$
@@ -143,33 +122,6 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 			else
 				message= JavaEditorMessages.getString("OverrideIndicatorManager.open.error.message"); //$NON-NLS-1$
 			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message);
-		}
-		
-		private IType getType(IMethodBinding methodBinding) throws JavaModelException {
-			if (methodBinding == null)
-				return null;
-			
-			int type= fJavaElement.getElementType();
-			
-			IType[] types= null;
-			if (type == IJavaElement.COMPILATION_UNIT)
-				types= ((ICompilationUnit)fJavaElement).getAllTypes();
-			else if (type == IJavaElement.CLASS_FILE)
-				types= new IType[] { ((IClassFile)fJavaElement).getType() };
-			
-			return findType(types, methodBinding.getDeclaringClass().getQualifiedName());
-		}
-		
-		private IType findType(IType[] types, String fullyQualifiedName) {
-			if (types == null)
-				return null;
-			
-			for (int i= 0; i < types.length; i++) {
-				IType type= types[i];
-				if (JavaModelUtil.getFullyQualifiedName(type).equals(fullyQualifiedName))
-					return type;
-			}
-			return null;
 		}
 	}
 	
