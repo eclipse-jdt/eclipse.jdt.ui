@@ -242,7 +242,7 @@ public class IndentAction extends TextEditorAction {
 					to++;
 				indent= command.text.substring(1, to);
 				
-			} else if (partition.getOffset() == offset && type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
+			} else if (!fIsTabAction && partition.getOffset() == offset && type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
 				
 				// line comment starting at position 0 -> indent inside
 				int slashes= 2;
@@ -253,7 +253,7 @@ public class IndentAction extends TextEditorAction {
 				
 				StringBuffer computed= indenter.computeIndentation(offset);
 				int tabSize= JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
-				while (slashes > 0) {
+				while (slashes > 0 && computed.length() > 0) {
 					char c= computed.charAt(0);
 					if (c == '\t')
 						if (slashes > tabSize)
