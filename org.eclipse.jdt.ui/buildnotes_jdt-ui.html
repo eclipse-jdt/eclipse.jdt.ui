@@ -1,10 +1,7 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
-<html>
-<head>
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en"><html><head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
-   <title>Java Tooling Release Notes</title>
-</head>
+   <meta name="GENERATOR" content="Microsoft FrontPage 4.0"><title>Java Tooling Release Notes</title></head>
+
 <body>
 
 <h1>
@@ -13,7 +10,7 @@ Java Development Tooling UI</h1>
 Eclipse Build Input April 16th 2002
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F04%2F09&chfieldto=2002%2F04%2F12&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F04%2F09&amp;chfieldto=2002%2F04%2F12&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between ????.
 
 
@@ -21,17 +18,45 @@ here</a> to see PRs which have been marked as RESOLVED or CLOSED between ????.
 What's new in this drop</h2>
 
 
-<p>
-JUnit</p>
+
 <ul>
-  <li>the results view provides rerun button to rerun the last test.</li>
-  <li>a new preference to show the results view on errors and failures only. If
+  <li>
+JUnit:</li>
+  <ul>
+    <li>the results view provides rerun button to rerun the last test.</li>
+  </ul>
+</ul>
+<ul>
+
+  
+  <ul>
+    <li>a new preference to show the results view on errors and failures only. If
     the preference is on, then the progress is shown in the fast view icon
     directly and in the case of errors or failures the view is shown. This
     option works best when the JUnit results view is docked as a fast view.
     Since test runs are successful most of the time we got the feedback that it
     is too invasive to always pop-up the results view.</li>
+  </ul>
+
+
 </ul>
+<ul>
+  <li>Search and Java Tooling no longer use its own implementation of working
+sets but take advantage of the workbench working set support. As a consequence
+you will have to redefine your existing working sets. There is also a slight
+change in the UI: The Packages explorer no longer offers an individual working
+set filter but uses the one set on the window. <br>
+To set a working set filter on a window: <br>
+- enable the working set feature if not yet done: <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Window -&gt; Preferences...
+-&gt; Workbench -&gt; Work In Progress -&gt; Enable workbench working sets
+    <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - restart Eclipse <br>
+- set a working set filter: Window -&gt; Select Working Set... <br>
+    <br>
+  </li>
+</ul>
+
 
 <h1>
 Eclipse Platform Build Notes&nbsp;<br>
@@ -44,7 +69,7 @@ Java Development Tooling UI</h1>
 Eclipse Build Input April 9th 2002
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F04%2F09&chfieldto=2002%2F04%2F12&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F04%2F09&amp;chfieldto=2002%2F04%2F12&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/04/09 and 2002/04/11.
 
@@ -55,10 +80,10 @@ Implemented the new menu proposal. During start up you get a message that
 the refactoring action set is missing. This message can be ignored. If
 the JDT perspectives (Java, Java Browsing, Type Hierarchy) are missing
 one of the Source, Refactor and Navigate menu in the menu bar you have
-to switch them on by hand. To do so go to Window->Customize Perspective->Actions
+to switch them on by hand. To do so go to Window-&gt;Customize Perspective-&gt;Actions
 and check the Java action set.
 <p>Some general comments regarding the new menu structure:
-<ul>
+</p><ul>
 <li>
 the Edit menu contains actions only applicable to Java files (source and
 class files).</li>
@@ -152,7 +177,7 @@ move compilation unit</li>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F04%2F02&chfieldto=2002%2F04%2F09&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F04%2F02&amp;chfieldto=2002%2F04%2F09&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/04/02 and 2002/04/09.
 <h1>
@@ -173,7 +198,7 @@ Deleting a field deletes its getter/setter (after prompting)</li>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F03%2F26&chfieldto=2002%2F04%2F02&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F03%2F26&amp;chfieldto=2002%2F04%2F02&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/03/26 and 2002/04/02.
 <h1>
@@ -185,8 +210,8 @@ What's new in this drop</h2>
 
 <ul>
 <li>
-The Java Browsing preferences have been moved from 'Java -> Work In Progress
--> Browsing' to 'Java -> Browsing'.</li>
+The Java Browsing preferences have been moved from 'Java -&gt; Work In Progress
+-&gt; Browsing' to 'Java -&gt; Browsing'.</li>
 
 <li>
 The package name compression preference has been moved from the 'Work In
@@ -200,7 +225,7 @@ Java Browsing perspective no longer offers to set the number of open editors
 due to changes in platform UI.</li>
 
 <li>
-'Refactor -> Rename' menu works on method parameters too.</li>
+'Refactor -&gt; Rename' menu works on method parameters too.</li>
 
 <li>
 Copying a top-level type to clipboard copies its compilation unit.</li>
@@ -228,7 +253,7 @@ the build. This is a known problem and will be fixed in the next build.</li>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F03%2F19&chfieldto=2002%2F03%2F26&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F03%2F19&amp;chfieldto=2002%2F03%2F26&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/03/19 and 2002/03/26.
 <br>&nbsp;
@@ -279,7 +304,7 @@ external Javadoc action.</li>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F03%2F12&chfieldto=2002%2F03%2F18&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F03%2F12&amp;chfieldto=2002%2F03%2F18&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/03/12 and 2002/03/18.
 <h1>
@@ -327,7 +352,7 @@ New API classes: wizard pages, JavaElementSorter</li>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F03%2F05&chfieldto=2002%2F03%2F12&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F03%2F05&amp;chfieldto=2002%2F03%2F12&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/03/05 and 2002/03/12.
 <h1>
@@ -336,7 +361,7 @@ Java Development Tooling UI</h1>
 Eclipse Build Input March 5th 2002
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F02%2F26&chfieldto=2002%2F03%2F05&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F02%2F26&amp;chfieldto=2002%2F03%2F05&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/02/26 and 2002/03/05.
 <h1>
@@ -345,7 +370,7 @@ Java Development Tooling UI</h1>
 Eclipse Build Input February 26th 2002
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F02%2F15&chfieldto=2002%2F02%2F26&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F02%2F15&amp;chfieldto=2002%2F02%2F26&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/02/15 and 2002/02/26.
 <h1>
@@ -354,7 +379,7 @@ Java Development Tooling UI</h1>
 Eclipse Build Input February 14th 2002
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F02%2F13&chfieldto=2002%2F02%2F14&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F02%2F13&amp;chfieldto=2002%2F02%2F14&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/02/13 and 2002/02/14.
 <h1>
@@ -370,7 +395,7 @@ Rename Field Refactoring now offers renaming of getter/setter methods.</li>
 
 <li>
 Rename Local Variable refactoring is now available from the global 'Refactor
--> Rename ...' menu.</li>
+-&gt; Rename ...' menu.</li>
 
 <li>
 Search for declarations in hierarchy now reports matches in super classes.</li>
@@ -399,13 +424,13 @@ New preference page to specify the javadoc command to be used.</li>
 <ul>
 <li>
 <b>Work in progress: VA/Java style code browsing:</b> A new perspective
-(Open -> Java Browsing) which contains four views to browse code similar
+(Open -&gt; Java Browsing) which contains four views to browse code similar
 to VA/Java. One convenient arrangement is to use the Projects view as a
 fast view.</li>
 </ul>
 
-<blockquote>Available Preferences (Workbench -> Preferences -> Java ->
-Work In Progress -> Browsing):</blockquote>
+<blockquote>Available Preferences (Workbench -&gt; Preferences -&gt; Java -&gt;
+Work In Progress -&gt; Browsing):</blockquote>
 
 <ul>
 <ul>
@@ -444,7 +469,7 @@ The JUnit plugin now contributes launch configurations for running tests.</li>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F02%2F05&chfieldto=2002%2F02%2F12&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F02%2F05&amp;chfieldto=2002%2F02%2F12&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/02/05 and 2002/02/12.
 <h1>
@@ -468,7 +493,7 @@ is now part of the JDT.</li>
 
 <h2>
 Problem Reports</h2>
-<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F01%2F29&chfieldto=2002%2F02%2F05&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
+<a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&amp;bug_status=CLOSED&amp;chfield=bug_status&amp;chfieldfrom=2002%2F01%2F29&amp;chfieldto=2002%2F02%2F05&amp;product=JDT&amp;component=UI&amp;cmdtype=doit&amp;&amp;order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/01/29 and 2002/02/05.
 <h1>
@@ -529,7 +554,7 @@ extract method: incorrect error message (1GKZ2UM)
 <br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8280">8280</a>
 Package view back/forward/up arrow hover help
 <br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8317">8317</a>
-Missing mnemonics in Java-->Compiler preference page
+Missing mnemonics in Java--&gt;Compiler preference page
 <br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8224">8224</a>
 Organize imports adds explicit import to wildcard import
 <br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=7505">7505</a>
@@ -555,7 +580,7 @@ NLS: key generation for strings with trailing ...
 <br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8476">8476</a>
 JAR Packager: Make main class field editable
 <br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8604">8604</a>
-J Search opens type selection dialog if code resolve has > 1
+J Search opens type selection dialog if code resolve has &gt; 1
 <br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=6306">6306</a>
 no shortcuts for reorg operations below cu level
 <br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8161">8161</a>
@@ -628,7 +653,7 @@ instance is stored in the metadata directory starting this build on an
 existing workspace leads to missing Java Element creation actions in the
 tool bar of a Java perspective. The actions can be restored by either closing
 and reopening the perspective or by checking the "Java Element Creation"
-action set in Perspective->Customize...->Others.</li>
+action set in Perspective-&gt;Customize...-&gt;Others.</li>
 
 <li>
 The refactoring action set ID (<tt>JavaUI.ID_REFACTORING_ACTION_SET</tt>
@@ -655,7 +680,7 @@ Java icons in Debug View
 <br><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=5523">5523</a>
 Add "Finds Strings To Externalize" to Java project and source folder
 <br><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=7469">7469</a>
-Preferences -> Java -> Templates
+Preferences -&gt; Java -&gt; Templates
 <br><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=7600">7600</a>
 Exception in TemplateCollector
 <br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=6601">6601</a>
@@ -1079,7 +1104,7 @@ NPE in CompilationUnitEditor</font>
 SEVERE: typing in java editor causes OutOfMemoryError in JDK 1.4</font>
 <br><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6263">6263</a>
 Extra closing braces inserted</font>
-<h3>
+</p><h3>
 <font face="Times New Roman">Problem Reports Closed</font></h3>
 <font face="Times New Roman"><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=6133">6133</a>
 Refactoring should update class path on source folder rename</font>
@@ -1153,7 +1178,7 @@ Java project properties dialog grows taller than screen</font>
 <br><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6196">6196</a>
 Last item selected by default in variable selection dialog</font>
 <br><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6298">6298</a>
-Replace with Local History: Workbench -> Workspace</font>
+Replace with Local History: Workbench -&gt; Workspace</font>
 <br><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6078">6078</a>
 Copy/Move features</font>
 <br><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=4369">4369</a>
@@ -1166,7 +1191,7 @@ Edit template panel doesn't resize</font>
 JavaEditor should honor tab width setting of the JavaFormatter</font>
 <br><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6322">6322</a>
 All types dialog shows obfuscated classes</font>
-<p><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=5455">5455</a>
+</p><p><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=5455">5455</a>
 generate getter/setter: easily fooled by field names (leads to syntax errors)</font>
 <br><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=4095">4095</a>
 avoid unhelpful javadoc comments (1GI95SQ)</font>
@@ -1176,9 +1201,9 @@ Add unimplemented methods creates incorrect comments</font>
 DCR: preference page for creating getter/setter (1GHGUR4)</font>
 <br><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=3915">3915</a>
 generate getter/setter too smart on names (1GF5WW1)</font>
-<p><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6062">6062</a>
+</p><p><font face="Times New Roman"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6062">6062</a>
 JavaDocCompletionProcessor should be have configurable case sensitivity</font>
-<h3>
+</p><h3>
 <font face="Times New Roman">Problem Reports Closed</font></h3>
 <font face="Times New Roman"><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=6133">6133</a>
 Refactoring should update class path on source folder rename</font>
@@ -1209,11 +1234,11 @@ Code formatter preference check box meaning is reversed</font>
 Adding a project to the build path adds it last (1GET2CB)</font>
 <br><font face="Times New Roman"><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=6009">6009</a>
 New class wizard doesn't get context right for nested classes</font>
-<p><font face="Times New Roman"><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3764">3764</a>
+</p><p><font face="Times New Roman"><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3764">3764</a>
 Build Path Page - entering a path in the selection box is ignored (1GEPA6S)</font>
 <br><font face="Times New Roman"><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3747">3747</a>
 Organize import adds import that leads to compile error (1GELIOE)</font>
-<h1>
+</p><h1>
 <font face="Times New Roman">Eclipse Platform Build Notes&nbsp;<br>
 Java Development Tooling UI</font></h1>
 <font face="Times New Roman">Eclipse Build Input November 19 2001</font>
@@ -1793,7 +1818,7 @@ usability: parameter hints (1GKYXK5)</font>
 <br><font face="Times New Roman">&nbsp; 3431&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Unreachable code in JCore (1GL2V6K)</font>
 <br>&nbsp;
-<h3>
+</p><h3>
 <font face="Times New Roman">Problem Reports Closed</font></h3>
 <font face="Times New Roman">1GF5PMF: ITPJUI:ALL - rename Package fixes
 compile errors when it should not</font>
@@ -1844,7 +1869,7 @@ Java Development Tooling UI</font></h1>
 <font face="Times New Roman">Global <b>Refactoring</b> menu. The actions
 in this menu retarget themselves to the currently active view part (including
 editor). To activate this menu for an existing workspace you have to go
-to Perspective->Customize->Others and check the Java Refactoring entry.</font></li>
+to Perspective-&gt;Customize-&gt;Others and check the Java Refactoring entry.</font></li>
 
 <li>
 <font face="Times New Roman">Method argument hints for code assist</font></li>
@@ -1926,7 +1951,7 @@ values.</font></li>
 </blockquote>
 
 <h2>
-<a NAME="Problem reports fixed"></a><font face="Times New Roman">Problem
+<a name="Problem reports fixed"></a><font face="Times New Roman">Problem
 reports</font></h2>
 
 <h3>
@@ -1989,7 +2014,6 @@ point doc inaccurate</font>
 adds many empty lines</font>
 <br><font face="Times New Roman">1GHU9O9: ITPDUI:ALL - JavaApplicationLauncher
 rename &amp; comments</font>
-<p><a href="../../../target2/plugins/Eclipse%20Java%20UI%20Release%20Notes/ReleaseNotes/hglegal.htm"><img SRC="ngibmcpy.gif" BORDER=0 height=12 width=195></a>
+<p><a href="../../../target2/plugins/Eclipse%20Java%20UI%20Release%20Notes/ReleaseNotes/hglegal.htm"><img src="ngibmcpy.gif" border="0" height="12" width="195"></a>
 <br>&nbsp;
-</body>
-</html>
+</p></body></html>
