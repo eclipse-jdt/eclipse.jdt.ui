@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
@@ -230,7 +231,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_FOREGROUND, new RGB(0, 0, 0));
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, ".,");
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, "@");
-		store.setDefault(ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, false);
+		store.setDefault(ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, true);
 		store.setDefault(ContentAssistPreference.CASE_SENSITIVITY, false);
 		store.setDefault(ContentAssistPreference.ORDER_PROPOSALS, false);
 		store.setDefault(ContentAssistPreference.ADD_IMPORT, true);				
@@ -265,7 +266,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		colorComposite.setLayout(new GridLayout());
 
 		Label label= new Label(colorComposite, SWT.LEFT);
-		label.setText("Colors");
+		label.setText("C&olors:");
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Composite editorComposite= new Composite(colorComposite, SWT.NULL);
@@ -291,7 +292,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText("Foreground:");
+		label.setText("Fo&reground:");
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
@@ -303,7 +304,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		colorButton.setLayoutData(gd);
 		
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText("Bold:");
+		label.setText("&Bold:");
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
@@ -314,7 +315,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBoldCheckBox.setLayoutData(gd);
 		
 		label= new Label(colorComposite, SWT.LEFT);
-		label.setText("Preview");
+		label.setText("Preview:");
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Control previewer= createPreviewer(colorComposite);
@@ -390,16 +391,35 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		behaviorComposite.setLayout(layout);
 				
-		String label= "Highlight matching brackets";
-		addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
+		String label= "Highlight &matching brackets";
+		final Button checkBox= addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
 		
-		label= "Matching brackets highlight color:";
-		addColorButton(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS_COLOR, 0);
+		label= "Matching &brackets highlight color:";
+		final Control colorControl= addColorButton(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS_COLOR, 0);
+
+		checkBox.addSelectionListener(new SelectionListener() {
+			Control control= colorControl;
+			Button button= checkBox;
+			ControlEnableState state= button.getSelection() ? null : ControlEnableState.disable(control);
+			
+			public void widgetSelected(SelectionEvent e) {
+				if (button.getSelection()) {
+					if (state != null) {
+						state.restore();
+						state= null;
+					}
+				} else {
+					state= ControlEnableState.disable(control);
+				}
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
 		
 		label= "Text font:";
 		addTextFontEditor(behaviorComposite, label, AbstractTextEditor.PREFERENCE_FONT);
 		
-		label= "&Displayed tab width:";
+		label= "Displayed &tab width:";
 		addTextField(behaviorComposite, label, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 2, 0);
 
 		return behaviorComposite;
@@ -411,16 +431,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		contentAssistComposite.setLayout(layout);
 				
-		String label= "Insert &single proposals automatically";
+		String label= "Insert single &proposals automatically";
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOINSERT, 0);
 		
-		label= "Show only proposals visible in the invocation &context";
+		label= "Show only proposals visible in the invocation conte&xt";
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, 0);
 		
 //		label= "Show only proposals with &matching cases";
 //		addCheckBox(contentAssistComposite, label, ContentAssistPreference.CASE_SENSITIVITY, 0);
 		
-		label= "Present proposals in &alphabetical order";
+		label= "Present proposals in a&lphabetical order";
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ORDER_PROPOSALS, 0);
 		
 		label= "&Enable auto activation";
@@ -429,13 +449,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= "Automatically add &import instead of qualified name";
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ADD_IMPORT, 0);
 		
-		label= "Auto activation &delay:";
+		label= "Auto activation dela&y:";
 		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_DELAY, 4, 0);
 		
 		label= "Auto activation &triggers for Java:";
 		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, 25, 0);
 		
-		label= "Auto activation tri&ggers for JavaDoc:";
+		label= "Auto activation triggers for &JavaDoc:";
 		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, 25, 0);
 				
 		label= "&Background for completion proposals:";
@@ -444,10 +464,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= "&Foreground for completion proposals:";
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PROPOSALS_FOREGROUND, 0);
 		
-		label= "B&ackground for method parameters:";
+		label= "Bac&kground for method parameters:";
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PARAMETERS_BACKGROUND, 0);
 		
-		label= "F&oreground for method parameters:";
+		label= "Fo&reground for method parameters:";
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PARAMETERS_FOREGROUND, 0);
 				
 		return contentAssistComposite;
@@ -476,7 +496,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item.setControl(createColorPage(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText("Code &Assist");
+		item.setText("Code A&ssist");
 		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CFILE));
 		item.setControl(createContentAssistPage(folder));
 		
@@ -574,16 +594,27 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		super.dispose();
 	}
 	
-	private void addColorButton(Composite parent, String label, String key, int indentation) {
+	private Control addColorButton(Composite parent, String label, String key, int indentation) {
+
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan= 2;
+		composite.setLayoutData(gd);
+		
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 2;
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		composite.setLayout(layout);
 				
-		Label labelControl= new Label(parent, SWT.NONE);
+		Label labelControl= new Label(composite, SWT.NONE);
 		labelControl.setText(label);
 		
-		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalIndent= indentation;
 		labelControl.setLayoutData(gd);
 		
-		ColorEditor editor= new ColorEditor(parent);
+		ColorEditor editor= new ColorEditor(composite);
 		Button button= editor.getButton();
 		button.setData(editor);
 		
@@ -593,9 +624,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		button.addSelectionListener(fColorButtonListener);
 		
 		fColorButtons.put(editor, key);
+		
+		return composite;
 	}
 	
-	private void addCheckBox(Composite parent, String label, String key, int indentation) {		
+	private Button addCheckBox(Composite parent, String label, String key, int indentation) {		
 		Button checkBox= new Button(parent, SWT.CHECK);
 		checkBox.setText(label);
 		
@@ -606,6 +639,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		checkBox.addSelectionListener(fCheckBoxListener);
 		
 		fCheckBoxes.put(checkBox, key);
+		
+		return checkBox;
 	}
 	
 	private void addTextField(Composite parent, String label, String key, int textLimit, int indentation) {
@@ -634,6 +669,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		layout.numColumns= 3;
 		editorComposite.setLayout(layout);		
 		fFontEditor= new WorkbenchChainedTextFontFieldEditor(key, label, editorComposite);
+		fFontEditor.setChangeButtonText("C&hange...");
 				
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
