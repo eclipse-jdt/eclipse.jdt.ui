@@ -145,6 +145,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IncompatibleExceptionInThrowsClause:
 			case IProblem.NoMessageSendOnArrayType:
 			case IProblem.InvalidOperator:
+			case IProblem.MissingSerialVersion:
 				return true;
 			default:
 				return false;
@@ -408,10 +409,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidOperator:
 				LocalCorrectionsSubProcessor.getInvalidOperatorProposals(context, problem, proposals);
 				break;
+			case IProblem.MissingSerialVersion:
+			    SerialVersionSubProcessor.getSerialVersionProposals(context, problem, proposals);
 			default:
 		}
 	}
-
-
-
 }
