@@ -21,14 +21,10 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
-
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -41,7 +37,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 /**
  *
  */
-public class UserLibraryManager {
+/* package */ class UserLibraryManager {
 	
 	public final static String CP_USERLIBRARY_PREFERENCES_PREFIX = JavaCore.PLUGIN_ID+".userLibrary."; //$NON-NLS-1$
 	public final static String CP_ENTRY_IGNORE = "##<cp entry ignore>##"; //$NON-NLS-1$
@@ -69,10 +65,11 @@ public class UserLibraryManager {
 	private UserLibraryManager() {
 		// do not instantiate
 	}
-	
+		
 	/**
-	 * Returns all know user library names. The corresponding user library can be received with <code>getUserLibrary</code>.
-	 * @return Return an array containing all names of known user libraries.
+	 * Returns the names of all defined user libraries. The corresponding classpath container path
+	 * is the name appended to the CONTAINER_ID.  
+	 * @return Return an array containing the names of all known user defined.
 	 */
 	public static String[] getUserLibraryNames() {
 		Set set= getLibraryMap().keySet();
@@ -100,33 +97,6 @@ public class UserLibraryManager {
 		internalSetUserLibrary(name, library, true, true, monitor);
 	}
 	
-	/**
-	 * Registers user libraries for given names. If a library for the given name already exists, its value will be updated.
-	 * This call will also rebind all related classpath container. 
-	 * @param newNames The names to register the libraries for
-	 * @param newLibs The libraries to register
-	 * @param monitor A progress monitor used when rebinding the classpath containers
-	 * @throws JavaModelException
-	 */
-	public static void setUserLibraries(String[] newNames, UserLibrary[] newLibs, IProgressMonitor monitor) throws JavaModelException {
-		Assert.isTrue(newNames.length == newLibs.length, "names and libraries should have the same length"); //$NON-NLS-1$
-		
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
-		}
-		
-		monitor.beginTask("Configure user libraries...", newNames.length);
-		try {
-			int last= newNames.length - 1;
-			for (int i= 0; i < newLibs.length; i++) {
-				internalSetUserLibrary(newNames[i], newLibs[i], i == last, true, new SubProgressMonitor(monitor, 1));
-			}
-		} finally {
-			monitor.done();
-		}
-	}
-	
-
 	private static Map getLibraryMap() {
 		if (userLibraries == null) {
 			userLibraries= new HashMap();

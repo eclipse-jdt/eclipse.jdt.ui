@@ -18,24 +18,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.Dialog;
 
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
-import org.eclipse.jdt.internal.corext.userlibrary.UserLibrary;
-import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryManager;
+import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainer;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
@@ -57,6 +61,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	private CPUserLibraryElement fEditResult;
 	private Set fUsedPaths;
 	private boolean fIsEditMode;
+	private IJavaProject fProject;
 	
 	public UserLibraryWizardPage() {
 		super("UserLibraryWizardPage"); //$NON-NLS-1$
@@ -85,19 +90,23 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	}
 	
 	private void updateLibraryList(String nameToSelect) {
-		String[] names= UserLibraryManager.getUserLibraryNames();
+		String[] names= UserLibraryClasspathContainer.getUserLibraryNames();
 		Arrays.sort(names, Collator.getInstance());
 		CPUserLibraryElement elementToSelect= null;
 		ArrayList elements= new ArrayList(names.length);
 		for (int i= 0; i < names.length; i++) {
 			String curr= names[i];
-			UserLibrary library= UserLibraryManager.getUserLibrary(curr);
-			if (library != null) {
-				CPUserLibraryElement elem= new CPUserLibraryElement(curr, library.isSystemLibrary(), null);
+			IPath path= new Path(UserLibraryClasspathContainer.CONTAINER_ID).append(curr);
+			try {
+				IClasspathContainer container= JavaCore.getClasspathContainer(path, fProject);
+				CPUserLibraryElement elem= new CPUserLibraryElement(curr, container);
 				elements.add(elem);
 				if (curr.equals(nameToSelect)) {
 					elementToSelect= elem;
 				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+				// ignore
 			}
 		}
 		fLibrarySelector.setElements(elements);
@@ -259,6 +268,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension#initialize(org.eclipse.jdt.core.IJavaProject, org.eclipse.jdt.core.IClasspathEntry[])
 	 */
 	public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
+		fProject= project;
 		for (int i= 0; i < currentEntries.length; i++) {
 			IClasspathEntry curr= currentEntries[i];
 			if (curr.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {

@@ -55,8 +55,12 @@ public class UserLibraryClasspathContainerInitializer extends ClasspathContainer
 	public void requestClasspathContainerUpdate(IPath containerPath, IJavaProject project, IClasspathContainer containerSuggestion) throws CoreException {
 		if (isUserLibraryContainer(containerPath)) {
 			String name= containerPath.segment(1);
-			UserLibrary library= new UserLibrary(containerSuggestion.getClasspathEntries(), containerSuggestion.getKind() == IClasspathContainer.K_SYSTEM);
-			UserLibraryManager.setUserLibrary(name, library, null); // should user a real progress monitor
+			if (containerSuggestion != null) {
+				UserLibrary library= new UserLibrary(containerSuggestion.getClasspathEntries(), containerSuggestion.getKind() == IClasspathContainer.K_SYSTEM);
+				UserLibraryManager.setUserLibrary(name, library, null); // should use a real progress monitor
+			} else {
+				UserLibraryManager.setUserLibrary(name, null, null); // should use a real progress monitor
+			}
 		}
 	}
 

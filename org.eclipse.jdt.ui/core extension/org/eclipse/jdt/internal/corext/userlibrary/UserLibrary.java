@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 /**
  *
  */
-public class UserLibrary {
+/* package */ class UserLibrary {
 
 	private static final String CURRENT_VERSION= "1"; //$NON-NLS-1$
 

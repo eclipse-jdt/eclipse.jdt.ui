@@ -25,14 +25,23 @@ public class UserLibraryClasspathContainer implements IClasspathContainer, IRunt
 	
 	public static final String CONTAINER_ID= "org.eclipse.jdt.USER_LIBRARY"; //$NON-NLS-1$
 	
+	/**
+	 * Returns the names of all defined user libraries. The corresponding classpath container path
+	 * is the name appended to the CONTAINER_ID.  
+	 * @return Return an array containing the names of all known user defined.
+	 */
+	public static String[] getUserLibraryNames() {
+		return UserLibraryManager.getUserLibraryNames();
+	}
+	
 	private String name;
 	
 	public UserLibraryClasspathContainer(String libName) {
-		name= libName;
+		this.name= libName;
 	}
 	
 	private UserLibrary getUserLibrary() {
-		return UserLibraryManager.getUserLibrary(name);
+		return UserLibraryManager.getUserLibrary(this.name);
 	}
 
 	/* (non-Javadoc)
@@ -51,7 +60,7 @@ public class UserLibraryClasspathContainer implements IClasspathContainer, IRunt
 	 * @see org.eclipse.jdt.core.IClasspathContainer#getDescription()
 	 */
 	public String getDescription() {
-		return name;
+		return this.name;
 	}
 
 	/* (non-Javadoc)
@@ -69,7 +78,7 @@ public class UserLibraryClasspathContainer implements IClasspathContainer, IRunt
 	 * @see org.eclipse.jdt.core.IClasspathContainer#getPath()
 	 */
 	public IPath getPath() {
-		return new Path(CONTAINER_ID).append(name);
+		return new Path(CONTAINER_ID).append(this.name);
 	}
 
 	/* (non-Javadoc)

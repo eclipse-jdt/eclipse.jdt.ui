@@ -25,6 +25,8 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -41,9 +43,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
-import org.eclipse.jdt.internal.corext.userlibrary.UserLibrary;
 import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainer;
-import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
@@ -881,11 +881,30 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 			assertTrue("lib does not exist",  lib != null && lib.exists());
 			IPath path= new Path(lib.getPath());
-			IClasspathEntry[] entries= { JavaCore.newLibraryEntry(path, null, null) };
-			UserLibraryManager.setUserLibrary("MyUserLibrary", new UserLibrary(entries, false), null);
+			final IClasspathEntry[] entries= { JavaCore.newLibraryEntry(path, null, null) };
+			final IPath containerPath= new Path(UserLibraryClasspathContainer.CONTAINER_ID).append("MyUserLibrary");
+
 			
-			// user library
-			IPath containerPath= new Path(UserLibraryClasspathContainer.CONTAINER_ID).append("MyUserLibrary");
+			IClasspathContainer newContainer= new IClasspathContainer() {
+				public IClasspathEntry[] getClasspathEntries() {
+					return entries;
+				}
+
+				public String getDescription() {
+					return "MyUserLibrary";
+				}
+
+				public int getKind() {
+					return IClasspathContainer.K_APPLICATION;
+				}
+
+				public IPath getPath() {
+					return containerPath;
+				}
+			};
+			ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(UserLibraryClasspathContainer.CONTAINER_ID);
+			initializer.requestClasspathContainerUpdate(containerPath, otherProject, newContainer);
+			
 			IClasspathEntry entry= JavaCore.newContainerEntry(containerPath);
 			JavaProjectHelper.addToClasspath(otherProject, entry);
 			

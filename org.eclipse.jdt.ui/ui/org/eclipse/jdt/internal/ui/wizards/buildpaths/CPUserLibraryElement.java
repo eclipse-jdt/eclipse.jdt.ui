@@ -16,24 +16,61 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.corext.userlibrary.*;
+import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainer;
 
 public class CPUserLibraryElement {
+	
+	private  class UpdatedClasspathContainer implements IClasspathContainer {
+				
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.core.IClasspathContainer#getClasspathEntries()
+		 */
+		public IClasspathEntry[] getClasspathEntries() {
+			CPListElement[] children= getChildren();
+			IClasspathEntry[] entries= new IClasspathEntry[children.length];
+			for (int i= 0; i < entries.length; i++) {
+				entries[i]= children[i].getClasspathEntry();
+			}
+			return entries;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.core.IClasspathContainer#getDescription()
+		 */
+		public String getDescription() {
+			return getName();
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.core.IClasspathContainer#getKind()
+		 */
+		public int getKind() {
+			return isSystemLibrary() ? IClasspathContainer.K_SYSTEM : K_APPLICATION;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.core.IClasspathContainer#getPath()
+		 */
+		public IPath getPath() {
+			return CPUserLibraryElement.this.getPath();
+		}
+	}
+	
 	
 	private String fName;
 	private List fChildren;
 	private boolean fIsSystemLibrary;
 
-	public CPUserLibraryElement(String name) {
+	public CPUserLibraryElement(String name, IClasspathContainer container) {
 		fName= name;
 		fChildren= new ArrayList();
-		UserLibrary library= UserLibraryManager.getUserLibrary(name);
-		if (library != null) {
-			IClasspathEntry[] entries= library.getEntries();
+		if (container != null) {
+			IClasspathEntry[] entries= container.getClasspathEntries();
 			CPListElement[] res= new CPListElement[entries.length];
 			for (int i= 0; i < res.length; i++) {
 				IClasspathEntry curr= entries[i];
@@ -42,7 +79,7 @@ public class CPUserLibraryElement {
 				elem.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(curr.getPath()));
 				fChildren.add(elem);
 			}
-			fIsSystemLibrary= library.isSystemLibrary();
+			fIsSystemLibrary= container.getKind() == IClasspathContainer.K_SYSTEM;
 		} else {
 			fIsSystemLibrary= false;
 		}
@@ -97,15 +134,6 @@ public class CPUserLibraryElement {
 			}
 		}
 	}
-
-	public UserLibrary getUserLibrary() {
-		CPListElement[] children= getChildren();
-		IClasspathEntry[] entries= new IClasspathEntry[children.length];
-		for (int i= 0; i < entries.length; i++) {
-			entries[i]= children[i].getClasspathEntry();
-		}
-		return new UserLibrary(entries, fIsSystemLibrary);
-	}
 	
 	public void collectJavaDocLocations(ArrayList paths, ArrayList urls) {
 		for (int i= 0; i < fChildren.size(); i++) {
@@ -113,7 +141,27 @@ public class CPUserLibraryElement {
 			curr.collectJavaDocLocations(paths, urls);
 		}
 	}
-
 	
-
+	public IClasspathContainer getUpdatedContainer() {
+		return new UpdatedClasspathContainer();
+	}
+		
+	public boolean hasChanges(IClasspathContainer oldContainer) {
+		if ((oldContainer.getKind() == IClasspathContainer.K_SYSTEM) && !fIsSystemLibrary) {
+			return true;
+		}
+		IClasspathEntry[] oldEntries= oldContainer.getClasspathEntries();
+		if (fChildren.size() != oldEntries.length) {
+			return true;
+		}
+		for (int i= 0; i < oldEntries.length; i++) {
+			CPListElement child= (CPListElement) fChildren.get(i);
+			if (!child.getClasspathEntry().equals(oldEntries[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
 }
