@@ -587,7 +587,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			StyleRange oldStyleRange= text.getStyleRangeAtOffset(offset);
 			Color foregroundColor= fColor;
 			Color backgroundColor= oldStyleRange == null ? text.getBackground() : oldStyleRange.background;
-			StyleRange styleRange= new StyleRange(offset, length, foregroundColor, backgroundColor);
+			int fontStyle= oldStyleRange== null ? SWT.NORMAL : oldStyleRange.fontStyle;
+			StyleRange styleRange= new StyleRange(offset, length, foregroundColor, backgroundColor, fontStyle);
 			text.setStyleRange(styleRange);
 
 			// underline
@@ -1188,7 +1189,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				// Check whether we are in a java code partititon and the preference is enabled
 				final IPreferenceStore store= getPreferenceStore();
 				final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position);
-				if (!region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE) || !store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
+				if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
 					super.run();
 					return;				
 				}
@@ -1365,8 +1366,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			
 				// Check whether we are in a java code partititon and the preference is enabled
 				final IPreferenceStore store= getPreferenceStore();
-				ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position);
-				if (!region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE) || !store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
+				if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
 					super.run();
 					return;				
 				}
@@ -1387,7 +1387,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					short next= Short.MAX_VALUE;
 
 					// Acquire collator for partition around caret
-					region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position);
+					final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position);
 					final String buffer= document.get(region.getOffset(), position - region.getOffset() + 1);
 					final CollationElementIterator iterator= fCollator.getCollationElementIterator(buffer);
 
