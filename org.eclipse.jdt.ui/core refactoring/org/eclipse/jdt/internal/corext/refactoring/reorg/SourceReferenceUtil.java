@@ -2,6 +2,7 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,16 +10,16 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.ui.reorg.*;
 
 public class SourceReferenceUtil {
 	
@@ -86,5 +87,19 @@ public class SourceReferenceUtil {
 		}
 		return map;
 	}	
+	
+	public static ISourceReference[] sortByOffset(ISourceReference[] methods){
+		Comparator comparator= new Comparator(){
+			public int compare(Object o1, Object o2){
+				try{
+					return ((ISourceReference)o2).getSourceRange().getOffset() - ((ISourceReference)o1).getSourceRange().getOffset();
+				} catch (JavaModelException e){
+					return o2.hashCode() - o1.hashCode();
+				}	
+			}
+		};
+		Arrays.sort(methods, comparator);
+		return methods;
+	}
 }
 
