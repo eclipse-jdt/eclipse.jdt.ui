@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -21,6 +22,13 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
@@ -35,6 +43,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
 /*
@@ -356,14 +365,47 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		// store in JCore and the preferences
 		Hashtable actualOptions= JavaCore.getOptions();
 		IPreferenceStore store= getPreferenceStore();
+		boolean hasChanges= false;
 		for (int i= 0; i < allKeys.length; i++) {
 			String key= allKeys[i];
 			String val=  (String) fWorkingValues.get(key);
+			String oldVal= (String) actualOptions.get(key);
+			hasChanges= hasChanges | !val.equals(oldVal);
+			
 			actualOptions.put(key, val);
 			store.putValue(key, val);
 		}
 		JavaCore.setOptions(actualOptions);
+		
+		if (hasChanges) {
+			String title= JavaUIMessages.getString("CompilerPreferencePage.needsbuild.title");
+			String message= JavaUIMessages.getString("CompilerPreferencePage.needsbuild.message");
+			if (MessageDialog.openQuestion(getShell(), title, message)) {
+				doFullBuild();
+			}
+		}
 		return super.performOk();
+	}
+	
+	private void doFullBuild() {
+		ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
+		try {
+			dialog.run(true, true, new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException {
+					try {
+						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+					} catch (CoreException e) {
+						throw new InvocationTargetException(e);
+					}
+				}
+			});
+		} catch (InterruptedException e) {
+			// cancelled by user
+		} catch (InvocationTargetException e) {
+			String title= JavaUIMessages.getString("CompilerPreferencePage.builderror.title");
+			String message= JavaUIMessages.getString("CompilerPreferencePage.builderror.message");
+			ExceptionHandler.handle(e, getShell(), title, message);
+		}
 	}		
 	
 	/*
