@@ -45,10 +45,12 @@ public class AddImportTest extends CoreTests {
 		if (true) {
 			return allTests();
 		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new AddImportTest("testRemoveImports1"));
-			return new ProjectTestSetup(suite);
+			return setUpTest(new AddImportTest("testRemoveImports1"));
 		}	
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 
 
@@ -168,8 +170,8 @@ public class AddImportTest extends CoreTests {
 		String[] order= new String[] { "java", "com", "pack" };
 		
 		ImportsStructure imports= new ImportsStructure(cu, order, 2, true);
-		imports.removeImport("java.util.Set");
-		imports.removeImport("pack.List");
+		imports.removeImport("java.util.Set", false);
+		imports.removeImport("pack.List", false);
 		
 		imports.create(true, null);
 
@@ -282,7 +284,77 @@ public class AddImportTest extends CoreTests {
 		buf.append("public class C {\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
-	}		
+	}
+	
+	public void testAddStaticImports1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "java" };
+
+		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
+		imports.addImport("java.lang.Math.min", true);
+		imports.addImport("java.lang.Math", false);
+		imports.addImport("java.lang.Math.max", true);
+
+		imports.create(true, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import static java.lang.Math.max;\n");
+		buf.append("import static java.lang.Math.min;\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testAddStaticImports2() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "java" };
+
+		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
+		imports.addImport("xx.MyConstants.SIZE", true);
+		imports.addImport("xy.MyConstants.*", true);
+		imports.addImport("xy.MyConstants", false);
+		
+		imports.create(true, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("\n");
+		buf.append("import static xx.MyConstants.SIZE;\n");
+		buf.append("import xy.MyConstants;\n");
+		buf.append("import static xy.MyConstants.*;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}	
 
 
 }
