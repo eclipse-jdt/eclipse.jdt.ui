@@ -1692,7 +1692,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (!(variableBinding instanceof IVariableBinding) || ((IVariableBinding) variableBinding).isField()) {
 			return false;
 		}
-		
 		final ITypeBinding variableTypeBinding= coveringName.resolveTypeBinding();
 		// we operate only on boolean variable
 		if (variableTypeBinding != ast.resolveWellKnownType("boolean")) { //$NON-NLS-1$
@@ -1719,21 +1718,34 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		// prepare new variable identifier
 		String oldIdentifier= coveringName.getIdentifier();
 		String newIdentifier= CorrectionMessages.getFormattedString("AdvancedQuickAssistProcessor.negatedVariableName", Character.toUpperCase(oldIdentifier.charAt(0)) + oldIdentifier.substring(1)); //$NON-NLS-1$
+		proposal.addLinkedPositionProposal(KEY_NAME, newIdentifier, null);
+		proposal.addLinkedPositionProposal(KEY_NAME, oldIdentifier, null);
 		// iterate over linked nodes and replace variable references with negated reference
 		for (int i= 0; i < linkedNodes.length; i++) {
 			SimpleName name= linkedNodes[i];
 			// prepare new name with new identifier
 			SimpleName newName= ast.newSimpleName(newIdentifier);
 			proposal.addLinkedPosition(rewrite.track(newName), name == coveringName, KEY_NAME);
-			proposal.addLinkedPositionProposal(KEY_NAME, newIdentifier, null);
-			proposal.addLinkedPositionProposal(KEY_NAME, oldIdentifier, null);
 			//
 			StructuralPropertyDescriptor location= name.getLocationInParent();
 			if (location == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-				// replace assigned expression
 				Assignment assignment= (Assignment) name.getParent();
 				Expression expression= assignment.getRightHandSide();
-				rewrite.replace(expression, getInversedBooleanExpression(ast, rewrite, expression), null);
+				int exStart= expression.getStartPosition();
+				int exEnd= exStart + expression.getLength();
+				// check that variable is not used in right hand side
+				boolean used= false;
+				for (int j= 0; j < linkedNodes.length; j++) {
+					SimpleName name2= linkedNodes[j];
+					int name2Start= name2.getStartPosition();
+					if (exStart <= name2Start && name2Start < exEnd) {
+						used= true;
+					}
+				}
+				// replace assigned expression
+				if (!used) {
+					rewrite.replace(expression, getInversedBooleanExpression(ast, rewrite, expression), null);
+				}
 				// set new name
 				rewrite.replace(name, newName, null);
 			} else if (location == VariableDeclarationFragment.NAME_PROPERTY) {
