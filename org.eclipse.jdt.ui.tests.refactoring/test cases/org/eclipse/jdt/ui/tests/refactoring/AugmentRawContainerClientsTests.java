@@ -129,4 +129,12 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 		performCuOK();
 	}
 	
+	public void testCuAddStringInteger() throws Exception {
+		performCuOK();
+	}
+	
+	public void testCuAddStringIntegerA() throws Exception {
+		performCuOK();
+	}
+	
 }
