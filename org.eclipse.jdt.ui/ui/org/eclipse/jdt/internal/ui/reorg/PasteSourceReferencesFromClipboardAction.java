@@ -176,8 +176,8 @@ public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchA
 			IJavaElement element= (IJavaElement)selected;
 			int tabWidth= CodeFormatterUtil.getTabWidth();
 			for (int i= 0; i < elems.length; i++) {
-				String[] source= Strings.convertIntoLines(elems[i].getSource());
-				MemberEdit edit= new MemberEdit(element, style, source, tabWidth);
+				String[] sourceLines= removeTrailingEmptyLines(Strings.convertIntoLines(elems[i].getSource()));
+				MemberEdit edit= new MemberEdit(element, style, sourceLines, tabWidth);
 				tbe.add(edit);
 			}
 			if (! tbe.canPerformEdits())
@@ -189,7 +189,24 @@ public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchA
 				TextBuffer.release(tb);
 		}
 	}
-	
+
+	private static String[] removeTrailingEmptyLines(String[] sourceLines) {
+		int lastNonEmpty= findLastNonEmptyLineIndex(sourceLines);
+		String[] result= new String[lastNonEmpty + 1];
+		for (int i= 0; i < result.length; i++) {
+			result[i]= sourceLines[i];
+		}
+		return result;
+	}
+
+	private static int findLastNonEmptyLineIndex(String[] sourceLines) {
+		for (int i= sourceLines.length - 1; i >= 0; i--) {
+			if (! sourceLines[i].trim().equals(""))
+				return i;
+		}
+		return -1;
+	}
+
 	private  void pasteInCompilationUnit(ICompilationUnit unit) throws CoreException{
 		TextBuffer tb= TextBuffer.acquire(SourceReferenceUtil.getFile(unit));
 		try{
