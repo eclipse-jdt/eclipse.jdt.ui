@@ -17,6 +17,9 @@ import org.eclipse.ui.ICapabilityInstallWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 import org.eclipse.jdt.ui.wizards.JavaCapatibilityConfigurationPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -25,7 +28,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class JavaCapabilityWizard extends Wizard implements ICapabilityInstallWizard {
 
-	private JavaCapatibilityConfigurationPage fJavaPage;
+	private JavaCapabilityConfigurationPage fJavaPage;
 	private IProject fProject;
 
 	public JavaCapabilityWizard() {
@@ -48,7 +51,8 @@ public class JavaCapabilityWizard extends Wizard implements ICapabilityInstallWi
 	public void addPages() {
 		super.addPages();
 		IWorkspaceRoot root= JavaPlugin.getWorkspace().getRoot();
-		fJavaPage= new JavaCapatibilityConfigurationPage(fProject);
+		fJavaPage= new JavaCapabilityConfigurationPage();
+		fJavaPage.init(JavaCore.create(fProject), null, null, false);
 		addPage(fJavaPage);
 	}		
 	
