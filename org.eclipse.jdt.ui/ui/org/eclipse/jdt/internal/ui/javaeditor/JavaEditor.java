@@ -76,7 +76,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 /**
  * Java specific text editor.
  */
-public abstract class JavaEditor extends AbstractTextEditor implements ISelectionChangedListener {
+public abstract class JavaEditor extends AbstractTextEditor {
 		
 	/**
 	 * "Smart" runnable for updating the outline page's selection.
@@ -113,17 +113,30 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	};
 	
 	
+	class SelectionChangedListener  implements ISelectionChangedListener {
+		/*
+		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
+		 */
+		public void selectionChanged(SelectionChangedEvent event) {
+			doSelectionChanged(event);
+		}
+	};
+	
+	
 	/** The outline page */
 	protected JavaOutlinePage fOutlinePage;
 	
 	/** Outliner context menu Id */
 	protected String fOutlinerContextMenuId;
 	
+	/** The selection changed listener */
+	private ISelectionChangedListener fSelectionChangedListener= new SelectionChangedListener();
+	
 	/** The outline page selection updater */
 	private OutlinePageSelectionUpdater fUpdater;
 	
-	/** Indicates whether the cursor change has been initiated by the outline page */
-	private boolean fOutlinePageInitiated= false;
+	/** Indicates whether this editor should react on outline page selection changes */
+	private int fIgnoreOutlinePageSelection;
 	
 	
 		
@@ -223,7 +236,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 		JavaOutlinePage page= new JavaOutlinePage(fOutlinerContextMenuId, this);
 		
-		page.addSelectionChangedListener(this);
+		page.addSelectionChangedListener(fSelectionChangedListener);
 		setOutlinePageInput(page, getEditorInput());
 		
 		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page)); //$NON-NLS-1$
@@ -235,7 +248,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	 */
 	public void outlinePageClosed() {
 		if (fOutlinePage != null) {
-			fOutlinePage.removeSelectionChangedListener(this);
+			fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
 			fOutlinePage= null;
 			resetHighlightRange();
 		}
@@ -380,14 +393,26 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			setSelection(reference, true);
 			// set outliner selection
 			if (fOutlinePage != null) {
-				fOutlinePage.removeSelectionChangedListener(this);
+				fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
 				fOutlinePage.select(reference);
-				fOutlinePage.addSelectionChangedListener(this);
+				fOutlinePage.addSelectionChangedListener(fSelectionChangedListener);
 			}
 		}
 	}
 	
-	public void selectionChanged(SelectionChangedEvent event) {
+	public synchronized void editingScriptStarted() {
+		++ fIgnoreOutlinePageSelection;
+	}
+	
+	public synchronized void editingScriptEnded() {
+		-- fIgnoreOutlinePageSelection;
+	}
+	
+	public synchronized boolean isEditingScriptRunning() {
+		return (fIgnoreOutlinePageSelection > 0);
+	}
+	
+	protected void doSelectionChanged(SelectionChangedEvent event) {
 				
 		ISourceReference reference= null;
 		
@@ -404,10 +429,10 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			JavaPlugin.getActivePage().bringToTop(this);
 			
 		try {
-			fOutlinePageInitiated= true;
+			editingScriptStarted();
 			setSelection(reference, !isActivePart());
 		} finally {
-			fOutlinePageInitiated= false;
+			editingScriptEnded();
 		}
 	}
 	
@@ -424,9 +449,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 				if (offset < range.getOffset() + range.getLength() && range.getOffset() < offset + length) {
 					setHighlightRange(range.getOffset(), range.getLength(), true);
 					if (fOutlinePage != null) {
-						fOutlinePage.removeSelectionChangedListener(this);
+						fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
 						fOutlinePage.select((ISourceReference) element);
-						fOutlinePage.addSelectionChangedListener(this);
+						fOutlinePage.addSelectionChangedListener(fSelectionChangedListener);
 					}
 					return;
 				}
@@ -580,7 +605,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	 */
 	protected void handleCursorPositionChanged() {
 		super.handleCursorPositionChanged();
-		if (!fOutlinePageInitiated && fUpdater != null)
+		if (!isEditingScriptRunning() && fUpdater != null)
 			fUpdater.post();
 	}
 }
