@@ -42,7 +42,7 @@ public class ImportOrganizeTest extends TestCase {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ImportOrganizeTest("testImportFromDefaultWithStar"));
+			suite.addTest(new ImportOrganizeTest("testImportOfMemberFromLocal"));
 			return suite;
 		}	
 	}
@@ -772,6 +772,51 @@ public class ImportOrganizeTest extends TestCase {
 		buf.append("    List1 v4;\n");
 		buf.append("    List2 v5;\n");
 		buf.append("    String v6;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testImportOfMemberFromLocal() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        class Local {\n");
+		buf.append("            class LocalMember {\n");
+		buf.append("            }\n");
+		buf.append("            LocalMember x;\n");
+		buf.append("            Vector v;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        class Local {\n");
+		buf.append("            class LocalMember {\n");
+		buf.append("            }\n");
+		buf.append("            LocalMember x;\n");
+		buf.append("            Vector v;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}	
