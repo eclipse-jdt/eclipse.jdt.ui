@@ -85,7 +85,9 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 						}
 					}
 				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
+					if (!e.isDoesNotExist()) {
+						JavaPlugin.log(e);
+					}
 				}
 			}
 		}
