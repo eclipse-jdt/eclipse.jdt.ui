@@ -498,7 +498,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 	
 	private void doListSelectionChanged(int page, ISourceRange[] ranges) {
-		if (page >= 0 && page < ranges.length) {
+		if (fEditor != null && ranges != null && page >= 0 && page < ranges.length) {
 			ISourceRange range= ranges[page];
 			fEditor.selectAndReveal(range.getOffset(), range.getLength());
 		}
