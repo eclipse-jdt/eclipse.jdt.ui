@@ -39,7 +39,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
@@ -137,7 +137,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
 	}
 	
-	public void testTypeInMethodDecl() throws Exception {
+	public void testTypeInMethodArguments() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -205,6 +205,132 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
 	}
+	
+	public void testTypeInMethodReturnType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    Vect1or[] foo() {\n");
+		buf.append("        return null;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);		
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 3);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    Vector[] foo() {\n");
+		buf.append("        return null;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		
+		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		ICompilationUnit newCU= pack1.getCompilationUnit("Vect1or.java");
+		assertTrue("Nothing created", newCU.exists());
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class Vect1or {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		JavaProjectHelper.performDummySearch();
+		newCU.delete(true, null);
+
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		newCU= pack1.getCompilationUnit("Vect1or.java");
+		assertTrue("Nothing created", newCU.exists());
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface Vect1or {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+	}
+
+	public void testTypeInExceptionType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() throws IOExcpetion {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);		
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() throws IOException {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		
+		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		ICompilationUnit newCU= pack1.getCompilationUnit("IOExcpetion.java");
+		assertTrue("Nothing created", newCU.exists());
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class IOExcpetion extends Exception {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		JavaProjectHelper.performDummySearch();
+		newCU.delete(true, null);
+	}
+	
 	
 	public void testTypeInStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -661,36 +787,44 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	}
 
 
-	public void testAmbiguousTypeInSuperClass() throws Exception {
+	private void createSomeAmbiguity(boolean ifc, boolean isException) throws Exception {
+
 		IPackageFragment pack3= fSourceFolder.createPackageFragment("test3", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test3;\n");
-		buf.append("public class A {\n");
+		buf.append("public "); buf.append(ifc ? "interface" : "class");
+		buf.append(" A "); buf.append(isException ? "extends Exception " : ""); buf.append("{\n");
 		buf.append("}\n");
 		pack3.createCompilationUnit("A.java", buf.toString(), false, null);
-
+	
 		buf= new StringBuffer();
 		buf.append("package test3;\n");
 		buf.append("public class B {\n");
 		buf.append("}\n");
 		pack3.createCompilationUnit("B.java", buf.toString(), false, null);
-		
+			
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
-		buf.append("public class A {\n");
+		buf.append("public "); buf.append(ifc ? "interface" : "class");
+		buf.append(" A "); buf.append(isException ? "extends Exception " : ""); buf.append("{\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("A.java", buf.toString(), false, null);
-		
+			
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
-		pack2.createCompilationUnit("C.java", buf.toString(), false, null);		
+		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+	}
+
+
+	public void testAmbiguousTypeInSuperClass() throws Exception {
+		createSomeAmbiguity(false, false);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");		
@@ -742,6 +876,392 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
+
+	public void testAmbiguousTypeInInterface() throws Exception {
+		createSomeAmbiguity(true, false);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("public class E implements A {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test2.A;\n");
+		buf.append("import test3.*;\n");
+		buf.append("public class E implements A {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("import test3.A;\n");
+		buf.append("public class E implements A {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	public void testAmbiguousTypeInField() throws Exception {
+		createSomeAmbiguity(true, false);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("public class E {\n");
+		buf.append("    A a;\n");	
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test2.A;\n");
+		buf.append("import test3.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    A a;\n");	
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("import test3.A;\n");
+		buf.append("public class E {\n");
+		buf.append("    A a;\n");	
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+	
+	public void testAmbiguousTypeInArgument() throws Exception {
+		createSomeAmbiguity(true, false);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public void foo(A a) {");		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test2.A;\n");
+		buf.append("import test3.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public void foo(A a) {");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("import test3.A;\n");
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public void foo(A a) {");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+	
+	public void testAmbiguousTypeInReturnType() throws Exception {
+		createSomeAmbiguity(false, false);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public A foo() {");
+		buf.append("        return null;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test2.A;\n");
+		buf.append("import test3.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public A foo() {");
+		buf.append("        return null;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("import test3.A;\n");
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public A foo() {");
+		buf.append("        return null;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+	
+	public void testAmbiguousTypeInExceptionType() throws Exception {
+		createSomeAmbiguity(false, true);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public void foo() throws A {");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test2.A;\n");
+		buf.append("import test3.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public void foo() throws A {");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("import test3.A;\n");
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public void foo() throws A {");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+	
+	public void testAmbiguousTypeInCatchBlock() throws Exception {
+		createSomeAmbiguity(false, true);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public void foo() {");
+		buf.append("        try {\n");
+		buf.append("        } catch (A e) {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test2.A;\n");
+		buf.append("import test3.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public void foo() {");
+		buf.append("        try {\n");
+		buf.append("        } catch (A e) {\n");		
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.*;\n");
+		buf.append("import test3.*;\n");		
+		buf.append("import test3.A;\n");
+		buf.append("public class E {\n");
+		buf.append("    B b;\n");
+		buf.append("    C c;\n");		
+		buf.append("    public void foo() {");
+		buf.append("        try {\n");
+		buf.append("        } catch (A e) {\n");		
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}	
 	
 
 }

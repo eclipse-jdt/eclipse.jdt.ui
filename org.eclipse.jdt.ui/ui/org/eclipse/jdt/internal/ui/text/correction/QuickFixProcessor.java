@@ -70,7 +70,8 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.ExceptionTypeAmbiguous:
 			case IProblem.ReturnTypeAmbiguous:
 			case IProblem.SuperclassAmbiguous:
-			case IProblem.InterfaceAmbiguous:					
+			case IProblem.InterfaceAmbiguous:
+			case IProblem.AmbiguousType:				
 				return true;
 			default:
 				return false;
@@ -116,7 +117,8 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.ExceptionTypeAmbiguous:
 			case IProblem.ReturnTypeAmbiguous:
 			case IProblem.SuperclassAmbiguous:
-			case IProblem.InterfaceAmbiguous:		
+			case IProblem.InterfaceAmbiguous:
+			case IProblem.AmbiguousType:	
 				UnresolvedElementsSubProcessor.getAmbiguosTypeReferenceProposals(context, proposals);
 				break;	
 			case IProblem.PublicClassMustMatchFileName:
