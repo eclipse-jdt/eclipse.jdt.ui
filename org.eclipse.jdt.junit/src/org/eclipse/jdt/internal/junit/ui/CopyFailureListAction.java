@@ -28,16 +28,13 @@ public class CopyFailureListAction extends Action {
 	private FailureRunView fView;
 	
 	private final Clipboard fClipboard;
-	
-	private TestRunnerViewPart fTestRunner;
-	
+		
 	/**
 	 * Constructor for CopyFailureListAction.
 	 */
 	public CopyFailureListAction(TestRunnerViewPart runner, FailureRunView view, Clipboard clipboard) {
 		super(JUnitMessages.getString("CopyFailureList.action.label"));  //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.COPYFAILURELIST_ACTION);
-		fTestRunner= runner;
 		fView= view;
 		fClipboard= clipboard;
 	}

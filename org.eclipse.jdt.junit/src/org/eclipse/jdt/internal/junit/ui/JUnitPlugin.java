@@ -304,10 +304,10 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		final JavaModelException[] exception= new JavaModelException[1];
 		ProgressMonitorDialog monitor= new ProgressMonitorDialog(shell);
 		IRunnableWithProgress r= new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			public void run(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
 				try {
 					Set packageNameSet= new HashSet();
-					monitor.beginTask(JUnitMessages.getString("JUnitPlugin.searching"), projects.length); //$NON-NLS-1$
+					pm.beginTask(JUnitMessages.getString("JUnitPlugin.searching"), projects.length); //$NON-NLS-1$
 					for (int i= 0; i < projects.length; i++) {
 						IPackageFragment[] pkgs= projects[i].getPackageFragments();
 						for (int j= 0; j < pkgs.length; j++) {
@@ -322,9 +322,9 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 							if (packageNameSet.add(pkgName))
 								packageList.add(pkg);
 						}
-						monitor.worked(1);
+						pm.worked(1);
 					}
-					monitor.done();
+					pm.done();
 				} catch (JavaModelException jme) {
 					exception[0]= jme;
 				}

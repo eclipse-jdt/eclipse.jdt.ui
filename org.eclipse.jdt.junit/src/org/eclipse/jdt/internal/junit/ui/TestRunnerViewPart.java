@@ -732,7 +732,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL));
 
 		ITestRunView failureRunView= new FailureRunView(tabFolder, fClipboard, this);		
-		ITestRunView testHierarchyRunView= new HierarchyRunView(tabFolder, fClipboard, this);
+		ITestRunView testHierarchyRunView= new HierarchyRunView(tabFolder, this);
 		
 		fTestRunViews.addElement(failureRunView);
 		fTestRunViews.addElement(testHierarchyRunView);

@@ -83,7 +83,6 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	public static final String START_MARKER= "//$JUnit-BEGIN$"; //$NON-NLS-1$
 	public static final String END_MARKER= "//$JUnit-END$"; //$NON-NLS-1$
 	
-	private IPackageFragment fCurrentPackage;
 	private CheckboxTableViewer fClassesInSuiteTable;	
 	private Button fSelectAllButton;
 	private Button fDeselectAllButton;
@@ -229,7 +228,6 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 				else
 					return;
 			}
-			fCurrentPackage= pack;			
 			fClassesInSuiteTable.setInput(pack);
 			fClassesInSuiteTable.setAllChecked(true);
 			updateSelectedClassesLabel();	
