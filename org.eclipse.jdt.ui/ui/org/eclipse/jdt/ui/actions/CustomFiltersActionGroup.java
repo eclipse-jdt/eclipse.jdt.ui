@@ -336,8 +336,10 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			fFilterIdsUsedInLastViewMenu[i]= id;
 			boolean state= fEnabledFilterIds.containsKey(id) && ((Boolean)fEnabledFilterIds.get(id)).booleanValue();
 			FilterDescriptor filterDesc= (FilterDescriptor)fFilterDescriptorMap.get(id);
-			IContributionItem item= new FilterActionMenuContributionItem(this, id, filterDesc.getName(), state, i+1);
-			mm.insertBefore(RECENT_FILTERS_GROUP_NAME, item);
+			if (filterDesc != null) {
+				IContributionItem item= new FilterActionMenuContributionItem(this, id, filterDesc.getName(), state, i+1);
+				mm.insertBefore(RECENT_FILTERS_GROUP_NAME, item);
+			}
 		}
 	}
 
