@@ -11,6 +11,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
@@ -21,11 +32,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -74,6 +80,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -87,16 +94,19 @@ import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelect
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectNextAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.SurroundWithTryCatchAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
+import org.eclipse.jdt.internal.ui.text.java.IProblemAcceptor;
+import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
 
 
 /**
  * Java specific text editor.
  */
-public class CompilationUnitEditor extends JavaEditor {
+public class CompilationUnitEditor extends JavaEditor implements IReconcilingParticipant, IProblemAcceptor {
 	
 	
 	interface ITextConverter {
@@ -104,12 +114,75 @@ public class CompilationUnitEditor extends JavaEditor {
 	};
 	
 	
-	class InternalSourceViewer extends JavaCorrectionSourceViewer {
+	class AdaptedRulerLayout extends Layout {
+		
+		protected int fGap;
+		protected AdaptedSourceViewer fAdaptedSourceViewer;
+		
+		
+		protected AdaptedRulerLayout(int gap, AdaptedSourceViewer asv) {
+			fGap= gap;
+			fAdaptedSourceViewer= asv;
+		}
+		
+		protected Point computeSize(Composite composite, int wHint, int hHint, boolean flushCache) {
+			Control[] children= composite.getChildren();
+			Point s= children[children.length - 1].computeSize(SWT.DEFAULT, SWT.DEFAULT, flushCache);
+			if (fAdaptedSourceViewer.isVerticalRulerVisible())
+				s.x += fAdaptedSourceViewer.getVerticalRuler().getWidth() + fGap;
+			return s;
+		}
+		
+		protected void layout(Composite composite, boolean flushCache) {
+			Rectangle clArea= composite.getClientArea();
+			if (fAdaptedSourceViewer.isVerticalRulerVisible()) {
+				
+				StyledText textWidget= fAdaptedSourceViewer.getTextWidget();
+				Rectangle trim= textWidget.computeTrim(0, 0, 0, 0);
+				int scrollbarHeight= trim.height;
+				
+				IVerticalRuler vr= fAdaptedSourceViewer.getVerticalRuler();
+				int vrWidth=vr.getWidth();
+				OverviewRuler or= fAdaptedSourceViewer.getOverviewRuler();
+				int orWidth= or.getWidth();
+				
+				vr.getControl().setBounds(0, 0, vrWidth, clArea.height - scrollbarHeight);
+				textWidget.setBounds(vrWidth + fGap, 0, clArea.width - vrWidth - orWidth - 2*fGap, clArea.height);
+				or.getControl().setBounds(clArea.width - orWidth, scrollbarHeight, orWidth, clArea.height - 3*scrollbarHeight);
+				
+			} else {
+				StyledText textWidget= fAdaptedSourceViewer.getTextWidget();
+				textWidget.setBounds(0, 0, clArea.width, clArea.height);
+			}
+		}
+	};
+	
+	
+	class AdaptedSourceViewer extends JavaCorrectionSourceViewer  {
 		
 		private List fTextConverters;
+		private OverviewRuler fOverviewRuler;
 		
-		public InternalSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+		private IVerticalRuler fCachedVerticalRuler;
+		private boolean fCachedIsVerticalRulerVisible;
+		
+		
+		public AdaptedSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 			super(parent, ruler, styles, CompilationUnitEditor.this);
+			
+			fCachedVerticalRuler= ruler;
+			fCachedIsVerticalRulerVisible= (ruler != null);
+			fOverviewRuler= new OverviewRuler(VERTICAL_RULER_WIDTH);
+			
+			delayedCreateControl(parent, styles);
+		}
+		
+		/*
+		 * @see ISourceViewer#showAnnotations(boolean)
+		 */
+		public void showAnnotations(boolean show) {
+			fCachedIsVerticalRulerVisible= (show && fCachedVerticalRuler != null);
+			super.showAnnotations(show);
 		}
 		
 		public IContentAssistant getContentAssistant() {
@@ -134,11 +207,14 @@ public class CompilationUnitEditor extends JavaEditor {
 			super.doOperation(operation);
 		}
 		
+		/*
+		 * @see ITextOperationTarget#canDoOperation(int)
+		 */
 		public boolean canDoOperation(int operation) {
 			
 			if (getTextWidget() == null)
 				return false;
-	
+		
 			switch (operation) {
 				case SHIFT_RIGHT:
 				case SHIFT_LEFT:
@@ -178,6 +254,37 @@ public class CompilationUnitEditor extends JavaEditor {
 					((ITextConverter) e.next()).customizeDocumentCommand(getDocument(), command);
 			}
 		}
+		
+		public IVerticalRuler getVerticalRuler() {
+			return fCachedVerticalRuler;
+		}
+		
+		public boolean isVerticalRulerVisible() {
+			return fCachedIsVerticalRulerVisible;
+		}
+		
+		public OverviewRuler getOverviewRuler() {
+			return fOverviewRuler;
+		}
+		
+		/*
+		 * @see TextViewer#createControl(Composite, int)
+		 */
+		protected void createControl(Composite parent, int styles) {
+			// do nothing here
+		}
+		
+		protected void delayedCreateControl(Composite parent, int styles) {
+			//create the viewer
+			super.createControl(parent, styles);
+			
+			Control control= getControl();
+			if (control instanceof Composite) {
+				Composite composite= (Composite) control;
+				composite.setLayout(new AdaptedRulerLayout(GAP_SIZE, this));
+				fOverviewRuler.createControl(composite, this);
+			}
+		}	
 	};
 	
 	static class TabConverter implements ITextConverter {
@@ -217,7 +324,6 @@ public class CompilationUnitEditor extends JavaEditor {
 	private final static String CODE_FORMATTER_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";	
 	/* Preference key for code formatter tab character */
 	private final static String CODE_FORMATTER_TAB_CHAR= "org.eclipse.jdt.core.formatter.tabulation.char";	
-
 	/** Preference key for matching brackets */
 	public final static String MATCHING_BRACKETS=  "matchingBrackets";
 	/** Preference key for matching brackets color */
@@ -261,6 +367,8 @@ public class CompilationUnitEditor extends JavaEditor {
 	private TabConverter fTabConverter;
 	/** History for structure select action */
 	private SelectionHistory fSelectionHistory;
+	/** The editor's overview ruler */
+	private OverviewRuler fOverviewRuler;
 	
 	/**
 	 * Creates a new compilation unit editor.
@@ -272,7 +380,6 @@ public class CompilationUnitEditor extends JavaEditor {
 		setRulerContextMenuId("#CompilationUnitRulerContext"); //$NON-NLS-1$
 		setOutlinerContextMenuId("#CompilationUnitOutlinerContext"); //$NON-NLS-1$
 		setHelpContextId(IJavaHelpContextIds.COMPILATION_UNIT_EDITOR);
-
 		fSavePolicy= null;
 			
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
@@ -291,7 +398,6 @@ public class CompilationUnitEditor extends JavaEditor {
 		
 		setAction("ContentAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("ContentAssistContextInformation", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION));			 //$NON-NLS-1$ //$NON-NLS-2$
-
 		setAction("AddImportOnSelection", new AddImportOnSelectionAction(this));		 //$NON-NLS-1$
 		setAction("OrganizeImports", new OrganizeImportsAction(this)); //$NON-NLS-1$
 		
@@ -324,8 +430,15 @@ public class CompilationUnitEditor extends JavaEditor {
 		if (unit != null) {
 			synchronized (unit) {
 				try {
+					
+//					ReconcilingProblemRequestor rpr= new ReconcilingProblemRequestor(this);
+//					rpr.init();
+//					unit.reconcile(rpr);
 					unit.reconcile();
+//					setProblems(rpr.getProblems());
+					
 					return unit.getElementAt(offset);
+				
 				} catch (JavaModelException x) {
 				}
 			}
@@ -393,7 +506,6 @@ public class CompilationUnitEditor extends JavaEditor {
 		
 		return page;
 	}
-
 	/**
 	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
 	 */
@@ -505,7 +617,6 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 		}
 	}
-
 	/**
 	 * Sets the given message as error message to this editor's status line.
 	 * @param msg message to be set
@@ -530,7 +641,6 @@ public class CompilationUnitEditor extends JavaEditor {
 			getSelectionProvider().addSelectionChangedListener(fStatusLineClearer);
 		}
 	}
-
 	
 	private IMarker getNextError(int offset, boolean forward) {
 		
@@ -568,7 +678,6 @@ public class CompilationUnitEditor extends JavaEditor {
 							distance= currentDistance;
 							nextError= marker;
 						}
-
 					}
 				}
 		
@@ -865,15 +974,15 @@ public class CompilationUnitEditor extends JavaEditor {
 		if (fTabConverter == null) {
 			fTabConverter= new TabConverter();
 			fTabConverter.setNumberOfSpacesPerTab(getPreferenceStore().getInt(CODE_FORMATTER_TAB_SIZE));
-			InternalSourceViewer isv= (InternalSourceViewer) getSourceViewer();
-			isv.addTextConverter(fTabConverter);
+			AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
+			asv.addTextConverter(fTabConverter);
 		}
 	}
 	
 	private void stopTabConversion() {
 		if (fTabConverter != null) {
-			InternalSourceViewer isv= (InternalSourceViewer) getSourceViewer();
-			isv.removeTextConverter(fTabConverter);
+			AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
+			asv.removeTextConverter(fTabConverter);
 			fTabConverter= null;
 		}
 	}
@@ -941,17 +1050,15 @@ public class CompilationUnitEditor extends JavaEditor {
 		
 		try {
 			
-			InternalSourceViewer isv= (InternalSourceViewer) getSourceViewer();
-			if (isv != null) {
+			AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
+			if (asv != null) {
 					
 				String p= event.getProperty();		
-
 				if (CODE_FORMATTER_TAB_SIZE.equals(p) || CODE_FORMATTER_TAB_CHAR.equals(p)) {
 				    SourceViewerConfiguration configuration= getSourceViewerConfiguration();
-
-					String[] types= configuration.getConfiguredContentTypes(isv);					
+					String[] types= configuration.getConfiguredContentTypes(asv);					
 					for (int i= 0; i < types.length; i++)
-					    isv.setIndentPrefixes(configuration.getIndentPrefixes(isv, types[i]), types[i]);
+					    asv.setIndentPrefixes(configuration.getIndentPrefixes(asv, types[i]), types[i]);
 					    
 					if (fTabConverter != null)
 						fTabConverter.setNumberOfSpacesPerTab(getPreferenceStore().getInt(CODE_FORMATTER_TAB_SIZE));
@@ -1027,7 +1134,7 @@ public class CompilationUnitEditor extends JavaEditor {
 					return;
 				}
 				
-				IContentAssistant c= isv.getContentAssistant();
+				IContentAssistant c= asv.getContentAssistant();
 				if (c instanceof ContentAssistant)
 					ContentAssistPreference.changeConfiguration((ContentAssistant) c, getPreferenceStore(), event);
 			}
@@ -1036,7 +1143,6 @@ public class CompilationUnitEditor extends JavaEditor {
 			super.handlePreferenceStoreChanged(event);
 		}
 	}
-
 	/**
 	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
 	 */
@@ -1054,25 +1160,52 @@ public class CompilationUnitEditor extends JavaEditor {
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-		return new InternalSourceViewer(parent, ruler, styles);
+		return new AdaptedSourceViewer(parent, ruler, styles);
 	}
 	
 	/**
-	 * Sets the given temporary problems as the editor's problems. This method
-	 * can be called from any thread.
+	 * Returns the list of problem positions.
 	 */
-	public void setProblems(final List problems) {	
-		getSite().getShell().getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				if (fProblemPainter != null)
-					fProblemPainter.updateProblems(problems);
-			}
-		});
-	}
-	
 	public List getProblemPositions() {
 		if (fProblemPainter != null)
 			return fProblemPainter.getProblemPositions();
 		return null;
+	}	
+	
+	/*
+	 * @see IProblemAcceptor#setProblems(IProblem[])
+	 */
+	public void setProblems(final IProblem[] problems) {
+		
+		if (fProblemPainter == null)
+			return;
+		
+		Shell shell= getSite().getShell();
+		if (shell != null && !shell.isDisposed()) {
+			shell.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					if (fProblemPainter != null)
+						fProblemPainter.updateProblems(problems);
+					AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
+					asv.getOverviewRuler().setProblemPositions(getProblemPositions());
+				}
+			});
+		}
+	}
+	
+	/*
+	 * @see IReconcilingParticipant#reconciled()
+	 */
+	public void reconciled() {
+		if (!WorkInProgressPreferencePage.synchronizeOutlineOnCursorMove()) {
+			Shell shell= getSite().getShell();
+			if (shell != null && !shell.isDisposed()) {
+				shell.getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						synchronizeOutlinePageSelection();
+					}
+				});
+			}
+		}
 	}
 }

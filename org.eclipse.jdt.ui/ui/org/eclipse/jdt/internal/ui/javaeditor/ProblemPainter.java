@@ -57,19 +57,21 @@ public class ProblemPainter implements IPainter, PaintListener {
 		fTextWidget= null;
 	}
 	
-	private void setProblems(List problems) {
-		for (Iterator e = problems.iterator(); e.hasNext();) {
-			ProblemPosition p= new ProblemPosition((IProblem) e.next());
+	private void setProblems(IProblem[] problems) {
+		int length= problems.length;
+		for (int i= 0; i < length; i++) {
+			ProblemPosition p= new ProblemPosition(problems[i]);
 			fProblemPositions.add(p);
 			if (fPositionManager != null)
 				fPositionManager.addManagedPosition(p);
 		}
 	}
 	
-	public void updateProblems(List problems) {
+	public void updateProblems(IProblem[] problems) {
 		deactivate(true);
-		setProblems(problems);
-		paint();
+		if (problems != null)
+			setProblems(problems);
+		paint(INTERNAL);
 	}
 	
 	private void removePositions() {
@@ -102,6 +104,9 @@ public class ProblemPainter implements IPainter, PaintListener {
 		}
 	}
 	
+	/*
+	 * @see PaintListener#paintControl(PaintEvent)
+	 */
 	public void paintControl(PaintEvent event) {
 		if (fTextWidget != null && hasProblems())
 			handleDrawRequest(event.gc);
@@ -174,9 +179,14 @@ public class ProblemPainter implements IPainter, PaintListener {
 	}
 	
 	/*
-	 * @see IPainter#paint()
+	 * @see IPainter#paint(int)
 	 */
-	public void paint() {
+	public void paint(int reason) {
+		if (INTERNAL == reason)
+			doPaint();
+	}
+	
+	private void doPaint() {
 		if (fIsActive) {
 			
 			if (hasProblems())

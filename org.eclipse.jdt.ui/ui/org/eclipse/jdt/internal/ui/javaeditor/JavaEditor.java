@@ -69,7 +69,6 @@ import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
-import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 
 
 

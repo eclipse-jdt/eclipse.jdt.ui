@@ -8,9 +8,17 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 public interface IPainter {
 	
+	/** Paint reasons */
+	int SELECTION=		0;
+	int TEXT_CHANGE=	1;
+	int KEY_STROKE=		2;
+	int MOUSE_BUTTON= 4;
+	int INTERNAL=			8; // may only be used by the painter itself
+	
+	
 	void dispose();
 	
-	void paint();
+	void paint(int reason);
 	
 	void deactivate(boolean redraw);
 	

@@ -104,9 +104,9 @@ public final class BracketPainter implements IPainter, PaintListener {
 	}
 	
 	/*
-	 * @see IPainter#paint()
+	 * @see IPainter#paint(int)
 	 */
-	public void paint() {
+	public void paint(int reason) {
 		Point selection= fSourceViewer.getSelectedRange();
 		if (selection.y > 0) {
 			deactivate(true);

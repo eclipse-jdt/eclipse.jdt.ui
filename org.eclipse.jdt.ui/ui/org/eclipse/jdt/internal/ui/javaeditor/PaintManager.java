@@ -162,9 +162,9 @@ public final class PaintManager implements KeyListener, MouseListener, ISelectio
 		}
 	}
 	
-	private void paint() {
+	private void paint(int reason) {
 		for (Iterator e = fPainters.iterator(); e.hasNext();)
-			((IPainter) e.next()).paint();
+			((IPainter) e.next()).paint(reason);
 	}
 	
 	/*
@@ -172,7 +172,7 @@ public final class PaintManager implements KeyListener, MouseListener, ISelectio
 	 */
 	public void keyPressed(KeyEvent e) {
 		if (fAutoRepeat)
-			paint();
+			paint(IPainter.KEY_STROKE);
 		
 		fTextChanged= false;
 		fAutoRepeat= true;
@@ -184,7 +184,7 @@ public final class PaintManager implements KeyListener, MouseListener, ISelectio
 	public void keyReleased(KeyEvent e) {
 		fAutoRepeat= false;
 		if (!fTextChanged)
-			paint();
+			paint(IPainter.KEY_STROKE);
 	}
 
 	/*
@@ -203,14 +203,14 @@ public final class PaintManager implements KeyListener, MouseListener, ISelectio
 	 * @see MouseListener#mouseUp(MouseEvent)
 	 */
 	public void mouseUp(MouseEvent e) {
-		paint();
+		paint(IPainter.MOUSE_BUTTON);
 	}
 	
 	/*
 	 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
 	 */
 	public void selectionChanged(SelectionChangedEvent event) {
-		paint();
+		paint(IPainter.SELECTION);
 	}
 	
 	/*
@@ -223,7 +223,7 @@ public final class PaintManager implements KeyListener, MouseListener, ISelectio
 			control.getDisplay().asyncExec(new Runnable() {
 				public void run() {
 					if (fTextChanged && fSourceViewer != null) 
-						paint();
+						paint(IPainter.TEXT_CHANGE);
 				}
 			});
 		}

@@ -43,7 +43,7 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 	 * @see LineBackgroundListener#lineGetBackground(LineBackgroundEvent)
 	 */
 	public void lineGetBackground(LineBackgroundEvent event) {
-		/* Don't use cached line information because of patched redrawing events. */
+		/* Don't use cached line information because of batched redrawing events. */
 		
 		if (fTextWidget != null) {
 			
@@ -116,9 +116,9 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 	}
 	
 	/*
-	 * @see IPainter#paint()
+	 * @see IPainter#paint(int)
 	 */
-	public void paint() {
+	public void paint(int reason) {
 		if (!fIsActive) {
 			fIsActive= true;
 			fTextWidget.addLineBackgroundListener(this);

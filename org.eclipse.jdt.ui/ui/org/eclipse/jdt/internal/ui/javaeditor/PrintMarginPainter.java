@@ -90,9 +90,9 @@ public class PrintMarginPainter  implements IPainter, PaintListener {
 	}
 
 	/*
-	 * @see IPainter#paint()
+	 * @see IPainter#paint(int)
 	 */
-	public void paint() {
+	public void paint(int reason) {
 		if (!fIsActive) {
 			fIsActive= true;
 			fTextWidget.addPaintListener(this);
