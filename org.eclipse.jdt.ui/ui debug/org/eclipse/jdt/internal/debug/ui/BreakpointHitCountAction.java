@@ -31,7 +31,7 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 	private static final String DIALOG_MESSAGE= PREFIX + "dialog.message";
 	private static final String DIALOG_INVALID= PREFIX + "dialog.invalid";
 
-	private static final String INITIAL_VALUE= "2";
+	private static final String INITIAL_VALUE= "0";
 
 	protected IStructuredSelection fCurrentSelection;
 
