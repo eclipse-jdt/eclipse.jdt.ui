@@ -1701,7 +1701,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 			
 		super.editorContextMenuAboutToShow(menu);
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, new Separator(IContextMenuConstants.GROUP_OPEN));	
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_SAVE, new Separator(IContextMenuConstants.GROUP_OPEN));	
 		menu.insertAfter(IContextMenuConstants.GROUP_OPEN, new GroupMarker(IContextMenuConstants.GROUP_SHOW));	
 		
 		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
