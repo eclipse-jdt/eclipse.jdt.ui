@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -597,7 +598,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 					// nothing reported in the wizard
 				}
 				if (manifest != null && manifest.getMainAttributes().getValue(Attributes.Name.MANIFEST_VERSION) == null)
-					setMessage(JarPackagerMessages.getString("JarManifestWizardPage.warning.noManifestVersion"), WizardPage.WARNING_MESSAGE); //$NON-NLS-1$
+					setMessage(JarPackagerMessages.getString("JarManifestWizardPage.warning.noManifestVersion"), DialogPage.WARNING); //$NON-NLS-1$
 			} else {
 				if (fJarPackage.getManifestLocation().toString().length() == 0)
 					setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.noManifestFile")); //$NON-NLS-1$
