@@ -1,4 +1,4 @@
-/*******************************************************************************
+ /*******************************************************************************
  * Copyright (c) 2000, 2003 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,6 +45,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -116,10 +118,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{PreferencesMessages.getString("JavaEditorPreferencePage.currentLineHighlighColor"), ExtendedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColor2"), ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.linkedPositionColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.linkedPositionSlaveColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_SLAVE_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.linkedPositionTargetColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_TARGET_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.linkedPositionExitColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_EXIT_COLOR}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.linkColor2"), PreferenceConstants.EDITOR_LINK_COLOR}, //$NON-NLS-1$
 	};
 	
@@ -132,6 +130,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForMethodParameters"), PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND }, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForCompletionReplacement"), PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND }, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForCompletionReplacement"), PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND } //$NON-NLS-1$
+	};
+	
+	private final String[] fAnnotationDecorationListModel= new String[] {
+		"None",
+		"Squigglies",
+		"Box",
+		"Underline",
+		"IBeam"
 	};
 
 	private OverlayPreferenceStore fOverlayStore;
@@ -190,6 +196,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Label fAutoInsertJavaTriggerLabel;
 	private Label fAutoInsertJavaDocTriggerLabel;
 	private Button fShowInTextCheckBox;
+	private Combo fDecorationStyleCombo;
 	private Button fHighlightInTextCheckBox;
 	private Button fShowInOverviewRulerCheckBox;
 	private Button fShowInVerticalRulerCheckBox;
@@ -274,10 +281,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR));
 
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINKED_POSITION_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINKED_POSITION_SLAVE_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINKED_POSITION_TARGET_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINKED_POSITION_EXIT_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINK_COLOR));
 		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CORRECTION_INDICATION));
@@ -341,6 +344,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getOverviewRulerPreferenceKey()));
 			if (info.getVerticalRulerPreferenceKey() != null)
 				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getVerticalRulerPreferenceKey()));
+			if (info.getTextStylePreferenceKey() != null)
+				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, info.getTextStylePreferenceKey()));
 		}
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
@@ -389,7 +394,17 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fAnnotationForegroundColorEditor.setColorValue(rgb);
 		
 		key= fAnnotationColorListModel[i][2];
-		fShowInTextCheckBox.setSelection(fOverlayStore.getBoolean(key));
+		boolean showInText = fOverlayStore.getBoolean(key);
+		fShowInTextCheckBox.setSelection(showInText);
+
+		key= fAnnotationColorListModel[i][6];
+		if (key != null) {
+			fDecorationStyleCombo.setEnabled(showInText);
+			fDecorationStyleCombo.setText(fAnnotationDecorationListModel[fOverlayStore.getInt(key)]);
+		} else {
+			fDecorationStyleCombo.setEnabled(false);
+			fDecorationStyleCombo.setText(fAnnotationDecorationListModel[AnnotationPreference.STYLE_SQUIGGLIES]); // set selection to squigglies if the key is not there (legacy support)
+		}
 		
 		key= fAnnotationColorListModel[i][3];
 		fShowInOverviewRulerCheckBox.setSelection(fOverlayStore.getBoolean(key));
@@ -722,6 +737,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
         gd.horizontalSpan= 2;
 		fShowInTextCheckBox.setLayoutData(gd);
 		
+		fDecorationStyleCombo= new Combo(optionsComposite, SWT.READ_ONLY);
+		for(int i= 0; i < fAnnotationDecorationListModel.length; i++)
+			fDecorationStyleCombo.add(fAnnotationDecorationListModel[i]);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+        gd.horizontalSpan= 2;
+		fDecorationStyleCombo.setLayoutData(gd);
+		
 		fHighlightInTextCheckBox= new Button(optionsComposite, SWT.CHECK);
 		fHighlightInTextCheckBox.setText(PreferencesMessages.getString("TextEditorPreferencePage.annotations.highlightInText")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
@@ -774,6 +797,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				int i= fAnnotationList.getSelectionIndex();
 				String key= fAnnotationColorListModel[i][2];
 				fOverlayStore.setValue(key, fShowInTextCheckBox.getSelection());
+				String decorationKey= fAnnotationColorListModel[i][6];
+				fDecorationStyleCombo.setEnabled(decorationKey != null && fShowInTextCheckBox.getSelection());
 			}
 		});
 		
@@ -825,6 +850,27 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		});
 		
+		fDecorationStyleCombo.addSelectionListener(new SelectionListener() {
+			/**
+			 * {@inheritdoc}
+			 */
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			
+			/**
+			 * {@inheritdoc}
+			 */
+			public void widgetSelected(SelectionEvent e) {
+				int i= fAnnotationList.getSelectionIndex();
+				String key= fAnnotationColorListModel[i][6];
+				if (key != null) {
+					int value= Arrays.asList(fAnnotationDecorationListModel).indexOf(fDecorationStyleCombo.getText());
+					fOverlayStore.setValue(key, value);
+				}
+			}
+		});
+		
 		return composite;
 	}
 
@@ -851,7 +897,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Iterator e= sortedPreferences.iterator();
 		while (e.hasNext()) {
 			AnnotationPreference info= (AnnotationPreference) e.next();
-			listModelItems.add(new String[] { info.getPreferenceLabel(), info.getColorPreferenceKey(), info.getTextPreferenceKey(), info.getOverviewRulerPreferenceKey(), info.getHighlightPreferenceKey(), info.getVerticalRulerPreferenceKey()});
+			listModelItems.add(new String[] { info.getPreferenceLabel(), info.getColorPreferenceKey(), info.getTextPreferenceKey(), info.getOverviewRulerPreferenceKey(), info.getHighlightPreferenceKey(), info.getVerticalRulerPreferenceKey(), info.getTextStylePreferenceKey()});
 		}
 		String[][] items= new String[listModelItems.size()][];
 		listModelItems.toArray(items);

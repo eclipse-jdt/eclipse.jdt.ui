@@ -48,10 +48,10 @@ class LinkedUIPainter implements PaintListener {
 
 	// configure drawing of master, slave, and target position
 	// TODO come up with a good setting / allow configuration
-	private static final int MASTER= BOX;
+	private static final int MASTER= NONE;
 	private static final int SLAVES= NONE;
-	private static final int TARGETS= BOX;
-	private static final int EXIT= VLINE;
+	private static final int TARGETS= NONE;
+	private static final int EXIT= NONE;
 	
 	
 	/**
@@ -123,7 +123,7 @@ class LinkedUIPainter implements PaintListener {
 			Point maxLocation= getMaximumLocation(text, offset, length);
 			
 			int x1= minLocation.x;
-			int x2= minLocation.x + maxLocation.x - minLocation.x - 1;
+			int x2= maxLocation.x - 1;
 			int y= minLocation.y + text.getLineHeight() - 1;
 			
 			GC gc= event.gc;

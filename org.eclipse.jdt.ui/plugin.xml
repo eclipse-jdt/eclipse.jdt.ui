@@ -611,10 +611,12 @@
             overviewRulerPreferenceValue="false"
             presentationLayer="4"
             label="%linked.focus.label"
-            textPreferenceValue="false"
+            textPreferenceValue="true"
             textPreferenceKey="linked.focus.text"
             highlightPreferenceKey="linked.focus.highlight"
             highlightPreferenceValue="true"
+            textStylePreferenceKey="linked.focus.text.style"
+            textStylePreferenceValue="BOX"
             overviewRulerPreferenceKey="linked.focus.overviewruler">
       </specification>      
       <specification
@@ -635,6 +637,8 @@
             textPreferenceKey="linked.slave.text"
             highlightPreferenceKey="linked.slave.highlight"
             highlightPreferenceValue="true"
+            textStylePreferenceKey="linked.slave.text.style"
+            textStylePreferenceValue="NONE"
             overviewRulerPreferenceKey="linked.slave.overviewruler">
       </specification>      
       <specification
@@ -651,11 +655,35 @@
             overviewRulerPreferenceValue="false"
             presentationLayer="4"
             label="%linked.target.label"
-            textPreferenceValue="false"
+            textPreferenceValue="true"
             textPreferenceKey="linked.target.text"
             highlightPreferenceKey="linked.target.highlight"
             highlightPreferenceValue="false"
+            textStylePreferenceKey="linked.target.text.style"
+            textStylePreferenceValue="BOX"
             overviewRulerPreferenceKey="linked.target.overviewruler">
+      </specification>
+      <specification
+            annotationType="org.eclipse.jdt.ui.link.exit"
+            colorPreferenceValue="252,255,150"
+            colorPreferenceKey="linked.exit.color"
+            isGoToPreviousNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="linked.exit.navigation.previous"
+            showInNextPrevDropdownToolbarAction="false"
+            showInNextPrevDropdownToolbarActionKey="linked.exit.navigation.dropdown"
+            isGoToNextNavigationTarget="false"
+            isGoToNextNavigationTargetKey="linked.exit.navigation.next"
+            contributesToHeader="false"
+            overviewRulerPreferenceValue="false"
+            presentationLayer="4"
+            label="%linked.exit.label"
+            textPreferenceValue="true"
+            textPreferenceKey="linked.exit.text"
+            highlightPreferenceKey="linked.exit.highlight"
+            highlightPreferenceValue="false"
+            textStylePreferenceKey="linked.exit.text.style"
+            textStylePreferenceValue="IBEAM"
+            overviewRulerPreferenceKey="linked.exit.overviewruler">
       </specification>
 	</extension>
 

@@ -19,14 +19,10 @@ import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -53,8 +49,6 @@ import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
@@ -527,9 +521,6 @@ public class LinkedUIControl {
 	/** The last caret position, used by fCaretListener. */
 	private final Position fCaretPosition= new Position(0, 0);
 
-	/** The painter for the underline of the current position. */
-	private LinkedUIPainter fPainter;
-
 	/** The exit policy to control custom exit behaviour */
 	private IExitPolicy fExitPolicy= new NullExitPolicy();
 
@@ -619,12 +610,6 @@ public class LinkedUIControl {
 		fIterator= new TabStopIterator(fEnvironment.getTabStopSequence());
 		fIterator.setCycling(!fEnvironment.isNested());
 		fEnvironment.addLinkedListener(fLinkedListener);
-
-		fPainter= new LinkedUIPainter(fCurrentTarget.getViewer(), fEnvironment);
-		fPainter.setMasterColor(getColor(PreferenceConstants.EDITOR_LINKED_POSITION_COLOR));
-		fPainter.setSlaveColor(getColor(PreferenceConstants.EDITOR_LINKED_POSITION_SLAVE_COLOR));
-		fPainter.setTargetColor(getColor(PreferenceConstants.EDITOR_LINKED_POSITION_TARGET_COLOR));
-		fPainter.setExitColor(getColor(PreferenceConstants.EDITOR_LINKED_POSITION_EXIT_COLOR));
 
 		fAssistant= new ContentAssistant2();
 		fAssistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
@@ -773,8 +758,6 @@ public class LinkedUIControl {
 		if (fFramePosition != null && fFramePosition != fExitPosition)
 			target.beginCompoundChange();
 	
-		fPainter.setMasterPosition(fFramePosition);
-		
 		if (select)
 			select();
 		if (fFramePosition == fExitPosition && !fIterator.isCycling())
@@ -817,7 +800,6 @@ public class LinkedUIControl {
 	private void redraw() {
 		if (fCurrentTarget.fAnnotationModel != null)
 			fCurrentTarget.fAnnotationModel.switchToPosition(fEnvironment, fFramePosition);
-		fPainter.redraw();
 	}
 
 	private void connect() {
@@ -845,15 +827,12 @@ public class LinkedUIControl {
 				if (ourModel == null) {
 					LinkedPositionAnnotations lpa= new LinkedPositionAnnotations();
 					lpa.setTargets(fIterator.getPositions());
+					lpa.setExitTarget(fExitPosition);
 					ext.addAnnotationModel(getUniqueKey(), lpa);
 					fCurrentTarget.fAnnotationModel= lpa;
 				}
 			}
 		}
-		fPainter.setViewer(viewer);
-		fPainter.setTargetPositions(fIterator.getPositions());
-		fPainter.setExitPosition(fExitPosition);
-		fCurrentTarget.fWidget.addPaintListener(fPainter);
 		fCurrentTarget.fWidget.showSelection();
 		fCurrentTarget.fWidget.addVerifyListener(fCaretListener);
 		fCurrentTarget.fWidget.addModifyListener(fCaretListener);
@@ -889,7 +868,6 @@ public class LinkedUIControl {
 		if (text != null && !text.isDisposed()) {
 			text.removeModifyListener(fCaretListener);
 			text.removeVerifyListener(fCaretListener);
-			text.removePaintListener(fPainter);
 		}
 
 		// don't remove the verify key listener to let it keep its position
@@ -924,7 +902,6 @@ public class LinkedUIControl {
 //		JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "leaving linked mode", null));
 		disconnect();
 		redraw();
-		fPainter.dispose();
 		
 		for (int i= 0; i < fTargets.length; i++) {
 			if (fCurrentTarget.fKeyListener != null) {
@@ -981,38 +958,6 @@ public class LinkedUIControl {
 		}
 
 		fEnvironment.exit(flags);
-	}
-
-	private Color getColor(String key) {
-		StyledText text= fCurrentTarget.getViewer().getTextWidget();
-		if (text != null) {
-			Display display= text.getDisplay();
-			return createColor(JavaPlugin.getDefault().getPreferenceStore(), key, display);
-		}
-		return null;
-	}
-
-	/**
-	 * Creates a color from the information stored in the given preference
-	 * store. Returns <code>null</code> if there is no such information
-	 * available.
-	 */
-	private Color createColor(IPreferenceStore store, String key, Display display) {
-
-		RGB rgb= null;
-
-		if (store != null && store.contains(key)) {
-
-			if (store.isDefault(key))
-				rgb= PreferenceConverter.getDefaultColor(store, key);
-			else
-				rgb= PreferenceConverter.getColor(store, key);
-
-			if (rgb != null)
-				return new Color(display, rgb);
-		}
-
-		return new Color(display, new RGB(100, 255, 100));
 	}
 
 	/**

@@ -34,17 +34,20 @@ final class LinkedPositionAnnotations extends AnnotationModel {
 	private static final String TARGET_ANNOTATION_TYPE= "org.eclipse.jdt.ui.link.target"; //$NON-NLS-1$
 	private static final String SLAVE_ANNOTATION_TYPE= "org.eclipse.jdt.ui.link.slave"; //$NON-NLS-1$
 	private static final String FOCUS_ANNOTATION_TYPE= "org.eclipse.jdt.ui.link.master"; //$NON-NLS-1$
+	private static final String EXIT_ANNOTATION_TYPE= "org.eclipse.jdt.ui.link.exit"; //$NON-NLS-1$
 	
 	/* configuration */
-	final static boolean markTargets= true;
-	final static boolean markSlaves= true;
-	final static boolean markFocus= true;
-	final static boolean markFirstTarget= true;
+	private final static boolean markTargets= true;
+	private final static boolean markSlaves= true;
+	private final static boolean markFocus= true;
+	private final static boolean markExitTarget= true;
 	
 	private Annotation fFocusAnnotation= null;
+	private Annotation fExitAnnotation= null;
 	private final Map fGroupAnnotations= new HashMap();
 	private final Map fTargetAnnotations= new HashMap();
 	private Position[] fTargets= new Position[0];
+	private LinkedPosition fExitPosition= null;
 
 	/**
 	 * Sets the position that should be highlighted as the focus position, i.e. 
@@ -61,6 +64,24 @@ final class LinkedPositionAnnotations extends AnnotationModel {
 				addAnnotation(fFocusAnnotation, position, false);
 			} else
 				fFocusAnnotation= null;
+		}
+	}
+	
+	/**
+	 * Sets the position that should be highlighted as the exit position, i.e. 
+	 * as the position whose changes are propagated to all its linked positions
+	 * by the linked environment.
+	 * 
+	 * @param position the new exit position, or <code>null</code> if no focus is set.
+	 */
+	private void setExitPosition(Position position) throws BadLocationException {
+		if (markExitTarget && getPosition(fExitAnnotation) != position) {
+			removeAnnotation(fExitAnnotation, false);
+			if (position != null) {
+				fExitAnnotation= new Annotation(EXIT_ANNOTATION_TYPE, false, ""); //$NON-NLS-1$
+				addAnnotation(fExitAnnotation, position, false);
+			} else
+				fExitAnnotation= null;
 		}
 	}
 	
@@ -143,7 +164,6 @@ final class LinkedPositionAnnotations extends AnnotationModel {
 		if (fDocument == null || position != null && getPosition(fFocusAnnotation) == position)
 			return;
 		
-		
 		LinkedPositionGroup linkedGroup= null;
 		if (position != null)
 			linkedGroup= env.getGroupForPosition(position);
@@ -161,14 +181,34 @@ final class LinkedPositionAnnotations extends AnnotationModel {
 			// position is not valid if not in this document
 			position= null;
 		
+		LinkedPosition exit= fExitPosition;
+		if (exit == null || !fDocument.equals(exit.getDocument()))
+			// position is not valid if not in this document
+			exit= null;
+		
+		
+		if (exit != null) {
+			group.remove(exit);
+			targets.remove(exit);
+		}
+		
 		group.removeAll(targets);
 		targets.remove(position);
 		group.remove(position);
+//		if (position == null)
+//			System.out.println("n");
+//		if (group.removeAll(targets))
+//			System.out.println("g");
+//		if (targets.remove(position))
+//			System.out.println("t");
+//		if (group.remove(position))
+//			System.out.println("p");
 		prune(targets);
 		prune(group);
 		
 		try {
 			setFocusPosition(position);
+			setExitPosition(exit);
 			setGroupPositions(group);
 			setTargetPositions(targets);
 		} catch (BadLocationException e) {
@@ -199,6 +239,15 @@ final class LinkedPositionAnnotations extends AnnotationModel {
 	 */
 	public void setTargets(Position[] positions) {
 		fTargets= positions;
+	}
+	
+	/**
+	 * Sets the exit position.
+	 * 
+	 * @param position the new exit position, or <code>null</code> if no exit position should be set
+	 */
+	public void setExitTarget(LinkedPosition position) {
+		fExitPosition = position;
 	}
 	
 	/*
