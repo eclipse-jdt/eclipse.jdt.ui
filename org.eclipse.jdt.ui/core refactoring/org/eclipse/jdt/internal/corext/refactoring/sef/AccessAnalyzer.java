@@ -192,6 +192,8 @@ class AccessAnalyzer extends ASTVisitor {
 	}
 	
 	private boolean considerBinding(IBinding binding, ASTNode node) {
+		if (!(binding instanceof IVariableBinding))
+			return false;
 		boolean result= Bindings.equals(fFieldBinding, binding);
 		if (!result || fEncapsulateDeclaringClass)
 			return result;

@@ -33,6 +33,8 @@ public class SefTests extends AbstractSelectionTestCase {
 
 	private static SefTestSetup fgTestSetup;
 	
+	private static final boolean BUG_83100= true;
+	
 	public SefTests(String name) {
 		super(name);
 	}
@@ -225,6 +227,14 @@ public class SefTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testGenericRead() throws Exception {
+		objectTest("field");
+	}
+
+	public void testGenericRead2() throws Exception {
+		if (BUG_83100) {
+			System.out.println("Test generic read 2 disabled due to bug 83100");
+			return;
+		}
 		objectTest("field");
 	}
 
