@@ -155,7 +155,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 									base= getMainType(cu);
 									if (base == null) {
 										if (fOutlineViewer != null)
-											fOutlineViewer.refresh(false);
+											fOutlineViewer.refresh(true);
 										return;
 									}
 								}
@@ -364,7 +364,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 							&& delta.getElement() instanceof IType
 							&& (delta.getKind() & IJavaElementDelta.ADDED) != 0)
 						{
-							refresh(false);
+							refresh(true);
 
 						} else {
 							Widget w= findItem(fInput);
@@ -377,7 +377,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						}
 					} else {
 						// just for now
-						refresh(false);
+						refresh(true);
 					}
 				}
 				
