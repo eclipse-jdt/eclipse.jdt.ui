@@ -57,8 +57,4 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getFormattedString("RenameRefactoringWizard.internal_error", msg));//$NON-NLS-1$
 		}	
 	}
-	
-	protected boolean checkActivationOnOpen() {
-		return true;
-	}
 }

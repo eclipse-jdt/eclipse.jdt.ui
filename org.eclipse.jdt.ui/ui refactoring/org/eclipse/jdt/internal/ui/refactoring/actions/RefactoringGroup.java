@@ -6,6 +6,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.rename.RenameParametersRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
@@ -28,9 +29,7 @@ import org.eclipse.ui.actions.SelectionProviderAction;
  */
 public class RefactoringGroup extends ContextMenuGroup {
 	
-	//wizard actions
 	private RefactoringAction[] fOpenWizardActions;
-	
 	private boolean fIntitialized= false;
 	
 	public void fill(IMenuManager manager, GroupContext context) {
@@ -58,17 +57,20 @@ public class RefactoringGroup extends ContextMenuGroup {
 		fIntitialized= true;
 	}
 	
-	/* package */ static ITextBufferChangeCreator createChangeCreator(){
+	static ITextBufferChangeCreator createChangeCreator(){
 		return new DocumentTextBufferChangeCreator(JavaPlugin.getDefault().getCompilationUnitDocumentProvider());
 	}
 	
 	// -------------------- method refactorings ----------------------
 	
-	/* package */ static OpenRefactoringWizardAction createRenameParametersAction(StructuredSelectionProvider selectionProvider, final ITextBufferChangeCreator changeCreator) {
+	static OpenRefactoringWizardAction createRenameParametersAction(StructuredSelectionProvider selectionProvider, final ITextBufferChangeCreator changeCreator) {
 		String label= RefactoringMessages.getString("RefactoringGroup.rename_parameters"); //$NON-NLS-1$
 		return new OpenRefactoringWizardAction(label, selectionProvider, IMethod.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameParametersRefactoring(changeCreator, (IMethod)obj);
+			}
+			boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
+				return ((RenameParametersRefactoring)refactoring).checkPreactivation().isOK();
 			}
 			protected RefactoringWizard createWizard(Refactoring ref){
 				return new RenameParametersWizard((RenameParametersRefactoring)ref);

@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.reorg.TextBufferChangeManager;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
@@ -39,7 +38,7 @@ import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
 import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
 
-public class RenameFieldRefactoring extends Refactoring implements IRenameRefactoring, IPreactivatedRefactoring{
+public class RenameFieldRefactoring extends Refactoring implements IRenameRefactoring{
 	
 	private String fNewName;
 	private IField fField;
@@ -54,6 +53,17 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		fTextBufferChangeCreator= changeCreator;
 		fField= field;
 		fUpdateReferences= true;
+	}
+	
+	/* non java-doc
+	 * @see Refactoring#checkPreconditions(IProgressMonitor)
+	 */
+	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= checkPreactivation();
+		if (result.hasFatalError())
+			return result;
+		result.merge(super.checkPreconditions(pm));
+		return result;
 	}
 		
 	/* non java-doc

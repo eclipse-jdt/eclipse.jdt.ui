@@ -6,18 +6,17 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.util.Iterator;
 
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	
@@ -46,7 +45,12 @@ public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	 * @see Action#run()
 	 */
 	public void run() {
-		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), createWizard(fRefactoring)).open();
+		Assert.isNotNull(fRefactoring);
+		try{
+			activateRefactoringWizard(fRefactoring, createWizard(fRefactoring), "Refactoring");
+		} catch (JavaModelException e){
+			ExceptionHandler.handle(e, "Refactoring", "Unexpected exception occurred. See log for details.");
+		}	
 	}
 		
 	/**
@@ -64,19 +68,13 @@ public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	private final boolean shouldAcceptElement(Object obj) {
 		try{
 			fRefactoring= createNewRefactoringInstance(obj);
-			return canActivateRefactoring();
+			return canActivateRefactoring(fRefactoring);
 		} catch (JavaModelException e){
 				JavaPlugin.log(e.getStatus());
 				return false;
 		}	
 	}
 	
-	private boolean canActivateRefactoring()  throws JavaModelException{
-		//FIX ME: must have a better solution to this
-		if (fRefactoring instanceof IPreactivatedRefactoring)
-			return ((IPreactivatedRefactoring)fRefactoring).checkPreactivation().isOK();
-		else	
-			return fRefactoring.checkActivation(new NullProgressMonitor()).isOK();
-	}
+	abstract boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException;
 }
 

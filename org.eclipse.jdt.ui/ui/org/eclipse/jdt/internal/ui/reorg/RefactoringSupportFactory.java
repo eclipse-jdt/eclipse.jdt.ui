@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -15,6 +16,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.rename.RenameCompilationUnitRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.rename.RenameFieldRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.rename.RenameJavaProjectRefactoring;
@@ -23,17 +25,20 @@ import org.eclipse.jdt.internal.core.refactoring.rename.RenamePackageRefactoring
 import org.eclipse.jdt.internal.core.refactoring.rename.RenameResourceRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.rename.RenameSourceFolderRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.rename.RenameTypeRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusContentProvider;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusEntryLabelProvider;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 
@@ -43,34 +48,25 @@ public class RefactoringSupportFactory {
 	private abstract static class RenameSupport implements IRefactoringRenameSupport {
 		private IRenameRefactoring fRefactoring;
 
-		public boolean canRename(Object element) {
-			try {
-				fRefactoring= createRefactoring(element, new DocumentTextBufferChangeCreator(JavaPlugin.getDefault().getCompilationUnitDocumentProvider()));
-				//FIX ME: must have a better solution to this
-				boolean canRename= false;
-				if (fRefactoring instanceof IPreactivatedRefactoring)
-					canRename= ((IPreactivatedRefactoring)fRefactoring).checkPreactivation().isOK();
-				 else
-					canRename= ((Refactoring)fRefactoring).checkActivation(new NullProgressMonitor()).isOK();
-				 if (!canRename)	
-				 	fRefactoring= null;
-				 return canRename;	
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
-				fRefactoring= null;
-				return false;
-			}	
+		public boolean canRename(Object element) throws JavaModelException{
+			fRefactoring= createRefactoring(element, new DocumentTextBufferChangeCreator(JavaPlugin.getDefault().getCompilationUnitDocumentProvider()));
+			boolean canRename= canAddToMenu(fRefactoring);
+			 if (!canRename)	
+			 	fRefactoring= null;
+			 return canRename;	
 		}
 		
-		public void rename(Object element) {
+		public void rename(Object element) throws JavaModelException{
 			Assert.isNotNull(fRefactoring);
-			new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), createWizard(fRefactoring)).open();
+			RefactoringAction.activateRefactoringWizard((Refactoring)fRefactoring, createWizard(fRefactoring), "Rename");
 			fRefactoring= null;
 		}
 		
 		abstract IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) throws JavaModelException;
 
 		abstract RefactoringWizard createWizard(IRenameRefactoring ref);
+		
+		abstract boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException;
 	}
 	
 	private static RefactoringWizard createRenameWizard(IRenameRefactoring ref, String title, String message, String wizardPageHelp, String errorPageHelp, ImageDescriptor image){
@@ -84,7 +80,9 @@ public class RefactoringSupportFactory {
 			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenamePackageRefactoring(creator, (IPackageFragment)element);
 			}
-			
+			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
+				return ((RenamePackageRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
+			}
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= "Rename Package";
 				String message= "Enter the new name for this package. References to all types declared in it will be updated.";
@@ -101,6 +99,9 @@ public class RefactoringSupportFactory {
 			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameCompilationUnitRefactoring(creator, (ICompilationUnit)element);
 			}
+			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
+				return ((RenameCompilationUnitRefactoring)refactoring).checkPreactivation().isOK();
+			}
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= "Rename Compilation Unit";
 				String message= "Enter the new name for this compilation unit. Refactoring will also rename and update references to the type (if any exists) that has the same name as this compilation unit.";
@@ -116,6 +117,9 @@ public class RefactoringSupportFactory {
 		return new RenameSupport(){
 			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameSourceFolderRefactoring(creator, (IPackageFragmentRoot)element);
+			}
+			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
+				return ((RenameSourceFolderRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
 			}
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= "Rename Source Folder";
@@ -134,6 +138,9 @@ public class RefactoringSupportFactory {
 			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameJavaProjectRefactoring(creator, (IJavaProject)element);
 			}
+			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
+				return ((RenameJavaProjectRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
+			}
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= "Rename Java Project";
 				String message= "Enter the new name for this Java project.";
@@ -150,6 +157,9 @@ public class RefactoringSupportFactory {
 		return new RenameSupport(){
 			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameResourceRefactoring(creator, (IResource)element);
+			}
+			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
+				return ((RenameResourceRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
 			}
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 					String title= "Rename Resource";
@@ -168,6 +178,9 @@ public class RefactoringSupportFactory {
 			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameTypeRefactoring(creator, (IType)element);
 			}
+			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
+				return ((RenameTypeRefactoring)refactoring).checkPreactivation().isOK();
+			}
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= RefactoringMessages.getString("RefactoringGroup.rename_type_title"); //$NON-NLS-1$
 				String message= RefactoringMessages.getString("RefactoringGroup.rename_type_message"); //$NON-NLS-1$
@@ -184,6 +197,9 @@ public class RefactoringSupportFactory {
 			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) throws JavaModelException{
 				return RenameMethodRefactoring.createInstance(creator, (IMethod)element);
 			}
+			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
+				return ((RenameMethodRefactoring)refactoring).checkPreactivation().isOK();
+			}
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= RefactoringMessages.getString("RefactoringGroup.rename_method_title"); //$NON-NLS-1$
 				String message= RefactoringMessages.getString("RefactoringGroup.rename_method_message"); //$NON-NLS-1$
@@ -199,6 +215,9 @@ public class RefactoringSupportFactory {
 		return new RenameSupport(){
 			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameFieldRefactoring(creator, (IField)element);
+			}
+			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
+				return ((RenameFieldRefactoring)refactoring).checkPreactivation().isOK();
 			}
 			RefactoringWizard createWizard(IRenameRefactoring refactoring){
 				String title= RefactoringMessages.getString("RefactoringGroup.rename_field_title"); //$NON-NLS-1$

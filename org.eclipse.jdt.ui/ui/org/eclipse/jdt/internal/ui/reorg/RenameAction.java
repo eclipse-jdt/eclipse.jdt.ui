@@ -4,10 +4,10 @@
  */
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.util.List;
-
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jface.viewers.IStructuredSelection;
 public class RenameAction extends ReorgAction {
 	
@@ -22,7 +22,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 	 *The user has invoked this action
 	 */
 	public void run() {
-		fRefactoringSupport.rename(getStructuredSelection().getFirstElement());
+		try{
+			fRefactoringSupport.rename(getStructuredSelection().getFirstElement());
+		} catch (JavaModelException e){
+			ExceptionHandler.handle(e, "Rename", "Unexpected exception occurred. See log for details.");
+		}	
 	}
 	
 	/* non java-doc
@@ -36,7 +40,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 		fRefactoringSupport= RefactoringSupportFactory.createRenameSupport(element);
 		if (fRefactoringSupport == null)
 			return false;
-		return fRefactoringSupport.canRename(element);
+		try{	
+			return fRefactoringSupport.canRename(element);
+		} catch (JavaModelException e){
+			JavaPlugin.log(e);
+			return false;
+		}	
 	}
 		
 	String getActionName() {

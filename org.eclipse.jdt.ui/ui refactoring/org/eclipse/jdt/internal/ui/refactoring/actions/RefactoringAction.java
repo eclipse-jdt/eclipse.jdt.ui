@@ -4,14 +4,19 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusContentProvider;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusEntryLabelProvider;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.ISelectionService;
 
 public abstract class RefactoringAction extends Action {
 
@@ -51,5 +56,21 @@ public abstract class RefactoringAction extends Action {
 			
 		setEnabled(enabled);
 	}	
+	
+	public static void activateRefactoringWizard(Refactoring refactoring, RefactoringWizard wizard, String dialogTitle) throws JavaModelException{
+		RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
+		if (! status.hasFatalError()){
+			wizard.setActivationStatus(status);
+			new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();
+		} else{
+			if (status.getEntries().size() == 1){
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, status.getFirstMessage(RefactoringStatus.FATAL));
+			}else{
+				ListDialog dialog= new ListDialog(JavaPlugin.getActiveWorkbenchShell(),	status, dialogTitle,"",
+																			new RefactoringStatusContentProvider(), new RefactoringStatusEntryLabelProvider());
+				dialog.open();															
+			}	
+		}	
+	}
 }
 

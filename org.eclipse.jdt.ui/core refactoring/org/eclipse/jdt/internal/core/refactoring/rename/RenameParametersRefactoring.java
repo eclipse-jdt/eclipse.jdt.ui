@@ -19,11 +19,10 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
-public class RenameParametersRefactoring extends Refactoring implements IPreactivatedRefactoring{
+public class RenameParametersRefactoring extends Refactoring{
 	private String[] fNewParameterNames;
 	private String[] fOldParameterNames;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
@@ -37,6 +36,17 @@ public class RenameParametersRefactoring extends Refactoring implements IPreacti
 		setOldParameterNames();
 		fTextBufferChangeCreator= changeCreator;
 		fUpdateReferences= true;
+	}
+	
+	/* non java-doc
+	 * @see Refactoring#checkPreconditions(IProgressMonitor)
+	 */
+	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= checkPreactivation();
+		if (result.hasFatalError())
+			return result;
+		result.merge(super.checkPreconditions(pm));
+		return result;
 	}
 	
 	/* non java-doc 

@@ -38,7 +38,4 @@ public class RenameParametersWizard extends RefactoringWizard {
 		return RefactoringMessages.getString("RenameParametersWizard.message"); //$NON-NLS-1$
 	}
 	
-	protected boolean checkActivationOnOpen() {
-		return true;
-	}
 }

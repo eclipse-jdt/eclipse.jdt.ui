@@ -385,12 +385,11 @@ public class Checks {
 	//---------------------
 	
 	public static RefactoringStatus checkIfCuBroken(IMember member) throws JavaModelException{
-		//1GF25DZ: ITPJUI:WINNT - SEVERE: Assertion failed in rename paramter refactoring
 		ICompilationUnit cu= (ICompilationUnit)JavaCore.create(Refactoring.getResource(member));
 		if (cu == null)
-			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("Checks.cu_not_created"));	 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.cu_not_created"));	 //$NON-NLS-1$
 		else if (! cu.isStructureKnown())
-			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("Checks.cu_not_parsed"));	 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.cu_not_parsed"));	 //$NON-NLS-1$
 		return new RefactoringStatus();
 	}
 	

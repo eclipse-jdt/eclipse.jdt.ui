@@ -5,8 +5,18 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatusEntry;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.help.DialogPageContextComputer;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Presents the list of failed preconditions to the user
@@ -14,12 +24,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 public class ErrorWizardPage extends RefactoringWizardPage {
 		
 	private RefactoringStatus fStatus;
-	
 	private TableViewer fTableViewer;
-	private static IStructuredContentProvider fgContentProvider;
-	
-	private String fHelpContextID;
-
+	private final String fHelpContextID;
 	public static final String PAGE_NAME= "ErrorPage"; //$NON-NLS-1$
 	
 	public ErrorWizardPage(String helpContextId){
@@ -76,56 +82,13 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 	
 	private TableViewer getTableViewer(Composite parent){
 		if (fTableViewer == null){
-			Table table= new Table(parent, SWT.BORDER | SWT.SINGLE | SWT.H_SCROLL);
-			fTableViewer= new TableViewer(table);
-			fTableViewer.setLabelProvider(createLabelProvider());
-			fTableViewer.setContentProvider(createContentProvider());
+			fTableViewer= new TableViewer(new Table(parent, SWT.BORDER | SWT.SINGLE | SWT.H_SCROLL));
+			fTableViewer.setLabelProvider(new RefactoringStatusEntryLabelProvider());
+			fTableViewer.setContentProvider(new RefactoringStatusContentProvider());
 		}
 		return fTableViewer;
 	}
 		
-	private ILabelProvider createLabelProvider(){
-		return new LabelProvider(){
-			public String getText(Object element){
-				return ((RefactoringStatusEntry)element).getMessage();
-			}
-			public Image getImage(Object element){
-				RefactoringStatusEntry entry= (RefactoringStatusEntry)element;
-				if (entry.isFatalError())
-					return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_FATAL);
-				else if (entry.isError())
-					return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_ERROR);
-				else if (entry.isWarning())	
-					return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_WARNING);
-				else 
-					return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_INFO);
-			}
-		};
-	}
-	
-	private IStructuredContentProvider createContentProvider() {
-		if (fgContentProvider == null) {
-			fgContentProvider= new IStructuredContentProvider() {
-				// ------- ITableContentProvider Interface ------------
-
-				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-				}
-
-				public boolean isDeleted(Object element) {
-					return false;
-				}
-
-				public void dispose() {
-				}
-
-				public Object[] getElements(Object obj) {
-					return ((RefactoringStatus)obj).getEntries().toArray();
-				}
-			};
-		}
-		return fgContentProvider;
-	}
-
 	//---- Reimplementation of WizardPage methods ------------------------------------------
 
 	/* (non-Javadoc)

@@ -5,16 +5,35 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.code.ExtractMethodRefactoring;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusContentProvider;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusEntryLabelProvider;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
+import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
+import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.wizard.WizardDialog;import org.eclipse.ui.IPartListener;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.IUpdate;
 
 /**
  * Extracts a new method from the text editor's text selection by using the
@@ -56,11 +75,20 @@ public class ExtractMethodAction extends Action implements IUpdate, IWorkbenchWi
 	 * Method declared in IAction.
 	 */
 	public void run() {
-		ICompilationUnit cu= getCompilationUnit();
-		ITextSelection selection= getTextSelection();
-		ExtractMethodWizard wizard= new ExtractMethodWizard(cu, selection, fEditor.getDocumentProvider());
-		WizardDialog dialog= new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
-		dialog.open();			
+		try{
+			ExtractMethodRefactoring refactoring= createRefactoring(getCompilationUnit(), getTextSelection(), fEditor.getDocumentProvider());
+			RefactoringAction.activateRefactoringWizard(refactoring, new ExtractMethodWizard(refactoring), "Extract Method");
+		} catch (JavaModelException e){
+			ExceptionHandler.handle(e, "Extract Method", "Unexpected exception occurred. See log for details.");
+		}	
+	}	
+	
+	private static ExtractMethodRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection, IDocumentProvider provider) {
+		return new ExtractMethodRefactoring(
+			cunit, new DocumentTextBufferChangeCreator(provider), 
+			selection.getOffset(), selection.getLength(),
+			CodeFormatterPreferencePage.isCompactingAssignment(),
+			CodeFormatterPreferencePage.getTabSize());
 	}
 	
 	//---- IWorkbenchWindowActionDelegate stuff ----------------------------------------------------

@@ -83,7 +83,7 @@ public abstract class Refactoring implements IRefactoring {
 	 * @see #checkInput
 	 * @see RefactoringStatus#merge
 	 */
-	public final RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 11); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkActivation(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK)));
@@ -143,6 +143,4 @@ public abstract class Refactoring implements IRefactoring {
 		Assert.isTrue(!member.isBinary());
 		return getResource(member.getCompilationUnit());
 	}
-	// ----------------------------
-
 }

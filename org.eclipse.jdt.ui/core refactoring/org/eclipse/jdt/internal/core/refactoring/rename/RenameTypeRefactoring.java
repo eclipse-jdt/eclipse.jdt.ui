@@ -40,14 +40,13 @@ import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.core.refactoring.reorg.TextBufferChangeManager;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
 import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
 
-public class RenameTypeRefactoring extends Refactoring implements IRenameRefactoring, IPreactivatedRefactoring{
+public class RenameTypeRefactoring extends Refactoring implements IRenameRefactoring{
 
 	private IType fType;	private String fNewName;
 	private SearchResultGroup[] fOccurrences;
@@ -62,6 +61,17 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		fTextBufferChangeCreator= changeCreator;
 		fType= type;
 		fUpdateReferences= true; //default is yes
+	}
+	
+	/* non java-doc
+	 * @see Refactoring#checkPreconditions(IProgressMonitor)
+	 */
+	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= checkPreactivation();
+		if (result.hasFatalError())
+			return result;
+		result.merge(super.checkPreconditions(pm));
+		return result;
 	}
 	
 	/* non java-doc

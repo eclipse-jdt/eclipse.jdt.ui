@@ -16,12 +16,11 @@ import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameCompilationUnitChange;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 
-public class RenameCompilationUnitRefactoring extends Refactoring implements IRenameRefactoring, IPreactivatedRefactoring{
+public class RenameCompilationUnitRefactoring extends Refactoring implements IRenameRefactoring{
 
 	private String fNewName;
 	private RenameTypeRefactoring fRenameTypeRefactoring;
@@ -34,6 +33,18 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		fCu= cu;
 		computeRenameTypeRefactoring(changeCreator);
 	}
+	
+	/* non java-doc
+	 * @see Refactoring#checkPreconditions(IProgressMonitor)
+	 */
+	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= checkPreactivation();
+		if (result.hasFatalError())
+			return result;
+		result.merge(super.checkPreconditions(pm));
+		return result;
+	}
+
 		
 	/* non javadoc
 	 * see Refactoring#setUnsavedFileList
