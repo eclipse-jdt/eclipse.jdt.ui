@@ -78,4 +78,14 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 	protected abstract String[] getAffectedProjectNatures() throws CoreException;
 	
 	public abstract boolean getUpdateReferences();	
+	
+	/**
+	 * <code>true</code> by default, subclasses may override.
+	 * 
+	 * @return <code>true</code> iff this refactoring needs all editors to be saved,
+	 *  <code>false</code> otherwise
+	 */
+	public boolean needsSavedEditors() {
+		return true;
+	}
 }

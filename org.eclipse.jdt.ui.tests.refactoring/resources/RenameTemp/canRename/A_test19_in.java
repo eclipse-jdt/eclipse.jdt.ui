@@ -3,7 +3,7 @@ package p;
 class A{
 	A i;
 	void m(){
-		/*[*/A i= null;/*]*/
+		A /*[*/i/*]*/= null;
 		i.toString();
 		i.equals(i.toString());
 		i.i.i= i;

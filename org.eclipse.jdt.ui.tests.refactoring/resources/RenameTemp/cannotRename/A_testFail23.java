@@ -1,5 +1,5 @@
 //rename to j
 package p;
 class A{
-	native void m(/*[*/int i/*]*/);
+	native void m(int /*[*/i/*]*/);
 }

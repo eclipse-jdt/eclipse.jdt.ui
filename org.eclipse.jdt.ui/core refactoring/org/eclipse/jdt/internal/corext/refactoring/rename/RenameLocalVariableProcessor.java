@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
@@ -23,9 +24,12 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -45,21 +49,26 @@ import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
-public class RenameTempRefactoring extends Refactoring implements INameUpdating, IReferenceUpdating {
+public class RenameLocalVariableProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating {
+
 	private static class ProblemNodeFinder {
 	
 		private ProblemNodeFinder() {
@@ -122,8 +131,7 @@ public class RenameTempRefactoring extends Refactoring implements INameUpdating,
 		}
 	}
 	
-	private final int fSelectionStart;
-	private final int fSelectionLength;
+	private final ILocalVariable fLocalVariable;
 	private final ICompilationUnit fCu;
 	
 	//the following fields are set or modified after the construction
@@ -133,60 +141,103 @@ public class RenameTempRefactoring extends Refactoring implements INameUpdating,
 	private CompilationUnit fCompilationUnitNode;
 	private VariableDeclaration fTempDeclarationNode;
 	private TextChange fChange;
+
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameTypeParameterProcessor"; //$NON-NLS-1$
 	
-	private RenameTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
-		Assert.isTrue(selectionStart >= 0);
-		Assert.isTrue(selectionLength >= 0);
-		Assert.isTrue(cu.exists());
+	public RenameLocalVariableProcessor(ILocalVariable localVariable) {
+		Assert.isNotNull(localVariable);
+		fLocalVariable= localVariable;
 		fUpdateReferences= true;
-		fSelectionStart= selectionStart;
-		fSelectionLength= selectionLength;
-		fCu= cu;
-		fNewName= "";//the only thing we can set //$NON-NLS-1$
-	}
-
-	public static boolean isAvailable(IJavaElement element) {
-		return element != null && element.getElementType() == IJavaElement.LOCAL_VARIABLE;
-	}
-
-	public static RenameTempRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
-		return new RenameTempRefactoring(cu, selectionStart, selectionLength);
-	}
-	
-	public Object getNewElement(){
-		return null; //?????
-	}
-	
-	/* non java-doc
-	 * @see IRefactoring#getName()
-	 */
-	public String getName() {
-		return RefactoringCoreMessages.getString("RenameTempRefactoring.rename"); //$NON-NLS-1$
+		fCu= (ICompilationUnit) localVariable.getAncestor(IJavaElement.COMPILATION_UNIT);
+		fNewName= ""; //$NON-NLS-1$
 	}
 
 	/*
-	 * @see IReferenceUpdatingRefactoring#canEnableUpdateReferences()
+	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#needsSavedEditors()
+	 */
+	public boolean needsSavedEditors() {
+		return false;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#loadDerivedParticipants(org.eclipse.ltk.core.refactoring.RefactoringStatus, java.util.List, java.lang.String[], org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
+	 */
+	protected final void loadDerivedParticipants(final RefactoringStatus status, final List result, final String[] natures, final SharableParticipants shared) throws CoreException {
+		// Do nothing
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#getAffectedProjectNatures()
+	 */
+	protected final String[] getAffectedProjectNatures() throws CoreException {
+		return JavaProcessors.computeAffectedNatures(fLocalVariable);
+	}
+	
+	/*
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
+	 */
+	public Object[] getElements() {
+		return new Object[] { fLocalVariable };
+	}
+	
+	/*
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
+	 */
+	public String getIdentifier() {
+		return IDENTIFIER;
+	}
+	
+	/*
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
+	 */
+	public String getProcessorName() {
+		return RefactoringCoreMessages.getString("RenameTempRefactoring.rename"); //$NON-NLS-1$
+	}
+	
+	/*
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#isApplicable()
+	 */
+	public boolean isApplicable() throws CoreException {
+		return Checks.isAvailable(fLocalVariable);
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating#canEnableUpdateReferences()
 	 */
 	public boolean canEnableUpdateReferences() {
 		return true;
 	}
 
 	/*
-	 * @see IReferenceUpdatingRefactoring#getUpdateReferences()
+	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#getUpdateReferences()
 	 */
 	public boolean getUpdateReferences() {
 		return fUpdateReferences;
 	}
 
 	/*
-	 * @see IReferenceUpdatingRefactoring#setUpdateReferences()
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating#setUpdateReferences(boolean)
 	 */
 	public void setUpdateReferences(boolean updateReferences) {
 		fUpdateReferences= updateReferences;
 	}
 	
 	/*
-	 * @see IRenameRefactoring#setNewName
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#getCurrentElementName()
+	 */
+	public String getCurrentElementName() {
+		return fCurrentName;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#getNewElementName()
+	 */
+	public String getNewElementName() {
+		return fNewName;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#setNewElementName(java.lang.String)
 	 */
 	public void setNewElementName(String newName) {
 		Assert.isNotNull(newName);
@@ -194,21 +245,13 @@ public class RenameTempRefactoring extends Refactoring implements INameUpdating,
 	}
 
 	/*
-	 * @see IRenameRefactoring#getNewName()
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#getNewElement()
 	 */
-	public String getNewElementName() {
-		return fNewName;
+	public Object getNewElement(){
+		return null; //cannot create an ILocalVariable
 	}
-
-	/*
-	 * @see IRenameRefactoring#getCurrentName()
-	 */
-	public String getCurrentElementName() {
-		return fCurrentName;
-	}
-
-		//--- preconditions 
-			
+	
+	
 	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
@@ -224,39 +267,33 @@ public class RenameTempRefactoring extends Refactoring implements INameUpdating,
 		return new RefactoringStatus();
 	}
 
-	private void initAST(){
+	private void initAST() throws JavaModelException {
 		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
-		fTempDeclarationNode= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
+		ISourceRange sourceRange= fLocalVariable.getNameRange();
+		ASTNode name= NodeFinder.perform(fCompilationUnitNode, sourceRange);
+		if (name == null)
+			return;
+		if (name.getParent() instanceof VariableDeclaration)
+			fTempDeclarationNode= (VariableDeclaration) name.getParent();
 	}
 	
 	private void initNames(){
 		fCurrentName= fTempDeclarationNode.getName().getIdentifier();
 	}
 	
+	
 	/*
-	 * @see IRenameRefactoring#checkNewName()
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
 	 */
-	public RefactoringStatus checkNewElementName(String newName) throws JavaModelException {
-		RefactoringStatus result= Checks.checkFieldName(newName);
-		if (! Checks.startsWithLowerCase(newName))
-			result.addWarning(RefactoringCoreMessages.getString("RenameTempRefactoring.lowercase")); //$NON-NLS-1$
-		return result;		
-	}
-		
-	/* non java-doc
-	 * @see Refactoring#checkInput(IProgressMonitor)
-	 */
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm)	throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context)
+			throws CoreException, OperationCanceledException {
 		try {
 			pm.beginTask("", 1);	 //$NON-NLS-1$
-			RefactoringStatus result= new RefactoringStatus();			
-			result.merge(Checks.validateModifiesFiles(
-				ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
-				getValidationContext()));
-			if (result.hasFatalError())
-				return result;
+
+			ValidateEditChecker checker= (ValidateEditChecker) context.getChecker(ValidateEditChecker.class);
+			checker.addFile(ResourceUtil.getFile(fCu));
 			
-			result.merge(checkNewElementName(fNewName));
+			RefactoringStatus result= checkNewElementName(fNewName);
 			if (result.hasFatalError())
 				return result;
 			result.merge(analyzeAST());
@@ -264,6 +301,16 @@ public class RenameTempRefactoring extends Refactoring implements INameUpdating,
 		} finally {
 			pm.done();
 		}	
+	}
+		
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#checkNewElementName(java.lang.String)
+	 */
+	public RefactoringStatus checkNewElementName(String newName) throws JavaModelException {
+		RefactoringStatus result= Checks.checkFieldName(newName);
+		if (! Checks.startsWithLowerCase(newName))
+			result.addWarning(RefactoringCoreMessages.getString("RenameTempRefactoring.lowercase")); //$NON-NLS-1$
+		return result;		
 	}
 		
 	private RefactoringStatus analyzeAST() throws CoreException{
@@ -336,7 +383,6 @@ public class RenameTempRefactoring extends Refactoring implements INameUpdating,
         return result;
     }
     
-	//--- changes 
 	
 	/* non java-doc
 	 * @see IRefactoring#createChange(IProgressMonitor)
@@ -345,4 +391,5 @@ public class RenameTempRefactoring extends Refactoring implements INameUpdating,
 		pm.done();
 		return fChange;
 	}
+
 }

@@ -47,10 +47,12 @@ public class UserInterfaceStarter {
 	 * @param refactoring the refactoring for which the user interface
 	 *  should be opened
 	 * @param parent the parent shell to be used
+	 * @param mustSaveEditors <code>true</code> iff dirty editors must be
+	 *  saved before the refactoring is started, <code>false</code> otherwise
 	 * 
 	 * @exception CoreException if the user interface can't be activated
 	 */
-	public void activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
-		new RefactoringStarter().activate(refactoring, fWizard, parent, fWizard.getDefaultPageTitle(), save);
+	public void activate(Refactoring refactoring, Shell parent, boolean mustSaveEditors) throws CoreException {
+		new RefactoringStarter().activate(refactoring, fWizard, parent, fWizard.getDefaultPageTitle(), mustSaveEditors);
 	}
 }

@@ -3,7 +3,7 @@ package p;
 class A{
 	int j;
 	void m(){
-		/*[*/int i;/*]*/
+		int /*[*/i/*]*/;
 		j= 0;
 	}
 }

@@ -2,7 +2,7 @@
 package p;
 class A{
 	void m(){
-		/*[*/final int i= 0;/*]*/
+		final int /*[*/i/*]*/= 0;
 		A a= new A(){
 			void m(int k){
 				k= i;

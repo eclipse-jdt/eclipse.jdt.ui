@@ -2,7 +2,7 @@
 package p;
 class A{
 	void m(){
-		/*[*/int i= 0;/*]*/
+		int /*[*/i/*]*/= 0;
 		int[] o= new int[8];
 		for (; i == i;){
 			i++;

@@ -2,7 +2,7 @@
 package p;
 class A{
 	void m(){
-		/*[*/Object j= null;/*]*/
+		Object /*[*/j/*]*/= null;
 		class j{}
 		j= new j();
 	};

@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -199,6 +200,8 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 				return RenameSupport.create((IField)element, newName, flags);
 			case IJavaElement.TYPE_PARAMETER:
 				return RenameSupport.create((ITypeParameter)element, newName, flags);
+			case IJavaElement.LOCAL_VARIABLE:
+				return RenameSupport.create((ILocalVariable)element, newName, flags);
 		}
 		return null;
 	}	

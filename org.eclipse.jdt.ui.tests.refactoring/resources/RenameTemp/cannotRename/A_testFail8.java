@@ -5,7 +5,7 @@ interface B{
 }
 class A implements B{
 	int m(){
-		/*[*/int i=0;/*]*/
+		int /*[*/i/*]*/=0;
 		i= j;
 		return 0;
 	};

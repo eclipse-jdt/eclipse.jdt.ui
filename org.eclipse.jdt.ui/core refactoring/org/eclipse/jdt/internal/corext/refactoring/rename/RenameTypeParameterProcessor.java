@@ -359,6 +359,13 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	protected final void loadDerivedParticipants(final RefactoringStatus status, final List result, final String[] natures, final SharableParticipants shared) throws CoreException {
 		// Do nothing
 	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#needsSavedEditors()
+	 */
+	public boolean needsSavedEditors() {
+		return false;
+	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating#setUpdateReferences(boolean)

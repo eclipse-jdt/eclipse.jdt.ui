@@ -5,7 +5,7 @@ class B{
 }
 class A extends B{
 	void m(){
-		/*[*/A k= null;/*]*/
+		A /*[*/k/*]*/= null;
 		super.i= 0;
 	}
 }

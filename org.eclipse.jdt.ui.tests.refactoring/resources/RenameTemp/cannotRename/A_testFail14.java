@@ -6,7 +6,7 @@ class A{
 		static int k;
 	}
 	void m(){
-		/*[*/A i;/*]*/
+		A /*[*/i/*]*/;
 		j.k= 0;
 	}
 }	

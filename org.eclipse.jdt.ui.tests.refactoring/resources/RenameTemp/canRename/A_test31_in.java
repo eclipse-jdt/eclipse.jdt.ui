@@ -2,7 +2,7 @@
 package p;
 class A{
 	private void m(){
-		/*[*/final int i= 0;/*]*/
+		final int /*[*/i/*]*/= 0;
 		int j= 0;
 		new Object(){
 			int kk;

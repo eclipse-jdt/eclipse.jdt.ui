@@ -4,7 +4,7 @@ class A{
 	int m(){
 		{
 				int i= 0;
-		 /*[*/int k= 0;/*]*/
+		 int /*[*/k/*]*/= 0;
 			
 			return i + k;
 		}

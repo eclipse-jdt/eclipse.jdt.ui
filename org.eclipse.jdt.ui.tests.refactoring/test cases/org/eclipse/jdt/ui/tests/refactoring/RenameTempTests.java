@@ -14,18 +14,27 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
+
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameLocalVariableProcessor;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameTempTests extends RefactoringTest{
+	private static final boolean BUG_checkDeclInNestedClass= true;
+	private static final boolean BUG_checkShadowing= true;
+	private static final boolean BUG_XXX= true;
 	
 	private static final Class clazz= RenameTempTests.class;
 	private static final String REFACTORING_PATH= "RenameTemp/";
+
 	
 	public RenameTempTests(String name){
 		super(name);
@@ -69,12 +78,16 @@ public class RenameTempTests extends RefactoringTest{
 	}
 
 	private void helper1(String newName, boolean updateReferences, ISourceRange selection, ICompilationUnit cu) throws Exception{
-//		IType classA= getType(cu, "A");
-		RenameTempRefactoring ref= RenameTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
-		ref.setUpdateReferences(updateReferences);
-		ref.setNewElementName(newName);
+		IJavaElement[] elements= cu.codeSelect(selection.getOffset(), selection.getLength());
+		assertEquals(1, elements.length);
+		assertTrue(elements[0].getClass().toString(), elements[0] instanceof ILocalVariable);
 		
-		RefactoringStatus result= performRefactoring(ref);
+		RenameLocalVariableProcessor processor= new RenameLocalVariableProcessor((ILocalVariable) elements[0]);
+		RenameRefactoring refactoring= new RenameRefactoring(processor);
+		processor.setUpdateReferences(updateReferences);
+		processor.setNewElementName(newName);
+		
+		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("precondition was supposed to pass", null, result);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
@@ -99,6 +112,27 @@ public class RenameTempTests extends RefactoringTest{
 		helper1(newName, true);
 	}
 
+	private void failHelperNoElement() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
+		ISourceRange selection= getSelection(cu);
+		IJavaElement[] elements= cu.codeSelect(selection.getOffset(), selection.getLength());
+		assertEquals(0, elements.length);
+	}
+	
+	private void failTestHelper(String newName, boolean updateReferences, ICompilationUnit cu, ISourceRange selection) throws Exception {
+		IJavaElement[] elements= cu.codeSelect(selection.getOffset(), selection.getLength());
+		assertEquals(1, elements.length);
+		assertTrue(elements[0].getClass().toString(), elements[0] instanceof ILocalVariable);
+		
+		RenameLocalVariableProcessor processor= new RenameLocalVariableProcessor((ILocalVariable) elements[0]);
+		RenameRefactoring refactoring= new RenameRefactoring(processor);
+		processor.setUpdateReferences(updateReferences);
+		processor.setNewElementName(newName);
+		
+		RefactoringStatus result= performRefactoring(refactoring);
+		assertNotNull("precondition was supposed to fail", result);
+	}
+
 	private void helper2(String newName, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= getSelection(cu);
@@ -109,15 +143,6 @@ public class RenameTempTests extends RefactoringTest{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		failTestHelper(newName, updateReferences, cu, selection);
-	}
-
-	private void failTestHelper(String newName, boolean updateReferences, ICompilationUnit cu, ISourceRange selection) throws Exception {
-		RenameTempRefactoring ref= RenameTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
-		ref.setUpdateReferences(updateReferences);
-		ref.setNewElementName(newName);
-		
-		RefactoringStatus result= performRefactoring(ref);
-		assertNotNull("precondition was supposed to fail", result);
 	}
 
 	private void helper2(String newName) throws Exception{
@@ -298,12 +323,12 @@ public class RenameTempTests extends RefactoringTest{
 	
 	public void test40() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#10660");
-		helper1("j", true, 4, 12, 4, 17);
+		helper1("j", true, 4, 16, 4, 17);
 	}
 	
 	public void test41() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#10660");
-		helper1("j", true, 3, 13, 3, 18);
+		helper1("j", true, 3, 17, 3, 18);
 	}
 
 	public void test42() throws Exception{
@@ -313,7 +338,7 @@ public class RenameTempTests extends RefactoringTest{
 
 	public void test43() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#10660");
-		helper1("j", true, 4, 19, 4, 24);
+		helper1("j", true, 4, 23, 4, 24);
 	}
 	
 	public void test44() throws Exception{
@@ -356,14 +381,26 @@ public class RenameTempTests extends RefactoringTest{
 		helper1("qwerty", true, 5, 19, 5, 20);
 	}
 	
+	public void test52() throws Exception{
+		helper1("j");
+	}
+
+	public void test53() throws Exception{
+//		printTestDisabledMessage("bug#19851");
+		helper1("locker");
+	}
+
 // -----
 	public void testFail0() throws Exception{
-		printTestDisabledMessage("fails - must revisit");
-//		helper2("j");
+		if (BUG_checkDeclInNestedClass) {
+			printTestDisabledMessage("fails - must revisit");
+			return;
+		}
+		helper2("j");
 	}
 	
 	public void testFail1() throws Exception{
-		helper2("j");
+		failHelperNoElement();
 	}
 
 	public void testFail2() throws Exception{
@@ -383,8 +420,11 @@ public class RenameTempTests extends RefactoringTest{
 	}
 
 	public void testFail6() throws Exception{
-		printTestDisabledMessage("fails - must revisit");
-//		helper2("j");
+		if (BUG_checkDeclInNestedClass) {
+			printTestDisabledMessage("fails - must revisit");
+			return;
+		}
+		helper2("j");
 	}
 
 	public void testFail7() throws Exception{
@@ -400,7 +440,7 @@ public class RenameTempTests extends RefactoringTest{
 	}
 	
 	public void testFail10() throws Exception{
-		helper2("uu");
+		failHelperNoElement();
 	}
 
 // disabled - it's allowed now
@@ -451,7 +491,7 @@ public class RenameTempTests extends RefactoringTest{
 //	}
 
 	public void testFail22() throws Exception{
-		helper2("j");
+		failHelperNoElement();
 	}
 
 // disabled - it's allowed now
@@ -460,8 +500,8 @@ public class RenameTempTests extends RefactoringTest{
 //	}
 	
 	public void testFail24() throws Exception{
-		printTestDisabledMessage("compile errors are ok now");
-		//helper2("j");
+		//printTestDisabledMessage("compile errors are ok now");
+		helper2("t"); //name collision
 	}
 	
 	public void testFail25() throws Exception{
@@ -469,8 +509,11 @@ public class RenameTempTests extends RefactoringTest{
 	}
 	
 	public void testFail26() throws Exception{
-		printTestDisabledMessage("Test disable until it is clear how 1.4 treats this");
-		// helper2("j");
+		if (BUG_checkShadowing) {
+			printTestDisabledMessage("Test disabled until it is clear how 1.4 treats this");
+			return;
+		}
+		helper2("j");
 	}
 	
 	public void testFail27() throws Exception{
@@ -481,19 +524,14 @@ public class RenameTempTests extends RefactoringTest{
 		helper2("j");
 	}
 
-	public void testFail29() throws Exception{
-		helper2("j");
-	}
-
-	public void testFail30() throws Exception{
-//		printTestDisabledMessage("bug#19851");
-		helper2("j");
-	}
-	public void testFail31() throws Exception{
-		helper2("j", true, 3, 9, 3, 13);
-	}
+	// no testFail29, testFail30, testFail31
 	
 	public void testFail32() throws Exception {
+		if (BUG_XXX) {
+			printTestDisabledMessage("duplicate local variable");
+			return;
+		}
+		
 //		printTestDisabledMessage("bug#47822");
 		helper2("j", true, 6, 19, 6, 20);
 	}

@@ -2,7 +2,7 @@
 package p;
 class A{
 	int m(){
-		/*[*/int i;/*]*/
+		int /*[*/i/*]*/;
 		{
 			int j;
 		}

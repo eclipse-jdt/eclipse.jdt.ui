@@ -1,5 +1,5 @@
 //rename to j
 package p;
 class A{
-	A(){/*[*/int i= 0;/*]*/}
+	A(){int /*[*/i/*]*/= 0;}
 }

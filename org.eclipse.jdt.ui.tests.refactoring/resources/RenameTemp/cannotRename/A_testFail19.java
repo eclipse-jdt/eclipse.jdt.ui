@@ -5,7 +5,7 @@ class B{
 }
 class A extends B{
 	void m(){
-		/*[*/int i;/*]*/
+		int /*[*/i/*]*/;
 		j= 0;
 	};
 }

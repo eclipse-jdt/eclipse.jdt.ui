@@ -2,7 +2,7 @@
 package p;
 class A{
 	Object m(){
-		/*[*/i j= new i();/*]*/
+		i /*[*/j/*]*/= new i();
 		j.i.i= j.i;
 		i:{
 			while(true){

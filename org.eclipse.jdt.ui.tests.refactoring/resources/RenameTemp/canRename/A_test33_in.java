@@ -3,7 +3,7 @@ package p;
 class A{
    A A;
    A m(A a){
-   	/*[*/A A= null;/*]*/
+   	A /*[*/A/*]*/= null;
      A:
         for (;;){
           if (A.m(A)==A)
