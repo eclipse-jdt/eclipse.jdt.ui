@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -157,12 +159,9 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 		if (fPackageFragment == null)
 			return null;
 		String input= contentAssistSubject.getDocument().get();
-		ICompletionProposal[] proposals;
-		if (documentOffset == 0) {
-			proposals= internalComputeCompletionProposals(1, "A"); //$NON-NLS-1$
-		} else {
-			proposals= internalComputeCompletionProposals(documentOffset, input);
-		}
+		if (documentOffset == 0)
+			return null;
+		ICompletionProposal[] proposals= internalComputeCompletionProposals(documentOffset, input);
 		Arrays.sort(proposals, fComparator);
 		return proposals;
 	}
@@ -174,7 +173,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 			/*
 			 * Explicitly create a new non-shared working copy.
 			 */
-			cu= (ICompilationUnit) cu.getWorkingCopy();
+			cu= cu.getWorkingCopy(new NullProgressMonitor());
 			cu.getBuffer().setContents(cuString);
 			int cuPrefixLength= CU_START.length();
 			TypeCompletionCollector collector= new TypeCompletionCollector(cuPrefixLength, fPackageFragment.getJavaProject(), fEnableBaseTypes, fEnableVoid);
@@ -194,7 +193,11 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 			JavaPlugin.log(e);
 			return null;
 		} finally {
-			cu.destroy();
+			try {
+				cu.discardWorkingCopy();
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
 		}
 	}
 
