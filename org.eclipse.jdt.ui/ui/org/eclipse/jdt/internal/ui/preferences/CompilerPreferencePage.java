@@ -15,9 +15,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -45,11 +42,11 @@ import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -220,32 +217,18 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 
 		TabItem item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("CompilerPreferencePage.warnings.tabtitle")); //$NON-NLS-1$
-		final Image errorWarningImage= JavaPluginImages.DESC_VIEW_ERRORWARNING_TAB.createImage();
-		item.setImage(errorWarningImage);
 		item.setControl(warningsComposite);
 	
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("CompilerPreferencePage.generation.tabtitle")); //$NON-NLS-1$
-		final Image generationImage= JavaPluginImages.DESC_VIEW_CLASSFILEGENERATION_TAB.createImage();
-		item.setImage(generationImage);
 		item.setControl(codeGenComposite);
 
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("CompilerPreferencePage.compliance.tabtitle")); //$NON-NLS-1$
-		final Image jdkcomplianceImage= JavaPluginImages.DESC_VIEW_JDKCOMPLIANCE_TAB.createImage();
-		item.setImage(jdkcomplianceImage);
 		item.setControl(complianceComposite);
 		
 		validateSettings(null, null);
-
-		folder.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				errorWarningImage.dispose();
-				generationImage.dispose();
-				jdkcomplianceImage.dispose();
-			}
-		});
-				
+	
 		return folder;
 	}
 
