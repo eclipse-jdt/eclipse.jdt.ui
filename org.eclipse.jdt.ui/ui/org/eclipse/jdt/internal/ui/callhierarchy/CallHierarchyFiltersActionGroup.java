@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -64,11 +63,7 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
      * Method declared on ActionGroup.
      */
     public void fillActionBars(IActionBars actionBars) {
-        fillToolBar(actionBars.getToolBarManager());
         fillViewMenu(actionBars.getMenuManager());
-    }
-
-    private void fillToolBar(IToolBarManager toolBar) {
     }
 
     private void fillViewMenu(IMenuManager viewMenu) {

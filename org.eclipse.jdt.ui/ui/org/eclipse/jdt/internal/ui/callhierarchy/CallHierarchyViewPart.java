@@ -694,13 +694,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 
     protected void handleKeyEvent(KeyEvent event) {
         if (event.stateMask == 0) {
-            //            if (event.keyCode == SWT.F3) {
-            //                if ((fOpenDeclarationAction != null) &&
-            //                            fOpenDeclarationAction.isEnabled()) {
-            //                    fOpenDeclarationAction.run();
-            //                    return;
-            //                }
-            //            } else 
             if (event.keyCode == SWT.F5) {
                 if ((fRefreshAction != null) && fRefreshAction.isEnabled()) {
                     fRefreshAction.run();
@@ -840,7 +833,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 
         fActionGroups.fillActionBars(actionBars);
         toolBar.add(fHistoryDropDownAction);
-        toolBar.add(fRefreshAction);
 
         for (int i = 0; i < fToggleCallModeActions.length; i++) {
             toolBar.add(fToggleCallModeActions[i]);
