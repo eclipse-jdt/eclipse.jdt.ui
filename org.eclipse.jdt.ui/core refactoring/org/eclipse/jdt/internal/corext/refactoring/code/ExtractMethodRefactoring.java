@@ -198,16 +198,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 			if (fVisibility == null) {
-				int modifiers= fAnalyzer.getEnclosingMethod().getModifiers();
-				String visibility= ""; //$NON-NLS-1$
-				if (Modifier.isPublic(modifiers))
-					visibility= "public"; //$NON-NLS-1$
-				else if (Modifier.isProtected(modifiers))
-					visibility= "protected"; //$NON-NLS-1$
-				else if (Modifier.isPrivate(modifiers))
-					visibility= "private"; //$NON-NLS-1$
-				setVisibility(visibility);
-				
+				setVisibility("private"); //$NON-NLS-1$
 			}
 			initializeParameterInfos();
 			initializeUsedNames();
