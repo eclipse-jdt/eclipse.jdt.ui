@@ -73,8 +73,6 @@ public class JDK12Launcher extends JavaLauncher {
 		} catch (IOException e) {
 			throw new CoreException(createStatus(LauncherMessages.getString("jdkLauncher.error.startMV"), e));
 		}
-		return null;
-		
 	}
 
 	protected String convertClassPath(String[] cp) {
