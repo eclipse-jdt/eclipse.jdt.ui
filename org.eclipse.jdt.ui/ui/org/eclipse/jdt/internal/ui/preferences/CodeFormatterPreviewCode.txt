@@ -2,7 +2,7 @@
  *    This header comment may be left unformatted.
  */
 
-package org.eclipse.formatter.example
+package org.eclipse.formatter.example;
 
 /**
  * Example class displaying the effects of various code formatting preferences.
