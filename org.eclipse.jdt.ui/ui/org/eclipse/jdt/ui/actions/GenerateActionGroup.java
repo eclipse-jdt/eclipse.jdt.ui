@@ -64,7 +64,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private AddGetterSetterAction fAddGetterSetter;
 	private AddDelegateMethodsAction fAddDelegateMethods;
 	private AddUnimplementedConstructorsAction fAddUnimplementedConstructors;
-	private CreateNewConstructorAction fCreateNewConstructor;
+	private GenerateNewConstructorUsingFieldsAction fGenerateConstructorUsingFields;
 	private AddJavaDocStubAction fAddJavaDocStub;
 	private AddBookmarkAction fAddBookmark;
 	private AddTaskAction fAddTaskAction;
@@ -121,9 +121,9 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddUnimplementedConstructors.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_UNIMPLEMENTED_CONTRUCTORS);
 		editor.setAction("AddUnimplementedConstructors", fAddUnimplementedConstructors); //$NON-NLS-1$		
 
-		fCreateNewConstructor= new CreateNewConstructorAction(editor);
-		fCreateNewConstructor.setActionDefinitionId(IJavaEditorActionDefinitionIds.CREATE_NEW_CONSTRUCTOR);
-		editor.setAction("CreateNewConstructor", fCreateNewConstructor); //$NON-NLS-1$		
+		fGenerateConstructorUsingFields= new GenerateNewConstructorUsingFieldsAction(editor);
+		fGenerateConstructorUsingFields.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_CONSTRUCTOR_USING_FIELDS);
+		editor.setAction("GenerateConstructorUsingFields", fGenerateConstructorUsingFields); //$NON-NLS-1$		
 
 		fAddJavaDocStub= new AddJavaDocStubAction(editor);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
@@ -187,7 +187,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddGetterSetter= new AddGetterSetterAction(site);
 		fAddDelegateMethods= new AddDelegateMethodsAction(site);
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(site);
-		fCreateNewConstructor= new CreateNewConstructorAction(site);
+		fGenerateConstructorUsingFields= new GenerateNewConstructorUsingFieldsAction(site);
 		fAddJavaDocStub= new AddJavaDocStubAction(site);
 		fAddBookmark= new AddBookmarkAction(site.getShell());
 		fAddToClasspathAction= new AddToClasspathAction(site);
@@ -202,7 +202,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddGetterSetter.update(selection);
 		fAddDelegateMethods.update(selection);
 		fAddUnimplementedConstructors.update(selection);	
-		fCreateNewConstructor.update(selection);
+		fGenerateConstructorUsingFields.update(selection);
 		fAddJavaDocStub.update(selection);
 		fAddToClasspathAction.update(selection);
 		fRemoveFromClasspathAction.update(selection);
@@ -222,7 +222,7 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fAddGetterSetter);
 		registerSelectionListener(provider, fAddDelegateMethods);
 		registerSelectionListener(provider, fAddUnimplementedConstructors);
-		registerSelectionListener(provider, fCreateNewConstructor);
+		registerSelectionListener(provider, fGenerateConstructorUsingFields);
 		registerSelectionListener(provider, fAddJavaDocStub);
 		registerSelectionListener(provider, fAddBookmark);
 		registerSelectionListener(provider, fAddToClasspathAction);
@@ -295,7 +295,7 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(result, fAddGetterSetter);
 		added+= addAction(result, fAddDelegateMethods);
 		added+= addAction(result, fAddUnimplementedConstructors);
-		added+= addAction(result, fCreateNewConstructor);
+		added+= addAction(result, fGenerateConstructorUsingFields);
 		added+= addAction(result, fAddJavaDocStub);
 		result.add(new Separator());		
 		added+= addAction(result, fSurroundWithTryCatch);
@@ -316,7 +316,7 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(result, fAddGetterSetter);
 		added+= addAction(result, fAddDelegateMethods);
 		added+= addAction(result, fAddUnimplementedConstructors);
-		added+= addAction(result, fCreateNewConstructor);
+		added+= addAction(result, fGenerateConstructorUsingFields);
 		added+= addAction(result, fAddJavaDocStub);
 		added+= addAction(result, fAddToClasspathAction);
 		added+= addAction(result, fRemoveFromClasspathAction);
@@ -350,8 +350,8 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.OVERRIDE_METHODS, fOverrideMethods);
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_GETTER_SETTER, fAddGetterSetter);
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_DELEGATE_METHODS, fAddDelegateMethods);
-		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_CONSTRUCTOR_FROM_SUPERCLASS, fAddUnimplementedConstructors);
-		actionBar.setGlobalActionHandler(JdtActionConstants.CREATE_NEW_CONSTRUCTOR, fCreateNewConstructor);
+		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_CONSTRUCTOR_FROM_SUPERCLASS, fAddUnimplementedConstructors);		
+		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_CONSTRUCTOR_USING_FIELDS, fGenerateConstructorUsingFields);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_JAVA_DOC_COMMENT, fAddJavaDocStub);
 		actionBar.setGlobalActionHandler(JdtActionConstants.EXTERNALIZE_STRINGS, fExternalizeStrings);
 		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);

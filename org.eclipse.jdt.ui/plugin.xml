@@ -1213,6 +1213,12 @@
       		label="%AddConstructorFromSuperclassAction.label"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"
 			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.GenerateConstructorUsingFields"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+      		label="%GenerateConstructorUsingFieldsAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.generate.constructor.using.fields"
+			retarget="true" />			
 
 		<action id="org.eclipse.jdt.ui.actions.GenerateDelegateMethods"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
@@ -1916,6 +1922,19 @@
 		string=""
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+
+	<command
+ 		category="org.eclipse.jdt.ui.category.source"
+		id="org.eclipse.jdt.ui.edit.text.java.generate.constructor.using.fields"
+		name= "%ActionDefinition.generateConstructorUsingFields.name"
+		description= "%ActionDefinition.generateConstructorsUsingFields.description">
+	</command>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.generate.constructor.using.fields"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 

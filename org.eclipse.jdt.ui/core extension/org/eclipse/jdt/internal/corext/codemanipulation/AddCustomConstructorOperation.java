@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -18,6 +20,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -30,7 +33,9 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Creates a custom constructor with fields initialized.
@@ -43,9 +48,10 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	private IMethod fConstructorCreated;
 	private boolean fDoSave;
 	private CodeGenerationSettings fSettings;
-	private IMethod[] fSuperMethod;
+	private IMethod fSuperConstructor;
+	private boolean fOmitSuper;
 	
-	public AddCustomConstructorOperation(IType type, CodeGenerationSettings settings, IField[] selected, boolean save, IJavaElement insertPosition, int superIndex) {
+	public AddCustomConstructorOperation(IType type, CodeGenerationSettings settings, IField[] selected, boolean save, IJavaElement insertPosition, IMethod superConstructor) {
 		super();
 		fType= type;
 		fDoSave= save;
@@ -53,11 +59,8 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 		fSettings= settings;
 		fSelected= selected;
 		fInsertPosition= insertPosition;
-		try {
-			fSuperMethod= new IMethod[1];
-			fSuperMethod[0]= StubUtility.getOverridableConstructors(type)[superIndex];
-		} catch (CoreException e) {
-		}					
+		fSuperConstructor= superConstructor;
+		fOmitSuper= false;
 	}
 
 	/**
@@ -70,15 +73,15 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 				monitor= new NullProgressMonitor();
 			}			
 			monitor.setTaskName(CodeGenerationMessages.getString("AddCustomConstructorOperation.description")); //$NON-NLS-1$
-			monitor.beginTask("", 3); //$NON-NLS-1$
-			
+			monitor.beginTask("", 40); //$NON-NLS-1$			
 			monitor.worked(1);
 			
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
 			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
-			monitor.worked(1);
+			monitor.worked(2);
 			
-			String defaultConstructor= StubUtility.genOverrideStubs(fSuperMethod, fType, hierarchy, fSettings, imports)[0];					
+			// Only calculating one constructor here
+			String defaultConstructor= genOverrideConstructorStub(fSuperConstructor, fType, hierarchy, fSettings, imports, fOmitSuper);					
 			int closingBraceIndex= defaultConstructor.lastIndexOf('}'); //$NON-NLS-1$
 
 			IScanner scanner= ToolFactory.createScanner(true, false, false, false);
@@ -86,10 +89,25 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			TokenScanner tokenScanner= new TokenScanner(scanner);
 			int closingParenIndex= tokenScanner.getTokenStartOffset(ITerminalSymbols.TokenNameRPAREN, 0);
 
-			StringBuffer buf= new StringBuffer(defaultConstructor.substring(0, closingParenIndex));
+			monitor.worked(7);
+
 			String[] params= new String[fSelected.length];
-			if (fSuperMethod[0].getParameterNames().length > 0)
+			String[] superConstructorParamNames= fSuperConstructor.getParameterNames();
+			String[] excludedNames= new String[superConstructorParamNames.length + params.length];
+
+			ArrayList superNames= new ArrayList(superConstructorParamNames.length);
+			for (int i= 0; i < superConstructorParamNames.length; i++) {
+				superNames.add(superConstructorParamNames[i]);
+				excludedNames[i]= superConstructorParamNames[i];
+			}
+			
+			StringBuffer buf= new StringBuffer(defaultConstructor.substring(0, closingParenIndex));
+						
+			if (superConstructorParamNames.length > 0)
 				buf.append(", "); //$NON-NLS-1$
+				
+			monitor.worked(5);
+				
 			for (int i= 0; i < fSelected.length; i++) {
 				buf.append(Signature.toString(fSelected[i].getTypeSignature()));				
 				buf.append(" "); //$NON-NLS-1$
@@ -102,12 +120,16 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 					}
 				}
 
-				String paramName= StubUtility.guessArgumentName(project, accessName, new String[0]);
-				
-				buf.append(params[i]= paramName);
+				// Allow no collisions with super constructor parameter names
+				String paramName= StubUtility.guessArgumentName(project, accessName, excludedNames);
+
+				excludedNames[superConstructorParamNames.length + i]= paramName;
+				params[i]= paramName;
+				buf.append(paramName);
 				if (i < fSelected.length - 1)
 					buf.append(", "); //$NON-NLS-1$				
 			}
+			monitor.worked(10);
 			
 			buf.append(defaultConstructor.substring(closingParenIndex, closingBraceIndex));
 			
@@ -118,7 +140,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 					buf.append(fSelected[i].getParent().getElementName());
 					buf.append("."); //$NON-NLS-1$
 				}	
-				else if ((fSettings.useKeywordThis) || params[i].equals(fieldName))
+				else if ((fSettings.useKeywordThis) || params[i].equals(fieldName) || superNames.contains(fieldName))
 					buf.append("this."); //$NON-NLS-1$				
 				buf.append(fieldName);
 				buf.append(" = "); //$NON-NLS-1$
@@ -126,6 +148,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 				buf.append(";\n"); //$NON-NLS-1$
 			}
 			buf.append("}"); //$NON-NLS-1$
+			monitor.worked(10);
 			
 			String lineDelim= StubUtility.getLineDelimiterUsed(fType);
 			int indent= StubUtility.getIndentUsed(fType) + 1;
@@ -133,12 +156,33 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;
 			fConstructorCreated= fType.createMethod(formattedContent, fInsertPosition, true, null);
 
-			monitor.worked(1);		
+			monitor.worked(5);		
 			imports.create(fDoSave, null);
 			monitor.worked(1);
 		} finally {
 			monitor.done();
 		}
+	}
+
+	public String genOverrideConstructorStub(IMethod constructorToImplement, IType type, ITypeHierarchy hierarchy, CodeGenerationSettings settings, IImportsStructure imports, boolean omitSuper) throws CoreException {
+		GenStubSettings genStubSettings= new GenStubSettings(settings);
+		genStubSettings.methodOverwrites= true;
+		if (omitSuper)
+			genStubSettings.callSuper= false;
+		else
+			genStubSettings.callSuper= true;
+		ICompilationUnit cu= type.getCompilationUnit();
+
+		IMethod overrides= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, constructorToImplement.getElementName(), constructorToImplement.getParameterTypes(), constructorToImplement.isConstructor());
+		if (overrides != null) {
+			constructorToImplement= overrides;
+		}
+		IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, constructorToImplement.getElementName(), constructorToImplement.getParameterTypes(), constructorToImplement.isConstructor());
+		if (desc == null) {
+			desc= constructorToImplement;
+		}
+		
+		return StubUtility.genStub(cu, type.getElementName(), constructorToImplement, desc.getDeclaringType(), genStubSettings, imports);
 	}
 	
 	/**
@@ -147,4 +191,9 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	public IMethod getCreatedConstructor() {
 		return fConstructorCreated;
 	}	
+	
+	public void setOmitSuper(boolean callSuper) {
+		fOmitSuper= callSuper;
+	}
+
 }
