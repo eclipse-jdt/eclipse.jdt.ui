@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringBufferInputStream;
 
 import junit.framework.TestCase;
 
@@ -121,6 +122,10 @@ public abstract class RefactoringTest extends TestCase {
 		}
 	}
 
+	protected static InputStream getStream(String content){
+		return new StringBufferInputStream(content);
+	}
+	
 	protected IPackageFragmentRoot getRoot() {
 		return fRoot;
 	}

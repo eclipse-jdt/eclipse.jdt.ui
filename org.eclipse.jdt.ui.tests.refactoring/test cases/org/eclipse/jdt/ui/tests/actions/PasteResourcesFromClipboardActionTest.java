@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.actions;
 
-import java.io.InputStream;
-import java.io.StringBufferInputStream;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -35,6 +32,7 @@ import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
@@ -65,10 +63,6 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	
 	public static Test suite() {
 		return new MySetup(new TestSuite(clazz));
-	}
-	
-	private static InputStream getStream(String content){
-		return new StringBufferInputStream(content);
 	}
 	
 	private IFile createFile(IFolder folder, String fileName) throws Exception {

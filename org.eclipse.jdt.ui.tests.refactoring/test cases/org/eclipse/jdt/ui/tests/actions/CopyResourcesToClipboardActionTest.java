@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.actions;
 
-import java.io.InputStream;
-import java.io.StringBufferInputStream;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -41,8 +38,7 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	private static final Class clazz= CopyResourcesToClipboardActionTest.class;
 
 	private ICompilationUnit fCuA;
-	private ICompilationUnit fCuB;
-	
+	private ICompilationUnit fCuB;	
 	private IPackageFragment fPackageQ;
 	private IPackageFragment fPackageQ_R;
 	private IPackageFragment fDefaultPackage;
@@ -58,10 +54,6 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	
 	public static Test suite() {
 		return new MySetup(new TestSuite(clazz));
-	}
-	
-	private static InputStream getStream(String content){
-		return new StringBufferInputStream(content);
 	}
 	
 	private IFile createFile(IFolder folder, String fileName) throws Exception {

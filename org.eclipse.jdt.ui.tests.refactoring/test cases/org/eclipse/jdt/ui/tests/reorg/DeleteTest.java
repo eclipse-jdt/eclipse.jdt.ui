@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.reorg;
 
-import java.io.InputStream;
-import java.io.StringBufferInputStream;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -63,10 +60,6 @@ public class DeleteTest extends RefactoringTest{
 
 	private void verifyEnabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
 		assertTrue("delete should be enabled", DeleteRefactoring2.isAvailable(resources, javaElements));
-	}
-
-	private static InputStream getStream(String content){
-		return new StringBufferInputStream(content);
 	}
 
 	private IPackageFragmentRoot getArchiveRoot() throws JavaModelException, Exception {

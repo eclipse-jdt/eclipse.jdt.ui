@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import java.io.InputStream;
-import java.io.StringBufferInputStream;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -32,10 +29,6 @@ public class RenameResourceChangeTests extends RefactoringTest {
 	
 	public static Test suite() {
 		return new MySetup(new TestSuite(clazz));
-	}
-	
-	private static InputStream getStream(String content){
-		return new StringBufferInputStream(content);
 	}
 	
 	public void testFile0() throws Exception{
