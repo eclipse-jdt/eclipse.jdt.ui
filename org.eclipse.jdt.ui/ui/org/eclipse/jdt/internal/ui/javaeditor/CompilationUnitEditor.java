@@ -323,14 +323,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	};
 	
-	private static class ExitPolicy implements LinkedPositionUI.ExitPolicy {
+	private class ExitPolicy implements LinkedPositionUI.ExitPolicy {
 		
 		final char fExitCharacter;
+		final char fEscapeCharacter;
 		final Stack fStack;
 		final int fSize;
 		
-		public ExitPolicy(char exitCharacter, Stack stack) {
+		public ExitPolicy(char exitCharacter, char escapeCharacter, Stack stack) {
 			fExitCharacter= exitCharacter;
+			fEscapeCharacter= escapeCharacter;
 			fStack= stack;
 			fSize= fStack.size();
 		}
@@ -342,7 +344,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			
 			if (event.character == fExitCharacter) {
 				
-				if (fSize == fStack.size()) {
+				if (fSize == fStack.size() && !isMasked(offset)) {
 					if (manager.anyPositionIncludes(offset, length))
 						return new ExitFlags(LinkedPositionUI.COMMIT| LinkedPositionUI.UPDATE_CARET, false);
 					else
@@ -367,6 +369,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			}						
 		}
 
+		private boolean isMasked(int offset) {
+			IDocument document= getSourceViewer().getDocument();
+			try {
+				return fEscapeCharacter == document.getChar(offset - 1);
+			} catch (BadLocationException e) {
+			}
+			return false;
+		}
 	};
 	
 	private static class BracketLevel {
@@ -485,7 +495,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 						return;
 
 					final char character= event.character;
-					final char closingCharacter= getPeerCharacter(character);		
+					final char closingCharacter= getPeerCharacter(character);
 					final StringBuffer buffer= new StringBuffer();
 					buffer.append(character);
 					buffer.append(closingCharacter);
@@ -504,7 +514,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			
 					level.fEditor= new LinkedPositionUI(sourceViewer, level.fManager);
 					level.fEditor.setCancelListener(this);
-					level.fEditor.setExitPolicy(new ExitPolicy(closingCharacter, fBracketLevelStack));
+					level.fEditor.setExitPolicy(new ExitPolicy(closingCharacter, getEscapeCharacter(closingCharacter), fBracketLevelStack));
 					level.fEditor.setFinalCaretOffset(offset + 2);
 					level.fEditor.enter();
 					
@@ -993,6 +1003,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (sourceViewer instanceof ITextViewerExtension)
 			((ITextViewerExtension) sourceViewer).prependVerifyKeyListener(fBracketInserter);
+	}
+	
+	private static char getEscapeCharacter(char character) {
+		if ('"' == character)
+			return '\\';
+		return 0;
 	}
 	
 	private static char getPeerCharacter(char character) {
