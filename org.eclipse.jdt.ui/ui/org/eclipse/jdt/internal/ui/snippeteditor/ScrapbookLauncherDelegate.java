@@ -63,7 +63,7 @@ public class ScrapbookLauncherDelegate extends JavaApplicationLauncherDelegate i
 		ILauncher[] launchers = DebugPlugin.getDefault().getLaunchManager().getLaunchers();
 		ILauncher me= null;
 		for (int i = 0; i < launchers.length; i++) {
-			if (launchers[i].getIdentifier().equals("org.eclipse.jdt.ui.launcher.ScrapbookLauncher")) { //$NON-NLS-1$
+			if (launchers[i].getIdentifier().equals("org.eclipse.jdt.ui.launcher.ScrapbookLauncherDelegate")) { //$NON-NLS-1$
 				me = launchers[i];
 				break; 
 			}
