@@ -185,12 +185,6 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			JavaPlugin.log(e);
 			openErrorDialog(viewer.getTextWidget().getShell(), e);		    	
 			fSelectedRegion= fRegion;
-
-
-		} catch (CoreException e) {
-			handleException(viewer.getTextWidget().getShell(), e);
-			fSelectedRegion= fRegion;
-
 		}
 
 	}	
@@ -227,9 +221,6 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 
 			return templateBuffer.getString();
 
-	    } catch (CoreException e) {
-			handleException(JavaPlugin.getActiveWorkbenchShell(), e);		    
-			return null;
 	    } catch (BadLocationException e) {
 			handleException(JavaPlugin.getActiveWorkbenchShell(), new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "", e))); //$NON-NLS-1$
 			return null;

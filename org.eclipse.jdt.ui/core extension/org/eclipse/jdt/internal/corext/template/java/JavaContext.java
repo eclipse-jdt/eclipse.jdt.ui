@@ -97,7 +97,7 @@ public class JavaContext extends CompilationUnitContext {
 	/*
 	 * @see TemplateContext#evaluate(Template template)
 	 */
-	public TemplateBuffer evaluate(Template template) throws CoreException, BadLocationException {
+	public TemplateBuffer evaluate(Template template) throws BadLocationException {
 
 		if (!canEvaluate(template))
 			return null;

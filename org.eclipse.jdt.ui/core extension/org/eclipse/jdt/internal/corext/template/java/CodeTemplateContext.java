@@ -12,8 +12,6 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
@@ -50,7 +48,7 @@ public class CodeTemplateContext extends TemplateContext {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.TemplateContext#evaluate(org.eclipse.jdt.internal.corext.template.Template)
 	 */
-	public TemplateBuffer evaluate(Template template) throws CoreException, BadLocationException {
+	public TemplateBuffer evaluate(Template template) throws BadLocationException {
 		// test that all variables are defined
 		Iterator iterator= getContextType().variableIterator();
 		while (iterator.hasNext()) {

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.ContextType;
@@ -160,7 +158,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	/*
 	 * @see TemplateContext#evaluate(Template)
 	 */
-	public TemplateBuffer evaluate(Template template) throws CoreException, BadLocationException {
+	public TemplateBuffer evaluate(Template template) throws BadLocationException {
 		TemplateTranslator translator= new TemplateTranslator();
 		TemplateBuffer buffer= translator.translate(template);
 		

@@ -70,13 +70,18 @@ public class JavaFormatter implements ITemplateEditor {
 	/*
 	 * @see ITemplateEditor#edit(TemplateBuffer, TemplateContext)
 	 */
-	public void edit(TemplateBuffer buffer, TemplateContext context) throws CoreException, BadLocationException {
-		if (fUseCodeFormatter)
-			format(buffer);
-		else
-			indentate(buffer);
-			
-		trimBegin(buffer);
+	public void edit(TemplateBuffer buffer, TemplateContext context) throws BadLocationException {
+		try {
+			if (fUseCodeFormatter)
+				format(buffer);
+			else
+				indentate(buffer);
+
+			trimBegin(buffer);
+		} catch (CoreException e) {
+			// TODO: handle exception
+			throw new BadLocationException();
+		}
 	}
 
 	private static int getCaretOffset(TemplatePosition[] variables) {
@@ -148,7 +153,7 @@ public class JavaFormatter implements ITemplateEditor {
 		}	    
 	}
 	
-	private void plainFormat(TemplateBuffer templateBuffer) throws CoreException {
+	private void plainFormat(TemplateBuffer templateBuffer) {
 
 		String string= templateBuffer.getString();
 		TemplatePosition[] variables= templateBuffer.getVariables();
@@ -300,7 +305,7 @@ public class JavaFormatter implements ITemplateEditor {
 		}
 	}	
 
-	private static void addEdits(TextBufferEditor editor, List edits) throws CoreException {
+	private static void addEdits(TextBufferEditor editor, List edits) {
 		for (Iterator iter= edits.iterator(); iter.hasNext();) {
 			editor.add((TextEdit) iter.next());
 		}
