@@ -3862,7 +3862,7 @@
       <filter
             targetId="org.eclipse.jdt.internal.ui.text.QuickOutline"
             name="%HideImportDeclaration.label"
-            enabled="false"
+            enabled="true"
             description="%HideImportDeclaration.description"
             class="org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
             id="org.eclipse.jdt.internal.ui.text.QuickOutline.ImportDeclarationFilter">

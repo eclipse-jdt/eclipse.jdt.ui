@@ -50,7 +50,6 @@ import org.eclipse.ui.keys.SWTKeySupport;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -661,13 +660,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	
 		final TreeViewer treeViewer= new OutlineTreeViewer(tree);
 	
-		// Hide import declarations but show the container
-		treeViewer.addFilter(new ViewerFilter() {
-			public boolean select(Viewer viewer, Object parentElement, Object element) {
-				return !(element instanceof IImportDeclaration);
-			}
-		});
-		
 		// Hard-coded filters
 		treeViewer.addFilter(new NamePatternFilter());
 		treeViewer.addFilter(new MemberFilter());
