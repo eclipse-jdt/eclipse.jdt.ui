@@ -243,7 +243,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					return true;
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				if (!e.isDoesNotExist()) {
+					JavaPlugin.log(e);
+				}
 			}
 		}
 		return false;
