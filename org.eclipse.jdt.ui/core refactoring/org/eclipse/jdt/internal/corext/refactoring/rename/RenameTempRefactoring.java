@@ -305,7 +305,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
         return result;
     }
 
-	private TextEdit[] getAllRenameEdits() throws JavaModelException {
+	private TextEdit[] getAllRenameEdits() {
 		Integer[] renamingOffsets= TempOccurrenceFinder.findTempOccurrenceOffsets(fTempDeclarationNode, fUpdateReferences, true);
 		Assert.isTrue(renamingOffsets.length > 0); //should be enforced by preconditions
 		TextEdit[] result= new TextEdit[renamingOffsets.length];
