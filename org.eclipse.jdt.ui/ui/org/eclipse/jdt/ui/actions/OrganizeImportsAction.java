@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -43,7 +44,9 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -140,15 +143,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		ICompilationUnit[] cus= getCompilationUnits(selection);
-		boolean isEnabled= cus.length > 0;
-		for (int i= 0; i < cus.length; i++) {
-			if (!JavaModelUtil.isEditable(cus[i])) {
-				isEnabled= false;
-				break;
-			}
-		}
-		setEnabled(isEnabled);
+		setEnabled(isEnabled(selection));
 	}
 	
 	private ICompilationUnit[] getCompilationUnits(IStructuredSelection selection) {
@@ -166,9 +161,17 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 							result.add(elem.getParent());
 							break;
 						case IJavaElement.PACKAGE_FRAGMENT:
-							IPackageFragment pack= (IPackageFragment) elem;
-							result.addAll(Arrays.asList(pack.getCompilationUnits()));
+							collectCompilationUnits((IPackageFragment) elem, result);
 							break;
+						case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+							collectCompilationUnits((IPackageFragmentRoot) elem, result);
+							break;
+						case IJavaElement.JAVA_PROJECT:
+							IPackageFragmentRoot[] roots= ((IJavaProject) elem).getPackageFragmentRoots();
+							for (int k= 0; k < roots.length; k++) {
+								collectCompilationUnits(roots[i], result);
+							}
+							break;			
 					}
 				}
 			} catch (JavaModelException e) {
@@ -176,6 +179,59 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			}
 		}
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
+	}
+	
+	private void collectCompilationUnits(IPackageFragment pack, Collection result) throws JavaModelException {
+		result.addAll(Arrays.asList(pack.getCompilationUnits()));
+	}
+
+	private void collectCompilationUnits(IPackageFragmentRoot root, Collection result) throws JavaModelException {
+		if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+			IJavaElement[] children= root.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				collectCompilationUnits((IPackageFragment) children[i], result);
+			}
+		}
+	}	
+	
+	
+	private boolean isEnabled(IStructuredSelection selection) {
+		Object[] selected= selection.toArray();
+		for (int i= 0; i < selected.length; i++) {
+			try {
+				if (selected[i] instanceof IJavaElement) {
+					IJavaElement elem= (IJavaElement) selected[i];
+					switch (elem.getElementType()) {
+						case IJavaElement.COMPILATION_UNIT:
+							return JavaModelUtil.isEditable((ICompilationUnit) elem);
+						case IJavaElement.IMPORT_CONTAINER:
+							return JavaModelUtil.isEditable((ICompilationUnit) elem.getParent());
+						case IJavaElement.PACKAGE_FRAGMENT:
+							IPackageFragment pack= (IPackageFragment) elem;
+							return pack.getCompilationUnits().length > 0;
+						case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+							IPackageFragmentRoot root= (IPackageFragmentRoot) elem;
+							return (root.getKind() == IPackageFragmentRoot.K_SOURCE) && root.hasChildren();
+						case IJavaElement.JAVA_PROJECT:
+							return hasSourceFolders((IJavaProject) elem);
+					}
+				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		return false;
+	}
+	
+	private boolean hasSourceFolders(IJavaProject project) throws JavaModelException {
+		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
+		for (int i= 0; i < roots.length; i++) {
+			IPackageFragmentRoot root= roots[i];
+			if ((root.getKind() == IPackageFragmentRoot.K_SOURCE) && root.hasChildren()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
@@ -246,31 +302,35 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	
 			for (int i= 0; i < cus.length; i++) {
 				ICompilationUnit cu= cus[i];
-				try {
-					if (!cu.isWorkingCopy()) {
-						ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
-						if (workingCopy != null) {
-							cu= workingCopy;
+				String cuLocation= cu.getPath().makeRelative().toString();
+				
+				if (!JavaModelUtil.isEditable(cu)) {
+					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.readonly", cuLocation); //$NON-NLS-1$
+					status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
+				} else {			
+					try {
+						cu= JavaModelUtil.toWorkingCopy(cu);
+						
+						monitor.subTask(cuLocation);
+						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, query);
+						op.run(new SubProgressMonitor(monitor, 1));
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
 						}
+						
+						ISourceRange errorRange= op.getErrorSourceRange();
+						if (errorRange != null) {
+							String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
+							status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
+						} 
+					} catch (OrganizeImportError e) {
+						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unresolvable", cuLocation); //$NON-NLS-1$
+						status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
+					} catch (CoreException e) {
+						JavaPlugin.log(e);
+						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getMessage()); //$NON-NLS-1$
+						status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
 					}
-					OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, query);
-					op.run(new SubProgressMonitor(monitor, 1));
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
-					
-					ISourceRange errorRange= op.getErrorSourceRange();
-					if (errorRange != null) {
-						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cu.getElementName()); //$NON-NLS-1$
-						status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
-					} 
-				} catch (OrganizeImportError e) {
-					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unresolvable", cu.getElementName()); //$NON-NLS-1$
-					status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
-				} catch (CoreException e) {
-					JavaPlugin.log(e);
-					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getMessage()); //$NON-NLS-1$
-					status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
 				}
 			}
 		} finally {
@@ -291,10 +351,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					fEditor= (JavaEditor) editor;
 				}
 				
-				ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
-				if (workingCopy != null) {
-					cu= workingCopy;
-				}
+				cu= JavaModelUtil.toWorkingCopy(cu);
 			}			
 			
 			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, createChooseImportQuery());

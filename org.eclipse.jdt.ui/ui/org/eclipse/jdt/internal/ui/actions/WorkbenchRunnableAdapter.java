@@ -9,6 +9,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -29,7 +31,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		try {
-			JavaPlugin.getWorkspace().run(fWorkspaceRunnable, monitor);
+			JavaCore.run(fWorkspaceRunnable, monitor);
 		} catch (OperationCanceledException e) {
 			throw new InterruptedException(e.getMessage());
 		} catch (CoreException e) {
