@@ -84,17 +84,17 @@ public class CodeFormatterUtil {
 		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(options);
 		return formatter.format(string, indentationLevel, positions, lineSeparator);
 	}	
-	
+
 	/**
-	 * @deprecated Port to <code>format2</code>
-	 */
+	 * Old API. Consider to use format2 (TextEdit)
+	 */	
 	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		return format(kind, string, 0, string.length(), indentationLevel, positions, lineSeparator, options);
 	}
 	
-	
+
 	/**
-	 * @deprecated Port to <code>format2</code>
+	 * Old API. Consider to use format2 (TextEdit)
 	 */	
 	public static String format(int kind, String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		if (OLD_FUNC) {
@@ -106,7 +106,7 @@ public class CodeFormatterUtil {
 	}
 	
 	/**
-	 * @deprecated Port to <code>format2</code>
+	 * Old API. Consider to use format2 (TextEdit)
 	 */	
 	public static String format(ASTNode node, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		if (OLD_FUNC) {
@@ -148,7 +148,7 @@ public class CodeFormatterUtil {
 		JavaPlugin.logErrorMessage("format returns null-edit"); //$NON-NLS-1$
 		return string;
 	}
-
+	
 	/**
 	 * Evaluates the edit on the given string.
 	 * @throws IllegalArgumentException If the positions are not inside the string, a
@@ -423,17 +423,17 @@ public class CodeFormatterUtil {
 	private static Document createDocument(String string, Position[] positions) throws IllegalArgumentException {
 		Document doc= new Document(string);
 		try {
-			doc.addPositionCategory(POS_CATEGORY);
-			doc.addPositionUpdater(new DefaultPositionUpdater(POS_CATEGORY) {
-				protected boolean notDeleted() {
-					if (fOffset < fPosition.offset && (fPosition.offset + fPosition.length < fOffset + fLength)) {
-						fPosition.offset= fOffset + fLength; // deleted positions: set to end of remove
-						return false;
-					}
-					return true;
-				}
-			});
 			if (positions != null) {
+				doc.addPositionCategory(POS_CATEGORY);
+				doc.addPositionUpdater(new DefaultPositionUpdater(POS_CATEGORY) {
+					protected boolean notDeleted() {
+						if (fOffset < fPosition.offset && (fPosition.offset + fPosition.length < fOffset + fLength)) {
+							fPosition.offset= fOffset + fLength; // deleted positions: set to end of remove
+							return false;
+						}
+						return true;
+					}
+				});
 				for (int i= 0; i < positions.length; i++) {
 					try {
 						doc.addPosition(POS_CATEGORY, positions[i]);
