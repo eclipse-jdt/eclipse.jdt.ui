@@ -8,15 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 public interface IDeclaredConstraintVariable {
-	
-	public void setCompilationUnit(ICompilationUnit cu);
-	
+
 	public ICompilationUnit getCompilationUnit();
-	
+
+	public Object getData(String name);
+
+	public void setCompilationUnit(ICompilationUnit cu);
 }
