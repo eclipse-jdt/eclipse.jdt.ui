@@ -32,16 +32,18 @@ public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 
 	private static final String AUTO_SCROLLING_FILE= AUTO_SCROLLING_FILE_PREFIX + ".txt";
 
-	private static final int N_OF_RUNS= 5;
+	private static final int N_OF_RUNS= 6;
+
+	private static final int N_OF_COLD_RUNS= 3;
 
 	public static Test suite() {
-		return new TestSuite(THIS);
+		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 	
 	public void testThumbScrollTextEditor1() throws CoreException {
 		try {
 			ResourceTestHelper.copy(THUMB_SCROLLING_ORIG_FILE, THUMB_SCROLLING_FILE);
-			measureScrolling(N_OF_RUNS, new ThumbScrollPoster(), ResourceTestHelper.findFile(THUMB_SCROLLING_FILE));
+			measureScrolling(N_OF_RUNS, N_OF_COLD_RUNS, new ThumbScrollPoster(), ResourceTestHelper.findFile(THUMB_SCROLLING_FILE));
 		} finally {
 			ResourceTestHelper.delete(THUMB_SCROLLING_FILE);
 		}
@@ -50,7 +52,7 @@ public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 	public void testAutoScrollTextEditor1() throws CoreException {
 		try {
 			ResourceTestHelper.copy(AUTO_SCROLLING_ORIG_FILE, AUTO_SCROLLING_FILE);
-			measureScrolling(N_OF_RUNS, new AutoScrollPoster(), ResourceTestHelper.findFile(AUTO_SCROLLING_FILE));
+			measureScrolling(N_OF_RUNS, N_OF_COLD_RUNS, new AutoScrollPoster(), ResourceTestHelper.findFile(AUTO_SCROLLING_FILE));
 		} finally {
 			ResourceTestHelper.delete(AUTO_SCROLLING_FILE);
 		}

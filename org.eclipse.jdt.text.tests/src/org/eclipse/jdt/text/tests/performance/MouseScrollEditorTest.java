@@ -142,7 +142,7 @@ public abstract class MouseScrollEditorTest extends TestCase {
 		fPerformanceMeter.dispose();
 	}
 
-	protected void measureScrolling(int nOfRuns, Poster poster, IFile file) throws PartInitException {
+	protected void measureScrolling(int nOfRuns, int nOfColdRuns, Poster poster, IFile file) throws PartInitException {
 		try {
 			IEditorPart editor= EditorTestHelper.openInEditor(file, true);
 			EditorTestHelper.joinJobs(5000, 10000, 100);
@@ -162,13 +162,15 @@ public abstract class MouseScrollEditorTest extends TestCase {
 				
 				fDone= false;
 				new Thread(fThreadRunnable).start();
-				fPerformanceMeter.start();
+				if (i >= nOfColdRuns)
+					fPerformanceMeter.start();
 				while (!fDone)
 					if (!fDisplay.readAndDispatch())
 						fDisplay.sleep();
 				if (fBackgroundError != null)
 					throw fBackgroundError;
-				fPerformanceMeter.stop();
+				if (i >= nOfColdRuns)
+					fPerformanceMeter.stop();
 				assertEquals(fMaxTopPixel, fText.getTopPixel());
 				EditorTestHelper.joinJobs(100, 1000, 100);
 				fText.setTopPixel(0);
