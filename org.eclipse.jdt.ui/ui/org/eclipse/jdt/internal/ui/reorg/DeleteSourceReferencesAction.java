@@ -17,7 +17,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -51,6 +50,12 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 			return;
 
 		Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess()); //IFile -> List of ISourceReference (elements from that file)
+		if (areAllFilesReadOnly(mapping)){
+			String title= "Delete";
+			String label= "Cannot delete. All selected elements are defined in read-only files."; 
+			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), title, label);
+			return;
+		}	
 				
 		List emptyCuList= Arrays.asList(getCusLeftEmpty(mapping));
 		
@@ -86,21 +91,6 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 				return false;
 		}
 		return true;
-	}
-	
-	/*
-	 * @see RefactoringAction#canOperateOn(IStructuredSelection)
-	 */
-	public boolean canOperateOn(IStructuredSelection selection) {
-		if (! super.canOperateOn(selection))
-			return false;
-		try {
-			Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess()); //IFile -> List of ISourceReference (elements from that file)
-			return ! areAllFilesReadOnly(mapping);
-		} catch(JavaModelException e) {
-			//ignore
-			return false;
-		}
 	}
 	
 	private static void deleteAll(Map mapping, IFile file) throws CoreException {
