@@ -55,6 +55,8 @@ public class AllTypesCacheTest extends TestCase {
 	
 	private IPackageFragmentRoot fLibrary;
 	private IPackageFragmentRoot fSourceFolder;
+	
+	private boolean fWasAutobuild;
 
 	public AllTypesCacheTest(String name) {
 		super(name);
@@ -65,17 +67,19 @@ public class AllTypesCacheTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new AllTypesCacheTest("testClasspathChange"));
+			suite.addTest(new AllTypesCacheTest("testNewElementCreation"));
 			return new ProjectTestSetup(suite);
 		}	
 	}
 
 
 	protected void setUp() throws Exception {
+		fWasAutobuild= JavaProjectHelper.setAutoBuilding(false);
+		
 		fJProject1= ProjectTestSetup.getProject();
 		
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
@@ -97,7 +101,7 @@ public class AllTypesCacheTest extends TestCase {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 		JavaProjectHelper.delete(fJProject2);		
-		
+		JavaProjectHelper.setAutoBuilding(fWasAutobuild);
 	}
 
 	public void testDifferentScopes() throws Exception {
@@ -162,23 +166,23 @@ public class AllTypesCacheTest extends TestCase {
 	}
 	
 	public void testClasspathChange() throws Exception {	
-//		IJavaSearchScope workspaceScope= SearchEngine.createWorkspaceScope();
-//		
-//		ArrayList res1= new ArrayList();
-//		
-//		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
-//		assertNotNull("mylib.Foo not found", findTypeRef(res1, "mylib.Foo"));
-//		assertTrue("542 types expected, is " + res1.size(), res1.size() == 542);
-//		
-//		int nFlushes= AllTypesCache.getNumberOfCacheFlushes();
-//		
-//		JavaProjectHelper.removeFromClasspath(fJProject1, fLibrary.getPath());	
-//		assertTrue("cache not flushed", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
-//		
-//		res1.clear();
-//		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
-//		assertNull("mylib.Foo still found", findTypeRef(res1, "mylib.Foo"));
-//		assertTrue("539 types in workspace expected, is " + res1.size(), res1.size() == 539);
+		IJavaSearchScope workspaceScope= SearchEngine.createWorkspaceScope();
+		
+		ArrayList res1= new ArrayList();
+		
+		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
+		assertNotNull("mylib.Foo not found", findTypeRef(res1, "mylib.Foo"));
+		assertTrue("542 types expected, is " + res1.size(), res1.size() == 542);
+		
+		int nFlushes= AllTypesCache.getNumberOfCacheFlushes();
+		
+		JavaProjectHelper.removeFromClasspath(fJProject1, fLibrary.getPath());	
+		assertTrue("cache not flushed", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
+		
+		res1.clear();
+		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
+		assertNull("mylib.Foo still found", findTypeRef(res1, "mylib.Foo"));
+		assertTrue("539 types in workspace expected, is " + res1.size(), res1.size() == 539);
 	}
 	
 	public void testNewElementCreation() throws Exception {
@@ -189,39 +193,35 @@ public class AllTypesCacheTest extends TestCase {
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
 		assertTrue("542 types expected, is " + res1.size(), res1.size() == 542);
 		
+		// add type
 		int nFlushes= AllTypesCache.getNumberOfCacheFlushes();
-		
 		IPackageFragment pack= fSourceFolder.getPackageFragment("");
 		ICompilationUnit newCU= pack.getCompilationUnit("A.java");
 		IType type= newCU.createType("public class A {\n}\n", null, true, null);
-		
+		assertTrue("cache not flushed after adding type", nFlushes != AllTypesCache.getNumberOfCacheFlushes());		
 		res1.clear();
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
 		assertNotNull("A not found", findTypeRef(res1, "A"));
-		
 		assertTrue("543 types in workspace expected, is " + res1.size(), res1.size() == 543);
 		
-		assertTrue("cache not flushed", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
-		nFlushes= AllTypesCache.getNumberOfCacheFlushes();
-
+		
 		// create a field: should not flush cache
+		nFlushes= AllTypesCache.getNumberOfCacheFlushes();
 		type.createField("public int fCount;", null, true, null);
-
+		assertTrue("cache was flushed", nFlushes == AllTypesCache.getNumberOfCacheFlushes());
 		res1.clear();
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);		
 		assertTrue("still 543 types in workspace expected, is " + res1.size(), res1.size() == 543);
 		
-//		assertTrue("cache was flushed", nFlushes == AllTypesCache.getNumberOfCacheFlushes());
 
 		// create an inner type: should flush cache
+		nFlushes= AllTypesCache.getNumberOfCacheFlushes();
 		type.createType("public class AInner {}", null, true, null);
-
 		res1.clear();
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);		
+		assertTrue("cache not flushed after inner type creation", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
 		assertNotNull("AInner not found", findTypeRef(res1, "A.AInner"));
 		assertTrue("still 544 types in workspace expected, is " + res1.size(), res1.size() == 544);
-		
-		assertTrue("cache not flushed after inner type creation", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
 	}
 	
 	public void testWorkingCopies() throws Exception {
@@ -305,9 +305,7 @@ public class AllTypesCacheTest extends TestCase {
 			JavaPlugin.getActivePage().closeAllEditors(false);
 		}
 	
-	}	
-	
-	
+	}
 	
 	private TypeInfo findTypeRef(List refs, String fullname) {
 		for (int i= 0; i <refs.size(); i++) {
