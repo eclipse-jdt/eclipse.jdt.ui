@@ -13,8 +13,8 @@ import org.eclipse.jdt.internal.ui.reorg.RenameAction;
 public class RenameActionDelegate extends RefactoringActionDelegate {
 
 	public RenameActionDelegate() {
-		super(RefactoringMessages.getString("RenameActionDelegate.rename"), "Operation unavailable on the current selection.\n" //$NON-NLS-1$
-		       + "Select a java project, source folder, resource, package, compilation unit, type, field, method, parameter or a local variable.");
+		super(RefactoringMessages.getString("RenameActionDelegate.rename"), //$NON-NLS-1$
+			RefactoringMessages.getString("RenameActionDelegate.unavailable")); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
