@@ -35,6 +35,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
@@ -97,8 +98,9 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 				group.createPosition(document, elem.getStartPosition(), elem.getLength(), i);
 			}
 			
-			LinkedEnvironment enviroment= LinkedEnvironment.createLinkedEnvironment(document);
+			LinkedEnvironment enviroment= new LinkedEnvironment();
 			enviroment.addGroup(group);
+			enviroment.forceInstall();
 			
 			LinkedUIControl ui= new LinkedUIControl(enviroment, viewer);
 //			ui.setInitialOffset(offset);
@@ -107,6 +109,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			
 			fSelectedRegion= ui.getSelectedRegion();
 		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
 		}
 	}	
 

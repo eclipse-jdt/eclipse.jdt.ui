@@ -139,7 +139,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			document.replace(start, end - start, templateString);	
 
 			// translate positions
-			LinkedEnvironment env= LinkedEnvironment.createLinkedEnvironment(document);
+			LinkedEnvironment env= new LinkedEnvironment();
 			TemplatePosition[] variables= templateBuffer.getVariables();
 			boolean hasPositions= false;
 			for (int i= 0; i != variables.length; i++) {
@@ -161,6 +161,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			}
 			
 			if (hasPositions) {
+				env.forceInstall();
 				LinkedUIControl editor= new LinkedUIControl(env, viewer);
 				editor.setExitPosition(viewer, getCaretOffset(templateBuffer) + start, 0, true);
 				editor.enter();

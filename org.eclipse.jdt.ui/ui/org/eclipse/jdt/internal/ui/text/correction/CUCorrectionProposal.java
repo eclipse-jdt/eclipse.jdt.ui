@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -275,7 +276,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			}
 		}
 		
-		LinkedEnvironment environment= LinkedEnvironment.createLinkedEnvironment(document);
+		LinkedEnvironment environment= new LinkedEnvironment();
 		boolean added= false;
 		for (Iterator it= map.values().iterator(); it.hasNext(); ) {
 			LinkedPositionGroup group= (LinkedPositionGroup) it.next();
@@ -284,6 +285,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				added= true;
 			}
 		}
+		
+		environment.forceInstall();
 		
 		if (added) { // only set up UI if there are any positions set
 			LinkedUIControl ui= new LinkedUIControl(environment, viewer);
@@ -330,7 +333,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.link;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -42,32 +43,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.0
  */
 public class LinkedEnvironment {
-
-	/**
-	 * Returns a linked environment on <code>document</code>.
-	 * 
-	 * @param document the document for which a <code>LinkedManager</code> is
-	 *        requested
-	 * @return a linked environment for <code>document</code>
-	 */
-	public static LinkedEnvironment createLinkedEnvironment(IDocument document) {
-		return LinkedManager.createEnvironment(document);
-	}
-
-	/**
-	 * Returns a linked environment for the specified documents. Throws a
-	 * <code>BadLocationException</code> if there is a conflict between the
-	 * documents (i.e. two or more environments are already installed on
-	 * subsets of <code>documents</code>).
-	 * 
-	 * @param documents the documents for which a�<code>LinkedManager</code>
-	 *        is requested
-	 * @return a linked manager for <code>documents</code>
-	 * @throws BadLocationException if there is a conflict
-	 */
-	public static LinkedEnvironment createLinkedEnvironment(IDocument[] documents) throws BadLocationException {
-		return LinkedManager.createEnvironment(documents);
-	}
 
 	/**
 	 * Checks whether there is alreay a linked environment installed on <code>document</code>.
@@ -227,7 +202,7 @@ public class LinkedEnvironment {
 	/** The document listener on the documents affected by this environment. */
 	private final IDocumentListener fDocumentListener= new DocumentListener();
 	/** The parent environment for a hierachical set up, or <code>null</code>. */
-	private final LinkedEnvironment fParentEnvironment; // set in ctor
+	private LinkedEnvironment fParentEnvironment;
 	/**
 	 * The position in <code>fParentEnvironment</code> that includes all
 	 * positions in this object, or <code>null</code> if there is no parent
@@ -250,22 +225,6 @@ public class LinkedEnvironment {
 	 * them.
 	 */
 	private List fPositionSequence= new ArrayList();
-
-	/**
-	 * Creates a new environment. If <code>parent</code> is not <code>null</code>,
-	 * a nested environment is created.
-	 * 
-	 * @param parent the parent environment, or <code>null</code> for a
-	 *        top-level environment
-	 */
-	LinkedEnvironment(LinkedEnvironment parent) {
-		// TODO debug trace the erroneous nestings.
-		Assert.isTrue(parent == null || parent.fGroups.size() > 0);
-		
-		fParentEnvironment= parent;
-		if (parent != null)
-			parent.suspend();
-	}
 
 	/**
 	 * Whether we are in the process of editing documents (set by <code>Replace</code>,
@@ -384,53 +343,175 @@ public class LinkedEnvironment {
 	 *         environment is already sealed
 	 */
 	public void addGroup(LinkedPositionGroup group) throws BadLocationException {
-		Assert.isNotNull(group);
+		if (group == null)
+			throw new IllegalArgumentException("group may not be null"); //$NON-NLS-1$
 		if (fIsSealed)
-			throw new IllegalStateException("environment is already sealed"); //$NON-NLS-1$
+			throw new IllegalStateException("environment is already installed"); //$NON-NLS-1$
 		if (fGroups.contains(group))
 			// nothing happens
 			return;
 
-		enforceNestability(group);
 		enforceDisjoint(group);
-		group.setEnvironment(this);
+		group.seal();
 		fGroups.add(group);
+	}
+	
+	
+	/**
+	 * Installs this environment, which includes registering as document listener
+	 * on all involved documents and storing global information about this environment. If
+	 * an exception is thrown, the installation failed and the environment is unusable.
+	 * 
+	 * @throws BadLocationException if some of the positions of this environment were not valid positions on their respective documents
+	 */
+	public void forceInstall() throws BadLocationException {
+		if (!install(true))
+			Assert.isTrue(false);
+	}
+	
+	/**
+	 * Installs this environment, which includes registering as document listener
+	 * on all involved documents and storing global information about this environment. The return
+	 * value states whether installation was successful; if not, the environment is not installed
+	 * and will not work.
+	 * 
+	 * @return <code>true</code> if installation was successful, <code>false</code> otherwise
+	 * @throws BadLocationException if some of the positions of this environment were not valid positions on their respective documents
+	 */
+	public boolean tryInstall() throws BadLocationException {
+		return install(false);
+	}
+	
+	/**
+	 * Installs this environment, which includes registering as document listener
+	 * on all involved documents and storing global information about this environment. The return
+	 * value states whether installation was successful; if not, the environment is not installed
+	 * and will not work. The return value can only then become <code>false</code> if <code>force</code>
+	 * was set to <code>false</code> as well.
+	 * 
+	 * @param force if <code>true</code>, any other environment that cannot coexist
+	 * with this one is canceled; if <code>false</code>, install will fail when conflicts
+	 * occur and return false
+	 * @return <code>true</code> if installation was successful, <code>false</code> otherwise
+	 * @throws BadLocationException if some of the positions of this environment were not valid positions on their respective documents
+	 */
+	private boolean install(boolean force) throws BadLocationException {
+		if (fIsSealed)
+			throw new IllegalStateException("environment is already installed"); //$NON-NLS-1$
+		enforceNotEmpty();
+		
+		IDocument[] documents= getDocuments();
+		LinkedManager manager= LinkedManager.getLinkedManager(documents, force);
+		// if we force creation, we require a valid manager
+		Assert.isTrue(!(force && manager == null));
+		if (manager == null)
+			return false;
+		
+		if (!manager.nestEnvironment(this, force))
+			if (force)
+				Assert.isTrue(false);
+			else
+				return false;
+		
+		// we set up successfully. After this point, exit has to be called to 
+		// remove registered listeners...
+		fIsSealed= true;
+		if (fParentEnvironment != null)
+			fParentEnvironment.suspend();
+		
+		// register positions
+		try {
+			for (Iterator it= fGroups.iterator(); it.hasNext(); ) {
+	            LinkedPositionGroup group= (LinkedPositionGroup) it.next();
+	            group.register(this);
+	        }
+			return true;
+		} catch (BadLocationException e){
+			// if we fail to add, make sure to release all listeners again 
+			exit(ILinkedListener.NONE);
+			throw e;
+		}
 	}
 
 	/**
+	 * Asserts that there is at least one linked position in this linked
+	 * environment, throws an IllegalStateException otherwise.
+	 */
+	private void enforceNotEmpty() {
+        boolean hasPosition= false;
+		for (Iterator it= fGroups.iterator(); it.hasNext(); )
+			if (!((LinkedPositionGroup) it.next()).isEmtpy()) {
+				hasPosition= true;
+				break;
+			}
+		if (!hasPosition)
+			throw new IllegalStateException("must specify at least one linked position"); //$NON-NLS-1$
+
+    }
+
+    /**
+	 * Collects all the documents that contained positions are set upon.
+     * @return the set of documents affected by this environment
+     */
+    private IDocument[] getDocuments() {
+    	Set docs= new HashSet();
+        for (Iterator it= fGroups.iterator(); it.hasNext(); ) {
+            LinkedPositionGroup group= (LinkedPositionGroup) it.next();
+            docs.addAll(Arrays.asList(group.getDocuments()));
+        }
+        return (IDocument[]) docs.toArray(new IDocument[docs.size()]);
+    }
+
+    /**
+     * Returns whether the receiver can be nested into the given <code>parent</code>
+     * environment. If yes, the parent environment and its position that the receiver
+     * fits in are remembered.
+     * 
+     * @param parent the parent environment candidate
+     * @return <code>true</code> if the receiver can be nested into <code>parent</code>, <code>false</code> otherwise
+     */
+    boolean canNestInto(LinkedEnvironment parent) {
+    	for (Iterator it= fGroups.iterator(); it.hasNext(); ) {
+			LinkedPositionGroup group= (LinkedPositionGroup) it.next();
+			if (!enforceNestability(group, parent)) {
+				fParentPosition= null;
+				return false;
+			}
+		}
+    	
+    	Assert.isNotNull(fParentPosition);
+    	fParentEnvironment= parent;
+    	return true;
+    }
+
+    /**
 	 * Called by nested environments when a group is added to them. All
 	 * positions in all groups of a nested environment have to fit inside a
 	 * single position in the parent environment.
 	 * 
 	 * @param group the group of the nested environment to be adopted.
-	 * @throws BadLocationException if the nesting requirement is violated
+	 * @param environment the environment to check against
 	 */
-	private void enforceNestability(LinkedPositionGroup group) throws BadLocationException {
-		// TODO debug trace the erroneous nestings.
-		Assert.isTrue(fParentEnvironment == null || fParentEnvironment.fGroups.size() > 0);
-		if (fParentEnvironment == null)
-			return;
-
-		for (Iterator it= fParentEnvironment.fGroups.iterator(); it.hasNext(); ) {
-			LinkedPositionGroup pg= (LinkedPositionGroup) it.next();
-			LinkedPosition pos= pg.adopt(group);
-			if (pos != null && fParentPosition != null && fParentPosition != pos)
-				throw new BadLocationException();
-			else if (fParentPosition == null && pos != null)
-				fParentPosition= pos;
+	private boolean enforceNestability(LinkedPositionGroup group, LinkedEnvironment environment) {
+		Assert.isNotNull(environment);
+		Assert.isNotNull(group);
+		
+		try {
+			for (Iterator it= environment.fGroups.iterator(); it.hasNext(); ) {
+				LinkedPositionGroup pg= (LinkedPositionGroup) it.next();
+				LinkedPosition pos;
+				pos= pg.adopt(group);
+				if (pos != null && fParentPosition != null && fParentPosition != pos)
+					return false; // group does not fit into one parent position, which is illegal
+				else if (fParentPosition == null && pos != null)
+					fParentPosition= pos;
+			}
+		} catch (BadLocationException e) {
+			return false;
 		}
 
-		// group must fit in exactly one of the parent's positions
-		if (fParentPosition == null)
-			throw new BadLocationException();
-	}
-
-	/**
-	 * Seals this environment. Further calls to <code>addGroup</code> will
-	 * throw an <code>IllegalStateException</code>.
-	 */
-	void seal() {
-		fIsSealed= true;
+		// group must fit into exactly one of the parent's positions
+		return fParentPosition != null;
 	}
 
 	/**
@@ -526,7 +607,7 @@ public class LinkedEnvironment {
 			fPositionSequence.add(position);
 		}
 	}
-
+	
 	/**
 	 * Suspends this environment.
 	 */
@@ -574,6 +655,10 @@ public class LinkedEnvironment {
 		return false;
 	}
 	
+	/**
+	 * @param position
+	 * @return
+	 */
 	LinkedPositionGroup getGroupForPosition(LinkedPosition position) {
 		for (Iterator it= fGroups.iterator(); it.hasNext(); ) {
 			LinkedPositionGroup group= (LinkedPositionGroup) it.next();

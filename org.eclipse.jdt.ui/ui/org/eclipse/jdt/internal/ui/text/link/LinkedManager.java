@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
 
 
@@ -87,29 +87,18 @@ class LinkedManager {
 	}
 	
 	/**
-	 * Returns a linked environment on <code>document</code>.
+	 * Returns the manager for the given documents. If <code>force</code> is 
+	 * <code>true</code>, any existing conflicting managers are canceled, otherwise,
+	 * the method may return <code>null</code> if there are conflicts.
 	 * 
-	 * @param document the document for which a <code>LinkedManager</code> is requested
-	 * @return a linked environment for <code>document</code>
+	 * @param documents the documents of interest
+	 * @param force whether to kill any conflicting managers
+	 * @return a manager able to cover the requested documents, or <code>null</code> if there is a conflict and <code>force</code> was set to <code>false</code>
 	 */
-	public static LinkedEnvironment createEnvironment(IDocument document) {
-		LinkedManager mgr= (LinkedManager) fManagers.get(document);
-		if (mgr == null) {
-			mgr= new LinkedManager();
-			fManagers.put(document, mgr);
-		}
-		return mgr.createLinkedEnvironment();
-	}
-
-	/**
-	 * Returns the linked manager for the specified documents, or <code>null</code> if there is
-	 * a conflict between the documents (i.e. two or more managers are already installed on subsets
-	 * of <code>documents</code>).
-	 * 
-	 * @param documents the documents for which a <code>LinkedManager</code> is requested
-	 * @return a linked manager for <code>documents</code>, or <code>null</code> if there is a conflict
-	 */
-	public static LinkedEnvironment createEnvironment(IDocument[] documents) throws BadLocationException {
+	public static LinkedManager getLinkedManager(IDocument[] documents, boolean force) {
+		if (documents == null || documents.length == 0)
+			return null;
+		
 		Set mgrs= new HashSet();
 		LinkedManager mgr= null;
 		for (int i= 0; i < documents.length; i++) {
@@ -118,7 +107,14 @@ class LinkedManager {
 				mgrs.add(mgr);
 		}
 		if (mgrs.size() > 1)
-			throw new BadLocationException();
+			if (force) {
+				for (Iterator it= mgrs.iterator(); it.hasNext(); ) {
+					LinkedManager m= (LinkedManager) it.next();
+					m.closeAllEnvironments();
+				}
+			} else {
+				return null;
+			}
 		
 		if (mgrs.size() == 0)
 			mgr= new LinkedManager();
@@ -126,7 +122,7 @@ class LinkedManager {
 		for (int i= 0; i < documents.length; i++)
 			fManagers.put(documents[i], mgr);
 		
-		return mgr.createLinkedEnvironment();
+		return mgr;
 	}
 	
 	/**
@@ -145,26 +141,8 @@ class LinkedManager {
 	private Listener fListener= new Listener();
 
 	/**
-	 * Creates a linked environment. If there are already other existing linked environments in the 
-	 * manager, a nested linked environment is created. 
+	 * Notify the manager about a leaving environment.
 	 * 
-	 * @return a linked environment on the documents of this manager.
-	 */
-	public LinkedEnvironment createLinkedEnvironment() {
-		LinkedEnvironment env;
-		if (fEnvironments.isEmpty()) {
-			env= new LinkedEnvironment(null);
-		} else {
-			LinkedEnvironment parent= (LinkedEnvironment) fEnvironments.peek();
-			parent.seal();
-			env= new LinkedEnvironment(parent);
-		}
-		env.addLinkedListener(fListener);
-		fEnvironments.push(env);
-		return env;
-	}
-	
-	/**
 	 * @param environment
 	 * @param flags
 	 */
@@ -202,4 +180,43 @@ class LinkedManager {
 		}
 	}
 	
+    /**
+     * Tries to nest the given <code>LinkedEnvironment</code> onto the top of 
+     * the stack of environments managed by the receiver. If <code>force</code>
+     * is <code>true</code>, any environments on the stack that create a conflict
+     * are killed.
+     *  
+     * @param environment the environment to nest
+     * @param force whether to force the addition of the environment
+     * @return <code>true</code> if nesting was successful, <code>false</code> otherwise (only possible if <code>force</code> is <code>false</code>
+     */
+    public boolean nestEnvironment(LinkedEnvironment environment, boolean force) {
+    	Assert.isNotNull(environment);
+
+    	try {
+    		while (true) {
+    			if (fEnvironments.isEmpty()) {
+    				environment.addLinkedListener(fListener);
+    				fEnvironments.push(environment);
+    				return true;
+    			}
+    			
+    			LinkedEnvironment top= (LinkedEnvironment) fEnvironments.peek();
+    			if (environment.canNestInto(top)) {
+    				environment.addLinkedListener(fListener);
+    				fEnvironments.push(environment);
+    				return true;
+    			} else if (!force) {
+    				return false;
+    			} else { // force
+    				fEnvironments.pop();
+    				top.exit(ILinkedListener.NONE);
+    				// continue;
+    			}
+    		}
+    	} finally {
+    		// if we remove any, make sure the new one got inserted
+    		Assert.isTrue(fEnvironments.size() > 0);
+    	}
+    }
 }

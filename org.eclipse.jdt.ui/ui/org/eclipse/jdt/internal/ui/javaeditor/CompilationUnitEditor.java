@@ -531,10 +531,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					LinkedPositionGroup group= new LinkedPositionGroup(); 
 					group.createPosition(document, offset + 1, 0);
 
-					LinkedEnvironment env= LinkedEnvironment.createLinkedEnvironment(document);
+					LinkedEnvironment env= new LinkedEnvironment();
 					env.addLinkedListener(this);
-					
 					env.addGroup(group);
+					env.forceInstall();
+					
 					level.fOffset= offset;
 					level.fLength= 2;
 			

@@ -53,8 +53,8 @@ public class LinkedPositionGroup {
 
 	/** The linked positions of this group. */
 	private final List fPositions= new LinkedList();
-	/** The environment. */
-	private LinkedEnvironment fEnvironment;
+	/** Whether we are sealed or not. */
+	private boolean fIsSealed= false;
 
 	/*
 	 * iteration variables, set to communicate state between isLegalEvent and
@@ -70,13 +70,6 @@ public class LinkedPositionGroup {
 	 */
 	private boolean fHasCustomIteration= false;
 	
-	/**
-	 * Creates a new position group.
-	 */
-	public LinkedPositionGroup() {
-		fEnvironment= null;
-	}
-
 	/**
 	 * Adds a position to this group. If the position overlaps with another in
 	 * this group, or if the group is already part of an environment, an
@@ -247,7 +240,7 @@ public class LinkedPositionGroup {
 	private void addPosition(LinkedPosition position) throws BadLocationException {
 		Assert.isNotNull(position);
 		// don't add positions after it is installed.
-		if (fEnvironment != null)
+		if (fIsSealed)
 			throw new IllegalStateException("cannot add positions after the group is added to an environment"); //$NON-NLS-1$
 
 		if (!fPositions.contains(position)) {
@@ -257,21 +250,6 @@ public class LinkedPositionGroup {
 			fHasCustomIteration |= position.getSequenceNumber() != LinkedPositionGroup.NO_STOP;
 		} else
 			return; // nothing happens
-	}
-
-	/**
-	 * Adds <code>position</code> to the document and ensures management of
-	 * its document by the environment.
-	 * 
-	 * @param position the position to register
-	 * @throws BadLocationException if the position overlaps with an other, or
-	 *         is illegal on the document
-	 */
-	private void register(LinkedPosition position) throws BadLocationException {
-		Assert.isNotNull(fEnvironment);
-		Assert.isNotNull(position);
-
-		fEnvironment.register(position);
 	}
 
 	/**
@@ -392,19 +370,30 @@ public class LinkedPositionGroup {
 	 * @throws BadLocationException if registering any position with the
 	 *         environment fails
 	 */
-	void setEnvironment(LinkedEnvironment environment) throws BadLocationException {
-		Assert.isNotNull(environment);
-		Assert.isTrue(fEnvironment == null);
-		fEnvironment= environment;
+	void seal() throws BadLocationException {
+		Assert.isTrue(!fIsSealed);
+		fIsSealed= true;
 
 		if (fHasCustomIteration == false && fPositions.size() > 0) {
 			((LinkedPosition) fPositions.get(0)).setSequenceNumber(0);
 		}
-
-		for (Iterator it= fPositions.iterator(); it.hasNext(); ) {
+	}
+	
+	IDocument[] getDocuments() {
+		IDocument[] docs= new IDocument[fPositions.size()];
+		int i= 0;
+		for (Iterator it= fPositions.iterator(); it.hasNext(); i++) {
 			LinkedPosition pos= (LinkedPosition) it.next();
-			register(pos);
+			docs[i]= pos.getDocument();
 		}
+		return docs;
+	}
+	
+	void register(LinkedEnvironment environment) throws BadLocationException {
+		for (Iterator it= fPositions.iterator(); it.hasNext(); ) {
+            LinkedPosition pos= (LinkedPosition) it.next();
+            environment.register(pos);
+        }
 	}
 
 	/**

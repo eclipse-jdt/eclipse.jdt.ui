@@ -133,7 +133,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			super.apply(document, trigger, offset);
 
 			if (parameterCount > 0) {
-				LinkedEnvironment environment= LinkedEnvironment.createLinkedEnvironment(document);
+				LinkedEnvironment environment= new LinkedEnvironment();
 				for (int i= 0; i != parameterCount; i++) {
 					LinkedPositionGroup group= new LinkedPositionGroup();
 					int positionOffset= baseOffset + positionOffsets[i];
@@ -145,12 +145,14 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 					environment.addGroup(group);
 				}
 				
+				environment.forceInstall();
+				
 				LinkedUIControl editor= new LinkedUIControl(environment, fViewer);
 				editor.setExitPosition(fViewer, baseOffset + replacementString.length(), 0, true);
 				editor.setCyclingMode(LinkedUIControl.CYCLE_WHEN_NO_PARENT);
 				editor.enter();
+				fSelectedRegion= editor.getSelectedRegion();
 				
-				fSelectedRegion= editor.getSelectedRegion();	
 			} else {
 				fSelectedRegion= new Region(baseOffset + replacementString.length(), 0);
 			}

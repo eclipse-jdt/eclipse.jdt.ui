@@ -199,14 +199,15 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 						LinkedPositionGroup group= new LinkedPositionGroup();
 						group.createPosition(document, newOffset, 0);
 						
-						LinkedEnvironment env= LinkedEnvironment.createLinkedEnvironment(document);
+						LinkedEnvironment env= new LinkedEnvironment();
 						env.addGroup(group);
-		
+						env.forceInstall();
+						
 						LinkedUIControl ui= new LinkedUIControl(env, fTextViewer);
 						ui.setExitPolicy(new ExitPolicy(')'));
 						ui.setExitPosition(fTextViewer, newOffset + 1, 0, true);
 						ui.setCyclingMode(LinkedUIControl.CYCLE_NEVER);
-						ui.enter();							
+						ui.enter();
 					}
 				}
 			}
