@@ -1198,7 +1198,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test615() throws Exception {
-//		expressionTest();
+		expressionTest();
 	}
 	
 	public void test616() throws Exception {
