@@ -34,6 +34,8 @@ public class RefactoringWizard extends Wizard {
 	private boolean fHasUserInputPages;
 	private boolean fExpandFirstNode;
 	private boolean fIsChangeCreationCancelable;
+	private boolean fPreviewReview;
+	private boolean fPreviewShown;
 	
 	private String fErrorPageContextHelpId;
 	
@@ -280,6 +282,27 @@ public class RefactoringWizard extends Wizard {
 			pages[i].setTitle(fPageTitle);
 		}
 	}
+	
+	/**
+	 * Forces the visiting of the preview page. The OK/Finish button will be
+	 * disabled until the user has reached the preview page.
+	 */
+	public void setPreviewReview(boolean review) {
+		fPreviewReview= review;
+		getContainer().updateButtons();	
+	}
+	
+	public void setPreviewShown(boolean shown) {
+		fPreviewShown= shown;
+		getContainer().updateButtons();
+	}
+	
+	public boolean canFinish() {
+		if (fPreviewReview && !fPreviewShown)
+			return false;
+		return super.canFinish();
+	}
+
 
 	//---- Change management -------------------------------------------------------------
 
@@ -411,7 +434,7 @@ public class RefactoringWizard extends Wizard {
 		}		
 		return super.getPreviousPage(page);		
 	}
-	
+
 	public IWizardPage getStartingPage() {
 		if (fHasUserInputPages)
 			return super.getStartingPage();

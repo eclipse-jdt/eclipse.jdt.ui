@@ -196,19 +196,17 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	 */
 	public void updateButtons() {
 		boolean previewPage= isPreviewPageActive();
-		boolean ok= previewPage ? true : fCurrentPage.canFlipToNextPage();
+		boolean ok= fWizard.canFinish();
+		boolean canFlip= fCurrentPage.canFlipToNextPage();
 		Button previewButton= getButton(PREVIEW_ID);
 		if (previewButton != null && !previewButton.isDisposed()) {
 			previewButton.setEnabled(!previewPage);
 			if (!previewPage)
-				previewButton.setEnabled(ok);
+				previewButton.setEnabled(canFlip);
 		}
 		Button okButton= getButton(IDialogConstants.OK_ID);
 		if (okButton != null && !okButton.isDisposed()) {
-			if (previewPage)
-				okButton.setEnabled(true);
-			else
-				okButton.setEnabled(ok);
+			okButton.setEnabled(ok);
 		}
 	}
 

@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
@@ -29,7 +30,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactor
 
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
-public abstract class RenameInputWizardPage extends TextInputWizardPage{
+public abstract class RenameInputWizardPage extends TextInputWizardPage {
 
 	private String fHelpContextID;
 	private QualifiedNameComponent fQualifiedNameComponent;
@@ -125,6 +126,7 @@ public abstract class RenameInputWizardPage extends TextInputWizardPage{
 		checkBox.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				refactoring.setUpdateStrings(checkBox.getSelection());
+				updatePreviewReview();
 			}
 		});		
 	}
@@ -137,6 +139,7 @@ public abstract class RenameInputWizardPage extends TextInputWizardPage{
 		checkBox.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				refactoring.setUpdateComments(checkBox.getSelection());
+				updatePreviewReview();
 			}
 		});		
 	}
@@ -149,6 +152,7 @@ public abstract class RenameInputWizardPage extends TextInputWizardPage{
 		checkBox.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				refactoring.setUpdateJavaDoc(checkBox.getSelection());
+				updatePreviewReview();
 			}
 		});		
 	}
@@ -176,23 +180,37 @@ public abstract class RenameInputWizardPage extends TextInputWizardPage{
 				boolean enabled= ((Button)e.widget).getSelection();
 				fQualifiedNameComponent.setEnabled(enabled);
 				ref.setUpdateQualifiedNames(enabled);
+				updatePreviewReview();
 			}
 		});
 	}
 	
-	protected String getLabelText(){
+	protected String getLabelText() {
 		return RefactoringMessages.getString("RenameInputWizardPage.enter_name"); //$NON-NLS-1$
 	}
 
-	private IRenameRefactoring getRenameRefactoring(){
+	private IRenameRefactoring getRenameRefactoring() {
 		return (IRenameRefactoring)getRefactoring();
 	}
 	
-	private static Button createCheckbox(Composite parent, String title, boolean value, RowLayouter layouter){
+	private static Button createCheckbox(Composite parent, String title, boolean value, RowLayouter layouter) {
 		Button checkBox= new Button(parent, SWT.CHECK);
 		checkBox.setText(title);
 		checkBox.setSelection(value);
 		layouter.perform(checkBox);
 		return checkBox;		
+	}
+	
+	private void updatePreviewReview() {
+		boolean previewReview= false;
+		IRefactoring ref= getRefactoring();
+		if (ref instanceof ITextUpdatingRefactoring) {
+			ITextUpdatingRefactoring tur= (ITextUpdatingRefactoring)ref;
+			previewReview= tur.getUpdateComments() || tur.getUpdateJavaDoc() || tur.getUpdateStrings();
+		}
+		if (ref instanceof IQualifiedNameUpdatingRefactoring) {
+			previewReview |= ((IQualifiedNameUpdatingRefactoring)ref).getUpdateQualifiedNames();
+		}
+		getRefactoringWizard().setPreviewReview(previewReview);
 	}
 }

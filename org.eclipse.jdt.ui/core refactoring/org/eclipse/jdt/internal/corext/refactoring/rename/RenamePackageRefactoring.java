@@ -214,7 +214,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	 * Method declared in IQualifiedNameUpdatingRefactoring
 	 */	
 	public void setUpdateQualifiedNames(boolean update) {
-		fUpdateQualifiedNames= true;
+		fUpdateQualifiedNames= update;
 	}
 	
 	/* non java-doc

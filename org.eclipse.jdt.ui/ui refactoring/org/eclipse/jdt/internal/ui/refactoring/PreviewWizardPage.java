@@ -410,6 +410,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 			fPageContainer.showPage(fNullPage);
 			super.setVisible(visible);
 		}
+		getRefactoringWizard().setPreviewShown(visible);
 	}
 	
 	private void setTreeViewerInput() {
