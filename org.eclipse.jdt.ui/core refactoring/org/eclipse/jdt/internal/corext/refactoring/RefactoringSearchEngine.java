@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -149,9 +150,13 @@ public class RefactoringSearchEngine {
 	public static ISearchPattern createSearchPattern(IJavaElement[] elements, int limitTo) {
 		if (elements == null || elements.length == 0)
 			return null;
-		ISearchPattern pattern= createSearchPattern(elements[0], limitTo);
-		for (int i= 1; i < elements.length; i++) {
-			pattern= SearchEngine.createOrSearchPattern(pattern, createSearchPattern(elements[i], limitTo));
+		Set set= new HashSet(Arrays.asList(elements));
+		Iterator iter= set.iterator();
+		IJavaElement first= (IJavaElement)iter.next();
+		ISearchPattern pattern= createSearchPattern(first, limitTo);
+		while(iter.hasNext()){
+			IJavaElement each= (IJavaElement)iter.next();
+			pattern= SearchEngine.createOrSearchPattern(pattern, createSearchPattern(each, limitTo));
 		}
 		return pattern;
 	}
