@@ -136,13 +136,13 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
 				buf.append("    public void foo() {\n");
-				buf.append("        Class c = getClass();\n");
+				buf.append("        Class class1 = getClass();\n");
 				buf.append("    }\n");
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 				
 				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "c", preview.substring(selection.x, selection.x + selection.y));	
+				assertEquals("wrong selection", "class1", preview.substring(selection.x, selection.x + selection.y));	
 			}
 		}
 	}

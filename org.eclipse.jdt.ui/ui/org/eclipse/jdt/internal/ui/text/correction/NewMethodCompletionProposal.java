@@ -183,13 +183,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		String[] names= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excludedNames);
 		
 		if (names.length == 0) {
-			System.out.println("No name for " + typeName);
-			String name= String.valueOf(Character.toLowerCase(typeName.charAt(0)));
-			while (takenNames.contains(name)) {
-				name += '1';
-			}
-			takenNames.add(name);
-			return name;
+			return "class1"; // fix for pr, remoev after 20030127
 		}
 		
 		takenNames.add(names[0]);

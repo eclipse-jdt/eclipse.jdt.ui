@@ -150,10 +150,9 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		String typeName= base.getName();
 		String[] names= NamingConventions.suggestLocalVariableNames(project, packName, typeName, binding.getDimensions(), excludedNames);
 		if (names.length == 0) {
-			System.out.println("No name for " + typeName);
-			return String.valueOf(Character.toLowerCase(typeName.charAt(0)));
+			return "class1"; // fix for pr, remoev after 20030127
 		}
-		return names[0];
+		return names[0]; 
 	}
 	
 	private String suggestFieldNames(ITypeBinding binding) {
@@ -166,8 +165,7 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		String typeName= base.getName();
 		String[] names= NamingConventions.suggestFieldNames(project, packName, typeName, binding.getDimensions(), binding.getModifiers(), excludedNames);
 		if (names.length == 0) {
-			System.out.println("No name for " + typeName);
-			return String.valueOf(Character.toLowerCase(typeName.charAt(0)));
+			return "class1"; // fix for pr, remoev after 20030127
 		}
 		return names[0];		
 	}	

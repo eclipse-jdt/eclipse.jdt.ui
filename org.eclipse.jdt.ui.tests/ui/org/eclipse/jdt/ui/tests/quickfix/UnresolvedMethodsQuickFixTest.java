@@ -549,7 +549,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public interface X {\n");
 		buf.append("\n");
-		buf.append("    boolean goo(Class c);\n");				
+		buf.append("    boolean goo(Class class1);\n");				
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
