@@ -561,7 +561,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	}
 	
 	protected Text createFilterText(Composite parent) {
-		fFilterText= new Text(parent, SWT.FLAT);
+		fFilterText= new Text(parent, SWT.NONE);
 
 		GridData data= new GridData(GridData.FILL_HORIZONTAL);
 		GC gc= new GC(parent);

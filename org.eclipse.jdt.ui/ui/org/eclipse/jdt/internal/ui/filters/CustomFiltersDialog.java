@@ -190,7 +190,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		// Description
 		info= new Label(parent, SWT.LEFT);
 		info.setText(FilterMessages.getString("CustomFiltersDialog.description.label"));  //$NON-NLS-1$
-		final Text description= new Text(parent, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.VERTICAL);
+		final Text description= new Text(parent, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.heightHint= convertHeightInCharsToPixels(3);
 		description.setLayoutData(data);
