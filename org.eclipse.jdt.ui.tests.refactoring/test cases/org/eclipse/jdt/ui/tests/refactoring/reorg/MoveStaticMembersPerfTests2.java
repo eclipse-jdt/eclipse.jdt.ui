@@ -15,15 +15,15 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
 
-public class RenameMethodPerfTests1 extends AbstractRenameMethodPerfTest {
+public class MoveStaticMembersPerfTests2 extends AbstractMoveCompilationUnitPrefTest {
 
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
-		TestSuite suite= new TestSuite("RenameTypePerfAcceptanceTests1");
-		suite.addTest(new RenameMethodPerfTests1("testCold_10_10"));
-		suite.addTest(new RenameMethodPerfTests1("test_10_10"));
-		suite.addTest(new RenameMethodPerfTests1("test_100_10"));
-		suite.addTest(new RenameMethodPerfTests1("test_1000_10"));
+		TestSuite suite= new TestSuite("MoveStaticMembersPerfTests2");
+		suite.addTest(new MoveStaticMembersPerfTests2("testCold_10_10"));
+		suite.addTest(new MoveStaticMembersPerfTests2("test_10_10"));
+		suite.addTest(new MoveStaticMembersPerfTests2("test_10_100"));
+		suite.addTest(new MoveStaticMembersPerfTests2("test_10_1000"));
 		return new AbstractRefactoringTestSetup(suite);
 	}
 
@@ -31,7 +31,7 @@ public class RenameMethodPerfTests1 extends AbstractRenameMethodPerfTest {
 		return new AbstractRefactoringTestSetup(someTest);
 	}
 
-	public RenameMethodPerfTests1(String name) {
+	public MoveStaticMembersPerfTests2(String name) {
 		super(name);
 	}
 	
@@ -43,11 +43,11 @@ public class RenameMethodPerfTests1 extends AbstractRenameMethodPerfTest {
 		executeRefactoring(generateSources(10, 10));
 	}
 	
-	public void test_100_10() throws Exception {
-		executeRefactoring(generateSources(100, 10));
+	public void test_10_100() throws Exception {
+		executeRefactoring(generateSources(10, 100));
 	}
 	
-	public void test_1000_10() throws Exception {
-		executeRefactoring(generateSources(1000, 10));
+	public void test_10_1000() throws Exception {
+		executeRefactoring(generateSources(10, 1000));
 	}
 }

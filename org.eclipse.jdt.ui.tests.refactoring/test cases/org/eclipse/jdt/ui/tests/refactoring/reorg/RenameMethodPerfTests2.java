@@ -13,17 +13,9 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IMethod;
-
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
 
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
-
-public class RenameMethodPerfTests2 extends RefactoringPerformanceTestCase {
+public class RenameMethodPerfTests2 extends AbstractRenameMethodPerfTest {
 
 	private TestProject fTestProject;
 	
@@ -57,25 +49,18 @@ public class RenameMethodPerfTests2 extends RefactoringPerformanceTestCase {
 	
 	public void testCold_10_10() throws Exception {
 		// 100 referencing CUs each containing 10 references
-		executeRefactoring(RenameMethodPerfTests1.generateSources(fTestProject, 10, 10));
+		executeRefactoring(generateSources(10, 10));
 	}
 	
 	public void test_10_10() throws Exception {
-		executeRefactoring(RenameMethodPerfTests1.generateSources(fTestProject, 10, 10));
+		executeRefactoring(generateSources(10, 10));
 	}
 	
 	public void test_10_100() throws Exception {
-		executeRefactoring(RenameMethodPerfTests1.generateSources(fTestProject, 10, 100));
+		executeRefactoring(generateSources(10, 100));
 	}
 	
 	public void test_10_1000() throws Exception {
-		executeRefactoring(RenameMethodPerfTests1.generateSources(fTestProject, 10, 1000));
-	}
-
-	private void executeRefactoring(ICompilationUnit cunit) throws Exception {
-		IMethod method= cunit.findPrimaryType().getMethod("foo", new String[0]);
-		RenameVirtualMethodProcessor processor= new RenameVirtualMethodProcessor(method);
-		processor.setNewElementName("foo2");
-		executeRefactoring(new RenameRefactoring(processor));
+		executeRefactoring(generateSources(10, 1000));
 	}
 }

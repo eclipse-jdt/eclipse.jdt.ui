@@ -35,6 +35,10 @@ public class RefactoringPerformanceTestCase extends JdtPerformanceTestCase {
 	}
 	
 	protected void executeRefactoring(Refactoring refactoring, int maxSeverity) throws Exception {
+		executeRefactoring(refactoring, maxSeverity, true);
+	}
+	
+	protected void executeRefactoring(Refactoring refactoring, int maxSeverity, boolean checkUndo) throws Exception {
 		PerformRefactoringOperation operation= new PerformRefactoringOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
 		joinBackgroudActivities();
 		System.gc();
@@ -43,7 +47,9 @@ public class RefactoringPerformanceTestCase extends JdtPerformanceTestCase {
 		finishMeasurements();
 		assertEquals(true, operation.getConditionStatus().getSeverity() <= maxSeverity);
 		assertEquals(true, operation.getValidationStatus().isOK());
-		assertNotNull(operation.getUndoChange());
+		if (checkUndo) {
+			assertNotNull(operation.getUndoChange());
+		}
 		RefactoringCore.getUndoManager().flush();
 		System.gc();
 	}

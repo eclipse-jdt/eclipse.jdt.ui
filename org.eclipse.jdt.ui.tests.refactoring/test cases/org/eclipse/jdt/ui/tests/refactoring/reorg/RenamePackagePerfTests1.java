@@ -15,15 +15,15 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
 
-public class RenameMethodPerfTests1 extends AbstractRenameMethodPerfTest {
+public class RenamePackagePerfTests1 extends AbstractRenamePackagePerfTest {
 
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
-		TestSuite suite= new TestSuite("RenameTypePerfAcceptanceTests1");
-		suite.addTest(new RenameMethodPerfTests1("testCold_10_10"));
-		suite.addTest(new RenameMethodPerfTests1("test_10_10"));
-		suite.addTest(new RenameMethodPerfTests1("test_100_10"));
-		suite.addTest(new RenameMethodPerfTests1("test_1000_10"));
+		TestSuite suite= new TestSuite("RenamePackagePerfTests1");
+		suite.addTest(new RenamePackagePerfTests1("testCold_10_10"));
+		suite.addTest(new RenamePackagePerfTests1("test_10_10"));
+		suite.addTest(new RenamePackagePerfTests1("test_100_10"));
+		suite.addTest(new RenamePackagePerfTests1("test_1000_10"));
 		return new AbstractRefactoringTestSetup(suite);
 	}
 
@@ -31,7 +31,7 @@ public class RenameMethodPerfTests1 extends AbstractRenameMethodPerfTest {
 		return new AbstractRefactoringTestSetup(someTest);
 	}
 
-	public RenameMethodPerfTests1(String name) {
+	public RenamePackagePerfTests1(String name) {
 		super(name);
 	}
 	

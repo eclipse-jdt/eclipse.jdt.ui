@@ -13,20 +13,10 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
 
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+public class RenameTypePerfTests2 extends AbstractRenameTypePerfTest {
 
-public class RenameTypePerfTests2 extends RefactoringPerformanceTestCase {
-
-	private TestProject fTestProject;
-	
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
 		TestSuite suite= new TestSuite("RenameTypePerfTests2");
@@ -45,36 +35,19 @@ public class RenameTypePerfTests2 extends RefactoringPerformanceTestCase {
 		super(name);
 	}
 	
-	protected void setUp() throws Exception {
-		super.setUp();
-		fTestProject= new TestProject();
-	}
-	
-	protected void tearDown() throws Exception {
-		fTestProject.delete();
-		super.tearDown();
-	}
-	
 	public void testCold_10_10() throws Exception {
-		executeRefactoring(RenameTypePerfTests1.generateSources(fTestProject, 10, 10));
+		executeRefactoring(generateSources(10, 10));
 	}
 	
 	public void test_10_10() throws Exception {
-		executeRefactoring(RenameTypePerfTests1.generateSources(fTestProject, 10, 10));
+		executeRefactoring(generateSources(10, 10));
 	}
 	
 	public void test_10_100() throws Exception {
-		executeRefactoring(RenameTypePerfTests1.generateSources(fTestProject, 10, 100));
+		executeRefactoring(generateSources(10, 100));
 	}
 	
 	public void test_10_1000() throws Exception {
-		executeRefactoring(RenameTypePerfTests1.generateSources(fTestProject, 10, 1000));
-	}
-
-	private void executeRefactoring(ICompilationUnit cunit) throws Exception {
-		IType type= cunit.findPrimaryType();
-		RenameTypeProcessor processor= new RenameTypeProcessor(type);
-		processor.setNewElementName("B");
-		executeRefactoring(new RenameRefactoring(processor));
+		executeRefactoring(generateSources(10, 1000));
 	}
 }
