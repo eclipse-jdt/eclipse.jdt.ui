@@ -94,8 +94,16 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (ref == null)
 			return null;
 		
-		Properties properties= NLSHintHelper.getProperties(je.getJavaProject(), ref.getBinding());
+		IStorage propertiesFile;
+		try {
+			propertiesFile= NLSHintHelper.getResourceBundle(je.getJavaProject(), ref.getBinding());
+			if (propertiesFile == null)
+				return null;
+		} catch (JavaModelException ex) {
+			return null;
+		}
 		
+		Properties properties= NLSHintHelper.getProperties(propertiesFile);
 		if (properties == null || properties.isEmpty())
 			return null;
 		
@@ -105,16 +113,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		else
 			value= JavaHoverMessages.getString("NLSStringHover.NLSStringHover.missingKeyWarning"); //$NON-NLS-1$
 		
-		String header= JavaHoverMessages.getString("NLSStringHover.header"); //$NON-NLS-1$;
-		try {
-			IStorage propertiesFile= NLSHintHelper.getResourceBundle(je.getJavaProject(), ref.getBinding());
-			if (propertiesFile != null)
-				header= propertiesFile.getName();
-		} catch (JavaModelException ex) {
-			// use default header
-		}
-		
-		return toHtml(header, value);
+		return toHtml(propertiesFile.getName(), value);
 	}
 	
 	private String toHtml(String header, String string) {
