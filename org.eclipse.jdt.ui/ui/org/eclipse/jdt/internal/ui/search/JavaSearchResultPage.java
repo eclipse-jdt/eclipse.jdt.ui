@@ -48,6 +48,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPageLayout;
@@ -102,6 +103,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		fFilterActions= new FilterAction[allFilters.length];
 		for (int i= 0; i < fFilterActions.length; i++) {
 			fFilterActions[i]= new FilterAction(this, allFilters[i]);
+			fFilterActions[i].setId("org.eclipse.jdt.search.filters."+i); //$NON-NLS-1$
 		}
 	}
 
@@ -427,12 +429,14 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 
 	private void updateFilterActions() {
+		IMenuManager menu= getSite().getActionBars().getMenuManager();
+		
 		for (int i= 0; i < fFilterActions.length; i++) {
 			fFilterActions[i].updateCheckState();
 		}
 		
 		getSite().getActionBars().updateActionBars();
-		getSite().getActionBars().getMenuManager().updateAll(true);
+		menu.updateAll(true);
 	}
 
 	private String encodeFilters() {
@@ -515,9 +519,19 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 
 	private void updateFilterEnablement(JavaSearchResult result) {
+		IActionBars bars= getSite().getActionBars();
+		IMenuManager menu= bars.getMenuManager();
 		for (int i= 0; i < fFilterActions.length; i++) {
-			fFilterActions[i].setEnabled(shouldEnable(result, fFilterActions[i]));
+			menu.remove(fFilterActions[i].getId());
 		}
+
+		for (int i= 0; i < fFilterActions.length; i++) {
+			if (shouldEnable(result, fFilterActions[i]))
+				menu.add(fFilterActions[i]);
+		}
+		
+		menu.updateAll(true);
+		bars.updateActionBars();
 	}
 
 	private boolean shouldEnable(JavaSearchResult result, FilterAction filterAction) {

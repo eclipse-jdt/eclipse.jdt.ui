@@ -77,7 +77,7 @@ abstract class FieldFilter extends MatchFilter {
 		if (spec instanceof ElementQuerySpecification) {
 			ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
 			return elementSpec.getElement() instanceof IField;
-		} else if (spec instanceof ElementQuerySpecification) {
+		} else if (spec instanceof PatternQuerySpecification) {
 			PatternQuerySpecification patternSpec= (PatternQuerySpecification) spec;
 			return patternSpec.getSearchFor() == IJavaSearchConstants.FIELD;
 		}
