@@ -29,13 +29,16 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
  */
 public class ResultCollector implements ICodeCompletionRequestor {
 	
+	/* Is eating code assist enabled or disabled? PR #3666 */
+	private final static boolean EATING_ENABLED= false;
+	
 	private class ProposalComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
 			ICompletionProposal c1= (ICompletionProposal) o1;
 			ICompletionProposal c2= (ICompletionProposal) o2;
 			return c1.getDisplayString().compareTo(c2.getDisplayString());
 		}
-	}
+	};
 
 	private final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-' };
 	private final static char[] GENERAL_TRIGGERS= new char[] { ';', ',', '.', '\t', '(', '{', '[' };
@@ -320,7 +323,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	protected JavaCompletionProposal createCompletion(int start, int end, String completion, String iconName, String name) {
 		int length;
 		if (fUserReplacementLength == -1) {
-			length= end - start;
+			length= EATING_ENABLED ? end - start : 0;
 		} else {
 			length= fUserReplacementLength;
 		}
