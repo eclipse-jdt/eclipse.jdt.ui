@@ -5,6 +5,8 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
  * All Rights Reserved.
  */
  
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.contentassist.CompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -27,7 +31,9 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
@@ -71,6 +77,8 @@ public class CompletionEvaluator {
 		fCurrentLength= length;
 		fResult= new ArrayList();
 		fRestrictToMatchingCase= false;
+		
+		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_PARAMETERS);
 	}
 
 
@@ -83,7 +91,7 @@ public class CompletionEvaluator {
 	public void restrictProposalsToMatchingCases(boolean restrict) {
 		fRestrictToMatchingCase= restrict;
 	}
-		
+	
 	private static boolean isWordPart(char ch) {
 		return Character.isJavaIdentifierPart(ch) || (ch == '#') || (ch == '.') || (ch == '/');
 	}
@@ -158,15 +166,12 @@ public class CompletionEvaluator {
 		return pos;
 	}
 		
-	public JavaCompletionProposal[] computeProposals() throws JavaModelException {
-		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_PARAMETERS);
-		try {
-			evalProposals();
-			return (JavaCompletionProposal[]) fResult.toArray(new JavaCompletionProposal[fResult.size()]);
-		} finally {
-			fLabelProvider.dispose();
-			fResult.clear();
-		}
+	public ICompletionProposal[] computeProposals() throws JavaModelException {
+		evalProposals();
+		ICompletionProposal[] res= new ICompletionProposal[fResult.size()];
+		fResult.toArray(res);
+		fResult.clear();
+		return res;
 	}	
 	
 	private void evalProposals() throws JavaModelException {
@@ -254,12 +259,29 @@ public class CompletionEvaluator {
 			IJavaElement elem= choices[i];
 			String curr= getReplaceString(elem);
 			if (prefixMatches(prefix, curr)) {
-				ProposalInfo info= (elem instanceof IMember) ? new ProposalInfo((IMember) elem) : null;
+				String info= getProposalInfo(elem);
 				fResult.add(createCompletion(curr, prefix, fLabelProvider.getText(elem), fLabelProvider.getImage(elem), info));
 			}
 		}
 	}
-		
+	
+	private String getProposalInfo(IJavaElement elem) {
+		if (elem instanceof IMember) {
+			try {
+				Reader reader= JavaDocAccess.getJavaDoc((IMember)elem, true);
+				if (reader != null) {
+					return (new JavaDoc2HTMLTextReader(reader)).getString();
+				}				
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			} catch (IOException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		return null;
+	}
+	
+	
 	private String getReplaceString(IJavaElement elem) {
 		if (elem instanceof IMethod) {
 			IMethod meth= (IMethod)elem;
@@ -353,15 +375,15 @@ public class CompletionEvaluator {
 		ICompilationUnit preparedCU= createPreparedCU(wordStart, fCurrentPos);
 		if (preparedCU != null) {
 			CompletionRequestorAdapter requestor= new CompletionRequestorAdapter() {
-				public void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers, int start, int end) {
+				public void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers, int start, int end, int relevance) {
 					fResult.add(createSeeTypeCompletion(true, start, end, completionName, className, packageName));
 				}
 
-				public void acceptInterface(char[] packageName, char[] interfaceName, char[] completionName, int modifiers, int start, int end) {
+				public void acceptInterface(char[] packageName, char[] interfaceName, char[] completionName, int modifiers, int start, int end, int relevance) {
 					fResult.add(createSeeTypeCompletion(false, start, end, completionName, interfaceName, packageName));
 				}
 
-				public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end) {
+				public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int relevance) {
 					fResult.add(createSeeTypeCompletion(true, start, end, completionName, typeName, packageName));
 				}
 			};
@@ -416,19 +438,16 @@ public class CompletionEvaluator {
 	}
 
 
-	private JavaCompletionProposal createCompletion(String newText, String oldText, String labelText, Image image, ProposalInfo proposalInfo) {
+	private ICompletionProposal createCompletion(String newText, String oldText, String labelText, Image image, String info) {
 		int offset= fCurrentPos - oldText.length();
 		int length= fCurrentLength + oldText.length();
 		if (fCurrentLength == 0)
 			length= findReplaceEndPos(fDocument, newText, oldText, fCurrentPos) - offset;			
 		
-		JavaCompletionProposal proposal= new JavaCompletionProposal(newText, offset, length, image, labelText, 0);
-		proposal.setProposalInfo(proposalInfo);
-		proposal.setTriggerCharacters( new char[] { '#' });
-		return proposal;
+		return new CompletionProposal(newText, offset, length, newText.length(), image, labelText, null, info);
 	}
 	
-	private JavaCompletionProposal createSeeTypeCompletion(boolean isClass, int start, int end, char[] completion, char[] typeName, char[] containerName) {
+	private ICompletionProposal createSeeTypeCompletion(boolean isClass, int start, int end, char[] completion, char[] typeName, char[] containerName) {
 		ProposalInfo proposalInfo= new ProposalInfo(fCompilationUnit.getJavaProject(), containerName, typeName); 
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(typeName);
@@ -447,7 +466,7 @@ public class CompletionEvaluator {
 			compLen--; // remove the semicolon from import proposals
 		}
 
-		JavaCompletionProposal proposal= new JavaCompletionProposal(new String(completion, 0, compLen), start, end - start, JavaPluginImages.get(imageKey), nameBuffer.toString(), 0);
+		JavaCompletionProposal proposal= new JavaCompletionProposal(new String(completion, 0, compLen), start, end - start, JavaPluginImages.get(imageKey), nameBuffer.toString());
 		proposal.setProposalInfo(proposalInfo);
 		proposal.setTriggerCharacters( new char[] { '#' });
 		return proposal;
