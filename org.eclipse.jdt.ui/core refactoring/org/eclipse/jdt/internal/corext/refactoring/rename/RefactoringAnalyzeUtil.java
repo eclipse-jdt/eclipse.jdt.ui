@@ -54,15 +54,10 @@ public class RefactoringAnalyzeUtil {
 		return result;
 	}
 
-	public static RefactoringStatus reportProblemNodes(ICompilationUnit modifiedWorkingCopy, SimpleName[] problemNodes){
+	public static RefactoringStatus reportProblemNodes(String modifiedWorkingCopySource, SimpleName[] problemNodes){
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problemNodes.length; i++) {
-			Context context;
-			try {
-				context= new StringContext(modifiedWorkingCopy.getSource(), new SourceRange(problemNodes[i]));
-			} catch (JavaModelException e) {
-				context= null;
-			}
+			Context context= new StringContext(modifiedWorkingCopySource, new SourceRange(problemNodes[i]));
 			result.addError(RefactoringCoreMessages.getString("RefactoringAnalyzeUtil.name_collision") + problemNodes[i].getIdentifier(), context); //$NON-NLS-1$
 		}
 		return result;
@@ -115,18 +110,13 @@ public class RefactoringAnalyzeUtil {
 		return ((MethodDeclaration)ASTNodes.getParent(decl, MethodDeclaration.class));
 	}
 
-	public static RefactoringStatus analyzeIntroducedCompileErrors(TextChange change, ICompilationUnit wc, CompilationUnit newCUNode, CompilationUnit oldCuNode) {
+	public static RefactoringStatus analyzeIntroducedCompileErrors(String wcSource, CompilationUnit newCUNode, CompilationUnit oldCuNode) {
 		RefactoringStatus subResult= new RefactoringStatus();				
 		Set oldErrorMessages= getOldErrorMessages(oldCuNode);
 		Message[] newErrorMessages= ASTNodes.getMessages(newCUNode, ASTNodes.INCLUDE_ALL_PARENTS);
 		for (int i= 0; i < newErrorMessages.length; i++) {
 			if (! oldErrorMessages.contains(newErrorMessages[i].getMessage())){
-				Context context;
-				try {
-					context= new StringContext(wc.getSource(), new SourceRange(newErrorMessages[i].getStartPosition(), newErrorMessages[i].getLength()));
-				} catch (JavaModelException e) {
-					context= null;
-				}
+				Context context= new StringContext(wcSource, new SourceRange(newErrorMessages[i].getStartPosition(), newErrorMessages[i].getLength()));
 				subResult.addError(newErrorMessages[i].getMessage(), context);
 			}	
 		}
