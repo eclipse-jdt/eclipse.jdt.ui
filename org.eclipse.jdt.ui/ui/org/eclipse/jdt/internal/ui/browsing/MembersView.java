@@ -142,17 +142,36 @@ public class MembersView extends JavaBrowsingPart {
 			case IJavaElement.TYPE:
 				if (((IType)je).getDeclaringType() == null)
 					return null;
+				break;
 			case IJavaElement.METHOD:
+				// fall through
 			case IJavaElement.FIELD:
+				// fall through
 			case IJavaElement.PACKAGE_DECLARATION:
+				// fall through			
 			case IJavaElement.IMPORT_CONTAINER:
-			case IJavaElement.IMPORT_DECLARATION:
 				je= getSuitableJavaElement(je);
 				if (je != null)
 					return je;
-			default:
-				return null; 
+				break;
+			case IJavaElement.IMPORT_DECLARATION:
+				je= getSuitableJavaElement(je);
+				if (je != null) {
+					ICompilationUnit cu= (ICompilationUnit)je.getParent().getParent();
+					try {
+						if (cu.getImports()[0].equals(je)) {
+							Object selectedElement= getSingleElementFromSelection(getViewer().getSelection());
+							if (selectedElement instanceof IImportContainer)
+								return (IImportContainer)selectedElement;
+						}							
+					} catch (JavaModelException ex) {
+						// return je;
+					}
+					return je;
+				}
+				break;
 		}
+		return null;
 	}
 
 	/**
