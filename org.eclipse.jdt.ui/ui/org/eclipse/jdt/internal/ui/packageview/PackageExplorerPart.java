@@ -1116,6 +1116,8 @@ public class PackageExplorerPart extends ViewPart
 	 */
 	public void setLinkingEnabled(boolean enabled) {
 		fLinkingEnabled= enabled;
+		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.LINK_PACKAGES_TO_EDITOR, enabled);
+
 		if (enabled) {
 			IEditorPart editor = getSite().getPage().getActiveEditor();
 			if (editor != null) {

@@ -1362,6 +1362,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	public void setLinkingEnabled(boolean enabled) {
 		fLinkingEnabled= enabled;
+		PreferenceConstants.getPreferenceStore().setValue(getLinkToEditorKey(), enabled);
 		if (enabled) {
 			IEditorPart editor = getSite().getPage().getActiveEditor();
 			if (editor != null) {

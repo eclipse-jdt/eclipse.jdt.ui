@@ -101,6 +101,7 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
@@ -1457,6 +1458,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	public void setLinkingEnabled(boolean enabled) {
 		fLinkingEnabled= enabled;
+		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR, enabled);
+
 		if (enabled) {
 			IEditorPart editor = getSite().getPage().getActiveEditor();
 			if (editor != null) {
