@@ -208,7 +208,7 @@ public class AllTypesCache {
 			
 			fgInitialized= true;
 			
-			if (fgTypeCache == null) {
+			if (!isCacheUpToDate()) {
 				// cache is empty
 				
 				if (fgTypeCacherThread == null) {
@@ -218,10 +218,8 @@ public class AllTypesCache {
 						TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
 						Arrays.sort(result, fgTypeNameComparator);
 						fgTypeCache= result;
+						fgSizeHint= result.length;
 					}
-					if (fgTypeCache != null)
-						fgSizeHint= fgTypeCache.length;
-
 				} else {
 					// wait for the thread to finished
 					try {
@@ -244,8 +242,26 @@ public class AllTypesCache {
 	 * Returns true if the type cache is up to date.
 	 */
 	public static boolean isCacheUpToDate() {
+		forceDeltaComplete();
 		return fgTypeCache != null;
 	}
+	
+	private static void forceDeltaComplete() {
+		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			ICompilationUnit[] primaryWorkingCopies= JavaCore.getWorkingCopies(null);
+			for (int i= 0; i < primaryWorkingCopies.length; i++) {
+				ICompilationUnit curr= primaryWorkingCopies[i];
+				try {
+					synchronized (curr) {
+						curr.reconcile(); // force a reconcile to make sure all deltas are processed
+					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+			}
+		}		
+	}
+	
 	
 	/**
 	 * Returns a hint for the number of all types in the workspace.
@@ -410,6 +426,7 @@ public class AllTypesCache {
 		try {
 			if (monitor == null)
 				monitor= new NullProgressMonitor();
+		
 			new SearchEngine().searchAllTypeNames(ResourcesPlugin.getWorkspace(),
 				null,
 				null,
@@ -466,7 +483,7 @@ public class AllTypesCache {
 				if (fgTerminated) {
 					// already terminated: do nothing
 				} else {
-					if (fgTypeCache != null) {
+					if (isCacheUpToDate()) {
 						// the cache is already uptodate
 					} else {
 						fgTypeCacherThread= new TypeCacher(fgSizeHint, INITIAL_DELAY, null);
