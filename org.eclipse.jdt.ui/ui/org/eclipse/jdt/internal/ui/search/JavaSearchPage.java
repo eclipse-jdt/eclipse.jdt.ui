@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.PatternQuerySpecification;
@@ -584,8 +585,18 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 	
 	final void updateOKStatus() {
-		boolean isValid= getContainer().hasValidScope() && getPattern().length() > 0;
+		boolean isValid= getContainer().hasValidScope() && isValidSearchPattern();
 		getContainer().setPerformActionEnabled(isValid);
+	}
+	
+	private boolean isValidSearchPattern() {
+		if (getPattern().length() == 0) {
+			return false;
+		}
+		if (fJavaElement != null) {
+			return true;
+		}
+		return SearchPattern.createPattern(getPattern(), getSearchFor(), getLimitTo(), SearchPattern.R_EXACT_MATCH) != null;		
 	}
 	
 	
