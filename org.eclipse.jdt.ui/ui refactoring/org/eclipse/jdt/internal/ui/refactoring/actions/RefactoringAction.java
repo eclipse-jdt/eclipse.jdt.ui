@@ -5,8 +5,10 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.Arrays;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -18,7 +20,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -33,19 +34,24 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorPart;
 
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
+import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
+import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusContentProvider;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusEntryLabelProvider;
@@ -55,9 +61,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
 public abstract class RefactoringAction extends Action {
-
 	private StructuredSelectionProvider fProvider;
-
 	protected RefactoringAction(String text, ISelectionProvider selectionProvider){
 		this(text, StructuredSelectionProvider.createFrom(selectionProvider));
 	}
@@ -98,8 +102,8 @@ public abstract class RefactoringAction extends Action {
 			setEnabled(false);
 		else	
 			setEnabled(canOperateOn(selection));
-	}	
-	
+	}
+
 	//--- wizard and dialog related methods + editor saving
 	
 	public static void activateRefactoringWizard(Refactoring refactoring, RefactoringWizard wizard, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
@@ -113,18 +117,81 @@ public abstract class RefactoringAction extends Action {
 			openErrorDialog(dialogTitle, activationStatus);
 		}	
 	}
-
+	
+	public static void activateRenameRefactoringDialog(final IRenameRefactoring renameRefactoring, String dialogTitle, String dialogMessage, boolean mustSaveEditors, Object element) throws JavaModelException {
+		if (! canActivate(mustSaveEditors))
+			return;
+		//XXX
+		if (! checkReadOnly(element))
+			return;
+		Refactoring refactoring= (Refactoring)renameRefactoring;
+		RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor()); 
+		if (status.hasFatalError()){
+			openErrorDialog(dialogTitle, status);
+		} else{
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
+			IInputValidator validator= new IInputValidator(){
+				public String isValid(String newText){
+					try{
+						RefactoringStatus check= renameRefactoring.checkNewName(newText);
+						if (check.isOK())
+							return null;
+						return check.getFirstMessage(RefactoringStatus.INFO);	
+					}	catch (JavaModelException e){
+						JavaPlugin.log(e);
+						return "Unexpected exception. See log for details";//don't want to show the error dialog
+					}
+				}
+			};
+			InputDialog dialog= new InputDialog(shell, dialogTitle, dialogMessage, renameRefactoring.getCurrentName(), validator);
+			int result= dialog.open();
+			if (result != Window.OK)
+				return;
+			renameRefactoring.setNewName(dialog.getValue());
+			PerformChangeOperation pco= new PerformChangeOperation(new CreateChangeOperation(refactoring, CheckConditionsOperation.PRECONDITIONS));
+			PerformRefactoringUtil.performRefactoring(pco, refactoring);
+		} 		
+	}
+	
+	private static boolean checkReadOnly(Object element) throws JavaModelException{
+		//Do a quick read only check
+		if (isReadOnly(element))
+			return MessageDialog.openQuestion(
+				JavaPlugin.getActiveWorkbenchShell(),
+				"Rename",
+				MessageFormat.format("{0} is read only. Do you still wish to rename it?", new Object[] {ReorgUtils.getName(element)}));
+		else
+			return true;
+	}
+	
+	private static boolean isReadOnly(Object element) throws JavaModelException{
+		if (element instanceof IResource)
+			return ((IResource)element).isReadOnly();
+		if (element instanceof IJavaProject)	
+			return ((IJavaProject)element).getCorrespondingResource().isReadOnly();
+		if (element instanceof IPackageFragmentRoot)
+			return isReadOnly((IPackageFragmentRoot)element);
+		Assert.isTrue(false);
+		return false;	
+	}
+	
+	private static boolean isReadOnly(IPackageFragmentRoot root) throws JavaModelException{
+		if (Checks.isClasspathDelete(root))
+			return false;
+		return root.getCorrespondingResource().isReadOnly();
+	}
+	
 	private static boolean canActivate(boolean mustSaveEditors) {
 		return ! mustSaveEditors || areAllEditorsSaved();
 	}
-
+	
 	private static void openErrorDialog(String dialogTitle, RefactoringStatus status) {
 		if (status.getEntries().size() == 1)
 			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, status.getFirstMessage(RefactoringStatus.FATAL));
 		else
 			openListDialog(dialogTitle, status);	
 	}
-
+	
 	private static void openListDialog(String dialogTitle, RefactoringStatus status) {
 		ListDialog dialog= new ListDialog(JavaPlugin.getActiveWorkbenchShell());
 		dialog.setInput(status);
@@ -134,7 +201,7 @@ public abstract class RefactoringAction extends Action {
 		dialog.setLabelProvider(new RefactoringStatusEntryLabelProvider());
 		dialog.open();	
 	}
-	
+
 	private static boolean areAllEditorsSaved(){
 		if (JavaPlugin.getDirtyEditors().length == 0)
 			return true;
@@ -152,7 +219,7 @@ public abstract class RefactoringAction extends Action {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Creates a runnable to be used inside an operation to save all editors.
 	 */
@@ -169,7 +236,7 @@ public abstract class RefactoringAction extends Action {
 			}
 		};
 	}
-	
+
 	private static boolean saveAllDirtyEditors() {
 		if (RefactoringPreferences.getSaveAllEditors()) //must save everything
 			return true;
@@ -194,7 +261,8 @@ public abstract class RefactoringAction extends Action {
 		dialog.setContentProvider(new ListContentProvider());
 		dialog.setInput(Arrays.asList(JavaPlugin.getDirtyEditors()));
 		return dialog.open() == Dialog.OK;
-	}	
+	}
+
 	private static ILabelProvider createDialogLabelProvider() {
 		return new LabelProvider() {
 			public Image getImage(Object element) {
@@ -206,4 +274,3 @@ public abstract class RefactoringAction extends Action {
 		};
 	}
 }
-

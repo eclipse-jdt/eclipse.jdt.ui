@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -41,6 +40,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 public class RefactoringSupportFactory {
 
 	private abstract static class RenameSupport implements IRefactoringRenameSupport {
+
 		private IRenameRefactoring fRefactoring;
 
 		public boolean canRename(Object element) throws JavaModelException{
@@ -54,16 +54,24 @@ public class RefactoringSupportFactory {
 		public void rename(Object element) throws JavaModelException{
 			Assert.isNotNull(fRefactoring);
 			RefactoringWizard wizard= createWizard(fRefactoring);
-			RefactoringAction.activateRefactoringWizard((Refactoring)fRefactoring, wizard, "Rename", true);
+			if (wizard != null)
+				RefactoringAction.activateRefactoringWizard((Refactoring)fRefactoring, wizard, "Rename", true);
+			else	
+				RefactoringAction.activateRenameRefactoringDialog(fRefactoring, "Rename", getNameEntryMessage(), false, element);
 			fRefactoring= null;
 		}
 		
 		abstract IRenameRefactoring createRefactoring(Object element) throws JavaModelException;
 
-		abstract RefactoringWizard createWizard(IRenameRefactoring ref);
-		
+		RefactoringWizard createWizard(IRenameRefactoring ref){
+			return null;
+		}
+				
 		abstract boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException;
-		
+
+		String getNameEntryMessage(){
+			return "";
+		}
 	}
 	
 	private static RefactoringWizard createRenameWizard(IRenameRefactoring ref, String title, String message, String wizardPageHelp, String errorPageHelp, ImageDescriptor image){
@@ -80,15 +88,9 @@ public class RefactoringSupportFactory {
 			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
 				return ((RenameJavaProjectRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
 			}
-			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
-				String title= "Rename Java Project";
-				String message= "Enter the new name for this Java project.";
-				//FIX ME: wrong icon
-				String wizardPageHelp= IJavaHelpContextIds.RENAME_JPRJ_WIZARD_PAGE; 
-				String errorPageHelp= IJavaHelpContextIds.RENAME_JPRJ_ERROR_WIZARD_PAGE;
-				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_NEWJPRJ;
-				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
-			}
+			String getNameEntryMessage(){
+				return "Enter the new name for this Java project:";
+			}	
 		};
 	}
 	
@@ -100,14 +102,8 @@ public class RefactoringSupportFactory {
 			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
 				return ((RenameSourceFolderRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
 			}
-			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
-				String title= "Rename Source Folder";
-				String message= "Enter the new name for this source folder.";
-				//FIX ME: wrong icon
-				String wizardPageHelp= IJavaHelpContextIds.RENAME_SRCFLDR_WIZARD_PAGE; 
-				String errorPageHelp= IJavaHelpContextIds.RENAME_SRCFLDR_ERROR_WIZARD_PAGE;
-				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR;
-				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
+			String getNameEntryMessage(){
+				return "Enter the new name for this source folder:";
 			}
 		};
 	}
@@ -120,14 +116,8 @@ public class RefactoringSupportFactory {
 			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
 				return ((RenameResourceRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
 			}
-			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
-					String title= "Rename Resource";
-					String message= "Enter the new name for this resource.";
-					//FIX ME: wrong icon
-					String wizardPageHelp= IJavaHelpContextIds.RENAME_RESOURCE_WIZARD_PAGE; 
-					String errorPageHelp= IJavaHelpContextIds.RENAME_RESOURCE_ERROR_WIZARD_PAGE;
-					ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_CU;
-					return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
+			String getNameEntryMessage(){
+				return "Enter the new name for this resource:";
 			}
 		};
 	}
