@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -58,9 +59,9 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -71,7 +72,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -690,7 +693,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements 
 		}
 		if (MessageDialog.openQuestion(getShell(), WizardMessages.getString("NewTestClassWizPage.not_on_buildpath.title"), WizardMessages.getString("NewTestClassWizPage.not_on_buildpath.message"))) { //$NON-NLS-1$ //$NON-NLS-2$
 			try {
-				addJUnitToBuildPath(jp);
+				addJUnitToBuildPath(getShell(), jp);
 				return;
 			} catch(JavaModelException e) {
 				ErrorDialog.openError(getShell(), WizardMessages.getString("NewTestClassWizPage.cannot_add.title"), WizardMessages.getString("NewTestClassWizPage.cannot_add.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -701,7 +704,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements 
 		fContainerStatus= status;
 	}
 	
-	public static void addJUnitToBuildPath(IJavaProject project) throws JavaModelException {
+	public static void addJUnitToBuildPath(Shell shell, IJavaProject project) throws JavaModelException {
 		IPath junitHome= new Path(JUnitPlugin.JUNIT_HOME);
 		IPath sourceHome= new Path("ORG_ECLIPSE_JDT_SOURCE_SRC"); //$NON-NLS-1$
 		IPath sourcePath= sourceHome.append("org.junit_3.8.1/junitsrc.zip"); //$NON-NLS-1$
@@ -710,10 +713,10 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements 
 			sourcePath,  //$NON-NLS-1$
 			null
 		);
-		addToClasspath(project, entry);
+		addToClasspath(shell, project, entry);
 	}	
 	
-	private static void addToClasspath(IJavaProject project, IClasspathEntry entry) throws JavaModelException {
+	private static void addToClasspath(Shell shell, final IJavaProject project, IClasspathEntry entry) throws JavaModelException {
 		IClasspathEntry[] oldEntries= project.getRawClasspath();
 		for (int i= 0; i < oldEntries.length; i++) {
 			if (oldEntries[i].equals(entry)) {
@@ -721,10 +724,28 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements 
 			}
 		}
 		int nEntries= oldEntries.length;
-		IClasspathEntry[] newEntries= new IClasspathEntry[nEntries + 1];
+		final IClasspathEntry[] newEntries= new IClasspathEntry[nEntries + 1];
 		System.arraycopy(oldEntries, 0, newEntries, 0, nEntries);
 		newEntries[nEntries]= entry;
-		project.setRawClasspath(newEntries, null);
+		// fix for 64974 OCE in New JUnit Test Case wizard while workspace is locked [JUnit] 
+		try {
+			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					try {
+						project.setRawClasspath(newEntries, monitor);
+					} catch (JavaModelException e) {
+						throw new InvocationTargetException(e);
+					}
+				}
+			});
+		} catch (InvocationTargetException e) {
+			Throwable t = e.getTargetException();
+			if (t instanceof CoreException) {	
+				ErrorDialog.openError(shell, WizardMessages.getString("NewTestClassWizPage.cannot_add.title"), WizardMessages.getString("NewTestClassWizPage.cannot_add.message"), ((CoreException)t).getStatus());
+			}
+		} catch (InterruptedException e) {
+			return;
+		}
 	}
 
 
