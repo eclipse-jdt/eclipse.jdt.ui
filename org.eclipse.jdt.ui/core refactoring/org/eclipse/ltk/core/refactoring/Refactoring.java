@@ -24,16 +24,16 @@ import org.eclipse.core.runtime.SubProgressMonitor;
  *   <li>the refactoring is initialized with the elements to be refactored. It is
  *       up to a concrete refactoring implementation to provide corresponding API.
  *   <li>{@link #checkInitialConditions(IProgressMonitor)} is called. The method 
- *       can be called more than ones.</li>
+ *       can be called more than once.</li>
  *   <li>additional arguments are provided to perform the refactoring (for example
  *       the new name of a element in the case of a rename refactoring). It is up
  *       to a concrete implementation to provide corresponding API.
  *   <li>{@link #checkFinalConditions(IProgressMonitor)} is called. The method 
- *       can be called more than ones. The method is not called if  
+ *       can be called more than once. The method is not called if  
  *       {@link #checkInitialConditions(IProgressMonitor)} returns a refactoring
  *       status of severity {@link RefactoringStatus#FATAL}.</li>
  *   <li>{@link #createChange(IProgressMonitor)} is called. The method is only 
- *       called ones and is not called if one of the condition checking methods
+ *       called once and is not called if one of the condition checking methods
  *       return a refactoring status of severity {@link RefactoringStatus#FATAL}.
  *       </li>
  * </ul>
