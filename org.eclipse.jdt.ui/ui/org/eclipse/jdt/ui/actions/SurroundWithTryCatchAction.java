@@ -51,7 +51,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
-	private static final String TITLE= RefactoringMessages.getString("SurroundWithTryCatchAction.title"); //$NON-NLS-1$
 
 	private static class Query implements ISurroundWithTryCatchQuery {
 		private Shell fParent;
@@ -59,7 +58,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			fParent= shell;
 		}
 		public boolean catchRuntimeException() {
-			return MessageDialog.openQuestion(fParent, TITLE,  RefactoringMessages.getString("SurroundWithTryCatchAction.no_exceptions")); //$NON-NLS-1$
+			return MessageDialog.openQuestion(fParent, getDialogTitle(),  RefactoringMessages.getString("SurroundWithTryCatchAction.no_exceptions")); //$NON-NLS-1$
 		}
 	}
 
@@ -71,7 +70,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	 */
 	public SurroundWithTryCatchAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
-		setText(TITLE);
+		setText(RefactoringMessages.getString("SurroundWithTryCatchAction.label")); //$NON-NLS-1$);
 		fEditor= editor;
 		setEnabled(checkEditor());
 	}
@@ -83,7 +82,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		try {
 			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 			if (status.hasFatalError()) {
-				RefactoringErrorDialogUtil.open(TITLE, status);
+				RefactoringErrorDialogUtil.open(getDialogTitle(), status);
 				RefactoringStatusEntry entry= status.getFirstEntry(RefactoringStatus.FATAL);
 				if (entry.getContext() instanceof JavaSourceContext && fEditor != null) {
 					JavaSourceContext context= (JavaSourceContext)entry.getContext();
@@ -98,9 +97,9 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			op.setChangeContext(new ChangeContext(new AbortChangeExceptionHandler()));
 			new BusyIndicatorRunnableContext().run(false, false, op);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, TITLE, RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, TITLE, RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// not cancelable
 		}
@@ -120,5 +119,9 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	
 	private boolean checkEditor() {
 		return fEditor != null && !fEditor.isEditorInputReadOnly() && getCompilationUnit() != null;
+	}
+	
+	private static String getDialogTitle() {
+		return RefactoringMessages.getString("SurroundWithTryCatchAction.dialog.title"); //$NON-NLS-1$
 	}
 }
