@@ -39,22 +39,22 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  */
 public abstract class Change implements IChange {
 
+	private IChange fParent;
 	private boolean fIsActive= true;
-	private String fName;
-
-	public Change() {
+	
+	public IChange getParent() {
+		return fParent;
 	}
 	
-	public Change(String name) {
-		Assert.isNotNull(name);
-		fName= name;
-	}
-	
-	public String getName() {
-		return fName;
+	public void internalSetParent(IChange parent) {
+		if (parent != null)
+			Assert.isTrue(fParent == null);
+		fParent= parent;
 	}
 	
 	public Object getAdapter(Class adapter) {
+		if (fParent != null)
+			return fParent.getAdapter(adapter);
 		return null;
 	}
 	

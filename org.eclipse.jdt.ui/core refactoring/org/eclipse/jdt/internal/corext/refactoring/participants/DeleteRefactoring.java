@@ -10,15 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.internal.refactoring.core.DelegatingValidationStateChange;
 
 
 public class DeleteRefactoring extends Refactoring {
@@ -113,22 +116,22 @@ public class DeleteRefactoring extends Refactoring {
 	 */
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", fElementParticipants.length + fDerivedParticipants.length + fMappedParticipants.length + 1); //$NON-NLS-1$
-		CompositeChange result= new CompositeChange();
-		result.add(fProcessor.createChange(new SubProgressMonitor(pm, 1)));
+		List changes= new ArrayList();
+		changes.add(fProcessor.createChange(new SubProgressMonitor(pm, 1)));
 		
 		for (int i= 0; i < fElementParticipants.length; i++) {
 			IDeleteParticipant participant= fElementParticipants[i];
-			result.add(participant.createChange(new SubProgressMonitor(pm, fElementParticipants.length)));
+			changes.add(participant.createChange(new SubProgressMonitor(pm, fElementParticipants.length)));
 		}
 		for (int i= 0; i < fDerivedParticipants.length; i++) {
 			IDeleteParticipant participant= fDerivedParticipants[i];
-			result.add(participant.createChange(new SubProgressMonitor(pm, fDerivedParticipants.length)));
+			changes.add(participant.createChange(new SubProgressMonitor(pm, fDerivedParticipants.length)));
 		}
 		for (int i= 0; i < fMappedParticipants.length; i++) {
 			IRefactoringParticipant participant= fMappedParticipants[i];
-			result.add(participant.createChange(new SubProgressMonitor(pm, fMappedParticipants.length)));
+			changes.add(participant.createChange(new SubProgressMonitor(pm, fMappedParticipants.length)));
 		}
-		return result;		
+		return new DelegatingValidationStateChange((IChange[]) changes.toArray(new IChange[changes.size()]));		
 	}
 
 	public String getName() {

@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -49,7 +51,7 @@ abstract class PackageFragmentRootReorgChange extends Change {
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public final void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+	public final void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
 		pm.beginTask(getName(), 2);
 		try{
 			if (!isActive())

@@ -65,20 +65,20 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -706,7 +706,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			TextChange change= new CompilationUnitChange(fUnit.getElementName(), fUnit);
 			TextEdit[] edits= getEdits(status);
 			for(int i= 0; i < edits.length; i++)
-				TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("InlineConstantRefactoring.Inline"), edits[i]);
+				TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("InlineConstantRefactoring.Inline"), edits[i]); //$NON-NLS-1$
 			return change;
 		}
 		
@@ -1059,14 +1059,13 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		try {
-			//XXX:  fix progress meter
 			pm.beginTask(RefactoringCoreMessages.getString("InlineConstantRefactoring.preview"), 2); //$NON-NLS-1$
 			
 			IChange[] cuChanges= createCompilationUnitChanges(pm);
 			
-			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("InlineConstantRefactoring.inline")); //$NON-NLS-1$
-			composite.addAll(cuChanges);
-			return composite;
+			final ValidationStateChange result= new ValidationStateChange(RefactoringCoreMessages.getString("InlineConstantRefactoring.inline")); //$NON-NLS-1$
+			result.addAll(cuChanges);
+			return result;
 		} finally {
 			pm.done();
 		}
@@ -1087,7 +1086,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			return;
 		
 		TextChange change= findOrAddDeclaringCUChange(changes);
-		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("InlineConstantRefactoring.remove_declaration"), edit);
+		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("InlineConstantRefactoring.remove_declaration"), edit); //$NON-NLS-1$
 	}
 	
 	private TextChange findOrAddDeclaringCUChange(List changes) throws JavaModelException, CoreException {

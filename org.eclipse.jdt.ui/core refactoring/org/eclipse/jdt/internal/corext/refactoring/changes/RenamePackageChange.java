@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -67,7 +68,7 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 		return new RenamePackageChange(createNewPath(), getNewName(), getOldName());
 	}
 	
-	protected void doRename(IProgressMonitor pm) throws JavaModelException {
+	protected void doRename(IProgressMonitor pm) throws JavaModelException, CoreException {
 		IPackageFragment pack= getPackage();
 		if (pack != null)
 			pack.rename(getNewName(), false, pm);

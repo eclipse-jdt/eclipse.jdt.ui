@@ -15,8 +15,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 
 /**
  * Represents a generic change to the workbench. An <code>IChange</code> object is typically 
@@ -65,7 +63,7 @@ public interface IChange extends IAdaptable {
 	 * <em>before</em> you call <code>getUndoChange</code>. In general, <code>IChange</code>
 	 * objects do not know what the reverse will be before they are performed.
 	 */
-	 public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException;
+	 public void perform(ChangeContext context, IProgressMonitor pm) throws CoreException, ChangeAbortException;
 	
 	/**
 	 * The change has been performed. Clients must ensure that this method is called after all
@@ -125,4 +123,8 @@ public interface IChange extends IAdaptable {
 	 * of <code>getUndoChange</code> will be ignored.
 	 */
 	public boolean isUndoable();
+	
+	public IChange getParent();
+	
+	public void internalSetParent(IChange change);
 }

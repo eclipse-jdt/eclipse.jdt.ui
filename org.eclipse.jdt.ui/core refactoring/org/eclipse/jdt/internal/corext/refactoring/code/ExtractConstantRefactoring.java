@@ -428,15 +428,15 @@ public class ExtractConstantRefactoring extends Refactoring {
 		try {
 			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractConstantRefactoring.preview"), 3); //$NON-NLS-1$
-			TextChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.extract_constant"), fCu); //$NON-NLS-1$
-			addConstantDeclaration(change);
+			TextChange result= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.extract_constant"), fCu); //$NON-NLS-1$
+			addConstantDeclaration(result);
 			pm.worked(1);
-			addImportIfNeeded(change, buffer);
+			addImportIfNeeded(result, buffer);
 			pm.worked(1);
-			addReplaceExpressionWithConstant(change);
+			addReplaceExpressionWithConstant(result);
 			pm.worked(1);
 
-			return change;
+			return result;
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);

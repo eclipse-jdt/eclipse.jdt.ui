@@ -60,13 +60,13 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ASTNodeDeleteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
@@ -268,10 +268,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
-			CompositeChange builder= new CompositeChange(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.name")); //$NON-NLS-1$
-			builder.addAll(fChangeManager.getAllChanges());
-			builder.add(createExtractedInterface(new SubProgressMonitor(pm, 1)));
-			return builder;
+			final ValidationStateChange result= new ValidationStateChange(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.name")); //$NON-NLS-1$
+			result.addAll(fChangeManager.getAllChanges());
+			result.add(createExtractedInterface(new SubProgressMonitor(pm, 1)));
+			return result;
 		} finally {
 			pm.done();
 		}

@@ -61,6 +61,7 @@ public class RefactoringExecutionHelper {
 
 	private class Operation implements IRunnableWithProgress {
 		public IChange fChange;
+		private RefactoringStatus fValidationStatus;
 		public void run(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
 			try {
 				pm.beginTask("", 10); //$NON-NLS-1$
@@ -77,7 +78,25 @@ public class RefactoringExecutionHelper {
 					fChange.aboutToPerform(fContext, new NullProgressMonitor());
 					JavaCore.run(new IWorkspaceRunnable() {
 						public void run(IProgressMonitor monitor) throws CoreException {
-							fChange.perform(fContext, monitor);
+							fValidationStatus= fChange.isValid(new SubProgressMonitor(monitor, 1));
+							if (fValidationStatus.hasFatalError())
+								return;
+							IUndoManager undoManager= Refactoring.getUndoManager();
+							Exception exception= null;
+							try {
+								undoManager.aboutToPerformChange(fChange);
+								fChange.perform(fContext, monitor);
+							} catch (CoreException e) {
+								exception= e;
+								throw e;
+							} catch (RuntimeException e) {
+								exception= e;
+								throw e;
+							} finally {
+								undoManager.changePerformed(fChange, exception);
+								if (fChange.isUndoable())
+									undoManager.addUndo(fRefactoring.getName(), fChange.getUndoChange());
+							}
 						}
 					}, new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				} finally {
@@ -119,23 +138,12 @@ public class RefactoringExecutionHelper {
 		if (fNeedsSavedEditors && !saveHelper.saveEditors(fParent))
 			throw new InterruptedException();
 		fContext= new ChangeContext(new ChangeExceptionHandler(fParent));
-		boolean success= false;
-		IUndoManager undoManager= Refactoring.getUndoManager();
 		Operation op= new Operation();
 		IRewriteTarget[] targets= null;
 		try{
 			targets= getRewriteTargets();
 			beginCompoundChange(targets);
-			undoManager.aboutToPerformRefactoring();
 			fExecContext.run(false, false, op);
-			if (op.isExecuted()) {
-				if (!op.isUndoable()) {
-					success= false;
-				} else { 
-					undoManager.addUndo(fRefactoring.getName(), op.getUndoChange());
-					success= true;
-				}
-			} 
 		} catch (InvocationTargetException e) {
 			Throwable t= e.getTargetException();
 			if (t instanceof ChangeAbortException) {
@@ -145,7 +153,6 @@ public class RefactoringExecutionHelper {
 			}
 		} finally {
 			fContext.clearPerformedChanges();
-			undoManager.refactoringPerformed(success);
 			saveHelper.triggerBuild();
 			if (targets != null)
 				endCompoundChange(targets);

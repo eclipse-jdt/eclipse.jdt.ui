@@ -223,10 +223,10 @@ public class InlineTempRefactoring extends Refactoring {
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("InlineTempRefactoring.preview"), 2); //$NON-NLS-1$
-			CompilationUnitChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("InlineTempRefactoring.inline"), fCu); //$NON-NLS-1$
-			inlineTemp(change, new SubProgressMonitor(pm, 1));
-			removeTemp(change);
-			return change;
+			final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.getString("InlineTempRefactoring.inline"), fCu); //$NON-NLS-1$
+			inlineTemp(result, new SubProgressMonitor(pm, 1));
+			removeTemp(result);
+			return result;
 		} finally {
 			pm.done();	
 		}	

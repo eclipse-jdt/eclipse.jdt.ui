@@ -25,8 +25,6 @@ import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
@@ -97,26 +95,22 @@ public class UndoTextFileChange extends Change {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+	public void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		pm.beginTask("", 2); //$NON-NLS-1$
+		ITextFileBuffer buffer= null;
 		try {
-			ITextFileBuffer buffer= null;
-			try {
-				manager.connect(fFile.getFullPath(), new SubProgressMonitor(pm, 1));
-				buffer= manager.getTextFileBuffer(fFile.getFullPath());
-				IDocument document= buffer.getDocument();
-				UndoEdit redo= fUndo.apply(document, TextEdit.CREATE_UNDO);
-				buffer.commit(pm, false);
-				fUndoChange= new UndoTextFileChange(getName(), fFile, redo);
-			} catch (BadLocationException e) {
-				throw new CoreException(createStatus(e));
-			} finally {
-				if (buffer != null)
-					manager.disconnect(fFile.getFullPath(), new SubProgressMonitor(pm, 1));
-			}
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
+			manager.connect(fFile.getFullPath(), new SubProgressMonitor(pm, 1));
+			buffer= manager.getTextFileBuffer(fFile.getFullPath());
+			IDocument document= buffer.getDocument();
+			UndoEdit redo= fUndo.apply(document, TextEdit.CREATE_UNDO);
+			buffer.commit(pm, false);
+			fUndoChange= new UndoTextFileChange(getName(), fFile, redo);
+		} catch (BadLocationException e) {
+			throw new CoreException(createStatus(e));
+		} finally {
+			if (buffer != null)
+				manager.disconnect(fFile.getFullPath(), new SubProgressMonitor(pm, 1));
 		}
 	}
 	

@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -17,7 +20,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -30,6 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModific
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameExtensionManager;
 import org.eclipse.jdt.internal.corext.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.ltk.internal.refactoring.core.DelegatingValidationStateChange;
 
 
 public class RenameRefactoring extends Refactoring implements IProcessorBasedRefactoring, IRenameRefactoring {
@@ -169,24 +172,24 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 	 */
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", fElementParticipants.length + fDerivedParticipants.length + fResourceParticipants.length + 1); //$NON-NLS-1$
-		CompositeChange result= new CompositeChange();
-		result.add(fProcessor.createChange(new SubProgressMonitor(pm, 1)));
+		List changes= new ArrayList();
+		changes.add(fProcessor.createChange(new SubProgressMonitor(pm, 1)));
 		
 		for (int i= 0; i < fElementParticipants.length; i++) {
 			IRenameParticipant participant= fElementParticipants[i];
 			fProcessor.propagateDataTo(participant);
-			result.add(participant.createChange(new SubProgressMonitor(pm, fElementParticipants.length)));
+			changes.add(participant.createChange(new SubProgressMonitor(pm, fElementParticipants.length)));
 		}
 		for (int i= 0; i < fDerivedParticipants.length; i++) {
 			IRenameParticipant participant= fDerivedParticipants[i];
 			fProcessor.propagateDataTo(participant);
-			result.add(participant.createChange(new SubProgressMonitor(pm, fDerivedParticipants.length)));
+			changes.add(participant.createChange(new SubProgressMonitor(pm, fDerivedParticipants.length)));
 		}
 		for (int i= 0; i < fResourceParticipants.length; i++) {
 			IRefactoringParticipant participant= fResourceParticipants[i];
-			result.add(participant.createChange(new SubProgressMonitor(pm, fResourceParticipants.length)));
+			changes.add(participant.createChange(new SubProgressMonitor(pm, fResourceParticipants.length)));
 		}
-		return result;		
+		return new DelegatingValidationStateChange((IChange[]) changes.toArray(new IChange[changes.size()]));		
 	}
 	
 	private void initParticipants() throws CoreException {
@@ -197,6 +200,8 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 		else
 			fResourceParticipants= new IRefactoringParticipant[0];
 	}
+	
+	
 	
 	/* non java-doc
 	 * for debugging only

@@ -17,6 +17,8 @@ import java.io.UnsupportedEncodingException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -67,7 +69,7 @@ public class CreateFileChange extends Change {
 	/*
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm)	throws JavaModelException, ChangeAbortException {
+	public void perform(ChangeContext context, IProgressMonitor pm)	throws ChangeAbortException, CoreException {
 
 		InputStream is= null;
 		try {

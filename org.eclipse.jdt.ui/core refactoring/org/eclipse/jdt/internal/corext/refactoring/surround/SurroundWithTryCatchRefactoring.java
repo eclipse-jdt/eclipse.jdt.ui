@@ -158,7 +158,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		final String NN= ""; //$NON-NLS-1$
 		TextBuffer buffer= null;
 		try {
-			CompilationUnitChange result= new CompilationUnitChange(getName(), fCUnit);
+			final CompilationUnitChange result= new CompilationUnitChange(getName(), fCUnit);
 			result.setSave(fSaveChanges);
 			MultiTextEdit root= new MultiTextEdit();
 			result.setEdit(root);

@@ -27,8 +27,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -133,6 +131,7 @@ public abstract class TextChange extends Change {
 	private boolean fTrackEdits;
 	private String fTextType;
 	private IChange fUndoChange;
+	private String fName;
 
 	/**
 	 * A special object denoting all edits managed by the text change. This even 
@@ -153,9 +152,17 @@ public abstract class TextChange extends Change {
 	 * @see #setTextType(String)
 	 */
 	protected TextChange(String name) {
-		super(name);
+		Assert.isNotNull(name);
 		fTextEditChangeGroups= new ArrayList(5);
 		fTextType= "txt"; //$NON-NLS-1$
+		fName= name;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getName() {
+		return fName;
 	}
 	
 	/**
@@ -285,6 +292,19 @@ public abstract class TextChange extends Change {
 	protected abstract IDocument aquireDocument(IProgressMonitor pm) throws CoreException;
 	
 	/**
+	 * Commits the document aquired vai a call to {@link #aquireDocument(IProgressMonitor)
+	 * aquireDocument}. It is up to the implementors of this method to decide what committing
+	 * a document means. Typically, the content of the document is written back to the file
+	 * system.
+	 * 
+	 * @param document the document to commit
+	 * @param pm a progress monitor
+	 * 
+	 * @throws CoreException if the document can't be committed
+	 */
+	protected abstract void commit(IProgressMonitor pm) throws CoreException;
+	
+	/**
 	 * Releases the document aquired via a call to {@link #aquireDocument(IProgressMonitor)
 	 * aquireDocument}.
 	 * 
@@ -296,8 +316,9 @@ public abstract class TextChange extends Change {
 	protected abstract void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException;
 	
 	/**
-	 * Hook to create a corresponding undo change for the given edit 
-	 * when performing this change object.
+	 * Hook to create an undo change for the given undo edit. This hook 
+	 * gets called while performing the change to construct the corresponding 
+	 * undo change object.
 	 * 
 	 * @param edit the {@link UndoEdit undo edit} to create a undo change
 	 *  object for
@@ -311,24 +332,21 @@ public abstract class TextChange extends Change {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
-		pm.beginTask("", 2); //$NON-NLS-1$
+	public void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
+		pm.beginTask("", 3); //$NON-NLS-1$
+		IDocument document= null;
 		try {
-			IDocument document= null;
-			try {
-				document= aquireDocument(new SubProgressMonitor(pm, 1));
-				TextEditProcessor processor= createTextEditProcessor(document, TextEdit.CREATE_UNDO, false);
-				UndoEdit undo= processor.performEdits();
-				fUndoChange= createUndoChange(undo);
-			} catch (BadLocationException e) {
-				Changes.asCoreException(e);
-			} finally {
-				if (document != null)
-					releaseDocument(document, new SubProgressMonitor(pm, 1));
-				pm.done();
-			}
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
+			document= aquireDocument(new SubProgressMonitor(pm, 1));
+			TextEditProcessor processor= createTextEditProcessor(document, TextEdit.CREATE_UNDO, false);
+			UndoEdit undo= processor.performEdits();
+			commit(new SubProgressMonitor(pm, 1));
+			fUndoChange= createUndoChange(undo);
+		} catch (BadLocationException e) {
+			Changes.asCoreException(e);
+		} finally {
+			if (document != null)
+				releaseDocument(document, new SubProgressMonitor(pm, 1));
+			pm.done();
 		}
 	}
 	

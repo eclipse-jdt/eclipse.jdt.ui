@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
@@ -28,7 +29,7 @@ public class NullChange extends Change {
 		this(null);
 	}
 		
-	public void perform(ChangeContext context, IProgressMonitor pm) {
+	public void perform(ChangeContext context, IProgressMonitor pm) throws CoreException {
 	}
 
 	public IChange getUndoChange() {

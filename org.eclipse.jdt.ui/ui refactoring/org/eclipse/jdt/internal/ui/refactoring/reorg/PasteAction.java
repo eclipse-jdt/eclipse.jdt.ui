@@ -583,10 +583,10 @@ public class PasteAction extends SelectionDispatchAction{
 				TextBuffer textBuffer= TextBuffer.create(getDestinationCu().getBuffer().getContents());
 				TextEdit rootEdit= new MultiTextEdit();
 				rewrite.rewriteNode(textBuffer, rootEdit);
-				CompilationUnitChange change= new CompilationUnitChange("name", getDestinationCu());
-				change.setSave(!getDestinationCu().isWorkingCopy());
-				TextChangeCompatibility.addTextEdit(change, "paste elements", rootEdit);
-				return change;
+				final CompilationUnitChange result= new CompilationUnitChange("name", getDestinationCu());
+				result.setSave(!getDestinationCu().isWorkingCopy());
+				TextChangeCompatibility.addTextEdit(result, "paste elements", rootEdit);
+				return result;
 			}
 			
 			private void pasteSource(TypedSource source, ASTRewrite rewrite, CompilationUnit cuNode) throws CoreException {

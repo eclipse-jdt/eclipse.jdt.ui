@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
@@ -332,8 +333,10 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 		
 		IResource resource= ResourceUtil.getResource(fCu);
 		if (resource != null && resource.isLinked())
-			return new RenameResourceChange(resource, getNewElementName());
+			return new ValidationStateChange( 
+			   new RenameResourceChange(resource, getNewElementName()));
 		
-		return new RenameCompilationUnitChange(fCu, getNewElementName());
+		return new ValidationStateChange( 
+			new RenameCompilationUnitChange(fCu, getNewElementName()));
 	}
 }

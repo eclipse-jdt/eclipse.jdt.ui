@@ -67,7 +67,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
@@ -76,6 +75,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -890,7 +890,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.createChanges"), fAllCallsTo.length); //$NON-NLS-1$
-		CompositeChange	topLevelChange= new CompositeChange(RefactoringCoreMessages.getString("IntroduceFactory.topLevelChangeLabel") + fCtorBinding.getName()); //$NON-NLS-1$
+		final ValidationStateChange result= new ValidationStateChange(RefactoringCoreMessages.getString("IntroduceFactory.topLevelChangeLabel") + fCtorBinding.getName()); //$NON-NLS-1$
 
 		try {
 			boolean hitInFactoryClass= false;
@@ -901,7 +901,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				CompilationUnitChange	cuChange= new CompilationUnitChange(getName(), unitHandle);
 
 				if (addAllChangesFor(rg, unitHandle, cuChange))
-					topLevelChange.add(cuChange);
+					result.add(cuChange);
 
 				if (unitHandle.equals(fFactoryUnitHandle))
 					hitInFactoryClass= true;
@@ -913,14 +913,14 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (!hitInFactoryClass) { // Handle factory class if no search hits there
 				CompilationUnitChange cuChange= new CompilationUnitChange(getName(), fFactoryUnitHandle);
 				addAllChangesFor(null, fFactoryUnitHandle, cuChange);
-				topLevelChange.add(cuChange);
+				result.add(cuChange);
 			}
 			if (!hitInCtorClass && !fFactoryUnitHandle.equals(ASTCreator.getCu(fCtorOwningClass))) { // Handle constructor-owning class if no search hits there
 				CompilationUnitChange cuChange= new CompilationUnitChange(getName(), ASTCreator.getCu(fCtorOwningClass));
 				addAllChangesFor(null, ASTCreator.getCu(fCtorOwningClass), cuChange);
-				topLevelChange.add(cuChange);
+				result.add(cuChange);
 			}
-			return topLevelChange;
+			return result;
 		} finally {
 			pm.done();
 		}

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -68,7 +69,7 @@ public class AddToClasspathChange extends Change {
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+	public void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
 		pm.beginTask(getName(), 1);
 		try{
 			if (!isActive())
@@ -132,6 +133,7 @@ public class AddToClasspathChange extends Change {
 	 */
 	public String getName() {
 		return RefactoringCoreMessages.getString("AddToClasspathChange.add") + getJavaProject().getElementName(); //$NON-NLS-1$
+ 
 	}
 
 	/* non java-doc

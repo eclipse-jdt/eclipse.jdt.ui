@@ -13,19 +13,19 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.UndoManagerAdapter;
+
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class RedoRefactoringAction extends UndoManagerAction {
@@ -52,7 +52,7 @@ public class RedoRefactoringAction extends UndoManagerAction {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
 					setPreflightStatus(Refactoring.getUndoManager().performRedo(context, pm));
-				} catch (JavaModelException e) {
+				} catch (CoreException e) {
 					throw new InvocationTargetException(e);			
 				} catch (ChangeAbortException e) {
 					throw new InvocationTargetException(e);

@@ -59,6 +59,13 @@ public class TextBufferChange extends TextChange {
 	/**
 	 * {@inheritDoc}
 	 */
+	protected void commit(IProgressMonitor pm) throws CoreException {
+		fChange.commit(pm);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
 		fChange.releaseDocument(document, pm);
 	}

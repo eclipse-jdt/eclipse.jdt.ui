@@ -75,7 +75,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		public IChange getUndoChange() {
 			return null;
 		}
-		public void perform(ChangeContext context, IProgressMonitor pm) {
+		public void perform(ChangeContext context, IProgressMonitor pm) throws CoreException {
 		}
 	}
 	

@@ -15,8 +15,6 @@ import org.eclipse.text.edits.UndoEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -93,7 +91,7 @@ public class TextFileChange extends TextChange  {
 		
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		IPath path= fFile.getFullPath();
-		manager.connect(path, new NullProgressMonitor());
+		manager.connect(path, pm);
 		fAquireCount++;
 		fBuffer= manager.getTextFileBuffer(path);
 		return fBuffer.getDocument();
@@ -102,15 +100,20 @@ public class TextFileChange extends TextChange  {
 	/**
 	 * {@inheritDoc}
 	 */
+	protected void commit(IProgressMonitor pm) throws CoreException {
+		if (fSave) {
+			fBuffer.commit(pm, false);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
 		Assert.isTrue(fAquireCount > 0);
 		if (fAquireCount == 1) {
-			pm.beginTask("", fSave ? 2 : 1); //$NON-NLS-1$
-			if (fSave)
-				fBuffer.commit(new SubProgressMonitor(pm, 1), false);
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-			manager.disconnect(fFile.getFullPath(), new SubProgressMonitor(pm, 1));
-			pm.done();
+			manager.disconnect(fFile.getFullPath(), pm);
 		}
 		fAquireCount--;
  	}

@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
@@ -160,7 +161,8 @@ public class RenameSourceFolderProcessor extends RenameProcessor {
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			return new RenameSourceFolderChange(fSourceFolder, fNewElementName);
+			return new ValidationStateChange(
+				new RenameSourceFolderChange(fSourceFolder, fNewElementName));
 		} finally{
 			pm.done();
 		}	

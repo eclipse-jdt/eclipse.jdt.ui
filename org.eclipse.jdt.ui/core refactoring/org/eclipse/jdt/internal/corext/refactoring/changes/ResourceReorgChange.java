@@ -54,7 +54,7 @@ abstract class ResourceReorgChange extends Change {
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public final void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+	public final void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
 		try{
 			pm.beginTask(getName(), 2);
 			if (!isActive())

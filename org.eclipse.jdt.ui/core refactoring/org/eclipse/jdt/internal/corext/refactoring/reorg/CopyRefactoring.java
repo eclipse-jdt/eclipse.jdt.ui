@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -21,13 +21,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.util.Resources;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public final class CopyRefactoring extends Refactoring{
 
@@ -106,19 +106,19 @@ public final class CopyRefactoring extends Refactoring{
 		Assert.isTrue(fCopyPolicy.getJavaElementDestination() == null || fCopyPolicy.getResourceDestination() == null);
 		Assert.isTrue(fCopyPolicy.getJavaElementDestination() != null || fCopyPolicy.getResourceDestination() != null);		
 		try {
-			CompositeChange resultComposite= new CompositeChange(){
+			final ValidationStateChange result= new ValidationStateChange() {
 				public boolean isUndoable(){
 					return false; 
 				}
 			};
 			IChange change= fCopyPolicy.createChange(pm, fNewNameQueries);
-			if (change instanceof ICompositeChange){
-				ICompositeChange subComposite= (ICompositeChange)change;
-				resultComposite.addAll(subComposite.getChildren());
+			if (change instanceof CompositeChange){
+				CompositeChange subComposite= (CompositeChange)change;
+				result.merge(subComposite);
 			} else{
-				resultComposite.add(change);
+				result.add(change);
 			}
-			return resultComposite;		
+			return result;		
 		} finally {
 			pm.done();
 		}

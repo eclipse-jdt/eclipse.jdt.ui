@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulat
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
@@ -60,7 +61,7 @@ class DeleteChangeCreator {
 	}
 	
 	static IChange createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements) throws CoreException {
-		CompositeChange composite= new CompositeChange() {
+		final ValidationStateChange result= new ValidationStateChange() {
 			public boolean isUndoable() {
 				return false;
 			}	
@@ -68,11 +69,11 @@ class DeleteChangeCreator {
 		for (int i= 0; i < javaElements.length; i++) {
 			IJavaElement element= javaElements[i];
 			if (! ReorgUtils.isInsideCompilationUnit(element))
-				composite.add(createDeleteChange(element));
+				result.add(createDeleteChange(element));
 		}
 
 		for (int i= 0; i < resources.length; i++) {
-			composite.add(createDeleteChange(resources[i]));
+			result.add(createDeleteChange(resources[i]));
 		}
 		
 		Map grouped= ReorgUtils.groupByCompilationUnit(getElementsSmallerThanCu(javaElements));
@@ -80,11 +81,11 @@ class DeleteChangeCreator {
 			Assert.isNotNull(manager);
 			for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
 				ICompilationUnit cu= (ICompilationUnit) iter.next();
-				composite.add(createDeleteChange(cu, (List)grouped.get(cu), manager));
+				result.add(createDeleteChange(cu, (List)grouped.get(cu), manager));
 			}
 		}
 
-		return composite;
+		return result;
 	}
 	
 	private static IChange createDeleteChange(IResource resource) {

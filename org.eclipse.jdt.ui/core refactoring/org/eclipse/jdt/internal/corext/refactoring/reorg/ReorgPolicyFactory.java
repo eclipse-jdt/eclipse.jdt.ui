@@ -74,7 +74,6 @@ import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyCompilationUnitChange;
@@ -1387,7 +1386,7 @@ class ReorgPolicyFactory {
 				}	
 				//</workaround>
 							
-				addAllChildren(composite, new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), fChangeManager.getAllChanges())); //$NON-NLS-1$
+				composite.merge(new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), fChangeManager.getAllChanges()));
 						
 				if (fUpdateQualifiedNames) {
 					computeQualifiedNameMatches(new SubProgressMonitor(pm, 1));
@@ -1395,8 +1394,8 @@ class ReorgPolicyFactory {
 				}
 							
 				IChange fileMove= createSimpleMoveChange(new SubProgressMonitor(pm, 1));
-				if (fileMove instanceof ICompositeChange) {
-					addAllChildren(composite, (ICompositeChange)fileMove);		
+				if (fileMove instanceof CompositeChange) {
+					composite.merge(((CompositeChange)fileMove));		
 				} else{
 					composite.add(fileMove);
 				}
@@ -1431,8 +1430,8 @@ class ReorgPolicyFactory {
 					return false; 
 				}
 			};
-			if (simpleCopyChange instanceof ICompositeChange) {
-				addAllChildren(result, (ICompositeChange)simpleCopyChange);		
+			if (simpleCopyChange instanceof CompositeChange) {
+				result.merge(((CompositeChange)simpleCopyChange));		
 			} else {
 				result.add(simpleCopyChange); 
 			}
@@ -1492,10 +1491,6 @@ class ReorgPolicyFactory {
 			if (destinationAsContainer == null)
 				return new NullChange();
 			return new MoveResourceChange(res, destinationAsContainer);
-		}
-
-		private static void addAllChildren(CompositeChange collector, ICompositeChange composite){
-			collector.addAll(composite.getChildren());
 		}
 
 		private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {

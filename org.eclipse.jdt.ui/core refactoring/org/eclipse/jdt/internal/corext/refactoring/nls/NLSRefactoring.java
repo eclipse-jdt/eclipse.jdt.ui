@@ -53,7 +53,6 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
@@ -63,6 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
@@ -511,22 +511,22 @@ public class NLSRefactoring extends Refactoring {
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask("", 3); //$NON-NLS-1$
-			CompositeChange builder= new CompositeChange();
+			final ValidationStateChange result= new ValidationStateChange();
 			
 			if (willModifySource())
-				builder.add(createSourceModification());
+				result.add(createSourceModification());
 			pm.worked(1);
 			
 			if (willModifyPropertyFile())
-				builder.add(createPropertyFile());
+				result.add(createPropertyFile());
 			pm.worked(1);
 			
 			if (willCreateAccessorClass())
-				builder.add(createAccessorCU(new SubProgressMonitor(pm, 1)));
+				result.add(createAccessorCU(new SubProgressMonitor(pm, 1)));
 			else	
 				pm.worked(1);
 			
-			return builder;
+			return result;
 		} finally {
 			pm.done();
 		}	

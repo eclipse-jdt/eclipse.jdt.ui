@@ -30,6 +30,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 /* package */ class UndoCompilationUnitChange extends Change {
 
 	private static class UndoTempWorkingCopyChange extends Change {
+		private String fName;
 		private IChange fUndoChange;
 		private UndoEdit fEdit;
 		private ICompilationUnit fUnit;
@@ -48,7 +50,9 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 		private IBufferChangedListener fListener;
 		
 		UndoTempWorkingCopyChange(String name, ICompilationUnit unit, UndoEdit edit) {
-			super(name);
+			Assert.isNotNull(name);
+			Assert.isNotNull(edit);
+			fName= name;
 			fEdit= edit;
 			fUnit= unit;
 			fListener= new IBufferChangedListener() {
@@ -73,19 +77,18 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 				return RefactoringStatus.createFatalErrorStatus("Buffer has changed");
 			return new RefactoringStatus();
 		}
-		public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+		public void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
+			IDocument document= new Document(fBuffer.getContents());
+			UndoEdit undo;
 			try {
-				IDocument document= new Document(fBuffer.getContents());
-				UndoEdit undo;
-				try {
-					undo= fEdit.apply(document, TextEdit.CREATE_UNDO);
-				} catch (BadLocationException e) {
-					throw new CoreException(new Status(IStatus.ERROR, Corext.getPluginId(), IStatus.ERROR, e.getMessage(), e));
-				}
-				fUndoChange= new UndoTempWorkingCopyChange(getName(), fUnit, undo);
-			} catch (CoreException e) {
-				throw new JavaModelException(e);
+				undo= fEdit.apply(document, TextEdit.CREATE_UNDO);
+			} catch (BadLocationException e) {
+				throw new CoreException(new Status(IStatus.ERROR, Corext.getPluginId(), IStatus.ERROR, e.getMessage(), e));
 			}
+			fUndoChange= new UndoTempWorkingCopyChange(getName(), fUnit, undo);
+		}
+		public String getName() {
+			return fName;
 		}
 		public IChange getUndoChange() {
 			return fUndoChange;
@@ -95,11 +98,14 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 		}
 	}
 
+	private String fName;
 	private IChange fChange;
 	private ICompilationUnit fUnit;
 	
 	public UndoCompilationUnitChange(String name, ICompilationUnit unit, UndoEdit edit) {
-		super(name);
+		Assert.isNotNull(name);
+		Assert.isNotNull(edit);
+		fName= name;
 		IFile file= (IFile)unit.getResource();
 		if (file != null) {
 			fChange= new UndoTextFileChange(name, file, edit);
@@ -108,6 +114,10 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 		}
 	}
 		
+	public String getName() {
+		return fName;
+	}
+	
 	public IChange getUndoChange() {
 		return fChange.getUndoChange();
 	}
@@ -122,7 +132,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 		return fChange.isValid(pm);
 	}
 	
-	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+	public void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
 		fChange.perform(context, pm);
 	}
 }

@@ -11,15 +11,14 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.JavaModelException;
-
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -34,6 +33,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 	private List fChanges;
 	private IChange fUndoChange;
 	private String fName;
+	private boolean fIsSynthetic;
 	
 	public CompositeChange() {
 		this(RefactoringCoreMessages.getString("CompositeChange.CompositeChange")); //$NON-NLS-1$
@@ -53,8 +53,17 @@ public class CompositeChange extends Change implements ICompositeChange {
 	}
 		
 	private CompositeChange(String name, List changes) {
+		Assert.isNotNull(changes);
 		fChanges= changes;
 		fName= name;
+	}
+	
+	protected boolean isSynthetic() {
+		return fIsSynthetic;
+	}
+	
+	protected void setSynthetic(boolean synthetic) {
+		fIsSynthetic= synthetic;
 	}
 	
 	/* (Non-Javadoc)
@@ -94,8 +103,30 @@ public class CompositeChange extends Change implements ICompositeChange {
 	}
 	
 	public void add(IChange change) {
-		if (change != null)
-			fChanges.add(change);	
+		if (change != null) {
+			Assert.isTrue(change.getParent() == null);
+			fChanges.add(change);
+			change.internalSetParent(this);
+		}
+	}
+	
+	public void merge(CompositeChange change) {
+		IChange[] others= change.getChildren();
+		for (int i= 0; i < others.length; i++) {
+			IChange other= others[i];
+			change.remove(other);
+			add(other);
+		}
+	}
+	
+	public boolean remove(IChange change) {
+		Assert.isNotNull(change);
+		boolean result= fChanges.remove(change);
+		if (result) {
+			change.internalSetParent(null);
+		}
+		return result;
+		
 	}
 		
 	public IChange[] getChildren() {
@@ -111,45 +142,58 @@ public class CompositeChange extends Change implements ICompositeChange {
 	/**
 	 * to reverse a composite means reversing all changes in reverse order
 	 */ 
-	private List createUndoList(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
-		List undoList= null;
+	private IChange[] createUndoList(ChangeContext context, IProgressMonitor pm) throws CoreException {
+		IChange[] undoList= null;
 		try {
-			undoList= new ArrayList(fChanges.size());
+			undoList= new IChange[fChanges.size()];
 			pm.beginTask("", fChanges.size()); //$NON-NLS-1$
-			for (Iterator iter= fChanges.iterator(); iter.hasNext();) {
+			int size= fChanges.size();
+			int last= size - 1;
+			for (int i= 0; i < size; i++) {
 				try {
-					IChange each= (IChange)iter.next();
+					IChange each= (IChange)fChanges.get(i);
 					each.perform(context, new SubProgressMonitor(pm, 1));
-					undoList.add(each.getUndoChange());
+					undoList[last - i]= each.getUndoChange();
 					context.addPerformedChange(each);
 				} catch (Exception e) {
 					handleException(context, e);
 				}
 			}
 			pm.done();
-			Collections.reverse(undoList);
 			return undoList;
 		} catch (Exception e) {
 			handleException(context, e);
 		}
 		if (undoList == null)
-			undoList= new ArrayList(0);
+			undoList= new IChange[0];
 		return undoList;	
 	}
 
 	/* non java-doc
 	 * @see IChange#perform
 	 */
-	public final void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
+	public final void perform(ChangeContext context, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.getString("CompositeChange.performingChangesTask.name")); //$NON-NLS-1$
 		if (!isActive()) {
 			fUndoChange= new NullChange();
 		} else {
-			fUndoChange= new CompositeChange(fName, createUndoList(context, new SubProgressMonitor(pm, 1)));
+			fUndoChange= createUndoChange(createUndoList(context, new SubProgressMonitor(pm, 1)));
 		}	
 		pm.done();
 	}
+	
+	/**
+	 * Hook to create an undo change.
+	 * 
+	 * @return the undo change
+	 * 
+	 * @throws CoreException if an undo change can't be created
+	 */
+	protected IChange createUndoChange(IChange[] childUndos) throws CoreException {
+		return new CompositeChange(fName, childUndos);
+	}
+	
 	
 	/* non java-doc
 	 * for debugging only

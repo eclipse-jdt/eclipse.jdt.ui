@@ -20,11 +20,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -54,13 +59,13 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -68,6 +73,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
@@ -88,9 +94,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
 
 /**
  * @author tip
@@ -453,16 +458,16 @@ public class ChangeTypeRefactoring extends Refactoring {
 			  new HashMap/*<ICompilationUnit,HashSet<ConstraintVariable>>*/();
 			groupChangesByCompilationUnit(relevantVarsByUnit);
 			
-			CompositeChange	topLevelChange= new CompositeChange(RefactoringCoreMessages.getString("ChangeTypeRefactoring.allChanges"));  //$NON-NLS-1$
+			final ValidationStateChange result= new ValidationStateChange(RefactoringCoreMessages.getString("ChangeTypeRefactoring.allChanges"));  //$NON-NLS-1$
 			for (Iterator/*<ICompilationUnit>*/ it= relevantVarsByUnit.keySet().iterator(); it.hasNext(); ){
 				ICompilationUnit icu= (ICompilationUnit)it.next();
 				Set/*<ConstraintVariable>*/ cVars = (Set)relevantVarsByUnit.get(icu);
 				CompilationUnitChange cuChange= new CompilationUnitChange(getName(), icu);
 				addAllChangesFor(icu, cVars, cuChange);
-				topLevelChange.add(cuChange);
+				result.add(cuChange);
 				pm.worked(1);
 			}
-			return topLevelChange;
+			return result;
 		} finally {
 			pm.done();
 		}

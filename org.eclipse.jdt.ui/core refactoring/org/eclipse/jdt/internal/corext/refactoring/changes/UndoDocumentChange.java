@@ -16,8 +16,6 @@ import org.eclipse.text.edits.UndoEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -35,6 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
  */
 public class UndoDocumentChange extends Change {
 	
+	private String fName;
 	private UndoEdit fUndo;
 	private IChange fUndoChange;
 	private IDocument fDocument;
@@ -52,10 +51,17 @@ public class UndoDocumentChange extends Change {
 	};
 	
 	public UndoDocumentChange(String name, IDocument document, UndoEdit undo) {
-		super(name);
+		fName= name;
 		fUndo= undo;
 		fDocument= document;
 		document.addDocumentListener(fListner);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getName() {
+		return fName;
 	}
 	
 	/**
@@ -84,20 +90,16 @@ public class UndoDocumentChange extends Change {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+	public void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
 		try {
-			try {
-				UndoEdit redo= fUndo.apply(fDocument, TextEdit.CREATE_UNDO);
-				fUndoChange= new UndoDocumentChange(getName(), fDocument, redo);
-				if (fListner != null) {
-					fDocument.removeDocumentListener(fListner);
-					fListner= null;
-				}
-			} catch (BadLocationException e) {
-				throw Changes.asCoreException(e);
+			UndoEdit redo= fUndo.apply(fDocument, TextEdit.CREATE_UNDO);
+			fUndoChange= new UndoDocumentChange(getName(), fDocument, redo);
+			if (fListner != null) {
+				fDocument.removeDocumentListener(fListner);
+				fListner= null;
 			}
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
+		} catch (BadLocationException e) {
+			throw Changes.asCoreException(e);
 		}
 	}
 }

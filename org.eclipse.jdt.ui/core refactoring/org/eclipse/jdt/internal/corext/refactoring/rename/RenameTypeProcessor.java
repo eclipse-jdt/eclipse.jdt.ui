@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.text.edits.ReplaceEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -48,17 +49,17 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
@@ -659,15 +660,15 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	 */
 	public IChange createChange(IProgressMonitor pm) throws CoreException{
 		pm.beginTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.creating_change"), 4); //$NON-NLS-1$
-		CompositeChange builder= new CompositeChange(
+		final ValidationStateChange result= new ValidationStateChange(
 			RefactoringCoreMessages.getString("Change.javaChanges")); //$NON-NLS-1$
-		builder.addAll(fChangeManager.getAllChanges());
+		result.addAll(fChangeManager.getAllChanges());
 		if (fQualifiedNameSearchResult != null)
-			builder.addAll(fQualifiedNameSearchResult.getAllChanges());
+			result.addAll(fQualifiedNameSearchResult.getAllChanges());
 		if (willRenameCU())
-			builder.add(new RenameResourceChange(ResourceUtil.getResource(fType), fNewElementName + ".java")); //$NON-NLS-1$
+			result.add(new RenameResourceChange(ResourceUtil.getResource(fType), fNewElementName + ".java")); //$NON-NLS-1$
 		pm.worked(1);	
-		return builder;	
+		return result;	
 	}
 	
 	private boolean willRenameCU() throws CoreException{

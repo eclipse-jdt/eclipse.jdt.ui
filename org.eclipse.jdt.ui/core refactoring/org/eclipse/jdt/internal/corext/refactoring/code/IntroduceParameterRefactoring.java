@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring.ASTData;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -309,14 +310,14 @@ public class IntroduceParameterRefactoring extends Refactoring {
 //--- checkInput
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.preview"), 5);
+		pm.beginTask(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.preview"), 5); //$NON-NLS-1$
 		RefactoringStatus result= checkExcludedParameterNames();
 		if (result.hasFatalError())
 			return result;
 		
 		// TODO: check for name clashes in ripple methods, ...
 		
-		fChange= new CompositeChange(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.introduce_parameter")); //$NON-NLS-1$
+		fChange= new ValidationStateChange(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.introduce_parameter")); //$NON-NLS-1$
 		fSource.reset(fSettings);
 		changeSource();
 		pm.worked(1);

@@ -15,4 +15,6 @@ import org.eclipse.core.runtime.CoreException;
 public interface IReorgExceptionHandler extends IChangeExceptionHandler{
 	
 	public boolean forceDeletingResourceOutOfSynch(String name, CoreException e);
+	
+	public void foo();
 }

@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -58,7 +60,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	/* non java-doc
 	 * @see AbstractRenameChange#doRename
 	 */	
-	protected void doRename(IProgressMonitor pm) throws Exception {
+	protected void doRename(IProgressMonitor pm) throws CoreException {
 		IPackageFragmentRoot sourceFolder= getSourceFolder();
 		if (sourceFolder != null)
 			sourceFolder.move(getNewPath(), getCoreMoveFlags(), getJavaModelUpdateFlags(), null, pm);

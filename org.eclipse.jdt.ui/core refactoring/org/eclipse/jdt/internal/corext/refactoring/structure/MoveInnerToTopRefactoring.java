@@ -89,7 +89,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
@@ -101,6 +100,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -329,10 +329,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.creating_preview"), 1); //$NON-NLS-1$
-			CompositeChange builder= new CompositeChange(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.move_to_Top")); //$NON-NLS-1$
-			builder.addAll(fChangeManager.getAllChanges());
-			builder.add(createCompilationUnitForMovedType(new SubProgressMonitor(pm, 1)));
-			return builder;
+			final ValidationStateChange result= new ValidationStateChange(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.move_to_Top")); //$NON-NLS-1$
+			result.addAll(fChangeManager.getAllChanges());
+			result.add(createCompilationUnitForMovedType(new SubProgressMonitor(pm, 1)));
+			return result;
 		} finally {
 			fImportManager.clear();	
 		}

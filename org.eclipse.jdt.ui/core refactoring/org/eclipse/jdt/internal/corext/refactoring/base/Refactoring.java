@@ -25,9 +25,11 @@ import org.eclipse.jdt.internal.corext.refactoring.UndoManager;
  */
 public abstract class Refactoring implements IAdaptable {
 
-	private static IUndoManager fgUndoManager= new UndoManager();
+	private static IUndoManager fgUndoManager= null;
 	
 	public static IUndoManager getUndoManager() {
+		if (fgUndoManager == null)
+			fgUndoManager= new UndoManager();
 		return fgUndoManager;
 	}
 	

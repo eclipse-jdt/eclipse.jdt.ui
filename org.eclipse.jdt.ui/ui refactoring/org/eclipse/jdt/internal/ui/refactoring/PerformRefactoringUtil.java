@@ -12,11 +12,6 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -26,10 +21,14 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
@@ -45,26 +44,16 @@ public class PerformRefactoringUtil {
 
 	public static boolean performRefactoring(PerformChangeOperation op, Refactoring refactoring, IRunnableContext execContext, Shell parent) {
 		ChangeContext context= new ChangeContext(new ChangeExceptionHandler(parent));
-		boolean success= false;
-		IUndoManager undoManager= Refactoring.getUndoManager();
+		op.setUndoManager(Refactoring.getUndoManager(), refactoring.getName());
 		try{
 			op.setChangeContext(context);
-			undoManager.aboutToPerformRefactoring();
 			execContext.run(false, false, op);
-			if (op.changeExecuted()) {
-				if (! op.getChange().isUndoable()){
-					success= false;
-				} else { 
-					undoManager.addUndo(refactoring.getName(), op.getChange().getUndoChange());
-					success= true;
-				}	
-			}
 		} catch (InvocationTargetException e) {
 			Throwable t= e.getTargetException();
 			if (t instanceof CoreException) {
 				IStatus status= ((CoreException)t).getStatus();
 				if (status != null && status.getCode() == IJavaStatusConstants.CHANGE_ABORTED && status.getPlugin().equals(status.getPlugin())) {
-					success= handleChangeAbortException(execContext, context);
+					handleChangeAbortException(execContext, context);
 					return true;
 				}
 			}
@@ -74,7 +63,6 @@ public class PerformRefactoringUtil {
 			return false;
 		} finally {
 			context.clearPerformedChanges();
-			undoManager.refactoringPerformed(success);
 		}
 		
 		return true;

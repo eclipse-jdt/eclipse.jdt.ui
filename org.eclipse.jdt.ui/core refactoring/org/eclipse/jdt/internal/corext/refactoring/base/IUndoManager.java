@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * An undo manager keeps track of changes performed by refactorings. Use <code>performUndo</code> 
@@ -41,20 +40,23 @@ public interface IUndoManager {
 	 * @param listener the listener to be removed
 	 */
 	public void removeListener(IUndoManagerListener listener);
-
-	/**
-	 * The refactoring infrastructure is going to perform a refactoring. 
-	 */
-	public void aboutToPerformRefactoring();
 	
 	/**
-	 * The execution of a refactoring is completed.
+	 * The infrastructure is goind to perform the given change.
 	 * 
-	 * @param success <code>true</code> if the refactoring has been executed successful.
-	 *  Otherwise <code>false<code>.
+	 * @param change the change to be performed.
 	 */
-	public void refactoringPerformed(boolean success);
+	public void aboutToPerformChange(IChange change);
 	
+	/**
+	 * The infrastructure has performed the given change.
+	 * 
+	 * @param change the change that was performed
+	 * @param e <code>null</code> if the change got executed
+	 *  successfully; otherwise the catched exception
+	 */
+	public void changePerformed(IChange change, Exception e);
+
 	/**
 	 * Adds a new undo change to this undo manager.
 	 * 
@@ -88,7 +90,7 @@ public interface IUndoManager {
 	 *  the undo change. The progress monitor must not be <code>null</code>
 	 * @return a status indicating if the undo preflight produced any error
 	 */	
-	public RefactoringStatus performUndo(ChangeContext context, IProgressMonitor pm) throws JavaModelException;
+	public RefactoringStatus performUndo(ChangeContext context, IProgressMonitor pm) throws CoreException;
 
 	/**
 	 * Returns <code>true</code> if there is anything to redo, otherwise
@@ -114,7 +116,7 @@ public interface IUndoManager {
 	 *  the redo change. The progress monitor must not be <code>null</code>
 	 * @return a status indicating if the undo preflight produced any error
 	 */	
-	public RefactoringStatus performRedo(ChangeContext context, IProgressMonitor pm) throws JavaModelException;
+	public RefactoringStatus performRedo(ChangeContext context, IProgressMonitor pm) throws CoreException;
 	
 	/**
 	 * Flushes the undo manager's undo and redo stacks.

@@ -77,6 +77,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -745,7 +746,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	
 	private void createChange(RefactoringStatus status, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
-		fChange= new CompositeChange(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_members")); //$NON-NLS-1$
+		fChange= new ValidationStateChange(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_members")); //$NON-NLS-1$
 		fTarget= getASTData(fDestinationType.getCompilationUnit());
 		ITypeBinding targetBinding= getDestinationBinding();
 		if (targetBinding == null) {
@@ -844,7 +845,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			}
 			TextEditGroup group= new TextEditGroup("moved member declaration");
 			fSource.rewriter.markAsTracked(declaration, group);
-			declaration.setProperty("group", group);
+			declaration.setProperty("group", group); //$NON-NLS-1$
 			targetNeedsSourceImport |= analyzer.targetNeedsSourceImport();
 			status.merge(analyzer.getStatus()); 
 		}
@@ -906,7 +907,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			//Fix for bug 42383: exclude multiple VariableDeclarationFragments ("int a=1, b=2")
 			if (result[i] instanceof FieldDeclaration 
 					&& ((FieldDeclaration) result[i]).fragments().size() != 1) {
-				status.addFatalError(RefactoringCoreMessages.getString("MoveMembersRefactoring.multi_var_fields"));
+				status.addFatalError(RefactoringCoreMessages.getString("MoveMembersRefactoring.multi_var_fields")); //$NON-NLS-1$
 				return result;
 			}
 			

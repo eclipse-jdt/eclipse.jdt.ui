@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -52,7 +53,7 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName());
 	}
 	
-	protected void doRename(IProgressMonitor pm) throws JavaModelException {
+	protected void doRename(IProgressMonitor pm) throws CoreException {
 		ICompilationUnit cu= (ICompilationUnit)getModifiedLanguageElement();
 		if (cu != null)
 			cu.rename(getNewName(), false, pm);

@@ -327,16 +327,16 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			pm.beginTask("", 2); //$NON-NLS-1$
 			pm.worked(1);
 			
-			TextChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), fCu); //$NON-NLS-1$
+			final TextChange result= new CompilationUnitChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), fCu); //$NON-NLS-1$
 			
 			String changeName= RefactoringCoreMessages.getFormattedString("RenameTempRefactoring.changeName", //$NON-NLS-1$
 						new String[]{fCurrentName, fNewName});
 			TextEdit[] edits= getAllRenameEdits();
 			for (int i= 0; i < edits.length; i++) {
-				TextChangeCompatibility.addTextEdit(change, changeName, edits[i]);
+				TextChangeCompatibility.addTextEdit(result, changeName, edits[i]);
 			}
 			
-			return change;
+			return result;
 		} finally {
 			pm.done();
 		}	

@@ -58,6 +58,13 @@ public class DocumentChange extends TextChange {
 	/**
 	 * {@inheritDoc}
 	 */
+	protected void commit(IProgressMonitor pm) throws CoreException {
+		// do nothing
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
 		//do nothing
 	}

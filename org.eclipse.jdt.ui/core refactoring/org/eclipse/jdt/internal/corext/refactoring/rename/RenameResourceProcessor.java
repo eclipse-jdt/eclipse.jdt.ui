@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringStyles;
@@ -139,7 +140,8 @@ public class RenameResourceProcessor extends RenameProcessor {
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			return new RenameResourceChange(fResource, fNewElementName);
+			return new ValidationStateChange(
+			  new RenameResourceChange(fResource, fNewElementName));
 		} finally{
 			pm.done();
 		}	

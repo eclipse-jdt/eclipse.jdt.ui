@@ -365,11 +365,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fRewriter= new ASTRewrite(type);
 		String sourceMethodName= declaration.getNodeType() == ASTNode.METHOD_DECLARATION 
 			? ((MethodDeclaration)declaration).getName().getIdentifier()
-			: "";
+			: ""; //$NON-NLS-1$
 		
-		CompilationUnitChange result= null;
-		
-		result= new CompilationUnitChange(
+		final CompilationUnitChange result= new CompilationUnitChange(
 			RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.change_name", new String[]{fMethodName, sourceMethodName}),  //$NON-NLS-1$
 			fCUnit);
 	

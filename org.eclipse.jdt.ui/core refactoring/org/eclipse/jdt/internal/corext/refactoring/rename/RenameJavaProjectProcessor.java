@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
@@ -149,7 +150,8 @@ public class RenameJavaProjectProcessor extends RenameProcessor implements IRefe
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			return new RenameJavaProjectChange(fProject, fNewElementName, fUpdateReferences);
+			return new ValidationStateChange(
+				new RenameJavaProjectChange(fProject, fNewElementName, fUpdateReferences));
 		} finally{
 			pm.done();
 		}	

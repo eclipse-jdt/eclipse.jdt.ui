@@ -597,13 +597,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     
     private IChange createChange(ASTRewrite rewrite) throws CoreException{
-        TextChange change= new CompilationUnitChange("", fCu); //$NON-NLS-1$
+        final TextChange result= new CompilationUnitChange("", fCu); //$NON-NLS-1$
         TextBuffer textBuffer= TextBuffer.create(fCu.getBuffer().getContents());
         TextEdit resultingEdits= new MultiTextEdit();
         rewrite.rewriteNode(textBuffer, resultingEdits);
-        TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.editName"), resultingEdits);
+        TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.editName"), resultingEdits);
         rewrite.removeModifications();
-        return change;
+        return result;
     }
 
     private void addLocalDeclarationSplit(ASTRewrite rewrite) throws JavaModelException {

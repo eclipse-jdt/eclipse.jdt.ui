@@ -479,15 +479,15 @@ public class ExtractTempRefactoring extends Refactoring {
 		try {
 			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.preview"), 3);	 //$NON-NLS-1$
-			TextChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractTempRefactoring.extract_temp"), fCu); //$NON-NLS-1$
-			addTempDeclaration(change);
+			final TextChange result= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractTempRefactoring.extract_temp"), fCu); //$NON-NLS-1$
+			addTempDeclaration(result);
 			pm.worked(1);
-			addImportIfNeeded(change, buffer);
+			addImportIfNeeded(result, buffer);
 			pm.worked(1);
-			addReplaceExpressionWithTemp(change);
+			addReplaceExpressionWithTemp(result);
 			pm.worked(1);
 			
-			return change;
+			return result;
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);
