@@ -28,6 +28,7 @@ import org.eclipse.jface.text.reconciler.IReconcileResult;
 import org.eclipse.jface.text.reconciler.IReconcilableModel;
 import org.eclipse.jface.text.reconciler.DocumentAdapter;
 
+import org.eclipse.ui.texteditor.DefaultAnnotation;
 import org.eclipse.ui.texteditor.IAnnotationExtension;
 
 import org.eclipse.jdt.core.IBuffer;
@@ -93,13 +94,13 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 			if (length < 0)
 				return null;
 
-			int type= TemporaryAnnotation.NONE;
+			int type= IMarker.SEVERITY_INFO;
 			if (fProblem.isError())
-				type= TemporaryAnnotation.ERROR;
+				type= IMarker.SEVERITY_ERROR;
 			else if (fProblem.isWarning())
-				type= TemporaryAnnotation.WARNING;
+				type= IMarker.SEVERITY_WARNING;
 				
-			return new TemporaryAnnotation(IMarker.PROBLEM, type, fProblem.getMessage());
+			return new DefaultAnnotation(IMarker.PROBLEM, type, true, fProblem.getMessage());
 		}
 		
 		private Position createPositionFromProblem() {
