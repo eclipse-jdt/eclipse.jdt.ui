@@ -96,6 +96,16 @@ public class JavadocView extends AbstractInfoView {
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 
+	/**
+	 * Flag which tells whether the SWT Browser widget
+	 * is not working correctly on the platform.
+	 * 
+	 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=67167
+	 * @since 3.0
+	 */
+	private static final boolean fgBrowserDoesNotWorkOnPlatform= "gtk".equalsIgnoreCase(SWT.getPlatform()); //$NON-NLS-1$
+
+	
 	/** The HTML widget. */
 	private Browser fBrowser;
 	/** The text widget. */
@@ -245,8 +255,12 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected void internalCreatePartControl(Composite parent) {
 		try {
-			fBrowser= new Browser(parent, SWT.NONE);
-			fIsUsingBrowserWidget= true;
+			if (fgBrowserDoesNotWorkOnPlatform)
+				fIsUsingBrowserWidget= false;
+			else {
+				fBrowser= new Browser(parent, SWT.NONE);
+				fIsUsingBrowserWidget= true;
+			}
 		} catch (SWTError er) {
 			
 			/* The Browser widget throws an SWTError if it fails to
@@ -268,8 +282,11 @@ public class JavadocView extends AbstractInfoView {
 					store.setValue(DO_NOT_WARN_PREFERENCE_KEY, dialog.getToggleState());
 			}
 			
-			fText= new StyledText(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 			fIsUsingBrowserWidget= false;
+		}
+		
+		if (!fIsUsingBrowserWidget) {
+			fText= new StyledText(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 			fText.setEditable(false);
 			fPresenter= new HTMLTextPresenter(false);
 			
@@ -282,6 +299,7 @@ public class JavadocView extends AbstractInfoView {
 				}
 			});
 		}
+		
 		initStyleSheetURL();
 		getViewSite().setSelectionProvider(new SelectionProvider(getControl()));
 	}
