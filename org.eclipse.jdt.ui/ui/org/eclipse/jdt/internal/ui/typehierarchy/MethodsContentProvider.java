@@ -18,6 +18,9 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+
 /**
  * Content provider used for the method view.
  * Allows also seeing methods inherited from base classes.
@@ -70,6 +73,7 @@ public class MethodsContentProvider implements IStructuredContentProvider {
 	public Object[] getElements(Object element) {
 		if (element instanceof IType) {
 			IType type= (IType)element;
+
 			List res= new ArrayList();
 			try {
 				ITypeHierarchy hierarchy= fHierarchyLifeCycle.getHierarchy();
@@ -78,11 +82,13 @@ public class MethodsContentProvider implements IStructuredContentProvider {
 					// sort in from last to first: elements with same name
 					// will show up in hierarchy order 
 					for (int i= allSupertypes.length - 1; i >= 0; i--) {
-						addAll(allSupertypes[i].getMethods(), res);
-						addAll(allSupertypes[i].getInitializers(), res);
-						addAll(allSupertypes[i].getFields(), res);
+						IType superType= getSuitableType(allSupertypes[i]);
+						addAll(superType.getMethods(), res);
+						addAll(superType.getInitializers(), res);
+						addAll(superType.getFields(), res);
 					}
 				}
+				type= getSuitableType(type);
 				addAll(type.getMethods(), res);
 				addAll(type.getInitializers(), res);
 				addAll(type.getFields(), res);				
@@ -110,4 +116,17 @@ public class MethodsContentProvider implements IStructuredContentProvider {
 	public void dispose() {
 	}	
 
+	/*
+	 * Returns the type as member of a working copy 
+	 * if reconcile everywhere is enabled and if there
+	 * is a corresponding working copy.
+	 */
+	private IType getSuitableType(IType type) throws JavaModelException {
+		if (JavaBasePreferencePage.reconcileJavaViews() && type.getCompilationUnit() != null) {
+			IType typeInWc= (IType)EditorUtility.getWorkingCopy(type);
+			if (typeInWc != null)
+				return typeInWc;
+		}
+		return type;
+	}
 }

@@ -22,6 +22,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+
 /**
  * Base class for content providers for type hierarchy viewers.
  * Implementors must override 'getTypesInHierarchy'.
@@ -145,6 +148,8 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	
 	private void addFilteredMembers(IType parent, List children) {
 		try {
+			parent= getSuitableType(parent);
+			
 			IMethod[] methods= parent.getMethods();
 			for (int i= 0; i < fMemberFilter.length; i++) {
 				IMember member= fMemberFilter[i];
@@ -181,6 +186,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		if (fShowAllTypes) {
 			return true;
 		}
+		type= getSuitableType(type);
 		
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < fMemberFilter.length; i++) {
@@ -231,4 +237,18 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return null;
 	}
+	
+	/*
+	 * Returns the type as member of a working copy
+	 * if reconcile everywhere is enabled and if there
+	 * is a corresponding working copy.
+	 */
+	private IType getSuitableType(IType type) throws JavaModelException {
+		if (JavaBasePreferencePage.reconcileJavaViews() && type.getCompilationUnit() != null) {
+			IType typeInWc= (IType)EditorUtility.getWorkingCopy(type);
+			if (typeInWc != null)
+				return typeInWc;
+		}
+		return type;
+	}	
 }

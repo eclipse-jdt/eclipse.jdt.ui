@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -9,6 +10,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.IAdornmentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -47,7 +49,7 @@ public class HierarchyAdornmentProvider implements IAdornmentProvider {
 			try {
 				IMethod method= (IMethod) element;
 				int flags= method.getFlags();
-				IType type= method.getDeclaringType();
+				IType type= getOriginalType(method.getDeclaringType());
 				ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
 				if (type.isClass() && !method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags) && (hierarchy != null)) {
 					IMethod impl= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, method.getElementName(), method.getParameterTypes(), false);
@@ -72,6 +74,17 @@ public class HierarchyAdornmentProvider implements IAdornmentProvider {
 	 */
 	public void dispose() {
 	}
+	
+	/*
+	 * Returns the corresponding original type or
+	 * the type itself if it is not in a working copy.
+	 */
+	private IType getOriginalType(IType type) {
+		ICompilationUnit cu= type.getCompilationUnit();
+		if (cu != null && cu.isWorkingCopy())
+			return (IType)cu.getOriginal(type);
+		return type;
+	}	
 
 }
 
