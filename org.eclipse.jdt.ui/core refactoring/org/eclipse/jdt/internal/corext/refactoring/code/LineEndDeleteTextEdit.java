@@ -46,11 +46,11 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 		int length= getTextRange().getLength();
 		try{	
 			Scanner scanner= new Scanner(true, true); //comments, whitespaces
-			scanner.recordLineSeparator = true;
+			scanner.recordLineSeparator= true;
 			scanner.setSource(fFullSource.toCharArray());
 			int start= getTextRange().getOffset() + length;
 			scanner.currentPosition= start;
-			int token = scanner.getNextToken();
+			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {
 				switch (token) {
 					case ITerminalSymbols.TokenNameWHITESPACE:
@@ -62,7 +62,7 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 					default:
 						return scanner.currentPosition - getTextRange().getOffset() - scanner.getCurrentTokenSource().length;
 				}
-				token = scanner.getNextToken();
+				token= scanner.getNextToken();
 			}
 			return length;
 		} catch (InvalidInputException e){
