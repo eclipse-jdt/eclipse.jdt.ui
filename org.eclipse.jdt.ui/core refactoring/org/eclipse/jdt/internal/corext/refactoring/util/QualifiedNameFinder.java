@@ -45,10 +45,10 @@ public class QualifiedNameFinder {
 		private IProgressMonitor fProgressMonitor;
 		private QualifiedNameSearchResult fResult;	
 		
-		public ResultCollector(String newValue,  IProgressMonitor monitor) {
+		public ResultCollector(QualifiedNameSearchResult result, String newValue,  IProgressMonitor monitor) {
+			fResult= result;
 			fNewValue= newValue;
 			fProgressMonitor= monitor;
-			fResult= new QualifiedNameSearchResult();
 		}
 		
 		public void aboutToStart() throws CoreException {
@@ -74,31 +74,26 @@ public class QualifiedNameFinder {
 		public IProgressMonitor getProgressMonitor() {
 			return fProgressMonitor;
 		}
-		
-		public QualifiedNameSearchResult getResult() {
-			return fResult;
-		}
 	}
 		
 	public QualifiedNameFinder() {
 	}
 	
-	public static QualifiedNameSearchResult process(String pattern, String newValue, String filePatterns, IProject root, IProgressMonitor monitor) throws JavaModelException {
+	public static void process(QualifiedNameSearchResult result, String pattern, String newValue, String filePatterns, IProject root, IProgressMonitor monitor) throws JavaModelException {
 		if (filePatterns == null || filePatterns.length() == 0) {
 			// Eat progress.
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.worked(1);
-			return new QualifiedNameSearchResult();
+			return;
 		}
 		Assert.isNotNull(pattern);
 		Assert.isNotNull(newValue);
 		Assert.isNotNull(root);
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
-		ResultCollector collector= new ResultCollector(newValue, monitor);
+		ResultCollector collector= new ResultCollector(result, newValue, monitor);
 		TextSearchEngine engine= new TextSearchEngine();
 		engine.search(ResourcesPlugin.getWorkspace(), pattern, "", createScope(filePatterns, root), collector); //$NON-NLS-1$
-		return collector.getResult();
 	}
 	
 	private static TextSearchScope createScope(String filePatterns, IProject root) throws JavaModelException {

@@ -761,7 +761,9 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	
 	private void computeQualifiedNameMatches(IProgressMonitor pm) throws CoreException {
 		IPackageFragment fragment= fType.getPackageFragment();
-		fQualifiedNameSearchResult= QualifiedNameFinder.process(fType.getFullyQualifiedName(),  
+		if (fQualifiedNameSearchResult == null)
+			fQualifiedNameSearchResult= new QualifiedNameSearchResult();
+		QualifiedNameFinder.process(fQualifiedNameSearchResult, fType.getFullyQualifiedName(),  
 			fragment.getElementName() + "." + fNewElementName, //$NON-NLS-1$
 			fFilePatterns, fType.getJavaProject().getProject(), pm);
 	}	

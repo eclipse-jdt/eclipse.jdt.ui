@@ -503,7 +503,9 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 	}
 	
 	private void computeQualifiedNameMatches(IProgressMonitor pm) throws CoreException {
-		fQualifiedNameSearchResult= QualifiedNameFinder.process(fPackage.getElementName(), fNewElementName, 
+		if (fQualifiedNameSearchResult == null)
+			fQualifiedNameSearchResult= new QualifiedNameSearchResult();
+		QualifiedNameFinder.process(fQualifiedNameSearchResult, fPackage.getElementName(), fNewElementName, 
 			fFilePatterns, fPackage.getJavaProject().getProject(), pm);
 	}	
 }

@@ -1496,9 +1496,8 @@ class ReorgPolicyFactory {
 		}
 
 		private void handleType(IType type, IPackageFragment destination, IProgressMonitor pm) throws JavaModelException {
-			fQualifiedNameSearchResult=
-				QualifiedNameFinder.process(type.getFullyQualifiedName(),  destination.getElementName() + "." + type.getTypeQualifiedName(), //$NON-NLS-1$
-						fFilePatterns, type.getJavaProject().getProject(), pm);
+			QualifiedNameFinder.process(fQualifiedNameSearchResult, type.getFullyQualifiedName(),  destination.getElementName() + "." + type.getTypeQualifiedName(), //$NON-NLS-1$
+				fFilePatterns, type.getJavaProject().getProject(), pm);
 		}	
 		
 		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
