@@ -520,9 +520,9 @@ public class JavaElementLabels {
 				getTypeLabel(declaringType, T_CONTAINER_QUALIFIED, buf);
 				buf.append('.');
 			}
-			IJavaElement parent= type.getParent();
-			if (parent instanceof IMethod) {
-				getMethodLabel((IMethod) parent, 0, buf);
+			int parentType= type.getParent().getElementType();
+			if (parentType == IJavaElement.METHOD || parentType == IJavaElement.FIELD || parentType == IJavaElement.INITIALIZER) { // anonymous or local
+				getElementLabel(type.getParent(), 0, buf);
 				buf.append('.');
 			}
 		}
@@ -545,10 +545,10 @@ public class JavaElementLabels {
 			IType declaringType= type.getDeclaringType();
 			if (declaringType != null) {
 				getTypeLabel(declaringType, T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
-				IJavaElement parent= type.getParent();
-				if (parent instanceof IMethod) {
+				int parentType= type.getParent().getElementType();
+				if (parentType == IJavaElement.METHOD || parentType == IJavaElement.FIELD || parentType == IJavaElement.INITIALIZER) { // anonymous or local
 					buf.append('.');
-					getMethodLabel((IMethod) parent, 0, buf);
+					getElementLabel(type.getParent(), 0, buf);
 				}
 			} else {
 				getPackageFragmentLabel(type.getPackageFragment(), (flags & P_COMPRESSED), buf);

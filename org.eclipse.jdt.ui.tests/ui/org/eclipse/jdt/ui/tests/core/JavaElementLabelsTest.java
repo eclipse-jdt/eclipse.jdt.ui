@@ -234,6 +234,72 @@ public class JavaElementLabelsTest extends CoreTests {
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.PREPEND_ROOT_PATH);
 		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.foo(..).new Object() {..}.xoo().new Serializable() {..}");
 	}
+	
+	public void testTypeLabelAnonymousInFieldInitializer() throws Exception {
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class Outer {\n");
+		buf.append("    Object o= new Thread() {\n");
+		buf.append("    };\n");	
+		buf.append("}\n");	
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("Outer.java", content, false, null);
+
+		IJavaElement elem= cu.getElementAt(content.indexOf("Thread"));
+		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED);
+		assertEqualString(lab, "org.test.Outer.o.new Thread() {..}");
+
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_CONTAINER_QUALIFIED);
+		assertEqualString(lab, "Outer.o.new Thread() {..}");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_POST_QUALIFIED);
+		assertEqualString(lab, "new Thread() {..} - org.test.Outer.o");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH);
+		assertEqualString(lab, "org.test.Outer.o.new Thread() {..} - TestSetupProject/src");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.PREPEND_ROOT_PATH);
+		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.o.new Thread() {..}");
+	}
+	
+	public void testTypeLabelAnonymousInInitializer() throws Exception {
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class Outer {\n");
+		buf.append("    static {\n");
+		buf.append("        new Object() {\n");
+		buf.append("        };\n");
+		buf.append("    }\n");	
+		buf.append("}\n");		
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("Outer.java", content, false, null);
+
+		IJavaElement elem= cu.getElementAt(content.indexOf("Object"));
+		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED);
+		assertEqualString(lab, "org.test.Outer.{...}.new Object() {..}");
+
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_CONTAINER_QUALIFIED);
+		assertEqualString(lab, "Outer.{...}.new Object() {..}");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_POST_QUALIFIED);
+		assertEqualString(lab, "new Object() {..} - org.test.Outer.{...}");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH);
+		assertEqualString(lab, "org.test.Outer.{...}.new Object() {..} - TestSetupProject/src");
+		
+		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.PREPEND_ROOT_PATH);
+		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.{...}.new Object() {..}");
+	}
 			
 	
 		
