@@ -144,7 +144,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	}
 	
 	private String getText(IPackageFragment fragment) {
-		if(isFlatView())
+		if (isFlatView())
 			return getFlatText(fragment);
 		else
 			return getHierarchicalText(fragment);
@@ -156,7 +156,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	}
 	
 	private String getFlatText(IPackageFragment fragment) {
-		return decorateText(JavaElementLabels.getElementLabel(fragment, getTextFlags()), fragment);
+		return super.getText(fragment);
 	}
 	
 	private boolean isFlatView() {
@@ -164,12 +164,10 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	}
 
 	private String getHierarchicalText(IPackageFragment fragment) {
-		if (fragment.isDefaultPackage())
-			//this must exist already but not in JavaElementLable
-			return decorateText(JavaElementLabels.getElementLabel(fragment, getTextFlags()), fragment);
-		String name= JavaElementLabels.getElementLabel(fragment, getTextFlags());
-		if (name.indexOf(".") != -1)//$NON-NLS-1$
-			name= name.substring(name.lastIndexOf(".") + 1);//$NON-NLS-1$
+		if (fragment.isDefaultPackage()) {
+			return super.getText(fragment);
+		}
+		String name= fragment.getResource().getName();
 		return decorateText(name, fragment);
 	}
 	
