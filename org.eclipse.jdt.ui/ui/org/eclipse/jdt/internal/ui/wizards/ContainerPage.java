@@ -137,8 +137,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	private void containerChangeControlPressed(DialogField field) {
 		// take the current jproject as init element of the dialog
 		IPackageFragmentRoot root= getPackageFragmentRoot();
-		IJavaProject jproject= (root != null) ? root.getJavaProject() : null; 
-		root= chooseSourceContainer(jproject);
+		root= chooseSourceContainer(root);
 		if (root != null) {
 			setPackageFragmentRoot(root, true);
 		}

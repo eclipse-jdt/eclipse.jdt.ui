@@ -423,7 +423,9 @@ public class BuildPathsBlock {
 	}
 	
 	
-	// a class path entry should not be the prefix of another entry
+	/**
+	 * Validates the build path.
+	 */
 	private void updateClassPathStatus() {
 		fClassPathStatus.setOK();
 		
@@ -446,7 +448,10 @@ public class BuildPathsBlock {
 			fClassPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.CycleInClassPath")); //$NON-NLS-1$
 		}	
 	}
-	
+
+	/**
+	 * Validates output location & build path.
+	 */	
 	private void updateBuildPathStatus() {
 		fOutputLocationPath= null;
 		
@@ -496,6 +501,9 @@ public class BuildPathsBlock {
 	
 	// -------- creation -------------------------------
 	
+	/**
+	 * Creates a runnable that sets the configured build paths.
+	 */
 	public IRunnableWithProgress getRunnable() {
 		final List classPathEntries= fClassPathList.getElements();
 		final IPath path= getOutputLocation();
@@ -507,7 +515,7 @@ public class BuildPathsBlock {
 				}				
 				monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc"), 12); //$NON-NLS-1$
 				try {
-					setJavaProjectProperties(classPathEntries, path, monitor);
+					createJavaProject(classPathEntries, path, monitor);
 				} catch (CoreException e) { 
 					throw new InvocationTargetException(e);
 				} finally {
@@ -517,7 +525,11 @@ public class BuildPathsBlock {
 		};
 	}		
 	
-	private void setJavaProjectProperties(List classPathEntries, IPath buildPath, IProgressMonitor monitor) throws CoreException {
+	/**
+	 * Creates the Java project and sets the configured build path and output location.
+	 * If the project already exists only build paths are updated.
+	 */
+	private void createJavaProject(List classPathEntries, IPath buildPath, IProgressMonitor monitor) throws CoreException {
 		IProject project= fCurrJProject.getProject();
 		
 		if (!project.exists()) {
@@ -571,7 +583,7 @@ public class BuildPathsBlock {
 	 * @param jproject The Java project after changing the class path
 	 * @param prevRequiredProjects The required projects before changing the class path
 	 */
-	public static void updateReferencedProjects(IJavaProject jproject, String[] prevRequiredProjects, IProgressMonitor monitor) throws CoreException {
+	private static void updateReferencedProjects(IJavaProject jproject, String[] prevRequiredProjects, IProgressMonitor monitor) throws CoreException {
 		String[] newRequiredProjects= jproject.getRequiredProjectNames();
 
 		ArrayList prevEntries= new ArrayList(Arrays.asList(prevRequiredProjects));

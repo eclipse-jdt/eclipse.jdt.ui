@@ -71,6 +71,15 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialog
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 
+/**
+ * <code>TypePage</code> contains controls and validation routines for a 'New Type WizardPage'
+ * Implementors decide which components to add and to enable. Implementors can also
+ * customize the validation code.
+ * <code>TypePage</code> is intended to serve as base class of all wizards that create types.
+ * Applets, Servlets, Classes, Interfaces...
+ * See <code>NewClassCreationWizardPage</code> or <code>NewInterfaceCreationWizardPage</code> for an
+ * example usage of TypePage.
+ */
 public abstract class TypePage extends ContainerPage {
 	
 	private final static String PAGE_NAME= "TypePage"; //$NON-NLS-1$
@@ -132,6 +141,9 @@ public abstract class TypePage extends ContainerPage {
 	private boolean fIsClass;
 	private int fStaticMdfIndex;
 	
+	private final int PUBLIC_INDEX= 0, DEFAULT_INDEX= 1, PRIVATE_INDEX= 2, PROTECTED_INDEX= 3;
+	private final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1;
+	
 	public TypePage(boolean isClass, String pageName, IWorkspaceRoot root) {
 		super(pageName, root);
 		fCreatedType= null;
@@ -175,8 +187,10 @@ public abstract class TypePage extends ContainerPage {
 		fSuperInterfacesDialogField.setRemoveButtonIndex(2);
 	
 		String[] buttonNames1= new String[] {
-			NewWizardMessages.getString("TypePage.modifiers.public"), NewWizardMessages.getString("TypePage.modifiers.default"), //$NON-NLS-1$ //$NON-NLS-2$
-			NewWizardMessages.getString("TypePage.modifiers.private"), NewWizardMessages.getString("TypePage.modifiers.protected") //$NON-NLS-2$ //$NON-NLS-1$
+			/* 0 == PUBLIC_INDEX */ NewWizardMessages.getString("TypePage.modifiers.public"), //$NON-NLS-1$
+			/* 1 == DEFAULT_INDEX */ NewWizardMessages.getString("TypePage.modifiers.default"), //$NON-NLS-1$
+			/* 2 == PRIVATE_INDEX */ NewWizardMessages.getString("TypePage.modifiers.private"), //$NON-NLS-1$
+			/* 3 == PROTECTED_INDEX*/ NewWizardMessages.getString("TypePage.modifiers.protected") //$NON-NLS-1$
 		};
 		fAccMdfButtons= new SelectionButtonDialogFieldGroup(SWT.RADIO, buttonNames1, 4);
 		fAccMdfButtons.setDialogFieldListener(adapter);
@@ -186,22 +200,23 @@ public abstract class TypePage extends ContainerPage {
 		String[] buttonNames2;
 		if (fIsClass) {
 			buttonNames2= new String[] {
-				NewWizardMessages.getString("TypePage.modifiers.abstract"), NewWizardMessages.getString("TypePage.modifiers.final"), //$NON-NLS-2$ //$NON-NLS-1$
-				NewWizardMessages.getString("TypePage.modifiers.static") //$NON-NLS-1$
+				/* 0 == ABSTRACT_INDEX */ NewWizardMessages.getString("TypePage.modifiers.abstract"), //$NON-NLS-1$
+				/* 1 == FINAL_INDEX */ NewWizardMessages.getString("TypePage.modifiers.final"), //$NON-NLS-1$
+				/* 2 */ NewWizardMessages.getString("TypePage.modifiers.static") //$NON-NLS-1$
 			};
-			fStaticMdfIndex= 2;
+			fStaticMdfIndex= 2; // index of the static checkbox is 2
 		} else {
 			buttonNames2= new String[] {
 				NewWizardMessages.getString("TypePage.modifiers.static") //$NON-NLS-1$
 			};
-			fStaticMdfIndex= 0;
+			fStaticMdfIndex= 0; // index of the static checkbox is 0
 		}
 
 		fOtherMdfButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames2, 4);
 		fOtherMdfButtons.setDialogFieldListener(adapter);
 		
-		fAccMdfButtons.enableSelectionButton(2, false);
-		fAccMdfButtons.enableSelectionButton(3, false);
+		fAccMdfButtons.enableSelectionButton(PRIVATE_INDEX, false);
+		fAccMdfButtons.enableSelectionButton(PROTECTED_INDEX, false);
 		fOtherMdfButtons.enableSelectionButton(fStaticMdfIndex, false);
 
 		fPackageStatus= new StatusInfo();
@@ -233,17 +248,15 @@ public abstract class TypePage extends ContainerPage {
 			pack= (IPackageFragment) JavaModelUtil.findElementOfKind(elem, IJavaElement.PACKAGE_FRAGMENT);
 			try {
 				IType type= null;
-				switch (elem.getElementType()) {
-				case IJavaElement.TYPE:
+				if (elem.getElementType() == IJavaElement.TYPE) {
 					type= (IType)elem;
-					break;
-				}
-				if (type != null && type.exists()) {
-					String superName= JavaModelUtil.getFullyQualifiedName(type);
-					if (type.isInterface()) {
-						initSuperinterfaces.add(superName);
-					} else {
-						initSuperclass= superName;
+					if (type.exists()) {
+						String superName= JavaModelUtil.getFullyQualifiedName(type);
+						if (type.isInterface()) {
+							initSuperinterfaces.add(superName);
+						} else {
+							initSuperclass= superName;
+						}
 					}
 				}
 			} catch (JavaModelException e) {
@@ -259,7 +272,6 @@ public abstract class TypePage extends ContainerPage {
 		setTypeName("", true); //$NON-NLS-1$
 		setSuperClass(initSuperclass, true);
 		setSuperInterfaces(initSuperinterfaces, true);
-		
 	}		
 	
 	// -------- UI Creation ---------
@@ -271,7 +283,6 @@ public abstract class TypePage extends ContainerPage {
 	 */
 	protected void createSeparator(Composite composite, int nColumns) {
 		initializeDialogUnits(composite);
-		//(new Separator()).doFillIntoGrid(composite, nColumns, convertHeightInCharsToPixels(1));		
 		(new Separator(SWT.SEPARATOR | SWT.HORIZONTAL)).doFillIntoGrid(composite, nColumns, convertHeightInCharsToPixels(1));		
 	}
 
@@ -408,17 +419,41 @@ public abstract class TypePage extends ContainerPage {
 		}
 	}
 	
+	/*
+	 * A field on the type has changed. The fields' status and all dependend
+	 * status are updated.
+	 */
 	private void typePageDialogFieldChanged(DialogField field) {
 		String fieldName= null;
 		if (field == fPackageDialogField) {
 			fPackageStatus= packageChanged();
 			updatePackageStatusLabel();
+			fTypeNameStatus= typeNameChanged();
+			fSuperClassStatus= superClassChanged();			
 			fieldName= PACKAGE;
 		} else if (field == fEnclosingTypeDialogField) {
 			fEnclosingTypeStatus= enclosingTypeChanged();
+			fTypeNameStatus= typeNameChanged();
+			fSuperClassStatus= superClassChanged();				
 			fieldName= ENCLOSING;
 		} else if (field == fEnclosingTypeSelection) {
 			updateEnableState();
+			boolean isEnclosedType= isEnclosingTypeSelected();
+			if (!isEnclosedType) {
+				if (fAccMdfButtons.isSelected(PRIVATE_INDEX) || fAccMdfButtons.isSelected(PROTECTED_INDEX)) {
+					fAccMdfButtons.setSelection(PRIVATE_INDEX, false);
+					fAccMdfButtons.setSelection(PROTECTED_INDEX, false); 
+					fAccMdfButtons.setSelection(PUBLIC_INDEX, true);
+				}
+				if (fOtherMdfButtons.isSelected(fStaticMdfIndex)) {
+					fOtherMdfButtons.setSelection(fStaticMdfIndex, false);
+				}
+			}
+			fAccMdfButtons.enableSelectionButton(PRIVATE_INDEX, isEnclosedType && fIsClass);
+			fAccMdfButtons.enableSelectionButton(PROTECTED_INDEX, isEnclosedType && fIsClass);
+			fOtherMdfButtons.enableSelectionButton(fStaticMdfIndex, isEnclosedType);
+			fTypeNameStatus= typeNameChanged();
+			fSuperClassStatus= superClassChanged();
 			fieldName= ENCLOSINGSELECTION;
 		} else if (field == fTypeNameDialogField) {
 			fTypeNameStatus= typeNameChanged();
@@ -445,6 +480,7 @@ public abstract class TypePage extends ContainerPage {
 
 	/**
 	 * Called whenever a content of a field has changed.
+	 * Implementors of TypePage can hook in.
 	 * @see ContainerPage#handleFieldChanged
 	 */			
 	protected void handleFieldChanged(String fieldName) {
@@ -455,31 +491,8 @@ public abstract class TypePage extends ContainerPage {
 			fTypeNameStatus= typeNameChanged();
 			fSuperClassStatus= superClassChanged();
 			fSuperInterfacesStatus= superInterfacesChanged();
-		} else if (fieldName ==  ENCLOSING || fieldName == PACKAGE) {
-			fTypeNameStatus= typeNameChanged();
-			fSuperClassStatus= superClassChanged();
-		} else if (fieldName ==  ENCLOSINGSELECTION) {
-			boolean isEnclosedType= isEnclosingTypeSelected();
-			if (!isEnclosedType) {
-				if (fAccMdfButtons.isSelected(2) || fAccMdfButtons.isSelected(3)) {
-					fAccMdfButtons.setSelection(2, false);
-					fAccMdfButtons.setSelection(3, false);
-					fAccMdfButtons.setSelection(0, true);
-				}
-				
-				if (fOtherMdfButtons.isSelected(fStaticMdfIndex)) {
-					fOtherMdfButtons.setSelection(fStaticMdfIndex, false);
-				}
-			}
-			fAccMdfButtons.enableSelectionButton(2, isEnclosedType && fIsClass);
-			fAccMdfButtons.enableSelectionButton(3, isEnclosedType && fIsClass);
-			fOtherMdfButtons.enableSelectionButton(fStaticMdfIndex, isEnclosedType);
-			fTypeNameStatus= typeNameChanged();
-			fSuperClassStatus= superClassChanged();
 		}
 	}
-	
-	
 	
 	// ---- set / get ----------------
 	
@@ -500,7 +513,7 @@ public abstract class TypePage extends ContainerPage {
 	
 	/**
 	 * Returns the package fragment corresponding to the current input.
-	 * Can be null if the input could not be resolved.
+	 * @return Returns <code>null</code> if the input could not be resolved.
 	 */
 	public IPackageFragment getPackageFragment() {
 		if (!isEnclosingTypeSelected()) {
@@ -528,7 +541,7 @@ public abstract class TypePage extends ContainerPage {
 
 	/**
 	 * Returns the encloding type corresponding to the current input.
-	 * Can be null if enclosing type is not selected or the input could not
+	 * @return Returns <code>null</code> if enclosing type is not selected or the input could not
 	 * be resolved.
 	 */
 	public IType getEnclosingType() {
@@ -552,7 +565,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 	
 	/**
-	 * Returns true if the enclosing type selection check box is enabled.
+	 * Returns <code>true</code> if the enclosing type selection check box is enabled.
 	 */
 	public boolean isEnclosingTypeSelected() {
 		return fEnclosingTypeSelection.isSelected();
@@ -590,17 +603,17 @@ public abstract class TypePage extends ContainerPage {
 	 */	
 	public int getModifiers() {
 		int mdf= 0;
-		if (fAccMdfButtons.isSelected(0)) {
+		if (fAccMdfButtons.isSelected(PUBLIC_INDEX)) {
 			mdf+= IConstants.AccPublic;
-		} else if (fAccMdfButtons.isSelected(2)) {
+		} else if (fAccMdfButtons.isSelected(PRIVATE_INDEX)) {
 			mdf+= IConstants.AccPrivate;
-		} else if (fAccMdfButtons.isSelected(3)) {	
+		} else if (fAccMdfButtons.isSelected(PROTECTED_INDEX)) {	
 			mdf+= IConstants.AccProtected;
 		}
-		if (fOtherMdfButtons.isSelected(0) && (fStaticMdfIndex != 0)) {	
+		if (fOtherMdfButtons.isSelected(ABSTRACT_INDEX) && (fStaticMdfIndex != 0)) {	
 			mdf+= IConstants.AccAbstract;
 		}
-		if (fOtherMdfButtons.isSelected(1)) {	
+		if (fOtherMdfButtons.isSelected(FINAL_INDEX)) {	
 			mdf+= IConstants.AccFinal;
 		}
 		if (fOtherMdfButtons.isSelected(fStaticMdfIndex)) {	
@@ -616,19 +629,19 @@ public abstract class TypePage extends ContainerPage {
 	 */		
 	public void setModifiers(int modifiers, boolean canBeModified) {
 		if (Flags.isPublic(modifiers)) {
-			fAccMdfButtons.setSelection(0, true);
+			fAccMdfButtons.setSelection(PUBLIC_INDEX, true);
 		} else if (Flags.isPrivate(modifiers)) {
-			fAccMdfButtons.setSelection(2, true);
+			fAccMdfButtons.setSelection(PRIVATE_INDEX, true);
 		} else if (Flags.isProtected(modifiers)) {
-			fAccMdfButtons.setSelection(3, true);
+			fAccMdfButtons.setSelection(PROTECTED_INDEX, true);
 		} else {
-			fAccMdfButtons.setSelection(1, true); // default
+			fAccMdfButtons.setSelection(DEFAULT_INDEX, true);
 		}
 		if (Flags.isAbstract(modifiers)) {
-			fOtherMdfButtons.setSelection(0, true);
+			fOtherMdfButtons.setSelection(ABSTRACT_INDEX, true);
 		}
 		if (Flags.isFinal(modifiers)) {
-			fOtherMdfButtons.setSelection(1, true);
+			fOtherMdfButtons.setSelection(FINAL_INDEX, true);
 		}		
 		if (Flags.isStatic(modifiers)) {
 			fOtherMdfButtons.setSelection(fStaticMdfIndex, true);
@@ -684,7 +697,7 @@ public abstract class TypePage extends ContainerPage {
 		fPackageDialogField.enableButton(getPackageFragmentRoot() != null);
 		
 		String packName= getPackageText();
-		if (!"".equals(packName)) { //$NON-NLS-1$
+		if (packName.length() > 0) {
 			IStatus val= JavaConventions.validatePackageName(packName);
 			if (val.getSeverity() == IStatus.ERROR) {
 				status.setError(NewWizardMessages.getFormattedString("TypePage.error.InvalidPackageName", val.getMessage())); //$NON-NLS-1$
@@ -728,7 +741,7 @@ public abstract class TypePage extends ContainerPage {
 	private void updatePackageStatusLabel() {
 		String packName= fPackageDialogField.getText();
 		
-		if ("".equals(packName)) { //$NON-NLS-1$
+		if (packName.length() == 0) {
 			fPackageDialogField.setStatus(NewWizardMessages.getString("TypePage.default")); //$NON-NLS-1$
 		} else {
 			fPackageDialogField.setStatus(""); //$NON-NLS-1$
@@ -763,7 +776,7 @@ public abstract class TypePage extends ContainerPage {
 		}
 		
 		String enclName= getEnclosingTypeText();
-		if ("".equals(enclName)) { //$NON-NLS-1$
+		if (enclName.length() == 0) {
 			status.setError(NewWizardMessages.getString("TypePage.error.EnclosingTypeEnterName")); //$NON-NLS-1$
 			return status;
 		}
@@ -796,7 +809,7 @@ public abstract class TypePage extends ContainerPage {
 		StatusInfo status= new StatusInfo();
 		String typeName= getTypeName();
 		// must not be empty
-		if ("".equals(typeName)) { //$NON-NLS-1$
+		if (typeName.length() == 0) {
 			status.setError(NewWizardMessages.getString("TypePage.error.EnterTypeName")); //$NON-NLS-1$
 			return status;
 		}
@@ -849,7 +862,7 @@ public abstract class TypePage extends ContainerPage {
 		fSuperClass= null;
 		
 		String sclassName= getSuperClass();
-		if ("".equals(sclassName)) { //$NON-NLS-1$
+		if (sclassName.length() == 0) {
 			// accept the empty field (stands for java.lang.Object)
 			return status;
 		}
@@ -891,7 +904,6 @@ public abstract class TypePage extends ContainerPage {
 		
 	}
 	
-	// 1GEXEI6: ITPJUI:ALL - Incorrect error message on class creation wizard
 	private IType resolveSuperTypeName(IJavaProject jproject, String sclassName) throws JavaModelException {
 		IType type= null;
 		if (isEnclosingTypeSelected()) {
@@ -923,7 +935,6 @@ public abstract class TypePage extends ContainerPage {
 		}
 		return type;
 	}		
-	
 	
 	/**
 	 * Called when the list of super interface has changed.
@@ -1001,6 +1012,9 @@ public abstract class TypePage extends ContainerPage {
 		dialog.setMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.description")); //$NON-NLS-1$
 		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$
 		dialog.setElements(packages);
+		if (fCurrPackage != null) {
+			dialog.setInitialSelections(new Object[] { fCurrPackage });
+		}
 
 		if (dialog.open() == dialog.OK) {
 			return (IPackageFragment) dialog.getFirstResult();
@@ -1022,6 +1036,11 @@ public abstract class TypePage extends ContainerPage {
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_TYPES);
 		dialog.setTitle(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
+		if (fCurrEnclosingType != null) {
+			dialog.setInitialSelections(new Object[] { fCurrEnclosingType });
+			dialog.setFilter(fCurrEnclosingType.getElementName().substring(0, 1));
+		}
+		
 		if (dialog.open() == dialog.OK) {	
 			return (IType) dialog.getFirstResult();
 		}
@@ -1043,6 +1062,9 @@ public abstract class TypePage extends ContainerPage {
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES);
 		dialog.setTitle(NewWizardMessages.getString("TypePage.SuperClassDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("TypePage.SuperClassDialog.message")); //$NON-NLS-1$
+		if (fSuperClass != null) {
+			dialog.setFilter(fSuperClass.getElementName());
+		}
 
 		if (dialog.open() == dialog.OK) {
 			return (IType) dialog.getFirstResult();
@@ -1095,7 +1117,6 @@ public abstract class TypePage extends ContainerPage {
 		ImportsStructure imports;
 		int indent= 0;
 		
-		// fix for: 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
 		String lineDelimiter= null;	
 		if (!isInnerClass) {
 			ICompilationUnit parentCU= pack.getCompilationUnit(clName + ".java"); //$NON-NLS-1$
@@ -1104,7 +1125,6 @@ public abstract class TypePage extends ContainerPage {
 			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
 			imports= new ImportsStructure(parentCU, prefOrder, threshold);
 			
-			//1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
 			lineDelimiter= StubUtility.getLineDelimiterUsed(parentCU);
 			
 			String content= createTypeBody(imports, lineDelimiter);
@@ -1114,7 +1134,7 @@ public abstract class TypePage extends ContainerPage {
 			
 			// if we are working on a enclosed type that is open in an editor,
 			// then replace the enclosing type with its working copy
-			IType workingCopy= (IType)EditorUtility.getWorkingCopy(enclosingType);
+			IType workingCopy= (IType) EditorUtility.getWorkingCopy(enclosingType);
 			if (workingCopy != null) {
 				enclosingType= workingCopy;
 			}
@@ -1122,7 +1142,6 @@ public abstract class TypePage extends ContainerPage {
 			ICompilationUnit parentCU= enclosingType.getCompilationUnit();
 			imports= new ImportsStructure(parentCU);
 			
-			//1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
 			lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
 			String content= createTypeBody(imports, lineDelimiter);
 			createdType= enclosingType.createType(content, null, false, new SubProgressMonitor(monitor, 1));
@@ -1143,7 +1162,6 @@ public abstract class TypePage extends ContainerPage {
 		} 
 		monitor.worked(1);	
 		
-		//1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
 		String formattedContent= StubUtility.codeFormat(createdType.getSource(), indent, lineDelimiter);
 		
 		ISourceRange range= createdType.getSourceRange();
@@ -1169,7 +1187,7 @@ public abstract class TypePage extends ContainerPage {
 		
 	private void writeSuperClass(StringBuffer buf, IImportsStructure imports) {
 		String typename= getSuperClass();
-		if (fIsClass && !"".equals(typename) && !"java.lang.Object".equals(typename)) { //$NON-NLS-2$ //$NON-NLS-1$
+		if (fIsClass && typename.length() > 0 && !"java.lang.Object".equals(typename)) { //$NON-NLS-1$
 			buf.append(" extends "); //$NON-NLS-1$
 			buf.append(Signature.getSimpleName(typename));
 			if (fSuperClass != null) {
@@ -1202,7 +1220,6 @@ public abstract class TypePage extends ContainerPage {
 
 	/*
 	 * Called from createType to construct the source for this type
-	 * fix for: 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
 	 */		
 	private String createTypeBody(IImportsStructure imports, String lineDelimiter) {	
 		StringBuffer buf= new StringBuffer();
