@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -25,7 +26,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 
 /* package */ class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 
-	private MethodDeclaration fEnclosingMethod;
 	private Selection fSelection;
 	
 	private static class ExceptionComparator implements Comparator {
@@ -48,16 +48,14 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 		}
 	}
 	
-	private ExceptionAnalyzer(MethodDeclaration enclosingMethod, Selection selection) {
-		Assert.isNotNull(enclosingMethod);
+	private ExceptionAnalyzer(Selection selection) {
 		Assert.isNotNull(selection);
-		fEnclosingMethod= enclosingMethod;
 		fSelection= selection;
 	}
 	
-	public static ITypeBinding[] perform(MethodDeclaration enclosingMethod, Selection selection) {
-		ExceptionAnalyzer analyzer= new ExceptionAnalyzer(enclosingMethod, selection);
-		enclosingMethod.accept(analyzer);
+	public static ITypeBinding[] perform(BodyDeclaration enclosingNode, Selection selection) {
+		ExceptionAnalyzer analyzer= new ExceptionAnalyzer(selection);
+		enclosingNode.accept(analyzer);
 		List exceptions= analyzer.getCurrentExceptions();
 		Collections.sort(exceptions, new ExceptionComparator());
 		return (ITypeBinding[]) exceptions.toArray(new ITypeBinding[exceptions.size()]);

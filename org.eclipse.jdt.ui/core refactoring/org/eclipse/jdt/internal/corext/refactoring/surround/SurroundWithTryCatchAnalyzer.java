@@ -7,8 +7,10 @@ package org.eclipse.jdt.internal.corext.refactoring.surround;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -40,7 +42,7 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 	}
 	
 	public void endVisit(CompilationUnit node) {
-		MethodDeclaration enclosingMethod= null;
+		BodyDeclaration enclosingNode= null;
 		superCall: {
 			if (getStatus().hasFatalError())
 				break superCall;
@@ -48,18 +50,18 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.doesNotCover")); //$NON-NLS-1$
 				break superCall;
 			}
-			enclosingMethod= (MethodDeclaration)ASTNodes.getParent(getFirstSelectedNode(), MethodDeclaration.class);
-			if (enclosingMethod == null) {
+			enclosingNode= (BodyDeclaration)ASTNodes.getParent(getFirstSelectedNode(), BodyDeclaration.class);
+			if (!(enclosingNode instanceof MethodDeclaration) && !(enclosingNode instanceof Initializer)) {
 				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.doesNotContain"));  //$NON-NLS-1$
 				break superCall;
 			}
 			if (!onlyStatements()) {
 				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.onlyStatements")); //$NON-NLS-1$
 			}
-			fLocals= LocalDeclarationAnalyzer.perform(enclosingMethod, getSelection());
+			fLocals= LocalDeclarationAnalyzer.perform(enclosingNode, getSelection());
 		}
-		if (enclosingMethod != null) {
-			fExceptions= ExceptionAnalyzer.perform(enclosingMethod, getSelection());
+		if (enclosingNode != null && !getStatus().hasFatalError()) {
+			fExceptions= ExceptionAnalyzer.perform(enclosingNode, getSelection());
 			if (fExceptions == null || fExceptions.length == 0) {
 				if (fQuery == null) {
 					invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.noUncaughtExceptions")); //$NON-NLS-1$

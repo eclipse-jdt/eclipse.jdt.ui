@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
@@ -23,9 +23,9 @@ public class LocalDeclarationAnalyzer extends ASTVisitor {
 	private Selection fSelection;
 	private List fAffectedLocals;
 
-	public static VariableDeclaration[] perform(MethodDeclaration method, Selection selection) {
+	public static VariableDeclaration[] perform(BodyDeclaration parent, Selection selection) {
 		LocalDeclarationAnalyzer analyzer= new LocalDeclarationAnalyzer(selection);
-		method.accept(analyzer);
+		parent.accept(analyzer);
 		return (VariableDeclaration[]) analyzer.fAffectedLocals.toArray(new VariableDeclaration[analyzer.fAffectedLocals.size()]);
 	}
 
