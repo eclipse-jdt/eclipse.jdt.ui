@@ -286,7 +286,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			
 			result.merge(checkIfConstructorName(method, fNewName));
 			
-			String[] msgData= new String[]{method.getElementName(), method.getDeclaringType().getFullyQualifiedName()};
+			String[] msgData= new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())};
 			if (! method.exists()){
 				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.not_in_model", msgData)); //$NON-NLS-1$ 
 				continue;

@@ -9,6 +9,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 class PrettySignature {
 
 	public static String getSignature(IJavaElement element) {
@@ -19,7 +21,7 @@ class PrettySignature {
 				case IJavaElement.METHOD:
 					return getMethodSignature((IMethod)element);
 				case IJavaElement.TYPE:
-					return ((IType)element).getFullyQualifiedName();
+					return JavaModelUtil.getFullyQualifiedName(((IType)element));
 				default:
 					return element.getElementName();
 			}
@@ -27,7 +29,7 @@ class PrettySignature {
 	
 	public static String getMethodSignature(IMethod method) {
 		StringBuffer buffer= new StringBuffer();
-		buffer.append(method.getDeclaringType().getFullyQualifiedName());
+		buffer.append(JavaModelUtil.getFullyQualifiedName(method.getDeclaringType()));
 		buffer.append("::"); //$NON-NLS-1$
 		buffer.append(getUnqualifiedMethodSignature(method));
 		

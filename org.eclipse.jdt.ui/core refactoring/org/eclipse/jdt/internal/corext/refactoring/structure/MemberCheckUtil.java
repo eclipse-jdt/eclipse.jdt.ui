@@ -34,7 +34,7 @@ public class MemberCheckUtil {
 		IMethod found= findMethod(method, destinationTypeMethods);
 		if (found != null){
 			Context context= JavaSourceContext.create(destinationType.getCompilationUnit(), found.getSourceRange());
-			result.addError("Method '" + method.getElementName() + "' (with the same signature) already exists in superclass '" + destinationType.getFullyQualifiedName() 
+			result.addError("Method '" + method.getElementName() + "' (with the same signature) already exists in superclass '" + JavaModelUtil.getFullyQualifiedName(destinationType) 
 										+ "', which will result in compile errors if you proceed.",
 										context);
 		} else {
@@ -42,7 +42,7 @@ public class MemberCheckUtil {
 			if (similar != null){
 				Context context= JavaSourceContext.create(destinationType.getCompilationUnit(), similar.getSourceRange());
 				result.addWarning("Method '" + method.getElementName() + "' (with the same number of parameters) already exists in type '" 
-													+ destinationType.getFullyQualifiedName() + "'",
+													+ JavaModelUtil.getFullyQualifiedName(destinationType) + "'",
 													context);
 			}										
 		}	
@@ -53,7 +53,7 @@ public class MemberCheckUtil {
 		if (! destinationTypeField.exists())
 			return;
 		Context context= JavaSourceContext.create(destinationType.getCompilationUnit(), destinationTypeField.getSourceRange());
-		result.addError("Field '" + field.getElementName() + "' already exists in superclass '" + destinationType.getFullyQualifiedName() 
+		result.addError("Field '" + field.getElementName() + "' already exists in superclass '" + JavaModelUtil.getFullyQualifiedName(destinationType) 
 									+ "', which will result in compile errors if you proceed.",
 									context);
 	}

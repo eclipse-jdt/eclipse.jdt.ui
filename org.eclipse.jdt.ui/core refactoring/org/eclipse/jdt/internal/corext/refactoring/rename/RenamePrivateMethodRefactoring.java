@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	
@@ -59,7 +60,7 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 			pm.subTask(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 			if (hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), getMethod(), getNewName()))
 				result.addError(RefactoringCoreMessages.getFormattedString("RenamePrivateMethodRefactoring.hierarchy_defines", //$NON-NLS-1$
-																			new String[]{getMethod().getDeclaringType().getFullyQualifiedName(), getNewName()}));
+																			new String[]{JavaModelUtil.getFullyQualifiedName(getMethod().getDeclaringType()), getNewName()}));
 			pm.subTask(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.analyzing_cu")); //$NON-NLS-1$
 			result.merge(analyzeCompilationUnit(new SubProgressMonitor(pm, 1)));
 			return result;

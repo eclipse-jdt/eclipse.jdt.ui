@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 class ReorderParametersRefactoring extends Refactoring {
 	
@@ -166,7 +167,7 @@ class ReorderParametersRefactoring extends Refactoring {
 			if (JdtFlags.isNative(fRippleMethods[i])){
 				String msg= "Method " + JavaElementUtil.createMethodSignature(fRippleMethods[i]) 
 									+ "' declared in type '" 
-									+ fRippleMethods[i].getDeclaringType().getFullyQualifiedName() 
+									+ JavaModelUtil.getFullyQualifiedName(fRippleMethods[i].getDeclaringType()) 
 									+ "' is native.  Reordering parameters will cause UnsatisfiedLinkError on runtime if you do not update your native libraries.";
 									
 				result.addError(msg, JavaSourceContext.create(fRippleMethods[i]));			

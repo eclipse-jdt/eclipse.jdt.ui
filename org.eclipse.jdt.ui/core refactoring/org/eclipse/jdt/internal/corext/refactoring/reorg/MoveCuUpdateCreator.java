@@ -142,7 +142,7 @@ public class MoveCuUpdateCreator {
 				if (results[j].getEnclosingElement().getElementType() == IJavaElement.IMPORT_DECLARATION){
 					ImportEdit importEdit= getImportEdit(referencingCu);
 					IType primaryType= JavaModelUtil.findPrimaryType(movedUnit);
-					importEdit.removeImport(primaryType.getFullyQualifiedName());
+					importEdit.removeImport(JavaModelUtil.getFullyQualifiedName(primaryType));
 					importEdit.addImport(fDestination.getElementName() + "." + primaryType.getElementName());
 				}	
 			}
@@ -153,7 +153,7 @@ public class MoveCuUpdateCreator {
 		ImportEdit importEdit= getImportEdit(movedUnit);
 		IType[] destinationTypes= getDestinationPackageTypes();
 		for (int i= 0; i < destinationTypes.length; i++) {
-			importEdit.removeImport(destinationTypes[i].getFullyQualifiedName());
+			importEdit.removeImport(JavaModelUtil.getFullyQualifiedName(destinationTypes[i]));
 		}
 	}
 	
@@ -181,7 +181,7 @@ public class MoveCuUpdateCreator {
 					continue;
 				if (cuList.contains(iType.getCompilationUnit()))
 					continue;
-				importEdit.addImport(iType.getFullyQualifiedName());
+				importEdit.addImport(JavaModelUtil.getFullyQualifiedName(iType));
 		}
 	}
 	

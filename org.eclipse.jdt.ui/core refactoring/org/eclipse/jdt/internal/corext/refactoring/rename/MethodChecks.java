@@ -39,7 +39,7 @@ public class MethodChecks {
 
 		Context context= JavaSourceContext.create(overrides);
 		String msg= "The selected method overrides method \'" + JavaElementUtil.createMethodSignature(overrides) + "\'"
-						 + " declared in type \'" + overrides.getDeclaringType().getFullyQualifiedName() + "\'. Reform the operation there.";
+						 + " declared in type \'" + JavaModelUtil.getFullyQualifiedName(overrides.getDeclaringType()) + "\'. Reform the operation there.";
 		return RefactoringStatus.createFatalErrorStatus(msg, context);
 	}
 	
@@ -51,7 +51,7 @@ public class MethodChecks {
 
 		Context context= JavaSourceContext.create(inInterface);
 		String msg= "The selected method is an implementation of method \'" + JavaElementUtil.createMethodSignature(inInterface) + "\'"
-						 + " declared in type \'" + inInterface.getDeclaringType().getFullyQualifiedName() + "\'.";
+						 + " declared in type \'" + JavaModelUtil.getFullyQualifiedName(inInterface.getDeclaringType()) + "\'.";
 		return RefactoringStatus.createFatalErrorStatus(msg, context);
 	}
 	

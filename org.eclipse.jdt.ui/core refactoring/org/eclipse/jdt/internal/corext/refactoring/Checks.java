@@ -68,7 +68,7 @@ public class Checks {
 			return RefactoringStatus.createWarningStatus("If you proceed, the method " 
 									+ JavaElementUtil.createMethodSignature(method)
 									+ " in \'" 
-									+ method.getDeclaringType().getFullyQualifiedName()
+									+ JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())
 									+ "\' will have a constructor name.");	
 	}
 		
@@ -231,7 +231,7 @@ public class Checks {
 		for (int i= 0; i < methods.length; i++) {
 			if (JdtFlags.isNative(methods[i])){
 				String msg= RefactoringCoreMessages.getFormattedString("Checks.method_native",  //$NON-NLS-1$
-								new String[]{methods[i].getDeclaringType().getFullyQualifiedName(), methods[i].getElementName()})
+								new String[]{JavaModelUtil.getFullyQualifiedName(methods[i].getDeclaringType()), methods[i].getElementName()})
 								+ " UnsatisfiedLinkError."; //$NON-NLS-1$
 				result.addError(msg, JavaSourceContext.create(methods[i])); 
 			}				
@@ -284,7 +284,7 @@ public class Checks {
 		 */
 		RefactoringStatus result= new RefactoringStatus();
 		if (JavaModelUtil.hasMainMethod(type))
-			result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.has_main", type.getFullyQualifiedName())); //$NON-NLS-1$
+			result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.has_main", JavaModelUtil.getFullyQualifiedName(type))); //$NON-NLS-1$
 		result.merge(checkForMainMethods(type.getTypes()));	
 		return result;
 	}

@@ -30,11 +30,11 @@ public class JavaElementUtil {
 	}
 	
 	public static String createFieldSignature(IField field){
-		return field.getDeclaringType().getFullyQualifiedName() + "." + field.getElementName();
+		return JavaModelUtil.getFullyQualifiedName(field.getDeclaringType()) + "." + field.getElementName();
 	}
 	
 	public static String createInitializerSignature(IInitializer initializer){
-		String label= "initializer in " + initializer.getDeclaringType().getFullyQualifiedName();
+		String label= "initializer in " + JavaModelUtil.getFullyQualifiedName(initializer.getDeclaringType());
 		try {
 			if (JdtFlags.isStatic(initializer))
 				return "static " + label;

@@ -46,7 +46,7 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 	
 	public void setVisible(boolean visible){
 		if (visible)
-			setDescription(getMoveRefactoring().getMovedMembers().length + " member(s) from \'" + getMoveRefactoring().getDeclaringType().getFullyQualifiedName() + "\'.");
+			setDescription(getMoveRefactoring().getMovedMembers().length + " member(s) from \'" + JavaModelUtil.getFullyQualifiedName(getMoveRefactoring().getDeclaringType()) + "\'.");
 		super.setVisible(visible);	
 	}
 	

@@ -57,6 +57,8 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -418,7 +420,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 		else{
 			String text= "";
 			if (entry instanceof IMethod)
-				text= "Source of method: '" + ((IMethod)entry).getElementName()+ "' declared in type '" + ((IMethod)entry).getDeclaringType().getFullyQualifiedName() + "'";
+				text= "Source of method: '" + ((IMethod)entry).getElementName()+ "' declared in type '" + JavaModelUtil.getFullyQualifiedName(((IMethod)entry).getDeclaringType()) + "'";
 			else if (entry instanceof IType)	
 				text= "Source of type: '" + ((IType)entry).getElementName()+ "' declared in package '" + ((IType)entry).getPackageFragment().getElementName()+ "'";
 			fContextLabel.setText(text);

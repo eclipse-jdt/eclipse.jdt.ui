@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class PullUpRefactoring extends Refactoring {
 
@@ -362,7 +363,7 @@ public class PullUpRefactoring extends Refactoring {
 		if (declaringType.isInterface()) //for now
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on interface members.");
 		
-		if (declaringType.getFullyQualifiedName().equals("java.lang.Object"))
+		if (JavaModelUtil.getFullyQualifiedName(declaringType).equals("java.lang.Object"))
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in java.lang.Object.");	
 
 		if (declaringType.isBinary())
@@ -411,8 +412,8 @@ public class PullUpRefactoring extends Refactoring {
 				continue;
 			
 			if (! canBeAccessedFrom(iType, superType)){
-				String msg= "Type '" + iType.getFullyQualifiedName() + "' referenced in one of the pulled elements is not accessible from type '" 
-								+ superType.getFullyQualifiedName() + "'.";
+				String msg= "Type '" + JavaModelUtil.getFullyQualifiedName(iType) + "' referenced in one of the pulled elements is not accessible from type '" 
+								+ JavaModelUtil.getFullyQualifiedName(superType) + "'.";
 				result.addError(msg, JavaSourceContext.create(iType));
 			}	
 		}
@@ -434,7 +435,7 @@ public class PullUpRefactoring extends Refactoring {
 			
 			if (! canBeAccessedFrom(iField, superType) && ! pulledUpList.contains(iField) && !deletedList.contains(iField)){
 				String msg= "Field '" + iField.getElementName() + "' referenced in one of the pulled elements is not accessible from type '" 
-								+ superType.getFullyQualifiedName() + "'.";
+								+ JavaModelUtil.getFullyQualifiedName(superType) + "'.";
 				result.addError(msg, JavaSourceContext.create(iField));
 			}	
 		}
@@ -455,7 +456,7 @@ public class PullUpRefactoring extends Refactoring {
 				continue;
 			if (! canBeAccessedFrom(iMethod, superType) && ! pulledUpList.contains(iMethod) && !deletedList.contains(iMethod)){
 				String msg= "Method '" + JavaElementUtil.createMethodSignature(iMethod) + "' referenced in one of the pulled elements is not accessible from type '" 
-								+ superType.getFullyQualifiedName() + "'.";
+								+ JavaModelUtil.getFullyQualifiedName(superType) + "'.";
 				result.addError(msg, JavaSourceContext.create(iMethod));
 			}	
 		}
@@ -524,7 +525,7 @@ public class PullUpRefactoring extends Refactoring {
 				if (returnType.equals(getReturnTypeName(matchingMethod)))
 					continue;
 				String msg= "Method '" + JavaElementUtil.createMethodSignature(matchingMethod) + "' declared in type'"
-									 + matchingMethod.getDeclaringType().getFullyQualifiedName()
+									 + JavaModelUtil.getFullyQualifiedName(matchingMethod.getDeclaringType())
 									 + "' has a different return type than its pulled up counterpart, which will result in compile errors if you proceed." ;
 				Context context= JavaSourceContext.create(matchingMethod.getCompilationUnit(), matchingMethod.getNameRange());
 				result.addError(msg, context);	
@@ -545,7 +546,7 @@ public class PullUpRefactoring extends Refactoring {
 				if (type.equals(getTypeName(matchingField)))
 					continue;
 				String msg= "Field '" + matchingField.getElementName() + "' declared in type'"
-									 + matchingField.getDeclaringType().getFullyQualifiedName()
+									 + JavaModelUtil.getFullyQualifiedName(matchingField.getDeclaringType())
 									 + "' has a different type than its pulled up counterpart." ;
 				Context context= JavaSourceContext.create(matchingField.getCompilationUnit(), matchingField.getSourceRange());					 
 				result.addError(msg, context);	
@@ -567,13 +568,13 @@ public class PullUpRefactoring extends Refactoring {
 		
 		if (JdtFlags.isStatic(method)){
 				String msg= "Method '" + JavaElementUtil.createMethodSignature(method) + "' declared in type '" 
-									 + method.getDeclaringType().getFullyQualifiedName()
+									 + JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())
 									 + "' is 'static', which will result in compile errors if you proceed." ;
 				result.addError(msg, errorContext);
 		 } 
 		 if (isVisibilityLowerThanProtected(method)){
 			String msg= "Method '" + JavaElementUtil.createMethodSignature(method)+ "' declared in type '" 
-								 + method.getDeclaringType().getFullyQualifiedName()
+								 + JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())
 								 + "' has visibility lower than 'protected', which will result in compile errors if you proceed." ;
 			result.addError(msg, errorContext);	
 		} 
@@ -680,11 +681,11 @@ public class PullUpRefactoring extends Refactoring {
 			IMethod method = (IMethod)member;
 			return "Delete method '"
 						+ JavaElementUtil.createMethodSignature(method)	 
-						+ "' declared in type '" + method.getDeclaringType().getFullyQualifiedName() + "'";
+						+ "' declared in type '" + JavaModelUtil.getFullyQualifiedName(method.getDeclaringType()) + "'";
 		} else {
 			return "Delete field '"
 						+ member.getElementName()	 
-						+ "' declared in type '" + member.getDeclaringType().getFullyQualifiedName() + "'";	
+						+ "' declared in type '" + JavaModelUtil.getFullyQualifiedName(member.getDeclaringType()) + "'";	
 		}
 	}
 	
@@ -694,7 +695,7 @@ public class PullUpRefactoring extends Refactoring {
 		ImportEdit importEdit= new ImportEdit(cu, fPreferenceSettings);
 		for (int i= 0; i < referencedTypes.length; i++) {
 			IType iType= referencedTypes[i];
-			importEdit.addImport(iType.getFullyQualifiedName());
+			importEdit.addImport(JavaModelUtil.getFullyQualifiedName(iType));
 		}
 		manager.get(cu).addTextEdit("Update imports", importEdit);
 	}

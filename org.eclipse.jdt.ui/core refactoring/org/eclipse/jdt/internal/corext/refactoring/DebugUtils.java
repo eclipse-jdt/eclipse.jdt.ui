@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 /**
  * useful debug routines
  * no java doc
@@ -68,7 +70,7 @@ public final class DebugUtils {
 				System.out.println("DUMPING method: null"); //$NON-NLS-1$
 				return;
 			}
-			System.out.println("DUMPING method:" +  method.getElementName() + "\n " + method.getSignature() + "\n declared in " + method.getDeclaringType().getFullyQualifiedName() //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+			System.out.println("DUMPING method:" +  method.getElementName() + "\n " + method.getSignature() + "\n declared in " + JavaModelUtil.getFullyQualifiedName(method.getDeclaringType()) //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 			+ "\nreturnType:" + method.getReturnType() ); //$NON-NLS-1$
 			dumpArray("paramTypes:", method.getParameterTypes()); //$NON-NLS-1$
 			dumpArray("exceptions:", method.getExceptionTypes()); //$NON-NLS-1$

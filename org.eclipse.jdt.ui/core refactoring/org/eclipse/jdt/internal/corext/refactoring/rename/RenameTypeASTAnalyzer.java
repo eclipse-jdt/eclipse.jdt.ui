@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoringASTAnalyzer;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 
@@ -127,7 +127,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 		TypeDeclaration type= typeDeclared(compilationUnitDeclaration, fNewNameArray);
 		if (type != null)
 			addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.conflict_with_declared_type",  //$NON-NLS-1$
-																new String[]{cuFullPath(), fType.getFullyQualifiedName(), fNewName}),
+																new String[]{cuFullPath(), JavaModelUtil.getFullyQualifiedName(fType), fNewName}),
 							type.sourceStart, type.sourceEnd);
 		return true;
 	}
@@ -142,7 +142,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 	public boolean visit(MethodDeclaration methodDeclaration, ClassScope scope) {
 		if (methodDeclaration.isNative() && typeUsedAsParameter(methodDeclaration))
 			addWarning(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.native_param",  //$NON-NLS-1$
-																	new Object[]{fType.getFullyQualifiedName(), 
+																	new Object[]{JavaModelUtil.getFullyQualifiedName(fType), 
 																				new String(methodDeclaration.selector),
 																				cuFullPath(),
 																				new Integer(getLineNumber(methodDeclaration))}),
@@ -171,7 +171,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 																new Object[]{cuFullPath(), 
 																			fNewName,
 																			new Integer(getLineNumber(singleTypeReference)),
-																			fType.getFullyQualifiedName()}),
+																			JavaModelUtil.getFullyQualifiedName(fType)}),
 								singleTypeReference.sourceStart, singleTypeReference.sourceEnd);
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
 			addError(singleTypeReference);
@@ -185,7 +185,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 																new Object[]{cuFullPath(), 
 																			fNewName,
 																			new Integer(getLineNumber(singleTypeReference)),
-																			fType.getFullyQualifiedName()}),
+																			JavaModelUtil.getFullyQualifiedName(fType)}),
 							singleTypeReference.sourceStart, singleTypeReference.sourceEnd);
 			
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
@@ -200,7 +200,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 																new Object[]{cuFullPath(), 
 																			fNewName,
 																			new Integer(getLineNumber(arrayTypeReference)),
-																			fType.getFullyQualifiedName()}),
+																			JavaModelUtil.getFullyQualifiedName(fType)}),
 							arrayTypeReference.sourceStart, arrayTypeReference.sourceEnd);
 			
 		if (sourceRangeOnList(arrayTypeReference.sourceStart, arrayTypeReference.sourceStart + arrayTypeReference.token.length) && localTypeExists(scope, fNewNameArray)) {
@@ -216,7 +216,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 																new Object[]{cuFullPath(), 
 																			fNewName,
 																			new Integer(getLineNumber(arrayTypeReference)),
-																			fType.getFullyQualifiedName()}),
+																			JavaModelUtil.getFullyQualifiedName(fType)}),
 							arrayTypeReference.sourceStart, arrayTypeReference.sourceEnd);
 			
 		return true;
@@ -282,7 +282,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 	private static ImportReference typeImported(CompilationUnitDeclaration compilationUnitDeclaration, IType type) {
 		if (compilationUnitDeclaration.imports == null)
 			return null;
-		String fullName= type.getFullyQualifiedName();	
+		String fullName= JavaModelUtil.getFullyQualifiedName(type);	
 		for (int i= 0; i < compilationUnitDeclaration.imports.length; i++){
 			if (! compilationUnitDeclaration.imports[i].onDemand
 				&& compilationUnitDeclaration.imports[i].toString().equals(fullName))

@@ -223,15 +223,15 @@ public class MoveMembersRefactoring extends Refactoring {
 			case IJavaElement.FIELD: 
 				return "field \'" + JavaElementUtil.createFieldSignature((IField)member)
 						+ "\' is " + createAccessModifierString(member)
-						+ " and will not be visible from \'" + type.getFullyQualifiedName() + "\'.";
+						+ " and will not be visible from \'" + JavaModelUtil.getFullyQualifiedName(type) + "\'.";
 			case IJavaElement.METHOD: 
 				return "method \'" + JavaElementUtil.createMethodSignature((IMethod)member)
 						+ "\' is " + createAccessModifierString(member)
-						+ " and will not be visible from \'" + type.getFullyQualifiedName() + "\'.";
+						+ " and will not be visible from \'" + JavaModelUtil.getFullyQualifiedName(type) + "\'.";
 			case IJavaElement.TYPE:
-				return "type \'" + ((IType)member).getFullyQualifiedName() 
+				return "type \'" + JavaModelUtil.getFullyQualifiedName(((IType)member)) 
 						+ "\' is " + createAccessModifierString(member)
-						+ " and will not be visible from \'" + type.getFullyQualifiedName() + "\'.";
+						+ " and will not be visible from \'" + JavaModelUtil.getFullyQualifiedName(type) + "\'.";
 			default:
 				Assert.isTrue(false);
 				return null;
@@ -377,7 +377,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	private RefactoringStatus checkDeclaringType() throws JavaModelException{
 		IType declaringType= getDeclaringType();
 				
-		if (declaringType.getFullyQualifiedName().equals("java.lang.Object"))
+		if (JavaModelUtil.getFullyQualifiedName(declaringType).equals("java.lang.Object"))
 			return RefactoringStatus.createFatalErrorStatus("Move is not allowed on members declared in java.lang.Object.");	
 
 		if (declaringType.isBinary())
@@ -669,6 +669,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private void addImportTo(IType type, ICompilationUnit cu){
+		//getImportEdit(cu).addImport(JavaModelUtil.getFullyQualifiedName(type));
 		getImportEdit(cu).addImport(type.getFullyQualifiedName());
 	}
 

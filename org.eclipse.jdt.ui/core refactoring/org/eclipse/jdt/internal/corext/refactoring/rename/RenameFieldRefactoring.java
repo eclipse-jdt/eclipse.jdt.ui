@@ -334,7 +334,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			return null;
 			
 		String msg= "Method \'" + JavaElementUtil.createMethodSignature(accessor) + "\' already exists in \'" 
-					+ fField.getDeclaringType().getFullyQualifiedName() + "\'";
+					+ JavaModelUtil.getFullyQualifiedName(fField.getDeclaringType()) + "\'";
 		result.addError(msg, JavaSourceContext.create(accessor));
 		return result;
 	}
@@ -372,7 +372,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			IField otherField= nestedTypes[i].getField(getNewName());
 			if (otherField.exists()){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding", //$NON-NLS-1$
-																			new String[]{fField.getElementName(), getNewName(), nestedTypes[i].getFullyQualifiedName()});
+																			new String[]{fField.getElementName(), getNewName(), JavaModelUtil.getFullyQualifiedName(nestedTypes[i])});
 				result.addWarning(msg, JavaSourceContext.create(otherField));
 			}									
 			result.merge(checkNestedHierarchy(nestedTypes[i]));	
@@ -389,7 +389,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			IField otherField= current.getField(getNewName());
 			if (otherField.exists()){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding2", //$NON-NLS-1$
-				 															new String[]{getNewName(), current.getFullyQualifiedName(), fField.getElementName()});
+				 															new String[]{getNewName(), JavaModelUtil.getFullyQualifiedName(current)});
 				result.addWarning(msg, JavaSourceContext.create(otherField));
 			}									
 			current= current.getDeclaringType();

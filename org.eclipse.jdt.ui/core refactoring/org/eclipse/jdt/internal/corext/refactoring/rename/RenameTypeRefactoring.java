@@ -184,7 +184,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	 */
 	public String getName(){
 		return RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name",  //$NON-NLS-1$
-														new String[]{fType.getFullyQualifiedName(), fNewName});
+														new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewName});
 	}
 	
 	/* non java-doc
@@ -227,7 +227,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fType);
 		if (orig == null || ! orig.exists())
-			return RefactoringStatus.createFatalErrorStatus("Type " + fType.getFullyQualifiedName() + " does not exist in the saved version of '" + fType.getCompilationUnit().getElementName()+ "'.");
+			return RefactoringStatus.createFatalErrorStatus("Type " + JavaModelUtil.getFullyQualifiedName(fType) + " does not exist in the saved version of '" + fType.getCompilationUnit().getElementName()+ "'.");
 		fType= orig;
 		
 		return Checks.checkIfCuBroken(fType);
@@ -369,7 +369,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		if (enclosedType == null)
 			return null;
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.encloses",  //$NON-NLS-1$
-																		new String[]{fType.getFullyQualifiedName(), fNewName});
+																		new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewName});
 		return RefactoringStatus.createErrorStatus(msg, JavaSourceContext.create(enclosedType));
 	}
 	
@@ -379,7 +379,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			return null;
 			
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed",//$NON-NLS-1$
-								new String[]{fType.getFullyQualifiedName(), fNewName});
+								new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewName});
 		return RefactoringStatus.createErrorStatus(msg, JavaSourceContext.create(enclosingType));
 	}
 	
@@ -472,7 +472,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			IType siblingType= fType.getDeclaringType().getType(fNewName);
 			if (siblingType.exists()){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.member_type_exists", //$NON-NLS-1$
-																		new String[]{fNewName, fType.getDeclaringType().getFullyQualifiedName()});
+																		new String[]{fNewName, JavaModelUtil.getFullyQualifiedName(fType.getDeclaringType())});
 				result.addError(msg, JavaSourceContext.create(siblingType));
 			}
 		}
@@ -572,7 +572,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			//could this be a problem (same package imports)?
 			if (JdtFlags.isPublic(types[i]) && types[i].getElementName().equals(fNewName)){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict1", //$NON-NLS-1$
-																			new Object[]{types[i].getFullyQualifiedName(), getFullPath(getCompilationUnit(imp))});
+																			new Object[]{JavaModelUtil.getFullyQualifiedName(types[i]), getFullPath(getCompilationUnit(imp))});
 				result.addError(msg, JavaSourceContext.create(imp));
 			}
 		}

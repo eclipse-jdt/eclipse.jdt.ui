@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class PullUpWizard extends RefactoringWizard {
@@ -39,8 +40,8 @@ public class PullUpWizard extends RefactoringWizard {
 		IType initialSetting= getPullUpRefactoring().getDeclaringType();
 		IType superType= getPullUpRefactoring().getSuperType(new NullProgressMonitor());
 		setPageTitle(getPageTitle() + " members declared in: " 
-							 + initialSetting.getFullyQualifiedName()
-		                     + " to: " + superType.getFullyQualifiedName());
+							 + JavaModelUtil.getFullyQualifiedName(initialSetting)
+		                     + " to: " + JavaModelUtil.getFullyQualifiedName(superType));
 	}
 	
 	private PullUpRefactoring getPullUpRefactoring(){

@@ -35,6 +35,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
@@ -308,7 +310,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		dialog.setFilter(guessTypeName);
 		if (dialog.open() == dialog.OK) {
 			IType type= (IType) dialog.getFirstResult();	
-			fNewImport.setText(type.getFullyQualifiedName());	
+			fNewImport.setText(JavaModelUtil.getFullyQualifiedName(type));	
 		}
 	}
 
