@@ -963,10 +963,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	private CompositeActionGroup fContextMenuGroup;
 	
 	/**
-	 * Reconcile listeners.
+	 * Reconciling listeners.
 	 * @since 3.0
 	 */
-	private ListenerList fReconcileListeners= new ListenerList();
+	private ListenerList fReconcilingListeners= new ListenerList();
 
 	
 	
@@ -1501,7 +1501,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	public void aboutToBeReconciled() {
 
 		// Notify listeners
-		Object[] listeners = fReconcileListeners.getListeners();
+		Object[] listeners = fReconcilingListeners.getListeners();
 		for (int i = 0, length= listeners.length; i < length; ++i)
 			((IJavaReconcilingListener)listeners[i]).aboutToBeReconciled();
 	}
@@ -1513,7 +1513,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	public void reconciled(CompilationUnit ast) {
 
 		// Notify listeners
-		Object[] listeners = fReconcileListeners.getListeners();
+		Object[] listeners = fReconcilingListeners.getListeners();
 		for (int i = 0, length= listeners.length; i < length; ++i)
 			((IJavaReconcilingListener)listeners[i]).reconciled(ast);
 		
@@ -1538,7 +1538,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @since 3.0
 	 */
 	final void addReconcileParticipant(IJavaReconcilingListener participant) {
-		fReconcileListeners.add(participant);
+		fReconcilingListeners.add(participant);
 	}
 	
 	/**
@@ -1549,7 +1549,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @since 3.0
 	 */
 	final void removeReconcileParticipant(IJavaReconcilingListener participant) {
-		fReconcileListeners.remove(participant);
+		fReconcilingListeners.remove(participant);
 	}
 		
 	protected void updateStateDependentActions() {

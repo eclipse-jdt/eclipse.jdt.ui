@@ -26,6 +26,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
@@ -42,12 +43,18 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	private IDocumentProvider fDocumentProvider;
 	private IProgressMonitor fProgressMonitor;
 	private boolean fNotify= true;
+
+	private IJavaReconcilingListener fJavaReconcilingParticipant;
+	private boolean fIsJavaReconcilingParticipant;
 	
 	
 	public JavaReconcilingStrategy(ITextEditor editor) {
 		fEditor= editor;
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
 		fDocumentProvider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+		fIsJavaReconcilingParticipant= fEditor instanceof IJavaReconcilingListener;
+		if (fIsJavaReconcilingParticipant)
+			fJavaReconcilingParticipant= (IJavaReconcilingListener)fEditor;
 	}
 	
 	private IProblemRequestorExtension getProblemRequestorExtension() {
@@ -61,27 +68,33 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());		
 		if (unit != null) {
 			try {
+				
+				if (fNotify && fIsJavaReconcilingParticipant)
+					fJavaReconcilingParticipant.aboutToBeReconciled();
 								
 				/* fix for missing cancel flag communication */
 				IProblemRequestorExtension extension= getProblemRequestorExtension();
 				if (extension != null)
 					extension.setProgressMonitor(fProgressMonitor);
 				
+				CompilationUnit ast= null;
+				
 				// reconcile
 				synchronized (unit) {
-					unit.reconcile(true, fProgressMonitor);
+					if (fIsJavaReconcilingParticipant)
+						ast= unit.reconcile(true, true, null, fProgressMonitor);
+					else
+						unit.reconcile(false, true, null, fProgressMonitor);
 				}
 				
 				/* fix for missing cancel flag communication */
 				if (extension != null)
 					extension.setProgressMonitor(null);
 				
-				// update participants
+				// update participant
 				try {
-					if (fEditor instanceof IReconcilingParticipant && fNotify && !fProgressMonitor.isCanceled()) {
-						IReconcilingParticipant p= (IReconcilingParticipant) fEditor;
-						p.reconciled();
-					}
+					if (fIsJavaReconcilingParticipant && fNotify && !fProgressMonitor.isCanceled())
+						fJavaReconcilingParticipant.reconciled(ast);
 				} finally {
 					fNotify= true;
 				}
