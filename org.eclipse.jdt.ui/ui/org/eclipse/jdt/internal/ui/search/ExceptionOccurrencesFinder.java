@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -55,6 +56,7 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.SearchUI;
+import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -167,6 +169,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			IRegion region= document.getLineInformation(line);
 			String lineContents= document.get(region.getOffset(), region.getLength());
 			MarkerUtilities.setMessage(attributes, lineContents.trim());
+			throw new BadLocationException();
 		} catch (BadLocationException e) {
 		}
 		marker.setAttributes(attributes);
@@ -177,12 +180,8 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		String elementName= ASTNodes.asString(fSelectedName);
 		view.searchStarted(
 			null,
-			SearchMessages.getFormattedString(
-				"ExceptionOccurrencesFinder.label.singular", //$NON-NLS-1$
-				new Object[] { elementName, "{0}", inputName}), //$NON-NLS-1$
-			SearchMessages.getFormattedString(
-				"ExceptionOccurrencesFinder.label.plural", //$NON-NLS-1$
-				new Object[] { elementName, "{0}", inputName}), //$NON-NLS-1$
+			getSingularLabel(elementName, inputName),
+			getPluralLabelPattern(elementName, inputName),
 			JavaPluginImages.DESC_OBJS_SEARCH_REF,
 			"org.eclipse.jdt.ui.JavaFileSearch", //$NON-NLS-1$
 			new ExceptionOccurrencesLabelProvider(),
@@ -190,6 +189,59 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			new SearchGroupByKeyComputer(),
 			null
 		);
+	}
+	
+	public Match[] getOccurrenceMatches(IJavaElement element, IDocument document) {
+		ArrayList matches= new ArrayList(fResult.size());
+		HashMap lineToLineElement= new HashMap();
+		
+		for (Iterator iter= fResult.iterator(); iter.hasNext();) {
+			ASTNode node= (ASTNode) iter.next();
+			int startPosition= node.getStartPosition();
+			int length= node.getLength();
+			try {
+				boolean isException= node == fSelectedName;
+				int line= document.getLineOfOffset(startPosition);
+				Integer lineInteger= new Integer(line);
+				ExceptionOccurrencesGroupKey groupKey= (ExceptionOccurrencesGroupKey) lineToLineElement.get(lineInteger);
+				if (groupKey == null) {
+					IRegion region= document.getLineInformation(line);
+					String lineContents= document.get(region.getOffset(), region.getLength()).trim();
+					groupKey= new ExceptionOccurrencesGroupKey(element, line, lineContents, isException);
+					lineToLineElement.put(lineInteger, groupKey);
+				} else if (isException) {
+					// the line with the target exception always has the exception icon:
+					groupKey.setException(true);
+				}
+				Match match= new Match(groupKey, startPosition, length);
+				matches.add(match);
+			} catch (BadLocationException e) {
+				//nothing
+			}
+		}
+		return (Match[]) matches.toArray(new Match[matches.size()]);
+	}
+	
+	public String getJobLabel() {
+		return SearchMessages.getString("ExceptionOccurrencesFinder.searchfor") ; //$NON-NLS-1$
+	}
+	
+	public String getPluralLabelPattern(String documentName) {
+		return getPluralLabelPattern(ASTNodes.asString(fSelectedName), documentName);
+	}
+	
+	public String getSingularLabel(String documentName) {
+		return getSingularLabel(ASTNodes.asString(fSelectedName), documentName);
+	}
+	
+	private String getPluralLabelPattern(String nodeContents, String elementName) {
+		String[] args= new String[] {nodeContents, "{0}", elementName}; //$NON-NLS-1$
+		return SearchMessages.getFormattedString("ExceptionOccurrencesFinder.label.plural", args); //$NON-NLS-1$
+	}
+	
+	private String getSingularLabel(String nodeContents, String elementName) {
+		String[] args= new String[] {nodeContents, elementName}; //$NON-NLS-1$
+		return SearchMessages.getFormattedString("ExceptionOccurrencesFinder.label.singular", args); //$NON-NLS-1$
 	}
 	
 	public boolean visit(AnonymousClassDeclaration node) {

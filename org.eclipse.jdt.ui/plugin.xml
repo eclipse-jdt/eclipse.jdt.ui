@@ -937,6 +937,11 @@
 			targetClass="org.eclipse.jdt.internal.ui.search.JavaSearchResult"
 			class="org.eclipse.jdt.internal.ui.search.JavaSearchResultPage">
 		</viewPage>
+		<viewPage
+			targetClass="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResult"
+			class="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResultPage"
+			id="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResultPage">
+		</viewPage>
 	</extension>
   
 <!-- =========================================================================== -->

@@ -33,9 +33,10 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.search.ui.ISearchResultView;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
@@ -45,6 +46,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.ui.JavaUI;
 
 public abstract class FindOccurrencesEngine {
+	
+	/** @deprecated TODO: remove switch for 3.0 */
+	private boolean USE_NEW_SEARCH= true;
 	
 	private IOccurrencesFinder fFinder;
 	
@@ -65,7 +69,7 @@ public abstract class FindOccurrencesEngine {
 			return fClassFile.getJavaProject().getProject();
 		}
 		protected void addSpecialAttributes(Map attributes) throws JavaModelException {
-			attributes.put(IWorkbenchPage.EDITOR_ID_ATTR, JavaUI.ID_CF_EDITOR);
+			attributes.put(IDE.EDITOR_ID_ATTR, JavaUI.ID_CF_EDITOR);
 			JavaCore.addJavaElementMarkerAttributes(attributes, fClassFile.getType());
 			attributes.put(IJavaSearchUIConstants.ATT_JE_HANDLE_ID, fClassFile.getType().getHandleIdentifier());
 		}
@@ -122,10 +126,16 @@ public abstract class FindOccurrencesEngine {
 	
 	protected abstract ISourceReference getSourceReference();
 	
+	/** @deprecated */
 	protected abstract IResource getMarkerOwner() throws JavaModelException;
 	
+	/** @deprecated */
 	protected abstract void addSpecialAttributes(Map attributes) throws JavaModelException;
 		
+	protected IOccurrencesFinder getOccurrencesFinder() {
+		return fFinder;
+	}
+
 	public String run(int offset, int length) throws JavaModelException {
 		ISourceReference sr= getSourceReference();
 		if (sr.getSourceRange() == null) {
@@ -141,6 +151,11 @@ public abstract class FindOccurrencesEngine {
 			return message;
 		
 		final IDocument document= new Document(getSourceReference().getSource());
+		
+		if (USE_NEW_SEARCH) {
+			performNewSearch(fFinder, document, getInput());
+			return null;
+		}
 		
 		final IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
@@ -203,4 +218,10 @@ public abstract class FindOccurrencesEngine {
 			}
 		);
 	}
+	
+	private void performNewSearch(IOccurrencesFinder finder, IDocument document, IJavaElement element) {
+		NewSearchUI.activateSearchResultView();
+		NewSearchUI.runQuery(new OccurrencesSearchQuery(finder, document, element));
+	}
+
 }

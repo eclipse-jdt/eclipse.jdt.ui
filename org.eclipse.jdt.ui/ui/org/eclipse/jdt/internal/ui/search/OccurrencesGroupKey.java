@@ -8,37 +8,33 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.search.ui.text.Match;
+package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-/**
- * @author Thomas Mäder
- *
- */
-public class OccurrenceMatch extends Match {
+public class OccurrencesGroupKey extends JavaElementLine {
 	private boolean fIsWriteAccess;
 	private boolean fIsVariable;
-	private String fText;
 	
-	public OccurrenceMatch(IJavaElement root, String text, int offset, int length, boolean isWriteAccess, boolean isVariable) {
-		super(root, offset, length);
-		fText= text;
-		fIsVariable= isVariable;
+	/**
+	 * @param element either an ICompilationUnit or an IClassFile
+	 */
+	public OccurrencesGroupKey(IJavaElement element, int line, String lineContents, boolean isWriteAccess, boolean isVariable) {
+		super(element, line, lineContents);
 		fIsWriteAccess= isWriteAccess;
+		fIsVariable= isVariable;
 	}
 
-	boolean isVariable() {
+	public boolean isVariable() {
 		return fIsVariable;
 	}
 
-	boolean isWriteAccess() {
+	public boolean isWriteAccess() {
 		return fIsWriteAccess;
 	}
 
-	String getText() {
-		return fText;
+	public void setWriteAccess(boolean isWriteAccess) {
+		fIsWriteAccess= isWriteAccess;
 	}
 }
