@@ -64,7 +64,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	}
 	
 	/**
-	 * The policy to evaluate the base name (no 'set'/'get' of the accessor.
+	 * The policy to evaluate the base name (setBasename / getBasename)
 	 */
 	private String evalAccessorName(String fieldname) {
 		String name= fieldname;
@@ -75,11 +75,8 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				if (fieldname.startsWith(curr)) {
 					int currLen= curr.length();
 					if (bestLength < currLen && fieldname.length() != currLen) {
-						String cand= fieldname.substring(currLen);
-						if (JavaConventions.validateFieldName(cand).isOK()) {
-							bestLength= currLen;
-							name= cand;
-						}
+						name= fieldname.substring(currLen);
+						bestLength= currLen;
 					}
 				}
 			}
@@ -90,15 +87,15 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				if (fieldname.endsWith(curr)) {
 					int currLen= curr.length();
 					if (bestLength < currLen && fieldname.length() != currLen) {
-						String cand= fieldname.substring(0, fieldname.length() - currLen);
-						if (JavaConventions.validateFieldName(cand).isOK()) {
-							bestLength= currLen;
-							name= cand;
-						}
+						name= fieldname.substring(0, fieldname.length() - currLen);
+						bestLength= currLen;
 					}
 				}
 			}
-		}			
+		}
+		if (name.length() > 0 && Character.isLowerCase(name.charAt(0))) {
+			name= String.valueOf(Character.toUpperCase(name.charAt(0))) + name.substring(1);
+		}
 		return name;
 	}
 	

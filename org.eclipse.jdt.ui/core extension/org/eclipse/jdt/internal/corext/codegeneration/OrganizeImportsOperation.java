@@ -30,6 +30,7 @@ import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.SourceElementParser;
 import org.eclipse.jdt.internal.compiler.SourceElementRequestorAdapter;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
@@ -245,7 +246,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}		
 	
 		TypeReferenceRequestor requestor= new TypeReferenceRequestor(references, inportEndPos);
-		SourceElementParser parser= new SourceElementParser(requestor, new DefaultProblemFactory());
+		SourceElementParser parser= new SourceElementParser(requestor, new DefaultProblemFactory(), new CompilerOptions());
 		if (cu instanceof org.eclipse.jdt.internal.compiler.env.ICompilationUnit) {
 			parser.parseCompilationUnit((org.eclipse.jdt.internal.compiler.env.ICompilationUnit)cu, true);
 		}	
