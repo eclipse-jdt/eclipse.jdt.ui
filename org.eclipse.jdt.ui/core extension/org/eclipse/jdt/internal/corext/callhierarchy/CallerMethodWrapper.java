@@ -85,4 +85,11 @@ class CallerMethodWrapper extends MethodWrapper {
 
         return result;
     }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#getDirection()
+     */
+    public int getDirection() {
+        return DIRECTION_CALLER;
+    }
 }

@@ -261,6 +261,12 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_IMPLEMENTS= create(T_OVR, "implm_co.gif");  				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_CONSTRUCTOR= create(T_OVR, "constr_ovr.gif");			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_FOCUS= create(T_OVR, "focus_ovr.gif"); //$NON-NLS-1$
+
+    // Call Hierarchy
+    public static final ImageDescriptor DESC_OVR_RECURSIVE= create(T_OVR, "recursive_co.gif");              //$NON-NLS-1$
+    public static final ImageDescriptor DESC_OVR_CALLER= create(T_OVR, "caller_co.gif");                    //$NON-NLS-1$
+    public static final ImageDescriptor DESC_OVR_CALLEE= create(T_OVR, "callee_co.gif");                    //$NON-NLS-1$
+    public static final ImageDescriptor DESC_OVR_MAX_LEVEL= create(T_OVR, "maxlevel_co.gif");                    //$NON-NLS-1$
 		
 	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= create(T_WIZBAN, "newclass_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWFIELD= create(T_WIZBAN, "newfield_wiz.gif"); 			//$NON-NLS-1$

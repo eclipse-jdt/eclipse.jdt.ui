@@ -2803,15 +2803,6 @@
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
    </extension>
-   <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            name="%callhierarchyPreferences.name"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
-            class="org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyPreferenceBasePage"
-            id="org.eclipse.jdt.callhierarchy.CallHierarchyPreferenceBasePage">
-      </page>
-   </extension>
 
 <!---
 <extension
