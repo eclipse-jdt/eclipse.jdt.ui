@@ -39,15 +39,16 @@ import org.eclipse.swt.widgets.Display;
 /**
  * Manages a search cache for types in the workspace. Instead of returning objects of type <code>IType</code>
  * the methods of this class returns a list of the lightweight objects <code>TypeInfo</code>.
- * <p>
+ * <P>
  * The AllTypesCache supports a synchronous and an asynchronous (background) mode.
- * In synchronous mode a dirty cache is rebuild as soon as <code>getAllTypes</code> is called.
- * In asynchronous mode dirtying the cache starts a timer . If the cache is dirty again while
- * the query runs, the query is aborted and the timer is resetted.
+ * In synchronous mode a dirty cache is rebuild as soon as <code>getAllTypes()</code> is called directly (or indirectly).
+ * In asynchronous mode dirtying the cache starts a timer thread which rebuilds the cache after TIMEOUT seconds.
+ * If the cache becomes dirty again while the background query is running, the query is aborted and the timer reset.
  * If <code>getAllTypes</code> is called before the background job has finished, getAllTypes waits
- * for the termination of the 
- * AllTypesCache tries to automatically switch from synchronous to asynchronous mode when it detects
- * that the UI event loop is
+ * for the termination of the background query.
+ * <P>
+ * AllTypesCache automatically switches from synchronous to asynchronous mode when it detects
+ * that the UI event loop is running.
  */
 public class AllTypesCache {
 	
