@@ -830,14 +830,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 		int selectionLength= Math.abs(selection.getLength());
 		if (selectionLength > 1) {
-			// invalid selection
+			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.invalidSelection"));	//$NON-NLS-1$		
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;
 		}
 
 		IRegion region= fBracketMatcher.match(document, selection.getOffset());
 		if (region == null) {
-			// no bracket found
+			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.noMatchingBracket"));	//$NON-NLS-1$		
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;		
 		}
@@ -853,7 +853,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 		IRegion visibleRegion= sourceViewer.getVisibleRegion();
 		if (targetOffset < visibleRegion.getOffset() || targetOffset >= visibleRegion.getOffset() + visibleRegion.getLength()) {
-			// bracket outside of visible region
+			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.bracketOutsideSelectedElement"));	//$NON-NLS-1$		
 			sourceViewer.getTextWidget().getDisplay().beep();
 			return;
 		}
