@@ -479,25 +479,4 @@ public class ASTNodes {
 		Assert.isTrue(false);
 		return ""; //$NON-NLS-1$
 	}
-	
-	/**
-	 * @deprecated Looking at the references of this method this can be coded as
-	 * ASTNode.copySubtree(ast, qualifiedName);
-	 */
-	public static String[] getIdentifiers(QualifiedName qualifiedName) {
-		List result= getIdentifierList(qualifiedName);
-		return (String[]) result.toArray(new String[result.size()]);
-	}
-	
-	private static List getIdentifierList(Name name) {
-		if (name.isSimpleName()){
-			List l= new ArrayList(1);
-			l.add(((SimpleName)name).getIdentifier());
-			return l;
-		}	else {
-			List l= getIdentifierList(((QualifiedName)name).getQualifier());
-			l.add(((QualifiedName)name).getName().getIdentifier());
-			return l;
-		}
-	}	
 }
