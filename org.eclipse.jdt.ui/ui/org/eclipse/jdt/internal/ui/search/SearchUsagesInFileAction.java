@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
@@ -64,8 +65,11 @@ import org.eclipse.search.ui.IGroupByKeyComputer;
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.SearchUI;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.texteditor.MarkerUtilities;
  
 /**
@@ -175,7 +179,6 @@ public class SearchUsagesInFileAction extends Action {
 	}
 
 	static class SearchGroupByKeyComputer implements IGroupByKeyComputer {
-		//TODO it seems that GroupByKeyComputers are obsolete...
 		public Object computeGroupByKey(IMarker marker) {
 			return marker; 
 		}
@@ -205,14 +208,17 @@ public class SearchUsagesInFileAction extends Action {
 	public final  void run() {
 		ITextSelection ts= getTextSelection();
 		final CompilationUnit root= createAST();
+		IStatusLineManager statusLine= getStatusLineManager();
 		if (root == null) {
-			MessageDialog.openError(fEditor.getSite().getShell(), SearchMessages.getString("SearchUsagesInFileAction.operationUnavailable.title"), SearchMessages.getString("SearchUsagesInFileAction.cannotParse.text")); 
+			if (statusLine != null)
+				statusLine.setErrorMessage(SearchMessages.getString("SearchUsagesInFileAction.cannotParse.text")); //$NON-NLS-1$
 			return;
 		}
 		ASTNode node= NodeFinder.perform(root, ts.getOffset(), ts.getLength());
 		
 		if (!(node instanceof Name)) {
-			MessageDialog.openError(fEditor.getSite().getShell(), SearchMessages.getString("SearchUsagesInFileAction.operationUnavailable.title"), SearchMessages.getString("SearchUsagesInFileAction.noJavaElement.text")); 
+			if (statusLine != null)
+				statusLine.setErrorMessage(SearchMessages.getString("SearchUsagesInFileAction.noJavaElement.text")); //$NON-NLS-1$
 			return;
 		}
 		
@@ -390,6 +396,17 @@ public class SearchUsagesInFileAction extends Action {
 	protected ICompilationUnit getCompilationUnit() {
 		return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
 	}
+	
+	private IStatusLineManager getStatusLineManager() {
+		IEditorActionBarContributor contributor= fEditor.getEditorSite().getActionBarContributor();		
+		if (!(contributor instanceof EditorActionBarContributor))
+			return null;
+		IActionBars actionBars= ((EditorActionBarContributor) contributor).getActionBars();
+		if (actionBars == null)
+			return null;
+		return actionBars.getStatusLineManager();
+	}
+
 	
 	protected final IClassFile getClassFile() {
 		IEditorInput input= fEditor.getEditorInput();
