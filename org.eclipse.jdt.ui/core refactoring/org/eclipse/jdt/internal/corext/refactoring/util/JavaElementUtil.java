@@ -5,20 +5,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.util.*;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class JavaElementUtil {
 	
@@ -123,5 +129,25 @@ public class JavaElementUtil {
 		}
 		return (IMethod[]) result.toArray(new IMethod[result.size()]);
 	}
+
+	/**
+	 * Returns an array of projects that have the specified root on their
+	 * classpaths.
+	 */
+	public static IJavaProject[] getReferencingProjects(IPackageFragmentRoot root) throws JavaModelException {
+		IClasspathEntry cpe= root.getRawClasspathEntry();
+		IJavaProject myProject= root.getJavaProject();
+		IJavaProject[] allJavaProjects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
+		List result= new ArrayList(allJavaProjects.length);
+		for (int i= 0; i < allJavaProjects.length; i++) {
+			IJavaProject project= allJavaProjects[i];
+			if (project.equals(myProject))
+				continue;
+			IPackageFragmentRoot[] roots= project.findPackageFragmentRoots(cpe);
+			if (roots.length > 0)
+				result.add(project);
+		}
+		return (IJavaProject[]) result.toArray(new IJavaProject[result.size()]);
+	}	
 	
 }
