@@ -81,6 +81,10 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.text.IInformationControlExtension3;
 
+import org.eclipse.ui.IKeyBindingService;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
@@ -224,12 +228,13 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		public void run() {
 			IDialogSettings settings= getDialogSettings();
 			
-			boolean disabledRestoreLocation= settings.getBoolean(STORE_DISABLE_RESTORE_LOCATION);
-			boolean disabledRestoreSize= settings.getBoolean(STORE_DISABLE_RESTORE_SIZE);
+			boolean newValue= !isChecked();
+
+			// store new value
+			settings.put(STORE_DISABLE_RESTORE_LOCATION, newValue);
+			settings.put(STORE_DISABLE_RESTORE_SIZE, newValue);
 			
-			// store toggled values
-			settings.put(STORE_DISABLE_RESTORE_LOCATION, !disabledRestoreLocation);
-			settings.put(STORE_DISABLE_RESTORE_SIZE, !disabledRestoreSize);
+			fIsDecativateListenerActive= true;
 		}
 	}
 
@@ -301,10 +306,6 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private Text fFilterText;
 	/** The control's tree widget */
 	private TreeViewer fTreeViewer;
-	/** The control's width constraint */
-	//private int fMaxWidthInChars= -1;
-	/** The control's height constraint */
-	//private int fMaxHeightInChars= -1;
 	/** The current string matcher */
 	private StringMatcher fStringMatcher;
 	private ICommand fInvokingCommand;
@@ -326,6 +327,9 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private ToolBar fToolBar;
 	private Composite fViewMenuButtonComposite;
 	private MenuManager fViewMenuManager;
+	private IKeyBindingService fKeyBindingService;
+	private String[] fKeyBindingScopes;
+	private IAction fShowViewMenuAction;
 	
 	private Listener fDeactivateListener;
 	private boolean fIsDecativateListenerActive= false;
@@ -348,6 +352,9 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			fInvokingCommand= commandManager.getCommand(invokingCommandId);
 			if (fInvokingCommand != null && !fInvokingCommand.isDefined())
 				fInvokingCommand= null;
+			else
+				// Pre-fetch key sequence - do not change because scope will change later.
+				getInvokingCommandKeySequences();
 		}
 		
 		fShell= new Shell(parent, shellStyle);
@@ -514,7 +521,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 					Point location= fComposite.getLocation();
 					fBounds.x= fBounds.x - fTrim.x + location.x;		
 					fBounds.y= fBounds.y - fTrim.y + location.y;
-				}
+			}
 			}
 		});
 	}
@@ -620,6 +627,31 @@ public abstract class AbstractInformationControl implements IInformationControl,
 				showViewMenu();
 			}
 		});
+		
+		// Key binding service
+		IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
+		IWorkbenchPartSite site= part.getSite();
+		fKeyBindingService=  site.getKeyBindingService();
+
+		// Remember current scope and then remove it.
+		fKeyBindingScopes= fKeyBindingService.getScopes();
+		fKeyBindingService.setScopes(new String[] {});
+		
+		// Register shell with key binding support
+		IWorkbench workbench= PlatformUI.getWorkbench();
+		workbench.getCommandSupport().registerForKeyBindings(fShell, false);
+		
+		// Register action with key binding service
+		fShowViewMenuAction= new Action("showViewMenu") { //$NON-NLS-1$
+			/*
+			 * @see org.eclipse.jface.action.Action#run()
+			 */
+			public void run() {
+				showViewMenu();
+			}
+		};
+		fShowViewMenuAction.setActionDefinitionId("org.eclipse.ui.window.showViewMenu"); //$NON-NLS-1$
+		fKeyBindingService.registerAction(fShowViewMenuAction);
 	}
 
 	private MenuManager getViewMenuManager() {
@@ -871,6 +903,16 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		fComposite= null;
 		fFilterText= null;
 		fStatusTextFont= null;
+		
+		// Unregister Show View Menu action
+		fKeyBindingService.registerAction(fShowViewMenuAction);
+		
+		// Restore editor's key binding scope
+		if (fKeyBindingScopes != null) {
+			fKeyBindingService.setScopes(fKeyBindingScopes);
+			fKeyBindingScopes= null;
+			fKeyBindingService= null;
+		}
 	}
 
 	/**
@@ -1029,17 +1071,19 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	}
 	
 	final protected KeySequence[] getInvokingCommandKeySequences() {
-		if (getInvokingCommand() != null) {
-			List list= getInvokingCommand().getKeySequenceBindings();
-			if (!list.isEmpty()) {
-				fInvokingCommandKeySequences= new KeySequence[list.size()];
-				for (int i= 0; i < fInvokingCommandKeySequences.length; i++) {
-					fInvokingCommandKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
-				}
-				return fInvokingCommandKeySequences;
-			}		
+		if (fInvokingCommandKeySequences == null) {
+			if (getInvokingCommand() != null) {
+				List list= getInvokingCommand().getKeySequenceBindings();
+				if (!list.isEmpty()) {
+					fInvokingCommandKeySequences= new KeySequence[list.size()];
+					for (int i= 0; i < fInvokingCommandKeySequences.length; i++) {
+						fInvokingCommandKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
+					}
+					return fInvokingCommandKeySequences;
+				}		
+			}
 		}
-		return null;
+		return fInvokingCommandKeySequences;
 	}
 	
 	protected IDialogSettings getDialogSettings() {
