@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -128,7 +129,7 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 		if (!(parent instanceof TypeDeclaration)) {
 
 			parent= parent.getParent();
-			if (parent instanceof ParameterizedType)
+			if (parent instanceof ParameterizedType || parent instanceof Type)
 				parent= parent.getParent();
 			if (parent instanceof ClassInstanceCreation) {
 
@@ -144,9 +145,9 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 	 */
 	protected final ASTRewrite getRewrite() throws CoreException {
 
-		final ASTNode declarations= getDeclarationNode();
+		final ASTNode node= getDeclarationNode();
 
-		final AST ast= declarations.getAST();
+		final AST ast= node.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 
 		final VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
@@ -161,8 +162,8 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 
 		if (fragment.getInitializer() != null) {
 
-			final ChildListPropertyDescriptor descriptor= (declarations.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
-			rewrite.getListRewrite(declarations, descriptor).insertAt(declaration, 0, null);
+			final ChildListPropertyDescriptor descriptor= (node.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
+			rewrite.getListRewrite(node, descriptor).insertAt(declaration, 0, null);
 
 			addLinkedPositions(rewrite, fragment);
 		}
