@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 
@@ -28,9 +29,26 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
  * IAction.actionPerformed and knit the methods together.
  */
 public abstract class OpenJavaElementAction extends JavaUIAction {
-		
+
+	/**
+	 * @deprecated	Use OpenJavaElementAction(String, ImageDescriptor) or OpenJavaElementAction(String) instead
+	 */
 	public OpenJavaElementAction(ResourceBundle bundle, String prefix) {
 		super(bundle, prefix);
+	}
+
+	/**
+	 * Creates a new action with the given label.
+	 */
+	public OpenJavaElementAction(String label) {
+		super(label);
+	}
+
+	/**
+	 * Creates a new action with the given label and image.
+	 */
+	public OpenJavaElementAction(String label, ImageDescriptor image) {
+		super(label, image);
 	}
 	
 	/**

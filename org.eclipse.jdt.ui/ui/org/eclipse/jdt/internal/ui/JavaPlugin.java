@@ -98,6 +98,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * Gets a string from the JavaPlugin resource bundle.
 	 * We don't want to crash because of a missing String.
 	 * Returns the key if not found.
+	 * 
+	 * @deprecated Use a dedicated static resource bundle accessor class
 	 */
 	public static String getResourceString(String key) {
 		try {
@@ -111,6 +113,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	/**
 	 * Gets a string from the resource bundle and formats it with an argument
+	 * 
+	 * @deprecated Use a dedicated static resource bundle accessor class
 	 */	
 	public static String getFormattedString(String key, String arg) {
 		return MessageFormat.format(getResourceString(key), new String[] { arg });
@@ -118,6 +122,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	/**
 	 * Gets a string from the resource bundle and formats it with arguments
+	 * 
+	 * @deprecated Use a dedicated static resource bundle accessor class
 	 */	
 	public static String getFormattedString(String key, String[] args) {
 		return MessageFormat.format(getResourceString(key), args);
@@ -125,6 +131,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	/**
 	 * Gets the Java UI resource bundle
+	 * 
+	 * @deprecated Use a dedicated static resource bundle accessor class
 	 */
 	public static ResourceBundle getResourceBundle() {
 		return fgResourceBundle;
