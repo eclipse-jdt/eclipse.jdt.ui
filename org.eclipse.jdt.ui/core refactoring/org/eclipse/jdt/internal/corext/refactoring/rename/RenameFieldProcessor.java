@@ -301,6 +301,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			
 			if (fUpdateReferences)
 				result.merge(analyzeAffectedCompilationUnits());
+			else
+				Checks.checkCompileErrorsInAffectedFile(result, fField.getResource());
 				
 			if (getGetter() != null && fRenameGetter){
 				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getGetter(), getNewGetterName()));

@@ -577,11 +577,26 @@ public class Checks {
 	
 	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] grouped) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < grouped.length; i++){
-			IResource resource= grouped[i].getResource();
-			if (hasCompileErrors(resource))
-				result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.cu_has_compile_errors", resource.getFullPath().makeRelative())); //$NON-NLS-1$
+		for (int i= 0; i < grouped.length; i++)
+			checkCompileErrorsInAffectedFile(result, grouped[i].getResource());
+		return result;
+	}
+	
+	public static void checkCompileErrorsInAffectedFile(RefactoringStatus result, IResource resource) throws JavaModelException {
+		if (hasCompileErrors(resource))
+			result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.cu_has_compile_errors", resource.getFullPath().makeRelative())); //$NON-NLS-1$
+	}
+	
+	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] references, IResource declaring) throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		for (int i= 0; i < references.length; i++){
+			IResource resource= references[i].getResource();
+			if (resource.equals(declaring))
+				declaring= null;
+			checkCompileErrorsInAffectedFile(result, resource);
 		}
+		if (declaring != null)
+			checkCompileErrorsInAffectedFile(result, declaring);
 		return result;
 	}
 	

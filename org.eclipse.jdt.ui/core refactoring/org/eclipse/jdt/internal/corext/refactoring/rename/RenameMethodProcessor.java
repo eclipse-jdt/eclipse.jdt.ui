@@ -263,8 +263,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				result.merge(checkRelatedMethods());
 			pm.worked(1);
 			
-			if (fUpdateReferences)
-				result.merge(analyzeCompilationUnits()); //removes CUs with syntax errors
+			result.merge(analyzeCompilationUnits()); //removes CUs with syntax errors
 			pm.worked(1);
 			
 			if (result.hasFatalError())

@@ -327,10 +327,12 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			
-			if (fUpdateReferences)
+			if (fUpdateReferences) {
 				result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 25)));
-			else
+			} else {
+				Checks.checkCompileErrorsInAffectedFile(result, fType.getResource());
 				pm.worked(25);
+			}
 			
 			if (result.hasFatalError())
 				return result;
@@ -596,7 +598,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		if (result.hasFatalError())
 			return result;
 			
-		result.merge(Checks.checkCompileErrorsInAffectedFiles(fReferences));	
+		result.merge(Checks.checkCompileErrorsInAffectedFiles(fReferences, fType.getResource()));	
 		
 		pm.beginTask("", fReferences.length); //$NON-NLS-1$
 		result.merge(checkConflictingTypes(pm));
