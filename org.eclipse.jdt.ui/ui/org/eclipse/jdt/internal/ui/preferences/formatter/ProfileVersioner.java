@@ -30,9 +30,10 @@ public class ProfileVersioner {
 	public static final int VERSION_5= 5; // after splitting of FORMATTER_INDENT_BLOCK_STATEMENTS
 	public static final int VERSION_6= 6; // after splitting of new_line_in_control_statements
 	public static final int VERSION_7= 7; // after moving comment formatter to JDT Core
-//	public static final int VERSION_8= 8; // after splitting tabSize -> tabLength / indentSize
+	public static final int VERSION_8= 8; // fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=89739
+//	public static final int VERSION_9= 9; // after splitting tabSize -> tabLength / indentSize
 	
-	public static final int CURRENT_VERSION= VERSION_7;
+	public static final int CURRENT_VERSION= VERSION_8;
 	
 	public static void updateAndComplete(CustomProfile profile) {
 		final Map oldSettings= profile.getSettings();
