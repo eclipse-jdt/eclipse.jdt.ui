@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.editors.text.IFoldingCommandIds;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
 /**
  * Action ids for standard actions, for groups in the menu bar, and
@@ -522,36 +523,4 @@ public class JdtActionConstants {
 	 * @since 3.0
 	 */
 	public static final String FIND_EXCEPTION_OCCURRENCES= "org.eclipse.jdt.ui.actions.ExceptionOccurrences"; //$NON-NLS-1$		
-
-	/**
-	 * Identifier of the "collapse folding region" action.
-	 * Value: {@value}.
-	 * 
-	 * @since 3.0
-	 */
-	public static final String FOLDING_COLLAPSE= IFoldingCommandIds.FOLDING_COLLAPSE;
-
-	/**
-	 * Identifier of the "expand folding region" action.
-	 * Value: {@value}.
-	 * 
-	 * @since 3.0
-	 */
-	public static final String FOLDING_EXPAND= IFoldingCommandIds.FOLDING_EXPAND;
-
-	/**
-	 * Identifier of the "expand all foldings" action.
-	 * Value: {@value}.
-	 * 
-	 * @since 3.0
-	 */
-	public static final String FOLDING_EXPAND_ALL= IFoldingCommandIds.FOLDING_EXPAND_ALL;
-
-	/**
-	 * Identifier of the "toggle folding" action.
-	 * Value: {@value}.
-	 * 
-	 * @since 3.0
-	 */
-	public static final String FOLDING_TOGGLE= IFoldingCommandIds.FOLDING_TOGGLE;
 }

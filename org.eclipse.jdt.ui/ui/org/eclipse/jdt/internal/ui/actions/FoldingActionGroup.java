@@ -16,13 +16,10 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.source.projection.IProjectionListener;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.editors.text.IFoldingCommandIds;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextOperationAction;
-
-import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 
 /**
@@ -68,19 +65,19 @@ public class FoldingActionGroup extends ActionGroup {
 			fToggle= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.Toggle.", editor, ProjectionViewer.TOGGLE, true); //$NON-NLS-1$
 			fToggle.setChecked(true);
 			fToggle.setActionDefinitionId(IFoldingCommandIds.FOLDING_TOGGLE);
-			editor.setAction(JdtActionConstants.FOLDING_TOGGLE, fToggle); //$NON-NLS-1$
+			editor.setAction("FoldingToggle", fToggle); //$NON-NLS-1$
 			
 			fExpandAll= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.ExpandAll.", editor, ProjectionViewer.EXPAND_ALL, true); //$NON-NLS-1$
 			fExpandAll.setActionDefinitionId(IFoldingCommandIds.FOLDING_EXPAND_ALL);
-			editor.setAction(JdtActionConstants.FOLDING_EXPAND_ALL, fExpandAll); //$NON-NLS-1$
+			editor.setAction("FoldingExpandAll", fExpandAll); //$NON-NLS-1$
 			
 			fExpand= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.Expand.", editor, ProjectionViewer.EXPAND, true); //$NON-NLS-1$
 			fExpand.setActionDefinitionId(IFoldingCommandIds.FOLDING_EXPAND);
-			editor.setAction(JdtActionConstants.FOLDING_EXPAND, fExpand); //$NON-NLS-1$
+			editor.setAction("FoldingExpand", fExpand); //$NON-NLS-1$
 			
 			fCollapse= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.Collapse.", editor, ProjectionViewer.COLLAPSE, true); //$NON-NLS-1$
 			fCollapse.setActionDefinitionId(IFoldingCommandIds.FOLDING_COLLAPSE);
-			editor.setAction(JdtActionConstants.FOLDING_COLLAPSE, fCollapse); //$NON-NLS-1$
+			editor.setAction("FoldingCollapse", fCollapse); //$NON-NLS-1$
 		}
 	}
 	
@@ -120,19 +117,6 @@ public class FoldingActionGroup extends ActionGroup {
 		}
 	}
 	
-	/*
-	 * @see org.eclipse.ui.actions.ActionGroup#fillActionBars(org.eclipse.ui.IActionBars)
-	 */
-	public void fillActionBars(IActionBars actionBars) {
-		if (isEnabled()) {
-			update();
-			actionBars.setGlobalActionHandler(JdtActionConstants.FOLDING_TOGGLE, fToggle);
-			actionBars.setGlobalActionHandler(JdtActionConstants.FOLDING_EXPAND_ALL, fExpandAll);
-			actionBars.setGlobalActionHandler(JdtActionConstants.FOLDING_EXPAND, fExpand);
-			actionBars.setGlobalActionHandler(JdtActionConstants.FOLDING_COLLAPSE, fCollapse);
-		}
-	}
-
 	/**
 	 * Fills the menu with all folding actions.
 	 * 
