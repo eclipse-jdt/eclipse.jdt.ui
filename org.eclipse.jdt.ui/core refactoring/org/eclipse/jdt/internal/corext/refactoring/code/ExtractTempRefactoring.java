@@ -242,7 +242,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 7); //$NON-NLS-1$
+			pm.beginTask("", 8); //$NON-NLS-1$
 	
 			IExpressionFragment selectedExpression= getSelectedExpression();
 			
@@ -270,11 +270,15 @@ public class ExtractTempRefactoring extends Refactoring {
 				return result;
 			pm.worked(1);
 			
-			result.merge(checkExpressionBinding());				
+			result.merge(checkExpressionBinding());
 			if (result.hasFatalError())
 				return result;				
 			pm.worked(1);
 			
+			if (isUsedInForInitializerOrUpdater(getSelectedExpression().getAssociatedExpression()))
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.for_initializer_updater")); //$NON-NLS-1$
+			pm.worked(1);				
+
 			if (isReferringToLocalVariableFromFor(getSelectedExpression().getAssociatedExpression()))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.refers_to_for_variable")); //$NON-NLS-1$
 			pm.worked(1);
@@ -384,6 +388,16 @@ public class ExtractTempRefactoring extends Refactoring {
 			return true;
 		if (ASTNodes.getParent(selectedExpression, SuperConstructorInvocation.class) != null)
 			return true;
+		return false;	
+	}
+	
+	private static boolean isUsedInForInitializerOrUpdater(Expression expression) {
+		ASTNode parent= expression.getParent();
+		if (parent instanceof ForStatement) {
+			ForStatement forStmt= (ForStatement) parent;
+			return forStmt.initializers().contains(expression)
+					|| forStmt.updaters().contains(expression);
+		}
 		return false;	
 	}
 		
@@ -752,6 +766,8 @@ public class ExtractTempRefactoring extends Refactoring {
     	if (isLeftValue(node))
 			return false;
 		if (isReferringToLocalVariableFromFor((Expression) node))
+			return false;
+		if (isUsedInForInitializerOrUpdater((Expression) node))
 			return false;
         return true;
 	}
