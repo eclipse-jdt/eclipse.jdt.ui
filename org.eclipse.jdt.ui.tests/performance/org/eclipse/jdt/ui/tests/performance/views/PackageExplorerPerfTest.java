@@ -15,8 +15,10 @@ import java.io.File;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -33,11 +35,9 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.tests.performance.OSPerformanceMeterFactory;
-import org.eclipse.jdt.ui.tests.performance.PerformanceMeter;
-import org.eclipse.jdt.ui.tests.performance.PerformanceMeterFactory;
+import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
-public class PackageExplorerPerfTest extends TestCase {
+public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 
 	private static class MyTestSetup extends TestSetup {
 		public static final String SRC_CONTAINER= "src";
@@ -60,12 +60,6 @@ public class PackageExplorerPerfTest extends TestCase {
 		}
 	}
 	
-	private PerformanceMeterFactory fPerformanceMeterFactory= new OSPerformanceMeterFactory();
-	
-	public PackageExplorerPerfTest(String name) {
-		super(name);
-	}
-	
 	public static Test suite() {
 		return new MyTestSetup(new TestSuite(PackageExplorerPerfTest.class));
 	}
@@ -75,25 +69,33 @@ public class PackageExplorerPerfTest extends TestCase {
 	}
 	
 	public void testPackageExplorer() throws Exception {
-		PerformanceMeter openMeter= fPerformanceMeterFactory.createPerformanceMeter(this, "open");
+		joinBackgroudJobs();
+		Performance performance= Performance.getDefault();
+		PerformanceMeter openMeter= performance.createPerformanceMeter(
+			performance.getDefaultScenarioId(this, "open")); 
 		IWorkbenchPage page= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		openMeter.start();
 		PackageExplorerPart part= (PackageExplorerPart)page.showView(JavaUI.ID_PACKAGES);
 		openMeter.stop();
 		openMeter.commit();
+		openMeter.dispose();
 		
 		TreeViewer viewer= part.getTreeViewer();
-		PerformanceMeter selectMeter= fPerformanceMeterFactory.createPerformanceMeter(this, "select");
+		PerformanceMeter selectMeter= performance.createPerformanceMeter(
+			performance.getDefaultScenarioId(this, "select")); 
 		StructuredSelection selection= new StructuredSelection(MyTestSetup.fJProject1);
 		selectMeter.start();
 		viewer.setSelection(selection);
 		selectMeter.stop();
 		selectMeter.commit();
+		selectMeter.dispose();
 		
-		PerformanceMeter expandMeter= fPerformanceMeterFactory.createPerformanceMeter(this, "expand");
+		PerformanceMeter expandMeter= performance.createPerformanceMeter(
+			performance.getDefaultScenarioId(this, "expand"));
 		expandMeter.start();
 		viewer.expandToLevel(MyTestSetup.fJProject1, 1);
 		expandMeter.stop();
 		expandMeter.commit();
+		expandMeter.dispose();
 	}	
 }

@@ -8,14 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.ui.tests.performance.views;
 
 import java.io.File;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,11 +26,9 @@ import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
-import org.eclipse.jdt.ui.tests.performance.OSPerformanceMeterFactory;
-import org.eclipse.jdt.ui.tests.performance.PerformanceMeter;
-import org.eclipse.jdt.ui.tests.performance.PerformanceMeterFactory;
+import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
-public class TypeHierarchyPerfTest extends TestCase {
+public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 
 	private static class MyTestSetup extends TestSetup {
 		public static final String SRC_CONTAINER= "src";
@@ -55,12 +51,6 @@ public class TypeHierarchyPerfTest extends TestCase {
 			if (fJProject1 != null && fJProject1.exists())
 				JavaProjectHelper.delete(fJProject1);
 		}
-	}
-	
-	private PerformanceMeterFactory fPerformanceMeterFactory= new OSPerformanceMeterFactory();
-	
-	public TypeHierarchyPerfTest(String name) {
-		super(name);
 	}
 	
 	public static Test suite() {
@@ -86,14 +76,14 @@ public class TypeHierarchyPerfTest extends TestCase {
 		measureOpenHierarchy(MyTestSetup.fJProject1.findType("java.lang.Object"));
 	}
 	
-	private void measureOpenHierarchy(IJavaElement element) {
-		PerformanceMeter performanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
-		performanceMeter.start();
+	private void measureOpenHierarchy(IJavaElement element) throws Exception {
+		joinBackgroudJobs();
+		
+		startMeasuring();
 		
 		OpenTypeHierarchyUtil.open(element, JavaPlugin.getActiveWorkbenchWindow());
-		
-		performanceMeter.stop();
-		performanceMeter.commit();
-	}
 
+		stopMeasuring();
+		commitMeasurements();
+	}
 }
