@@ -32,6 +32,7 @@
 		    <fileset dir="ui debug" />
 		    <fileset dir="ui" />
 		    <fileset dir="core codemanipulaton" />
+		    <fileset dir="nls" />
   		</zip>		
 	</target>
 </project>

@@ -999,4 +999,54 @@
 	</objectContribution>			
 </extension>
 
+<!-- =========================================================================== -->
+<!-- NLS tool 																	 -->
+<!-- =========================================================================== -->
+
+<!-- 'Externalize Strings' Action                                                -->
+<extension
+      point="org.eclipse.ui.popupMenus">
+   <objectContribution
+         objectClass="org.eclipse.jdt.core.ICompilationUnit"
+         id="org.eclipse.jdt.internal.ui.nls">
+      <action
+            label="%NLSexternalizeStringsLabel"
+            class="org.eclipse.jdt.internal.ui.nls.ExternalizeAction"
+            menubarPath="additions"
+            enablesFor="1"
+            id="ExternalizeStrings">
+      </action>
+   </objectContribution>
+</extension>
+
+<!-- 'Find Strings to Externalize' Action                                        -->
+<extension
+      point="org.eclipse.ui.popupMenus">
+   <objectContribution
+         objectClass="org.eclipse.jdt.core.IPackageFragment"
+         id="org.eclipse.jdt.internal.ui.nls">
+      <action
+            label="%NLSfindStringsLabel"
+            class="org.eclipse.jdt.internal.ui.nls.FindStringsAction"
+            menubarPath="additions"
+            enablesFor="+"
+            id="FindStrings">
+      </action>
+   </objectContribution>
+</extension>
+
+<!-- Unused Keys Search Page                                                     
+ <extension                                                                  
+      point="org.eclipse.search.searchPages">  								 
+   <page 			                                                         
+         tabPosition="2000000000" 											 
+         label="%NLSsearchPageLabel" 										 
+         icon="icons/full/obj16/nls_search_obj.gif" 						 
+         extensions="java:89, properties:90" 								 
+         class="org.eclipse.jdt.internal.ui.nls.search.NLSSearchPage" 		 
+         sizeHint="460,160" 												 
+         id="org.eclipse.jdt.ui.nls.NLSSearchPage"> 						 
+   </page> 																	 
+ /extension> 																 -->
+
 </plugin>
