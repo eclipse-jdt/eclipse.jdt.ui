@@ -157,7 +157,7 @@ public class ChkpiiTests extends TestCase {
 	}
 	
 	private String getChkpiiString(FileCategory type) {
-		return getExec() + " " + type.getFilesToTest() + " -E -O " + type.getOutputFile() + " -XM @" + getExcludeErrors() + " -X " + getExcludeFile () + " -S"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		return getExec() + " " + type.getFilesToTest() + " -E -O " + type.getOutputFile() + " -XM @" + getExcludeErrors() + " -X " + getExcludeFile () + " -S -JSQ"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
 
 	private String getPluginDirectory() {
