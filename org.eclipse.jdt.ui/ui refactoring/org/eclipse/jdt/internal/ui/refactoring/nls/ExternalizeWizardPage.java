@@ -185,11 +185,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private class NLSSubstitutionLabelProvider extends LabelProvider implements ITableLabelProvider, IFontProvider {
 
-		private Font bold;
+		private Font fBold;
 
 		public NLSSubstitutionLabelProvider() {
 			FontRegistry fontRegistry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry();
-			bold= fontRegistry.getBold(JFaceResources.DEFAULT_FONT);
+			fBold= fontRegistry.getBold(JFaceResources.DIALOG_FONT);
 		}
 
 		public String getColumnText(Object element, int columnIndex) {
@@ -251,7 +251,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			if (element instanceof NLSSubstitution) {
 				NLSSubstitution substitution= (NLSSubstitution) element;
 				if (substitution.hasPropertyFileChange() || substitution.hasSourceChange()) {
-					return bold;
+					return fBold;
 				}
 			}
 			return null;
