@@ -143,6 +143,22 @@ public class SelectionConverter {
 	public static IJavaElement[] codeResolve(JavaEditor editor) throws JavaModelException {
 			return codeResolve(getInput(editor), (ITextSelection)editor.getSelectionProvider().getSelection());
 	}
+
+	/**
+	 * Converts the text selection provided by the given editor a Java element by
+	 * asking the user if code reolve returned more than one result. If the selection 
+	 * doesn't cover a Java element <code>null</code> is returned.
+	 */
+	public static IJavaElement codeResolve(JavaEditor editor, Shell shell, String title, String message) throws JavaModelException {
+		IJavaElement[] elements= codeResolve(editor);
+		if (elements == null || elements.length == 0)
+			return null;
+		IJavaElement candidate= elements[0];
+		if (elements.length > 1) {
+			candidate= OpenActionUtil.selectJavaElement(Arrays.asList(elements), shell, title, message);
+		}
+		return candidate;
+	}
 	
 	public static IJavaElement[] codeResolveHandled(JavaEditor editor, Shell shell, String title) {
 		try {
