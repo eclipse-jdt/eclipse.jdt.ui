@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.test.internal.db;
+package org.eclipse.test.internal.performance.db;
 
 import java.sql.*;
 import java.util.Properties;
