@@ -152,7 +152,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	
 	private JavaCorrectionAssistant fAssistant;
 
-	/**
+	/*
 	 * Constructor for JavaCorrectionProcessor.
 	 */
 	public JavaCorrectionProcessor(JavaCorrectionAssistant assistant) {
