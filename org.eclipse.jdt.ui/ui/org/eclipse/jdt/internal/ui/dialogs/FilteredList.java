@@ -224,17 +224,30 @@ public class FilteredList extends Composite {
 			return;			
 		
 		// fill indices
-		int[] indices= new int[elements.length];		
+		int[] indices= new int[elements.length];
 		for (int i= 0; i != elements.length; i++) {
 			int j;
 			for (j= 0; j != fFilteredCount; j++) {
-				if (elements[i] == fElements[fFoldedIndices[fFilteredIndices[j]]]) {
-					indices[i] = j;
-					break;
+				int k = fFilteredIndices[j];
+				int max= (k == fFoldedCount - 1)
+					? fElements.length
+					: fFoldedIndices[k + 1];
+				
+				int l;
+				for (l= fFoldedIndices[k]; l != max; l++) {
+					// found matching element?
+					if (fElements[l].equals(elements[i])) {
+						indices[i]= j;
+						break;
+					}					
 				}
+				
+				if (l != max)
+					break;
 			}
 			
-			if (j == fElements.length)
+			// not found
+			if (j == fFilteredCount)
 				indices[i] = 0;
 		}
 		

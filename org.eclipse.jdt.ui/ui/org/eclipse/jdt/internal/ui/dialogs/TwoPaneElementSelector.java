@@ -35,10 +35,10 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 
 	private String fUpperListLabel;
 	private String fLowerListLabel;
-	private Table fLowerList;
 	private ILabelProvider fQualifierRenderer;
-
 	private Object[] fElements= new Object[0];
+
+	private Table fLowerList;	
 	private Object[] fQualifierElements;
 		
 	/**
@@ -88,12 +88,6 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 	public Control createDialogArea(Composite parent) {
 		Composite contents= (Composite) super.createDialogArea(parent);
 
-		List initialSelections= getInitialSelections();
-		if (initialSelections != null && initialSelections.size() != 0) {
-			String filter= (String) initialSelections.get(0);
-			setFilter(filter);
-		}
-
 		createMessageArea(contents);
 		createFilterText(contents);
 		createLabel(contents, fUpperListLabel);
@@ -101,9 +95,15 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 		createLabel(contents, fLowerListLabel);
 		createLowerList(contents);	
 
-		initFilteredList();
-		initFilterText();		
 		setListElements(fElements);
+		
+		List initialSelections= getInitialSelections();
+		if (initialSelections != null && initialSelections.size() != 0) {
+			Object element= initialSelections.get(0);
+
+			setSelection(new Object[] {element});
+			setLowerSelectedElement(element);
+		}
 		
 		return contents;
 	}
@@ -205,7 +205,22 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 	private void handleLowerSelectionChanged() {
 		updateOkState();
 	}
-	
+
+	/**
+	 * Selects an element in the lower pane.
+	 */
+	protected void setLowerSelectedElement(Object element) {
+		// find matching index
+		int i;
+		for (i= 0; i != fQualifierElements.length; i++)
+			if (fQualifierElements[i].equals(element))
+				break;
+
+		// set selection				
+		if (i != fQualifierElements.length)
+			fLowerList.setSelection(i);
+	}
+		
 	/**
 	 * Returns the selected element from the lower pane.
 	 */
@@ -242,6 +257,14 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 		
 		if (fLowerList.getItemCount() > 0)
 			fLowerList.setSelection(0);
+	}
+	
+	/*
+	 * @see AbstractElementListSelectionDialog#handleEmptyList()
+	 */
+	protected void handleEmptyList() {
+		super.handleEmptyList();
+		fLowerList.setEnabled(false);
 	}
 	
 }

@@ -17,7 +17,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.internal.ui.widgets.MessageLine;
 
 /**
  * An abstract base class for dialogs with a status bar and ok/cancel buttons.

@@ -167,10 +167,11 @@ public final class JavaUI {
 	 *   <code>IJavaElementSearchConstants.CONSIDER_BINARIES</code>, indicating that 
 	 *   packages from binary package fragment roots should be included in addition
 	 *   to those from source package fragment roots
+	 * @param filter the filter
 	 * @return a new selection dialog
 	 * @exception JavaModelException if the selection dialog could not be opened
 	 */
-	public static SelectionDialog createPackageDialog(Shell parent, IJavaProject project, int style) throws JavaModelException {
+	public static SelectionDialog createPackageDialog(Shell parent, IJavaProject project, int style, String filter) throws JavaModelException {
 		Assert.isTrue((style | IJavaElementSearchConstants.CONSIDER_BINARIES) == IJavaElementSearchConstants.CONSIDER_BINARIES);
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();	
 		List consideredRoots= null;
@@ -199,8 +200,17 @@ public final class JavaUI {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(flags));
 		dialog.setIgnoreCase(false);
 		dialog.setElements(packages.toArray()); // XXX inefficient
+		dialog.setFilter(filter);
 		return dialog;
 	}
+
+	/**
+	 * @see createPackageDialog(Shell,IJavaProject,int,String)
+	 */
+	public static SelectionDialog createPackageDialog(Shell parent, IJavaProject project, int style) throws JavaModelException {
+		return createPackageDialog(parent, project, style, "A"); //$NON-NLS-1$
+	}
+	
 	
 	/**
 	 * Creates a selection dialog that lists all packages under the given package 
@@ -211,15 +221,23 @@ public final class JavaUI {
 	 * 
 	 * @param parent the parent shell of the dialog to be created
 	 * @param root the package fragment root
+	 * @param filter the filter
 	 * @return a new selection dialog
 	 * @exception JavaModelException if the selection dialog could not be opened
 	 */
-	public static SelectionDialog createPackageDialog(Shell parent, IPackageFragmentRoot root) throws JavaModelException {
+	public static SelectionDialog createPackageDialog(Shell parent, IPackageFragmentRoot root, String filter) throws JavaModelException {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		dialog.setIgnoreCase(false);
 		dialog.setElements(root.getChildren());
+		dialog.setFilter(filter);
 		return dialog;
+	}
 
+	/**
+	 * @see createPackageDialog(Shell,IPackageFragmentRoot)
+	 */
+	public static SelectionDialog createPackageDialog(Shell parent, IPackageFragmentRoot root) throws JavaModelException {
+		return createPackageDialog(parent, root, "A"); //$NON-NLS-1$
 	}
 
 	/**
@@ -237,18 +255,28 @@ public final class JavaUI {
 	 *   <code>CONSIDER_INTERFACES</code>, or their bitwise OR 
 	 *   (equivalent to <code>CONSIDER_TYPES</code>)
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
+	 * @param filter the filter
 	 * @return a new selection dialog
 	 * @exception JavaModelException if the selection dialog could not be opened
 	 */
-	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) throws JavaModelException {
+	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection, String filter) throws JavaModelException {
 		Assert.isTrue((style | IJavaElementSearchConstants.CONSIDER_TYPES) == IJavaElementSearchConstants.CONSIDER_TYPES);
-		SelectionDialog dialog= null;
 		if (multipleSelection) {
-			dialog= new MultiTypeSelectionDialog(parent, context, scope, style);
+			MultiTypeSelectionDialog dialog= new MultiTypeSelectionDialog(parent, context, scope, style);
+			dialog.setFilter(filter);
+			return dialog;			
 		} else {
-			dialog= new TypeSelectionDialog(parent, context, scope, style);
+			TypeSelectionDialog dialog= new TypeSelectionDialog(parent, context, scope, style);
+			dialog.setFilter(filter);
+			return dialog;
 		}
-		return dialog;
+	}
+
+	/**
+	 * @see createTypeDialog(Shell,IRunnableContext,IJavaSearchScope,int,boolean,String)
+	 */
+	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) throws JavaModelException {
+		return createTypeDialog(parent, context, scope, style, multipleSelection, "A");//$NON-NLS-1$
 	}
 		
 	/**
@@ -290,7 +318,7 @@ public final class JavaUI {
 	 * @see createMainTypeDialog(Shell,IRunnableContext,IJavaSearchScope,int,boolean,String)
 	 */
 	public static SelectionDialog createMainTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) {
-		return createMainTypeDialog(parent, context, scope, style, multipleSelection, "A");
+		return createMainTypeDialog(parent, context, scope, style, multipleSelection, "A");//$NON-NLS-1$
 	}
 	
 	/**

@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -18,7 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.dialogs.SelectionDialog;
 
-import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.ui.widgets.MessageLine;
+import org.eclipse.core.runtime.IStatus;
 
 /**
  * An abstract base class for dialogs with a status bar and ok/cancel buttons.

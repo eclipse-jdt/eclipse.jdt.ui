@@ -196,7 +196,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	}
 	
 	/**
-	 * Sets the selection referenced by an array of indices.
+	 * Sets the selection referenced by an array of elements.
 	 * To be called within open().
 	 * @param selection the indices of the selection.
 	 */
@@ -204,12 +204,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		Assert.isNotNull(fFilteredList);
 		fFilteredList.setSelection(selection);
 	}
-/*	
-	protected void setSelection(int[] selection) {
-		Assert.isNotNull(fFilteredList);
-		fFilteredList.setSelection(selection);
-	} 
-*/	 	
+ 	
 	/**
 	 * Returns an array of the currently selected elements.
 	 * To be called within or after open().
@@ -314,6 +309,8 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		data.horizontalAlignment= GridData.FILL;
 		data.verticalAlignment= GridData.FILL;
 		list.setLayoutData(data);
+		
+		list.setFilter((fFilter == null ? "" : fFilter)); //$NON-NLS-1$		
 
 		list.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -328,14 +325,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 
 		return list;		
 	}
-	
-	protected void initFilteredList() {
-		if (fFilter == null)
-			fFilteredList.setFilter(""); //$NON-NLS-1$		
-		else
-			fFilteredList.setFilter(fFilter);
-	}
-	
+
 	protected Text createFilterText(Composite parent) {
 		Text text= new Text(parent, SWT.BORDER);
 
@@ -345,6 +335,8 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		data.horizontalAlignment= GridData.FILL;
 		data.verticalAlignment= GridData.BEGINNING;
 		text.setLayoutData(data);
+
+		text.setText((fFilter == null ? "" : fFilter)); //$NON-NLS-1$
 		
 		Listener listener= new Listener() {
 			public void handleEvent(Event e) {
@@ -356,13 +348,6 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		fFilterText= text;
 				
 		return text;
-	}
-
-	protected void initFilterText() {
-		if (fFilter == null)
-			fFilterText.setText(""); //$NON-NLS-1$
-		else
-			fFilterText.setText(fFilter);
 	}
 
 	/*
@@ -390,14 +375,21 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		Assert.isNotNull(fFilteredList);
 
     	if (fFilteredList.isEmpty()) {
-     		fMessage.setEnabled(false);
-     		fFilterText.setEnabled(false);
-     		fFilteredList.setEnabled(false);
+    		handleEmptyList();
      	} else {
-	     	validateCurrentSelection();		
+	     	validateCurrentSelection();
 			fFilterText.selectAll();
 			fFilterText.setFocus();
-     	}	
+     	}
+	}
+	
+	/**
+	 * Handles empty list by disabling widgets.
+	 */
+	protected void handleEmptyList() {
+     	fMessage.setEnabled(false);
+     	fFilterText.setEnabled(false);
+     	fFilteredList.setEnabled(false);		
 	}
 	
 }

@@ -39,13 +39,11 @@ public class RunInPackageAction extends SnippetAction {
 		try {
 			IJavaProject p= fEditor.getJavaProject();
 			//fix for 1G472LK: ITPJUI:WIN2000 - Package selection dialog must qualify package names regarding source folders
-			SelectionDialog dialog= JavaUI.createPackageDialog(shell, p, IJavaElementSearchConstants.CONSIDER_BINARIES);
+			String pkg= fEditor.getPackage();
+			String filter= (pkg == null) ? "" : pkg; //$NON-NLS-1$
+			SelectionDialog dialog= JavaUI.createPackageDialog(shell, p, IJavaElementSearchConstants.CONSIDER_BINARIES, filter);
 			dialog.setTitle(SnippetMessages.getString("RunInPackage.dialog.title")); //$NON-NLS-1$
 			dialog.setMessage(SnippetMessages.getString("RunInPackage.dialog.message")); //$NON-NLS-1$
-			String pkg= fEditor.getPackage();
-			if (pkg != null) {
-				dialog.setInitialSelections(new String[] {pkg});
-			}
 			dialog.open();		
 			Object[] res= dialog.getResult();
 			if (res != null && res.length > 0) 

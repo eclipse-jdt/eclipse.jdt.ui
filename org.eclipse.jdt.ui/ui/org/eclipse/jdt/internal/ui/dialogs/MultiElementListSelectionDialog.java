@@ -110,9 +110,6 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		createFilterText(contents);
 		createFilteredList(contents);
 
-		initFilteredList();
-		initFilterText();		
-				
 		fCurrentPage= 0;
 		setPageData();
 		

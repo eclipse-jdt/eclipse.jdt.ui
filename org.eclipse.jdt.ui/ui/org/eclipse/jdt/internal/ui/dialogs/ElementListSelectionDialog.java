@@ -53,9 +53,9 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 		createFilterText(contents);
 		createFilteredList(contents);
 
-		initFilteredList();
-		initFilterText();
 		setListElements(fElements);
+		
+		// XXX set initial selections
 						
 		return contents;
 	}
