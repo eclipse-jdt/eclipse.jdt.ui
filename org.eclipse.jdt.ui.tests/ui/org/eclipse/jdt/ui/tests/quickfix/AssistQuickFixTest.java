@@ -1180,43 +1180,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	
-	private static final boolean BUG_75066= true;
-	
-	public void testUnwrapParanthesis() throws Exception {
-		if (BUG_75066) {
-			return;
-		}
-		
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int foo() {\n");
-		buf.append("        return (9+ 8);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
-		String str= "(9+ 8)";
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
-		
-		assertNumberOfProposals(proposals, 1);
-		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int foo() {\n");
-		buf.append("        return 9+ 8;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
-	}
-	
 	public void testUnwrapMethodInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

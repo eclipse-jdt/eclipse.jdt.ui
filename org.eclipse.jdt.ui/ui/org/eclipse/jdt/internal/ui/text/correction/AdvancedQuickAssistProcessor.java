@@ -15,16 +15,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.NamingConventions;
+
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
+
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -38,21 +47,28 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	 */
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ASTNode coveringNode = context.getCoveringNode();
+		ArrayList coveredNodes = getFullyCoveredNodes(context, coveringNode);
 		if (coveringNode != null) {
 			return getInverseIfProposals(context, coveringNode, null)
 					|| getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, null)
 					|| getInverseIfContinueIntoIfThenInLoopsProposals(context, coveringNode, null)
 					|| getInverseIfIntoContinueInLoopsProposals(context, coveringNode, null)
-					|| getInverseConditionProposals(context, coveringNode, null)
-					|| getRemoveExtraParenthesisProposals(context, coveringNode, null)
-					|| getAddParanoidalParenthesisProposals(context, coveringNode, null)
+					|| getInverseConditionProposals(context, coveringNode, coveredNodes, null)
+					|| getRemoveExtraParenthesisProposals(context, coveringNode, coveredNodes, null)
+					|| getAddParanoidalParenthesisProposals(context, coveringNode, coveredNodes, null)
 					|| getJoinAndIfStatementsProposals(context, coveringNode, null)
 					|| getSplitAndConditionProposals(context, coveringNode, null)
-					|| getJoinOrIfStatementsProposals(context, coveringNode, null)
+					|| getJoinOrIfStatementsProposals(context, coveringNode, coveredNodes, null)
 					|| getSplitOrConditionProposals(context, coveringNode, null)
 					|| getInverseConditionalExpressionProposals(context, coveringNode, null)
 					|| getExchangeInnerAndOuterIfConditionsProposals(context, coveringNode, null)
-					|| getExchangeOperandsProposals(context, coveringNode, null);
+					|| getExchangeOperandsProposals(context, coveringNode, null)
+					|| getCastAndAssignIfStatementProposals(context, coveringNode, null)
+					|| getPickOutStringProposals(context, coveringNode, null)
+					|| getReplaceIfElseReturnWithReturnConditionalProposals(context, coveringNode, null)
+					|| getReplaceIfElseAssignWithReturnConditionalProposals(context, coveringNode, null)
+					|| getReplaceReturnConditionalWithIfElseReturnProposals(context, coveringNode, null)
+					|| getReplaceAssignConditionalWithIfElseAssignProposals(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -62,6 +78,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations)
 			throws CoreException {
 		ASTNode coveringNode = context.getCoveringNode();
+		ArrayList coveredNodes = getFullyCoveredNodes(context, coveringNode);
 		if (coveringNode != null) {
 			ArrayList resultingCollections = new ArrayList();
 			if (noErrorsAtLocation(locations)) {
@@ -69,16 +86,22 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, resultingCollections);
 				getInverseIfContinueIntoIfThenInLoopsProposals(context, coveringNode, resultingCollections);
 				getInverseIfIntoContinueInLoopsProposals(context, coveringNode, resultingCollections);
-				getInverseConditionProposals(context, coveringNode, resultingCollections);
-				getRemoveExtraParenthesisProposals(context, coveringNode, resultingCollections);
-				getAddParanoidalParenthesisProposals(context, coveringNode, resultingCollections);
+				getInverseConditionProposals(context, coveringNode, coveredNodes, resultingCollections);
+				getRemoveExtraParenthesisProposals(context, coveringNode, coveredNodes, resultingCollections);
+				getAddParanoidalParenthesisProposals(context, coveringNode, coveredNodes, resultingCollections);
 				getJoinAndIfStatementsProposals(context, coveringNode, resultingCollections);
 				getSplitAndConditionProposals(context, coveringNode, resultingCollections);
-				getJoinOrIfStatementsProposals(context, coveringNode, resultingCollections);
+				getJoinOrIfStatementsProposals(context, coveringNode, coveredNodes, resultingCollections);
 				getSplitOrConditionProposals(context, coveringNode, resultingCollections);
 				getInverseConditionalExpressionProposals(context, coveringNode, resultingCollections);
 				getExchangeInnerAndOuterIfConditionsProposals(context, coveringNode, resultingCollections);
 				getExchangeOperandsProposals(context, coveringNode, resultingCollections);
+				getCastAndAssignIfStatementProposals(context, coveringNode, resultingCollections);
+				getPickOutStringProposals(context, coveringNode, resultingCollections);
+				getReplaceIfElseReturnWithReturnConditionalProposals(context, coveringNode, resultingCollections);
+				getReplaceIfElseAssignWithReturnConditionalProposals(context, coveringNode, resultingCollections);
+				getReplaceReturnConditionalWithIfElseReturnProposals(context, coveringNode, resultingCollections);
+				getReplaceAssignConditionalWithIfElseAssignProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -338,9 +361,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return statements;
 	}
-	private static boolean getInverseConditionProposals(IInvocationContext context, ASTNode covering,
+	private static boolean getInverseConditionProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes,
 			Collection resultingCollections) {
-		ArrayList coveredNodes = getFullyCoveredNodes(context);
 		if (coveredNodes.isEmpty()) {
 			return false;
 		}
@@ -487,66 +509,71 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		newExpression.setRightOperand(rightOperand);
 		return newExpression;
 	}
-	private static boolean getRemoveExtraParenthesisProposals(IInvocationContext context, ASTNode covering,
+	private static boolean getRemoveExtraParenthesisProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes,
 			Collection resultingCollections) {
-		ArrayList coveredNodes = getFullyCoveredNodes(context);
-		if (coveredNodes.isEmpty())
+		ArrayList nodes;
+		if ((context.getSelectionLength() == 0) && (covering instanceof ParenthesizedExpression)) {
+			nodes = new ArrayList();
+			nodes.add(covering);
+		} else {
+			nodes= coveredNodes;
+		}
+		if (nodes.isEmpty())
 			return false;
 		//
-		final AST ast = covering.getAST();
-		final ASTRewrite rewrite = ASTRewrite.create(ast);
+		final AST ast= covering.getAST();
+		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		// check sub-expressions in fully covered nodes
-		final ArrayList changedNodes = new ArrayList();
-		for (Iterator I = coveredNodes.iterator(); I.hasNext();) {
-			ASTNode covered = (ASTNode) I.next();
+		final ArrayList changedNodes= new ArrayList();
+		for (Iterator I= nodes.iterator(); I.hasNext();) {
+			ASTNode covered= (ASTNode) I.next();
 			covered.accept(new ASTVisitor() {
 				public void postVisit(ASTNode node) {
 					if (!(node instanceof ParenthesizedExpression)) {
 						return;
 					}
-					ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) node;
-					Expression expression = parenthesizedExpression.getExpression();
+					ParenthesizedExpression parenthesizedExpression= (ParenthesizedExpression) node;
+					Expression expression= parenthesizedExpression.getExpression();
 					while (expression instanceof ParenthesizedExpression) {
-						expression = ((ParenthesizedExpression) expression).getExpression();
+						expression= ((ParenthesizedExpression) expression).getExpression();
 					}
-					// check for this and parent precedences
-					int expressionPrecedence = getExpressionPrecedence(expression);
-					if (!(parenthesizedExpression.getParent() instanceof Expression)) {
-						return;
-					}
-					Expression parentExpression = (Expression) parenthesizedExpression.getParent();
-					int parentPrecedence = getExpressionPrecedence(parentExpression);
-					if ((expressionPrecedence > parentPrecedence)
+					// if this is part of another expression, check for this and parent precedences
+					if (parenthesizedExpression.getParent() instanceof Expression) {
+						Expression parentExpression= (Expression) parenthesizedExpression.getParent();
+						int expressionPrecedence= getExpressionPrecedence(expression);
+						int parentPrecedence= getExpressionPrecedence(parentExpression);
+						if ((expressionPrecedence > parentPrecedence)
 							&& !(parenthesizedExpression.getParent() instanceof ParenthesizedExpression)) {
-						return;
-					}
-					// check for case when precedences for expression and parent are same
-					if ((expressionPrecedence == parentPrecedence) && (parentExpression instanceof InfixExpression)) {
-						InfixExpression parentInfix = (InfixExpression) parentExpression;
-						Operator parentOperator = parentInfix.getOperator();
-						// check for PLUS with String
-						if (parentOperator == InfixExpression.Operator.PLUS) {
-							if (isStringExpression(parentInfix.getLeftOperand())
-								|| isStringExpression(parentInfix.getRightOperand())) {
-								return;
-							}
-							for (Iterator J = parentInfix.extendedOperands().iterator(); J.hasNext();) {
-								Expression operand = (Expression) J.next();
-								if (isStringExpression(operand)) {
+							return;
+						}
+						// check for case when precedences for expression and parent are same
+						if ((expressionPrecedence == parentPrecedence) && (parentExpression instanceof InfixExpression)) {
+							InfixExpression parentInfix= (InfixExpression) parentExpression;
+							Operator parentOperator= parentInfix.getOperator();
+							// check for PLUS with String
+							if (parentOperator == InfixExpression.Operator.PLUS) {
+								if (isStringExpression(parentInfix.getLeftOperand())
+									|| isStringExpression(parentInfix.getRightOperand())) {
 									return;
 								}
+								for (Iterator J= parentInfix.extendedOperands().iterator(); J.hasNext();) {
+									Expression operand= (Expression) J.next();
+									if (isStringExpression(operand)) {
+										return;
+									}
+								}
 							}
-						}
-						// check for /, %, -
-						if ((parentOperator == InfixExpression.Operator.DIVIDE)
-							|| (parentOperator == InfixExpression.Operator.REMAINDER)
-							|| parentOperator == InfixExpression.Operator.MINUS) {
-							if (parentInfix.getLeftOperand() != parenthesizedExpression)
-								return;
+							// check for /, %, -
+							if ((parentOperator == InfixExpression.Operator.DIVIDE)
+								|| (parentOperator == InfixExpression.Operator.REMAINDER)
+								|| parentOperator == InfixExpression.Operator.MINUS) {
+								if (parentInfix.getLeftOperand() != parenthesizedExpression)
+									return;
+							}
 						}
 					}
 					// remove parenthesis around expression
-					rewrite.replace(parenthesizedExpression, expression, null);
+					rewrite.replace(parenthesizedExpression, rewrite.createMoveTarget(expression), null);
 					changedNodes.add(node);
 				}
 			});
@@ -558,10 +585,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 		// add correction proposal
-		String label = CorrectionMessages.getString("AdvancedQuickAssistProcessor.removeParenthesis.description"); //$NON-NLS-1$
-		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal = new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(),
-				rewrite, 1, image);
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.removeParenthesis.description"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -592,6 +618,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		if (expression instanceof Assignment) {
 			return 14;
+		}
+		if (expression instanceof MethodInvocation) {
+			return 15;
 		}
 		return -1;
 	}
@@ -633,9 +662,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return -1;
 	}
-	private static boolean getAddParanoidalParenthesisProposals(IInvocationContext context, ASTNode covering,
+	private static boolean getAddParanoidalParenthesisProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes,
 			Collection resultingCollections) {
-		ArrayList coveredNodes = getFullyCoveredNodes(context);
 		if (coveredNodes.isEmpty())
 			return false;
 		//
@@ -697,15 +725,23 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 	}
-	private static ArrayList getFullyCoveredNodes(IInvocationContext context) {
+	private static ArrayList getFullyCoveredNodes(IInvocationContext context, ASTNode coveringNode) {
 		final ArrayList coveredNodes = new ArrayList();
 		final int selectionBegin = context.getSelectionOffset();
 		final int selectionEnd = selectionBegin + context.getSelectionLength();
-		context.getASTRoot().accept(new ASTVisitor() {
+		coveringNode.accept(new GenericVisitor() {
+			protected boolean visitNode(ASTNode node) {
+				int nodeStart= node.getStartPosition();
+				int nodeEnd= nodeStart + node.getLength();
+				if (nodeEnd < selectionBegin || selectionEnd < nodeStart) {
+					return false;
+				}
+				return true;
+			}
 			public void postVisit(ASTNode node) {
 				if (isCovered(node)) {
 					ASTNode parent = node.getParent();
-					if (parent != null && !isCovered(parent)) {
+					if ((parent == null) || !isCovered(parent)) {
 						coveredNodes.add(node);
 					}
 				}
@@ -920,10 +956,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 	}
-	private static boolean getJoinOrIfStatementsProposals(IInvocationContext context, ASTNode covering,
+	private static boolean getJoinOrIfStatementsProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes,
 			Collection resultingCollections) {
 		Operator orOperator = InfixExpression.Operator.CONDITIONAL_OR;
-		ArrayList coveredNodes = getFullyCoveredNodes(context);
 		if (coveredNodes.size() < 2)
 			return false;
 		// check that all covered nodes are IfStatement's with same 'then' statement and without 'else'
@@ -1236,8 +1271,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				&& (operator != InfixExpression.Operator.EQUALS) && (operator != InfixExpression.Operator.PLUS)
 				&& (operator != InfixExpression.Operator.TIMES) && (operator != InfixExpression.Operator.XOR)) {
 			return false;
-		}		
-		//
+		}
+		// ok, we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
@@ -1286,5 +1321,377 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		infix.setRightOperand(rightPlaceholder);
 		expression = infix;
 		return expression;
+	}
+
+	private static boolean getCastAndAssignIfStatementProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+		if (!(node instanceof InstanceofExpression)) {
+			return false;
+		}
+		InstanceofExpression expression= (InstanceofExpression) node;
+		// test that we are the expression of a 'while' or 'if'
+		while (node.getParent() instanceof Expression) {
+			node= node.getParent();
+		}
+		StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
+		
+		Statement body= null;
+		if (locationInParent == IfStatement.EXPRESSION_PROPERTY) {
+			body= ((IfStatement) node.getParent()).getThenStatement();
+		} else if (locationInParent == WhileStatement.EXPRESSION_PROPERTY) {
+			body= ((WhileStatement) node.getParent()).getBody();
+		}	
+		if (body == null) {
+			return false;
+		}
+		
+		Type originalType= expression.getRightOperand();
+		if (originalType.resolveBinding() == null) {
+			return false;
+		}
+		
+		// ok, we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+		
+		final String KEY_NAME= "name"; //$NON-NLS-1$
+		final String KEY_TYPE= "type"; //$NON-NLS-1$
+		//
+		AST ast= expression.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		ICompilationUnit cu= context.getCompilationUnit();
+		// prepare correction proposal
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.castAndAssign"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 1, image);
+		// prepare possible variable names
+		String[] varNames= suggestLocalVariableNames(cu, originalType.resolveBinding());
+		for (int i= 0; i < varNames.length; i++) {
+			proposal.addLinkedPositionProposal(KEY_NAME, varNames[i], null);
+		}
+		CastExpression castExpression= ast.newCastExpression();
+		castExpression.setExpression((Expression) rewrite.createCopyTarget(expression.getLeftOperand()));
+		castExpression.setType((Type) ASTNode.copySubtree(ast, originalType));
+		// prepare new variable declaration
+		VariableDeclarationFragment vdf= ast.newVariableDeclarationFragment();
+		vdf.setName(ast.newSimpleName(varNames[0]));
+		vdf.setInitializer(castExpression);
+		// prepare new variable declaration statement
+		VariableDeclarationStatement vds= ast.newVariableDeclarationStatement(vdf);
+		vds.setType((Type) ASTNode.copySubtree(ast, originalType));
+		// add new variable declaration statement
+		if (body instanceof Block) {
+			ListRewrite listRewriter= rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
+			listRewriter.insertAt(vds, 0, null);
+		} else {
+			Block newBlock= ast.newBlock();
+			List statements= newBlock.statements();
+			statements.add(vds);
+			statements.add(rewrite.createMoveTarget(body));
+			rewrite.replace(body, newBlock, null);
+		}
+
+		// setup linked positions
+		proposal.addLinkedPosition(rewrite.track(vdf.getName()), true, KEY_NAME);
+		proposal.addLinkedPosition(rewrite.track(vds.getType()), false, KEY_TYPE);
+		proposal.addLinkedPosition(rewrite.track(castExpression.getType()), false, KEY_TYPE);
+		proposal.setEndPosition(rewrite.track(vds)); // set cursor after expression statement
+		// add correction proposal
+		resultingCollections.add(proposal);
+		return true;
+	}
+	
+	private static String[] suggestLocalVariableNames(ICompilationUnit cu, ITypeBinding binding) {
+		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
+		IPackageBinding packBinding= base.getPackage();
+		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
+		String typeName= base.getName();
+		return NamingConventions.suggestLocalVariableNames(cu.getJavaProject(), packName, typeName, binding.getDimensions(), new String[0]);
+	}
+
+	private static boolean getPickOutStringProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+		// we work with String's
+		if (!(node instanceof StringLiteral)) {
+			return false;
+		}
+		// user should select part of String
+		int selectionPos= context.getSelectionOffset();
+		int selectionLen= context.getSelectionLength();
+		if (selectionLen == 0) {
+			return false;
+		}
+		if ((selectionPos < node.getStartPosition()) || (selectionPos > node.getStartPosition() + node.getLength())) {
+			return false;
+		}
+		// prepare string parts positions
+		StringLiteral stringLiteral= (StringLiteral) node;
+		String stringValue= stringLiteral.getLiteralValue();
+		int stringPos= selectionPos - stringLiteral.getStartPosition() - 1; // -1 for "
+		// check if selection starts on "
+		if (stringPos == -1) {
+			stringPos= 0;
+			selectionLen--;
+		}
+		// check if selection ends on "
+		if (stringPos + selectionLen == stringValue.length() + 1) {
+			selectionLen--;
+		}
+		// check that after all checks part and only part is selected 
+		if ((selectionLen == 0) || (selectionLen == stringValue.length())) {
+			return false;
+		}
+		// ok, we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+		// prepare string parts
+		String leftPart= stringValue.substring(0, stringPos);
+		String centerPart= stringValue.substring(stringPos, stringPos + selectionLen);
+		String rightPart= stringValue.substring(stringPos + selectionLen);
+		//
+		AST ast= node.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		// prepare StringLiteral's for parts
+		StringLiteral leftLiteral= ast.newStringLiteral();
+		leftLiteral.setLiteralValue(leftPart);
+		StringLiteral centerLiteral= ast.newStringLiteral();
+		centerLiteral.setLiteralValue(centerPart);
+		StringLiteral rightLiteral= ast.newStringLiteral();
+		rightLiteral.setLiteralValue(rightPart);
+		// prepare new expression instead of StringLiteral
+		InfixExpression expression= ast.newInfixExpression();
+		expression.setOperator(InfixExpression.Operator.PLUS);
+		if (leftPart.length() == 0) {
+			expression.setLeftOperand(centerLiteral);
+			expression.setRightOperand(rightLiteral);
+		} else if (rightPart.length() == 0) {
+			expression.setLeftOperand(leftLiteral);
+			expression.setRightOperand(centerLiteral);
+		} else {
+			expression.setLeftOperand(leftLiteral);
+			expression.setRightOperand(centerLiteral);
+			expression.extendedOperands().add(rightLiteral);
+		}
+		// use new expression instead of old StirngLiteral
+		rewrite.replace(stringLiteral, expression, null);
+		// add correction proposal
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.pickSelectedString"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		proposal.addLinkedPosition(rewrite.track(centerLiteral), true, "CENTER_STRING"); //$NON-NLS-1$
+		resultingCollections.add(proposal);
+		return true;
+	}
+	
+	private static Statement getSingleStatement(Statement statement) {
+		if (statement instanceof Block) {
+			List blockStatements= ((Block) statement).statements();
+			if (blockStatements.size() != 1) {
+				return null;
+			}
+			return (Statement) blockStatements.get(0);
+		}
+		return statement;
+	}
+	
+	private static boolean getReplaceIfElseReturnWithReturnConditionalProposals(IInvocationContext context,
+			ASTNode node, Collection resultingCollections) {
+		Statement statement= ASTResolving.findParentStatement(node);
+		if (!(statement instanceof IfStatement)) {
+			return false;
+		}
+		IfStatement ifStatement= (IfStatement) statement;
+		// check 'then' statement
+		Statement thenStatement= getSingleStatement(ifStatement.getThenStatement());
+		if (!(thenStatement instanceof ReturnStatement)) {
+			return false;
+		}
+		ReturnStatement thenReturn= (ReturnStatement) thenStatement;
+		// check 'else' statement
+		Statement elseStatement= getSingleStatement(ifStatement.getElseStatement());
+		if (!(elseStatement instanceof ReturnStatement)) {
+			return false;
+		}
+		ReturnStatement elseReturn= (ReturnStatement) elseStatement;
+		// check that both return statements have returning expressions
+		if ((thenReturn.getExpression() == null) || (elseReturn.getExpression() == null)) {
+			return false;
+		}
+		// ok, we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+		//
+		AST ast= node.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		// prepare conditional expression
+		ConditionalExpression conditionalExpression = ast.newConditionalExpression();
+		Expression conditionCopy= (Expression) rewrite.createCopyTarget(ifStatement.getExpression());
+		conditionalExpression.setExpression(conditionCopy);
+		Expression thenCopy= (Expression) rewrite.createCopyTarget(thenReturn.getExpression());
+		conditionalExpression.setThenExpression(thenCopy);
+		Expression elseCopy= (Expression) rewrite.createCopyTarget(elseReturn.getExpression());
+		conditionalExpression.setElseExpression(elseCopy);
+		// replace 'if' statement with conditional expression
+		ReturnStatement returnStatement = ast.newReturnStatement();
+		returnStatement.setExpression(conditionalExpression);
+		rewrite.replace(ifStatement, returnStatement, null);
+		// add correction proposal
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.replaceIfWithConditionalReturn"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+	private static boolean getReplaceIfElseAssignWithReturnConditionalProposals(IInvocationContext context,
+			ASTNode node, Collection resultingCollections) {
+		Statement statement= ASTResolving.findParentStatement(node);
+		if (!(statement instanceof IfStatement)) {
+			return false;
+		}
+		IfStatement ifStatement= (IfStatement) statement;
+		// check 'then' statement
+		Statement thenStatement= getSingleStatement(ifStatement.getThenStatement());
+		if (!(thenStatement instanceof ExpressionStatement)) {
+			return false;
+		}
+		Expression thenExpression= ((ExpressionStatement) thenStatement).getExpression();
+		if (!(thenExpression instanceof Assignment)) {
+			return false;
+		}
+		Assignment thenAssignment= (Assignment) thenExpression;
+		// check 'else' statement
+		Statement elseStatement= getSingleStatement(ifStatement.getElseStatement());
+		if (!(elseStatement instanceof ExpressionStatement)) {
+			return false;
+		}
+		Expression elseExpression= ((ExpressionStatement) elseStatement).getExpression();
+		if (!(elseExpression instanceof Assignment)) {
+			return false;
+		}
+		Assignment elseAssignment= (Assignment) elseExpression;
+		// check that both assignmens are for same left expression
+		if (!thenAssignment.getLeftHandSide().toString().equals(elseAssignment.getLeftHandSide().toString())) {
+			return false;
+		}
+		// ok, we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+		//
+		AST ast= node.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		// prepare conditional expression
+		ConditionalExpression conditionalExpression= ast.newConditionalExpression();
+		Expression conditionCopy= (Expression) rewrite.createCopyTarget(ifStatement.getExpression());
+		conditionalExpression.setExpression(conditionCopy);
+		Expression thenCopy= (Expression) rewrite.createCopyTarget(thenAssignment.getRightHandSide());
+		conditionalExpression.setThenExpression(thenCopy);
+		Expression elseCopy= (Expression) rewrite.createCopyTarget(elseAssignment.getRightHandSide());
+		conditionalExpression.setElseExpression(elseCopy);
+		// replace 'if' statement with conditional expression
+		Assignment assignment= ast.newAssignment();
+		assignment.setLeftHandSide((Expression) rewrite.createCopyTarget(thenAssignment.getLeftHandSide()));
+		assignment.setRightHandSide(conditionalExpression);
+		ExpressionStatement expressionStatement = ast.newExpressionStatement(assignment);
+		rewrite.replace(ifStatement, expressionStatement, null);
+		// add correction proposal
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.replaceIfWithConditionalAssign"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+	private static boolean getReplaceReturnConditionalWithIfElseReturnProposals(IInvocationContext context,
+			ASTNode covering, Collection resultingCollections) {
+		// check that parent statement is 'return'
+		Statement statement= ASTResolving.findParentStatement(covering);
+		if (!(statement instanceof ReturnStatement)) {
+			return false;
+		}
+		ReturnStatement returnStatement= (ReturnStatement) statement;
+		// check that reutrn expression is conditional expression
+		if (!(returnStatement.getExpression() instanceof ConditionalExpression)) {
+			return false;
+		}
+		ConditionalExpression conditional= (ConditionalExpression) returnStatement.getExpression();
+		// ok, we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+		//
+		AST ast= covering.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		// prepare new 'if' statement
+		IfStatement ifStatement = ast.newIfStatement();
+		ifStatement.setExpression((Expression) rewrite.createCopyTarget(conditional.getExpression()));
+		//
+		ReturnStatement thenReturn= createReturnExpression(ast, rewrite, conditional.getThenExpression());
+		ifStatement.setThenStatement(thenReturn);
+		//
+		ReturnStatement elseReturn= createReturnExpression(ast, rewrite, conditional.getThenExpression());
+		ifStatement.setElseStatement(elseReturn);
+		//
+		// replace return conditional expression with if/then/else/return
+		rewrite.replace(statement, ifStatement, null);
+		// add correction proposal
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.replaceConditionalWithIfReturn"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+	private static ReturnStatement createReturnExpression(AST ast, ASTRewrite rewrite, Expression expression) {
+		ReturnStatement thenReturn = ast.newReturnStatement();
+		thenReturn.setExpression((Expression) rewrite.createCopyTarget(expression));
+		return thenReturn;
+	}
+	private static boolean getReplaceAssignConditionalWithIfElseAssignProposals(IInvocationContext context,
+			ASTNode covering, Collection resultingCollections) {
+		// check that parent statement is assignment
+		Statement statement= ASTResolving.findParentStatement(covering);
+		if (!(statement instanceof ExpressionStatement)) {
+			return false;
+		}
+		ExpressionStatement expressionStatement= (ExpressionStatement) statement;
+		if (!(expressionStatement.getExpression() instanceof Assignment)) {
+			return false;
+		}
+		Assignment assignment= (Assignment) expressionStatement.getExpression();
+		// check that reutrn expression is conditional expression
+		if (!(assignment.getRightHandSide() instanceof ConditionalExpression)) {
+			return false;
+		}
+		ConditionalExpression conditional= (ConditionalExpression) assignment.getRightHandSide();
+		// ok, we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+		//
+		AST ast= covering.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		// prepare new 'if' statement
+		IfStatement ifStatement= ast.newIfStatement();
+		ifStatement.setExpression((Expression) rewrite.createCopyTarget(conditional.getExpression()));
+		//
+		Assignment thenAssignment= ast.newAssignment();
+		thenAssignment.setLeftHandSide((Expression) rewrite.createCopyTarget(assignment.getLeftHandSide()));
+		thenAssignment.setRightHandSide((Expression) rewrite.createCopyTarget(conditional.getThenExpression()));
+		ExpressionStatement thenStatement = ast.newExpressionStatement(thenAssignment);
+		ifStatement.setThenStatement(thenStatement);
+		//
+		Assignment elseAssignment= ast.newAssignment();
+		elseAssignment.setLeftHandSide((Expression) rewrite.createCopyTarget(assignment.getLeftHandSide()));
+		elseAssignment.setRightHandSide((Expression) rewrite.createCopyTarget(conditional.getElseExpression()));
+		ExpressionStatement elseStatement = ast.newExpressionStatement(elseAssignment);
+		ifStatement.setElseStatement(elseStatement);
+		// replace return conditional expression with if/then/else/return
+		rewrite.replace(statement, ifStatement, null);
+		// add correction proposal
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.replaceConditionalWithIfAssign"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		resultingCollections.add(proposal);
+		return true;
 	}
 }
