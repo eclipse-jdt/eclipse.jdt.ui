@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -83,12 +85,10 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		fSelectedName= ASTNodes.getTopMostName((Name)node);
 		ASTNode parent= fSelectedName.getParent();
-		if (parent instanceof MethodDeclaration) {
-			MethodDeclaration decl= (MethodDeclaration)parent;
-			if (decl.thrownExceptions().contains(fSelectedName)) {
-				fException= fSelectedName.resolveTypeBinding();
-				fStart= decl.getBody();
-			}
+		MethodDeclaration decl= resolveMethodDeclaration(parent);
+		if (decl != null && methodThrowsException(decl, fSelectedName)) {
+			fException= fSelectedName.resolveTypeBinding();
+			fStart= decl.getBody();
 		} else if (parent instanceof Type) {
 			parent= parent.getParent();
 			if (parent instanceof SingleVariableDeclaration && parent.getParent() instanceof CatchClause) {
@@ -106,6 +106,27 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		if (fException == null || fStart == null)
 			return SearchMessages.getString("ExceptionOccurrencesFinder.no_exception");  //$NON-NLS-1$
 		return null;
+	}
+	
+	private MethodDeclaration resolveMethodDeclaration(ASTNode node) {
+		if (node instanceof MethodDeclaration)
+			return (MethodDeclaration)node;
+		Javadoc doc= (Javadoc) ASTNodes.getParent(node, ASTNode.JAVADOC);
+		if (doc == null)
+			return null;
+		if (doc.getParent() instanceof MethodDeclaration)
+			return (MethodDeclaration) doc.getParent();
+		return null;
+	}
+	
+	private boolean methodThrowsException(MethodDeclaration method, Name exception) {
+		ASTMatcher matcher = new ASTMatcher();
+		for (Iterator iter = method.thrownExceptions().iterator(); iter.hasNext();) {
+			Name thrown = (Name)iter.next();
+			if (exception.subtreeMatch(matcher, thrown))
+				return true;
+		}
+		return false;
 	}
 	
 	public List perform() {
@@ -214,9 +235,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	
 	public boolean visit(SuperMethodInvocation node) {
 		if (matches(node.resolveMethodBinding())) {
-			SimpleName name= fAST.newSimpleName("xxxxx"); //$NON-NLS-1$
-			name.setSourceRange(node.getStartPosition(), 5);
-			fResult.add(name);
+			fResult.add(node.getName());
 		}
 		return super.visit(node);
 	}
