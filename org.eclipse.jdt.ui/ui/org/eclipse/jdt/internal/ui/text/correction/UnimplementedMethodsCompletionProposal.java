@@ -162,13 +162,14 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		return names;
 	}
 		
-	private void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet visited, ArrayList allMethods, ArrayList toImplement) {
+	private void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet visited, ArrayList allMethods, IPackageBinding currPack, ArrayList toImplement) {
 		if (visited.add(typeBinding)) {
 			IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
 			for (int i= 0; i < typeMethods.length; i++) {
 				IMethodBinding curr= typeMethods[i];
 				IMethodBinding impl= findMethod(curr, allMethods);
-				if (impl == null || ((curr.getExceptionTypes().length < impl.getExceptionTypes().length) && !Modifier.isFinal(impl.getModifiers()))) {
+				if (impl == null || !Bindings.isVisibleInHierarchy(impl, currPack) || 
+						((curr.getExceptionTypes().length < impl.getExceptionTypes().length) && !Modifier.isFinal(impl.getModifiers()))) {
 					if (impl != null) {
 						allMethods.remove(impl);
 					}
@@ -180,7 +181,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 			}
 			ITypeBinding[] superInterfaces= typeBinding.getInterfaces();
 			for (int i= 0; i < superInterfaces.length; i++) {
-				findUnimplementedInterfaceMethods(superInterfaces[i], visited, allMethods, toImplement);
+				findUnimplementedInterfaceMethods(superInterfaces[i], visited, allMethods, currPack, toImplement);
 			}
 		}
 	}
@@ -227,7 +228,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		while (curr != null) {
 			ITypeBinding[] superInterfaces= curr.getInterfaces();
 			for (int i= 0; i < superInterfaces.length; i++) {
-				findUnimplementedInterfaceMethods(superInterfaces[i], visited, allMethods, toImplement);
+				findUnimplementedInterfaceMethods(superInterfaces[i], visited, allMethods, typeBinding.getPackage(), toImplement);
 			}
 			curr= curr.getSuperclass();
 		}
