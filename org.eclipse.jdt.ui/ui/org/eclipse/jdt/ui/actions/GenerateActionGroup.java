@@ -295,6 +295,8 @@ public class GenerateActionGroup extends ActionGroup {
 	private IMenuManager createViewSubMenu(IMenuManager mainMenu) {
 		IMenuManager result= new MenuManager(ActionMessages.getString("SourceMenu.label")); //$NON-NLS-1$
 		int added= 0;
+		added+= addAction(result, fSortMembers);
+		result.add(new Separator());
 		added+= addAction(result, fOrganizeImports);
 		added+= addAction(result, fAddImport);
 		result.add(new Separator());
@@ -303,11 +305,10 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(result, fAddDelegateMethods);
 		added+= addAction(result, fAddUnimplementedConstructors);
 		added+= addAction(result, fAddJavaDocStub);
-		added+= addAction(result, fSortMembers);
-		added+= addAction(result, fAddBookmark);
 		result.add(new Separator());		
 		added+= addAction(result, fSurroundWithTryCatch);
 		added+= addAction(result, fExternalizeStrings);
+		added+= addAction(result, fFindStringsToExternalize);
 		if (added == 0)
 			result= null;
 		return result;
