@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
@@ -82,7 +83,8 @@ public class JavaModelUtil {
 		ICompilationUnit[] cus= pack.getCompilationUnits();
 		for (int i= 0; i < cus.length; i++) {
 			ICompilationUnit unit= cus[i];
-			IType type= findType(unit, fullyQualifiedName);
+			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(unit);
+			IType type= findType(wc, fullyQualifiedName);
 			if (type != null && type.exists())
 				return type;
 		}
