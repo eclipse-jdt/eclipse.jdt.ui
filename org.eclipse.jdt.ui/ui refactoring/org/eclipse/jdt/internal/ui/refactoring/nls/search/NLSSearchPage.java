@@ -112,6 +112,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
 
 	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.nls.NLSSearchPage"; //$NON-NLS-1$
+	private static final String RESOURCE_BUNDLE_FIELD= "RESOURCE_BUNDLE"; //$NON-NLS-1$
 
 	private static java.util.List fgPreviousSearchPatterns= new ArrayList(20);
 
@@ -155,7 +156,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	//---- Action Handling ------------------------------------------------
 
 	public boolean performAction() {
-		if (true) //TODO: remove old search support
+		if (false) //TODO: remove old search support
 			return performNewSearch();
 		else
 			return performOldSearch();
@@ -555,6 +556,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 			return null;
 		int searchFor= UNKNOWN;
 		String pattern= null;
+		IType mainType= null;
 		switch (element.getElementType()) {
 			case IJavaElement.PACKAGE_FRAGMENT :
 				searchFor= PACKAGE;
@@ -581,12 +583,13 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				break;
 			case IJavaElement.TYPE :
 				searchFor= TYPE;
-				pattern= JavaModelUtil.getFullyQualifiedName((IType) element);
+				mainType= (IType) element;
+				pattern= JavaModelUtil.getFullyQualifiedName(mainType);
 				break;
 			case IJavaElement.COMPILATION_UNIT :
 				ICompilationUnit cu= (ICompilationUnit) element;
 				String mainTypeName= element.getElementName().substring(0, element.getElementName().indexOf(".")); //$NON-NLS-1$
-				IType mainType= cu.getType(mainTypeName);
+				mainType= cu.getType(mainTypeName);
 				mainTypeName= JavaModelUtil.getTypeQualifiedName(mainType);
 				try {
 					mainType= JavaModelUtil.findTypeInCompilationUnit(cu, mainTypeName);
@@ -644,8 +647,26 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		if (searchFor == TYPE && pattern != null) {
 			String propertyFilePathStr= ""; //$NON-NLS-1$
 			// make suggestion for properties file
-			IPath path= element.getPath().removeFileExtension().addFileExtension("properties"); //$NON-NLS-1$
-			propertyFilePathStr= path.toString();
+			if (mainType != null) {
+				IField bundle= mainType.getField(RESOURCE_BUNDLE_FIELD);
+				if (bundle.exists()) {
+					try {
+						Object constant= bundle.getConstant();
+						if (constant instanceof String) {
+							String string= (String) constant;
+							propertyFilePathStr= mainType.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT).getPath().toString()
+								+ IPath.SEPARATOR + string.substring(1, string.length() - 1).replace('.', IPath.SEPARATOR)
+								+ ".properties"; //$NON-NLS-1$
+						}
+					} catch (JavaModelException e) {
+						//failed
+					}
+				}
+			}
+			if (propertyFilePathStr.length() == 0) {
+				IPath path= element.getPath().removeFileExtension().addFileExtension("properties"); //$NON-NLS-1$
+				propertyFilePathStr= path.toString();
+			}
 			return new SearchPatternData(pattern, element, propertyFilePathStr); //$NON-NLS-1$
 		}
 
