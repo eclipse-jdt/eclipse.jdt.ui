@@ -20,7 +20,6 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -52,6 +51,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 
@@ -171,6 +171,8 @@ public class FullConstraintCreator extends ConstraintCreator{
 	public ITypeConstraint[] create(MethodDeclaration declaration){
 		List result= new ArrayList(declaration.parameters().size());
 		IMethodBinding methodBinding= declaration.resolveBinding();
+		if (methodBinding == null)
+			return new ITypeConstraint[0];
 		result.add(SimpleTypeConstraint.createDefinesConstraint(new DeclaringTypeVariable(methodBinding), new RawBindingVariable(methodBinding.getDeclaringClass())));
 		if (! methodBinding.isConstructor() && ! methodBinding.getReturnType().isPrimitive()){
 			ConstraintVariable returnTypeBindingVariable= new ReturnTypeVariable(methodBinding);
@@ -207,6 +209,8 @@ public class FullConstraintCreator extends ConstraintCreator{
 		List arguments= invocation.arguments();
 		List result= new ArrayList(arguments.size());
 		IMethodBinding methodBinding= invocation.resolveMethodBinding();
+		if (methodBinding == null)
+			return new ITypeConstraint[0];
 		ITypeConstraint returnTypeConstraint= getReturnTypeConstraint(invocation, methodBinding);
 		if (returnTypeConstraint != null)
 			result.add(returnTypeConstraint);
@@ -418,7 +422,7 @@ public class FullConstraintCreator extends ConstraintCreator{
   }
 	
   private static ITypeConstraint getReturnTypeConstraint(Expression invocation, IMethodBinding methodBinding){
-	  if (methodBinding.isConstructor() || methodBinding.getReturnType().isPrimitive())
+	  if (methodBinding == null || methodBinding.isConstructor() || methodBinding.getReturnType().isPrimitive())
 		  return null;
 	  ConstraintVariable returnTypeVariable= new ReturnTypeVariable(methodBinding);
 	  ConstraintVariable invocationVariable= new ExpressionVariable(invocation);
@@ -437,33 +441,28 @@ public class FullConstraintCreator extends ConstraintCreator{
 	  return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);		
   }
 			
-  private static Type getTypeParent(ArrayInitializer arrayInitializer) {
-	  if (arrayInitializer.getParent() instanceof ArrayCreation){
-		  return ((ArrayCreation)arrayInitializer.getParent()).getType().getElementType();
-	  } else if (arrayInitializer.getParent() instanceof VariableDeclaration){
-		  VariableDeclaration parent= (VariableDeclaration)arrayInitializer.getParent();
-
-		  if (parent.getParent() instanceof VariableDeclarationStatement){
-			  Type type= ((VariableDeclarationStatement)parent.getParent()).getType();
-			  if (type.isArrayType())
-				  return ((ArrayType)type).getElementType();
-		  }
-
-		  else if (parent.getParent() instanceof VariableDeclarationExpression){
-			  Type type= ((VariableDeclarationExpression)parent.getParent()).getType();
-			  if (type.isArrayType())
-				  return ((ArrayType)type).getElementType();
-		  }
-
-		  else if (parent.getParent() instanceof FieldDeclaration){
-			  Type type= ((FieldDeclaration)parent.getParent()).getType();
-			  if (type.isArrayType())
-				  return ((ArrayType)type).getElementType();
-		  }
-	  }
-	  Assert.isTrue(false);//array initializers are allowed in only 2 places
-	  return null;
-  }
+	private static Type getTypeParent(ArrayInitializer arrayInitializer) {
+		if (arrayInitializer.getParent() instanceof ArrayCreation){
+			return ((ArrayCreation)arrayInitializer.getParent()).getType().getElementType();
+		} else if (arrayInitializer.getParent() instanceof ArrayInitializer){
+			return getTypeParent((ArrayInitializer) arrayInitializer.getParent());
+		} else if (arrayInitializer.getParent() instanceof VariableDeclaration){
+			VariableDeclaration parent= (VariableDeclaration)arrayInitializer.getParent();
+			
+			if (parent.getParent() instanceof VariableDeclarationStatement){
+				Type type= ((VariableDeclarationStatement)parent.getParent()).getType();
+				return ASTNodes.getElementType(type);
+			} else if (parent.getParent() instanceof VariableDeclarationExpression){
+				Type type= ((VariableDeclarationExpression)parent.getParent()).getType();
+				return ASTNodes.getElementType(type);
+			} else if (parent.getParent() instanceof FieldDeclaration){
+				Type type= ((FieldDeclaration)parent.getParent()).getType();
+				return ASTNodes.getElementType(type);
+		  	}
+		}
+		Assert.isTrue(false);//array initializers are allowed in only 2 places
+		return null;
+	}
 		
   private static ITypeConstraint createOrOrSubtypeConstraint(ConstraintVariable var1, ConstraintVariable var2){
 	  ITypeConstraint c1= SimpleTypeConstraint.createSubtypeConstraint(var1, var2);
