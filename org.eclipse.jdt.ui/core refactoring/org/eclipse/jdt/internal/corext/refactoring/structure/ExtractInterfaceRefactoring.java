@@ -27,10 +27,15 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
@@ -48,11 +53,11 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TemplateUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
@@ -61,17 +66,17 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private final CodeGenerationSettings fCodeGenerationSettings;
 	private final ASTNodeMappingManager fASTMappingManager;
-	private IType fInputClass;
+	private IType fInputType;
 	private String fNewInterfaceName;
 	private IMember[] fExtractedMembers;
 	private boolean fReplaceOccurrences= false;
 	private TextChangeManager fChangeManager;
     private Set fUpdatedTypeReferenceNodes; //Set of ASTNodes
 	
-	public ExtractInterfaceRefactoring(IType clazz, CodeGenerationSettings codeGenerationSettings){
-		Assert.isNotNull(clazz);
+	public ExtractInterfaceRefactoring(IType type, CodeGenerationSettings codeGenerationSettings){
+		Assert.isNotNull(type);
 		Assert.isNotNull(codeGenerationSettings);
-		fInputClass= clazz;
+		fInputType= type;
 		fCodeGenerationSettings= codeGenerationSettings;
 		fExtractedMembers= new IMember[0];
 		fASTMappingManager= new ASTNodeMappingManager();
@@ -84,8 +89,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return "Extract Interface";
 	}
 	
-	public IType getInputClass() {
-		return fInputClass;
+	public IType getInputType() {
+		return fInputType;
 	}
 
 	public String getNewInterfaceName() {
@@ -112,7 +117,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	
 	public IMember[] getExtractableMembers() throws JavaModelException{
 		List members= new ArrayList();
-		IJavaElement[] children= fInputClass.getChildren();
+		IJavaElement[] children= fInputType.getChildren();
 		for (int i= 0; i < children.length; i++) {
 			if (children[i] instanceof IMember && isExtractableMember((IMember)children[i]))
 				members.add(children[i]);
@@ -121,26 +126,22 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkPreactivation() throws JavaModelException {
-		RefactoringStatus result= Checks.checkAvailability(fInputClass);	
-		if (result.hasFatalError())
-			return result;
-		if (fInputClass.isInterface())
-			result.addFatalError("Cannot perform Extract Interface on interfaces.");
+		RefactoringStatus result= Checks.checkAvailability(fInputType);	
 		if (result.hasFatalError())
 			return result;
 
-		if (fInputClass.isLocal())
+		if (fInputType.isLocal())
 			result.addFatalError("Cannot perform Extract Interface on local types.");
 		if (result.hasFatalError())
 			return result;
 
-		if (fInputClass.isAnonymous())
+		if (fInputType.isAnonymous())
 			result.addFatalError("Cannot perform Extract Interface on anonymous types.");
 		if (result.hasFatalError())
 			return result;
 
 		//XXX for now
-		if (! Checks.isTopLevel(fInputClass))
+		if (! Checks.isTopLevel(fInputType))
 			result.addFatalError("Cannot perform Extract Interface on member classes.");
 		if (result.hasFatalError())
 			return result;
@@ -163,20 +164,20 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		IType orig= (IType)WorkingCopyUtil.getOriginal(fInputClass);
+		IType orig= (IType)WorkingCopyUtil.getOriginal(fInputType);
 		if (orig == null || ! orig.exists()){
 			String key= "The selected type has been deleted from ''{0}''";
-			String message= MessageFormat.format(key, new String[]{fInputClass.getCompilationUnit().getElementName()});
+			String message= MessageFormat.format(key, new String[]{fInputType.getCompilationUnit().getElementName()});
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
-		fInputClass= orig;
+		fInputType= orig;
 		
-		if (Checks.isException(fInputClass, pm)){
+		if (Checks.isException(fInputType, pm)){
 			String message= "Extract Interface refactoring is not available on \"java.lang.Throwable\" and its subclasses";
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}
 			
-		return Checks.checkIfCuBroken(fInputClass);
+		return Checks.checkIfCuBroken(fInputType);
 	}
 	
 	/*
@@ -263,7 +264,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
-			pm.beginTask("", 11); //$NON-NLS-1$
+			pm.beginTask("", 10); //$NON-NLS-1$
 			pm.setTaskName("Analyzing...");
 			TextChangeManager manager= new TextChangeManager();
 			updateTypeDeclaration(manager, new SubProgressMonitor(pm, 1));
@@ -271,31 +272,43 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				updateReferences(manager, new SubProgressMonitor(pm, 9));
 			else
 				pm.worked(1);	
-			deleteExtractedConstants(manager, new SubProgressMonitor(pm, 1));	
+				
+			deleteExtractedFields(manager);
+			if (fInputType.isInterface())
+				deleteExtractedMethods(manager);
+				
 			return manager;
 		} finally{
 			pm.done();
 		}	
 	}
+    
+	private void deleteExtractedMethods(TextChangeManager manager) throws CoreException {
+		IMethod[] methods= getExtractedMethods();
+		for (int i= 0; i < methods.length; i++) {
+			deleteExtractedMember(manager, methods[i], "Delete extracted method");
+		}
+	}    
 	
-    private void deleteExtractedConstants(TextChangeManager manager, SubProgressMonitor subProgressMonitor) throws CoreException {
-    	for (int i= 0; i < fExtractedMembers.length; i++) {
-            if (! (fExtractedMembers[i] instanceof IField))
-            	continue;
-            IField field= (IField)fExtractedMembers[i];
-    	    ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(field.getCompilationUnit());
-    	    TextEdit edit= new DeleteSourceReferenceEdit(field, wc);
-           	manager.get(wc).addTextEdit("Delete extracted field", edit);
-        }
-    }
+	private void deleteExtractedFields(TextChangeManager manager) throws CoreException {
+		IField[] fields= getExtractedFields();
+		for (int i= 0; i < fields.length; i++) {
+			deleteExtractedMember(manager, fields[i], "Delete extracted field");
+		}
+	}
+	
+	private static void deleteExtractedMember(TextChangeManager manager, IMember member, String editName) throws CoreException {
+		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(member.getCompilationUnit());
+		manager.get(wc).addTextEdit(editName, new DeleteSourceReferenceEdit(member, wc));
+	}
 
 	private void updateReferences(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException, CoreException {
-		fUpdatedTypeReferenceNodes= UseSupertypeWherePossibleUtil.updateReferences(manager, fExtractedMembers, fNewInterfaceName, fInputClass, fCodeGenerationSettings, fASTMappingManager, pm);
+		fUpdatedTypeReferenceNodes= UseSupertypeWherePossibleUtil.updateReferences(manager, fExtractedMembers, fNewInterfaceName, fInputType, fCodeGenerationSettings, fASTMappingManager, pm);
 	}
 	
 	private boolean areAllExtractableMembersOfClass(IMember[] extractedMembers) throws JavaModelException {
 		for (int i= 0; i < extractedMembers.length; i++) {
-			if (! extractedMembers[i].getParent().equals(fInputClass))
+			if (! extractedMembers[i].getParent().equals(fInputType))
 				return false;
 			if (! isExtractableMember(extractedMembers[i]))
 				return false;
@@ -334,7 +347,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	//----- methods related to creation of the new interface -------
 	private IChange createExtractedInterface() throws CoreException {
 		String lineSeparator= getLineSeperator(); 
-		IPath cuPath= ResourceUtil.getFile(fInputClass.getCompilationUnit()).getFullPath();
+		IPath cuPath= ResourceUtil.getFile(fInputType.getCompilationUnit()).getFullPath();
 		IPath interfaceCuPath= cuPath
 										.removeLastSegments(1)
 										.append(getCuNameForNewInterface());
@@ -350,19 +363,19 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private IPackageFragment getInputClassPackage() {
-		return fInputClass.getPackageFragment();
+		return fInputType.getPackageFragment();
 	}
 
 	private String getLineSeperator() {
 		try {
-			return StubUtility.getLineDelimiterUsed(fInputClass);
+			return StubUtility.getLineDelimiterUsed(fInputType);
 		} catch (JavaModelException e) {
 			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
 	private boolean inputClassHasDirectSuperinterfaces() throws JavaModelException {
-		return fInputClass.getSuperInterfaceNames().length > 0;
+		return fInputType.getSuperInterfaceNames().length > 0;
 	}
 
 	private void updateTypeDeclaration(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
@@ -370,16 +383,18 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		String editName= "Update Type Declaration";
 		int offset= computeIndexOfSuperinterfaceNameInsertion();
 		String text=  computeTextOfSuperinterfaceNameInsertion();
-		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fInputClass.getCompilationUnit());
+		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fInputType.getCompilationUnit());
 		manager.get(cu).addTextEdit(editName, SimpleTextEdit.createInsert(offset, text));
 		pm.done();
 	}
 
 	private String computeTextOfSuperinterfaceNameInsertion() throws JavaModelException {
-		if (! inputClassHasDirectSuperinterfaces())
+		if (inputClassHasDirectSuperinterfaces())
+			return ", " + fNewInterfaceName; //$NON-NLS-1$
+		if (fInputType.isClass())	
 			return " implements " + fNewInterfaceName;	//$NON-NLS-1$
 		else
-			return ", " + fNewInterfaceName; //$NON-NLS-1$
+			return " extends " + fNewInterfaceName;	//$NON-NLS-1$
 	}
 
 	private int computeIndexOfSuperinterfaceNameInsertion() throws JavaModelException {
@@ -396,8 +411,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private TypeDeclaration getTypeDeclarationNode() throws JavaModelException {
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(fInputClass.getNameRange().getOffset(), fInputClass.getNameRange().getLength() +1), true);
-		getAST(fInputClass.getCompilationUnit()).accept(analyzer);
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(fInputType.getNameRange().getOffset(), fInputType.getNameRange().getLength() +1), true);
+		getAST(fInputType.getCompilationUnit()).accept(analyzer);
 		if (analyzer.getFirstSelectedNode() != null){
 			if (analyzer.getFirstSelectedNode().getParent() instanceof TypeDeclaration)
 				return (TypeDeclaration)analyzer.getFirstSelectedNode().getParent();
@@ -426,13 +441,14 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			 .append("interface ")//$NON-NLS-1$
 			 .append(fNewInterfaceName)
 			 .append(" {")//$NON-NLS-1$
+			 .append(getLineSeperator())
 			 .append(createInterfaceMemberDeclarationsSource())
 			 .append("}");//$NON-NLS-1$
 		return buff.toString();
 	}
 
 	private String createInterfaceModifierString() throws JavaModelException {
-		if (JdtFlags.isPublic(fInputClass))
+		if (JdtFlags.isPublic(fInputType))
 			return JdtFlags.VISIBILITY_STRING_PUBLIC + " ";//$NON-NLS-1$
 		else
 			return JdtFlags.VISIBILITY_STRING_PACKAGE;	
@@ -443,6 +459,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		sortByOffset(fExtractedMembers);
 		for (int i= 0; i < fExtractedMembers.length; i++) {
 			buff.append(createInterfaceMemberDeclarationsSource(fExtractedMembers[i]));
+			if (i + 1 != fExtractedMembers.length)
+				buff.append(getLineSeperator());
 		}
 		return buff.toString();
 	}
@@ -465,9 +483,24 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private String createInterfaceMemberDeclarationsSource(IMember iMember) throws JavaModelException {
 		Assert.isTrue(iMember.getElementType() == IJavaElement.FIELD || iMember.getElementType() == IJavaElement.METHOD);
 		if (iMember.getElementType() == IJavaElement.FIELD)
-			return iMember.getSource();
+			return createInterfaceFieldDeclarationSource((IField)iMember);
 		else 
 			return createInterfaceMethodDeclarationsSource((IMethod)iMember);
+	}
+	
+	private String createInterfaceFieldDeclarationSource(IField iField) throws JavaModelException {
+		FieldDeclaration fieldDeclaration= getFieldDeclarationNode(iField);
+		if (fieldDeclaration == null)
+			return ""; //$NON-NLS-1$
+
+		StringBuffer fieldSource= new StringBuffer(SourceReferenceSourceRangeComputer.computeSource(iField));
+		
+		if (fUpdatedTypeReferenceNodes != null){
+			int offset= SourceReferenceSourceRangeComputer.computeSourceRange(iField, iField.getCompilationUnit().getSource()).getOffset();
+			replaceReferencesInFieldDeclaration(fieldDeclaration, offset, fieldSource);
+		}	
+			
+		return fieldSource.toString();
 	}
 
 	private String createInterfaceMethodDeclarationsSource(IMethod iMethod) throws JavaModelException {
@@ -475,16 +508,25 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (methodDeclaration == null)
 			return ""; //$NON-NLS-1$
 	
-		int methodDeclarationOffset= methodDeclaration.getReturnType().getStartPosition();
-		int length= getMethodDeclarationLength(iMethod, methodDeclaration);
-		StringBuffer methodDeclarationSource= new StringBuffer(iMethod.getCompilationUnit().getBuffer().getText(methodDeclarationOffset, length));
-		
-		if (methodDeclaration.getBody() != null)
-			methodDeclarationSource.append(";");
-		
-		if (fUpdatedTypeReferenceNodes != null)
-	        replaceReferencesInMethodDeclaration(methodDeclaration, methodDeclarationOffset, methodDeclarationSource);
-		return methodDeclarationSource.toString();		
+		if (fInputType.isClass()){
+			int methodDeclarationOffset= methodDeclaration.getReturnType().getStartPosition();
+			int length= getMethodDeclarationLength(iMethod, methodDeclaration);
+			StringBuffer methodDeclarationSource= new StringBuffer(iMethod.getCompilationUnit().getBuffer().getText(methodDeclarationOffset, length));
+			
+			if (methodDeclaration.getBody() != null)
+				methodDeclarationSource.append(";");
+			
+			if (fUpdatedTypeReferenceNodes != null)
+		        replaceReferencesInMethodDeclaration(methodDeclaration, methodDeclarationOffset, methodDeclarationSource);
+			return methodDeclarationSource.toString();		
+		} else {
+			StringBuffer source= new StringBuffer(SourceReferenceSourceRangeComputer.computeSource(iMethod));
+			if (fUpdatedTypeReferenceNodes != null){
+				int offset= SourceReferenceSourceRangeComputer.computeSourceRange(iMethod, iMethod.getCompilationUnit().getSource()).getOffset();
+				replaceReferencesInMethodDeclaration(methodDeclaration, offset, source);
+			}
+			return source.toString();
+		}	
 	}
     private void replaceReferencesInMethodDeclaration(MethodDeclaration methodDeclaration, int methodDeclarationOffset, StringBuffer methodDeclarationSource) {
         SingleVariableDeclaration[] params= (SingleVariableDeclaration[]) methodDeclaration.parameters().toArray(new SingleVariableDeclaration[methodDeclaration.parameters().size()]);
@@ -494,6 +536,60 @@ public class ExtractInterfaceRefactoring extends Refactoring {
         }
         replaceReferencesIfUpdated(methodDeclarationOffset, methodDeclarationSource, methodDeclaration.getReturnType());
     }
+
+	private void replaceReferencesInFieldDeclaration(FieldDeclaration fieldDeclaration, int offset, StringBuffer fieldSource) {
+		ASTNode[] inputTypeReferences= getInputTypeReferencesUsedInside(fieldDeclaration);
+		sortBackwardsByStartPosition(inputTypeReferences);
+		for (int i= 0; i < inputTypeReferences.length; i++) {
+			ASTNode node= inputTypeReferences[i];
+			replaceReferencesIfUpdated(offset, fieldSource, node);
+		}
+	}
+	
+	private static void sortBackwardsByStartPosition(ASTNode[] nodes) {
+		Arrays.sort(nodes, new Comparator(){
+			public int compare(Object o1, Object o2) {
+				return ((ASTNode)o1).getStartPosition() - ((ASTNode)o2).getStartPosition();
+			}
+		});
+	}
+	
+	private ASTNode[] getInputTypeReferencesUsedInside(FieldDeclaration fieldDeclaration) {
+		final Set nodes= new HashSet(0);
+		ASTVisitor collector= new ASTVisitor(){
+			public boolean visit(SimpleName node) {
+				if (isReferenceToInputType(node))
+					nodes.add(node);
+				return false;
+			}
+			public boolean visit(SimpleType node) {
+				if (isReferenceToInputType(node))
+					nodes.add(node);
+				return false;
+			}
+			private boolean isReferenceToInputType(SimpleType node) {
+				return isBindingOfInputType(node.resolveBinding());
+			}
+			private boolean isReferenceToInputType(SimpleName node) {
+				return isBindingOfInputType(node.resolveBinding());
+			}
+			private boolean isBindingOfInputType(IBinding iBinding) {
+				if (!(iBinding instanceof ITypeBinding))
+					return false;
+				ITypeBinding tb= (ITypeBinding)iBinding;
+				if (tb.isPrimitive())
+					return false;
+				if (tb.isNullType())	
+					return false;
+				if (! tb.getName().equals(getInputType().getElementName()))	
+					return false;
+				return JavaModelUtil.getFullyQualifiedName(getInputType()).equals(Bindings.getFullyQualifiedImportName(tb));
+			}
+		};
+		fieldDeclaration.accept(collector);
+		return (ASTNode[]) nodes.toArray(new ASTNode[nodes.size()]);
+	}
+
     private void replaceReferencesIfUpdated(int methodDeclarationOffset, StringBuffer methodDeclarationSource, ASTNode node) {
         if (fUpdatedTypeReferenceNodes.contains(node))
         	methodDeclarationSource.replace(node.getStartPosition() - methodDeclarationOffset, ASTNodes.getExclusiveEnd(node) - methodDeclarationOffset, fNewInterfaceName);
@@ -509,6 +605,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private MethodDeclaration getMethodDeclarationNode(IMethod iMethod) throws JavaModelException{
 		return ASTNodeSearchUtil.getMethodDeclarationNode(iMethod, fASTMappingManager);
+	}
+
+	private FieldDeclaration getFieldDeclarationNode(IField iField) throws JavaModelException {
+		return ASTNodeSearchUtil.getFieldDeclarationNode(iField, fASTMappingManager);
 	}
 	
 	private String createImportsSource() throws JavaModelException {
@@ -526,6 +626,15 @@ public class ExtractInterfaceRefactoring extends Refactoring {
         }
         return (IField[]) fields.toArray(new IField[fields.size()]);
     }
+
+	private IMethod[] getExtractedMethods() {
+		List fields= new ArrayList();
+		for (int i= 0; i < fExtractedMembers.length; i++) {
+			if (fExtractedMembers[i] instanceof IMethod)
+				fields.add(fExtractedMembers[i]);
+		}
+		return (IMethod[]) fields.toArray(new IMethod[fields.size()]);
+	}
 
     private void addImportsToTypesReferencedInFieldDeclarations(StringBuffer buff) throws JavaModelException {
     	//XXX pm
