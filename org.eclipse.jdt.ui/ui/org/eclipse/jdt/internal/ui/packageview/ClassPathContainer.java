@@ -3,6 +3,7 @@ package org.eclipse.jdt.internal.ui.packageview;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -57,6 +58,10 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	}
 
 	public Object getParent(Object o) {
+		return fProject;
+	}
+	
+	public IJavaProject getJavaProject() {
 		return fProject;
 	}
 }

@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 
 /**
  * Filters non-shared resources and Java elements
@@ -36,13 +37,18 @@ public class NonSharedFilter extends ViewerFilter {
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IResource)
 			return isSharedProject(((IResource)element).getProject());
-		else if (element instanceof IJavaElement) {
-			IJavaProject jp= ((IJavaElement)element).getJavaProject();
-			if (jp == null)
-				return false;
-			return isSharedProject(jp.getProject());
-		} else
+		
+		IJavaProject jp= null;
+		if (element instanceof IJavaElement) {
+			jp= ((IJavaElement)element).getJavaProject();
+	
+		} else if (element instanceof ClassPathContainer) {
+			ClassPathContainer container= (ClassPathContainer) element;
+			jp= container.getJavaProject();
+		}
+		if (jp == null)
 			return false;
+		return isSharedProject(jp.getProject());
 	}
 	
 	private boolean isSharedProject(IProject project) {
