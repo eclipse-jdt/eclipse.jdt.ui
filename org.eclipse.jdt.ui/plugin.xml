@@ -652,10 +652,10 @@
       point="org.eclipse.ui.popupMenus">
    <objectContribution
          objectClass="org.eclipse.jdt.core.ICompilationUnit"
-         id="org.eclipse.jdt.internal.ui.nls">
+         id="org.eclipse.jdt.internal.ui.refactoring.nls">
       <action
             label="%NLSexternalizeStringsLabel"
-            class="org.eclipse.jdt.internal.ui.nls.ExternalizeAction"
+            class="org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeAction"
             menubarPath="additions"
             enablesFor="1"
             id="ExternalizeStrings">
@@ -668,10 +668,10 @@
       point="org.eclipse.ui.popupMenus">
    <objectContribution
          objectClass="org.eclipse.jdt.core.IPackageFragment"
-         id="org.eclipse.jdt.internal.ui.nls">
+         id="org.eclipse.jdt.internal.ui.refactoring.nls">
       <action
             label="%NLSfindStringsLabel"
-            class="org.eclipse.jdt.internal.ui.nls.FindStringsAction"
+            class="org.eclipse.jdt.internal.ui.refactoring.nls.FindStringsAction"
             menubarPath="additions"
             enablesFor="+"
             id="FindStrings">
@@ -687,9 +687,9 @@
          label="%NLSsearchPageLabel" 										 
          icon="icons/full/obj16/nls_search_obj.gif" 						 
          extensions="java:89, properties:90" 								 
-         class="org.eclipse.jdt.internal.ui.nls.search.NLSSearchPage" 		 
+         class="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchPage" 		 
          sizeHint="460,160" 												 
-         id="org.eclipse.jdt.ui.nls.NLSSearchPage"> 						 
+         id="org.eclipse.jdt.ui.refactoring.nls.NLSSearchPage"> 						 
    </page> 																	 
  /extension> 																 -->
 

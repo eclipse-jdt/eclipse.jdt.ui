@@ -9,7 +9,7 @@ import java.util.ResourceBundle;
 
 class Messages {
 
-	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.nls.changes.nls";//$NON-NLS-1$
+	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.core.refactoring.nls.changes.nls";//$NON-NLS-1$
 
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
 

@@ -9,11 +9,11 @@ import java.util.ResourceBundle;
 
 class Messages {
 
-	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.ui.nls.model.nls"; //$NON-NLS-1$
+	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.core.refactoring.nls.nls"; //$NON-NLS-1$
 
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
 
-		public static String getString(String key) {
+	public static String getString(String key) {
 		try {
 			return fgResourceBundle.getString(key);
 		} catch (MissingResourceException e) {
