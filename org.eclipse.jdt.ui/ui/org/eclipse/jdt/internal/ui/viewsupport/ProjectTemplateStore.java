@@ -19,6 +19,7 @@ import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
@@ -51,11 +52,11 @@ public final class ProjectTemplateStore {
 		}
 	}
 	
-	public TemplatePersistenceData[] getTemplateData(boolean includeDeleted) {
+	public TemplatePersistenceData[] getTemplateData() {
 		if (fProjectStore != null)
 			return (TemplatePersistenceData[]) fDatas.values().toArray(new TemplatePersistenceData[fDatas.size()]);
 		else
-			return fInstanceStore.getTemplateData(includeDeleted);
+			return fInstanceStore.getTemplateData(false);
 	}
 	
 	public Template findTemplateById(String id) {
@@ -69,9 +70,7 @@ public final class ProjectTemplateStore {
 	}
 	
 	public void load() throws IOException {
-		if (fProjectStore == null) {
-			fInstanceStore.load();
-		} else {
+		if (fProjectStore != null) {
 			fDatas.clear();
 			TemplatePersistenceData[] templateData= fInstanceStore.getTemplateData(false);
 			for (int i= 0; i < templateData.length; i++) {
@@ -93,29 +92,26 @@ public final class ProjectTemplateStore {
 		}
 	}
 	
-	public boolean isInheriting(TemplatePersistenceData data) {
+	public boolean isProjectSpecific(TemplatePersistenceData data) {
 		if (fProjectStore == null)
 			return false;
 		
 		return data.isDeleted() || fProjectStore.findTemplateById(data.getId()) == null;
 	}
 	
-	public void makeProjectSpecific(TemplatePersistenceData data) {
-		if (fProjectStore == null)
-			return;
-		
-		if (fProjectStore.findTemplateById(data.getId()) == null)
-			fProjectStore.add(data);
-		data.setDeleted(false);
-	}
 	
-	public void makeInheriting(TemplatePersistenceData data) {
-		if (fProjectStore == null)
-			return;
+	public void setProjectSpecific(TemplatePersistenceData data, boolean projectSpecific) {
+		Assert.isNotNull(fProjectStore);
 		
-		data.setDeleted(true);
+		if (projectSpecific) {
+			if (fProjectStore.findTemplateById(data.getId()) == null)
+				fProjectStore.add(data);
+			data.setDeleted(false);
+		} else {
+			data.setDeleted(true);
+		}
 	}
-	
+
 	public void restoreDefaults() {
 		if (fProjectStore == null) {
 			fInstanceStore.restoreDefaults();
