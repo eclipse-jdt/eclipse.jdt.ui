@@ -86,8 +86,6 @@ public class WorkingSetActionGroup extends ActionGroup {
 	
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		if (fEditAction != null && fEditAction.isEnabled())
-			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fEditAction);
 		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_WORKINGSETS));
 		if (fRemoveAction != null && fRemoveAction.isEnabled())
 			menu.appendToGroup(GROUP_WORKINGSETS, fRemoveAction);
@@ -95,5 +93,7 @@ public class WorkingSetActionGroup extends ActionGroup {
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fCloseAction);
 		if (fOpenAction != null && fOpenAction.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fOpenAction);
+		if (fEditAction != null && fEditAction.isEnabled())
+			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fEditAction);
 	}
 }
