@@ -13,7 +13,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
@@ -103,15 +102,12 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		
 		initializeDialogUnits(parent);
 		
 		Composite result= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
-		layout.marginHeight= 0; //convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+		layout.marginHeight= 0;
 		layout.marginWidth= 0;
-		//layout.verticalSpacing= convertVerticalDLUsToPixels(10);
-		//layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 		result.setLayout(layout);
 	
 		int horizontalIndent= convertWidthInCharsToPixels(4);

@@ -55,7 +55,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_STYLE_COMPACT_ASSIGNEMENT= JavaCore.FORMATTER_COMPACT_ASSIGNMENT;
 	private static final String PREF_TAB_CHAR= JavaCore.FORMATTER_TAB_CHAR;
 	private static final String PREF_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
-	private static final String PREF_SPACE_CASTEXPRESSION= "org.eclipse.jdt.core.formatter.space.castexpression"; //TODO
+	private static final String PREF_SPACE_CASTEXPRESSION= JavaCore.FORMATTER_SPACE_CASTEXPRESSION;
 
 	// values
 	private static final String INSERT=  JavaCore.INSERT;

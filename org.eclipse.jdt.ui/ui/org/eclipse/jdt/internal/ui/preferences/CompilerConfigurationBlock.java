@@ -66,7 +66,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_CIRCULAR_BUILDPATH= JavaCore.CORE_CIRCULAR_CLASSPATH;
 	private static final String PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE= JavaCore.COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE;
 	private static final String PREF_PB_DUPLICATE_RESOURCE= JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE;
-//	private static final String PREF_PB_INCOMPATIBLE_INTERFACE_METHOD= "org.eclipse.jdt.core.compiler.incompatibleNonInheritedInterfaceMethod"; // TODO
+	private static final String PREF_PB_INCOMPATIBLE_INTERFACE_METHOD= JavaCore.COMPILER_PB_INCOMPATIBLE_NON_INHERITED_INTERFACE_METHOD;
 
 	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
 
@@ -123,7 +123,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_UNUSED_IMPORT, PREF_PB_MAX_PER_UNIT, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, 
 			PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_INCOMPLETE_BUILDPATH,
 			PREF_PB_CIRCULAR_BUILDPATH, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, PREF_BUILD_CLEAN_OUTPUT_FOLDER,
-			PREF_PB_DUPLICATE_RESOURCE, PREF_PB_NO_EFFECT_ASSIGNMENT/*, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD*/
+			PREF_PB_DUPLICATE_RESOURCE, PREF_PB_NO_EFFECT_ASSIGNMENT, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD
 		};	
 	}
 
@@ -328,8 +328,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_method_naming.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
-//		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_incompatible_interface_method.label"); //$NON-NLS-1$
-//		addComboBox(warningsComposite, label, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_incompatible_interface_method.label"); //$NON-NLS-1$
+		addComboBox(warningsComposite, label, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_hidden_catchblock.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_HIDDEN_CATCH_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
