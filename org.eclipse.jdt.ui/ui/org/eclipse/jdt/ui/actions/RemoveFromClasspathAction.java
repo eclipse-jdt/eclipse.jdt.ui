@@ -125,7 +125,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 		IPackageFragmentRoot root= (IPackageFragmentRoot)element;
 		try {
 			IClasspathEntry cpe= root.getRawClasspathEntry();
-			if (cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER)
+			if (cpe == null || cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER)
 				return false; // don't want to remove the container if only a child is selected
 			return true;
 		} catch (JavaModelException e) {
