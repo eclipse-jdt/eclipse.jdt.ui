@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,38 +91,44 @@ import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
-
 /**
- * Creates getter and setter methods for a type's fields. Opens a dialog
- * with a list of fields for which a setter or getter can be generated.
- * User is able to check or uncheck items before setters or getters
- * are generated.
+ * Creates getter and setter methods for a type's fields. Opens a dialog with a list of
+ * fields for which a setter or getter can be generated. User is able to check or uncheck
+ * items before setters or getters are generated.
  * <p>
- * Will open the parent compilation unit in a Java editor. The result is 
- * unsaved, so the user can decide if the changes are acceptable.
+ * Will open the parent compilation unit in a Java editor. The result is unsaved, so the
+ * user can decide if the changes are acceptable.
  * <p>
- * The action is applicable to structured selections containing elements
- * of type <code>IField</code> or <code>IType</code>.
+ * The action is applicable to structured selections containing elements of type
+ * <code>IField</code> or <code>IType</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- *
+ * 
  * @since 2.0
  */
 public class AddGetterSetterAction extends SelectionDispatchAction {
+
 	private boolean fSort;
+
 	private boolean fSynchronized;
-	private boolean fFinal;	
+
+	private boolean fFinal;
+
 	private int fVisibility;
+
 	private boolean fGenerateComment;
+
 	private int fNumEntries;
+
 	private CompilationUnitEditor fEditor;
+
 	private static final String DIALOG_TITLE= ActionMessages.getString("AddGetterSetterAction.error.title"); //$NON-NLS-1$
 
 	/**
-	 * Creates a new <code>AddGetterSetterAction</code>. The action requires
-	 * that the selection provided by the site's selection provider is of type <code>
+	 * Creates a new <code>AddGetterSetterAction</code>. The action requires that the
+	 * selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
@@ -131,12 +138,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		setText(ActionMessages.getString("AddGetterSetterAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("AddGetterSetterAction.description")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("AddGetterSetterAction.tooltip")); //$NON-NLS-1$
-		
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GETTERSETTER_ACTION);
 	}
 
 	/**
-	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * Note: This constructor is for internal use only. Clients should not call this
+	 * constructor.
 	 */
 	public AddGetterSetterAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
@@ -144,11 +152,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(editor) != null);
 		fEditor.getEditorSite();
 	}
-		
-	//---- Structured Viewer -----------------------------------------------------------
-	
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
+
+	// ---- Structured Viewer -----------------------------------------------------------
+
+	/*
+	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -160,97 +168,97 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
-		
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */		
+
+	/*
+	 * (non-Javadoc) Method declared on SelectionDispatchAction
+	 */
 	public void run(IStructuredSelection selection) {
 		try {
 			IField[] selectedFields= getSelectedFields(selection);
-			if (canRunOn(selectedFields)){
+			if (canRunOn(selectedFields)) {
 				run(selectedFields[0].getDeclaringType(), selectedFields, false);
 				return;
-			}	
+			}
 			Object firstElement= selection.getFirstElement();
 
 			if (firstElement instanceof IType)
-				run((IType)firstElement, new IField[0], false);
-			else if (firstElement instanceof ICompilationUnit)	{
-				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38500				
+				run((IType) firstElement, new IField[0], false);
+			else if (firstElement instanceof ICompilationUnit) {
+				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38500
 				IType type= ((ICompilationUnit) firstElement).findPrimaryType();
 				if (type.isInterface()) {
 					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
 					return;
-				}
-				else 
+				} else if (type.isAnnotation()) {
+					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.annotation_not_applicable")); //$NON-NLS-1$					
+					return;
+				} else
 					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
 			}
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
-				
+
 	}
-	
+
 	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
 		if (getSelectedFields(selection) != null)
 			return true;
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			//	look if class: not cheap but done by all source generation actions
+			// look if class: not cheap but done by all source generation actions
 			// disable locals until create method is supported by jdt.core (bug 44395)
-			return type.getCompilationUnit() != null && type.isClass() && !type.isLocal();
+			return type.getCompilationUnit() != null && !type.isInterface() && !type.isAnnotation() && !type.isLocal();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
 			return true;
 
 		return false;
-	}	
+	}
 
 	private boolean canRunOn(IField[] fields) throws JavaModelException {
-		if (fields != null && fields.length > 0) {
-			for (int i= 0; i < fields.length; i++) {
-				if (JdtFlags.isEnum(fields[i])) {
-					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.enum_not_applicable")); //$NON-NLS-1$			
-					return false;
-				}
-			}
-			return true;
+		if (fields == null || fields.length == 0)
+			return false;
+		int count= 0;
+		for (int index= 0; index < fields.length; index++) {
+			if (!JdtFlags.isEnum(fields[index]))
+				count++;
 		}
-		return false;
+		if (count == 0)
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.not_applicable")); //$NON-NLS-1$
+		return (count > 0);
 	}
-	
+
 	private void resetNumEntries() {
 		fNumEntries= 0;
 	}
-	
+
 	private void incNumEntries() {
 		fNumEntries++;
 	}
 
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
-		if (type.isEnum()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.enum_not_applicable")); //$NON-NLS-1$
-			return;
-		}
 		if (type.isInterface()) {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
 			return;
-		}		
-		
+		} else if (type.isAnnotation()) {
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.annotation_not_applicable")); //$NON-NLS-1$					
+			return;
+		}
 		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor))
 			return;
 		if (!ActionUtil.isProcessable(getShell(), type))
-			return;			
-		
+			return;
+
 		ILabelProvider lp= new AddGetterSetterLabelProvider();
 		resetNumEntries();
 		Map entries= createGetterSetterMapping(type);
-		if (entries.isEmpty()){
+		if (entries.isEmpty()) {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGettSetterAction.typeContainsNoFields.message")); //$NON-NLS-1$
 			return;
-		}	
+		}
 		AddGetterSetterContentProvider cp= new AddGetterSetterContentProvider(entries);
 		GetterSetterTreeSelectionDialog dialog= new GetterSetterTreeSelectionDialog(getShell(), lp, cp, fEditor, type);
 		dialog.setSorter(new JavaElementSorter());
@@ -262,7 +270,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		dialog.setSize(60, 18);
 		dialog.setInput(type);
 
-		if (preselected.length > 0)  {
+		if (preselected.length > 0) {
 			dialog.setInitialSelections(preselected);
 			dialog.setExpandedElements(preselected);
 		}
@@ -281,191 +289,188 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				getterFields= getGetterFields(result);
 				setterFields= getSetterFields(result);
 				getterSetterFields= new IField[0];
-			}
-			else {
+			} else {
 				getterFields= getGetterOnlyFields(result);
 				setterFields= getSetterOnlyFields(result);
-				getterSetterFields= getGetterSetterFields(result);			
+				getterSetterFields= getGetterSetterFields(result);
 			}
 			IJavaElement elementPosition= dialog.getElementPosition();
-			
+
 			generate(getterFields, setterFields, getterSetterFields, elementPosition);
 		}
 	}
-	
+
 	private static class AddGetterSetterSelectionStatusValidator implements ISelectionStatusValidator {
+
 		private static int fEntries;
-			
+
 		AddGetterSetterSelectionStatusValidator(int entries) {
 			fEntries= entries;
 		}
-		
+
 		public IStatus validate(Object[] selection) {
-			// 	https://bugs.eclipse.org/bugs/show_bug.cgi?id=38478
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38478
 			HashSet map= null;
-			if ((selection != null) && (selection.length > 1))  {
-				map= new HashSet(selection.length);		
-			}						
-	
+			if ((selection != null) && (selection.length > 1)) {
+				map= new HashSet(selection.length);
+			}
+
 			int count= 0;
-			for (int i = 0; i < selection.length; i++) {
+			for (int i= 0; i < selection.length; i++) {
 				try {
-					if (selection[i] instanceof GetterSetterEntry)  {
-						Object key = selection[i];					
+					if (selection[i] instanceof GetterSetterEntry) {
+						Object key= selection[i];
 						IField getsetField= ((GetterSetterEntry) selection[i]).fField;
 						if (((GetterSetterEntry) selection[i]).fGetterEntry) {
 							if (!map.add(GetterSetterUtil.getGetterName(getsetField, null)))
 								return new StatusInfo(IStatus.WARNING, ActionMessages.getString("AddGetterSetterAction.error.duplicate_methods")); //$NON-NLS-1$
-						}
-						else {
+						} else {
 							key= createSignatureKey(GetterSetterUtil.getSetterName(getsetField, null), getsetField);
 							if (!map.add(key))
 								return new StatusInfo(IStatus.WARNING, ActionMessages.getString("AddGetterSetterAction.error.duplicate_methods")); //$NON-NLS-1$					}
 						}
 						count++;
-					} 					
+					}
 				} catch (JavaModelException e) {
-				}				
+				}
 			}
-			
+
 			if (count == 0)
 				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			String message= ActionMessages.getFormattedString("AddGetterSetterAction.methods_selected", //$NON-NLS-1$
-																new Object[] { String.valueOf(count), String.valueOf(fEntries)} ); 																	
+					new Object[] { String.valueOf(count), String.valueOf(fEntries)});
 			return new StatusInfo(IStatus.INFO, message);
-		}		
+		}
 	}
-	
-	/***
-	 * Creates a key used for hashmaps for a method signature (gettersettername+arguments(fqn))
+
+	/*************************************************************************************
+	 * Creates a key used for hashmaps for a method signature
+	 * (gettersettername+arguments(fqn))
 	 */
 	private static String createSignatureKey(String methodName, IField field) throws JavaModelException {
-		StringBuffer buffer = new StringBuffer();
+		StringBuffer buffer= new StringBuffer();
 		buffer.append(methodName);
-		String fieldType= field.getTypeSignature();		
+		String fieldType= field.getTypeSignature();
 		String signature= Signature.getSimpleName(Signature.toString(fieldType));
-		buffer.append("#");  //$NON-NLS-1$
+		buffer.append("#"); //$NON-NLS-1$
 		buffer.append(signature);
-		
+
 		return buffer.toString();
-	}	
-	
+	}
+
 	private static ISelectionStatusValidator createValidator(int entries) {
 		AddGetterSetterSelectionStatusValidator validator= new AddGetterSetterSelectionStatusValidator(entries);
 		return validator;
 	}
 
-	//	returns a list of fields with setter entries checked
-	private static IField[] getSetterFields(Object[] result){
+	// returns a list of fields with setter entries checked
+	private static IField[] getSetterFields(Object[] result) {
 		Collection list= new ArrayList(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
-		for (int i = 0; i < result.length; i++) {
+		for (int i= 0; i < result.length; i++) {
 			each= result[i];
-			if ((each instanceof GetterSetterEntry)){ 
-				entry= (GetterSetterEntry)each;
-				if (! entry.fGetterEntry) {
+			if ((each instanceof GetterSetterEntry)) {
+				entry= (GetterSetterEntry) each;
+				if (!entry.fGetterEntry) {
 					list.add(entry.fField);
 				}
 			}
 		}
-		return (IField[]) list.toArray(new IField[list.size()]);			
+		return (IField[]) list.toArray(new IField[list.size()]);
 	}
-	
-	//	returns a list of fields with getter entries checked
-	private static IField[] getGetterFields(Object[] result){
+
+	// returns a list of fields with getter entries checked
+	private static IField[] getGetterFields(Object[] result) {
 		Collection list= new ArrayList(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
-		for (int i = 0; i < result.length; i++) {
+		for (int i= 0; i < result.length; i++) {
 			each= result[i];
-			if ((each instanceof GetterSetterEntry)){ 
-				entry= (GetterSetterEntry)each;
+			if ((each instanceof GetterSetterEntry)) {
+				entry= (GetterSetterEntry) each;
 				if (entry.fGetterEntry) {
 					list.add(entry.fField);
 				}
 			}
 		}
-		return (IField[]) list.toArray(new IField[list.size()]);			
+		return (IField[]) list.toArray(new IField[list.size()]);
 	}
-	
-	//	returns a list of fields with only getter entires checked
-	private static IField[] getGetterOnlyFields(Object[] result){
+
+	// returns a list of fields with only getter entires checked
+	private static IField[] getGetterOnlyFields(Object[] result) {
 		Collection list= new ArrayList(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
-		for (int i = 0; i < result.length; i++) {
+		for (int i= 0; i < result.length; i++) {
 			each= result[i];
-			if ((each instanceof GetterSetterEntry)){ 
-				entry= (GetterSetterEntry)each;
+			if ((each instanceof GetterSetterEntry)) {
+				entry= (GetterSetterEntry) each;
 				if (entry.fGetterEntry) {
 					list.add(entry.fField);
 					getterSet= true;
 				}
-				if ((! entry.fGetterEntry) && (getterSet == true)) {
+				if ((!entry.fGetterEntry) && (getterSet == true)) {
 					list.remove(entry.fField);
 					getterSet= false;
 				}
-			}
-			else
-				getterSet= false;	
+			} else
+				getterSet= false;
 		}
-		return (IField[]) list.toArray(new IField[list.size()]);			
+		return (IField[]) list.toArray(new IField[list.size()]);
 	}
-	
-	//	returns a list of fields with only setter entries checked
-	private static IField[] getSetterOnlyFields(Object[] result){
+
+	// returns a list of fields with only setter entries checked
+	private static IField[] getSetterOnlyFields(Object[] result) {
 		Collection list= new ArrayList(0);
-		Object each= null;	
+		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
-		for (int i = 0; i < result.length; i++) {
+		for (int i= 0; i < result.length; i++) {
 			each= result[i];
-			if ((each instanceof GetterSetterEntry)){ 
-				entry= (GetterSetterEntry)each;
+			if ((each instanceof GetterSetterEntry)) {
+				entry= (GetterSetterEntry) each;
 				if (entry.fGetterEntry) {
 					getterSet= true;
 				}
-				if ((! entry.fGetterEntry) && (getterSet != true)) {
+				if ((!entry.fGetterEntry) && (getterSet != true)) {
 					list.add(entry.fField);
 					getterSet= false;
 				}
-			}
-			else
-				getterSet= false;	
+			} else
+				getterSet= false;
 		}
-		return (IField[]) list.toArray(new IField[list.size()]);					
+		return (IField[]) list.toArray(new IField[list.size()]);
 	}
-	
+
 	// returns a list of fields with both entries checked
-	private static IField[] getGetterSetterFields(Object[] result){
+	private static IField[] getGetterSetterFields(Object[] result) {
 		Collection list= new ArrayList(0);
-		Object each= null;		
+		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
-		for (int i = 0; i < result.length; i++) {
+		for (int i= 0; i < result.length; i++) {
 			each= result[i];
-			if ((each instanceof GetterSetterEntry)){ 
-				entry= (GetterSetterEntry)each;
+			if ((each instanceof GetterSetterEntry)) {
+				entry= (GetterSetterEntry) each;
 				if (entry.fGetterEntry) {
 					getterSet= true;
 				}
-				if ((! entry.fGetterEntry) && (getterSet == true)) {
+				if ((!entry.fGetterEntry) && (getterSet == true)) {
 					list.add(entry.fField);
 					getterSet= false;
 				}
-			}
-			else
-				getterSet= false;	
+			} else
+				getterSet= false;
 		}
-		return (IField[]) list.toArray(new IField[list.size()]);			
+		return (IField[]) list.toArray(new IField[list.size()]);
 	}
-	
-	private void generate(IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IJavaElement elementPosition) throws CoreException{
+
+	private void generate(IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IJavaElement elementPosition) throws CoreException {
 		if (getterFields.length == 0 && setterFields.length == 0 && getterSetterFields.length == 0)
 			return;
-		
+
 		ICompilationUnit cu= null;
 		if (getterFields.length != 0)
 			cu= getterFields[0].getCompilationUnit();
@@ -473,53 +478,52 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			cu= setterFields[0].getCompilationUnit();
 		else
 			cu= getterSetterFields[0].getCompilationUnit();
-		//open the editor, forces the creation of a working copy
+		// open the editor, forces the creation of a working copy
 		IEditorPart editor= EditorUtility.openInEditor(cu);
-		run(cu, getterFields, setterFields, getterSetterFields, editor, elementPosition);			
+		run(cu, getterFields, setterFields, getterSetterFields, editor, elementPosition);
 	}
-	
-	//---- Java Editior --------------------------------------------------------------
-    
-    /* (non-Javadoc)
-     * Method declared on SelectionDispatchAction
-     */		
+
+	// ---- Java Editior --------------------------------------------------------------
+
+	/*
+	 * (non-Javadoc) Method declared on SelectionDispatchAction
+	 */
 	public void selectionChanged(ITextSelection selection) {
-    }
-	
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */		
+	}
+
+	/*
+	 * (non-Javadoc) Method declared on SelectionDispatchAction
+	 */
 	public void run(ITextSelection selection) {
 		try {
 			if (!ActionUtil.isProcessable(getShell(), fEditor))
-				return;		
-			
+				return;
+
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
-				IField field= (IField)elements[0];
-				run(field.getDeclaringType(), new IField[] {field}, true);
+				IField field= (IField) elements[0];
+				run(field.getDeclaringType(), new IField[] { field}, true);
 				return;
 			}
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
-			
-			if (element != null){
-				IType type= (IType)element.getAncestor(IJavaElement.TYPE);
+
+			if (element != null) {
+				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
 				if (type != null) {
-					if (type.getFields().length > 0){
-						run(type, new IField[0], true);	
+					if (type.getFields().length > 0) {
+						run(type, new IField[0], true);
 						return;
-					} 
+					}
 				}
-			} 
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, 
-				ActionMessages.getString("AddGetterSetterAction.not_applicable")); //$NON-NLS-1$
+			}
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.not_applicable")); //$NON-NLS-1$
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
 	}
-		
-	//---- Helpers -------------------------------------------------------------------
-	
+
+	// ---- Helpers -------------------------------------------------------------------
+
 	private void run(ICompilationUnit cu, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IEditorPart editor, IJavaElement elementPosition) {
 		IRewriteTarget target= (IRewriteTarget) editor.getAdapter(IRewriteTarget.class);
 		if (target != null) {
@@ -528,20 +532,18 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		try {
 			AddGetterSetterOperation op= createAddGetterSetterOperation(getterFields, setterFields, getterSetterFields, elementPosition);
 			setOperationStatusFields(op);
-			
+
 			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 			if (context == null) {
 				context= new BusyIndicatorRunnableContext();
 			}
-			
-			PlatformUI.getWorkbench().getProgressService().runInUI(context, 
-				new WorkbenchRunnableAdapter(op, op.getScheduleRule()),
-				op.getScheduleRule());
-			
+
+			PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
+
 			IMethod[] createdMethods= op.getCreatedAccessors();
 			if (createdMethods.length > 0) {
 				EditorUtility.revealInEditor(editor, createdMethods[0]);
-			}		
+			}
 		} catch (InvocationTargetException e) {
 			String message= ActionMessages.getString("AddGetterSetterAction.error.actionfailed"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, message);
@@ -553,15 +555,15 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}
 		}
 	}
-	
+
 	private void setOperationStatusFields(AddGetterSetterOperation op) {
 		// Set the status fields corresponding to the visibility and modifiers set
 		int flags= fVisibility;
 		if (fSynchronized) {
-			flags |= Flags.AccSynchronized;
+			flags|= Flags.AccSynchronized;
 		}
 		if (fFinal) {
-			flags |= Flags.AccFinal;
+			flags|= Flags.AccFinal;
 		}
 		op.setSort(fSort);
 		op.setFlags(flags);
@@ -573,57 +575,59 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		IRequestQuery skipReplaceQuery= skipReplaceQuery();
 		return new AddGetterSetterOperation(getterFields, setterFields, getterSetterFields, skipSetterForFinalQuery, skipReplaceQuery, elementPosition);
 	}
-	
+
 	private IRequestQuery skipSetterForFinalQuery() {
 		return new IRequestQuery() {
+
 			public int doQuery(IMember field) {
 				// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19367
-				int[] returnCodes= {IRequestQuery.YES, IRequestQuery.YES_ALL, IRequestQuery.NO, IRequestQuery.CANCEL};
-				String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL};
+				int[] returnCodes= { IRequestQuery.YES, IRequestQuery.YES_ALL, IRequestQuery.NO, IRequestQuery.CANCEL};
+				String[] options= { IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL};
 				String fieldName= JavaElementLabels.getElementLabel(field, 0);
 				String formattedMessage= ActionMessages.getFormattedString("AddGetterSetterAction.SkipSetterForFinalDialog.message", fieldName); //$NON-NLS-1$
-				return showQueryDialog(formattedMessage, options, returnCodes);	
+				return showQueryDialog(formattedMessage, options, returnCodes);
 			}
 		};
 	}
-	
+
 	private IRequestQuery skipReplaceQuery() {
 		return new IRequestQuery() {
+
 			public int doQuery(IMember method) {
-				int[] returnCodes= {IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
+				int[] returnCodes= { IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
 				String skipLabel= ActionMessages.getString("AddGetterSetterAction.SkipExistingDialog.skip.label"); //$NON-NLS-1$
 				String replaceLabel= ActionMessages.getString("AddGetterSetterAction.SkipExistingDialog.replace.label"); //$NON-NLS-1$
 				String skipAllLabel= ActionMessages.getString("AddGetterSetterAction.SkipExistingDialog.skipAll.label"); //$NON-NLS-1$
 				String[] options= { skipLabel, replaceLabel, skipAllLabel, IDialogConstants.CANCEL_LABEL};
 				String methodName= JavaElementLabels.getElementLabel(method, JavaElementLabels.M_PARAMETER_TYPES);
 				String formattedMessage= ActionMessages.getFormattedString("AddGetterSetterAction.SkipExistingDialog.message", methodName); //$NON-NLS-1$
-				return showQueryDialog(formattedMessage, options, returnCodes);		
+				return showQueryDialog(formattedMessage, options, returnCodes);
 			}
 		};
 	}
-	
-	
+
 	private int showQueryDialog(final String message, final String[] buttonLabels, int[] returnCodes) {
 		final Shell shell= getShell();
 		if (shell == null) {
 			JavaPlugin.logErrorMessage("AddGetterSetterAction.showQueryDialog: No active shell found"); //$NON-NLS-1$
 			return IRequestQuery.CANCEL;
-		}		
-		final int[] result= { Window.CANCEL };
+		}
+		final int[] result= { Window.CANCEL};
 		shell.getDisplay().syncExec(new Runnable() {
+
 			public void run() {
 				String title= ActionMessages.getString("AddGetterSetterAction.QueryDialog.title"); //$NON-NLS-1$
 				MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
-				result[0]= dialog.open();				
+				result[0]= dialog.open();
 			}
 		});
 		int returnVal= result[0];
 		return returnVal < 0 ? IRequestQuery.CANCEL : returnCodes[returnVal];
-	}	
+	}
 
 	/*
-	 * Returns fields in the selection or <code>null</code> if the selection is 
-	 * empty or not valid.
+	 * Returns fields in the selection or <code>null</code> if the selection is empty or
+	 * not valid.
 	 */
 	private IField[] getSelectedFields(IStructuredSelection selection) {
 		List elements= selection.toList();
@@ -634,8 +638,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			for (int i= 0; i < nElements; i++) {
 				Object curr= elements.get(i);
 				if (curr instanceof IField) {
-					IField fld= (IField)curr;
-					
+					IField fld= (IField) curr;
+
 					if (i == 0) {
 						// remember the cu of the first element
 						cu= fld.getCompilationUnit();
@@ -647,15 +651,16 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 						return null;
 					}
 					try {
-						if (fld.getDeclaringType().isInterface()) {
-							// no setters/getters for interfaces
+						final IType declaringType= fld.getDeclaringType();
+						if (declaringType.isInterface() || declaringType.isAnnotation()) {
+							// no setters/getters for interfaces or annotations
 							return null;
 						}
 					} catch (JavaModelException e) {
 						JavaPlugin.log(e);
 						return null;
 					}
-					
+
 					res[i]= fld;
 				} else {
 					return null;
@@ -665,12 +670,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 		return null;
 	}
-	
+
 	private static class AddGetterSetterLabelProvider extends JavaElementLabelProvider {
-						
-		AddGetterSetterLabelProvider() {	
+
+		AddGetterSetterLabelProvider() {
 		}
-		
+
 		/*
 		 * @see ILabelProvider#getText(Object)
 		 */
@@ -709,40 +714,47 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			return super.getImage(element);
 		}
 	}
-	
+
 	/**
 	 * @return map IField -> GetterSetterEntry[]
 	 */
-	private Map createGetterSetterMapping(IType type) throws JavaModelException{
+	private Map createGetterSetterMapping(IType type) throws JavaModelException {
 		IField[] fields= type.getFields();
 		Map result= new HashMap();
 		for (int i= 0; i < fields.length; i++) {
-			List l= new ArrayList(2);
-			if (GetterSetterUtil.getGetter(fields[i]) == null) {
-				l.add(new GetterSetterEntry(fields[i], true));
-				incNumEntries();
-			}
-				
-			if (GetterSetterUtil.getSetter(fields[i]) == null) {		
-				l.add(new GetterSetterEntry(fields[i], false));	
-				incNumEntries();
-			}
+			if (!JdtFlags.isEnum(fields[i])) {
+				List l= new ArrayList(2);
+				if (GetterSetterUtil.getGetter(fields[i]) == null) {
+					l.add(new GetterSetterEntry(fields[i], true));
+					incNumEntries();
+				}
 
-			if (! l.isEmpty())
-				result.put(fields[i], l.toArray(new GetterSetterEntry[l.size()]));
+				if (GetterSetterUtil.getSetter(fields[i]) == null) {
+					l.add(new GetterSetterEntry(fields[i], false));
+					incNumEntries();
+				}
+
+				if (!l.isEmpty())
+					result.put(fields[i], l.toArray(new GetterSetterEntry[l.size()]));
+			}
 		}
 		return result;
 	}
-	
 
-	private static class AddGetterSetterContentProvider implements ITreeContentProvider {		
+	private static class AddGetterSetterContentProvider implements ITreeContentProvider {
+
 		private static final Object[] EMPTY= new Object[0];
+
 		private Viewer fViewer;
-		private Map fGetterSetterEntries;	//IField -> Object[] (with 0 to 2 elements of type GetterSetterEntry)
-		
+
+		private Map fGetterSetterEntries; // IField -> Object[]
+																// (with 0 to 2 elements
+																// of type
+																// GetterSetterEntry)
+
 		public AddGetterSetterContentProvider(Map entries) {
-			fGetterSetterEntries= entries;		
-		}		
+			fGetterSetterEntries= entries;
+		}
 
 		/*
 		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
@@ -750,17 +762,17 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			fViewer= viewer;
 		}
-		
+
 		public Viewer getViewer() {
 			return fViewer;
 		}
-		
+
 		/*
 		 * @see ITreeContentProvider#getChildren(Object)
 		 */
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof IField)
-				return (Object[])fGetterSetterEntries.get(parentElement);	
+				return (Object[]) fGetterSetterEntries.get(parentElement);
 			return EMPTY;
 		}
 
@@ -768,10 +780,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		 * @see ITreeContentProvider#getParent(Object)
 		 */
 		public Object getParent(Object element) {
-			if (element instanceof IMember) 
-				return ((IMember)element).getDeclaringType();
+			if (element instanceof IMember)
+				return ((IMember) element).getDeclaringType();
 			if (element instanceof GetterSetterEntry)
-				return ((GetterSetterEntry)element).fField;
+				return ((GetterSetterEntry) element).fField;
 			return null;
 		}
 
@@ -781,16 +793,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		public boolean hasChildren(Object element) {
 			return getChildren(element).length > 0;
 		}
-		
-				
+
 		/*
 		 * @see IStructuredContentProvider#getElements(Object)
 		 */
 		public Object[] getElements(Object inputElement) {
 			return fGetterSetterEntries.keySet().toArray();
 		}
-		
-		
+
 		/*
 		 * @see IContentProvider#dispose()
 		 */
@@ -799,76 +809,81 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			fGetterSetterEntries= null;
 		}
 	}
-	
+
 	private static class GetterSetterTreeSelectionDialog extends SourceActionDialog {
+
 		private AddGetterSetterContentProvider fContentProvider;
+
 		private static final int SELECT_GETTERS_ID= IDialogConstants.CLIENT_ID + 1;
+
 		private static final int SELECT_SETTERS_ID= IDialogConstants.CLIENT_ID + 2;
-		private IDialogSettings fSettings;		
+
+		private IDialogSettings fSettings;
 
 		private boolean fSortOrder;
-		
+
 		private final String SETTINGS_SECTION= "AddGetterSetterDialog"; //$NON-NLS-1$
+
 		private final String SORT_ORDER= "SortOrdering"; //$NON-NLS-1$
-				
+
 		public GetterSetterTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, AddGetterSetterContentProvider contentProvider, CompilationUnitEditor editor, IType type) throws JavaModelException {
 			super(parent, labelProvider, contentProvider, editor, type, false);
 			fContentProvider= contentProvider;
-			
+
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 			fSettings= dialogSettings.getSection(SETTINGS_SECTION);
 			if (fSettings == null) {
 				fSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
 				fSettings.put(SORT_ORDER, false); //$NON-NLS-1$
-			}			
-			 
+			}
+
 			fSortOrder= fSettings.getBoolean(SORT_ORDER);
 		}
-		
+
 		public boolean getSortOrder() {
 			return fSortOrder;
-		}				
+		}
 
-		public void setSortOrder(boolean sort)  {
-			if (fSortOrder != sort)  {
+		public void setSortOrder(boolean sort) {
+			if (fSortOrder != sort) {
 				fSortOrder= sort;
 				fSettings.put(SORT_ORDER, sort);
-				if (fContentProvider.fViewer != null)  {
+				if (fContentProvider.fViewer != null) {
 					fContentProvider.fViewer.refresh();
 				}
 			}
 		}
-				
+
 		private void createGetterSetterButtons(Composite buttonComposite) {
 			createButton(buttonComposite, SELECT_GETTERS_ID, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_getters"), false); //$NON-NLS-1$	
 			createButton(buttonComposite, SELECT_SETTERS_ID, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_setters"), false); //$NON-NLS-1$				
 		}
-						
+
 		protected void buttonPressed(int buttonId) {
 			super.buttonPressed(buttonId);
-			switch(buttonId) {
+			switch (buttonId) {
 				case SELECT_GETTERS_ID: {
 					getTreeViewer().setCheckedElements(getGetterSetterElements(true));
-					updateOKStatus();						
+					updateOKStatus();
 					break;
 				}
 				case SELECT_SETTERS_ID: {
 					getTreeViewer().setCheckedElements(getGetterSetterElements(false));
-					updateOKStatus();									
+					updateOKStatus();
 					break;
 				}
 			}
-		}			
-		
+		}
+
 		protected Composite createInsertPositionCombo(Composite composite) {
-			Composite entryComposite= super.createInsertPositionCombo(composite);			
+			Composite entryComposite= super.createInsertPositionCombo(composite);
 			addSortOrder(entryComposite);
 			addVisibilityAndModifiersChoices(entryComposite);
-			
-			return entryComposite;						
+
+			return entryComposite;
 		}
-		
+
 		private Composite addSortOrder(Composite composite) {
 			Label label= new Label(composite, SWT.NONE);
 			label.setText(ActionMessages.getString("GetterSetterTreeSelectionDialog.sort_label")); //$NON-NLS-1$
@@ -876,29 +891,31 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			label.setLayoutData(gd);
 
 			final Combo combo= new Combo(composite, SWT.READ_ONLY);
-			combo.setItems(new String[]{ActionMessages.getString("GetterSetterTreeSelectionDialog.alpha_pair_sort"), //$NON-NLS-1$
-										ActionMessages.getString("GetterSetterTreeSelectionDialog.alpha_method_sort")});  //$NON-NLS-1$  
-			final int methodIndex= 1;	// Hard-coded. Change this if the list gets more complicated.
+			combo.setItems(new String[] { ActionMessages.getString("GetterSetterTreeSelectionDialog.alpha_pair_sort"), //$NON-NLS-1$
+					ActionMessages.getString("GetterSetterTreeSelectionDialog.alpha_method_sort")}); //$NON-NLS-1$  
+			final int methodIndex= 1; // Hard-coded. Change this if the
+														// list gets more complicated.
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
 			int sort= getSortOrder() ? 1 : 0;
 			combo.setText(combo.getItem(sort));
 			gd= new GridData(GridData.FILL_BOTH);
 			combo.setLayoutData(gd);
-			combo.addSelectionListener(new SelectionAdapter(){
+			combo.addSelectionListener(new SelectionAdapter() {
+
 				public void widgetSelected(SelectionEvent e) {
 					setSortOrder(combo.getSelectionIndex() == methodIndex);
 				}
-			});	
+			});
 			return composite;
 		}
-				
-		private Object[] getGetterSetterElements(boolean isGetter){
+
+		private Object[] getGetterSetterElements(boolean isGetter) {
 			Object[] allFields= fContentProvider.getElements(null);
 			Set result= new HashSet();
-			for (int i = 0; i < allFields.length; i++) {
-				IField field= (IField)allFields[i];
+			for (int i= 0; i < allFields.length; i++) {
+				IField field= (IField) allFields[i];
 				GetterSetterEntry[] entries= getEntries(field);
-				for (int j = 0; j < entries.length; j++) {
+				for (int j= 0; j < entries.length; j++) {
 					AddGetterSetterAction.GetterSetterEntry entry= entries[j];
 					if (entry.fGetterEntry == isGetter)
 						result.add(entry);
@@ -911,19 +928,19 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			List result= Arrays.asList(fContentProvider.getChildren(field));
 			return (GetterSetterEntry[]) result.toArray(new GetterSetterEntry[result.size()]);
 		}
-		
+
 		protected Composite createSelectionButtons(Composite composite) {
 			Composite buttonComposite= super.createSelectionButtons(composite);
 
-			GridLayout layout = new GridLayout();
-			buttonComposite.setLayout(layout);						
+			GridLayout layout= new GridLayout();
+			buttonComposite.setLayout(layout);
 
 			createGetterSetterButtons(buttonComposite);
-			
+
 			layout.marginHeight= 0;
-			layout.marginWidth= 0;						
+			layout.marginWidth= 0;
 			layout.numColumns= 1;
-			
+
 			return buttonComposite;
 		}
 
@@ -933,20 +950,21 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		protected Control createLinkControl(Composite composite) {
 			final Control control= createLinkText(composite, new Object[] { JavaUIMessages.getString("GetterSetterMethodDialog.link.text.before"), new String[] { JavaUIMessages.getString("GetterSetterMethodDialog.link.text.middle"), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", "gettercomment", JavaUIMessages.getString("GetterSetterMethodDialog.link.tooltip")}, JavaUIMessages.getString("GetterSetterMethodDialog.link.text.after")}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 			final GridData data= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-			data.widthHint= 150; // only expand further if anyone else requires it
+			data.widthHint= 150;
 			control.setLayoutData(data);
 			return control;
 		}
 	}
 
 	private static class GetterSetterEntry {
+
 		public final IField fField;
+
 		public final boolean fGetterEntry;
 
-		GetterSetterEntry(IField field, boolean isGetterEntry){
+		GetterSetterEntry(IField field, boolean isGetterEntry) {
 			fField= field;
 			fGetterEntry= isGetterEntry;
 		}
 	}
-
 }
