@@ -685,7 +685,9 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 
 		fTreeViewer.setChecked(treeElement, shouldBeAtLeastGray);
 		setWhiteChecked(treeElement, whiteChecked);
-		if (!whiteChecked)
+		if (whiteChecked)
+			fTreeViewer.setGrayed(treeElement, false);
+		else
 			fTreeViewer.setGrayed(treeElement, shouldBeAtLeastGray);
 
 		// proceed up the tree element hierarchy
