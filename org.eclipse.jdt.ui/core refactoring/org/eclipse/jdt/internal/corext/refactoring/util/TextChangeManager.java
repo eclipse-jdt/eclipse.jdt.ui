@@ -74,5 +74,14 @@ public class TextChangeManager {
 	public void clear() {
 		fMap.clear();
 	}
+
+	/**
+	 * Returns if any text changes are managed for the specified compilation unit.
+	 * 
+	 * @return <code>true</code> if any text changes are managed for the specified compilation unit and <code>false</code> otherwise.
+	 */		
+	public boolean containsChangesIn(ICompilationUnit cu){
+		return fMap.containsKey(cu);
+	}
 }
 
