@@ -149,7 +149,7 @@ public class AddExceptionDialog extends StatusDialog {
 		}
 		fExceptionType= getExceptionType(resolvedType);
 		if (fExceptionType == NO_EXCEPTION) {
-			updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The selcted class is not a subclass of java.lang.Throwable", null));
+			updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The selected class is not a subclass of java.lang.Throwable", null));
 			return;
 		}
 		fIsCaughtSelected= fCaughtBox.getSelection();
