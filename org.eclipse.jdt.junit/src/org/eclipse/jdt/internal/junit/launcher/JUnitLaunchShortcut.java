@@ -39,7 +39,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
  */
 public class JUnitLaunchShortcut implements ILaunchShortcut {
 
-	private void searchAndLaunch(Object[] search, String mode) {
+	protected void searchAndLaunch(Object[] search, String mode) {
 		IType[] types= null;
 
 		if (search != null) {
