@@ -2,7 +2,7 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.rename.InlineTempRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -42,7 +42,7 @@ public class InlineTempAction extends TextSelectionBasedRefactoringAction {
 	 * @see TextSelectionBasedRefactoringAction#getDialogTitle()
 	 */
 	protected String getDialogTitle() {
-		return "Inline local variable";
+		return "Inline Local Variable";
 	}
 }
 

@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.InlineTempRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 public class InlineTempTests extends RefactoringTest {
 
