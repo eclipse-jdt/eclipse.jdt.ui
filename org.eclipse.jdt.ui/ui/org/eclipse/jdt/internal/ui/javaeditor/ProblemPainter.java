@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
@@ -153,6 +154,26 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		fModel= null;
 		fProblemPositions= null;
 	}
+
+	/*
+	 * Returns the document offset of the upper left corner of the widgets viewport,
+	 * possibly including partially visible lines.
+	 */
+	private static int getInclusiveTopIndexStartOffset(StyledText text, IDocument document, int visibleRegionOffset) {
+		
+		if (text != null) {	
+			int top= text.getTopIndex();
+			if ((text.getTopPixel() % text.getLineHeight()) != 0)
+				top--;
+			try {
+				top= document.getLineOffset(top -  visibleRegionOffset);
+				return top + visibleRegionOffset;
+			} catch (BadLocationException ex) {
+			}
+		}
+		
+		return -1;
+	}
 	
 	/*
 	 * @see PaintListener#paintControl(PaintEvent)
@@ -163,13 +184,14 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	}
 	
 	private void handleDrawRequest(GC gc) {
-		
-		int vOffset= fSourceViewer.getTopIndexStartOffset();
-		int vLength= fSourceViewer.getBottomIndexEndOffset();
-		
+
 		IRegion region= fSourceViewer.getVisibleRegion();
 		int offset= region.getOffset();
 		int length= region.getLength();
+
+		int vOffset= getInclusiveTopIndexStartOffset(fTextWidget, fSourceViewer.getDocument(), offset);		
+//		int vOffset= fSourceViewer.getTopIndexStartOffset();
+		int vLength= fSourceViewer.getBottomIndexEndOffset();		
 		
 		for (Iterator e = fProblemPositions.iterator(); e.hasNext();) {
 			Position p = (Position) e.next();
