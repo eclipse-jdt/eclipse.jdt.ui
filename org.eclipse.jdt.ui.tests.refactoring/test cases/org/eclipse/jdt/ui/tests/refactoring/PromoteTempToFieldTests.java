@@ -80,13 +80,6 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 	}
 	
 	
-	private String getFailingTestFileName(){
-		return getTestFileName(false, false);
-	}
-	private String getPassingTestFileName(boolean input){
-		return getTestFileName(true, input);
-	}
-	
 	//------------
 	protected final ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canPromote, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canPromote, input), getFileContents(getTestFileName(canPromote, input)));
