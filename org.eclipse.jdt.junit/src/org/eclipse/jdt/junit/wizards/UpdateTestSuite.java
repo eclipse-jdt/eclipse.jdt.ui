@@ -222,6 +222,6 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	}
 
 	private void noSuiteError() {
-		MessageDialog.openError(fShell, Messages.getString("UpdateAllTests.cannotFind.errorDialog.title"), Messages.getString("UpdateAllTests.cannotFind.errorDialog.message"));
+		MessageDialog.openError(fShell, Messages.getString("UpdateAllTests.cannotFind.errorDialog.title"), Messages.getString("UpdateAllTests.cannotFind.errorDialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

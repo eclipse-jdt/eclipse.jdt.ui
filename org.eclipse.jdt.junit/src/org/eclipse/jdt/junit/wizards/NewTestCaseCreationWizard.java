@@ -22,13 +22,13 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 	private NewTestCaseCreationWizardPage fPage;
 	private NewTestCaseCreationWizardPage2 fPage2;
 
-	private static String DIALOG_SETTINGS_KEY= "NewTestCaseCreationWizardPage";
+	private static String DIALOG_SETTINGS_KEY= "NewTestCaseCreationWizardPage"; //$NON-NLS-1$
 	
 	public NewTestCaseCreationWizard() {
 		super();
 		//setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
 		//setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle("JUnit TestCase");
+		setWindowTitle(Messages.getString("Wizard.title.new")); //$NON-NLS-1$
 		IDialogSettings pluginSettings= JUnitPlugin.getDefault().getDialogSettings();
 		IDialogSettings wizardSettings= pluginSettings.getSection(DIALOG_SETTINGS_KEY);
 		if (wizardSettings == null) {

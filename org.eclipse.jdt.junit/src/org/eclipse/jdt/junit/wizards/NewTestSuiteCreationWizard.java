@@ -36,7 +36,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 		super();
 		//setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
 		//setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		//setWindowTitle(NewWizardMessages.getString("NewClassCreationWizard.title")); //$NON-NLS-1$
+		setWindowTitle(Messages.getString("Wizard.title.new")); //$NON-NLS-1$
 	}
 
 	/*

@@ -70,7 +70,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 
 	protected final static String STORE_GENERATE_MAIN= PAGE_NAME + ".GENERATE_MAIN"; //$NON-NLS-1$
 	protected final static String STORE_USE_TESTRUNNER= PAGE_NAME + ".USE_TESTRUNNER";	//$NON-NLS-1$
-	protected final static String STORE_TESTRUNNER_TYPE= PAGE_NAME + ".TESTRUNNER_TYPE";
+	protected final static String STORE_TESTRUNNER_TYPE= PAGE_NAME + ".TESTRUNNER_TYPE"; //$NON-NLS-1$
 
 	
 	private String fDefaultClassToTest;
@@ -600,7 +600,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 
 		if (visible && fFirstTime) {
 			handleFieldChanged(CLASS_TO_TEST); //creates error message when wizard is opened if TestCase already exists
-			if (getClassToTestText().equals(""))
+			if (getClassToTestText().equals("")) //$NON-NLS-1$
 				setPageComplete(false);
 			fFirstTime= false;
 		}
@@ -803,7 +803,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 						status.setWarning(Messages.getFormattedString("NewTestClassWizPage.warning.class_to_test.is_interface",classToTestName)); //$NON-NLS-1$
 					}
 					if (pack != null && !JavaModelUtil.isVisible(type, pack)) {
-						status.setWarning(Messages.getFormattedString("NewTestClassWizPage.warning.class_to_test.not_visible",classToTestName));//$NON-NLS-1$
+						status.setWarning(Messages.getFormattedString("NewTestClassWizPage.warning.class_to_test.not_visible", new String[] {(type.isInterface())?Messages.getString("Interface"):Messages.getString("Class") , classToTestName})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 				}
 				fClassToTest= type;
