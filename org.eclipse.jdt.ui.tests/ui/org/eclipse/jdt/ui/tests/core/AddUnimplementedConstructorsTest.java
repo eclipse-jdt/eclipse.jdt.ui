@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstruc
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
@@ -56,7 +57,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -141,7 +142,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super();\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("}\n");
 		compareSource(buf.toString(), testClass.getSource());
 	}
@@ -188,7 +189,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super();\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     */\n");
@@ -196,7 +197,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("}\n");
 
 		compareSource(buf.toString(), testClass.getSource());
@@ -245,7 +246,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     */\n");
@@ -253,7 +254,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param boo\n");
@@ -262,7 +263,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("}\n");
 
 		compareSource(buf.toString(), testClass.getSource());
@@ -308,7 +309,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super();\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("}\n");
 
 		compareSource(buf.toString(), testClass.getSource());
@@ -434,42 +435,42 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    public Test1(int a) {\n");
 		buf.append("        super(a);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    public Test1(int a, boolean boo, String fooString) {\n");
 		buf.append("        super(a, boo, fooString);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    public Test1(int a, boolean boo, String fooString, StringBuffer buf) {\n");
 		buf.append("        super(a, boo, fooString, buf);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a) {\n");
 		buf.append("        super(a, boo, fooString, buf, a);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a, double c) {\n");
 		buf.append("        super(a, boo, fooString, buf, a, c);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a, double c, float d) {\n");
 		buf.append("        super(a, boo, fooString, buf, a, c, d);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a, double c, float d, String secondString) {\n");
 		buf.append("        super(a, boo, fooString, buf, a, c, d, secondString);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("}\n");
 
 		compareSource(buf.toString(), testClass.getSource());
@@ -528,7 +529,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, buf, a);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param boo\n");
@@ -541,7 +542,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, buf, a, c);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param boo\n");
@@ -555,7 +556,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, buf, a, c, d);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param boo\n");
@@ -570,7 +571,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, buf, a, c, d, secondString);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("}\n");
 		compareSource(buf.toString(), testClass.getSource());
 	}
@@ -636,7 +637,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, buf, a);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param boo\n");
@@ -649,7 +650,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, buf, a, c);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param boo\n");
@@ -663,7 +664,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, buf, a, c, d);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param boo\n");
@@ -678,7 +679,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, buf, a, c, d, secondString);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param boo\n");
@@ -694,7 +695,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, buf, a, c, d, secondString, xxx);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("}\n");
 
 		compareSource(buf.toString(), testClass.getSource());
@@ -838,12 +839,12 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super();\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    public Test1(int a, boolean boo, String fooString, int bologna) {\n");
 		buf.append("        super(a, boo, fooString, bologna);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("}\n");
 
 
@@ -896,7 +897,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     */\n");
@@ -904,7 +905,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param boo\n");
@@ -915,7 +916,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, bologna);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param boo\n");
@@ -926,7 +927,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, buf);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("}\n");
 
 		compareSource(buf.toString(), testClass.getSource());
@@ -977,7 +978,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(a, boo, fooString, buf);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("}\n");
 
 
@@ -1030,7 +1031,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("        super(v, a);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		if (CodeFormatterUtil.OLD_FORMATTER) buf.append("\n");
 		buf.append("}\n");
 
 

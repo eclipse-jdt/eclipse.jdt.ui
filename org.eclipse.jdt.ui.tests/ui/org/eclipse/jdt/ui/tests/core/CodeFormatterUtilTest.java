@@ -19,6 +19,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
@@ -84,7 +86,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		String contents= buf.toString();
 		
 	
-		String formatted= CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, contents, 0, null, "\n", null);
+		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 0, null, "\n", null);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -109,7 +111,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		String contents= buf.toString();
 		
 	
-		String formatted= CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, contents, 1, null, "\n", null);
+		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 1, null, "\n", null);
 
 		buf= new StringBuffer();
 		buf.append("    package test1;\n");
@@ -133,7 +135,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("}\n");
 		String contents= buf.toString();
 			
-		TextEdit edit= CodeFormatterUtil.format2(CodeFormatterUtil.K_COMPILATION_UNIT, contents, 0, "\n", null);
+		TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, contents, 0, "\n", null);
 		Document doc= new Document(contents);
 		edit.apply(doc);
 		String formatted= doc.get();
@@ -164,7 +166,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("}\n");
 		String contents= buf.toString();
 			
-		TextEdit edit= CodeFormatterUtil.format2(CodeFormatterUtil.K_COMPILATION_UNIT, contents, 0, "\n", null);
+		TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, contents, 0, "\n", null);
 		Document doc= new Document(contents);
 		edit.apply(doc);
 		String formatted= doc.get();
@@ -199,7 +201,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		int start1= contents.indexOf(word1);
 		int[] positions= { start1, start1 + word1.length() - 1};
 		
-		String formatted= CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, contents, 0, positions, "\n", null);
+		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 0, positions, "\n", null);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -466,7 +468,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		
 		String formatString= "Runnable runnable= new Runnable() {};";
 		int formatStart= contents.indexOf(formatString);
-		int formatEnd= formatStart + formatString.length();
+		int formatLength= formatString.length();
 		
 		
 		String word1= "import";
@@ -477,11 +479,15 @@ public class CodeFormatterUtilTest extends CoreTests {
 		
 		String word3= "toString";
 		int start3= contents.indexOf(word3);		
+				
+		Position pos1= new Position(start1, word1.length());
+		Position pos2= new Position(start2, word2.length());
+		Position pos3= new Position(start3, word3.length());
 		
-		int[] positions= { start1, start1 + word1.length() - 1, start2, start2 + word2.length() - 1, start3, start3 + word3.length() - 1};
+		TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, contents, formatStart, formatLength, 0, "\n", null);
+		assertNotNull(edit);
+		String formatted= CodeFormatterUtil.evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2, pos3});
 		
-		String formatted= CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, contents, formatStart, formatEnd, 0, positions, "\n", null);
-
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -496,13 +502,13 @@ public class CodeFormatterUtilTest extends CoreTests {
 		String expected= buf.toString();
 		assertEqualString(formatted, expected);
 		
-		String curr1= formatted.substring(positions[0], positions[1] + 1);
+		String curr1= formatted.substring(pos1.offset, pos1.getOffset() + pos1.getLength());
 		assertEqualString(curr1, word1);
 		
-		String curr2= formatted.substring(positions[2], positions[3] + 1);
+		String curr2= formatted.substring(pos2.offset, pos2.getOffset() + pos2.getLength());
 		assertEqualString(curr2, word2);
 		
-		String curr3= formatted.substring(positions[4], positions[5] + 1);
+		String curr3= formatted.substring(pos3.offset, pos3.getOffset() + pos3.getLength());
 		assertEqualString(curr3, word3);
 		
 	}	
