@@ -43,6 +43,8 @@ import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 
 public class RenamePackageTests extends RefactoringTest {
+	private static final boolean BUG_6054= true;
+	private static final boolean BUG_54962_71267= true;
 	
 	private static final Class clazz= RenamePackageTests.class;
 	private static final String REFACTORING_PATH= "RenamePackage/";
@@ -398,9 +400,11 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	//-------
 	public void test0() throws Exception{
-		printTestDisabledMessage("bug 54962");
-		if (false)
-			helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
+		if (BUG_54962_71267) {
+			printTestDisabledMessage("bugs 54962, 71267");
+			return;
+		}
+		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
 	}
 	
 	public void test1() throws Exception{
@@ -429,9 +433,10 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void testReadOnly() throws Exception{
-		printTestDisabledMessage("see bug#6054 (renaming a read-only package resets the read-only flag)");
-		if (true)
+		if (BUG_6054) {
+			printTestDisabledMessage("see bug#6054 (renaming a read-only package resets the read-only flag)");
 			return;
+		}
 		
 		String[] packageNames= new String[]{"r"};
 		String[][] packageFileNames= new String[][]{{"A"}};
