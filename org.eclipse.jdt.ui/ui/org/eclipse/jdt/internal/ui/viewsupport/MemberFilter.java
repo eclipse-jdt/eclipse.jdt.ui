@@ -14,7 +14,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
@@ -64,20 +63,22 @@ public class MemberFilter extends ViewerFilter {
 	 */		
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		try {
-			if (hasFilter(FILTER_FIELDS) && element instanceof IField) {
-				return false;
-			}
-			if (hasFilter(FILTER_LOCALTYPES) && element instanceof IType && ((IType) element).isLocal()) {
-				return false;
-			}
-			
 			if (element instanceof IMember) {
-				IMember member= (IMember)element;
+				IMember member= (IMember) element;
+				int memberType= member.getElementType();
+				
+				if (hasFilter(FILTER_FIELDS) && memberType == IJavaElement.FIELD) {
+					return false;
+				}
+				if (hasFilter(FILTER_LOCALTYPES) && memberType == IJavaElement.TYPE && !(member.getParent() instanceof IType)) {
+					return false;
+				}
+				
 				if (member.getElementName().startsWith("<")) { // filter out <clinit> //$NON-NLS-1$
 					return false;
 				}
 				int flags= member.getFlags();
-				if (hasFilter(FILTER_STATIC) && (Flags.isStatic(flags) || isFieldInInterface(member)) && member.getElementType() != IJavaElement.TYPE) {
+				if (hasFilter(FILTER_STATIC) && (Flags.isStatic(flags) || isFieldInInterface(member)) && memberType != IJavaElement.TYPE) {
 					return false;
 				}
 				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterface(member) && !isTopLevelType(member)) {
@@ -99,7 +100,7 @@ public class MemberFilter extends ViewerFilter {
 		return (member.getElementType() == IJavaElement.FIELD) && member.getDeclaringType().isInterface();
 	}	
 	
-	private boolean isTopLevelType(IMember member) throws JavaModelException {
+	private boolean isTopLevelType(IMember member) {
 		IType parent= member.getDeclaringType();
 		return parent == null;
 	}		
