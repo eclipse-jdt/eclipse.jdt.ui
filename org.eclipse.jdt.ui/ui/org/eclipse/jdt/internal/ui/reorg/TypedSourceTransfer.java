@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-class TypedSourceTransfer extends ByteArrayTransfer {
+public class TypedSourceTransfer extends ByteArrayTransfer {
 
 	/**
 	 * Singleton instance.
@@ -127,7 +127,7 @@ class TypedSourceTransfer extends ByteArrayTransfer {
 	private static TypedSource readJavaElement(DataInputStream dataIn) throws IOException {
 		int type= dataIn.readInt();
 		String source= dataIn.readUTF();
-		return new TypedSource(source, type);
+		return TypedSource.create(source, type);
 	}
 
 	private static void writeJavaElement(DataOutputStream dataOut, TypedSource sourceReference) throws IOException, JavaModelException {
