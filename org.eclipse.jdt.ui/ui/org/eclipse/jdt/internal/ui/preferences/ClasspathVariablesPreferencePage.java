@@ -33,6 +33,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		// title only used when page is shown programatically
 		setTitle(PreferencesMessages.getString("ClasspathVariablesPreferencePage.title")); //$NON-NLS-1$
 		setDescription(PreferencesMessages.getString("ClasspathVariablesPreferencePage.description")); //$NON-NLS-1$
+		noDefaultAndApplyButton();
 	}
 
 	/*
