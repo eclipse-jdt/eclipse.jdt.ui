@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.texteditor.MarkerUtilities;
+import org.eclipse.ui.views.tasklist.TaskPropertiesDialog;
 
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -45,18 +46,9 @@ public class AddTaskAction extends SelectionDispatchAction {
 		if (resource == null)
 			return;
 
-		InputDialog dialog= new InputDialog(getShell(), getDialogTitle(), ActionMessages.getString("AddTaskAction.inputDialog.message"), "", null); //$NON-NLS-1$ //$NON-NLS-2$
-		if (dialog.open() == IDialogConstants.CANCEL_ID)
-			return;
-			
-		String message= dialog.getValue().trim();
-		Map attributes= new HashMap(2);
-		MarkerUtilities.setMessage(attributes, message);
-		try {
-			MarkerUtilities.createMarker(resource, attributes, IMarker.TASK);
-		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddTaskAction.error.create_failed")); //$NON-NLS-1$
-		}	
+		TaskPropertiesDialog dialog= new TaskPropertiesDialog(getShell());
+		dialog.setResource(resource);
+		dialog.open();
 	}
 	
 	private IResource getElement(IStructuredSelection selection) {
@@ -67,9 +59,5 @@ public class AddTaskAction extends SelectionDispatchAction {
 		if (!(element instanceof IAdaptable))
 			return null;
 		return (IResource)((IAdaptable)element).getAdapter(IResource.class);
-	}
-	
-	private String getDialogTitle() {
-		return ActionMessages.getString("AddTaskAction.dialog.title"); //$NON-NLS-1$
-	}
+	}	
 }
