@@ -310,11 +310,19 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		
 		if (!imp.isOnDemand()){
 			IType importedType= (IType)JavaModelUtility.convertFromImportDeclaration(imp);
-			if (name.substring(name.lastIndexOf(".") + 1).equals(fNewName))
-				result.addError("Name conflict with type" + importedType.getFullyQualifiedName() + " in "+ getFullPath(getCompilationUnit(imp)));
+			if (name.substring(name.lastIndexOf(".") + 1).equals(fNewName)){
+				if (importedType != null)
+					result.addError("Name conflict with type" + importedType.getFullyQualifiedName() + " in "+ getFullPath(getCompilationUnit(imp)));
+				else
+					result.addError("Name conflict with type" + name + " in "+ getFullPath(getCompilationUnit(imp)));
+			}	
 			return;
 		}
+		
 		IJavaElement imported= JavaModelUtility.convertFromImportDeclaration(imp);
+		if (imported == null)
+			return;
+			
 		if (imported instanceof IPackageFragment){
 			ICompilationUnit[] cus= ((IPackageFragment)imported).getCompilationUnits();
 			if (cus != null){
