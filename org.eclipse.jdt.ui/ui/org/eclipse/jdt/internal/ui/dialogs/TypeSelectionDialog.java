@@ -54,12 +54,12 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			// type			
 			if (qualifierIndex == -1) {
 				fQualifierMatcher= null;
-				fMatcher= new StringMatcher(pattern + '*', ignoreCase, igoreWildCards);
+				fMatcher= new StringMatcher(adjustPattern(pattern), ignoreCase, igoreWildCards);
 				
 			// qualified type
 			} else {
 				fQualifierMatcher= new StringMatcher(pattern.substring(0, qualifierIndex), ignoreCase, igoreWildCards);
-				fMatcher= new StringMatcher(pattern.substring(qualifierIndex + 1), ignoreCase, igoreWildCards);
+				fMatcher= new StringMatcher(adjustPattern(pattern.substring(qualifierIndex + 1)), ignoreCase, igoreWildCards);
 			}
 		}
 
@@ -79,7 +79,15 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 				return true;
 
 			return fQualifierMatcher.match(type.getTypeContainerName());
-		}	
+		}
+		
+		private String adjustPattern(String pattern) {
+			int pos= pattern.indexOf('*');
+			if (pos == -1)
+				return pattern + '*';
+			else
+				return pattern;
+		}
 	}
 	
 	/*
