@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.ui.editors.text.IFoldingCommandIds;
-import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
-
 /**
  * Action ids for standard actions, for groups in the menu bar, and
  * for actions in context menus of JDT views.
