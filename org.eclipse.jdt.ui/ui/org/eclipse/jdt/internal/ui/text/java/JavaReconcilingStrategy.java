@@ -67,44 +67,46 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	}
 	
 	private void reconcile() {
-		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());		
-		if (unit != null) {
-			try {
-				
-				/* fix for missing cancel flag communication */
-				IProblemRequestorExtension extension= getProblemRequestorExtension();
-				if (extension != null)
-					extension.setProgressMonitor(fProgressMonitor);
-				
-				CompilationUnit ast= null;
-				
+		CompilationUnit ast= null;
+		try {
+			ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());		
+			if (unit != null) {
 				try {
-					// reconcile
-					synchronized (unit) {
-						if (fIsJavaReconcilingListener)
-							ast= unit.reconcile(true, true, null, fProgressMonitor);
-						else
-							unit.reconcile(false, true, null, fProgressMonitor);
+					
+					/* fix for missing cancel flag communication */
+					IProblemRequestorExtension extension= getProblemRequestorExtension();
+					if (extension != null)
+						extension.setProgressMonitor(fProgressMonitor);
+					
+					try {
+						// reconcile
+						synchronized (unit) {
+							if (fIsJavaReconcilingListener)
+								ast= unit.reconcile(true, true, null, fProgressMonitor);
+							else
+								unit.reconcile(false, true, null, fProgressMonitor);
+						}
+					} catch (OperationCanceledException ex) {
+						Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());
+						ast= null;
 					}
-				} catch (OperationCanceledException ex) {
-					Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());
-					ast= null;
+					
+					/* fix for missing cancel flag communication */
+					if (extension != null)
+						extension.setProgressMonitor(null);
+					
+					
+				} catch (JavaModelException x) {
+					// swallow exception
 				}
-				
-				/* fix for missing cancel flag communication */
-				if (extension != null)
-					extension.setProgressMonitor(null);
-				
-				// notify listeners
-				try {
-					if (fIsJavaReconcilingListener && fNotify && (fProgressMonitor == null || !fProgressMonitor.isCanceled()))
-						fJavaReconcilingListener.reconciled(ast);
-				} finally {
-					fNotify= true;
-				}
-				
-			} catch (JavaModelException x) {
-				// swallow exception
+			}
+		} finally {
+			// Always notify listeners, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=55969 for the final solution
+			try {
+				if (fIsJavaReconcilingListener)
+					fJavaReconcilingListener.reconciled(ast, fProgressMonitor != null && fProgressMonitor.isCanceled(), !fNotify);
+			} finally {
+				fNotify= true;
 			}
 		}
 	}
@@ -158,7 +160,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	 * @since 3.0
 	 */
 	public void aboutToBeReconciled() {
-		if (fNotify && fIsJavaReconcilingListener)
+		if (fIsJavaReconcilingListener)
 			fJavaReconcilingListener.aboutToBeReconciled();
 	}
 }

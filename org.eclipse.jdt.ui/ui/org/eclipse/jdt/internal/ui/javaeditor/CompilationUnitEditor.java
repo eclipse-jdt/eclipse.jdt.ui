@@ -1521,31 +1521,32 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit)
+	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit, boolean, boolean)
 	 * @since 3.0
 	 */
-	public void reconciled(CompilationUnit ast) {
+	public void reconciled(CompilationUnit ast, boolean cancelled, boolean forced) {
 
-		// Notify AST provider
+		// Always notify AST provider
 		JavaPlugin.getDefault().getASTProvider().reconciled(ast, getInputJavaElement());
 		
 		// Notify listeners
 		synchronized (fReconcilingListeners) {
 			Object[] listeners = fReconcilingListeners.getListeners();
 			for (int i = 0, length= listeners.length; i < length; ++i)
-				((IJavaReconcilingListener)listeners[i]).reconciled(ast);
+				((IJavaReconcilingListener)listeners[i]).reconciled(ast, cancelled, forced);
 		}
-
 		
 		// Update Java Outline page selection
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE)) {
-			Shell shell= getSite().getShell();
-			if (shell != null && !shell.isDisposed()) {
-				shell.getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						synchronizeOutlinePageSelection();
-					}
-				});
+		if (!forced && !cancelled) {
+			if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE)) {
+				Shell shell= getSite().getShell();
+				if (shell != null && !shell.isDisposed()) {
+					shell.getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							synchronizeOutlinePageSelection();
+						}
+					});
+				}
 			}
 		}
 	}

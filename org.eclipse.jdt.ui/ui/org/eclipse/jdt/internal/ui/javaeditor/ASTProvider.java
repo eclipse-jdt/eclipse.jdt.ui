@@ -228,7 +228,6 @@ public final class ASTProvider {
 	}
 
 	void aboutToBeReconciled(IJavaElement javaElement) {
-		Assert.isNotNull(javaElement);
 		
 		if (DEBUG)
 			System.out.println(DEBUG_PREFIX + "about to reconcile: " + toString(javaElement)); //$NON-NLS-1$
@@ -407,27 +406,27 @@ public final class ASTProvider {
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit)
 	 */
 	void reconciled(CompilationUnit ast, IJavaElement javaElement) {
-		Assert.isNotNull(javaElement);
 		
 		if (DEBUG)
 			System.out.println(DEBUG_PREFIX + "reconciled AST: " + toString(ast)); //$NON-NLS-1$
 
 		synchronized (fReconcileLock) {
-
 		
 			fIsReconciling= false;
-			if (!javaElement.equals(fReconcilingJavaElement)) {
+			if (javaElement == null || !javaElement.equals(fReconcilingJavaElement)) {
 				
 				if (DEBUG)
 					System.out.println(DEBUG_PREFIX + "  ignoring AST of out-dated editor"); //$NON-NLS-1$
-				
+
+				// Signal - threads might wait for wrong element
+				synchronized (fWaitLock) {
+					fWaitLock.notifyAll();
+				}
+
 				return;
 			}
 			
-			if (ast != null && javaElement != null)
-				cache(ast, javaElement);
+			cache(ast, javaElement);
 		}
-		
 	}
-
 }

@@ -28,7 +28,10 @@ public interface IJavaReconcilingListener {
 	/**
 	 * Called after reconciling has been finished.
 	 * 
-	 * @param ast the compilation unit AST or <code>null</code> if the working copy was consistent
+	 * @param ast			the compilation unit AST or <code>null</code> if
+	 * 							the working copy was consistent or reconciliation has been cancelled
+	 * @param cancelled		<code>true</code> iff the reconciliation has been cancelled
+	 * @param forced		<code>true</code> iff this reconciliation was forced
 	 */
-	void reconciled(CompilationUnit ast);
+	void reconciled(CompilationUnit ast, boolean cancelled, boolean forced);
 }
