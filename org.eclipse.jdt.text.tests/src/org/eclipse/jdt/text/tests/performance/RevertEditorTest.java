@@ -34,7 +34,7 @@ public abstract class RevertEditorTest extends TestCase {
 	private IEvaluator fEvaluator;
 	
 	
-	protected void setUp() {
+	protected void setUp() throws Exception {
 		fPerformanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
 		fEvaluator= new Evaluator();
 		fEvaluator.setDimensions(new Dimension[] {PerfMsrDimensions.CPU_TIME, PerfMsrDimensions.WORKING_SET});

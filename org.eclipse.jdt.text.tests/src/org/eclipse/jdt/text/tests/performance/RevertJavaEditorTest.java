@@ -24,7 +24,7 @@ public class RevertJavaEditorTest extends RevertEditorTest {
 	private static final String FILE_PREFIX= "TextLayout";
 	private static final String FILE_SUFFIX= ".java";
 	
-	protected void setUp() {
+	protected void setUp() throws Exception {
 		super.setUp();
 		EditorTestHelper.runEventQueue();
 	}
