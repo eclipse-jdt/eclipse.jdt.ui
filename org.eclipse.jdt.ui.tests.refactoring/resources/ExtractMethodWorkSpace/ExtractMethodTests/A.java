@@ -1,9 +1,8 @@
 public class A{
-	public int value;
-	boolean m(){
-		return a().length != 3;
+	public A(int i) {
 	}
-	int[] a(){
-		return null;
+	
+	public void foo() {
+		A a= new A(10);
 	}
 }

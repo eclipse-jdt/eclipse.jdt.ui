@@ -524,13 +524,13 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	//---- Constructor
 	
 	public void test180() throws Exception {
-		System.out.println(getClass().getName() + "::"+  getName() + " disabled - see bug 11853");
-//		invalidSelectionTest();
+		// System.out.println(getClass().getName() + "::"+  getName() + " disabled - see bug 11853");
+		invalidSelectionTest();
 	}
 	
 	public void test181() throws Exception {
-		System.out.println(getClass().getName() + "::"+  getName() + " disabled - see bug 11853");
-//		invalidSelectionTest();
+		// System.out.println(getClass().getName() + "::"+  getName() + " disabled - see bug 11853");
+		invalidSelectionTest();
 	}
 	
 	//---- More return statement handling

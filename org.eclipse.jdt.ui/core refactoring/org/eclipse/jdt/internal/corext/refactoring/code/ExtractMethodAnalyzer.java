@@ -14,11 +14,10 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -28,20 +27,14 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeCompletionProposal;
-
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -462,13 +455,20 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		return super.visit(node);
 	}
 	
-	public boolean visit(SuperMethodInvocation node) {
-		boolean result= super.visit(node);
+	public boolean visit(ConstructorInvocation node) {
+		return visitConstructorInvocation(node, super.visit(node));
+	}
+	
+	public boolean visit(SuperConstructorInvocation node) {
+		return visitConstructorInvocation(node, super.visit(node));
+	}
+	
+	private boolean visitConstructorInvocation(ASTNode node, boolean superResult) {
 		if (getSelection().getVisitSelectionMode(node) == Selection.SELECTED) {
 			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.super_or_this"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
 			return false;
 		}
-		return result;
+		return superResult;
 	}
 	
 	public boolean visit(VariableDeclarationFragment node) {
