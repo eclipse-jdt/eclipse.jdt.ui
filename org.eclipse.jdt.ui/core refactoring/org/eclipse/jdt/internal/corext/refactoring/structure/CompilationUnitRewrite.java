@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -57,7 +56,7 @@ public class CompilationUnitRewrite {
 	private List/*<TextEditGroup>*/ fTextEditGroups;
 	
 	private CompilationUnit fRoot; // lazily initialized
-	private OldASTRewrite fRewrite; // lazily initialized
+	private ASTRewrite fRewrite; // lazily initialized
 	private ImportRewrite fImportRewrite; // lazily initialized
 	private ImportRemover fImportRemover; // lazily initialized
 	private boolean fResolveBindings;
@@ -93,8 +92,7 @@ public class CompilationUnitRewrite {
 	}
 	
 	public void clearASTRewrite() {
-		if (fRewrite != null)
-			fRewrite.removeModifications();
+		fRewrite= null;
 		fTextEditGroups= new ArrayList();
 	}
 
@@ -187,16 +185,11 @@ public class CompilationUnitRewrite {
 	public AST getAST() {
 		return getRoot().getAST();
 	}
-	
-	/** @deprecated use {@link #getASTRewrite()} */
-	public OldASTRewrite getOldRewrite() {
-		if (fRewrite == null)
-			fRewrite= new OldASTRewrite(getRoot());
-		return fRewrite;
-	}
-	
+
 	public ASTRewrite getASTRewrite() {
-		return getOldRewrite();
+		if (fRewrite == null)
+			fRewrite= ASTRewrite.create(getRoot().getAST());
+		return fRewrite;
 	}
 
 	public ImportRewrite getImportRewrite() {
