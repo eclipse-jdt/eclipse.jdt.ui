@@ -38,24 +38,28 @@ public class TreeHierarchyLayoutProblemsDecorator extends ProblemsLabelDecorator
 	public TreeHierarchyLayoutProblemsDecorator(boolean isFlatLayout) {
 		super(null);
 		fIsFlatLayout= isFlatLayout;
-	}	
+	}
+	
+	protected int computePackageAdornmentFlags(IPackageFragment fragment) {
+		if (!fIsFlatLayout) {
+			return super.computeAdornmentFlags(fragment.getResource());
+		}
+		return super.computeAdornmentFlags(fragment);
+	}		
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.ProblemsLabelDecorator#computeAdornmentFlags(java.lang.Object)
 	 */
 	protected int computeAdornmentFlags(Object element) {
 		if (element instanceof IPackageFragment) {
-			IPackageFragment fragment= (IPackageFragment) element;
-			if (!fIsFlatLayout) {
-				return super.computeAdornmentFlags(fragment.getResource());
-			}
+			return computePackageAdornmentFlags((IPackageFragment) element);
 		} else if (element instanceof LogicalPackage) {
 			IPackageFragment[] fragments= ((LogicalPackage) element).getFragments();
 			int res= 0;
 			for (int i= 0; i < fragments.length; i++) {
-				int flags= super.computeAdornmentFlags(fragments[i]);
+				int flags= computePackageAdornmentFlags(fragments[i]);
 				if (flags == JavaElementImageDescriptor.ERROR) {
-					return res;
+					return flags;
 				} else if (flags != 0) {
 					res= flags;
 				}
