@@ -870,7 +870,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * @return the number of spaces displayed for a tabulator in the editor
 	 */
 	private static int getVisualTabLengthPreference() {
-		return JavaPlugin.getDefault().getPreferenceStore().getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
+		return getPreferenceStore().getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
 	}
 
 	private static int getPeerPosition(IDocument document, DocumentCommand command) {
@@ -1138,7 +1138,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	}
 	
 	private static IPreferenceStore getPreferenceStore() {
-		return JavaPlugin.getDefault().getPreferenceStore();
+		return JavaPlugin.getDefault().getCombinedPreferenceStore();
 	}
 	
 	private boolean closeBrace() {
