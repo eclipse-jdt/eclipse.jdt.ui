@@ -575,11 +575,44 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	private static boolean isControlStatementWithBlock(ASTNode node) {
+		switch (node.getNodeType()) {
+			case ASTNode.IF_STATEMENT:
+			case ASTNode.WHILE_STATEMENT:
+			case ASTNode.FOR_STATEMENT:
+			case ASTNode.DO_STATEMENT:
+				return true;
+			default:
+				return false;
+		}
+	}
+	
 	
 	private boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (statement == null) {
 			return false;
+		}
+
+		if (!isControlStatementWithBlock(statement)) {
+			if (!isControlStatementWithBlock(statement.getParent())) {
+				return false;
+			}
+			int statementStart= statement.getStartPosition();
+			int statementEnd= statementStart + statement.getLength();
+			
+			int offset= context.getSelectionOffset();
+			int length= context.getSelectionLength();
+			if (length == 0) {
+				if (offset != statementEnd) { // cursor at end
+					return false;
+				}
+			} else {
+				if (offset > statementStart || offset + length < statementEnd) { // statement selected
+					return false;
+				}
+			}
+			statement= (Statement) statement.getParent();
 		}
 		
 		int childProperty= -1;
@@ -622,7 +655,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					childProperty= ASTNodeConstants.BODY;
 					child= doBody;
 				}
-				break;			
+				break;
+			default:
 		}
 		if (child == null) {
 			return false;
