@@ -1019,21 +1019,36 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		int offset= c.offset;
 		int length= c.length;
 		String text= c.text;
-		if (text == null)
-			text= new String();
 		
-		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text))
+		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text)) {
 			smartIndentAfterNewLine(d, c);
-		else if (c.text.length() == 1)
+			installSmartBackspace(d, c, offset, length, text);			
+		} else if (c.text.length() == 1) {
 			smartIndentAfterBlockDelimiter(d, c);
-		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
-			smartPaste(d, c);
+			installSmartBackspace(d, c, offset, length, text);			
+		} else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
+			smartPaste(d, c); // no smart backspace for paste
 		
+	}
+	
+	/**
+	 * Installs a smart backspace handler to undo the smart modification
+	 * 
+	 * @param d the document
+	 * @param c the modified document command
+	 * @param origOffset original offset of the command
+	 * @param origLength original length of the command
+	 * @param origText original text of the command
+	 */
+	private void installSmartBackspace(IDocument d, DocumentCommand c, int origOffset, int origLength, String origText) {
+		if (origText == null)
+			origText= new String();
+
 		int newOffset= c.offset;
 		int newLength= c.length;
 		String newText= c.text;
 		
-		if (newLength != length || newOffset != offset || !text.equals(newText)) {
+		if (newLength != origLength || newOffset != origOffset || !origText.equals(newText)) {
 			
 			IWorkbenchPage page= JavaPlugin.getActivePage();
 			if (page == null)
@@ -1050,11 +1065,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 					// restore smart portion
 					ReplaceEdit smart= new ReplaceEdit(newOffset, newText.length(), deletedText);
 					// restore raw text
-					ReplaceEdit raw= new ReplaceEdit(offset, length, text);
+					ReplaceEdit raw= new ReplaceEdit(origOffset, origLength, origText);
 					
 					final UndoSpec s2= new UndoSpec(
 							c.caretOffset != -1 ? c.caretOffset : newOffset + newText.length(),
-							new Region(offset + text.length(), 0),
+							new Region(origOffset + origText.length(), 0),
 							new TextEdit[] { smart, raw },
 							3,
 							null);
@@ -1065,9 +1080,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			} catch (MalformedTreeException e) {
 				JavaPlugin.log(e);
 			}
-		}			
+		}
 	}
-	
+
 	private static IPreferenceStore getPreferenceStore() {
 		return JavaPlugin.getDefault().getPreferenceStore();
 	}
