@@ -281,18 +281,19 @@ public class EditTemplateDialog extends StatusDialog {
 		createLabel(parent, TemplateMessages.getString("EditTemplateDialog.description")); //$NON-NLS-1$		
 		fDescriptionText= createText(parent);
 
+		Label patternLabel= createLabel(parent, TemplateMessages.getString("EditTemplateDialog.pattern")); //$NON-NLS-1$
+		patternLabel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
+		fPatternEditor= createEditor(parent);
+		
+		Label filler= new Label(parent, SWT.NONE);		
+		filler.setLayoutData(new GridData());
+		
 		composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		layout= new GridLayout();		
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
-		composite.setLayout(layout);
-
-		createLabel(composite, TemplateMessages.getString("EditTemplateDialog.pattern")); //$NON-NLS-1$
-		fPatternEditor= createEditor(parent);
-		
-		Label filler= new Label(composite, SWT.NONE);		
-		filler.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+		composite.setLayout(layout);		
+		composite.setLayoutData(new GridData());
 		
 		fInsertVariableButton= new Button(composite, SWT.NONE);
 		fInsertVariableButton.setLayoutData(getButtonGridData(fInsertVariableButton));
