@@ -510,13 +510,9 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		// get default values for view
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 
-		// XXX: can be removed once bug 22533 is fixed.
+		// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=22533
 		if (!store.contains(getPreferenceKey("TAG_DUMMY_TO_TEST_EXISTENCE")))//$NON-NLS-1$
 			return;
-
-		// XXX: Uncomment once bug 22533 is fixed.
-//		if (!store.contains(getPreferenceKey(TAG_USER_DEFINED_PATTERNS_ENABLED)))
-//			return;
 		
 		fUserDefinedPatternsEnabled= store.getBoolean(getPreferenceKey(TAG_USER_DEFINED_PATTERNS_ENABLED));
 		setUserDefinedPatterns(CustomFiltersDialog.convertFromString(store.getString(getPreferenceKey(TAG_USER_DEFINED_PATTERNS)), SEPARATOR));
@@ -542,7 +538,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		// get default values for view
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 
-		// XXX: can be removed once bug 22533 is fixed.
+		// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=22533
 		store.setValue(getPreferenceKey("TAG_DUMMY_TO_TEST_EXISTENCE"), "storedViewPreferences");//$NON-NLS-1$//$NON-NLS-2$
 		
 		store.setValue(getPreferenceKey(TAG_USER_DEFINED_PATTERNS_ENABLED), fUserDefinedPatternsEnabled);
