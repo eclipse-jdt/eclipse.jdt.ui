@@ -139,7 +139,6 @@ public final class ASTRewrite {
 	 * @param node Description of the change.
 	 */
 	public final void markAsInserted(ASTNode node, String description) {
-		Assert.isTrue(node.getStartPosition() == -1, "Tries to insert an existing node");
 		ASTInsert insert= new ASTInsert();
 		insert.description= description;
 		setChangeProperty(node, insert);

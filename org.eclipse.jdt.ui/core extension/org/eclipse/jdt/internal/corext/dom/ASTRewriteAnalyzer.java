@@ -564,7 +564,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 
 	private void doTextInsert(int insertOffset, ASTNode node, int initialIndentLevel, boolean removeLeadingIndent, String description) {		
-		Assert.isTrue(node.getStartPosition() == -1, "Node to generate must be new nodes");
 		
 		ASTWithExistingFlattener flattener= new ASTWithExistingFlattener();
 		node.accept(flattener);
