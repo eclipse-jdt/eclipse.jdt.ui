@@ -369,6 +369,8 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 
 	private ITypeHierarchy fCachedTargetClassHierarchy;
 
+	private final CodeGenerationSettings fCodeGenerationSettings;
+
 	private boolean fCreateMethodStubs;
 
 	private IMethod[] fMethodsToDeclareAbstract;
@@ -377,9 +379,9 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 
 	private IType fTargetType;
 
-	private PullUpRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings) {
-		super(elements, preferenceSettings);
-
+	private PullUpRefactoring(IMember[] elements, CodeGenerationSettings settings) {
+		super(elements);
+		fCodeGenerationSettings= settings;
 		fMethodsToDelete= new IMethod[0];
 		fMethodsToDeclareAbstract= new IMethod[0];
 		fCreateMethodStubs= true;
@@ -1077,19 +1079,20 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 	}
 
 	private Javadoc createJavadocForStub(String enclosingTypeName, MethodDeclaration oldMethod, MethodDeclaration newMethodNode, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
-		if (!fCodeGenerationSettings.createComments)
-			return null;
-		IMethodBinding binding= oldMethod.resolveBinding();
-		if (binding == null)
-			return null;
-		ITypeBinding[] params= binding.getParameterTypes();
-		String fullTypeName= JavaModelUtil.getFullyQualifiedName(getTargetClass());
-		String[] fullParamNames= new String[params.length];
-		for (int i= 0; i < fullParamNames.length; i++) {
-			fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
+		if (fCodeGenerationSettings.createComments) {
+			IMethodBinding binding= oldMethod.resolveBinding();
+			if (binding != null) {
+				ITypeBinding[] params= binding.getParameterTypes();
+				String fullTypeName= JavaModelUtil.getFullyQualifiedName(getTargetClass());
+				String[] fullParamNames= new String[params.length];
+				for (int i= 0; i < fullParamNames.length; i++) {
+					fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
+				}
+				String comment= StubUtility.getMethodComment(cu, enclosingTypeName, newMethodNode, true, false, fullTypeName, fullParamNames, String.valueOf('\n'));
+				return (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
+			}
 		}
-		String comment= StubUtility.getMethodComment(cu, enclosingTypeName, newMethodNode, true, false, fullTypeName, fullParamNames, String.valueOf('\n'));
-		return (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
+		return null;
 	}
 
 	private Map createMembersToDeleteMap(IProgressMonitor pm) throws JavaModelException {
