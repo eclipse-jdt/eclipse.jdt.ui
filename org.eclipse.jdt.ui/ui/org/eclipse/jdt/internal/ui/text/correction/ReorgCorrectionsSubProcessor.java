@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
@@ -20,19 +21,14 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
 public class ReorgCorrectionsSubProcessor {
@@ -91,5 +87,36 @@ public class ReorgCorrectionsSubProcessor {
 		}
 	}
 	
+	public static void removeImportStatementProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		
+		TextBuffer buffer= null;
+		try {
+			buffer= aquireTextBuffer(problemPos.getCompilationUnit());
+			int line= buffer.getLineOfOffset(problemPos.getOffset());
+			if (line != -1) {
+				TextRegion region= buffer.getLineInformation(line);
+				int start= region.getOffset();
+				int end= start + region.getLength();
+				if (line > 0) {
+					region= buffer.getLineInformation(line - 1);
+					start= region.getOffset() + region.getLength();
+				} 
+				String label= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.unusedimport.description"); //$NON-NLS-1$
+				proposals.add(new ReplaceCorrectionProposal(label, problemPos.getCompilationUnit(), start, end - start, "", 0)); //$NON-NLS-1$
+			}
+		} finally {
+			if (buffer != null) {
+				TextBuffer.release(buffer);
+			}
+		 }
+	}
+		
+	private static TextBuffer aquireTextBuffer(ICompilationUnit cu) throws CoreException {
+		if (cu.isWorkingCopy()) {
+			cu= (ICompilationUnit) cu.getOriginalElement();
+		}		
+		IFile file= (IFile) cu.getUnderlyingResource();
+		return TextBuffer.acquire(file);
+	}		
 
 }

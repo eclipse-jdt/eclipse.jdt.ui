@@ -47,7 +47,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	public static boolean hasCorrections(int problemId) {
 		switch (problemId) {
 			case IProblem.UnterminatedString:
-			case IProblem.UnterminatedComment:
+			case IProblem.UnusedImport:
 			case IProblem.UndefinedMethod:
 			case IProblem.UndefinedConstructor:
 			case IProblem.ParameterMismatch:
@@ -148,9 +148,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					int pos= InsertCorrectionProposal.moveBack(problemPos.getOffset() + problemPos.getLength(), problemPos.getOffset(), "\n\r", problemPos.getCompilationUnit()); //$NON-NLS-1$
 					proposals.add(new InsertCorrectionProposal(quoteLabel, problemPos.getCompilationUnit(), pos, "\"", 0)); //$NON-NLS-1$ 
 					break;
-				case IProblem.UnterminatedComment:
-					String commentLabel= CorrectionMessages.getString("JavaCorrectionProcessor.addcomment.description"); //$NON-NLS-1$
-					proposals.add(new InsertCorrectionProposal(commentLabel, problemPos.getCompilationUnit(), problemPos.getOffset() + problemPos.getLength(), "*/", 0)); //$NON-NLS-1$
+				case IProblem.UnusedImport:
+					ReorgCorrectionsSubProcessor.removeImportStatementProposals(problemPos, proposals);
 					break;
 				case IProblem.UndefinedMethod:
 					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, false, proposals);
