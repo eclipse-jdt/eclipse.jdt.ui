@@ -117,12 +117,6 @@ public class DeleteAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static RefactoringWizard createWizard(DeleteRefactoring refactoring) {
-		DeleteWizard result= new DeleteWizard();
-		result.initialize(refactoring);
-		return result;
-	}
-
 	private DeleteRefactoring createRefactoring(Object[] elements) throws CoreException {
 		return new DeleteRefactoring(elements);
 	}
