@@ -91,7 +91,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 				// create the getter stub
 				StringBuffer buf= new StringBuffer();
 				buf.append("\t/**\n"); //$NON-NLS-1$
-				buf.append("\t * Gets the "); buf.append(argname); buf.append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				buf.append("\t * Gets the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				buf.append("\t * @return Returns a "); buf.append(typeName); buf.append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				buf.append("\t */\n\t"); //$NON-NLS-1$
 				buf.append("public "); //$NON-NLS-1$
@@ -117,7 +117,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 								
 				StringBuffer buf= new StringBuffer();
 				buf.append("\t/**\n"); //$NON-NLS-1$
-				buf.append("\t * Sets the "); buf.append(argname); buf.append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				buf.append("\t * Sets the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				buf.append("\t * @param "); buf.append(argname); buf.append(" The "); buf.append(argname); buf.append(" to set\n"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-2$
 				buf.append("\t */\n\t"); //$NON-NLS-1$
 				buf.append("public "); //$NON-NLS-1$
@@ -128,7 +128,12 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 				buf.append('('); buf.append(typeName); buf.append(' '); 
 				buf.append(argname); buf.append(") {\n\t\t"); //$NON-NLS-1$
 				if (argname.equals(fieldName)) {
-					buf.append("this."); //$NON-NLS-1$
+					if (isStatic) {
+						buf.append(parentType.getElementName());
+						buf.append('.');
+					} else {
+						buf.append("this."); //$NON-NLS-1$
+					}
 				}
 				buf.append(fieldName); buf.append("= "); buf.append(argname); buf.append(";\n\t}\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				

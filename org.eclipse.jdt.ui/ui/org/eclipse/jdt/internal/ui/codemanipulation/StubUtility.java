@@ -136,7 +136,7 @@ public class StubUtility {
 			buf.append(";\n\n"); //$NON-NLS-1$
 		} else {
 			buf.append(" {\n\t"); //$NON-NLS-1$
-			if (Flags.isAbstract(method.getFlags()) || declaringtype.isInterface()) {
+			if (Flags.isAbstract(method.getFlags()) || declaringtype.isInterface() || Flags.isStatic(method.getFlags())) {
 				String retTypeSig= method.getReturnType();
 				if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
 					buf.append('\t');
