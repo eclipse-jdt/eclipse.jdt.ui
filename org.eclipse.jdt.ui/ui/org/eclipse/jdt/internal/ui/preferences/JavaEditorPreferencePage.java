@@ -19,6 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -69,6 +70,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
+
+import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
 
 
 /*
@@ -234,6 +237,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fBoldCheckBox;
 	private SourceViewer fPreviewViewer;
 	private Color fBackgroundColor;
+    private Control fAutoInsertDelayText;
+    private Control fAutoInsertJavaTriggerText;
+    private Control fAutoInsertJavaDocTriggerText;
 	
 	public JavaEditorPreferencePage() {
 		setDescription(JavaUIMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
@@ -731,33 +737,33 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Composite contentAssistComposite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		contentAssistComposite.setLayout(layout);
-				
+
 		String label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSingleProposalsAutomatically"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOINSERT, 0);
-		
+		addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOINSERT, 0);		
+
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOnlyProposalsVisibleInTheInvocationContext"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.presentProposalsInAlphabeticalOrder"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ORDER_PROPOSALS, 0);
 		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION, 0);
-
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ADD_IMPORT, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.FILL_METHOD_ARGUMENTS, 0);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
+		final Button autoactivation= addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationDelay"); //$NON-NLS-1$
-		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_DELAY, 4, 0, true);
+		fAutoInsertDelayText= addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_DELAY, 4, 0, true);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJava"); //$NON-NLS-1$
-		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
+		fAutoInsertJavaTriggerText= addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
-		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
+		fAutoInsertJavaDocTriggerText= addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
 								
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PROPOSALS_BACKGROUND, 0);
@@ -770,7 +776,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.foregroundForMethodParameters"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PARAMETERS_FOREGROUND, 0);
-				
+		
+		autoactivation.addSelectionListener(new SelectionAdapter(){
+            public void widgetSelected(SelectionEvent e) {
+            	updateAutoactivationControls();
+            }
+		});		
 		return contentAssistComposite;
 	}
 
@@ -868,7 +879,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBackgroundDefaultRadioButton.setSelection(default_);
 		fBackgroundCustomRadioButton.setSelection(!default_);
 		fBackgroundColorButton.setEnabled(!default_);
+		
+        updateAutoactivationControls();
 	}
+
+    private void updateAutoactivationControls() {
+        boolean autoactivation= fOverlayStore.getBoolean(ContentAssistPreference.AUTOACTIVATION);
+        fAutoInsertDelayText.setEnabled(autoactivation);
+        fAutoInsertJavaTriggerText.setEnabled(autoactivation);
+        fAutoInsertJavaDocTriggerText.setEnabled(autoactivation);
+    }
 	
 	/*
 	 * @see PreferencePage#performOk()
@@ -974,7 +994,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			textControl.addModifyListener(fTextFieldListener);
 		}
 			
-		return composite;
+		return textControl;
 	}
 	
 	private void addTextFontEditor(Composite parent, String label, String key) {
