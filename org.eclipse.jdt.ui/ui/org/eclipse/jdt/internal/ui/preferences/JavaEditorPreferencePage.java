@@ -1112,7 +1112,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotationsTab.title")); //$NON-NLS-1$
-		item.setControl(fAnnotationsConfigurationBlock.createContents(folder));
+		item.setControl(fAnnotationsConfigurationBlock.createControl(folder));
 
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.typing.tabTitle")); //$NON-NLS-1$
