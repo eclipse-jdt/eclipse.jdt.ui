@@ -36,7 +36,7 @@ public class ViewActionGroup extends ActionGroup {
 	private static final Integer INT_SHOW_PROJECTS= new Integer(SHOW_PROJECTS);
 	private static final Integer INT_SHOW_WORKING_SETS= new Integer(SHOW_WORKING_SETS);
 	
-	private final IPropertyChangeListener fChangeListener;
+	private IPropertyChangeListener fChangeListener;
 	
 	private int fMode;
 	private IMenuManager fMenuManager;
@@ -53,6 +53,13 @@ public class ViewActionGroup extends ActionGroup {
 			fActiveActionGroup= fShowActionGroup;
 		else
 			fActiveActionGroup= fFilterActionGroup;
+	}
+	
+	public void dispose() {
+		fFilterActionGroup.dispose();
+		fShowActionGroup.dispose();
+		fChangeListener= null;
+		super.dispose();
 	}
 	
 	public void setWorkingSetModel(WorkingSetModel model) {
