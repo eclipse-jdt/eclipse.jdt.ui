@@ -189,57 +189,37 @@ public abstract class JavaElementAction extends Action {
 			shell.getDisplay().beep();
 	}	
 	protected IJavaElement findType(ICompilationUnit cu, boolean silent) {
-		if (silent) {
-			//XXX fix for 1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
-			if (cu.getElementName().indexOf(".") != cu.getElementName().lastIndexOf(".")) //$NON-NLS-2$ //$NON-NLS-1$
-				return null;
-			String mainTypeName= cu.getElementName().substring(0, cu.getElementName().length() - 5);
-			IType mainType= cu.getType(mainTypeName);
-			mainTypeName= JavaModelUtil.getTypeQualifiedName((IType)mainType);
-			try {					
-				mainType= JavaModelUtil.findTypeInCompilationUnit(cu, mainTypeName);
-				if (mainType == null) {
-					// fetch type which is declared first in the file
-					IType[] types= cu.getTypes();
-					if (types.length > 0)
-						mainType= types[0];
-					else
-						return null;
-				}
-			} catch (JavaModelException ex) {
-				// silent mode
-				ExceptionHandler.log(ex, SearchMessages.getString("OpenTypeAction.error.open.message")); //$NON-NLS-1$
+		IType[] types= null;
+		try {					
+			types= cu.getAllTypes();
+		} catch (JavaModelException ex) {
+			// silent mode
+			ExceptionHandler.log(ex, SearchMessages.getString("OpenTypeAction.error.open.message")); //$NON-NLS-1$
+			if (silent)
 				return RETURN_WITHOUT_BEEP;
-			}
-			return mainType;
-		} 
-		else {
-			IType[] types= null;
-			try {
-				types= cu.getAllTypes();
-			} catch (JavaModelException ex) {
-				ExceptionHandler.handle(ex, SearchMessages.getString("OpenTypeAction.error.open.title"), SearchMessages.getString("OpenTypeAction.error.open.message")); //$NON-NLS-2$ //$NON-NLS-1$
-				return RETURN_WITHOUT_BEEP;
-			}
-			if (types.length == 1)
-				return types[0];
-			if (types.length == 0)
-				return null;
-			String title= SearchMessages.getString("ShowTypeHierarchyAction.selectionDialog.title"); //$NON-NLS-1$
-			String message = SearchMessages.getString("ShowTypeHierarchyAction.selectionDialog.message"); //$NON-NLS-1$
-			Shell parent= JavaPlugin.getActiveWorkbenchShell();
-			int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
-
-			ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(flags));
-			dialog.setTitle(title);
-			dialog.setMessage(message);
-			dialog.setElements(types);
-			
-			if (dialog.open() == dialog.OK)
-				return (IType)dialog.getFirstResult();
 			else
-				return RETURN_WITHOUT_BEEP;
+				return null;
 		}
+		if (types.length == 1 || (silent && types.length > 0))
+			return types[0];
+		if (silent)
+			return RETURN_WITHOUT_BEEP;
+		if (types.length == 0)
+			return null;
+		String title= SearchMessages.getString("ShowTypeHierarchyAction.selectionDialog.title"); //$NON-NLS-1$
+		String message = SearchMessages.getString("ShowTypeHierarchyAction.selectionDialog.message"); //$NON-NLS-1$
+		Shell parent= JavaPlugin.getActiveWorkbenchShell();
+		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
+
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(flags));
+		dialog.setTitle(title);
+		dialog.setMessage(message);
+		dialog.setElements(types);
+		
+		if (dialog.open() == dialog.OK)
+			return (IType)dialog.getFirstResult();
+		else
+			return RETURN_WITHOUT_BEEP;
 	}
 
 	protected IType findType(IClassFile cf) {
