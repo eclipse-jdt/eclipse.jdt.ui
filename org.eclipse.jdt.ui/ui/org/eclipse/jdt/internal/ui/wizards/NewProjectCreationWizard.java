@@ -27,7 +27,7 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 	private NewProjectCreationWizardPage fJavaPage;
 	private WizardNewProjectCreationPage fMainPage;
 	private IConfigurationElement fConfigElement;
-
+	
 	public NewProjectCreationWizard() {
 		super();
 		
@@ -53,14 +53,14 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
-		fJavaPage.createProject(monitor); // use the full progress monitor
+		fJavaPage.configureJavaProject(monitor); // use the full progress monitor
 		BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 		selectAndReveal(fJavaPage.getJavaProject().getProject());
 	}
 	
 	protected void handleFinishException(Shell shell, InvocationTargetException e) {
 		String title= NewWizardMessages.getString("NewProjectCreationWizard.op_error.title"); //$NON-NLS-1$
-		String message= NewWizardMessages.getString("NewProjectCreationWizard.op_error.message");			 //$NON-NLS-1$
+		String message= NewWizardMessages.getString("NewProjectCreationWizard.op_error_create.message");			 //$NON-NLS-1$
 		ExceptionHandler.handle(e, getShell(), title, message);
 	}	
 			
@@ -79,5 +79,8 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 		fJavaPage.performCancel();
 		return super.performCancel();
 	}
+
+
+		
 
 }

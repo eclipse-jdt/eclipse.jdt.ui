@@ -168,6 +168,17 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		}
 		return null;	
 	}
+
+	/**
+	 * Helper method to create and open a IProject . The project location
+	 * is configured. No natures are added.
+	 * 
+	 * @param monitor a progress monitor to report progress or <code>null</code> if
+	 * progress reporting is not desired
+	 */
+	public static void createProject(IProject project, IPath locationPath, IProgressMonitor monitor) throws CoreException {
+		BuildPathsBlock.createProject(project, locationPath, monitor);
+	}
 	
 	/**
 	 * Adds the Java nature to the project (if not set yet) and configures the build classpath.
@@ -180,8 +191,8 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 			monitor= new NullProgressMonitor();
 		}
 		
-		int nSteps= 5;			
-		monitor.beginTask(NewWizardMessages.getString("JavaCapabilityConfigurationPage.op_desc"), nSteps); //$NON-NLS-1$
+		int nSteps= 6;			
+		monitor.beginTask(NewWizardMessages.getString("JavaCapabilityConfigurationPage.op_desc_java"), nSteps); //$NON-NLS-1$
 		
 		try {
 			IProject project= getJavaProject().getProject();

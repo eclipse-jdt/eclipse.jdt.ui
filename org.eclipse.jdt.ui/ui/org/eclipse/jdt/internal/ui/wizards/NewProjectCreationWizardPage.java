@@ -14,82 +14,67 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
 /**
- * As addition to the JavaCapabilityConfigurationPage, the wizard checks if an existing external
- * location was specified and offers to do an early project creation so that classpath can be detected.
+ * As addition to the JavaCapabilityConfigurationPage, the wizard does an
+ * early project creation (so that linked folders can be defined) and, if an
+ * existing external location was specified, offers to do a classpath detection
  */
 public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPage {
 
 	private WizardNewProjectCreationPage fMainPage;
+
 	private IPath fCurrProjectLocation;
-	private boolean fProjectCreated;
+	private IProject fCurrProject;	
 
 	/**
-	 * Constructor for ProjectWizardPage.
+	 * Constructor for NewProjectCreationWizardPage.
 	 */
 	public NewProjectCreationWizardPage(WizardNewProjectCreationPage mainPage) {
 		super();
 		fMainPage= mainPage;
-		fCurrProjectLocation= fMainPage.getLocationPath();
-		fProjectCreated= false;
+		fCurrProjectLocation= null;
+		fCurrProject= null;
 	}
 	
-	private boolean canDetectExistingClassPath(IPath projLocation) {
-		return projLocation.toFile().exists() && !Platform.getLocation().equals(projLocation);
-	}
-	
-	private void update() {
-		IPath projLocation= fMainPage.getLocationPath();
-		if (!projLocation.equals(fCurrProjectLocation) && canDetectExistingClassPath(projLocation)) {
-			String title= NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationDialog.title"); //$NON-NLS-1$
-			String description= NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationDialog.description"); //$NON-NLS-1$
-			if (MessageDialog.openQuestion(getShell(), title, description)) {
-				createAndDetect();
-			}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+	 */
+	public void setVisible(boolean visible) {
+		if (visible) {
+			changeToNewProject();
 		}
-					
-		fCurrProjectLocation= projLocation;
-				
-		IJavaProject prevProject= getJavaProject();
-		IProject currProject= fMainPage.getProjectHandle();
-		if ((prevProject == null) || !currProject.equals(prevProject.getProject())) {
-			init(JavaCore.create(currProject), null, null, false);
-		}		
+		super.setVisible(visible);
 	}
-
-	private void createAndDetect() {
+	
+	private void changeToNewProject() {
+		IProject newProjectHandle= fMainPage.getProjectHandle();
+		IPath newProjectLocation= fMainPage.getLocationPath();
+		
+		if (newProjectHandle.equals(fCurrProject) && newProjectLocation.equals(fCurrProjectLocation)) {
+			return; // no changes
+		}		
+		
 		IRunnableWithProgress op= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				if (monitor == null)
-					monitor= new NullProgressMonitor();		
-		
-				monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.desc"), 3);				 //$NON-NLS-1$
 				try {
-					BuildPathsBlock.createProject(fMainPage.getProjectHandle(), fMainPage.getLocationPath(), new SubProgressMonitor(monitor, 1));
-					fProjectCreated= true;					
-					initFromExistingStructures(new SubProgressMonitor(monitor, 2));						
+					updateProject(monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
-				}
+				} 
 			}
 		};
-
+	
 		try {
 			getContainer().run(false, true, op);
 		} catch (InvocationTargetException e) {
@@ -100,76 +85,55 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 			// cancel pressed
 		}
 	}
-		
-	/* (non-Javadoc)
-	 * @see IDialogPage#setVisible(boolean)
-	 */
-	public void setVisible(boolean visible) {
-		if (visible) {
-			update();
-		}
-		super.setVisible(visible);
-	}
 	
-	/* (non-Javadoc)
-	 * @see IWizardPage#getPreviousPage()
-	 */
-	public IWizardPage getPreviousPage() {
-		if (fProjectCreated) {
-			return null;
-		}
-		return super.getPreviousPage();
-	}
-		
-	public void createProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
+	protected void updateProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		try {		
-			monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.NormalCreationOperation.desc"), 4); //$NON-NLS-1$
-			BuildPathsBlock.createProject(fMainPage.getProjectHandle(), fMainPage.getLocationPath(), new SubProgressMonitor(monitor, 1));
-			if (getJavaProject() == null) {
-				initFromExistingStructures(new SubProgressMonitor(monitor, 1));
+		try {
+			monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.desc"), 3);				 //$NON-NLS-1$
+				
+			if (fCurrProject != null) { // remove existing project
+				fCurrProject.delete(false, false, new SubProgressMonitor(monitor, 1));
 			} else {
 				monitor.worked(1);
 			}
-			configureJavaProject(new SubProgressMonitor(monitor, 2));
-		} finally {
-			monitor.done();
-		}
-	}
-	
-	private void initFromExistingStructures(IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.DetectingClasspathOperation.desc"), 2); //$NON-NLS-1$
-		try {
-			IProject project= fMainPage.getProjectHandle();
+			fCurrProject= fMainPage.getProjectHandle();
+			fCurrProjectLocation= fMainPage.getLocationPath();			
+				
+			createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 1));
 			
-			if (project.getFile(".classpath").exists()) { //$NON-NLS-1$
-				init(JavaCore.create(project), null, null, false);
-				monitor.worked(2);
-			} else{
-				ClassPathDetector detector= new ClassPathDetector(project);
-				IClasspathEntry[] entries= detector.getClasspath();
-				IPath outputLocation= detector.getOutputLocation();
+			IClasspathEntry[] entries= null;
+			IPath outputLocation= null;
 
-				init(JavaCore.create(project), outputLocation, entries, false);
-				monitor.worked(2);
-			}
+			if (fCurrProjectLocation.toFile().exists() && !Platform.getLocation().equals(fCurrProjectLocation)) {
+				// detect classpath
+				if (!fCurrProject.getFile(".classpath").exists()) { //$NON-NLS-1$
+					// if .classpath exists noneed to look for files
+					ClassPathDetector detector= new ClassPathDetector(fCurrProject);
+					entries= detector.getClasspath();
+					outputLocation= detector.getOutputLocation();
+				}
+			}				
+			init(JavaCore.create(fCurrProject), outputLocation, entries, false);
+			monitor.worked(1);
+	
 		} finally {
 			monitor.done();
 		}
-		
 	}
 		
 	/**
 	 * Called from the wizard on cancel.
 	 */
 	public void performCancel() {
-		if (fProjectCreated) {
+		if (fCurrProject != null) {
 			try {
-				fMainPage.getProjectHandle().delete(false, false, null);
+				fCurrProject.delete(false, false, null);
 			} catch (CoreException e) {
-				JavaPlugin.log(e);
+				String title= NewWizardMessages.getString("NewProjectCreationWizardPage.op_error.title"); //$NON-NLS-1$
+				String message= NewWizardMessages.getString("NewProjectCreationWizardPage.op_error_remove.message");			 //$NON-NLS-1$
+				ExceptionHandler.handle(e, getShell(), title, message);				
 			}
 		}
 	}

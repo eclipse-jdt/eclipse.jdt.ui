@@ -532,6 +532,11 @@ public class BuildPathsBlock {
 	// -------- creation -------------------------------
 	
 	public static void createProject(IProject project, IPath locationPath, IProgressMonitor monitor) throws CoreException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}				
+		monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc_project"), 10); //$NON-NLS-1$
+
 		// create the project
 		try {
 			if (!project.exists()) {
@@ -563,6 +568,8 @@ public class BuildPathsBlock {
 			newNatures[prevNatures.length]= JavaCore.NATURE_ID;
 			description.setNatureIds(newNatures);
 			project.setDescription(description, monitor);
+		} else {
+			monitor.worked(1);
 		}
 	}
 	
@@ -570,7 +577,7 @@ public class BuildPathsBlock {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}				
-		monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc"), 10); //$NON-NLS-1$
+		monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc_java"), 10); //$NON-NLS-1$
 
 		try {
 			Shell shell= null;
