@@ -125,7 +125,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			final boolean format= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMAT));
 			final boolean header= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER));
 
-			if (format && (header || position.getOffset() != 0 || !type.equals(IJavaPartitions.JAVA_DOC))) {
+			if (format && (header || position.getOffset() != 0 || !type.equals(IJavaPartitions.JAVA_DOC) && !type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))) {
 
 				final CommentRegion region= CommentObjectFactory.createRegion(this, position, TextUtilities.getDefaultLineDelimiter(document));
 				final String indentation= getLineIndentation(document, region, position.getOffset());
