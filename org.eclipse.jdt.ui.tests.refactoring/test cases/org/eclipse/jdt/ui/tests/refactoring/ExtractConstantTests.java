@@ -88,7 +88,7 @@ public class ExtractConstantTests extends RefactoringTest {
 		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 																									JavaPreferencesSettings.getCodeGenerationSettings());		
 		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());
-		assertTrue("activation was supposed to be successful", preconditionResult.isOK());
+		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
 		assertEquals("contant name not guessed", expectedGuessedName, ref.guessConstantName());
 	}
 
@@ -98,7 +98,7 @@ public class ExtractConstantTests extends RefactoringTest {
 		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 																									JavaPreferencesSettings.getCodeGenerationSettings());
 		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());
-		assertTrue("activation was supposed to be successful", preconditionResult.isOK());
+		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
 
 		if(!allowLoadtime)
 			assertTrue("The selected expression has been erroneously reported to contain references to non-static or non-final fields.", ref.selectionAllStaticFinal());		
@@ -308,6 +308,14 @@ public class ExtractConstantTests extends RefactoringTest {
 	public void testGuessStringLiteral1() throws Exception {
 		//test for bug 37377
 		guessHelper(4, 19, 4, 33, "FOO_HASH_MAP") ;
+	}
+
+	public void testGuessFromGetterName0() throws Exception {
+		guessHelper(4, 19, 4, 30, "FOO_BAR") ;
+	}
+
+	public void testGuessFromGetterName1() throws Exception {
+		guessHelper(4, 23, 4, 33, "FOO_BAR") ;
 	}
 }
 
