@@ -78,8 +78,10 @@ public class ChangeExceptionHandler implements IChangeExceptionHandler {
 		if (e instanceof CoreException) {
 			status= ((CoreException)e).getStatus();
 		} else {
-			status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-				e.getMessage(), e);
+			if (e.getMessage() == null)
+				status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "", e);
+			else
+				status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, e.getMessage(), e);
 		}
 		final ErrorDialog dialog= new RefactorErrorDialog(fParent,
 			RefactoringMessages.getString("ChangeExceptionHandler.refactoring"), //$NON-NLS-1$
