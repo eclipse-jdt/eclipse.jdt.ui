@@ -390,14 +390,14 @@ public class JavaElementLabels {
 		try {
 			// return type
 			if (getFlag(flags, M_PRE_TYPE_PARAMETERS) && method.exists()) {
-				String[] typeParameters= method.getTypeParameterSignatures();
+				ITypeParameter[] typeParameters= method.getTypeParameters();
 				if (typeParameters.length > 0) {
 					buf.append('<');
 					for (int i = 0; i < typeParameters.length; i++) {
 						if (i > 0) {
 							buf.append(COMMA_STRING);
 						}
-						buf.append(Signature.getTypeVariable(typeParameters[i]));
+						buf.append(typeParameters[i].getElementName());
 					}
 					buf.append('>');
 					buf.append(' ');
@@ -421,16 +421,28 @@ public class JavaElementLabels {
 			// parameters
 			buf.append('(');
 			if (getFlag(flags, M_PARAMETER_TYPES | M_PARAMETER_NAMES)) {
+				
 				String[] types= getFlag(flags, M_PARAMETER_TYPES) ? method.getParameterTypes() : null;
 				String[] names= (getFlag(flags, M_PARAMETER_NAMES) && method.exists()) ? method.getParameterNames() : null;
 				int nParams= types != null ? types.length : names.length;
+				boolean renderVarargs= (types != null) && method.exists() && Flags.isVarargs(method.getFlags());
 				
 				for (int i= 0; i < nParams; i++) {
 					if (i > 0) {
 						buf.append(COMMA_STRING); //$NON-NLS-1$
 					}
 					if (types != null) {
-						buf.append(Signature.getSimpleName(Signature.toString(types[i])));
+						String paramSig= types[i];
+						if (renderVarargs && (i == nParams - 1)) {
+							int newDim= Signature.getArrayCount(paramSig) - 1;
+							buf.append(Signature.getSimpleName(Signature.toString(Signature.getElementType(paramSig))));
+							for (int k= 0; k < newDim; k++) {
+								buf.append("[]"); //$NON-NLS-1$
+							}
+							buf.append("..."); //$NON-NLS-1$
+						} else {
+							buf.append(Signature.getSimpleName(Signature.toString(paramSig)));
+						}
 					}
 					if (names != null) {
 						if (types != null) {
@@ -460,7 +472,7 @@ public class JavaElementLabels {
 			}
 			
 			if (getFlag(flags, M_APP_TYPE_PARAMETERS) && method.exists()) {
-				String[] typeParameters= method.getTypeParameterSignatures();
+				ITypeParameter[] typeParameters= method.getTypeParameters();
 				if (typeParameters.length > 0) {
 					buf.append(' ');
 					buf.append('<');
@@ -468,7 +480,7 @@ public class JavaElementLabels {
 						if (i > 0) {
 							buf.append(COMMA_STRING);
 						}
-						buf.append(Signature.getTypeVariable(typeParameters[i]));
+						buf.append(typeParameters[i].getElementName());
 					}
 					buf.append('>');
 				}						
@@ -592,14 +604,14 @@ public class JavaElementLabels {
 		}
 		buf.append(typeName);
 		try {
-			String[] typeParameters = type.getTypeParameterSignatures();
+			ITypeParameter[] typeParameters = type.getTypeParameters();
 			if (typeParameters.length > 0) {
 				buf.append('<');
 				for (int i = 0; i < typeParameters.length; i++) {
 					if (i > 0) {
 						buf.append(COMMA_STRING);
 					}
-					buf.append(Signature.getTypeVariable(typeParameters[i]));
+					buf.append(typeParameters[i].getElementName());
 				}
 				buf.append('>');
 			}		
