@@ -321,6 +321,10 @@ public class TypeContextChecker {
 							results[i].addError(problems[p].getMessage());
 					}
 					typeBindings[i]= type.resolveBinding();
+					if (typeBindings[i] != null && typeBindings[i].isGenericType() && ! typeBindings[i].isRawType() && ! typeBindings[i].isParameterizedType()) {
+						//TODO: workaround for bug 81101
+						typeBindings[i]= null;
+					}
 					if (firstPass && typeBindings[i] == null)
 						types[i]= qualifyTypes(types[i], type, results[i]);
 				}
