@@ -11,12 +11,14 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
@@ -24,10 +26,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -50,11 +56,14 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -62,6 +71,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
@@ -74,453 +84,225 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class InlineConstantRefactoring extends Refactoring {
 
 	private static class InlineTargetCompilationUnit {
 
-		private static class ClassQualification extends StringInsertion {
-
-			public static class ClassQualificationCannotBePerformed extends Exception {
-
-				// not really serializable
-				private static final long serialVersionUID= 1L;
-
-				public ClassQualificationCannotBePerformed(String message) {
-					super(message);
-				}
-
-				public void fillInStatus(RefactoringStatus status, RefactoringStatusContext context) {
-					status.addInfo(getMessage(), context);
-				}
+		private static class InitializerTraversal extends HierarchicalASTVisitor {
+		
+			private static boolean areInSameClassOrInterface(ASTNode one, ASTNode other) {
+				ASTNode onesContainer= getContainingClassOrInterfaceDeclaration(one);
+				ASTNode othersContainer= getContainingClassOrInterfaceDeclaration(other);
+		
+				if (onesContainer == null || othersContainer == null)
+					return false;
+		
+				ITypeBinding onesContainerBinding= getTypeBindingForClassOrInterfaceDeclaration(onesContainer);
+				ITypeBinding othersContainerBinding= getTypeBindingForClassOrInterfaceDeclaration(othersContainer);
+		
+				Assert.isNotNull(onesContainerBinding);
+				Assert.isNotNull(othersContainerBinding);
+		
+				String onesKey= onesContainerBinding.getKey();
+				String othersKey= othersContainerBinding.getKey();
+		
+				if (onesKey == null || othersKey == null)
+					return false;
+		
+				return onesKey.equals(othersKey);
 			}
-
-			public static ClassQualification create(SimpleName toQualify, IntegerMapping nodeToTargetPositionMap) throws ClassQualificationCannotBePerformed {
+		
+			private static boolean isStaticAccess(SimpleName memberName) {
+				IBinding binding= memberName.resolveBinding();
+				Assert.isTrue(binding instanceof IVariableBinding || binding instanceof IMethodBinding || binding instanceof ITypeBinding);
+		
+				if (binding instanceof ITypeBinding)
+					return true;
+		
+				if (binding instanceof IVariableBinding)
+					return ((IVariableBinding) binding).isField();
+		
+				int modifiers= binding.getModifiers();
+				return Modifier.isStatic(modifiers);
+			}
+		
+			private static ASTNode getContainingClassOrInterfaceDeclaration(ASTNode node) {
+				while (node != null && !(node instanceof AbstractTypeDeclaration) && !(node instanceof AnonymousClassDeclaration)) {
+					node= node.getParent();
+				}
+				return node;
+			}
+		
+			private static ITypeBinding getTypeBindingForClassOrInterfaceDeclaration(ASTNode declaration) {
+				if (declaration instanceof AnonymousClassDeclaration)
+					return ((AnonymousClassDeclaration) declaration).resolveBinding();
+		
+				if (declaration instanceof AbstractTypeDeclaration)
+					return ((AbstractTypeDeclaration) declaration).resolveBinding();
+		
+				Assert.isTrue(false);
+				return null;
+			}
+		
+			private final Expression fInitializer;
+			private ASTRewrite fInitializerRewrite;
+		
+			// cache:
+			private Set fNamesDeclaredLocallyAtNewLocation;
+		
+			private final Expression fNewLocation;
+			private final CompilationUnitRewrite fNewLocationCuRewrite;
+		
+			public InitializerTraversal(Expression initializer, Expression newLocation, CompilationUnitRewrite newLocationCuRewrite) {
+				fInitializer= initializer;
+				fInitializerRewrite= ASTRewrite.create(initializer.getAST());
+				fNewLocation= newLocation;
+				fNewLocationCuRewrite= newLocationCuRewrite;
+		
+				perform(initializer);
+			}
+		
+			/**
+			 * @param scope not a TypeDeclaration
+			 * @return Set containing Strings representing simple names
+			 */
+			private Set getLocallyDeclaredNames(BodyDeclaration scope) {
+				Assert.isTrue(!(scope instanceof AbstractTypeDeclaration));
+		
+				final Set result= new HashSet();
+		
+				if (scope instanceof FieldDeclaration)
+					return result;
+		
+				scope.accept(new HierarchicalASTVisitor() {
+		
+					public boolean visit(AbstractTypeDeclaration node) {
+						Assert.isTrue(node.getParent() instanceof TypeDeclarationStatement);
+		
+						result.add(node.getName().getIdentifier());
+						return false;
+					}
+		
+					public boolean visit(AnonymousClassDeclaration anonDecl) {
+						return false;
+					}
+		
+					public boolean visit(VariableDeclaration varDecl) {
+						result.add(varDecl.getName().getIdentifier());
+						return false;
+					}
+				});
+				return result;
+			}
+		
+			private Set getNamesDeclaredLocallyAtNewLocation() {
+				if (fNamesDeclaredLocallyAtNewLocation != null)
+					return fNamesDeclaredLocallyAtNewLocation;
+		
+				BodyDeclaration enclosingBodyDecl= (BodyDeclaration) ASTNodes.getParent(fNewLocation, BodyDeclaration.class);
+				Assert.isTrue(!(enclosingBodyDecl instanceof AbstractTypeDeclaration));
+		
+				return fNamesDeclaredLocallyAtNewLocation= getLocallyDeclaredNames(enclosingBodyDecl);
+			}
+		
+			public ASTRewrite getInitializerRewrite() {
+				return fInitializerRewrite;
+			}
+		
+			private boolean mayBeShadowedByLocalDeclaration(SimpleName memberName) {
+				return getNamesDeclaredLocallyAtNewLocation().contains(memberName.getIdentifier());
+			}
+		
+			private void perform(Expression initializer) {
+				initializer.accept(this);
+			}
+		
+			private void qualifyMemberName(SimpleName memberName) {
+				if (isStaticAccess(memberName))
+					qualifyToTopLevelClass(memberName);
+			}
+		
+			private void qualifyToTopLevelClass(SimpleName toQualify) {
 				ITypeBinding declaringClass= getDeclaringClassBinding(toQualify);
-				String declaringClassName= getDeclaringClassName(toQualify);
-
-				if (declaringClassName == null)
-					return null;
-
-				return new ClassQualification(declaringClassName, nodeToTargetPositionMap.map(toQualify.getStartPosition()), declaringClass);
+				if (declaringClass == null)
+					return;
+				
+				Type newQualification= fNewLocationCuRewrite.getImportRewrite().addImport(declaringClass, fInitializerRewrite.getAST());
+				fNewLocationCuRewrite.getImportRemover().registerAddedImports(newQualification);
+				
+				SimpleName newToQualify= (SimpleName) fInitializerRewrite.createMoveTarget(toQualify);
+				Type newType= fInitializerRewrite.getAST().newQualifiedType(newQualification, newToQualify);
+				fInitializerRewrite.replace(toQualify, newType, null);
 			}
-
-			private static String getClassNameQualifiedToTopLevel(ITypeBinding clazz) throws ClassQualificationCannotBePerformed {
-				if (clazz.isAnonymous())
-					throw new ClassQualificationCannotBePerformed(RefactoringCoreMessages.getString("InlineConstantRefactoring.members_declared_in_anonymous")); //$NON-NLS-1$
-
-				ITypeBinding declaring= clazz.getDeclaringClass();
-
-				String qualifier= declaring == null ? "" : getClassNameQualifiedToTopLevel(declaring) + "."; //$NON-NLS-1$ //$NON-NLS-2$
-				return qualifier + clazz.getName();
-			}
-
+			
 			private static ITypeBinding getDeclaringClassBinding(SimpleName memberName) {
-
+		
 				IBinding binding= memberName.resolveBinding();
 				if (binding instanceof IMethodBinding)
 					return ((IMethodBinding) binding).getDeclaringClass();
-
+		
 				if (binding instanceof IVariableBinding)
 					return ((IVariableBinding) binding).getDeclaringClass();
-
+		
 				if (binding instanceof ITypeBinding)
 					return ((ITypeBinding) binding).getDeclaringClass();
-
+		
 				Assert.isTrue(false);
 				return null;
-
+		
 			}
-
-			private static String getDeclaringClassName(SimpleName memberName) throws ClassQualificationCannotBePerformed {
-				ITypeBinding declaring= getDeclaringClassBinding(memberName);
-				if (declaring == null)
-					return null;
-
-				return getClassNameQualifiedToTopLevel(declaring);
+		
+			private void qualifyUnqualifiedMemberNameIfNecessary(SimpleName memberName) {
+				if (shouldQualify(memberName))
+					qualifyMemberName(memberName);
 			}
-
-			private final ITypeBinding fQualifyingClass;
-
-			private ClassQualification(String qualifier, int insertionPosition, ITypeBinding qualifyingClass) {
-				super(insertionPosition, qualifier + "."); //$NON-NLS-1$
-				fQualifyingClass= qualifyingClass;
-			}
-
-			public ITypeBinding getQualifyingClass() {
-				return fQualifyingClass;
-			}
-
-		}
-
-		private static class InitializerExpressionRelocationPreparer {
-
-			// ---- Begin InlineTargetCompilationUnit.InitializerExpressionRelocationPreparer.InitializerTraversal
-			private static class InitializerTraversal extends HierarchicalASTVisitor {
-
-				private static boolean areInSameClassOrInterface(ASTNode one, ASTNode other) {
-					ASTNode onesContainer= getContainingClassOrInterfaceDeclaration(one);
-					ASTNode othersContainer= getContainingClassOrInterfaceDeclaration(other);
-
-					if (onesContainer == null || othersContainer == null)
-						return false;
-
-					ITypeBinding onesContainerBinding= getTypeBindingForClassOrInterfaceDeclaration(onesContainer);
-					ITypeBinding othersContainerBinding= getTypeBindingForClassOrInterfaceDeclaration(othersContainer);
-
-					Assert.isNotNull(onesContainerBinding);
-					Assert.isNotNull(othersContainerBinding);
-
-					String onesKey= onesContainerBinding.getKey();
-					String othersKey= othersContainerBinding.getKey();
-
-					if (onesKey == null || othersKey == null)
-						return false;
-
-					return onesKey.equals(othersKey);
-				}
-
-				private static void checkMemberAcceptable(SimpleName memberName) {
-					IBinding binding= memberName.resolveBinding();
-					Assert.isTrue(binding instanceof IVariableBinding || binding instanceof IMethodBinding || binding instanceof ITypeBinding);
-
-					if (binding instanceof ITypeBinding)
-						return;
-
-					if (binding instanceof IVariableBinding)
-						Assert.isTrue(((IVariableBinding) binding).isField());
-
-					int modifiers= binding.getModifiers();
-					Assert.isTrue(Modifier.isStatic(modifiers), "Relocation of non-static initializer expressions is not currently supported"); //$NON-NLS-1$
-				}
-
-				private static ASTNode getContainingClassOrInterfaceDeclaration(ASTNode node) {
-					while (node != null && !(node instanceof AbstractTypeDeclaration) && !(node instanceof AnonymousClassDeclaration)) {
-						node= node.getParent();
-					}
-					return node;
-				}
-
-				private static ITypeBinding getTypeBindingForClassOrInterfaceDeclaration(ASTNode declaration) {
-					if (declaration instanceof AnonymousClassDeclaration)
-						return ((AnonymousClassDeclaration) declaration).resolveBinding();
-
-					if (declaration instanceof AbstractTypeDeclaration)
-						return ((AbstractTypeDeclaration) declaration).resolveBinding();
-
-					Assert.isTrue(false);
-					return null;
-				}
-
-				private boolean fCanBePrepared= true;
-
-				private final Expression fInitializer3;// use name other than fInitializer to avoid hiding
-
-				// cache:
-				private Set fNamesDeclaredLocallyAtNewLocation;
-
-				private final Expression fNewLocation;
-
-				private final ICompilationUnit fNewLocationCU;
-
-				private List fQualifications= new ArrayList();
-
-				private final RefactoringStatus fStatus2;
-
-				public InitializerTraversal(Expression initializer, Expression newLocation, ICompilationUnit newLocationCU, RefactoringStatus status) {
-					fStatus2= status;
-					fInitializer3= initializer;
-					fNewLocation= newLocation;
-					fNewLocationCU= newLocationCU;
-
-					perform(initializer);
-				}
-
-				public boolean canInitializerBePrepared() {
-					return fCanBePrepared;
-				}
-
-				/**
-				 * @param scope not a TypeDeclaration
-				 * @return Set containing Strings representing simple names
-				 */
-				private Set getLocallyDeclaredNames(BodyDeclaration scope) {
-					Assert.isTrue(!(scope instanceof AbstractTypeDeclaration));
-
-					final Set result= new HashSet();
-
-					if (scope instanceof FieldDeclaration)
-						return result;
-
-					scope.accept(new HierarchicalASTVisitor() {
-
-						public boolean visit(AbstractTypeDeclaration node) {
-							Assert.isTrue(node.getParent() instanceof TypeDeclarationStatement);
-
-							result.add(node.getName().getIdentifier());
-							return false;
-						}
-
-						public boolean visit(AnonymousClassDeclaration anonDecl) {
-							return false;
-						}
-
-						public boolean visit(VariableDeclaration varDecl) {
-							result.add(varDecl.getName().getIdentifier());
-							return false;
-						}
-					});
-					return result;
-				}
-
-				private Set getNamesDeclaredLocallyAtNewLocation() {
-					if (fNamesDeclaredLocallyAtNewLocation != null)
-						return fNamesDeclaredLocallyAtNewLocation;
-
-					BodyDeclaration enclosingBodyDecl= (BodyDeclaration) ASTNodes.getParent(fNewLocation, BodyDeclaration.class);
-					Assert.isTrue(!(enclosingBodyDecl instanceof AbstractTypeDeclaration));
-
-					return fNamesDeclaredLocallyAtNewLocation= getLocallyDeclaredNames(enclosingBodyDecl);
-				}
-
-				public ClassQualification[] getQualifications() {
-					return (ClassQualification[]) fQualifications.toArray(new ClassQualification[fQualifications.size()]);
-				}
-
-				private boolean mayBeShadowedByLocalDeclaration(SimpleName memberName) {
-					return getNamesDeclaredLocallyAtNewLocation().contains(memberName.getIdentifier());
-				}
-
-				private void perform(Expression initializer) {
-					initializer.accept(this);
-				}
-
-				private void qualifyMemberName(SimpleName memberName) {
-					checkMemberAcceptable(memberName);
-					qualifyToTopLevelClass(memberName);
-				}
-
-				private void qualifyToTopLevelClass(SimpleName name) {
-					try {
-						ClassQualification qualification= ClassQualification.create(name, new IntegerMapping() {
-
-							public int map(int position) {
-								return position - fInitializer3.getStartPosition();
-							}
-						});
-						if (qualification != null)
-							fQualifications.add(qualification);
-					} catch (ClassQualification.ClassQualificationCannotBePerformed e) {
-						e.fillInStatus(fStatus2, JavaStatusContext.create(fNewLocationCU, fNewLocation));
-						fCanBePrepared= false;
-					}
-				}
-
-				private void qualifyUnqualifiedMemberNameIfNecessary(SimpleName memberName) {
-					if (shouldQualify(memberName))
-						qualifyMemberName(memberName);
-				}
-
-				private boolean shouldQualify(SimpleName memberName) {
-					if (!areInSameClassOrInterface(fInitializer3, fNewLocation))
-						return true;
-
-					return mayBeShadowedByLocalDeclaration(memberName);
-				}
-
-				public boolean visit(ASTNode node) {
-					return fCanBePrepared;
-				}
-
-				public boolean visit(FieldAccess fieldAccess) {
-					fieldAccess.getExpression().accept(this);
-					return false;
-				}
-
-				public boolean visit(MethodInvocation invocation) {
-					if (invocation.getExpression() == null)
-						qualifyUnqualifiedMemberNameIfNecessary(invocation.getName());
-					else
-						invocation.getExpression().accept(this);
-
-					for (Iterator it= invocation.arguments().iterator(); it.hasNext();)
-						((Expression) it.next()).accept(this);
-
-					return false;
-				}
-
-				public boolean visit(Name name) {
-					SimpleName leftmost= getLeftmost(name);
-
-					IBinding leftmostBinding= leftmost.resolveBinding();
-					if (leftmostBinding instanceof IVariableBinding || leftmostBinding instanceof IMethodBinding || leftmostBinding instanceof ITypeBinding)
-						qualifyUnqualifiedMemberNameIfNecessary(leftmost);
-
-					return false;
-				}
-			}
-
-			public static String prepareInitializerForLocation(Expression initializer, ICompilationUnit initializerCU, Expression location, ICompilationUnit locationCU, Set newTypes, RefactoringStatus status) throws JavaModelException {
-				return new InitializerExpressionRelocationPreparer(initializer, initializerCU, location, locationCU, newTypes, status).prepareInitializer();
-			}
-
-			// ---- End InlineTargetCompilationUnit.InitializerExpressionRelocationPreparer.InitializerTraversal
-
-			private final Expression fInitializer2;// use name other than fInitializer to avoid hiding
-
-			private final ICompilationUnit fInitializerCU;
-
-			private final Expression fLocation;
-
-			private final ICompilationUnit fLocationCU;
-
-			private final Set fNewTypes;
-
-			private final RefactoringStatus fStatus;
-
-			private InitializerExpressionRelocationPreparer(Expression initializer, ICompilationUnit initializerCU, Expression location, ICompilationUnit locationCU, Set newTypes, RefactoringStatus status) {
-				fInitializer2= initializer;
-				fInitializerCU= initializerCU;
-				fLocation= location;
-				fLocationCU= locationCU;
-				fNewTypes= newTypes;
-				fStatus= status;
-			}
-
-			private String prepareInitializer() throws JavaModelException {
-				InitializerTraversal traversal= new InitializerTraversal(fInitializer2, fLocation, fLocationCU, fStatus);
-
-				if (!traversal.canInitializerBePrepared())
-					return null;
-
-				ClassQualification[] qualifications= traversal.getQualifications();
-				for (int i= 0; i < qualifications.length; i++)
-					fNewTypes.add(qualifications[i].getQualifyingClass());
-
-				String originalInitializerString= fInitializerCU.getBuffer().getText(fInitializer2.getStartPosition(), fInitializer2.getLength());
-				String result= new MultiInsertionStringEdit(qualifications).applyTo(originalInitializerString);
-
-				if (shouldParenthesizeSubstitute(fInitializer2, fLocation))
-					result= "(" + result + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-
-				return result;
-			}
-			
-			private static boolean shouldParenthesizeSubstitute(Expression substitute, Expression location) {
-				if (substitute instanceof Assignment)// for esthetic reasons
+		
+			private boolean shouldQualify(SimpleName memberName) {
+				if (!areInSameClassOrInterface(fInitializer, fNewLocation))
 					return true;
-
-				return ASTNodes.substituteMustBeParenthesized(substitute, location);
+		
+				return mayBeShadowedByLocalDeclaration(memberName);
 			}
-		}
-
-		private static interface IntegerMapping {
-
-			public int map(int x);
-		}
-
-		private static class MultiInsertionStringEdit extends StringEdit {
-
-			private final StringInsertion[] fOrderedInsertions;
-
-			public MultiInsertionStringEdit(StringInsertion[] insertions) {
-				orderInsertions(insertions);
-				checkInsertions(insertions);
-				fOrderedInsertions= insertions;
+		
+			public boolean visit(FieldAccess fieldAccess) {
+				fieldAccess.getExpression().accept(this);
+				return false;
 			}
-
-			public String applyTo(String target) {
-				String result= target;
-				for (int i= fOrderedInsertions.length - 1; i >= 0; i--) {
-					result= fOrderedInsertions[i].applyTo(result);
-				}
-				return result;
+		
+			public boolean visit(MethodInvocation invocation) {
+				if (invocation.getExpression() == null)
+					qualifyUnqualifiedMemberNameIfNecessary(invocation.getName());
+				else
+					invocation.getExpression().accept(this);
+		
+				for (Iterator it= invocation.arguments().iterator(); it.hasNext();)
+					((Expression) it.next()).accept(this);
+		
+				return false;
 			}
-
-			private void checkInsertions(StringInsertion[] insertions) {
-				for (int i= 1; i < insertions.length; i++) {
-					StringInsertion one= insertions[i - 1], other= insertions[i];
-					Assert.isTrue(one.compareTo(other) != 0);
-				}
-			}
-
-			private StringInsertion[] orderInsertions(StringInsertion[] insertions) {
-				Arrays.sort(insertions);
-				return insertions;
-			}
-		}
-
-		private abstract static class StringEdit {
-			public StringEdit() {}
-			public abstract String applyTo(String target);
-		}
-
-		private static class StringInsertion extends StringEdit implements Comparable {
-
-			private final int fOffset;
-
-			private final String fToInsert;
-
-			public StringInsertion(int offset, String toInsert) {
-				fOffset= offset;
-				fToInsert= toInsert;
-			}
-
-			public String applyTo(String target) {
-				return target.substring(0, fOffset) + fToInsert + target.substring(fOffset);
-			}
-
-			/**
-			 * 
-			 * @see java.lang.Comparable#compareTo(java.lang.Object)
-			 */
-			public int compareTo(Object other) {
-				Assert.isTrue(other instanceof StringInsertion);
-
-				StringInsertion otherInsertion= (StringInsertion) other;
-
-				if (fOffset < otherInsertion.fOffset)
-					return -1;
-				if (fOffset == otherInsertion.fOffset)
-					return 0;
-				Assert.isTrue(fOffset > otherInsertion.fOffset);
-				return 1;
-			}
-		}
-
-		private static class TypeReferenceFinder extends HierarchicalASTVisitor {
-
-			public static ITypeBinding[] getReferencedTopLevelTypes(ASTNode tree) {
-				return new TypeReferenceFinder().getTopLevelTypesReferenced(tree);
-			}
-
-			private List fTypes;
-
-			private ITypeBinding[] getTopLevelTypesReferenced(ASTNode tree) {
-				reset();
-				tree.accept(this);
-				return (ITypeBinding[]) fTypes.toArray(new ITypeBinding[fTypes.size()]);
-			}
-
-			private void reset() {
-				fTypes= new ArrayList();
-			}
-
+		
 			public boolean visit(Name name) {
 				SimpleName leftmost= getLeftmost(name);
-
-				IBinding binding= leftmost.resolveBinding();
-				if (binding instanceof ITypeBinding)
-					fTypes.add(binding);
-
+		
+				IBinding leftmostBinding= leftmost.resolveBinding();
+				if (leftmostBinding instanceof IVariableBinding || leftmostBinding instanceof IMethodBinding || leftmostBinding instanceof ITypeBinding)
+					qualifyUnqualifiedMemberNameIfNecessary(leftmost);
+		
+				if (leftmostBinding instanceof ITypeBinding)
+					fNewLocationCuRewrite.getImportRewrite().addImport((ITypeBinding) leftmostBinding);
+				
 				return false;
 			}
 		}
@@ -530,40 +312,35 @@ public class InlineConstantRefactoring extends Refactoring {
 
 		/** The references in this compilation unit, represented as AST Nodes in the parsed representation of the compilation unit */
 		private final Expression[] fReferences;
-
+		private VariableDeclarationFragment fDeclarationToRemove;
 		private final CompilationUnitRewrite fCuRewrite;
 		
-		private final InlineConstantRefactoring fRefactoring;
-
 		private InlineTargetCompilationUnit(CompilationUnitRewrite cuRewrite, Name singleReference, InlineConstantRefactoring refactoring) throws JavaModelException {
-			Expression initializer= refactoring.getInitializer();
-			ICompilationUnit initializerUnit= refactoring.getDeclaringCompilationUnit();
+			fInitializer= refactoring.getInitializer();
+			fInitializerUnit= refactoring.getDeclaringCompilationUnit();
+			
+			fCuRewrite= cuRewrite;
+			if (refactoring.getRemoveDeclaration() && cuRewrite.getCu().equals(fInitializerUnit))
+				fDeclarationToRemove= refactoring.getDeclaration();
 			
 			fReferences= new Expression[] { getQualifiedReference(singleReference)};
-			fCuRewrite= cuRewrite;
-			fRefactoring= refactoring;
-			fInitializer= initializer;
-			fInitializerUnit= initializerUnit;
 		}
 
 		private InlineTargetCompilationUnit(CompilationUnitRewrite cuRewrite, SearchMatch[] references, InlineConstantRefactoring refactoring) throws JavaModelException {
-			Expression initializer= refactoring.getInitializer();
-			ICompilationUnit initializerUnit= refactoring.getDeclaringCompilationUnit();
+			fInitializer= refactoring.getInitializer();
+			fInitializerUnit= refactoring.getDeclaringCompilationUnit();
 			
 			fCuRewrite= cuRewrite;
-			fRefactoring= refactoring;
-			fInitializer= initializer;
-			fInitializerUnit= initializerUnit;
-
+			if (refactoring.getRemoveDeclaration() && cuRewrite.getCu().equals(fInitializerUnit))
+				fDeclarationToRemove= refactoring.getDeclaration();
+			
 			fReferences= new Expression[references.length];
-
 			CompilationUnit cuNode= fCuRewrite.getRoot();
 			for (int i= 0; i < references.length; i++) {
 				ASTNode node= NodeFinder.perform(cuNode, references[i].getOffset(), references[i].getLength());
 				Assert.isTrue(node instanceof Name);
 				fReferences[i]= getQualifiedReference((Name) node);
 			}
-
 		}
 
 		private static Expression getQualifiedReference(Name fieldName) {
@@ -593,8 +370,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			for (int i= 0; i < fReferences.length; i++)
 				inlineReference(fReferences[i]);
 			
-			if (fCuRewrite.getCu().equals(fInitializerUnit))
-				removeConstantDeclarationIfNecessary();
+			removeConstantDeclarationIfNecessary();
 			
 			fCuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
 				public SourceRange computeSourceRange(ASTNode node) {
@@ -605,53 +381,68 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 
 		private void inlineReference(Expression reference) throws CoreException {
-			Set newTypes= new HashSet();
-			
 			ASTNode importDecl= ASTNodes.getParent(reference, ImportDeclaration.class);
 			if (importDecl != null)
 				return; // don't inline into static imports
 
-			String modifiedInitializer= prepareInitializerFor(reference, newTypes, new RefactoringStatus()); //TODO: collect problems?
+			String modifiedInitializer= prepareInitializerForLocation(reference);
 			if (modifiedInitializer == null)
 				return;
 
 			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.getString("InlineConstantRefactoring.Inline")); //$NON-NLS-1$
-			ASTNode newReference= fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
+			Expression newReference= (Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
+			if (shouldParenthesizeSubstitute(fInitializer, reference)) {
+				ParenthesizedExpression parenthesized= fCuRewrite.getAST().newParenthesizedExpression();
+				parenthesized.setExpression(newReference);
+				newReference= parenthesized;
+			}
 			fCuRewrite.getASTRewrite().replace(reference, newReference, msg);
-			
-			addImportsForTypesInOriginalInitializer();
-			addImportsForNewTypes(newTypes);
 		}
 
-		private String prepareInitializerFor(Expression reference, Set newTypes, RefactoringStatus status) throws JavaModelException {
-			return InitializerExpressionRelocationPreparer.prepareInitializerForLocation(fInitializer, fInitializerUnit, reference, fCuRewrite.getCu(), newTypes, status);
+		private String prepareInitializerForLocation(Expression location) throws CoreException {
+			InitializerTraversal traversal= new InitializerTraversal(fInitializer, location, fCuRewrite);
+			ASTRewrite initializerRewrite= traversal.getInitializerRewrite();
+			IDocument document= new Document(fInitializerUnit.getBuffer().getContents()); // could reuse document when generating and applying undo edits
+			
+			final RangeMarker marker= new RangeMarker(fInitializer.getStartPosition(), fInitializer.getLength());
+			TextEdit[] rewriteEdits= initializerRewrite.rewriteAST(document, fInitializerUnit.getJavaProject().getOptions(true)).removeChildren();
+			marker.addChildren(rewriteEdits);
+			try {
+				marker.apply(document, TextEdit.UPDATE_REGIONS);
+				String rewrittenInitializer= document.get(marker.getOffset(), marker.getLength());
+				int width= CodeFormatterUtil.getTabWidth(fCuRewrite.getCu().getJavaProject());
+				IRegion region= document.getLineInformation(document.getLineOfOffset(marker.getOffset()));
+				int oldIndent= Strings.computeIndent(document.get(region.getOffset(), region.getLength()), width);
+				return Strings.changeIndent(rewrittenInitializer, oldIndent, width, "", StubUtility.getLineDelimiterFor(document)); //$NON-NLS-1$
+			} catch (MalformedTreeException e) {
+				JavaPlugin.log(e);
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			}
+			return fInitializerUnit.getBuffer().getText(fInitializer.getStartPosition(), fInitializer.getLength());
+		}
+
+		private static boolean shouldParenthesizeSubstitute(Expression substitute, Expression location) {
+			if (substitute instanceof Assignment) // for esthetic reasons
+				return true;
+			else
+				return ASTNodes.substituteMustBeParenthesized(substitute, location);
 		}
 		
-		private void addImportsForNewTypes(Set newTypes) {
-			for (Iterator it= newTypes.iterator(); it.hasNext();)
-				fCuRewrite.getImportRewrite().addImport(((ITypeBinding) it.next()));
-		}
-
-		private void addImportsForTypesInOriginalInitializer() {
-			ITypeBinding[] types= TypeReferenceFinder.getReferencedTopLevelTypes(fInitializer);
-			for (int i= 0; i < types.length; i++)
-				fCuRewrite.getImportRewrite().addImport(types[i]);
-		}
-
 		private void removeConstantDeclarationIfNecessary() throws CoreException {
-			if (! fRefactoring.getRemoveDeclaration())
+			if (fDeclarationToRemove == null)
 				return;
-
-			VariableDeclarationFragment declaration= fRefactoring.getDeclaration();
-			FieldDeclaration parentDeclaration= (FieldDeclaration) declaration.getParent();
+			
+			FieldDeclaration parentDeclaration= (FieldDeclaration) fDeclarationToRemove.getParent();
 			ASTNode toRemove;
 			if (parentDeclaration.fragments().size() == 1)
 				toRemove= parentDeclaration;
 			else
-				toRemove= declaration;
+				toRemove= fDeclarationToRemove;
 
 			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.getString("InlineConstantRefactoring.remove_declaration")); //$NON-NLS-1$
 			fCuRewrite.getASTRewrite().remove(toRemove, msg);
+			fCuRewrite.getImportRemover().registerRemovedNode(toRemove);
 		}
 	}
 
@@ -875,9 +666,10 @@ public class InlineConstantRefactoring extends Refactoring {
 					}
 				}
 				if (! declarationRemoved) {
-					InlineTargetCompilationUnit targetForDeclaration= new InlineTargetCompilationUnit(
-							fDeclarationCuRewrite, new SearchMatch[0], this);
-					changes.add(targetForDeclaration.getChange());
+					InlineTargetCompilationUnit targetForDeclaration= new InlineTargetCompilationUnit(fDeclarationCuRewrite, new SearchMatch[0], this);
+					CompilationUnitChange change= targetForDeclaration.getChange();
+					if (change != null)
+						changes.add(change);
 				}
 			}
 
