@@ -32,10 +32,12 @@ public class ListDialog extends SelectionDialog {
 	private Object fInput;
 	private TableViewer fTableViewer;
 	private boolean fAddCancelButton;
+	private final int fShellStyle;
 	
-	public ListDialog(Shell parent) {
+	public ListDialog(Shell parent, int shellStyle) {
 		super(parent);
 		fAddCancelButton= false;
+		fShellStyle= shellStyle;
 	}
 
 	public void setInput(Object input) {
@@ -63,7 +65,7 @@ public class ListDialog extends SelectionDialog {
 	}
 	
 	public void create() {
-		setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE);
+		setShellStyle(fShellStyle);
 		super.create();
 	}
 	
