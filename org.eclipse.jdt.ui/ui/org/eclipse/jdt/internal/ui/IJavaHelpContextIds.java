@@ -91,9 +91,9 @@ public interface IJavaHelpContextIds {
 	public static final String FIND_DECLARATIONS_IN_WORKSPACE_ACTION= 						PREFIX + "find_declarations_in_workspace_action"; //$NON-NLS-1$	
 	public static final String FIND_DECLARATIONS_IN_HIERARCHY_ACTION= 						PREFIX + "find_declarations_in_hierarchy_action"; //$NON-NLS-1$	
 	public static final String FIND_DECLARATIONS_IN_WORKING_SET_ACTION= 						PREFIX + "find_declarations_in_working_set_action"; //$NON-NLS-1$	
-	public static final String FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION= 						PREFIX + "find_implementors_in_worspace_action"; //$NON-NLS-1$			
+	public static final String FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION= 						PREFIX + "find_implementors_in_workspace_action"; //$NON-NLS-1$			
 	public static final String FIND_IMPLEMENTORS_IN_WORKING_SET_ACTION= 						PREFIX + "find_implementors_in_working_set_action"; //$NON-NLS-1$			
-	public static final String FIND_REFERENCES_IN_WORKSPACE_ACTION= 							PREFIX + "find_references_in_workpace_action"; //$NON-NLS-1$			
+	public static final String FIND_REFERENCES_IN_WORKSPACE_ACTION= 							PREFIX + "find_references_in_workspace_action"; //$NON-NLS-1$			
 	public static final String FIND_REFERENCES_IN_HIERARCHY_ACTION= 							PREFIX + "find_references_in_hierarchy_action"; //$NON-NLS-1$			
 	public static final String FIND_REFERENCES_IN_WORKING_SET_ACTION= 						PREFIX + "find_references_in_working_set_action"; //$NON-NLS-1$			
 	public static final String FIND_READ_REFERENCES_IN_WORKSPACE_ACTION= 					PREFIX + "find_read_references_in_workspace_action"; //$NON-NLS-1$			

@@ -1334,6 +1334,7 @@
 			menubarPath="org.eclipse.search.menu/dialogGroup"
 			label="%openJavaSearchPageAction.label"
 	        icon="icons/full/obj16/jsearch_obj.gif"
+			helpContextId="java_search_action_context"
 			class="org.eclipse.jdt.internal.ui.search.OpenJavaSearchPageAction"/>
 
       	<!-- context menu group  -->

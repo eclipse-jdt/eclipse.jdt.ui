@@ -30,6 +30,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
+import org.eclipse.ui.editors.text.ITextEditorHelpContextIds;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ConvertLineDelimitersAction;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -137,14 +138,17 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fConvertToWindows= new ConvertLineDelimitersAction(editor, "\r\n"); //$NON-NLS-1$
 		fConvertToWindows.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_WINDOWS);
+		fConvertToWindows.setHelpContextId(ITextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_WINDOWS);
 		editor.setAction("ConvertLineDelimitersToWindows", fConvertToWindows); //$NON-NLS-1$		
 		
 		fConvertToUNIX= new ConvertLineDelimitersAction(editor, "\n"); //$NON-NLS-1$
 		fConvertToUNIX.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
+		fConvertToUNIX.setHelpContextId(ITextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
 		editor.setAction("ConvertLineDelimitersToUNIX", fConvertToUNIX); //$NON-NLS-1$		
 	
 		fConvertToMac= new ConvertLineDelimitersAction(editor, "\r"); //$NON-NLS-1$
 		fConvertToMac.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_MAC);
+		fConvertToMac.setHelpContextId(ITextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_MAC);
 		editor.setAction("ConvertLineDelimitersToMac", fConvertToMac); //$NON-NLS-1$
 	}
 	
