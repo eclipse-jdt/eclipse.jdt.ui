@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -20,7 +21,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
@@ -240,13 +246,28 @@ public class NLSHintHelper {
 	}
 	
 	public static Properties getProperties(IStorage storage) {
+		if (storage == null)
+			return null;
+
 		Properties props= new Properties();
 		InputStream is= null;
+		
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
-			if (storage != null) {
-				is= storage.getContents();
-				props.load(is);
+			if (manager != null) {
+				ITextFileBuffer buffer= manager.getTextFileBuffer(storage.getFullPath());
+				if (buffer != null) {
+					IDocument document= buffer.getDocument();
+					is= new ByteArrayInputStream(document.get().getBytes());
+				}
 			}
+			
+			// Fallback: read from storage
+			if (is == null)
+				is= storage.getContents();
+			
+			props.load(is);
+			
 		} catch (IOException e) {
 			// sorry no properties
 		} catch (CoreException e) {
@@ -260,6 +281,5 @@ public class NLSHintHelper {
 		}
 		return props;
 	}
-
 
 }
