@@ -368,14 +368,19 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			}	
 		} catch (InterruptedException ie) {
 		} catch (InvocationTargetException ite) {
-		}		
+		}	
+		if (name == null)
+			name= "";
+				
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, name);
-		int index = name.lastIndexOf('.');
-		if (index > 0) {
-			name = name.substring(index + 1);
+		if (name.length() > 0) {
+			int index = name.lastIndexOf('.');
+			if (index > 0) {
+				name = name.substring(index + 1);
+			}
+			name= getLaunchConfigurationDialog().generateName(name);
+			config.rename(name);
 		}
-		name= getLaunchConfigurationDialog().generateName(name);
-		config.rename(name);
 	}
 	
 	/**
