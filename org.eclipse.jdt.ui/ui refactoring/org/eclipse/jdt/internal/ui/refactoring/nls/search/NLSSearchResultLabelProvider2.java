@@ -11,22 +11,22 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 
-import org.eclipse.jdt.internal.ui.search.JavaSearchResultLabelProvider;
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jdt.internal.ui.search.TextSearchLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 
 class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider {
 	
-	private JavaSearchResultLabelProvider fLabelProvider;
+	private AppearanceAwareLabelProvider fLabelProvider;
 	
 	public NLSSearchResultLabelProvider2(AbstractTextSearchViewPage page) {
 		super(page);
-		fLabelProvider= new JavaSearchResultLabelProvider();
-		fLabelProvider.setAppearance(JavaSearchResultLabelProvider.SHOW_ELEMENT_CONTAINER);
+		fLabelProvider= new AppearanceAwareLabelProvider(JavaElementLabels.ALL_POST_QUALIFIED, 0);
 	}
 	
 	/*

@@ -25,16 +25,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
+import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
-import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
-import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 
 /**
  * Finds declarations of the selected element in the workspace.
@@ -80,21 +78,6 @@ public class FindDeclarationsAction extends FindAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKSPACE_ACTION);
 	}
 	
-	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		if (element.getElementType() == IJavaElement.METHOD) {
-			IMethod method= (IMethod)element;
-			int searchFor= IJavaSearchConstants.METHOD;
-			if (method.isConstructor())
-				searchFor= IJavaSearchConstants.CONSTRUCTOR;
-			IType type= getType(element);
-			String pattern= PrettySignature.getUnqualifiedMethodSignature(method);
-			return new JavaSearchOperation(JavaPlugin.getWorkspace(), pattern, true,
-				searchFor, getLimitTo(), getScope(type), getScopeDescription(type), getCollector());
-		}
-		else
-			return super.makeOperation(element);
-	}
-
 	int getLimitTo() {
 		return IJavaSearchConstants.DECLARATIONS;
 	}
@@ -112,5 +95,5 @@ public class FindDeclarationsAction extends FindAction {
 		else
 			return super.createJob(element);
 	}
-
+	
 }

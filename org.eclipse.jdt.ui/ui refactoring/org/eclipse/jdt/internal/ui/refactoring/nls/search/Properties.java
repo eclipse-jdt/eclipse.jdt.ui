@@ -17,6 +17,8 @@ import org.eclipse.jface.util.Assert;
 
 class Properties extends java.util.Properties {
 	
+	private static final long serialVersionUID= 1L;
+	
 	private Set fDuplicateKeys;
 
 	public Properties() {

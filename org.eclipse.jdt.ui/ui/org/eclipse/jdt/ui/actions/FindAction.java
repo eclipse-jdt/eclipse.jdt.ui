@@ -10,12 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.search.ui.NewSearchUI;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IWorkspaceDescription;
+
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -29,36 +36,18 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
-
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-
-import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchDescription;
-import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
-import org.eclipse.jdt.internal.ui.search.JavaSearchResultCollector;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 /**
  * Abstract class for Java search actions.
@@ -275,56 +264,11 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
 		
-		if (JavaPlugin.useNewSearch()) {
-			// will return true except for debugging purposes.
-			try {
-				performNewSearch(element);
-			} catch (JavaModelException ex) {
-				ExceptionHandler.handle(ex, getShell(), SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-		} else {
-			SearchUI.activateSearchResultView();
-			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			JavaSearchOperation op= null;
-			try {
-				op= makeOperation(element);
-				if (op == null)
-					return;
-			} catch (JavaModelException ex) {
-				ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
-				return;
-			}
-			IWorkspaceDescription workspaceDesc= JavaPlugin.getWorkspace().getDescription();
-			boolean isAutoBuilding= workspaceDesc.isAutoBuilding();
-			if (isAutoBuilding) {
-				// disable auto-build during search operation
-				workspaceDesc.setAutoBuilding(false);
-				try {
-					JavaPlugin.getWorkspace().setDescription(workspaceDesc);
-				}
-				catch (CoreException ex) {
-					ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.setDescription.title"), SearchMessages.getString("Search.Error.setDescription.message")); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-			try {
-				PlatformUI.getWorkbench().getProgressService().run(true, true, op);
-			} catch (InvocationTargetException ex) {
-				ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
-			} catch(InterruptedException e) {
-				// means it's cancelled
-			} finally {
-				if (isAutoBuilding) {
-					// enable auto-building again
-					workspaceDesc= JavaPlugin.getWorkspace().getDescription();
-					workspaceDesc.setAutoBuilding(true);
-					try {
-						JavaPlugin.getWorkspace().setDescription(workspaceDesc);
-					}
-					catch (CoreException ex) {
-						ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.setDescription.title"), SearchMessages.getString("Search.Error.setDescription.message")); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-				}				
-			}
+		// will return true except for debugging purposes.
+		try {
+			performNewSearch(element);
+		} catch (JavaModelException ex) {
+			ExceptionHandler.handle(ex, getShell(), SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -345,16 +289,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 		return new JavaSearchDescription(getLimitTo(), element, null, getScopeDescription(type));
 	}
 
-	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(element), getScopeDescription(element), getCollector());
-	}
-
 	abstract int getLimitTo();
 
-
-	JavaSearchResultCollector getCollector() {
-		return new JavaSearchResultCollector();
-	}
 	
 	String getScopeDescription(IJavaElement element) {
 		return SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
@@ -376,27 +312,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		else if (element instanceof ILocalVariable) {
 			type= (IType)element.getAncestor(IJavaElement.TYPE);
 		}
-		if (type != null) {
-			ICompilationUnit cu= type.getCompilationUnit();
-			if (cu == null)
-				return type;
-				
-			IType wcType= (IType) getWorkingCopy(type);
-			if (wcType != null)
-				return wcType;
-			else
-				return type;
-		}
-		return null;
+		return type;
 	}
-	
-	/**
-	 * Tries to find the given element in a working copy.
-	 */
-	private IJavaElement getWorkingCopy(IJavaElement input) {
-		// TODO: With new working copy story: original == working copy.
-		// Note that the previous code could result in a reconcile as side effect. Should check if that
-		// is still required.
-		return input;
-	}
+		
 }

@@ -979,41 +979,6 @@
             id="org.eclipse.jdt.ui.JavaSearchPage">
       </page>
    </extension>
-   <extension
-         point="org.eclipse.search.searchResultSorters">
-      <sorter
-            pageId="org.eclipse.jdt.ui.JavaSearchPage"
-            label="%ElementNameSorter.label"
-            icon="icons/full/elcl16/search_sortmatch.gif"
-            tooltip="%ElementNameSorter.tooltip"
-            class="org.eclipse.jdt.internal.ui.search.ElementNameSorter"
-            id="org.eclipse.search.internal.ui.ElementNameSorter">
-      </sorter>
-      <sorter
-            pageId="org.eclipse.jdt.ui.JavaSearchPage"
-            label="%ParentNameSorter.label"
-            icon="icons/full/elcl16/search_sortmatch.gif"
-            tooltip="%ParentNameSorter.tooltip"
-            class="org.eclipse.jdt.internal.ui.search.ParentNameSorter"
-            id="org.eclipse.search.internal.ui.ParentNameSorter">
-      </sorter>
-      <sorter
-            pageId="org.eclipse.jdt.ui.JavaSearchPage"
-            label="%PathNameSorter.label"
-            icon="icons/full/elcl16/search_sortmatch.gif"
-            tooltip="%PathNameSorter.tooltip"
-            class="org.eclipse.jdt.internal.ui.search.PathNameSorter"
-            id="org.eclipse.search.internal.ui.PathNameSorter">
-      </sorter>
-      <sorter
-            pageId="org.eclipse.jdt.ui.JavaFileSearch"
-            label="%PositionSorter.label"
-            icon="icons/full/elcl16/search_sortmatch.gif"
-            tooltip="%PositionSorter.tooltip"
-            class="org.eclipse.jdt.internal.ui.search.MatchPositionSorter"
-            id="org.eclipse.search.internal.ui.MatchPositionSorter">
-      </sorter>
-   </extension>
    
    <extension
     	id="JavaSearchResultPage"

@@ -13,34 +13,22 @@ package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.search.ui.ISearchPage;
+import org.eclipse.search.ui.ISearchPageContainer;
+import org.eclipse.search.ui.ISearchResultViewEntry;
+import org.eclipse.search.ui.NewSearchUI;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICodeAssist;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -80,14 +68,28 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
-import org.eclipse.search.ui.ISearchPage;
-import org.eclipse.search.ui.ISearchPageContainer;
-import org.eclipse.search.ui.ISearchResultViewEntry;
-import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICodeAssist;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -101,13 +103,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
-
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
 
@@ -157,10 +152,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	//---- Action Handling ------------------------------------------------
 
 	public boolean performAction() {
-		if (true) //TODO: remove old search support
-			return performNewSearch();
-		else
-			return performOldSearch();
+		return performNewSearch();
 	}
 
 	private boolean performNewSearch() {
@@ -206,61 +198,6 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		NLSSearchQuery query= new NLSSearchQuery(data.wrapperClass, data.propertyFile, scope, scopeDescription);
 		NewSearchUI.activateSearchResultView();
 		NewSearchUI.runQuery(query);
-		return true;
-	}
-
-	private boolean performOldSearch() {
-		SearchUI.activateSearchResultView();
-		SearchPatternData data= getPatternData();
-		if (data.wrapperClass == null || data.propertyFile == null)
-			return false;
-		IWorkspace workspace= JavaPlugin.getWorkspace();
-		
-		boolean includeJRE= true;
-
-		// Setup search scope
-		IJavaSearchScope scope= null;
-		String scopeDescription= ""; //$NON-NLS-1$
-		switch (getContainer().getSelectedScope()) {
-			case ISearchPageContainer.WORKSPACE_SCOPE :
-				scopeDescription= NLSSearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
-				scope= SearchEngine.createWorkspaceScope();
-				break;
-			case ISearchPageContainer.SELECTION_SCOPE :
-				scopeDescription= NLSSearchMessages.getString("SelectionScope"); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getSelection(), includeJRE);
-				break;
-			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE :
-				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(getSelection(), includeJRE);
-				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
-				if (projects.length > 1)
-					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
-				else if (projects.length == 1)
-					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectScope", projects[0].getName()); //$NON-NLS-1$
-				else 
-					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
-				break;
-			case ISearchPageContainer.WORKING_SET_SCOPE :
-				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
-				// should not happen - just to be sure
-				if (workingSets == null || workingSets.length < 1)
-					return false;
-				scopeDescription= NLSSearchMessages.getFormattedString("WorkingSetScope", new String[] { SearchUtil.toString(workingSets)}); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets(), includeJRE);
-				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
-		}
-
-		NLSSearchResultCollector collector= new NLSSearchResultCollector(data.propertyFile);
-		NLSSearchOperation op= new NLSSearchOperation(workspace, data.wrapperClass, REFERENCES, scope, scopeDescription, collector);
-		Shell shell= getControl().getShell();
-		try {
-			getContainer().getRunnableContext().run(true, true, op);
-		} catch (InvocationTargetException ex) {
-			ExceptionHandler.handle(ex, shell, NLSSearchMessages.getString("Search.Error.search.title"), NLSSearchMessages.getString("Search.Error.search.message")); //$NON-NLS-2$ //$NON-NLS-1$
-			return false;
-		} catch (InterruptedException ex) {
-			return false;
-		}
 		return true;
 	}
 
@@ -550,11 +487,14 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 
 	private IJavaElement getJavaElement(IMarker marker) {
 		try {
-			return JavaCore.create((String) marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
+			String handle= (String) marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID);
+			if (handle != null) {
+				return JavaCore.create(handle);
+			}
 		} catch (CoreException ex) {
 			ExceptionHandler.handle(ex, NLSSearchMessages.getString("Search.Error.createJavaElement.title"), NLSSearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
-			return null;
 		}
+		return null;
 	}
 
 	private SearchPatternData determineInitValuesFrom(IJavaElement element) {

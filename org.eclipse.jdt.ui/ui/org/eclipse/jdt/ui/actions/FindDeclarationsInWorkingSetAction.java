@@ -20,18 +20,16 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.ui.search.ElementQuerySpecification;
+import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
-import org.eclipse.jdt.ui.search.ElementQuerySpecification;
-import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 
 /**
  * Finds declarations of the selected element in working sets.
@@ -94,26 +92,6 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 	private void init() {
 		setText(SearchMessages.getString("Search.FindDeclarationsInWorkingSetAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInWorkingSetAction.tooltip")); //$NON-NLS-1$
-	}
-
-	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		IWorkingSet[] workingSets= fWorkingSet;
-		if (fWorkingSet == null) {
-			workingSets= JavaSearchScopeFactory.getInstance().queryWorkingSets();
-			if (workingSets == null)
-				return null;
-		}
-		SearchUtil.updateLRUWorkingSets(workingSets);
-		if (element.getElementType() == IJavaElement.METHOD) {
-			IMethod method= (IMethod)element;
-			int searchFor= IJavaSearchConstants.METHOD;
-			if (method.isConstructor())
-				searchFor= IJavaSearchConstants.CONSTRUCTOR;
-			String pattern= PrettySignature.getUnqualifiedMethodSignature(method);
-			return new JavaSearchOperation(JavaPlugin.getWorkspace(), pattern, true, searchFor, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets), getCollector());
-		}
-		else
-			return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets), getCollector());
 	}
 
 	/* (non-Javadoc)

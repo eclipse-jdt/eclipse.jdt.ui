@@ -18,30 +18,18 @@ public class JavaSearchDescription {
 	private String fStringPattern;
 	private String fScopeDescription;
 
-	/**
-	 * @return
-	 */
 	public IJavaElement getElementPattern() {
 		return fElementPattern;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getLimitTo() {
 		return fLimitTo;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getStringPattern() {
 		return fStringPattern;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getScopeDescription() {
 		return fScopeDescription;
 	}

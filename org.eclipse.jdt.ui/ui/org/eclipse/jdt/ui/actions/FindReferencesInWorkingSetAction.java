@@ -18,17 +18,15 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
-import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 
 /**
@@ -115,17 +113,6 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 		super(editor, "", validTypes);  //$NON-NLS-1$
 		fWorkingSets= workingSets;
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKING_SET_ACTION);
-	}
-
-	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		IWorkingSet[] workingSets= fWorkingSets;
-		if (fWorkingSets == null) {
-			workingSets= JavaSearchScopeFactory.getInstance().queryWorkingSets();
-			if (workingSets == null)
-				return null;
-		}
-		SearchUtil.updateLRUWorkingSets(workingSets);
-		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets), getCollector());
 	}
 
 	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {

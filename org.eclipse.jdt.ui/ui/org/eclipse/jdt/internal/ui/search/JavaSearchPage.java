@@ -13,46 +13,16 @@ package org.eclipse.jdt.internal.ui.search;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.RowLayouter;
-import org.eclipse.jdt.ui.search.ElementQuerySpecification;
-import org.eclipse.jdt.ui.search.PatternQuerySpecification;
-import org.eclipse.jdt.ui.search.QuerySpecification;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.DialogPage;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
-import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.NewSearchUI;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -66,7 +36,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -74,6 +53,29 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+
+import org.eclipse.jdt.ui.search.ElementQuerySpecification;
+import org.eclipse.jdt.ui.search.PatternQuerySpecification;
+import org.eclipse.jdt.ui.search.QuerySpecification;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
 	
@@ -204,74 +206,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	//---- Action Handling ------------------------------------------------
 	
 	public boolean performAction() {
-		if (JavaPlugin.useNewSearch()) {
-			return performNewSearch();
-		} else {
-			return performOldSearch();
-		}
-	}
-	
-	private boolean performOldSearch() {
-		org.eclipse.search.ui.SearchUI.activateSearchResultView();
-
-		SearchPatternData data= getPatternData();
-		IWorkspace workspace= JavaPlugin.getWorkspace();
-
-		// Setup search scope
-		IJavaSearchScope scope= null;
-		String scopeDescription= ""; //$NON-NLS-1$
-		
-		boolean includeJRE= false;
-		
-		switch (getContainer().getSelectedScope()) {
-			case ISearchPageContainer.WORKSPACE_SCOPE:
-				scopeDescription= SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
-				scope= SearchEngine.createWorkspaceScope();
-				break;
-			case ISearchPageContainer.SELECTION_SCOPE:
-				scopeDescription= SearchMessages.getString("SelectionScope"); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection, includeJRE);
-				break;
-			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
-				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(fStructuredSelection, includeJRE);
-				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
-				if (projects.length > 1)
-					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
-				else if (projects.length == 1)
-					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectScope", projects[0].getName()); //$NON-NLS-1$
-				else 
-					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
-				break;
-			case ISearchPageContainer.WORKING_SET_SCOPE:
-				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
-				// should not happen - just to be sure
-				if (workingSets == null || workingSets.length < 1)
-					return false;
-				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(workingSets)); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets(), includeJRE);
-				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
-		}
-		
-		JavaSearchResultCollector collector= new JavaSearchResultCollector();
-		JavaSearchOperation op= null;
-		if (data.getJavaElement() != null && getPattern().equals(fInitialData.getPattern())) {
-			op= new JavaSearchOperation(workspace, data.getJavaElement(), data.getLimitTo(), scope, scopeDescription, collector);
-			if (data.getLimitTo() == IJavaSearchConstants.REFERENCES)
-				SearchUtil.warnIfBinaryConstant(data.getJavaElement(), getShell());
-		} else {
-			data.setJavaElement(null);
-			op= new JavaSearchOperation(workspace, data.getPattern(), data.isCaseSensitive(), data.getSearchFor(), data.getLimitTo(), scope, scopeDescription, collector);
-		}
-		Shell shell= getControl().getShell();
-		try {
-			getContainer().getRunnableContext().run(true, true, op);
-		} catch (InvocationTargetException ex) {
-			ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-2$ //$NON-NLS-1$
-			return false;
-		} catch (InterruptedException ex) {
-			return false;
-		}
-		return true;
+		return performNewSearch();
 	}
 	
 	private boolean performNewSearch() {
@@ -732,8 +667,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		Object o= selection.getFirstElement();
 		if (o instanceof IJavaElement) {
 			return determineInitValuesFrom((IJavaElement)o);
-		} else if (o instanceof ISearchResultViewEntry) {
-			IJavaElement element= SearchUtil.getJavaElement(((ISearchResultViewEntry)o).getSelectedMarker());
+		} else if (SearchUtil.isISearchResultViewEntry(o)) {
+			IJavaElement element= SearchUtil.getJavaElement(o);
 			return determineInitValuesFrom(element);
 		} else if (o instanceof LogicalPackage) {
 			LogicalPackage lp= (LogicalPackage)o;

@@ -132,13 +132,6 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		}
 	}
 
-	/**
-	 * returns true if the child already was a child of parent.
-	 * 
-	 * @param parent
-	 * @param child
-	 * @return
-	 */
 	private boolean insertChild(Object parent, Object child) {
 		return insertInto(parent, child, fChildrenMap);
 	}

@@ -55,7 +55,7 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider im
 		}
 		
 		viewer.add(added.toArray());
-		viewer.update(updated.toArray(), new String[] { SortingLabelProvider.PROPERTY_MATCH_COUNT });
+		viewer.update(updated.toArray(), new String[] { SearchLabelProvider.PROPERTY_MATCH_COUNT });
 		viewer.remove(removed.toArray());
 	}
 

@@ -134,6 +134,23 @@ public class SearchUtil {
 		return object != null && isSearchPlugInActivated() && (object instanceof ISearchResultViewEntry);
 	}
 	
+	public static IMarker getMarkerFromPossibleSearchResultViewEntry(Object object) {
+		if (object instanceof ISearchResultViewEntry) {
+			ISearchResultViewEntry entry= (ISearchResultViewEntry) object;
+			return entry.getSelectedMarker();
+		}
+		return null;
+	}
+	
+	public static Object getGroupByKeyFromPossibleSearchResultViewEntry(Object object) {
+		if (object instanceof ISearchResultViewEntry) {
+			ISearchResultViewEntry entry= (ISearchResultViewEntry) object;
+			return entry.getGroupByKey();
+		}
+		return null;
+	}
+	
+	
 	/**
 	 * Returns the compilation unit for the given java element.
 	 * 

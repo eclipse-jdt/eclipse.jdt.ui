@@ -21,22 +21,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.search.ui.ISearchResultViewEntry;
-import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -44,6 +36,18 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
 public class JavaSearchScopeFactory {
 
@@ -177,9 +181,11 @@ public class JavaSearchScopeFactory {
 				Object selectedElement= iter.next();
 
 				// Unpack search result view entry
-				if (selectedElement instanceof ISearchResultViewEntry)
-					selectedElement= ((ISearchResultViewEntry) selectedElement).getGroupByKey();
-
+				Object oldSearchResultEntry= SearchUtil.getGroupByKeyFromPossibleSearchResultViewEntry(selectedElement);
+				if (oldSearchResultEntry != null) {
+					selectedElement= oldSearchResultEntry;
+				}
+				
 				if (selectedElement instanceof LogicalPackage)
 					// must check this first, since it's adaptable, but doesn't adapt to anything useful
 					javaProjects.add(((LogicalPackage) selectedElement).getJavaProject());
@@ -240,8 +246,10 @@ public class JavaSearchScopeFactory {
 				Object selectedElement= iter.next();
 
 				// Unpack search result view entry
-				if (selectedElement instanceof ISearchResultViewEntry)
-					selectedElement= ((ISearchResultViewEntry) selectedElement).getGroupByKey();
+				Object oldSearchResultEntry= SearchUtil.getGroupByKeyFromPossibleSearchResultViewEntry(selectedElement);
+				if (oldSearchResultEntry != null) {
+					selectedElement= oldSearchResultEntry;
+				}
 
 				if (selectedElement instanceof IJavaElement)
 					addJavaElements(javaElements, (IJavaElement) selectedElement);

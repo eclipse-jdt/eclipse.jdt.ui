@@ -15,7 +15,6 @@ import org.eclipse.jface.viewers.Viewer;
 public abstract class JavaSearchContentProvider implements IStructuredContentProvider {
 	protected final Object[] EMPTY_ARR= new Object[0];
 	protected JavaSearchResult fResult;
-	private MatchFilter[] fFilters= new MatchFilter[0];
 	private JavaSearchResultPage fPage;
 
 	JavaSearchContentProvider(JavaSearchResultPage page) {
@@ -34,7 +33,6 @@ public abstract class JavaSearchContentProvider implements IStructuredContentPro
 	public abstract void clear();
 
 	public void filtersChanged(MatchFilter[] filters) {
-		fFilters= filters;
 	}
 	
 	

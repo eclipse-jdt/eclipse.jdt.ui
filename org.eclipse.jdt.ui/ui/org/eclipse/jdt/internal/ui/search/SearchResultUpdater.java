@@ -89,11 +89,6 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 		return false;
 	}
 
-	/**
-	 * @param object
-	 * @param object2
-	 * @return
-	 */
 	private boolean isParentOf(Object ancestor, Object descendant) {
 		while (descendant != null && !ancestor.equals(descendant))
 			descendant= getParent(descendant);
