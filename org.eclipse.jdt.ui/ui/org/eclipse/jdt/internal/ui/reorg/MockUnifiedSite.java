@@ -14,18 +14,21 @@ import org.eclipse.jdt.ui.actions.UnifiedSite;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-class MockUnifiedSite extends UnifiedSite {
+public class MockUnifiedSite extends UnifiedSite {
 	
 	private ISelectionProvider fProvider;
-
+	
+	public MockUnifiedSite(ISelectionProvider provider){
+		Assert.isNotNull(provider);
+		fProvider= provider;		
+	}
+	
 	public MockUnifiedSite(Object[] elements){
-		Assert.isNotNull(elements);
-		fProvider= new SimpleSelectionProvider(elements);
+		this(new SimpleSelectionProvider(elements));
 	}
 	
 	public MockUnifiedSite(List elements){
-		Assert.isNotNull(elements);
-		fProvider= new SimpleSelectionProvider(elements);
+		this(new SimpleSelectionProvider(elements));
 	}
 	
 	public IWorkbenchPage getPage() {
