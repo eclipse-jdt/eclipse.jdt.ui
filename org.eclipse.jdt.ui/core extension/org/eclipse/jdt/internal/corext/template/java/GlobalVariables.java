@@ -6,6 +6,9 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.text.DateFormat;
 
+//import org.eclipse.jface.text.BadLocationException;
+
+import org.eclipse.jdt.internal.corext.template.DocumentTemplateContext;
 import org.eclipse.jdt.internal.corext.template.SimpleTemplateVariable;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 
@@ -23,6 +26,14 @@ public class GlobalVariables {
 			setEvaluationString(""); //$NON-NLS-1$
 			setResolved(true);
 		}
+		public String evaluate(TemplateContext context) {
+			DocumentTemplateContext documentContext= (DocumentTemplateContext) context; // XXX unsafe cast
+			if (documentContext.getCompletionLength() == 0) {
+				return ""; //$NON-NLS-1$
+			} else {
+				return documentContext.getKey();		
+			}
+		}		
 	}
 
 	/**

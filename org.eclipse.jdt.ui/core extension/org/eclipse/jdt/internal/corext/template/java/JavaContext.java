@@ -48,8 +48,6 @@ public class JavaContext extends CompilationUnitContext {
 	/** The platform default line delimiter. */
 	private static final String PLATFORM_LINE_DELIMITER= System.getProperty("line.separator"); //$NON-NLS-1$
 
-	/** A flag to force evaluation in head-less mode. */
-	private boolean fForceEvaluation;
 	/** A code completion requestor for guessing local variable names. */
 	private CompilationUnitCompletion fCompletion;
 	
@@ -58,19 +56,21 @@ public class JavaContext extends CompilationUnitContext {
 	 * 
 	 * @param type   the context type.
 	 * @param document the document.
-	 * @param completionPosition the completion position within the document.
+	 * @param completionOffset the completion offset within the document.
+	 * @param completionLength the completion length.
 	 * @param unit the compilation unit (may be <code>null</code>).
 	 */
-	public JavaContext(ContextType type, IDocument document, int completionPosition,
+	public JavaContext(ContextType type, IDocument document, int completionOffset, int completionLength,
 		ICompilationUnit compilationUnit)
 	{
-		super(type, document, completionPosition, compilationUnit);
+		super(type, document, completionOffset, completionLength, compilationUnit);
 	}
 	
 	/*
 	 * @see TemplateContext#evaluate(Template template)
 	 */
 	public TemplateBuffer evaluate(Template template) throws CoreException {
+
 		if (!canEvaluate(template))
 			return null;
 		
@@ -94,39 +94,77 @@ public class JavaContext extends CompilationUnitContext {
 		return buffer;
 	}
 	
-	/**
-	 * Forces evaluation.
-	 */
-	public void setForceEvaluation(boolean evaluate) {
-		fForceEvaluation= evaluate;	
-	}
-	
 	/*
 	 * @see TemplateContext#canEvaluate(Template templates)
 	 */
 	public boolean canEvaluate(Template template) {
-		return fForceEvaluation || template.matches(getKey(), getContextType().getName());
+		String key= getKey();
+
+		return template.matches(key, getContextType().getName()) &&
+			(fForceEvaluation || 
+			((key.length() != 0) && template.getName().toLowerCase().startsWith(key.toLowerCase())));
 	}
 
 	/*
 	 * @see DocumentTemplateContext#getCompletionPosition();
 	 */
 	public int getStart() {
-		IDocument document= getDocument();
+
 		try {
-			int start= getCompletionPosition();
-	
-			while ((start != 0) && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
-				start--;
+			IDocument document= getDocument();
+
+			if (getCompletionLength() == 0) {
+
+				int start= getCompletionOffset();		
+				while ((start != 0) && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
+					start--;
+					
+				if ((start != 0) && Character.isUnicodeIdentifierStart(document.getChar(start - 1)))
+					start--;
+		
+				return start;
+			
+			} else {
+
+				int start= getCompletionOffset();
+				int end= getCompletionOffset() + getCompletionLength();
 				
-			if ((start != 0) && Character.isUnicodeIdentifierStart(document.getChar(start - 1)))
-				start--;
-	
-			return start;
+				while (start != end && Character.isWhitespace(document.getChar(start)))
+					start++;
+				
+				if (start == end)
+					start= getCompletionOffset();	
+				
+				return start;	
+			}
 
 		} catch (BadLocationException e) {
-			return getCompletionPosition();	
+			return super.getStart();	
 		}
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getEnd()
+	 */
+	public int getEnd() {
+		
+		if (getCompletionLength() == 0)		
+			return super.getEnd();
+
+		try {			
+			IDocument document= getDocument();
+
+			int start= getCompletionOffset();
+			int end= getCompletionOffset() + getCompletionLength();
+			
+			while (start != end && Character.isWhitespace(document.getChar(end - 1)))
+				end--;
+			
+			return end;	
+
+		} catch (BadLocationException e) {
+			return super.getEnd();
+		}		
 	}
 
 	/**
@@ -388,13 +426,12 @@ public class JavaContext extends CompilationUnitContext {
 		if (compilationUnit != null && compilationUnit.exists())
 			document.set(compilationUnit.getSource());
 
-		JavaContext context= new JavaContext(contextType, document, position, compilationUnit);
+		JavaContext context= new JavaContext(contextType, document, position, 0, compilationUnit);
 		context.setForceEvaluation(true);
 
 		TemplateBuffer buffer= context.evaluate(template);
 		return buffer.getString();
 	}
-	
-	
+
 }
 

@@ -151,9 +151,9 @@ public class Template {
 	public boolean matches(String prefix, String contextTypeName) {
 		return 
 			fEnabled &&
-			fContextTypeName.equals(contextTypeName) &&
-			(prefix.length() != 0) &&
-			fName.toLowerCase().startsWith(prefix.toLowerCase());
+			fContextTypeName.equals(contextTypeName); // &&
+//			(prefix.length() != 0) &&
+//			fName.toLowerCase().startsWith(prefix.toLowerCase());
 	}
 
 }

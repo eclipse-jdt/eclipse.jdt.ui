@@ -22,6 +22,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.template.DocumentTemplateContext;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
@@ -130,7 +131,14 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	    }	    
 	}
 	
-	private static int getCaretOffset(TemplateBuffer buffer) {
+	private int getCaretOffset(TemplateBuffer buffer) {
+		
+		if (fContext instanceof DocumentTemplateContext &&
+			((DocumentTemplateContext) fContext).getCompletionLength() != 0)
+		{
+			return buffer.getString().length();
+		}
+		
 	    TemplatePosition[] variables= buffer.getVariables();
 		for (int i= 0; i != variables.length; i++) {
 			TemplatePosition variable= variables[i];

@@ -24,8 +24,10 @@ public abstract class CompilationUnitContextType extends ContextType {
 	/** the document */
 	protected IDocument fDocument;
 
-	/** the completion position within the document string */
-	protected int fPosition;
+	/** the completion offset within the document string */
+	protected int fOffset;
+	/** the completion length */
+	protected int fLength;
 
 	/** the associated compilation unit, may be <code>null</code> */
 	protected ICompilationUnit fCompilationUnit;
@@ -170,9 +172,10 @@ public abstract class CompilationUnitContextType extends ContextType {
 	/**
 	 * Sets context parameters. Needs to be called before createContext().
 	 */
-	public void setContextParameters(IDocument document, int position, ICompilationUnit compilationUnit) {
+	public void setContextParameters(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
 		fDocument= document;
-		fPosition= position;
+		fOffset= offset;
+		fLength= length;
 		fCompilationUnit= compilationUnit;
 	}
 

@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.ui.text.template;
 
 import java.util.ArrayList;
 
+import org.eclipse.swt.graphics.Point;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -75,17 +77,30 @@ public class TemplateEngine {
 
 		if (!(fContextType instanceof CompilationUnitContextType))
 			return;
+
+		Point selection= viewer.getSelectedRange();
 		
-		((CompilationUnitContextType) fContextType).setContextParameters(document, completionPosition, compilationUnit);
+		((CompilationUnitContextType) fContextType).setContextParameters(document, completionPosition, selection.y, compilationUnit);
 		CompilationUnitContext context= (CompilationUnitContext) fContextType.createContext();
 		int start= context.getStart();
 		int end= context.getEnd();
 		IRegion region= new Region(start, end - start);
 
 		Template[] templates= Templates.getInstance().getTemplates();
-		for (int i= 0; i != templates.length; i++)
-			if (context.canEvaluate(templates[i]))
-				fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
+
+		if (selection.y == 0) {	
+			for (int i= 0; i != templates.length; i++)
+				if (context.canEvaluate(templates[i]))
+					fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
+
+		} else {			
+			context.setForceEvaluation(true);
+			for (int i= 0; i != templates.length; i++) {
+				Template template= templates[i];				
+				if (context.canEvaluate(template) && template.getPattern().indexOf("${cursor}") != -1)
+					fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));			
+			}
+		}
 	}
 
 }

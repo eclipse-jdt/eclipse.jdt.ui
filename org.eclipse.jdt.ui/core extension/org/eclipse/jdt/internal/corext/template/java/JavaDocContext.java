@@ -34,10 +34,27 @@ public class JavaDocContext extends CompilationUnitContext {
 	 * @param completionPosition the completion position within the document.
 	 * @param unit the compilation unit (may be <code>null</code>).
 	 */
-	public JavaDocContext(ContextType type, IDocument document, int completionPosition,
+	public JavaDocContext(ContextType type, IDocument document, int completionOffset,
 		ICompilationUnit compilationUnit)
 	{
-		super(type, document, completionPosition, compilationUnit);
+		super(type, document, completionOffset, 0, compilationUnit);
+	}
+
+	public JavaDocContext(ContextType type, IDocument document, int completionOffset, int completionLength,
+		ICompilationUnit compilationUnit)
+	{
+		super(type, document, completionOffset, completionLength, compilationUnit);
+	}
+
+	/*
+	 * @see TemplateContext#canEvaluate(Template templates)
+	 */
+	public boolean canEvaluate(Template template) {
+		String key= getKey();
+
+		return template.matches(key, getContextType().getName()) &&
+			(fForceEvaluation || 
+			((key.length() != 0) && template.getName().toLowerCase().startsWith(key.toLowerCase())));
 	}
 
 	/*
@@ -46,37 +63,70 @@ public class JavaDocContext extends CompilationUnitContext {
 	public int getStart() {
 		try {
 			IDocument document= getDocument();
-			int start= getCompletionPosition();
-	
-			if ((start != 0) && (document.getChar(start - 1) == HTML_TAG_END))
-				start--;
-	
-			while ((start != 0) && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
-				start--;
-			
-			if ((start != 0) && Character.isUnicodeIdentifierStart(document.getChar(start - 1)))
-				start--;
-	
-			// include html and javadoc tags
-			if ((start != 0) && (
-				(document.getChar(start - 1) == HTML_TAG_BEGIN) ||
-				(document.getChar(start - 1) == JAVADOC_TAG_BEGIN)))
-			{
-				start--;
-			}	
-	
-			return start;
+
+			if (getCompletionLength() == 0) {
+				int start= getCompletionOffset();
+		
+				if ((start != 0) && (document.getChar(start - 1) == HTML_TAG_END))
+					start--;
+		
+				while ((start != 0) && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
+					start--;
+				
+				if ((start != 0) && Character.isUnicodeIdentifierStart(document.getChar(start - 1)))
+					start--;
+		
+				// include html and javadoc tags
+				if ((start != 0) && (
+					(document.getChar(start - 1) == HTML_TAG_BEGIN) ||
+					(document.getChar(start - 1) == JAVADOC_TAG_BEGIN)))
+				{
+					start--;
+				}	
+		
+				return start;
+				
+			} else {
+
+				int start= getCompletionOffset();
+				int end= getCompletionOffset() + getCompletionLength();
+				
+				while (start != end && Character.isWhitespace(document.getChar(start)))
+					start++;
+				
+				if (start == end)
+					start= getCompletionOffset();	
+				
+				return start;					
+			}
 
 		} catch (BadLocationException e) {
-			return getCompletionPosition();	
+			return getCompletionOffset();	
 		}
 	}
 
 	/*
-	 * @see TemplateContext#canEvaluate(Template templates)
+	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getEnd()
 	 */
-	public boolean canEvaluate(Template template) {
-		return template.matches(getKey(), getContextType().getName());
+	public int getEnd() {
+		
+		if (getCompletionLength() == 0)		
+			return super.getEnd();
+
+		try {			
+			IDocument document= getDocument();
+
+			int start= getCompletionOffset();
+			int end= getCompletionOffset() + getCompletionLength();
+			
+			while (start != end && Character.isWhitespace(document.getChar(end - 1)))
+				end--;
+			
+			return end;	
+
+		} catch (BadLocationException e) {
+			return super.getEnd();
+		}		
 	}
 
 	/*

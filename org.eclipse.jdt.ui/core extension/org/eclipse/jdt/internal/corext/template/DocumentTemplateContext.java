@@ -16,20 +16,26 @@ public abstract class DocumentTemplateContext extends TemplateContext {
 
 	/** The text of the document. */
 	private final IDocument fDocument;
-	/** The completion position. */
-	private final int fCompletionPosition;
+	/** The completion offset. */
+	private final int fCompletionOffset;
+	/** The completion length. */
+	private final int fCompletionLength;
 
 	/**
 	 * Creates a document template context.
 	 */
-	protected DocumentTemplateContext(ContextType type, IDocument document, int completionPosition) {
+	protected DocumentTemplateContext(ContextType type, IDocument document,
+		int completionOffset, int completionLength)
+	{
 		super(type);
 		
 		Assert.isNotNull(document);
-		Assert.isTrue(completionPosition >= 0 && completionPosition <= document.getLength());
+		Assert.isTrue(completionOffset >= 0 && completionOffset <= document.getLength());
+		Assert.isTrue(completionLength >= 0);
 		
 		fDocument= document;
-		fCompletionPosition= completionPosition;
+		fCompletionOffset= completionOffset;
+		fCompletionLength= completionLength;
 	}
 	
 	public IDocument getDocument() {
@@ -37,17 +43,17 @@ public abstract class DocumentTemplateContext extends TemplateContext {
 	}
 	
 	/**
-	 * Returns the string of the context.
+	 * Returns the completion offset within the string of the context.
 	 */
-//	public String getString() {
-//		return fDocument.get();
-//	}
+	public int getCompletionOffset() {
+		return fCompletionOffset;	
+	}
 	
 	/**
-	 * Returns the completion position within the string of the context.
+	 * Returns the completion length within the string of the context.
 	 */
-	public int getCompletionPosition() {
-		return fCompletionPosition;	
+	public int getCompletionLength() {
+		return fCompletionLength;
 	}
 	
 	/**
@@ -67,14 +73,14 @@ public abstract class DocumentTemplateContext extends TemplateContext {
 	 * Returns the beginning offset of the keyword.
 	 */
 	public int getStart() {
-		return fCompletionPosition;		
+		return fCompletionOffset;		
 	}
 	
 	/**
 	 * Returns the end offset of the keyword.
 	 */
 	public int getEnd() {
-		return fCompletionPosition;
+		return fCompletionOffset + fCompletionLength;
 	}
 		
 }

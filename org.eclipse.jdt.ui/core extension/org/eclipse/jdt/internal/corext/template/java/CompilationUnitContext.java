@@ -20,6 +20,8 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 
 	/** The compilation unit, may be <code>null</code>. */
 	private final ICompilationUnit fCompilationUnit;
+	/** A flag to force evaluation in head-less mode. */
+	protected boolean fForceEvaluation;
 
 	/**
 	 * Creates a compilation unit context.
@@ -29,10 +31,10 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	 * @param completionPosition the completion position within the document.
 	 * @param compilationUnit the compilation unit (may be <code>null</code>).
 	 */
-	protected CompilationUnitContext(ContextType type, IDocument document, int completionPosition,
-		ICompilationUnit compilationUnit)
+	protected CompilationUnitContext(ContextType type, IDocument document, int completionOffset,
+		int completionLength, ICompilationUnit compilationUnit)
 	{
-		super(type, document, completionPosition);
+		super(type, document, completionOffset, completionLength);
 		fCompilationUnit= compilationUnit;
 	}
 	
@@ -61,6 +63,13 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 		} catch (JavaModelException e) {
 			return null;
 		}	
+	}
+
+	/**
+	 * Forces evaluation.
+	 */
+	public void setForceEvaluation(boolean evaluate) {
+		fForceEvaluation= evaluate;	
 	}
 
 }
