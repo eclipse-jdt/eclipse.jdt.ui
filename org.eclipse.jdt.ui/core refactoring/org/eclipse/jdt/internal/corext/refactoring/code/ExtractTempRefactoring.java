@@ -504,7 +504,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (isCompactingAssignment())
 			return "= ";
 		else
-			return "=";
+			return " = ";
 	}
 
 	private boolean isCompactingAssignment() {
