@@ -372,7 +372,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return string.equals(cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type)));
 	}
 
-	public static boolean isValidTypeName(String string){
+	public static boolean isValidParameterTypeName(String string){
 		return isValidTypeName(string, false);
 	}
 	
