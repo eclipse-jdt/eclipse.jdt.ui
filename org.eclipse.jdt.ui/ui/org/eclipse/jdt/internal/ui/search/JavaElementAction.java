@@ -60,6 +60,11 @@ public abstract class JavaElementAction extends Action {
 		return false;
 	}
 	public void run() {
+		if (!canOperateOn(getSelection())) {
+			beep();
+			return;
+		}
+		
 		IJavaElement element= getJavaElement(getSelection(), false);
 		if (element == null) {
 			beep();
@@ -67,7 +72,7 @@ public abstract class JavaElementAction extends Action {
 		} 
 		else if (element == RETURN_WITHOUT_BEEP)
 			return;
-
+		
 		run(element);
 	}
 	protected abstract void run(IJavaElement element);
