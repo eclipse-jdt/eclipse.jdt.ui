@@ -445,7 +445,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 			fViewer.setInput(root);
 			fSash.setMaximizedControl(fViewer.getTree());
 			fTrayRoots= new ArrayList();
-			fTray.setInput(fTrayRoots);
+			if (fTray != null)
+				fTray.setInput(fTrayRoots);
 			setASTUptoDate(true);
 			
 			ASTNode node= NodeFinder.perform(root, offset, length);
