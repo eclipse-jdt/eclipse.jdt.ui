@@ -7,7 +7,7 @@
 	class="org.eclipse.jsp.JspUIPlugin">
 
 	<runtime>
-		<library name="jsp.jar"/>
+		<library name="javafamily.jar"/>
 		<!--packages prefixes="org.eclipse.jsp,org.eclipse.core.indexsearch"/-->
 	</runtime>
       
