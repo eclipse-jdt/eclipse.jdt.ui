@@ -11,10 +11,11 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-
 
 
 /**
@@ -62,10 +63,7 @@ public class SWTEventHelper {
 	public static void keyCodeEvent(Display display, int type, int keyCode, boolean runEventQueue) {
 		fgKeyCodeEvent.type= type;
 		fgKeyCodeEvent.keyCode= keyCode;
-		
-		display.post(fgKeyCodeEvent);
-		if (runEventQueue)
-			EditorTestHelper.runEventQueue();
+		postEvent(display, fgKeyCodeEvent, runEventQueue);
 	}
 	
 	public static void pressKeyChar(Display display, char keyChar) {
@@ -100,10 +98,20 @@ public class SWTEventHelper {
 	public static void keyCharEvent(Display display, int type, char keyChar, boolean runEventQueue) {
 		fgKeyCharEvent.type= type;
 		fgKeyCharEvent.character= keyChar;
-		
-		display.post(fgKeyCharEvent);
+		postEvent(display, fgKeyCharEvent, runEventQueue);
+	}
+
+	private static void postEvent(final Display display, final Event event, boolean runEventQueue) {
+		DisplayHelper helper= new DisplayHelper() {
+			public boolean condition() {
+				return display.post(event);
+			}
+		};
+		Assert.assertTrue(helper.waitForCondition(display, 1000));
+
 		if (runEventQueue)
 			EditorTestHelper.runEventQueue();
+			
 	}
 	
 	private static Event fgMouseMoveEvent= new Event();
@@ -111,10 +119,7 @@ public class SWTEventHelper {
 		fgMouseMoveEvent.type= SWT.MouseMove;
 		fgMouseMoveEvent.x= x;
 		fgMouseMoveEvent.y= y;
-		
-		display.post(fgMouseMoveEvent);
-		if (runEventQueue)
-			EditorTestHelper.runEventQueue();
+		postEvent(display, fgMouseMoveEvent, runEventQueue);
 	}
 	
 	public static void mouseDownEvent(Display display, int button, boolean runEventQueue) {
@@ -129,9 +134,6 @@ public class SWTEventHelper {
 	public static void mouseButtonEvent(Display display, int type, int button, boolean runEventQueue) {
 		fgMouseButtonEvent.type= type;
 		fgMouseButtonEvent.button= button;
-		
-		display.post(fgMouseButtonEvent);
-		if (runEventQueue)
-			EditorTestHelper.runEventQueue();
+		postEvent(display, fgMouseButtonEvent, runEventQueue);
 	}
 }
