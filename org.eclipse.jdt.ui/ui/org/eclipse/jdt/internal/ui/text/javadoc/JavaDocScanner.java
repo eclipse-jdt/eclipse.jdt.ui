@@ -33,9 +33,6 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 
-
-
-
 /**
  * A rule based JavaDoc scanner.
  */
@@ -48,14 +45,14 @@ public final class JavaDocScanner extends JavaCommentScanner {
 	static class JavaDocKeywordDetector implements IWordDetector {
 
 		/**
-		 * @see IWordDetector#isWordStart
+		 * @see IWordDetector#isWordStart(char)
 		 */
 		public boolean isWordStart(char c) {
 			return (c == '@');
 		}
 
 		/**
-		 * @see IWordDetector#isWordPart
+		 * @see IWordDetector#isWordPart(char)
 		 */
 		public boolean isWordPart(char c) {
 			return Character.isLetter(c);
@@ -69,14 +66,14 @@ public final class JavaDocScanner extends JavaCommentScanner {
 	static class HTMLCommentDetector implements IWordDetector {
 
 		/**
-		 * @see IWordDetector#isWordStart
+		 * @see IWordDetector#isWordStart(char)
 		 */
 		public boolean isWordStart(char c) {
 			return (c == '<' || c == '-');
 		}
 
 		/**
-		 * @see IWordDetector#isWordPart
+		 * @see IWordDetector#isWordPart(char)
 		 */
 		public boolean isWordPart(char c) {
 			return (c == '-' || c == '!' || c == '>');
