@@ -125,8 +125,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	}	
 
 	/**
-	 * Extend this method to set a user defined default class path or output location
-	 * @see IDialogPage#setVisible
+	 * Extend this method to set a user defined default class path or output location.
 	 */	
 	public void setVisible(boolean visible) {
 		if (visible) {

@@ -264,7 +264,6 @@ public final class JavaUI {
 	 *   <code>CONSIDER_EXTERNAL_JARS</code>, or their bitwise OR, or <code>0</code>
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 * @return a new selection dialog
-	 * @exception JavaModelException if the selection dialog could not be opened
 	 */
 	public static SelectionDialog createMainTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) {
 		SelectionDialog dialog= null;

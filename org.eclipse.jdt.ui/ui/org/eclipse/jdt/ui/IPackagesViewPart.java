@@ -16,7 +16,7 @@ import org.eclipse.ui.IViewPart;
  * This interface is not intended to be implemented by clients.
  * </p>
  *
- * @see IJavaUIConstants#ID_PACKAGES
+ * @see JavaUI#ID_PACKAGES
  */
 public interface IPackagesViewPart extends IViewPart {
 	/**
