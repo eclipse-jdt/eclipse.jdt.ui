@@ -36,6 +36,9 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	
 	// Return statement handling if a return statement has been selected.
 	private ReturnStatement fExtractedReturnStatement;
+	
+	// Return type of an extracted expression
+	private TypeReference fExpressionReturnType;
 
 	// Code generation
 	private LocalVariableBinding fReturnStatementBinding;
@@ -106,6 +109,14 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 
 	public void setExtractedReturnStatement(ReturnStatement returnStatement) {
 		fExtractedReturnStatement= returnStatement;
+	}
+	
+	public void setExpressionReturnType(TypeReference returnType) {
+		fExpressionReturnType= returnType;
+	}
+	
+	public TypeReference getExpressionReturnType() {
+		return fExpressionReturnType;
 	}
 	
 	private LocalVariableBinding getLocalVariableBindingIfSingleNameReference(Reference ref) {
@@ -208,7 +219,12 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	}
 	
 	public String getCallSignature(String methodName) {
-		StringBuffer result= new StringBuffer(fReturnType);
+		StringBuffer result= new StringBuffer();
+		if (fExpressionReturnType != null) {
+			result.append(fExpressionReturnType.toStringExpression(0));
+		} else {
+			result.append(fReturnType);
+		}
 		result.append(" ");
 		result.append(methodName);
 		result.append("(");
@@ -286,7 +302,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		}
 		if (returnBinding != null) {
 			fReturnStatementBinding= returnBinding;
-			computeReturnType(returnBinding);
+			computeReturnType(returnBinding, isHardReturnDeclaration, status);
 		}
 	}
 	
@@ -309,7 +325,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		if (returnBinding != null) {
 			if (returnTypeIsVoid()) {
 				fReturnStatementBinding= returnBinding;
-				computeReturnType(returnBinding);
+				computeReturnType(returnBinding, true, status);
 				fLocalDeclaration= makeDeclaration(returnBinding);
 			} else {
 				status.addFatalError("Ambigious return value: assignment to local variable and reference to a selected local declaration found");
@@ -335,7 +351,10 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		return "void".equals(fReturnType);
 	}
 	
-	private void computeReturnType(LocalVariableBinding binding) {
+	private void computeReturnType(LocalVariableBinding binding, boolean isHardReturnType, RefactoringStatus status) {
+		if (isHardReturnType && fExpressionReturnType != null) {
+			status.addFatalError("Ambigious return value: expression has return type and a value must be returned from extracted method");
+		}
 		LocalDeclaration declaration= binding.declaration;
 		TypeReference typeRef= declaration.type;
 		fReturnType= typeRef.toStringExpression(0);

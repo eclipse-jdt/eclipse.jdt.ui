@@ -6,7 +6,7 @@
 package org.eclipse.jdt.core.refactoring.code;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
@@ -19,10 +19,10 @@ import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;import org.eclipse.jdt.internal.compiler.util.CharOperation;
+import org.eclipse.jdt.internal.compiler.lookup.TypeIds;import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.refactoring.ASTEndVisitAdapter;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
-import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
+import org.eclipse.jdt.internal.core.refactoring.AstNodeData;import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.eclipse.jdt.internal.core.util.HackFinder;
 
 /**
@@ -72,10 +72,14 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	private Stack fImplicitBranchTargets= new Stack();	
 	private List fLabeledStatements= new ArrayList(2);
 	
+	// A hashtable to add additional data to an AstNode
+	private AstNodeData fAstNodeData= new AstNodeData();
+	
 	private static final int BREAK_LENGTH= "break".length();
 	private static final int CONTINUE_LENGTH= "continue".length();
 	private static final int DO_LENGTH=    "do".length();
 	private static final int ELSE_LENGTH=  "else".length();
+	private static final int WHILE_LENGTH= "while".length();
 	 
 	public StatementAnalyzer(ExtendedBuffer buffer, int start, int length, boolean asymetricAssignment) {
 		// System.out.println("Start: " + start + " length: " + length);
@@ -352,6 +356,58 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		}
 	}	
 	
+	//--- node management ---------------------------------------------------------
+	
+	private boolean isPartOfNodeSelected(AstNode node) {
+		return fMode == BEFORE && fSelection.end < fBuffer.indexOfStatementCharacter(node.sourceEnd + 1);
+	}
+	
+	//--- Expression / Condition handling -----------------------------------------
+
+	public boolean visitBinaryExpression(BinaryExpression binaryExpression, BlockScope scope, int returnType) {
+		int currentScanPosition= fLastEnd;
+		if (!visitStatement(binaryExpression, scope))
+			return false;
+		if (fMode != SELECTED)
+			return true;
+			
+		if (isTopMostNodeInSelection(currentScanPosition, binaryExpression)) {
+			if (returnType == TypeIds.T_undefined)
+				returnType= binaryExpression.bits & binaryExpression.ReturnTypeIDMASK;
+			if (returnType == TypeIds.T_undefined) {
+				invalidSelection("Can not determine return type of the expression to be extracted");
+				return false;
+			}
+			fLocalVariableAnalyzer.setExpressionReturnType(TypeReference.baseTypeReference(returnType, 0));
+		}
+		return true;	
+	}
+
+	private boolean isConditionSelected(AstNode node, Expression condition, int scanStart) {
+		if (node == null || condition == null || scanStart < 0)
+			return false;
+		int conditionStart= fBuffer.indexOf('(', scanStart) + 1;
+		int conditionEnd= fBuffer.indexOf(')', condition.sourceEnd + 1) - 1;
+		if (fSelection.coveredBy(conditionStart, conditionEnd)) {
+			fAstNodeData.put(node, new Boolean(true));
+			fLastEnd= conditionStart - 1;
+			return true;
+		}
+		return false;
+	}
+		
+	private boolean isTopMostNodeInSelection(int rangeStart, AstNode node) {
+		int nextStart= fBuffer.indexOfStatementCharacter(node.sourceEnd + 1);
+		return fSelection.coveredBy(rangeStart, nextStart - 1) && fSelection.covers(node);
+	}
+
+	private void endVisitConditionBlock(AstNode node, String statementName) {
+		Boolean inCondition= (Boolean)fAstNodeData.get(node);
+		if (inCondition != null && inCondition.booleanValue() && fLocalVariableAnalyzer.getExpressionReturnType() == null) {
+			invalidSelection("Can not extract the selected statement(s) from the condition part of " + statementName + " statement");
+		}	
+	}
+		
 	//---- Problem management -----------------------------------------------------
 	
 	public void acceptProblem(IProblem problem) {
@@ -523,7 +579,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		return visitStatement(allocationExpression, scope);
 	}
 	public boolean visit(AND_AND_Expression and_and_Expression, BlockScope scope) {
-		return visitStatement(and_and_Expression, scope);
+		return visitBinaryExpression(and_and_Expression, scope, TypeIds.T_boolean);
 	}
 	
 	public boolean visit(ArrayAllocationExpression arrayAllocationExpression, BlockScope scope) {
@@ -539,7 +595,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(BinaryExpression binaryExpression, BlockScope scope) {
-		return visitStatement(binaryExpression, scope);
+		return visitBinaryExpression(binaryExpression, scope, TypeIds.T_undefined);
 	}
 
 	public boolean visit(Block block, BlockScope scope) {
@@ -609,29 +665,36 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		if (!visitImplicitBranchTarget(doStatement, scope))
 			return false;
 		
-		int nextStart= fBuffer.indexOfStatementCharacter(doStatement.sourceEnd + 1);	
-		// Either the selection covers the whole do statement or the section lies
-		// inside the do statement's action.
-		if (fMode == BEFORE && fSelection.end < nextStart) {
+		if (isPartOfNodeSelected(doStatement)) {
+			
+			// Check if condition is selected
+			if (isConditionSelected(doStatement, doStatement.condition, doStatement.action.sourceEnd))
+				return true;
+				
 			// skip the string "do"
 			int actionStart= doStatement.sourceStart + DO_LENGTH;		
 			int actionEnd= fBuffer.indexOfStatementCharacter(doStatement.action.sourceEnd + 1) - 1;
+			
+			// Check if action part is selected.
+			if (fSelection.coveredBy(actionStart + 1, actionEnd)) {
+				fLastEnd= actionStart;
+				return true;
+			}
+				
 			if (fSelection.start == actionStart) {
 				invalidSelection("Selection may not start right after the do keyword");
 				return false;
-			} else if (fSelection.coveredBy(actionStart + 1, actionEnd)) {
-				fLastEnd= actionStart;
-				return true;
-			} else {
-				invalidSelection("Selection must either cover whole do-while statement or parts of the action block");
-				return false;
 			}
+				
+			invalidSelection("Selection must either cover whole do-while statement or parts of the action block");
+			return false;
 		}
 		return true;
 	}
 	
 	public void endVisit(DoStatement doStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(doStatement, scope);
+		endVisitConditionBlock(doStatement, "a do-while");
 		fLastEnd= doStatement.sourceEnd;
 	}
 
@@ -640,7 +703,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(EqualExpression equalExpression, BlockScope scope) {
-		return visitStatement(equalExpression, scope);
+		return visitBinaryExpression(equalExpression, scope, TypeIds.T_boolean);
 	}
 
 	public boolean visit(ExplicitConstructorCall explicitConstructor, BlockScope scope) {
@@ -664,10 +727,12 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		if (!result)
 			return false;
 			
-		int nextStart= fBuffer.indexOfStatementCharacter(forStatement.sourceEnd + 1);	
 		// forStatement.sourceEnd includes the statement's action. Since the
 		// selection can be the statements body adjust last end if so.
-		if (fMode == BEFORE && fSelection.end < nextStart) {
+		if (isPartOfNodeSelected(forStatement)) {
+			if (isConditionSelected(forStatement))
+				return true;
+				
 			int start= forStatement.sourceStart;
 			if (forStatement.increments != null) {
 				start= forStatement.increments[forStatement.increments.length - 1].sourceEnd;
@@ -680,27 +745,50 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		}
 		return result;
 	}
+	
+	private boolean isConditionSelected(ForStatement forStatement) {
+		if (forStatement.condition == null)
+			return false;
+			
+		int start= forStatement.sourceStart;
+		if (forStatement.initializations != null) {
+			start= forStatement.initializations[forStatement.initializations.length - 1].sourceEnd;
+		}
+		int conditionStart= fBuffer.indexOf(';', start) + 1;
+		int conditionEnd= fBuffer.indexOf(';', forStatement.condition.sourceEnd) - 1;
+		if (fSelection.coveredBy(conditionStart, conditionEnd)) {
+			fAstNodeData.put(forStatement, new Boolean(true));
+			fLastEnd= conditionStart - 1;
+			return true;
+		}	
+		return false;
+	}
 
 	public void endVisit(ForStatement forStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(forStatement, scope);
+		endVisitConditionBlock(forStatement, "a for");
 	}
 	
 	public boolean visit(IfStatement ifStatement, BlockScope scope) {
-		boolean result= visitStatement(ifStatement, scope);
-		if (!result)
+		if (!visitStatement(ifStatement, scope))
 			return false;
 			
 		int nextStart= fBuffer.indexOfStatementCharacter(ifStatement.sourceEnd + 1);
 		if (fMode == BEFORE && fSelection.end < nextStart) {
-			int lastEnd= getIfElseBodyStart(ifStatement, nextStart) - 1;
-			if (lastEnd < 0) {
-				invalidSelection("Selection must either cover whole if-then-else statement or statements of then or else block");
-				result= false;
-			} else {
-				fLastEnd= lastEnd;
-			}
+			if (isConditionSelected(ifStatement, ifStatement.condition, ifStatement.sourceStart))
+				return true;
+
+			if ((fLastEnd= getIfElseBodyStart(ifStatement, nextStart) - 1) >= 0)
+				return true;
+				
+			invalidSelection("Selection must either cover whole if-then-else statement or parts of then or else block");
+			return false;
 		}
-		return result;		
+		return true;
+	}
+	
+	public void endVisit(IfStatement ifStatement, BlockScope scope) {
+		endVisitConditionBlock(ifStatement, "an if-then-else");
 	}
 
 	private int getIfElseBodyStart(IfStatement ifStatement, int nextStart) {
@@ -753,7 +841,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(OR_OR_Expression or_or_Expression, BlockScope scope) {
-		return visitStatement(or_or_Expression, scope);
+		return visitBinaryExpression(or_or_Expression, scope, TypeIds.T_boolean);
 	}
 
 	public boolean visit(PostfixExpression postfixExpression, BlockScope scope) {
@@ -800,8 +888,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		if (!visitImplicitBranchTarget(switchStatement, scope))
 			return false;
 		
-		int nextStart= fBuffer.indexOfStatementCharacter(switchStatement.sourceEnd + 1);
-		if (fMode == BEFORE && fSelection.end < nextStart) {
+		if (isPartOfNodeSelected(switchStatement)) {
 			int lastEnd= getCaseBodyStart(switchStatement) - 1;
 			if (lastEnd < 0) {
 				invalidSelection("Selection must either cover whole switch statement or parts of a single case block");
@@ -884,9 +971,8 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			return false;
 			
 		fExceptionAnalyzer.visitTryStatement(tryStatement, scope, fMode);
-		int nextStart= fBuffer.indexOfStatementCharacter(tryStatement.sourceEnd + 1);
 		
-		if (fMode == BEFORE && fSelection.end < nextStart) {
+		if (isPartOfNodeSelected(tryStatement)) {
 			if (fSelection.intersects(tryStatement)) {
 				invalidSelection("Selection must either cover whole try statement or parts of try, catch, or finally block");
 				return false;
@@ -932,22 +1018,20 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(WhileStatement whileStatement, BlockScope scope) {
-		boolean result= visitImplicitBranchTarget(whileStatement, scope);
-		if (!result)
+		if (!visitImplicitBranchTarget(whileStatement, scope))
 			return false;
 			
-		int nextStart= fBuffer.indexOfStatementCharacter(whileStatement.sourceEnd + 1);	
-		if (fMode == BEFORE && fSelection.end < nextStart) {
-			int start= whileStatement.sourceStart;
-			if (whileStatement.condition != null) {
-				start= whileStatement.condition.sourceEnd;
-			}
-			fLastEnd= fBuffer.indexOf(')', start);
+		if (isPartOfNodeSelected(whileStatement)) {
+			if (isConditionSelected(whileStatement, whileStatement.condition, whileStatement.sourceStart + WHILE_LENGTH))
+				return true;
+				
+			fLastEnd= fBuffer.indexOf(')', whileStatement.condition.sourceEnd);
 		}
-		return result;
+		return true;
 	}
 
 	public void endVisit(WhileStatement whileStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(whileStatement, scope);
+		endVisitConditionBlock(whileStatement, "a while");
 	}
 }

@@ -348,25 +348,36 @@ public class ExtractMethodRefactoring extends Refactoring{
 		String localReturnValueDeclaration= localAnalyzer.getLocalReturnValueDeclaration();
 		addLine(result, indent, localReturnValueDeclaration, delimiter);
 		
+		boolean isExpressionExtracting= localAnalyzer.getExpressionReturnType() != null;
+		if (isExpressionExtracting) {
+			result.append(indent);
+			result.append("return ");
+		}
+		
 		// Reformat and add to buffer
 		boolean isFirstLine= true;
 		for (int i= 0; i < lines.length; i++) {
 			String line= lines[i];
 			if (line != null) {
-				if (!isFirstLine)
+				if (!isFirstLine) {
 					result.append(delimiter);
-				else
-					isFirstLine= false;			
-				result.append(indent);
+					result.append(indent);
+				} else {
+					isFirstLine= false;
+					if (!isExpressionExtracting)
+						result.append(indent);
+				}
 				result.append(line);
 			}
 		}
 		if (sourceNeedsSemicolon())
 			result.append(";");
 		result.append(delimiter);
-			
-		String returnStatement= localAnalyzer.getReturnStatement();
-		addLine(result, indent, returnStatement, delimiter);
+		
+		if (!isExpressionExtracting) {
+			String returnStatement= localAnalyzer.getReturnStatement();
+			addLine(result, indent, returnStatement, delimiter);
+		}
 		return result.toString();
 	}
 	
@@ -409,26 +420,24 @@ public class ExtractMethodRefactoring extends Refactoring{
 	
 	
 	private boolean callNeedsSemicolon() {
+		// We are extracting an expression.	
+		if (fStatementAnalyzer.getLocalVariableAnalyzer().getExpressionReturnType() != null)
+			return false;
+		
 		int start= fStatementAnalyzer.getLastSelectedStatementEnd() + 1;
 		int length= fSelectionLength - (start - fSelectionStart);
+		
 		if (length <= 0)
 			return true;
-		if (fBuffer.indexOf(';', start, length) != -1) {
+		
+		// Does the source have a semicolon	
+		if (fBuffer.indexOf(';', start, length) != -1)
 			return true;
-		} else {
-			return !fStatementAnalyzer.getNeedsSemicolon();
-		}
+		
+		return !fStatementAnalyzer.getNeedsSemicolon();
 	}
 	
 	private boolean sourceNeedsSemicolon() {
-		int start= fStatementAnalyzer.getLastSelectedStatementEnd() + 1;
-		int length= fSelectionLength - (start - fSelectionStart);
-		if (length <= 0)
-			return false;
-		if (fBuffer.indexOf(';', start, length) != -1) {
-			return false;
-		} else {
-			return fStatementAnalyzer.getNeedsSemicolon();
-		}
+		return !callNeedsSemicolon();
 	}	
 }
