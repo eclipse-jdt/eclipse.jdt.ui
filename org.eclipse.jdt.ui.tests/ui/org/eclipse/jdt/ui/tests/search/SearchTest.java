@@ -35,6 +35,7 @@ public class SearchTest {
 		suite.addTest(WorkspaceReferenceTest.allTests());
 		suite.addTest(TreeContentProviderTest.allTests());
 		suite.addTest(ParticipantTest.allTests());
+		suite.addTest(FileAdapterTest.allTests());
 		return suite;
 	}
 
@@ -55,6 +56,15 @@ public class SearchTest {
 		IMethod method= getMethod(TypeName, methodName, parameterTypes);
 		NewSearchUI.activateSearchResultView();
 		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(method, IJavaSearchConstants.REFERENCES, ReferenceScopeFactory.createWorkspaceScope(true), "workspace scope"));
+		NewSearchUI.runQueryInForeground(null, query);
+		return query;
+	}
+
+	
+	static JavaSearchQuery runTypeRefQuery(String typeName) throws JavaModelException {
+		IType type= getType(typeName);
+		NewSearchUI.activateSearchResultView();
+		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(type, IJavaSearchConstants.REFERENCES, ReferenceScopeFactory.createWorkspaceScope(true), "workspace scope"));
 		NewSearchUI.runQueryInForeground(null, query);
 		return query;
 	}

@@ -119,18 +119,26 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 	public IFile getFile(Object element) {
 		if (element instanceof IJavaElement) {
 			IJavaElement javaElement= (IJavaElement) element;
-			try {
-				element= javaElement.getUnderlyingResource();
-			} catch (JavaModelException e) {
-				// we can't get a resource for this.
+			IFile matchFile= null;
+			ICompilationUnit cu= (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
+			if (cu != null) {
+				matchFile= (IFile) cu.getResource();
+			} else {
+				IClassFile cf= (IClassFile) javaElement.getAncestor(IJavaElement.CLASS_FILE);
+				if (cf != null)
+					matchFile= (IFile) cf.getResource();
 			}
+			return matchFile;
 		}
 		if (element instanceof IFile)
-			return (IFile)element;
+			return (IFile) element;
 		return null;
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.search2.ui.text.IStructureProvider#isShownInEditor(org.eclipse.search2.ui.text.Match, org.eclipse.ui.IEditorPart)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.search2.ui.text.IStructureProvider#isShownInEditor(org.eclipse.search2.ui.text.Match,
+	 *      org.eclipse.ui.IEditorPart)
 	 */
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
 		IEditorInput editorInput= editor.getEditorInput();

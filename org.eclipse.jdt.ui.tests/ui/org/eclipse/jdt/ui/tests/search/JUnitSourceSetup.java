@@ -17,12 +17,13 @@ import junit.framework.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-
+import org.eclipse.jdt.internal.ui.search.SearchParticipantRecord;
+import org.eclipse.jdt.internal.ui.search.SearchParticipantsExtensionPoint;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
@@ -33,17 +34,30 @@ public class JUnitSourceSetup extends TestSetup {
 	public static final String SRC_CONTAINER= "src";
 	
 	private IJavaProject fProject;
+	private SearchParticipantsExtensionPoint fExtensionPoint;
+	
+	static class NullExtensionPoint extends SearchParticipantsExtensionPoint {
+		public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) throws CoreException {
+			return new SearchParticipantRecord[0];
+		}
+	}
 	
 	public static IJavaProject getProject() {
 		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
 		return JavaCore.create(project);
 	}
 
-	public JUnitSourceSetup(Test test) {
+	public JUnitSourceSetup(Test test, SearchParticipantsExtensionPoint participants) {
 		super(test);
+		fExtensionPoint= participants;
 	}
 	
+	public JUnitSourceSetup(Test test) {
+		this(test, new NullExtensionPoint());
+	}
+
 	protected void setUp() throws Exception {
+		SearchParticipantsExtensionPoint.debugSetInstance(fExtensionPoint);
 		fProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin"); //$NON-NLS-2$
 		IClasspathEntry jreLib= JavaCore.newContainerEntry(new Path("org.eclipse.jdt.launching.JRE_CONTAINER"));  //$NON-NLS-1$
 		JavaProjectHelper.addToClasspath(fProject, jreLib);
@@ -56,5 +70,6 @@ public class JUnitSourceSetup extends TestSetup {
 	 */
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
+		SearchParticipantsExtensionPoint.debugSetInstance(null);
 	}
 }

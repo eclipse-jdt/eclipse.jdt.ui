@@ -30,13 +30,13 @@ import org.eclipse.jdt.ui.search.IQueryParticipant;
  */
 public class ParticipantTest extends TestCase {
 	
-	class TestExtensionPoint extends SearchParticipantsExtensionPoint {
+	static class TestExtensionPoint extends SearchParticipantsExtensionPoint {
 		public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) throws CoreException {
 			return new SearchParticipantRecord[] { new SearchParticipantRecord(new TestParticipantRecord(), new TestParticipant()) };
 		}
 	}
 	
-	class TestParticipantRecord extends SearchParticipantDescriptor {
+	static class TestParticipantRecord extends SearchParticipantDescriptor {
 
 		TestParticipantRecord() {
 			super(null);
@@ -60,7 +60,7 @@ public class ParticipantTest extends TestCase {
 	}
 
 	public static Test allTests() {
-		return new JUnitSourceSetup(new TestSuite(ParticipantTest.class));
+		return new JUnitSourceSetup(new TestSuite(ParticipantTest.class), new TestExtensionPoint());
 	}
 	
 	public static Test suite() {
@@ -82,12 +82,4 @@ public class ParticipantTest extends TestCase {
 		}
 	}
 
-	protected void setUp() throws Exception {
-		SearchParticipantsExtensionPoint.debugSetInstance(new TestExtensionPoint());
-	}
-	
-	protected void tearDown() throws Exception {
-		SearchParticipantsExtensionPoint.debugSetInstance(null);
-		super.tearDown();
-	}
 }
