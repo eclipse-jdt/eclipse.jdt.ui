@@ -46,9 +46,20 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	protected boolean fProvideMembers= false;
 	protected boolean fProvideWorkingCopy= false;
 	
+	/**
+	 * Creates a new conent provider. It does not
+	 * provide the members of a compilation unit and
+	 * it does not provide working copies.
+	 */	
 	public StandardJavaElementContentProvider() {
 	}
 	
+	/**
+	 * Creates a new label provider.
+	 *
+	 * @param providerMembers does this content provider provide the members of a compilation unit
+	 * @param provideWorkingCopies does this content provider provide working copy elements.
+	 */
 	public StandardJavaElementContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
 		fProvideMembers= provideMembers;
 		fProvideWorkingCopy= provideWorkingCopy;
@@ -93,6 +104,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	public void setProvideMembers(boolean b) {
 		fProvideMembers= b;
 	}
+	
 	/* (non-Javadoc)
 	 * Method declared on IStructuredContentProvider.
 	 */
