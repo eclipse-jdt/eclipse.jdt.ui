@@ -19,20 +19,29 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.resource.JFaceResources;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewerExtension;
 
 import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl;
 
 /**
- * CustomSourceInformationControl
+ * Source viewer used to display quick diff hovers.
+ * 
  * @since 3.0
  */
 public class CustomSourceInformationControl extends SourceViewerInformationControl {
 
+	/** The font name for the viewer font - the same as the java editor's. */
 	private static final String SYMBOLIC_FONT_NAME= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
 	
+	/** The maximum width of the control, set in <code>setSizeConstraints(int, int)</code>. */
 	int fMaxWidth= Integer.MAX_VALUE;
+	/** The maximum height of the control, set in <code>setSizeConstraints(int, int)</code>. */
 	int fMaxHeight= Integer.MAX_VALUE;
+
+	/** The partition type to be used as the starting partition type by the paritition scanner. */
+	private String fPartition;
 	
 	/*
 	 * @see org.eclipse.jface.text.IInformationControl#setSizeConstraints(int, int)
@@ -43,11 +52,15 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 	}
 
 	/**
-	 * @param parent
+	 * Creates a new information control.
+	 * 
+	 * @param parent the shell that is the parent of this hover / control
+	 * @param partition the initial partition type to be used for the underlying viewer
 	 */
-	public CustomSourceInformationControl(Shell parent) {
+	public CustomSourceInformationControl(Shell parent, String partition) {
 		super(parent);
 		setViewerFont();
+		setStartingPartitionType(partition);
 	}
 	
 	/*
@@ -92,10 +105,45 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 			
 			parent.setRedraw(true);
 			
-			
 		} else {
 			StyledText styledText= getViewer().getTextWidget();
 			styledText.setFont(font);
 		}	
+	}
+
+	/**
+	 * Sets the initial partition for the underlying source viewer.
+	 * 
+	 * @param partition the partition type
+	 */
+	public void setStartingPartitionType(String partition) {
+		if (partition == null)
+			fPartition= IDocument.DEFAULT_CONTENT_TYPE;
+		else
+			fPartition= partition;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.IInformationControl#setInformation(java.lang.String)
+	 */
+	public void setInformation(String content) {
+		super.setInformation(content);
+		IDocument doc= getViewer().getDocument();
+		if (doc == null)
+			return;
+			
+		String start= null;
+		if (IJavaPartitions.JAVA_DOC.equals(fPartition)) {
+			start= "/**\n"; //$NON-NLS-1$
+		} else if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(fPartition)) {
+			start= "/* \n"; //$NON-NLS-1$
+		}
+		if (start != null) {
+			try {
+				doc.replace(0, 0, start);
+				getViewer().setDocument(doc, 4, doc.getLength() - 4);
+			} catch (BadLocationException e) {
+			}
+		}
 	}
 }

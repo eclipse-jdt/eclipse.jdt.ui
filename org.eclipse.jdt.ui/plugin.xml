@@ -2937,6 +2937,49 @@
     </page>
 </extension>
 
+<!-- add the quick diff context menu -->
+<extension 
+	point="org.eclipse.ui.popupMenus">
+	<viewerContribution
+		targetID="#CompilationUnitRulerContext"
+		id="org.eclipse.jdt.ui.quickdiff.CompilationUnitEditorContribution">
+		<action
+			label="%quickdiff.toggle.enable"
+			style="push"
+			helpContextId="quickdiff.toggle"
+			class="org.eclipse.ui.editors.quickdiff.QuickDiffToggleAction"
+			menubarPath="quickdiff"
+			id="quickdiff.toggle">
+		</action>
+	</viewerContribution>
+</extension>
+
+<extension
+	point="org.eclipse.ui.editorActions">
+<!-- properties editor -->
+	<editorContribution
+		targetID="org.eclipse.jdt.ui.DefaultTextEditor"
+		id="org.eclipse.quickdiff.editoractions.propertieseditor">
+		<action
+			definitionId="org.eclipse.quickdiff.toggle"
+			label="%quickdiff.toggle.enable"
+			class="org.eclipse.ui.editors.quickdiff.QuickDiffToggleAction"
+			id="org.eclipse.ui.editors.quickdiff.QuickDiffToggleAction">
+		</action>
+	</editorContribution>
+<!-- compilation unit editor -->
+	<editorContribution
+		targetID="org.eclipse.jdt.ui.CompilationUnitEditor"
+		id="org.eclipse.quickdiff.editoractions.cueditor">
+		<action
+			definitionId="org.eclipse.quickdiff.toggle"
+			label="%quickdiff.toggle.enable"
+			class="org.eclipse.ui.editors.quickdiff.QuickDiffToggleAction"
+			id="org.eclipse.ui.editors.quickdiff.QuickDiffToggleAction">
+		</action>
+	</editorContribution>
+</extension>
+
 <!---
 <extension
 	point="org.eclipse.ui.decorators">

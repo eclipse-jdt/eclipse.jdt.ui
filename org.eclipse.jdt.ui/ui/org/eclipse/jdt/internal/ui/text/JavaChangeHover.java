@@ -10,17 +10,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
-import org.eclipse.swt.widgets.Shell;
-
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.LineChangeHover;
 
+import org.eclipse.swt.widgets.Shell;
+
 /**
- * JavaChangeHover
+ * A line change hover for Java source code. Adds a custom information control creator returning a
+ * source viewer with syntax coloring.
+ * 
  * @since 3.0
  */
 public class JavaChangeHover extends LineChangeHover  {
+	
+	/** The last computet partition type. */
+	String fPartition;
+	/** The last created information control. */
+	CustomSourceInformationControl fInformationControl;
 	
 	/*
 	 * @see org.eclipse.ui.internal.editors.text.LineChangeHover#formatSource(java.lang.String)
@@ -35,8 +47,48 @@ public class JavaChangeHover extends LineChangeHover  {
 	public IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new CustomSourceInformationControl(parent);
+				fInformationControl= new CustomSourceInformationControl(parent, fPartition);
+				return fInformationControl;
 			}
 		};
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.IAnnotationHoverExtension#getLineRange(org.eclipse.jface.text.source.ISourceViewer, int, int, int)
+	 */
+	public ITextSelection getLineRange(ISourceViewer viewer, int line, int first, int number) {
+		ITextSelection lineRange= super.getLineRange(viewer, line, first, number);
+		if (lineRange != null) {
+			fPartition= getPartition(viewer, lineRange.getStartLine());
+		} else {
+			fPartition= IDocument.DEFAULT_CONTENT_TYPE;
+		}
+		if (fInformationControl != null)
+			fInformationControl.setStartingPartitionType(fPartition); 
+		return lineRange;
+	}
+
+	/**
+	 * Returns the partition type of the document displayed in <code>viewer</code> at <code>startLine</code>.
+
+	 * @param viewer the viewer
+	 * @param startLine the line in the viewer
+	 * @return the partition type at the start of <code>startLine</code>, or <code>IDocument.DEFAULT_CONTENT_TYPE</code> if none can be detected
+	 */
+	private String getPartition(ISourceViewer viewer, int startLine) {
+		if (viewer == null)
+			return null;
+		IDocument doc= viewer.getDocument();
+		if (doc == null)
+			return null;
+		if (startLine <= 0)
+			return IDocument.DEFAULT_CONTENT_TYPE;
+		try {
+			ITypedRegion region= doc.getPartition(doc.getLineOffset(startLine) - 1);
+			if (region != null)
+				return region.getType();
+		} catch (BadLocationException e) {
+		}
+		return IDocument.DEFAULT_CONTENT_TYPE;
 	}
 }
