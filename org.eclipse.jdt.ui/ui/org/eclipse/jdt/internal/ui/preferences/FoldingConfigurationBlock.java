@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -314,6 +315,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 				fProviderControls.put(id, control);
 			}
 		}
+		Dialog.applyDialogFont(control);
 		fStackLayout.topControl= control;
 		control.pack();
 		fGroup.layout();
