@@ -29,6 +29,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
 	public static final int SHOW_CONTAINER_ELEMENT= 2;
 	public static final int SHOW_PATH= 3;
+	public static final String POTENTIAL_MATCH= SearchMessages.getString("JavaSearchResultLabelProvider.potentialMatch"); //$NON-NLS-1$
 
 	private JavaElementLabelProvider fLabelProvider;
 	private int fTextFlags= 0;
@@ -55,7 +56,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 				if (isAccurate) 
 					return fLabelProvider.getText(fLastMarker.getResource());
 				else
-					return "?: " + fLabelProvider.getText(fLastMarker.getResource()); //$NON-NLS-1$
+					return fLabelProvider.getText(fLastMarker.getResource()) + POTENTIAL_MATCH;
 			}
 			else
 				return ""; //$NON-NLS-1$
@@ -64,9 +65,9 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 			javaElement= ((IImportDeclaration)javaElement).getParent().getParent();
 
 		fBufffer.setLength(0);
-		if (!isAccurate) 
-			fBufffer.append("?: "); //$NON-NLS-1$
 		JavaElementLabels.getElementLabel(javaElement, fTextFlags, fBufffer);
+		if (!isAccurate) 
+			fBufffer.append(POTENTIAL_MATCH);
 		return fBufffer.toString();
 	}
 
