@@ -16,15 +16,18 @@ public class ParameterInfo {
 	
 	private static final int INDEX_FOR_ADDED= -1;
 	private final String fOldName;
+	private final String fOldTypeName;
 	private final int fOldIndex;
-	private String fType;
+
+	private String fNewTypeName;
 	private String fDefaultValue;
 	private String fNewName;
 	private Object fData;
 	private boolean fIsDeleted;
 	
 	public ParameterInfo(String type, String name, int index){
-		fType= type;
+		fOldTypeName= type;
+		fNewTypeName= type;
 		fOldName= name;
 		fNewName= name;
 		fOldIndex= index;
@@ -54,15 +57,21 @@ public class ParameterInfo {
 	}
 	
 	public void setDefaultValue(String value){
+		Assert.isNotNull(value);
 		fDefaultValue= value;
 	}
-	
-	public String getType() {
-		return fType;
+
+	public String getOldTypeName() {
+		return fOldTypeName;
 	}
 	
-	public void setType(String type){
-		fType= type;
+	public String getNewTypeName() {
+		return fNewTypeName;
+	}
+	
+	public void setNewTypeName(String type){
+		Assert.isNotNull(type);
+		fNewTypeName= type;
 	}
 
 	public String getOldName() {
@@ -74,6 +83,7 @@ public class ParameterInfo {
 	}
 
 	public void setNewName(String newName) {
+		Assert.isNotNull(newName);
 		fNewName= newName;
 	}
 
@@ -92,4 +102,9 @@ public class ParameterInfo {
 	public boolean isRenamed() {
 		return !fOldName.equals(fNewName);
 	}
+	
+	public boolean isTypeNameChanged() {
+		return !fOldTypeName.equals(fNewTypeName);
+	}
+	
 }

@@ -162,7 +162,7 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 				getChangeMethodSignatureRefactoring().setupNewParameterInfo(parameter);
 				update(true);
 			}
-		}, true, true);
+		}, true, true, true);
 		cp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
 		cp.setInput(getChangeMethodSignatureRefactoring().getParameterInfos());
 	}

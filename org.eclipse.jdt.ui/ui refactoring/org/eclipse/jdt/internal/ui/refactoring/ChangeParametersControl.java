@@ -96,7 +96,7 @@ public class ChangeParametersControl extends Composite {
 		public String getColumnText(Object element, int columnIndex) {
 			ParameterInfo info= (ParameterInfo) element;
 			if (columnIndex == TYPE_PROP)
-				return info.getType();
+				return info.getNewTypeName();
 			if (columnIndex == NEWNAME_PROP)
 				return info.getNewName();
 			if (columnIndex == DEFAULT_PROP)
@@ -106,19 +106,22 @@ public class ChangeParametersControl extends Composite {
 		}
 	}
 
-	private class ReorderParametersCellModifier implements ICellModifier {
+	private class ParametersCellModifier implements ICellModifier {
 		public boolean canModify(Object element, String property) {
-			if (!(element instanceof ParameterInfo))
-				return false;
-			if (property.equals(PROPERTIES[NEWNAME_PROP]))
-				return true;
-			return (((ParameterInfo)element).isAdded());
+			Assert.isTrue(element instanceof ParameterInfo);
+			if (property.equals(PROPERTIES[TYPE_PROP]))
+				return ChangeParametersControl.this.fCanChangeTypesOfOldParameters;
+			else if (property.equals(PROPERTIES[NEWNAME_PROP]))
+				return ChangeParametersControl.this.fCanChangeParameterNames;
+			else if (property.equals(PROPERTIES[DEFAULT_PROP]))
+				return (((ParameterInfo)element).isAdded());
+			Assert.isTrue(false);
+			return false;
 		}
 		public Object getValue(Object element, String property) {
-			if (!(element instanceof ParameterInfo))
-				return null;
+			Assert.isTrue(element instanceof ParameterInfo);
 			if (property.equals(PROPERTIES[TYPE_PROP]))
-				return ((ParameterInfo) element).getType();
+				return ((ParameterInfo) element).getNewTypeName();
 			else if (property.equals(PROPERTIES[NEWNAME_PROP]))
 				return ((ParameterInfo) element).getNewName();
 			else if (property.equals(PROPERTIES[DEFAULT_PROP]))
@@ -138,11 +141,11 @@ public class ChangeParametersControl extends Composite {
 			else if (property.equals(PROPERTIES[DEFAULT_PROP]))
 				parameterInfo.setDefaultValue((String) value);
 			else if (property.equals(PROPERTIES[TYPE_PROP]))
-				parameterInfo.setType((String) value);
+				parameterInfo.setNewTypeName((String) value);
  			else 
  				Assert.isTrue(false);
-			fListener.parameterChanged(parameterInfo);
-			fTableViewer.update(parameterInfo, new String[] { property });
+			ChangeParametersControl.this.fListener.parameterChanged(parameterInfo);
+			ChangeParametersControl.this.fTableViewer.update(parameterInfo, new String[] { property });
 		}
 	};
 
@@ -153,7 +156,8 @@ public class ChangeParametersControl extends Composite {
 
 	private static final int ROW_COUNT= 10;
 
-	private final boolean fEditable;
+	private final boolean fCanChangeParameterNames;
+	private final boolean fCanChangeTypesOfOldParameters;
 	private final boolean fCanAddParameters;
 	private final ParameterListChangeListener fListener;
 
@@ -166,11 +170,12 @@ public class ChangeParametersControl extends Composite {
 	private List fParameterInfos;
 	private TableCursor fTableCursor;
 
-	public ChangeParametersControl(Composite parent, int style, String label, ParameterListChangeListener listener, boolean editable, boolean canAddParameters) {
+	public ChangeParametersControl(Composite parent, int style, String label, ParameterListChangeListener listener, boolean canChangeParameterNames, boolean canChangeTypesOfOldParameters, boolean canAddParameters) {
 		super(parent, style);
 		Assert.isNotNull(listener);
 		fListener= listener;
-		fEditable= editable;
+		fCanChangeParameterNames= canChangeParameterNames;
+		fCanChangeTypesOfOldParameters= canChangeTypesOfOldParameters;
 		fCanAddParameters= canAddParameters;
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
@@ -235,7 +240,7 @@ public class ChangeParametersControl extends Composite {
 			}
 		});
 
-		if (fEditable){
+		if (fCanChangeParameterNames){
 			addCellEditors();
 			addTableCursor(table);
 		}	
@@ -333,7 +338,7 @@ public class ChangeParametersControl extends Composite {
 
 		fUpButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_up"), true); //$NON-NLS-1$
 		fDownButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_down"), false); //$NON-NLS-1$
-		if (fEditable)
+		if (fCanChangeParameterNames)
 			fEditButton= createEditButton(buttonComposite);
 		if(fCanAddParameters){
 			fAddButton= createAddButton(buttonComposite);	
@@ -532,7 +537,7 @@ public class ChangeParametersControl extends Composite {
 
 		fTableViewer.setCellEditors(editors);
 		fTableViewer.setColumnProperties(PROPERTIES);
-		fTableViewer.setCellModifier(new ReorderParametersCellModifier());
+		fTableViewer.setCellModifier(new ParametersCellModifier());
 	}
 
 	//---- change order ----------------------------------------------------------------------------------------

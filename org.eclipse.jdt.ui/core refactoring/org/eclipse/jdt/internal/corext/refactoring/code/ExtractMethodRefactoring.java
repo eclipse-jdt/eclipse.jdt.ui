@@ -624,7 +624,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (i > 0)
 				buffer.append(COMMA_BLANK);
 			appendModifiers(buffer, info);
-			buffer.append(info.getType());
+			buffer.append(info.getNewTypeName());
 			buffer.append(BLANK);
 			buffer.append(info.getNewName());
 		}
