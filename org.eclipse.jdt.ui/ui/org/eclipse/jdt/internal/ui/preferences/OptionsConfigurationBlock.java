@@ -118,6 +118,7 @@ public abstract class OptionsConfigurationBlock {
 		fAllKeys= allKeys;
 		
 		fWorkingValues= getOptions(true);
+		testIfOptionsComplete(fWorkingValues, allKeys);
 		
 		fCheckBoxes= new ArrayList();
 		fComboBoxes= new ArrayList();
@@ -125,6 +126,14 @@ public abstract class OptionsConfigurationBlock {
 		fLabels= new HashMap();
 	}
 	
+	private void testIfOptionsComplete(Map workingValues, String[] allKeys) {
+		for (int i= 0; i < allKeys.length; i++) {
+			if (workingValues.get(allKeys[i]) == null) {
+				JavaPlugin.logErrorMessage("preference option missing: " + allKeys[i] + " (" + this.getClass().getName() +')');  //$NON-NLS-1$//$NON-NLS-2$
+			}
+		}
+	}
+
 	protected Map getOptions(boolean inheritJavaCoreOptions) {
 		if (fProject != null) {
 			return fProject.getOptions(inheritJavaCoreOptions);
@@ -294,7 +303,9 @@ public abstract class OptionsConfigurationBlock {
 		fLabels.put(textBox, labelControl);
 		
 		String currValue= (String) fWorkingValues.get(key);	
-		textBox.setText(currValue);
+		if (currValue != null) {
+			textBox.setText(currValue);
+		}
 		textBox.addModifyListener(getTextModifyListener());
 
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -389,7 +400,7 @@ public abstract class OptionsConfigurationBlock {
 			String val= null;
 			if (enabled) {
 				val= (String) fWorkingValues.get(key);
-				if (!val.equals(oldVal)) {
+				if (val != null && !val.equals(oldVal)) {
 					hasChanges= true;
 					actualOptions.put(key, val);
 				}
@@ -501,7 +512,9 @@ public abstract class OptionsConfigurationBlock {
 		String key= (String) curr.getData();
 		
 		String currValue= (String) fWorkingValues.get(key);
-		curr.setText(currValue);				
+		if (currValue != null) {
+			curr.setText(currValue);
+		}
 	}
 	
 	protected Button getCheckBox(String key) {
