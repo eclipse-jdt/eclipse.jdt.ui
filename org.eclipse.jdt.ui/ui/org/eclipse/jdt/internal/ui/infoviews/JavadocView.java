@@ -14,10 +14,12 @@ import java.io.Reader;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -192,6 +194,15 @@ public class JavadocView extends AbstractInfoView {
 		fText.setEditable(false);
 		fPresenter= new HTMLTextPresenter(false);
 		getViewSite().setSelectionProvider(new SelectionProvider(fText));
+		
+		fText.addControlListener(new ControlAdapter() {
+			/*
+			 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
+			 */
+			public void controlResized(ControlEvent e) {
+				setInput(fText.getText());
+			}
+		});
 	}
 	
 	/*
@@ -258,9 +269,10 @@ public class JavadocView extends AbstractInfoView {
 		String javadocHtml= (String)input;
 		
 		fPresentation.clear();
-		Point size= fText.getSize();
+		Rectangle size=  fText.getClientArea();
+		
 		try {
-			javadocHtml= fPresenter.updatePresentation(getSite().getShell().getDisplay(), javadocHtml, fPresentation, size.x, size.y);
+			javadocHtml= fPresenter.updatePresentation(getSite().getShell().getDisplay(), javadocHtml, fPresentation, size.width, size.height);
 		} catch (IllegalArgumentException ex) {
 			// the javadoc might no longer be valid
 			return;
