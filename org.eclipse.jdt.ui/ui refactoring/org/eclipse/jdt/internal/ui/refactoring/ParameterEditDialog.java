@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.text.MessageFormat;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -21,16 +26,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-
-import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 
 public class ParameterEditDialog extends StatusDialog {
 	
@@ -158,23 +160,22 @@ public class ParameterEditDialog extends StatusDialog {
 		if (fType == null)
 			return null;
 		String typeName= fType.getText();
-		if (typeName.length() == 0) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, 
-				RefactoringMessages.getString("ParameterEditDialog.all.type.error"), null); //$NON-NLS-1$
-		} else if (PrimitiveType.toCode(typeName) != null) {
+		if (ChangeSignatureRefactoring.isValidParameterTypeName(typeName))
 			return createOkStatus();
-		} else {
-			return JavaConventions.validateJavaTypeName(typeName);
-		}								
+		String msg= MessageFormat.format("''{0}'' is not a valid parameter type name", new String[]{typeName});
+		return createErrorStatus(msg); 
 	}
 	
+	private Status createErrorStatus(String message) {
+		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, message, null);
+	}
+
 	private IStatus validateName() {
 		if (fName == null) 
 			return null;
 		String text= fName.getText();
 		if (text.length() == 0)
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, 
-				RefactoringMessages.getString("ParameterEditDialog.all.name.error"), null); //$NON-NLS-1$
+			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.all.name.error"));//$NON-NLS-1$
 		return JavaConventions.validateFieldName(text);
 	}
 	
@@ -183,8 +184,7 @@ public class ParameterEditDialog extends StatusDialog {
 			return null;
 		String s= fDefaultValue.getText();
 		if (s.length() == 0) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, 
-				RefactoringMessages.getString("ParameterEditDialog.all.defaultValue.error"), null); //$NON-NLS-1$
+			return createErrorStatus(RefactoringMessages.getString("ParameterEditDialog.all.defaultValue.error"));//$NON-NLS-1$
 		} else {
 			return createOkStatus(); 
 		}
