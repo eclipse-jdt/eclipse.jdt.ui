@@ -43,7 +43,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testUnimplementedMethods"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testUnimplementedMethods2"));
 			return suite;
 		}
 	}
@@ -845,14 +845,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-
-	private boolean BUG_25183= true;
 	
 	public void testUnimplementedMethods() throws Exception {
-		if (BUG_25183) {
-			return ;
-		}
-
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -910,7 +904,78 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 		
-	}	
+	}
+	
+	public void testUnimplementedMethods2() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public interface Inter {\n");
+		buf.append("    int getCount(Object[] o) throws IOException;\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("Inter.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public abstract class InterImpl implements Inter {\n");
+		buf.append("    protected abstract int[] getMusic() throws IOException;\n");		
+		buf.append("}\n");
+		pack2.createCompilationUnit("InterImpl.java", buf.toString(), false, null);		
+
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.InterImpl;\n");		
+		buf.append("public class E extends InterImpl {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 2);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.InterImpl;\n");		
+		buf.append("public abstract class E extends InterImpl {\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("\n");		
+		buf.append("import test2.InterImpl;\n");
+		buf.append("public class E extends InterImpl {\n");
+		buf.append("    protected int[] getMusic() throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("    public int getCount(Object[] o) throws IOException {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+		
+	}		
 	
 	
 	

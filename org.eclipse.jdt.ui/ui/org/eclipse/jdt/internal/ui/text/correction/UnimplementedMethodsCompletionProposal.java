@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -134,17 +135,16 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 				fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
 			}
 			StubUtility.genJavaDocSeeTag(fullTypeName, binding.getName(), fullParamNames, commentSettings.createNonJavadocComments, binding.isDeprecated(), buf);
+			String comment= buf.toString();
 			Javadoc javadoc;
 			if (commentSettings.createNonJavadocComments) {
-				String str= buf.substring(0, buf.length() -  1); // cut away last line delim
-				javadoc= (Javadoc) rewrite.createPlaceholder(str, ASTRewrite.JAVADOC);
+				javadoc= (Javadoc) rewrite.createPlaceholder(comment, ASTRewrite.JAVADOC);
 			} else {
 				javadoc= ast.newJavadoc();
-				javadoc.setComment(buf.toString());
+				javadoc.setComment(comment);
 			}
 			decl.setJavadoc(javadoc);
 		}
-		
 		return decl;
 	}
 	
@@ -166,28 +166,25 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		}
 		return names;
 	}
-	
-	
 		
-	private void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, ArrayList visited, ArrayList allMethods, ArrayList toImplement) {
-		visited.add(typeBinding);
-		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
-		for (int i= 0; i < typeMethods.length; i++) {
-			IMethodBinding curr= typeMethods[i];
-			IMethodBinding impl= findMethod(curr, allMethods);
-			if (impl == null || ((curr.getExceptionTypes().length < impl.getExceptionTypes().length) && !Modifier.isFinal(impl.getModifiers()))) {
-				if (impl != null) {
-					allMethods.remove(impl);
+	private void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet visited, ArrayList allMethods, ArrayList toImplement) {
+		if (visited.add(typeBinding)) {
+			IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
+			for (int i= 0; i < typeMethods.length; i++) {
+				IMethodBinding curr= typeMethods[i];
+				IMethodBinding impl= findMethod(curr, allMethods);
+				if (impl == null || ((curr.getExceptionTypes().length < impl.getExceptionTypes().length) && !Modifier.isFinal(impl.getModifiers()))) {
+					if (impl != null) {
+						allMethods.remove(impl);
+					}
+					// implement an interface method when it does not exist in the hierarchy
+					// or when it throws less exceptions that the implemented
+					toImplement.add(curr);
+					allMethods.add(curr);
 				}
-				// implement an interface method when it does not exist in the hierarchy
-				// or when it throws less exceptions that the implemented
-				toImplement.add(curr);
-				allMethods.add(curr);
 			}
-		}
-		ITypeBinding[] superInterfaces= typeBinding.getInterfaces();
-		for (int i= 0; i < superInterfaces.length; i++) {
-			if (!visited.contains(superInterfaces[i])) {
+			ITypeBinding[] superInterfaces= typeBinding.getInterfaces();
+			for (int i= 0; i < superInterfaces.length; i++) {
 				findUnimplementedInterfaceMethods(superInterfaces[i], visited, allMethods, toImplement);
 			}
 		}
@@ -230,10 +227,14 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 			}
 		}
 
-		ArrayList visited= new ArrayList();
-		ITypeBinding[] superInterfaces= typeBinding.getInterfaces();
-		for (int i= 0; i < superInterfaces.length; i++) {
-			findUnimplementedInterfaceMethods(superInterfaces[i], visited, allMethods, toImplement);
+		HashSet visited= new HashSet();
+		ITypeBinding curr= typeBinding;
+		while (curr != null) {
+			ITypeBinding[] superInterfaces= curr.getInterfaces();
+			for (int i= 0; i < superInterfaces.length; i++) {
+				findUnimplementedInterfaceMethods(superInterfaces[i], visited, allMethods, toImplement);
+			}
+			curr= curr.getSuperclass();
 		}
 		
 		return (IMethodBinding[]) toImplement.toArray(new IMethodBinding[toImplement.size()]);
