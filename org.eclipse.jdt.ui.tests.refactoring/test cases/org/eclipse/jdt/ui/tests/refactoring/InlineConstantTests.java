@@ -27,8 +27,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InlineConstantTests extends RefactoringTest {
 	private static final boolean BUG_84659_CORE_ANNOT_REF= true;
-	private static final boolean BUG_84920_CANNOT_INLINE_ANONYMOUS= true;
-	private static final boolean BUG_STATIC_IMPORTS= true;
 
 	private static final Class clazz = InlineConstantTests.class;
 	private static final String REFACTORING_PATH = "InlineConstant/";
@@ -251,23 +249,19 @@ public class InlineConstantTests extends RefactoringTest {
 	}
 		
 	public void test21() throws Exception {
-		if (BUG_STATIC_IMPORTS)
-			return;
 		helper1(new String[] {"p.A", "q.Consts"}, "p.A", 8, 16, 8, 19, true, false);
 	}
 		
 	public void test22() throws Exception {
-		if (BUG_STATIC_IMPORTS)
-			return;
-		helper1(new String[] {"p.A", "q.Consts"}, "p.A", 11, 16, 11, 19, true, true);
+		helper1(new String[] {"p.A", "q.Consts", "r.Third"}, "p.A", 11, 16, 11, 19, true, true);
 	}
 		
 	public void test23() throws Exception {
-		if (BUG_84920_CANNOT_INLINE_ANONYMOUS) {
-			printTestDisabledMessage("BUG_84920_CANNOT_INLINE_ANONYMOUS");
-			return;
-		}
 		helper1("p.Test", 6, 26, 6, 26, false, false);
+	}
+		
+	public void test24() throws Exception {
+		helper1(new String[] {"p.A", "q.Consts"}, "p.A", 14, 17, 14, 17, true, true);
 	}
 		
 	// -- testing failing preconditions

@@ -1,9 +1,9 @@
 package q;
 
 import p.A;
-import p.B;
+import r.Third;
 import static p.A.getCount2;
-import static p.Third.B;
+import static r.Third.B;
 
 public interface Consts {
 	int I= 1;

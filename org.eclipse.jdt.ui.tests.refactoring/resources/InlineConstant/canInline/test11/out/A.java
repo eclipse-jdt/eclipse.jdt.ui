@@ -1,7 +1,6 @@
 // 8, 25 -> 8, 25  replaceAll == false 
 package p1;
 
-import p2.B;
 import p3.C;
 
 public class A {

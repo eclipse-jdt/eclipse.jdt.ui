@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
@@ -31,6 +32,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 public class ImportRemover {
 
@@ -191,6 +193,20 @@ public class ImportRemover {
 
 	public void registerAddedStaticImport(String qualifier, String member, boolean field) {
 		fAddedStaticImports.add(new StaticImportData(qualifier, member, field));
+	}
+
+	public void registerAddedStaticImport(IBinding binding) {
+		if (binding instanceof IVariableBinding) {
+			ITypeBinding declaringType= ((IVariableBinding) binding).getDeclaringClass();
+			fAddedStaticImports.add(new StaticImportData(Bindings.getRawQualifiedName(declaringType), binding.getName(), true));
+			
+		} else if (binding instanceof IMethodBinding) {
+			ITypeBinding declaringType= ((IMethodBinding) binding).getDeclaringClass();
+			fAddedStaticImports.add(new StaticImportData(Bindings.getRawQualifiedName(declaringType), binding.getName(), false));
+			
+		} else {
+			throw new IllegalArgumentException(binding.toString());
+		}
 	}
 
 	public void registerRemovedNode(ASTNode removed) {
