@@ -30,6 +30,8 @@ import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.source.ISourceViewer;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
@@ -67,10 +69,11 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			final int begin= line.getOffset();
 			final int end= Math.min(offset, line.getOffset() + line.getLength());
 
-			result= region.stringToIndent(document.get(begin, end - begin), true);
+			boolean useTab= JavaCore.TAB.equals(JavaCore.getOption(JavaCore.FORMATTER_TAB_CHAR));
+			result= region.stringToIndent(document.get(begin, end - begin), useTab);
 
 		} catch (BadLocationException exception) {
-			// Should not happen
+			// Ignore and return empty
 		}
 		return result;
 	}
