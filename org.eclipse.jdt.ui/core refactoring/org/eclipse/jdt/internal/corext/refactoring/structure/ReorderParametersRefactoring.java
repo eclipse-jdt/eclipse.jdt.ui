@@ -103,6 +103,18 @@ class ReorderParametersRefactoring extends Refactoring {
 
 			RefactoringStatus result= new RefactoringStatus();
 			
+			if (MethodChecks.isVirtual(fMethod)){
+				if (MethodChecks.overridesAnotherMethod(fMethod, new SubProgressMonitor(pm, 1)))
+					result.addError("Method '" + JavaElementUtil.createMethodSignature(fMethod)+"' overrides another method. Perform this action in the most abstract type that declares it.");
+				if (MethodChecks.isDeclaredInInterface(fMethod, new SubProgressMonitor(pm, 1)))	
+					result.addError("Method '" + JavaElementUtil.createMethodSignature(fMethod)+"' is declared in an interface. Perform this action there.");
+			}
+		
+			if (fMethod.getDeclaringType().isInterface()){
+				if (MethodChecks.overridesAnotherMethod(fMethod, new SubProgressMonitor(pm, 1)))
+					result.addError("Method '" + JavaElementUtil.createMethodSignature(fMethod)+"' overrides another method. Perform this action in the most abstract type that declares it.");
+			}	
+			
 			fRippleMethods= RippleMethodFinder.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1));
 			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 1));			
 			fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
@@ -143,17 +155,6 @@ class ReorderParametersRefactoring extends Refactoring {
 			return result;
 
 		//XX			
-		if (MethodChecks.isVirtual(fMethod)){
-			if (MethodChecks.overridesAnotherMethod(fMethod, new SubProgressMonitor(pm, 1)))
-				result.addError("Method '" + JavaElementUtil.createMethodSignature(fMethod)+"' overrides another method. Perform this action in the most abstract type that declares it.");
-			if (MethodChecks.isDeclaredInInterface(fMethod, new SubProgressMonitor(pm, 1)))	
-				result.addError("Method '" + JavaElementUtil.createMethodSignature(fMethod)+"' is declared in an interface. Perform this action there.");
-		}
-		
-		if (fMethod.getDeclaringType().isInterface()){
-			if (MethodChecks.overridesAnotherMethod(fMethod, new SubProgressMonitor(pm, 1)))
-				result.addError("Method '" + JavaElementUtil.createMethodSignature(fMethod)+"' overrides another method. Perform this action in the most abstract type that declares it.");
-		}	
 			
 		return result;
 	}
