@@ -44,7 +44,6 @@ public class ProjectTestSetup extends TestSetup {
 	
 	public static IClasspathEntry[] getDefaultClasspath() {
 		IPath[] rtJarPath= JavaProjectHelper.find15RtJar();
-		assertTrue("rt not found", rtJarPath != null);		
 		return new IClasspathEntry[] {  JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
 	}
 	

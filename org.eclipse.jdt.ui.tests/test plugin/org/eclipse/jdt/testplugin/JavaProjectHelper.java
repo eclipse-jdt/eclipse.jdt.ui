@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  */
 public class JavaProjectHelper {
 	
+	public static final IPath RT_STUBS_13= new Path("testresources/rtstubs.jar");
 	public static final IPath RT_STUBS_15= new Path("testresources/rtstubs15.jar");
 	public static final IPath JUNIT_SRC= new Path("testresources/junit37-noUI-src.zip");
 	
@@ -388,16 +389,25 @@ public class JavaProjectHelper {
 	}	
 
 	/**
-	 * Adds a library entry pointing to a JRE.
-	 * @return Can return null, if no JRE installation was found.
+	 * Adds a library entry pointing to a current JRE (stubs only).
+	 * @param jproject target
+	 * @return the new package fragment root
+	 * @throws CoreException
 	 */	
 	public static IPackageFragmentRoot addRTJar(IJavaProject jproject) throws CoreException {
-
 		IPath[] rtJarPath= find15RtJar();
-		if (rtJarPath != null) {
-			return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
-		}
-		return null;
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+	}
+	
+	/**
+	 * Adds a library entry pointing to a 1.3 JRE (stubs only).
+	 * @param jproject target
+	 * @return the new package fragment root
+	 * @throws CoreException
+	 */	
+	public static IPackageFragmentRoot add13RTJar(IJavaProject jproject) throws CoreException {
+		IPath[] rtJarPath= find13RtJar();
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 	
 	/**
@@ -415,33 +425,30 @@ public class JavaProjectHelper {
 	}
 	
 	/**
-	 * Adds a variable entry pointing to a JRE.
+	 * Adds a variable entry pointing to a current JRE (stubs only).
 	 * The arguments specify the names of the variable to be used.
 	 * @param libVarName Name of the variable for the library
 	 * @param srcVarName Name of the variable for the source attchment. Can be <code>null</code>.
 	 * @param srcrootVarName Name of the variable for the source attchment root. Can be <code>null</code>.
-	 * @return Returns <code>null</code>, if no JRE installation was found.
+	 * @return the new package fragment root
 	 */	
 	public static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, String libVarName, String srcVarName, String srcrootVarName) throws CoreException {
 		IPath[] rtJarPaths= find15RtJar();
-		if (rtJarPaths != null) {
-			IPath libVarPath= new Path(libVarName);
-			IPath srcVarPath= null;
-			IPath srcrootVarPath= null;
-			JavaCore.setClasspathVariable(libVarName, rtJarPaths[0], null);
-			if (srcVarName != null) {
-				IPath varValue= rtJarPaths[1] != null ? rtJarPaths[1] : Path.EMPTY;
-				JavaCore.setClasspathVariable(srcVarName, varValue, null);
-				srcVarPath= new Path(srcVarName);
-			}
-			if (srcrootVarName != null) {
-				IPath varValue= rtJarPaths[2] != null ? rtJarPaths[2] : Path.EMPTY;
-				JavaCore.setClasspathVariable(srcrootVarName, varValue, null);
-				srcrootVarPath= new Path(srcrootVarName);
-			}
-			return addVariableEntry(jproject, libVarPath, srcVarPath, srcrootVarPath);
+		IPath libVarPath= new Path(libVarName);
+		IPath srcVarPath= null;
+		IPath srcrootVarPath= null;
+		JavaCore.setClasspathVariable(libVarName, rtJarPaths[0], null);
+		if (srcVarName != null) {
+			IPath varValue= rtJarPaths[1] != null ? rtJarPaths[1] : Path.EMPTY;
+			JavaCore.setClasspathVariable(srcVarName, varValue, null);
+			srcVarPath= new Path(srcVarName);
 		}
-		return null;
+		if (srcrootVarName != null) {
+			IPath varValue= rtJarPaths[2] != null ? rtJarPaths[2] : Path.EMPTY;
+			JavaCore.setClasspathVariable(srcrootVarName, varValue, null);
+			srcrootVarPath= new Path(srcrootVarName);
+		}
+		return addVariableEntry(jproject, libVarPath, srcVarPath, srcrootVarPath);
 	}	
 
 	/**
@@ -494,20 +501,33 @@ public class JavaProjectHelper {
 	}
 	
 	/**
-	 * Try to find a 1.5 rt.jar
+	 * @return a 1.5 rt.jar (stubs only)
 	 */
 	public static IPath[] find15RtJar() {
 		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(RT_STUBS_15);
-		if (rtStubs != null && rtStubs.exists()) {
-			return new IPath[] {
-				new Path(rtStubs.getPath()),
-				null,
-				null
-			};
-		}
-		return null;
+		Assert.assertNotNull(rtStubs);
+		Assert.assertTrue(rtStubs.exists());
+		return new IPath[] {
+			new Path(rtStubs.getPath()),
+			null,
+			null
+		};
 	}
-		
+	
+	/**
+	 * @return a 1.3 rt.jar (stubs only)
+	 */
+	public static IPath[] find13RtJar() {
+		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(RT_STUBS_13);
+		Assert.assertNotNull(rtStubs);
+		Assert.assertTrue(rtStubs.exists());
+		return new IPath[] {
+			new Path(rtStubs.getPath()),
+			null,
+			null
+		};
+	}
+	
 	private static void addNatureToProject(IProject proj, String natureId, IProgressMonitor monitor) throws CoreException {
 		IProjectDescription description = proj.getDescription();
 		String[] prevNatures= description.getNatureIds();
