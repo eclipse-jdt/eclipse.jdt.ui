@@ -415,4 +415,28 @@ public class ASTNodes {
 		return ""; //$NON-NLS-1$
 	}
 	
+	public static int clearAccessModifiers(int flags) {
+		return clearFlag(Modifier.PROTECTED, clearFlag(Modifier.PUBLIC, clearFlag(Modifier.PRIVATE, flags)));
+	}
+	
+	public static int clearFlag(int flag, int flags){
+		return flags & ~ flag;
+	}
+	
+	public static String[] getIdentifiers(QualifiedName qualifiedName) {
+		List result= getIdentifierList(qualifiedName);
+		return (String[]) result.toArray(new String[result.size()]);
+	}
+	
+	private static List getIdentifierList(Name name) {
+		if (name.isSimpleName()){
+			List l= new ArrayList(1);
+			l.add(((SimpleName)name).getIdentifier());
+			return l;
+		}	else {
+			List l= getIdentifierList(((QualifiedName)name).getQualifier());
+			l.add(((QualifiedName)name).getName().getIdentifier());
+			return l;
+		}
+	}
 }
