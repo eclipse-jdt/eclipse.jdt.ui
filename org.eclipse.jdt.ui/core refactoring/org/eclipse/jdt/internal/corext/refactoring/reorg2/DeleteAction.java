@@ -42,7 +42,7 @@ public class DeleteAction extends SelectionDispatchAction{
 	public DeleteAction(IWorkbenchSite site) {
 		super(site);
 		setText("&Delete");
-		setDescription("Delete the selected elements");
+		setDescription("Deletes the selected elements");
 		fSuggestGetterSetterDeletion= true;//default
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE_DISABLED));
@@ -75,6 +75,7 @@ public class DeleteAction extends SelectionDispatchAction{
 				setEnabled(canEnable(resources, javaElements));
 		} catch (JavaModelException e) {
 			//no ui here - this happens on selection changes
+			JavaPlugin.log(e);
 			setEnabled(false);
 		}
 	}
