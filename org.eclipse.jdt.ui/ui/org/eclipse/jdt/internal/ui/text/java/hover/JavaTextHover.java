@@ -138,7 +138,7 @@ public class JavaTextHover implements ITextHover {
 				String id= prerequisite.getUniqueIdentifier();			
 				IPluginDescriptor descriptor= registry.getPluginDescriptor(id);
 				
-				if (descriptor.equals(descriptor1) || dependsOn(descriptor, descriptor1))
+				if (descriptor != null && (descriptor.equals(descriptor1) || dependsOn(descriptor, descriptor1)))
 					return true;
 			}
 			
