@@ -662,7 +662,7 @@ public class PullUpWizard extends RefactoringWizard {
 
 		
 			setTableInput();
-			markAsMembersToPullUp(getPullUpRefactoring().getMembersToPullUp(), false);
+			markAsMembersToPullUp(getPullUpRefactoring().getMembersToMove(), false);
 			setupCellEditors(table);
 		}
 
@@ -683,7 +683,7 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 
 		private MemberActionInfo[] convertPullableMemberToMemberActionInfoArray() {
-			List toPullUp= Arrays.asList(getPullUpRefactoring().getMembersToPullUp());
+			List toPullUp= Arrays.asList(getPullUpRefactoring().getMembersToMove());
 			IMember[] members= getPullUpRefactoring().getPullableMembersOfDeclaringType();
 			MemberActionInfo[] result= new MemberActionInfo[members.length];
 			for (int i= 0; i < members.length; i++) {
@@ -743,8 +743,8 @@ public class PullUpWizard extends RefactoringWizard {
 			initializeRefactoring();
 			if (canSkipSecondInputPage())
 				return computeSuccessorPage();
-			else 
-				return super.getNextPage();
+
+			return super.getNextPage();
 		}
 	
 		/*
@@ -754,8 +754,8 @@ public class PullUpWizard extends RefactoringWizard {
 			if (canSkipSecondInputPage())
 				//cannot call super here because it tries to compute successor page, which is expensive
 				return isPageComplete();
-			else
-				return super.canFlipToNextPage();
+
+			return super.canFlipToNextPage();
 		}
 
 		private boolean canSkipSecondInputPage() {
@@ -771,7 +771,7 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 	
 		private void initializeRefactoring() {
-			getPullUpRefactoring().setMembersToPullUp(getMembersToPullUp());
+			getPullUpRefactoring().setMembersToMove(getMembersToPullUp());
 			getPullUpRefactoring().setMethodsToDeclareAbstract(getMethodsToDeclareAbstract());
 			getPullUpRefactoring().setTargetClass(getSelectedClass());
 			getPullUpRefactoring().setCreateMethodStubs(fCreateStubsButton.getSelection());
@@ -1058,7 +1058,7 @@ public class PullUpWizard extends RefactoringWizard {
 	
 		public void checkPulledUp() {
 			uncheckAll();
-			fTreeViewer.setCheckedElements(getPullUpMethodsRefactoring().getMembersToPullUp());
+			fTreeViewer.setCheckedElements(getPullUpMethodsRefactoring().getMembersToMove());
 			IType parent= getPullUpMethodsRefactoring().getDeclaringType();
 			fTreeViewer.setChecked(parent, true);
 			checkAllParents(parent);
@@ -1250,7 +1250,7 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 	
 		private void precheckElements(final PullUpTreeViewer treeViewer) {
-			IMember[] members= getPullUpMethodsRefactoring().getMembersToPullUp();
+			IMember[] members= getPullUpMethodsRefactoring().getMembersToMove();
 			for (int i= 0; i < members.length; i++) {
 				treeViewer.setCheckState(members[i], true);
 			}

@@ -75,6 +75,7 @@ public class PushDownAction extends SelectionDispatchAction{
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor
 	 */
 	public PushDownAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
@@ -122,6 +123,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * @param selection
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
@@ -203,7 +205,7 @@ public class PushDownAction extends SelectionDispatchAction{
 		PushDownRefactoring refactoring= createNewRefactoringInstance(members);
 		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), refactoring.getDeclaringClass()))
+		if (!ActionUtil.isProcessable(getShell(), refactoring.getDeclaringType()))
 			return;
 	
 		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), 
