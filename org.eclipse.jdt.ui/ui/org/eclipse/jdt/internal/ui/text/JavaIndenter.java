@@ -532,6 +532,7 @@ public class JavaIndenter {
 				fIndent= prefSimpleIndent();
 				return fPosition;
 			case Symbols.TokenRPAREN:
+				int line= fLine;
 				if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN)) {
 					int scope= fPosition;
 					nextToken();
@@ -544,7 +545,9 @@ public class JavaIndenter {
 						return skipToStatementStart(danglingElse, false);
 					}
 				}
+				// restore
 				fPosition= offset;
+				fLine= line;
 				// else: fall through to default
 				
 			case Symbols.TokenCOMMA:
@@ -756,7 +759,8 @@ public class JavaIndenter {
 			if (fLine < startLine) {
 				try {
 					int lineOffset= fDocument.getLineOffset(startLine);
-					fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(lineOffset, startPosition + 1);
+					int bound= Math.min(fDocument.getLength(), startPosition + 1);
+					fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(lineOffset, bound);
 				} catch (BadLocationException e) {
 					// ignore and return just the position
 				}
