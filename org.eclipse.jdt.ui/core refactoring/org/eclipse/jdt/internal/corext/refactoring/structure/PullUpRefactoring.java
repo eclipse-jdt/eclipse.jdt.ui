@@ -606,9 +606,11 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 			IMember member= (IMember) iter.next();
 			if (member.getElementType() == IJavaElement.METHOD && !toDeclareAbstract.contains(member)) {
 				IMethod method= ((IMethod) member);
-				if (!JdtFlags.isPublic(method) && !JdtFlags.isProtected(method)) {
-					result.addError(RefactoringCoreMessages.getFormattedString("PullUpRefactoring.lower_visibility", new String[] { createMethodLabel(method), createTypeLabel(method.getDeclaringType())}), JavaStatusContext.create(method)); //$NON-NLS-1$
-				}
+				if (method.getDeclaringType().getPackageFragment().equals(fTargetType.getPackageFragment())) {
+					if (JdtFlags.isPrivate(method))
+						result.addError(RefactoringCoreMessages.getFormattedString("PullUpRefactoring.lower_default_visibility", new String[] { createMethodLabel(method), createTypeLabel(method.getDeclaringType())}), JavaStatusContext.create(method)); //$NON-NLS-1$
+				} else if (!JdtFlags.isPublic(method) && !JdtFlags.isProtected(method))
+					result.addError(RefactoringCoreMessages.getFormattedString("PullUpRefactoring.lower_protected_visibility", new String[] { createMethodLabel(method), createTypeLabel(method.getDeclaringType())}), JavaStatusContext.create(method)); //$NON-NLS-1$
 			}
 		}
 	}

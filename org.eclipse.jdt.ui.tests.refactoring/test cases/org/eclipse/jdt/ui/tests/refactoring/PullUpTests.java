@@ -926,10 +926,6 @@ public class PullUpTests extends RefactoringTest {
 		helper2(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
 	}
 
-	public void testFail5() throws Exception{
-		helper2(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
-	}
-	
 	public void testFail6() throws Exception{
 		String[] methodNames= new String[]{"m"};
 		String[][] signatures= new String[][]{new String[0]};
