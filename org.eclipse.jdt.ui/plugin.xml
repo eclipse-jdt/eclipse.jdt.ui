@@ -830,6 +830,30 @@
           </debugModelPresentation> 
 </extension>
 
+<!-- Property adapters for java breakpoints -->
+<extension point="org.eclipse.debug.ui.breakpointPropertyAdapters">
+		<breakpointPropertyAdapter
+			id="org.eclipse.jdt.debug.javaBreakpointPropertyAdapter"
+			markerType="org.eclipse.jdt.debug.javaLineBreakpointMarker"
+			class="org.eclipse.jdt.internal.debug.ui.JavaBreakpointPropertySource">
+		</breakpointPropertyAdapter>
+		<breakpointPropertyAdapter
+			id="org.eclipse.jdt.debug.javaMethodEntryBreakpointPropertyAdapter"
+			markerType="org.eclipse.jdt.debug.javaMethodEntryBreakpointMarker"
+			class="org.eclipse.jdt.internal.debug.ui.JavaBreakpointPropertySource">
+		</breakpointPropertyAdapter>
+		<breakpointPropertyAdapter
+			id="org.eclipse.jdt.debug.javaExceptionBreakpointPropertyAdapter"
+			markerType="org.eclipse.jdt.debug.javaExceptionBreakpointMarker"
+			class="org.eclipse.jdt.internal.debug.ui.JavaExceptionBreakpointPropertySource">
+		</breakpointPropertyAdapter>
+		<breakpointPropertyAdapter
+			id="org.eclipse.jdt.debug.javaWatchpointPropertyAdapter"
+			markerType="org.eclipse.jdt.debug.javaWatchpointMarker"
+			class="org.eclipse.jdt.internal.debug.ui.JavaWatchpointPropertySource">
+		</breakpointPropertyAdapter>
+</extension>
+
 <extension
 	point= "org.eclipse.ui.resourceFilters">
 	<filter pattern = "*.class" selected = "false" >
