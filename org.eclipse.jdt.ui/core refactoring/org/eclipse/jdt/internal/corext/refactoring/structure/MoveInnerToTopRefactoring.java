@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeBlock;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -287,10 +288,9 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
-			pm.beginTask("", 4); //$NON-NLS-1$
+			pm.beginTask("", 3); //$NON-NLS-1$
 			TextChangeManager manager= new TextChangeManager();
 			cutType(manager);
-			removeUnusedImports(new SubProgressMonitor(pm, 1));
 			updateTypeReferences(manager, new SubProgressMonitor(pm, 1));
 			if (isInputTypeStatic())
 				pm.worked(2);
@@ -561,18 +561,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return fType.getPackageFragment().getElementName() + '.' + fType.getElementName();
 	}
 
-	private void removeUnusedImports(IProgressMonitor pm) throws CoreException {
-		IType[] types= getTypesReferencedOnlyInInputType(pm);
-		for (int i= 0; i < types.length; i++) {
-			fImportEditManager.removeImportTo(types[i], getInputTypeCu());
-		}
-	}
-	
-	private IType[] getTypesReferencedOnlyInInputType(IProgressMonitor pm) throws JavaModelException{
-		//XXX
-		return new IType[0];
-	}
-
 	private void cutType(TextChangeManager manager) throws CoreException {
 		fCutTypeEdit= new DeleteSourceReferenceEdit(fType, getInputTypeCu());
 		manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.cut_type"), fCutTypeEdit); //$NON-NLS-1$
@@ -583,42 +571,32 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private IChange createCompilationUnitForMovedType(IProgressMonitor pm) throws CoreException {
-		ICompilationUnit newCuWC= getInputTypePackage().getCompilationUnit(getNameForNewCu());
-		return new CreateTextFileChange(createPathForNewCu(), createSourceForNewCu(newCuWC, pm), true);	
+		ICompilationUnit newCuWC= null;
+		try{
+			newCuWC= (ICompilationUnit)getInputTypePackage().getCompilationUnit(getNameForNewCu()).getWorkingCopy();
+			String source= createSourceForNewCu(newCuWC, pm);
+			return new CreateTextFileChange(createPathForNewCu(), source, true);	
+		} finally{
+			if (newCuWC != null)
+				newCuWC.destroy();
+		}
 	}
 	
 	private String createSourceForNewCu(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		StringBuffer buff= new StringBuffer();
-		buff.append(createCuSourcePrefix(new SubProgressMonitor(pm, 1), newCu));
-		buff.append(createTypeSource(new SubProgressMonitor(pm, 1)));
-		return buff.toString();
-	}
-
-	private String createCuSourcePrefix(IProgressMonitor pm, ICompilationUnit newCu) throws CoreException{
-		pm.beginTask("", 1); //$NON-NLS-1$
-		StringBuffer buffer= new StringBuffer();
-		if (! getInputTypePackage().isDefaultPackage())	
-			buffer.append(createPackageDeclarationSource());
-		buffer.append(createImportsSource(new SubProgressMonitor(pm, 1)));
-		buffer.append(getLineSeperator());
+		newCu.getBuffer().setContents(StubUtility.getCompilationUnitContent(newCu, "", createTypeSource(new SubProgressMonitor(pm, 1)).toString(), getLineSeperator()));
+		addImportsToNewCu(newCu, new SubProgressMonitor(pm, 1));
 		pm.done();
-		return format(buffer.toString(), 0);
-	}
-	
-	private String createImportsSource(IProgressMonitor pm) throws JavaModelException {
-		IType[] typesReferencedInInputType= ReferenceFinderUtil.getTypesReferencedIn(new IJavaElement[]{fType}, pm);
-		StringBuffer buff= new StringBuffer();
-		for (int i= 0; i < typesReferencedInInputType.length; i++) {
-			IType iType= typesReferencedInInputType[i];
-			if (! isImplicityImported(iType))
-				buff.append("import ").append(JavaElementUtil.createSignature(iType)).append(';'); //$NON-NLS-1$
-		}
-		return buff.toString();
+		return newCu.getSource();
 	}
 
-	private boolean isImplicityImported(IType iType) {
-		return iType.getParent().getElementName().equals("java.lang") || iType.getPackageFragment().equals(getInputTypePackage()); //$NON-NLS-1$
+	private void addImportsToNewCu(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException, JavaModelException {
+		ImportsStructure is= new ImportsStructure(newCu, fCodeGenerationSettings.importOrder, fCodeGenerationSettings.importThreshold, true);
+		IType[] typesReferencedInInputType= ReferenceFinderUtil.getTypesReferencedIn(new IJavaElement[]{fType}, pm);
+		for (int i= 0; i < typesReferencedInInputType.length; i++) {
+			is.addImport(JavaModelUtil.getFullyQualifiedName(typesReferencedInInputType[i]));
+		}
+		is.create(false, pm);
 	}
 
 	private String createTypeSource(IProgressMonitor pm) throws CoreException {
@@ -679,10 +657,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
-	private String createPackageDeclarationSource() {
-		return "package " + getInputTypePackage().getElementName() + ';';//$NON-NLS-1$
-	}
-	
 	private IPath createPathForNewCu() throws JavaModelException {
 		return ResourceUtil.getFile(getInputTypeCu()).getFullPath()
 										.removeLastSegments(1)
