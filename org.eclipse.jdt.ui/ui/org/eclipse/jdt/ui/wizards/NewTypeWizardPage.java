@@ -1672,7 +1672,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				createdWorkingCopy= parentCU.getWorkingCopy(null);
 				
 				// use the compiler template a first time to read the imports
-				String content= CodeGeneration.getCompilationUnitContent(createdWorkingCopy, null, null, "", lineDelimiter); //$NON-NLS-1$
+				String content= CodeGeneration.getCompilationUnitContent(createdWorkingCopy, getFileComment(createdWorkingCopy, lineDelimiter), null, "", lineDelimiter); //$NON-NLS-1$
 				if (content != null) {
 					createdWorkingCopy.getBuffer().setContents(content);
 				}
