@@ -40,15 +40,7 @@ import org.eclipse.jface.text.contentassist.IContentAssistSubject;
 import org.eclipse.jdt.internal.corext.Assert;
 
 //###################################################################################
-//#################### COPY FROM org.eclipse.ui.texteditor !!! ######################
-//###################################################################################
-// Changes: - getLocationAtOffset();
-//          - added VerifyKeyListener support;
-//###################################################################################
-
-
-//###################################################################################
-//#################### COPY FROM org.eclipse.ui.texteditor !!! ######################
+//#################### COPY FROM org.eclipse.ui.texteditor  #########################
 //###################################################################################
 // Changes: - getLocationAtOffset();
 //          - added VerifyKeyListener support;
@@ -98,7 +90,7 @@ final class ComboContentAssistSubjectAdapter implements IContentAssistSubject {
 	private Combo fCombo;
 	private HashMap fModifyListeners;
 	private List fVerifyKeyListeners;
-	private Listener fKeyDownListener;
+	private Listener fKeyListener;
 
 	/**
 	 * Creates a content assist subject adapter for the given combo.
@@ -201,7 +193,7 @@ final class ComboContentAssistSubjectAdapter implements IContentAssistSubject {
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistSubject#appendVerifyKeyListener(org.eclipse.swt.custom.VerifyKeyListener)
 	 */
 	public boolean appendVerifyKeyListener(final VerifyKeyListener verifyKeyListener) {
-		installKeyDownListener();
+		installVerifyKeyListener();
 		fVerifyKeyListeners.add(verifyKeyListener);
 		return true;
 	}
@@ -210,7 +202,7 @@ final class ComboContentAssistSubjectAdapter implements IContentAssistSubject {
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistSubject#prependVerifyKeyListener(org.eclipse.swt.custom.VerifyKeyListener)
 	 */
 	public boolean prependVerifyKeyListener(final VerifyKeyListener verifyKeyListener) {
-		installKeyDownListener();
+		installVerifyKeyListener();
 		fVerifyKeyListeners.add(0, verifyKeyListener);
 		return true;
 	}
@@ -220,16 +212,14 @@ final class ComboContentAssistSubjectAdapter implements IContentAssistSubject {
 	 */
 	public void removeVerifyKeyListener(VerifyKeyListener verifyKeyListener) {
 		fVerifyKeyListeners.remove(verifyKeyListener);
-		if (fVerifyKeyListeners.size() == 0 && fKeyDownListener != null) {
-			fCombo.removeListener(SWT.KeyDown, fKeyDownListener);
-			fKeyDownListener= null;
-		}
+		if (fVerifyKeyListeners.size() == 0 && fKeyListener != null)
+			uninstallVerifyKeyListener();
 	}
 	
-	private void installKeyDownListener() {
-		if (fKeyDownListener != null)
+	private void installVerifyKeyListener() {
+		if (fKeyListener != null)
 			return;
-		fKeyDownListener= new Listener() {
+		fKeyListener= new Listener() {
 			public void handleEvent(Event e) {
 				VerifyEvent verifyEvent= new VerifyEvent(e);
 				for (Iterator iter= fVerifyKeyListeners.iterator(); iter.hasNext() && verifyEvent.doit; ) {
@@ -239,16 +229,21 @@ final class ComboContentAssistSubjectAdapter implements IContentAssistSubject {
 				e.doit= verifyEvent.doit;
 			}
 		};
-		fCombo.addListener(SWT.KeyDown, fKeyDownListener);
+		fCombo.addListener(SWT.Traverse, fKeyListener);
+		fCombo.addListener(SWT.KeyDown, fKeyListener);
+	}
+
+	private void uninstallVerifyKeyListener() {
+		fCombo.removeListener(SWT.Traverse, fKeyListener);
+		fCombo.removeListener(SWT.KeyDown, fKeyListener);
+		fKeyListener= null;
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistSubject#setEventConsumer(org.eclipse.jface.text.IEventConsumer)
 	 */
-	public void setEventConsumer(final IEventConsumer eventConsumer) {
+	public void setEventConsumer(IEventConsumer eventConsumer) {
 		// this is not supported
-		//TODO: must be supported to handle Tab (to put focus into proposalsList)
-		//p.s.: event is handled too late if done in verifyKeyListener (-> fCombo already lost focus)
 	}
 
 	/*
