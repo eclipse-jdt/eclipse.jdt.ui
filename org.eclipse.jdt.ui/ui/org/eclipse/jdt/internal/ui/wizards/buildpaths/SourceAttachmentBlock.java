@@ -59,6 +59,7 @@ import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.swt.layout.GridData;
@@ -77,13 +78,11 @@ public class SourceAttachmentBlock {
 	private SelectionButtonDialogField fInternalButtonField;
 	
 	private StringButtonDialogField fPrefixField;
-	private StringButtonDialogField fJavaDocField;
 	
 	private boolean fIsVariableEntry;
 	
 	private IStatus fNameStatus;
 	private IStatus fPrefixStatus;
-	private IStatus fJavaDocStatus;
 		
 	private IPath fJARPath;
 	
@@ -98,8 +97,6 @@ public class SourceAttachmentBlock {
 	 * Null if invalid path or not resolvable. Must not exist.
 	 */	
 	private IPath fFileVariablePath;
-	
-	private URL fJavaDocLocation;
 		
 	private IWorkspaceRoot fRoot;
 	
@@ -120,7 +117,6 @@ public class SourceAttachmentBlock {
 		
 		fNameStatus= new StatusInfo();
 		fPrefixStatus= new StatusInfo();
-		fJavaDocStatus= new StatusInfo();		
 		
 		fJARPath= (oldEntry != null) ? oldEntry.getPath() : Path.EMPTY;
 		
@@ -156,11 +152,6 @@ public class SourceAttachmentBlock {
 			fPrefixField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.prefix.button")); //$NON-NLS-1$
 
 		}	
-		
-		fJavaDocField= new StringButtonDialogField(adapter);
-		fJavaDocField.setDialogFieldListener(adapter);
-		fJavaDocField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.label")); //$NON-NLS-1$
-		fJavaDocField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.button"));		 //$NON-NLS-1$
 	
 		// set the old settings
 		setDefaults();
@@ -179,21 +170,6 @@ public class SourceAttachmentBlock {
 		} else {
 			fPrefixField.setText(""); //$NON-NLS-1$
 		}
-		
-		String jdocText= ""; //$NON-NLS-1$
-		if (fOldEntry != null) {
-			IPath path= fJARPath;
-			if (path != null && fIsVariableEntry) {
-				path= getResolvedPath(path);
-			}
-			if (path != null) {
-				URL jdocLocation= JavaDocLocations.getLibraryJavadocLocation(path);
-				if (jdocLocation != null) {
-					jdocText= jdocLocation.toExternalForm();
-				}
-			}
-		}
-		fJavaDocField.setText(jdocText);
 	}
 	
 	/**
@@ -215,13 +191,6 @@ public class SourceAttachmentBlock {
 		} else {
 			return new Path(fPrefixField.getText());
 		}
-	}
-	
-	/**
-	 * Gets the Javadoc location chosen by the user
-	 */	
-	public URL getJavadocLocation() {
-		return fJavaDocLocation;
 	}
 	
 		
@@ -263,8 +232,8 @@ public class SourceAttachmentBlock {
 		}
 		// archive name field
 		fFileNameField.doFillIntoGrid(composite, 4);
-		gd= (GridData)fFileNameField.getTextControl(null).getLayoutData();
-		gd.widthHint= widthHint;
+		LayoutUtil.setWidthHint(fFileNameField.getTextControl(null), widthHint);
+		LayoutUtil.setHorizontalGrabbing(fFileNameField.getTextControl(null));
 		
 		if (!fIsVariableEntry) {
 			// aditional 'browse workspace' button for normal jars
@@ -291,8 +260,7 @@ public class SourceAttachmentBlock {
 		
 		// root path field	
 		fPrefixField.doFillIntoGrid(composite, 4);
-		gd= (GridData)fPrefixField.getTextControl(null).getLayoutData();
-		gd.widthHint= widthHint;
+		LayoutUtil.setWidthHint(fPrefixField.getTextControl(null), widthHint);
 		
 		if (fIsVariableEntry) {
 			// label that shows the resolved path for variable jars
@@ -304,20 +272,7 @@ public class SourceAttachmentBlock {
 		}
 		
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
-		
-////		if (!fIsVariableEntry) {
-//			DialogField.createEmptySpace(composite, 1);
-//			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-//			gd.widthHint= widthHint;
-//			gd.horizontalSpan= 2;
-//			desc= new Label(composite, SWT.LEFT + SWT.WRAP);
-//			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.description")); //$NON-NLS-1$
-//			desc.setLayoutData(gd);
-//			DialogField.createEmptySpace(composite, 1);		
-//
-//			fJavaDocField.doFillIntoGrid(composite, 4);
-////		}
-		
+				
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK);
 		return composite;
 	}
@@ -347,12 +302,7 @@ public class SourceAttachmentBlock {
 			if (prefixPath != null) {
 				fPrefixField.setText(prefixPath.toString());
 			}
-		} else if (field == fJavaDocField) {
-			URL jdocURL= chooseJavaDocLocation();
-			if (jdocURL != null) {
-				fJavaDocField.setText(jdocURL.toExternalForm());
-			}
-		}			
+		}		
 	}
 	
 	// ---------- IDialogFieldListener --------
@@ -368,9 +318,7 @@ public class SourceAttachmentBlock {
 			return;
 		} else if (field == fPrefixField) {
 			fPrefixStatus= updatePrefixStatus();
-		} else if (field == fJavaDocField) {
-			fJavaDocStatus= updateJavaDocLocationStatus();
-		}
+		} 
 		doStatusLineUpdate();
 	}	
 		
@@ -386,7 +334,7 @@ public class SourceAttachmentBlock {
 			fPrefixResolvedLabel.setText(getResolvedLabelString(fPrefixField.getText(), false));
 		}
 		
-		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fNameStatus, fPrefixStatus, fJavaDocStatus });
+		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fNameStatus, fPrefixStatus });
 		fContext.statusChanged(status);
 	}
 	
@@ -536,35 +484,6 @@ public class SourceAttachmentBlock {
 		return status;
 	}
 	
-	private IStatus updateJavaDocLocationStatus() {
-		StatusInfo status= new StatusInfo();
-		fJavaDocLocation= null;
-		String jdocLocation= fJavaDocField.getText();
-		if (!"".equals(jdocLocation)) { //$NON-NLS-1$
-			try {
-				URL url= new URL(jdocLocation);
-				if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
-					File dir= new File(url.getFile());
-					if (!dir.isDirectory()) {
-						status.setError(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.error.notafolder")); //$NON-NLS-1$
-						return status;
-					} else {
-						File packagesFile= new File(dir, "package-list"); //$NON-NLS-1$
-						if (!packagesFile.exists()) {
-							status.setWarning(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.warning.packagelist")); //$NON-NLS-1$
-							// only a warning, go on
-						}
-					}	
-				}
-				fJavaDocLocation= url;
-			} catch (MalformedURLException e) {
-				status.setError(NewWizardMessages.getFormattedString("SourceAttachmentBlock.javadoc.error.malformed", e.getLocalizedMessage())); //$NON-NLS-1$
-				return status;
-			}
-		}
-		return status;
-	}
-	
 	/*
 	 * Opens a dialog to choose a jar from the file system.
 	 */
@@ -676,30 +595,6 @@ public class SourceAttachmentBlock {
 		return null;
 	}
 	
-	/*
-	 * Opens a dialog to choose a root in the file system.
-	 */	
-	private URL chooseJavaDocLocation() {
-		String initPath= ""; //$NON-NLS-1$
-		if (fJavaDocLocation != null && "file".equals(fJavaDocLocation.getProtocol())) { //$NON-NLS-1$
-			initPath= (new File(fJavaDocLocation.getFile())).getPath();
-		}
-		DirectoryDialog dialog= new DirectoryDialog(getShell());
-		dialog.setText(NewWizardMessages.getString("SourceAttachmentBlock.jdocdialog.text")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.jdocdialog.message")); //$NON-NLS-1$
-		dialog.setFilterPath(initPath);
-		String res= dialog.open();
-		if (res != null) {
-			try {
-				return (new File(res)).toURL();
-			} catch (MalformedURLException e) {
-				// should not happen
-				JavaPlugin.log(e);
-			}
-		}
-		return null;		
-		
-	}
 		
 	private Shell getShell() {
 		if (fSWTWidget != null) {
@@ -751,14 +646,6 @@ public class SourceAttachmentBlock {
 					if (entries != null) {
 						jproject.setRawClasspath(entries, monitor);
 					}
-
-					IPath path= fJARPath;
-					if (path != null && fIsVariableEntry) {
-						path= getResolvedPath(path);
-					}
-					//if (path != null) {
-					//	JavaDocLocations.setLibraryJavadocLocation(path, getJavadocLocation());
-					//}
 				} catch (JavaModelException e) {
 					throw new InvocationTargetException(e);
 				}
