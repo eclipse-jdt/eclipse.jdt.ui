@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -33,11 +35,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
  * 
  * @since 3.1
  */
-public final class ImportUpdateUtil {
-
-	private ImportUpdateUtil() {
-		// Not for instantiation
-	}
+public final class ImportRewriteUtil {
 
 	/**
 	 * Adds the necessary imports for an ast node to the specified compilation unit.
@@ -97,5 +95,53 @@ public final class ImportUpdateUtil {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Collects the necessary imports for an element represented by the specified ast node.
+	 * 
+	 * @param project the java project containing the element
+	 * @param node the ast node specifying the element for which imports should be collected
+	 * @param typeBindings the set of type bindings (element type: Set <ITypeBinding>).
+	 * @param staticBindings the set of bindings (element type: Set <IBinding>).
+	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
+	 */
+	public static void collectImports(final IJavaProject project, final ASTNode node, final Collection typeBindings, final Collection staticBindings, final boolean declarations) {
+		Assert.isNotNull(project);
+		Assert.isNotNull(node);
+		Assert.isNotNull(typeBindings);
+		Assert.isNotNull(staticBindings);
+		final Set types= new HashSet();
+		final Set members= new HashSet();
+		final ImportReferencesCollector collector= new ImportReferencesCollector(project, null, types, members) {
+
+			public final boolean visit(final Block block) {
+				Assert.isNotNull(block);
+				if (declarations && block.getParent() instanceof MethodDeclaration)
+					return false;
+				return super.visit(block);
+			}
+		};
+		node.accept(collector);
+		Name name= null;
+		IBinding binding= null;
+		for (final Iterator iterator= types.iterator(); iterator.hasNext();) {
+			name= (Name) iterator.next();
+			binding= name.resolveBinding();
+			if (binding instanceof ITypeBinding) {
+				final ITypeBinding type= (ITypeBinding) binding;
+				typeBindings.add(type);
+			}
+		}
+		for (final Iterator iterator= members.iterator(); iterator.hasNext();) {
+			name= (Name) iterator.next();
+			binding= name.resolveBinding();
+			if (binding != null)
+				staticBindings.add(binding);
+		}
+	}
+
+	private ImportRewriteUtil() {
+		// Not for instantiation
 	}
 }

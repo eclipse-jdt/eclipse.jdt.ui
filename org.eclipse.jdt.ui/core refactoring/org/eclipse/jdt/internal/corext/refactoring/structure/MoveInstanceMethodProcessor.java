@@ -2101,7 +2101,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		monitor.beginTask("", 1); //$NON-NLS-1$
 		monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.creating")); //$NON-NLS-1$
 		try {
-			ImportUpdateUtil.addImports(rewrite, declaration, new HashMap(), new HashMap(), false);
+			ImportRewriteUtil.addImports(rewrite, declaration, new HashMap(), new HashMap(), false);
 		} finally {
 			monitor.done();
 		}
