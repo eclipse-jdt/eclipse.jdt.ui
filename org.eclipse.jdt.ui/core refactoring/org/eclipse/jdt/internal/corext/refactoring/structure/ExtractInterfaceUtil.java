@@ -475,7 +475,7 @@ class ExtractInterfaceUtil {
 	}
 
 	private static IField getField(VariableDeclarationFragment fragment, IJavaProject in) throws JavaModelException {
-		IBinding binding= (IBinding)fragment.getName().resolveBinding();
+		IBinding binding= fragment.getName().resolveBinding();
 		if (! (binding instanceof IVariableBinding))
 			return null;
 		IVariableBinding variableBinding= (IVariableBinding)binding;
