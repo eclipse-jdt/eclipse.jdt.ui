@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids - bug 38507
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
@@ -649,9 +650,10 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		super.setVisible(visible);
 
 		if (visible && fFirstTime) {
-			handleFieldChanged(CLASS_TO_TEST); //creates error message when wizard is opened if TestCase already exists
 			if (getClassToTestText().equals("")) //$NON-NLS-1$
 				setPageComplete(false);
+			else
+				handleFieldChanged(CLASS_TO_TEST); //creates error message when wizard is opened if TestCase already exists
 			fFirstTime= false;
 		}
 		
