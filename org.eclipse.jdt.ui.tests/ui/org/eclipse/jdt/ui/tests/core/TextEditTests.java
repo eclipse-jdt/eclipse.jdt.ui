@@ -786,6 +786,50 @@ public class TextEditTests extends TestCase {
 		doUndoRedo(undo, "0142356789");		
 	}
 	
+	public void testNestedMoveSource() throws Exception {
+		MoveSourceEdit s1= new MoveSourceEdit(1, 5);
+		MoveSourceEdit s2= new MoveSourceEdit(2, 3);
+		MoveSourceEdit s3= new MoveSourceEdit(3, 1);
+		s1.addChild(s2);
+		s2.addChild(s3);
+		MoveTargetEdit t1= new MoveTargetEdit(9, s1);
+		MoveTargetEdit t2= new MoveTargetEdit(8, s2);
+		MoveTargetEdit t3= new MoveTargetEdit(7, s3);
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		fRoot.addChild(t2);
+		fRoot.addChild(t3);
+		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals(s1, 1, 0);
+		assertEquals(s2, 8, 0);
+		assertEquals(s3, 5, 0);
+		assertEquals(t1, 7, 2);
+		assertEquals(t2, 4, 2);
+		assertEquals(t3, 2, 1);
+		String result= "0637248159";
+		assertEquals("Buffer content", result, fDocument.get());
+		doUndoRedo(undo, result);		
+	}
+	
+	public void testNestedMoveTarget() throws Exception {
+		MoveSourceEdit s1= new MoveSourceEdit(1, 2);
+		MoveSourceEdit s2= new MoveSourceEdit(5, 3);
+		MoveTargetEdit t1= new MoveTargetEdit(6, s1);
+		MoveTargetEdit t2= new MoveTargetEdit(9, s2);
+		s2.addChild(t1);
+		fRoot.addChild(s1);
+		fRoot.addChild(s2);
+		fRoot.addChild(t2);
+		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals(s1, 1, 0);
+		assertEquals(s2, 3, 0);
+		assertEquals(t1, 5, 2);
+		assertEquals(t2, 4, 5);
+		String result= "0348512679";
+		assertEquals("Buffer content", result, fDocument.get());
+		doUndoRedo(undo, result);		
+	}
+	
 	public void testCopyDown() throws Exception {
 		CopySourceEdit s1= new CopySourceEdit(2, 3);
 		CopyTargetEdit t1= new CopyTargetEdit(8, s1);
@@ -830,6 +874,50 @@ public class TextEditTests extends TestCase {
 		assertEquals(s2, 7, 2);
 		assertEquals(t2, 2, 2);
 		String result= "01562345675689";
+		assertEquals("Buffer content", result, fDocument.get());
+		doUndoRedo(undo, result);		
+	}
+	
+	public void testNestedCopySource() throws Exception {
+		CopySourceEdit s1= new CopySourceEdit(1, 5);
+		CopySourceEdit s2= new CopySourceEdit(2, 3);
+		CopySourceEdit s3= new CopySourceEdit(3, 1);
+		s1.addChild(s2);
+		s2.addChild(s3);
+		CopyTargetEdit t1= new CopyTargetEdit(9, s1);
+		CopyTargetEdit t2= new CopyTargetEdit(8, s2);
+		CopyTargetEdit t3= new CopyTargetEdit(7, s3);
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		fRoot.addChild(t2);
+		fRoot.addChild(t3);
+		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals(s1, 1, 5);
+		assertEquals(s2, 2, 3);
+		assertEquals(s3, 3, 1);
+		assertEquals(t1, 13, 5);
+		assertEquals(t2, 9, 3);
+		assertEquals(t3, 7, 1);
+		String result= "0123456372348123459";
+		assertEquals("Buffer content", result, fDocument.get());
+		doUndoRedo(undo, result);		
+	}
+	
+	public void testNestedCopyTarget() throws Exception {
+		CopySourceEdit s1= new CopySourceEdit(1, 2);
+		CopySourceEdit s2= new CopySourceEdit(5, 3);
+		CopyTargetEdit t1= new CopyTargetEdit(6, s1);
+		CopyTargetEdit t2= new CopyTargetEdit(9, s2);
+		s2.addChild(t1);
+		fRoot.addChild(s1);
+		fRoot.addChild(s2);
+		fRoot.addChild(t2);
+		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals(s1, 1, 2);
+		assertEquals(s2, 5, 5);
+		assertEquals(t1, 6, 2);
+		assertEquals(t2, 11, 5);
+		String result= "01234512678512679";
 		assertEquals("Buffer content", result, fDocument.get());
 		doUndoRedo(undo, result);		
 	}
