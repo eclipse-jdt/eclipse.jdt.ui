@@ -9,13 +9,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.util.Assert;
-
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -23,6 +23,8 @@ import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Search for all types in the workspace. Instead of returning objects of type <code>IType</code>
@@ -51,6 +53,7 @@ public class AllTypesSearchEngine extends SearchEngine {
 		try {
 			context.run(true, true, runnable);
 		} catch (InvocationTargetException e) {
+			JavaPlugin.log(e.getTargetException());
 		} catch (InterruptedException e) {
 		}
 		
@@ -80,6 +83,7 @@ public class AllTypesSearchEngine extends SearchEngine {
 				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				pm);
 		} catch(CoreException e){
+			JavaPlugin.log(e);
 		}
 	}
 }

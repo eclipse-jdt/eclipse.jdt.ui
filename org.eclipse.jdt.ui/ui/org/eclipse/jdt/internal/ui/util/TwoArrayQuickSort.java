@@ -22,7 +22,7 @@ public class TwoArrayQuickSort {
 				internalSort(keys, values, 0, keys.length - 1, ignoreCase);	
 		} else {
 			if (keys != null || values != null)
-				Assert.isTrue(false, "Either keys or values in null");
+				Assert.isTrue(false, "Either keys or values in null"); //$NON-NLS-1$
 		}
 	}
 	

@@ -89,7 +89,7 @@ public class MainMethodSearchEngine extends SearchEngine {
 			}
 		};
 		
-		search(JavaPlugin.getWorkspace(), "main(String[]) void", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, scope, collector);
+		search(JavaPlugin.getWorkspace(), "main(String[]) void", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, scope, collector); //$NON-NLS-1$
 		return v;
 	}
 

@@ -8,8 +8,8 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 public class TypeRefLabelProvider extends LabelProvider {
@@ -37,7 +37,7 @@ public class TypeRefLabelProvider extends LabelProvider {
 	private String getPackageName(TypeRef typeRef) {
 		String packName= typeRef.getPackageName();
 		if (packName.length() == 0) {
-			return JavaPlugin.getResourceString("DefaultPackage.label");
+			return JavaUIMessages.getString("TypeRefLabelProvider.default_package"); //$NON-NLS-1$
 		} else {
 			return packName;
 		}
@@ -57,14 +57,14 @@ public class TypeRefLabelProvider extends LabelProvider {
 					buf.append(typeRef.getTypeQualifiedName());
 				}
 				if (isSet(SHOW_PACKAGE_POSTFIX)) {
-					buf.append(" - ");
+					buf.append(" - "); //$NON-NLS-1$
 					buf.append(getPackageName(typeRef));
 				}
 			} else {
 				buf.append(getPackageName(typeRef));
 			}
 			if (isSet(SHOW_ROOT_POSTFIX)) {
-				buf.append(" - ");
+				buf.append(" - "); //$NON-NLS-1$
 				buf.append(typeRef.getPackageFragmentRootPath().toString());
 			}
 			return buf.toString();				

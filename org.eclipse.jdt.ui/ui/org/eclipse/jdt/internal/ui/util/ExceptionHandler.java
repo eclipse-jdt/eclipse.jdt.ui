@@ -55,7 +55,7 @@ public class ExceptionHandler {
 	 * @deprecated Use handle(Throwable, Shell, String, String) instead	 * 
 	 */
 	public static boolean handle(Throwable t, Shell shell, ResourceBundle bundle, String resourcePrefix) {
-		return handle(t, shell, getResourceString(bundle, resourcePrefix+"title"), getResourceString(bundle, resourcePrefix+"message")); 
+		return handle(t, shell, getResourceString(bundle, resourcePrefix+"title"), getResourceString(bundle, resourcePrefix+"message"));  //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**
@@ -82,7 +82,7 @@ public class ExceptionHandler {
 	 * @deprecated Use log(Throwable, String) instead
 	 */
 	public static void log(Throwable t, ResourceBundle bundle, String prefix) {
-		log(t, getResourceString(bundle, prefix+"message")); 
+		log(t, getResourceString(bundle, prefix+"message"));  //$NON-NLS-1$
 	}
 	
 	/**
@@ -136,7 +136,7 @@ public class ExceptionHandler {
 		StringWriter msg= new StringWriter();
 		if (message != null) {
 			msg.write(message);
-			msg.write("\n\n");
+			msg.write("\n\n"); //$NON-NLS-1$
 		}
 		if (t.getMessage() == null || t.getMessage().length() == 0)
 			msg.write(t.toString());

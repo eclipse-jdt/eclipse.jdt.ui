@@ -12,14 +12,14 @@ import org.eclipse.core.resources.IResourceDelta;
 public class ResourceDeltaSpy implements IResourceChangeListener {
 	public void resourceChanged(IResourceChangeEvent event) {
 		IResourceDelta delta= event.getDelta();
-		System.out.println("resource delta:");
-		processDelta("", delta);
+		System.out.println("resource delta:"); //$NON-NLS-1$
+		processDelta("", delta); //$NON-NLS-1$
 	}
 
 	protected void processDelta(String indent, IResourceDelta delta) {
 		System.out.println(indent+delta);
 		IResourceDelta[] subdeltas= delta.getAffectedChildren();
 		for (int i= 0; i < subdeltas.length; i++)
-			processDelta(indent+"   ", subdeltas[i]);
+			processDelta(indent+"   ", subdeltas[i]); //$NON-NLS-1$
 	}
 }

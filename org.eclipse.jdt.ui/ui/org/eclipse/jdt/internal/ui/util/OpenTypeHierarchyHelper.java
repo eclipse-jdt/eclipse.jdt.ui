@@ -2,14 +2,46 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.util;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IPerspectiveDescriptor;import org.eclipse.ui.IPerspectiveRegistry;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchPreferenceConstants;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.PartInitException;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.WorkbenchException;import org.eclipse.ui.internal.WorkbenchPlugin;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;
+package org.eclipse.jdt.internal.ui.util;import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IPerspectiveRegistry;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.internal.WorkbenchPlugin;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;
+import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 
 public class OpenTypeHierarchyHelper {
-
-	public static final String PREFIX= "OpenTypeHierarchyAction.";
-	public static final String ERROR_OPEN_VIEW= PREFIX+"error.open_view";
-	public static final String ERROR_OPEN_PERSPECTIVE= PREFIX + "error.open_perspective";
-	public static final String ERROR_OPEN_EDITOR= PREFIX + "error.open_editor";
 
 	private TypeHierarchyViewPart fTypeHierarchy;
 
@@ -69,12 +101,14 @@ public class OpenTypeHierarchyHelper {
 			}
 				
 		} catch (WorkbenchException e) {
+			JavaPlugin.log(e);
 			MessageDialog.openError(window.getShell(),
-				JavaPlugin.getResourceString(ERROR_OPEN_PERSPECTIVE),
+				JavaUIMessages.getString("OpenTypeHierarchyHelper.error.open_perspective"), //$NON-NLS-1$
 				e.getMessage());
 		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
 			MessageDialog.openError(window.getShell(),
-				JavaPlugin.getResourceString(ERROR_OPEN_EDITOR),
+				JavaUIMessages.getString("OpenTypeHierarchyHelper.error.open_editor"), //$NON-NLS-1$
 				e.getMessage());
 		}
 	}
@@ -93,11 +127,13 @@ public class OpenTypeHierarchyHelper {
 			fTypeHierarchy= (TypeHierarchyViewPart)page.showView(JavaUI.ID_TYPE_HIERARCHY);
 			fTypeHierarchy.setInput(input);
 		} catch (PartInitException e) {
+			JavaPlugin.log(e);
 			MessageDialog.openError(window.getShell(), 
-				JavaPlugin.getResourceString(ERROR_OPEN_VIEW), e.getMessage());
+				JavaUIMessages.getString("OpenTypeHierarchyHelper.error.open_view"), e.getMessage()); //$NON-NLS-1$
 		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
 			MessageDialog.openError(window.getShell(), 
-				JavaPlugin.getResourceString(ERROR_OPEN_VIEW), e.getMessage());
+				JavaUIMessages.getString("OpenTypeHierarchyHelper.error.open_view"), e.getMessage()); //$NON-NLS-1$
 		}		
 	}
 	
@@ -105,7 +141,7 @@ public class OpenTypeHierarchyHelper {
 		IPerspectiveRegistry registry= PlatformUI.getWorkbench().getPerspectiveRegistry();
 		IPerspectiveDescriptor pd= registry.findPerspectiveWithId(JavaUI.ID_HIERARCHYPERSPECTIVE);
 		if (pd == null) {
-			JavaPlugin.getDefault().logErrorMessage("Type Hierarchy perspective not found");
+			JavaPlugin.getDefault().logErrorMessage("Type Hierarchy perspective not found"); //$NON-NLS-1$
 			return;
 		}
 		
@@ -172,9 +208,9 @@ public class OpenTypeHierarchyHelper {
 		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
 		ElementListSelectionDialog d= new ElementListSelectionDialog(
 			shell, 
-			JavaPlugin.getResourceString(PREFIX + "selectionDialog.title"), 
+			JavaUIMessages.getString("OpenTypeHierarchyHelper.selectionDialog.title"),  //$NON-NLS-1$
 			null, new JavaElementLabelProvider(flags), true, false);
-		d.setMessage(JavaPlugin.getResourceString(PREFIX + "selectionDialog.message"));
+		d.setMessage(JavaUIMessages.getString("OpenTypeHierarchyHelper.selectionDialog.message")); //$NON-NLS-1$
 		if (d.open(types, null) == d.OK) {
 			Object[] elements= d.getResult();
 			if (elements != null && elements.length == 1) {
@@ -207,7 +243,7 @@ public class OpenTypeHierarchyHelper {
 				IType[] result= {(IType)type};
 				return result;
 			} catch (JavaModelException e) {
-				// not handled here
+				JavaPlugin.log(e.getStatus());
 			}
 		}
 		if (input instanceof ICompilationUnit) {
@@ -217,6 +253,7 @@ public class OpenTypeHierarchyHelper {
 					return null;
 				return types;
 			} catch (JavaModelException e) {
+				JavaPlugin.log(e.getStatus());
 				return null;
 			}
 		}

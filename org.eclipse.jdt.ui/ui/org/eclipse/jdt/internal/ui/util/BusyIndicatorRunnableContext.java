@@ -7,31 +7,29 @@ package org.eclipse.jdt.internal.ui.util;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.jface.operation.ModalContext;import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jface.operation.ModalContext;
 
 /**
- * A runnabel context that shows the busy cursor instead of a progress
- * monitor. Note, that the UI thread is block even if the runnable
+ * A runnable context that shows the busy cursor instead of a progress
+ * monitor. Note, that the UI thread is blocked even if the runnable
  * is executed in a separate thread by passing <code>fork= true</code>
  * to the context's run method. Furthermore the context doesn't provide
  * any UI to cancel the operation.
  */
 public class BusyIndicatorRunnableContext implements IRunnableContext {
 
-	private static boolean fgDebug= false;
-
 	static class ThreadContext extends Thread {
 		IRunnableWithProgress fRunnable;
 		Throwable fThrowable;
 		
 		public ThreadContext(IRunnableWithProgress runnable) {
-			this(runnable, "BusyCursorRunnableContext-Thread");
+			this(runnable, "BusyCursorRunnableContext-Thread"); //$NON-NLS-1$
 		}
 		
 		protected ThreadContext(IRunnableWithProgress runnable, String name) {
@@ -111,14 +109,6 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 			// Check if the separate thread was terminated by an exception
 			Throwable throwable= t.fThrowable;
 			if (throwable != null) {
-				if (fgDebug) {
-					System.err.println("Exception in runnable context thread:");
-					throwable.printStackTrace();
-					System.err.println("Called from:");
-					// Don't create the InvocationTargetException on the throwable,
-					// otherwise it will print its stack trace (from the other thread).
-					new InvocationTargetException(null).printStackTrace();
-				}
 				if (throwable instanceof InvocationTargetException) {
 					throw (InvocationTargetException) throwable;
 				} else if (throwable instanceof InterruptedException) {

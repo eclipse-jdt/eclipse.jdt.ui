@@ -4,8 +4,34 @@
  */
 package org.eclipse.jdt.internal.ui.util;
 
-import java.util.ArrayList;import java.util.Arrays;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IProjectDescription;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IOpenable;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;
+import java.util.ArrayList;
+import java.util.Arrays;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Utility methods for the Java Model. These methods should be part of
@@ -21,7 +47,7 @@ public class JavaModelUtility {
 	 * The method does not find inner types. Waiting for a Java Core solution
 	 */	
 	public static IType findType(IJavaProject jproject, String str) throws JavaModelException {
-		String pathStr= str.replace('.', '/') + ".java";
+		String pathStr= str.replace('.', '/') + ".java"; //$NON-NLS-1$
 		IJavaElement jelement= jproject.findElement(new Path(pathStr));
 		if (jelement instanceof ICompilationUnit) {
 			String simpleName= Signature.getSimpleName(str);
@@ -49,15 +75,15 @@ public class JavaModelUtility {
 		if (pack.length() > 0) {
 			packPath= new Path(pack.replace('.', '/'));
 		} else {
-			packPath= new Path("");
+			packPath= new Path(""); //$NON-NLS-1$
 		}
 		// fixed for 1GEXEI6: ITPJUI:ALL - Incorrect error message on class creation wizard
-		IPath path= packPath.append(typeQualifiedName.substring(0, dot) + ".java");
+		IPath path= packPath.append(typeQualifiedName.substring(0, dot) + ".java"); //$NON-NLS-1$
 		IJavaElement elem= jproject.findElement(path);
 		if (elem instanceof ICompilationUnit) {
 			return findTypeInCompilationUnit((ICompilationUnit)elem, typeQualifiedName);
 		} else if (elem instanceof IClassFile) {
-			path= packPath.append(typeQualifiedName.replace('.', '$') + ".class");
+			path= packPath.append(typeQualifiedName.replace('.', '$') + ".class"); //$NON-NLS-1$
 			elem= jproject.findElement(path);
 			if (elem instanceof IClassFile) {
 				return ((IClassFile)elem).getType();
@@ -85,7 +111,7 @@ public class JavaModelUtility {
 	
 	/**
 	 * Returns the qualified type name of the given type using '.' as separators.
-	 * This is a replace to IType.getTypeQualifiedName()
+	 * This is a replace for IType.getTypeQualifiedName()
 	 * which uses '$' as separators. As '$' is also a valid character in an id
 	 * this is ambiguous. Hoping for a fix in JavaCore (1GCFUNT)
 	 */
@@ -106,7 +132,7 @@ public class JavaModelUtility {
 
 	/**
 	 * Returns the fully qualified name of the given type using '.' as separators.
-	 * This is a replace to IType.getFullyQualifiedTypeName
+	 * This is a replace for IType.getFullyQualifiedTypeName
 	 * which uses '$' as separators. As '$' is also a valid character in an id
 	 * this is ambiguous. Hoping for a fix in JavaCore (1GCFUNT)
 	 */
@@ -260,6 +286,7 @@ public class JavaModelUtility {
 			IPath path= new Path(pattern).makeAbsolute();
 			return project.findPackageFragment(path);
 		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
 			return null;
 		}	
 	}
@@ -330,17 +357,17 @@ public class JavaModelUtility {
 		return element;				
 	}
 	
-	private static final String SIG1= Signature.createArraySignature(Signature.createTypeSignature("String", false), 1);
-	private static final String SIG2= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", false), 1);
-	private static final String SIG3= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", true), 1);
+	private static final String SIG1= Signature.createArraySignature(Signature.createTypeSignature("String", false), 1); //$NON-NLS-1$
+	private static final String SIG2= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", false), 1); //$NON-NLS-1$
+	private static final String SIG3= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", true), 1); //$NON-NLS-1$
 
 	/**
 	 * Checks whether the given IType has a main method or not.
 	 */
 	public static boolean hasMainMethod(IType type) {
-		if (isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG1 })) || 
-			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG2 })) || 
-			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG3 }))) {
+		if (isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG1 })) ||  //$NON-NLS-1$
+			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG2 })) ||  //$NON-NLS-1$
+			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG3 }))) { //$NON-NLS-1$
 				return true;
 		}
 		
@@ -352,25 +379,27 @@ public class JavaModelUtility {
 			if (!isStaticPublicVoidMethod(method))
 				return false;
 			String signature= method.getSignature();
-			if ("([Qjava.lang.String;)V".equals(signature) ||
-				"([Ljava/lang/String;)V".equals(signature))
+			if ("([Qjava.lang.String;)V".equals(signature) || //$NON-NLS-1$
+				"([Ljava/lang/String;)V".equals(signature)) //$NON-NLS-1$
 				return true;
-			if ("([QString;)V".equals(signature)) {
-				String[][] resolvedNames= method.getDeclaringType().resolveType("String");
+			if ("([QString;)V".equals(signature)) { //$NON-NLS-1$
+				String[][] resolvedNames= method.getDeclaringType().resolveType("String"); //$NON-NLS-1$
 				if (resolvedNames != null && resolvedNames.length > 0 
-					&& "java.lang".equals(resolvedNames[0][0]) && "String".equals(resolvedNames[0][1]))
+					&& "java.lang".equals(resolvedNames[0][0]) && "String".equals(resolvedNames[0][1])) //$NON-NLS-1$ //$NON-NLS-2$
 					return true;
 			}
 			return false;
 		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
 		}
 		return false;
 	}
 	
 	private static boolean isStaticPublicVoidMethod(IMethod m) {
 		try {
-			return "V".equals(m.getReturnType()) && Flags.isStatic(m.getFlags()) && Flags.isPublic(m.getFlags());
+			return "V".equals(m.getReturnType()) && Flags.isStatic(m.getFlags()) && Flags.isPublic(m.getFlags()); //$NON-NLS-1$
 		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
 			return false;
 		}
 	}

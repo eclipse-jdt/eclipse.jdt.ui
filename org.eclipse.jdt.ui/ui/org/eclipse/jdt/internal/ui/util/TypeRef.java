@@ -38,28 +38,28 @@ public class TypeRef {
 	}
 	
 	/**
-	 * Gets the type name
+	 * Gets the type name.
 	 */
 	public String getTypeName() {
 		return new String(fName);
 	}
 	 
 	/**
-	 * Gets the package name
+	 * Gets the package name.
 	 */
 	public String getPackageName() {
 		return new String(fPackage);
 	}
 
 	/**
-	 * Returns true if the type ref describes an interface
+	 * Returns true if the type ref describes an interface.
 	 */	
 	public boolean isInterface() {
 		return fIsInterface;
 	}
 
 	/**
-	 * Gets the enlosing name (dot separated)
+	 * Gets the enlosing name (dot separated).
 	 */
 	public String getEnclosingName() {
 		StringBuffer buf= new StringBuffer();
@@ -106,8 +106,8 @@ public class TypeRef {
 	
 	/**
 	 * Gets the fully qualified type container name: Package name or
-	 * enclosing type name with package name
-	 * package. All identifiers are separated by dots.
+	 * enclosing type name with package name.
+	 * All identifiers are separated by dots.
 	 */
 	public String getTypeContainerName() {
 		StringBuffer buf= new StringBuffer();
@@ -123,7 +123,7 @@ public class TypeRef {
 
 	/**
 	 * Gets the name of they type as it is used for the class file:
-	 * Enclosing type name and type name, separated with '$'
+	 * Enclosing type name and type name, separated with '$'.
 	 */	
 	public String getVMName() {
 		StringBuffer buf= new StringBuffer();
@@ -136,7 +136,7 @@ public class TypeRef {
 	}
 	
 	/**
-	 * Contructs the package fragment root name from the type ref path
+	 * Contructs the package fragment root name from the type ref path.
 	 */	
 	public IPath getPackageFragmentRootPath() {
 		int index= fPath.indexOf('|');
@@ -205,13 +205,13 @@ public class TypeRef {
 			
 	public String toString() {
 		StringBuffer buf= new StringBuffer();
-		buf.append("path= ");
+		buf.append("path= "); //$NON-NLS-1$
 		buf.append(fPath);
-		buf.append("; pkg= ");
+		buf.append("; pkg= "); //$NON-NLS-1$
 		buf.append(fPackage);
-		buf.append("; enclosing= ");
+		buf.append("; enclosing= "); //$NON-NLS-1$
 		buf.append(getEnclosingName());
-		buf.append("; name= ");		
+		buf.append("; name= ");		 //$NON-NLS-1$
 		buf.append(fName);
 		return buf.toString();
 	}	

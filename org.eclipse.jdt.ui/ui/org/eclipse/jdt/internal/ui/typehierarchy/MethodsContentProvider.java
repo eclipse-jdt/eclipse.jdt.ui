@@ -110,7 +110,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 					}
 				}
 			} catch (JavaModelException e) {
-				// ignore errors
+				JavaPlugin.log(e.getStatus());
 			}
 			return res.toArray();
 		}
@@ -192,7 +192,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 					processDeltaNoHierarchy(event.getDelta());
 				}
 			} catch(JavaModelException e) {
-				JavaPlugin.getDefault().getLog().log(e.getStatus());
+				JavaPlugin.log(e.getStatus());
 			}
 		}
 	}
