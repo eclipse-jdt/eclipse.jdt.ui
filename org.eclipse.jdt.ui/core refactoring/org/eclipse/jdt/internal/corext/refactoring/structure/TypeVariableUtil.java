@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Utilities for manipulations of type variables in signatures.
+ * Utilities to create mappings between type variables of different types in a type hierarchy.
  */
 public final class TypeVariableUtil {
 
@@ -69,6 +69,27 @@ public final class TypeVariableUtil {
 	}
 
 	/**
+	 * Extracts the type variables from a signature
+	 * 
+	 * @param signature
+	 *        the signature to extract the type variables from
+	 * @param variables
+	 *        the set of variables to fill in
+	 */
+	private static void extractTypeVariables(final String signature, final Set variables) {
+		Assert.isNotNull(signature);
+		Assert.isNotNull(variables);
+
+		try {
+			final String[] arguments= Signature.getTypeArguments(signature);
+			for (int index= 0; index < arguments.length; index++)
+				variables.add(Signature.toString(arguments[index]));
+		} catch (IllegalArgumentException exception) {
+			variables.add(Signature.toString(signature));
+		}
+	}
+
+	/**
 	 * Returns the type variables referenced in the signature of the specified member.
 	 * 
 	 * @param declaring
@@ -97,10 +118,23 @@ public final class TypeVariableUtil {
 						break;
 					}
 				}
-			} else
-				result= signatures;
+			} else {
+				result= new String[signatures.length];
+				for (int index= 0; index < result.length; index++)
+					result[index]= Signature.toString(signatures[index]);
+			}
 		} else if (member instanceof IMethod) {
-			result= parametersToVariables(((IMethod) member).getTypeParameters());
+			final IMethod method= (IMethod) member;
+			final HashSet set= new HashSet();
+			final String[] types= method.getParameterTypes();
+			for (int index= 0; index < types.length; index++)
+				extractTypeVariables(types[index], set);
+			extractTypeVariables(method.getReturnType(), set);
+			final String[] arguments= parametersToVariables(((IMethod) member).getTypeParameters());
+			for (int index= 0; index < arguments.length; index++)
+				set.add(arguments[index]);
+			result= new String[set.size()];
+			set.toArray(result);
 		} else if (member instanceof IType)
 			result= parametersToVariables(((IType) member).getTypeParameters());
 		else {
@@ -213,20 +247,32 @@ public final class TypeVariableUtil {
 	 *        the domain of the mapping
 	 * @param range
 	 *        the range of the mapping
+	 * @param indexes
+	 *        <code>true</code> if the indexes should be compared, <code>false</code> if the names should be compared
 	 * @return a possibly empty type variable mapping
 	 */
-	private static TypeVariableMaplet[] parametersToSignatures(final ITypeParameter[] domain, final String[] range) {
+	private static TypeVariableMaplet[] parametersToSignatures(final ITypeParameter[] domain, final String[] range, final boolean indexes) {
 		Assert.isNotNull(domain);
 		Assert.isNotNull(range);
 
 		final Set set= new HashSet();
 		ITypeParameter source= null;
 		String target= null;
+		String element= null;
+		String signature= null;
 		for (int index= 0; index < domain.length; index++) {
 			source= domain[index];
 			for (int offset= 0; offset < range.length; offset++) {
 				target= range[offset];
-				set.add(new TypeVariableMaplet(source.getElementName(), index, Signature.toString(target), offset));
+				element= source.getElementName();
+				signature= Signature.toString(target);
+				if (indexes) {
+					if (offset == index)
+						set.add(new TypeVariableMaplet(element, index, signature, offset));
+				} else {
+					if (element.equals(signature))
+						set.add(new TypeVariableMaplet(element, index, signature, offset));
+				}
 			}
 		}
 		final TypeVariableMaplet[] result= new TypeVariableMaplet[set.size()];
@@ -268,11 +314,11 @@ public final class TypeVariableUtil {
 
 		final List list= new ArrayList();
 		String source= null;
-		ITypeParameter target= null;
+		String target= null;
 		for (int index= 0; index < domain.length; index++) {
-			source= domain[index];
-			target= range[index];
-			list.add(new TypeVariableMaplet(source, index, target.getElementName(), index));
+			source= Signature.toString(domain[index]);
+			target= range[index].getElementName();
+			list.add(new TypeVariableMaplet(source, index, target, index));
 		}
 		final TypeVariableMaplet[] result= new TypeVariableMaplet[list.size()];
 		list.toArray(result);
@@ -297,7 +343,7 @@ public final class TypeVariableUtil {
 			if (signature != null) {
 				final String[] range= getVariableSignatures(signature);
 				if (range.length > 0)
-					return parametersToSignatures(domain, range);
+					return parametersToSignatures(domain, range, false);
 			}
 		}
 		return new TypeVariableMaplet[0];
@@ -354,7 +400,7 @@ public final class TypeVariableUtil {
 			if (signature != null) {
 				final String[] range= getVariableSignatures(signature);
 				if (range.length > 0)
-					return parametersToSignatures(domain, range);
+					return parametersToSignatures(domain, range, true);
 			}
 		}
 		return new TypeVariableMaplet[0];

@@ -12,6 +12,13 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -20,13 +27,11 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.refactoring.RenameSupport;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -37,9 +42,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.refactoring.RenameSupport;
 
 public class RenameJavaElementAction extends SelectionDispatchAction {
 
@@ -190,7 +192,9 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			case IJavaElement.METHOD:
 				return RenameSupport.create((IMethod)element, newName, flags); 
 			case IJavaElement.FIELD:
-				return RenameSupport.create((IField)element, newName, flags); 
+				return RenameSupport.create((IField)element, newName, flags);
+			case IJavaElement.TYPE_PARAMETER:
+				return RenameSupport.create((ITypeParameter)element, newName, flags);
 		}
 		return null;
 	}	

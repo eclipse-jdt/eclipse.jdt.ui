@@ -12,9 +12,14 @@ package org.eclipse.jdt.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -23,11 +28,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jdt.core.ITypeParameter;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
@@ -36,6 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProce
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeParameterProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
@@ -311,7 +313,26 @@ public class RenameSupport {
 		processor.setRenameSetter(updateSetterMethod(flags));
 		return new RenameSupport(processor, newName, flags);
 	}
-	
+
+	/**
+	 * Creates a new rename support for the given {@link ITypeParameter}.
+	 * 
+	 * @param parameter the {@link ITypeParameter} to be renamed.
+	 * @param newName the parameter's new name. <code>null</code> is a valid value
+	 * indicating that no new name is provided.
+	 * @param flags flags controlling additional parameters. Valid flags are
+	 * <code>UPDATE_REFERENCES</code>, or <code>NONE</code>.
+	 * @return the {@link RenameSupport}.
+	 * @throws CoreException if an unexpected error occurred while creating
+	 * the {@link RenameSupport}.
+	 * @since 3.1
+	 */
+	public static RenameSupport create(ITypeParameter parameter, String newName, int flags) throws CoreException {
+		RenameTypeParameterProcessor processor= new RenameTypeParameterProcessor(parameter);
+		processor.setUpdateReferences(updateReferences(flags));
+		return new RenameSupport(processor, newName, flags);
+	}
+
 	private static void initialize(RenameRefactoring refactoring, String newName, int flags) {
 		if (refactoring.getProcessor() == null)
 			return;

@@ -316,6 +316,7 @@ public interface IJavaHelpContextIds {
 	public static final String PULL_UP_WIZARD_PAGE= 									PREFIX + "pull_up_wizard_page_context"; //$NON-NLS-1$
 	public static final String PUSH_DOWN_WIZARD_PAGE= 									PREFIX + "push_down_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_PACKAGE_WIZARD_PAGE= 						PREFIX + "rename_package_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_TYPE_PARAMETER_WIZARD_PAGE= 						PREFIX + "rename_type_parameter_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_TEMP_WIZARD_PAGE=  							PREFIX + "rename_local_variable_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_CU_WIZARD_PAGE= 								PREFIX + "rename_cu_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_METHOD_WIZARD_PAGE= 						PREFIX + "rename_method_wizard_page_context"; //$NON-NLS-1$

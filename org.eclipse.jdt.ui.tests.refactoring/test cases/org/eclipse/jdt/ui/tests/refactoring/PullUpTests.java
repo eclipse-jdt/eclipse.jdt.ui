@@ -1549,4 +1549,153 @@ public class PullUpTests extends RefactoringTest {
 		IMember[] members= {typeB};
 		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
 	}
+
+	//------------------ tests -------------
+	
+	public void testGenerics0() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
+	}
+
+	public void testGenerics1() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
+	}
+
+	public void testGenerics2() throws Exception{
+		helper1(new String[]{"mmm", "n"}, new String[][]{new String[] {"QT;"}, new String[0]}, true, false, 0);
+	}
+
+	public void testGenerics3() throws Exception{
+		helper1(new String[]{"mmm", "n"}, new String[][]{new String[] {"QT;"}, new String[0]}, true, true, 0);
+	}
+
+	public void testGenerics4() throws Exception{
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+		
+		try{
+			String[] methodNames= new String[]{"m"};
+			String[][] signatures= new String[][]{new String[]{"QList<QT;>;"}};
+			
+			IType type= getType(cuB, "B");
+			IMethod[] methods= getMethods(type, methodNames, signatures);
+			PullUpRefactoring ref= createRefactoring(methods);
+			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+			setSuperclassAsTargetClass(ref);
+	
+			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
+		
+			RefactoringStatus result= performRefactoring(ref);
+			assertEquals("precondition was supposed to pass", null, result);
+			
+			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
+		} finally{
+			performDummySearch();
+			cuA.delete(false, null);
+			cuB.delete(false, null);
+		}					
+	}
+
+	public void testGenerics5() throws Exception{
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+		
+		try{
+			String[] methodNames= new String[]{"m"};
+			String[][] signatures= new String[][]{new String[] {"QS;"}};
+			
+			IType type= getType(cuB, "B");
+			IMethod[] methods= getMethods(type, methodNames, signatures);
+			PullUpRefactoring ref= createRefactoring(methods);
+			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+			setSuperclassAsTargetClass(ref);
+	
+			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
+		
+			RefactoringStatus result= performRefactoring(ref);
+			assertEquals("precondition was supposed to pass", null, result);
+			
+			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
+		} finally{
+			performDummySearch();
+			cuA.delete(false, null);
+			cuB.delete(false, null);
+		}		
+	}
+
+	public void testGenerics6() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
+	}
+
+	public void testGenerics7() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
+	}
+
+	public void testGenerics8() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
+	}
+
+	public void testGenerics9() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
+	}
+
+	public void testGenerics10() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
+	}
+
+	public void testGenerics11() throws Exception{
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
+	}
+
+	public void testGenerics12() throws Exception{
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+	
+		try{
+			String[] methodNames= new String[]{"m"};
+			String[][] signatures= new String[][]{new String[]{"QT;"}};
+			
+			IType type= getType(cuB, "B");
+			IMethod[] methods= getMethods(type, methodNames, signatures);
+			PullUpRefactoring ref= createRefactoring(methods);
+			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+			setSuperclassAsTargetClass(ref);
+			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
+		
+			RefactoringStatus result= performRefactoring(ref);
+			assertEquals("precondition was supposed to pass", null, result);
+			
+			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
+		} finally{
+			performDummySearch();
+			cuA.delete(false, null);
+			cuB.delete(false, null);
+		}							
+	}
+
+	public void testGenerics13() throws Exception {
+		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, 0);
+	}
+
+	public void testGenerics14() throws Exception {
+		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, 0);
+	}
+
+	public void testGenerics15() throws Exception {
+		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, 0);
+	}
+
+	public void testGenericsFail0() throws Exception {
+		helper2(new String[] { "m"}, new String[][] { new String[] {"QT;"}}, true, false, 0);
+	}
+
+	public void testGenericsFail1() throws Exception {
+		helper2(new String[] { "m"}, new String[][] { new String[]{"QS;"}}, true, false, 0);
+	}
+
+	public void testGenericsFail2() throws Exception {
+		helper2(new String[] { "m"}, new String[][] { new String[]{"QT;"}}, true, false, 0);
+	}
 }
