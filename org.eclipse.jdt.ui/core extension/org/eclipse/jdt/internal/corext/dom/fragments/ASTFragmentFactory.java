@@ -25,7 +25,8 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
  * See the documentation of the factory methods.
  * 
  * @see IASTFragment
- *  */
+ * 
+ */
 public class ASTFragmentFactory {
 
 	// Factory Methods: /////////////////////////////////////////////////////////////////////////
@@ -36,7 +37,8 @@ public class ASTFragmentFactory {
 	 * the node to which the produced IASTFragment maps (see {@link  org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment  IASTFragment})
 	 * will be <code>node</code>.
 	 * 
-	 * XXX: more doc (current assertions about input vs. output)	 */
+	 * XXX: more doc (current assertions about input vs. output)
+	 */
 	public static IASTFragment createFragmentForFullSubtree(ASTNode node) {
 		IASTFragment result= FragmentForFullSubtreeFactory.createFragmentFor(node);			
 		Assert.isNotNull(result);
@@ -50,9 +52,15 @@ public class ASTFragmentFactory {
 	 * <code>scope</code>.
 	 * 
 	 * XXX: more doc (current assertions about input vs. output)
-	 * 	 * @param range	The source range which the create fragment must have.	 * @param scope	A node identifying the AST subtree in which the fragment must lie.	 * @param cu		The compilation unit to which the source range applies, and to which the AST corresponds.	 * @return IASTFragment	A fragment whose source range is <code>range</code> within
+	 * 
+	 * @param range	The source range which the create fragment must have.
+	 * @param scope	A node identifying the AST subtree in which the fragment must lie.
+	 * @param cu		The compilation unit to which the source range applies, and to which the AST corresponds.
+	 * @return IASTFragment	A fragment whose source range is <code>range</code> within
 	 * 							compilation unit <code>cu</code>, residing somewhere within the
-	 * 							AST subtree identified by <code>scope</code>.	 * @throws JavaModelException	 */
+	 * 							AST subtree identified by <code>scope</code>.
+	 * @throws JavaModelException
+	 */
 	public static IASTFragment createFragmentForSourceRange(SourceRange range, ASTNode scope, ICompilationUnit cu) throws JavaModelException {
 		SelectionAnalyzer sa= new SelectionAnalyzer(Selection.createFromStartLength(range.getOffset(), range.getLength()), false);
 		scope.accept(sa);
@@ -94,19 +102,20 @@ public class ASTFragmentFactory {
 		public boolean visit(InfixExpression node) {
 			/* Try creating an associative infix expression fragment
 			/* for the full subtree.  If this is not applicable,
-			 * try something more generic.			 */
+			 * try something more generic.
+			 */
 			IASTFragment fragment= AssociativeInfixExpressionFragment.createFragmentForFullSubtree(node);
 			if(fragment == null)
-				return visitExpression(node);
+				return visit((Expression) node);
 			
 			setFragment(fragment);
 			return false;
 		}
-		public boolean visitExpression(Expression node) {
+		public boolean visit(Expression node) {
 			setFragment(new SimpleExpressionFragment((Expression) node));
 			return false;
 		}
-		public boolean visitASTNode(ASTNode node) {
+		public boolean visit(ASTNode node) {
 			setFragment(new SimpleFragment(node));
 			return false;	
 		}
@@ -131,7 +140,7 @@ public class ASTFragmentFactory {
 			}
 		}
 		
-		public boolean visitASTNode(ASTNode node) {
+		public boolean visit(ASTNode node) {
 			//let fragment be null
 			return false;			
 		}

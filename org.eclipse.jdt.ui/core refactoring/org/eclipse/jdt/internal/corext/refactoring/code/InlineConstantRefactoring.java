@@ -291,7 +291,7 @@ public class InlineConstantRefactoring extends Refactoring {
 					}
 				}
 	
-				public boolean visitASTNode(ASTNode node) {
+				public boolean visit(ASTNode node) {
 					return fCanBePrepared;	
 				}
 	
@@ -307,7 +307,7 @@ public class InlineConstantRefactoring extends Refactoring {
 						
 					return false;
 				}			
-				public boolean visitName(Name name) {
+				public boolean visit(Name name) {
 					SimpleName leftmost= getLeftmost(name);
 					
 					IBinding leftmostBinding= leftmost.resolveBinding();
@@ -418,7 +418,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				fTypes= new ArrayList();	
 			}
 			
-			public boolean visitName(Name name) {
+			public boolean visit(Name name) {
 				SimpleName leftmost= getLeftmost(name);
 				
 				IBinding binding= leftmost.resolveBinding();
@@ -860,7 +860,8 @@ public class InlineConstantRefactoring extends Refactoring {
 	/**
 	 * Returns the constant's initializer, or null
 	 * if the constant has no initializer at its declaration.
-	 * 	 */
+	 * 
+	 */
 	private Expression getInitializer() {
 		Assert.isTrue(fInitializerFound);
 		return fInitializer;
@@ -869,7 +870,8 @@ public class InlineConstantRefactoring extends Refactoring {
 	/**
 	 * Returns the  variable declaration fragment
 	 * corresponding to the selected static final field name,
-	 * or null if the constant is declared in a class file.	 */
+	 * or null if the constant is declared in a class file.
+	 */
 	private VariableDeclarationFragment getDeclaration() throws JavaModelException {
 		Assert.isNotNull(getConstantNameNode());
 		

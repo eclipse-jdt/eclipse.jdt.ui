@@ -632,13 +632,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	public List getLocalTypeUsageNodes(){
     		return fLocalTypes;
     	}
-    	public boolean visitType(Type node) {
+		public boolean visit(Type node) {
 	  		ITypeBinding typeBinding= node.resolveBinding();
 	  		if (typeBinding != null && typeBinding.isLocal())
 	  			fLocalTypes.add(node);
-	  		return super.visitType(node);	
+			return super.visit(node); 
 		}
-		public boolean visitName(Name node) {
+		public boolean visit(Name node) {
 			ITypeBinding typeBinding= node.resolveTypeBinding();
 			if (typeBinding != null && typeBinding.isLocal())
 				fLocalTypes.add(node);
@@ -649,7 +649,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 				else if (binding != null && binding.getKind() == IBinding.VARIABLE && ! ((IVariableBinding)binding).isField())
 					fLocalTypes.add(node);
 			}
-            return super.visitName(node);
+            return super.visit(node);
         }
     }    
 }
