@@ -211,10 +211,8 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		private String fPrefix;
 		private String fSuffix;
 		private int fStart;
-		private int fEnd;
 		
-		public BlockFormattingPrefix(String prefix, String suffix, int start, int end) {
-			fEnd= end;
+		public BlockFormattingPrefix(String prefix, String suffix, int start) {
 			fStart= start;
 			fSuffix= suffix;
 			fPrefix= prefix;
@@ -228,7 +226,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			String s= fPrefix + nodeString + fSuffix;
 		
 			
-			int[] pos= new int[] { fStart, nodeStart, nodeEnd - 1, nodeEnd + fEnd }; 
+			int[] pos= new int[] { fStart, nodeStart, nodeEnd - 1, nodeEnd }; 
 			String res= CodeFormatterUtil.format(CodeFormatterUtil.K_STATEMENTS, s, indent, pos, lineDelim, null);
 			return new String[] { res.substring(pos[0] + 1, pos[1]), res.substring(pos[2] + 1, pos[3]) };
 		}
@@ -244,8 +242,13 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	public final static Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch {}", "} c" , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
 
 
-	public final static BlockContext IF_BLOCK_WITH_ELSE= new BlockFormattingPrefix("if (true)", "else{} ", 8, 0); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext IF_BLOCK_NO_ELSE= new BlockFormattingPrefix("if (true)", "", 8, 0); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext ELSE_AFTER_STATEMENT= new BlockFormattingPrefix("if (true) foo(); else ", "", 15, 0); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext ELSE_AFTER_BLOCK= new BlockFormattingPrefix("if (true) {} else ", "", 11, 0); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext IF_BLOCK_WITH_ELSE= new BlockFormattingPrefix("if (true)", "else{} ", 8); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext IF_BLOCK_NO_ELSE= new BlockFormattingPrefix("if (true)", "", 8); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext ELSE_AFTER_STATEMENT= new BlockFormattingPrefix("if (true) foo(); else ", "", 15); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext ELSE_AFTER_BLOCK= new BlockFormattingPrefix("if (true) {} else ", "", 11); //$NON-NLS-1$ //$NON-NLS-2$
+
+	public final static BlockContext FOR_BLOCK= new BlockFormattingPrefix("for (;;) ", "", 7); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext WHILE_BLOCK= new BlockFormattingPrefix("while ()", "", 7); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext DO_BLOCK= new BlockFormattingPrefix("do ", "while (true)", 1); //$NON-NLS-1$ //$NON-NLS-2$
+
 }

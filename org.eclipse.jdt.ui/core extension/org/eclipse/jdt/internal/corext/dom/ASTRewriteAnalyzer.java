@@ -1532,7 +1532,21 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(DoStatement)
 	 */
 	public boolean visit(DoStatement node) { // do statement while expression
-		rewriteRequiredNode(node.getBody());	
+		int pos= node.getStartPosition();
+		try {
+			Statement body= node.getBody();
+			if (isReplaced(body)) {
+				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNamedo, pos);
+				int bodyEnd= body.getStartPosition() + body.getLength();
+				int endPos= getScanner().getTokenStartOffset(ITerminalSymbols.TokenNamewhile, bodyEnd);
+				rewriteBodyNode(body, startOffset, endPos, getIndent(node.getStartPosition()), ASTRewriteFormatter.DO_BLOCK); // body
+			} else {
+				doVisit(body);
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+
 		rewriteRequiredNode(node.getExpression());	
 		return false;
 	}
@@ -1614,18 +1628,20 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			} else {
 				pos= visitList(updaters, pos);
 			}
+
+			Statement body= node.getBody();
+			if (isReplaced(body)) {
+				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRPAREN, pos);
+				ISourceRange range= getNodeRange(body, startOffset - 1);
+				int endPos= range.getOffset() + range.getLength();
+				rewriteBodyNode(body, startOffset, endPos, getIndent(node.getStartPosition()), ASTRewriteFormatter.FOR_BLOCK); // body
+			} else {
+				doVisit(body);
+			}
+			
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
-		Statement body= node.getBody();
-		rewriteRequiredNode(body);
-		
-//		if (isReplaced(body)) {
-//			int start= getScanner()
-//			int endPos= body.getStartPosition() + body.getLength();
-//			rewriteBodyNode(node.getBody()); // body
-//			
-
 			
 		
 		return false;
@@ -2209,8 +2225,21 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(WhileStatement)
 	 */
 	public boolean visit(WhileStatement node) {
-		rewriteRequiredNode(node.getExpression());
-		rewriteRequiredNode(node.getBody()); // body
+		int pos= rewriteRequiredNode(node.getExpression());
+		
+		try {
+			Statement body= node.getBody();
+			if (isReplaced(body)) {
+				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRPAREN, pos);
+				ISourceRange range= getNodeRange(body, startOffset - 1);
+				int endPos= range.getOffset() + range.getLength();
+				rewriteBodyNode(body, startOffset, endPos, getIndent(node.getStartPosition()), ASTRewriteFormatter.WHILE_BLOCK); // body
+			} else {
+				doVisit(body);
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
 		return false;
 	}
 

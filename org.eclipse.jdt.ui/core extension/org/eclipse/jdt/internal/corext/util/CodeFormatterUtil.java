@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.formatter.FormattingPreferences;
 
 public class CodeFormatterUtil {
 	
-	private static boolean OLD_FORMATTER= true;
+	public static boolean OLD_FORMATTER= true;
 	
 	
 	public static final int K_EXPRESSION = CodeFormatter.K_EXPRESSION;

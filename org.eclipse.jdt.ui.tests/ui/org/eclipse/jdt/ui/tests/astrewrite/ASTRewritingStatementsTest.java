@@ -29,6 +29,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingStatementsTest extends ASTRewritingTest {
@@ -50,7 +51,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingStatementsTest("testIfStatementReplaceElse2"));
+			suite.addTest(new ASTRewritingStatementsTest("testDoStatement"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -745,7 +746,139 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
+	}
+	
+	public void testDoStatement1() throws Exception {
+		if (CodeFormatterUtil.OLD_FORMATTER) {
+			return; // old fomatter has a bug with do statements
+		}
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        do {\n");
+		buf.append("            foo();\n");		
+		buf.append("        } while (true);\n");	
+		buf.append("        do\n");
+		buf.append("            foo();\n");
+		buf.append("        while (true);\n");	
+		buf.append("        do {\n");
+		buf.append("            foo();\n");	
+		buf.append("        } while (true);\n");	
+		buf.append("        do\n");
+		buf.append("            foo();\n");
+		buf.append("        while (true);\n");	
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		assertTrue("Parse errors", (block.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+
+		{ // replace body block with statement
+			DoStatement doStatement= (DoStatement) statements.get(0);
+			
+			
+			TryStatement newTry= ast.newTryStatement();
+			newTry.getBody().statements().add(ast.newReturnStatement());
+			CatchClause newCatchClause= ast.newCatchClause();
+			SingleVariableDeclaration varDecl= ast.newSingleVariableDeclaration();
+			varDecl.setType(ast.newSimpleType(ast.newSimpleName("Exception")));
+			varDecl.setName(ast.newSimpleName("e"));
+			newCatchClause.setException(varDecl);
+			newTry.catchClauses().add(newCatchClause);
+			
+			rewrite.markAsReplaced(doStatement.getBody(), newTry);
+		}
+		{ // replace body statement with block
+			DoStatement doStatement= (DoStatement) statements.get(1);
+			
+			Block newBody= ast.newBlock();
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("hoo"));
+			invocation.arguments().add(ast.newNumberLiteral("11"));
+			
+			newBody.statements().add(ast.newExpressionStatement(invocation));
+			
+			rewrite.markAsReplaced(doStatement.getBody(), newBody);
+
+		}
+		{ // replace body block with block
+			DoStatement doStatement= (DoStatement) statements.get(2);
+			
+			Block newBody= ast.newBlock();
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("hoo"));
+			invocation.arguments().add(ast.newNumberLiteral("11"));
+			
+			newBody.statements().add(ast.newExpressionStatement(invocation));
+			
+			rewrite.markAsReplaced(doStatement.getBody(), newBody);
+
+		}		
+		{ // replace body statement with body
+			DoStatement doStatement= (DoStatement) statements.get(3);
+			
+			
+			TryStatement newTry= ast.newTryStatement();
+			newTry.getBody().statements().add(ast.newReturnStatement());
+			CatchClause newCatchClause= ast.newCatchClause();
+			SingleVariableDeclaration varDecl= ast.newSingleVariableDeclaration();
+			varDecl.setType(ast.newSimpleType(ast.newSimpleName("Exception")));
+			varDecl.setName(ast.newSimpleName("e"));
+			newCatchClause.setException(varDecl);
+			newTry.catchClauses().add(newCatchClause);
+			
+			rewrite.markAsReplaced(doStatement.getBody(), newTry);
+		}
+		
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        do\n");
+		buf.append("            try {\n");
+		buf.append("                return;\n");
+		buf.append("            } catch (Exception e) {\n");
+		buf.append("            }\n");
+		buf.append("        while (true);\n");	
+		buf.append("        do {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        } while (true);\n");	
+		buf.append("        do {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        } while (true);\n");	
+		buf.append("        do\n");
+		buf.append("            try {\n");
+		buf.append("                return;\n");
+		buf.append("            } catch (Exception e) {\n");
+		buf.append("            }\n");
+		buf.append("        while (true);\n");	
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}		
+	
 
 	public void testExpressionStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -971,7 +1104,131 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
+	}
+	
+	public void testForStatement1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (;;) {\n");
+		buf.append("            foo();\n");		
+		buf.append("        }\n");	
+		buf.append("        for (;;)\n");
+		buf.append("            foo();\n");	
+		buf.append("        for (;;) {\n");
+		buf.append("            foo();\n");	
+		buf.append("        }\n");	
+		buf.append("        for (;;)\n");
+		buf.append("            foo();\n");	
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		assertTrue("Parse errors", (block.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+
+		{ // replace body block with statement
+			ForStatement forStatement= (ForStatement) statements.get(0);
+			
+			
+			TryStatement newTry= ast.newTryStatement();
+			newTry.getBody().statements().add(ast.newReturnStatement());
+			CatchClause newCatchClause= ast.newCatchClause();
+			SingleVariableDeclaration varDecl= ast.newSingleVariableDeclaration();
+			varDecl.setType(ast.newSimpleType(ast.newSimpleName("Exception")));
+			varDecl.setName(ast.newSimpleName("e"));
+			newCatchClause.setException(varDecl);
+			newTry.catchClauses().add(newCatchClause);
+			
+			rewrite.markAsReplaced(forStatement.getBody(), newTry);
+		}
+		{ // replace body statement with block
+			ForStatement forStatement= (ForStatement) statements.get(1);
+			
+			Block newBody= ast.newBlock();
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("hoo"));
+			invocation.arguments().add(ast.newNumberLiteral("11"));
+			
+			newBody.statements().add(ast.newExpressionStatement(invocation));
+			
+			rewrite.markAsReplaced(forStatement.getBody(), newBody);
+
+		}
+		{ // replace body block with block
+			ForStatement forStatement= (ForStatement) statements.get(2);
+			
+			Block newBody= ast.newBlock();
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("hoo"));
+			invocation.arguments().add(ast.newNumberLiteral("11"));
+			
+			newBody.statements().add(ast.newExpressionStatement(invocation));
+			
+			rewrite.markAsReplaced(forStatement.getBody(), newBody);
+
+		}		
+		{ // replace body statement with body
+			ForStatement forStatement= (ForStatement) statements.get(3);
+			
+			
+			TryStatement newTry= ast.newTryStatement();
+			newTry.getBody().statements().add(ast.newReturnStatement());
+			CatchClause newCatchClause= ast.newCatchClause();
+			SingleVariableDeclaration varDecl= ast.newSingleVariableDeclaration();
+			varDecl.setType(ast.newSimpleType(ast.newSimpleName("Exception")));
+			varDecl.setName(ast.newSimpleName("e"));
+			newCatchClause.setException(varDecl);
+			newTry.catchClauses().add(newCatchClause);
+			
+			rewrite.markAsReplaced(forStatement.getBody(), newTry);
+		}
+		
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (;;)\n");
+		buf.append("            try {\n");
+		buf.append("                return;\n");
+		buf.append("            } catch (Exception e) {\n");
+		buf.append("            }\n");	
+		buf.append("        for (;;) {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");	
+		buf.append("        for (;;) {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");	
+		buf.append("        for (;;)\n");
+		buf.append("            try {\n");
+		buf.append("                return;\n");
+		buf.append("            } catch (Exception e) {\n");
+		buf.append("            }\n");	
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}		
+	
 	
 	public void testIfStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -2988,6 +3245,129 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+
+	public void testWhileStatement1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (true) {\n");
+		buf.append("            foo();\n");		
+		buf.append("        }\n");	
+		buf.append("        while (true)\n");
+		buf.append("            foo();\n");	
+		buf.append("        while (true) {\n");
+		buf.append("            foo();\n");	
+		buf.append("        }\n");	
+		buf.append("        while (true)\n");
+		buf.append("            foo();\n");	
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		assertTrue("Parse errors", (block.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+
+		{ // replace body block with statement
+			WhileStatement whileStatement= (WhileStatement) statements.get(0);
+			
+			
+			TryStatement newTry= ast.newTryStatement();
+			newTry.getBody().statements().add(ast.newReturnStatement());
+			CatchClause newCatchClause= ast.newCatchClause();
+			SingleVariableDeclaration varDecl= ast.newSingleVariableDeclaration();
+			varDecl.setType(ast.newSimpleType(ast.newSimpleName("Exception")));
+			varDecl.setName(ast.newSimpleName("e"));
+			newCatchClause.setException(varDecl);
+			newTry.catchClauses().add(newCatchClause);
+			
+			rewrite.markAsReplaced(whileStatement.getBody(), newTry);
+		}
+		{ // replace body statement with block
+			WhileStatement whileStatement= (WhileStatement) statements.get(1);
+			
+			Block newBody= ast.newBlock();
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("hoo"));
+			invocation.arguments().add(ast.newNumberLiteral("11"));
+			
+			newBody.statements().add(ast.newExpressionStatement(invocation));
+			
+			rewrite.markAsReplaced(whileStatement.getBody(), newBody);
+
+		}
+		{ // replace body block with block
+			WhileStatement whileStatement= (WhileStatement) statements.get(2);
+			
+			Block newBody= ast.newBlock();
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("hoo"));
+			invocation.arguments().add(ast.newNumberLiteral("11"));
+			
+			newBody.statements().add(ast.newExpressionStatement(invocation));
+			
+			rewrite.markAsReplaced(whileStatement.getBody(), newBody);
+
+		}		
+		{ // replace body statement with body
+			WhileStatement whileStatement= (WhileStatement) statements.get(3);
+			
+			
+			TryStatement newTry= ast.newTryStatement();
+			newTry.getBody().statements().add(ast.newReturnStatement());
+			CatchClause newCatchClause= ast.newCatchClause();
+			SingleVariableDeclaration varDecl= ast.newSingleVariableDeclaration();
+			varDecl.setType(ast.newSimpleType(ast.newSimpleName("Exception")));
+			varDecl.setName(ast.newSimpleName("e"));
+			newCatchClause.setException(varDecl);
+			newTry.catchClauses().add(newCatchClause);
+			
+			rewrite.markAsReplaced(whileStatement.getBody(), newTry);
+		}
+		
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (true)\n");
+		buf.append("            try {\n");
+		buf.append("                return;\n");
+		buf.append("            } catch (Exception e) {\n");
+		buf.append("            }\n");	
+		buf.append("        while (true) {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");	
+		buf.append("        while (true) {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");	
+		buf.append("        while (true)\n");
+		buf.append("            try {\n");
+		buf.append("                return;\n");
+		buf.append("            } catch (Exception e) {\n");
+		buf.append("            }\n");	
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}		
 	
 	
 	public void testInsertCode() throws Exception {

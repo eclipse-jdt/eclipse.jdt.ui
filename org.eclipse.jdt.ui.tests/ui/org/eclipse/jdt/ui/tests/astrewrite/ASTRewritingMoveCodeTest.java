@@ -1488,10 +1488,9 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        for(int i= 0; i < 8; i++)\n");
-		buf.append("            {\n");
-		buf.append("                foo();\n");
-		buf.append("            }\n");		
+		buf.append("        for(int i= 0; i < 8; i++) {\n");
+		buf.append("            foo();\n");
+		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
@@ -1539,10 +1538,9 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        for(int i= 0; i < 8; i++)\n");
-		buf.append("            {\n");
-		buf.append("                foo();\n");
-		buf.append("            }\n");		
+		buf.append("        for(int i= 0; i < 8; i++) {\n");
+		buf.append("            foo();\n");
+		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
