@@ -579,7 +579,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
-		presenter.setSizeConstraints(40, 20, true, false);
+		presenter.setSizeConstraints(40, 20, true, true);
 		return presenter;
 	}
 	
@@ -594,7 +594,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
-		presenter.setSizeConstraints(50, 20, true, false);
+		presenter.setSizeConstraints(50, 20, true, true);
 		return presenter;
 	}
 }
