@@ -127,7 +127,7 @@ public class AllTypesCache {
 					if (((ICompilationUnit) elem).isWorkingCopy()) {
 						return false;
 					}
-					if (isAddedOrRemoved || (delta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
+					if (isAddedOrRemoved || isPossibleStructuralChange(delta.getFlags())) {
 						return true;
 					}
 					return processChildrenDelta(delta);
@@ -136,6 +136,10 @@ public class AllTypesCache {
 					return false;
 			}	
 		}
+		
+		private boolean isPossibleStructuralChange(int flags) {
+			return (flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT;
+		}		
 		
 		private boolean processChildrenDelta(IJavaElementDelta delta) {
 			IJavaElementDelta[] children= delta.getAffectedChildren();
