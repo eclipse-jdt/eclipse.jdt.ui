@@ -661,6 +661,41 @@ public class ScopeAnalyzerTest extends CoreTests {
 		}
 	}
 	
+	public void testTypeDeclarationsTypeParameters() throws Exception {
+		
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("test0.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public class H<M> {\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("H.java", buf.toString(), false, null);		
+
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("import test0.ae.H;\n");
+		buf.append("public class G<X, Y> extends H<String> {\n");
+		buf.append("    public <A, B> void foo() {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
+
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("G.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= createAST(compilationUnit);
+		assertNoProblems(astRoot);
+		{
+			String str= "return;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.TYPES;
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
+			
+			assertVariables(res, new String[] { "A", "B", "G", "X", "Y"});
+		}
+	}
+	
 	public void testClassInstanceCreation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
 		StringBuffer buf= new StringBuffer();

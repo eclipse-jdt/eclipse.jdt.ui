@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -124,11 +125,15 @@ public class ScopeAnalyzer {
 		return null;
 	}
 	
-	private boolean hasFlag(int property, int flags) {
+	static final boolean hasFlag(int property, int flags) {
 		return (flags & property) != 0;
 	}
 	
-	
+	/**
+	 * Collects all elements available in a type and its hierarchy
+	 * @param binding The type binding
+	 * @param flags Flags defining the elements to report
+	 */
 	private void addInherited(ITypeBinding binding, int flags) {
 		if (!fTypesVisited.add(binding)) {
 			return;
@@ -175,9 +180,19 @@ public class ScopeAnalyzer {
 	}
 		
 	
+	/**
+	 * Collects all elements available in a type: its hierarchy and its outer scopes.
+	 * @param binding The type binding
+	 * @param flags Flags defining the elements to report
+	 */
 	private void addTypeDeclarations(ITypeBinding binding, int flags) {
 		if (hasFlag(TYPES, flags) && !binding.isAnonymous()) {
 			addResult(binding);
+			
+			ITypeBinding[] typeParameters= binding.getTypeParameters();
+			for (int i= 0; i < typeParameters.length; i++) {
+				addResult(typeParameters[i]);
+			}
 		}
 		
 		addInherited(binding, flags); // add inherited 
@@ -424,6 +439,17 @@ public class ScopeAnalyzer {
 			return false;
 		}
 		
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.TypeParameter)
+		 */
+		public boolean visit(TypeParameter node) {
+			if (hasFlag(TYPES, fFlags) && node.getStartPosition() < fPosition) {
+				addResult(node.getName().resolveBinding());
+			}
+			return true;
+		}
+		
 		public boolean visit(ClassInstanceCreation node) {
 			boolean isInside= isInside(node);
 			
@@ -432,14 +458,14 @@ public class ScopeAnalyzer {
 				ASTNode nameNode= (node.getAST().apiLevel() >= AST.JLS3) ? (ASTNode) node.getType() : node.getName();
 				ITypeBinding binding= node.getExpression().resolveTypeBinding();
 				if (isInside(nameNode) && binding != null) {
-					addTypeDeclarations(binding, fFlags & TYPES);
+					addInherited(binding, fFlags & TYPES);
 				}
 			}
 			return isInside;
 		}
 		
 		public boolean visit(SwitchCase node) {
-			// switch on enum allows to use enum constants without qualifization
+			// switch on enum allows to use enum constants without qualification
 			if (hasFlag(VARIABLES, fFlags) && !node.isDefault() && isInside(node.getExpression())) {
 				SwitchStatement switchStatement= (SwitchStatement) node.getParent();
 				ITypeBinding binding= switchStatement.getExpression().resolveTypeBinding();
