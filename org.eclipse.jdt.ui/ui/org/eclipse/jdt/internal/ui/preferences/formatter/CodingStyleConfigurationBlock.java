@@ -470,6 +470,16 @@ public class CodingStyleConfigurationBlock {
 		fProfileManager.commitChanges();
 	}
 	
+	public void performDefaults() {
+		Profile profile= fProfileManager.getProfile(ProfileManager.DEFAULT_PROFILE);
+		if (profile != null) {
+			int defaultIndex= fProfileManager.getSortedProfiles().indexOf(profile);
+			if (defaultIndex != -1) {
+				fProfileCombo.select(defaultIndex);
+				fProfileManager.setSelected(profile);
+			}
+		}
+	}
 	
 	/**
 	 * Get a <code>File</code> object representing the internal store file.

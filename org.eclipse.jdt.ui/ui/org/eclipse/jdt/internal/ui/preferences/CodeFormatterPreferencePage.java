@@ -79,6 +79,14 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
+	 */
+	protected void performDefaults() {
+		fNewConfigurationBlock.performDefaults();
+		super.performDefaults();
+	}
+		
+	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
 	 */
 	public void statusChanged(IStatus status) {
