@@ -181,7 +181,7 @@ public class PerformChangeOperation implements IWorkspaceRunnable {
 					Exception exception= null;
 					fValidationStatus= fChange.isValid(new SubProgressMonitor(monitor, 1));
 					if (fValidationStatus.hasFatalError())
-						return;
+						return; //TODO: inform user about error
 					try {
 						if (fUndoManager != null) {
 							ResourcesPlugin.getWorkspace().checkpoint(false);
