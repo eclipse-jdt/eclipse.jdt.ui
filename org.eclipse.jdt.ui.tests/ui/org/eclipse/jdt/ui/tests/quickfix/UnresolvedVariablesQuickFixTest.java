@@ -40,7 +40,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
@@ -151,6 +151,83 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			}
 		}
 	}
+	
+	public void testVarInForInitializer() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (i= 0;;) {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 3);
+		assertCorrectLabels(proposals);
+		
+		boolean doField= true, doParam= true, doLocal= true;
+		for (int i= 0; i < proposals.size(); i++) {
+			NewVariableCompletionProposal proposal= (NewVariableCompletionProposal) proposals.get(i);
+			String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+			if (proposal.getVariableKind() == NewVariableCompletionProposal.FIELD) {
+				assertTrue("2 field proposals", doField);
+				doField= false;
+				
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class E {\n");
+				buf.append("    private int i;\n");				
+				buf.append("    void foo() {\n");
+				buf.append("        for (i= 0;;) {\n");
+				buf.append("        }\n");		
+				buf.append("    }\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());
+			} else if (proposal.getVariableKind() == NewVariableCompletionProposal.LOCAL) {
+				assertTrue("2 local proposals", doLocal);
+				doLocal= false;
+				
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class E {\n");
+				buf.append("    void foo() {\n");
+				buf.append("        for (int i = 0;;) {\n");
+				buf.append("        }\n");		
+				buf.append("    }\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());
+			} else if (proposal.getVariableKind() == NewVariableCompletionProposal.PARAM) {
+				assertTrue("2 param proposals", doParam);
+				doParam= false;
+				
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class E {\n");
+				buf.append("    void foo(int i) {\n");
+				buf.append("        for (i= 0;;) {\n");
+				buf.append("        }\n");		
+				buf.append("    }\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());
+			} else {
+				assertTrue("unknown type", false);
+			}
+		}
+	}	
+	
 	
 	public void testVarInInitializer() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -392,6 +469,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 					buf.append("\n");
 					buf.append("}\n");
 					assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+					JavaProjectHelper.performDummySearch();
 					newCU.delete(true, null);
 				} else {
 					assertTrue("2 interface proposals", doInterface);
@@ -404,6 +482,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 					buf.append("\n");
 					buf.append("}\n");
 					assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+					JavaProjectHelper.performDummySearch();
 					newCU.delete(true, null);
 				}
 			} else {
