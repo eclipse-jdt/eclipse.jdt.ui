@@ -50,7 +50,6 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -1235,9 +1234,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					// Check for leading underscores				
 					position += offset;
 					if (Character.getType(document.getChar(position - 1)) != Character.CONNECTOR_PUNCTUATION) {
-
 						setCaretPosition(position);
-						handleCursorPositionChanged();
+						fireSelectionChanged();
 						return;
 					}
 				}
@@ -1245,7 +1243,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				// Use default behavior
 			}
 			super.run();
-			handleCursorPositionChanged();
 		}
 
 		/**
@@ -1274,15 +1271,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.NextSubWordAction#setCaretPosition(int)
 		 */
 		protected void setCaretPosition(final int position) {
-			final ISourceViewer viewer= getSourceViewer();
-			final StyledText text= viewer.getTextWidget();
-			
-			text.setCaretOffset(modelOffset2WidgetOffset(viewer, position));
-
-			final Event event= new Event();
-			event.x= text.getSelection().x;
-			event.y= text.getSelection().y;
-			text.notifyListeners(SWT.Selection, event);
+			getTextWidget().setCaretOffset(modelOffset2WidgetOffset(getSourceViewer(), position));
 		}
 	}
 
@@ -1346,11 +1335,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					text.setSelectionRange(selection.y, offset - selection.y);
 				else
 					text.setSelectionRange(selection.x, offset - selection.x);		
-
-				final Event event= new Event();
-				event.x= text.getSelection().x;
-				event.y= text.getSelection().y;
-				text.notifyListeners(SWT.Selection, event);
 			}
 		}
 	}
@@ -1447,14 +1431,13 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 						character= document.getChar(--position);
 
 					setCaretPosition(position + 1);
-					handleCursorPositionChanged();
+					fireSelectionChanged();
 					return;
 				}
 			} catch (BadLocationException exception) {
 				// Use default behavior
 			}
 			super.run();
-			handleCursorPositionChanged();
 		}
 
 		/**
@@ -1483,15 +1466,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.PreviousSubWordAction#setCaretPosition(int)
 		 */
 		protected void setCaretPosition(final int position) {
-			final ISourceViewer viewer= getSourceViewer();
-			final StyledText text= viewer.getTextWidget();
-			
-			text.setCaretOffset(modelOffset2WidgetOffset(viewer, position));
-
-			final Event event= new Event();
-			event.x= text.getSelection().x;
-			event.y= text.getSelection().y;
-			text.notifyListeners(SWT.Selection, event);
+			getTextWidget().setCaretOffset(modelOffset2WidgetOffset(getSourceViewer(), position));
 		}
 	}
 
@@ -1555,11 +1530,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					text.setSelectionRange(selection.y, offset - selection.y);
 				else
 					text.setSelectionRange(selection.x, offset - selection.x);		
-
-				final Event event= new Event();
-				event.x= text.getSelection().x;
-				event.y= text.getSelection().y;
-				text.notifyListeners(SWT.Selection, event);
 			}
 		}
 	}
@@ -1580,48 +1550,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @since 3.0
 	 */
 	protected class QuickFormatAction extends Action {
-		
-		/**
-		 * Formats the range of the source viewer document.
-		 * 
-		 * @param viewer The source viewer to operate on
-		 * @param offset The offset of the range to be formatted
-		 * @param length The length of the range to be formatted
-		 * @param normalize <code>true</code> iff the region should be block normalized, <code>false</code> otherwise
-		 */
-		protected void format(final JavaSourceViewer viewer, int offset, int length, boolean normalize) {
-
-			final IDocument document= viewer.getDocument();
-
-			if (normalize) {
-
-				try {
-
-					final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset);
-					if (region.getType() != IDocument.DEFAULT_CONTENT_TYPE) {
-
-						final int delta= region.getOffset() + region.getLength() - offset + 2;
-						offset += delta;
-						length -= delta;
-					}
-
-					final IRegion line= document.getLineInformationOfOffset(offset);
-					final int delta= offset - line.getOffset();
-					offset -= delta;
-					length += delta;
-
-				} catch (BadLocationException exception) {
-					// Should not happen
-					return;
-				}
-			}
-			
-			viewer.rememberSelection();
-			viewer.setSelectedRange(offset, length);
-			viewer.doOperation(ISourceViewer.FORMAT);
-	
-			viewer.restoreSelection();
-		}
 
 		/*
 		 * @see org.eclipse.jface.action.IAction#run()
@@ -1631,47 +1559,39 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			final JavaSourceViewer viewer= (JavaSourceViewer) getSourceViewer();
 			if (viewer.isEditable()) {
 
-				final IDocument document= viewer.getDocument();
-				final Point selection= viewer.getSelectedRange();
-
+				final Point selection= viewer.rememberSelection();
 				try {
-					if (selection.y == 0) {
 
-						final String type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, selection.x);
-						if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT) || type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
+					final String type= TextUtilities.getContentType(viewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, selection.x);
+					if (type.equals(IDocument.DEFAULT_CONTENT_TYPE) && selection.y == 0) {
 
-							final ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, selection.x);
+						try {
+							final IJavaElement element= getElementAt(selection.x, true);
+							if (element != null && element.exists()) {
 
-							format(viewer, partition.getOffset(), partition.getLength(), false);
+								final int kind= element.getElementType();
+								if (kind == IJavaElement.TYPE || kind == IJavaElement.METHOD || kind == IJavaElement.INITIALIZER) {
 
-						} else if (type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+									final ISourceReference reference= (ISourceReference)element;
+									final ISourceRange range= reference.getSourceRange();
 
-							try {
-
-								final IJavaElement element= getElementAt(selection.x, true);
-								if (element != null && element.exists()) {
-
-									ISourceRange range= null;
-									final int kind= element.getElementType();
-
-									if (kind == IJavaElement.TYPE || kind == IJavaElement.METHOD || kind == IJavaElement.INITIALIZER) {
-
-										final ISourceReference reference= (ISourceReference)element;
-										range= reference.getSourceRange();
+									if (range != null) {
+										viewer.setSelectedRange(range.getOffset(), range.getLength());
+										viewer.doOperation(ISourceViewer.FORMAT);
 									}
-
-									if (range != null)
-										format(viewer, range.getOffset(), range.getLength(), true);
 								}
-							} catch (JavaModelException exception) {
-								// Should not happen
 							}
+						} catch (JavaModelException exception) {
+							// Should not happen
 						}
-					} else
-						format(viewer, selection.x, selection.y, true);
-
+					} else {
+						viewer.setSelectedRange(selection.x, 1);
+						viewer.doOperation(ISourceViewer.FORMAT);
+					}
 				} catch (BadLocationException exception) {
-					// Should not happen
+					// Can not happen
+				} finally {
+					viewer.restoreSelection();
 				}
 			}
 		}
