@@ -897,13 +897,13 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void test54() throws Exception { 
-		printTestDisabledMessage("//waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
-		//helper2_0("A", "X", "XYZ", "A", true);		
+		//printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
+		helper2_0("A", "X", "XYZ", "A", true);		
 	}
 	
 	public void test55() throws Exception { 
-		printTestDisabledMessage("//waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
-		//helper2_0("A", "X", "XYZ", "A", false);		
+		//printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
+		helper2_0("A", "X", "XYZ", "A", false);		
 	}
 		
 	public void test5() throws Exception { 
