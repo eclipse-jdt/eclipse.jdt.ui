@@ -326,7 +326,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						}
 					}
 					fRootStatus.setError(status.getMessage());
-				} else {
+				} else if (fIsProjectAsSourceFolder) {
 					fRootStatus.setWarning(NewWizardMessages.getString("NewSourceFolderWizardPage.warning.ReplaceSF")); //$NON-NLS-1$
 				}					
 			}
@@ -388,12 +388,16 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			}
 		} else {
 			newEntries= new IClasspathEntry[entries.length + 1];
-			for (int i= entries.length - 1, k= entries.length; i >= 0; i--) {
+			int k= entries.length;
+			for (int i= k - 1; i >= 0; i--) {
 				IClasspathEntry curr= entries[i];
 				if (k > i && curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 					newEntries[k--]= JavaCore.newSourceEntry(path);
 				}
 				newEntries[k--]= curr;
+			}
+			if (k == 0) {
+				newEntries[k--]= JavaCore.newSourceEntry(path);
 			}
 		}		
 
