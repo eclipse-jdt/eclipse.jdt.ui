@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -31,26 +29,60 @@ class ReorderParameterMoveFinder {
 	 * returns List of ISourceRange[]
 	 */
 	static List findParameterSourceRanges(SearchResultGroup searchResultGroup) throws JavaModelException{
-		IJavaElement element= JavaCore.create(searchResultGroup.getResource());
-		if (!(element instanceof ICompilationUnit))
+		ICompilationUnit cu= searchResultGroup.getCompilationUnit();
+		if (cu == null)
 			return new ArrayList(0);
-			
 		ReorderParameterMoveFinderVisitor visitor= new ReorderParameterMoveFinderVisitor(searchResultGroup.getSearchResults());
-		AST.parseCompilationUnit((ICompilationUnit)element, false).accept(visitor);
-		return visitor.getRegions();
+		AST.parseCompilationUnit(cu, false).accept(visitor);
+		return visitor.getAllRegions();
 	}
 		
+	/**
+	 * returns List of ISourceRange[]
+	 */
+	static List findParameterDeclarationSourceRanges(SearchResultGroup searchResultGroup) throws JavaModelException{
+		ICompilationUnit cu= searchResultGroup.getCompilationUnit();
+		if (cu == null)
+			return new ArrayList(0);
+		ReorderParameterMoveFinderVisitor visitor= new ReorderParameterMoveFinderVisitor(searchResultGroup.getSearchResults());
+		AST.parseCompilationUnit(cu, false).accept(visitor);
+		return visitor.getDeclarationRegions();
+	}
+
+	/**
+	 * returns List of ISourceRange[]
+	 */
+	static List findParameterReferenceSourceRanges(SearchResultGroup searchResultGroup) throws JavaModelException{
+		ICompilationUnit cu= searchResultGroup.getCompilationUnit();
+		if (cu == null)
+			return new ArrayList(0);
+		ReorderParameterMoveFinderVisitor visitor= new ReorderParameterMoveFinderVisitor(searchResultGroup.getSearchResults());
+		AST.parseCompilationUnit(cu, false).accept(visitor);
+		return visitor.getReferenceRegions();
+	}
+	
 	private static class ReorderParameterMoveFinderVisitor extends ASTVisitor {
-		private List fRegionsFound;
-		private SearchResult[] fSearchResults;
+		private final SearchResult[] fSearchResults;
+		private final List fDeclarationRegionsFound;
+		private final List fReferenceRegionsFound;
 
 		ReorderParameterMoveFinderVisitor(SearchResult[] searchResults){
 			fSearchResults= searchResults;
-			fRegionsFound= new ArrayList();
+			fDeclarationRegionsFound= new ArrayList(0);
+			fReferenceRegionsFound= new ArrayList(0);
 		}
 		
-		List getRegions(){
-			return fRegionsFound;
+		List getAllRegions(){
+			List result= new ArrayList(fDeclarationRegionsFound.size() + fReferenceRegionsFound.size());
+			result.addAll(fDeclarationRegionsFound);
+			result.addAll(fReferenceRegionsFound);
+			return result;
+		}
+		List getDeclarationRegions(){
+			return fDeclarationRegionsFound;
+		}
+		List getReferenceRegions(){
+			return fReferenceRegionsFound;
 		}
 		
 		private boolean isStartPositionOnList(int start){
@@ -88,19 +120,19 @@ class ReorderParameterMoveFinder {
 	
 		public boolean visit(MethodInvocation methodInvocation) {
 			if (isStartPositionOnList(methodInvocation.getName().getStartPosition()))
-				fRegionsFound.add(createRegionsArray(methodInvocation));
+				fReferenceRegionsFound.add(createRegionsArray(methodInvocation));
 			return true;
 		}
 		
 		public boolean visit(MethodDeclaration methodDeclaration) {
 			if (isStartPositionOnList(methodDeclaration.getName().getStartPosition()))
-				fRegionsFound.add(createRegionsArray(methodDeclaration));
+				fDeclarationRegionsFound.add(createRegionsArray(methodDeclaration));
 			return true;
 		}
 		
 		public boolean visit(SuperMethodInvocation superMethodInvocation) {
 			if (isStartPositionOnList(superMethodInvocation.getName().getStartPosition()))
-				fRegionsFound.add(createRegionsArray(superMethodInvocation));
+				fReferenceRegionsFound.add(createRegionsArray(superMethodInvocation));
 			return true;
 		}
 		
