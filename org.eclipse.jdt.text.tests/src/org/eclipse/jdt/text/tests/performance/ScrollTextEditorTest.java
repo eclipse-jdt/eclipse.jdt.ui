@@ -48,7 +48,7 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 	public void testScrollTextEditorLineWise2() throws Exception {
 		try {
 			ResourceTestHelper.copy(ORIG_LINE_FILE, LINE_FILE);
-			measureScrolling(LINE_FILE, LINE_WISE_NO_CARET_MOVE, false);
+			measureScrolling(LINE_FILE, LINE_WISE_NO_CARET_MOVE);
 		} finally {
 			ResourceTestHelper.delete(LINE_FILE);
 		}
@@ -57,25 +57,7 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 	public void testScrollTextEditorPageWise() throws Exception {
 		try {
 			ResourceTestHelper.copy(ORIG_PAGE_FILE, PAGE_FILE);
-			measureScrolling(PAGE_FILE, PAGE_WISE, false);
-		} finally {
-			ResourceTestHelper.delete(PAGE_FILE);
-		}
-	}
-	
-	public void testScrollTextEditorLineWisePreloaded2() throws Exception {
-		try {
-			ResourceTestHelper.copy(ORIG_LINE_FILE, LINE_FILE);
-			measureScrolling(LINE_FILE, LINE_WISE_NO_CARET_MOVE, true);
-		} finally {
-			ResourceTestHelper.delete(LINE_FILE);
-		}
-	}
-	
-	public void testScrollTextEditorPageWisePreloaded2() throws Exception {
-		try {
-			ResourceTestHelper.copy(ORIG_PAGE_FILE, PAGE_FILE);
-			measureScrolling(PAGE_FILE, PAGE_WISE, true);
+			measureScrolling(PAGE_FILE, PAGE_WISE);
 		} finally {
 			ResourceTestHelper.delete(PAGE_FILE);
 		}
@@ -84,16 +66,7 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 	public void testScrollTextEditorLineWiseMoveCaret2() throws Exception {
 		try {
 			ResourceTestHelper.copy(ORIG_LINE_FILE, LINE_FILE);
-			measureScrolling(LINE_FILE, LINE_WISE, false);
-		} finally {
-			ResourceTestHelper.delete(LINE_FILE);
-		}
-	}
-	
-	public void testScrollTextEditorLineWiseMoveCaretPreloaded2() throws Exception {
-		try {
-			ResourceTestHelper.copy(ORIG_LINE_FILE, LINE_FILE);
-			measureScrolling(LINE_FILE, LINE_WISE, true);
+			measureScrolling(LINE_FILE, LINE_WISE);
 		} finally {
 			ResourceTestHelper.delete(LINE_FILE);
 		}
@@ -102,7 +75,7 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 	public void testScrollTextEditorLineWiseSelect2() throws Exception {
 		try {
 			ResourceTestHelper.copy(ORIG_LINE_FILE, LINE_FILE);
-			measureScrolling(LINE_FILE, LINE_WISE_SELECT, false);
+			measureScrolling(LINE_FILE, LINE_WISE_SELECT);
 		} finally {
 			ResourceTestHelper.delete(LINE_FILE);
 		}
