@@ -540,7 +540,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			new JavaSearchGroup()
 		};
 		
-		fDeleteAction= new DeleteAction(StructuredSelectionProvider.createFrom(provider));
+		fDeleteAction= new DeleteAction(provider);
 		fRefreshAction= new RefreshAction(getShell());
 		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
 		fShowLibrariesAction = new ShowLibrariesAction(this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
@@ -661,7 +661,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			fDeleteAction.update();
 			if (fDeleteAction.isEnabled())
 				fDeleteAction.run();
-		}	
+		}
 	}
 	
 	/**
