@@ -223,7 +223,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		dialog.setMessage(JavaEditorMessages.getString("AddImportOnSelection.dialog.message")); //$NON-NLS-1$
 		dialog.setElements(results);
 		if (dialog.open() == dialog.OK) {
-			return (IType) dialog.getFirstElement();
+			return (IType) dialog.getFirstResult();
 		}
 		return null;
 	}

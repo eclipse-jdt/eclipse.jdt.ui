@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -60,7 +61,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -556,9 +556,41 @@ public class BuildPathsBlock {
 			
 		fCurrJProject.setRawClasspath(classpath, new SubProgressMonitor(monitor, 5));
 		
-		JavaModelUtil.updateRequiredProjects(fCurrJProject, prevRequiredProjects, new SubProgressMonitor(monitor, 1));
+		updateReferencedProjects(fCurrJProject, prevRequiredProjects, new SubProgressMonitor(monitor, 1));
 		
 	}
+	
+	// --------- project dependencies -----------
+	
+	/**
+	 * @param jproject The Java project after changing the class path
+	 * @param prevRequiredProjects The required projects before changing the class path
+	 */
+	public static void updateReferencedProjects(IJavaProject jproject, String[] prevRequiredProjects, IProgressMonitor monitor) throws CoreException {
+		String[] newRequiredProjects= jproject.getRequiredProjectNames();
+
+		ArrayList prevEntries= new ArrayList(Arrays.asList(prevRequiredProjects));
+		ArrayList newEntries= new ArrayList(Arrays.asList(newRequiredProjects));
+		
+		IProject proj= jproject.getProject();
+		IProjectDescription projDesc= proj.getDescription();  
+		
+		ArrayList newRefs= new ArrayList();
+		IProject[] referencedProjects= projDesc.getReferencedProjects();
+		for (int i= 0; i < referencedProjects.length; i++) {
+			String curr= referencedProjects[i].getName();
+			if (newEntries.remove(curr) || !prevEntries.contains(curr)) {
+				newRefs.add(referencedProjects[i]);
+			}
+		}
+		IWorkspaceRoot root= proj.getWorkspace().getRoot();
+		for (int i= 0; i < newEntries.size(); i++) {
+			String curr= (String) newEntries.get(i);
+			newRefs.add(root.getProject(curr));
+		}		
+		projDesc.setReferencedProjects((IProject[]) newRefs.toArray(new IProject[newRefs.size()]));
+		proj.setDescription(projDesc, monitor);
+	}		
 	
 	/**
 	 * Adds a nature to a project
