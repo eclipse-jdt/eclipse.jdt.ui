@@ -160,9 +160,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			if (pattern.length() == 0) {
 				return null;
 			}
-			IJavaElement elem= JavaCore.create(settings.get("javaElement")); //$NON-NLS-1$
-			if (elem != null && !elem.exists()) {
-				elem= null;
+			IJavaElement elem= null;
+			String handleId= settings.get("javaElement"); //$NON-NLS-1$
+			if (handleId != null && handleId.length() > 0) {
+				IJavaElement restored= JavaCore.create(handleId); //$NON-NLS-1$
+				if (restored != null && isSearchableType(restored) && restored.exists()) {
+					elem= restored;
+				}
 			}
 			String[] wsIds= settings.getArray("workingSets"); //$NON-NLS-1$
 			IWorkingSet[] workingSets= null;
@@ -580,7 +584,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 	
 	final void updateOKStatus() {
-		getContainer().setPerformActionEnabled(getPattern().length() > 0);
+		boolean isValid= getContainer().hasValidScope() && getPattern().length() > 0;
+		getContainer().setPerformActionEnabled(isValid);
 	}
 	
 	
@@ -755,6 +760,19 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			}
 		}
 		return res;
+	}
+	
+	final static boolean isSearchableType(IJavaElement element) {
+		switch (element.getElementType()) {
+			case IJavaElement.PACKAGE_FRAGMENT:
+			case IJavaElement.PACKAGE_DECLARATION:
+			case IJavaElement.IMPORT_DECLARATION:
+			case IJavaElement.TYPE:
+			case IJavaElement.FIELD:
+			case IJavaElement.METHOD:
+				return true;
+		}
+		return false;
 	}
 
 	private SearchPatternData determineInitValuesFrom(IJavaElement element) {
