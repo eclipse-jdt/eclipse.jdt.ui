@@ -131,7 +131,7 @@ public class ASTNodeFactory {
 		}
 		
 		if (normalizedBinding.isArray()) {
-			Type elementType= newType(ast, normalizedBinding.getElementType(), false);
+			Type elementType= newType(ast, normalizedBinding.getElementType(), fullyQualify);
 			return ast.newArrayType(elementType, normalizedBinding.getDimensions());
 		}
 		
