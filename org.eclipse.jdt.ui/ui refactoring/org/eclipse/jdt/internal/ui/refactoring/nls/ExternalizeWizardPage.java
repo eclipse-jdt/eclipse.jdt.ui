@@ -84,7 +84,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private static final int KEY_PROP= 1; 
 	private static final int VAL_PROP= 2; 
 	private static final int SIZE= 3; //column counter
-	private static final int ROW_COUNT= 6;
+	private static final int ROW_COUNT= 5;
 	public static final String DEFAULT_KEY_PREFIX= ""; //$NON-NLS-1$
 	
 	public static final String PAGE_NAME= "NLSWizardPage1"; //$NON-NLS-1$
@@ -236,7 +236,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		createTableViewer(composite);
 		createSourceViewer(composite);
 				
-		composite.setWeights(new int[]{50, 50});
+		composite.setWeights(new int[]{55, 45});
 	 
 		createLabels(supercomposite);
 		
@@ -330,7 +330,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private void createSourceViewer(Composite parent){
 		Composite c= new Composite(parent, SWT.NONE);
 		c.setLayoutData(new GridData(GridData.FILL_BOTH));
-		c.setLayout(new GridLayout());
+		GridLayout gl= new GridLayout();
+		gl.marginHeight= 0;
+		gl.marginWidth= 0;
+        c.setLayout(gl);
 		
 		Label l= new Label(c, SWT.NONE);
 		l.setText(NLSUIMessages.getString("wizardPage.context")); //$NON-NLS-1$
@@ -368,6 +371,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout gl= new GridLayout();
 		gl.numColumns= 2;
+		gl.marginWidth= 0;
 		composite.setLayout(gl);
 		
 		Label l= new Label(composite, SWT.NONE);
@@ -389,8 +393,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	
 	private void createLabels(Composite parent){
 		Composite labelSuperComposite= new Composite(parent, SWT.NONE);
-		GridLayout gd= new GridLayout();
-		labelSuperComposite.setLayout(gd);
+		GridLayout gl= new GridLayout();
+		gl.marginHeight= 0;
+		gl.marginWidth= 0;
+		labelSuperComposite.setLayout(gl);
 		labelSuperComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		fPreviewLabel= new CLabel(labelSuperComposite, SWT.NONE);
@@ -437,7 +443,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private void createTableComposite(Composite parent) {
 		Composite comp= new Composite(parent, SWT.NONE);
 		comp.setLayoutData(new GridData(GridData.FILL_BOTH));
-		comp.setLayout(new GridLayout());
+		GridLayout gl= new GridLayout();
+		gl.marginWidth= 0;
+		gl.marginHeight= 0;
+		comp.setLayout(gl);
 		
 		Label l= new Label(comp, SWT.NONE);
 		l.setText(NLSUIMessages.getString("wizardPage.strings_to_externalize")); //$NON-NLS-1$
@@ -458,6 +467,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fTable= new Table(c, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION | SWT.HIDE_SELECTION | SWT.BORDER);
 		GridData tableGD= new GridData(GridData.FILL_BOTH);
 		tableGD.heightHint= fTable.getGridLineWidth() + fTable.getItemHeight() * ROW_COUNT;
+		tableGD.widthHint= 40;
 		fTable.setLayoutData(tableGD);
 		
 		fTable.setLinesVisible(true);
@@ -469,14 +479,14 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		
 		ColumnLayoutData[] columnLayoutData= new ColumnLayoutData[SIZE];
 		columnLayoutData[TASK_PROP]= new ColumnPixelData(20, false);
-		columnLayoutData[KEY_PROP]= new ColumnWeightData(50);
-		columnLayoutData[VAL_PROP]= new ColumnWeightData(50);
+		columnLayoutData[KEY_PROP]= new ColumnWeightData(40, true);
+		columnLayoutData[VAL_PROP]= new ColumnWeightData(40, true);
 		
 		for (int i= 0; i < fgTitles.length; i++) {
-			layout.addColumnData(columnLayoutData[i]);
 			TableColumn tc= new TableColumn(fTable, SWT.NONE, i);
-			tc.setResizable(columnLayoutData[i].resizable);
 			tc.setText(fgTitles[i]);
+			layout.addColumnData(columnLayoutData[i]);
+			tc.setResizable(columnLayoutData[i].resizable);
 		}
 		
 		createButtonComposite(c);	
@@ -488,7 +498,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		gl.marginHeight= 0;
 		gl.marginWidth= 0;
 		buttonComp.setLayout(gl);
-		buttonComp.setLayoutData(new GridData());
+		buttonComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		
 		Button translateSelected= new Button(buttonComp, SWT.PUSH);
 		translateSelected.setText(NLSUIMessages.getString("wizardPage.Translate_Selected")); //$NON-NLS-1$
@@ -520,21 +530,18 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			}
 		});
 		
-		addEditButton(buttonComp);
+		fEditButton= new Button(buttonComp, SWT.PUSH);
+        fEditButton.setText("Edit &Key...");
+        fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        SWTUtil.setButtonDimensionHint(fEditButton);
+        fEditButton.setEnabled(false);
+        fEditButton.addSelectionListener(new SelectionAdapter(){
+        	public void widgetSelected(SelectionEvent e) {
+        		openEditButton(fViewer.getSelection());
+        	}
+        });
 	}
 	
-	private void addEditButton(Composite buttonComp) {
-		fEditButton= new Button(buttonComp, SWT.PUSH);
-		fEditButton.setText("Edit &Key...");
-		fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		SWTUtil.setButtonDimensionHint(fEditButton);
-		fEditButton.setEnabled(false);
-		fEditButton.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent e) {
-				openEditButton(fViewer.getSelection());
-			}
-		});
-	}
 	
 	private void openEditButton(ISelection selection){
 		try{
