@@ -1,9 +1,11 @@
 package locals_in;
-public class A_test517 {
+
+public class A_test517 {
 	public void foo() {
-		int i= 0;
-		int[] array= new int[10];
+		/*]*/int i;
+		int j;
+		j= 20;/*[*/
 		
-		/*]*/array[i++]= 10;/*[*/
+		i= j + 10;
 	}
 }

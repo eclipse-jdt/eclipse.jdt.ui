@@ -153,7 +153,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	 * @return whether or not the given AST node is selected in the editor.
 	 */
 	public boolean isSelected(AstNode node) {
-		return fSelection.start <= node.sourceStart && node.sourceEnd <= fSelection.end;
+		return fSelection.covers(node);
 	}
 	
 	/**
@@ -193,7 +193,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 		return fNeedsSemicolon;
 	}
 	
-	//---- Helper methods -----------------------------------------------------------------------
+	//--- node management ---------------------------------------------------------
 	
 	private void reset() {
 		fMode= UNDEFINED;
@@ -265,12 +265,32 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 			fCursorPosition= end;
 	}
 	
-	private boolean visitAssignment(Assignment assignment, BlockScope scope, boolean compound) {
+	private boolean isPartOfNodeSelected(AstNode node) {
+		return fMode == BEFORE && fSelection.end < fBuffer.indexOfStatementCharacter(node.sourceEnd + 1);
+	}
+	
+	private void endVisitNode(AstNode node, Scope scope) {
+		endVisitRange(node.sourceStart, node.sourceEnd, node, scope);
+	}
+	
+	private void endVisitRange(int start, int end, AstNode node, Scope scope) {
+		// Make sure that in cases where the last statement is selected in a compound statement
+		// the compound statement doesn't have mode == SELECTED when in endVisit.
+		if (fMode == SELECTED && start < fSelection.start && fSelection.end < end)
+				fMode= AFTER;
+	}
+	
+	//---- General visit* methods --------------------------------------------------
+	
+	private boolean visitAssignment(Assignment assignment, BlockScope scope) {
 		if (!visitNode(assignment, scope))
 			return false;
-			
-		fLocalVariableAnalyzer.visitAssignment(assignment, scope, fMode, compound);
+		fLocalVariableAnalyzer.visitAssignment(assignment, scope, fMode);
 		return true;
+	}
+	
+	private void endVisitAssignment(Assignment assignment, BlockScope scope, boolean compound) {
+		fLocalVariableAnalyzer.endVisitAssignment(assignment, scope, fMode, compound);
 	}
 	
 	private boolean visitAbstractMethodDeclaration(AbstractMethodDeclaration node, Scope scope) {
@@ -372,12 +392,6 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 		}
 		return true;
 	}	
-	
-	//--- node management ---------------------------------------------------------
-	
-	private boolean isPartOfNodeSelected(AstNode node) {
-		return fMode == BEFORE && fSelection.end < fBuffer.indexOfStatementCharacter(node.sourceEnd + 1);
-	}
 	
 	//--- Expression / Condition handling -----------------------------------------
 
@@ -619,9 +633,14 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	}
 	
 	public boolean visit(Assignment assignment, BlockScope scope) {
-		return visitAssignment(assignment, scope, false);
+		return visitAssignment(assignment, scope);
 	}
 
+	public void endVisit(Assignment assignment, BlockScope scope) {
+		endVisitNode(assignment, scope);
+		endVisitAssignment(assignment, scope, false);
+	}
+	
 	public boolean visit(BinaryExpression binaryExpression, BlockScope scope) {
 		return visitBinaryExpression(binaryExpression, scope, TypeIds.T_undefined);
 	}
@@ -641,7 +660,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	}
 
 	public void endVisit(Block block, BlockScope scope) {
-		// PR: 1GEWDJ4: ITPJCORE:WINNT - Refactoring - invalid variable initialization extraction
+		endVisitNode(block, scope);
 		trackLastEnd(block.sourceEnd);
 		if (fSelection.covers(block))
 			fNeedsSemicolon= false;
@@ -675,7 +694,11 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	}
 
 	public boolean visit(CompoundAssignment compoundAssignment, BlockScope scope) {
-		return visitAssignment(compoundAssignment, scope, true);
+		return visitAssignment(compoundAssignment, scope);
+	}
+	
+	public void endVisit(CompoundAssignment compoundAssignment, BlockScope scope) {
+		endVisitAssignment(compoundAssignment, scope, true);
 	}
 
 	public boolean visit(ConditionalExpression conditionalExpression, BlockScope scope) {
@@ -730,6 +753,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	}
 	
 	public void endVisit(DoStatement doStatement, BlockScope scope) {
+		endVisitNode(doStatement, scope);
 		endVisitImplicitBranchTarget(doStatement, scope);
 		endVisitConditionBlock(doStatement, RefactoringCoreMessages.getString("StatementAnalyzer.do_while")); //$NON-NLS-1$
 		fReturnAnalyzer.endVisit(doStatement, scope, fMode);
@@ -745,7 +769,13 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	}
 
 	public boolean visit(ExplicitConstructorCall explicitConstructor, BlockScope scope) {
-		return visitNode(explicitConstructor, scope);
+		if (!visitNode(explicitConstructor, scope))
+			return false;
+		if (fMode == SELECTED) {
+			invalidSelection("Cannot extract super or this call from constructor.");
+			return false;
+		}
+		return true;
 	}
 
 	public boolean visit(ExtendedStringLiteral extendedStringLiteral, BlockScope scope) {
@@ -781,8 +811,10 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 				start= forStatement.initializations[forStatement.initializations.length - 1].sourceEnd;
 			}
 			fCursorPosition= fBuffer.indexOf(')', start + 1);
-			if (fSelection.start <= fCursorPosition)
+			if (fSelection.start <= fCursorPosition) {
 				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.for_statement")); //$NON-NLS-1$
+				return false;
+			}
 		}
 		return true;
 	}
@@ -806,6 +838,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	}
 
 	public void endVisit(ForStatement forStatement, BlockScope scope) {
+		endVisitNode(forStatement, scope);
 		endVisitImplicitBranchTarget(forStatement, scope);
 		endVisitConditionBlock(forStatement, RefactoringCoreMessages.getString("StatementAnalyzer.a_for")); //$NON-NLS-1$
 		fReturnAnalyzer.endVisit(forStatement, scope, fMode);
@@ -832,6 +865,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	}
 	
 	public void endVisit(IfStatement ifStatement, BlockScope scope) {
+		endVisitNode(ifStatement, scope);
 		endVisitConditionBlock(ifStatement, RefactoringCoreMessages.getString("StatementAnalyzer.if-then-else")); //$NON-NLS-1$
 		fReturnAnalyzer.endVisit(ifStatement, scope, fMode);
 	}
@@ -938,6 +972,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	}
 
 	public void endVisit(SwitchStatement switchStatement, BlockScope scope) {
+		endVisitNode(switchStatement, scope);
 		endVisitImplicitBranchTarget(switchStatement, scope);
 		fReturnAnalyzer.endVisit(switchStatement, scope, fMode);
 	}
@@ -991,12 +1026,10 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	}
 
 	public boolean visit(ThrowStatement throwStatement, BlockScope scope) {
-		// Begin PR: 1GEUXTX: ITPJCORE:WINNT - Refactoring - invalid exception when extracting throws statement
 		if (!visitNode(throwStatement, scope))
 			return false;
 		fExceptionAnalyzer.visit(throwStatement, scope, fMode);
 		return true;
-		// End PR
 	}
 
 	public boolean visit(TrueLiteral trueLiteral, BlockScope scope) {
@@ -1039,6 +1072,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 		return true;
 	}
 	public void endVisit(TryStatement tryStatement, BlockScope scope) {
+		endVisitNode(tryStatement, scope);
 		if (tryStatement.catchArguments != null)
 			fExceptionAnalyzer.visitCatchArguments(tryStatement.catchArguments, scope, fMode);
 		fExceptionAnalyzer.endVisit(tryStatement, scope, fMode);
@@ -1076,6 +1110,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 	}
 
 	public void endVisit(WhileStatement whileStatement, BlockScope scope) {
+		endVisitNode(whileStatement, scope);
 		endVisitImplicitBranchTarget(whileStatement, scope);
 		endVisitConditionBlock(whileStatement, RefactoringCoreMessages.getString("StatementAnalyzer.a_while")); //$NON-NLS-1$
 		fReturnAnalyzer.endVisit(whileStatement, scope, fMode);

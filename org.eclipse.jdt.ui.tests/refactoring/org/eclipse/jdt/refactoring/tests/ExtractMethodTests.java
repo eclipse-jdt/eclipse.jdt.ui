@@ -643,6 +643,16 @@ public class ExtractMethodTests extends RefactoringTest {
 	public void test173() throws Exception {
 		invalidSelectionTest();
 	}
+
+	//---- Constructor
+	
+	public void test180() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test181() throws Exception {
+		invalidSelectionTest();
+	}
 	
 	//====================================================================================
 	// Testing valid selections
@@ -950,6 +960,10 @@ public class ExtractMethodTests extends RefactoringTest {
 		tryTest();
 	}
 	
+	public void test458() throws Exception {
+		tryTest();
+	}
+	
 	//---- Test local vars and types
 	
 	public void test500() throws Exception {
@@ -1029,6 +1043,66 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	public void test519() throws Exception {
+		localsTest();
+	}
+	
+	public void test520() throws Exception {
+		localsTest();
+	}
+	
+	public void test530() throws Exception {
+		localsTest();
+	}
+	
+	public void test531() throws Exception {
+		localsTest();
+	}
+	
+	public void test532() throws Exception {
+		localsTest();
+	}
+	
+	public void test533() throws Exception {
+		localsTest();
+	}
+	
+	public void test534() throws Exception {
+		localsTest();
+	}
+	
+	public void test535() throws Exception {
+		localsTest();
+	}
+	
+	public void test536() throws Exception {
+		localsTest();
+	}
+	
+	public void test537() throws Exception {
+		localsTest();
+	}
+	
+	public void test538() throws Exception {
+		localsTest();
+	}
+	
+	public void test539() throws Exception {
+		localsTest();
+	}
+	
+	public void test540() throws Exception {
+		localsTest();
+	}
+	
+	public void test541() throws Exception {
+		localsTest();
+	}
+	
+	public void test542() throws Exception {
+		localsTest();
+	}
+	
+	public void test543() throws Exception {
 		localsTest();
 	}
 	

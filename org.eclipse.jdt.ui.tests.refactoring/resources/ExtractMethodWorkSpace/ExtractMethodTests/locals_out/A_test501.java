@@ -2,19 +2,13 @@ package locals_out;
 
 public class A_test501 {
 	public void foo() {
-		int x= 0;
-		double d= 10;
+		int x= 10;
 		
-		/*]*/x= extracted(d);/*[*/
+		/*]*/extracted();/*[*/
 	}
-
-	protected int extracted(double d) {
+	protected void extracted() {
 		int x;
-		x= g(d);
-		return x;
-	}
-	
-	private int g(double d) {
-		return 10;
+		x= 20;
+		int y= x;
 	}
 }

@@ -1,16 +1,13 @@
 package locals_out;
-public class A_test516 {
-	class Inner {
-		public int x;
-	}
+
+public class A_test516 {
 	public void foo() {
-		int[] array= new int[10];
-		Inner inner= new Inner();
+		/*]*/int j= extracted();/*[*/
 		
-		/*]*/extracted(array, inner);/*[*/
+		j++;
 	}
-	protected void extracted(int[] array, Inner inner) {
-		array[inner.x]= 10;
-		inner.x= 20;
+	protected int extracted() {
+		int i= 10, j= 20;
+		return j;
 	}
 }

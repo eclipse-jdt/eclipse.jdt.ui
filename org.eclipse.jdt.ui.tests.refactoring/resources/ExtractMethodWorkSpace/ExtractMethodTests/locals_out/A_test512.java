@@ -1,18 +1,13 @@
 package locals_out;
 public class A_test512 {
 	public void foo() {
-		final int i= 10;
+		/*]*/int x= extracted();/*[*/
 		
-		/*]*/Runnable run= extracted(i);/*[*/
-		
-		run.run();
+		x++;
 	}
-	protected Runnable extracted(final int i) {
-		Runnable run= new Runnable() {
-			public void run() {
-				System.out.println("" + i);
-			}
-		};
-		return run;
+	protected int extracted() {
+		int x= 0;
+		int y= x;
+		return x;
 	}
 }

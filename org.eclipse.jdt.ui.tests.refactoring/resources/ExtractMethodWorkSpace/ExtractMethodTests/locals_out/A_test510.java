@@ -1,14 +1,9 @@
 package locals_out;
 public class A_test510 {
 	public void foo() {
-		/*]*/int i= extracted();/*[*/
-		
-		i++;
+		/*]*/extracted();/*[*/
 	}
-	protected int extracted() {
-		foo();
-		int i= 10;
-		i= 2;
-		return i;
+	protected void extracted() {
+		int x= 0;
 	}
 }

@@ -2,9 +2,12 @@ package locals_out;
 
 public class A_test518 {
 	public void foo() {
+		int i;
+		
 		/*]*/extracted();/*[*/
 	}
 	protected void extracted() {
-		int i= 10, j= 20;
+		int i;
+		i= 10;
 	}
 }

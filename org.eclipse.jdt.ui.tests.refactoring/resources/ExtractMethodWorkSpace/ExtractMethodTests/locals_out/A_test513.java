@@ -1,12 +1,15 @@
 package locals_out;
 public class A_test513 {
 	public void foo() {
-		int i= 0;
-		int[] array= new int[10];
+		/*]*/int y;
+		int x= extracted();/*[*/
 		
-		/*]*/extracted(array, i);/*[*/
+		x++;
+		y= 10;
 	}
-	protected void extracted(int[] array, int i) {
-		array[i]= 10;
+	protected int extracted() {
+		int x= 0;
+		int y= 0;
+		return x;
 	}
 }

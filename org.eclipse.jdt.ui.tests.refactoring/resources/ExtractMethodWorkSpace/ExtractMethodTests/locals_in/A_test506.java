@@ -1,13 +1,12 @@
 package locals_in;
 
 public class A_test506 {
-	class Inner {
-		public int x;
+	public void foo() {
+		int x= 0;
+		
+		/*]*/bar(x);/*[*/
 	}
 	
-	public void foo() {
-		Inner inner= new Inner();
-		
-		/*]*/inner.x= 10;/*[*/
+	public void bar(int i) {
 	}
 }
