@@ -112,7 +112,7 @@ public class RefactoringStarter {
 			context.run(false, false, cco);
 			return cco.getStatus();
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, "Error", RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$
+			ExceptionHandler.handle(e, "Error", RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$ //$NON-NLS-2$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$
 		} catch (InterruptedException e) {
 			Assert.isTrue(false);
