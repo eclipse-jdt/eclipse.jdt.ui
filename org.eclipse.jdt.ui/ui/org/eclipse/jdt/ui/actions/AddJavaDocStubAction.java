@@ -15,20 +15,21 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddJavaDocStubOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -42,7 +43,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.ProgressService;
 
 /**
  * Creates a Java Doc Stubs for the selected members.
@@ -167,7 +167,10 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	public void run(ICompilationUnit cu, IMember[] members) {
 		try {
 			AddJavaDocStubOperation op= new AddJavaDocStubOperation(members);
-			 ProgressService.runSuspended(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));					
+			PlatformUI.getWorkbench().getProgressService().runInUI(
+				PlatformUI.getWorkbench().getProgressService(),
+				new WorkbenchRunnableAdapter(op, op.getScheduleRule()),
+				op.getScheduleRule());
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
 		} catch (InterruptedException e) {

@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -43,7 +44,6 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.ProgressService;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
@@ -129,7 +129,9 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			change.initializeValidationData(new NullProgressMonitor());
 			PerformChangeOperation op= RefactoringUI.createUIAwareChangeOperation(change);
 			// must be fork == false since file buffers can't be manipulated in a different thread.
-			ProgressService.runSuspended(new BusyIndicatorRunnableContext(), false, false, new WorkbenchRunnableAdapter(op));
+			WorkbenchRunnableAdapter adapter= new WorkbenchRunnableAdapter(op);
+			PlatformUI.getWorkbench().getProgressService().runInUI(
+				new BusyIndicatorRunnableContext(), adapter, adapter.getSchedulingRule());
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
 		} catch (InvocationTargetException e) {

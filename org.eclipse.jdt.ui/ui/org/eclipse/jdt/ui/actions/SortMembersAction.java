@@ -15,6 +15,10 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -26,11 +30,8 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.SortMembersOperation;
 
@@ -46,7 +47,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.ProgressService;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -202,7 +202,9 @@ public class SortMembersAction extends SelectionDispatchAction {
 		SortMembersOperation op= new SortMembersOperation(cu, null);
 		try {
 			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-			ProgressService.runSuspended(context, false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
+			PlatformUI.getWorkbench().getProgressService().runInUI(context,
+				new WorkbenchRunnableAdapter(op, op.getScheduleRule()),
+				op.getScheduleRule());
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
 		} catch (InterruptedException e) {
