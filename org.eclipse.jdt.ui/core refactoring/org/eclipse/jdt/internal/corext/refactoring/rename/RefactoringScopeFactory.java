@@ -89,8 +89,16 @@ public class RefactoringScopeFactory {
 		IProject[] referencingProjects= focus.getProject().getReferencingProjects();
 		for (int i= 0; i < referencingProjects.length; i++) {
 			IJavaProject candidate= JavaCore.create(referencingProjects[i]);
-			if (projects.contains(candidate))
-				continue; // break cycle	
+			if (candidate == null || projects.contains(candidate))
+				continue; // break cycle
+			try {
+				// TODO workaround for http://dev.eclipse.org/bugs/show_bug.cgi?id=29404
+				candidate.getResolvedClasspath(true);	
+			} catch (JavaModelException e) {
+				if (e.isDoesNotExist())
+					continue;
+				throw e;
+			}
 			IClasspathEntry entry= getReferencingClassPathEntry(candidate, focus);
 			if (entry != null) {
 				projects.add(candidate);

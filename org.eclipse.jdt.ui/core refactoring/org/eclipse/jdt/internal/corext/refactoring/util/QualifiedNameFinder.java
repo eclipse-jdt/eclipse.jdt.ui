@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,12 +21,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
 import org.eclipse.search.internal.core.text.TextSearchEngine;
 import org.eclipse.search.internal.core.text.TextSearchScope;
+
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
@@ -56,6 +58,7 @@ public class QualifiedNameFinder {
 			if (change == null) {
 				change= new TextFileChange(resource.getName(), (IFile)resource);
 				fChanges.put(resource, change);
+				fChangesList.add(change);
 			}
 			change.addTextEdit("Update fully qualified name", SimpleTextEdit.createReplace(start, length, fNewValue));
 		}
@@ -69,33 +72,35 @@ public class QualifiedNameFinder {
 		}
 	}
 	
-	private String fFilePatterns;
 	private String fPattern;
 	private String fNewValue;
+	private TextSearchScope fScope;
 	
 	private Map fChanges;
+	private List fChangesList;
 	private IProgressMonitor fProgressMonitor;
 	
 	
-	public QualifiedNameFinder(String filePatterns, String pattern, String newValue) {
+	public QualifiedNameFinder(String pattern, String newValue, String filePatterns, IProject root)  throws JavaModelException {
 		Assert.isNotNull(filePatterns);
 		Assert.isNotNull(pattern);
 		Assert.isNotNull(newValue);
-		fFilePatterns= filePatterns;
+		Assert.isNotNull(root);
 		fPattern= pattern;
 		fNewValue= newValue;
+		fScope= createScope(filePatterns, root);
 		fChanges= new HashMap();
+		fChangesList= new ArrayList();
 	}
 	
 	public void process(IProgressMonitor monitor) {
 		ResultCollector collector= new ResultCollector(fNewValue, monitor);
 		TextSearchEngine engine= new TextSearchEngine();
-		engine.search(ResourcesPlugin.getWorkspace(), fPattern, "", createScope(), collector);
+		engine.search(ResourcesPlugin.getWorkspace(), fPattern, "", fScope, collector);
 	}
 	
 	public TextChange[] getAllChanges() {
-		Collection values= fChanges.values();
-		return (TextChange[])values.toArray(new TextChange[values.size()]);
+		return (TextChange[])fChangesList.toArray(new TextChange[fChangesList.size()]);
 	}
 	
 	public IFile[] getAllFiles() {
@@ -103,20 +108,33 @@ public class QualifiedNameFinder {
 		return (IFile[])keys.toArray(new IFile[keys.size()]);			
 	}
 	
-	private TextSearchScope createScope() {
-		String[] patterns= splitFilePatterns();
-		TextSearchScope result= TextSearchScope.newWorkspaceScope();
+	private static TextSearchScope createScope(String filePatterns, IProject root) throws JavaModelException {
+		String[] patterns= splitFilePatterns(filePatterns);
+		TextSearchScope result= new TextSearchScope("");
+		result.add(root);
+		addReferencingProjects(result, root);
 		for (int i= 0; i < patterns.length; i++) {
 			result.addExtension(patterns[i]);
 		}
 		return result;
 	}
 	
-	private String[] splitFilePatterns() {
+	private static String[] splitFilePatterns(String filePatterns) {
 		List result= new ArrayList();
-		StringTokenizer tokenizer= new StringTokenizer(fFilePatterns, ",");
+		StringTokenizer tokenizer= new StringTokenizer(filePatterns, ",");
 		while(tokenizer.hasMoreTokens())
-			result.add(tokenizer.nextToken());
+			result.add(tokenizer.nextToken().trim());
 		return (String[]) result.toArray(new String[result.size()]);	
-	}	
+	}
+	
+	private static void addReferencingProjects(TextSearchScope scope, IProject root) {
+		IProject[] projects= root.getReferencingProjects();
+		for (int i= 0; i < projects.length; i++) {
+			IProject project= projects[i];
+			if (!scope.encloses(project)) {
+				scope.add(project);
+				addReferencingProjects(scope, project);
+			}
+		}
+	}
 }

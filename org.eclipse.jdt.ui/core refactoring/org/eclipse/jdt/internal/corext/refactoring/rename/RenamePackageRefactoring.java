@@ -533,8 +533,9 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		}	
 	}
 	
-	private void computeQualifiedNameMatches(IProgressMonitor pm) {
-		fQualifiedNameFinder= new QualifiedNameFinder(fFilePatterns, fPackage.getElementName(), fNewName);
+	private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {
+		fQualifiedNameFinder= new QualifiedNameFinder(fPackage.getElementName(), fNewName, 
+			fFilePatterns, fPackage.getJavaProject().getProject());
 		fQualifiedNameFinder.process(pm);
 	}	
 }

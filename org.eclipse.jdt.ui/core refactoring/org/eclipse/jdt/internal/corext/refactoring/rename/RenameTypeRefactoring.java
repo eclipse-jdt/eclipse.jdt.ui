@@ -384,7 +384,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 
 			result.merge(validateModifiesFiles());
 			return result;
-		} catch (CoreException e){
+		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		} finally {
 			pm.done();
@@ -828,10 +828,10 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		}
 	}
 	
-	private void computeQualifiedNameMatches(IProgressMonitor pm) {
+	private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {
 		IPackageFragment fragment= fType.getPackageFragment();
-		fQualifiedNameFinder= new QualifiedNameFinder(fFilePatterns, fType.getFullyQualifiedName(), 
-			fragment.getElementName() + "." + fNewName);
+		fQualifiedNameFinder= new QualifiedNameFinder(fType.getFullyQualifiedName(),  fragment.getElementName() + "." + fNewName,
+			fFilePatterns, fType.getJavaProject().getProject());
 		fQualifiedNameFinder.process(pm);
 	}	
 }
