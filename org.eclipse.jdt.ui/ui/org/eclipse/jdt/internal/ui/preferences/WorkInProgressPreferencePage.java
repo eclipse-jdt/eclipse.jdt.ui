@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.text.java.ExperimentalPreference;
  */
 public class WorkInProgressPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= "PackagesView.pkgNamePatternForPackagesView"; //$NON-NLS-1$
+
 	public static final String PREF_SYNC_OUTLINE_ON_CURSOR_MOVE= "JavaEditor.SyncOutlineOnCursorMove";
 
 
@@ -40,7 +40,6 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, false);
-		store.setDefault(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, "");
 		store.setDefault(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
 	}
 	
@@ -62,13 +61,6 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 			parent
         );
 		addField(boolEditor);
-        StringFieldEditor stringEditor= new StringFieldEditor(
-        	PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW,
-			JavaUIMessages.getString("WorkInProgressPreferencePage.packagesView.pkgNamePatternForPackagesView.text"), //$NON-NLS-1$
-			parent
-        );
-        stringEditor.getLabelControl(parent).setToolTipText(JavaUIMessages.getString("WorkInProgressPreferencePage.packagesView.pkgNamePatternForPackagesView.tooltip")); //$NON-NLS-1$
-		addField(stringEditor);
 		 		
 		boolEditor= new BooleanFieldEditor(
 			PREF_SYNC_OUTLINE_ON_CURSOR_MOVE,
@@ -78,14 +70,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 		addField(boolEditor);
 	}
 		
-	static public boolean isCompressingPkgNameInPackagesView() {
-		return getPkgNamePatternForPackagesView().length() > 0;
-	}
 	
-	static public String getPkgNamePatternForPackagesView() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW);
-	}
 	
 	static public boolean synchronizeOutlineOnCursorMove() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE);

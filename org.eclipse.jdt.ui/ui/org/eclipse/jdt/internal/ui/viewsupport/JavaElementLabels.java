@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 
 public class JavaElementLabels {
@@ -613,7 +614,7 @@ public class JavaElementLabels {
 	}	
 
 	private static void refreshPackageNamePattern() {
-		String pattern= WorkInProgressPreferencePage.getPkgNamePatternForPackagesView();
+		String pattern= AppearancePreferencePage.getPkgNamePatternForPackagesView();
 		if (pattern.equals(fgPkgNamePattern))
 			return;
 		else if (pattern.equals("")) {

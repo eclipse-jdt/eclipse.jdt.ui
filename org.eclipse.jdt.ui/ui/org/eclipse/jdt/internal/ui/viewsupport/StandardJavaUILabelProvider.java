@@ -43,7 +43,7 @@ public class StandardJavaUILabelProvider extends JavaUILabelProvider implements 
 		if (!AppearancePreferencePage.showMethodReturnType()) {
 			fTextFlagMask ^= JavaElementLabels.M_APP_RETURNTYPE;
 		}
-		if (!WorkInProgressPreferencePage.isCompressingPkgNameInPackagesView()) {
+		if (!AppearancePreferencePage.isCompressingPkgNameInPackagesView()) {
 			fTextFlagMask ^= JavaElementLabels.P_COMPRESSED;
 		}
 		
@@ -57,7 +57,7 @@ public class StandardJavaUILabelProvider extends JavaUILabelProvider implements 
 		String property= event.getProperty();
 		if (property.equals(AppearancePreferencePage.PREF_METHOD_RETURNTYPE)
 				|| property.equals(AppearancePreferencePage.PREF_OVERRIDE_INDICATOR)
-				|| property.equals(WorkInProgressPreferencePage.PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW)) {
+				|| property.equals(AppearancePreferencePage.PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW)) {
 			initMasks();
 			LabelProviderChangedEvent lpEvent= new LabelProviderChangedEvent(this, null); // refresh all
 			fireLabelProviderChanged(lpEvent);
