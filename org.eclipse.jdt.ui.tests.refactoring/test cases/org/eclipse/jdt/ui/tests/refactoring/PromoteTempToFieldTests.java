@@ -367,6 +367,41 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 	
+	public void testEnablement12() throws Exception{
+        boolean expectedCanEnableInitInConstructors	= false;
+        boolean expectedCanEnableInitInMethod			= true;
+        boolean expectedCanEnableInitInField			= false;
+        boolean expectedCanEnableSettingStatic			= true;
+        boolean expectedCanEnableSettingFinal			= false;
+        
+        String newName= "i";
+		boolean declareStatic = false;
+	  	boolean declareFinal= false;
+	  	int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+	  	int accessModifier= Modifier.PRIVATE;
+        
+		enablementHelper(5, 16, 5, 17, newName, declareStatic, declareFinal, initializeIn, accessModifier,
+					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
+	}
+	
+	public void testEnablement13() throws Exception{
+        boolean expectedCanEnableInitInConstructors	= false;
+        boolean expectedCanEnableInitInMethod			= true;
+        boolean expectedCanEnableInitInField			= false;
+        boolean expectedCanEnableSettingStatic			= true;
+        boolean expectedCanEnableSettingFinal			= false;
+        
+        String newName= "i";
+		boolean declareStatic = false;
+	  	boolean declareFinal= false;
+	  	int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+	  	int accessModifier= Modifier.PRIVATE;
+        
+		enablementHelper(4, 18, 4, 19, newName, declareStatic, declareFinal, initializeIn, accessModifier,
+					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
+	}
+	
+			
 	///---- test failing preconditions --------------
 	
 	public void testFail0() throws Exception{
@@ -381,10 +416,6 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		failHelper(5, 15, 5, 16, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
 
-	public void testFail3() throws Exception{
-//TODO: is fine		failHelper(5, 16, 5, 17, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR, Modifier.PRIVATE, RefactoringStatus.FATAL);
-	}
-
 	public void testFail4() throws Exception{
 		failHelper(7, 13, 7, 14, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
@@ -393,10 +424,6 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		failHelper(6, 13, 6, 14, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
 
-	public void testFail6() throws Exception{
-//TODO: is fine		failHelper(4, 18, 4, 19, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR, Modifier.PRIVATE, RefactoringStatus.FATAL);
-	}
-	
 	public void testFailGenerics1() throws Exception{
 		failHelper(6, 12, 6, 12, "fYou", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
@@ -603,6 +630,22 @@ public class PromoteTempToFieldTests extends RefactoringTest{
         boolean declareFinal= false;
         boolean declareStatic= false;
 		passHelper(6, 12, 6, 12, "fMyT", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void testEnum1() throws Exception {
+        int accessModifier= Modifier.PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
+        boolean declareFinal= true;
+        boolean declareStatic= false;
+		passHelper(6, 13, 6, 16, "fVar", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void testEnum2() throws Exception {
+        int accessModifier= Modifier.PUBLIC;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
+        boolean declareFinal= true;
+        boolean declareStatic= true;
+		passHelper(10, 21, 10, 21, "fM", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 	
 }
