@@ -30,6 +30,7 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
+import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.jdt.core.*;
@@ -1348,7 +1349,10 @@ public class StubUtility {
 	
 	public static void setCodeTemplate(String templateId, String pattern, IJavaProject project) {
 		TemplateStore codeTemplateStore= JavaPlugin.getDefault().getCodeTemplateStore();
-		codeTemplateStore.findTemplateById(templateId).setPattern(pattern);
+		TemplatePersistenceData data= codeTemplateStore.getTemplateData(templateId);
+		Template orig= data.getTemplate();
+		Template copy= new Template(orig.getName(), orig.getDescription(), orig.getContextTypeId(), pattern);
+		data.setTemplate(copy);
 	}
 	
 	private static Template getCodeTemplate(String id, IJavaProject project) {
