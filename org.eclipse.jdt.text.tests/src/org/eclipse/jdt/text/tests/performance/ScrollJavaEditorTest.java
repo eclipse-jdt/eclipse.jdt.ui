@@ -13,8 +13,6 @@ package org.eclipse.jdt.text.tests.performance;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.ui.PartInitException;
-
 public class ScrollJavaEditorTest extends ScrollEditorTest {
 	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
@@ -23,11 +21,69 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 
 	private IFile fFile;
 
-	public void testScrollJavaEditor1() throws PartInitException {
+	public void testScrollJavaEditorLineWise1() {
+		setScrollingMode(LINE_WISE);
+		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
 
-	public void testScrollJavaEditor2() throws PartInitException {
+	public void testScrollJavaEditorLineWise2() {
+		setScrollingMode(LINE_WISE);
+		setPreloadEvents(false);
+		measureScrolling(N_OF_RUNS);
+	}
+
+	public void testScrollJavaEditorPageWise() {
+		setScrollingMode(PAGE_WISE);
+		setPreloadEvents(false);
+		measureScrolling(N_OF_RUNS);
+	}
+
+	public void testScrollJavaEditorLineWisePreloaded1() {
+		setScrollingMode(LINE_WISE);
+		setPreloadEvents(true);
+		measureScrolling(N_OF_RUNS);
+	}
+	
+	public void testScrollJavaEditorLineWisePreloaded2() {
+		setScrollingMode(LINE_WISE);
+		setPreloadEvents(true);
+		measureScrolling(N_OF_RUNS);
+	}
+
+	public void testScrollJavaEditorPageWisePreloaded1() {
+		setScrollingMode(PAGE_WISE);
+		setPreloadEvents(true);
+		measureScrolling(N_OF_RUNS);
+	}
+
+	public void testScrollJavaEditorPageWisePreloaded2() {
+		setScrollingMode(PAGE_WISE);
+		setPreloadEvents(true);
+		measureScrolling(N_OF_RUNS);
+	}
+
+	public void testScrollJavaEditorLineWiseMoveCaret1() {
+		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setPreloadEvents(false);
+		measureScrolling(N_OF_RUNS);
+	}
+	
+	public void testScrollJavaEditorLineWiseMoveCaret2() {
+		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setPreloadEvents(false);
+		measureScrolling(N_OF_RUNS);
+	}
+
+	public void testScrollJavaEditorLineWiseMoveCaretPreloaded1() {
+		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setPreloadEvents(true);
+		measureScrolling(N_OF_RUNS);
+	}
+	
+	public void testScrollJavaEditorLineWiseMoveCaretPreloaded2() {
+		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setPreloadEvents(true);
 		measureScrolling(N_OF_RUNS);
 	}
 

@@ -28,31 +28,40 @@ public class SWTEventHelper {
 	}
 
 	public static void pressKeyCode(Display display, int keyCode) {
-		keyCodeDown(display, keyCode);
-		keyCodeUp(display, keyCode);
+		pressKeyCode(display, keyCode, true);
+	}
+	
+	public static void pressKeyCode(Display display, int keyCode, boolean runEventQueue) {
+		keyCodeDown(display, keyCode, runEventQueue);
+		keyCodeUp(display, keyCode, runEventQueue);
 	}
 
 	public static void pressKeyCodeCombination(Display display, int[] keyCodes) {
+		pressKeyCodeCombination(display, keyCodes, true);
+	}
+	
+	public static void pressKeyCodeCombination(Display display, int[] keyCodes, boolean runEventQueue) {
 		for (int i= 0; i < keyCodes.length; i++)
-			keyCodeDown(display, keyCodes[i]);
+			keyCodeDown(display, keyCodes[i], runEventQueue);
 		for (int i= keyCodes.length - 1; i >= 0; i--)
-			keyCodeUp(display, keyCodes[i]);
+			keyCodeUp(display, keyCodes[i], runEventQueue);
 	}
 
-	private static void keyCodeDown(Display display, int keyCode) {
-		keyCodeEvent(display, SWT.KeyDown, keyCode);
+	private static void keyCodeDown(Display display, int keyCode, boolean runEventQueue) {
+		keyCodeEvent(display, SWT.KeyDown, keyCode, runEventQueue);
 	}
 
-	private static void keyCodeUp(Display display, int keyCode) {
-		keyCodeEvent(display, SWT.KeyUp, keyCode);
+	private static void keyCodeUp(Display display, int keyCode, boolean runEventQueue) {
+		keyCodeEvent(display, SWT.KeyUp, keyCode, runEventQueue);
 	}
 
 	private static Event sfKeyCodeEvent= new Event();
-	private static void keyCodeEvent(Display display, int type, int keyCode) {
+	private static void keyCodeEvent(Display display, int type, int keyCode, boolean runEventQueue) {
 		sfKeyCodeEvent.type= type;
 		sfKeyCodeEvent.keyCode= keyCode;
 		
 		display.post(sfKeyCodeEvent);
-		EditorTestHelper.runEventQueue();
+		if (runEventQueue)
+			EditorTestHelper.runEventQueue();
 	}
 }
