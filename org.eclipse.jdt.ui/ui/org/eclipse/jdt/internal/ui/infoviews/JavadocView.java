@@ -73,6 +73,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 /**
  * View which shows Javadoc for a given Java element.
  * 
+ * XXX: As of 3.0 context menu is not yet supported in Browser widget
+ * 		see https://bugs.eclipse.org/bugs/show_bug.cgi?id=59698
+ * 
  * @since 3.0
  */
 public class JavadocView extends AbstractInfoView {
