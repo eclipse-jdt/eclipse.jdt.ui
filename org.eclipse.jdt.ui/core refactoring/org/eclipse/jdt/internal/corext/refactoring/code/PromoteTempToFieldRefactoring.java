@@ -11,15 +11,22 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ILocalVariable;
@@ -54,8 +61,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -75,13 +80,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
+import org.eclipse.jdt.ui.CodeGeneration;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
 public class PromoteTempToFieldRefactoring extends Refactoring {
 
@@ -104,6 +105,10 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     private CompilationUnit fCompilationUnitNode;
     private VariableDeclaration fTempDeclarationNode;
     private final CodeGenerationSettings fCodeGenerationSettings;
+	//------ analysis ---------//
+	private boolean fInitializerUsesLocalTypes;
+	private boolean fTempTypeUsesClassTypeVariables;
+	
 	
 	private PromoteTempToFieldRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){
 		Assert.isTrue(selectionStart >= 0);
@@ -192,7 +197,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	
 	public boolean canEnableSettingStatic(){
 		return fInitializeIn != INITIALIZE_IN_CONSTRUCTOR &&
-				! isTempDeclaredInStaticMethod();
+				! isTempDeclaredInStaticMethod() &&
+				! fTempTypeUsesClassTypeVariables;
 	}
 	
 	public boolean canEnableSettingFinal(){
@@ -212,6 +218,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	
 	public boolean canEnableSettingDeclareInConstructors(){
 		return ! fDeclareStatic &&
+				! fInitializerUsesLocalTypes &&
 				! getMethodDeclaration().isConstructor() &&
 				! isDeclaredInAnonymousClass() && 
 				! isTempDeclaredInStaticMethod() && 
@@ -227,7 +234,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 
 	public boolean canEnableSettingDeclareInFieldDeclaration(){
-		return tempHasInitializer();
+		return ! fInitializerUsesLocalTypes && tempHasInitializer();
 	}
 
     private Expression getTempInitializer() {
@@ -273,7 +280,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		result.merge(checkTempTypeForLocalTypeUsage());
 		if (result.hasFatalError())
 		    return result;
-		 
+		
+		checkTempInitializerForLocalTypeUsage();
+		
 		initializeDefaults();
 		return result;
 	}
@@ -338,18 +347,15 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		return dim;
 	}
         
-    private RefactoringStatus checkTempInitializerForLocalTypeUsage() {
+    private void checkTempInitializerForLocalTypeUsage() {
     	Expression initializer= fTempDeclarationNode.getInitializer();
     	if (initializer == null)
-	        return null;
+	        return;
 	    
-	    LocalTypeAndVariableUsageAnalyzer localTypeAnalyer= new LocalTypeAndVariableUsageAnalyzer();
+		ITypeBinding[] methodTypeParameters= getMethodDeclaration().resolveBinding().getTypeParameters();
+	    LocalTypeAndVariableUsageAnalyzer localTypeAnalyer= new LocalTypeAndVariableUsageAnalyzer(methodTypeParameters);
 	    initializer.accept(localTypeAnalyer);
-	    //do not create a list - it is not shown in a dialog anyway.
-	    //can optimize here to not walk the whole expression but only until 1 match is found
-	    if (! localTypeAnalyer.getUsageOfEnclosingNodes().isEmpty())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.uses_types_declared_locally")); //$NON-NLS-1$
-        return null;
+	    fInitializerUsesLocalTypes= ! localTypeAnalyer.getUsageOfEnclosingNodes().isEmpty();
     }
     
     private RefactoringStatus checkTempTypeForLocalTypeUsage(){
@@ -360,7 +366,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	ITypeBinding binding= type.resolveBinding();
     	if (binding == null)
     		return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.cannot_promote")); //$NON-NLS-1$
-    	if (binding.isLocal())
+    	
+		ITypeBinding[] methodTypeParameters= getMethodDeclaration().resolveBinding().getTypeParameters();
+		LocalTypeAndVariableUsageAnalyzer analyzer= new LocalTypeAndVariableUsageAnalyzer(methodTypeParameters);
+		type.accept(analyzer);
+		boolean usesLocalTypes= ! analyzer.getUsageOfEnclosingNodes().isEmpty();
+		fTempTypeUsesClassTypeVariables= analyzer.getClassTypeVariablesUsed();
+		if (usesLocalTypes)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.uses_type_declared_locally")); //$NON-NLS-1$
 		return null;    	
     }
@@ -391,13 +403,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
      */
     public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
     	try{
-	        RefactoringStatus result= new RefactoringStatus();
-	        
-	        if (fInitializeIn != INITIALIZE_IN_METHOD)
-	        	result.merge(checkTempInitializerForLocalTypeUsage());
-	        if (result.hasFatalError())
-	        	return result;
-	        
+	        RefactoringStatus result= new RefactoringStatus();	        
 	        result.merge(checkClashesWithExistingFields());  
 	        if (fInitializeIn == INITIALIZE_IN_CONSTRUCTOR)
 		        result.merge(checkClashesInConstructors());  
@@ -732,9 +738,17 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     private static class LocalTypeAndVariableUsageAnalyzer extends HierarchicalASTVisitor{
     	private final List fLocalDefinitions= new ArrayList(0); // List of IBinding (Variable and Type)
     	private final List fLocalReferencesToEnclosing= new ArrayList(0); // List of ASTNodes
-    	public List getUsageOfEnclosingNodes(){
-    		return fLocalReferencesToEnclosing;
-    	}
+		private final List fMethodTypeVariables;
+		private boolean fClassTypeVariablesUsed= false;
+    	public LocalTypeAndVariableUsageAnalyzer(ITypeBinding[] methodTypeVariables) {
+			fMethodTypeVariables= Arrays.asList(methodTypeVariables);
+		}
+		public List getUsageOfEnclosingNodes(){
+			return fLocalReferencesToEnclosing;
+		}
+		public boolean getClassTypeVariablesUsed() {
+			return fClassTypeVariablesUsed;
+		}
 		public boolean visit(SimpleName node) {
 			ITypeBinding typeBinding= node.resolveTypeBinding();
 			if (typeBinding != null && typeBinding.isLocal()) {
@@ -742,6 +756,17 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 					fLocalDefinitions.add(typeBinding);
 				} else if (! fLocalDefinitions.contains(typeBinding)) {
 					fLocalReferencesToEnclosing.add(node);
+				}
+			}
+			if (typeBinding != null && typeBinding.isTypeVariable()) {
+				if (node.isDeclaration()) {
+					fLocalDefinitions.add(typeBinding);
+				} else if (! fLocalDefinitions.contains(typeBinding)) {
+					if (fMethodTypeVariables.contains(typeBinding)) {
+						fLocalReferencesToEnclosing.add(node);
+					} else {
+						fClassTypeVariablesUsed= true;
+					}
 				}
 			}
 			IBinding binding= node.resolveBinding();
@@ -753,26 +778,6 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 				}
 			}
 			return super.visit(node);
-//		
-//		public boolean visit(Type node) {
-//	  		ITypeBinding typeBinding= node.resolveBinding();
-//	  		if (typeBinding != null && typeBinding.isLocal() && !fLocalDefinitions.contains(typeBinding))
-//	  			fLocalReferencesToEnclosing.add(node);
-//			return super.visit(node); 
-//		}
-//		public boolean visit(Name node) {
-//			ITypeBinding typeBinding= node.resolveTypeBinding();
-//			if (typeBinding != null && typeBinding.isLocal())
-//				fLocalTypes.add(node);
-//			else {
-//				IBinding binding= node.resolveBinding();
-//				if (binding != null && binding.getKind() == IBinding.TYPE && ((ITypeBinding)binding).isLocal())
-//					fLocalTypes.add(node);
-//				else if (binding != null && binding.getKind() == IBinding.VARIABLE && ! ((IVariableBinding)binding).isField())
-//					fLocalTypes.add(node);
-//			}
-//            return super.visit(node);
-//        }
 		}
     }    
 }
