@@ -156,20 +156,30 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		super();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.addPropertyChangeListener(this);
-		DebugPlugin.getDefault().addDebugEventListener(this);
-		initializeThreadPool();
 	}
 	
 	public void dispose() {
 		super.dispose();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.removePropertyChangeListener(this);
-		DebugPlugin.getDefault().removeDebugEventListener(this);
-		fThreadPool.clear();
+		disposeThreadPool();
+	}
+	
+	/**
+	 * If the thread pool was used, it is disposed, and this
+	 * presentation is removed as a debug event listener.
+	 */
+	protected void disposeThreadPool() {
+		if (fThreadPool != null) {
+			DebugPlugin.getDefault().removeDebugEventListener(this);
+			fThreadPool.clear();
+		}
 	}
 
 	/**
-	 * Initializes the thread pool with all suspended Java threads
+	 * Initializes the thread pool with all suspended Java
+	 * threads. Registers this presentation as a debug event
+	 * handler.
 	 */
 	protected void initializeThreadPool() {
 		fThreadPool = new Hashtable();
@@ -190,7 +200,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 				}
 			}
 		}
-		
+		DebugPlugin.getDefault().addDebugEventListener(this);
 	}
 	
 	/**
@@ -222,7 +232,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	 * <p>
 	 * This presentation maintains a pool of suspended
 	 * threads per VM. Any suspended thread in the same
-	 * VM may be used.
+	 * VM may be used. The pool is lazily initialized on
+	 * the first call to this method.
 	 * </p>
 	 * 
 	 * @param debug target the target in which a thread is 
@@ -230,6 +241,9 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	 * @return thread or <code>null</code>
 	 */
 	protected IJavaThread getEvaluationThread(IJavaDebugTarget target) {
+		if (fThreadPool == null) {
+			initializeThreadPool();
+		}
 		List threads = (List)fThreadPool.get(target);
 		if (threads != null && !threads.isEmpty()) {
 			return (IJavaThread)threads.get(0);
