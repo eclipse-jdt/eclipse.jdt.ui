@@ -234,7 +234,11 @@ public class MethodsViewer extends ProblemTableViewer {
 						}
 					}
 				}
-				newSelection= new StructuredSelection(newSelectionElements);
+				if (!newSelectionElements.isEmpty()) {
+					newSelection= new StructuredSelection(newSelectionElements);
+				} else if (currElements.length > 0) {
+					newSelection= new StructuredSelection(currElements[0]);
+				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
