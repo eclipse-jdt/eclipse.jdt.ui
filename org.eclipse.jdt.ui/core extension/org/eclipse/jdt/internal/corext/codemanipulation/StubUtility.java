@@ -104,8 +104,14 @@ public class StubUtility {
 			buf.append('\n');
 		}
 		// add method declaration
-		String bodyStatement= settings.noBody ? null : getDefaultMethodBodyStatement(methName, paramNames, returnType, settings.callSuper);
-		String bodyContent= getMethodBodyContent(returnType == null, method.getJavaProject(), destTypeName, methName, bodyStatement);
+		String bodyContent= null;
+		if (!settings.noBody) {
+			String bodyStatement= getDefaultMethodBodyStatement(methName, paramNames, returnType, settings.callSuper);
+			bodyContent= getMethodBodyContent(returnType == null, method.getJavaProject(), destTypeName, methName, bodyStatement);
+			if (bodyContent == null) {
+				bodyContent= ""; //$NON-NLS-1$
+			}
+		}
 		genMethodDeclaration(destTypeName, method, bodyContent, imports, buf);
 		return buf.toString();
 	}
