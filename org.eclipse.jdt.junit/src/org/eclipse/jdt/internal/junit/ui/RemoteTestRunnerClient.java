@@ -367,8 +367,6 @@ public class RemoteTestRunnerClient {
 		// extract the test name and add it as the testId
 		int index0= treeEntry.indexOf(',');
 		String testName= treeEntry.substring(0, index0).trim();
-		System.out.println("original:"+fVersion+"+"+treeEntry);
-		System.out.println(testName+","+treeEntry);
 		return testName+","+treeEntry; //$NON-NLS-1$
 	}
 
