@@ -72,7 +72,6 @@ public class PullUpTests extends RefactoringTest {
 			IMethod[] methods= getMethods(type, methodNames, signatures);
 
 			PullUpRefactoring ref= createRefactoring(merge(methods, fields));
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 			setSuperclassAsTargetClass(ref);
 
@@ -82,7 +81,7 @@ public class PullUpTests extends RefactoringTest {
 				ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
 								
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
+			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());	
 			performChange(ref, false);
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
@@ -117,7 +116,6 @@ public class PullUpTests extends RefactoringTest {
 
 			IMember[] members= merge(methods, fields);
 			PullUpRefactoring ref= createRefactoring(members);
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 			setSuperclassAsTargetClass(ref);
 
@@ -154,7 +152,7 @@ public class PullUpTests extends RefactoringTest {
 			setTargetClass(ref, targetClassIndex);
 		
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
+			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());	
 			performChange(ref, false);
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
@@ -176,7 +174,7 @@ public class PullUpTests extends RefactoringTest {
 			setTargetClass(ref, targetClassIndex);
 
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to fail", ! checkInputResult.isOK());	
+			assertTrue("precondition was supposed to fail", !checkInputResult.isOK());	
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -202,7 +200,6 @@ public class PullUpTests extends RefactoringTest {
 		IMember[] selectedMembers= merge(selectedFields, selectedMethods, selectedTypes);
 		
 		PullUpRefactoring ref= createRefactoring(selectedMembers);
-//		assertTrue("preactivation", ref.checkPreactivation().isOK());
 		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 		
 		setTargetClass(ref, targetClassIndex);
@@ -234,7 +231,7 @@ public class PullUpTests extends RefactoringTest {
 			PullUpRefactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, selectedTypeNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfTypesToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, deleteAllPulledUpMethods, deleteAllMatchingMethods, targetClassIndex, cu);
 
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to fail", ! checkInputResult.isOK());	
+			assertTrue("precondition was supposed to fail", !checkInputResult.isOK());	
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -253,7 +250,7 @@ public class PullUpTests extends RefactoringTest {
 			PullUpRefactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, selectedTypeNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfTypesToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, deleteAllPulledUpMethods, deleteAllMatchingMethods, targetClassIndex, cu);
 
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
+			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());	
 			performChange(ref, false);
 
 			String expected= getFileContents(getOutputTestFileName("A"));
@@ -280,7 +277,7 @@ public class PullUpTests extends RefactoringTest {
 				ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
+			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());	
 			performChange(ref, false);
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
@@ -306,7 +303,7 @@ public class PullUpTests extends RefactoringTest {
 				ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to fail", ! checkInputResult.isOK());	
+			assertTrue("precondition was supposed to fail", !checkInputResult.isOK());	
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -320,7 +317,6 @@ public class PullUpTests extends RefactoringTest {
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertEquals("activation", shouldActivationCheckPass, ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 			if (! shouldActivationCheckPass)
 				return;
@@ -331,7 +327,7 @@ public class PullUpTests extends RefactoringTest {
 				ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
 
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to fail", ! checkInputResult.isOK());	
+			assertTrue("precondition was supposed to fail", !checkInputResult.isOK());	
 		} finally{
 			performDummySearch();
 			cuA.delete(false, null);
@@ -374,7 +370,7 @@ public class PullUpTests extends RefactoringTest {
 			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);
-			assertEquals("precondition was supposed to pass", null, result);
+			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 			
 			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
 			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
@@ -402,7 +398,7 @@ public class PullUpTests extends RefactoringTest {
 			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);
-			assertEquals("precondition was supposed to pass", null, result);
+			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 			
 			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
 			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
@@ -454,7 +450,7 @@ public class PullUpTests extends RefactoringTest {
 			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);
-			assertEquals("precondition was supposed to pass", null, result);
+			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 			
 			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
 			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
@@ -1655,7 +1651,7 @@ public class PullUpTests extends RefactoringTest {
 			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);
-			assertEquals("precondition was supposed to pass", null, result);
+			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 			
 			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
 			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
@@ -1706,7 +1702,7 @@ public class PullUpTests extends RefactoringTest {
 			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);
-			assertEquals("precondition was supposed to pass", null, result);
+			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 			
 			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
 			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
