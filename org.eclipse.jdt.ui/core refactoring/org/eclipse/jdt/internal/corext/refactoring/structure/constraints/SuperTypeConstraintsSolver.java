@@ -24,10 +24,10 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IDeclaredConstraintVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ISourceConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ImmutableTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
 
 /**
@@ -72,7 +72,7 @@ public final class SuperTypeConstraintsSolver {
 	private ITypeSet computeInitialTypeEstimate(final ConstraintVariable2 variable) {
 		Assert.isNotNull(variable);
 		final TType type= variable.getType();
-		if (variable instanceof PlainTypeVariable2 || !type.equals(fModel.getSubType()))
+		if (variable instanceof ImmutableTypeVariable2 || !type.equals(fModel.getSubType()))
 			return SuperTypeSet.createTypeSet(type);
 		return SuperTypeSet.createTypeSet(type, fModel.getSuperType());
 	}
@@ -143,17 +143,17 @@ public final class SuperTypeConstraintsSolver {
 		ITypeSet estimate= null;
 		ICompilationUnit unit= null;
 		ConstraintVariable2 variable= null;
-		IDeclaredConstraintVariable declaration= null;
+		ISourceConstraintVariable declaration= null;
 		for (final Iterator iterator= variables.iterator(); iterator.hasNext();) {
 			variable= (ConstraintVariable2) iterator.next();
-			if (variable instanceof IDeclaredConstraintVariable) {
+			if (variable instanceof ISourceConstraintVariable) {
 				estimate= variable.getTypeEstimate();
 				if (estimate != null) {
 					type= estimate.chooseSingleType();
 					if (type == fModel.getSuperType()) {
 						variable.setData(DATA_TYPE_ESTIMATE, type);
-						if (variable instanceof IDeclaredConstraintVariable) {
-							declaration= (IDeclaredConstraintVariable) variable;
+						if (variable instanceof ISourceConstraintVariable) {
+							declaration= (ISourceConstraintVariable) variable;
 							unit= declaration.getCompilationUnit();
 							if (unit != null) {
 								Collection matches= (Collection) fTypeOccurrences.get(unit);
