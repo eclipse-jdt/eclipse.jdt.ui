@@ -1068,6 +1068,14 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 		endVisitNode(doubleLiteral, scope);
 	}
 
+	public boolean visit(EmptyStatement node, BlockScope scope) {
+		return visitNode(node, scope);
+	}
+	
+	public void endVisit(EmptyStatement node, BlockScope scope) {
+		endVisitNode(node, scope);
+	}
+	
 	public boolean visit(EqualExpression equalExpression, BlockScope scope) {
 		if (!visitNode(equalExpression, scope))
 			return false;

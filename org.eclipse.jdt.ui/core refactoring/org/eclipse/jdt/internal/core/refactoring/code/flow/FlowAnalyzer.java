@@ -374,6 +374,10 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		// Leaf node.
 	}
 
+	public void endVisit(EmptyStatement node, BlockScope scope) {
+		// Leaf node.
+	}
+	
 	public void endVisit(EqualExpression node, BlockScope scope) {
 		if (skipNode(node))
 			return;
@@ -854,6 +858,11 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		return traverseNode(node);
 	}
 
+	public boolean visit(EmptyStatement node, BlockScope scope) {
+		// Empty statements aren't of any interest.
+		return false;
+	}
+	
 	public boolean visit(EqualExpression node, BlockScope scope) {
 		return traverseNode(node);
 	}

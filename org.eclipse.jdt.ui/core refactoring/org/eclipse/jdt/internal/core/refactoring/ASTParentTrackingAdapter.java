@@ -176,6 +176,11 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 		fVisitor.endVisit(doubleLiteral, scope);	
 	}
 
+	public void endVisit(EmptyStatement node, BlockScope scope) {
+		popParent();
+		fVisitor.endVisit(node, scope);
+	}
+	
 	public void endVisit(EqualExpression equalExpression, BlockScope scope) {
 		popParent();
 		fVisitor.endVisit(equalExpression, scope);	
@@ -579,6 +584,12 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 		return result;
 	}
 
+	public boolean visit(EmptyStatement node, BlockScope scope) {
+		boolean result= fVisitor.visit(node, scope);
+		pushParent(node);
+		return result;
+	}
+	
 	public boolean visit(EqualExpression equalExpression, BlockScope scope) {
 		boolean result= fVisitor.visit(equalExpression, scope);
 		pushParent(equalExpression);
