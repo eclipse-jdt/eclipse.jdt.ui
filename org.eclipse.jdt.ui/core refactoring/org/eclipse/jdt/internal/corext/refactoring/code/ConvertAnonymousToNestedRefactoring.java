@@ -181,6 +181,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		initializeDefaults();
 		if (getSuperConstructorBinding() == null)
 		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.compile_errors")); //$NON-NLS-1$
+		if (getSuperTypeBinding().isLocal())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.extends_local_type")); //TODO
 		return new RefactoringStatus();
     }
 
@@ -332,7 +334,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         try {
             RefactoringStatus status= validateInput();
             if (accessesAnonymousFields())
-                status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.annonymous_field_access"))); //$NON-NLS-1$
+                status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.anonymous_field_access"))); //$NON-NLS-1$
             return status;
         } finally {
             pm.done();
@@ -677,6 +679,15 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
     private Name getSuperTypeName() throws JavaModelException {
         return getAST().newName(Strings.splitByToken(getNodeSourceCode(getClassInstanceCreation().getName()), ".")); //$NON-NLS-1$
+    }
+    
+    private ITypeBinding getSuperTypeBinding() {
+    	ITypeBinding types= fAnonymousInnerClassNode.resolveBinding();
+    	ITypeBinding[] interfaces= types.getInterfaces();
+    	if (interfaces.length > 0)
+    		return interfaces[0];
+    	else
+    		return types.getSuperclass();
     }
 
     private String getNodeSourceCode(ASTNode node) throws JavaModelException {
