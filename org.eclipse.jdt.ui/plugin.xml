@@ -1766,6 +1766,11 @@
 		name= "%ActionDefinition.showInNavigatorView.name"
 		description= "%ActionDefinition.showInNavigatorView.description"
 	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket"
+		name= "%ActionDefinition.gotoMatchingBracket.name"
+		description= "%ActionDefinition.gotoMatchingBracket.description"
+	/>	
 
 	<!-- search -->
 	<actionDefinition

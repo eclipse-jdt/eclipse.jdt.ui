@@ -738,7 +738,8 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int lineOffset= document.getLineOffset(line);
 
 			// erase line delimiter
-			if (document.getLineDelimiter(line).equals(text)) {
+			String lineDelimiter= document.getLineDelimiter(line);
+			if (lineDelimiter != null && lineDelimiter.equals(text)) {
 				
 				String prefix= jdocExtractLinePrefix(document, line + 1);
 
@@ -755,9 +756,9 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			// backspace: beginning of a javadoc line
 			} else if (document.getChar(c.offset - 1) == '*' && jdocExtractLinePrefix(document, line).length() - 1 >= c.offset - lineOffset) {
 
+				lineDelimiter= document.getLineDelimiter(line - 1);
 				String prefix= jdocExtractLinePrefix(document, line);
-				String lineDelimiter= document.getLineDelimiter(line - 1);
-				int length= lineDelimiter.length() + prefix.length();
+				int length= (lineDelimiter != null ? lineDelimiter.length() : 0) + prefix.length();
 				document.replace(c.offset - length + 1, length, null);
 
 				c.doit= false;
