@@ -287,17 +287,24 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	}
 	
 	private SourceViewer createViewer(Composite parent) {
+		Label label= new Label(parent, SWT.NONE);
+		label.setText("Preview:");
+		GridData data= new GridData();
+		data.horizontalSpan= 2;
+		label.setLayoutData(data);
+		
 		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
 		viewer.setEditable(false);
 		viewer.setDocument(new Document());
+		viewer.getTextWidget().setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 	
 		Font font= JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
 		
 		Control control= viewer.getControl();
-		GridData data= new GridData(GridData.FILL_BOTH);
+		data= new GridData(GridData.FILL_BOTH);
 		data.heightHint= convertHeightInCharsToPixels(5);
 		control.setLayoutData(data);
 		
