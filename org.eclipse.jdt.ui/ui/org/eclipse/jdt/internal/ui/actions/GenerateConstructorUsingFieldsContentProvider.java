@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.actions;
+package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.ArrayList;
 import java.util.Iterator;

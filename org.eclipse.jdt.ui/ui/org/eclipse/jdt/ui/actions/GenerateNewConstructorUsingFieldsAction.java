@@ -52,6 +52,9 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.GenerateConstructorUsingFieldsContentProvider;
+import org.eclipse.jdt.internal.ui.actions.GenerateConstructorUsingFieldsSelectionDialog;
+import org.eclipse.jdt.internal.ui.actions.GenerateConstructorUsingFieldsValidator;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -83,9 +86,9 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 	private static final String DIALOG_TITLE= ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.title"); //$NON-NLS-1$
 
-	static final int DOWN_INDEX= 1;
+	static public final int DOWN_INDEX= 1;
 
-	static final int UP_INDEX= 0;
+	static public final int UP_INDEX= 0;
 
 	// ---- Structured Viewer -----------------------------------------------------------
 

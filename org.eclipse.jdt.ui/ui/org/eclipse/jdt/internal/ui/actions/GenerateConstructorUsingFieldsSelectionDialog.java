@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.actions;
+package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,15 +40,16 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 
+import org.eclipse.jdt.ui.actions.GenerateNewConstructorUsingFieldsAction;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
+public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 
 	class GenerateConstructorUsingFieldsTreeViewerAdapter implements ISelectionChangedListener, IDoubleClickListener {
 
