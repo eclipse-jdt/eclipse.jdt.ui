@@ -127,7 +127,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 */
 	public void addGroupDescription(GroupDescription description) {
 		Assert.isTrue(description != null && !fAutoMode);
-		fTextEditChanges.add(description);
+		fTextEditChanges.add(new EditChange(description, this));
 	}
 	
 	/**
