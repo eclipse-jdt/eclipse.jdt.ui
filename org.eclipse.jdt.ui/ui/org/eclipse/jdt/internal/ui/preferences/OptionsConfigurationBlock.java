@@ -80,7 +80,7 @@ public abstract class OptionsConfigurationBlock {
 					return i;
 				}
 			}
-			throw new IllegalArgumentException();
+			return 0;
 		}
 	}
 	
