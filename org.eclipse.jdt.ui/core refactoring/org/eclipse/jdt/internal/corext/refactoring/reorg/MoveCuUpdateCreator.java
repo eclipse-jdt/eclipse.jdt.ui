@@ -236,13 +236,26 @@ public class MoveCuUpdateCreator {
 			if (je.getElementType() != IJavaElement.COMPILATION_UNIT)
 				continue;
 			ICompilationUnit referencingCu= (ICompilationUnit)je;
-			if (hasSimpleReference(searchResultGroup) 
-				&& (!referencingCu.equals(movedUnit)) 
-				&& (!cuList.contains(referencingCu))){
-					result.add(referencingCu);
-				}	
+			if (needsImportToDestinationPackage(movedUnit, cuList, searchResultGroup, referencingCu))
+				result.add(referencingCu);
 		}
 		return result;
+	}
+
+	private boolean needsImportToDestinationPackage(ICompilationUnit movedUnit, List cuList, SearchResultGroup searchResultGroup, ICompilationUnit referencingCu) throws JavaModelException {
+		if (! hasSimpleReference(searchResultGroup))
+			return false;
+		if (referencingCu.equals(movedUnit))	
+			return false;
+		if (cuList.contains(referencingCu))	
+			return false;
+			
+		//heuristic	
+		if (referencingCu.getImport(movedUnit.getParent().getElementName() + ".*").exists())
+			return true;
+		if (! referencingCu.getParent().equals(movedUnit.getParent()))	
+			return false;
+		return true;
 	}
 	
 	private static boolean hasSimpleReference(SearchResultGroup searchResultGroup) throws JavaModelException{
