@@ -6,18 +6,14 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jdt.internal.ui.actions.*;
 
 public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	
@@ -39,13 +35,15 @@ public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 		
 		if (selection.size() > 1 && !canOperateOnMultiSelection())	
 			return false;
-			
+		
+		if (selection.size() == 1&& !canOperateOnMultiSelection())
+			return fActivationType.isInstance(selection.getFirstElement()) && shouldAcceptElement(selection.getFirstElement());
+				
 		for  (Iterator iter= selection.iterator(); iter.hasNext(); ) {
-			Object obj= iter.next();
-			if (!fActivationType.isInstance(obj) || !shouldAcceptElement(obj))
+			if (!fActivationType.isInstance(iter.next()))
 				return false;
 		}
-		return true;
+		return shouldAcceptElement(selection.toArray());
 	}
 
 	protected boolean canOperateOnMultiSelection(){
@@ -71,6 +69,8 @@ public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	/**
 	 * Creates a new instance of <code>Refactoring</code>.
 	 * @param obj is guaranteed to be of the accepted type (passed in the constructor)
+	 * However, if <code>canOperateOnMultiSelection</code> resturns <code>true</code>, 
+	 * then obj is <code>Object[]</code> and contains elements of the accepted type (passed in the constructor) 
 	 */
 	protected abstract Refactoring createNewRefactoringInstance(Object obj) throws JavaModelException;	
 	
@@ -78,6 +78,8 @@ public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	
 	/**
 	 * @param obj is guaranteed to be of the accepted type (passed in the constructor)
+	 * However, if <code>canOperateOnMultiSelection</code> resturns <code>true</code>, 
+	 * then obj is <code>Object[]</code> and contains elements of the accepted type (passed in the constructor) 
 	 * @see OpenWizardAction#shouldAcceptElement
 	 */
 	private final boolean shouldAcceptElement(Object obj) {
