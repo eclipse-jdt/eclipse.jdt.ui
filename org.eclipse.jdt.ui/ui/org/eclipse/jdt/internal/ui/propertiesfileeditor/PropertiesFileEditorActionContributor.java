@@ -26,9 +26,13 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
+
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 /**
  * Action contributor for Properties file editor.
@@ -38,10 +42,13 @@ import org.eclipse.jdt.ui.actions.JdtActionConstants;
 public class PropertiesFileEditorActionContributor extends BasicTextEditorActionContributor {
 	
 	private List fPartListeners= new ArrayList();
+	protected RetargetTextEditorAction fCorrectionAssist;
 	
 	
-	protected final void markAsPartListener(RetargetAction action) {
-		fPartListeners.add(action);
+	
+	public PropertiesFileEditorActionContributor() {
+		fCorrectionAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal."); //$NON-NLS-1$
+		fCorrectionAssist.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);
 	}
 	
 	/*
@@ -67,7 +74,10 @@ public class PropertiesFileEditorActionContributor extends BasicTextEditorAction
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_OPEN));			
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
+
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCorrectionAssist);			
 		}
+		
 	}
 	
 	/*
@@ -87,8 +97,10 @@ public class PropertiesFileEditorActionContributor extends BasicTextEditorAction
 			textEditor= (ITextEditor)part;
 		
 		IAction openAction= null;
-		if (textEditor != null)
+		if (textEditor != null) {
 			openAction= textEditor.getAction(JdtActionConstants.OPEN);
+			fCorrectionAssist.setAction(getAction(textEditor, "CorrectionAssistProposal")); //$NON-NLS-1$
+		}
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN, openAction);
 	}
 	
