@@ -306,7 +306,7 @@ public class ASTRewrite {
 		return node.getProperty(CHANGEKEY) instanceof ASTModify;
 	}
 	
-	/* package */ final String getDescription(ASTNode node) {
+	public final String getDescription(ASTNode node) {
 		Object info= node.getProperty(CHANGEKEY);
 		if (info instanceof ASTChange) {
 			return ((ASTChange) info).description;
@@ -314,7 +314,7 @@ public class ASTRewrite {
 		return null;
 	}
 	
-	/* package */ final ASTNode getModifiedNode(ASTNode node) {
+	public final ASTNode getModifiedNode(ASTNode node) {
 		Object info= node.getProperty(CHANGEKEY);
 		if (info instanceof ASTModify) {
 			return ((ASTModify) info).modifiedNode;
@@ -322,7 +322,7 @@ public class ASTRewrite {
 		return null;
 	}
 
-	/* package */ final ASTNode getReplacingNode(ASTNode node) {
+	public final ASTNode getReplacingNode(ASTNode node) {
 		Object info= node.getProperty(CHANGEKEY);
 		if (info instanceof ASTReplace) {
 			return ((ASTReplace) info).replacingNode;
