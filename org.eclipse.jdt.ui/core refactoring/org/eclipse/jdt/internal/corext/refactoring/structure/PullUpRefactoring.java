@@ -384,10 +384,11 @@ public class PullUpRefactoring extends Refactoring {
 		}				
 	}
 	
-	public IMember[] getRequiredPullableMembers(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("Calculating required members", fMembersToPullUp.length);//not true, but not easy to give anything better
-		List queue= new ArrayList(fMembersToPullUp.length);
-		queue.addAll(Arrays.asList(fMembersToPullUp));
+	public IMember[] getAdditionalRequiredMembersToPullUp(IProgressMonitor pm) throws JavaModelException{
+		IMember[] members= getMembersToBeCreatedInTargetClass();
+		pm.beginTask("Calculating required members", members.length);//not true, but not easy to give anything better
+		List queue= new ArrayList(members.length);
+		queue.addAll(Arrays.asList(members));
 		int i= 0;
 		IMember current;
 		do{
@@ -397,6 +398,7 @@ public class PullUpRefactoring extends Refactoring {
 			if (queue.size() == i)
 				current= null;
 		} while(current != null);
+		queue.removeAll(Arrays.asList(members));//report only additional
 		return (IMember[]) queue.toArray(new IMember[queue.size()]);
 	}
 	
