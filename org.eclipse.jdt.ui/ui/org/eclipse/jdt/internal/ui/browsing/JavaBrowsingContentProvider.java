@@ -252,7 +252,6 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				if (element instanceof IClassFile) {
 					postRemove(((IClassFile)element).getType());
 				} else if (element instanceof ICompilationUnit && !((ICompilationUnit)element).isWorkingCopy()) {
-//					if (!getProvideWorkingCopy())
 						postRefresh(null);
 				} else if (element instanceof ICompilationUnit && ((ICompilationUnit)element).isWorkingCopy()) {
 					if (getProvideWorkingCopy())
@@ -263,7 +262,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 						postRefresh(null);
 					}
 				} else if (element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy() && parent != null && parent.equals(fInput))
-				// closed editor - removing working copy
+					// closed editor - removing working copy
 					postRefresh(null);
 				else
 					postRemove(element);
@@ -288,7 +287,6 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				if (element instanceof IClassFile) {
 					postAdd(parent, ((IClassFile)element).getType());
 				} else if (element instanceof ICompilationUnit && !((ICompilationUnit)element).isWorkingCopy()) {
-//					if (!getProvideWorkingCopy())
 						postAdd(parent, ((ICompilationUnit)element).getAllTypes());
 				} else if (parent instanceof ICompilationUnit && getProvideWorkingCopy() && !((ICompilationUnit)parent).isWorkingCopy()) {
 					//	do nothing
@@ -319,6 +317,13 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		if (isClassPathChange(delta))
 			 // throw the towel and do a full refresh
 			postRefresh(null);
+
+		if ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0 && fInput instanceof IJavaElement) {
+			IPackageFragmentRoot pkgRoot= (IPackageFragmentRoot)element;
+			IJavaElement inputsParent= ((IJavaElement)fInput).getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			if (pkgRoot.equals(inputsParent))
+				postRefresh(null);
+		}
 		
 		IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
 		if (affectedChildren.length > 1) {
