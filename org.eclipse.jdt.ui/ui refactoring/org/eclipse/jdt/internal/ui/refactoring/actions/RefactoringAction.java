@@ -56,6 +56,10 @@ public abstract class RefactoringAction extends Action {
 		Assert.isNotNull(fProvider);
 	}
 	
+	protected StructuredSelectionProvider getProvider() {
+		return fProvider;
+	}
+	
 	/**
 	 * Returns <code>true</code> iff the action can operate on the specified selection.
 	 * @return <code>true</code> if the action can operate on the specified selection, 
@@ -84,6 +88,8 @@ public abstract class RefactoringAction extends Action {
 			
 		setEnabled(enabled);
 	}	
+	
+	//--- wizard related methods + editor saving
 	
 	public static void activateRefactoringWizard(Refactoring refactoring, RefactoringWizard wizard, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
 		if (mustSaveEditors && ! areAllEditorsSaved())
