@@ -199,16 +199,20 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		
 		boolean defaultSelection= getBooleanSetting(UPDATE_QUALIFIED_NAMES, ref.getUpdateQualifiedNames());
 		fUpdateQualifiedNames.setSelection(defaultSelection);
-		fQualifiedNameComponent.setEnabled(defaultSelection);
+		updateQulifiedNameUpdating(ref, defaultSelection);
 
 		fUpdateQualifiedNames.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				boolean enabled= ((Button)e.widget).getSelection();
-				fQualifiedNameComponent.setEnabled(enabled);
-				ref.setUpdateQualifiedNames(enabled);
-				updateForcePreview();
+				updateQulifiedNameUpdating(ref, enabled);
 			}
 		});
+	}
+	
+	private void updateQulifiedNameUpdating(final IQualifiedNameUpdating ref, boolean enabled) {
+		fQualifiedNameComponent.setEnabled(enabled);
+		ref.setUpdateQualifiedNames(enabled);
+		updateForcePreview();
 	}
 	
 	protected String getLabelText() {
