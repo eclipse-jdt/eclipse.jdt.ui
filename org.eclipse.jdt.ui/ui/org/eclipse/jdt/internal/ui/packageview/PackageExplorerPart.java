@@ -286,7 +286,37 @@ public class PackageExplorerPart extends ViewPart
 			}
 			return object;
 		}
-	
+
+		/*
+		 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
+		 * @since 3.0
+		 */
+		protected Object[] filter(Object[] elements) {
+			if (isFlatLayout())
+				return super.filter(elements);
+
+			ViewerFilter[] filters= getFilters();
+			if (filters == null || filters.length == 0)
+				return elements;
+			
+			ArrayList filtered= new ArrayList(elements.length);
+			Object root= getRoot();
+			for (int i= 0; i < elements.length; i++) {
+				boolean add= true;
+				if (!isEssential(elements[i])) {
+					for (int j = 0; j < filters.length; j++) {
+						add= filters[j].select(this, root,
+							elements[i]);
+						if (!add)
+							break;
+					}
+				}
+				if (add)
+					filtered.add(elements[i]);
+			}
+			return filtered.toArray();
+		}
+		
 		/* Checks if a filtered object in essential (ie. is a parent that
 		 * should not be removed).
 		 */ 
