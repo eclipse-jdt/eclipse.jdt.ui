@@ -14,12 +14,37 @@ import java.io.Reader;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.ListenerList;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.TextSelection;
+
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,9 +53,13 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
 
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
@@ -40,31 +69,158 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  */
 public class JavadocView extends AbstractInfoView {
 
+	/** Flags used to render a label in the text widget. */
 	private static final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 
+	/** The styled text widget. */
 	private StyledText fText;
+	/** The information presenter. */
 	private DefaultInformationControl.IInformationPresenter fPresenter;
+	/** The text presentation. */
 	private TextPresentation fPresentation= new TextPresentation();
+	/** The select all action */
+	private SelectAllAction fSelectAllAction;
 
+	/**
+	 * The Javadoc view's select all action.
+	 */
+	private static class SelectAllAction extends Action {
+
+		/** The styled text widget. */
+		private StyledText fStyledText;
+		/** The selection provider. */
+		private SelectionProvider fSelectionProvider;
+
+		/**
+		 * Creates the action.
+		 */
+		public SelectAllAction(StyledText styledText, SelectionProvider selectionProvider) {
+			super("selectAll"); //$NON-NLS-1$
+
+			Assert.isNotNull(styledText);
+			Assert.isNotNull(selectionProvider);
+			fStyledText= styledText;
+			fSelectionProvider= selectionProvider;
+
+			setText(InfoViewMessages.getString("SelectAllAction.label")); //$NON-NLS-1$
+			setToolTipText(InfoViewMessages.getString("SelectAllAction.tooltip")); //$NON-NLS-1$
+			setDescription(InfoViewMessages.getString("SelectAllAction.description")); //$NON-NLS-1$
+
+			WorkbenchHelp.setHelp(this, IAbstractTextEditorHelpContextIds.SELECT_ALL_ACTION);
+		}
+
+		/**
+		 * Selects all in the view.
+		 */
+		public void run() {
+			fStyledText.selectAll();
+			fSelectionProvider.fireSelectionChanged();
+		}
+	}
+
+	/**
+	 * The Javadoc view's selection provider.
+	 */
+	private static class SelectionProvider implements ISelectionProvider {
+
+		/** The selection changed listeners. */
+		private ListenerList fListeners= new ListenerList();
+		/** The styled text widget. */
+		private StyledText fStyledText;
+
+		/**
+		 * Creates a new selection provider.
+		 * 
+		 * @param styledText	the styled text widget
+		 */
+		public SelectionProvider(StyledText styledText) {
+			Assert.isNotNull(styledText);
+			fStyledText= styledText;
+			
+			fStyledText.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					fireSelectionChanged();
+				}
+			});
+		}
+		
+		/**
+		 * Sends a selection changed event to all listeners.
+		 */
+		public void fireSelectionChanged() {
+			ISelection selection= getSelection();
+			SelectionChangedEvent event= new SelectionChangedEvent(this, selection);
+			Object[] selectionChangedListeners= fListeners.getListeners();
+			for (int i= 0; i < selectionChangedListeners.length; i++)
+				((ISelectionChangedListener)selectionChangedListeners[i]).selectionChanged(event);
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+		 */
+		public void addSelectionChangedListener(ISelectionChangedListener listener) {
+			fListeners.add(listener);
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
+		 */
+		public ISelection getSelection() {
+			IDocument document= new Document(fStyledText.getSelectionText());
+			return new TextSelection(document, 0, document.getLength());
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+		 */
+		public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+			fListeners.remove(listener);
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
+		 */
+		public void setSelection(ISelection selection) {
+			// not supported
+		}
+	}
+
+	/*
+	 * @see AbstractInfoView#internalCreatePartControl(Composite)
+	 */
 	protected void internalCreatePartControl(Composite parent) {
 		fText= new StyledText(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 		fText.setEditable(false);
-		
 		fPresenter= new HTMLTextPresenter(false);
+		getViewSite().setSelectionProvider(new SelectionProvider(fText));
+	}
+	
+	/*
+	 * @see AbstractInfoView#createActions()
+	 */
+	protected void createActions() {
+		super.createActions();
+		fSelectAllAction= new SelectAllAction(fText, (SelectionProvider)getSelectionProvider());
 	}
 
+	/*
+ 	 * @see AbstractInfoView#setForeground(Color)
+ 	 */
 	protected void setForeground(Color color) {
 		fText.setForeground(color);
 	}
 
+	/*
+	 * @see AbstractInfoView#setBackground(Color)
+	 */
 	protected void setBackground(Color color) {
 		fText.setBackground(color);
 	}
 
 	/*
-	 * @see IWorkbenchPart#dispose()
+	 * @see AbstractInfoView#internalDispose()
 	 */
 	protected void internalDispose() {
 		fText= null;
@@ -76,7 +232,10 @@ public class JavadocView extends AbstractInfoView {
 	public void setFocus() {
 		fText.setFocus();
 	}
-	
+
+	/*
+	 * @see AbstractInfoView#setInput(Object)
+	 */
 	protected boolean setInput(Object input) {
 		if (fText == null || ! (input instanceof IJavaElement))
 			return false;
@@ -110,6 +269,12 @@ public class JavadocView extends AbstractInfoView {
 		return true;
 	}
 
+	/**
+	 * Returns the Javadoc in HTML format.
+	 * 
+	 * @param result the Java elements for which to get the Javadoc
+	 * @return a string with the Javadoc in HTML format. 
+	 */
 	private String getJavadocHtml(IJavaElement[] result) {
 		StringBuffer buffer= new StringBuffer();
 		int nResults= result.length;
@@ -151,7 +316,76 @@ public class JavadocView extends AbstractInfoView {
 		return null;
 	}
 
+	/**
+	 * Gets the label for the given member.
+	 * 
+	 * @param member the Java member
+	 * @return a string containing the member's label
+	 */
 	private String getInfoText(IMember member) {
 		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
+	}
+
+	/*
+	 * @see AbstractInfoView#isUpdatingIfSameInput() 
+	 */
+	protected boolean isIngoringEqualInput() {
+		return false;
+	}
+
+	/*
+	 * @see AbstractInfoView#findSelectedJavaElement(IWorkbenchPart) 
+	 */
+	protected IJavaElement findSelectedJavaElement(IWorkbenchPart part) {
+		Object element;
+		try {
+			IStructuredSelection sel= SelectionConverter.getStructuredSelection(part);
+		
+			if (sel.isEmpty() && part instanceof JavaEditor) {
+			
+				JavaEditor editor= (JavaEditor)part;
+
+				IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+				if (document == null)
+					return null;
+				
+				ITypedRegion typedRegion= document.getPartition(((ITextSelection)editor.getSelectionProvider().getSelection()).getOffset());
+				if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType()))
+					element= SelectionConverter.getElementAtOffset((JavaEditor)part);
+				else
+					return null;
+			} else
+				element= SelectionUtil.getSingleElement(sel);
+		} catch (JavaModelException e) {
+			return null;
+		} catch (BadLocationException e) {
+			return null;
+		}
+		
+		return findJavaElement(element);
+	}
+
+	/*
+	 * @see org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
+	 */
+	public void menuAboutToShow(IMenuManager menu) {
+		super.menuAboutToShow(menu);
+		menu.add(fSelectAllAction);
+	}
+	
+	/*
+	 * @see AbstractInfoView#fillActionBars(IActionBars)
+	 */
+	protected void fillActionBars(IActionBars actionBars) {
+		super.fillActionBars(actionBars);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, fSelectAllAction);
+		
+	}
+
+	/*
+	 * @see AbstractInfoView#getControl()
+	 */
+	protected Control getControl() {
+		return fText;
 	}
 }
