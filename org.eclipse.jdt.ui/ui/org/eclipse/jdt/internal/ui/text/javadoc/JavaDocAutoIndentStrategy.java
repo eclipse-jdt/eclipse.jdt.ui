@@ -109,7 +109,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 						
 						if (isPreferenceTrue(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS)) {
 							// we need to close the comment before computing 
-							// the tags correct tags.
+							// the correct tags in order to get the method
 							d.replace(offset, 0, endTag);
 
 							// evaluate method signature
@@ -184,7 +184,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * 
 	 * @param document the document
 	 * @param command the command
-	 * @param indentation the base indentation to use 
+	 * @param indentation the base indentation to use
 	 * @param lineDelimiter the line delimiter to use
 	 * @param unit the compilation unit shown in the editor
 	 * @return the tags to add to the document
@@ -235,8 +235,15 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 	
 	private String createTypeTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IType type)
-		throws CoreException
+		throws CoreException, BadLocationException
 	{
+		IRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset, false);
+		ISourceRange sourceRange= type.getSourceRange();
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=55325
+		// don't add parameters if the member already has a comment
+		if (document.get(sourceRange.getOffset(), sourceRange.getLength()).lastIndexOf("/**", type.getNameRange().getOffset() - sourceRange.getOffset()) + sourceRange.getOffset() != partition.getOffset()) //$NON-NLS-1$
+			return null;
+
 		String comment= CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), lineDelimiter);
 		if (comment != null) {
 			return prepareTemplateComment(comment.trim(), indentation, lineDelimiter);
@@ -250,6 +257,11 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		IRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset, false);
 		ISourceRange sourceRange= method.getSourceRange();
 		if (sourceRange == null || sourceRange.getOffset() != partition.getOffset())
+			return null;
+		
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=55325
+		// don't add parameters if the member already has a javadoc comment
+		if (document.get(sourceRange.getOffset(), sourceRange.getLength()).lastIndexOf("/**", method.getNameRange().getOffset() - sourceRange.getOffset()) + sourceRange.getOffset() != partition.getOffset()) //$NON-NLS-1$
 			return null;
 			
 		IMethod inheritedMethod= getInheritedMethod(method);
@@ -292,7 +304,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * 
 	 * @param document the document
 	 * @param commandOffset the command offset
-	 * @return aa
+	 * @return <code>true</code> if the comment should be closed, <code>false</code> if not
 	 */
 	private boolean isNewComment(IDocument document, int commandOffset) {
 		
@@ -377,7 +389,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	/**
 	 * Returns the compilation unit of the CompilationUnitEditor invoking the AutoIndentStrategy,
 	 * might return <code>null</code> on error.
-	 * @return aa
+	 * @return the compilation unit represented by the document
 	 */
 	private static ICompilationUnit getCompilationUnit() {
 
