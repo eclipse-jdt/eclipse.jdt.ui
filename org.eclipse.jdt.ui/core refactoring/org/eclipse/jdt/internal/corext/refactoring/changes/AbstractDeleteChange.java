@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -29,7 +28,7 @@ abstract class AbstractDeleteChange extends Change {
 			pm.beginTask(RefactoringCoreMessages.getString("AbstractDeleteChange.deleting"), 1); //$NON-NLS-1$
 			if (!isActive())
 				return;
-			doDelete(context, new SubProgressMonitor(pm, 1));
+			doDelete(context, pm);
 		} catch (Exception e) {
 			handleException(context, e);
 			setActive(false);
