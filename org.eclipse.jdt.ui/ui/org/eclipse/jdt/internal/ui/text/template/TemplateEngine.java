@@ -110,7 +110,7 @@ public class TemplateEngine {
 		if (selection.y == 0) {
 			for (int i= 0; i != templates.length; i++)
 				if (context.canEvaluate(templates[i]))
-					fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
+					fProposals.add(new TemplateProposal(templates[i], context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
 
 		} else {
 
@@ -125,7 +125,7 @@ public class TemplateEngine {
 					template.getContextTypeName().equals(context.getContextType().getName()) &&				
 					(!multipleLinesSelected && template.getPattern().indexOf($_WORD_SELECTION) != -1 || (multipleLinesSelected && template.getPattern().indexOf($_LINE_SELECTION) != -1)))
 				{
-					fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
+					fProposals.add(new TemplateProposal(templates[i], context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
 				}
 			}
 		}

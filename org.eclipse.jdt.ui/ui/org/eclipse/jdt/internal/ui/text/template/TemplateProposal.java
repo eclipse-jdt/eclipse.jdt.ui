@@ -17,16 +17,17 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
@@ -47,11 +48,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * A template proposal.
  */
-public class TemplateProposal implements IJavaCompletionProposal, ICompletionProposalExtension3 {
+public class TemplateProposal implements IJavaCompletionProposal, ICompletionProposalExtension2, ICompletionProposalExtension3 {
 
 	private final Template fTemplate;
 	private final TemplateContext fContext;
-	private final ITextViewer fViewer;
 	private final Image fImage;
 	private final IRegion fRegion;
 	private int fRelevance;
@@ -65,15 +65,13 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 * @param context   the context in which the template was requested.
 	 * @param image     the icon of the proposal.
 	 */	
-	public TemplateProposal(Template template, TemplateContext context, IRegion region, ITextViewer viewer, Image image) {
+	public TemplateProposal(Template template, TemplateContext context, IRegion region, Image image) {
 		Assert.isNotNull(template);
 		Assert.isNotNull(context);
 		Assert.isNotNull(region);
-		Assert.isNotNull(viewer);
 		
 		fTemplate= template;
 		fContext= context;
-		fViewer= viewer;
 		fImage= image;
 		fRegion= region;
 		
@@ -99,9 +97,17 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
-	public void apply(IDocument document) {
-
-	    try {
+	public final void apply(IDocument document) {
+		// not called anymore
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
+	 */
+	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+		try {
+			IDocument document= viewer.getDocument();
+			
 			Position position= new Position(fRegion.getOffset(), fRegion.getLength());
 			final String category= "__template_position_" + System.currentTimeMillis(); //$NON-NLS-1$
 			IPositionUpdater updater= new DefaultPositionUpdater(category);
@@ -109,12 +115,12 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			document.addPositionUpdater(updater);
 			document.addPosition(position);
 
-		    fContext.setReadOnly(false);
+			fContext.setReadOnly(false);
 			TemplateBuffer templateBuffer= fContext.evaluate(fTemplate);
 			if (templateBuffer == null) {
 				fSelectedRegion= fRegion;
 				return;
-	    	}
+			}
 			
 			document.removePosition(position);
 			document.removePositionUpdater(updater);
@@ -143,27 +149,28 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 					manager.addPosition(offsets[j] + start, length);
 			}
 			
-			LinkedPositionUI editor= new LinkedPositionUI(fViewer, manager);
+			LinkedPositionUI editor= new LinkedPositionUI(viewer, manager);
 			editor.setFinalCaretOffset(getCaretOffset(templateBuffer) + start);
 			editor.enter();
 
 			fSelectedRegion= editor.getSelectedRegion();
 			
 		} catch (BadLocationException e) {
-			JavaPlugin.log(e);	
-			openErrorDialog(e);		    
+			JavaPlugin.log(e);
+			openErrorDialog(viewer.getTextWidget().getShell(), e);		    
 			fSelectedRegion= fRegion;
 			
-	    } catch (BadPositionCategoryException e) {    
-			JavaPlugin.log(e);	
-			openErrorDialog(e);		    	
+		} catch (BadPositionCategoryException e) {    
+			JavaPlugin.log(e);
+			openErrorDialog(viewer.getTextWidget().getShell(), e);		    	
 			fSelectedRegion= fRegion;
 
-	    } catch (CoreException e) {
-			handleException(e);
+		} catch (CoreException e) {
+			handleException(viewer.getTextWidget().getShell(), e);
 			fSelectedRegion= fRegion;
-	    }	    
-	}
+		}	    
+
+	}	
 	
 	private int getCaretOffset(TemplateBuffer buffer) {
 	
@@ -198,7 +205,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			return templateBuffer.getString();
 
 	    } catch (CoreException e) {
-			handleException(e);		    
+			handleException(JavaPlugin.getActiveWorkbenchShell(), e);		    
 			return null;
 	    }
 	}
@@ -231,13 +238,11 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		return null;
 	}
 
-	private void openErrorDialog(Exception e) {
-		Shell shell= fViewer.getTextWidget().getShell();
+	private void openErrorDialog(Shell shell, Exception e) {
 		MessageDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
 	}
 
-	private void handleException(CoreException e) {
-		Shell shell= fViewer.getTextWidget().getShell();
+	private void handleException(Shell shell, CoreException e) {
 		ExceptionHandler.handle(e, shell, TemplateMessages.getString("TemplateEvaluator.error.title"), null); //$NON-NLS-1$
 	}
 
@@ -261,5 +266,24 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 */
 	public IInformationControlCreator getInformationControlCreator() {
 		return new TemplateInformationControlCreator();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer, boolean)
+	 */
+	public void selected(ITextViewer viewer, boolean smartToggle) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
+	 */
+	public void unselected(ITextViewer viewer) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
+	 */
+	public boolean validate(IDocument document, int offset, DocumentEvent event) {
+		return false;
 	}
 }
