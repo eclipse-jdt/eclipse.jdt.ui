@@ -148,8 +148,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	}
 
 	private RefactoringWizard createWizard(ChangeTypeRefactoring refactoring) {
-		String pageTitle= RefactoringMessages.getString("ChangeTypeWizard.title"); //$NON-NLS-1$
-
+//		String pageTitle= RefactoringMessages.getString("ChangeTypeWizard.title"); //$NON-NLS-1$
 		return new ChangeTypeWizard(refactoring);
 	}
 

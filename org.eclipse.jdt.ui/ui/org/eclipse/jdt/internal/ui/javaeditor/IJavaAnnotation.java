@@ -27,36 +27,24 @@ import org.eclipse.jdt.core.ICompilationUnit;
 public interface IJavaAnnotation {
 	
 	/**
-	 * Returns the type of the given Java annotation.
-	 * 
-	 * @return the type of the given annotation or <code>null</code> if it has none.
+	 * @see org.eclipse.jface.text.source.Annotation#getType()
 	 */
-	String getAnnotationType();
-	
-	boolean isTemporary();
-	
-	String getMessage();
-	
-	String[] getArguments();
-	
-	int getId();
-	
-	
-	Image getImage(Display display);
+	String getType();
 	
 	/**
-	 * Returns whether this annotation is relavant.
-	 * <p>
-	 * If the annotation is overlaid then it is not
-	 * relevant. After all overlays have been removed
-	 * the annotation might either become relevant again
-	 * or stay irrelevant.
-	 * </p>
-	 * 
-	 * @return <code>true</code> if relevant
-	 * @see #hasOverlay()
+	 * @see org.eclipse.jface.text.source.Annotation#isPersistent()
 	 */
-	boolean isRelevant();
+	boolean isPersistent();
+	
+	/**
+	 * @see org.eclipse.jface.text.source.Annotation#isMarkedDeleted()
+	 */
+	boolean isMarkedDeleted();
+	
+	/**
+	 * @see org.eclipse.jface.text.source.Annotation#getText() 
+	 */
+	String getText();
 	
 	/**
 	 * Returns whether this annotation is overlaid.
@@ -64,6 +52,14 @@ public interface IJavaAnnotation {
 	 * @return <code>true</code> if overlaid
 	 */
 	boolean hasOverlay();
+	
+	/**
+	 * Returns the overlay of this annotation.
+	 * 
+	 * @return the annotation's overlay
+	 * @since 3.0
+	 */
+	IJavaAnnotation getOverlay();
 	
 	/**
 	 * Returns an iterator for iterating over the
@@ -97,10 +93,15 @@ public interface IJavaAnnotation {
 	 */
 	boolean isProblem();
 	
-	
 	/**
 	 * Returns the compilation unit corresponding to the document on which the annotation is set
 	 * or <code>null</code> if no corresponding co0mpilationunit exists.
 	 */
 	ICompilationUnit getCompilationUnit();
+	
+	String[] getArguments();
+	
+	int getId();
+	
+	Image getImage(Display display);
 }

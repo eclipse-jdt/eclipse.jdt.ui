@@ -26,6 +26,8 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationPresentation;
+
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -54,7 +56,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
  */
 public class QuickAssistLightBulbUpdater {
 
-	public static class AssistAnnotation extends Annotation {
+	public static class AssistAnnotation extends Annotation implements IAnnotationPresentation {
 		
 		private Image fImage;
 		

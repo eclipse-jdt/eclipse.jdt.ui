@@ -61,18 +61,29 @@ public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 		}	
 	}
 	
-	/**
-	 * Report an added annotation
+	/*
+	 * @see org.eclipse.jface.text.source.AnnotationModelEvent#annotationAdded(org.eclipse.jface.text.source.Annotation)
 	 */
 	public void annotationAdded(Annotation annotation) {
+		super.annotationAdded(annotation);
 		testIfProblemMarker(annotation);
 	}
 
-	/**
-	 * Report an remove annotation
+
+	/*
+	 * @see org.eclipse.jface.text.source.AnnotationModelEvent#annotationRemoved(org.eclipse.jface.text.source.Annotation)
 	 */
 	public void annotationRemoved(Annotation annotation) {
+		super.annotationRemoved(annotation);
 		testIfProblemMarker(annotation);
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.AnnotationModelEvent#annotationChanged(org.eclipse.jface.text.source.Annotation)
+	 */
+	public void annotationChanged(Annotation annotation) {
+		testIfProblemMarker(annotation);
+		super.annotationChanged(annotation);
 	}
 		
 	/**

@@ -52,20 +52,19 @@ public class JavaAnnotationIterator implements Iterator {
 	
 	private void skip() {
 		while (fIterator.hasNext()) {
-			Object next= fIterator.next();
+			Annotation next= (Annotation) fIterator.next();
 			if (next instanceof IJavaAnnotation) {
-				IJavaAnnotation a= (IJavaAnnotation) next;
 				if (fSkipIrrelevants) {
-					if (a.isRelevant()) {
-						fNext= (Annotation)a;
+					if (!next.isMarkedDeleted()) {
+						fNext= next;
 						return;
 					}
 				} else {
-					fNext= (Annotation)a;
+					fNext= next;
 					return;
 				}
 			} else if (fReturnAllAnnotations) {
-				fNext= (Annotation)next;
+				fNext= next;
 				return;
 			}
 		}

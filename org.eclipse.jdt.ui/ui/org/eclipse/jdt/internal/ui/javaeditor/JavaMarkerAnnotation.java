@@ -26,10 +26,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.jface.resource.ImageRegistry;
 
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.source.IAnnotationPresentation;
 
-import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
-import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import org.eclipse.debug.ui.DebugUITools;
@@ -50,7 +49,7 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
 
 
-public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnotation {
+public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnotation, IAnnotationPresentation {
 
 	private static final String TASK_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.task"; //$NON-NLS-1$
 	private static final String ERROR_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.error"; //$NON-NLS-1$
@@ -70,15 +69,8 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	
 	private IDebugModelPresentation fPresentation;
 	private IJavaAnnotation fOverlay;
-	private boolean fNotRelevant= false;
-	private String fType;
 	private int fImageType;
 	private boolean fQuickFixIconEnabled;
-	/**
-	 * The marker annotation preferences.
-	 * @since 3.0
-	 */
-	private MarkerAnnotationPreferences fMarkerAnnotationPreferences;
 	
 	
 	public JavaMarkerAnnotation(IMarker marker) {
@@ -98,10 +90,8 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 */
 	protected void initialize() {
 		fQuickFixIconEnabled= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
-		fMarkerAnnotationPreferences= new MarkerAnnotationPreferences();
 		fImageType= NO_IMAGE;
 		IMarker marker= getMarker();
-		fType= findAnnotationTypeForMarker(marker);
 		
 		if (MarkerUtilities.isMarkerType(marker, IBreakpoint.BREAKPOINT_MARKER)) {
 			
@@ -132,24 +122,6 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 			fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
 		return fgQuickFixErrorImage;
 	}
-
-	/*
-	 * @see IJavaAnnotation#getMessage()
-	 */
-	public String getMessage() {
-		IMarker marker= getMarker();
-		if (marker == null || !marker.exists())
-			return ""; //$NON-NLS-1$
-		else
-			return marker.getAttribute(IMarker.MESSAGE, ""); //$NON-NLS-1$
-	}
-
-	/*
-	 * @see IJavaAnnotation#isTemporary()
-	 */
-	public boolean isTemporary() {
-		return false;
-	}
 	
 	/*
 	 * @see IJavaAnnotation#getArguments()
@@ -172,7 +144,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 		if (isProblem())
 			return marker.getAttribute(IJavaModelMarker.ID, -1);
 			
-		if (TASK_ANNOTATION_TYPE.equals(fType)) {
+		if (TASK_ANNOTATION_TYPE.equals(getType())) {
 			try {
 				if (marker.isSubtypeOf(IJavaModelMarker.TASK_MARKER)) {
 					return IProblem.Task;
@@ -188,14 +160,8 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 * @see IJavaAnnotation#isProblem()
 	 */
 	public boolean isProblem() {
-		return WARNING_ANNOTATION_TYPE.equals(fType) || ERROR_ANNOTATION_TYPE.equals(fType);
-	}
-	
-	/*
-	 * @see IJavaAnnotation#isRelevant()
-	 */
-	public boolean isRelevant() {
-		return !fNotRelevant;
+		String type= getType();
+		return WARNING_ANNOTATION_TYPE.equals(type) || ERROR_ANNOTATION_TYPE.equals(type);
 	}
 
 	/**
@@ -208,10 +174,11 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 			fOverlay.removeOverlaid(this);
 			
 		fOverlay= javaAnnotation;
-		fNotRelevant= (fNotRelevant || fOverlay != null);
+		if (!isMarkedDeleted())
+			markDeleted(fOverlay != null);
 		
-		if (javaAnnotation != null)
-			javaAnnotation.addOverlaid(this);
+		if (fOverlay != null)
+			fOverlay.addOverlaid(this);
 	}
 	
 	/*
@@ -219,6 +186,13 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 */
 	public boolean hasOverlay() {
 		return fOverlay != null;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getOverlay()
+	 */
+	public IJavaAnnotation getOverlay() {
+		return fOverlay;
 	}
 	
 	/*
@@ -241,9 +215,9 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 
 		if (hasOverlay())
 			newImageType= OVERLAY_IMAGE;
-		else if (isRelevant()) {
+		else if (!isMarkedDeleted()) {
 			if (isProblem() && mustShowQuickFixIcon()) { // no light bulb for tasks
-				if (ERROR_ANNOTATION_TYPE.equals(fType))
+				if (ERROR_ANNOTATION_TYPE.equals(getType()))
 					newImageType= QUICKFIX_ERROR_IMAGE;
 				else
 					newImageType= QUICKFIX_IMAGE; 
@@ -323,13 +297,6 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 		// not supported
 		return null;
 	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getAnnotationType()
-	 */
-	public String getAnnotationType() {
-		return fType;
-	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getCompilationUnit()
@@ -343,32 +310,6 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 				return workingCopy;
 			}
 			return cu;
-		}
-		return null;
-	}
-
-	/**
-	 * Finds the annotation type for the given marker.
-	 * 
-	 * @param marker the marker
-	 * @return the annotation type or <code>null</code> if none was found
-	 * @since 3.0
-	 */
-	private String findAnnotationTypeForMarker(IMarker marker) {
-		Iterator e= fMarkerAnnotationPreferences.getAnnotationPreferences().iterator();
-		while (e.hasNext()) {
-			AnnotationPreference annotationPreference= (AnnotationPreference) e.next();
-			boolean isSubtype;
-			Integer severity;
-			try {
-				isSubtype= marker.isSubtypeOf(annotationPreference.getMarkerType());
-				severity= (Integer)marker.getAttribute(IMarker.SEVERITY);
-			} catch (CoreException ex) {
-				JavaPlugin.log(ex);
-				return null;
-			}
-			if (isSubtype && (severity == null || severity.intValue() == annotationPreference.getSeverity()))
-				return (String)annotationPreference.getAnnotationType();
 		}
 		return null;
 	}

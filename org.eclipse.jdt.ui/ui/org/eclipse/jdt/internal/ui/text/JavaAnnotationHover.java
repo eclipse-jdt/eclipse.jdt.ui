@@ -23,19 +23,15 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
-import org.eclipse.ui.texteditor.IAnnotationExtension;
-import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
+import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 
 
 /**
@@ -51,9 +47,8 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	public static final JavaAnnotationHoverType TEXT_RULER_HOVER= new JavaAnnotationHoverType();
 	public static final JavaAnnotationHoverType VERTICAL_RULER_HOVER= new JavaAnnotationHoverType();
 	
-	private MarkerAnnotationPreferences fMarkerAnnotationPreferences= new MarkerAnnotationPreferences();
+	private AnnotationPreferenceLookup fPreferenceLookup= new AnnotationPreferenceLookup();
 	private IPreferenceStore fStore= JavaPlugin.getDefault().getPreferenceStore();
-	private IAnnotationAccess fAnnotationAccess= new DefaultMarkerAnnotationAccess(fMarkerAnnotationPreferences);
 	
 	private JavaAnnotationHoverType fType;
 	
@@ -106,78 +101,47 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		Iterator e= model.getAnnotationIterator();
 		HashMap messagesAtPosition= new HashMap();
 		while (e.hasNext()) {
-			Object o= e.next();
-			if (o instanceof IJavaAnnotation) {
-				IJavaAnnotation a= (IJavaAnnotation)o;
-
-				if (OVERVIEW_RULER_HOVER.equals(fType)) {				
-					AnnotationPreference preference= getAnnotationPreference(a.getAnnotationType());
-					if (preference == null || !fStore.getBoolean(preference.getOverviewRulerPreferenceKey()))
-						continue;
-				} else if (TEXT_RULER_HOVER.equals(fType)) {				
-					AnnotationPreference preference= getAnnotationPreference(a.getAnnotationType());
-					if (preference == null || !(fStore.getBoolean(preference.getTextPreferenceKey()) || (preference.getHighlightPreferenceKey() != null && fStore.getBoolean(preference.getHighlightPreferenceKey()))))
-						continue;
-				} else if (VERTICAL_RULER_HOVER.equals(fType)) {
-					AnnotationPreference preference= getAnnotationPreference(a.getAnnotationType());
-					if (preference == null || preference.getVerticalRulerPreferenceKey() != null && !fStore.getBoolean(preference.getVerticalRulerPreferenceKey()))
-						continue;
-				}
-				
-				if (!a.hasOverlay()) {
-					Position position= model.getPosition((Annotation)a);
-					if (position == null)
-						continue;
-
-					if (isDuplicateJavaAnnotation(messagesAtPosition, position, a.getMessage()))
-						continue;
-	
-					switch (compareRulerLine(position, document, line)) {
-						case 1:
-							exact.add(a);
-							break;
-						case 2:
-							including.add(a);
-							break;
-					}
-				}
-			} else if (o instanceof IAnnotationExtension) {
-				IAnnotationExtension a= (IAnnotationExtension) o;
-
-				if (OVERVIEW_RULER_HOVER.equals(fType)) {
-					Object type= fAnnotationAccess.getType((Annotation)a);
-					if (type != null) {
-						AnnotationPreference preference= getAnnotationPreference(type.toString());
-						if (preference == null || !fStore.getBoolean(preference.getOverviewRulerPreferenceKey()))
-							continue;
-					} else
-						continue;
-				} else if (TEXT_RULER_HOVER.equals(fType)) {				
-					Object type= fAnnotationAccess.getType((Annotation)a);
-					if (type != null) {
-						AnnotationPreference preference= getAnnotationPreference(type.toString());
-						if (preference == null || !(fStore.getBoolean(preference.getTextPreferenceKey()) || fStore.getBoolean(preference.getHighlightPreferenceKey())))
-							continue;
-					} else
-						continue;
-				} else
-					continue; // only take Java annotations for the vertical ruler
-				
-				Position position= model.getPosition((Annotation)a);
-				if (position == null)
+			Annotation annotation= (Annotation) e.next();
+			
+			Position position= model.getPosition(annotation);
+			if (position == null)
+				continue;
+			
+			AnnotationPreference preference= getAnnotationPreference(annotation);
+			if (preference == null)
+				continue;
+			
+			if (OVERVIEW_RULER_HOVER.equals(fType)) {				
+				String key= preference.getOverviewRulerPreferenceKey();
+				if (key == null || !fStore.getBoolean(key))
 					continue;
-
-				if (isDuplicateJavaAnnotation(messagesAtPosition, position, a.getMessage()))
-					continue;
-	
-				switch (compareRulerLine(position, document, line)) {
-					case 1:
-						exact.add(a);
-						break;
-					case 2:
-						including.add(a);
-						break;
+			} else if (TEXT_RULER_HOVER.equals(fType)) {
+				String key= preference.getTextPreferenceKey();
+				if (key != null) {
+					if (!fStore.getBoolean(key))
+						continue;
+				} else {
+					key= preference.getHighlightPreferenceKey();
+					if (key == null || !fStore.getBoolean(key))
+						continue;
 				}
+			} else if (VERTICAL_RULER_HOVER.equals(fType)) {
+				String key= preference.getVerticalRulerPreferenceKey();
+				// backward compatibility
+				if (key != null && !fStore.getBoolean(key))
+					continue;
+			}
+			
+			if (isDuplicateJavaAnnotation(messagesAtPosition, position, annotation.getText()))
+				continue;
+			
+			switch (compareRulerLine(position, document, line)) {
+			case 1:
+				exact.add(annotation);
+				break;
+			case 2:
+				including.add(annotation);
+				break;
 			}
 		}
 		
@@ -217,8 +181,8 @@ public class JavaAnnotationHover implements IAnnotationHover {
 			if (javaAnnotations.size() == 1) {
 				
 				// optimization
-				IAnnotationExtension annotation= (IAnnotationExtension) javaAnnotations.get(0);
-				String message= annotation.getMessage();
+				Annotation annotation= (Annotation) javaAnnotations.get(0);
+				String message= annotation.getText();
 				if (message != null && message.trim().length() > 0)
 					return formatSingleMessage(message);
 					
@@ -228,8 +192,8 @@ public class JavaAnnotationHover implements IAnnotationHover {
 				
 				Iterator e= javaAnnotations.iterator();
 				while (e.hasNext()) {
-					IAnnotationExtension annotation= (IAnnotationExtension) e.next();
-					String message= annotation.getMessage();
+					Annotation annotation= (Annotation) e.next();
+					String message= annotation.getText();
 					if (message != null && message.trim().length() > 0)
 						messages.add(message.trim());
 				}
@@ -275,18 +239,12 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	}
 
 	/**
-	 * Returns the annotation preference for the given marker.
+	 * Returns the annotation preference for the given annotation.
 	 * 
-	 * @param marker
+	 * @param annotation the annotation
 	 * @return the annotation preference or <code>null</code> if none
 	 */	
-	private AnnotationPreference getAnnotationPreference(String annotationType) {
-		Iterator e= fMarkerAnnotationPreferences.getAnnotationPreferences().iterator();
-		while (e.hasNext()) {
-			AnnotationPreference info= (AnnotationPreference) e.next();
-			if (info.getAnnotationType().equals(annotationType))
-				return info;
-			}
-		return null;
+	private AnnotationPreference getAnnotationPreference(Annotation annotation) {
+		return fPreferenceLookup.getAnnotationPreference(annotation);
 	}
 }

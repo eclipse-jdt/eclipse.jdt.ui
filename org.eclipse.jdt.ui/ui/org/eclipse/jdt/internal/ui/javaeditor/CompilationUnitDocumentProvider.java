@@ -51,6 +51,7 @@ import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
+import org.eclipse.jface.text.source.IAnnotationPresentation;
 
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 
@@ -58,8 +59,8 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.DefaultAnnotation;
-import org.eclipse.ui.texteditor.IAnnotationExtension;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -113,12 +114,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		/**
 		 * Annotation representating an <code>IProblem</code>.
 		 */
-		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationExtension {
-
-			private static final String TASK_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.task"; //$NON-NLS-1$
-			private static final String ERROR_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.error"; //$NON-NLS-1$
-			private static final String WARNING_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.warning"; //$NON-NLS-1$
-			private static final String INFO_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.info"; //$NON-NLS-1$
+		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationPresentation {
 
 			private static Image fgQuickFixImage;
 			private static Image fgQuickFixErrorImage;
@@ -129,7 +125,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private IProblem fProblem;
 			private Image fImage;
 			private boolean fQuickFixImagesInitialized= false;
-			private String fType;
 			
 			
 			public ProblemAnnotation(IProblem problem, ICompilationUnit cu) {
@@ -138,16 +133,16 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				fCompilationUnit= cu;
 				
 				if (IProblem.Task == fProblem.getID()) {
-					fType= TASK_ANNOTATION_TYPE;
+					setType(JavaMarkerAnnotation2.TASK_ANNOTATION_TYPE);
 					setLayer(DefaultAnnotation.TASK_LAYER + 1);
 				} else if (fProblem.isWarning()) {
-					fType= WARNING_ANNOTATION_TYPE;
+					setType(JavaMarkerAnnotation2.WARNING_ANNOTATION_TYPE);
 					setLayer(DefaultAnnotation.WARNING_LAYER + 1);
 				} else if (fProblem.isError()) {
-					fType= ERROR_ANNOTATION_TYPE;
+					setType(JavaMarkerAnnotation2.ERROR_ANNOTATION_TYPE);
 					setLayer(DefaultAnnotation.ERROR_LAYER + 1);
 				} else {
-					fType= INFO_ANNOTATION_TYPE;
+					setType(JavaMarkerAnnotation2.INFO_ANNOTATION_TYPE);
 					setLayer(DefaultAnnotation.INFO_LAYER + 1);
 				}
 			}
@@ -161,7 +156,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 							fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
 							fgQuickFixImagesInitialized= true;
 						}
-						if (ERROR_ANNOTATION_TYPE.equals(fType))
+						if (JavaMarkerAnnotation2.ERROR_ANNOTATION_TYPE.equals(getType()))
 							fImage= fgQuickFixErrorImage;
 						else
 							fImage= fgQuickFixImage;
@@ -194,15 +189,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			/*
 			 * @see IJavaAnnotation#getMessage()
 			 */
-			public String getMessage() {
+			public String getText() {
 				return fProblem.getMessage();
-			}
-
-			/*
-			 * @see IJavaAnnotation#isTemporary()
-			 */
-			public boolean isTemporary() {
-				return true;
 			}
 			
 			/*
@@ -223,14 +211,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IJavaAnnotation#isProblem()
 			 */
 			public boolean isProblem() {
-				return  WARNING_ANNOTATION_TYPE.equals(fType)  || ERROR_ANNOTATION_TYPE.equals(fType);
-			}
-			
-			/*
-			 * @see IJavaAnnotation#isRelevant()
-			 */
-			public boolean isRelevant() {
-				return true;
+				String type= getType();
+				return  JavaMarkerAnnotation2.WARNING_ANNOTATION_TYPE.equals(type)  || JavaMarkerAnnotation2.ERROR_ANNOTATION_TYPE.equals(type);
 			}
 			
 			/*
@@ -238,6 +220,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 */
 			public boolean hasOverlay() {
 				return false;
+			}
+			
+			/*
+			 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getOverlay()
+			 */
+			public IJavaAnnotation getOverlay() {
+				return null;
 			}
 			
 			/*
@@ -269,31 +258,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				return null;
 			}
 			
-			public String getAnnotationType() {
-				return fType;
-			}
-
-			/*
-			 * @see IAnnotationExtension#getMarkerType()
-			 */
-			public String getMarkerType() {
-				if (isProblem() || INFO_ANNOTATION_TYPE.equals(fType))
-					return IMarker.PROBLEM;
-				else
-					return IMarker.TASK;
-			}
-
-			/*
-			 * @see IAnnotationExtension#getSeverity()
-			 */
-			public int getSeverity() {
-				if (ERROR_ANNOTATION_TYPE.equals(fType))
-					return IMarker.SEVERITY_ERROR;
-				if (WARNING_ANNOTATION_TYPE.equals(fType))
-					return IMarker.SEVERITY_WARNING;
-				return IMarker.SEVERITY_INFO;
-			}
-
 			/*
 			 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getCompilationUnit()
 			 */
@@ -398,17 +362,26 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private ReverseMap fReverseMap= new ReverseMap();
 			private List fPreviouslyOverlaid= null; 
 			private List fCurrentlyOverlaid= new ArrayList();
-			private CompilationUnitAnnotationModelEvent fCurrentEvent;
 			private boolean fIncludesProblemAnnotationChanges= false;
 
 			public CompilationUnitAnnotationModel(IFileEditorInput input) {
 				super(input.getFile());
 				fInput= input;
-				fCurrentEvent= new CompilationUnitAnnotationModelEvent(this, getResource());
 			}
 			
 			protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
-				return new JavaMarkerAnnotation(marker);
+				String markerType= MarkerUtilities.getMarkerType(marker);
+				if (markerType != null && markerType.startsWith(JavaMarkerAnnotation2.JAVA_MARKER_TYPE_PREFIX))
+					return new JavaMarkerAnnotation2(marker);
+				return super.createMarkerAnnotation(marker);
+				
+			}
+			
+			/*
+			 * @see org.eclipse.jface.text.source.AnnotationModel#createAnnotationModelEvent()
+			 */
+			protected AnnotationModelEvent createAnnotationModelEvent() {
+				return new CompilationUnitAnnotationModelEvent(this, getResource());
 			}
 			
 			protected Position createPositionFromProblem(IProblem problem) {
@@ -529,7 +502,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				} else if (fPreviouslyOverlaid != null) {
 					Iterator e= fPreviouslyOverlaid.iterator();
 					while (e.hasNext()) {
-						JavaMarkerAnnotation annotation= (JavaMarkerAnnotation) e.next();
+						JavaMarkerAnnotation2 annotation= (JavaMarkerAnnotation2) e.next();
 						annotation.setOverlay(null);
 					}
 				}			
@@ -540,8 +513,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @param problemAnnotation
 			 */
 			private void setOverlay(Object value, ProblemAnnotation problemAnnotation) {
-				if (value instanceof  JavaMarkerAnnotation) {
-					JavaMarkerAnnotation annotation= (JavaMarkerAnnotation) value;
+				if (value instanceof  JavaMarkerAnnotation2) {
+					JavaMarkerAnnotation2 annotation= (JavaMarkerAnnotation2) value;
 					if (annotation.isProblem()) {
 						annotation.setOverlay(problemAnnotation);
 						fPreviouslyOverlaid.remove(annotation);
@@ -582,12 +555,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 			
 			/*
-			 * @see AnnotationModel#fireModelChanged()
+			 * @see org.eclipse.jface.text.source.AnnotationModel#fireModelChanged(org.eclipse.jface.text.source.AnnotationModelEvent)
 			 */
-			protected void fireModelChanged() {
-				fireModelChanged(fCurrentEvent);
-				fIncludesProblemAnnotationChanges= fCurrentEvent.includesProblemMarkerAnnotationChanges();
-				fCurrentEvent= new CompilationUnitAnnotationModelEvent(this, getResource());
+			protected void fireModelChanged(AnnotationModelEvent event) {
+				if (event instanceof CompilationUnitAnnotationModelEvent) {
+					CompilationUnitAnnotationModelEvent e= (CompilationUnitAnnotationModelEvent) event;
+					fIncludesProblemAnnotationChanges= e.includesProblemMarkerAnnotationChanges();
+				}
+				super.fireModelChanged(event);
 			}
 			
 			/*
@@ -626,8 +601,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 */
 			protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged) throws BadLocationException {
 				super.addAnnotation(annotation, position, fireModelChanged);
-
-				fCurrentEvent.annotationAdded(annotation);
 				
 				Object cached= fReverseMap.get(position);
 				if (cached == null)
@@ -647,9 +620,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see AnnotationModel#removeAllAnnotations(boolean)
 			 */
 			protected void removeAllAnnotations(boolean fireModelChanged) {
-				for (Iterator iter= getAnnotationIterator(); iter.hasNext();) {
-					fCurrentEvent.annotationRemoved((Annotation) iter.next());
-				}
 				super.removeAllAnnotations(fireModelChanged);
 				fReverseMap.clear();
 			}
@@ -658,8 +628,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see AnnotationModel#removeAnnotation(Annotation, boolean)
 			 */
 			protected void removeAnnotation(Annotation annotation, boolean fireModelChanged) {
-				fCurrentEvent.annotationRemoved(annotation);
-				
 				Position position= getPosition(annotation);
 				Object cached= fReverseMap.get(position);
 				if (cached instanceof List) {

@@ -102,7 +102,6 @@ import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.IOverviewRuler;
@@ -110,9 +109,6 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-
-import org.eclipse.ui.editors.text.DefaultEncodingSupport;
-import org.eclipse.ui.editors.text.IEncodingSupport;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
@@ -124,12 +120,12 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.eclipse.ui.texteditor.DefaultAnnotation;
-import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.ExtendedTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -137,7 +133,6 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
-import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -145,8 +140,6 @@ import org.eclipse.ui.texteditor.TextNavigationAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-
-import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -1095,45 +1088,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 		}
 	}
-	
-	static protected class AnnotationAccess extends DefaultMarkerAnnotationAccess {
-		
-		public AnnotationAccess(MarkerAnnotationPreferences markerAnnotationPreferences) {
-			super(markerAnnotationPreferences);
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
-		 */
-		public Object getType(Annotation annotation) {
-			if (annotation instanceof IJavaAnnotation) {
-				IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
-				if (javaAnnotation.isRelevant())
-					return javaAnnotation.getAnnotationType();
-				return null;
-			}
-			return super.getType(annotation);
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isMultiLine(org.eclipse.jface.text.source.Annotation)
-		 */
-		public boolean isMultiLine(Annotation annotation) {
-			return true;
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isTemporary(org.eclipse.jface.text.source.Annotation)
-		 */
-		public boolean isTemporary(Annotation annotation) {
-			if (annotation instanceof IJavaAnnotation) {
-				IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
-				if (javaAnnotation.isRelevant())
-					return javaAnnotation.isTemporary();
-			}
-			return false;
-		}
-	}
 
 	private class PropertyChangeListener implements org.eclipse.core.runtime.Preferences.IPropertyChangeListener {
 		/*
@@ -1799,13 +1753,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		getSourceViewerDecorationSupport(viewer);				
 		
 		return viewer;
-	}
-	
-	/*
-	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#createAnnotationAccess()
-	 */
-	protected IAnnotationAccess createAnnotationAccess() {
-		return new AnnotationAccess(new MarkerAnnotationPreferences());
 	}
 	
 	public final ISourceViewer getViewer() {
@@ -2653,8 +2600,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			if (annotation != null) {
 				updateAnnotationViews(annotation);
 				selectAndReveal(position.getOffset(), position.getLength());
-				if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation)annotation).isProblem())
-					setStatusLineMessage(((IJavaAnnotation)annotation).getMessage());
+				setStatusLineMessage(annotation.getText());
 			}
 		}
 	}
@@ -2811,7 +2757,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 						continue;
 					}
 					annotationMap.put(
-							new DefaultAnnotation(SearchUI.SEARCH_MARKER, IMarker.SEVERITY_INFO, true, message),
+							new Annotation("org.eclipse.search.results", false, message),
 							new Position(node.getStartPosition(), node.getLength()));
 				}
 				
@@ -2911,8 +2857,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			} finally {
 				fIsUpdatingAnnotationViews= false;
 			}
-			if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation)annotation).isProblem())
-				setStatusLineMessage(((IJavaAnnotation)annotation).getMessage());
+			if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation) annotation).isProblem())
+				setStatusLineMessage(annotation.getText());
 		}
 	}
 	
@@ -3068,20 +3014,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		int endOfDocument= document.getLength(); 
 		int distance= Integer.MAX_VALUE;
 		
-		IAnnotationAccess access= getAnnotationAccess();
-		
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
 		Iterator e= new JavaAnnotationIterator(model, true, true);
 		while (e.hasNext()) {
 			Annotation a= (Annotation) e.next();
-			Object type;
-			if (a instanceof IJavaAnnotation)
-				type= ((IJavaAnnotation) a).getAnnotationType();
-			else
-				type= access.getType(a);
-			boolean isNavigationTarget= isNavigationTargetType(type);
-			
-			if ((a instanceof IJavaAnnotation) && ((IJavaAnnotation)a).hasOverlay() || !isNavigationTarget)
+			if ((a instanceof IJavaAnnotation) && ((IJavaAnnotation)a).hasOverlay() || !isNavigationTarget(a))
 				continue;
 				
 			Position p= model.getPosition(a);
@@ -3142,16 +3079,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @since 3.0
 	 */
 	private Annotation getAnnotation(int offset, int length) {
-		IAnnotationAccess access= getAnnotationAccess();
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
 		Iterator e= new JavaAnnotationIterator(model, true, true);
 		while (e.hasNext()) {
 			Annotation a= (Annotation) e.next();
-			if (a instanceof IJavaAnnotation) {
-				IJavaAnnotation annotation= (IJavaAnnotation) a;
-				if (annotation.hasOverlay() || !isNavigationTargetType(annotation.getAnnotationType()))
-					continue;
-			} else if (!isNavigationTargetType(access.getType(a)))
+			if (!isNavigationTarget(a))
 				continue;
 				
 			Position p= model.getPosition(a);
@@ -3163,28 +3095,21 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 	
 	/**
-	 * Returns whether the given annotation type is configured as a target type
-	 * for the "Go to Next/Previous Annotation" actions
+	 * Returns whether the given annotation is configured as a target for the
+	 * "Go to Next/Previous Annotation" actions
 	 * 
-	 * @param type the annotation type
-	 * @return <code>true</code> if this is a target type, <code>false</code>
-	 *            otherwise
+	 * @param annotation the annotation
+	 * @return <code>true</code> if this is a target, <code>false</code>
+	 *         otherwise
 	 * @since 3.0
 	 */
-	private boolean isNavigationTargetType(Object type) {
+	private boolean isNavigationTarget(Annotation annotation) {
 		Preferences preferences= Platform.getPlugin("org.eclipse.ui.editors").getPluginPreferences(); //$NON-NLS-1$
-		Iterator i= getAnnotationPreferences().getAnnotationPreferences().iterator();
-		while (i.hasNext()) {
-			AnnotationPreference annotationPref= (AnnotationPreference) i.next();
-			if (annotationPref.getAnnotationType().equals(type)) {
-//				See bug 41689
-//				String key= forward ? annotationPref.getIsGoToNextNavigationTargetKey() : annotationPref.getIsGoToPreviousNavigationTargetKey();
-				String key= annotationPref.getIsGoToNextNavigationTargetKey();
-				if (key != null && preferences.getBoolean(key))
-					return true;
-			}
-		}
-		return false;
+		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
+//		See bug 41689
+//		String key= forward ? preference.getIsGoToNextNavigationTargetKey() : preference.getIsGoToPreviousNavigationTargetKey();
+		String key= preference == null ? null : preference.getIsGoToNextNavigationTargetKey();
+		return (key != null && preferences.getBoolean(key));
 	}
 
 	/**

@@ -173,7 +173,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 			Object element= iterator.next();
 			if (element instanceof IJavaAnnotation) {
 				IJavaAnnotation annot= (IJavaAnnotation) element;
-				if (annot.isRelevant() && !annot.isTemporary() && !annot.isProblem())
+				if (!annot.isMarkedDeleted() && annot.isPersistent() && !annot.isProblem())
 					return true;
 			}
 		}		

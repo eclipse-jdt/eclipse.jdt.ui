@@ -20,28 +20,28 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationAccess;
+import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 
 public class AnnotationHover extends AbstractJavaEditorTextHover {
 
-	private MarkerAnnotationPreferences fMarkerAnnotationPreferences= new MarkerAnnotationPreferences();
 	private IPreferenceStore fStore= JavaPlugin.getDefault().getPreferenceStore();
-	private IAnnotationAccess fAnnotationAccess= new DefaultMarkerAnnotationAccess(fMarkerAnnotationPreferences);
+	private IAnnotationAccess fAnnotationAccess= new DefaultMarkerAnnotationAccess();
+	private AnnotationPreferenceLookup fPreferenceLookup= new AnnotationPreferenceLookup();
 	
 	/*
 	 * Formats a message as HTML text.
@@ -61,6 +61,10 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 		
 		if (getEditor() == null)
 			return null;
+		
+		IAnnotationAccessExtension annotationAccessExtension= null;
+		if (fAnnotationAccess instanceof IAnnotationAccessExtension)
+			annotationAccessExtension= (IAnnotationAccessExtension) fAnnotationAccess;
 			
 		IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 		IAnnotationModel model= provider.getAnnotationModel(getEditor().getEditorInput());
@@ -77,11 +81,16 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 					continue;
 
 				Position p= model.getPosition(a);
-				if (a.getLayer() > layer && p != null && p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
-					String msg= ((IJavaAnnotation) a).getMessage();
+				
+				int l= IAnnotationAccessExtension.DEFAULT_LAYER;
+				if (fAnnotationAccess != null)
+					l= annotationAccessExtension.getLayer(a);
+				
+				if (l > layer && p != null && p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
+					String msg= a.getText();
 					if (msg != null && msg.trim().length() > 0) {
 						message= msg;
-						layer= a.getLayer();
+						layer= l;
 					}
 				}
 			}
@@ -103,20 +112,16 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 	}
 
 	/**
-	 * Returns the annotation preference for the given marker.
+	 * Returns the annotation preference for the given annotation.
 	 *
-	 * @param marker
+	 * @param annotation the annotation
 	 * @return the annotation preference or <code>null</code> if none
 	 */	
 	private AnnotationPreference getAnnotationPreference(Annotation annotation) {
-		Object type= fAnnotationAccess.getType(annotation);
-		Iterator e= fMarkerAnnotationPreferences.getAnnotationPreferences().iterator();
-		while (e.hasNext()) {
-			AnnotationPreference info= (AnnotationPreference)e.next();
-			if (info.getAnnotationType().equals(type))
-				return info;
-			}
-		return null;
+		
+		if (annotation.isMarkedDeleted())
+			return null;
+		return fPreferenceLookup.getAnnotationPreference(annotation);
 	}
 
 	static boolean isJavaProblemHover(String id) {

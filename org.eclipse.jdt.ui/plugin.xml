@@ -522,6 +522,47 @@
       </updater>
    </extension>
    <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+         name="org.eclipse.jdt.ui.error"
+         super="org.eclipse.ui.workbench.texteditor.error"
+         markerType="org.eclipse.jdt.core.problem"
+         markerSeverity="2">
+      </type>
+      <type
+         name="org.eclipse.jdt.ui.warning"
+         super="org.eclipse.ui.workbench.texteditor.warning"
+         markerType="org.eclipse.jdt.core.problem"
+         markerSeverity="1">
+      </type>
+      <type
+         name="org.eclipse.jdt.ui.info"
+         super="org.eclipse.ui.workbench.texteditor.info"
+         markerType="org.eclipse.jdt.core.problem"
+         markerSeverity="0">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="org.eclipse.jdt.ui.error"
+            annotationImageProvider="org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationImageProvider">
+      </specification>
+      <specification
+            annotationType="org.eclipse.jdt.ui.warning"
+            annotationImageProvider="org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationImageProvider">
+      </specification>
+      <specification
+            annotationType="org.eclipse.jdt.ui.info"
+            annotationImageProvider="org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationImageProvider">
+      </specification>
+      <specification
+            annotationType="org.eclipse.debug.core.breakpoint"
+            icon="icons/full/obj16/brkp_obj.gif"
+            annotationImageProvider="org.eclipse.jdt.internal.ui.javaeditor.BreakpointImageProvider">
+      </specification>
+   </extension>
+   <extension
          id="org.eclipse.jdt.ui.JavaDocumentSetupParticipant"
          name="%javaDocumentSetupParticipant"
          point="org.eclipse.core.filebuffers.documentSetup">
