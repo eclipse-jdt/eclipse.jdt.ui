@@ -353,7 +353,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());//$NON-NLS-1$
 
-		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);//$NON-NLS-1$
+		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);//$NON-NLS-1$
 		
 		fPackJunit= fArchiveFragmentRoot.getPackageFragment("junit");//$NON-NLS-1$
 		fPackJunitSamples= fArchiveFragmentRoot.getPackageFragment("junit.samples");//$NON-NLS-1$

@@ -152,7 +152,7 @@ public class ClassPathDetectorTest extends TestCase {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);		
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);		
 		
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib not found", junitSrcArchive != null && junitSrcArchive.exists());
@@ -188,7 +188,7 @@ public class ClassPathDetectorTest extends TestCase {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src1", junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src1", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src2");
 		IPackageFragment pack1= root.createPackageFragment("test1", false, null);
@@ -231,7 +231,7 @@ public class ClassPathDetectorTest extends TestCase {
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
 		IPath[] exclusionFilter= new IPath[] { new Path("src2/") };
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src1", junitSrcArchive, exclusionFilter);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src1", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING, exclusionFilter);
 		
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src1/src2");
 		IPackageFragment pack1= root.createPackageFragment("test1", false, null);
@@ -273,7 +273,7 @@ public class ClassPathDetectorTest extends TestCase {
 	
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "", junitSrcArchive);		
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);		
 	
 		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
 		for (int i= 0; i < jreEntries.length; i++) {

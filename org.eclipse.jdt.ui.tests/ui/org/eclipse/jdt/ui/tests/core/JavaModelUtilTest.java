@@ -91,7 +91,7 @@ public class JavaModelUtilTest extends TestCase {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(LIB);
 		assertTrue("lib not found", junitSrcArchive != null && junitSrcArchive.exists());

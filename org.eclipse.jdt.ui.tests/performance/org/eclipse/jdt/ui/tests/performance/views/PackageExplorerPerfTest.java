@@ -51,7 +51,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 			fJProject1= JavaProjectHelper.createJavaProject("Testing", "bin");
 			assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
-			fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive);
+			fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}
 		protected void tearDown() throws Exception {
 			if (fJProject1 != null && fJProject1.exists())

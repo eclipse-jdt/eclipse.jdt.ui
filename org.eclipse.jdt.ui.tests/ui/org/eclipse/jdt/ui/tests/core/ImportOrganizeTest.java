@@ -120,7 +120,7 @@ public class ImportOrganizeTest extends CoreTests {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/BaseTestRunner.java"));
 		assertNotNull("BaseTestRunner.java", cu);
@@ -161,7 +161,7 @@ public class ImportOrganizeTest extends CoreTests {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/BaseTestRunner.java"));
 		assertNotNull("BaseTestRunner.java", cu);
@@ -203,7 +203,7 @@ public class ImportOrganizeTest extends CoreTests {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/LoadingTestCollector.java"));
 		assertNotNull("LoadingTestCollector.java", cu);
@@ -227,7 +227,7 @@ public class ImportOrganizeTest extends CoreTests {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/TestCaseClassLoader.java"));
 		assertNotNull("TestCaseClassLoader.java", cu);
@@ -251,7 +251,7 @@ public class ImportOrganizeTest extends CoreTests {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/textui/TestRunner.java"));
 		assertNotNull("TestRunner.java", cu);
