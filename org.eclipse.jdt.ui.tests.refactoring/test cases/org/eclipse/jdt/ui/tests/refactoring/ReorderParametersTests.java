@@ -1,9 +1,13 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
@@ -11,7 +15,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 
 public class ReorderParametersTests extends RefactoringTest {
-	
 	private static final Class clazz= ReorderParametersTests.class;
 	private static final String REFACTORING_PATH= "ReorderParameters/";
 	
@@ -54,12 +57,18 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 	
 	private void helper1(String[] newOrder, String[] signature) throws Exception{
+		helper1(newOrder, signature, null, null);
+	}
+	
+	private void helper1(String[] newOrder, String[] signature, String[] oldNames, String[] newNames) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
-		//DebugUtils.dump("cu" + cu.getSource());
 		IType classA= getType(cu, "A");
-		//DebugUtils.dump("classA" + classA);
-		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(classA.getMethod("m", signature));
+		IMethod method = classA.getMethod("m", signature);
+		assertTrue("method does not exist", method.exists());
+		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(method);
 		ref.setNewParameterOrder(newOrder);
+		if (newNames != null && oldNames != null)
+			ref.setNewNames(createRenamings(oldNames, newNames));
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
 		
@@ -68,13 +77,17 @@ public class ReorderParametersTests extends RefactoringTest {
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+	}
 
-//		System.out.println("-------------------------------------------");
-//		System.out.println(getName());
-//		System.out.println(newcu.getSource());
+	private Map createRenamings(String[] oldNames, String[] newNames) {
+		Map map= new HashMap(oldNames.length);
+		for (int i = 0; i < newNames.length; i++) {
+			map.put(oldNames[i], newNames[i]);
+		}
+		return map;
 	}
 	
-	private void helper2(String[] newOrder, String[] signature, int expectedSeverity) throws Exception{
+	private void helperFail(String[] newOrder, String[] signature, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
 		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(classA.getMethod("m", signature));
 		ref.setNewParameterOrder(newOrder);
@@ -86,11 +99,11 @@ public class ReorderParametersTests extends RefactoringTest {
 	//------- tests 
 	
 	public void testFail0() throws Exception{
-		helper2(new String[]{"j", "i"}, new String[]{"I", "I"}, RefactoringStatus.ERROR);
+		helperFail(new String[]{"j", "i"}, new String[]{"I", "I"}, RefactoringStatus.ERROR);
 	}
 	
 	public void testFail1() throws Exception{
-		helper2(new String[]{"j", "i"}, new String[]{"I", "I"}, RefactoringStatus.ERROR);
+		helperFail(new String[]{"j", "i"}, new String[]{"I", "I"}, RefactoringStatus.ERROR);
 	}
 	
 	//---------
@@ -176,10 +189,35 @@ public class ReorderParametersTests extends RefactoringTest {
 //		printTestDisabledMessage("bug 7274 - reorder parameters: incorrect when parameters have more than 1 modifiers");
 		helper1(new String[]{"b", "i"}, new String[]{"I", "Z"});
 	}
-	
 	public void test20() throws Exception{
 //		printTestDisabledMessage("bug 18147");
 		helper1(new String[]{"b", "a"}, new String[]{"I", "[I"});
 	}
+
+//constructor tests
+//	public void test21() throws Exception{
+//		helper1(new String[]{"b", "a"}, new String[]{"I", "I"});
+//	}
+//	public void test22() throws Exception{
+//		helper1(new String[]{"b", "a"}, new String[]{"I", "I"});
+//	}
+//	public void test23() throws Exception{
+//		helper1(new String[]{"b", "a"}, new String[]{"I", "I"});
+//	}
+//	public void test24() throws Exception{
+//		helper1(new String[]{"b", "a"}, new String[]{"I", "I"});
+//	}
+//	public void test25() throws Exception{
+//		helper1(new String[]{"b", "a"}, new String[]{"I", "I"});
+//	}
+
+	public void test26() throws Exception{
+		helper1(new String[]{"a", "y"}, new String[]{"Z", "I"}, new String[]{"y", "a"}, new String[]{"zzz", "bb"});
+	}
+	
+	public void test27() throws Exception{
+		helper1(new String[]{"a", "y"}, new String[]{"Z", "I"}, new String[]{"y", "a"}, new String[]{"yyy", "a"});
+	}
+	
 }
 
