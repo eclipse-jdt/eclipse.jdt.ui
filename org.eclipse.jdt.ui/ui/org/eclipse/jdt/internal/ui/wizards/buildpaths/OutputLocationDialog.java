@@ -95,6 +95,7 @@ public class OutputLocationDialog extends StatusDialog {
 		
 		fCurrProject= entryToEdit.getJavaProject().getProject();
         fClassPathList= classPathList;
+		classPathList.remove(entryToEdit);
 		
 		IPath outputLocation= (IPath) entryToEdit.getAttribute(CPListElement.OUTPUT);
 		if (outputLocation == null) {
@@ -202,7 +203,7 @@ public class OutputLocationDialog extends StatusDialog {
             
             if (!checkIfFolderValid(path)) {
                 fContainerFieldStatus.setError(NewWizardMessages.getFormattedString("OutputLocationDialog.error.invalidFolder", path)); //$NON-NLS-1$
-                return;
+               return;
             }            
 		}
 		fOutputLocation= path;
