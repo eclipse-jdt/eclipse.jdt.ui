@@ -111,7 +111,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					UnknownTypeEvaluator.getTypeProposals(problemPos, UnknownTypeEvaluator.INTERFACE, proposals);
 					break;	
 				default:
-					proposals.add(new NoCorrectionProposal(problemPos));
+					//proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
