@@ -747,18 +747,18 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 							if (binding != null) {
 								final TypeEnvironment environment= new TypeEnvironment();
 								fSuperType= environment.create(binding);
-								final ASTRewrite rewriter= ASTRewrite.create(target.getAST());
+								final CompilationUnitRewrite rewriter= new CompilationUnitRewrite(workingCopy, target);
 								final TextEditGroup group= sourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.update_reference")); //$NON-NLS-1$
 								for (int index= 0; index < ranges.length; index++) {
 									final CompilationUnitRange range= ranges[index];
 									if (range.getCompilationUnit().equals(type))
-										rewriteTypeOccurrence(range, sourceRewrite.getASTRewrite(), sourceRewrite.getRoot(), source, replacements, group);
+										rewriteTypeOccurrence(range, sourceRewrite, source, replacements, group);
 									else if (range.getCompilationUnit().equals(workingCopy))
-										rewriteTypeOccurrence(range, rewriter, target, target, replacements, group);
+										rewriteTypeOccurrence(range, rewriter, target, replacements, group);
 								}
 								final IDocument document= new Document(fTypeSource);
 								try {
-									rewriter.rewriteAST(document, fType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
+									rewriter.getASTRewrite().rewriteAST(document, fType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 								} catch (MalformedTreeException exception) {
 									JavaPlugin.log(exception);
 								} catch (IllegalArgumentException exception) {
@@ -1113,19 +1113,25 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor#rewriteTypeOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.core.dom.CompilationUnit, java.util.Set)
 	 */
-	protected void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite subRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) {
-		final ICompilationUnit subUnit= subRewrite.getCu();
-		final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, node);
+	protected void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite subRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
 		final Collection collection= (Collection) fTypeOccurrences.get(unit);
 		if (collection != null && !collection.isEmpty()) {
 			TType type= null;
 			ISourceConstraintVariable variable= null;
+			final ICompilationUnit subUnit= subRewrite.getCu();
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, node);
 			for (final Iterator iterator= collection.iterator(); iterator.hasNext();) {
 				variable= (ISourceConstraintVariable) iterator.next();
 				type= (TType) variable.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
 				if (type != null && variable instanceof ITypeConstraintVariable) {
-					if (unit.getPrimary().equals(subUnit))
-						rewriteTypeOccurrence(((ITypeConstraintVariable) variable).getRange(), subRewrite.getASTRewrite(), subRewrite.getRoot(), node, replacements, rewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
+					final CompilationUnitRange range= ((ITypeConstraintVariable) variable).getRange();
+					final ICompilationUnit primary= unit.getPrimary();
+					if (primary.equals(subUnit))
+						rewriteTypeOccurrence(range, subRewrite, node, replacements, rewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
+					else {
+						rewriteTypeOccurrence(range, rewrite, node, rewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
+						manager.manage(primary, rewrite.createChange());
+					}
 				}
 			}
 		}
@@ -1185,7 +1191,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 						if (superBinding != null) {
 							solveSuperTypeConstraints(subUnit, subNode, subType, subBinding, superBinding, new SubProgressMonitor(monitor, 1), status);
 							if (!status.hasFatalError())
-								rewriteTypeOccurrences(manager, sourceRewrite, subUnit, subNode, replacements, new SubProgressMonitor(monitor, 1));
+								rewriteTypeOccurrences(manager, sourceRewrite, subUnit, subNode, replacements, status, new SubProgressMonitor(monitor, 1));
 						}
 					}
 				}
