@@ -17,7 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.text.edits.MultiTextEdit;
 
 import org.eclipse.compare.HistoryItem;
-import org.eclipse.compare.IStreamContentAccessorExtension2;
+import org.eclipse.compare.IEncodedStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.ResourceNode;
 
@@ -74,7 +74,7 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 	 * Implements the IStreamContentAccessor and ITypedElement protocols
 	 * for a TextBuffer.
 	 */
-	class JavaTextBufferNode implements ITypedElement, IStreamContentAccessorExtension2 {
+	class JavaTextBufferNode implements ITypedElement, IEncodedStreamContentAccessor {
 		
 		private TextBuffer fBuffer;
 		private boolean fInEditor;

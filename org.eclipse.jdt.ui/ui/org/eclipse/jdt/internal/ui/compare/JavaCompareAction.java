@@ -35,7 +35,7 @@ import org.eclipse.compare.structuremergeviewer.DiffNode;
 
 public class JavaCompareAction implements IActionDelegate {
 	
-	class TypedElement implements ITypedElement, IStreamContentAccessorExtension2 {
+	class TypedElement implements ITypedElement, IEncodedStreamContentAccessor {
 		
 		private ISourceReference fSource;
 		private String fContents;
