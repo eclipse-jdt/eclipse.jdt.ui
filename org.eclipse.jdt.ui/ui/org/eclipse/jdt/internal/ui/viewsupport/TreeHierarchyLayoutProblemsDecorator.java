@@ -60,6 +60,11 @@ public class TreeHierarchyLayoutProblemsDecorator implements ILabelDecorator {
 	 */
 	public Image decorateImage(Image image, Object element) {
 
+//		XXX: Work in progress for problem decorator being a workbench decorator
+//		IDecoratorManager decoratorMgr= PlatformUI.getWorkbench().getDecoratorManager();
+//		if (!decoratorMgr.getEnabled("org.eclipse.jdt.ui.problem.decorator")) //$NON-NLS-1$
+//			return image;
+
 		try {
 			if (!fIsFlatLayout && element instanceof IPackageFragment) {
 				IPackageFragment fragment= (IPackageFragment) element;
@@ -84,6 +89,12 @@ public class TreeHierarchyLayoutProblemsDecorator implements ILabelDecorator {
 	}
 	
 	public Image decorateImage(Image image, int adornment){	
+
+//		XXX: Work in progress for problem decorator being a workbench decorator
+//		IDecoratorManager decoratorMgr= PlatformUI.getWorkbench().getDecoratorManager();
+//		if (!decoratorMgr.getEnabled("org.eclipse.jdt.ui.problem.decorator")) //$NON-NLS-1$
+//			return image;		
+
 		return adornImage(image, adornment);
 	}
 	
