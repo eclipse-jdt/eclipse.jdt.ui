@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -30,6 +31,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -678,6 +680,11 @@ public class LocalCorrectionsSubProcessor {
 		AST ast= root.getAST();
 		
 		ASTNode selectedNode= problem.getCoveringNode(root);
+		
+		while (selectedNode instanceof ParenthesizedExpression) {
+			selectedNode= ((ParenthesizedExpression) selectedNode).getExpression();
+		}
+
 		if (selectedNode instanceof PrefixExpression) {
 			// !x instanceof X -> !(x instanceof X)
 			
@@ -712,6 +719,54 @@ public class LocalCorrectionsSubProcessor {
 					proposals.add(proposal);	
 				}
 			}
+		} else if (selectedNode instanceof InfixExpression && isBitOperation((((InfixExpression) selectedNode).getOperator()))) {
+			// a & b == c -> (a & b) == c
+			CompareInBitWiseOpFinder visitor= new CompareInBitWiseOpFinder();
+			selectedNode.accept(visitor);
+			if (visitor.compareExpression != null) { // compare operation inside bit operations: set parents
+				ASTNode expr= selectedNode;
+				ASTNode parent= expr.getParent(); // include all parents
+				while (parent instanceof InfixExpression && isBitOperation(((InfixExpression) parent).getOperator())) {
+					expr= parent;
+					parent= expr.getParent();
+				}
+				String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.LocalCorrectionsSubProcessor.setparenteses.bitop.description"); //$NON-NLS-1$
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
+				CUCorrectionProposal proposal= new CUCorrectionProposal(label, context.getCompilationUnit(), 5, image);
+				proposals.add(proposal);
+				TextEdit edit= proposal.getTextChange().getEdit();
+				ASTNode left= visitor.compareExpression.getLeftOperand();
+				
+				if (expr.getStartPosition() < left.getStartPosition()) {
+					edit.addChild(new InsertEdit(expr.getStartPosition(), String.valueOf('(')));
+					edit.addChild(new InsertEdit(ASTNodes.getExclusiveEnd(left), String.valueOf(')')));
+				}
+				ASTNode rigth= visitor.compareExpression.getRightOperand();
+				int selEnd= ASTNodes.getExclusiveEnd(expr);
+				if (selEnd > ASTNodes.getExclusiveEnd(rigth)) {
+					edit.addChild(new InsertEdit(rigth.getStartPosition(), String.valueOf('(')));
+					edit.addChild(new InsertEdit(selEnd, String.valueOf(')')));
+				}
+			}
+		}
+	}
+	
+	private static boolean isBitOperation(InfixExpression.Operator op) {
+		return op == InfixExpression.Operator.AND || op == InfixExpression.Operator.OR || op == InfixExpression.Operator.XOR;
+	}
+
+	private static class CompareInBitWiseOpFinder extends ASTVisitor{
+		public InfixExpression compareExpression= null;
+		
+		public boolean visit(InfixExpression e) {
+			InfixExpression.Operator op= e.getOperator();
+			if (isBitOperation(op)) {
+				return true;
+			} else if (op == InfixExpression.Operator.EQUALS || op == InfixExpression.Operator.NOT_EQUALS) {
+				compareExpression= e;
+				return false;
+			}
+			return false;
 		}
 	}
 
