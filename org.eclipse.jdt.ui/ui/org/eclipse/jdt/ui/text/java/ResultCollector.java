@@ -353,9 +353,12 @@ public class ResultCollector extends CompletionRequestor {
 	}
 
 	/**
-	 * Returns the compilation unit that the receiver operates on.
+	 * Returns the compilation unit that the receiver operates on, or
+	 * <code>null</code> if the <code>IJavaProject</code> constructor was
+	 * used to create the receiver.
 	 * 
-	 * @return the compilation unit that the receiver operates on
+	 * @return the compilation unit that the receiver operates on, or
+	 *         <code>null</code>
 	 */
 	protected final ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;

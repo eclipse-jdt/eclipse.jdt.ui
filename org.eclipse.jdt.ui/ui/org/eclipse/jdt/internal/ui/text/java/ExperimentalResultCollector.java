@@ -93,7 +93,11 @@ public final class ExperimentalResultCollector extends ResultCollector {
 	 * @see org.eclipse.jdt.internal.ui.text.java.ResultCollector#createTypeCompletion(org.eclipse.jdt.core.CompletionProposal)
 	 */
 	private IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
-		IJavaProject project= getCompilationUnit().getJavaProject();
+		final ICompilationUnit cu= getCompilationUnit();
+		if (cu == null)
+			return super.createJavaCompletionProposal(typeProposal);
+			
+		IJavaProject project= cu.getJavaProject();
 		if (!shouldProposeGenerics(project))
 			return super.createJavaCompletionProposal(typeProposal);
 
@@ -107,7 +111,7 @@ public final class ExperimentalResultCollector extends ResultCollector {
 		Image image= getImage(getLabelProvider().createImageDescriptor(typeProposal));
 		String label= getLabelProvider().createLabel(typeProposal);
 		
-		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getContext(), start, length, getCompilationUnit(), image, label);
+		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getContext(), start, length, cu, image, label);
 		if (project != null)
 			newProposal.setProposalInfo(new TypeProposalInfo(project, typeProposal));
 		
