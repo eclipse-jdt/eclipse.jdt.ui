@@ -246,8 +246,8 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	/** UI position lock */
 	private Object fPositionLock= new Object();
 	
-	/** Timestamp */
-	private Object fTimestamp= new Object();
+	/** <code>true</code> iff the current reconcile is canceled. */
+	private boolean fIsCanceled= false;
 	
 	/**
 	 * Creates and returns a new highlighted position with the given offset, length and highlighting.
@@ -281,21 +281,19 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 
 	/**
 	 * Register the added positions on the document and delete the removed positions.
-	 * Do nothing if the timestamp is not valid.
 	 * <p>
 	 * NOTE: Called from background thread.
 	 * </p>
 	 * 
 	 * @param addedPositions the added positions
 	 * @param removedPositions the removed positions
-	 * @param timeStamp the timestamp
 	 * @return the repair description
 	 */
-	public TextPresentation createPresentation(List addedPositions, List removedPositions, Object timeStamp) {
+	public TextPresentation createPresentation(List addedPositions, List removedPositions) {
 		if (fSourceViewer == null)
 			return null;
 		
-		if (timeStamp != getTimestamp())
+		if (isCanceled())
 			return null;
 		
 		IDocument document= fSourceViewer.getDocument();
@@ -318,7 +316,11 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		}
 		
 		if (minStart < maxEnd)
-			return fPresentationReconciler.createRepairDescription(new Region(minStart, maxEnd - minStart), document);
+			try {
+				return fPresentationReconciler.createRepairDescription(new Region(minStart, maxEnd - minStart), document);
+			} catch (RuntimeException e) {
+				// Assume concurrent modification from UI thread
+			}
 		
 		return null;
 	}
@@ -331,9 +333,8 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @param textPresentation the text presentation
 	 * @param addedPositions the added positions
 	 * @param removedPositions the removed positions
-	 * @param timeStamp the timestamp
 	 */
-	public void updatePresentation(final TextPresentation textPresentation, List addedPositions, List removedPositions, final Object timeStamp) {
+	public void updatePresentation(final TextPresentation textPresentation, List addedPositions, List removedPositions) {
 		if (fSourceViewer == null)
 			return;
 		
@@ -343,11 +344,14 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		final SemanticHighlightingManager.HighlightedPosition[] removed= new SemanticHighlightingManager.HighlightedPosition[removedPositions.size()];
 		removedPositions.toArray(removed);
 		
+		if (isCanceled())
+			return;
+		
 		Shell shell= fEditor.getSite().getShell();
 		if (shell != null && !shell.isDisposed()) { 
 			shell.getDisplay().asyncExec(new Runnable() {
 				public void run() {
-					internalUpdatePresentation(textPresentation, added, removed, timeStamp);
+					internalUpdatePresentation(textPresentation, added, removed);
 				}
 			});
 		}
@@ -361,7 +365,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * </p>
 	 * @param addedPositions The added positions
 	 */
-	private void internalUpdatePresentation(TextPresentation textPresentation, HighlightedPosition[] addedPositions, HighlightedPosition[] removedPositions, Object timeStamp) {
+	private void internalUpdatePresentation(TextPresentation textPresentation, HighlightedPosition[] addedPositions, HighlightedPosition[] removedPositions) {
 		if (fSourceViewer == null)
 			return;
 		
@@ -371,7 +375,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		
 		// TODO: double-check consistency with document.getPositions(...)
 		// TODO: reuse removed positions
-		if (timeStamp != getTimestamp())
+		if (isCanceled())
 			return;
 		
 		IDocument document= fSourceViewer.getDocument();
@@ -567,32 +571,34 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
 	 */
 	public void documentChanged(DocumentEvent event) {
-		updateTimestamp();
+		setCanceled(true);
 	}
 	
 	/**
-	 * @return Returns the timestamp.
+	 * @return Returns <code>true</code> iff the current reconcile is cancelled.
 	 * <p>
 	 * NOTE: Also called from background thread.
 	 * </p>
 	 */
-	public Object getTimestamp() {
+	public boolean isCanceled() {
 		IDocument document= fSourceViewer != null ? fSourceViewer.getDocument() : null;
 		if (document == null)
-			return fTimestamp;
+			return fIsCanceled;
 		
 		synchronized (document) {
-			return fTimestamp;
+			return fIsCanceled;
 		}
 	}
 	
 	/**
-	 * @param timestamp The timestamp to set.
+	 * Set whether or not the current reconcile is canceled.
+	 * 
+	 * @param isCanceled <code>true</code> iff the current reconcile is cancelled
 	 */
-	private void updateTimestamp() {
+	public void setCanceled(boolean isCanceled) {
 		IDocument document= fSourceViewer.getDocument();
 		synchronized (document) {
-			fTimestamp= new Object();
+			fIsCanceled= isCanceled;
 		}
 	}
 

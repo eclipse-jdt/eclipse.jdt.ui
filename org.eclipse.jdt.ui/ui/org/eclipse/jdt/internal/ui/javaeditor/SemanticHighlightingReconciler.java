@@ -146,10 +146,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener 
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 */
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
-		// TODO: get timestamp from document when copying its content for parsing
-		Object timeStamp= fPresenter.getTimestamp();
+		fPresenter.setCanceled(progressMonitor.isCanceled());
 		
-		if (ast == null)
+		if (ast == null || fPresenter.isCanceled())
 			return;
 		
 		ASTNode[] subtrees= getAffectedSubtrees(ast);
@@ -160,9 +159,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener 
 		
 		reconcilePositions(subtrees);
 		
-		TextPresentation textPresentation= fPresenter.createPresentation(fAddedPositions, fRemovedPositions, timeStamp);
+		TextPresentation textPresentation= fPresenter.createPresentation(fAddedPositions, fRemovedPositions);
 		
-		fPresenter.updatePresentation(textPresentation, fAddedPositions, fRemovedPositions, timeStamp);
+		fPresenter.updatePresentation(textPresentation, fAddedPositions, fRemovedPositions);
 		
 		stopReconcilingPositions();
 	}
