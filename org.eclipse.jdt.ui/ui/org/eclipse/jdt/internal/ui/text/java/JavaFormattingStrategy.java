@@ -58,12 +58,12 @@ public class JavaFormattingStrategy implements IFormattingStrategy {
 		if (lineSeparator == null)
 			lineSeparator = System.getProperty("line.separator");
 		int index= 0;
-		while (index < content.length() && Character.isWhitespace(content.charAt(index)) && ! clearAllNewlines)
+		while (index < content.length() && Character.isWhitespace(content.charAt(index)))
 		{
 			index++;
 		}
-		int reverseIndex= content.length();
-		while(reverseIndex > 1 && Character.isWhitespace(content.charAt(reverseIndex - 1)) && ! clearAllNewlines)
+		int reverseIndex= content.length() - 1 ;
+		while(reverseIndex > 0 && Character.isWhitespace(content.charAt(reverseIndex)))
 		{
 			reverseIndex--;
 		}
@@ -72,26 +72,23 @@ public class JavaFormattingStrategy implements IFormattingStrategy {
 
 		formatter.setInitialIndentationLevel(fInitialIndentation == null ? 0 : fInitialIndentation.length());
 
-		String result = null;
+		String result= null;
 
-		if (reverseIndex > index)
-			result = formatter.formatSourceString(content.substring(index, reverseIndex));
-
-		if (positions != null) {
-			int[] newPositions= formatter.getMappedPositions();
-			for (int i= 0; i < positions.length; i++)
-				positions[i]= newPositions[i];
-		}
-		
 		if (reverseIndex >= index)
 		{
-			if (!clearAllNewlines)
-				return content.substring(0, index) + result + content.substring(reverseIndex) ;
-			else 
-				return content.substring(0, index) + result + content.substring(reverseIndex) + lineSeparator;
+			result = formatter.formatSourceString(content.substring(index, reverseIndex+1));
+
+			if (positions != null) {
+				int[] newPositions= formatter.getMappedPositions();
+				for (int i= 0; i < positions.length; i++)
+				positions[i]= newPositions[i];
+			}
+		}		
+		if (reverseIndex >= index){
+				return content.substring(0, index) + result + content.substring(reverseIndex+1);
 		}
 		else
-			return "";
+			return content;
 
 	}
 }
