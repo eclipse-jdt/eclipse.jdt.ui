@@ -40,15 +40,16 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocVMInstallListener;
+
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
@@ -83,6 +84,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private ImageDescriptorRegistry fImageDescriptorRegistry;
 	
 	private JavaDocVMInstallListener fVMInstallListener;
+	
+	private JavaElementAdapterFactory fJavaElementAdapterFactory;
+	private MarkerAdapterFactory fMarkerAdapterFactory;
+	private EditorInputAdapterFactory fEditorInputAdapterFactory;
+	private ResourceAdapterFactory fResourceAdapterFactory;
+	
 	
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -178,13 +185,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/* (non - Javadoc)
 	 * Method declared in Plugin
 	 */
-	public void startup() {
-		IAdapterManager manager= Platform.getAdapterManager();
-		manager.registerAdapters(new JavaElementAdapterFactory(), IJavaElement.class);
-		manager.registerAdapters(new MarkerAdapterFactory(), IMarker.class);
-		manager.registerAdapters(new EditorInputAdapterFactory(), IEditorInput.class);
-		manager.registerAdapters(new ResourceAdapterFactory(), IResource.class);
-		
+	public void startup() throws CoreException {
+		super.startup();
+		registerAdapters();
 		try {
 			JavaDocLocations.loadJavadocLocations();
 		
@@ -209,6 +212,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		if (fImageDescriptorRegistry != null)
 			fImageDescriptorRegistry.dispose();
+
+		unregisterAdapters();
 		
 		super.shutdown();
 		
@@ -316,5 +321,26 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fImageDescriptorRegistry == null)
 			fImageDescriptorRegistry= new ImageDescriptorRegistry();
 		return fImageDescriptorRegistry;
+	}
+
+	private void registerAdapters() {
+		fJavaElementAdapterFactory= new JavaElementAdapterFactory();
+		fMarkerAdapterFactory= new MarkerAdapterFactory();
+		fEditorInputAdapterFactory= new EditorInputAdapterFactory();
+		fResourceAdapterFactory= new ResourceAdapterFactory();
+
+		IAdapterManager manager= Platform.getAdapterManager();		
+		manager.registerAdapters(fJavaElementAdapterFactory, IJavaElement.class);
+		manager.registerAdapters(fMarkerAdapterFactory, IMarker.class);
+		manager.registerAdapters(fEditorInputAdapterFactory, IEditorInput.class);
+		manager.registerAdapters(fResourceAdapterFactory, IResource.class);
+	}
+
+	private void unregisterAdapters() {
+		IAdapterManager manager= Platform.getAdapterManager();
+		manager.unregisterAdapters(fJavaElementAdapterFactory);
+		manager.unregisterAdapters(fMarkerAdapterFactory);
+		manager.unregisterAdapters(fEditorInputAdapterFactory);
+		manager.unregisterAdapters(fResourceAdapterFactory);
 	}
 }
