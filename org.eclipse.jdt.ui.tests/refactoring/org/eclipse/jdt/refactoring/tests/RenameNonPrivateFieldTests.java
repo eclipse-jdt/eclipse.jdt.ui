@@ -144,13 +144,13 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}	
 	
 	public void testFail13() throws Exception{
-		printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
-		//helper1();
+		//printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
+		helper1();
 	}
 	
 	public void testFail14() throws Exception{
-		printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
-		//helper1();
+		//printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
+		helper1();
 	}
 	
 	// ------ 
@@ -171,8 +171,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 	
 	public void test4() throws Exception{
-		//helper2();
-		printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
+		helper2();
+		//printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
 	}
 
 	public void test5() throws Exception{
@@ -180,8 +180,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 	
 	public void test6() throws Exception{
-		printTestDisabledMessage("1GKB9YH: ITPJCORE:WIN2000 - search for field refs - incorrect results");
-		//helper2();
+		//printTestDisabledMessage("1GKB9YH: ITPJCORE:WIN2000 - search for field refs - incorrect results");
+		helper2();
 	}
 
 	public void test7() throws Exception{
@@ -189,8 +189,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 	
 	public void test8() throws Exception{
-		printTestDisabledMessage("1GD79XM: ITPJCORE:WINNT - Search - search for field references - not all found");
-		//helper2();
+		//printTestDisabledMessage("1GD79XM: ITPJCORE:WINNT - Search - search for field references - not all found");
+		helper2();
 	}
 	
 	public void test9() throws Exception{
