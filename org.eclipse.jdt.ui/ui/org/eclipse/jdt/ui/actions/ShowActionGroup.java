@@ -64,7 +64,7 @@ public class ShowActionGroup extends ActionGroup {
 	 */
 	public ShowActionGroup(IViewPart part) {
 		this(part.getSite());
-		fIsPackageExplorer= false; // remove the Show in support
+		fIsPackageExplorer= part instanceof PackageExplorerPart;
 	}
 	
 	/**

@@ -21,8 +21,7 @@ import org.eclipse.ui.actions.ActionGroup;
 /**
  * Action group that adds the open and show actions to a context menu and
  * the action bar's navigate menu. This action group reuses the <code>
- * OpenEditorActionGroup</code>, <code>OpenViewActionGroup</code>
- * and <code>ShowActionGroup</code>.
+ * OpenEditorActionGroup</code> and <code>OpenViewActionGroup</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -34,7 +33,6 @@ public class NavigateActionGroup extends ActionGroup {
 
 	private OpenEditorActionGroup fOpenEditorActionGroup;
 	private OpenViewActionGroup fOpenViewActionGroup;
-	private ShowActionGroup fShowActionGroup;
 	
 	/**
 	 * Creates a new <code>NavigateActionGroup</code>. The group requires
@@ -46,7 +44,6 @@ public class NavigateActionGroup extends ActionGroup {
 	public NavigateActionGroup(IViewPart  part) {
 		fOpenEditorActionGroup= new OpenEditorActionGroup(part);
 		fOpenViewActionGroup= new OpenViewActionGroup(part);
-		fShowActionGroup= new ShowActionGroup(part);
 	}
 
 	/**
@@ -66,7 +63,6 @@ public class NavigateActionGroup extends ActionGroup {
 		super.dispose();
 		fOpenEditorActionGroup.dispose();
 		fOpenViewActionGroup.dispose();
-		fShowActionGroup.dispose();
 	}
 
 	/* (non-Javadoc)
@@ -76,7 +72,6 @@ public class NavigateActionGroup extends ActionGroup {
 		super.fillActionBars(actionBars);
 		fOpenEditorActionGroup.fillActionBars(actionBars);
 		fOpenViewActionGroup.fillActionBars(actionBars);
-		fShowActionGroup.fillActionBars(actionBars);
 	}
 
 	/* (non-Javadoc)
@@ -87,8 +82,6 @@ public class NavigateActionGroup extends ActionGroup {
 		
 		fOpenEditorActionGroup.fillContextMenu(menu);
 		fOpenViewActionGroup.fillContextMenu(menu);
-		fShowActionGroup.fillContextMenu(menu);
-		
 	}
 
 	/* (non-Javadoc)
@@ -98,7 +91,6 @@ public class NavigateActionGroup extends ActionGroup {
 		super.setContext(context);
 		fOpenEditorActionGroup.setContext(context);
 		fOpenViewActionGroup.setContext(context);
-		fShowActionGroup.setContext(context);
 	}
 
 	/* (non-Javadoc)
@@ -108,6 +100,5 @@ public class NavigateActionGroup extends ActionGroup {
 		super.updateActionBars();
 		fOpenEditorActionGroup.updateActionBars();
 		fOpenViewActionGroup.updateActionBars();
-		fShowActionGroup.updateActionBars();
 	}
 }
