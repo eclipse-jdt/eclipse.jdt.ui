@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.text;
-
 
 import org.eclipse.core.runtime.Preferences;
 
@@ -31,6 +30,7 @@ import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
+
 
 /**
  * Tools required to configure a Java text viewer. 
@@ -67,9 +67,9 @@ public class JavaTextTools {
 	private JavaColorManager fColorManager;
 	/** The Java source code scanner. */
 	private JavaCodeScanner fCodeScanner;
-	/** The Java multiline comment scanner. */
+	/** The Java multi-line comment scanner. */
 	private JavaCommentScanner fMultilineCommentScanner;
-	/** The Java singleline comment scanner. */
+	/** The Java single-line comment scanner. */
 	private JavaCommentScanner fSinglelineCommentScanner;
 	/** The Java string scanner. */
 	private SingleTokenJavaScanner fStringScanner;
@@ -108,7 +108,7 @@ public class JavaTextTools {
 	 * @param store the preference store to initialize the text tools. The text tool
 	 *			instance installs a listener on the passed preference store to adapt itself to 
 	 *			changes in the preference store. In general <code>PreferenceConstants.
-	 *			getPreferenceStore()</code> shoould be used to initialize the text tools.
+	 *			getPreferenceStore()</code> should be used to initialize the text tools.
 	 * @param autoDisposeOnDisplayDispose if <code>true</code>  the color manager
 	 *			automatically disposes all managed colors when the current display gets disposed
 	 *			and all calls to {@link org.eclipse.jface.text.source.ISharedTextColors#dispose()} are ignored.
@@ -212,29 +212,29 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan Java source code.
 	 *
 	 * @return a Java source code scanner
-	 * @deprecated As of 3.0
+	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#getCodeScanner()}
 	 */
 	public RuleBasedScanner getCodeScanner() {
 		return fCodeScanner;
 	}
 	
 	/**
-	 * Returns a scanner which is configured to scan Java multiline comments.
+	 * Returns a scanner which is configured to scan Java multi-line comments.
 	 *
-	 * @return a Java multiline comment scanner
+	 * @return a Java multi-line comment scanner
 	 * @since 2.0
-	 * @deprecated As of 3.0
+	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#getMultilineCommentScanner()}
 	 */
 	public RuleBasedScanner getMultilineCommentScanner() {
 		return fMultilineCommentScanner;
 	}
 
 	/**
-	 * Returns a scanner which is configured to scan Java singleline comments.
+	 * Returns a scanner which is configured to scan Java single-line comments.
 	 *
-	 * @return a Java singleline comment scanner
+	 * @return a Java single-line comment scanner
 	 * @since 2.0
-	 * @deprecated As of 3.0
+	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#getSinglelineCommentScanner()}
 	 */
 	public RuleBasedScanner getSinglelineCommentScanner() {
 		return fSinglelineCommentScanner;
@@ -245,7 +245,7 @@ public class JavaTextTools {
 	 *
 	 * @return a Java string scanner
 	 * @since 2.0
-	 * @deprecated As of 3.0
+	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#getStringScanner()}
 	 */
 	public RuleBasedScanner getStringScanner() {
 		return fStringScanner;
@@ -255,10 +255,10 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan JavaDoc compliant comments.
 	 * <p>
 	 * Note that the start sequence "/**" and the corresponding end sequence
-	 * are part of the JavaDoc comment.</p>
+	 * are part of the Javadoc comment.</p>
 	 *
-	 * @return a JavaDoc scanner
-	 * @deprecated As of 3.0
+	 * @return a Javadoc scanner
+	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#getJavaDocScanner()}
 	 */
 	public RuleBasedScanner getJavaDocScanner() {
 		return fJavaDocScanner;
@@ -294,7 +294,7 @@ public class JavaTextTools {
 	 * result is <code>null</code>.</p>
 	 *
 	 * @return the partition managing position categories or <code>null</code> if there is none
-	 * @deprecated use <code>TextUtilities.computePartitionManagingPositionCategories(IDocument)</code>
+	 * @deprecated As of 3.0, replaced by {@link org.eclipse.jface.text.TextUtilities#computePartitionManagingCategories(IDocument)}
 	 */
 	public String[] getPartitionManagingPositionCategories() {
 		return new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY };
@@ -307,7 +307,7 @@ public class JavaTextTools {
 	 * @param event the event to be investigated
 	 * @return <code>true</code> if event causes a behavioral change
 	 * @since 2.0
-	 * @deprecated As of 3.0
+	 * @deprecated As of 3.0, replaced by {@link org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration#affectsTextPresentation(PropertyChangeEvent)}
 	 */
 	public boolean affectsBehavior(PropertyChangeEvent event) {
 		return  fCodeScanner.affectsBehavior(event) ||
@@ -323,7 +323,7 @@ public class JavaTextTools {
 	 * 
 	 * @param event the event to which to adapt
 	 * @since 2.0
-	 * @deprecated As of 3.0
+	 * @deprecated As of 3.0, no replacement
 	 */
 	protected void adaptToPreferenceChange(PropertyChangeEvent event) {
 		if (fCodeScanner.affectsBehavior(event))

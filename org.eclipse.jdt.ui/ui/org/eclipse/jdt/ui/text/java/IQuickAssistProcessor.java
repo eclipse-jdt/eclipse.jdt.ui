@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.text.java;
 
 import org.eclipse.core.runtime.CoreException;
 
+
 /**
  * Interface to be implemented by contributors to the extension point
  * <code>org.eclipse.jdt.ui.quickAssistProcessors</code>.
@@ -32,6 +33,7 @@ public interface IQuickAssistProcessor {
 	
 	/**
 	 * Collects quick assists for the given context.
+	 * 
 	 * @param context Defines current compilation unit, position and a shared AST
 	 * @param locations The locations of problems at the invocation offset. The processor can decide to only
 	 * 			add assists when there are no errors at the selection offset.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -106,7 +106,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Preference key used to look up display tab width.
 	 * 
 	 * @since 2.0
-	 * @deprecated As of 3.0 replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_TAB_WIDTH}
+	 * @deprecated As of 3.0, replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_TAB_WIDTH}
 	 */
 	public final static String PREFERENCE_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
 
@@ -126,37 +126,37 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	private String fDocumentPartitioning;
 	/**
-	 * The Java source code scanner
+	 * The Java source code scanner.
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fCodeScanner;
 	/** 
-	 * The Java multi-line comment scanner 
+	 * The Java multi-line comment scanner. 
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fMultilineCommentScanner;
 	/**
-	 * The Java single-line comment scanner
+	 * The Java single-line comment scanner.
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fSinglelineCommentScanner;
 	/**
-	 * The Java string scanner
+	 * The Java string scanner.
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fStringScanner;
 	/**
-	 * The Javadoc scanner
+	 * The Javadoc scanner.
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fJavaDocScanner;
 	/**
-	 * The preference store, can be read-only
+	 * The preference store, can be read-only.
 	 * @since 3.0
 	 */
 	private IPreferenceStore fPreferenceStore;
 	/**
-	 * The color manager
+	 * The color manager.
 	 * @since 3.0
 	 */
 	private IColorManager fColorManager;
@@ -301,9 +301,9 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 
 	/**
 	 * Creates and returns a preference store which combines the preference
-	 * stores from the text tools.
+	 * stores from the text tools and which is read-only.
 	 *
-	 * @return the preference store, which is read-only
+	 * @return the read-only preference store 
 	 * @since 3.0
 	 */
 	private IPreferenceStore createPreferenceStore() {
@@ -772,10 +772,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * <p>
 	 * Clients are not allowed to call this method if the old setup with
 	 * text tools is in use.
-	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)
 	 * </p>
 	 * 
 	 * @param event the event to which to adapt
+	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)
 	 * @since 3.0
 	 */
 	public void handlePropertyChangeEvent(PropertyChangeEvent event) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Control;
 public interface IJavaFoldingPreferenceBlock {
 
 	/**
-	 * Creates the control that will be displayed on the Java Editor folding
+	 * Creates the control that will be displayed on the Java &gt; Editor &gt; Folding
 	 * preference page.
 	 * 
 	 * @param parent the parent composite to which to add the preferences control

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,7 @@ package org.eclipse.jdt.ui.text;
 
 /**
  * Color keys used for syntax highlighting Java 
- * code and JavaDoc compliant comments. 
+ * code and Javadoc compliant comments. 
  * A <code>IColorManager</code> is responsible for mapping 
  * concrete colors to these keys.
  * <p>
@@ -21,6 +21,7 @@ package org.eclipse.jdt.ui.text;
  * </p>
  *
  * @see org.eclipse.jdt.ui.text.IColorManager
+ * @see org.eclipse.jdt.ui.text.IColorManagerExtension
  */
 public interface IJavaColorConstants {
 	
@@ -53,33 +54,36 @@ public interface IJavaColorConstants {
 
 	/** The color key for method names in Java code
 	 * (value <code>"java_method_name"</code>).
+	 * 
 	 * @since 3.0
 	 */
 	String JAVA_METHOD_NAME= "java_method_name"; //$NON-NLS-1$
 
 	/** The color key for keyword 'return' in Java code
 	 * (value <code>"java_keyword_return"</code>).
+	 * 
 	 * @since 3.0
 	 */
 	String JAVA_KEYWORD_RETURN= "java_keyword_return"; //$NON-NLS-1$
 
 	/** The color key for operators and brackets in Java code
 	 * (value <code>"java_operator"</code>).
+	 * 
 	 * @since 3.0
 	 */
 	String JAVA_OPERATOR= "java_operator"; //$NON-NLS-1$
 
 	/**
-	 * The color key for everthing in Java code for which no other color is specified
+	 * The color key for everything in Java code for which no other color is specified
 	 * (value <code>"java_default"</code>).
 	 */
 	String JAVA_DEFAULT= "java_default"; //$NON-NLS-1$
 
 	/** 
-	 * The color key for the Java built-in types such as int and char in Java code
+	 * The color key for the Java built-in types such as <code>int</code> and <code>char</code> in Java code
 	 * (value <code>"java_type"</code>).
 	 * 
-	 * @deprecated no longer used, use <code>JAVA_KEYWORD</code> instead
+	 * @deprecated no longer used, replaced by <code>JAVA_KEYWORD</code>
 	 */
 	String JAVA_TYPE= "java_type"; //$NON-NLS-1$
 	
@@ -110,7 +114,7 @@ public interface IJavaColorConstants {
 	String JAVADOC_LINK= "java_doc_link"; //$NON-NLS-1$
 
 	/**
-	 * The color key for everthing in JavaDoc comments for which no other color is specified
+	 * The color key for everything in JavaDoc comments for which no other color is specified
 	 * (value <code>"java_doc_default"</code>).
 	 */
 	String JAVADOC_DEFAULT= "java_doc_default"; //$NON-NLS-1$
