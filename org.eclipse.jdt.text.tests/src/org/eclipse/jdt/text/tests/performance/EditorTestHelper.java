@@ -32,6 +32,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -306,8 +307,11 @@ public class EditorTestHelper {
 	}
 
 	public static void showPerspective(String perspective) throws WorkbenchException {
-		IWorkbench workbench= PlatformUI.getWorkbench();
-		IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
-		workbench.showPerspective(perspective, activeWindow);
+		IPerspectiveDescriptor current= getActivePage().getPerspective();
+		if (current != null && !current.getId().equals(perspective)) {
+			IWorkbench workbench= PlatformUI.getWorkbench();
+			IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
+			workbench.showPerspective(perspective, activeWindow);
+		}
 	}
 }
