@@ -61,7 +61,6 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
@@ -921,7 +920,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private IType getContainingType() throws JavaModelException {
-		IType type= Bindings.findType(getContainingTypeBinding(), fCu.getJavaProject());
+		IType type= (IType) fCu.getElementAt(getContainingTypeDeclarationNode().getName().getStartPosition());
 		Assert.isNotNull(type);
 
 		return type;
