@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 
 import org.eclipse.ui.IEditorInput;
@@ -42,6 +43,7 @@ import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
  
 /**
@@ -171,6 +173,11 @@ public class JavaReconciler extends MonoReconciler {
 	/** The shell listener */
 	private ShellListener fActivationListener;
 	/**
+	 * The mutex that keeps us from running multiple reconcilers on one editor.
+	 * TODO remove once we have ensured that there is only one reconciler per editor. 
+	 */
+	private Object fMutex;
+	/**
 	 * The Java element changed listener.
 	 * @since 3.0
 	 */
@@ -193,6 +200,21 @@ public class JavaReconciler extends MonoReconciler {
 	public JavaReconciler(ITextEditor editor, JavaCompositeReconcilingStrategy strategy, boolean isIncremental) {
 		super(strategy, isIncremental);
 		fTextEditor= editor;
+		
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898
+		// when re-using editors, a new reconciler is set up by the source viewer
+		// and the old one uninstalled. However, the old reconciler may still be
+		// running. 
+		// To avoid having to reconcilers calling CompilationUnitEditor.reconciled,
+		// we synchronized on a lock object provided by the editor.
+		// The critical section is really the entire run() method of the reconciler
+		// thread, but synchronizing process() only will keep JavaReconcilingStrategy
+		// from running concurrently on the same editor.
+		// TODO remove once we have ensured that there is only one reconciler per editor. 
+		if (editor instanceof CompilationUnitEditor)
+			fMutex= ((CompilationUnitEditor) editor).getReconcilerLock();
+		else
+			fMutex= new Object(); // Null Object
 	}
 	
 	/*
@@ -277,8 +299,21 @@ public class JavaReconciler extends MonoReconciler {
 	 * @see org.eclipse.jface.text.reconciler.MonoReconciler#initialProcess()
 	 */
 	protected void initialProcess() {
-		super.initialProcess();
+		// TODO remove once we have ensured that there is only one reconciler per editor. 
+		synchronized (fMutex) {
+			super.initialProcess();
+		}
 		fIninitalProcessDone= true;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.reconciler.MonoReconciler#process(org.eclipse.jface.text.reconciler.DirtyRegion)
+	 */
+	protected void process(DirtyRegion dirtyRegion) {
+		// TODO remove once we have ensured that there is only one reconciler per editor. 
+		synchronized (fMutex) { 
+			super.process(dirtyRegion);
+		}
 	}
 	
 	/**

@@ -1140,6 +1140,15 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	private ListenerList fReconcilingListeners= new ListenerList();
 
+	/**
+	 * Mutex for the reconciler. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898
+	 * for a description of the problem.
+	 * <p>
+	 * TODO remove once the underlying problem is solved.
+	 * </p>
+	 */
+	private final Object fReconcilerLock= new Object();
+
 	
 	
 	/**
@@ -1852,6 +1861,18 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 
 		return super.getAdapter(required);
+	}
+
+	/**
+	 * Returns the mutex for the reconciler. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898
+	 * for a description of the problem.
+	 * <p>
+	 * TODO remove once the underlying problem is solved.
+	 * </p>
+	 * @return the lock reconcilers may use to synchronize on
+	 */
+	public Object getReconcilerLock() {
+		return fReconcilerLock;
 	}
 
 }
