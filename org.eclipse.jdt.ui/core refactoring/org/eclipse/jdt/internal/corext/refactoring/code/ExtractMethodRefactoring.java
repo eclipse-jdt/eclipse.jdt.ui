@@ -584,7 +584,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		// We have a void return statement. The code looks like
 		// extracted();
 		// return;	
-		if (returnKind == ExtractMethodAnalyzer.RETURN_STATEMENT_VOID) {
+		if (returnKind == ExtractMethodAnalyzer.RETURN_STATEMENT_VOID && !fAnalyzer.isLastStatementSelected()) {
 			code.append(delimiter);
 			code.append(RETURN);
 			code.append(SEMICOLON);

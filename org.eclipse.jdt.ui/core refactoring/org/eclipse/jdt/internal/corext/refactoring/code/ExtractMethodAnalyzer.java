@@ -248,7 +248,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		}
 		if (fInputFlowInfo.isValueReturn()) {
 			fReturnKind= RETURN_STATEMENT_VALUE;
-		} else  if (fInputFlowInfo.isVoidReturn()) {
+		} else  if (fInputFlowInfo.isVoidReturn() || (fInputFlowInfo.isPartialReturn() && isVoidMethod() && isLastStatementSelected())) {
 			fReturnKind= RETURN_STATEMENT_VOID;
 		} else if (fInputFlowInfo.isNoReturn() || fInputFlowInfo.isThrow() || fInputFlowInfo.isUndefined()) {
 			fReturnKind= NO;
@@ -268,6 +268,21 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		return status;
 	}
 	
+	private boolean isVoidMethod() {
+		ITypeBinding binding= fEnclosingMethodBinding.getReturnType();
+		if (fEnclosingMethod.getAST().resolveWellKnownType("void").equals(binding)) //$NON-NLS-1$
+			return true;
+		return false;
+	}
+	
+	public boolean isLastStatementSelected() {
+		ASTNode[] nodes= getSelectedNodes();
+		if (nodes.length == 0)
+			return false;
+		List statements= fEnclosingMethod.getBody().statements();
+		return nodes[nodes.length - 1] == statements.get(statements.size() - 1);
+	}
+
 	private void computeInput() {
 		int argumentMode= FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN;
 		fArguments= fInputFlowInfo.get(fInputFlowContext, argumentMode);
