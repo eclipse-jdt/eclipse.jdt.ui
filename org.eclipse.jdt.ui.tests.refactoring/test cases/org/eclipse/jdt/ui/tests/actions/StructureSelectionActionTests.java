@@ -166,7 +166,6 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class S
 	}
 
 	public void test9() throws Exception{
-//		printTestDisabledMessage("incorrect range for Argument");	
 		helperSelectUp(3, 10, 3, 11);
 	}
 	
@@ -191,7 +190,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class S
 	}
 	
 	public void test15() throws Exception{
-//		printTestDisabledMessage("incorrect range for Argument");	
+		// identical to test9 ???
 		helperSelectUp(3, 10, 3, 11);
 	}
 	
