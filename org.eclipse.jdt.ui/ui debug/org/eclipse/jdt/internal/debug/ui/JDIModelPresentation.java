@@ -427,15 +427,21 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		switch (sig.charAt(0)) {
 			case 'B' :
 				buff.append(" (0x");
-				int intVal = Integer.parseInt(value.getValueString());
-				intVal = intVal & 0xFF;
-				buff.append(Integer.toHexString(intVal));
+				int byteVal = Integer.parseInt(value.getValueString());
+				byteVal = byteVal & 0xFF;
+				buff.append(Integer.toHexString(byteVal));
 				buff.append(')');
 				break;
 			case 'I' :
-			case 'S' :
 				buff.append(" (0x");
 				buff.append(Integer.toHexString(Integer.parseInt(value.getValueString())));
+				buff.append(')');
+				break;			
+			case 'S' :
+				buff.append(" (0x");
+				int shortVal = Integer.parseInt(value.getValueString());
+				shortVal = shortVal & 0xFFFF;
+				buff.append(Integer.toHexString(shortVal));
 				buff.append(')');
 				break;
 			case 'J' :
