@@ -890,6 +890,11 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.src14tgt14.error")); //$NON-NLS-1$
 				return status;
 			}
+		} else if (VERSION_1_5.equals(source)) {
+			if (!VERSION_1_5.equals(target)) {
+				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.src15tgt15.error")); //$NON-NLS-1$
+				return status;
+			}
 		}
 		return status;
 	}
