@@ -1,7 +1,7 @@
 package p;
 
 import java.util.List;
-
-interface I{
+/** typecomment template*/
+interface I {
 	public List m();
 }

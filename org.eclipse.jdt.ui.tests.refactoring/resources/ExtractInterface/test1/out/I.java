@@ -1,4 +1,5 @@
 package p;
-interface I{
+/** typecomment template*/
+interface I {
 	public void m();
 }
