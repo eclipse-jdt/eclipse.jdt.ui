@@ -68,7 +68,11 @@ public class CodeFormatterUtil {
 	
 	public static int getTabWidth() {
 		Hashtable options= JavaCore.getOptions();
-		String result= (String)options.get(JavaCore.FORMATTER_TAB_SIZE);
-		return Integer.parseInt(result);
+		try {
+			String result= (String)options.get(JavaCore.FORMATTER_TAB_SIZE);
+			return Integer.parseInt(result);
+		} catch (NumberFormatException e) {
+			return 4;
+		}
 	}	
 }
