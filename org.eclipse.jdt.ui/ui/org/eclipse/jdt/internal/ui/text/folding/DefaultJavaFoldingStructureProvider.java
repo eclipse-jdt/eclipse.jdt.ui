@@ -477,7 +477,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				int terminal= scanner.getNextToken();
 				while (terminal != ITerminalSymbols.TokenNameEOF && !(terminal == ITerminalSymbols.TokenNameclass || terminal == ITerminalSymbols.TokenNameinterface || terminal == ITerminalSymbols.TokenNameenum || (foundComment && (terminal == ITerminalSymbols.TokenNameimport || terminal == ITerminalSymbols.TokenNamepackage)))) {
 					
-					if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || terminal == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
+					if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || terminal == ITerminalSymbols.TokenNameCOMMENT_BLOCK || terminal == ITerminalSymbols.TokenNameCOMMENT_LINE) {
 						if (!foundComment)
 							headerStart= scanner.getCurrentTokenStartPosition();
 						headerEnd= scanner.getCurrentTokenEndPosition();
