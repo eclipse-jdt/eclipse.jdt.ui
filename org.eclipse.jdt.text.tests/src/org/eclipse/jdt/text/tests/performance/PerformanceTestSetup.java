@@ -29,8 +29,8 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.actions.RefreshAction;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -38,9 +38,7 @@ import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 public class PerformanceTestSetup extends TestSetup {
 
-	public PerformanceTestSetup(Test test) {
-		super(test);
-	}
+	private static final String PERSPECTIVE= "org.eclipse.jdt.ui.JavaPerspective";
 
 	public static final String PROJECT= "org.eclipse.swt";
 	
@@ -48,24 +46,27 @@ public class PerformanceTestSetup extends TestSetup {
 
 	private static final String INTRO_VIEW= "org.eclipse.ui.internal.introview";
 	
+	public PerformanceTestSetup(Test test) {
+		super(test);
+	}
+
 	/*
 	 * @see junit.extensions.TestSetup#setUp()
 	 */
 	protected void setUp() throws Exception {
 		IWorkbench workbench= PlatformUI.getWorkbench();
-		IWorkbenchPage activePage= workbench.getActiveWorkbenchWindow().getActivePage();
+		IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
+		IWorkbenchPage activePage= activeWindow.getActivePage();
 		
 		activePage.hideView(activePage.findViewReference(INTRO_VIEW));
+		
+		workbench.showPerspective(PERSPECTIVE, activeWindow);
 		
 		boolean autobuild= ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding();
 		if (autobuild)
 			ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(false);
 		
 		setUpProject();
-		
-		setUpTestCases();
-
-		new RefreshAction(workbench.getActiveWorkbenchWindow().getShell()).refreshAll();
 		
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		if (autobuild)
@@ -92,11 +93,6 @@ public class PerformanceTestSetup extends TestSetup {
 		}
 	}
 	
-	private void setUpTestCases() throws Exception {
-		OpenJavaEditorTest.setUpWorkspace();
-		OpenTextEditorTest.setUpWorkspace();
-	}
-
 	private void setUpProject() throws IOException, ZipException, CoreException {
 		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
 		FileTool.unzip(new ZipFile(FileTool.getFileInPlugin(JdtTextTestPlugin.getDefault(), new Path(PROJECT_ZIP))), new File(workspacePath));

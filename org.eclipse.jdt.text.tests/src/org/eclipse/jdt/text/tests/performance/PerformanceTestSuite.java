@@ -24,6 +24,8 @@ public class PerformanceTestSuite extends TestSuite {
 	}
 	
 	public PerformanceTestSuite() {
+		addTest(new OpenJavaEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench
+		addTest(new OpenTextEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench
 		addTestSuite(RevertTextEditorTest.class);
 		addTestSuite(RevertJavaEditorTest.class);
 		addTestSuite(ToggleCommentTest.class);
