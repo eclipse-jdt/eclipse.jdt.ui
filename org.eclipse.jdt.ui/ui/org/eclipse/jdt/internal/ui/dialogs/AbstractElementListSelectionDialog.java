@@ -53,7 +53,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	private int fWidth= 60;
 	private int fHeight= 18;
 	
-	private int[] fSelectionIndices= new int[0];
+	private Object[] fSelection= new Object[0];
 	
 	/**
 	 * Constructs a list selection dialog.
@@ -332,17 +332,17 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 
 	// 3515	
 	private void handleWidgetSelected() {
-		int[] newSelectionIndices= fFilteredList.getSelectionIndices();
+		Object[] newSelection= fFilteredList.getSelection();
 		
-		if (newSelectionIndices.length != fSelectionIndices.length) {
-			fSelectionIndices= newSelectionIndices;
+		if (newSelection.length != fSelection.length) {
+			fSelection= newSelection;
 			handleSelectionChanged();
 		} else {
-			for (int i= 0; i != newSelectionIndices.length; i++) {
-				if (newSelectionIndices[i] != fSelectionIndices[i]) {
-					fSelectionIndices= newSelectionIndices;
+			for (int i= 0; i != newSelection.length; i++) {
+				if (!newSelection[i].equals(fSelection[i])) {
+					fSelection= newSelection;
 					handleSelectionChanged();
-					break;							
+					break;
 				}
 			}
 		}		
