@@ -15,9 +15,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
-import org.eclipse.jdt.internal.core.Openable;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.JavaParameterListValidator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -37,6 +37,7 @@ public class DisplayCompletionProcessor implements IContentAssistProcessor {
 	
 	private DisplayResultCollector fCollector;
 	private DisplayView fView;
+	private IContextInformationValidator fValidator;
 	
 	public DisplayCompletionProcessor(DisplayView view) {
 		fCollector= new DisplayResultCollector();
@@ -54,7 +55,9 @@ public class DisplayCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getContextInformationValidator()
 	 */
 	public IContextInformationValidator getContextInformationValidator() {
-		return null;
+		if (fValidator == null)
+			fValidator= new JavaParameterListValidator();
+		return fValidator;
 	}
 
 	/**

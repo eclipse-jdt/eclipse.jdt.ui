@@ -4,22 +4,16 @@
  */
 package org.eclipse.jdt.internal.ui.snippeteditor;
 
-import java.util.List;
-import java.util.ResourceBundle;
-
-import org.eclipse.swt.widgets.Shell;
-
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.text.java.JavaParameterListValidator;
+import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
+import org.eclipse.swt.widgets.Shell;
 
 
 /**
@@ -29,6 +23,7 @@ public class JavaSnippetCompletionProcessor implements IContentAssistProcessor {
 	
 	private ResultCollector fCollector;
 	private JavaSnippetEditor fEditor;
+	private IContextInformationValidator fValidator;
 	
 	public JavaSnippetCompletionProcessor(JavaSnippetEditor editor) {
 		fCollector= new ResultCollector();
@@ -46,7 +41,10 @@ public class JavaSnippetCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getContextInformationValidator()
 	 */
 	public IContextInformationValidator getContextInformationValidator() {
-		return null;
+		if (fValidator == null) {
+			fValidator= new JavaParameterListValidator();
+		}
+		return fValidator;
 	}
 
 	/**
