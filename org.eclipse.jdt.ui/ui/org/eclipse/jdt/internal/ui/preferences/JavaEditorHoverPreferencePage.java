@@ -11,6 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -46,6 +49,11 @@ public class JavaEditorHoverPreferencePage extends AbstractConfigurationBlockPre
 	 */
 	protected void setPreferenceStore() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+	}
+	
+	
+	protected Label createDescriptionLabel(Composite parent) {
+		return null; // no description for new look.
 	}
 
 	/*
