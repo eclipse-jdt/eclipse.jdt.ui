@@ -43,15 +43,9 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 	}
 		
 	protected ASTRewrite getRewrite() throws CoreException {
-		AST ast= new AST();
-		CompilationUnit origCU= ASTResolving.findParentCompilationUnit(fOriginalNode);
-		
-		ASTCloner cloner= new ASTCloner(ast, origCU);
-
-		CompilationUnit cu= (CompilationUnit) cloner.getClonedRoot();
-		SimpleName node= (SimpleName) cloner.getCloned(fOriginalNode);
-		
-		cloner= null;
+		AST ast= fOriginalNode.getAST();
+		CompilationUnit cu= ASTResolving.findParentCompilationUnit(fOriginalNode);
+		SimpleName node= fOriginalNode;
 
 		ASTRewrite rewrite= new ASTRewrite(cu);
 		
