@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 
 <plugin
-    name = "Java Tooling UI"
+    name = "Java Development Tools UI"
     id = "org.eclipse.jdt.ui"
-    version = "1.0"
-    vendor-name = "IBM"
+    version = "0.9"
+    vendor-name = "Object Technology International, Inc."
     class="org.eclipse.jdt.internal.ui.JavaPlugin">
 
 
