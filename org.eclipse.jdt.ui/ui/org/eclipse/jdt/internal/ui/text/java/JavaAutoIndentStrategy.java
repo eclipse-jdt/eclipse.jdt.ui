@@ -489,7 +489,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		else if (c.text.length() == 1)
 			smartIndentAfterBlockDelimiter(d, c);
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
-			pasteText(d, c);
+			smartPaste(d, c);
 	}
 	
 	private static boolean useSpaces() {
