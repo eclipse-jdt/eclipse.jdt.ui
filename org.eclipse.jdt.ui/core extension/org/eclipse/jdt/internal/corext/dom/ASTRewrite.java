@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -79,6 +81,7 @@ public final class ASTRewrite {
 	public static final int SINGLEVAR_DECLARATION= 5;
 	public static final int TYPE= 6;
 	public static final int JAVADOC= 7;
+	public static final int VAR_DECLARATION_FRAGMENT= 8;
 	
 	private ASTNode fRootNode;
 	
@@ -299,6 +302,10 @@ public final class ASTRewrite {
 			return BODY_DECLARATION;
 		} else if (existingNode instanceof SingleVariableDeclaration) {
 			return SINGLEVAR_DECLARATION;
+		} else if (existingNode instanceof VariableDeclarationFragment) {
+			return VAR_DECLARATION_FRAGMENT;
+		} else if (existingNode instanceof Type) {
+			return TYPE;
 		} else if (existingNode instanceof Javadoc) {
 			return JAVADOC;				
 		} else {
