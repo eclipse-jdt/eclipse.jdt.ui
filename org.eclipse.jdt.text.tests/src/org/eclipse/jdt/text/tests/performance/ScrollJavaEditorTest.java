@@ -30,7 +30,7 @@ public class ScrollJavaEditorTest extends TestCase {
 
 	private static final int[] CTRL_HOME= new int[] { SWT.CTRL, SWT.HOME };
 
-	private PerformanceMeterFactory fPerformanceMeterFactory= new OSPerformanceMeterFactory();
+	private PerformanceMeterFactory fPerformanceMeterFactory= Performance.createPerformanceMeterFactory();
 
 	protected void setUp() {
 		EditorTestHelper.runEventQueue();
