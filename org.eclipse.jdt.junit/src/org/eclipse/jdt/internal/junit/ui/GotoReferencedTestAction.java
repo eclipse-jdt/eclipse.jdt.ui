@@ -46,7 +46,7 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 	
 	private void run(IStructuredSelection selection) {
 		IJavaElement[] elements= getSelectedElements(selection);
-		if (elements == null || elements.length == 0) {
+		if (elements.length == 0) {
 			MessageDialog.openInformation(getShell(), JUnitMessages.getString("GotoReferencedTestAction.dialog.title"), JUnitMessages.getString("GotoReferencedTestAction.dialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
@@ -104,7 +104,7 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 		List elements= selection.toList();
 		int size= elements.size();
 		if (size == 0)
-			return null;
+			return new IJavaElement[0];
 			
 		ArrayList result= new ArrayList(size);
 			
@@ -124,7 +124,7 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 			else if (e instanceof IMethod || e instanceof IType || e instanceof IField) {
 				result.add(e);
 			} else {
-				return null;
+				return new IJavaElement[0];
 			}
 		}
 		return (IJavaElement[])result.toArray(new IJavaElement[result.size()]);

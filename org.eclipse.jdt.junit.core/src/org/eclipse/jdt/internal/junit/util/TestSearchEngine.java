@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
  */
 public class TestSearchEngine {
 
-	private class JUnitSearchResultCollector extends SearchRequestor {
+	private static class JUnitSearchResultCollector extends SearchRequestor {
 		List fList;
 		Set fFailed= new HashSet();
 		Set fMatches= new HashSet();

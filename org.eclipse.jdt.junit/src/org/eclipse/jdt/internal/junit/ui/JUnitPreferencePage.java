@@ -120,7 +120,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	/**
 	 * Model object that represents a single entry in the filter table.
 	 */
-	private class Filter {
+	private static class Filter {
 
 		private String fName;
 		private boolean fChecked;
@@ -162,7 +162,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	/**
 	 * Sorter for the filter table; sorts alphabetically ascending.
 	 */
-	private class FilterViewerSorter extends WorkbenchViewerSorter {
+	private static class FilterViewerSorter extends WorkbenchViewerSorter {
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			ILabelProvider lprov= (ILabelProvider) ((ContentViewer) viewer).getLabelProvider();
 			String name1= lprov.getText(e1);
@@ -189,7 +189,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	/**
 	 * Label provider for Filter model objects
 	 */
-	private class FilterLabelProvider extends LabelProvider implements ITableLabelProvider {
+	private static class FilterLabelProvider extends LabelProvider implements ITableLabelProvider {
 
 		public String getColumnText(Object object, int column) {
 			return (column == 0) ? ((Filter) object).getName() : ""; //$NON-NLS-1$

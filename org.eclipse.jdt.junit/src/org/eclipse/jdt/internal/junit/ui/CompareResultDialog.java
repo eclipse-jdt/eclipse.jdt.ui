@@ -69,7 +69,7 @@ public class CompareResultDialog extends Dialog {
     }
     
     public static class CompareResultViewerConfiguration extends SourceViewerConfiguration {
-        public class SimpleDamagerRepairer implements IPresentationDamager, IPresentationRepairer {
+        public static class SimpleDamagerRepairer implements IPresentationDamager, IPresentationRepairer {
             private IDocument fDocument;
 
             public void setDocument(IDocument document) {
@@ -282,7 +282,7 @@ public class CompareResultDialog extends Dialog {
 	    compareConfiguration.setLeftEditable(false);
 	    compareConfiguration.setRightLabel(JUnitMessages.getString("CompareResultDialog.actualLabel"));	 //$NON-NLS-1$
 	    compareConfiguration.setRightEditable(false);
-	    compareConfiguration.setProperty(CompareConfiguration.IGNORE_WHITESPACE, new Boolean(false));
+	    compareConfiguration.setProperty(CompareConfiguration.IGNORE_WHITESPACE, Boolean.FALSE);
 
 	    fViewer= new CompareResultMergeViewer(parent, SWT.NONE, compareConfiguration);
 	    fViewer.setInput(new DiffNode( 

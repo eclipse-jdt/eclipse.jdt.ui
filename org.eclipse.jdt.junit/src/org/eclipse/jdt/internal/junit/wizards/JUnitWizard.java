@@ -40,7 +40,7 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 public abstract class JUnitWizard extends Wizard implements INewWizard {
 
 	private IWorkbench fWorkbench;
-	protected static String DIALOG_SETTINGS_KEY= "JUnitWizards"; //$NON-NLS-1$
+	protected static final String DIALOG_SETTINGS_KEY= "JUnitWizards"; //$NON-NLS-1$
 	private IStructuredSelection fSelection;
 
 	public JUnitWizard() {

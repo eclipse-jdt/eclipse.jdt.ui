@@ -426,7 +426,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
 		else 
 			action= new OpenTestAction(fTestRunnerPart, getClassName(), getTestMethod());
 
-		if (action != null && action.isEnabled())
+		if (action.isEnabled())
 			action.run();													
 	}
 

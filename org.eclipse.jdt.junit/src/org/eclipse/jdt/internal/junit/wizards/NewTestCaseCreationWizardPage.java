@@ -513,10 +513,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements 
 		String tearDown= ""; //$NON-NLS-1$
 		IMethod methodTemplate= null;
 		if (type.exists()) {
-			if (typeHierarchy == null) {
-				typeHierarchy= type.newSupertypeHierarchy(null);
-				superTypes= typeHierarchy.getAllSuperclasses(type);
-			}
+			typeHierarchy= type.newSupertypeHierarchy(null);
+			superTypes= typeHierarchy.getAllSuperclasses(type);
 			for (int i= 0; i < superTypes.length; i++) {
 				if (superTypes[i].exists()) {
 					IMethod testM= superTypes[i].getMethod(TEARDOWN, new String[] {});

@@ -169,7 +169,7 @@ public class FailureTab extends TestRunTab implements IMenuListener {
 			return null;
 		return fTable.getItem(index);
 	}
-	
+		
 	public void setSelectedTest(String testId){
 		TableItem[] items= fTable.getItems();
 		for (int i= 0; i < items.length; i++) {
