@@ -76,8 +76,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
-import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -91,12 +91,11 @@ import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -342,8 +341,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		pm.beginTask(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.29"), 2); //$NON-NLS-1$
 		TextChangeManager manager= new TextChangeManager();
-		Map typeReferences= createTypeReferencesMapping(new SubProgressMonitor(pm, 1));	//Map<ICompilationUnit, SearchResult[]>
-		Map constructorReferences;	//Map<ICompilationUnit, SearchResult[]>
+		Map typeReferences= createTypeReferencesMapping(new SubProgressMonitor(pm, 1));	//Map<ICompilationUnit, SearchMatch[]>
+		Map constructorReferences;	//Map<ICompilationUnit, SearchMatch[]>
 		if (isInputTypeStatic()){
 			constructorReferences= new HashMap(0);
 			pm.worked(1);
@@ -518,21 +517,21 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return result;
 	}
 	
-	//Map<ICompilationUnit, SearchResult[]>
+	//Map<ICompilationUnit, SearchMatch[]>
 	private Map createTypeReferencesMapping(IProgressMonitor pm) throws JavaModelException {
-		ISearchPattern pattern= SearchEngine.createSearchPattern(fType, IJavaSearchConstants.ALL_OCCURRENCES);
+		SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.ALL_OCCURRENCES);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
-		SearchResultGroup[] groups= RefactoringSearchEngine.search(pm, scope, pattern);
+		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm);
 		return createSearchResultMapping(groups);
 	}
 
-	//Map<ICompilationUnit, SearchResult[]>
+	//Map<ICompilationUnit, SearchMatch[]>
 	private Map createConstructorReferencesMapping(IProgressMonitor pm) throws JavaModelException {
 		SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(fType, pm);
 		return createSearchResultMapping(groups);
 	}
 
-	//Map<ICompilationUnit, SearchResult[]>
+	//Map<ICompilationUnit, SearchMatch[]>
 	private static Map createSearchResultMapping(SearchResultGroup[] groups){
 		Map result= new HashMap();
 		for (int i= 0; i < groups.length; i++) {
@@ -546,7 +545,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private static ASTNode[] getReferenceNodesIn(CompilationUnit cuNode, Map references, ICompilationUnit cu){
-		SearchResult[] results= (SearchResult[])references.get(cu);
+		SearchMatch[] results= (SearchMatch[])references.get(cu);
 		if (results == null)
 			return new ASTNode[0];
 		return ASTNodeSearchUtil.getAstNodes(results, cuNode);

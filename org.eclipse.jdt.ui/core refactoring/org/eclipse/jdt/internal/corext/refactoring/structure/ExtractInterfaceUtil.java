@@ -59,8 +59,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
-import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jface.text.Document;
 
@@ -401,12 +400,12 @@ class ExtractInterfaceUtil {
 	private ICompilationUnit[] getCusToParse(IType theType, IType theSupertype, IProgressMonitor pm) throws JavaModelException{
 		try{
 			pm.beginTask("", 2); //$NON-NLS-1$
-			ISearchPattern pattern= SearchEngine.createSearchPattern(theType, IJavaSearchConstants.REFERENCES);
+			SearchPattern pattern= SearchPattern.createPattern(theType, IJavaSearchConstants.REFERENCES);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(theType);
 			ICompilationUnit[] workingCopies= getWorkingCopies(theType.getCompilationUnit(), theSupertype.getCompilationUnit());
 			if (workingCopies.length == 0)
 				workingCopies= null;
-			SearchResultGroup[] typeReferences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern, workingCopies);
+			SearchResultGroup[] typeReferences= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1), workingCopies);
 			ICompilationUnit[] typeReferencingCus= getCus(typeReferences);
 			ICompilationUnit[] fieldAndMethodReferencingCus= fieldAndMethodReferringCus(theType, typeReferences, workingCopies, new SubProgressMonitor(pm, 1));
 			return merge(fieldAndMethodReferencingCus, typeReferencingCus);
@@ -424,11 +423,11 @@ class ExtractInterfaceUtil {
 	}
 	
 	private ICompilationUnit[] fieldAndMethodReferringCus(IType theType, SearchResultGroup[] typeReferences, ICompilationUnit[] wcs, IProgressMonitor pm) throws JavaModelException {
-		ISearchPattern pattern= createPatternForReferencingFieldsAndMethods(typeReferences);
+		SearchPattern pattern= createPatternForReferencingFieldsAndMethods(typeReferences);
 		if (pattern == null)
 			return new ICompilationUnit[0];
 		IJavaSearchScope scope= RefactoringScopeFactory.create(theType);
-		ICompilationUnit[] units= RefactoringSearchEngine.findAffectedCompilationUnits(pm, scope, pattern);
+		ICompilationUnit[] units= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, scope, pm);
 		Set result= new HashSet(units.length);
 		for (int i= 0; i < units.length; i++) {
 			result.add(getUnproceededElement(units[i], wcs));
@@ -450,8 +449,8 @@ class ExtractInterfaceUtil {
 		return wc.getResource() == null || wc.getResource().equals(unit.getResource());			
 	}
 
-	private ISearchPattern createPatternForReferencingFieldsAndMethods(SearchResultGroup[] typeReferences) throws JavaModelException {
-		return RefactoringSearchEngine.createSearchPattern(getReferencingFieldsAndMethods(typeReferences), IJavaSearchConstants.ALL_OCCURRENCES);		
+	private SearchPattern createPatternForReferencingFieldsAndMethods(SearchResultGroup[] typeReferences) throws JavaModelException {
+		return RefactoringSearchEngine.createOrPattern(getReferencingFieldsAndMethods(typeReferences), IJavaSearchConstants.ALL_OCCURRENCES);		
 	}
 
 	private IMethod[] getReferencingMethods(ASTNode[] typeReferenceNodes) throws JavaModelException {

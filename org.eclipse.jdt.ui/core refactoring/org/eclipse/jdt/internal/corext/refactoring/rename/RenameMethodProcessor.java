@@ -32,23 +32,24 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -247,21 +248,21 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return RefactoringScopeFactory.create(method);
 	}
 	
-	ISearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) throws CoreException {
+	SearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) throws CoreException {
 		HashSet methods= new HashSet(fMethodsToRename);
 		methods.add(fMethod);
 		IMethod[] ms= (IMethod[]) methods.toArray(new IMethod[methods.size()]);
 		pm.done();
-		return RefactoringSearchEngine.createSearchPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);
+		return RefactoringSearchEngine.createOrPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 
-	private ISearchPattern createSearchPatternWithOwner(IProgressMonitor pm, IMethod method) throws CoreException {
+	private SearchPattern createSearchPatternWithOwner(IProgressMonitor pm, IMethod method) throws CoreException {
 		HashSet methods= new HashSet();
 		methods.add(method);
 		IMethod[] rippleMethods= RippleMethodFinder2.getRelatedMethods(method, pm, fWorkingCopyOwner);
 		methods.addAll(Arrays.asList(rippleMethods));
 		IMethod[] ms= (IMethod[]) methods.toArray(new IMethod[methods.size()]);
-		return RefactoringSearchEngine.createSearchPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);
+		return RefactoringSearchEngine.createOrPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 	
 	SearchResultGroup[] getOccurrences(){
@@ -273,9 +274,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	 */
 	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2);	 //$NON-NLS-1$
-		ISearchPattern pattern= createOccurrenceSearchPattern(new SubProgressMonitor(pm, 1));
-		return RefactoringSearchEngine.search(createRefactoringScope(), pattern,
-			new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), getMethod().getElementName()));	
+		SearchPattern pattern= createOccurrenceSearchPattern(new SubProgressMonitor(pm, 1));
+		return RefactoringSearchEngine.search(pattern, createRefactoringScope(),
+			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1));	
 	}
 
 	private static boolean isSpecialCase(IMethod method) throws CoreException {
@@ -371,9 +372,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			if (method == null || ! method.exists())
 				return new SearchResultGroup[0];
 			
-			ISearchPattern newPattern= createSearchPatternWithOwner(new SubProgressMonitor(pm, 1), method);
-			return RefactoringSearchEngine.search(fWorkingCopyOwner, createRefactoringScope(method), newPattern,
-					new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), method.getElementName()));
+			SearchPattern newPattern= createSearchPatternWithOwner(new SubProgressMonitor(pm, 1), method);
+			return RefactoringSearchEngine.search(newPattern, createRefactoringScope(method),
+					new MethodOccurenceCollector(method.getElementName()), new SubProgressMonitor(pm, 1), fWorkingCopyOwner);
 		} finally{
 			pm.done();
 		}	
@@ -465,7 +466,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			if (cu == null)	
 				continue;
 			
-			SearchResult[] results= fOccurrences[i].getSearchResults();
+			SearchMatch[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_occurrence"); //$NON-NLS-1$
 				TextChangeCompatibility.addTextEdit(manager.get(cu), editName, createTextChange(results[j]));
@@ -484,7 +485,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), new ReplaceEdit(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), getNewElementName())); //$NON-NLS-1$
 	}
 	
-	final TextEdit createTextChange(SearchResult searchResult) {
-		return new ReplaceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), getNewElementName());
+	final TextEdit createTextChange(SearchMatch searchResult) {
+		return new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNewElementName());
 	}
 }	

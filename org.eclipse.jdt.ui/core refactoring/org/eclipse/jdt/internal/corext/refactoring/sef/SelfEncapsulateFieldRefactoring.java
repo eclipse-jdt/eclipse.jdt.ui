@@ -60,7 +60,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
@@ -282,8 +282,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			return result;
 		pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.searching_for_cunits")); //$NON-NLS-1$
 		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
-			new SubProgressMonitor(pm, 5), RefactoringScopeFactory.create(fField),
-			SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES));
+			SearchPattern.createPattern(fField, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(fField),
+			new SubProgressMonitor(pm, 5));
 		
 		checkInHierarchy(result);
 		if (result.hasFatalError())

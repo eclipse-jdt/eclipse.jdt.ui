@@ -53,8 +53,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
-import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jface.text.IRegion;
 
@@ -67,7 +67,6 @@ import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -80,6 +79,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -655,10 +655,10 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		HashSet blindAccessorTypes= new HashSet(); // referencing, but access to destination type illegal
 		SearchResultGroup[] references= getReferences(member, new SubProgressMonitor(pm, 1));
 		for (int i = 0; i < references.length; i++) {
-			SearchResult[] searchResults= references[i].getSearchResults();
+			SearchMatch[] searchResults= references[i].getSearchResults();
 			for (int k= 0; k < searchResults.length; k++) {
-				SearchResult searchResult= searchResults[k];
-				IJavaElement element= searchResult.getEnclosingElement();
+				SearchMatch searchResult= searchResults[k];
+				IJavaElement element= SearchUtils.getEnclosingJavaElement(searchResult);
 				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
 				if (type != null //reference can e.g. be an import declaration
 						&& ! blindAccessorTypes.contains(type)
@@ -723,8 +723,8 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	
 	private static SearchResultGroup[] getReferences(IMember member, IProgressMonitor pm) throws JavaModelException {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
-		ISearchPattern pattern= SearchEngine.createSearchPattern(member, IJavaSearchConstants.REFERENCES);
-		SearchResultGroup[] references= RefactoringSearchEngine.search(pm, scope, pattern);
+		SearchPattern pattern= SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES);
+		SearchResultGroup[] references= RefactoringSearchEngine.search(pattern, scope, pm);
 		return references;
 	}
 
@@ -770,11 +770,11 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		return false;
 	}
 
-	private boolean isWithinMemberToMove(SearchResult result) throws JavaModelException {
-		ICompilationUnit referenceCU= result.getCompilationUnit();
+	private boolean isWithinMemberToMove(SearchMatch result) throws JavaModelException {
+		ICompilationUnit referenceCU= SearchUtils.getCompilationUnit(result);
 		if (! referenceCU.equals(fSource.unit))
 			return false;
-		int referenceStart= result.getStart();
+		int referenceStart= result.getOffset();
 		for (int i= 0; i < fMembersToMove.length; i++) {
 			if (liesWithin(fMembersToMove[i].getSourceRange(), referenceStart))
 				return true;
@@ -832,8 +832,8 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		if (status.hasFatalError())
 			return;
 		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
-			new SubProgressMonitor(pm, 1), RefactoringScopeFactory.create(fMembersToMove),
-			RefactoringSearchEngine.createSearchPattern(fMembersToMove, IJavaSearchConstants.REFERENCES));
+			RefactoringSearchEngine.createOrPattern(fMembersToMove, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(fMembersToMove),
+			new SubProgressMonitor(pm, 1));
 		modifiedCus.addAll(Arrays.asList(affectedCUs));
 		SubProgressMonitor sub= new SubProgressMonitor(pm, 1);
 		sub.beginTask("", affectedCUs.length); //$NON-NLS-1$

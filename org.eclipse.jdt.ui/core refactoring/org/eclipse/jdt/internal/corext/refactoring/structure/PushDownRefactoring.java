@@ -54,8 +54,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -65,11 +66,10 @@ import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -548,16 +549,16 @@ public class PushDownRefactoring extends Refactoring {
 	}
 
 	private static IJavaElement[] getReferencingElementsFromSameClass(IMember member, IProgressMonitor pm) throws JavaModelException {
-		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(new IJavaElement[]{member}, IJavaSearchConstants.REFERENCES);
+		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(new IJavaElement[]{member}, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[]{member.getDeclaringType()});
-		SearchResultGroup[] groups= RefactoringSearchEngine.search(pm, scope, pattern);
+		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm);
 		Set result= new HashSet(3);
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
-			SearchResult[] results= group.getSearchResults();
+			SearchMatch[] results= group.getSearchResults();
 			for (int j= 0; j < results.length; j++) {
-				SearchResult searchResult= results[i];
-				result.add(searchResult.getEnclosingElement());
+				SearchMatch searchResult= results[i];
+				result.add(SearchUtils.getEnclosingJavaElement(searchResult));
 			}
 		}
 		return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);

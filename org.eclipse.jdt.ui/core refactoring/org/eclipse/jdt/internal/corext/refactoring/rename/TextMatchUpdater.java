@@ -35,13 +35,14 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 class TextMatchUpdater {
 	
@@ -155,10 +156,10 @@ class TextMatchUpdater {
 	}
 
 	private void removeReferences(Set matches, SearchResultGroup group) {
-		SearchResult[] searchResults= group.getSearchResults();
+		SearchMatch[] searchResults= group.getSearchResults();
 		for (int r= 0; r < searchResults.length; r++) {
 			//int start= searchResults[r].getStart(); // doesn't work for pack.ReferencedType
-			int unqualifiedStart= searchResults[r].getEnd() - fCurrentNameLength;
+			int unqualifiedStart= SearchUtils.getEnd(searchResults[r]) - fCurrentNameLength;
 			matches.remove(new Integer(unqualifiedStart));
 		}
 	}

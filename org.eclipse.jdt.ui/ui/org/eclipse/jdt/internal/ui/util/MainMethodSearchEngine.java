@@ -14,40 +14,41 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
+
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 public class MainMethodSearchEngine{
 	
-	private static class MethodCollector implements IJavaSearchResultCollector {
+	private static class MethodCollector extends SearchRequestor {
 			private List fResult;
 			private int fStyle;
-			private IProgressMonitor fProgressMonitor;
 
-			public MethodCollector(List result, int style, IProgressMonitor progressMonitor) {
+			public MethodCollector(List result, int style) {
 				Assert.isNotNull(result);
 				fResult= result;
 				fStyle= style;
-				fProgressMonitor= progressMonitor;
 			}
 
 			private boolean considerExternalJars() {
@@ -58,7 +59,11 @@ public class MainMethodSearchEngine{
 				return (fStyle & IJavaElementSearchConstants.CONSIDER_BINARIES) != 0;
 			}		
 			
-			public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
+			 */
+			public void acceptSearchMatch(SearchMatch match) throws CoreException {
+				Object enclosingElement= match.getElement();
 				if (enclosingElement instanceof IMethod) { // defensive code
 					try {
 						IMethod curr= (IMethod) enclosingElement;
@@ -79,16 +84,6 @@ public class MainMethodSearchEngine{
 					}
 				}
 			}
-							
-			public IProgressMonitor getProgressMonitor() {
-				return fProgressMonitor;
-			}
-			
-			public void aboutToStart() {
-			}
-			
-			public void done() {
-			}
 	}
 
 	/**
@@ -96,12 +91,13 @@ public class MainMethodSearchEngine{
 	 * Valid styles are IJavaElementSearchConstants.CONSIDER_BINARIES and
 	 * IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS
 	 */	
-	public IType[] searchMainMethods(IProgressMonitor pm, IJavaSearchScope scope, int style) throws JavaModelException {
+	public IType[] searchMainMethods(IProgressMonitor pm, IJavaSearchScope scope, int style) throws CoreException {
 		List typesFound= new ArrayList(200);
 		
-		IJavaSearchResultCollector collector= new MethodCollector(typesFound, style, pm);				
-		new SearchEngine().search(JavaPlugin.getWorkspace(), "main(String[]) void", IJavaSearchConstants.METHOD,  //$NON-NLS-1$
-			IJavaSearchConstants.DECLARATIONS, scope, collector); //$NON-NLS-1$
+		SearchPattern pattern= SearchPattern.createPattern("main(String[]) void", //$NON-NLS-1$
+				IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH, true);
+		SearchRequestor requestor= new MethodCollector(typesFound, style);
+		new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, pm);
 			
 		return (IType[]) typesFound.toArray(new IType[typesFound.size()]);
 	}
@@ -123,7 +119,7 @@ public class MainMethodSearchEngine{
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
 					res[0]= searchMainMethods(pm, scope, style);
-				} catch (JavaModelException e) {
+				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
 			}

@@ -53,8 +53,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.corext.Assert;
@@ -62,13 +63,12 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -76,6 +76,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -363,10 +365,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	}
 
 	/**
-	 * Returns an <code>ISearchPattern</code> that finds all calls to the constructor
+	 * Returns a <code>SearchPattern</code> that finds all calls to the constructor
 	 * identified by the argument <code>methodBinding</code>.
 	 */
-	private ISearchPattern createSearchPattern(IMethodBinding methodBinding) throws JavaModelException {
+	private SearchPattern createSearchPattern(IMethodBinding methodBinding) throws JavaModelException {
 		Assert.isNotNull(methodBinding,
 				RefactoringCoreMessages.getString("IntroduceFactory.noBindingForSelectedConstructor")); //$NON-NLS-1$
 
@@ -377,7 +379,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		IMethod method= Bindings.findMethod(methodBinding, javaProject);
 
 		if (method != null)
-			return SearchEngine.createSearchPattern(method, IJavaSearchConstants.REFERENCES);
+			return SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES);
 		else { // perhaps a synthetic method? (but apparently not always... hmmm...)
 			// Can't find an IMethod for this method, so build a string pattern instead
 			StringBuffer	buf= new StringBuffer();
@@ -390,7 +392,8 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				buf.append(fArgTypes[i].getQualifiedName());
 			}
 			buf.append(")"); //$NON-NLS-1$
-			return SearchEngine.createSearchPattern(buf.toString(), IJavaSearchConstants.CONSTRUCTOR, IJavaSearchConstants.REFERENCES, true);
+			return SearchPattern.createPattern(buf.toString(), IJavaSearchConstants.CONSTRUCTOR,
+					IJavaSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH, true);
 		}
 	}
 
@@ -423,10 +426,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @throws JavaModelException
 	 */
 	private SearchResultGroup[] searchForCallsTo(IMethodBinding methodBinding, IProgressMonitor pm) throws JavaModelException {
-		ISearchPattern		pattern=  createSearchPattern(methodBinding);
+		SearchPattern		pattern=  createSearchPattern(methodBinding);
 		IJavaProject		javaProj= (IJavaProject) fCUHandle.getAncestor(IJavaElement.JAVA_PROJECT);
 		IJavaSearchScope	scope=	  SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj }, false);
-		SearchResultGroup[]	groups=	  RefactoringSearchEngine.search(pm, scope, pattern);
+		SearchResultGroup[]	groups=	  RefactoringSearchEngine.search(pattern, scope, pm);
 
 		return groups;
 	}
@@ -771,12 +774,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 											OldASTRewrite unitRewriter, CompilationUnitChange unitChange)
 	throws JavaModelException {
 		Assert.isTrue(ASTCreator.getCu(unit).equals(rg.getCompilationUnit()));
-		SearchResult[]	hits= rg.getSearchResults();
+		SearchMatch[]	hits= rg.getSearchResults();
 		AST	ctorCallAST= unit.getAST();
 		boolean someCallPatched= false;
 
 		for(int i=0; i < hits.length; i++) {
-			ClassInstanceCreation	creation= getCtorCallAt(hits[i].getStart(), hits[i].getEnd(), unit);
+			ClassInstanceCreation	creation= getCtorCallAt(hits[i].getOffset(), SearchUtils.getEnd(hits[i]), unit);
 
 			if (creation != null) {
 				TextEditGroup gd= new TextEditGroup(RefactoringCoreMessages.getString("IntroduceFactory.replaceCalls")); //$NON-NLS-1$

@@ -19,31 +19,33 @@ import java.util.Set;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class SearchResultGroup {
 
 	private final IResource fResouce;
-	private final List fSearchResults;
+	private final List fSearchMatches;
 	
-	public SearchResultGroup(IResource res, SearchResult[] results){
-		Assert.isNotNull(results);
+	public SearchResultGroup(IResource res, SearchMatch[] matches){
+		Assert.isNotNull(matches);
 		fResouce= res;
-		fSearchResults= new ArrayList(Arrays.asList(results));//have to is this way to allow adding
+		fSearchMatches= new ArrayList(Arrays.asList(matches));
 	}
 
-	public void add(SearchResult result) {
-		Assert.isNotNull(result);
-		fSearchResults.add(result);		
+	public void add(SearchMatch match) {
+		Assert.isNotNull(match);
+		fSearchMatches.add(match);		
 	}
 	
 	public IResource getResource() {
 		return fResouce;
 	}
 	
-	public SearchResult[] getSearchResults() {
-		return (SearchResult[]) fSearchResults.toArray(new SearchResult[fSearchResults.size()]);
+	public SearchMatch[] getSearchResults() {
+		return (SearchMatch[]) fSearchMatches.toArray(new SearchMatch[fSearchMatches.size()]);
 	}
 	
 	public static IResource[] getResources(SearchResultGroup[] searchResultGroups){
@@ -57,6 +59,6 @@ public class SearchResultGroup {
 	public ICompilationUnit getCompilationUnit(){
 		if (getSearchResults() == null || getSearchResults().length == 0)
 			return null;
-		return getSearchResults()[0].getCompilationUnit();
+		return SearchUtils.getCompilationUnit(getSearchResults()[0]);
 	}
 }

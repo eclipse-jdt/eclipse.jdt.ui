@@ -21,17 +21,19 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -47,14 +49,14 @@ class RenameAnalyzeUtil {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < oldOccurrences.length; i++) {
 			SearchResultGroup oldGroup= oldOccurrences[i];
-			SearchResult[] oldSearchResults= oldGroup.getSearchResults();
+			SearchMatch[] oldSearchResults= oldGroup.getSearchResults();
 			ICompilationUnit cunit= oldGroup.getCompilationUnit();
 			if (cunit == null)
 				continue;
 			for (int j= 0; j < oldSearchResults.length; j++) {
-				SearchResult oldSearchResult= oldSearchResults[j];
+				SearchMatch oldSearchResult= oldSearchResults[j];
 				if (! RenameAnalyzeUtil.existsInNewOccurrences(oldSearchResult, newOccurrences, manager)){
-					ISourceRange range= new SourceRange(oldSearchResult.getStart(), oldSearchResult.getEnd() - oldSearchResult.getStart());
+					ISourceRange range= new SourceRange(oldSearchResult.getOffset(), oldSearchResult.getLength());
 					RefactoringStatusContext context= JavaStatusContext.create(cunit, range); //XXX
 					String message= RefactoringCoreMessages.getFormattedString("RenameAnalyzeUtil.shadows", cunit.getElementName());	//$NON-NLS-1$
 					result.addError(message , context);
@@ -102,7 +104,7 @@ class RenameAnalyzeUtil {
 		return newWorkingCopies;
 	}
 	
-	private static boolean existsInNewOccurrences(SearchResult searchResult, SearchResultGroup[] newOccurrences, TextChangeManager manager) {
+	private static boolean existsInNewOccurrences(SearchMatch searchResult, SearchResultGroup[] newOccurrences, TextChangeManager manager) {
 		SearchResultGroup newGroup= findOccurrenceGroup(searchResult.getResource(), newOccurrences);
 		if (newGroup == null)
 			return false;
@@ -111,16 +113,16 @@ class RenameAnalyzeUtil {
 		if (oldEditRange == null)
 			return false;
 		
-		SearchResult[] newSearchResults= newGroup.getSearchResults();
+		SearchMatch[] newSearchResults= newGroup.getSearchResults();
 		int oldRangeOffset = oldEditRange.getOffset();
 		for (int i= 0; i < newSearchResults.length; i++) {
-			if (newSearchResults[i].getStart() == oldRangeOffset)
+			if (newSearchResults[i].getOffset() == oldRangeOffset)
 				return true;
 		}
 		return false;
 	}
 	
-	private static IRegion getCorrespondingEditChangeRange(SearchResult searchResult, TextChangeManager manager) {
+	private static IRegion getCorrespondingEditChangeRange(SearchMatch searchResult, TextChangeManager manager) {
 		TextChange change= getTextChange(searchResult, manager);
 		if (change == null)
 			return null;
@@ -134,16 +136,15 @@ class RenameAnalyzeUtil {
 		return null;
 	}
 	
-	private static TextChange getTextChange(SearchResult searchResult, TextChangeManager manager) {
-		ICompilationUnit cu= searchResult.getCompilationUnit();
+	private static TextChange getTextChange(SearchMatch searchResult, TextChangeManager manager) {
+		ICompilationUnit cu= SearchUtils.getCompilationUnit(searchResult);
 		if (cu == null)
 			return null;
 		return manager.get(cu);
 	}
 	
-	private static IRegion createTextRange(SearchResult searchResult) {
-		int start= searchResult.getStart();
-		return new Region(start, searchResult.getEnd() - start);
+	private static IRegion createTextRange(SearchMatch searchResult) {
+		return new Region(searchResult.getOffset(), searchResult.getLength());
 	}
 	
 	private static SearchResultGroup findOccurrenceGroup(IResource resource, SearchResultGroup[] newOccurrences) {

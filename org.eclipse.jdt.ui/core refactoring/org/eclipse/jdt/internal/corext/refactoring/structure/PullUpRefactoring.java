@@ -75,8 +75,8 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
-import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -88,11 +88,10 @@ import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
@@ -1719,7 +1718,7 @@ public class PullUpRefactoring extends Refactoring {
 		ICompilationUnit referencingCu= references[0].getCompilationUnit();
 		if (! getDeclaringCU().equals(referencingCu))
 			return true;
-		SearchResult[] searchResults= references[0].getSearchResults();
+		SearchMatch[] searchResults= references[0].getSearchResults();
 		for (int i= 0; i < searchResults.length; i++) {
 			if (! isWithinMemberToPullUp(searchResults[i]))
 				return true;
@@ -1730,14 +1729,14 @@ public class PullUpRefactoring extends Refactoring {
 	private SearchResultGroup[] getReferences(IMember member, IProgressMonitor pm) throws JavaModelException {
 		if (! fCachedMembersReferences.containsKey(member)) {
 			IJavaSearchScope scope= RefactoringScopeFactory.create(member);
-			ISearchPattern pattern= SearchEngine.createSearchPattern(member, IJavaSearchConstants.REFERENCES);
-			fCachedMembersReferences.put(member, RefactoringSearchEngine.search(pm, scope, pattern));
+			SearchPattern pattern= SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES);
+			fCachedMembersReferences.put(member, RefactoringSearchEngine.search(pattern, scope, pm));
 		}
 		return (SearchResultGroup[])fCachedMembersReferences.get(member);
 	}
 
-	private boolean isWithinMemberToPullUp(SearchResult result) throws JavaModelException {
-		int referenceStart= result.getStart();
+	private boolean isWithinMemberToPullUp(SearchMatch result) throws JavaModelException {
+		int referenceStart= result.getOffset();
 		for (int i= 0; i < fMembersToPullUp.length; i++) {
 			if (liesWithin(fMembersToPullUp[i].getSourceRange(), referenceStart))
 				return true;

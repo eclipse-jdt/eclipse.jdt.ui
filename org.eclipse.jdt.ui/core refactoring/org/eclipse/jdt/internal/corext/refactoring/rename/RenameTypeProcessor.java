@@ -44,20 +44,19 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
-import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
@@ -72,7 +71,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -454,12 +455,12 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		return RefactoringScopeFactory.create(fType);
 	}
 	
-	private ISearchPattern createSearchPattern() {
-		return SearchEngine.createSearchPattern(fType, IJavaSearchConstants.REFERENCES);
+	private SearchPattern createSearchPattern() {
+		return SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES);
 	}
 	
 	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws CoreException {
-		return RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
+		return RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(), pm);
 	}
 	
 	private RefactoringStatus checkForMethodsWithConstructorNames()  throws CoreException{
@@ -613,8 +614,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 	private RefactoringStatus checkConflictingTypes(IProgressMonitor pm) throws CoreException {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
-		ISearchPattern pattern= SearchEngine.createSearchPattern(getNewElementName(), IJavaSearchConstants.TYPE, IJavaSearchConstants.ALL_OCCURRENCES, true);
-		ICompilationUnit[] cusWithReferencesToConflictingTypes= RefactoringSearchEngine.findAffectedCompilationUnits(pm, scope, pattern);
+		SearchPattern pattern= SearchPattern.createPattern(getNewElementName(),
+				IJavaSearchConstants.TYPE, IJavaSearchConstants.ALL_OCCURRENCES, SearchPattern.R_EXACT_MATCH, true);
+		ICompilationUnit[] cusWithReferencesToConflictingTypes= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, scope, pm);
 		if (cusWithReferencesToConflictingTypes.length == 0)
 			return new RefactoringStatus();
 		ICompilationUnit[] 	cusWithReferencesToRenamedType= getCus(fReferences);
@@ -775,12 +777,12 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				continue;
 					
 			String name= RefactoringCoreMessages.getString("RenameTypeRefactoring.update_reference"); //$NON-NLS-1$
-			SearchResult[] results= fReferences[i].getSearchResults();
+			SearchMatch[] results= fReferences[i].getSearchResults();
 
 			for (int j= 0; j < results.length; j++){
-				SearchResult searchResult= results[j];
+				SearchMatch searchResult= results[j];
 				String oldName= fType.getElementName();
-				int offset= searchResult.getEnd() - oldName.length();
+				int offset= SearchUtils.getEnd(searchResult) - oldName.length();
 				TextChangeCompatibility.addTextEdit(manager.get(cu), name, new ReplaceEdit(offset, oldName.length(), getNewElementName()));
 			}
 			pm.worked(1);

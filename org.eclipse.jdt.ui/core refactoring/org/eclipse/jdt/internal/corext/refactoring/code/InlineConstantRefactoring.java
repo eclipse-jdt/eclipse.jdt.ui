@@ -50,7 +50,9 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jface.text.Document;
 
@@ -69,13 +71,12 @@ import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -357,7 +358,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				}
 
 				/**
-				 * @param decl		not a TypeDeclaration
+				 * @param scope		not a TypeDeclaration
 				 * @return Set		containing Strings representing simple names
 				 */
 				private Set getLocallyDeclaredNames(BodyDeclaration scope) {
@@ -582,11 +583,13 @@ public class InlineConstantRefactoring extends Refactoring {
 			Assert.isTrue(!refactoring.isDeclarationSelected());
 			return new InlineTargetCompilationUnit(refactoring.getSelectionCompilationUnit(), refactoring.getConstantNameNode(), refactoring.getInitializer(), refactoring.getDeclaringCompilationUnit(), refactoring.getCodeGenSettings());
 		}
+		
 		private static SearchResultGroup[] search(IField field, IProgressMonitor pm) throws JavaModelException {		
 			Assert.isNotNull(pm);
 			Assert.isNotNull(field);
-			
-			return RefactoringSearchEngine.search(pm, RefactoringScopeFactory.create(field), SearchEngine.createSearchPattern(field, IJavaSearchConstants.REFERENCES));
+			IJavaSearchScope scope= RefactoringScopeFactory.create(field);
+			SearchPattern pattern= SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES);
+			return RefactoringSearchEngine.search(pattern, scope, pm);
 		}
 		
 		private InlineTargetCompilationUnit(SearchResultGroup group, Expression initializer, ICompilationUnit initializerUnit, CodeGenerationSettings codeGenSettings) {
@@ -607,7 +610,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			fInitializerUnit= initializerUnit;
 		}
 
-		private InlineTargetCompilationUnit(ICompilationUnit cu, SearchResult[] references, Expression initializer, ICompilationUnit initializerUnit, CodeGenerationSettings codeGenSettings) {
+		private InlineTargetCompilationUnit(ICompilationUnit cu, SearchMatch[] references, Expression initializer, ICompilationUnit initializerUnit, CodeGenerationSettings codeGenSettings) {
 			Assert.isNotNull(initializer);
 			Assert.isNotNull(references);
 			Assert.isTrue(references.length > 0);
@@ -623,7 +626,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			
 			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, true);
 			for(int i= 0; i < references.length; i++) {
-				ASTNode node= NodeFinder.perform(cuNode, references[i].getStart(), references[i].getEnd() - references[i].getStart());
+				ASTNode node= NodeFinder.perform(cuNode, references[i].getOffset(), references[i].getLength());
 				Assert.isTrue(node instanceof Name);
 				fReferences[i]= getQualifiedReference((Name) node);
 			}
@@ -1015,7 +1018,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		return field.getCompilationUnit();
 	}
 		
-	private void checkDeclarationSelected() throws JavaModelException {
+	private void checkDeclarationSelected() {
 		Assert.isNotNull(getConstantNameNode());
 		
 		fDeclarationSelected= false;

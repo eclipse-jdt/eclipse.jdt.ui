@@ -40,7 +40,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -303,8 +303,8 @@ abstract class TargetProvider {
 			IMethod method= Bindings.findMethod(fMethod.resolveBinding(), fCUnit.getJavaProject());
 			Assert.isTrue(method != null);
 			ICompilationUnit[] result= RefactoringSearchEngine.findAffectedCompilationUnits(	
-				pm, RefactoringScopeFactory.create(method),
-				SearchEngine.createSearchPattern(method, IJavaSearchConstants.REFERENCES));
+				SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(method),
+				pm);
 			return result;
 		}
 	

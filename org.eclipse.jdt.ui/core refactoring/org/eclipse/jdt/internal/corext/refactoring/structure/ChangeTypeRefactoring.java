@@ -19,11 +19,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -52,8 +58,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
-import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -87,12 +93,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
 
 /**
  * @author tip
@@ -1215,18 +1221,17 @@ public class ChangeTypeRefactoring extends Refactoring {
 				
 				IMethod[] rippleMethods= RippleMethodFinder.getRelatedMethods(
 						root, new SubProgressMonitor(pm, 15), new IWorkingCopy[0]);
-				ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(
-					rippleMethods,
-					IJavaSearchConstants.ALL_OCCURRENCES);
+				SearchPattern pattern= RefactoringSearchEngine.createOrPattern(
+						rippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);
 
 				// To compute the scope we have to use the selected method. Otherwise we
 				// might start from the wrong project.
 				IJavaSearchScope scope= RefactoringScopeFactory.create(selectedMethod);
 				ICompilationUnit[] workingCopies= null;
 				SearchResultGroup[] groups= RefactoringSearchEngine.search(
-					new SubProgressMonitor(pm, 80),
-					scope,
 					pattern,
+					scope,
+					new SubProgressMonitor(pm, 80),
 					workingCopies);
 				
 				fAffectedUnits= getCus(groups);
@@ -1237,13 +1242,12 @@ public class ChangeTypeRefactoring extends Refactoring {
 				// can't happens since we checked it upfront in check initial conditions
 				Assert.isTrue(false, RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_filed")); //$NON-NLS-1$
 			}
-			ISearchPattern pattern=
-				SearchEngine.createSearchPattern(iField,
-												 IJavaSearchConstants.ALL_OCCURRENCES);
+			SearchPattern pattern= SearchPattern.createPattern(
+					iField, IJavaSearchConstants.ALL_OCCURRENCES);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(iField);
 			ICompilationUnit[] workingCopies= null;
 			SearchResultGroup[] groups=
-				RefactoringSearchEngine.search(new SubProgressMonitor(pm, 100), scope, pattern, workingCopies);
+				RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 100), workingCopies);
 			fAffectedUnits= getCus(groups);
 		} else {
 			// otherwise, selection was a local variable and we only have to search the CU

@@ -18,6 +18,8 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -33,15 +35,14 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -76,13 +77,13 @@ class ConstructorReferenceFinder {
 
 	private SearchResultGroup[] getConstructorReferences(IProgressMonitor pm, int limitTo) throws JavaModelException{
 		IJavaSearchScope scope= createSearchScope();
-		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(fConstructors, limitTo);
+		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(fConstructors, limitTo);
 		if (pattern == null){
 			if (fConstructors.length != 0)
 				return new SearchResultGroup[0];
 			return getImplicitConstructorReferences(pm);	
 		}	
-		return removeUnrealReferences(RefactoringSearchEngine.search(pm, scope, pattern));
+		return removeUnrealReferences(RefactoringSearchEngine.search(pattern, scope, pm));
 	}
 	
 	//XXX this method is a workaround for jdt core bug 27236
@@ -94,15 +95,15 @@ class ConstructorReferenceFinder {
 			if (cu == null)
 				continue;
 			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, false);
-			SearchResult[] allSearchResults= group.getSearchResults();
+			SearchMatch[] allSearchResults= group.getSearchResults();
 			List realConstructorReferences= new ArrayList(Arrays.asList(allSearchResults));
 			for (int j= 0; j < allSearchResults.length; j++) {
-				SearchResult searchResult= allSearchResults[j];
+				SearchMatch searchResult= allSearchResults[j];
 				if (! isRealConstructorReferenceNode(ASTNodeSearchUtil.getAstNode(searchResult, cuNode)))
 					realConstructorReferences.remove(searchResult);
 			}
 			if (! realConstructorReferences.isEmpty())
-				result.add(new SearchResultGroup(group.getResource(), (SearchResult[]) realConstructorReferences.toArray(new SearchResult[realConstructorReferences.size()])));
+				result.add(new SearchResultGroup(group.getResource(), (SearchMatch[]) realConstructorReferences.toArray(new SearchMatch[realConstructorReferences.size()])));
 		}
 		return (SearchResultGroup[]) result.toArray(new SearchResultGroup[result.size()]);
 	}
@@ -140,19 +141,19 @@ class ConstructorReferenceFinder {
 
 	private SearchResultGroup[] getImplicitConstructorReferences(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		List searchResults= new ArrayList();
-		searchResults.addAll(getImplicitConstructorReferencesFromHierarchy(new SubProgressMonitor(pm, 1)));
-		searchResults.addAll(getImplicitConstructorReferencesInClassCreations(new SubProgressMonitor(pm, 1)));
+		List searchMatches= new ArrayList();
+		searchMatches.addAll(getImplicitConstructorReferencesFromHierarchy(new SubProgressMonitor(pm, 1)));
+		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(new SubProgressMonitor(pm, 1)));
 		pm.done();
-		return RefactoringSearchEngine.groupByResource((SearchResult[]) searchResults.toArray(new SearchResult[searchResults.size()]));
+		return RefactoringSearchEngine.groupByResource((SearchMatch[]) searchMatches.toArray(new SearchMatch[searchMatches.size()]));
 	}
 		
 	//List of SearchResults
 	private List getImplicitConstructorReferencesInClassCreations(IProgressMonitor pm) throws JavaModelException {
 		//XXX workaround for jdt core bug 23112
-		ISearchPattern pattern= SearchEngine.createSearchPattern(fType, IJavaSearchConstants.REFERENCES);
+		SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
-		SearchResultGroup[] refs= RefactoringSearchEngine.search(pm, scope, pattern);
+		SearchResultGroup[] refs= RefactoringSearchEngine.search(pattern, scope, pm);
 		List result= new ArrayList();
 		for (int i= 0; i < refs.length; i++) {
 			SearchResultGroup group= refs[i];
@@ -160,9 +161,9 @@ class ConstructorReferenceFinder {
 			if (cu == null)
 				continue;
 			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, false);
-			SearchResult[] results= group.getSearchResults();
+			SearchMatch[] results= group.getSearchResults();
 			for (int j= 0; j < results.length; j++) {
-				SearchResult searchResult= results[j];
+				SearchMatch searchResult= results[j];
 				ASTNode node= ASTNodeSearchUtil.getAstNode(searchResult, cuNode);
 				if (isImplicitConstructorReferenceNodeInClassCreations(node))
 					result.add(searchResult);
@@ -213,8 +214,12 @@ class ConstructorReferenceFinder {
 		return result;
 	}
 
-	private static SearchResult createSearchResult(ASTNode superCall, IMethod constructor) {
-		return new SearchResult(constructor.getResource(), superCall.getStartPosition(), ASTNodes.getInclusiveEnd(superCall), constructor, IJavaSearchResultCollector.EXACT_MATCH);
+	private static SearchMatch createSearchResult(ASTNode superCall, IMethod constructor) {
+		int start= superCall.getStartPosition();
+		int end= ASTNodes.getInclusiveEnd(superCall); //TODO: why inclusive?
+		IResource resource= constructor.getResource();
+		return new SearchMatch(constructor, SearchMatch.A_ACCURATE, start, end - start,
+				SearchEngine.getDefaultSearchParticipant(), resource);
 	}
 
 	private static SuperConstructorInvocation getSuperConstructorCallNode(IMethod constructor, CompilationUnit cuNode) throws JavaModelException {

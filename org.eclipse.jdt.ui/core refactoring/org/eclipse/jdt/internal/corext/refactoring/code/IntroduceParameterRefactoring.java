@@ -44,7 +44,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor.ASTData;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -400,12 +401,12 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return new ASTData(unit, true, fSettings);
 	}
 	
-	private ICompilationUnit[] findAffectedCompilationUnits(IProgressMonitor pm)  throws JavaModelException {
+	private ICompilationUnit[] findAffectedCompilationUnits(IProgressMonitor pm) throws CoreException {
 		IMethod method= Bindings.findMethod(fMethodDeclaration.resolveBinding(), fSourceCU.getJavaProject());
 		Assert.isTrue(method != null);
-		ICompilationUnit[] result= RefactoringSearchEngine.findAffectedCompilationUnits(	
-			pm, RefactoringScopeFactory.create(method),
-			SearchEngine.createSearchPattern(method, IJavaSearchConstants.REFERENCES));
+		ICompilationUnit[] result= RefactoringSearchEngine.findAffectedCompilationUnits(
+			SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(method),
+			pm);
 		return result;
 	}
 	

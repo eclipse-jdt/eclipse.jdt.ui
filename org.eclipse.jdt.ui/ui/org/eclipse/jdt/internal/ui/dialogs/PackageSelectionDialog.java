@@ -14,9 +14,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -33,20 +41,14 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * Dialog to browse for package fragments.
@@ -69,11 +71,11 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 
 	/**
 	 * Creates a package selection dialog.
-	 * @param parent The parent shell
-	 * @param context The runnable context to run the search in
-	 * @param flags A combination of <code>F_REMOVE_DUPLICATES</code>, <code>F_SHOW_PARENTS</code>
+	 * @param parent the parent shell
+	 * @param context the runnable context to run the search in
+	 * @param flags a combination of <code>F_REMOVE_DUPLICATES</code>, <code>F_SHOW_PARENTS</code>
 	 * and  <code>F_HIDE_DEFAULT_PACKAGE</code>
-	 * @param The scope defining the avaiable packages.
+	 * @param scope the scope defining the available packages.
 	 */
 	public PackageSelectionDialog(Shell parent, IRunnableContext context, int flags, IJavaSearchScope scope) {
 		super(parent, createLabelProvider(flags));
@@ -100,16 +102,14 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
-					IJavaSearchResultCollector requestor= new IJavaSearchResultCollector() {
-						
+					SearchRequestor requestor= new SearchRequestor() {
 						private HashSet fSet= new HashSet();
 						private final boolean fAddDefault= (fFlags & F_HIDE_DEFAULT_PACKAGE) == 0;
 						private final boolean fDuplicates= (fFlags & F_REMOVE_DUPLICATES) == 0;
 						private final boolean fIncludeParents= (fFlags & F_SHOW_PARENTS) != 0;
 
-						public void aboutToStart() {}
-
-						public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
+						public void acceptSearchMatch(SearchMatch match) throws CoreException {
+							IJavaElement enclosingElement= (IJavaElement) match.getElement();
 							String name= enclosingElement.getElementName();
 							if (fAddDefault || name.length() > 0) {
 								if (fDuplicates || fSet.add(name)) {
@@ -132,18 +132,12 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 								idx= name.lastIndexOf('.');
 							}
 						}
-
-						public void done() {}
-
-						public IProgressMonitor getProgressMonitor() {
-							return monitor;
-						}
 					};
-					
-					new SearchEngine().search(ResourcesPlugin.getWorkspace(), "*",  //$NON-NLS-1$
+					SearchPattern pattern= SearchPattern.createPattern("*", //$NON-NLS-1$
 							IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS,
-							fScope, requestor);
-				} catch (JavaModelException e) {
+							SearchPattern.R_PATTERN_MATCH, true);
+					new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), fScope, requestor, monitor);
+				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
 				if (monitor.isCanceled()) {

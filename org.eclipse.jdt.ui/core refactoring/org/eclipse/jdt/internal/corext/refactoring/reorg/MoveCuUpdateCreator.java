@@ -41,14 +41,15 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -152,20 +154,20 @@ public class MoveCuUpdateCreator {
 				continue;
 			
 			boolean simpleReferencesNeedNewImport= simpleReferencesNeedNewImport(movedUnit, referencingCu, cuList);
-			SearchResult[] results= searchResultGroup.getSearchResults();
+			SearchMatch[] results= searchResultGroup.getSearchResults();
 			for (int j= 0; j < results.length; j++) {
 				//TODO: should update type references with results from addImport
 				TypeReference reference= (TypeReference)results[j];
 				if (reference.isImportDeclaration()) {
 					ImportRewrite importEdit= getImportRewrite(referencingCu);
-					IImportDeclaration importDecl= (IImportDeclaration)results[j].getEnclosingElement();
+					IImportDeclaration importDecl= (IImportDeclaration)SearchUtils.getEnclosingJavaElement(results[j]);
 					importEdit.removeImport(importDecl.getElementName());
                     importEdit.addImport(createStringForNewImport(movedUnit, importDecl));
 				} else if (reference.isQualified()) {
 					TextChange textChange= changeManager.get(referencingCu);
 					String changeName= RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"); //$NON-NLS-1$
 					String newPackage= fDestination.isDefaultPackage() ? "" : fDestination.getElementName() + '.'; //$NON-NLS-1$
-					TextEdit replaceEdit= new ReplaceEdit(reference.getStart(), reference.getSimpleNameStart() - reference.getStart(), newPackage);
+					TextEdit replaceEdit= new ReplaceEdit(reference.getOffset(), reference.getSimpleNameStart() - reference.getOffset(), newPackage);
 					TextChangeCompatibility.addTextEdit(textChange, changeName, replaceEdit);
 				} else if (simpleReferencesNeedNewImport) {
 					ImportRewrite importEdit= getImportRewrite(referencingCu);
@@ -280,52 +282,59 @@ public class MoveCuUpdateCreator {
 		return ! cuPack.equals(pack) && JavaModelUtil.isSamePackage(cuPack, pack);
 	}
 	
-	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm) throws JavaModelException {
+	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm) throws CoreException {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(unit);
-		ISearchPattern pattern= createSearchPattern(unit);
-		return RefactoringSearchEngine.search(scope, pattern, 
-			new Collector(new SubProgressMonitor(pm, 1), getPackage(unit)));
+		SearchPattern pattern= createSearchPattern(unit);
+		return RefactoringSearchEngine.search(pattern, scope, new Collector(getPackage(unit)), new SubProgressMonitor(pm, 1));
 	}
 
 	private static IPackageFragment getPackage(ICompilationUnit cu){
 		return (IPackageFragment)cu.getParent();
 	}
 	
-	private static ISearchPattern createSearchPattern(ICompilationUnit cu) throws JavaModelException{
-		return RefactoringSearchEngine.createSearchPattern(cu.getTypes(), IJavaSearchConstants.REFERENCES);
+	private static SearchPattern createSearchPattern(ICompilationUnit cu) throws JavaModelException{
+		return RefactoringSearchEngine.createOrPattern(cu.getTypes(), IJavaSearchConstants.REFERENCES);
 	}
 
-	private final static class Collector extends SearchResultCollector {
+	private final static class Collector extends CollectingSearchRequestor {
 		private IPackageFragment fSource;
 		private IScanner fScanner;
 		
-		public Collector(IProgressMonitor pm, IPackageFragment source) {
-			super(pm);
+		public Collector(IPackageFragment source) {
 			fSource= source;
 			fScanner= ToolFactory.createScanner(false, false, false, false);
 		}
 		
-		public void accept(IResource res, int start, int end, IJavaElement element, int accuracy) throws CoreException {
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor#acceptSearchMatch(SearchMatch)
+		 */
+		public void acceptSearchMatch(SearchMatch match) throws CoreException {
 			/*
 			 * Processing is done in collector to reuse the buffer which was
 			 * already required by the search engine to locate the matches.
 			 */
 			// [start, end[ include qualification.
+			IJavaElement element= SearchUtils.getEnclosingJavaElement(match);
+			int accuracy= match.getAccuracy();
+			int start= match.getOffset();
+			int length= match.getLength();
+			IResource res= match.getResource();
 			if (element.getAncestor(IJavaElement.IMPORT_DECLARATION) != null) {
-				getResults().add(TypeReference.createImportReference(res, start, end, element, accuracy));
+				super.acceptSearchMatch(TypeReference.createImportReference(element, accuracy, start, length, res));
 			} else {
 				ICompilationUnit unit= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (unit != null) {
 					IBuffer buffer= unit.getBuffer();
-					String matchText= buffer.getText(start, end - start);
+					String matchText= buffer.getText(start, length);
 					if (fSource.isDefaultPackage()) {
-						getResults().add(TypeReference.createSimpleReference(res, start, end, element, accuracy, matchText));
+						super.acceptSearchMatch(TypeReference.createSimpleReference(element, accuracy, start, length, res, matchText));
 					} else {
+						// assert: matchText doesn't start nor end with comment
 						int simpleNameStart= getLastSimpleNameStart(matchText);
 						if (simpleNameStart != 0) {
-							getResults().add(TypeReference.createQualifiedReference(res, start, end, element, accuracy, start + simpleNameStart));
+							super.acceptSearchMatch(TypeReference.createQualifiedReference(element, accuracy, start, length, res, start + simpleNameStart));
 						} else {
-							getResults().add(TypeReference.createSimpleReference(res, start, end, element, accuracy, matchText));
+							super.acceptSearchMatch(TypeReference.createSimpleReference(element, accuracy, start, length, res, matchText));
 						}
 					}
 				}
@@ -350,34 +359,34 @@ public class MoveCuUpdateCreator {
 	}
 	
 	
-	private final static class TypeReference extends SearchResult {
+	private final static class TypeReference extends SearchMatch {
 		private String fSimpleTypeName;
 		private int fSimpleNameStart;
 		
-		private TypeReference(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy,
+		private TypeReference(IJavaElement enclosingElement, int accuracy, int start, int length, IResource resource,
 				int simpleNameStart, String simpleName) {
-			super(resource, start, end, enclosingElement, accuracy);
+			super(enclosingElement, accuracy, start, length, SearchEngine.getDefaultSearchParticipant(), resource);
 			fSimpleNameStart= simpleNameStart;
 			fSimpleTypeName= simpleName;
 		}
 		
-		public static TypeReference createQualifiedReference(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy,
+		public static TypeReference createQualifiedReference(IJavaElement enclosingElement, int accuracy, int start, int length, IResource resource,
 				int simpleNameStart) {
-			Assert.isTrue(start < simpleNameStart && simpleNameStart < end);
-			return new TypeReference(resource, start, end, enclosingElement, accuracy, simpleNameStart, null);
+			Assert.isTrue(start < simpleNameStart && simpleNameStart < start + length);
+			return new TypeReference(enclosingElement, accuracy, start, length, resource, simpleNameStart, null);
 		}
 		
-		public static TypeReference createImportReference(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
-			return new TypeReference(resource, start, end, enclosingElement, accuracy, -1, null);
+		public static TypeReference createImportReference(IJavaElement enclosingElement, int accuracy, int start, int length, IResource resource) {
+			return new TypeReference(enclosingElement, accuracy, start, length, resource, -1, null);
 		}
 		
-		public static TypeReference createSimpleReference(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy,
+		public static TypeReference createSimpleReference(IJavaElement enclosingElement, int accuracy, int start, int length, IResource resource,
 				String simpleName) {
-			return new TypeReference(resource, start, end, enclosingElement, accuracy, -1, simpleName);
+			return new TypeReference(enclosingElement, accuracy, start, length, resource, -1, simpleName);
 		}
 		
 		public boolean isImportDeclaration() {
-			return getEnclosingElement().getAncestor(IJavaElement.IMPORT_DECLARATION) != null;
+			return SearchUtils.getEnclosingJavaElement(this).getAncestor(IJavaElement.IMPORT_DECLARATION) != null;
 		}
 		
 		public boolean isQualified() {

@@ -23,22 +23,23 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 /**
- * Convenience wrapper for <code>SearchEngine</code> - performs searching and sorts the results.
+ * Convenience wrapper for {@link SearchEngine} - performs searching and sorts the results by {@link IResource}.
+ * TODO: throw CoreExceptions from search(..) methods instead of wrapped JavaModelExceptions.
  */
 public class RefactoringSearchEngine {
 
@@ -46,123 +47,119 @@ public class RefactoringSearchEngine {
 		//no instances
 	}
 	
-	public static ICompilationUnit[] findAffectedCompilationUnits(final IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
-		final Set matches= new HashSet(5);
-		IJavaSearchResultCollector collector = new IJavaSearchResultCollector() {
-			private IResource fLastMatch;
-			public void aboutToStart() { /*nothing*/ }
-			public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
-				if (fLastMatch != resource) {
-					matches.add(resource);	
-					fLastMatch= resource;
+	//TODO: throw CoreException
+	//TODO: reorder parameters: pattern, scope, monitor
+	public static ICompilationUnit[] findAffectedCompilationUnits(SearchPattern pattern,
+			IJavaSearchScope scope, final IProgressMonitor pm) throws JavaModelException {
+		
+		final Set resources= new HashSet(5);
+		SearchRequestor requestor = new SearchRequestor() {
+			private IResource fLastResource;
+			public void acceptSearchMatch(SearchMatch match) {
+				if (fLastResource != match.getResource()) {
+					fLastResource= match.getResource();
+					resources.add(fLastResource);	
 				}
 			}
-			public void done() { /*nothing*/ }
-			public IProgressMonitor getProgressMonitor() {
-				return pm;
-			}
 		};
-		new SearchEngine().search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
+		try {
+			new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, pm);
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
+		}
 
-		List result= new ArrayList(matches.size());
-		for (Iterator iter= matches.iterator(); iter.hasNext(); ) {
-			IResource resource= (IResource)iter.next();
+		List result= new ArrayList(resources.size());
+		for (Iterator iter= resources.iterator(); iter.hasNext(); ) {
+			IResource resource= (IResource) iter.next();
 			IJavaElement element= JavaCore.create(resource);
 			if (element instanceof ICompilationUnit) {
 				result.add(element);
 			}
 		}
-		return (ICompilationUnit[])result.toArray(new ICompilationUnit[result.size()]);
+		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 			
 	/**
-	 * Performs searching for a given <code>SearchPattern</code>.
-	 * Returns SearchResultGroup[] 
-	 * In each of SearchResultGroups all SearchResults are
-	 * sorted backwards by <code>SearchResult#getStart()</code> 
-	 * @see SearchResult
-	 */			
-	public static SearchResultGroup[] search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
-		return search(scope, pattern, new SearchResultCollector(pm));
+	 * Performs a search and groups the resulting {@link SearchMatch}es by
+	 * {@link SearchMatch#getResource()}.
+	 * 
+	 * @return a {@link SearchResultGroup}[], where each {@link SearchResultGroup} 
+	 * 		has a different {@link SearchMatch#getResource() getResource()}s.
+	 * @see SearchMatch
+	 * @throws CoreException when the search failed
+	 */
+	//TODO: throw CoreException
+	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope, IProgressMonitor monitor)
+			throws JavaModelException {
+		return internalSearch(new SearchEngine(), pattern, scope, new CollectingSearchRequestor(), monitor);
 	}
 	
-	public static SearchResultGroup[] search(IJavaSearchScope scope, ISearchPattern pattern, SearchResultCollector collector) throws JavaModelException {
-		return search(scope, pattern, collector, null);
+	//TODO: throw CoreException
+	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope, CollectingSearchRequestor requestor,
+			IProgressMonitor monitor) throws JavaModelException {
+		return internalSearch(new SearchEngine(), pattern, scope, requestor, monitor);
 	}
 	
-	public static SearchResultGroup[] search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern, ICompilationUnit[] workingCopies) throws JavaModelException {
-		return search(scope, pattern, new SearchResultCollector(pm), workingCopies);
+	//TODO: throw CoreException
+	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope, CollectingSearchRequestor requestor,
+			IProgressMonitor monitor, WorkingCopyOwner owner) throws JavaModelException {
+		return internalSearch(new SearchEngine(owner), pattern, scope, requestor, monitor);
 	}
 	
-	public static SearchResultGroup[] search(IJavaSearchScope scope, ISearchPattern pattern, SearchResultCollector collector, ICompilationUnit[] workingCopies) throws JavaModelException {
-		internalSearch(scope, pattern, collector, workingCopies);	
-		return groupByResource(createSearchResultArray(collector.getResults()));
+	/** @deprecated use {@link #search(SearchPattern, IJavaSearchScope, CollectingSearchRequestor, IProgressMonitor, WorkingCopyOwner)} */
+	//TODO: throw CoreException
+	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope,
+			IProgressMonitor monitor, ICompilationUnit[] workingCopies) throws JavaModelException {
+		return internalSearch(new SearchEngine(workingCopies), pattern, scope, new CollectingSearchRequestor(), monitor);
 	}
 	
-	public static SearchResultGroup[] search(WorkingCopyOwner owner, IJavaSearchScope scope, ISearchPattern pattern, SearchResultCollector collector) throws JavaModelException {
-		new SearchEngine(owner).search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
-		return groupByResource(createSearchResultArray(collector.getResults()));
+	//TODO: throw CoreException
+	private static SearchResultGroup[] internalSearch(SearchEngine searchEngine, SearchPattern pattern, IJavaSearchScope scope,
+			CollectingSearchRequestor requestor, IProgressMonitor monitor) throws JavaModelException {
+		try {
+			searchEngine.search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, monitor);
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
+		}
+		return groupByResource(requestor.getResults());
+	}
+
+	public static SearchResultGroup[] groupByResource(SearchMatch[] matches){
+		return groupByResource(Arrays.asList(matches));	
 	}
 	
-	public static SearchResultGroup[] groupByResource(SearchResult[] results){
-		Map grouped= groupByResource(Arrays.asList(results));
+	private static SearchResultGroup[] groupByResource(List matchList) {
+		Map grouped= new HashMap();
+		for (Iterator iter= matchList.iterator(); iter.hasNext();) {
+			SearchMatch searchMatch= (SearchMatch) iter.next();
+			if (! grouped.containsKey(searchMatch.getResource()))
+				grouped.put(searchMatch.getResource(), new ArrayList(1));
+			((List) grouped.get(searchMatch.getResource())).add(searchMatch);
+		}
 		
 		SearchResultGroup[] result= new SearchResultGroup[grouped.keySet().size()];
 		int i= 0;
 		for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
-			IResource resource= (IResource)iter.next();
-			List searchResults= (List)grouped.get(resource);
-			result[i]= new SearchResultGroup(resource, createSearchResultArray(searchResults));
+			IResource resource= (IResource) iter.next();
+			List searchMatches= (List) grouped.get(resource);
+			SearchMatch[] matchArray= (SearchMatch[]) searchMatches.toArray(new SearchMatch[searchMatches.size()]);
+			result[i]= new SearchResultGroup(resource, matchArray);
 			i++;
 		}
-		return result;		
+		return result;
 	}
 	
-	private static SearchResult[] createSearchResultArray(List searchResults){
-		return (SearchResult[])searchResults.toArray(new SearchResult[searchResults.size()]);
-	}
-	
-	private static Map groupByResource(List searchResults){
-		Map grouped= new HashMap(); //IResource -> List of SearchResults
-		for (Iterator iter= searchResults.iterator(); iter.hasNext();) {
-			SearchResult searchResult= (SearchResult) iter.next();
-			if (! grouped.containsKey(searchResult.getResource()))
-				grouped.put(searchResult.getResource(), new ArrayList(1));
-			((List)grouped.get(searchResult.getResource())).add(searchResult);
-		}
-		return grouped;
-	}
-	
-	private static void internalSearch(IJavaSearchScope scope, ISearchPattern pattern, IJavaSearchResultCollector collector, ICompilationUnit[] workingCopies) throws JavaModelException {
-		if (pattern == null)
-			return;
-		Assert.isNotNull(scope, "scope"); //$NON-NLS-1$
-		createSearchEngine(workingCopies).search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
-	}
-	
-	private static SearchEngine createSearchEngine(ICompilationUnit[] workingCopies){
-		if (workingCopies == null)
-			return new SearchEngine();
-		else 	
-			return  new SearchEngine(workingCopies);
-	}
-	
-	public static ISearchPattern createSearchPattern(IJavaElement[] elements, int limitTo) {
+	public static SearchPattern createOrPattern(IJavaElement[] elements, int limitTo) {
 		if (elements == null || elements.length == 0)
 			return null;
 		Set set= new HashSet(Arrays.asList(elements));
 		Iterator iter= set.iterator();
 		IJavaElement first= (IJavaElement)iter.next();
-		ISearchPattern pattern= createSearchPattern(first, limitTo);
+		SearchPattern pattern= SearchPattern.createPattern(first, limitTo);
 		while(iter.hasNext()){
 			IJavaElement each= (IJavaElement)iter.next();
-			pattern= SearchEngine.createOrSearchPattern(pattern, createSearchPattern(each, limitTo));
+			pattern= SearchPattern.createOrPattern(pattern, SearchPattern.createPattern(each, limitTo));
 		}
 		return pattern;
 	}
-
-	private static ISearchPattern createSearchPattern(IJavaElement element, int limitTo) {
-		return SearchEngine.createSearchPattern(element, limitTo);
-	}
-	
 }

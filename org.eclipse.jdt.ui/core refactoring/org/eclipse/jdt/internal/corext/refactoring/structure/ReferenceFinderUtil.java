@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -30,89 +29,90 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
 
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
+import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class ReferenceFinderUtil {
 	
-	//no instances
 	private ReferenceFinderUtil(){
+		//no instances
 	}
 
 	//----- referenced types -
 	
 	public static IType[] getTypesReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
-		SearchResult[] results= getTypeReferencesIn(elements, pm);
+		SearchMatch[] results= getTypeReferencesIn(elements, pm);
 		Set referencedTypes= extractElements(results, IJavaElement.TYPE);
 		return (IType[]) referencedTypes.toArray(new IType[referencedTypes.size()]);	
 	}
 	
-	private static SearchResult[] getTypeReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
+	private static SearchMatch[] getTypeReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		List referencedTypes= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
 			referencedTypes.addAll(getTypeReferencesIn(elements[i], new SubProgressMonitor(pm, 1)));
 		}
 		pm.done();
-		return (SearchResult[]) referencedTypes.toArray(new SearchResult[referencedTypes.size()]);
+		return (SearchMatch[]) referencedTypes.toArray(new SearchMatch[referencedTypes.size()]);
 	}
 	
 	private static List getTypeReferencesIn(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
-		SearchResultCollector collector= new SearchResultCollector(pm);
-		new SearchEngine().searchDeclarationsOfReferencedTypes(ResourcesPlugin.getWorkspace(), element, collector);
-		return collector.getResults();
+		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
+		new SearchEngine().searchDeclarationsOfReferencedTypes(element, requestor, pm);
+		return requestor.getResults();
 	}
 	
 	//----- referenced fields ----
 	
 	public static IField[] getFieldsReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
-		SearchResult[] results= getFieldReferencesIn(elements, pm);
+		SearchMatch[] results= getFieldReferencesIn(elements, pm);
 		Set referencedFields= extractElements(results, IJavaElement.FIELD);
 		return (IField[]) referencedFields.toArray(new IField[referencedFields.size()]);
 	}
 
-	private static SearchResult[] getFieldReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
+	private static SearchMatch[] getFieldReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		List referencedFields= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
 			referencedFields.addAll(getFieldReferencesIn(elements[i], new SubProgressMonitor(pm, 1)));
 		}
 		pm.done();
-		return (SearchResult[]) referencedFields.toArray(new SearchResult[referencedFields.size()]);
+		return (SearchMatch[]) referencedFields.toArray(new SearchMatch[referencedFields.size()]);
 	}
 	
 	private static List getFieldReferencesIn(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
-		SearchResultCollector collector= new SearchResultCollector(pm);
-		new SearchEngine().searchDeclarationsOfAccessedFields(ResourcesPlugin.getWorkspace(), element, collector);
-		return collector.getResults();
+		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
+		new SearchEngine().searchDeclarationsOfAccessedFields(element, requestor, pm);
+		return requestor.getResults();
 	}
 	
 	//----- referenced methods ----
 	
 	public static IMethod[] getMethodsReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
-		SearchResult[] results= getMethodReferencesIn(elements, pm);
+		SearchMatch[] results= getMethodReferencesIn(elements, pm);
 		Set referencedMethods= extractElements(results, IJavaElement.METHOD);
 		return (IMethod[]) referencedMethods.toArray(new IMethod[referencedMethods.size()]);
 	}
 	
-	private static SearchResult[] getMethodReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
+	private static SearchMatch[] getMethodReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		List referencedMethods= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
 			referencedMethods.addAll(getMethodReferencesIn(elements[i], new SubProgressMonitor(pm, 1)));
 		}
 		pm.done();
-		return (SearchResult[]) referencedMethods.toArray(new SearchResult[referencedMethods.size()]);
+		return (SearchMatch[]) referencedMethods.toArray(new SearchMatch[referencedMethods.size()]);
 	}
 	
 	private static List getMethodReferencesIn(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
-		SearchResultCollector collector= new SearchResultCollector(pm);
-		new SearchEngine().searchDeclarationsOfSentMessages(ResourcesPlugin.getWorkspace(), element, collector);
-		return collector.getResults();
+		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
+		new SearchEngine().searchDeclarationsOfSentMessages(element, requestor, pm);
+		return requestor.getResults();
 	}
 	
-	public static ITypeBinding[] getTypesReferencedInDeclarations(MethodDeclaration[] methods) throws JavaModelException{
+	public static ITypeBinding[] getTypesReferencedInDeclarations(MethodDeclaration[] methods) {
 		Set typesUsed= new HashSet();
 		for (int i= 0; i < methods.length; i++) {
 			typesUsed.addAll(getTypesUsedInDeclaration(methods[i]));
@@ -121,7 +121,7 @@ public class ReferenceFinderUtil {
 	}
 		
 	//set of ITypeBindings
-	public static Set getTypesUsedInDeclaration(MethodDeclaration methodDeclaration) throws JavaModelException {
+	public static Set getTypesUsedInDeclaration(MethodDeclaration methodDeclaration) {
 		if (methodDeclaration == null)
 			return new HashSet(0);
 		Set result= new HashSet();	
@@ -138,10 +138,10 @@ public class ReferenceFinderUtil {
 	}
 		
 	/// private helpers 	
-	private static Set extractElements(SearchResult[] searchResults, int elementType){
+	private static Set extractElements(SearchMatch[] searchResults, int elementType) {
 		Set elements= new HashSet();
 		for (int i= 0; i < searchResults.length; i++) {
-			IJavaElement el= searchResults[i].getEnclosingElement();
+			IJavaElement el= SearchUtils.getEnclosingJavaElement(searchResults[i]);
 			if (el.exists() && el.getElementType() == elementType)
 				elements.add(el);
 		}

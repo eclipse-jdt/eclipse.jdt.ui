@@ -42,21 +42,21 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
@@ -69,6 +69,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResul
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -318,11 +319,11 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	
 	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws CoreException {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fPackage);
-		ISearchPattern pattern= SearchEngine.createSearchPattern(fPackage, IJavaSearchConstants.REFERENCES);
-		return RefactoringSearchEngine.search(pm, scope, pattern);
+		SearchPattern pattern= SearchPattern.createPattern(fPackage, IJavaSearchConstants.REFERENCES);
+		return RefactoringSearchEngine.search(pattern, scope, pm);
 	}
 		
-	private List getReferencesToTypesInNamesakes(IProgressMonitor pm) throws JavaModelException {
+	private List getReferencesToTypesInNamesakes(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		// e.g. renaming B-p.p; project C requires B, X and has ref to B-p.p and X-p.p;
 		// goal: find refs to X-p.p in CUs from fOccurrences
@@ -344,9 +345,9 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		// (from fOccurrences (without namesakes): may have shared star import)
 		// (from fPackage: may have unimported references to types of namesake packages)
 		IType[] typesToSearch= getTypesInPackages(namesakePackages);
-		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
+		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= getPackageAndOccurrencesWithoutNamesakesScope();
-		SearchResultGroup[] results= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
+		SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1));
 		pm.done();
 		return new ArrayList(Arrays.asList(results));
 	}
@@ -354,16 +355,18 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	/**
 	 * @return all package fragments in <code>scope</code> with same name as <code>fPackage</code>, excluding fPackage
 	 */
-	private IPackageFragment[] getNamesakePackages(IJavaSearchScope scope, IProgressMonitor pm) throws JavaModelException {
-		ISearchPattern pattern= SearchEngine.createSearchPattern(fPackage.getElementName(), IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS, true);
-		SearchResultCollector collector= new SearchResultCollector(pm);
-		new SearchEngine().search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
-
-		List results= collector.getResults();
+	private IPackageFragment[] getNamesakePackages(IJavaSearchScope scope, IProgressMonitor pm) throws CoreException {
+		SearchPattern pattern= SearchPattern.createPattern(fPackage.getElementName(), IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH, true);
+		
+		//TODO: put filter logic into requestor
+		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
+		new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, pm);
+		
+		List results= requestor.getResults();
 		List packageFragments= new ArrayList();
 		for (Iterator iter= results.iterator(); iter.hasNext();) {
-			SearchResult result= (SearchResult) iter.next();
-			IJavaElement enclosingElement= result.getEnclosingElement();
+			SearchMatch result= (SearchMatch) iter.next();
+			IJavaElement enclosingElement= SearchUtils.getEnclosingJavaElement(result);
 			if (enclosingElement instanceof IPackageFragment) {
 				IPackageFragment pack= (IPackageFragment) enclosingElement;
 				if (! fPackage.equals(pack))
@@ -417,7 +420,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		return SearchEngine.createJavaSearchScope((IJavaElement[]) scopeList.toArray(new IJavaElement[scopeList.size()])); 
 	}
 
-	private List getReferencesToTypesInPackage(IProgressMonitor pm) throws JavaModelException {
+	private List getReferencesToTypesInPackage(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		IJavaSearchScope referencedFromNamesakesScope= RefactoringScopeFactory.create(fPackage);
 		IPackageFragment[] namesakePackages= getNamesakePackages(referencedFromNamesakesScope, new SubProgressMonitor(pm, 1));
@@ -428,8 +431,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(namesakePackages);
 		IType[] typesToSearch= getTypesInPackage(fPackage);
-		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
-		SearchResultGroup[] results= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
+		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
+		SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1));
 		pm.done();
 		return new ArrayList(Arrays.asList(results));
 	}
@@ -606,8 +609,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		TextMatchUpdater.perform(pm, RefactoringScopeFactory.create(fPackage), this, manager, fOccurrences);
 	}
 	
-	private TextEdit createTextChange(SearchResult searchResult) {
-		return new ReplaceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), getNewElementName());
+	private TextEdit createTextChange(SearchMatch searchResult) {
+		return new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNewElementName());
 	}
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
@@ -634,13 +637,13 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				continue;
 			String name= RefactoringCoreMessages.getString("RenamePackageRefactoring.update_reference"); //$NON-NLS-1$
 			ImportRewrite importRewrite= null;
-			SearchResult[] results= fOccurrences[i].getSearchResults();
+			SearchMatch[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				SearchResult result= results[j];
+				SearchMatch result= results[j];
 				if (isImport(result)) {
 					if (importRewrite == null)
 						importRewrite= newImportRewrite(cu);
-					IImportDeclaration importDeclaration= (IImportDeclaration) result.getEnclosingElement();
+					IImportDeclaration importDeclaration= (IImportDeclaration) SearchUtils.getEnclosingJavaElement(result);
 					importRewrite.removeImport(importDeclaration.getElementName());
 					importRewrite.addImport(getUpdatedImport(importDeclaration));
 				} else { // is reference 
@@ -712,10 +715,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	 * @return the ImportRewrite or null
 	 */
 	private ImportRewrite addTypeImports(ImportRewrite importRewrite, SearchResultGroup typeReferences) throws CoreException {
-		SearchResult[] searchResults= typeReferences.getSearchResults();
+		SearchMatch[] searchResults= typeReferences.getSearchResults();
 		for (int i= 0; i < searchResults.length; i++) {
-			SearchResult result= searchResults[i];
-			IJavaElement enclosingElement= result.getEnclosingElement();
+			SearchMatch result= searchResults[i];
+			IJavaElement enclosingElement= SearchUtils.getEnclosingJavaElement(result);
 			if (! (enclosingElement instanceof IImportDeclaration)) {
 				String reference= getNormalizedTypeReference(result);
 				if (! reference.startsWith(fPackage.getElementName())) {
@@ -736,10 +739,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	 * @return the ImportRewrite or null
 	 */
 	private ImportRewrite updateTypeImports(ImportRewrite importRewrite, SearchResultGroup typeReferences) throws CoreException {
-		SearchResult[] searchResults= typeReferences.getSearchResults();
+		SearchMatch[] searchResults= typeReferences.getSearchResults();
 		for (int i= 0; i < searchResults.length; i++) {
-			SearchResult result= searchResults[i];
-			IJavaElement enclosingElement= result.getEnclosingElement();
+			SearchMatch result= searchResults[i];
+			IJavaElement enclosingElement= SearchUtils.getEnclosingJavaElement(result);
 			if (enclosingElement instanceof IImportDeclaration) {
 				IImportDeclaration importDeclaration= (IImportDeclaration) enclosingElement;
 				if (importRewrite == null)
@@ -760,9 +763,9 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		return importRewrite;
 	}
 	
-	private static String getNormalizedTypeReference(SearchResult searchResult) throws JavaModelException {
-		ICompilationUnit cu= searchResult.getCompilationUnit();
-		String reference= cu.getBuffer().getText(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart());
+	private static String getNormalizedTypeReference(SearchMatch searchResult) throws JavaModelException {
+		ICompilationUnit cu= SearchUtils.getCompilationUnit(searchResult);
+		String reference= cu.getBuffer().getText(searchResult.getOffset(), searchResult.getLength());
 		//reference may be package-qualified -> normalize (remove comments, etc.):
 		return CommentAnalyzer.normalizeReference(reference);
 	}
@@ -781,8 +784,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		return result;
 	}
 
-	private static boolean isImport(SearchResult searchResult) {
-		return searchResult.getEnclosingElement() instanceof IImportDeclaration;
+	private static boolean isImport(SearchMatch searchResult) {
+		return SearchUtils.getEnclosingJavaElement(searchResult) instanceof IImportDeclaration;
 	}
 	
 	/** Removes the found SearchResultGroup from the list iff found.
