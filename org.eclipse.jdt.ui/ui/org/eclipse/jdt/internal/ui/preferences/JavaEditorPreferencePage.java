@@ -15,11 +15,15 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Preferences;
@@ -821,7 +825,25 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 	private String[][] createAnnotationTypeListModel(MarkerAnnotationPreferences preferences) {
 		ArrayList listModelItems= new ArrayList();
-		Iterator e= preferences.getAnnotationPreferences().iterator();
+		SortedSet sortedPreferences= new TreeSet(new Comparator() {
+			/*
+			 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+			 */
+			public int compare(Object o1, Object o2) {
+				if (!(o2 instanceof AnnotationPreference))
+					return -1;
+				if (!(o1 instanceof AnnotationPreference))
+					return 1;
+				
+				AnnotationPreference a1= (AnnotationPreference)o1;
+				AnnotationPreference a2= (AnnotationPreference)o2;
+				
+				return Collator.getInstance().compare(a1.getPreferenceLabel(), a2.getPreferenceLabel());
+				
+			}
+		});
+		sortedPreferences.addAll(preferences.getAnnotationPreferences());
+		Iterator e= sortedPreferences.iterator();
 		while (e.hasNext()) {
 			AnnotationPreference info= (AnnotationPreference) e.next();
 			listModelItems.add(new String[] { info.getPreferenceLabel(), info.getColorPreferenceKey(), info.getTextPreferenceKey(), info.getOverviewRulerPreferenceKey(), info.getHighlightPreferenceKey(), info.getVerticalRulerPreferenceKey()});
