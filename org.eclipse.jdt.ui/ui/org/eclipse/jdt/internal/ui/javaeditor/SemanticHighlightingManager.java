@@ -540,6 +540,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 				IColorManagerExtension ext= (IColorManagerExtension) fColorManager;
 				ext.unbindColor(property);
 				ext.bindColor(property, rgb);
+				color= fColorManager.getColor(property);
 			}
 			
 			TextAttribute oldAttr= highlighting.getTextAttribute();
