@@ -46,11 +46,6 @@ public class NonSharedFilter extends ViewerFilter {
 	}
 	
 	private boolean isSharedProject(IProject project) {
-		try {
-			return RepositoryProvider.getProvider(project) != null;
-		// FIXME: this is a workaround for bug 30683
-		} catch (NoClassDefFoundError ex) {
-			return true;
-		} 
+		return RepositoryProvider.getProvider(project) != null;
 	}
 }
