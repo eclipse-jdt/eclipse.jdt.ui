@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 public abstract class ContainerPage extends NewElementWizardPage {
@@ -55,7 +56,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	protected IStatus fContainerStatus;
 
 	private StringButtonDialogField fContainerDialogField;
-	
+		
 	/*
 	 * package fragment root corresponding to the input type (can be null)
 	 */
@@ -145,6 +146,15 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		return jelem;
 	}
 	
+	/**
+	 * Returns the recommended maximum width for text fields (in pixels)
+	 * Not valid until entering createContent.
+	 * Overwrite to change value.
+	 */
+	protected int getMaxFieldWidth() {
+		return convertWidthInCharsToPixels(40);
+	}
+	
 	
 	/**
 	 * Creates the controls for the container field.
@@ -153,6 +163,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	 */
 	protected void createContainerControls(Composite parent, int nColumns) {
 		fContainerDialogField.doFillIntoGrid(parent, nColumns);
+		LayoutUtil.setWidthHint(fContainerDialogField.getTextControl(null), getMaxFieldWidth());
 	}
 	
 	protected void setFocusOnContainer() {

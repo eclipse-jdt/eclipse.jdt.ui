@@ -8,12 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -24,6 +18,12 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -59,11 +59,11 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
@@ -180,27 +180,35 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 	 * @see WizardPage#createControl
 	 */	
 	public void createControl(Composite parent) {
+		initializeDialogUnits(parent);
+		
 		Composite composite= new Composite(parent, SWT.NONE);
 			
 		MGridLayout layout= new MGridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;	
-		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
-		layout.minimumHeight= SWTUtil.convertHeightInCharsToPixels(20, composite);
+		layout.minimumWidth= convertWidthInCharsToPixels(80);
+		layout.minimumHeight= convertHeightInCharsToPixels(20);
 		layout.numColumns= 3;
 		composite.setLayout(layout);
-		
-		fProjectField.doFillIntoGrid(composite, 3);		
+				
+		fProjectField.doFillIntoGrid(composite, 3);	
 		fRootDialogField.doFillIntoGrid(composite, 3);
 		fRootDialogField.setFocus();
+		
+		int maxFieldWidth= convertWidthInCharsToPixels(40);
+		LayoutUtil.setWidthHint(fProjectField.getTextControl(null), maxFieldWidth);	
+		LayoutUtil.setWidthHint(fRootDialogField.getTextControl(null), maxFieldWidth);	
 			
 		(new Separator()).doFillIntoGrid(composite, 3);
 		
 		fEditClassPathField.doFillIntoGrid(composite, 3);
+
 		Control control= fEditClassPathField.getSelectionButton(null);
 		MGridData gd= (MGridData) control.getLayoutData();
 		gd.verticalAlignment= MGridData.END;
 		gd.horizontalAlignment= MGridData.BEGINNING;		
+
 		setControl(composite);
 		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.NEW_PACKAGEROOT_WIZARD_PAGE));		
 	}	

@@ -135,7 +135,7 @@ public class DialogField {
 		if (fLabel == null) {
 			assertCompositeNotNull(parent);
 			
-			fLabel= new Label(parent, SWT.LEFT);
+			fLabel= new Label(parent, SWT.LEFT | SWT.WRAP);
 			fLabel.setFont(parent.getFont());
 			fLabel.setEnabled(fEnabled);		
 			if (fLabelText != null && !"".equals(fLabelText)) { //$NON-NLS-1$

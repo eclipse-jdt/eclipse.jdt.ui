@@ -91,6 +91,10 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		Composite inner= new Composite(composite, SWT.NONE);
 		int minimalWidth= convertWidthInCharsToPixels(80);
 		LayoutUtil.doDefaultLayout(inner, new DialogField[] { fNameDialogField }, true, minimalWidth, 0, 0, 0);
+		
+		int fieldWidthHint= convertWidthInCharsToPixels(60);
+		LayoutUtil.setWidthHint(fNameDialogField.getTextControl(null), fieldWidthHint);
+		
 		fNameDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		
 		return composite;

@@ -296,7 +296,6 @@ public abstract class TypePage extends ContainerPage {
 	 * @param nColumns Number of columns to span
 	 */
 	protected void createSeparator(Composite composite, int nColumns) {
-		initializeDialogUnits(composite);
 		(new Separator(SWT.SEPARATOR | SWT.HORIZONTAL)).doFillIntoGrid(composite, nColumns, convertHeightInCharsToPixels(1));		
 	}
 
@@ -307,6 +306,7 @@ public abstract class TypePage extends ContainerPage {
 	 */	
 	protected void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, 4);
+		LayoutUtil.setWidthHint(fPackageDialogField.getTextControl(null), getMaxFieldWidth());	
 	}
 
 	/**
@@ -318,8 +318,11 @@ public abstract class TypePage extends ContainerPage {
 		fEnclosingTypeSelection.doFillIntoGrid(composite, 1);
 		
 		Control c= fEnclosingTypeDialogField.getTextControl(composite);
-		c.setLayoutData(new MGridData(MGridData.FILL_HORIZONTAL));
-		LayoutUtil.setHorizontalSpan(c, 2);
+		MGridData gd= new MGridData(MGridData.FILL_HORIZONTAL);
+		gd.widthHint= getMaxFieldWidth();
+		gd.horizontalSpan= 2;
+		c.setLayoutData(gd);
+		
 		c= fEnclosingTypeDialogField.getChangeControl(composite);
 		c.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));
 	}	
@@ -333,6 +336,7 @@ public abstract class TypePage extends ContainerPage {
 		fTypeNameDialogField.doFillIntoGrid(composite, nColumns - 1);
 		DialogField.createEmptySpace(composite);
 		
+		LayoutUtil.setWidthHint(fTypeNameDialogField.getTextControl(null), getMaxFieldWidth());
 	}
 
 	/**
@@ -367,6 +371,7 @@ public abstract class TypePage extends ContainerPage {
 	 */		
 	protected void createSuperClassControls(Composite composite, int nColumns) {
 		fSuperClassDialogField.doFillIntoGrid(composite, nColumns);
+		LayoutUtil.setWidthHint(fSuperClassDialogField.getTextControl(null), getMaxFieldWidth());
 	}
 
 	/**
@@ -375,7 +380,6 @@ public abstract class TypePage extends ContainerPage {
 	 * @param nColumns Number of columns to span
 	 */			
 	protected void createSuperInterfacesControls(Composite composite, int nColumns) {
-		initializeDialogUnits(composite);
 		fSuperInterfacesDialogField.doFillIntoGrid(composite, nColumns);
 		MGridData gd= (MGridData)fSuperInterfacesDialogField.getListControl(null).getLayoutData();
 		if (fIsClass) {

@@ -156,8 +156,8 @@ public class BuildPathsBlock {
 		
 		MGridLayout layout= new MGridLayout();
 		layout.marginWidth= 0;
-		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
-		layout.minimumHeight= SWTUtil.convertHeightInCharsToPixels(20, composite);
+		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, parent);
+		layout.minimumHeight= SWTUtil.convertHeightInCharsToPixels(20, parent);
 		layout.numColumns= 1;		
 		composite.setLayout(layout);
 		
@@ -220,6 +220,9 @@ public class BuildPathsBlock {
 		DialogField[] editors= new DialogField[] { fBuildPathDialogField };
 		LayoutUtil.doDefaultLayout(editorcomp, editors, true, 0, 0, 0, 0);
 		
+		int maxFieldWidth= SWTUtil.convertWidthInCharsToPixels(40, parent);
+		LayoutUtil.setWidthHint(fBuildPathDialogField.getTextControl(null), maxFieldWidth);	
+	
 		editorcomp.setLayoutData(new MGridData(MGridData.FILL_HORIZONTAL));
 		
 		if (fIsNewProject) {

@@ -7,16 +7,16 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.io.File;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
@@ -118,15 +119,20 @@ public class VariableCreationDialog extends StatusDialog {
 		Composite inner= new Composite(composite, SWT.NONE);
 		
 		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
+		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, parent);
 		layout.marginWidth= 0;
 		layout.numColumns= 3;
 		inner.setLayout(layout);
 		
+		int fieldWidthHint= SWTUtil.convertWidthInCharsToPixels(50, parent);
+		
 		fNameField.doFillIntoGrid(inner, 2);
+		LayoutUtil.setWidthHint(fNameField.getTextControl(null), fieldWidthHint);
+		
 		DialogField.createEmptySpace(inner, 1);
 		
 		fPathField.doFillIntoGrid(inner, 3);
+		LayoutUtil.setWidthHint(fPathField.getTextControl(null), fieldWidthHint);
 		
 		DialogField.createEmptySpace(inner, 2);
 		fDirButton.doFillIntoGrid(inner, 1);

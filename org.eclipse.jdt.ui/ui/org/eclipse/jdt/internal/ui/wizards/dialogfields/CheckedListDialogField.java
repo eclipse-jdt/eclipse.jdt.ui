@@ -82,7 +82,9 @@ public class CheckedListDialogField extends ListDialogField {
 	 */
 	public Control getListControl(Composite parent) {
 		Control control= super.getListControl(parent);
-		((CheckboxTableViewer)fTable).setCheckedElements(fCheckElements.toArray());
+		if (parent != null) {
+			((CheckboxTableViewer)fTable).setCheckedElements(fCheckElements.toArray());
+		}
 		return control;
 	}	
 	

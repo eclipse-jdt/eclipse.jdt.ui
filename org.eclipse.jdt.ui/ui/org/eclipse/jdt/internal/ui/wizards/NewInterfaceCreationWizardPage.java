@@ -4,14 +4,11 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -19,12 +16,9 @@ import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class NewInterfaceCreationWizardPage extends TypePage {
@@ -82,12 +76,14 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 	 * @see WizardPage#createControl
 	 */
 	public void createControl(Composite parent) {
+		initializeDialogUnits(parent);
+		
 		Composite composite= new Composite(parent, SWT.NONE);
 		
 		int nColumns= 4;
 		
 		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
+		layout.minimumWidth= convertWidthInCharsToPixels(80);
 		layout.numColumns= nColumns;		
 		composite.setLayout(layout);
 		

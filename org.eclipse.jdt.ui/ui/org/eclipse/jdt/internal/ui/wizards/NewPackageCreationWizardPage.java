@@ -6,20 +6,15 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.swt.widgets.Label;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,17 +26,15 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
@@ -98,15 +91,17 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	 * @see WizardPage#createControl
 	 */	
 	public void createControl(Composite parent) {
+		initializeDialogUnits(parent);
+		
 		Composite composite= new Composite(parent, SWT.NONE);
 		
 		int nColumns= 3;
-		int widthHint= SWTUtil.convertWidthInCharsToPixels(80, composite);
+		int widthHint= convertWidthInCharsToPixels(80);
 		MGridLayout layout= new MGridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;	
 		layout.minimumWidth= widthHint;
-		layout.minimumHeight= SWTUtil.convertHeightInCharsToPixels(20, composite);
+		layout.minimumHeight= convertHeightInCharsToPixels(20);
 		layout.numColumns= 3;		
 		composite.setLayout(layout);
 		
@@ -128,6 +123,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	
 	protected void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns - 1);
+		LayoutUtil.setWidthHint(fPackageDialogField.getTextControl(null), getMaxFieldWidth());
 		DialogField.createEmptySpace(composite);		
 	}
 				

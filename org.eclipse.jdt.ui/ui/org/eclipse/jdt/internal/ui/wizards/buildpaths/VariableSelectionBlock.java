@@ -1,4 +1,4 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;import org.eclipse.jdt.internal.ui.util.SWTUtil;import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.util.List;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;import org.eclipse.jdt.internal.ui.util.SWTUtil;import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class VariableSelectionBlock {
 	
@@ -66,38 +66,21 @@ public class VariableSelectionBlock {
 			}		}
 		return null;
 	}	
-		
-	public void doFillIntoGrid(Composite inner, int nColumns) {
-		fVariableField.doFillIntoGrid(inner, nColumns);	
-		
-		fExtensionField.doFillIntoGrid(inner, nColumns);
-		
-		Label label= new Label(inner, SWT.LEFT);
-		label.setLayoutData(new MGridData());
-		label.setText(NewWizardMessages.getString("VariableSelectionBlock.fullpath.label")); //$NON-NLS-1$
-		
-		fFullPath= new CLabel(inner, SWT.NONE);
-		fFullPath.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));
-		DialogField.createEmptySpace(inner, nColumns - 2);
-		updateFullTextField();
-		
-	}
-	
+			
 	public void setFocus(Display display) {
 		fVariableField.postSetFocusOnDialogField(display);
 	}
 
 	
-	public Control createControl(Composite parent) {		
+	public Control createControl(Composite parent) {		int nColumns= 3;		
 		Composite inner= new Composite(parent, SWT.NONE);
-		MGridLayout layout= new MGridLayout();		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, inner);		
+		MGridLayout layout= new MGridLayout();		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, parent);		
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
-		layout.numColumns= 3;
+		layout.numColumns= nColumns;
 		inner.setLayout(layout);
-		
-		doFillIntoGrid(inner, 3);
-		
+				int fieldWidthHint= SWTUtil.convertWidthInCharsToPixels(50, parent);		
+		fVariableField.doFillIntoGrid(inner, nColumns);		LayoutUtil.setWidthHint(fVariableField.getTextControl(null), fieldWidthHint);				fExtensionField.doFillIntoGrid(inner, nColumns);		LayoutUtil.setWidthHint(fExtensionField.getTextControl(null), fieldWidthHint);				Label label= new Label(inner, SWT.LEFT);		label.setLayoutData(new MGridData());		label.setText(NewWizardMessages.getString("VariableSelectionBlock.fullpath.label")); //$NON-NLS-1$				fFullPath= new CLabel(inner, SWT.NONE);		fFullPath.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));		DialogField.createEmptySpace(inner, nColumns - 2);		updateFullTextField();		
 		setFocus(parent.getDisplay());
 		
 		return inner;

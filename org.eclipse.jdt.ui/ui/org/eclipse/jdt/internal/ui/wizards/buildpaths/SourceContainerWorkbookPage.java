@@ -155,9 +155,12 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 		fProjectRadioButton.doFillIntoGrid(composite, 2);
 		fFolderRadioButton.doFillIntoGrid(composite, 2);
+		
 		Control control= fFoldersList.getListControl(composite);
 		MGridData gd= new MGridData(MGridData.FILL_BOTH);
-		gd.horizontalIndent= 10;
+		gd.horizontalIndent= SWTUtil.convertWidthInCharsToPixels(2, composite);
+		gd.widthHint= SWTUtil.convertWidthInCharsToPixels(75, composite);
+		gd.heightHint= SWTUtil.convertWidthInCharsToPixels(15, composite);
 		control.setLayoutData(gd);
 		
 		control= fFoldersList.getButtonBox(composite);

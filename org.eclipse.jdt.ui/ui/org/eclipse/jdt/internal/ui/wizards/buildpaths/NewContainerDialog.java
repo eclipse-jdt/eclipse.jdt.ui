@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
@@ -59,15 +60,21 @@ public class NewContainerDialog extends StatusDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
 		
+		int widthHint= convertWidthInCharsToPixels(80);
+		
 		Composite inner= new Composite(composite, SWT.NONE);
 		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= convertWidthInCharsToPixels(70);
+		layout.minimumWidth= widthHint;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 1;
 		inner.setLayout(layout);
 		
 		fContainerDialogField.doFillIntoGrid(inner, 2);
+		
+		LayoutUtil.setWidthHint(fContainerDialogField.getLabelControl(null), widthHint);
+		LayoutUtil.setWidthHint(fContainerDialogField.getTextControl(null), widthHint);
+		
 				
 		fContainerDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		return composite;

@@ -93,4 +93,14 @@ public class LayoutUtil {
 		}
 	}	
 
+	/**
+	 * Sets the span of a control. Assumes that MGriddata is used.
+	 */
+	public static void setWidthHint(Control control, int widthHint) {
+		Object ld= control.getLayoutData();
+		if (ld instanceof MGridData) {
+			((MGridData)ld).widthHint= widthHint;
+		}
+	}	
+
 }

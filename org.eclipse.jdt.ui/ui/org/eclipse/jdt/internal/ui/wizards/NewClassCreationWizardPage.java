@@ -10,6 +10,7 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -32,10 +33,10 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
@@ -108,12 +109,14 @@ public class NewClassCreationWizardPage extends TypePage {
 	 * @see WizardPage#createControl
 	 */
 	public void createControl(Composite parent) {
+		initializeDialogUnits(parent);
+		
 		Composite composite= new Composite(parent, SWT.NONE);
 		
 		int nColumns= 4;
 		
 		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
+		layout.minimumWidth= convertWidthInCharsToPixels(80);
 		layout.numColumns= nColumns;		
 		composite.setLayout(layout);
 		
@@ -126,17 +129,17 @@ public class NewClassCreationWizardPage extends TypePage {
 		createTypeNameControls(composite, nColumns);
 		createModifierControls(composite, nColumns);
 
-		// createSeparator(composite, nColumns);
+		//// createSeparator(composite, nColumns);
 				
 		createSuperClassControls(composite, nColumns);
 		createSuperInterfacesControls(composite, nColumns);
 				
-		//createSeparator(composite, nColumns);
+		////createSeparator(composite, nColumns);
 		
 		createMethodStubSelectionControls(composite, nColumns);
 		
 		setControl(composite);
-		
+			
 		setFocus();
 		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.NEW_CLASS_WIZARD_PAGE));	
 	}
