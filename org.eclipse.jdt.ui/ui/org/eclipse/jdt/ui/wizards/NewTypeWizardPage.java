@@ -1395,7 +1395,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */		
 	protected String getFileComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doFileComments()) {
-			return getTemplate("filecomment", parentCU); //$NON-NLS-1$
+			return getTemplate("filecomment", parentCU, 0); //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -1406,19 +1406,25 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */		
 	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doCreateComments()) {
-			return getTemplate("typecomment", parentCU); //$NON-NLS-1$
+			return getTemplate("typecomment", parentCU, 0); //$NON-NLS-1$
 		}
 		return null;
+	}
+
+
+	protected String getTemplate(String name, ICompilationUnit parentCU) {
+		return getTemplate(name, parentCU, 0);
+	
 	}
 	
 	/**
 	 * Gets the template of the given name, evaluated in the context of a CU.
 	 */
-	protected String getTemplate(String name, ICompilationUnit parentCU) {
+	protected String getTemplate(String name, ICompilationUnit parentCU, int pos) {
 		try {
 			Template[] templates= Templates.getInstance().getTemplates(name);
 			if (templates.length > 0) {
-				return JavaContext.evaluateTemplate(templates[0], parentCU);
+				return JavaContext.evaluateTemplate(templates[0], parentCU, pos);
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);

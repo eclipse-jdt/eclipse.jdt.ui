@@ -74,13 +74,13 @@ public class CreateCompilationUnitChange extends Change {
 				
 				if (fCodeGenerationSettings.createFileComments) {
 					IBuffer buf= fCompilationUnit.getBuffer();
-					buf.replace(0, 0, getTemplate("filecomment")); //$NON-NLS-1$
+					buf.replace(0, 0, getTemplate("filecomment", 0)); //$NON-NLS-1$
 					buf.save(null, false);
 				}
 
 				StringBuffer buf= new StringBuffer();
 				if (fCodeGenerationSettings.createComments) {
-					buf.append(getTemplate("typecomment")); //$NON-NLS-1$
+					buf.append(getTemplate("typecomment", 0)); //$NON-NLS-1$
 				}
 				ImportsStructure imports= new ImportsStructure(fCompilationUnit, fCodeGenerationSettings.importOrder,  fCodeGenerationSettings.importThreshold, false);
 				createTypeStub(fCompilationUnit, fIsClass, fSuperTypes, imports, buf);
@@ -134,10 +134,10 @@ public class CreateCompilationUnitChange extends Change {
 		buf.append(" {\n\n}\n"); //$NON-NLS-1$
 	}
 	
-	protected String getTemplate(String name) throws CoreException {
+	protected String getTemplate(String name, int pos) throws CoreException {
 		Template[] templates= Templates.getInstance().getTemplates(name);
 		if (templates.length > 0) {
-			String template= JavaContext.evaluateTemplate(templates[0], fCompilationUnit);
+			String template= JavaContext.evaluateTemplate(templates[0], fCompilationUnit, pos);
 			if (template != null) {
 				return template;
 			}

@@ -57,7 +57,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		String comment= null;
 		for (int i= 0; i < templates.length; i++) {
 			if ("typecomment".equals(templates[i].getName())) { //$NON-NLS-1$
-				comment= JavaContext.evaluateTemplate(templates[i], type.getCompilationUnit());
+				comment= JavaContext.evaluateTemplate(templates[i], type.getCompilationUnit(), type.getSourceRange().getOffset());
 				break;
 			}
 		}

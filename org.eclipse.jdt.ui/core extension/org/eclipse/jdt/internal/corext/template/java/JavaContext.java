@@ -277,7 +277,7 @@ public class JavaContext extends CompilationUnitContext {
 	/**
 	 * Evaluates a 'java' template in thecontext of a compilation unit
 	 */
-	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit) throws CoreException {
+	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException {
 		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java"); //$NON-NLS-1$
 		if (contextType == null)
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.getString("JavaContext.error.message"), null)); //$NON-NLS-1$
@@ -286,7 +286,6 @@ public class JavaContext extends CompilationUnitContext {
 		if (compilationUnit != null && compilationUnit.exists()) {
 			string= compilationUnit.getSource();
 		}
-		int position= 0;
 
 		JavaContext context= new JavaContext(contextType, string, position, compilationUnit);
 		context.setForceEvaluation(true);
