@@ -23,7 +23,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
-import org.eclipse.jface.text.formatter.ContentFormatter;
+import org.eclipse.jface.text.formatter.ContentFormatter2;
 import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
 import org.eclipse.jface.text.formatter.FormattingContext;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
@@ -79,7 +79,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 * Content formatter with which this formatting strategy has been
 	 * registered
 	 */
-	private final ContentFormatter fFormatter;
+	private final ContentFormatter2 fFormatter;
 
 	/** Partitions to be formatted by this strategy */
 	private final LinkedList fPartitions= new LinkedList();
@@ -93,7 +93,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 * @param viewer
 	 *                  The source viewer where to apply the formatting strategy
 	 */
-	public CommentFormattingStrategy(final ContentFormatter formatter, final ISourceViewer viewer) {
+	public CommentFormattingStrategy(final ContentFormatter2 formatter, final ISourceViewer viewer) {
 		super(viewer);
 
 		fFormatter= formatter;
@@ -160,7 +160,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 * 
 	 * @return The content formatter
 	 */
-	public final ContentFormatter getFormatter() {
+	public final ContentFormatter2 getFormatter() {
 		return fFormatter;
 	}
 }

@@ -26,7 +26,7 @@ import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
-import org.eclipse.jface.text.formatter.ContentFormatter;
+import org.eclipse.jface.text.formatter.ContentFormatter2;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 
@@ -77,7 +77,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 
 		if (fFormatSource) {
 
-			final ContentFormatter formatter= getStrategy().getFormatter();
+			final ContentFormatter2 formatter= getStrategy().getFormatter();
 			try {
 
 				final IDocument document= getDocument();
