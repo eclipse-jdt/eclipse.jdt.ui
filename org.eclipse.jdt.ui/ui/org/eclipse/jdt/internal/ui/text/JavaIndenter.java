@@ -884,6 +884,8 @@ public class JavaIndenter {
 			case Symbols.TokenRBRACE:
 				return skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE);
 			case Symbols.TokenGREATERTHAN:
+				if (!hasGenerics())
+					return false;
 				int storedPosition= fPosition;
 				int storedToken= fToken;
 				nextToken();
@@ -1151,21 +1153,6 @@ public class JavaIndenter {
 	}
 	
 	/**
-	 * Skips a generic type definition between "&lt;&gt;". The current token
-	 * is expected to be a "&gt;". If <code>true</code> is returned, the current
-	 * token points to a "&lt;"; 
-	 * 
-	 * @return <code>true</code> if a <code>[]</code> could be scanned, the
-	 *         current token is left at the LANGULAR.
-	 */
-	private boolean skipAngularBrackets() {
-		if (fToken == Symbols.TokenGREATERTHAN) {
-			return skipScope(Symbols.TokenLESSTHAN, Symbols.TokenGREATERTHAN);
-		}
-		return false;
-	}
-	
-	/**
 	 * Reads the next token in backward direction from the heuristic scanner
 	 * and sets the fields <code>fToken, fPreviousPosition</code> and <code>fPosition</code>
 	 * accordingly.
@@ -1216,11 +1203,6 @@ public class JavaIndenter {
 			do nextToken();
 			while (skipBrackets()); // optional brackets for array valued return types
 
-			if (hasGenerics()) {
-				// [1.5] also skip angular brackets for generic return types
-				do nextToken();
-				while (skipAngularBrackets());
-			}
 			return fToken == Symbols.TokenIDENT; // return type name
 			
 		}
