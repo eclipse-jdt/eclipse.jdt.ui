@@ -205,4 +205,16 @@ public class SingleLineTestCase extends CommentTestCase {
 		String string= prefix + comment + postfix;
 		assertEquals(string, testFormat(string, prefix.length(), comment.length()));
 	}
+	
+	public void testNoChange1() {
+		String content= PREFIX;
+		assertEquals(content, testFormat(content));
+	}
+	
+	public void testNoFormat1() {
+		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMAT, "false");
+		setUserOption(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, "1");
+		String content= PREFIX + "test test";
+		assertEquals(content, testFormat(content));
+	}
 }

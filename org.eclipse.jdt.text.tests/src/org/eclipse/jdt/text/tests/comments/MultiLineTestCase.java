@@ -119,4 +119,15 @@ public class MultiLineTestCase extends CommentTestCase {
 		output= testFormat(output, offset, output.lastIndexOf(POSTFIX) + POSTFIX.length() - offset, IJavaPartitions.JAVA_DOC);
 		assertEquals(expectedPrefix + expectedInfix + postfix, output);
 	}
+	
+	public void testNoChange1() {
+		String content= PREFIX + DELIMITER + POSTFIX;
+		assertEquals(content, testFormat(content));
+	}
+	
+	public void testNoFormat1() {
+		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMAT, "false");
+		String content= PREFIX + DELIMITER + INFIX + "test" + DELIMITER + INFIX + "test" + DELIMITER + POSTFIX;
+		assertEquals(content, testFormat(content));
+	}
 }
