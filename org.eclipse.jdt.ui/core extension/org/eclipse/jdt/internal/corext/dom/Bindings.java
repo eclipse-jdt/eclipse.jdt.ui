@@ -805,11 +805,7 @@ public class Bindings {
 		if (isPrimitiveType(candidate) != type.isPrimitive()) {
 			return false;
 		}
-		
-		if (isTypeVariable(candidate) != type.isTypeVariable()) {
-			return false;
-		}
-		
+			
 		if (type.isPrimitive() || type.isTypeVariable()) {
 			return type.getName().equals(Signature.toString(candidate));
 		} else {
@@ -840,10 +836,6 @@ public class Bindings {
 		return Signature.getTypeSignatureKind(s) == Signature.BASE_TYPE_SIGNATURE;
 	}
 	
-	private static boolean isTypeVariable(String s) {
-		return Signature.getTypeSignatureKind(s) == Signature.TYPE_VARIABLE_SIGNATURE;
-	}
-
 	private static boolean isResolvedType(String s) {
 		int arrayCount= Signature.getArrayCount(s);
 		return s.charAt(arrayCount) == Signature.C_RESOLVED;
