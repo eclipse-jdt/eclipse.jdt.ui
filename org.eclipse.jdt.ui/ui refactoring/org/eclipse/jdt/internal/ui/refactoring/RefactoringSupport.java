@@ -75,7 +75,6 @@ public class RefactoringSupport {
 				IWorkbenchPage page = dw.getActivePage();
 				if (page == null)
 					return;
-				List parts = new ArrayList();
 				IViewReference vrefs[]= page.getViewReferences();
 				for(int i= 0; i < vrefs.length; i++) {
 					consider(vrefs[i].getPart(false));

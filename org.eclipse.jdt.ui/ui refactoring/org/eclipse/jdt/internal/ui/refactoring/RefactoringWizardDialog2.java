@@ -410,7 +410,6 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	}
 	
 	private boolean showErrorDialog(ErrorWizardPage page) {
-		RefactoringStatus status= page.getStatus();
 		RefactoringStatusDialog dialog= new RefactoringStatusDialog(getShell(), page, true);
 		switch (dialog.open()) {
 			case IDialogConstants.OK_ID:

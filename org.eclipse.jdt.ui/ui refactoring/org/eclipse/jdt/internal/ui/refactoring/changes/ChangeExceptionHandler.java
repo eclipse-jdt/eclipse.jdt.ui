@@ -52,7 +52,7 @@ public class ChangeExceptionHandler implements IChangeExceptionHandler {
 		}
 		protected Control createMessageArea (Composite parent) {
 			Control result= super.createMessageArea(parent);
-			Label filler= new Label(parent, SWT.NONE);
+			new Label(parent, SWT.NONE); // filler
 			Label label= new Label(parent, SWT.NONE);
 			label.setText(RefactoringMessages.getString("ChangeExceptionHandler.button_explanation")); //$NON-NLS-1$
 			label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
