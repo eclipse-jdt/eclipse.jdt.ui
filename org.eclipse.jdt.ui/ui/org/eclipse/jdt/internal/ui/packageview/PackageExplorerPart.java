@@ -355,8 +355,8 @@ public class PackageExplorerPart extends ViewPart
 	 * 
 	 * @since 2.1
 	 */
-	private ProblemTreeViewer createViewer(Composite parent) {
-		return  new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL) {
+	private ProblemTreeViewer createViewer(Composite composite) {
+		return  new ProblemTreeViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL) {
 			/*
 			 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object)
 			 */
@@ -638,8 +638,8 @@ public class PackageExplorerPart extends ViewPart
 	private void handleSelectionChanged(SelectionChangedEvent event) {
 		IStructuredSelection selection= (IStructuredSelection) event.getSelection();
 		fActionSet.handleSelectionChanged(event);
-		// if (OpenStrategy.getOpenMethod() != OpenStrategy.SINGLE_CLICK)
-		linkToEditor(selection);
+		if (isLinkingEnabled())
+			linkToEditor(selection);
 	}
 
 	public void selectReveal(ISelection selection) {
@@ -1010,8 +1010,8 @@ public class PackageExplorerPart extends ViewPart
 				if (ctrl != null && !ctrl.isDisposed()) {
 					ctrl.getDisplay().asyncExec(new Runnable() {
 						public void run() {
-							Control ctrl= fViewer.getControl();
-							if (ctrl != null && !ctrl.isDisposed()) 
+							Control ctrl2= fViewer.getControl();
+							if (ctrl2 != null && !ctrl2.isDisposed()) 
 								fViewer.expandToLevel(type2, 1);
 						}
 					}); 
