@@ -36,6 +36,10 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	
 	private static final String PERSPECTIVE= "org.eclipse.jdt.ui.JavaPerspective";
 
+	protected void setUp() {
+		EditorTestHelper.runEventQueue();
+	}
+
 	public void testOpenJavaEditor1() throws PartInitException {
 		// cold run
 		measureOpenInEditor(EditorTestHelper.findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));

@@ -30,6 +30,10 @@ public class OpenTextEditorTest extends OpenEditorTest {
 	
 	public static final String ORIG_FILE= PATH + FILE_PREFIX + ".java";
 	
+	protected void setUp() {
+		EditorTestHelper.runEventQueue();
+	}
+
 	public void testOpenTextEditor1() throws PartInitException {
 		// cold run
 		measureOpenInEditor(EditorTestHelper.findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
