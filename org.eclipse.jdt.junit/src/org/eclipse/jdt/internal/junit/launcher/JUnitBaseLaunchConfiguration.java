@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -85,10 +86,12 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		// Program & VM args
 		String vmArgs= getVMArguments(configuration);
 		ExecutionArguments execArgs = new ExecutionArguments(vmArgs, ""); //$NON-NLS-1$
-				
+		String[] envp= DebugPlugin.getDefault().getLaunchManager().getEnvironment(configuration);
+
 		VMRunnerConfiguration runConfig= createVMRunner(configuration, tests, port, mode);
 		runConfig.setVMArguments(execArgs.getVMArgumentsArray());
 		runConfig.setWorkingDirectory(workingDirName);
+		runConfig.setEnvironment(envp);
 
 		Map vmAttributesMap = getVMSpecificAttributesMap(configuration);
 		runConfig.setVMSpecificAttributesMap(vmAttributesMap);
