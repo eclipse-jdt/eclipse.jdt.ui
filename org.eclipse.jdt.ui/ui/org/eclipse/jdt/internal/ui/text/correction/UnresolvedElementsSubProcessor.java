@@ -596,6 +596,14 @@ public class UnresolvedElementsSubProcessor {
 		if (!isOnlyParameterMismatch && !isSuperInvocation && sender != null) {
 			addMissingCastParentsProposal(cu, (MethodInvocation) invocationNode, proposals);
 		}
+		
+		if (!isSuperInvocation && sender == null && invocationNode.getParent() instanceof ThrowStatement) {
+			String str= "new ";   //$NON-NLS-1$ // do it the manual way, copting all the arguments is nasty
+			String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.addnewkeyword.description"); //$NON-NLS-1$
+			int relevance= Character.isUpperCase(methodName.charAt(0)) ? 7 : 4;
+			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, invocationNode.getStartPosition(), 0, str, relevance);
+			proposals.add(proposal);
+		}
 
 	}
 
