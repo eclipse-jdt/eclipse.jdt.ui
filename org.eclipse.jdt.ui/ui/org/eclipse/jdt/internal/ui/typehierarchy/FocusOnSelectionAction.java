@@ -46,12 +46,12 @@ public class FocusOnSelectionAction extends Action implements IUpdate {
 	
 	public void update() {
 		setEnabled(canActionBeAdded());
-	}
+	}		
 	
 	public boolean canActionBeAdded() {
 		Object element= SelectionUtil.getSingleElement(fSelectionProvider.getSelection());
 		if (element instanceof IType) {
-			setText(fText + " \"" + ((IType)element).getElementName() + "\""); //$NON-NLS-2$ //$NON-NLS-1$
+			setText(TypeHierarchyMessages.getFormattedString("FocusOnSelectionAction.label", ((IType)element).getElementName())); //$NON-NLS-1$
 			return true;
 		}
 		return false;

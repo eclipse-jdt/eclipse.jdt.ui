@@ -565,7 +565,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		// viewer entries
 		viewer.contributeToContextMenu(menu);
 		IStructuredSelection selection= (IStructuredSelection)viewer.getSelection();
-		addOpenPerspectiveItem(menu, selection);
+		if (JavaBasePreferencePage.openTypeHierarchyInPerspective()) {
+			addOpenPerspectiveItem(menu, selection);
+		}
 		addOpenWithMenu(menu, selection);
 		
 		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fFocusOnTypeAction);
@@ -599,6 +601,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		if (!refactoring.isEmpty())
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactoring);
 	}
+	
 	private void addOpenWithMenu(IMenuManager menu, IStructuredSelection selection) {
 		// If one file is selected get it.
 		// Otherwise, do not show the "open with" menu.
@@ -624,6 +627,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		// Add the submenu.
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
 	}
+	
+	
+
 
 	private void addOpenPerspectiveItem(IMenuManager menu, IStructuredSelection selection) {
 		OpenTypeHierarchyHelper.addToMenu(getSite().getWorkbenchWindow(), menu, selection);

@@ -72,13 +72,12 @@ public abstract class TypeHierarchyViewer extends TreeViewer {
 			}
 		});
 		
-		fOpen= new OpenSourceReferenceAction();
+		fOpen= new OpenSourceReferenceAction(this);
 		addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				fOpen.run();
 			}
 		});
-		fOpen.setSelectionProvider(this);
 		fShowInPackageViewAction= new ShowInPackageViewAction(part.getSite(), this);
 		fStandardGroups= new ContextMenuGroup[] {
 			new JavaSearchGroup(), new NewGroup(), new GenerateGroup()

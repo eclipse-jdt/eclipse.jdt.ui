@@ -81,14 +81,11 @@ public class MethodsViewer extends TableViewer {
 		setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		setContentProvider(contentProvider);
 				
-		fOpen= new OpenSourceReferenceAction();
-		fOpen.setSelectionProvider(this);
+		fOpen= new OpenSourceReferenceAction(this);
 		
 		addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
-				if (fOpen.isEnabled()) {
-					fOpen.run();
-				}
+				fOpen.run();
 			}
 		});
 				
