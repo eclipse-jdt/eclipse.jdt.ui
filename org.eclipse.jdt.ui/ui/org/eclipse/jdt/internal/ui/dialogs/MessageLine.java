@@ -73,7 +73,8 @@ public class MessageLine extends CLabel {
 			}
 		}		
 		setText("");
-		setImage(null);		
+		setImage(null);
+		setBackground(fNormalMsgAreaBackground);	
 	}
 	
 	/*
