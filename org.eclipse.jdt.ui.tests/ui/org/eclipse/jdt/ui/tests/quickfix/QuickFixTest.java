@@ -54,7 +54,8 @@ public class QuickFixTest extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
-		suite.addTest(SerialVersionQuickFixTest.allTests());
+		//commented out for https://bugs.eclipse.org/bugs/show_bug.cgi?id=79130
+		//suite.addTest(SerialVersionQuickFixTest.allTests());
 		suite.addTest(UnresolvedTypesQuickFixTest.allTests());
 		suite.addTest(UnresolvedVariablesQuickFixTest.allTests());
 		suite.addTest(UnresolvedMethodsQuickFixTest.allTests());
