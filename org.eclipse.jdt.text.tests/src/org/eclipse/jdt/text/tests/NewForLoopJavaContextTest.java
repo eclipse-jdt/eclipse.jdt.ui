@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import java.util.Hashtable;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -30,6 +32,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -87,6 +90,13 @@ public class NewForLoopJavaContextTest extends TestCase {
 	private ICompilationUnit fCU;
 
 	protected void setUp() throws Exception {
+		if (JavaCore.getPlugin() != null) {
+			Hashtable options= JavaCore.getDefaultOptions();
+			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
+			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, "4");
+			options.put(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, "4");
+			JavaCore.setOptions(options);
+		}
 		setUpProject(JavaCore.VERSION_1_5);
 	}
 	
@@ -103,6 +113,9 @@ public class NewForLoopJavaContextTest extends TestCase {
 	protected void tearDown() throws Exception {
 		fCU.discardWorkingCopy();
 		JavaProjectHelper.delete(fProject);
+		if (JavaCore.getPlugin() != null) {
+			JavaCore.setOptions(JavaCore.getDefaultOptions());
+		}
 	}
 	
 	private Template getTemplate(String id) {
