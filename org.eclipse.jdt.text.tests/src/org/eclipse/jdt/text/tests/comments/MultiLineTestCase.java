@@ -13,7 +13,8 @@ package org.eclipse.jdt.text.tests.comments;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 
@@ -41,7 +42,7 @@ public class MultiLineTestCase extends CommentTestCase {
 	}
 
 	public void testMultiLineCommentHeader1() {
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, "false");
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER, "false");
 		String prefix= PREFIX.trim() + DELIMITER + INFIX + "header" + DELIMITER + INFIX + "comment" + DELIMITER + POSTFIX + DELIMITER;
 		String inputInfix = JavaDocTestCase.PREFIX + DELIMITER + INFIX + "class" + DELIMITER + INFIX + "comment" + DELIMITER + POSTFIX + DELIMITER;
 		String expectedInfix = JavaDocTestCase.PREFIX + DELIMITER + INFIX + "class comment" + DELIMITER + POSTFIX + DELIMITER;
@@ -54,7 +55,7 @@ public class MultiLineTestCase extends CommentTestCase {
 	}
 	
 	public void testMultiLineCommentHeader2() {
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, "true");
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER, "true");
 		String inputPrefix= PREFIX.trim() + DELIMITER + INFIX + "header" + DELIMITER + INFIX + "comment" + DELIMITER + POSTFIX + DELIMITER;
 		String expectedPrefix= PREFIX.trim() + DELIMITER + INFIX + "header comment" + DELIMITER + POSTFIX + DELIMITER;
 		String inputInfix = JavaDocTestCase.PREFIX + DELIMITER + INFIX + "class" + DELIMITER + INFIX + "comment" + DELIMITER + POSTFIX + DELIMITER;
@@ -73,7 +74,7 @@ public class MultiLineTestCase extends CommentTestCase {
 	}
 	
 	public void testNoFormat1() {
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMAT, "false");
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT, "false");
 		String content= PREFIX + DELIMITER + INFIX + "test" + DELIMITER + INFIX + "test" + DELIMITER + POSTFIX;
 		assertEquals(content, testFormat(content));
 	}

@@ -51,7 +51,6 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
@@ -135,8 +134,6 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		// with project dependent versions (see CompilationUnitEditor.AdaptedSourceViewer)
 		IFormattingContext context= new CommentFormattingContext();
 		Map map= new Hashtable(JavaCore.getOptions());
-		
-		context.storeToMap(PreferenceConstants.getPreferenceStore(), map, false);
 		context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, map);
 		
 		return context;

@@ -16,7 +16,6 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 
@@ -102,7 +101,7 @@ public class JavaDocTestCase extends CommentTestCase {
 	}
 	
 	public void testNoFormat1() {
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMAT, "false");
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT, "false");
 		String content= PREFIX + DELIMITER + INFIX + "test" + DELIMITER + INFIX + "test" + DELIMITER + POSTFIX;
 		assertEquals(content, testFormat(content));
 	}

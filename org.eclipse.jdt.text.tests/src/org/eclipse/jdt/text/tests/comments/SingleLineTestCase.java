@@ -18,7 +18,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 
@@ -53,14 +52,14 @@ public class SingleLineTestCase extends CommentTestCase {
 	}
 
 	public void testHeaderComment1() {
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, IPreferenceStore.FALSE);
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, "12"); //$NON-NLS-1$
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER, IPreferenceStore.FALSE);
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, "12"); //$NON-NLS-1$
 		assertEquals(PREFIX + "test test" + DELIMITER + PREFIX + "test test" + DELIMITER + PREFIX + "test test" + DELIMITER, testFormat("//test\t\t\t\ttest" + DELIMITER + PREFIX + "test test test test")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
 
 	public void testHeaderComment2() {
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, IPreferenceStore.FALSE);
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, "24"); //$NON-NLS-1$
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER, IPreferenceStore.FALSE);
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, "24"); //$NON-NLS-1$
 		assertEquals(PREFIX + "test test test test" + DELIMITER + PREFIX + "test" + DELIMITER, testFormat("//test\t\t\t" + DELIMITER + PREFIX + "test test test test" + DELIMITER)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
@@ -94,8 +93,8 @@ public class SingleLineTestCase extends CommentTestCase {
 	}
 	
 	public void testNoFormat1() {
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMAT, "false");
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, "1");
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT, "false");
+		setUserOption(DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, "1");
 		String content= PREFIX + "test test";
 		assertEquals(content, testFormat(content));
 	}

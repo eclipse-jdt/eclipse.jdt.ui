@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.dom.Statement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
 public class CodeFormatterUtil {
 			
@@ -179,7 +178,6 @@ public class CodeFormatterUtil {
 		if (offset < 0 || length < 0 || offset + length > string.length()) {
 			throw new IllegalArgumentException("offset or length outside of string. offset: " + offset + ", length: " + length + ", string size: " + string.length());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
-		options= CommentFormattingContext.mapOptions(options);
 		return ToolFactory.createCodeFormatter(options).format(kind, string, offset, length, indentationLevel, lineSeparator);
 	}
 	
@@ -281,7 +279,6 @@ public class CodeFormatterUtil {
 		}
 		
 		String concatStr= prefix + str + suffix;
-		options= CommentFormattingContext.mapOptions(options);
 		TextEdit edit= ToolFactory.createCodeFormatter(options).format(code, concatStr, prefix.length(), str.length(), indentationLevel, lineSeparator);
 		if (prefix.length() > 0) {
 			edit= shifEdit(edit, prefix.length());

@@ -313,7 +313,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			else
 				preferences= new HashMap(javaProject.getOptions(true));
 			
-			context.storeToMap(PreferenceConstants.getPreferenceStore(), preferences, false);
 			context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, preferences);
 			
 			return context;
