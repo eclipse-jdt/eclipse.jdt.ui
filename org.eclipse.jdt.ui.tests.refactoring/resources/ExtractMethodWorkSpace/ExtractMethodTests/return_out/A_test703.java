@@ -4,6 +4,7 @@ public class A_test703 {
 	public boolean foo() {
 		/*]*/return extracted();/*[*/
 	}
+
 	protected boolean extracted() {
 		if (0 == 0) {
 			if (10 == 10)

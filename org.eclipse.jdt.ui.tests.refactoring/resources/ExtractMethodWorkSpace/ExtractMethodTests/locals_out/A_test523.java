@@ -2,7 +2,7 @@ package locals_out;
 
 public class A_test523 {
 	public volatile boolean flag;
-	
+
 	protected void foo() {
 		int i= 0;
 		/*]*/i = extracted(i);/*[*/
@@ -17,7 +17,7 @@ public class A_test523 {
 		} catch (Exception e) {
 		}
 		return i;
-	}	
+	}
 
 	private void read(int i) {
 	}

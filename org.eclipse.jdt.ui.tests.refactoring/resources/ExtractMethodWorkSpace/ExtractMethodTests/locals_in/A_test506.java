@@ -6,7 +6,7 @@ public class A_test506 {
 		
 		/*]*/bar(x);/*[*/
 	}
-	
+
 	public void bar(int i) {
 	}
 }

@@ -62,6 +62,30 @@ public abstract class TextChange extends AbstractTextChange {
 		/* package */ GroupDescription getGroupDescription() {
 			return fDescription;
 		}
+		public boolean coveredBy(TextRange sourceRange) {
+			int sLength= sourceRange.getLength();
+			if (sLength == 0)
+				return false;
+			int sOffset= sourceRange.getOffset();
+			int sEnd= sOffset + sLength - 1;
+			TextEdit[] edits= fDescription.getTextEdits();
+			for (int i= 0; i < edits.length; i++) {
+				TextRange range= edits[i].getTextRange();
+				if (range.isUndefined() || range.isDeleted())
+					return false;
+				int rOffset= range.getOffset();
+				int rLength= range.getLength();
+				int rEnd= rOffset + rLength - 1;
+			    if (rLength == 0) {
+					if (!(sOffset < rOffset && rOffset <= sEnd))
+						return false;
+				} else {
+					if (!(sOffset <= rOffset && rEnd <= sEnd))
+						return false;
+				}
+			}
+			return true;
+		}
 	}
 
 	private List fTextEditChanges;
@@ -146,6 +170,17 @@ public abstract class TextChange extends AbstractTextChange {
 		Assert.isTrue(!fAutoMode, "Group descriptions are only supported if root edit has been set by setEdit"); //$NON-NLS-1$
 		Assert.isTrue(description != null);
 		fTextEditChanges.add(new EditChange(description, this));
+	}
+	
+	/**
+	 * Adds a set of group descriptions.
+	 * 
+	 * @param descriptios the group descriptions to be added
+	 */
+	public void addGroupDescriptions(GroupDescription[] descriptions) {
+		for (int i= 0; i < descriptions.length; i++) {
+			addGroupDescription(descriptions[i]);
+		}
 	}
 	
 	/**

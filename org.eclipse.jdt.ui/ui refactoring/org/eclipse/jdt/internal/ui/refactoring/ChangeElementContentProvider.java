@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -190,15 +189,18 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 		if (result == null)
 			return cunit;
 		
-		if (result instanceof ISourceReference) {
-			try {
-				ISourceRange elementRange= ((ISourceReference)result).getSourceRange();
-				// An insertion point before the element. So we actually modify the parent.
-				if (elementRange.getOffset() == range.getOffset() && range.getLength() == 0 && result.getParent() != null)
-					result= result.getParent();
-			} catch(JavaModelException e) {
-				// do nothing. Use old value.
+		try {
+			while(true) {
+				ISourceReference ref= (ISourceReference)result;
+				TextRange sRange= TextRange.createFromStartAndLength(ref.getSourceRange().getOffset(), ref.getSourceRange().getLength());
+				if (result.getParent() == null || edit.coveredBy(sRange))
+					break;
+				result= result.getParent();
 			}
+		} catch(JavaModelException e) {
+			// Do nothing, use old value.
+		} catch(ClassCastException e) {
+			// Do nothing, use old value.
 		}
 		return result;
 	}
@@ -208,6 +210,6 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 		if (range == null)
 			range= TextRange.UNDEFINED;
 		return range;
-	}	
+	}
 }
 

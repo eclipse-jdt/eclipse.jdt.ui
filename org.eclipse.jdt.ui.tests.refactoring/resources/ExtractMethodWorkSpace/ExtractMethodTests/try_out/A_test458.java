@@ -8,6 +8,7 @@ public class A_test458 {
 			/*]*/extracted(t);/*[*/
 		}
 	}
+
 	protected void extracted(Throwable t) throws Throwable {
 		throw t;
 	}

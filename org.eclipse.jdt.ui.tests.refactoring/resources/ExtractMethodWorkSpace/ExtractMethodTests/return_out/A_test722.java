@@ -6,6 +6,7 @@ public class A_test722 {
 			/*]*/extracted();/*[*/
 		}
 	}
+
 	protected void extracted() {
 		for (int j = 0; j < 10; j++) {
 		}

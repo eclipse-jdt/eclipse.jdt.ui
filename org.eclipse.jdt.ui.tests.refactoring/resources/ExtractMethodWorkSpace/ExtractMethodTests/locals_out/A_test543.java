@@ -9,6 +9,7 @@ public class A_test543 {
 		
 		i++;
 	}
+
 	protected int extracted(int i, int[] array) {
 		array[i++]= 10;
 		return i;

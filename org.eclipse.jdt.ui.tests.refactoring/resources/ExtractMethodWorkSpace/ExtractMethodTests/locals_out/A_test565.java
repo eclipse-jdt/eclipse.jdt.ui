@@ -5,6 +5,7 @@ public class A_test565 {
 		String s= "k";
 		extracted(bytes, s);
 	}
+
 	protected void extracted(byte bytes, String s) {
 		/*[*/System.out.println(s + " " + bytes); /*]*/
 	}

@@ -9,7 +9,7 @@ public class A_test727 {
 		if (true) return;
 		bar();
 	}
-	
+
 	public void bar() {
 	}
 }

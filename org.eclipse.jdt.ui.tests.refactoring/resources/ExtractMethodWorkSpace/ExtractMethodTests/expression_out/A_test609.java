@@ -5,6 +5,7 @@ public class A_test609 {
 		boolean b;
 		b= 1 < 10 && /*]*/extracted()/*[*/;
 	}
+
 	protected boolean extracted() {
 		return 2 < 20;
 	}

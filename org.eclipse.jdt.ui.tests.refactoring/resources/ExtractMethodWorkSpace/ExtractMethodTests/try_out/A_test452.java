@@ -13,7 +13,7 @@ public class A_test452 {
 	protected void extracted() throws IOException {
 		g();
 	}
-	
+
 	public void g() throws IOException {
 	}
 }

@@ -4,6 +4,7 @@ public class A_test705 {
 	public boolean foo() {
 		/*]*/return extracted();/*[*/
 	}
+
 	protected boolean extracted() {
 		try {
 			foo();

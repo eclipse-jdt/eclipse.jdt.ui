@@ -15,5 +15,4 @@ public class A_test2005 {
 		} catch (Exception e) {
 		}
 	}
-
 }

@@ -9,7 +9,7 @@ public class A_test801 {
 	protected void extracted(List l) {
 		g(l);
 	}
-	
+
 	public void g(List l) {
 	}
 }

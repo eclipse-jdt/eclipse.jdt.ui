@@ -24,7 +24,7 @@ public abstract class A_test460 {
 			}
 		}
 	}
-	
+
 	public abstract void bar() throws IOException;
 }
 

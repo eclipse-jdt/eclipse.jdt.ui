@@ -10,6 +10,7 @@ public class A_test564 {
 		}
 		i++;
 	}
+
 	protected int extracted() {
 		int i;
 		i= 1;

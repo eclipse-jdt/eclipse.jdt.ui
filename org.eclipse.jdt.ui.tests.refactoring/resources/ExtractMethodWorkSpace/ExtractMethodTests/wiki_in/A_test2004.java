@@ -13,5 +13,4 @@ public class A_test2004 {
 			/*[*/
 		}
 	}
-
 }

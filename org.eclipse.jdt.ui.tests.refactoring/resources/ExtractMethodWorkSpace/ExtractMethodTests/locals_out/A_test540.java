@@ -8,6 +8,7 @@ public class A_test540 {
 		
 		/*]*/extracted(array, index);/*[*/
 	}
+
 	protected void extracted(int[] array, int[] index) {
 		array[0]= index[0];
 	}

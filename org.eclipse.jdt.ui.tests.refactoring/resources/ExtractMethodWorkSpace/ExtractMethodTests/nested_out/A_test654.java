@@ -6,6 +6,7 @@ public class A_test654 {
 			public void foo() {
 				/*]*/extracted();/*[*/
 			}
+
 			protected void extracted() {
 				foo();
 			}

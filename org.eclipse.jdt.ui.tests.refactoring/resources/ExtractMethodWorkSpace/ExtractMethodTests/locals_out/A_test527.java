@@ -17,7 +17,7 @@ public class A_test527 {
 		} catch (Exception e) {
 		}
 		return i;
-	}	
+	}
 
 	private void read(int i) {
 	}

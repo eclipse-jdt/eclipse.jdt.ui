@@ -10,6 +10,7 @@ public class A_test652 {
 		
 		/*]*/extracted();/*[*/
 	}
+
 	protected void extracted() {
 		foo();
 	}

@@ -1,7 +1,7 @@
 package expression_in;
 
 public class A_test608 {
-	
+
 	public static class Scanner {
 		public int x;
 		public int y;
@@ -10,7 +10,7 @@ public class A_test608 {
 		public int start;
 		public int end;
 	}
-	
+
 	public void foo(Selection selection) {
 		Scanner scanner= new Scanner();
 		
@@ -18,7 +18,7 @@ public class A_test608 {
 			g();
 		}
 	}
-	
+
 	public void g() {
 	}
 }

@@ -30,6 +30,8 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.dom.Modifier;
+
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
@@ -98,8 +100,8 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			RefactoringMessages.getString("ExtractMethodInputPage.default"), //$NON-NLS-1$
 			RefactoringMessages.getString("ExtractMethodInputPage.private") //$NON-NLS-1$
 		};
-		String[] data= new String[] {"public", "protected", "", "private" }; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-		String visibility= fRefactoring.getVisibility();
+		Integer[] data= new Integer[] {new Integer(Modifier.PUBLIC), new Integer(Modifier.PROTECTED), new Integer(Modifier.NONE), new Integer(Modifier.PRIVATE)};
+		Integer visibility= new Integer(fRefactoring.getVisibility());
 		for (int i= 0; i < labels.length; i++) {
 			Button radio= new Button(group, SWT.RADIO);
 			radio.setText(labels[i]);
@@ -108,7 +110,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 				radio.setSelection(true);
 			radio.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
-					setVisibility((String)event.widget.getData());
+					setVisibility((Integer)event.widget.getData());
 				}
 			});
 		}
@@ -184,8 +186,8 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		return RefactoringMessages.getString("ExtractMethodInputPage.label_text"); //$NON-NLS-1$
 	}
 	
-	private void setVisibility(String s) {
-		fRefactoring.setVisibility(s);
+	private void setVisibility(Integer visibility) {
+		fRefactoring.setVisibility(visibility.intValue());
 		updatePreview(getText());
 	}
 	

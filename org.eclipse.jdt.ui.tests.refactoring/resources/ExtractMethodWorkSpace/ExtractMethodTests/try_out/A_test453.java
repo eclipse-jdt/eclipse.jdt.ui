@@ -3,7 +3,7 @@ package try_out;
 import java.io.IOException;
 
 public class A_test453 {
-	
+
 	public void foo() {
 		/*]*/extracted();/*[*/
 	}
@@ -14,7 +14,7 @@ public class A_test453 {
 		} catch (Exception e) {
 		}
 	}
-	
+
 	public void g() throws IOException {
 	}
 }

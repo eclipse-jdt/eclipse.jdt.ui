@@ -18,8 +18,6 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -191,21 +189,6 @@ public class Bindings {
 		return type;
 	}
 	
-	public static Type createType(ITypeBinding binding, AST ast, boolean fullyQualify) {
-		if (binding.isPrimitive()) {
-			String name= binding.getName();
-			return ast.newPrimitiveType(PrimitiveType.toCode(name));
-		} else if (binding.isArray()) {
-			Type elementType= createType(binding.getElementType(), ast, fullyQualify);
-			return ast.newArrayType(elementType, binding.getDimensions());
-		} else {
-			if (fullyQualify)
-				return ast.newSimpleType(ast.newName(Bindings.getAllNameComponents(binding)));
-			else
-				return ast.newSimpleType(ast.newName(Bindings.getNameComponents(binding)));	
-		}
-	}
-
 	/**
 	 * Checks whether	the passed type binding is a runtime exception.
 	 * 

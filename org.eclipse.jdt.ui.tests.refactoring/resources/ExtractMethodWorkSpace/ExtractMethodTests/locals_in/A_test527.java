@@ -12,7 +12,7 @@ public class A_test527 {
 		} catch (Exception e) {
 		}/*[*/
 		read(i);
-	}	
+	}
 
 	private void read(int i) {
 	}

@@ -5,7 +5,7 @@ public class A_test801 {
 		List l;
 		/*]*/g(l);/*[*/
 	}
-	
+
 	public void g(List l) {
 	}
 }

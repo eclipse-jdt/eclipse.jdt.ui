@@ -5,6 +5,7 @@ public class A_test709 {
 		int i= 0;
 		/*]*/return extracted(i);/*[*/
 	}
+
 	protected boolean extracted(int i) {
 		switch (i) {
 			case 1:

@@ -5,6 +5,7 @@ public class A_test407 {
 		boolean b;
 		b= /*]*/extracted()/*[*/;
 	}
+
 	protected boolean extracted() {
 		return 10 == 20;
 	}

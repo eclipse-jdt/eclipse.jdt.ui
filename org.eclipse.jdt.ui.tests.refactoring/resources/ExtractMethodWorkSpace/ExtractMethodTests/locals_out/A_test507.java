@@ -8,6 +8,7 @@ public class A_test507 {
 		
 		int y= x;
 	}
+
 	protected int extracted() {
 		int x;
 		x= 10;

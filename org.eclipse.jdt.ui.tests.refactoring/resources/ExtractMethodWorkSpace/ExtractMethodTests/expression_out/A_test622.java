@@ -7,6 +7,7 @@ public class A_test622 {
 		public Inner() {
 			super(/*]*/extracted()/*[*/);
 		}
+
 		protected static int extracted() {
 			return 5 + 6;
 		}

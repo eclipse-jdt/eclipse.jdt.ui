@@ -8,6 +8,7 @@ public class A_test537 {
 		
 		run.run();
 	}
+
 	protected Runnable extracted(final int i) {
 		Runnable run= new Runnable() {
 			public void run() {

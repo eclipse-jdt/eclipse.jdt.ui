@@ -6,6 +6,7 @@ public class A_test404 {
 		extracted();/*[*/
 		x= 10;
 	}
+
 	protected void extracted() {
 		int x= 0;
 	}

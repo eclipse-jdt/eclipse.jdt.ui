@@ -20,7 +20,7 @@ public class A_test726 {
 		j= 10;
 		return j;
 	}
-	
+
 	private void read(int i) {
 	}
 }

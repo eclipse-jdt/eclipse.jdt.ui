@@ -7,6 +7,7 @@ public class A_test538 {
 		
 		/*]*/extracted(i, array);/*[*/
 	}
+
 	protected void extracted(int i, int[] array) {
 		array[i]= 10;
 	}

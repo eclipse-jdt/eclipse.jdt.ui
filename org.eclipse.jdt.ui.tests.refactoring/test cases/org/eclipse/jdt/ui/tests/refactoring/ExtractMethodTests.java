@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,7 +82,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 			unit, selection[0], selection[1],
 			JavaPreferencesSettings.getCodeGenerationSettings());
 		refactoring.setMethodName("extracted");
-		refactoring.setVisibility("protected");
+		refactoring.setVisibility(Modifier.PROTECTED);
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:
@@ -165,6 +166,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	// Testing selections
 	//=====================================================================================
 	
+
 	public void test1() throws Exception {
 		selectionTest(5, 9, 5, 24);
 	}

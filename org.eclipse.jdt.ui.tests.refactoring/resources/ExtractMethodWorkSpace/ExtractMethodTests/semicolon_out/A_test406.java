@@ -5,6 +5,7 @@ public class A_test406 {
 		if (/*]*/extracted()/*[*/)
 			foo();
 	}
+
 	protected boolean extracted() {
 		return 1 == 10;
 	}

@@ -4,6 +4,7 @@ public class A_test403 {
 	public void foo() {
 		extracted();
 	}
+
 	protected void extracted() {
 		/*[*/try {
 			foo();

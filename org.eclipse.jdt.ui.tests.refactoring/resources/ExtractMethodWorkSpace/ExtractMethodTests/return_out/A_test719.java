@@ -3,6 +3,7 @@ public class A_test719 {
 	public boolean foo() {
 		/*]*/return extracted();/*[*/
 	}
+
 	protected boolean extracted() {
 		if (foo())
 			return true;

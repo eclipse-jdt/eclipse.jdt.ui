@@ -6,6 +6,7 @@ public class A_test501 {
 		
 		/*]*/extracted();/*[*/
 	}
+
 	protected void extracted() {
 		int x;
 		x= 20;

@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
@@ -88,7 +89,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	private ITypeBinding[] fAllExceptions;
 	private ITypeBinding fExpressionBinding;
 
-	private boolean fForceStatic;	
+	private boolean fForceStatic;
+	private boolean fIsLastStatementSelected;
 	
 	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws JavaModelException {
 		super(unit, selection, false);
@@ -193,6 +195,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	
 	private void initReturnType() {
 		AST ast= fEnclosingMethod.getAST();
+		fReturnType= null;
 		switch (fReturnKind) {
 			case ACCESS_TO_LOCAL:
 				VariableDeclaration declaration= ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingMethod);
@@ -206,20 +209,20 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 					fExpressionBinding= expression.resolveTypeBinding();
 				}
 				if (fExpressionBinding != null) {
-					fReturnType= Bindings.createType(fExpressionBinding, ast, true);
+					fReturnType= ASTNodeFactory.newType(ast, fExpressionBinding, true);
 					break;
 				}
 				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
 				getStatus().addError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_determine_return_type"), JavaSourceContext.create(fCUnit, expression)); //$NON-NLS-1$
 				break;	
 			case RETURN_STATEMENT_VALUE:
-				if (fEnclosingMethod.isConstructor())
-					fReturnType= null;
 				fReturnType= fEnclosingMethod.getReturnType();
 				break;
 			default:
 				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
 		}
+		if (fReturnType == null)
+			fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
 	}
 	
 	//---- Input checking -----------------------------------------------------------------------------------
@@ -282,11 +285,17 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	}
 	
 	public boolean isLastStatementSelected() {
+		return fIsLastStatementSelected;
+	}
+
+	private void computeLastStatementSelected() {
 		ASTNode[] nodes= getSelectedNodes();
-		if (nodes.length == 0)
-			return false;
-		List statements= fEnclosingMethod.getBody().statements();
-		return nodes[nodes.length - 1] == statements.get(statements.size() - 1);
+		if (nodes.length == 0) {
+			fIsLastStatementSelected= false;
+		} else {
+			List statements= fEnclosingMethod.getBody().statements();
+			fIsLastStatementSelected= nodes[nodes.length - 1] == statements.get(statements.size() - 1);
+		}
 	}
 
 	private void computeInput() {
@@ -483,6 +492,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 					ASTNodes.getParent(expression, ASTNode.CONSTRUCTOR_INVOCATION) != null;
 			}
 			status.merge(LocalTypeAnalyzer.perform(fEnclosingMethod, getSelection()));
+			computeLastStatementSelected();
 		}
 		super.endVisit(node);
 	}

@@ -5,6 +5,7 @@ public class A_test568 {
 		String[] args[]= null;
 		/*]*/extracted(args);/*[*/
 	}
+
 	protected void extracted(String[][] args) {
 		for (int i = 0; i < args.length; i++) {
 			args[i]= null;

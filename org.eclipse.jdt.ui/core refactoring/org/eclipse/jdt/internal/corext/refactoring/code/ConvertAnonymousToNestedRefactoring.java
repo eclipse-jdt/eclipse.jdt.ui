@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
@@ -347,7 +348,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             fragment.setInitializer(null);
             fragment.setName(getAST().newSimpleName(local.getName()));
             FieldDeclaration field= getAST().newFieldDeclaration(fragment);
-            field.setType(Bindings.createType(local.getType(), getAST(), false));
+            field.setType(ASTNodeFactory.newType(getAST(), local.getType(), false));
             field.setModifiers(Modifier.PRIVATE | Modifier.FINAL);
             newType.bodyDeclarations().add(findIndexOfLastField(newType.bodyDeclarations()) + 1, field);
             rewrite.markAsInserted(field);
@@ -537,7 +538,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         param.setInitializer(null);
         param.setModifiers(Modifier.NONE);
         param.setName(getAST().newSimpleName(paramName));
-        param.setType(Bindings.createType(paramType, getAST(), false));
+        param.setType(ASTNodeFactory.newType(getAST(), paramType, false));
         return param;
     }
 

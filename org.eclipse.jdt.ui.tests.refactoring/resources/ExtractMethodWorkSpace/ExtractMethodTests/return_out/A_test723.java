@@ -8,6 +8,7 @@ public class A_test723 {
 			i++;
 		}
 	}
+
 	protected int extracted(int i) {
 		i--;
 		return i;

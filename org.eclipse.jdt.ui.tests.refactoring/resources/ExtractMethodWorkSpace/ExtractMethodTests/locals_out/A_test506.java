@@ -10,7 +10,7 @@ public class A_test506 {
 	protected void extracted(int x) {
 		bar(x);
 	}
-	
+
 	public void bar(int i) {
 	}
 }

@@ -8,6 +8,7 @@ public class A_test567 {
 		
 		args[0]= args[1];
 	}
+
 	protected String[] extracted() {
 		String[] args;
 		args= new String[4];

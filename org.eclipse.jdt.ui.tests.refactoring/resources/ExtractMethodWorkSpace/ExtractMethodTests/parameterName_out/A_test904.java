@@ -7,6 +7,7 @@ public class A_test904 {
 		
 		/*]*/extracted(y, i);/*[*/
 	}
+
 	protected void extracted(float zz, int xx) {
 		System.out.println(xx + zz);
 	}

@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-/* package */ class ASTFlattener extends GenericVisitor {
+public class ASTFlattener extends GenericVisitor {
 
 	protected StringBuffer fResult;
 

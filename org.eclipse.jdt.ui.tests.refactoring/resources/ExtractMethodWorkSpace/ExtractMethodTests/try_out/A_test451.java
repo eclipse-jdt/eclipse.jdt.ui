@@ -11,7 +11,7 @@ public class A_test451 {
 		} catch (java.io.IOException e) {
 		}/*]*/
 	}
-	
+
 	public void g() throws java.io.IOException {
 	}
 }

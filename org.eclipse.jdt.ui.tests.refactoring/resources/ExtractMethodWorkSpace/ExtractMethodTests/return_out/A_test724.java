@@ -14,6 +14,7 @@ public class A_test724 {
 		}
 		System.out.println(i);
 	}
+
 	protected int extracted() {
 		int i;
 		/*[*/

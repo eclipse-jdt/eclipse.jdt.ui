@@ -7,6 +7,7 @@ public class A_test620 {
 		B b= new B();
 		Object o= /*]*/extracted(b)/*[*/;
 	}
+
 	protected List[] extracted(B b) {
 		return b.foo();
 	}

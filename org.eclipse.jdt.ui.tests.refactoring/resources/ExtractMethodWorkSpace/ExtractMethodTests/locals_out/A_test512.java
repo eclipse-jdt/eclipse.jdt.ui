@@ -6,6 +6,7 @@ public class A_test512 {
 		
 		x++;
 	}
+
 	protected int extracted() {
 		int x= 0;
 		int y= x;

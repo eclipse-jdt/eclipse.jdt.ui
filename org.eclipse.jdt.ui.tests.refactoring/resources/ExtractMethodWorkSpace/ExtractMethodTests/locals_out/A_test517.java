@@ -7,6 +7,7 @@ public class A_test517 {
 		
 		i= j + 10;
 	}
+
 	protected int extracted() {
 		int i;
 		int j;

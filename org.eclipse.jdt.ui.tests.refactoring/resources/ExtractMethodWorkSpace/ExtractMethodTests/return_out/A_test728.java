@@ -6,6 +6,7 @@ public class A_test728 {
 		Object[] disposeList= null;
 		/*]*/extracted(runnable, disposeList);/*[*/
 	}
+
 	protected void extracted(Object runnable, Object[] disposeList) {
 		for (int i=0; i < disposeList.length; i++) {
 			if (disposeList [i] == null) {

@@ -7,6 +7,7 @@ public class A_test616 {
 		A a= null;
 		/*]*/extracted(a)/*[*/.getName();
 	}
+
 	protected File extracted(A a) {
 		return a.getFile();
 	}

@@ -14,7 +14,7 @@ public class A_test726 {
 			}
 		}
 	}
-	
+
 	private void read(int i) {
 	}
 }

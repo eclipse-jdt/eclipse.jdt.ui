@@ -9,7 +9,7 @@ public class A_test452 {
 		} catch (IOException e) {
 		}
 	}
-	
+
 	public void g() throws IOException {
 	}
 }

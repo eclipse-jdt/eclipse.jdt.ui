@@ -5,13 +5,13 @@ public class A_test362 {
 	}
 	void n(){
 		final int y= 0;
-		extracted(y);
+		/*]*/extracted(y);/*[*/
 	}
 	protected void extracted(final int y) {
-		/*[*/new A_test362(y){
+		new A_test362(y){
 			void f(){
 				int y= 9;
 			}
-		};/*]*/
+		};
 	}
 }

@@ -7,6 +7,7 @@ public class A_test509 {
 
 		/*]*/extracted(x);/*[*/		
 	}
+
 	protected void extracted(int x) {
 		int y;
 		y= x;

@@ -7,6 +7,7 @@ public class A_test614 {
 		A a= null;
 		a.useFile(/*]*/extracted(a)/*[*/);
 	}
+
 	protected File extracted(A a) {
 		return a.getFile();
 	}
