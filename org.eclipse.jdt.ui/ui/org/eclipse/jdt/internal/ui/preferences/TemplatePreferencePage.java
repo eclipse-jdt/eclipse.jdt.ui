@@ -1,5 +1,9 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.swt.widgets.FileDialog;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -15,8 +19,8 @@ import org.eclipse.jdt.internal.ui.text.template.TemplateContentProvider;
 import org.eclipse.jdt.internal.ui.text.template.TemplateLabelProvider;
 import org.eclipse.jdt.internal.ui.text.template.TemplateMessages;
 import org.eclipse.jdt.internal.ui.text.template.TemplateSet;
+import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -37,6 +41,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
@@ -69,19 +74,16 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 
 	private CheckboxTableViewer fTableViewer;
 	private Button fAddButton;
+	private Button fEditButton;
+	private Button fImportButton;
+	private Button fExportButton;
+	private Button fExportAllButton;
 	private Button fRemoveButton;
 	private Button fEnableAllButton;
 	private Button fDisableAllButton;
-	private Group fEditor;
-	private Text fNameText;
-	private Text fDescriptionText;
-	private Combo fContextCombo;
-	private SourceViewer fPatternEditor;
+
+	private SourceViewer fPatternViewer;
 	private Button fFormatButton;
-	private ControlEnableState fEditorEnabler;
-	
-	private boolean fSuppressError= false; // #4354
-	private Template fCurrent;
 	
 	public TemplatePreferencePage() {
 		super();
@@ -94,28 +96,13 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	 */
 	protected Control createContents(Composite ancestor) {	
 		Composite parent= new Composite(ancestor, SWT.NULL);
-
 		GridLayout layout= new GridLayout();
+		layout.numColumns= 2;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
+		parent.setLayout(layout);				
 		
-		parent.setLayout(layout);		
-
-		TabFolder folder= new TabFolder(parent, SWT.NONE);
-		folder.setLayout(new TabFolderLayout());	
-		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
-
-		Composite firstPage= new Composite(folder, SWT.NONE);
-		layout= new GridLayout();
-		layout.numColumns= 2;
-		firstPage.setLayout(layout);		
-		
-		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText(TemplateMessages.getString("TemplatePreferencePage.tab.edit")); //$NON-NLS-1$
-		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
-		item.setControl(firstPage);
-		
-		fTableViewer= new CheckboxTableViewer(firstPage, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+		fTableViewer= new CheckboxTableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		Table table= fTableViewer.getTable();
 		
 		GridData data= new GridData(GridData.FILL_BOTH);
@@ -129,14 +116,17 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		TableLayout tableLayout= new TableLayout();
 		table.setLayout(tableLayout);
 		
-//		TableColumn column1= new TableColumn(table, SWT.NULL);
 		TableColumn column1= table.getColumn(0);
 		column1.setText(TemplateMessages.getString("TemplatePreferencePage.column.name")); //$NON-NLS-1$
-	
+
 		TableColumn column2= new TableColumn(table, SWT.NULL);
-		column2.setText(TemplateMessages.getString("TemplatePreferencePage.column.description")); //$NON-NLS-1$
+		column2.setText(TemplateMessages.getString("TemplatePreferencePage.column.context")); //$NON-NLS-1$
+	
+		TableColumn column3= new TableColumn(table, SWT.NULL);
+		column3.setText(TemplateMessages.getString("TemplatePreferencePage.column.description")); //$NON-NLS-1$
 		
 		tableLayout.addColumnData(new ColumnWeightData(30));
+		tableLayout.addColumnData(new ColumnWeightData(20));
 		tableLayout.addColumnData(new ColumnWeightData(70));
 		
 		fTableViewer.setLabelProvider(new TemplateLabelProvider());
@@ -173,7 +163,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			}
 		});
 
-		Composite buttons= new Composite(firstPage, SWT.NULL);
+		Composite buttons= new Composite(parent, SWT.NULL);
 		buttons.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -188,7 +178,43 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 				add();
 			}
 		});
-		
+
+		fEditButton= new Button(buttons, SWT.PUSH);
+		fEditButton.setLayoutData(getButtonGridData(fEditButton));
+		fEditButton.setText(TemplateMessages.getString("TemplatePreferencePage.edit")); //$NON-NLS-1$
+		fEditButton.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				edit();
+			}
+		});
+
+		fImportButton= new Button(buttons, SWT.PUSH);
+		fImportButton.setLayoutData(getButtonGridData(fImportButton));
+		fImportButton.setText(TemplateMessages.getString("TemplatePreferencePage.import")); //$NON-NLS-1$
+		fImportButton.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				import_();
+			}
+		});
+
+		fExportButton= new Button(buttons, SWT.PUSH);
+		fExportButton.setLayoutData(getButtonGridData(fExportButton));
+		fExportButton.setText(TemplateMessages.getString("TemplatePreferencePage.export")); //$NON-NLS-1$
+		fExportButton.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				export();
+			}
+		});
+
+		fExportAllButton= new Button(buttons, SWT.PUSH);
+		fExportAllButton.setLayoutData(getButtonGridData(fExportButton));
+		fExportAllButton.setText(TemplateMessages.getString("TemplatePreferencePage.export.all")); //$NON-NLS-1$
+		fExportAllButton.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				exportAll();
+			}
+		});		
+
 		fRemoveButton= new Button(buttons, SWT.PUSH);
 		fRemoveButton.setLayoutData(getButtonGridData(fRemoveButton));
 		fRemoveButton.setText(TemplateMessages.getString("TemplatePreferencePage.remove")); //$NON-NLS-1$
@@ -216,80 +242,9 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			}
 		});
 
-		fEditor= new Group(firstPage, SWT.NULL);
-		fEditor.setText(TemplateMessages.getString("TemplatePreferencePage.editor")); //$NON-NLS-1$
-		fEditor.setLayoutData(new GridData(GridData.FILL_BOTH));
-		layout= new GridLayout();
-		layout.numColumns= 2;
-		fEditor.setLayout(layout);
+		fPatternViewer= createViewer(parent);
 
-		createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.name")); //$NON-NLS-1$
-		
-		Composite composite= new Composite(fEditor, SWT.NONE);
-		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		layout= new GridLayout();
-		layout.numColumns= 3;
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;
-		composite.setLayout(layout);
-
-		fNameText= createText(composite);
-		fNameText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				if (fCurrent == null)
-					return;
-
-				String name= fNameText.getText();
-
-				if (fSuppressError && (name.length() != 0))
-					fSuppressError= false;
-
-				fCurrent.setName(name);				
-				fTableViewer.refresh(fCurrent);
-				updateButtons();
-			}
-		});
-
-		createLabel(composite, TemplateMessages.getString("TemplatePreferencePage.context")); //$NON-NLS-1$		
-		fContextCombo= new Combo(composite, SWT.READ_ONLY);
-		fContextCombo.setItems(new String[] {"java", "javadoc"}); //$NON-NLS-1$ //$NON-NLS-2$
-		fContextCombo.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				if (fCurrent == null)
-					return;
-
-				fCurrent.setContext(fContextCombo.getText());
-				fTableViewer.refresh(fCurrent);
-			}
-		});
-		
-		createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.description")); //$NON-NLS-1$		
-		fDescriptionText= createText(fEditor);
-		fDescriptionText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				if (fCurrent == null)
-					return;
-					
-				fCurrent.setDescription(fDescriptionText.getText());
-				fTableViewer.refresh(fCurrent);
-			}
-		});
-
-		Label patternLabel= createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.pattern")); //$NON-NLS-1$
-		patternLabel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
-		fPatternEditor= createEditor(fEditor);
-
-		Composite secondPage= new Composite(folder, SWT.NONE);
-		layout= new GridLayout();
-		layout.numColumns= 1;
-		secondPage.setLayout(layout);		
-
-		item= new TabItem(folder, SWT.NONE);
-		item.setText(TemplateMessages.getString("TemplatePreferencePage.tab.options")); //$NON-NLS-1$
-		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
-		item.setControl(secondPage);
-				
-		fFormatButton= new Button(secondPage, SWT.CHECK);
+		fFormatButton= new Button(parent, SWT.CHECK);
 		fFormatButton.setText(TemplateMessages.getString("TemplatePreferencePage.use.code.formatter")); //$NON-NLS-1$
 
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
@@ -300,8 +255,8 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		fTableViewer.setCheckedElements(getEnabledTemplates());		
 		updateButtons();
 
+		// XXX
 		WorkbenchHelp.setHelp(parent, new DialogPageContextComputer(this, IJavaHelpContextIds.JRE_PREFERENCE_PAGE));		
-		leaveEditor();
 		
 		return parent;
 	}
@@ -317,27 +272,12 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 				
 		return (Template[]) list.toArray(new Template[list.size()]);
 	}
-
-	private static Label createLabel(Composite parent, String name) {
-		Label label= new Label(parent, SWT.NULL);
-		label.setText(name);
-		label.setLayoutData(new GridData());
-
-		return label;
-	}
 	
-	private static Text createText(Composite parent) {
-		Text text= new Text(parent, SWT.BORDER);
-		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));		
-		
-		return text;
-	}
-	
-	private SourceViewer createEditor(Composite parent) {
-		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+	private SourceViewer createViewer(Composite parent) {
+		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER /*| SWT.V_SCROLL | SWT.H_SCROLL*/);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
-		viewer.setEditable(true);
+		viewer.setEditable(false);
 		viewer.setDocument(new Document());
 	
 		Font font= JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT);
@@ -364,111 +304,106 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 
 		if (selection.size() == 1) {
 			Template template= (Template) selection.getFirstElement();
-			enterEditor(template);		
+			fPatternViewer.getTextWidget().setText(template.getPattern());
 		} else {		
-			leaveEditor();
+			fPatternViewer.getTextWidget().setText(""); //$NON-NLS-1$
 		}
 		
 		updateButtons();
 	}
 	
-	private static boolean isValid(Template template) {
-		return
-			(template == null) ||
-			(template.getName().trim().length() != 0);		
-	}
-	
 	private void updateButtons() {
-		boolean valid= isValid(fCurrent);
 		int selectionCount= ((IStructuredSelection) fTableViewer.getSelection()).size();
 		int itemCount= fTableViewer.getTable().getItemCount();
 		
-		fTableViewer.getTable().setEnabled(valid);
-		fAddButton.setEnabled(valid);
+		fEditButton.setEnabled(selectionCount == 1);
+		fExportButton.setEnabled(selectionCount > 0);
 		fRemoveButton.setEnabled(selectionCount > 0 && selectionCount <= itemCount);
-		fEnableAllButton.setEnabled(valid && itemCount > 0);
-		fDisableAllButton.setEnabled(valid && itemCount > 0);
-		setValid(valid);
-		
-		updateStatus(valid);
-	}
-	
-	private void updateStatus(boolean valid) {
-		StatusInfo status= new StatusInfo();
-		
-		if (!valid) {
-			if (fSuppressError)
-				status.setError(""); //$NON-NLS-1$							
-			else
-				status.setError(TemplateMessages.getString("TemplatePreferencePage.error.noname")); //$NON-NLS-1$
-		}
-
-		if (valid || !fSuppressError)
-			StatusUtil.applyToStatusLine(this, status);			
-	}
-	
-	private static int getIndex(String context) {
-		if (context.equals("java")) //$NON-NLS-1$
-			return 0;
-		else if (context.equals("javadoc")) //$NON-NLS-1$
-			return 1;
-		else
-			return -1;
-	}
-
-	private void enterEditor(Template template) {
-		if (template == fCurrent) // #4916
-			return;
-		
-		if (fCurrent != null) // #4358
-			leaveEditor();
-		
-		fCurrent= template;
-	
-		fNameText.setText(template.getName());
-		fDescriptionText.setText(template.getDescription());
-		fContextCombo.select(getIndex(template.getContext()));
-		fPatternEditor.getDocument().set(template.getPattern());
-
-		if (fEditorEnabler != null) {
-			fEditorEnabler.restore();
-			fEditorEnabler= null;
-		}
-	}
-	
-	private void leaveEditor() {
-		if (fCurrent == null)
-			return;
-			
-		// #4358			
-		fCurrent.setPattern(fPatternEditor.getTextWidget().getText());
-		
-		fCurrent= null;
-
-		fNameText.setText(""); //$NON-NLS-1$
-		fDescriptionText.setText(""); //$NON-NLS-1$
-		fContextCombo.select(getIndex("")); //$NON-NLS-1$
-		fPatternEditor.getDocument().set(""); //$NON-NLS-1$
-
-		if (fEditorEnabler == null)
-			fEditorEnabler= ControlEnableState.disable(fEditor);		
+		fEnableAllButton.setEnabled(itemCount > 0);
+		fDisableAllButton.setEnabled(itemCount > 0);
 	}
 	
 	private void add() {
 		Template template= new Template();
-		template.setContext("java"); //$NON-NLS-1$
+		template.setContext(TemplateContext.JAVA); //$NON-NLS-1$
 
-		fSuppressError= true;
-
-		TemplateSet.getInstance().add(template);
-		fTableViewer.refresh();
-		fTableViewer.setChecked(template, template.isEnabled());
-		fTableViewer.setSelection(new StructuredSelection(template));
-		
-		enterEditor(template);
-
-		fNameText.setFocus();
+		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, false);
+		if (dialog.open() == dialog.OK) {
+			TemplateSet.getInstance().add(template);
+			fTableViewer.refresh();
+			fTableViewer.setChecked(template, template.isEnabled());
+			fTableViewer.setSelection(new StructuredSelection(template));			
+		}
 	}
+
+	private void edit() {
+		IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
+		Template template= (Template) selection.getFirstElement();
+
+		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, true);
+		if (dialog.open() == dialog.OK) {
+			fTableViewer.refresh(template);
+			fTableViewer.setChecked(template, template.isEnabled());
+			fTableViewer.setSelection(new StructuredSelection(template));			
+		}
+	}
+	
+	private void import_() {
+		FileDialog dialog= new FileDialog(getShell());
+		dialog.setText(TemplateMessages.getString("TemplatePreferencePage.import.title")); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] {TemplateMessages.getString("TemplatePreferencePage.import.extension")}); //$NON-NLS-1$
+		String path= dialog.open();
+		
+		if (path == null)
+			return;
+		
+		try {
+			FileInputStream stream= new FileInputStream(path);		
+			TemplateSet.getInstance().addFromStream(stream);
+			
+			fTableViewer.refresh();
+			fTableViewer.setAllChecked(false);
+			fTableViewer.setCheckedElements(getEnabledTemplates());									
+		} catch (IOException e) {			
+			JavaPlugin.log(e);
+			MessageDialog.openError(getShell(), TemplateMessages.getString("TemplatePreferencePage.error.import"), e.getMessage()); //$NON-NLS-1$			
+		}
+	}
+	
+	private void exportAll() {
+		export(TemplateSet.getInstance());	
+	}
+
+	private void export() {
+		IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
+		Object[] templates= selection.toArray();
+		
+		TemplateSet templateSet= new TemplateSet();
+		for (int i= 0; i != templates.length; i++)
+			templateSet.add((Template) templates[i]);
+		
+		export(templateSet);	
+	}
+	
+	private void export(TemplateSet templateSet) {
+		FileDialog dialog= new FileDialog(getShell());
+		dialog.setText(TemplateMessages.getFormattedString("TemplatePreferencePage.export.title", new Integer(templateSet.getTemplates().length))); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] {TemplateMessages.getString("TemplatePreferencePage.export.extension")}); //$NON-NLS-1$
+		dialog.setFileName(TemplateMessages.getString("TemplatePreferencePage.export.filename")); //$NON-NLS-1$
+		String path= dialog.open();
+		
+		if (path == null)
+			return;
+		
+		try {
+			FileOutputStream stream= new FileOutputStream(path);		
+			templateSet.saveToStream(stream);			
+		} catch (IOException e) {			
+			JavaPlugin.log(e);
+			MessageDialog.openError(getShell(), TemplateMessages.getString("TemplatePreferencePage.error.export"), e.getMessage()); //$NON-NLS-1$			
+		}		
+	}
+	
 	
 	private void remove() {
 		IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
@@ -479,7 +414,6 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			TemplateSet.getInstance().remove(template);
 		}
 
-		leaveEditor();
 		fTableViewer.refresh();
 	}
 	
@@ -525,8 +459,6 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	 * @see PreferencePage#performOk()
 	 */	
 	public boolean performOk() {
-		leaveEditor(); // #4358
-		
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		prefs.setValue(PREF_FORMAT_TEMPLATES, fFormatButton.getSelection());
 

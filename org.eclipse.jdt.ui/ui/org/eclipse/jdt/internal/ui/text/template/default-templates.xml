@@ -27,7 +27,7 @@ All Rights Reserved.
 }</template>
 
   <template description="iterate over vector" name="for" context="java"
->for (int ${index}= 0; ${index} &lt; ${vector}.size(); ${index}++) {
+>for (int ${index} = 0; ${index} &lt; ${vector}.size(); ${index}++) {
 	${type} ${element} = (${type}) ${vector}.elementAt(${index});
 	${cursor}
 }</template>
@@ -49,7 +49,7 @@ All Rights Reserved.
 	${cursor}
 } while (${condition});</template>
 
-  <template description="switch statement" name="switch" context="java"
+  <template description="switch case statement" name="switch" context="java"
 >switch (${key}) {
 	case ${value}:
 		${cursor}
@@ -59,17 +59,24 @@ All Rights Reserved.
 		break;
 }</template>
 
-  <template description="if () {}" name="if" context="java"
+  <template description="if statement" name="if" context="java"
 >if (${condition}) {
 	${cursor}
 }</template>
 
-  <template description="else if () {}" name="elseif" context="java"
+  <template description="if else statement" name="ifelse" context="java"
+>if (${condition}) {
+	${cursor}
+} else {
+	
+}</template>
+
+  <template description="else if block" name="elseif" context="java"
 >else if (${condition}) {
 	${cursor}
 }</template>
 
-  <template description="else {}" name="else" context="java"
+  <template description="else block" name="else" context="java"
 >else {
 	${cursor}
 }</template>
@@ -114,10 +121,10 @@ All Rights Reserved.
  */
 </template>
 
-  <template description="print to standard out" name="System.out.println" context="java"
+  <template description="print to standard out" name="stdout" context="java"
   >System.out.println(&quot;${cursor}&quot;);</template>
 
-  <template description="print to standard error" name="System.err.println" context="java"
+  <template description="print to standard error" name="stderr" context="java"
   >System.err.println(&quot;${cursor}&quot;);</template>
 
   <!-- javadoc -->

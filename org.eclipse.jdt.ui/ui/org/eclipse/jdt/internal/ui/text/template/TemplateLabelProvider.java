@@ -27,6 +27,8 @@ public class TemplateLabelProvider implements ITableLabelProvider {
 			case 0:
 				return template.getName();
 			case 1:
+				return template.getContext();
+			case 2:
 				return template.getDescription();
 			default:
 				return null;

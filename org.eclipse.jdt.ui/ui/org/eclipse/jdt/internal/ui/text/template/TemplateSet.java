@@ -89,7 +89,7 @@ public class TemplateSet {
 		return path.toFile();
 	}
 	
-	private TemplateSet() {
+	public TemplateSet() {
 	}
 
 	private static TemplateSet create() {
@@ -152,7 +152,7 @@ public class TemplateSet {
 		}
 	}
 
-	private boolean addFromStream(InputStream stream) {
+	public boolean addFromStream(InputStream stream) {
 		try {
 			TemplateSet templateSet= new TemplateSet();
 			
@@ -209,7 +209,7 @@ public class TemplateSet {
 	 */
 	public boolean save() {					
 		try {
-			fgTemplateSet.save(new FileOutputStream(getTemplateFile()));
+			fgTemplateSet.saveToStream(new FileOutputStream(getTemplateFile()));
 			return true;
 		} catch (IOException e) {
 			JavaPlugin.log(e);
@@ -220,7 +220,7 @@ public class TemplateSet {
 	/**
 	 * Saves the template set as XML.
 	 */
-	private boolean save(OutputStream stream) {
+	public void saveToStream(OutputStream stream) throws IOException {
 		try {
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder= factory.newDocumentBuilder();		
@@ -262,15 +262,9 @@ public class TemplateSet {
 			Serializer serializer = SerializerFactory.getSerializerFactory("xml").makeSerializer(stream, format); //$NON-NLS-1$
 			serializer.asDOMSerializer().serialize(document);
 			
-			return true;
-			
 		} catch (ParserConfigurationException e) {
 			JavaPlugin.log(e);
-		} catch (IOException e) {
-			JavaPlugin.log(e);
 		}		
-
-		return false;
 	}
 
 	/**

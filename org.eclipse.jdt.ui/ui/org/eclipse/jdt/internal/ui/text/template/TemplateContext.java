@@ -34,6 +34,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 
 public class TemplateContext implements VariableEvaluator {
+	
+	public static final String JAVA= "java"; //$NON-NLS-1$
+	public static final String JAVADOC= "javadoc"; //$NON-NLS-1$
 
 	private static final String FILE= "file"; //$NON-NLS-1$
 	private static final String LINE= "line"; //$NON-NLS-1$
