@@ -3,8 +3,6 @@ package org.eclipse.jdt.internal.junit.ui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
@@ -22,9 +20,9 @@ public class JUnitProgressBar extends Canvas {
 	private static final int DEFAULT_WIDTH = 160;
 	private static final int DEFAULT_HEIGHT = 18;
 
-	private int fSelection= 0;
-	private int fMax= 0;
-	private int fX= 0;
+	private int fCurrentTickCount= 0;
+	private int fMaxTickCount= 0;	
+	private int fColorBarWidth= 0;
 	private boolean fError;
 	
 	public JUnitProgressBar(Composite parent) {
@@ -32,7 +30,7 @@ public class JUnitProgressBar extends Canvas {
 		
 		addControlListener(new ControlAdapter() {
 			public void controlResized(ControlEvent e) {
-				fX= scale(fX);
+				fColorBarWidth= scale(fCurrentTickCount);
 				redraw();
 			}
 		});	
@@ -41,21 +39,17 @@ public class JUnitProgressBar extends Canvas {
 				paint(e);
 			}
 		});
-		addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e){
-			}
-		});
 	}
 
 	public void setMaximum(int max) {
-		fMax= max;
+		fMaxTickCount= max;
 	}
 		
 	public void reset() {
 		fError= false;
-		fSelection= 0;
-		fX= 0;
-		fMax= 0;
+		fCurrentTickCount= 0;
+		fColorBarWidth= 0;
+		fMaxTickCount= 0;
 		redraw();
 	}
 	
@@ -76,10 +70,10 @@ public class JUnitProgressBar extends Canvas {
 	}
 
 	private int scale(int value) {
-		if (fMax > 0) {
+		if (fMaxTickCount > 0) {
 			Rectangle r= getClientArea();
 			if (r.width != 0)
-				return Math.max(0, value*(r.width-2)/fMax);
+				return Math.max(0, value*(r.width-2)/fMaxTickCount);
 		}
 		return value; 
 	}
@@ -105,32 +99,31 @@ public class JUnitProgressBar extends Canvas {
 			disp.getSystemColor(SWT.COLOR_WIDGET_HIGHLIGHT_SHADOW));
 		
 		setStatusColor(gc);
-		fX= Math.min(rect.width-2, fX);
-		gc.fillRectangle(1, 1, fX, rect.height-2);
+		fColorBarWidth= Math.min(rect.width-2, fColorBarWidth);
+		gc.fillRectangle(1, 1, fColorBarWidth, rect.height-2);
 	}	
 	
 	public Point computeSize(int wHint, int hHint, boolean changed) {
 		checkWidget();
-		Point size= null;
-		size= new Point(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+		Point size= new Point(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 		if (wHint != SWT.DEFAULT) size.x= wHint;
 		if (hHint != SWT.DEFAULT) size.y= hHint;
 		return size;
 	}
 	
 	public void step(int failures) {
-		fSelection++;
-		int x= fX;
+		fCurrentTickCount++;
+		int x= fColorBarWidth;
 
-		fX= scale(fSelection);
+		fColorBarWidth= scale(fCurrentTickCount);
 
 		if (!fError && failures > 0) {
 			fError= true;
 			x= 1;
 		}
-		if (fSelection == fMax)
-			fX= getClientArea().width-1;
-		paintStep(x, fX);
+		if (fCurrentTickCount == fMaxTickCount)
+			fColorBarWidth= getClientArea().width-1;
+		paintStep(x, fColorBarWidth);
 	}
 	
 }
