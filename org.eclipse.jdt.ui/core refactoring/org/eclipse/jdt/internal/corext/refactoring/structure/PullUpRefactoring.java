@@ -924,7 +924,10 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		newMethod.setConstructor(false);
 		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
 		newMethod.setJavadoc(null);
-		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, getModifiersWithUpdatedVisibility(sourceMethod, Modifier.ABSTRACT | JdtFlags.clearFlag(Modifier.NATIVE | Modifier.FINAL, sourceMethod.getFlags()), adjustments, pm, false, status)));
+		int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, Modifier.ABSTRACT | JdtFlags.clearFlag(Modifier.NATIVE | Modifier.FINAL, sourceMethod.getFlags()), adjustments, pm, false, status);
+		if (oldMethod.isVarargs())
+			modifiers&= ~Flags.AccVarargs;
+		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
 		newMethod.setName(((SimpleName) ASTNode.copySubtree(ast, oldMethod.getName())));
 		copyReturnType(targetRewrite.getASTRewrite(), getDeclaringType().getCompilationUnit(), oldMethod, newMethod, mapping);
 		copyParameters(targetRewrite.getASTRewrite(), getDeclaringType().getCompilationUnit(), oldMethod, newMethod, mapping);
@@ -1106,7 +1109,10 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		newMethod.setConstructor(oldMethod.isConstructor());
 		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
 		copyJavadocNode(rewrite, sourceMethod, oldMethod, newMethod);
-		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, getModifiersWithUpdatedVisibility(sourceMethod, sourceMethod.getFlags(), adjustments, pm, true, status)));
+		int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, sourceMethod.getFlags(), adjustments, pm, true, status);
+		if (oldMethod.isVarargs())
+			modifiers&= ~Flags.AccVarargs;
+		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
 		newMethod.setName(((SimpleName) ASTNode.copySubtree(ast, oldMethod.getName())));
 		copyReturnType(rewrite, getDeclaringType().getCompilationUnit(), oldMethod, newMethod, mapping);
 		copyParameters(rewrite, getDeclaringType().getCompilationUnit(), oldMethod, newMethod, mapping);
