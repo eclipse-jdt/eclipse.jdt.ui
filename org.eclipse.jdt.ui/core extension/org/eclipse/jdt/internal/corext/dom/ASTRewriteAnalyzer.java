@@ -558,7 +558,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	private String getCurrentLine(String str, int pos) {
 		for (int i= pos - 1; i>= 0; i--) {
 			char ch= str.charAt(i);
-			if (ch == '\n' || ch == '\r') {
+			if (Strings.isLineDelimiterChar(ch)) {
 				return str.substring(i + 1, pos);
 			}
 		}

@@ -7,6 +7,8 @@ package org.eclipse.jdt.internal.corext.javadoc;
 
 import org.eclipse.jdt.core.IBuffer;
 
+import org.eclipse.jdt.internal.corext.util.Strings;
+
 /**
  * Reads a java doc comment from a java doc comment. Skips star-character
  * on begin of line
@@ -28,10 +30,6 @@ public class JavaDocCommentReader extends SingleCharReader {
 		
 		reset();
 	}
-	
-	private final static boolean isNewLineCharacter(char ch) {
-		return (ch == '\n' || ch == '\r');
-	}		
 		
 	/**
 	 * @see java.io.Reader#read()
@@ -55,7 +53,7 @@ public class JavaDocCommentReader extends SingleCharReader {
 			} else {
 				ch= fBuffer.getChar(fCurrPos++);
 			}
-			fWasNewLine= isNewLineCharacter(ch);
+			fWasNewLine= Strings.isLineDelimiterChar(ch);
 			
 			return ch;
 		}

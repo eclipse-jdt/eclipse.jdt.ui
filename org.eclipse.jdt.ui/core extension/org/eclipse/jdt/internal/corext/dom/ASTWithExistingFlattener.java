@@ -134,18 +134,4 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 			marker.length= fResult.length() - marker.offset;
 		}
 	}
-	
-	private String getCurrentLine(String str, int pos) {
-		for (int i= pos - 1; i>= 0; i--) {
-			char ch= str.charAt(i);
-			if (ch == '\n' || ch == '\r') {
-				return str.substring(i + 1, pos);
-			}
-		}
-		return str.substring(0, pos);
-	}
-	
-	
-
-
 }

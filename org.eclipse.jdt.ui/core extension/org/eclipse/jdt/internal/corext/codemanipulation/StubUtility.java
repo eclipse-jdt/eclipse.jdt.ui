@@ -485,7 +485,7 @@ public class StubUtility {
 				int offset= ((ISourceReference)elem).getSourceRange().getOffset();
 				int i= offset;
 				// find beginning of line
-				while (i > 0 && "\n\r".indexOf(buf.getChar(i - 1)) == -1) { //$NON-NLS-1$
+				while (i > 0 && Strings.isLineDelimiterChar(buf.getChar(i - 1)) ){
 					i--;
 				}
 				return Strings.computeIndent(buf.getText(i, offset - i), CodeFormatterUtil.getTabWidth());

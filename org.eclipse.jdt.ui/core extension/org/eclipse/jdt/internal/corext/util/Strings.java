@@ -16,12 +16,18 @@ public class Strings {
 	
 	/**
 	 * Indent char is a space char but not a line delimiters.
-	 * == Character.isSpaceChar(ch) && ch != '\n' && ch != '\r'
+	 * == Character.isWhitespace(ch) && ch != '\n' && ch != '\r'
 	 */
 	public static boolean isIndentChar(char ch) {
-		int kind= Character.getType(ch);
-		return kind == Character.SPACE_SEPARATOR || kind == Character.PARAGRAPH_SEPARATOR;
+		return Character.isWhitespace(ch) && !isLineDelimiterChar(ch);
 	}
+	
+	/**
+	 * Line delimiter chars are  '\n' and '\r'.
+	 */
+	public static boolean isLineDelimiterChar(char ch) {
+		return ch == '\n' || ch == '\r';
+	}	
 
 	public static String removeNewLine(String message) {
 		StringBuffer result= new StringBuffer();
