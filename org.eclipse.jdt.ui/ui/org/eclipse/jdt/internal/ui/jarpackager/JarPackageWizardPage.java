@@ -40,6 +40,7 @@ import org.eclipse.ui.dialogs.WizardExportResourcesPage;
 import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -535,10 +536,19 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			setErrorMessage(JarPackagerMessages.getString("JarPackageWizardPage.error.noExportTypeChecked")); //$NON-NLS-1$
 			return false;
 		}
-		if (getSelectedResources().size() == 0) {
+		if (getSelectedResources().size() == 0) 
 			return false;
+		
+		if (fExportClassFilesCheckbox.getSelection() || !fExportJavaFilesCheckbox.getSelection())
+			return true;
+			
+		// No class file export - check if there are source files
+		Iterator iter= getSelectedResourcesIterator();
+		while (iter.hasNext()) {
+			if (!(iter.next() instanceof IClassFile))
+				return true;
 		}
-		return true;
+		return false;
 	}
 	/*
 	 * Overwrides method from WizardExportPage
@@ -574,7 +584,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		Iterator enum= fInitialSelection.iterator();
 		while (enum.hasNext()) {
 			Object selectedElement= enum.next();
-			if (selectedElement instanceof ICompilationUnit || selectedElement instanceof IFile)
+			if (selectedElement instanceof ICompilationUnit || selectedElement instanceof IClassFile || selectedElement instanceof IFile)
 				fInputGroup.initialCheckListItem(selectedElement);
 			else
 				fInputGroup.initialCheckTreeItem(selectedElement);

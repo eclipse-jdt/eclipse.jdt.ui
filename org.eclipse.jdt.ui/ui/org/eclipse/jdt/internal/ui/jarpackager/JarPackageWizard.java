@@ -25,6 +25,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -230,32 +231,30 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 					IJavaElement je= (IJavaElement)selectedElement;
 					if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
 						selectedElements.add(je);
+					else if (je.getElementType() == IJavaElement.CLASS_FILE)
+						selectedElements.add(je);
 					else if (je.getElementType() == IJavaElement.JAVA_PROJECT)
 						selectedElements.add(je);
 					else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-						try {
-							if (((IPackageFragment)je).getKind() == IPackageFragmentRoot.K_SOURCE)
-								selectedElements.add(je);
-						} catch (JavaModelException ex) {
-							// ignore selected element
-							continue;
-						}
+						if (!((IPackageFragmentRoot)((IPackageFragment)je).getParent()).isArchive())
+							selectedElements.add(je);
 					}
 					else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-						try {
-							if (((IPackageFragmentRoot)je).getKind() == IPackageFragmentRoot.K_SOURCE)
+						if (!((IPackageFragmentRoot)je).isArchive())
 								selectedElements.add(je);
-						} catch (JavaModelException ex) {
-							// ignore selected element
-						}
 					}
 					else {
-						IJavaElement jcu= JavaModelUtil.findParentOfKind(je, IJavaElement.COMPILATION_UNIT);
-						if (jcu != null) {
-							ICompilationUnit cu= (ICompilationUnit)jcu;
+						IJavaElement cuOrCf= JavaModelUtil.findParentOfKind(je, IJavaElement.COMPILATION_UNIT);
+						if (cuOrCf instanceof ICompilationUnit) {
+							ICompilationUnit cu= (ICompilationUnit)cuOrCf;
 							if (!cu.isWorkingCopy() || (cu= (ICompilationUnit)cu.getOriginalElement()) != null)
 								selectedElements.add(cu);
+						} else {
+							cuOrCf= JavaModelUtil.findParentOfKind(je, IJavaElement.CLASS_FILE);
+							if (cuOrCf instanceof IClassFile)
+								selectedElements.add(cuOrCf.getParent());
 						}
+						
 					}
 				}
 			}
