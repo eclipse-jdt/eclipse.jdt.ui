@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.IBuffer;
@@ -284,6 +285,32 @@ public class ASTResolving {
 		} while (curr != tok); 
 	}	
 	
+	public static int getPositionAfter(IScanner scanner, int token) throws InvalidInputException {
+		readToToken(scanner, token);
+		return scanner.getCurrentTokenEndPosition() + 1;
+	}
+	
+	public static int getPositionBefore(IScanner scanner, int token) throws InvalidInputException {
+		readToToken(scanner, token);
+		return scanner.getCurrentTokenStartPosition();
+	}
+	
+	public static int getPositionAfter(IScanner scanner, int defaultPos, int[] tokens) throws InvalidInputException {
+		int pos= defaultPos;
+		loop: while(true) {
+			int curr= scanner.getNextToken();
+			if (curr == ITerminalSymbols.TokenNameEOF) {
+				return pos;
+			}
+			for (int i= 0; i < tokens.length; i++) {
+				if (tokens[i] == curr) {
+					pos= scanner.getCurrentTokenEndPosition() + 1;
+					continue loop;
+				}
+			}
+			return pos;
+		}
+	}
 	
 	public static Expression getNullExpression(Type type) {
 		AST ast= type.getAST();

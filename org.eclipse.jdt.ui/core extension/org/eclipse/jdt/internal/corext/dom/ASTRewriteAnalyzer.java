@@ -12,24 +12,13 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.List;
 
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTWithExistingFlattener.ExistingNodeMarker;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -107,6 +96,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	private CompilationUnitChange fChange;
 	private TextBuffer fTextBuffer;
 	
+	private IScanner fScanner; // shared scanner
+	
 	private final int[] MODIFIERS= new int[] { ITerminalSymbols.TokenNamepublic, ITerminalSymbols.TokenNameprotected, ITerminalSymbols.TokenNameprivate,
 		ITerminalSymbols.TokenNamestatic, ITerminalSymbols.TokenNamefinal, ITerminalSymbols.TokenNameabstract, ITerminalSymbols.TokenNamenative,
 		ITerminalSymbols.TokenNamevolatile, ITerminalSymbols.TokenNamestrictfp, ITerminalSymbols.TokenNametransient, ITerminalSymbols.TokenNamesynchronized };
@@ -117,6 +108,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	public ASTRewriteAnalyzer(TextBuffer textBuffer, CompilationUnitChange change) {
 		fTextBuffer= textBuffer;
 		fChange= change;
+		fScanner= null;
 	}
 	
 	private void addInsert(int offset, String insertString, String description) {
@@ -140,43 +132,40 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}		
 	
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ReturnStatement)
-	 */
-	public boolean visit(ReturnStatement node) {
-		Expression expression= node.getExpression();
-		if (expression != null) {
-			if (isReplaced(expression)) {
-				replaceNode(expression, getReplacingNode(expression));
-			} else if (isInserted(expression)) {
-				insertNode(expression, node.getStartPosition(), new int[] { ITerminalSymbols.TokenNamereturn });
-			} else {
-				expression.accept(this);
-			}
+	private IScanner getScanner(int pos) {
+		if (fScanner == null) {
+			fScanner= ToolFactory.createScanner(false, false, false, false);
+			String content= fTextBuffer.getContent();
+			char[] chars= new char[fTextBuffer.getLength()];
+			fTextBuffer.getContent().getChars(0, chars.length, chars, 0);
+			fScanner.setSource(chars);
 		}
-		return false;
-	}	
+		fScanner.resetTo(pos, fTextBuffer.getLength());
+		return fScanner;
+	}
 	
-	private void insertNode(ASTNode inserted, int offset, int[] prevTokens) {
-		try {
-			IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), offset);
-			ASTResolving.overreadToken(scanner, prevTokens);
-		
-			int pos= scanner.getCurrentTokenStartPosition();
-			if (pos > 0 && Character.isLetterOrDigit(fTextBuffer.getChar(pos - 1))) {
-				addInsert(pos, " ", "Add Space before");
-			}
-			addGenerated(pos, 0, inserted, 0, false);
-			if (Character.isLetterOrDigit(fTextBuffer.getChar(pos))) {
-				addInsert(pos, " ", "Add Space after");
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		} catch (InvalidInputException e) {
-			JavaPlugin.log(e);
+	private int rewriteNode(ASTNode node, int offset) {
+		if (isInserted(node)) {
+			insertNode(node, offset);
+			return offset;
+		}
+		if (isReplaced(node)) {
+			replaceNode(node, getReplacingNode(node));
+		} else {
+			node.accept(this);
+		}
+		return node.getStartPosition() + node.getLength();
+	}
+	
+	private void insertNode(ASTNode inserted, int offset) {
+		if (offset > 0 && Character.isLetterOrDigit(fTextBuffer.getChar(offset - 1))) {
+			addInsert(offset, " ", "Add Space before");
+		}
+		addGenerated(offset, 0, inserted, 0, false);
+		if (Character.isLetterOrDigit(fTextBuffer.getChar(offset))) {
+			addInsert(offset, " ", "Add Space after");
 		}
 	}
-				
 			
 	private void replaceNode(ASTNode old, ASTNode modified) {
 		int offset= old.getStartPosition();
@@ -193,19 +182,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(Block)
-	 */
-	public boolean visit(Block block) {
-		List list= block.statements();
-		int startPos= block.getStartPosition() + 1; // insert after left brace
-		int startIndent= 0;
-		if (!list.isEmpty() && isInserted((ASTNode) list.get(0))) { // calculate only when needed
-			startIndent= getIndent(block.getStartPosition()) + 1;
-		}
-		rewriteParagraphList(list, startPos, startIndent);
-		return false;
-	}
 	
 	private int rewriteParagraphList(List list, int insertPos, int insertIndent) {
 		ASTNode last= null; 
@@ -238,71 +214,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(MethodDeclaration)
-	 */
-	public boolean visit(MethodDeclaration methodDecl) {
-		boolean invertKind= false; // from method to constructor or back
-		ASTFlagsModification modfiedFlags= getModifiedFlags(methodDecl);
-		if (modfiedFlags != null) {
-			rewriteModifiers(methodDecl.getStartPosition(), methodDecl.getModifiers(), modfiedFlags.changedModifiers);
-			invertKind= modfiedFlags.invertType;
-		}
-		
-		boolean willBeConstructor= methodDecl.isConstructor() != invertKind;
-		
-		Type returnType= methodDecl.getReturnType();
-		if (isReplaced(returnType)) {
-			replaceNode(returnType, getReplacingNode(returnType));
-		} else if (isInserted(returnType)) {
-			if (!willBeConstructor) {
-				insertNode(returnType, methodDecl.getStartPosition(), MODIFIERS);
-			}
-		}
-		
-		SimpleName simpleName= methodDecl.getName();
-		if (isReplaced(simpleName)) {
-			replaceNode(simpleName, getReplacingNode(simpleName));
-		}
-		
-		List parameters= methodDecl.parameters();
-		List exceptions= methodDecl.thrownExceptions();
-		
-		boolean changedParams= hasChanges(parameters);
-		boolean changedExc= hasChanges(exceptions);
-		
-		if (changedParams || changedExc) {
-			try {
-				int offset= methodDecl.getStartPosition(); // simpleName.getStartPosition() + simpleName.getLength();
-				IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), offset);
-				
-				if (changedParams) {
-					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameLPAREN);
-					rewriteList(scanner.getCurrentTokenEndPosition() + 1, "", parameters, false);
-				}
-				if (changedExc) {
-					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameRPAREN);
-					rewriteList(scanner.getCurrentTokenEndPosition() + 1, " throws ", exceptions, false);
-				}
-				
-			} catch (InvalidInputException e) {
-				// ignore
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}
-		}
-
-		Block body= methodDecl.getBody();
-		if (body != null) {
-			rewriteMethodBody(methodDecl, body);
-		}				
-		return false;
-	}
 
 	private void rewriteMethodBody(MethodDeclaration methodDecl, Block body) {
 		if (isModifiedNode(body)) {
 			try {
-				IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), methodDecl.getStartPosition());
+				IScanner scanner= getScanner(methodDecl.getStartPosition());
 				if (isInserted(body)) {
 					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameSEMICOLON);
 					int startPos= scanner.getCurrentTokenStartPosition();
@@ -320,9 +236,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				}
 			} catch (InvalidInputException e) {
 				// ignore
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}					
+			}	
 		} else {
 			body.accept(this);
 		}
@@ -525,6 +439,68 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}	
 	
 
+	private void rewriteModifiers(int startPos, int oldModifiers, int newModifiers) {
+		if (oldModifiers == newModifiers) {
+			return;
+		}
+		
+		try {
+			IScanner scanner= getScanner(startPos);
+			int tok= scanner.getNextToken();
+			int endPos= startPos;
+			loop: while (true) {
+				boolean keep= true;
+				switch (tok) {
+					case ITerminalSymbols.TokenNamepublic: keep= Modifier.isPublic(newModifiers); break;
+					case ITerminalSymbols.TokenNameprotected: keep= Modifier.isProtected(newModifiers); break;
+					case ITerminalSymbols.TokenNameprivate: keep= Modifier.isPrivate(newModifiers); break;
+					case ITerminalSymbols.TokenNamestatic: keep= Modifier.isStatic(newModifiers); break;
+					case ITerminalSymbols.TokenNamefinal: keep= Modifier.isFinal(newModifiers); break;
+					case ITerminalSymbols.TokenNameabstract: keep= Modifier.isAbstract(newModifiers); break;
+					case ITerminalSymbols.TokenNamenative: keep= Modifier.isNative(newModifiers); break;
+					case ITerminalSymbols.TokenNamevolatile: keep= Modifier.isVolatile(newModifiers); break;
+					case ITerminalSymbols.TokenNamestrictfp: keep= Modifier.isStrictfp(newModifiers); break;
+					case ITerminalSymbols.TokenNametransient: keep= Modifier.isTransient(newModifiers); break;
+					case ITerminalSymbols.TokenNamesynchronized: keep= Modifier.isSynchronized(newModifiers); break;
+					default:
+						break loop;
+				}
+				tok= scanner.getNextToken();
+				int currPos= endPos;
+				endPos= scanner.getCurrentTokenStartPosition();
+				if (!keep) {
+					addDelete(currPos, endPos - currPos, "Remove Modifier");
+				}
+			} 
+			int addedModifiers= (newModifiers ^ oldModifiers) & newModifiers;
+			if (addedModifiers != 0) {
+				StringBuffer buf= new StringBuffer();
+				ASTFlattener.printModifiers(addedModifiers, buf);
+				addInsert(endPos, buf.toString(), "Add Modifier");
+			}
+		} catch (InvalidInputException e) {
+			// ignore
+		}		
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(CompilationUnit)
+	 */ 
+	public boolean visit(CompilationUnit node) {
+		PackageDeclaration packageDeclaration= node.getPackage();
+		ASTNode last= rewriteParagraph(packageDeclaration, null, 0, 0, true);
+				
+		List imports= node.imports();
+		int startPos= last != null ? last.getStartPosition() + last.getLength() : 0;
+		startPos= rewriteParagraphList(imports, startPos, 0);
+
+		List types= node.types();
+		rewriteParagraphList(types, startPos, 0);
+		return false;
+	}
+
+
 	/**
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(TypeDeclaration)
 	 */
@@ -538,7 +514,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			if (modifiedFlags.invertType) { // change from class to interface or reverse
 				invertType= true;
 				try {
-					IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), typeDecl.getStartPosition());
+					IScanner scanner= getScanner(typeDecl.getStartPosition());
 					int typeToken= typeDecl.isInterface() ? ITerminalSymbols.TokenNameinterface : ITerminalSymbols.TokenNameclass;
 					ASTResolving.readToToken(scanner, typeToken);
 					
@@ -547,8 +523,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					int end= scanner.getCurrentTokenEndPosition() + 1;
 					
 					addReplace(start, end - start, str, "Invert Type");
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
 				} catch (InvalidInputException e) {
 					// ignore
 				}
@@ -604,12 +578,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			startIndent= getIndent(typeDecl.getStartPosition()) + 1;
 			try {
 				int pos= typeDecl.getStartPosition(); //simpleName.getStartPosition() + simpleName.getLength();
-				IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), pos);
+				IScanner scanner= getScanner(pos);
 				ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameLBRACE);		
 				
 				startPos= scanner.getCurrentTokenEndPosition() + 1;
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
 			} catch (InvalidInputException e) {
 				// ignore
 			}
@@ -618,67 +590,513 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return false;
 	}
 
-	private void rewriteModifiers(int startPos, int oldModifiers, int newModifiers) {
-		if (oldModifiers == newModifiers) {
-			return;
-		}
-		
-		try {
-			IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), startPos);
-			int tok= scanner.getNextToken();
-			int endPos= startPos;
-			loop: while (true) {
-				boolean keep= true;
-				switch (tok) {
-					case ITerminalSymbols.TokenNamepublic: keep= Modifier.isPublic(newModifiers); break;
-					case ITerminalSymbols.TokenNameprotected: keep= Modifier.isProtected(newModifiers); break;
-					case ITerminalSymbols.TokenNameprivate: keep= Modifier.isPrivate(newModifiers); break;
-					case ITerminalSymbols.TokenNamestatic: keep= Modifier.isStatic(newModifiers); break;
-					case ITerminalSymbols.TokenNamefinal: keep= Modifier.isFinal(newModifiers); break;
-					case ITerminalSymbols.TokenNameabstract: keep= Modifier.isAbstract(newModifiers); break;
-					case ITerminalSymbols.TokenNamenative: keep= Modifier.isNative(newModifiers); break;
-					case ITerminalSymbols.TokenNamevolatile: keep= Modifier.isVolatile(newModifiers); break;
-					case ITerminalSymbols.TokenNamestrictfp: keep= Modifier.isStrictfp(newModifiers); break;
-					case ITerminalSymbols.TokenNametransient: keep= Modifier.isTransient(newModifiers); break;
-					case ITerminalSymbols.TokenNamesynchronized: keep= Modifier.isSynchronized(newModifiers); break;
-					default:
-						break loop;
-				}
-				tok= scanner.getNextToken();
-				int currPos= endPos;
-				endPos= scanner.getCurrentTokenStartPosition();
-				if (!keep) {
-					addDelete(currPos, endPos - currPos, "Remove Modifier");
-				}
-			} 
-			int addedModifiers= (newModifiers ^ oldModifiers) & newModifiers;
-			if (addedModifiers != 0) {
-				StringBuffer buf= new StringBuffer();
-				ASTFlattener.printModifiers(addedModifiers, buf);
-				addInsert(endPos, buf.toString(), "Add Modifier");
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		} catch (InvalidInputException e) {
-			// ignore
-		}		
-	}
-
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(CompilationUnit)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(MethodDeclaration)
 	 */
-	public boolean visit(CompilationUnit node) {
-		PackageDeclaration packageDeclaration= node.getPackage();
-		ASTNode last= rewriteParagraph(packageDeclaration, null, 0, 0, true);
+	public boolean visit(MethodDeclaration methodDecl) {
+		boolean invertKind= false; // from method to constructor or back
+		ASTFlagsModification modfiedFlags= getModifiedFlags(methodDecl);
+		if (modfiedFlags != null) {
+			rewriteModifiers(methodDecl.getStartPosition(), methodDecl.getModifiers(), modfiedFlags.changedModifiers);
+			invertKind= modfiedFlags.invertType;
+		}
+		
+		boolean willBeConstructor= methodDecl.isConstructor() != invertKind;
+		Type returnType= methodDecl.getReturnType();
+		if (isReplaced(returnType)) {
+			replaceNode(returnType, getReplacingNode(returnType));
+		} else if (isInserted(returnType)) {
+			if (!willBeConstructor) {
+				try {
+					int startPos= methodDecl.getStartPosition();
+					int offset= ASTResolving.getPositionAfter(getScanner(startPos), startPos, MODIFIERS);
+					insertNode(returnType, offset);
+				} catch (InvalidInputException e) {
+					JavaPlugin.log(e);
+				}
+			}
+		}
+		
+		SimpleName simpleName= methodDecl.getName();
+		if (isReplaced(simpleName)) {
+			replaceNode(simpleName, getReplacingNode(simpleName));
+		}
+		
+		List parameters= methodDecl.parameters();
+		List exceptions= methodDecl.thrownExceptions();
+		
+		boolean changedParams= hasChanges(parameters);
+		boolean changedExc= hasChanges(exceptions);
+		
+		if (changedParams || changedExc) {
+			try {
+				int offset= methodDecl.getStartPosition(); // simpleName.getStartPosition() + simpleName.getLength();
+				IScanner scanner= getScanner(offset);
 				
-		List imports= node.imports();
-		int startPos= last != null ? last.getStartPosition() + last.getLength() : 0;
-		startPos= rewriteParagraphList(imports, startPos, 0);
+				if (changedParams) {
+					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameLPAREN);
+					rewriteList(scanner.getCurrentTokenEndPosition() + 1, "", parameters, false);
+				}
+				if (changedExc) {
+					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameRPAREN);
+					rewriteList(scanner.getCurrentTokenEndPosition() + 1, " throws ", exceptions, false);
+				}
+				
+			} catch (InvalidInputException e) {
+				// ignore
+			}
+		}
 
-		List types= node.types();
-		rewriteParagraphList(types, startPos, 0);
+		Block body= methodDecl.getBody();
+		if (body != null) {
+			rewriteMethodBody(methodDecl, body);
+		}				
 		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(Block)
+	 */
+	public boolean visit(Block block) {
+		List list= block.statements();
+		int startPos= block.getStartPosition() + 1; // insert after left brace
+		int startIndent= 0;
+		if (!list.isEmpty() && isInserted((ASTNode) list.get(0))) { // calculate only when needed
+			startIndent= getIndent(block.getStartPosition()) + 1;
+		}
+		rewriteParagraphList(list, startPos, startIndent);
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ReturnStatement)
+	 */
+	public boolean visit(ReturnStatement node) {
+		Expression expression= node.getExpression();
+		if (expression != null) {
+			int offset= node.getStartPosition();
+			if (isInserted(expression)) {
+				try {
+					offset= ASTResolving.getPositionAfter(getScanner(offset), ITerminalSymbols.TokenNamereturn);
+				} catch (InvalidInputException e) {
+					JavaPlugin.log(e);
+				}
+			}
+			rewriteNode(expression, offset);
+		}
+		return false;
+	}		
+	
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(AnonymousClassDeclaration)
+	 */
+	public boolean visit(AnonymousClassDeclaration node) {
+		List declarations= node.bodyDeclarations();
+		int startPos= node.getStartPosition() + 1;
+		int startIndent= isInsertFirst(declarations) ? (getIndent(node.getStartPosition()) + 1) : 0;
+		rewriteParagraphList(declarations, startPos, startIndent);
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayAccess)
+	 */
+	public boolean visit(ArrayAccess node) {
+		Expression arrayExpr= node.getArray();
+		Assert.isTrue(!isInserted(node), "Array expression in ArrayAccess can only be replaced");
+		rewriteNode(arrayExpr, 0);
+		
+		Expression indexExpr= node.getIndex();
+		Assert.isTrue(!isInserted(node), "Index expression in ArrayAccess can only be replaced");
+		rewriteNode(indexExpr, 0);		
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayCreation)
+	 */
+	public boolean visit(ArrayCreation node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayInitializer)
+	 */
+	public boolean visit(ArrayInitializer node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayType)
+	 */
+	public boolean visit(ArrayType node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(AssertStatement)
+	 */
+	public boolean visit(AssertStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(Assignment)
+	 */
+	public boolean visit(Assignment node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(BooleanLiteral)
+	 */
+	public boolean visit(BooleanLiteral node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(BreakStatement)
+	 */
+	public boolean visit(BreakStatement node) { 
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(CastExpression)
+	 */
+	public boolean visit(CastExpression node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(CatchClause)
+	 */
+	public boolean visit(CatchClause node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(CharacterLiteral)
+	 */
+	public boolean visit(CharacterLiteral node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ClassInstanceCreation)
+	 */
+	public boolean visit(ClassInstanceCreation node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ConditionalExpression)
+	 */
+	public boolean visit(ConditionalExpression node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ConstructorInvocation)
+	 */
+	public boolean visit(ConstructorInvocation node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ContinueStatement)
+	 */
+	public boolean visit(ContinueStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(DoStatement)
+	 */
+	public boolean visit(DoStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(EmptyStatement)
+	 */
+	public boolean visit(EmptyStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ExpressionStatement)
+	 */
+	public boolean visit(ExpressionStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(FieldAccess)
+	 */
+	public boolean visit(FieldAccess node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(FieldDeclaration)
+	 */
+	public boolean visit(FieldDeclaration node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ForStatement)
+	 */
+	public boolean visit(ForStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(IfStatement)
+	 */
+	public boolean visit(IfStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ImportDeclaration)
+	 */
+	public boolean visit(ImportDeclaration node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(InfixExpression)
+	 */
+	public boolean visit(InfixExpression node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(Initializer)
+	 */
+	public boolean visit(Initializer node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(InstanceofExpression)
+	 */
+	public boolean visit(InstanceofExpression node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(Javadoc)
+	 */
+	public boolean visit(Javadoc node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(LabeledStatement)
+	 */
+	public boolean visit(LabeledStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(MethodInvocation)
+	 */
+	public boolean visit(MethodInvocation node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(NullLiteral)
+	 */
+	public boolean visit(NullLiteral node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(NumberLiteral)
+	 */
+	public boolean visit(NumberLiteral node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(PackageDeclaration)
+	 */
+	public boolean visit(PackageDeclaration node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ParenthesizedExpression)
+	 */
+	public boolean visit(ParenthesizedExpression node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(PostfixExpression)
+	 */
+	public boolean visit(PostfixExpression node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(PrefixExpression)
+	 */
+	public boolean visit(PrefixExpression node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(PrimitiveType)
+	 */
+	public boolean visit(PrimitiveType node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(QualifiedName)
+	 */
+	public boolean visit(QualifiedName node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SimpleName)
+	 */
+	public boolean visit(SimpleName node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SimpleType)
+	 */
+	public boolean visit(SimpleType node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SingleVariableDeclaration)
+	 */
+	public boolean visit(SingleVariableDeclaration node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(StringLiteral)
+	 */
+	public boolean visit(StringLiteral node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SuperConstructorInvocation)
+	 */
+	public boolean visit(SuperConstructorInvocation node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SuperFieldAccess)
+	 */
+	public boolean visit(SuperFieldAccess node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SuperMethodInvocation)
+	 */
+	public boolean visit(SuperMethodInvocation node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SwitchCase)
+	 */
+	public boolean visit(SwitchCase node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SwitchStatement)
+	 */
+	public boolean visit(SwitchStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SynchronizedStatement)
+	 */
+	public boolean visit(SynchronizedStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ThisExpression)
+	 */
+	public boolean visit(ThisExpression node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ThrowStatement)
+	 */
+	public boolean visit(ThrowStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(TryStatement)
+	 */
+	public boolean visit(TryStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(TypeDeclarationStatement)
+	 */
+	public boolean visit(TypeDeclarationStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(TypeLiteral)
+	 */
+	public boolean visit(TypeLiteral node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(VariableDeclarationExpression)
+	 */
+	public boolean visit(VariableDeclarationExpression node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(VariableDeclarationFragment)
+	 */
+	public boolean visit(VariableDeclarationFragment node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(VariableDeclarationStatement)
+	 */
+	public boolean visit(VariableDeclarationStatement node) {
+		return super.visit(node);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(WhileStatement)
+	 */
+	public boolean visit(WhileStatement node) {
+		return super.visit(node);
 	}
 
 }
