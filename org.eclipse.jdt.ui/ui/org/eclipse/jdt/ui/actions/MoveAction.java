@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -28,7 +26,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -137,24 +134,24 @@ public class MoveAction extends SelectionDispatchAction{
 			fJdtMoveAction.run();
 			return;
 		}
-		if (fMoveInstanceMethodAction.isEnabled() && tryMoveInstanceMethod(selection))
-			return;
-			
 		if (fMoveStaticMembersAction.isEnabled() && tryMoveStaticMembers(selection))
 			return;
 	
+		if (fMoveInstanceMethodAction.isEnabled() && tryMoveInstanceMethod(selection))
+			return;
+			
 		MessageDialog.openInformation(getShell(), RefactoringMessages.getString("MoveAction.Move"), RefactoringMessages.getString("MoveAction.select")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private boolean tryMoveStaticMembers(ITextSelection selection) {
 		try {
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
-			if (element == null)
+			if (element == null || !(element instanceof IMember))
 				return false;
-			if (!(element instanceof IMember))
+			IMember[] array= new IMember[]{(IMember)element};
+			if (! MoveStaticMembersRefactoring.isAvailable(array))	
 				return false;
-
-			MoveStaticMembersRefactoring refactoring= MoveStaticMembersRefactoring.create(new IMember[]{(IMember)element}, JavaPreferencesSettings.getCodeGenerationSettings());
+			MoveStaticMembersRefactoring refactoring= MoveStaticMembersRefactoring.create(array, JavaPreferencesSettings.getCodeGenerationSettings());
 			if (refactoring == null)
 				return false;
 			fMoveStaticMembersAction.run(selection);
