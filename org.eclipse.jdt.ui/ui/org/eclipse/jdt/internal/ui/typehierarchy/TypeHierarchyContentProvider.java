@@ -129,26 +129,23 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	public boolean hasChildren(Object element) {
 		if (element instanceof IType) {
 			IType type= (IType)element;
-			IType[] childrenTypes= getTypesInHierarchy(type);
-				
 			if (fMemberFilter != null) {
-				List children= new ArrayList();
-				addFilteredMembers(type, children);
-				if (!children.isEmpty()) {
-					return true;
+				try {
+					return hasFilteredChildren(type);
+				} catch (JavaModelException e) {
+					return false;
 				}
-				addFilteredTypes(childrenTypes, children);
-				return !children.isEmpty();
 			} else {
+				IType[] childrenTypes= getTypesInHierarchy(type);
 				return childrenTypes.length > 0;
 			}				
 		}
 		return false;
 	}	
 	
-	private void addFilteredMembers(IType parent, List children) {
+	private void addFilteredMembers(IType origType, List children) {
 		try {
-			parent= getSuitableType(parent);
+			IType parent= getSuitableType(origType);
 			
 			IMethod[] methods= parent.getMethods();
 			for (int i= 0; i < fMemberFilter.length; i++) {
@@ -182,11 +179,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 	}
 	
-	private boolean hasFilteredChildren(IType type) throws JavaModelException {
+	private boolean hasFilteredChildren(IType origType) throws JavaModelException {
 		if (fShowAllTypes) {
 			return true;
 		}
-		type= getSuitableType(type);
+		IType type= getSuitableType(origType);
 		
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < fMemberFilter.length; i++) {
@@ -201,7 +198,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				}
 			}
 		}
-		IType[] childrenTypes= getTypesInHierarchy(type);
+		IType[] childrenTypes= getTypesInHierarchy(origType);
 		for (int i= 0; i < childrenTypes.length; i++) {
 			if (hasFilteredChildren(childrenTypes[i])) {
 				return true;
