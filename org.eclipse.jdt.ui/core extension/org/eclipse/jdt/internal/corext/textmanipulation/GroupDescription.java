@@ -21,6 +21,10 @@ public class GroupDescription {
 	private String fDescription;
 	private List fEdits;
 
+	public GroupDescription() {
+		this( "NO_DESCRIPTION"); //$NON-NLS-1$
+	}
+
 	public GroupDescription(String description) {
 		super();
 		Assert.isNotNull(description);

@@ -99,9 +99,20 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 		MethodDeclaration newMethodDecl= createNewMethodDeclaration(ast, fSuperConstructor, rewrite, settings);
 		rewrite.markAsInserted(newMethodDecl);
 		fTypeNode.bodyDeclarations().add(0, newMethodDecl);
-
+		
+		addLinkedRanges(rewrite, newMethodDecl);
+		
 		return rewrite;
 	}
+	
+	private void addLinkedRanges(ASTRewrite rewrite, MethodDeclaration newStub) {
+		List parameters= newStub.parameters();
+		for (int i= 0; i < parameters.size(); i++) {
+			SingleVariableDeclaration curr= (SingleVariableDeclaration) parameters.get(i);
+			markAsLinked(rewrite, curr.getType(), false, "arg_type_" + i); //$NON-NLS-1$
+			markAsLinked(rewrite, curr.getName(), false, "arg_name_" + i); //$NON-NLS-1$
+		}
+	}	
 	
 	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, ASTRewrite rewrite, CodeGenerationSettings commentSettings) throws CoreException {
 		String name= fTypeNode.getName().getIdentifier();

@@ -72,30 +72,22 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 		}
 	}	
 		
-	private CompilationUnit fRoot;
+	private ASTNode fNameNode;
 	private IMethodBinding fSenderBinding;
 	private ChangeDescription[] fParameterChanges;
-	private GroupDescription fSelectionDescription;
 		
-	public ChangeMethodSignatureProposal(String label, ICompilationUnit targetCU, CompilationUnit root, IMethodBinding binding, ChangeDescription[] changes, int relevance, Image image) {
+	public ChangeMethodSignatureProposal(String label, ICompilationUnit targetCU, ASTNode nameNode, IMethodBinding binding, ChangeDescription[] changes, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
 		
-		fRoot= root;
+		fNameNode= nameNode;
 		fSenderBinding= binding;
 		fParameterChanges= changes;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
-	 */
-	protected GroupDescription getSelectionDescription() {
-		return fSelectionDescription;
-	}	
-	
 	protected ASTRewrite getRewrite() throws CoreException {
-		ASTNode methodDecl= fRoot.findDeclaringNode(fSenderBinding);
+		CompilationUnit astRoot= (CompilationUnit) fNameNode.getRoot();
+		ASTNode methodDecl= astRoot.findDeclaringNode(fSenderBinding);
 		ASTNode newMethodDecl= null;
-		CompilationUnit astRoot= fRoot;
 		boolean isInDifferentCU;
 		if (methodDecl != null) {
 			isInDifferentCU= false;
@@ -106,7 +98,7 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 			newMethodDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
 		if (newMethodDecl instanceof MethodDeclaration) {
-			ASTRewrite rewrite= new ASTRewrite(newMethodDecl);
+			ASTRewrite rewrite= new ASTRewrite(astRoot);
 			modifySignature(rewrite, (MethodDeclaration) newMethodDecl, isInDifferentCU);
 			return rewrite;
 		}
@@ -116,8 +108,10 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 	private final String NAME_SUGGESTION= "name_suggestion"; //$NON-NLS-1$
 	
 	protected void modifySignature(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
+		GroupDescription selectionDescription= null;
 		if (isInDifferentCU) {
-			fSelectionDescription= new GroupDescription("selection"); //$NON-NLS-1$
+			selectionDescription= new GroupDescription();
+			setSelectionDescription(selectionDescription);
 		}
 		
 		List parameters= methodDecl.parameters();
@@ -148,10 +142,11 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 
 				createdVariables.add(newNode);
 				
-				rewrite.markAsInserted(newNode, fSelectionDescription);
+				rewrite.markAsInserted(newNode, selectionDescription);
 				parameters.add(i, newNode);
+					
 			} else if (curr instanceof RemoveDescription) {
-				rewrite.markAsRemoved(oldParameters[k], fSelectionDescription);
+				rewrite.markAsRemoved(oldParameters[k], selectionDescription);
 				k++;
 			} else if (curr instanceof EditDescription) {
 				EditDescription desc= (EditDescription) curr;
@@ -164,13 +159,14 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 				
 				rewrite.markAsReplaced(oldParameters[k], newNode);
 				createdVariables.add(newNode);
+				
 				k++;
 			} else if (curr instanceof SwapDescription) {
 				SingleVariableDeclaration decl1= oldParameters[k];
 				SingleVariableDeclaration decl2= oldParameters[((SwapDescription) curr).index];
 				
-				rewrite.markAsReplaced(decl1, rewrite.createCopy(decl2), fSelectionDescription);
-				rewrite.markAsReplaced(decl2, rewrite.createCopy(decl1), fSelectionDescription);
+				rewrite.markAsReplaced(decl1, rewrite.createCopy(decl2), selectionDescription);
+				rewrite.markAsReplaced(decl2, rewrite.createCopy(decl1), selectionDescription);
 				
 				usedNames.add(decl1.getName().getIdentifier());
 				k++;	
@@ -206,8 +202,12 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 			}
 			var.setName(ast.newSimpleName(name));
 			usedNames.add(name);
+			
+			markAsLinked(rewrite, var.getType(), false, "param_type_" + i); //$NON-NLS-1$
+			markAsLinked(rewrite, var.getName(), false, "param_name_" + i); //$NON-NLS-1$
 		}
-	
-		
+		if (!createdVariables.isEmpty()) {
+			markAsSelection(rewrite, fNameNode.getParent());
+		}
 	}
 }

@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -26,9 +25,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal {
@@ -39,10 +35,7 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 	private int  fVariableKind;
 	private ExpressionStatement fExpressionStatement;
 	private ITypeBinding fTypeBinding;
-	
-	private GroupDescription fSelectionDescription;
-	private ArrayList fLinkedPositions;
-	
+		
 	public AssignToVariableAssistProposal(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance) {
 		super(null, cu, null, relevance, null);
 	
@@ -56,36 +49,8 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 			setDisplayName(CorrectionMessages.getString("AssignToVariableAssistProposal.assigntofield.description")); //$NON-NLS-1$
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 		}
-		
-		fLinkedPositions= new ArrayList();
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
-	 */
-	protected GroupDescription getSelectionDescription() {
-		return fSelectionDescription;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getLinkedRanges()
-	 */
-	protected GroupDescription[] getLinkedRanges() {
-		if (fLinkedPositions.isEmpty()) {
-			return null;
-		}
-		return (GroupDescription[]) fLinkedPositions.toArray(new GroupDescription[fLinkedPositions.size()]);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(java.lang.String, org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.internal.corext.textmanipulation.TextEdit)
-	 */
-	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit rootEdit) throws CoreException {
-		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, rootEdit);
-		change.setKeepExecutedTextEdits(true);
-		return change;
-	}
-		
+				
 	protected ASTRewrite getRewrite() throws CoreException {
 		if (fVariableKind == FIELD) {
 			return doAddField();
@@ -100,15 +65,9 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		AST ast= fExpressionStatement.getAST();
 
 		String varName= suggestLocalVariableNames(fTypeBinding);
-
-		GroupDescription link1= new GroupDescription("link1"); //$NON-NLS-1$
-		fSelectionDescription= new GroupDescription("sel"); //$NON-NLS-1$
-		
-		SimpleName name= ast.newSimpleName(varName);
-		rewrite.markAsTracked(name, link1); //$NON-NLS-1$
-		
+				
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
-		newDeclFrag.setName(name);
+		newDeclFrag.setName(ast.newSimpleName(varName));
 		newDeclFrag.setInitializer((Expression) rewrite.createCopy(expression));
 		
 		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
@@ -116,9 +75,11 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		newDecl.setType(ASTNodeFactory.newType(ast, typeName));
 		
 		rewrite.markAsReplaced(fExpressionStatement, newDecl); 
-		rewrite.markAsTracked(newDecl, fSelectionDescription);
+		
+		markAsLinked(rewrite, newDeclFrag.getName(), true, "name"); //$NON-NLS-1$
+		markAsLinked(rewrite, newDecl.getType(), false, "type"); //$NON-NLS-1$
+		markAsSelection(rewrite, newDecl);
 
-		fLinkedPositions.add(link1);
 		return rewrite;
 	}
 
@@ -129,22 +90,12 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
 		List decls= isAnonymous ?  ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations() :  ((TypeDeclaration) newTypeDecl).bodyDeclarations();
 		
-		fSelectionDescription= new GroupDescription("sel"); //$NON-NLS-1$
-		GroupDescription link1= new GroupDescription("link1"); //$NON-NLS-1$
-		GroupDescription link2= new GroupDescription("link2"); //$NON-NLS-1$
-		fLinkedPositions.add(link1);
-		fLinkedPositions.add(link2);
-				
 		ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
 		AST ast= fExpressionStatement.getAST();
 		
 		String varName= suggestFieldNames(fTypeBinding);
-
-		SimpleName name= ast.newSimpleName(varName);
-		rewrite.markAsTracked(name, link2); //$NON-NLS-1$
-		
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
-		newDeclFrag.setName(name);
+		newDeclFrag.setName(ast.newSimpleName(varName));
 				
 		FieldDeclaration newDecl= ast.newFieldDeclaration(newDeclFrag);
 		String typeName= addImport(fTypeBinding);
@@ -155,8 +106,6 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		assignment.setRightHandSide((Expression) rewrite.createCopy(expression));
 
 		SimpleName accessName= ast.newSimpleName(varName);
-		rewrite.markAsTracked(accessName, link1); //$NON-NLS-1$
-		
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS)) {
 			FieldAccess fieldAccess= ast.newFieldAccess();
 			fieldAccess.setName(accessName);
@@ -166,7 +115,11 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 			assignment.setLeftHandSide(accessName);
 		}
 		rewrite.markAsReplaced(expression, assignment);
-		rewrite.markAsTracked(fExpressionStatement, fSelectionDescription);
+		
+		markAsLinked(rewrite, newDeclFrag.getName(), false, "name"); //$NON-NLS-1$
+		markAsLinked(rewrite, newDecl.getType(), false, "type"); //$NON-NLS-1$
+		markAsLinked(rewrite, accessName, true, "name");  //$NON-NLS-1$
+		markAsSelection(rewrite, fExpressionStatement);
 		
 		decls.add(findInsertIndex(decls, fExpressionStatement.getStartPosition()), newDecl);
 		

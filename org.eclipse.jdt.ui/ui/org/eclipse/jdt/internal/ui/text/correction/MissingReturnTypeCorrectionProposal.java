@@ -55,6 +55,8 @@ public class MissingReturnTypeCorrectionProposal extends ASTRewriteCorrectionPro
 			if (expression != null) {
 				fExistingReturn.setExpression(expression);
 				rewrite.markAsInserted(expression);
+				
+				markAsLinked(rewrite, expression, true, "value"); //$NON-NLS-1$
 			}
 			return rewrite;
 		} else {
@@ -74,6 +76,8 @@ public class MissingReturnTypeCorrectionProposal extends ASTRewriteCorrectionPro
 			returnStatement.setExpression(getReturnExpresion(ast, offset));
 			statements.add(returnStatement);
 			rewrite.markAsInserted(returnStatement);
+			
+			markAsLinked(rewrite, returnStatement.getExpression(), true, "value"); //$NON-NLS-1$
 			return rewrite;
 		}
 	}

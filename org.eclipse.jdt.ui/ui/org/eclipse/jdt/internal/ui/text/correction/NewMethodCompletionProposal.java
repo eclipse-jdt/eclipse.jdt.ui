@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
@@ -41,37 +40,15 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	private List fArguments;
 	private ITypeBinding fSenderBinding;
 	private boolean fIsInDifferentCU;
-	
-	private GroupDescription fSelectionDescription;
-	private ArrayList fLinkedPositions;
-	
+		
 	public NewMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode,  List arguments, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
 		
 		fNode= invocationNode;
 		fArguments= arguments;
 		fSenderBinding= binding;
-		
-		fLinkedPositions= new ArrayList();
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
-	 */
-	protected GroupDescription getSelectionDescription() {
-		return fSelectionDescription;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getLinkedRanges()
-	 */
-	protected GroupDescription[] getLinkedRanges() {
-		if (fLinkedPositions.isEmpty()) {
-			return null;
-		}
-		return (GroupDescription[]) fLinkedPositions.toArray(new GroupDescription[fLinkedPositions.size()]);
-	}	
-		
+			
 	protected ASTRewrite getRewrite() throws CoreException {
 		
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
@@ -82,11 +59,11 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			newTypeDecl= typeDecl;
 		} else {
 			fIsInDifferentCU= true;
-			CompilationUnit newRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
-			newTypeDecl= newRoot.findDeclaringNode(fSenderBinding.getKey());
+			astRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
+			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
 		if (newTypeDecl != null) {
-			ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
+			ASTRewrite rewrite= new ASTRewrite(astRoot);
 			
 			List members;
 			if (fSenderBinding.isAnonymous()) {
@@ -105,30 +82,34 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			}
 			rewrite.markAsInserted(newStub);
 
-			fSelectionDescription= new GroupDescription("sel"); //$NON-NLS-1$
-			GroupDescription link1= new GroupDescription("link1"); //$NON-NLS-1$
-			GroupDescription link2= new GroupDescription("link2"); //$NON-NLS-1$
-			GroupDescription link3= new GroupDescription("link3"); //$NON-NLS-1$
-			fLinkedPositions.add(link1);
-			fLinkedPositions.add(link2);
-			fLinkedPositions.add(link3);
-			
-			rewrite.markAsTracked(newStub.getName(), link2); //$NON-NLS-1$\
-			if (!newStub.isConstructor()) {
-				rewrite.markAsTracked(newStub.getReturnType(), link1); //$NON-NLS-1$\
-			}
-		
-			if (!fIsInDifferentCU) {
-				rewrite.markAsTracked(fNode, fSelectionDescription);
-				Name invocationName= getInvocationName();
-				if (invocationName != null) {
-					rewrite.markAsTracked(invocationName, link3); //$NON-NLS-1$\
-				}
-			}			
+			addLinkedRanges(rewrite, newStub);
+
 			return rewrite;
 		}
 		return null;
 	}
+		
+	
+	private void addLinkedRanges(ASTRewrite rewrite, MethodDeclaration newStub) {
+		if (!fIsInDifferentCU) {
+			markAsSelection(rewrite, fNode);
+			Name invocationName= getInvocationName();
+			if (invocationName != null) {
+				markAsLinked(rewrite, invocationName, true, "name"); //$NON-NLS-1$
+			}
+		}
+		markAsLinked(rewrite, newStub.getName(), false, "name");  //$NON-NLS-1$
+		if (!newStub.isConstructor()) {
+			markAsLinked(rewrite, newStub.getReturnType(), false, "type");  //$NON-NLS-1$
+		}
+		List parameters= newStub.parameters();
+		for (int i= 0; i < parameters.size(); i++) {
+			SingleVariableDeclaration curr= (SingleVariableDeclaration) parameters.get(i);
+			markAsLinked(rewrite, curr.getType(), false, "arg_type_" + i); //$NON-NLS-1$
+			markAsLinked(rewrite, curr.getName(), false, "arg_name_" + i); //$NON-NLS-1$
+		}
+	}
+	
 	
 	private boolean isConstructor() {
 		return fNode.getNodeType() != ASTNode.METHOD_INVOCATION && fNode.getNodeType() != ASTNode.SUPER_METHOD_INVOCATION;

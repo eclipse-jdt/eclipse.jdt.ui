@@ -57,7 +57,10 @@ public class AddArgumentCorrectionProposal extends ASTRewriteCorrectionProposal 
 			Expression newArg= getArgumentExpresion(ast, fParamTypes[idx]);
 			rewrite.markAsInserted(newArg);
 			fArguments.add(idx, newArg);
+			
+			markAsLinked(rewrite, newArg, i == 0, "newarg_" + i); //$NON-NLS-1$
 		}
+		markAsSelection(rewrite, fNameNode.getParent());
 		return rewrite;
 	}
 	

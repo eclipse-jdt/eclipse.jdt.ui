@@ -506,7 +506,7 @@ public class UnresolvedElementsSubProcessor {
 			int diff= elem.getParameterTypes().length - argTypes.length;
 			if (diff == 0) {
 				int nProposals= proposals.size();
-				doEqualNumberOfParameters(context, arguments, argTypes, elem, proposals);
+				doEqualNumberOfParameters(context, problem, arguments, argTypes, elem, proposals);
 				if (nProposals != proposals.size()) {
 					return; // only suggest for one method (avoid duplicated proposals)
 				}
@@ -535,7 +535,9 @@ public class UnresolvedElementsSubProcessor {
 		}
 		ITypeBinding declaringType= methodBinding.getDeclaringClass();
 		ICompilationUnit cu= context.getCompilationUnit();
-		CompilationUnit astRoot= context.getASTRoot();		
+		CompilationUnit astRoot= context.getASTRoot();
+		
+		ASTNode nameNode= problem.getCoveredNode(context);
 		
 		// add arguments
 		{			
@@ -546,7 +548,7 @@ public class UnresolvedElementsSubProcessor {
 			} else {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addarguments.description", arg); //$NON-NLS-1$
 			}			
-			AddArgumentCorrectionProposal proposal= new AddArgumentCorrectionProposal(label, context.getCompilationUnit(), problem.getCoveredNode(context), arguments, indexSkipped, paramTypes, 8);
+			AddArgumentCorrectionProposal proposal= new AddArgumentCorrectionProposal(label, context.getCompilationUnit(), nameNode, arguments, indexSkipped, paramTypes, 8);
 			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD));
 			proposal.ensureNoModifications();
 			proposals.add(proposal);				
@@ -580,7 +582,7 @@ public class UnresolvedElementsSubProcessor {
 				}
 			
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
-				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
+				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 1, image);
 				proposals.add(proposal);
 			}
 		}		
@@ -615,6 +617,8 @@ public class UnresolvedElementsSubProcessor {
 		ITypeBinding declaringType= methodBinding.getDeclaringClass();
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
+		
+		ASTNode nameNode= problem.getCoveredNode(context);
 		
 		// remove arguments
 		{
@@ -670,7 +674,7 @@ public class UnresolvedElementsSubProcessor {
 					}
 				}	
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
+				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 1, image);
 				proposals.add(proposal);
 			}
 		}		
@@ -713,7 +717,7 @@ public class UnresolvedElementsSubProcessor {
 	}	
 	
 
-	private static void doEqualNumberOfParameters(IAssistContext context, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
+	private static void doEqualNumberOfParameters(IAssistContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int[] indexOfDiff= new int[paramTypes.length];
 		int nDiffs= 0;
@@ -725,6 +729,8 @@ public class UnresolvedElementsSubProcessor {
 		ITypeBinding declaringType= methodBinding.getDeclaringClass();
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
+		
+		ASTNode nameNode= problem.getCoveredNode(context);
 		
 		if (nDiffs == 1) { // one argument missmatching: try to fix
 			int idx= indexOfDiff[0];
@@ -773,7 +779,7 @@ public class UnresolvedElementsSubProcessor {
 							label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.swapparams.description", args); //$NON-NLS-1$
 						}
 						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-						ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
+						ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 1, image);
 						proposals.add(proposal);
 					}
 				}
@@ -799,7 +805,7 @@ public class UnresolvedElementsSubProcessor {
 					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changeparamsignature.description", args); //$NON-NLS-1$
 				}
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
+				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 1, image);
 				proposals.add(proposal);
 			}
 		}

@@ -76,6 +76,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		CompilationUnitChange change= new CompilationUnitChange(name, cu);
 		change.setEdit(rootEdit);
 		change.setSave(false);
+		setChange(change);
 		return change;
 	}
 
@@ -85,8 +86,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	protected Change getChange() throws CoreException {
 		Change change= super.getChange();
 		if (change == null) {
-			change= createCompilationUnitChange(getDisplayString(), fCompilationUnit, fRootEdit);
-			setChange(change);
+			return createCompilationUnitChange(getDisplayString(), fCompilationUnit, fRootEdit);
 		}
 		return change;
 	}
@@ -228,15 +228,21 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				for (int i= 0; i < linked.length; i++) {
 					GroupDescription curr= linked[i];
 					TextRange range= change.getNewTextRange(curr.getTextEdits());
-					manager.addPosition(range.getOffset(), range.getLength());
-					if (i == 0) {
-						editor.setInitialOffset(range.getOffset());
+					if (range != null && range.isValid()) {
+						manager.addPosition(range.getOffset(), range.getLength());
+						if (i == 0) {
+							editor.setInitialOffset(range.getOffset());
+						}
 					}
 				}
-				if (selection != null) {
+				/*if (selection != null) {
 					TextRange range= change.getNewTextRange(selection.getTextEdits());
-					editor.setFinalCaretOffset(range.getExclusiveEnd());					
-				}
+					if (range != null && range.isValid()) {
+						
+					}					
+				}*/
+				editor.setFinalCaretOffset(viewer.getSelectedRange().x);
+				
 				editor.enter();
 				
 				IRegion region= editor.getSelectedRegion();

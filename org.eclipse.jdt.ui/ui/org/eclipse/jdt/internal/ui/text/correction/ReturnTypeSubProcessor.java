@@ -137,7 +137,9 @@ public class ReturnTypeSubProcessor {
 					rewrite.markAsInserted(newReturnType);
 				} else {
 					rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
-				}			
+				}
+				proposal.markAsLinked(rewrite, newReturnType, true, "return_type"); //$NON-NLS-1$
+				
 
 				proposal.ensureNoModifications();
 				proposals.add(proposal);
@@ -199,6 +201,8 @@ public class ReturnTypeSubProcessor {
 			modifiedNode.setConstructor(false);
 			rewrite.markAsModified(methodDeclaration, modifiedNode);
 			
+			proposal.markAsLinked(rewrite, type, true, "return_type"); //$NON-NLS-1$
+			
 			proposal.ensureNoModifications();
 			proposals.add(proposal);
 			
@@ -243,9 +247,7 @@ public class ReturnTypeSubProcessor {
 				proposals.add(proposal);				
 			}
 		}
-		
 
-	
 	}
 
 }

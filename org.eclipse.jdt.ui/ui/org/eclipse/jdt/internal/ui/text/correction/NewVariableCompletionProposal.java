@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal {
 
@@ -35,25 +34,14 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 	private SimpleName fOriginalNode;
 	private ITypeBinding fSenderBinding;
 	
-	private GroupDescription fSelectionDescription;
-	
 	public NewVariableCompletionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, ITypeBinding senderBinding, int relevance, Image image) {
 		super(label, cu, null, relevance, image);
 	
 		fVariableKind= variableKind;
 		fOriginalNode= node;
 		fSenderBinding= senderBinding;
+	}
 		
-		fSelectionDescription= new GroupDescription("sel"); //$NON-NLS-1$
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
-	 */
-	protected GroupDescription getSelectionDescription() {
-		return fSelectionDescription;
-	}
-	
 	protected ASTRewrite getRewrite() throws CoreException {
 
 		CompilationUnit cu= ASTResolving.findParentCompilationUnit(fOriginalNode);
@@ -80,6 +68,11 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 			
 			rewrite.markAsInserted(newDecl);
 			((MethodDeclaration)decl).parameters().add(newDecl);
+			
+			markAsLinked(rewrite, node, true, "name"); //$NON-NLS-1$
+			markAsLinked(rewrite, newDecl.getType(), false, "type"); //$NON-NLS-1$
+			markAsLinked(rewrite, newDecl.getName(), false, "name"); //$NON-NLS-1$
+			
 			return rewrite;
 		}
 		return null;
@@ -93,27 +86,31 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration || decl instanceof Initializer) {
 			ASTRewrite rewrite= new ASTRewrite(decl);
-			
-			VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
-			VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
-			
-			Type type= evaluateVariableType(ast);
-			newDecl.setType(type);
-			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
-			newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, type, 0));
-			
+					
 			ASTNode parent= node.getParent();
 			if (parent.getNodeType() == ASTNode.ASSIGNMENT) {
 				Assignment assignment= (Assignment) parent;
 				if (node.equals(assignment.getLeftHandSide())) {
 					int parentParentKind= parent.getParent().getNodeType();
 					if (parentParentKind == ASTNode.EXPRESSION_STATEMENT) {
+						
+						// x = 1; -> int x = 1;
+						VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
+						VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
+						newDecl.setType(evaluateVariableType(ast));
+						
 						Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
 						newDeclFrag.setInitializer(placeholder);
-				
+						newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
 						rewrite.markAsReplaced(assignment.getParent(), newDecl);
+						
+						markAsLinked(rewrite, newDeclFrag.getName(), true, "name"); //$NON-NLS-1$	
+						markAsLinked(rewrite, newDecl.getType(), false, "type"); //$NON-NLS-1$
+
 						return rewrite;
 					} else if (parentParentKind == ASTNode.FOR_STATEMENT) {
+						//	for (x = 1;;) ->for (int x = 1;;)
+						
 						ForStatement forStatement= (ForStatement) parent.getParent();
 						if (forStatement.initializers().size() == 1 && assignment.equals(forStatement.initializers().get(0))) {
 							VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
@@ -124,14 +121,28 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 							expression.setType(evaluateVariableType(ast));
 							
 							rewrite.markAsReplaced(assignment, expression);
+							
+							markAsLinked(rewrite, frag.getName(), true, "name"); //$NON-NLS-1$	
+							markAsLinked(rewrite, expression.getType(), false, "type"); //$NON-NLS-1$
+							
 							return rewrite;
 						}			
 					}			
 				}
-			} else if (parent.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-				rewrite.markAsReplaced(parent, newDecl);
-				return rewrite;
 			}
+			//	foo(x) -> int x= 0; foo(x)
+			
+			VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
+			VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
+
+			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
+			newDecl.setType(evaluateVariableType(ast));
+			newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
+
+			markAsLinked(rewrite, node, true, "name"); //$NON-NLS-1$	
+			markAsLinked(rewrite, newDecl.getType(), false, "type"); //$NON-NLS-1$
+			markAsLinked(rewrite, newDeclFrag.getName(), false, "name"); //$NON-NLS-1$			
+
 			Statement statement= ASTResolving.findParentStatement(node);
 			if (statement != null) {
 				List list= ASTNodes.getContainingList(statement);
@@ -178,16 +189,19 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 			boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
 			List decls= isAnonymous ?  ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations() :  ((TypeDeclaration) newTypeDecl).bodyDeclarations();
 							
-			decls.add(findInsertIndex(decls, node.getStartPosition()), newDecl);
+			decls.add(findFieldInsertIndex(decls, node.getStartPosition()), newDecl);
+			rewrite.markAsInserted(newDecl);
 			
-			rewrite.markAsInserted(newDecl, fSelectionDescription);
+			markAsLinked(rewrite, node, true, "name"); //$NON-NLS-1$		
+			markAsLinked(rewrite, newDecl.getType(), false, "type"); //$NON-NLS-1$
+			markAsLinked(rewrite, fragment.getName(), false, "name"); //$NON-NLS-1$		
 			
 			return rewrite;
 		}
 		return null;
 	}
 	
-	private int findInsertIndex(List decls, int currPos) {
+	private int findFieldInsertIndex(List decls, int currPos) {
 		for (int i= decls.size() - 1; i >= 0; i--) {
 			ASTNode curr= (ASTNode) decls.get(i);
 			if (curr instanceof FieldDeclaration) {
