@@ -212,7 +212,7 @@
       id="org.eclipse.jdt.ui.CompilationUnitEditor"
       icon="icons/full/obj16/jcu_obj.gif"
       name="Java Editor"
-      extensions="jav, java"
+      extensions="java"
       class="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor"
       contributorClass="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditorActionContributor">
    </editor>
