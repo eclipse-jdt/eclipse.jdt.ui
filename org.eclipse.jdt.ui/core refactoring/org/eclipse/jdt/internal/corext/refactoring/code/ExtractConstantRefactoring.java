@@ -70,13 +70,14 @@ import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class ExtractConstantRefactoring extends Refactoring {
 
-	public static final String PUBLIC= "public"; //$NON-NLS-1$
-	public static final String PROTECTED= "protected"; //$NON-NLS-1$
-	public static final String PACKAGE= ""; //$NON-NLS-1$
-	public static final String PRIVATE= "private"; //$NON-NLS-1$
+	public static final String PUBLIC= 	JdtFlags.VISIBILITY_STRING_PUBLIC;
+	public static final String PROTECTED= JdtFlags.VISIBILITY_STRING_PROTECTED;
+	public static final String PACKAGE= 	JdtFlags.VISIBILITY_STRING_PACKAGE;
+	public static final String PRIVATE= 	JdtFlags.VISIBILITY_STRING_PRIVATE;
 
 	private static abstract class ExpressionChecker extends ASTVisitor {
 
@@ -234,6 +235,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private static final String MODIFIER= "static final"; //$NON-NLS-1$
+	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
 
 	private final int fSelectionStart;
 	private final int fSelectionLength;
@@ -292,10 +294,52 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return fAccessModifier;	
 	}
 
+	//XXX similar to code in ExtractTemp
 	public String guessConstantName() throws JavaModelException {
-		//TODO: add guessing
+		IExpressionFragment selectedFregment= getSelectedExpression();
+		if (selectedFregment == null)
+			return fConstantName;
+		Expression selected= selectedFregment.getAssociatedExpression();
+		if (selected instanceof MethodInvocation){
+			MethodInvocation mi= (MethodInvocation)selected;
+			for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
+				String proposal= tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], mi.getName().getIdentifier());
+				if (proposal != null)
+					return proposal;
+			}
+		}
 		return fConstantName;
 	}
+	
+	private static String tryTempNamePrefix(String prefix, String methodName){
+		if (isPrefixOk(prefix, methodName))
+			return splitByUpperCaseChars(methodName.substring(prefix.length())).toUpperCase();
+		else	
+			return null;
+	}
+
+	//XXX similar to code in ExtractTemp
+	private static boolean isPrefixOk(String prefix, String methodName){
+		if (! methodName.startsWith(prefix))
+			return false;
+		else if (methodName.length() <= prefix.length())
+			return false;
+		else if (! Character.isUpperCase(methodName.charAt(prefix.length())))
+			return false;
+		else 
+			return true;
+	}
+	
+    private static String splitByUpperCaseChars(String string) {
+    	StringBuffer buff= new StringBuffer(string.length());
+    	for (int i= 0, n= string.length(); i < n; i++) {
+			char c= string.charAt(i);
+			if (i != 0 && Character.isUpperCase(c))
+				buff.append('_');
+			buff.append(c);	
+        }
+    	return buff.toString();
+    }
 
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try {
