@@ -18,7 +18,6 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 	}
 	
 	protected Control createJavaContents(Composite ancestor) {
-		
 		noDefaultAndApplyButton();
 		Control vmSelector= fVMSelector.createContents(ancestor);
 		fVMSelector.initFromProject(getJavaProject());
@@ -48,5 +47,9 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 		if (getJavaProject() != null && isOpenProject())
 			setDescription("Select the JRE for running Java programs");
 	} 
+	
+	public void setVisible(boolean visible) {
+		setTitle("Java Runtime Environment");		
+	}
 
 }
