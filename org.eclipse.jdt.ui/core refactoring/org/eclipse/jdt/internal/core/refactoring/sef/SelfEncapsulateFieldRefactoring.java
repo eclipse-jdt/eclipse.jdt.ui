@@ -61,11 +61,10 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private List fUsedSetterNames;
 	private int fInsertionIndex;
 	
-	public SelfEncapsulateFieldRefactoring(IField field, ITextBufferChangeCreator creator, int tabWidth) {
+	public SelfEncapsulateFieldRefactoring(IField field, int tabWidth) {
 		fField= field;
 		Assert.isNotNull(fField);
 		fTabWidth= tabWidth;
-		Assert.isNotNull(creator);
 		fChangeManager= new TextChangeManager();
 		fChange= new CompositeChange(getName());
 		String proposal= createProposal();
