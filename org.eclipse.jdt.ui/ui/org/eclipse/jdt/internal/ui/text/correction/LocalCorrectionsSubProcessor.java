@@ -1,16 +1,15 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -23,15 +22,18 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 
 /**
   */
@@ -166,8 +168,6 @@ public class LocalCorrectionsSubProcessor {
 			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, start, end - start, "", 0); 
 			proposals.add(proposal);			
 		}
-		
-	
 	}
 
 	public static void addVoidMethodReturnsProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
@@ -243,4 +243,22 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
+	public static void addNLSProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		final ICompilationUnit cu= problemPos.getCompilationUnit();
+		String name= "Externalize Strings";
+		
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 0) {
+			public void apply(IDocument document) {
+				try {
+					NLSRefactoring refactoring= new NLSRefactoring(cu);
+					ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
+					String dialogTitle= "Externalize Strings";
+					new RefactoringStarter().activate(refactoring, wizard, dialogTitle, true);
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+			}
+		};
+		proposals.add(proposal);
+	}
 }

@@ -78,7 +78,12 @@ public class ChangeCorrectionProposal implements ICompletionProposal {
 		StringBuffer buf= new StringBuffer();
 		buf.append("<p>"); //$NON-NLS-1$
 		try {
-			buf.append(getChange().getName());
+			Change change= getChange();
+			if (change != null) {
+				buf.append(change.getName());
+			} else {
+				return null;
+			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			buf.append(getDisplayString());
