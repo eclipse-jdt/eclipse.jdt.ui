@@ -59,7 +59,7 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 			label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			
 			Button flatListButton= new Button(inner, SWT.CHECK);
-			flatListButton.setText("Show &types to group methods");
+			flatListButton.setText("Group methods by &types");
 			flatListButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 			
 			flatListButton.addSelectionListener(new SelectionListener() {
