@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2001 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 
 import org.eclipse.jdt.core.Flags;
@@ -31,6 +37,15 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 
+/**
+ * Analyzer to find all references to the field and to determine how to convert 
+ * them into setter or getter calls.
+ * 
+ * Contributors:
+ * 
+ * jens.lukowski@gmx.de: contributed code to convert prefix and postfix expressions
+ *   into a combination of setter and getter calls.
+ */
 class AccessAnalyzer extends ASTVisitor {
 
 	private ICompilationUnit fCUnit;
