@@ -136,5 +136,27 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 	public void testCuAddStringIntegerA() throws Exception {
 		performCuOK();
 	}
+		
+	public void testCuInferFromCast() throws Exception {
+		printTestDisabledMessage("not implemented yet");
+//		performCuOK();
+	}
 	
+	public void testCuRippleMethods() throws Exception {
+		performCuOK();
+	}
+	
+	public void testCuRippleMethods2() throws Exception {
+		performCuOK();
+	}
+	
+	public void testCuCannotStringDouble() throws Exception {
+		printTestDisabledMessage("not implemented yet");
+//		performCuOK();
+	}
+	
+	public void testCuRippleMethods3() throws Exception {
+		printTestDisabledMessage("not implemented yet");
+//		performCuOK();
+	}
 }

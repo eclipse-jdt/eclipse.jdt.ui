@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
@@ -180,8 +181,10 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 
 		if (methodBinding == null)
 			return; //TODO: emit error?
-
-		for (int i= 0, n= node.parameters().size(); i < n; i++) {
+		
+		int count= node.parameters().size();
+		CollectionElementVariable2[] parameterElementCvs= new CollectionElementVariable2[count];
+		for (int i= 0; i < count; i++) {
 			SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) node.parameters().get(i);
 			//parameterTypeVariable currently not used, but need to register in order to store source range
 			TypeConstraintVariable2 parameterTypeVariable= fTCModel.makeDeclaredParameterTypeVariable(methodBinding, i, fCU);
@@ -191,6 +194,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 			if (parameterElementCv == null)
 				continue;
 			
+			parameterElementCvs[i]= parameterElementCv;
 			ConstraintVariable2 typeCv= getConstraintVariable(paramDecl.getType());
 			CollectionElementVariable2 typeElementCv= fTCModel.getElementVariable(typeCv);
 			fTCModel.createEqualsConstraint(parameterElementCv, typeElementCv);
@@ -201,22 +205,57 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 			fTCModel.createEqualsConstraint(parameterElementCv, nameElementCv);
 		}
 		
-		if (! methodBinding.isConstructor()){
+		CollectionElementVariable2 returnTypeElementCv= null;
+		if (! methodBinding.isConstructor()) {
 			TypeConstraintVariable2 returnTypeBindingCv= fTCModel.makeDeclaredReturnTypeVariable(methodBinding, fCU);
 			if (returnTypeBindingCv != null) {
 				TypeConstraintVariable2 returnTypeCv= (TypeConstraintVariable2) getConstraintVariable(node.getReturnType2());
 				CollectionElementVariable2 returnTypeBindingElementCv= fTCModel.makeElementVariable(returnTypeBindingCv);
-				CollectionElementVariable2 returnTypeElementCv= fTCModel.getElementVariable(returnTypeCv);
+				returnTypeElementCv= fTCModel.getElementVariable(returnTypeCv);
 				fTCModel.createEqualsConstraint(returnTypeBindingElementCv, returnTypeElementCv);
 			}
 		}
-		if (MethodChecks.isVirtual(methodBinding)){
-			//TODO: RippleMethod constraints
-//			Collection constraintsForOverriding = getConstraintsForOverriding(methodBinding);
-//			result.addAll(constraintsForOverriding);
+		if (MethodChecks.isVirtual(methodBinding)) {
+			//TODO: RippleMethod constraints for corner cases: see testCuRippleMethods3, bug 41989
+			addConstraintsForOverriding(methodBinding, returnTypeElementCv, parameterElementCvs);
 		}
 	}
 	
+	private void addConstraintsForOverriding(IMethodBinding methodBinding, CollectionElementVariable2 returnTypeElementCv, CollectionElementVariable2[] parameterElementCvs) {
+		boolean hasParameterElementCvs= false;;
+		for (int i= 0; i < parameterElementCvs.length; i++)
+			if (parameterElementCvs[i] != null)
+				hasParameterElementCvs= true;
+		
+		if (returnTypeElementCv == null && ! hasParameterElementCvs)
+			return;
+		
+		String name= methodBinding.getName();
+		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+		
+		ITypeBinding[] allSuperTypes= Bindings.getAllSuperTypes(methodBinding.getDeclaringClass());
+		for (int i= 0; i < allSuperTypes.length; i++) {
+			ITypeBinding superType= allSuperTypes[i];
+			IMethodBinding superMethod= Bindings.findMethodInType(superType, name, parameterTypes);
+			if (superMethod == null)
+				continue;
+			
+			for (int p= 0; p < parameterElementCvs.length; p++) {
+				if (parameterElementCvs[p] == null)
+					continue;
+				ParameterTypeVariable2 parameterTypeVariable= fTCModel.makeParameterTypeVariable(superMethod, p);
+				CollectionElementVariable2 superParameterElementCv= fTCModel.makeElementVariable(parameterTypeVariable);
+				fTCModel.createEqualsConstraint(superParameterElementCv, parameterElementCvs[p]);
+			}
+			
+			if (returnTypeElementCv != null) {
+				ReturnTypeVariable2 returnTypeVariable= fTCModel.makeReturnTypeVariable(superMethod);
+				CollectionElementVariable2 superReturnElementCv= fTCModel.makeElementVariable(returnTypeVariable);
+				fTCModel.createEqualsConstraint(superReturnElementCv, returnTypeElementCv);
+			}
+		}
+	}
+
 	public void endVisit(MethodInvocation node) {
 		IMethodBinding methodBinding= node.resolveMethodBinding();
 		if (methodBinding == null)
