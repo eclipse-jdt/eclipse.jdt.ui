@@ -702,34 +702,50 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (!"equals".equals(method.getName().getIdentifier())) { //$NON-NLS-1$
 			return false;
 		}
-		Expression left= method.getExpression(); //always non-null
 		List arguments= method.arguments();
 		if (arguments.size() != 1) { //overloaded equals w/ more than 1 arg
 			return false;
 		}
 		Expression right= (Expression) arguments.get(0);
 		ITypeBinding binding = right.resolveTypeBinding();
-		if (!(binding.isClass() || binding.isInterface())) { //overloaded equals w/ non-class/interface arg
+		if (!(binding.isClass() || binding.isInterface())) { //overloaded equals w/ non-class/interface arg or null
 			return false;
 		}
-		
-		ASTRewrite rewrite= new ASTRewrite(method);
-		
-		if (left instanceof ParenthesizedExpression) {
-			Expression ex = ((ParenthesizedExpression) left).getExpression();
-			rewrite.markAsReplaced(right, rewrite.createCopy(ex));
+		Expression left= method.getExpression();
+
+		ASTRewrite rewrite;
+		if (left == null) { // equals(x) -> x.equals(this)
+			rewrite= new ASTRewrite(method.getParent());
+			AST ast= rewrite.getAST();
+			MethodInvocation replacement= ast.newMethodInvocation();
+			replacement.setName((SimpleName) rewrite.createCopy(method.getName()));
+			replacement.arguments().add(ast.newThisExpression());
+			replacement.setExpression((Expression) rewrite.createCopy(right));
+			rewrite.markAsReplaced(method, replacement);
+		} else if (right instanceof ThisExpression) { // x.equals(this) -> equals(x)
+			rewrite= new ASTRewrite(method.getParent());
+			MethodInvocation replacement= rewrite.getAST().newMethodInvocation();
+			replacement.setName((SimpleName) rewrite.createCopy(method.getName()));
+			replacement.arguments().add(rewrite.createCopy(left));
+			rewrite.markAsReplaced(method, replacement);
 		} else {
-			rewrite.markAsReplaced(right, left);
-		}
-		if ((right instanceof CastExpression)
-			|| (right instanceof Assignment)
-			|| (right instanceof ConditionalExpression)
-			|| (right instanceof InfixExpression)) {
-			ParenthesizedExpression paren = method.getAST().newParenthesizedExpression();
-			paren.setExpression((Expression) rewrite.createCopy(right));
-			rewrite.markAsReplaced(left, paren);
-		} else {
-			rewrite.markAsReplaced(left, right);	
+			rewrite= new ASTRewrite(method);
+			if (left instanceof ParenthesizedExpression) {
+				Expression ex= ((ParenthesizedExpression) left).getExpression();
+				rewrite.markAsReplaced(right, rewrite.createCopy(ex));
+			} else {
+				rewrite.markAsReplaced(right, rewrite.createCopy(left));
+			}
+			if ((right instanceof CastExpression)
+				|| (right instanceof Assignment)
+				|| (right instanceof ConditionalExpression)
+				|| (right instanceof InfixExpression)) {
+				ParenthesizedExpression paren= rewrite.getAST().newParenthesizedExpression();
+				paren.setExpression((Expression) rewrite.createCopy(right));
+				rewrite.markAsReplaced(left, paren);
+			} else {
+				rewrite.markAsReplaced(left, rewrite.createCopy(right));
+			}
 		}
 		
 		String label= CorrectionMessages.getString("QuickAssistProcessor.invertequals.description"); //$NON-NLS-1$
