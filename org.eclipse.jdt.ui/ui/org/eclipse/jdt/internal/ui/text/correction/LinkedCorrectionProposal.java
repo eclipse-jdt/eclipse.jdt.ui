@@ -51,7 +51,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ITrackedNodePosition;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
@@ -75,14 +75,14 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	private Map fLinkGroups;
 	private List fPositionOrder;
 
-	public LinkedCorrectionProposal(String name, ICompilationUnit cu, OldASTRewrite rewrite, int relevance, Image image) {
+	public LinkedCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, rewrite, relevance, image);
 		fSelectionDescription= null;
 		fLinkGroups= null;
 	}
 		
 	
-	public void markAsSelection(OldASTRewrite rewrite, ASTNode node) {
+	public void markAsSelection(ASTRewrite rewrite, ASTNode node) {
 		fSelectionDescription= rewrite.track(node);
 	}
 	
@@ -99,7 +99,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		getLinkedModeGroup(name).proposals.add(proposal);
 	}
 	
-	public void markAsLinked(OldASTRewrite rewrite, ASTNode node, boolean isFirst, String name) {
+	public void markAsLinked(ASTRewrite rewrite, ASTNode node, boolean isFirst, String name) {
 		ITrackedNodePosition position= rewrite.track(node);
 		getLinkedModeGroup(name).positions.add(position);
 		if (fPositionOrder == null) {

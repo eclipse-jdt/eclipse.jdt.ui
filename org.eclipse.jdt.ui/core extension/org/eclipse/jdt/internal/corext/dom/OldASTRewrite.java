@@ -34,50 +34,9 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Example:
- * <code>
- * void foo(int i, boolean b) {
- *     doSomething(x + 7 - y);
- * }
- *   MethodDeclaration existingDecl
- *   ASTRewrite rewrite= ASTRewrite(existingDecl);
- *   AST ast= existingDecl.getAST();
- * 
- *   // change return type to array of float
- *   ArrayType newReturnType= ast.newArrayType(ast.newPrimitiveType(PrimitiveType.FLOAT), 1);
- *   rewrite.markAsReplaced(existingDecl.getReturnType(), newReturnType);
- * 
- *   // change name
- *   SimpleName newName= ast.newSimpleName("work");
- *   rewrite.markAsReplaced(existingDecl.getName(), newName);
- *  
- *   // remove first parameter
- *   List parameters= existingDecl.parameters();
- *   rewrite.markAsRemoved((ASTNode) parameters.get(0));
- * 
- *   // add new throws declaration
- *   List thrownExceptions= existingDecl.thrownExceptions();
- *   SimpleName newException= ast.newSimpleName("IOException");
- *   thrownExceptions.add(newException);
- *   rewrite.markAsInserted(newException);
- * 
- *   // move statement inside if
- *   List statements= existingDecl.getBody().statements();
- *   
- *   Statement movedNode= (Statement) statements.get(0);
- *   Statement copyTarget= (Statement) rewrite.createCopy(movedNode);
- *   
- *   IfStatement newIfStatement= ast.newIfStatement();
- *   newIfStatement.setExpression(ast.newSimpleName("b"));
- *   newIfStatement.setThenStatement(copyTarget);
- * 
- *   rewrite.markAsReplaced(movedNode, newIfStatement);
- * 
- *   TextEdit resultingEdits= new MultiTextEdit();
- *   rewrite.rewriteNode(textBuffer, resultingEdits);
- *   </code>
+ * Original version of the ASTRewrite: Mix of modifying an decribing API.
+ * Move the ASTRewrite
  */
-
 public final class OldASTRewrite extends ASTRewrite {
 		
 	private HashMap fChangedProperties;
@@ -86,7 +45,7 @@ public final class OldASTRewrite extends ASTRewrite {
 	private ASTNode fRootNode;
 	
 	/**
-	 * Creates the <code>ASTRewrite</code> object.
+	 * Creates the <code>OldASTRewrite</code> object.
 	 * @param node A node which is parent to all modified, changed or tracked nodes.
 	 */
 	public OldASTRewrite(ASTNode node) {
@@ -245,7 +204,7 @@ public final class OldASTRewrite extends ASTRewrite {
 			
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node. ({@link #createCopy(ASTNode)})
+	 * create a copy target first and insert this target node. ({@link #createCopyTarget(ASTNode)})
 	 * @param node The node to be marked as inserted.
 	 * @param description Description of the change.
 	 */
@@ -261,7 +220,7 @@ public final class OldASTRewrite extends ASTRewrite {
 
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node. ({@link #createCopy(ASTNode)})
+	 * create a copy target first and insert this target node. ({@link #createCopyTarget(ASTNode)})
 	 * @param node The node to be marked as inserted.
 	 */
 	public final void markAsInserted(ASTNode node) {
@@ -295,33 +254,7 @@ public final class OldASTRewrite extends ASTRewrite {
 		
 		getRewriteEventStore().setTrackedNodeData(node, editGroup);
 	}	
-	
-	/**
-	 * Creates a target node for a node to be copied. A target node can be inserted or used
-	 * to replace at the target position. 
-	 * @param node
-	 * @return
-	 */
-	public final ASTNode createCopy(ASTNode node) {
-		return createCopyTarget(node);
-	}
-	
-	/**
-	 * Creates a target node for a node to be moved. A target node can be inserted or used
-	 * to replace at the target position. The source node will be marked as removed, but the user can also
-	 * override this by marking it as replaced.
-	 * @param node
-	 * @return
-	 */
-	public final ASTNode createMove(ASTNode node) {
-
-		return createMoveTarget(node);
-	}
-	
-	public final ASTNode createPlaceholder(String code, int nodeType) {
-		return createStringPlaceholder(code, nodeType);
-	}
-	
+		
 	/**
 	 * Succeeding nodes in a list are collapsed and represented by a new 'compound' node. The new compound node is inserted in the list
 	 * and replaces the collapsed node. The compound node can be used for rewriting, e.g. a copy can be created to move

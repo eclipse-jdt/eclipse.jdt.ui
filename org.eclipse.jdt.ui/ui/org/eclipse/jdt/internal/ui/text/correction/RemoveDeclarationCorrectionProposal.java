@@ -18,7 +18,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -98,20 +98,21 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected OldASTRewrite getRewrite() {
+	protected ASTRewrite getRewrite() {
 		IBinding binding= fName.resolveBinding();
 		CompilationUnit root= (CompilationUnit) fName.getRoot();
-		OldASTRewrite rewrite;
+		ASTRewrite rewrite;
 		if (binding.getKind() != IBinding.VARIABLE) {
 			ASTNode declaration= root.findDeclaringNode(binding);
-			rewrite= new OldASTRewrite(declaration.getParent());
+			rewrite= new ASTRewrite(root.getAST());
 			rewrite.remove(declaration, null);
 		} else { // variable
 			// needs full AST
-			CompilationUnit completeRoot= AST.parseCompilationUnit(getCompilationUnit(), true, null, null);
+			CompilationUnit completeRoot= JavaPlugin.getDefault().getASTProvider().getAST(getCompilationUnit(), true, null);
+
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fName.getStartPosition(), fName.getLength());
 
-			rewrite= new OldASTRewrite(completeRoot); 
+			rewrite= new ASTRewrite(completeRoot.getAST()); 
 			SimpleName[] references= LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding());
 			for (int i= 0; i < references.length; i++) {
 				removeVariableReferences(rewrite, references[i]);
@@ -156,7 +157,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	 * Remove the field or variable declaration including the initializer.
 	 * 
 	 */
-	private void removeVariableReferences(OldASTRewrite rewrite, SimpleName reference) {
+	private void removeVariableReferences(ASTRewrite rewrite, SimpleName reference) {
 		int nameParentType= reference.getParent().getNodeType();
 		if (nameParentType == ASTNode.ASSIGNMENT) {
 			Assignment assignment= (Assignment) reference.getParent();
@@ -166,7 +167,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			if (parent.getNodeType() == ASTNode.EXPRESSION_STATEMENT && rightHand.getNodeType() != ASTNode.ASSIGNMENT) {
 				removeVariableWithInitializer(rewrite, rightHand, parent);
 			}	else {
-				rewrite.replace(assignment, rewrite.createCopy(rightHand), null);
+				rewrite.replace(assignment, rewrite.createCopyTarget(rightHand), null);
 			}
 		} else if (nameParentType == ASTNode.SINGLE_VARIABLE_DECLARATION) {
 			rewrite.remove(reference.getParent(), null);
@@ -189,7 +190,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		}
 	}
 	
-	private void removeVariableWithInitializer(OldASTRewrite rewrite, ASTNode initializerNode, ASTNode statementNode) {
+	private void removeVariableWithInitializer(ASTRewrite rewrite, ASTNode initializerNode, ASTNode statementNode) {
 		ArrayList sideEffectNodes= new ArrayList();
 		initializerNode.accept(new SideEffectFinder(sideEffectNodes));
 		int nSideEffects= sideEffectNodes.size();

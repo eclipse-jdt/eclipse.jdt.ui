@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -73,7 +73,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 	}	
 				
-	protected OldASTRewrite getRewrite() throws CoreException {
+	protected ASTRewrite getRewrite() throws CoreException {
 		if (fVariableKind == FIELD) {
 			return doAddField();
 		} else { // LOCAL
@@ -81,16 +81,17 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 	}
 
-	private OldASTRewrite doAddLocal() throws CoreException {
+	private ASTRewrite doAddLocal() throws CoreException {
 		Expression expression= ((ExpressionStatement) fNodeToAssign).getExpression();
-		OldASTRewrite rewrite= new OldASTRewrite(fNodeToAssign.getParent());
 		AST ast= fNodeToAssign.getAST();
+		
+		ASTRewrite rewrite= new ASTRewrite(ast);
 
 		String varName= suggestLocalVariableNames(fTypeBinding);
 				
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 		newDeclFrag.setName(ast.newSimpleName(varName));
-		newDeclFrag.setInitializer((Expression) rewrite.createCopy(expression));
+		newDeclFrag.setInitializer((Expression) rewrite.createCopyTarget(expression));
 		
 		// trick for bug 43248: use an VariableDeclarationExpression and keep the ExpressionStatement
 		VariableDeclarationExpression newDecl= ast.newVariableDeclarationExpression(newDeclFrag);
@@ -107,7 +108,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		return rewrite;
 	}
 
-	private OldASTRewrite doAddField() throws CoreException {
+	private ASTRewrite doAddField() throws CoreException {
 		boolean isParamToField= fNodeToAssign.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION;
 			
 		ASTNode newTypeDecl= ASTResolving.findParentType(fNodeToAssign);
@@ -121,8 +122,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		ChildListPropertyDescriptor property=  isAnonymous ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
 		List decls= (List) newTypeDecl.getStructuralProperty(property);
 		
-		OldASTRewrite rewrite= new OldASTRewrite(newTypeDecl);
 		AST ast= newTypeDecl.getAST();
+		ASTRewrite rewrite= new ASTRewrite(ast);
 		
 		BodyDeclaration bodyDecl= ASTResolving.findParentBodyDeclaration(fNodeToAssign);
 		Block body;
@@ -151,7 +152,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		newDecl.setModifiers(modifiers);
 		
 		Assignment assignment= ast.newAssignment();
-		assignment.setRightHandSide((Expression) rewrite.createCopy(expression));
+		assignment.setRightHandSide((Expression) rewrite.createCopyTarget(expression));
 
 		boolean needsThis= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS);
 		if (isParamToField) {

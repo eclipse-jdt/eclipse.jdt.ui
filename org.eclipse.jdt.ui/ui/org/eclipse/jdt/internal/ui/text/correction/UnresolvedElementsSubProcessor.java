@@ -171,7 +171,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
-	private static void addNewVariableProposals(ICompilationUnit cu, Name node, SimpleName simpleName, Collection proposals) throws CoreException {
+	private static void addNewVariableProposals(ICompilationUnit cu, Name node, SimpleName simpleName, Collection proposals) {
 		String name= simpleName.getIdentifier();
 		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
 		int type= bodyDeclaration.getNodeType();
@@ -198,7 +198,6 @@ public class UnresolvedElementsSubProcessor {
 				String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.removestatement.description"); //$NON-NLS-1$
 				Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 4, image);
-				proposal.ensureNoModifications();
 				proposals.add(proposal);
 			}
 		}
@@ -597,7 +596,7 @@ public class UnresolvedElementsSubProcessor {
 		
 	}
 
-	private static void addMissingCastParentsProposal(ICompilationUnit cu, CastExpression expression, Expression accessExpression, SimpleName accessSelector, ITypeBinding[] paramTypes, Collection proposals) throws CoreException {
+	private static void addMissingCastParentsProposal(ICompilationUnit cu, CastExpression expression, Expression accessExpression, SimpleName accessSelector, ITypeBinding[] paramTypes, Collection proposals) {
 		ITypeBinding castType= expression.getType().resolveBinding();
 		if (castType == null) {
 			return;
@@ -620,18 +619,17 @@ public class UnresolvedElementsSubProcessor {
 			OldASTRewrite rewrite= new OldASTRewrite(expression.getParent());
 			CastExpression newCast= ast.newCastExpression();
 			newCast.setType((Type) ASTNode.copySubtree(ast, expression.getType()));
-			newCast.setExpression((Expression) rewrite.createCopy(accessExpression));
+			newCast.setExpression((Expression) rewrite.createCopyTarget(accessExpression));
 			ParenthesizedExpression parents= ast.newParenthesizedExpression();
 			parents.setExpression(newCast);
 			
-			ASTNode node= rewrite.createCopy(expression.getExpression());
+			ASTNode node= rewrite.createCopyTarget(expression.getExpression());
 			rewrite.replace(expression, node, null);
 			rewrite.replace(accessExpression, parents, null);
 
 			String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.missingcastbrackets.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 8, image);
-			proposal.ensureNoModifications();
 			proposals.add(proposal);				
 		}
 	}
@@ -690,7 +688,6 @@ public class UnresolvedElementsSubProcessor {
 			}			
 			AddArgumentCorrectionProposal proposal= new AddArgumentCorrectionProposal(label, context.getCompilationUnit(), invocationNode, indexSkipped, paramTypes, 8);
 			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD));
-			proposal.ensureNoModifications();
 			proposals.add(proposal);				
 		}
 		
@@ -806,7 +803,6 @@ public class UnresolvedElementsSubProcessor {
 			}			
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
-			proposal.ensureNoModifications();
 			proposals.add(proposal);				
 		}
 		
@@ -952,7 +948,6 @@ public class UnresolvedElementsSubProcessor {
 				ASTRewriteCorrectionProposal proposal= LocalCorrectionsSubProcessor.createCastProposal(context, castTypeName, nodeToCast, 6);
 				String[] arg= new String[] { getArgumentName(cu, arguments, idx), castTypeName};
 				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addargumentcast.description", arg)); //$NON-NLS-1$
-				proposal.ensureNoModifications();
 				proposals.add(proposal);
 			}
 		}
@@ -965,14 +960,13 @@ public class UnresolvedElementsSubProcessor {
 				Expression arg2= (Expression) arguments.get(idx2);
 				
 				OldASTRewrite rewrite= new OldASTRewrite(arg1.getParent());
-				rewrite.replace(arg1, rewrite.createCopy(arg2), null);
-				rewrite.replace(arg2, rewrite.createCopy(arg1), null);
+				rewrite.replace(arg1, rewrite.createCopyTarget(arg2), null);
+				rewrite.replace(arg2, rewrite.createCopyTarget(arg1), null);
 				{
 					String[] arg= new String[] { getArgumentName(cu, arguments, idx1), getArgumentName(cu, arguments, idx2) };
 					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.swaparguments.description", arg); //$NON-NLS-1$
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
-					proposal.ensureNoModifications();
 					proposals.add(proposal);					
 				}
 				
@@ -1080,7 +1074,6 @@ public class UnresolvedElementsSubProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
 		proposal.setImportRewrite(imports);
-		proposal.ensureNoModifications();
 		proposals.add(proposal);	
 	}
 	

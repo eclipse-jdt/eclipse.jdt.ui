@@ -19,13 +19,13 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  *  
  */
@@ -50,7 +50,9 @@ public class RenameNodeCompletionProposal extends CUCorrectionProposal {
 		
 		TextEdit root= getRootTextEdit();
 		
-		CompilationUnit unit= AST.parseCompilationUnit(getCompilationUnit(), true); // build a full AST
+		// build a full AST
+		CompilationUnit unit= JavaPlugin.getDefault().getASTProvider().getAST(getCompilationUnit(), true, null);
+
 		ASTNode name= NodeFinder.perform(unit, fOffset, fLength);
 		if (name instanceof SimpleName) {
 			

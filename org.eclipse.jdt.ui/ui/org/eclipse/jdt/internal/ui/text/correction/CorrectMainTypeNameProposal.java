@@ -19,10 +19,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -52,11 +53,19 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected OldASTRewrite getRewrite() throws CoreException {
+	protected ASTRewrite getRewrite() throws CoreException {
 		char[] content= getCompilationUnit().getBuffer().getCharacters();
-		CompilationUnit astRoot= AST.parseCompilationUnit(content, fOldName + ".java", getCompilationUnit().getJavaProject()); //$NON-NLS-1$
-		OldASTRewrite rewrite= new OldASTRewrite(astRoot);
+		
+		ASTParser astParser= ASTParser.newParser(AST.LEVEL_2_0);
+		astParser.setSource(content);
+		astParser.setUnitName(fOldName + ".java"); //$NON-NLS-1$
+		astParser.setProject(getCompilationUnit().getJavaProject());
+		astParser.setResolveBindings(true);
+		CompilationUnit astRoot= (CompilationUnit) astParser.createAST(null);
+		
 		AST ast= astRoot.getAST();
+		ASTRewrite rewrite= new ASTRewrite(ast);
+
 		TypeDeclaration decl= findTypeDeclaration(astRoot.types(), fOldName);
 		if (decl != null) {
 			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(astRoot, decl.getName());

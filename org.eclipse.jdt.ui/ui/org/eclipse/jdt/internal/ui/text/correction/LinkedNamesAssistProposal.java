@@ -31,7 +31,7 @@ import org.eclipse.jface.text.link.LinkedUIControl;
 import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.AST;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -70,8 +70,9 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
-			// create full ast
-			CompilationUnit root= AST.parseCompilationUnit(fCompilationUnit, true, null, null); // full AST needed
+			// get full ast
+			CompilationUnit root= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, true, null);
+
 			ASTNode nameNode= NodeFinder.perform(root, fNode.getStartPosition(), fNode.getLength());
 			final int pos= fNode.getStartPosition();
 			

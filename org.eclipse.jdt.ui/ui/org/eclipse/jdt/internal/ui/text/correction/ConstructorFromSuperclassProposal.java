@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -81,9 +81,10 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected OldASTRewrite getRewrite() throws CoreException {
-		OldASTRewrite rewrite= new OldASTRewrite(fTypeNode);
+	protected ASTRewrite getRewrite() throws CoreException {
 		AST ast= fTypeNode.getAST();
+		
+		ASTRewrite rewrite= new ASTRewrite(ast);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		if (!settings.createComments) {
 			settings= null;
@@ -97,7 +98,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		return rewrite;
 	}
 	
-	private void addLinkedRanges(OldASTRewrite rewrite, MethodDeclaration newStub) {
+	private void addLinkedRanges(ASTRewrite rewrite, MethodDeclaration newStub) {
 		List parameters= newStub.parameters();
 		for (int i= 0; i < parameters.size(); i++) {
 			SingleVariableDeclaration curr= (SingleVariableDeclaration) parameters.get(i);
@@ -107,7 +108,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		}
 	}	
 	
-	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, OldASTRewrite rewrite, CodeGenerationSettings commentSettings) throws CoreException {
+	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, ASTRewrite rewrite, CodeGenerationSettings commentSettings) throws CoreException {
 		String name= fTypeNode.getName().getIdentifier();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.setConstructor(true);
@@ -161,20 +162,20 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		String bodyStatement= (invocation == null) ? "" : ASTNodes.asFormattedString(invocation, 0, String.valueOf('\n')); //$NON-NLS-1$
 		String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), name, name, true, bodyStatement, String.valueOf('\n')); 	
 		if (placeHolder != null) {
-			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
+			ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
 			body.statements().add(todoNode);
 		}
 		if (commentSettings != null) {
 			String string= CodeGeneration.getMethodComment(getCompilationUnit(), name, decl, null, String.valueOf('\n'));
 			if (string != null) {
-				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTNode.JAVADOC);
+				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
 			}
 		}
 		return decl;
 	}
 	
-	private SuperConstructorInvocation addEnclosingInstanceAccess(OldASTRewrite rewrite, List parameters, String[] paramNames, ITypeBinding enclosingInstance) throws CoreException {
+	private SuperConstructorInvocation addEnclosingInstanceAccess(ASTRewrite rewrite, List parameters, String[] paramNames, ITypeBinding enclosingInstance) throws CoreException {
 		AST ast= rewrite.getAST();
 		SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
 		

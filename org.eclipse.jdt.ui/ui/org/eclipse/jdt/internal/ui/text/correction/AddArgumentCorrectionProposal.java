@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
@@ -49,9 +49,9 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected OldASTRewrite getRewrite() {
+	protected ASTRewrite getRewrite() {
 		AST ast= fCallerNode.getAST();
-		OldASTRewrite rewrite= new OldASTRewrite(fCallerNode);
+		ASTRewrite rewrite= new ASTRewrite(ast);
 		ChildListPropertyDescriptor property= getProperty();
 
 		for (int i= 0; i < fInsertIndexes.length; i++) {

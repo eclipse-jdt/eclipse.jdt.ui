@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ListRewrite;
 
@@ -53,7 +53,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		fSenderBinding= senderBinding;
 	}
 		
-	protected OldASTRewrite getRewrite() throws CoreException {
+	protected ASTRewrite getRewrite() throws CoreException {
 
 		CompilationUnit cu= ASTResolving.findParentCompilationUnit(fOriginalNode);
 		if (fVariableKind == PARAM) {
@@ -65,13 +65,13 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 	}
 
-	private OldASTRewrite doAddParam(CompilationUnit cu) throws CoreException {
+	private ASTRewrite doAddParam(CompilationUnit cu) throws CoreException {
 		AST ast= cu.getAST();
 		SimpleName node= fOriginalNode;
 
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration) {
-			OldASTRewrite rewrite= new OldASTRewrite(decl);
+			ASTRewrite rewrite= new ASTRewrite(ast);
 			
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
 			newDecl.setType(evaluateVariableType(ast));
@@ -113,7 +113,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 	}
 	
 
-	private OldASTRewrite doAddLocal(CompilationUnit cu) throws CoreException {
+	private ASTRewrite doAddLocal(CompilationUnit cu) throws CoreException {
 		AST ast= cu.getAST();
 		
 		Block body;
@@ -125,7 +125,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		} else {
 			return null;
 		}
-		OldASTRewrite rewrite= new OldASTRewrite(decl);
+		ASTRewrite rewrite= new ASTRewrite(ast);
 		
 		SimpleName[] names= getAllReferences(body);
 		ASTNode dominant= getDominantNode(names);
@@ -141,7 +141,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
 			newDecl.setType(evaluateVariableType(ast));
 			
-			Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
+			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			newDeclFrag.setInitializer(placeholder);
 			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
 			rewrite.replace(dominantStatement, newDecl, null);
@@ -160,7 +160,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
 			VariableDeclarationExpression expression= ast.newVariableDeclarationExpression(frag);
 			frag.setName(ast.newSimpleName(node.getIdentifier()));
-			Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
+			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			frag.setInitializer(placeholder);
 			expression.setType(evaluateVariableType(ast));
 			
@@ -255,21 +255,25 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		return parent;
 	}	
 
-	private OldASTRewrite doAddField(CompilationUnit astRoot) throws CoreException {
+	private ASTRewrite doAddField(CompilationUnit astRoot) throws CoreException {
 		SimpleName node= fOriginalNode;
 		boolean isInDifferentCU= false;
 		
 		ASTNode newTypeDecl= astRoot.findDeclaringNode(fSenderBinding);
 		if (newTypeDecl == null) {
-			astRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
+			ASTParser astParser= ASTParser.newParser(AST.LEVEL_2_0);
+			astParser.setSource(getCompilationUnit());
+			astParser.setResolveBindings(true);
+			astRoot= (CompilationUnit) astParser.createAST(null);
 			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 			isInDifferentCU= true;
 		}
 		
 		if (newTypeDecl != null) {
-			OldASTRewrite rewrite= new OldASTRewrite(astRoot);
-			
 			AST ast= newTypeDecl.getAST();
+			
+			ASTRewrite rewrite= new ASTRewrite(ast);
+
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setName(ast.newSimpleName(node.getIdentifier()));
 			

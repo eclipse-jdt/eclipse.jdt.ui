@@ -42,7 +42,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
@@ -114,14 +114,14 @@ public class ReorgCorrectionsSubProcessor {
 		}
 	}
 	
-	public static void removeImportStatementProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void removeImportStatementProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		final ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode != null) {
 			ASTNode node= ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
 			if (node instanceof ImportDeclaration) {
-				OldASTRewrite rewrite= new OldASTRewrite(node.getParent());
+				ASTRewrite rewrite= new ASTRewrite(node.getAST());
 
 				rewrite.remove(node, null);
 			
@@ -129,7 +129,6 @@ public class ReorgCorrectionsSubProcessor {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
 
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
-				proposal.ensureNoModifications();
 				proposals.add(proposal);
 			}
 		}

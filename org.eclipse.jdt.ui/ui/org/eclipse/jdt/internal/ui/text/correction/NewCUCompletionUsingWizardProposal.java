@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -36,6 +38,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Type;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -54,7 +58,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
  * If selected, this proposal will open a {@link NewClassCreationWizard} or
  * {@link NewInterfaceCreationWizard}.
  * 
- * @see UnresolvedElementsSubProcessor#getTypeProposals
+ * @see UnresolvedElementsSubProcessor#getTypeProposals(IInvocationContext, IProblemLocation, Collection)
  */
 
 public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal {
