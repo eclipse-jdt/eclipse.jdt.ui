@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -79,7 +80,7 @@ public class ModifierRewrite {
 				modifierRewrite= rewrite.getListRewrite(declNode, AnnotationTypeMemberDeclaration.MODIFIERS2_PROPERTY);
 				break;
 			default:
-				throw new IllegalArgumentException("node has no modfiers: " + declNode.getClass().getName()); //$NON-NLS-1$
+				throw new IllegalArgumentException("node has no modifiers: " + declNode.getClass().getName()); //$NON-NLS-1$
 		}
 		fModifierRewrite= modifierRewrite;
 		fAst= declNode.getAST();
@@ -100,10 +101,9 @@ public class ModifierRewrite {
 	public void setVisibility(int visibilityFlags, TextEditGroup editGroup) {
 		internalSetModifiers(visibilityFlags, VISIBILITY_MODIFIERS, editGroup);
 	}
-	
-	
+
 	private void internalSetModifiers(int modfiers, int consideredFlags, TextEditGroup editGroup) {
-		// remove modfiers
+		// remove modifiers
 		int newModifiers= modfiers & consideredFlags;
 		
 		List originalList= fModifierRewrite.getOriginalList();
@@ -119,18 +119,28 @@ public class ModifierRewrite {
 				}
 			}
 		}
+		// find last annotation
+		IExtendedModifier last= null;
+		List extendedList= fModifierRewrite.getRewrittenList();
+		for (int i= 0; i < extendedList.size(); i++) {
+			IExtendedModifier curr= (IExtendedModifier) extendedList.get(i);
+			if (!curr.isAnnotation())
+				last= curr;
+		}
+		
 		List newNodes= ASTNodeFactory.newModifiers(fAst, newModifiers);
 		
 		// add modifiers
 		for (int i= 0; i < newNodes.size(); i++) {
 			Modifier curr= (Modifier) newNodes.get(i);
 			if ((curr.getKeyword().toFlagValue() & VISIBILITY_MODIFIERS) != 0) {
-				fModifierRewrite.insertFirst(curr, editGroup);
+				if (last != null)
+					fModifierRewrite.insertBefore(curr, (ASTNode) last, editGroup);
+				else
+					fModifierRewrite.insertFirst(curr, editGroup);
 			} else {
 				fModifierRewrite.insertLast(curr, editGroup);
 			}
 		}
 	}
-	
-
 }
