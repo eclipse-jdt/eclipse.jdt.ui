@@ -230,6 +230,10 @@ public class MoveMembersTests extends RefactoringTest {
 		fieldMethodHelper_passingTest(new String[]{"FRED"}, new String[0], new String[0][0]);
 	}
 	
+	public void test25() throws Exception{
+		//printTestDisabledMessage("test for 27098");
+		fieldMethodHelper_passingTest(new String[]{"FRED"}, new String[0], new String[0][0]);
+	}
 	
 	
 	//---
