@@ -79,7 +79,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 public class JavaSearchResultPage extends AbstractTextSearchViewPage implements IAdaptable {
 	
-	public class DecoratorIgnoringViewerSorter extends ViewerSorter {
+	public static class DecoratorIgnoringViewerSorter extends ViewerSorter {
 
 		private final ILabelProvider fLabelProvider;
 
