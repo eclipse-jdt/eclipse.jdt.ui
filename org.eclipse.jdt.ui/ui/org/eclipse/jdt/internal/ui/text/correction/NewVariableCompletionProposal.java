@@ -159,6 +159,10 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		ASTNode dominant= getDominantNode(names);
 		
 		Statement dominantStatement= ASTResolving.findParentStatement(dominant);
+		if (ASTNodes.isControlStatementBody(dominantStatement.getLocationInParent())) {
+			dominantStatement= (Statement) dominantStatement.getParent();
+		}
+		
 		SimpleName node= names[0];
 		
 		if (isAssigned(dominantStatement, node)) {

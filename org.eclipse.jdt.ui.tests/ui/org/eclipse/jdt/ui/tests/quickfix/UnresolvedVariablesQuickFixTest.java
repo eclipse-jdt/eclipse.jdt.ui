@@ -162,6 +162,178 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });	
 	}
+	
+	public void testVarAssingmentInIfBody() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        if (vec != null)\n");
+		buf.append("            iter= vec.iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 4);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    private Iterator iter;\n");
+		buf.append("\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        if (vec != null)\n");
+		buf.append("            iter= vec.iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        Iterator iter;\n");
+		buf.append("        if (vec != null)\n");
+		buf.append("            iter= vec.iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec, Iterator iter) {\n");
+		buf.append("        if (vec != null)\n");
+		buf.append("            iter= vec.iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(3);
+		String preview4= getPreviewContent(proposal);
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        if (vec != null) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+	
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });	
+	}
+	
+	public void testVarAssingmentInThenBody() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        if (vec == null) {\n");
+		buf.append("        } else\n");
+		buf.append("            iter= vec.iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 4);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    private Iterator iter;\n");
+		buf.append("\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        if (vec == null) {\n");
+		buf.append("        } else\n");
+		buf.append("            iter= vec.iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        Iterator iter;\n");
+		buf.append("        if (vec == null) {\n");
+		buf.append("        } else\n");
+		buf.append("            iter= vec.iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec, Iterator iter) {\n");
+		buf.append("        if (vec == null) {\n");
+		buf.append("        } else\n");
+		buf.append("            iter= vec.iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(3);
+		String preview4= getPreviewContent(proposal);
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        if (vec == null) {\n");
+		buf.append("        } else {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+	
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });	
+	}
+
 
 	public void testVarInForInitializer() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
