@@ -28,6 +28,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -102,16 +103,27 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		boolean enabled= false;
 		try {
-			enabled= getSelectedType(selection) != null;
+			setEnabled(canEnable(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))
 				JavaPlugin.log(e);
+			setEnabled(false);
 		}
-		setEnabled(enabled);
-	}	
+	}
+	
+	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
+		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
+			IType type= (IType) selection.getFirstElement();
+			return type.getCompilationUnit() != null && type.isClass(); // look if class: not cheap but done by all source generation actions
+		}
+
+		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
+			return true;
+
+		return false;
+	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
@@ -120,7 +132,11 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		Shell shell= getShell();
 		try {
 			IType type= getSelectedType(selection);
-			if (type == null || !ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), type)) {
+			if (type == null) {
+				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
+				return;
+			}	
+			if (!ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), type)) {
 				return;
 			}
 			
@@ -159,7 +175,8 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		try {
 			IType type= SelectionConverter.getTypeAtOffset(fEditor);
 			if (type != null) {
-				if (!ElementValidator.check(type, shell, getDialogTitle(), false) || !ActionUtil.isProcessable(shell, type)) {
+				if (!ElementValidator.check(type, shell, getDialogTitle(), false) || !ActionUtil.isProcessable(shell, type) || type.isInterface()) {
+					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
 					return;
 				}						
 				run(shell, type, fEditor);
@@ -177,6 +194,10 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		OverrideMethodDialog dialog= new OverrideMethodDialog(shell, fEditor, type, false);
 
 		IMethod[] selected= null;
+		if (!dialog.hasMethodsToOverride()) {
+			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.nothing_found")); //$NON-NLS-1$
+			return;
+		}
 		int dialogResult= dialog.open();
 		if (dialogResult == Window.OK) {		
 			Object[] checkedElements= dialog.getResult();
@@ -232,6 +253,12 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			if (type.getCompilationUnit() != null && type.isClass()) {
 				return type;
 			}
+		}
+		else if (elements[0] instanceof ICompilationUnit) {
+			ICompilationUnit cu= (ICompilationUnit) elements[0];
+			IType type= cu.findPrimaryType();
+			if (!type.isInterface())
+				return type;
 		}
 		return null;
 	}

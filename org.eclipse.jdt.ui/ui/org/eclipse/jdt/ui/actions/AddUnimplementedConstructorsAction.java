@@ -32,6 +32,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -112,17 +113,28 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	 * Method declared on SelectionDispatchAction
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		boolean enabled= false;
 		try {
-			enabled= getSelectedType(selection) != null;
+			setEnabled(canEnable(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);			
+				JavaPlugin.log(e);
+			setEnabled(false);
 		}
-		setEnabled(enabled);
 	}
+	
+	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
+		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
+			IType type= (IType) selection.getFirstElement();
+			return type.getCompilationUnit() != null && type.isClass(); // look if class: not cheap but done by all source generation actions
+		}
 
+		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
+			return true;
+
+		return false;
+	}
+	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -131,6 +143,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		try {
 			IType type= getSelectedType(selection);
 			if (type == null) {
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.not_applicable")); //$NON-NLS-1$
 				return;
 			}		
 			// open an editor and work on a working copy
@@ -186,7 +199,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		}
 		if (!ActionUtil.isProcessable(getShell(), type)) {
 			return;		
-		}
+		}		
 
 		IMethod[] constructorMethods= StubUtility.getOverridableConstructors(type);
 		
@@ -271,6 +284,12 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			if (type.getCompilationUnit() != null && type.isClass()) {
 				return type;
 			}
+		}
+		else if (elements[0] instanceof ICompilationUnit) {
+			ICompilationUnit cu= (ICompilationUnit) elements[0];
+			IType type= cu.findPrimaryType();
+			if (type != null && !type.isInterface())
+				return type;
 		}
 		return null;
 	}	

@@ -112,7 +112,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private boolean fSort;
 	private boolean fSynchronized;
 	private boolean fFinal;	
-	private boolean fNative;
 	private boolean fGenerateComment;
 	private int fNumEntries;
 	private CompilationUnitEditor fEditor;
@@ -166,7 +165,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			IField[] selectedFields= getSelectedFields(selection);
-			if (canEnableOn(selectedFields)){
+			if (canRunOn(selectedFields)){
 				run(selectedFields[0].getDeclaringType(), selectedFields, false);
 				return;
 			}	
@@ -182,30 +181,22 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				
 	}
 	
-	private boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		if (canEnableOn(getSelectedFields(selection)))
+	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
+		if (getSelectedFields(selection) != null)
 			return true;
-			
-		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType))
-			return canEnableOn((IType)selection.getFirstElement());
+
+		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
+			IType type= (IType) selection.getFirstElement();
+			return type.getCompilationUnit() != null && type.isClass(); // look if class: not cheap but done by all source generation actions
+		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
-			return canEnableOn(((ICompilationUnit)selection.getFirstElement()).findPrimaryType());
+			return true;
 
-		return false;	
-	}
+		return false;
+	}	
 
-	private static boolean canEnableOn(IType type) throws JavaModelException {
-		if (type == null)
-			return false;
-		if (type.getFields().length == 0)
-			return false;
-		if (type.getCompilationUnit() == null)
-			return false;
-		return true;
-	}
-	
-	private static boolean canEnableOn(IField[] fields) throws JavaModelException {
+	private static boolean canRunOn(IField[] fields) throws JavaModelException {
 		return fields != null && fields.length > 0;
 	}
 	
@@ -249,7 +240,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				return;
 			fSort= dialog.getSort();
 			fSynchronized= dialog.getSynchronized();
-			fNative= dialog.getNative();
 			fFinal= dialog.getFinal();
 			fGenerateComment= dialog.getGenerateComment();
 			IField[] getterFields, setterFields, getterSetterFields;
@@ -479,6 +469,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		try {
 			IJavaElement input= SelectionConverter.getInput(fEditor);
+				
 			if (!ActionUtil.isProcessable(getShell(), input))
 				return;					
 			
@@ -492,7 +483,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			
 			if (element != null){
 				IType type= (IType)element.getAncestor(IJavaElement.TYPE);
-				if (type != null){
+				if (type != null) {
 					if (type.getFields().length > 0){
 						run(type, new IField[0], true);	
 						return;
@@ -545,7 +536,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		op.setVisibility(Modifier.PUBLIC);
 		op.setSynchronized(fSynchronized);
 		op.setFinal(fFinal);
-		op.setNative(fNative);
 	}
 
 	private AddGetterSetterOperation createAddGetterSetterOperation(IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IJavaElement elementPosition) {
@@ -781,7 +771,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		private boolean fSort;
 		private int fVisibility;
-		private boolean fNative;
 		private boolean fFinal;
 		private boolean fSynchronized;
 		private ITreeContentProvider fContentProvider;
@@ -804,11 +793,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		public boolean getFinal() {
 			return fFinal;
 		}		
-
-		public boolean getNative() {
-			return fNative;
-		}	
-		
+	
 		public boolean getSynchronized() {
 			return fSynchronized;
 		}					
@@ -873,14 +858,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					switch (modifier) {
 						case Modifier.FINAL: fFinal= isChecked; return;
 						case Modifier.SYNCHRONIZED: fSynchronized= isChecked; return;
-						case Modifier.NATIVE: fNative= isChecked; return;
 						default: return;
 					}
 				}
 			};
 			int correctVisibility= Modifier.PUBLIC;
 			int[] availableVisibilities= new int[]{Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.NONE};
-			int[] availableModifiers= new int[] {Modifier.FINAL, Modifier.SYNCHRONIZED, Modifier.NATIVE};
+			int[] availableModifiers= new int[] {Modifier.FINAL, Modifier.SYNCHRONIZED};
 			
 			Composite visibilityComposite= VisibilityControlUtil.createVisibilityControlAndModifiers(buttonComposite, visibilityChangeListener, availableVisibilities, correctVisibility, availableModifiers);
 			((GridData)visibilityComposite.getLayoutData()).horizontalSpan = 4;		
