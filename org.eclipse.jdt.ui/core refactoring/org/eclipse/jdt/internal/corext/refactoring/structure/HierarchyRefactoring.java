@@ -39,39 +39,28 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -98,111 +87,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
  * Partial implementation of a refactoring executed on type hierarchies.
  */
 public abstract class HierarchyRefactoring extends Refactoring {
-
-	/**
-	 * AST node visitor which performs the actual mapping.
-	 */
-	public static class MethodBodyMapper extends TypeVariableMapper {
-
-		/** Are we in an anonymous class declaration? */
-		protected boolean fAnonymousClassDeclaration= false;
-
-		/** The qualified type name where the super references are referring to */
-		protected final String fQualifiedName;
-
-		/** The source compilation unit rewrite to use */
-		protected final CompilationUnitRewrite fSourceRewriter;
-
-		/** The target compilation unit rewrite to use */
-		protected final CompilationUnitRewrite fTargetRewriter;
-
-		/** Are we in a type declaration statement? */
-		protected boolean fTypeDeclarationStatement= false;
-
-		/**
-		 * Creates a new method body mapper.
-		 * 
-		 * @param sourceRewriter
-		 *        the source compilation unit rewrite to use
-		 * @param targetRewriter
-		 *        the target compilation unit rewrite to use
-		 * @param rewrite
-		 *        the AST rewrite to use
-		 * @param type
-		 *        the super reference type
-		 * @param mapping
-		 *        the type variable mapping
-		 */
-		public MethodBodyMapper(final CompilationUnitRewrite sourceRewriter, final CompilationUnitRewrite targetRewriter, final ASTRewrite rewrite, final IType type, final TypeVariableMaplet[] mapping) {
-			super(rewrite, mapping);
-			Assert.isNotNull(rewrite);
-			Assert.isNotNull(type);
-			fSourceRewriter= sourceRewriter;
-			fTargetRewriter= targetRewriter;
-			fQualifiedName= JavaModelUtil.getFullyQualifiedName(type);
-		}
-
-		public final void endVisit(final AnonymousClassDeclaration node) {
-			fAnonymousClassDeclaration= false;
-			super.endVisit(node);
-		}
-
-		public final void endVisit(final TypeDeclarationStatement node) {
-			fTypeDeclarationStatement= false;
-			super.endVisit(node);
-		}
-
-		public final boolean visit(final AnonymousClassDeclaration node) {
-			fAnonymousClassDeclaration= true;
-			return super.visit(node);
-		}
-
-		public final boolean visit(final SuperFieldAccess node) {
-			if (!fAnonymousClassDeclaration && !fTypeDeclarationStatement) {
-				final AST ast= node.getAST();
-				final FieldAccess access= ast.newFieldAccess();
-				access.setExpression(ast.newThisExpression());
-				access.setName(ast.newSimpleName(node.getName().getIdentifier()));
-				fRewrite.replace(node, access, null);
-				if (!fSourceRewriter.getCu().equals(fTargetRewriter.getCu()))
-					fSourceRewriter.getImportRemover().registerRemovedNode(node);
-				return true;
-			}
-			return false;
-		}
-
-		public final boolean visit(final SuperMethodInvocation node) {
-			if (!fAnonymousClassDeclaration && !fTypeDeclarationStatement) {
-				final IBinding name= node.getName().resolveBinding();
-				if (name != null && name.getKind() == IBinding.METHOD) {
-					final ITypeBinding type= ((IMethodBinding) name).getDeclaringClass();
-					if (type != null && !fQualifiedName.equals(Bindings.getFullyQualifiedName(type)))
-						return true;
-				}
-				final AST ast= node.getAST();
-				final ThisExpression expression= ast.newThisExpression();
-				final MethodInvocation invocation= ast.newMethodInvocation();
-				final SimpleName simple= ast.newSimpleName(node.getName().getIdentifier());
-				invocation.setName(simple);
-				invocation.setExpression(expression);
-				final List arguments= (List) node.getStructuralProperty(SuperMethodInvocation.ARGUMENTS_PROPERTY);
-				if (arguments != null && arguments.size() > 0) {
-					final ListRewrite rewriter= fRewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
-					rewriter.insertLast(rewriter.createCopyTarget((ASTNode) arguments.get(0), (ASTNode) arguments.get(arguments.size() - 1)), null);
-				}
-				fRewrite.replace(node, invocation, null);
-				if (!fSourceRewriter.getCu().equals(fTargetRewriter.getCu()))
-					fSourceRewriter.getImportRemover().registerRemovedNode(node);
-				return true;
-			}
-			return false;
-		}
-
-		public final boolean visit(final TypeDeclarationStatement node) {
-			fTypeDeclarationStatement= true;
-			return super.visit(node);
-		}
-	}
 
 	/**
 	 * AST node visitor which performs the actual mapping.
@@ -445,9 +329,8 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		return JavaModelUtil.getFullyQualifiedName(type);
 	}
 
-	protected static void deleteDeclarationNodes(final CompilationUnitRewrite sourceRewriter, final CompilationUnitRewrite targetRewriter, final CompilationUnitRewrite unitRewriter, final List members) throws JavaModelException {
+	protected static void deleteDeclarationNodes(final CompilationUnitRewrite sourceRewriter, final boolean sameCu, final CompilationUnitRewrite unitRewriter, final List members) throws JavaModelException {
 		final List declarationNodes= getDeclarationNodes(unitRewriter.getRoot(), members);
-		final boolean sameCu= sourceRewriter.getCu().equals(targetRewriter.getCu());
 		for (final Iterator iterator= declarationNodes.iterator(); iterator.hasNext();) {
 			final ASTNode node= (ASTNode) iterator.next();
 			final ASTRewrite rewriter= unitRewriter.getASTRewrite();
@@ -456,17 +339,17 @@ public abstract class HierarchyRefactoring extends Refactoring {
 				if (node.getParent() instanceof FieldDeclaration) {
 					final FieldDeclaration declaration= (FieldDeclaration) node.getParent();
 					if (areAllFragmentsDeleted(declaration, declarationNodes)) {
-						rewriter.remove(declaration, null);
+						rewriter.remove(declaration, unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.remove_member"))); //$NON-NLS-1$
 						if (!sameCu)
 							remover.registerRemovedNode(declaration);
 					} else {
-						rewriter.remove(node, null);
+						rewriter.remove(node, unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.remove_member"))); //$NON-NLS-1$
 						if (!sameCu)
 							remover.registerRemovedNode(node);
 					}
 				}
 			} else {
-				rewriter.remove(node, null);
+				rewriter.remove(node, unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.remove_member"))); //$NON-NLS-1$
 				if (!sameCu)
 					remover.registerRemovedNode(node);
 			}
