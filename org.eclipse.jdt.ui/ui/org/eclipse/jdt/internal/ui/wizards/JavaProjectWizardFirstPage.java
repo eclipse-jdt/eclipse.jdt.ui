@@ -30,7 +30,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -46,6 +46,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
 
 /**
  * The first page of the <code>SimpleProjectWizard</code>.
@@ -113,15 +115,14 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	 */
 	private final class LocationGroup extends Observable implements Observer {
 
-		protected final Button fWorkspaceCheckbox;
+		protected final Button fWorkspaceRadio;
+		protected final Button fExternalRadio;
 		protected final Label fLocationLabel;
 		protected final Text fLocationField;
 		protected final Button fLocationButton;
 		protected String fExternalLocation;
 
 		public LocationGroup(Composite composite) {
-
-			final Font font= composite.getFont();
 
 			final int numColumns= 3;
 			
@@ -130,28 +131,32 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			final Group group= new Group(composite, SWT.NONE);
 			group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			group.setLayout(initGridLayout(new GridLayout(numColumns, false), true));
-			group.setFont(font);
 			group.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.title")); //$NON-NLS-1$
 
-			fWorkspaceCheckbox= new Button(group, SWT.CHECK | SWT.RIGHT);
-			fWorkspaceCheckbox.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.checkbox.desc")); //$NON-NLS-1$
-			fWorkspaceCheckbox.setSelection(true);
-			fWorkspaceCheckbox.setFont(font);
-
+			fWorkspaceRadio= new Button(group, SWT.RADIO | SWT.RIGHT);
+			fWorkspaceRadio.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.workspace.desc")); //$NON-NLS-1$
+			fWorkspaceRadio.setSelection(true);
+			
 			final GridData gd= new GridData();
 			gd.horizontalSpan= numColumns;
-			fWorkspaceCheckbox.setLayoutData(gd);
+			fWorkspaceRadio.setLayoutData(gd);
+			
+			fExternalRadio= new Button(group, SWT.RADIO | SWT.RIGHT);
+			fExternalRadio.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.external.desc")); //$NON-NLS-1$
+			fExternalRadio.setSelection(false);
+
+			final GridData gd2= new GridData();
+			gd2.horizontalSpan= numColumns;
+			fExternalRadio.setLayoutData(gd2);
 
 			fLocationLabel= new Label(group, SWT.NONE);
 			fLocationLabel.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.locationLabel.desc")); //$NON-NLS-1$
 			fLocationLabel.setEnabled(false);
-			fLocationLabel.setFont(font);
 			fLocationLabel.setLayoutData(new GridData());
 
 			fLocationField= new Text(group, SWT.BORDER);
 			fLocationField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fLocationField.setEnabled(false);
-			fLocationField.setFont(font);
 			fLocationField.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
 					if (fLocationField.getEnabled()) {
@@ -170,7 +175,6 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			setButtonLayoutData(fLocationButton);
 			fLocationButton.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.browseButton.desc")); //$NON-NLS-1$
 			fLocationButton.setEnabled(false);
-			fLocationButton.setFont(font);
 			fLocationButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					final DirectoryDialog dialog= new DirectoryDialog(fLocationField.getShell());
@@ -189,9 +193,9 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 					}
 				}
 			});
-			fWorkspaceCheckbox.addSelectionListener(new SelectionAdapter() {
+			fWorkspaceRadio.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					final boolean checked= fWorkspaceCheckbox.getSelection();
+					final boolean checked= fWorkspaceRadio.getSelection();
 					fLocationLabel.setEnabled(!checked);
 					fLocationField.setEnabled(!checked);
 					fLocationButton.setEnabled(!checked);
@@ -222,7 +226,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		 *      java.lang.Object)
 		 */
 		public void update(Observable o, Object arg) {
-			if (fWorkspaceCheckbox.getSelection()) {
+			if (fWorkspaceRadio.getSelection()) {
 				fLocationField.setText(getDefaultPath(fNameGroup.getName()));
 			}
 			fireEvent();
@@ -236,16 +240,16 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 
 		public boolean isInWorkspace() {
-			return fWorkspaceCheckbox.getSelection();
+			return fWorkspaceRadio.getSelection();
 		}
 	}
 
 	/**
 	 * Request a project layout.
 	 */
-	private final class LayoutGroup implements Observer {
+	private final class LayoutGroup implements Observer, SelectionListener {
 
-		protected final Button fStdRadio, fSrcBinRadio;
+		protected final Button fStdRadio, fSrcBinRadio, fConfigureButton;
 		protected final Group fGroup;
 		
 		public LayoutGroup(Composite composite) {
@@ -254,21 +258,24 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fGroup.setLayout(initGridLayout(new GridLayout(), true));
 			fGroup.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.title")); //$NON-NLS-1$
-			fGroup.setFont(composite.getFont());
+			
+			fStdRadio= new Button(fGroup, SWT.RADIO);
+			fStdRadio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			fStdRadio.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.option.oneFolder")); //$NON-NLS-1$
 			
 			fSrcBinRadio= new Button(fGroup, SWT.RADIO);
-			fSrcBinRadio.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
+			fSrcBinRadio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fSrcBinRadio.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.option.separateFolders")); //$NON-NLS-1$
-			fSrcBinRadio.setFont(composite.getFont());
 						
-			fStdRadio= new Button(fGroup, SWT.RADIO);
-			fStdRadio.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
-			fStdRadio.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.option.oneFolder")); //$NON-NLS-1$
-			fStdRadio.setFont(composite.getFont());
-
 			boolean useSrcBin= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ);
 			fSrcBinRadio.setSelection(useSrcBin);
 			fStdRadio.setSelection(!useSrcBin);
+			
+			fConfigureButton= new Button(composite, SWT.PUSH);
+			fConfigureButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+			fConfigureButton.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.configure")); //$NON-NLS-1$
+			fConfigureButton.addSelectionListener(this);
+			
 		}
 
 		public void update(Observable o, Object arg) {
@@ -280,6 +287,21 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		
 		public boolean isSrcBin() {
 			return fSrcBinRadio.getSelection();
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+		 */
+		public void widgetSelected(SelectionEvent e) {
+			if (e.widget == fConfigureButton) {
+				PreferencePageSupport.showPreferencePage(getShell(), NewJavaProjectPreferencePage.ID, new NewJavaProjectPreferencePage());
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+		 */
+		public void widgetDefaultSelected(SelectionEvent e) {
 		}
 	}
 

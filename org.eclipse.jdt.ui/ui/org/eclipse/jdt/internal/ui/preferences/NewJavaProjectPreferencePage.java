@@ -69,6 +69,8 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
  */
 public class NewJavaProjectPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
+	public static final String ID= "org.eclipse.jdt.ui.preferences.NewJavaProjectPreferencePage"; //$NON-NLS-1$
+	
 	private static final String SRCBIN_FOLDERS_IN_NEWPROJ= PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ;
 	private static final String SRCBIN_SRCNAME= PreferenceConstants.SRCBIN_SRCNAME;
 	private static final String SRCBIN_BINNAME= PreferenceConstants.SRCBIN_BINNAME;
@@ -232,6 +234,9 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(PreferencesMessages.getString("NewJavaProjectPreferencePage.description")); //$NON-NLS-1$
 	
+		// title used when opened programatically
+		setTitle(PreferencesMessages.getString("NewJavaProjectPreferencePage.title")); //$NON-NLS-1$
+		
 		fRadioButtons= new ArrayList();
 		fCheckBoxes= new ArrayList();
 		fTextControls= new ArrayList();
