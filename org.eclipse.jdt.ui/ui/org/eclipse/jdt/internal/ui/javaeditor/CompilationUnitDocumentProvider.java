@@ -62,11 +62,9 @@ import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
-import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -630,48 +628,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 		};
 		
 		
-		/**
-		 * Creates <code>IBuffer</code>s based on documents.
-		 */
-		protected class BufferFactory implements IBufferFactory {
-			
-			private IDocument internalGetDocument(IFileEditorInput input) throws CoreException {
-				IDocument document= getDocument(input);
-				if (document != null)
-					return document;
-				return CompilationUnitDocumentProvider.this.createDocument(input);
-			}
-			
-			public IBuffer createBuffer(IOpenable owner) {
-				if (owner instanceof ICompilationUnit) {
-					
-					ICompilationUnit unit= (ICompilationUnit) owner;
-					ICompilationUnit original= (ICompilationUnit) unit.getOriginalElement();
-					IResource resource= original.getResource();
-					if (resource instanceof IFile) {
-						IFileEditorInput providerKey= new FileEditorInput((IFile) resource);
-						
-						IDocument document= null;
-						IStatus status= null;
-						
-						try {
-							document= internalGetDocument(providerKey);
-						} catch (CoreException x) {
-							status= x.getStatus();
-							document= new Document();
-							initializeDocument(document);
-						}
-						
-						DocumentAdapter adapter= new DocumentAdapter(unit, document, new DefaultLineTracker(), CompilationUnitDocumentProvider.this, providerKey);
-						adapter.setStatus(status);
-						return adapter;
-					}
-						
-				}
-				return DocumentAdapter.NULL;
-			}
-		};
-		
 		protected static class GlobalAnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
 			
 			private ListenerList fListenerList;
@@ -775,7 +731,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 	
 	
 	/** The buffer factory */
-	private IBufferFactory fBufferFactory= new BufferFactory();
+	private IBufferFactory fBufferFactory= new CustomBufferFactory();
 	/** Indicates whether the save has been initialized by this provider */
 	private boolean fIsAboutToSave= false;
 	/** The save policy used by this provider */
@@ -854,7 +810,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 				
 				IAnnotationModel m= createCompilationUnitAnnotationModel(input);
 				IProblemRequestor r= m instanceof IProblemRequestor ? (IProblemRequestor) m : null;
-				ICompilationUnit c= (ICompilationUnit) original.getSharedWorkingCopy(getProgressMonitor(), fBufferFactory, r);
+				
+				ICompilationUnit c= null;
+				if (JavaPlugin.USE_WORKING_COPY_OWNERS)  {
+					original.becomeWorkingCopy(r, getProgressMonitor());
+					c= original;
+				} else  {
+					c= (ICompilationUnit) original.getSharedWorkingCopy(getProgressMonitor(), fBufferFactory, r);
+				}
 				
 				DocumentAdapter a= null;
 				try {
@@ -895,7 +858,19 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 		
 		if (info instanceof CompilationUnitInfo) {
 			CompilationUnitInfo cuInfo= (CompilationUnitInfo) info;
-			cuInfo.fCopy.destroy();
+			
+			if (JavaPlugin.USE_WORKING_COPY_OWNERS)  {
+				
+				try  {
+					cuInfo.fCopy.discardWorkingCopy();
+				} catch (JavaModelException x)  {
+					handleCoreException(x, x.getMessage());
+				}
+			
+			} else  {
+				cuInfo.fCopy.destroy();
+			}
+			
 			cuInfo.fModel.removeAnnotationModelListener(fGlobalAnnotationModelListener);
 		}
 		
@@ -932,9 +907,15 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			// inform about the upcoming content change
 			fireElementStateChanging(element);	
 			try {
+				
 				fIsAboutToSave= true;
+				
 				// commit working copy
-				info.fCopy.commit(overwrite, monitor);
+				if (JavaPlugin.USE_WORKING_COPY_OWNERS)
+					info.fCopy.commitWorkingCopy(overwrite, monitor);
+				else
+					info.fCopy.commit(overwrite, monitor);
+					
 			} catch (CoreException x) {
 				// inform about the failure
 				fireElementStateChangeFailed(element);

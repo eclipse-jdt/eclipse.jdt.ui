@@ -59,11 +59,13 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.CustomBufferFactory;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
@@ -76,8 +78,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
  * of the plugin such as document providers and find-replace-dialogs.
  */
 public class JavaPlugin extends AbstractUIPlugin {
-
-		
+	
+	/** temporarily */
+	public static final boolean USE_WORKING_COPY_OWNERS= false;
+	
+	
 	private static JavaPlugin fgJavaPlugin;
 
 	private IWorkingCopyManager fWorkingCopyManager;
@@ -218,7 +223,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public void startup() throws CoreException {
 		super.startup();
 		registerAdapters();
-
+		
+		if (USE_WORKING_COPY_OWNERS)
+			DefaultWorkingCopyOwner.PRIMARY.factory= new CustomBufferFactory();
 
 		/*
 		 * Backward compatibility: propagate the Java editor font from a
