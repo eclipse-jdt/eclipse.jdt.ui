@@ -11,10 +11,10 @@
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -23,26 +23,35 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
@@ -76,10 +85,14 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class PropertyKeyHyperlink implements IHyperlink {
 
 	
-	private static class KeyReference extends PlatformObject implements IWorkbenchAdapter {
+	private static class KeyReference extends PlatformObject implements IWorkbenchAdapter, Comparable {
+		
+		private static final Collator fgCollator= Collator.getInstance();
+		
 		private IStorage storage;
 		private int offset;
 		private int length;
+
 	
 		private KeyReference(IStorage storage, int offset, int length) {
 			Assert.isNotNull(storage);
@@ -116,14 +129,45 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
 		 */
 		public String getLabel(Object o) {
-			Object[] args= new Object[] { storage.getFullPath(), new Integer(offset), new Integer(length) }; 
-			return PropertiesFileEditorMessages.getFormattedString("OpenAction.SelectionDialog.elementLabel", args); //$NON-NLS-1$
+			
+			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+			try {
+				manager.connect(storage.getFullPath(), null);
+				try {
+					ITextFileBuffer buffer= manager.getTextFileBuffer(storage.getFullPath());
+					IDocument document= buffer.getDocument();
+					if (document != null) {
+						int line= document.getLineOfOffset(offset) + 1;
+						Object[] args= new Object[] { new Integer(line), storage.getFullPath() };
+						return PropertiesFileEditorMessages.getFormattedString("OpenAction.SelectionDialog.elementLabel", args); //$NON-NLS-1$
+					}
+				} finally {
+					manager.disconnect(storage.getFullPath(), null);
+				}
+			} catch (CoreException e) {
+				JavaPlugin.log(e.getStatus());
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			}
+			
+			return storage.getFullPath().toString();
 		}
 		/*
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getParent(java.lang.Object)
 		 */
 		public Object getParent(Object o) {
 			return null;
+		}
+
+		public int compareTo(Object o) {
+			KeyReference otherRef= (KeyReference)o;
+			String thisPath= storage.getFullPath().toString();
+			String otherPath= otherRef.storage.getFullPath().toString();
+			int result= fgCollator.compare(thisPath, otherPath);
+			if (result != 0)
+				return result;
+			else
+				return offset - otherRef.offset;
 		}
 	}
 
@@ -241,8 +285,42 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			open(select(keyReferences));
 	}
 	
-	private KeyReference select(KeyReference[] keyReferences) {
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(fShell, new WorkbenchLabelProvider());
+	/**
+	 * Opens a dialog which allows to select a key reference.  
+	 * <p>
+	 * FIXME: The lower pane is currently not sorted due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=84220
+	 * </p>
+	 * 
+	 * @param keyReferences the array of key references
+	 * @return the selected key reference or <code>null</code> if canceled by the user
+	 */
+	private KeyReference select(final KeyReference[] keyReferences) {
+		Arrays.sort(keyReferences);
+		final int length= keyReferences.length;
+		ILabelProvider labelProvider= new WorkbenchLabelProvider() {
+			public String decorateText(String input, Object element) {
+				KeyReference keyRef= (KeyReference)element;
+				IStorage storage= keyRef.storage;
+				String name= storage.getName();
+				if (name == null)
+					return input;
+				
+				int count= 0;
+				for (int i= 0; i < length; i++) {
+					if (keyReferences[i].storage.equals(storage))
+						count++;
+				}
+				if (count > 1) {
+					Object[] args= new Object[] { name, new Integer(count) };
+					name= PropertiesFileEditorMessages.getFormattedString("OpenAction.SelectionDialog.elementLabelWithMatchCount", args); //$NON-NLS-1$
+				}
+				
+				return name;
+			}
+		};
+		
+		TwoPaneElementSelector dialog= new TwoPaneElementSelector(fShell, labelProvider, new WorkbenchLabelProvider());
+		dialog.setLowerListLabel(PropertiesFileEditorMessages.getString("OpenAction.SelectionDialog.details")); //$NON-NLS-1$
 		dialog.setMultipleSelection(false);
 		dialog.setTitle(PropertiesFileEditorMessages.getString("OpenAction.SelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(PropertiesFileEditorMessages.getString("OpenAction.SelectionDialog.message")); //$NON-NLS-1$
