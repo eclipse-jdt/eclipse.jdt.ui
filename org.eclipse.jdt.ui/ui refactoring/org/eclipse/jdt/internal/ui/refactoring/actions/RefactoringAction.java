@@ -11,7 +11,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 
-public abstract class RefactoringAction extends Action {
+public abstract class RefactoringAction extends Action implements IRefactoringAction {
 	
 	private StructuredSelectionProvider fProvider;
 	

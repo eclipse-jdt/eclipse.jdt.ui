@@ -13,7 +13,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public abstract class TextSelectionBasedRefactoringAction extends TextSelectionAction{
+public abstract class TextSelectionBasedRefactoringAction extends TextSelectionAction implements IRefactoringAction{
 
 	protected TextSelectionBasedRefactoringAction(String name) {
 		super(name);
@@ -23,7 +23,7 @@ public abstract class TextSelectionBasedRefactoringAction extends TextSelectionA
 	 * Method declared in IAction.
 	 */
 	public void run() {
-	try{
+		try{
 			Refactoring refactoring= createRefactoring(getCompilationUnit(), getTextSelection());
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getMessageDialogTitle(), false);
 		} catch (JavaModelException e){
