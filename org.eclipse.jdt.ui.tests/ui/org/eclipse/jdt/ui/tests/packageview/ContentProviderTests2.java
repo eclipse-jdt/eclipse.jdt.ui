@@ -103,88 +103,88 @@ public class ContentProviderTests2 extends TestCase{
 	}
 	
 	public void testGetChildrenProject() throws Exception{
-		Object[] expectedChildren= new Object[]{fPack1, fPack2, fPack3, fRoot1.getPackageFragment(""), fFile1, fFile2,fInternalRoot1,jdk};
+		Object[] expectedChildren= new Object[]{fPack1, fPack2, fPack3, fRoot1.getPackageFragment(""), fFile1, fFile2,fInternalRoot1,jdk}; //$NON-NLS-1$
 		Object[] children= fProvider.getChildren(fJProject3);
-		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));
+		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 	
 	public void testGetChildrentMidLevelFragment() throws Exception{
 		Object[] expectedChildren= new Object[]{fPack4, fPack5};
 		Object[] children= fProvider.getChildren(fPack3);
-		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));
+		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 	
 	public void testGetChildrenBottomLevelFragment() throws Exception{
 		Object[] expectedChildren= new Object[]{};
 		Object[] children= fProvider.getChildren(fPack1);
-		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));
+		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 	
 	public void testGetChildrenBottomLevelFragmentWithCU() throws Exception{
 		Object[] expectedChildren= new Object[]{fCU1};
 		Object[] children= fProvider.getChildren(fPack2);
-		assertTrue("Wrong children found for PackageFragment with CU",compareArrays(children, expectedChildren));
+		assertTrue("Wrong children found for PackageFragment with CU",compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 	
 	public void testGetChildrenBottomLevelFragmentFile() throws Exception{
 		Object[] expectedChildren= new Object[]{};
 		Object[] children= fProvider.getChildren(fPack1);
-		assertTrue("Wrong children found for PackageFragment with File",compareArrays(children, expectedChildren));
+		assertTrue("Wrong children found for PackageFragment with File",compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 	
 	public void testGetChildrenBottomLevelFragment2() throws Exception{
 		Object[] expectedChildren= new Object[]{fCU2};
 		Object[] children= fProvider.getChildren(fPack6);
-		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));
+		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 
 	public void testGetChildrenMidLevelFragmentInInternalArchive() throws Exception{
 		Object[] expectedChildren= new Object[]{fC};
 		Object[] children= fProvider.getChildren(fB);
-		assertTrue("wrong children found for a NON bottom PackageFragment in PackageFragmentRoot Internal Archive", compareArrays(children, expectedChildren));
+		assertTrue("wrong children found for a NON bottom PackageFragment in PackageFragmentRoot Internal Archive", compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
 
 	public void testGetChildrenBottomLevelFragmentInInternalArchive() throws Exception{
 		Object[] expectedChildren= new Object[]{fYClassFile};
 		Object[] children= fProvider.getChildren(fY);
-		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Internal Archive", compareArrays(children, expectedChildren));	
+		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Internal Archive", compareArrays(children, expectedChildren));	//$NON-NLS-1$
 	}
 	
 	public void getChildrenInternalArchive() throws Exception{
-		Object[] expectedChildren= new Object[]{fX,fA, fInternalRoot1.getPackageFragment("")};
+		Object[] expectedChildren= new Object[]{fX,fA, fInternalRoot1.getPackageFragment("")}; //$NON-NLS-1$
 		Object[] children= fProvider.getChildren(fInternalRoot1);	
-		assertTrue("Wrong child found for PackageFragmentRoot Internal Archive", compareArrays(children,expectedChildren));
+		assertTrue("Wrong child found for PackageFragmentRoot Internal Archive", compareArrays(children,expectedChildren));//$NON-NLS-1$
 	}
 	
 	//---------------Get Parent Tests-----------------------------
 	
 	public void testGetParentArchive() throws Exception{
 		Object parent= fProvider.getParent(fInternalRoot1);
-		assertTrue("Wrong parent found for PackageFragmentRoot Archive", parent==null);
+		assertTrue("Wrong parent found for PackageFragmentRoot Archive", parent==null); //$NON-NLS-1$
 	}
 
 	public void testGetParentMidLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fB;
 		Object parent= fProvider.getParent(fC);
-		assertTrue("Wrong parent found for a NON top level PackageFragment in an Archive", expectedParent.equals(parent));
+		assertTrue("Wrong parent found for a NON top level PackageFragment in an Archive", expectedParent.equals(parent)); //$NON-NLS-1$
 	}	
 	
 	public void testGetParentTopLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fInternalRoot1;
 		Object parent= fProvider.getParent(fA);
-		assertTrue("Wrong parent found for a top level PackageFragment in an Archive", expectedParent.equals(parent));	
+		assertTrue("Wrong parent found for a top level PackageFragment in an Archive", expectedParent.equals(parent));	 //$NON-NLS-1$
 	}
 	
 	public void testGetParentTopLevelFragment() throws Exception{
 		Object expectedParent= fJProject3;
 		Object parent= fProvider.getParent(fPack3);
-		assertTrue("Wrong parent found for a top level PackageFragment", expectedParent.equals(parent));
+		assertTrue("Wrong parent found for a top level PackageFragment", expectedParent.equals(parent)); //$NON-NLS-1$
 	}
 	
 	public void testGetParentMidLevelFragment() throws Exception{
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack5);
-		assertTrue("Wrong parent found for a NON top level PackageFragment", expectedParent.equals(parent));
+		assertTrue("Wrong parent found for a NON top level PackageFragment", expectedParent.equals(parent)); //$NON-NLS-1$
 	}
 	
 	
@@ -205,17 +205,17 @@ public class ContentProviderTests2 extends TestCase{
 			JavaProjectHelper.setAutoBuilding(false);
 		
 		//create project
-		fJProject3= JavaProjectHelper.createJavaProject("TestProject3", "bin");
-		assertNotNull("project3 null", fJProject3);
+		fJProject3= JavaProjectHelper.createJavaProject("TestProject3", "bin"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertNotNull("project3 null", fJProject3); //$NON-NLS-1$
 		
 		Object[] resource= fJProject3.getNonJavaResources();
 		for (int i = 0; i < resource.length; i++) {
 			Object object = resource[i];
 			if(object instanceof IFile){
 				IFile file = (IFile) object;
-				if(".classpath".equals(file.getName()))
+				if(".classpath".equals(file.getName())) //$NON-NLS-1$
 					fFile1= file;
-				else if (".project".equals(file.getName()))
+				else if (".project".equals(file.getName())) //$NON-NLS-1$
 					fFile2= file;
 			}
 		}
@@ -223,39 +223,39 @@ public class ContentProviderTests2 extends TestCase{
 		assertNotNull(fFile2);
 
 		//add rt.jar
-		jdk= JavaProjectHelper.addVariableRTJar(fJProject3, "JRE_LIB_TEST", null, null);
-		assertTrue("jdk not found", jdk != null);
+		jdk= JavaProjectHelper.addVariableRTJar(fJProject3, "JRE_LIB_TEST", null, null); //$NON-NLS-1$
+		assertTrue("jdk not found", jdk != null); //$NON-NLS-1$
 		
 		//create the PackageFragmentRoot that represents the project as source folder
-		fRoot1= JavaProjectHelper.addSourceContainer(fJProject3, "");
-		assertNotNull("getting default package", fRoot1);
+		fRoot1= JavaProjectHelper.addSourceContainer(fJProject3, ""); //$NON-NLS-1$
+		assertNotNull("getting default package", fRoot1); //$NON-NLS-1$
 		
 		//set up project #3: file system structure with project as source folder
 		//add an internal jar
-		File myInternalLibJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/myinternallib.jar"));
-		assertTrue("lib not found", myInternalLibJar != null && myInternalLibJar.exists());
+		File myInternalLibJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/myinternallib.jar")); //$NON-NLS-1$
+		assertTrue("lib not found", myInternalLibJar != null && myInternalLibJar.exists()); //$NON-NLS-1$
 		fInternalRoot1= JavaProjectHelper.addLibraryWithImport(fJProject3, new Path(myInternalLibJar.getPath()), null, null);
 	
 		//create internal PackageFragments
-		fA= fInternalRoot1.getPackageFragment("a");
-		fX= fInternalRoot1.getPackageFragment("x");
-		fB= fInternalRoot1.getPackageFragment("a.b");
-		fC= fInternalRoot1.getPackageFragment("a.b.c");
-		fD= fInternalRoot1.getPackageFragment("a.d");
-		fY= fInternalRoot1.getPackageFragment("x.y");
+		fA= fInternalRoot1.getPackageFragment("a"); //$NON-NLS-1$
+		fX= fInternalRoot1.getPackageFragment("x"); //$NON-NLS-1$
+		fB= fInternalRoot1.getPackageFragment("a.b"); //$NON-NLS-1$
+		fC= fInternalRoot1.getPackageFragment("a.b.c"); //$NON-NLS-1$
+		fD= fInternalRoot1.getPackageFragment("a.d"); //$NON-NLS-1$
+		fY= fInternalRoot1.getPackageFragment("x.y"); //$NON-NLS-1$
 		
-		fYClassFile= fY.getClassFile("Y.class");
+		fYClassFile= fY.getClassFile("Y.class"); //$NON-NLS-1$
 		
 		//create PackageFragments
-		fPack1= fRoot1.createPackageFragment("pack1", true, null);
-		fPack2= fRoot1.createPackageFragment("pack2", true, null);
-		fPack3= fRoot1.createPackageFragment("pack3",true,null);
-		fPack4= fRoot1.createPackageFragment("pack3.pack4", true,null);
-		fPack5= fRoot1.createPackageFragment("pack3.pack5",true,null);
-		fPack6= fRoot1.createPackageFragment("pack3.pack5.pack6", true, null);
+		fPack1= fRoot1.createPackageFragment("pack1", true, null); //$NON-NLS-1$
+		fPack2= fRoot1.createPackageFragment("pack2", true, null); //$NON-NLS-1$
+		fPack3= fRoot1.createPackageFragment("pack3",true,null); //$NON-NLS-1$
+		fPack4= fRoot1.createPackageFragment("pack3.pack4", true,null); //$NON-NLS-1$
+		fPack5= fRoot1.createPackageFragment("pack3.pack5",true,null); //$NON-NLS-1$
+		fPack6= fRoot1.createPackageFragment("pack3.pack5.pack6", true, null); //$NON-NLS-1$
 		
-		fCU1= fPack2.createCompilationUnit("Object.java", "", true, null);
-		fCU2= fPack6.createCompilationUnit("Object.java","", true, null);
+		fCU1= fPack2.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$ //$NON-NLS-2$
+		fCU2= fPack6.createCompilationUnit("Object.java","", true, null); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//set up the mock view
 		setUpMockView();
@@ -275,13 +275,13 @@ public class ContentProviderTests2 extends TestCase{
 		IViewPart myPart = new MockPluginView();
 		assertNotNull(myPart);
 
-		myPart = page.showView("org.eclipse.jdt.ui.tests.packageview.MockPluginView");
+		myPart = page.showView("org.eclipse.jdt.ui.tests.packageview.MockPluginView"); //$NON-NLS-1$
 		if (myPart instanceof MockPluginView) {
 			fMyPart = (MockPluginView) myPart;
 			fMyPart.setFolding(false);
 			fProvider = (ITreeContentProvider) fMyPart.getTreeViewer().getContentProvider();
 		} else
-			assertTrue("Unable to get view", false);
+			assertTrue("Unable to get view", false); //$NON-NLS-1$
 
 		assertNotNull(fProvider);
 	}

@@ -103,27 +103,27 @@ public class ContentProviderTests3 extends TestCase {
 	public void testGetChildrenProjectWithSourceFolders() throws Exception{
 		Object[] expectedChildren= new Object[]{fRoot1, fFile1, fFile2, jdk};
 		Object[] children= fProvider.getChildren(fJProject2);
-		assertTrue("Wrong children found for project with folding", compareArrays(children, expectedChildren));
+		assertTrue("Wrong children found for project with folding", compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
 	
 	
 	public void testGetChildrentMidLevelFragment() throws Exception{
 		Object[] expectedChildren= new Object[]{fPack4, fPack6};
 		Object[] children= fProvider.getChildren(fPack3);
-		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));
+		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
 	
 	public void testGetChildrenBottomLevelFragment() throws Exception{
 		Object[] expectedChildren= new Object[]{};
 		Object[] children= fProvider.getChildren(fPack1);
-		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));
+		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));//$NON-NLS-1$
 		
 	}
 	
 	public void testGetChildrenBottomLevelFragmentWithCU() throws Exception{
 		Object[] expectedChildren= new Object[]{fCU1};
 		Object[] children= fProvider.getChildren(fPack2);
-		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));	
+		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));	//$NON-NLS-1$
 	}
 
 //This test will fail unless the contents of junit.samples are deleted
@@ -137,19 +137,19 @@ public class ContentProviderTests3 extends TestCase {
 	public void testGetChildrenBottomLevelFragmentInArchive() throws Exception{
 		Object[] expectedChildren= new Object[]{fCUIMoney, fCUMoney, fCUMoneyBag, fCUMoneyTest};
 		Object[] children= fProvider.getChildren(fPackJunitSamplesMoney);
-		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Archive with folding", compareArrays(children, expectedChildren));	
+		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Archive with folding", compareArrays(children, expectedChildren));	//$NON-NLS-1$
 	}
 	
 	public void testGetChildrenSource() throws Exception{
-		Object[] expectedChildren= new Object[]{fPack1,fPack2,fPack3, fRoot1.getPackageFragment("")};
+		Object[] expectedChildren= new Object[]{fPack1,fPack2,fPack3, fRoot1.getPackageFragment("")};//$NON-NLS-1$
 		Object[] children= fProvider.getChildren(fRoot1);
-		assertTrue("Wrong children found for PackageFragmentRoot with folding", compareArrays(children, expectedChildren));	
+		assertTrue("Wrong children found for PackageFragmentRoot with folding", compareArrays(children, expectedChildren));	//$NON-NLS-1$
 	}
 	
 	public void testGetChildrenArchive(){
-		Object[] expectedChildren= new Object[]{fPackJunit, fArchiveFragmentRoot.getPackageFragment("")};
+		Object[] expectedChildren= new Object[]{fPackJunit, fArchiveFragmentRoot.getPackageFragment("")};//$NON-NLS-1$
 		Object[] children= fProvider.getChildren(fArchiveFragmentRoot);
-		assertTrue("Wrong child found for PackageFragmentRoot Archive with folding", compareArrays(children,expectedChildren));
+		assertTrue("Wrong child found for PackageFragmentRoot Archive with folding", compareArrays(children,expectedChildren));//$NON-NLS-1$
 		
 	}
 	
@@ -157,7 +157,7 @@ public class ContentProviderTests3 extends TestCase {
 	
 	public void testGetParentArchive() throws Exception{
 		Object parent= fProvider.getParent(fArchiveFragmentRoot);
-		assertTrue("Wrong parent found for PackageFragmentRoot Archive with folding", parent==null);
+		assertTrue("Wrong parent found for PackageFragmentRoot Archive with folding", parent==null);//$NON-NLS-1$
 	}
 
 //	public void testGetParentMidLevelFragmentInFoldedArchive() throws Exception{
@@ -170,26 +170,26 @@ public class ContentProviderTests3 extends TestCase {
 	public void testGetParentTopLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fPackJunit;
 		Object parent= fProvider.getParent(fPackJunitSamples);
-		assertTrue("Wrong parent found for a top level PackageFragment in an Archive with folding", expectedParent.equals(parent));	
+		assertTrue("Wrong parent found for a top level PackageFragment in an Archive with folding", expectedParent.equals(parent));	//$NON-NLS-1$
 	}
 	
 	public void testGetParentTopLevelFragment() throws Exception{
 		Object expectedParent= fRoot1;
 		Object parent= fProvider.getParent(fPack3);
-		assertTrue("Wrong parent found for a top level PackageFragment with folding", expectedParent.equals(parent));
+		assertTrue("Wrong parent found for a top level PackageFragment with folding", expectedParent.equals(parent)); //$NON-NLS-1$
 	}
 	
 	public void testGetParentFoldedBottomFragment() throws Exception{
 		Object expectedParent= fRoot1;
 		Object parent= fProvider.getParent(fPack3);
-		assertTrue("Wrong parent found for a top level PackageFragment with folding", expectedParent.equals(parent));
+		assertTrue("Wrong parent found for a top level PackageFragment with folding", expectedParent.equals(parent));//$NON-NLS-1$
 		
 	}
 	
 	public void testGetParentMidLevelFragment() throws Exception{
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack4);
-		assertTrue("Wrong parent found for a NON top level PackageFragment with folding", expectedParent.equals(parent));
+		assertTrue("Wrong parent found for a NON top level PackageFragment with folding", expectedParent.equals(parent));//$NON-NLS-1$
 	}
 	
 
@@ -206,20 +206,20 @@ public class ContentProviderTests3 extends TestCase {
 		if (fEnableAutoBuildAfterTesting)
 			JavaProjectHelper.setAutoBuilding(false);
 
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");//$NON-NLS-1$//$NON-NLS-2$
+		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");//$NON-NLS-1$//$NON-NLS-2$
 		
-		assertNotNull("project1 null", fJProject1);
-		assertNotNull("project2 null", fJProject2);
+		assertNotNull("project1 null", fJProject1);//$NON-NLS-1$
+		assertNotNull("project2 null", fJProject2);//$NON-NLS-1$
 		
 		Object[] resource= fJProject2.getNonJavaResources();
 		for (int i = 0; i < resource.length; i++) {
 			Object object = resource[i];
 			if(object instanceof IFile){
 				IFile file = (IFile) object;
-				if(".classpath".equals(file.getName()))
+				if(".classpath".equals(file.getName()))//$NON-NLS-1$
 					fFile1= file;
-				else if (".project".equals(file.getName()))
+				else if (".project".equals(file.getName()))//$NON-NLS-1$
 					fFile2= file;
 			}
 		}
@@ -227,60 +227,60 @@ public class ContentProviderTests3 extends TestCase {
 		assertNotNull(fFile2);
 		
 		//set up project #1 : External Jar and zip file
-		jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);
-		assertTrue("jdk not found", jdk != null);
+		jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
+		assertTrue("jdk not found", jdk != null);//$NON-NLS-1$
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());//$NON-NLS-1$
 		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);//$NON-NLS-1$
 		
-		fPackJunit= fArchiveFragmentRoot.getPackageFragment("junit");
-		fPackJunitSamples= fArchiveFragmentRoot.getPackageFragment("junit.samples");
-		fPackJunitSamplesMoney= fArchiveFragmentRoot.getPackageFragment("junit.samples.money");
-		fPackJunitExtentions= fArchiveFragmentRoot.getPackageFragment("junit.extensions");
-		fPackJunitFramework= fArchiveFragmentRoot.getPackageFragment("junit.framework");
-		fPackJunitRunner= fArchiveFragmentRoot.getPackageFragment("junit.runner");
-		fPackJunitTests= fArchiveFragmentRoot.getPackageFragment("junit.tests");
-		fPackJunitTextUi= fArchiveFragmentRoot.getPackageFragment("junit.textui");
-		fPackJunitUi= fArchiveFragmentRoot.getPackageFragment("junit.ui");
+		fPackJunit= fArchiveFragmentRoot.getPackageFragment("junit");//$NON-NLS-1$
+		fPackJunitSamples= fArchiveFragmentRoot.getPackageFragment("junit.samples");//$NON-NLS-1$
+		fPackJunitSamplesMoney= fArchiveFragmentRoot.getPackageFragment("junit.samples.money");//$NON-NLS-1$
+		fPackJunitExtentions= fArchiveFragmentRoot.getPackageFragment("junit.extensions");//$NON-NLS-1$
+		fPackJunitFramework= fArchiveFragmentRoot.getPackageFragment("junit.framework");//$NON-NLS-1$
+		fPackJunitRunner= fArchiveFragmentRoot.getPackageFragment("junit.runner");//$NON-NLS-1$
+		fPackJunitTests= fArchiveFragmentRoot.getPackageFragment("junit.tests");//$NON-NLS-1$
+		fPackJunitTextUi= fArchiveFragmentRoot.getPackageFragment("junit.textui");//$NON-NLS-1$
+		fPackJunitUi= fArchiveFragmentRoot.getPackageFragment("junit.ui");//$NON-NLS-1$
 		
-		assertNotNull("creating fPackJunit", fPackJunit);
-		assertNotNull("creating fPackJunitSamples", fPackJunitSamples);
-		assertNotNull("creating fPackJunitSamplesMoney",fPackJunitSamplesMoney);
-		assertNotNull("", fPackJunitExtentions);
-		assertNotNull("",fPackJunitFramework);
-		assertNotNull("",fPackJunitRunner);
-		assertNotNull("",fPackJunitTests);
-		assertNotNull("",fPackJunitTextUi);
-		assertNotNull("",fPackJunitUi);
+		assertNotNull("creating fPackJunit", fPackJunit);//$NON-NLS-1$
+		assertNotNull("creating fPackJunitSamples", fPackJunitSamples);//$NON-NLS-1$
+		assertNotNull("creating fPackJunitSamplesMoney",fPackJunitSamplesMoney);//$NON-NLS-1$
+		assertNotNull("", fPackJunitExtentions);//$NON-NLS-1$
+		assertNotNull("",fPackJunitFramework);//$NON-NLS-1$
+		assertNotNull("",fPackJunitRunner);//$NON-NLS-1$
+		assertNotNull("",fPackJunitTests);//$NON-NLS-1$
+		assertNotNull("",fPackJunitTextUi);//$NON-NLS-1$
+		assertNotNull("",fPackJunitUi);//$NON-NLS-1$
 		
-		fCUIMoney= fPackJunitSamplesMoney.getCompilationUnit("IMoney.java");
-		fCUMoney= fPackJunitSamplesMoney.getCompilationUnit("Money.java");
-		fCUMoneyBag= fPackJunitSamplesMoney.getCompilationUnit("MoneyBag.java");
-		fCUMoneyTest= fPackJunitSamplesMoney.getCompilationUnit("MoneyTest.java");
+		fCUIMoney= fPackJunitSamplesMoney.getCompilationUnit("IMoney.java");//$NON-NLS-1$
+		fCUMoney= fPackJunitSamplesMoney.getCompilationUnit("Money.java");//$NON-NLS-1$
+		fCUMoneyBag= fPackJunitSamplesMoney.getCompilationUnit("MoneyBag.java");//$NON-NLS-1$
+		fCUMoneyTest= fPackJunitSamplesMoney.getCompilationUnit("MoneyTest.java");//$NON-NLS-1$
 		
 		
 		
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
-		assertTrue("lib not found", mylibJar != null && mylibJar.exists());
+		assertTrue("lib not found", mylibJar != null && mylibJar.exists());//$NON-NLS-1$
 		JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(mylibJar.getPath()), null, null);
 
 		//set up project #2: file system structure with in a source folder
 
-		JavaProjectHelper.addVariableEntry(fJProject2, new Path("JRE_LIB_TEST"), null, null);
+		JavaProjectHelper.addVariableEntry(fJProject2, new Path("JRE_LIB_TEST"), null, null);//$NON-NLS-1$
 
-		fRoot1= JavaProjectHelper.addSourceContainer(fJProject2, "src1");
-		fPack1= fRoot1.createPackageFragment("pack1", true, null);
-		fPack2= fRoot1.createPackageFragment("pack2", true, null);
-		fPack3= fRoot1.createPackageFragment("pack3",true,null);
-		fPack4= fRoot1.createPackageFragment("pack3.pack4", true,null);
-		fPack5= fRoot1.createPackageFragment("pack3.pack5",true,null);
-		fPack6= fRoot1.createPackageFragment("pack3.pack5.pack6", true, null);
+		fRoot1= JavaProjectHelper.addSourceContainer(fJProject2, "src1");//$NON-NLS-1$
+		fPack1= fRoot1.createPackageFragment("pack1", true, null);//$NON-NLS-1$
+		fPack2= fRoot1.createPackageFragment("pack2", true, null);//$NON-NLS-1$
+		fPack3= fRoot1.createPackageFragment("pack3",true,null);//$NON-NLS-1$
+		fPack4= fRoot1.createPackageFragment("pack3.pack4", true,null);//$NON-NLS-1$
+		fPack5= fRoot1.createPackageFragment("pack3.pack5",true,null);//$NON-NLS-1$
+		fPack6= fRoot1.createPackageFragment("pack3.pack5.pack6", true, null);//$NON-NLS-1$
 		
-		fCU1= fPack2.createCompilationUnit("Object.java", "", true, null);
-		fCU2= fPack6.createCompilationUnit("Object.java","", true, null);
+		fCU1= fPack2.createCompilationUnit("Object.java", "", true, null);//$NON-NLS-1$//$NON-NLS-2$
+		fCU2= fPack6.createCompilationUnit("Object.java","", true, null);//$NON-NLS-1$//$NON-NLS-2$
 		
 		//set up the mock view
 		setUpMockView();
@@ -302,14 +302,14 @@ public class ContentProviderTests3 extends TestCase {
 		IViewPart myPart= new MockPluginView();
 		assertNotNull(myPart);
 		
-		myPart= page.showView("org.eclipse.jdt.ui.tests.packageview.MockPluginView");
+		myPart= page.showView("org.eclipse.jdt.ui.tests.packageview.MockPluginView");//$NON-NLS-1$
 		if (myPart instanceof MockPluginView) {
 			fMyPart= (MockPluginView) myPart;
 			//turn on folding
 			fMyPart.setFolding(true);
 			fProvider= (ITreeContentProvider)fMyPart.getTreeViewer().getContentProvider();
 	
-		}else assertTrue("Unable to get view",false);
+		}else assertTrue("Unable to get view",false);//$NON-NLS-1$
 	
 		assertNotNull(fProvider);
 	}
