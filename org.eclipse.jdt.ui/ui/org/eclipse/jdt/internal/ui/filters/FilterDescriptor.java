@@ -71,6 +71,7 @@ public class FilterDescriptor implements Comparable {
 	private static final String CLASS_ATTRIBUTE= "class"; //$NON-NLS-1$
 	private static final String NAME_ATTRIBUTE= "name"; //$NON-NLS-1$
 	private static final String ENABLED_ATTRIBUTE= "enabled"; //$NON-NLS-1$
+	private static final String DESCRIPTION_ATTRIBUTE= "description"; //$NON-NLS-1$	
 	/**
 	 * @deprecated	use "enabled" instead
 	 */
@@ -200,6 +201,18 @@ public class FilterDescriptor implements Comparable {
 	 */
 	public String getViewId() {
 		return fElement.getAttribute(VIEW_ID_ATTRIBUTE);
+	}
+
+	/**
+	 * Returns the filter's description.
+	 * 
+	 * @return the description or <code>null</code> if no description is provided
+	 */
+	public String getDescription() {
+		String description= fElement.getAttribute(DESCRIPTION_ATTRIBUTE);
+		if (description == null)
+			description= ""; //$NON-NLS-1$
+		return description;
 	}
 
 	/**

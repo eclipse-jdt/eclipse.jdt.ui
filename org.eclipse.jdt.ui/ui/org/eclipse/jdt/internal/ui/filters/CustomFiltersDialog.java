@@ -36,8 +36,12 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -163,8 +167,8 @@ public class CustomFiltersDialog extends SelectionDialog {
 		info.setText(FilterMessages.getString("CustomFiltersDialog.filterList.label"));  //$NON-NLS-1$
 		
 		fCheckBoxList= CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
-		GridData data = new GridData(GridData.FILL_BOTH);
-		data.heightHint= convertHeightInCharsToPixels(15);
+		GridData data= new GridData(GridData.FILL_BOTH);
+		data.heightHint= convertHeightInCharsToPixels(10);
 		fCheckBoxList.getTable().setLayoutData(data);
 
 		fCheckBoxList.setLabelProvider(createLabelPrivder());
@@ -172,12 +176,30 @@ public class CustomFiltersDialog extends SelectionDialog {
 
 		fCheckBoxList.setInput(fBuiltInFilters);
 		setInitialSelections(getEnabledFilterDescriptors());
-	
-		addSelectionButtons(parent);
 
 		if (getInitialSelections() != null && !getInitialSelections().isEmpty())
 			checkInitialSelections();
 
+		// Description
+		info= new Label(parent, SWT.LEFT);
+		info.setText(FilterMessages.getString("CustomFiltersDialog.description.label"));  //$NON-NLS-1$
+		final Text description= new Text(parent, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.VERTICAL);
+		data = new GridData(GridData.FILL_BOTH);
+		data.heightHint= convertHeightInCharsToPixels(3);
+		description.setLayoutData(data);
+		fCheckBoxList.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				ISelection selection= event.getSelection();
+				if (selection instanceof IStructuredSelection) {
+					Object selectedElement= ((IStructuredSelection)selection).getFirstElement();
+					if (selectedElement instanceof FilterDescriptor)
+						description.setText(((FilterDescriptor)selectedElement).getDescription());
+				}
+			}
+		});
+
+
+		addSelectionButtons(parent);
 	}
 
 	private void addSelectionButtons(Composite composite) {
