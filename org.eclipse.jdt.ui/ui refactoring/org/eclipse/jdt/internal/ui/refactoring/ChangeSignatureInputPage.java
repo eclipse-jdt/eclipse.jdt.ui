@@ -122,7 +122,12 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 
 	private void updateStatus(boolean displayErrorMessage) {
 		try{
-			RefactoringStatus nameCheck= getChangeMethodSignatureRefactoring().checkSignature();
+			if (getChangeMethodSignatureRefactoring().isSignatureSameAsInitial()){
+			    setErrorMessage(null);
+			    setPageComplete(false);
+			    return;
+			}
+		    RefactoringStatus nameCheck= getChangeMethodSignatureRefactoring().checkSignature();
 			if (nameCheck.hasFatalError()){
 				if (displayErrorMessage)
 					setErrorMessage(nameCheck.getFirstMessage(RefactoringStatus.FATAL));

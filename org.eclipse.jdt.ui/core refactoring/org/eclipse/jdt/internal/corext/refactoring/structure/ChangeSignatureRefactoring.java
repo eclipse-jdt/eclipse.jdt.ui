@@ -229,10 +229,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkSignature() throws JavaModelException{
-		if (fMethod.getNumberOfParameters() == 0 && fParameterInfos.isEmpty() && isVisibilitySameAsInitial() && isReturnTypeSameAsInitial())
-			return RefactoringStatus.createFatalErrorStatus("No parameters were added, visibility and return type are unchanged");
-		if (isSignatureSameAsOriginal())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.no_changes")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		checkForDuplicateNames(result);
 		if (result.hasFatalError())
@@ -244,15 +240,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private boolean isSignatureSameAsOriginal() throws JavaModelException {
-		return areNamesSameAsInitial() 
-			&& isOrderSameAsInitial() 
-			&& isVisibilitySameAsInitial()
-			&& ! areAnyParametersDeleted()
-			&& isReturnTypeSameAsInitial()
-			&& areParameterTypesSameAsInitial();
-	}
-	
+    public boolean isSignatureSameAsInitial() throws JavaModelException {
+        if (fMethod.getNumberOfParameters() == 0 && fParameterInfos.isEmpty() && isVisibilitySameAsInitial() && isReturnTypeSameAsInitial())
+            return true;
+        if (   areNamesSameAsInitial()
+	        && isOrderSameAsInitial()
+    	    && isVisibilitySameAsInitial()
+        	&& ! areAnyParametersDeleted()
+        	&& isReturnTypeSameAsInitial()
+        	&& areParameterTypesSameAsInitial())
+        	return true;
+       return false; 
+    }
+
 	private boolean areParameterTypesSameAsInitial() {
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
@@ -448,6 +448,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 5); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
+			if (isSignatureSameAsInitial())
+				return RefactoringStatus.createFatalErrorStatus("Method signature and return type are unchanged.");
 			result.merge(checkSignature());
 			if (result.hasFatalError())
 				return result;
