@@ -39,7 +39,8 @@ public class TextBufferEditor extends TextEditProcessor {
 	 * @param the text buffer this editor is working on.
 	 */
 	public TextBufferEditor(TextBuffer buffer) {
-		super(buffer.getDocument(), new MultiTextEdit(0, buffer.getDocument().getLength()));
+		super(buffer.getDocument(), new MultiTextEdit(0, buffer.getDocument().getLength()),
+				TextEdit.CREATE_UNDO | TextEdit.UPDATE_REGIONS);
 		fBuffer= buffer;
 	}
 	
@@ -80,7 +81,7 @@ public class TextBufferEditor extends TextEditProcessor {
 	 */
 	public void add(UndoEdit undo) {
 		Assert.isTrue(!getRoot().hasChildren());
-		fUndoProcessor= new TextEditProcessor(getDocument(), undo);
+		fUndoProcessor= new TextEditProcessor(getDocument(), undo, TextEdit.CREATE_UNDO | TextEdit.UPDATE_REGIONS);
 	}
 	
 	/* (non-Javadoc)

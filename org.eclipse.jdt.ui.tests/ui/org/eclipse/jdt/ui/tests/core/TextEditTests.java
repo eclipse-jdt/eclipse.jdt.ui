@@ -286,6 +286,7 @@ public class TextEditTests extends TestCase {
 		fRoot.addChild(e1);
 		fRoot.addChild(e2);
 		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals(fRoot, 2, 6);
 		assertEquals(e1, 2, 2);
 		assertEquals(e2, 4, 4);
 		assertEquals("Buffer content", "01yy345656789", fDocument.get());
@@ -299,6 +300,7 @@ public class TextEditTests extends TestCase {
 		fRoot.addChild(e1);
 		fRoot.addChild(e2);
 		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals(fRoot, 2, 4);
 		assertEquals(e1, 2, 2);
 		assertEquals(e2, 4, 2);
 		assertEquals("Buffer content", "01yyxx23456789", fDocument.get());
@@ -314,6 +316,7 @@ public class TextEditTests extends TestCase {
 		fRoot.addChild(e2);
 		fRoot.addChild(e3);
 		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals(fRoot, 0, 6);
 		assertEquals(e1, 0, 3);
 		assertEquals(e2, 3, 2);
 		assertEquals(e3, 5, 1);
@@ -326,6 +329,7 @@ public class TextEditTests extends TestCase {
 		fRoot.addChild(e1);
 		UndoEdit undo= fRoot.apply(fDocument);
 		assertEquals("Buffer length", 12, fDocument.getLength());
+		assertEquals(fRoot, 0, 2);
 		assertEquals(e1, 0, 2);
 		assertEquals("Buffer content", "xx0123456789", fDocument.get());
 		doUndoRedo(undo, "xx0123456789");
@@ -336,6 +340,7 @@ public class TextEditTests extends TestCase {
 		fRoot.addChild(e1);
 		UndoEdit undo= fRoot.apply(fDocument);
 		assertEquals("Buffer length", 12, fDocument.getLength());
+		assertEquals(fRoot, 10, 2);
 		assertEquals(e1, 10, 2);
 		assertEquals("Buffer content", "0123456789xx", fDocument.get());
 		doUndoRedo(undo, "0123456789xx");
@@ -347,6 +352,7 @@ public class TextEditTests extends TestCase {
 		fRoot.addChild(e1);
 		fRoot.addChild(e2);
 		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals(fRoot, 2, 3);
 		assertEquals(e1, 4, 1);
 		assertEquals(e2, 2, 2);
 		assertEquals("Buffer content", "01xxy3456789", fDocument.get());
@@ -357,6 +363,7 @@ public class TextEditTests extends TestCase {
 		TextEdit e1= new DeleteEdit(3, 1);
 		fRoot.addChild(e1);
 		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals(fRoot, 3, 0);
 		assertEquals(e1, 3, 0);
 		assertEquals("Buffer content", "012456789", fDocument.get());
 		doUndoRedo(undo, "012456789");
@@ -370,6 +377,7 @@ public class TextEditTests extends TestCase {
 		fRoot.addChild(e2);
 		fRoot.addChild(e3);
 		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals(fRoot, 3, 0);
 		assertEquals(e1, 3, 0);
 		assertEquals(e2, 3, 0);
 		assertEquals(e3, 3, 0);
@@ -383,6 +391,7 @@ public class TextEditTests extends TestCase {
 		fRoot.addChild(e1);
 		fRoot.addChild(e2);
 		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals(fRoot, 3, 1);
 		assertEquals(e1, 3, 1);
 		assertEquals(e2, 4, 0);
 		assertEquals("Buffer content", "012x456789", fDocument.get());
@@ -400,10 +409,39 @@ public class TextEditTests extends TestCase {
 		fRoot.addChild(e1);
 		UndoEdit undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0189", fDocument.get());
+		assertEquals(fRoot, 2, 0);
+		assertEquals(e1, 2, 0);
 		assertTrue(e2.isDeleted());
 		assertTrue(e3.isDeleted());
 		assertTrue(e4.isDeleted());
 		doUndoRedo(undo, "0189");
+	}
+	
+	public void testTreeUpdate1() throws Exception {
+		MultiTextEdit m1= new MultiTextEdit();
+		TextEdit e1= new InsertEdit(2, "aa");
+		TextEdit e2= new InsertEdit(4, "bb");
+		m1.addChild(e1);
+		m1.addChild(e2);
+		MultiTextEdit m2= new MultiTextEdit();
+		TextEdit e3= new InsertEdit(6, "cc");
+		TextEdit e4= new InsertEdit(8, "dd");
+		m2.addChild(e3);
+		m2.addChild(e4);
+		fRoot.addChild(m1);
+		fRoot.addChild(m2);
+		assertEquals(m1, 2, 2);
+		assertEquals(m2, 6, 2);
+		UndoEdit undo= fRoot.apply(fDocument);
+		assertEquals("Buffer content", "01aa23bb45cc67dd89", fDocument.get());
+		assertEquals(e1, 2, 2);
+		assertEquals(e2, 6, 2);
+		assertEquals(e3, 10, 2);
+		assertEquals(e4, 14, 2);
+		assertEquals(m1, 2, 6);
+		assertEquals(m2, 10, 6);
+		assertEquals(fRoot, 2, 14);
+		doUndoRedo(undo, "01aa23bb45cc67dd89");
 	}
 	
 	public void testMove1() throws Exception {
