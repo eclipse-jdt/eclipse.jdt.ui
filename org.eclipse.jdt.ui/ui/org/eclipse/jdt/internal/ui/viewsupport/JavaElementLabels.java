@@ -247,7 +247,7 @@ public class JavaElementLabels {
 	private static String fgPkgNamePrefix;
 	private static String fgPkgNamePostfix;
 	private static int fgPkgNameChars;
-	private static int fgPkgNameLength;
+	private static int fgPkgNameLength= -1;
 
 	private JavaElementLabels() {
 	}
@@ -447,7 +447,7 @@ public class JavaElementLabels {
 	public static void getInitializerLabel(IInitializer initializer, int flags, StringBuffer buf) {
 		// qualification
 		if (getFlag(flags, I_FULLY_QUALIFIED)) {
-			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED | (flags ^ P_COMPRESSED), buf);
+			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
 			buf.append('.');
 		}
 		buf.append(JavaUIMessages.getString("JavaElementLabels.initializer")); //$NON-NLS-1$
