@@ -71,6 +71,7 @@ import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
+import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
@@ -815,7 +816,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fMenu= manager.createContextMenu(tree);
 		tree.setMenu(fMenu);
 		
-		fActionGroups= new ContextMenuGroup[] { new GenerateGroup(), new JavaSearchGroup() };
+		fActionGroups= new ContextMenuGroup[] { new GenerateGroup(), new JavaSearchGroup(), new ReorgGroup() };
 					
 		fOutlineViewer.setInput(fInput);	
 		fOutlineViewer.addSelectionChangedListener(new ISelectionChangedListener() {

@@ -83,6 +83,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
+import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -625,7 +626,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fFocusOnSelectionAction);
 			
 		addRefactoring(menu, viewer);
-		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup() }, viewer);
+		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(), new ReorgGroup() }, viewer);
 	}
 
 	/**
@@ -643,7 +644,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction(fMethodsViewer));	
 		addOpenWithMenu(menu, (IStructuredSelection)fMethodsViewer.getSelection());
 		addRefactoring(menu, fMethodsViewer);
-		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup() }, fMethodsViewer);
+		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(), new ReorgGroup() }, fMethodsViewer);
 	}
 	
 	private void addRefactoring(IMenuManager menu, IInputSelectionProvider viewer){

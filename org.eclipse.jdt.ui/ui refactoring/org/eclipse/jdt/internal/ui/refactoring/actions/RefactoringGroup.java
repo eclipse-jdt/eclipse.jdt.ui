@@ -19,71 +19,55 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.RenameParametersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.refactoring.undo.RedoRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.undo.UndoRefactoringAction;
+import org.eclipse.jdt.internal.ui.reorg.RenameAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.actions.SelectionProviderAction;
 
 /**
  * Refactoring menu group
  */
 public class RefactoringGroup extends ContextMenuGroup {
-
 	private UndoRefactoringAction fUndoRefactoring;
 	private RedoRefactoringAction fRedoRefactoring;
 	
 	//wizard actions
-	private OpenRefactoringWizardAction[] openWizardActions;
+	private SelectionProviderAction[] fOpenWizardActions;
 	
 	private boolean fIntitialized= false;
 	
-	private boolean isSelectionOk(ISelectionProvider selectionProvider){
-		if (selectionProvider == null)
-			return false;	
-		
-		ISelection selection= selectionProvider.getSelection();
-		if (! (selection instanceof IStructuredSelection))
-			return false;
-		else if (((IStructuredSelection)selection).size() != 1)
-			return false;
-		else
-			return true;		
-	}
-	
 	public void fill(IMenuManager manager, GroupContext context) {
-	
-		ISelectionProvider selectionProvider= context.getSelectionProvider();
-		if (!isSelectionOk(selectionProvider))
-			return;
+		createActions(context.getSelectionProvider());
 		
-		createActions();
-		
-		for (int i= 0; i < openWizardActions.length; i++) {
-			OpenRefactoringWizardAction action= openWizardActions[i];
-			if (action != null && action.canActionBeAdded())
-				manager.add(action);
+		for (int i= 0; i < fOpenWizardActions.length; i++) {
+			if (fOpenWizardActions[i].isEnabled())
+				manager.add( fOpenWizardActions[i]);
 		}
 	
 		if (!manager.isEmpty())
 			manager.add(new Separator());
-
-		if (fUndoRefactoring.canActionBeAdded()) {
+
+		if (fUndoRefactoring.isEnabled()) {
 			fUndoRefactoring.update();
 			manager.add(fUndoRefactoring);
 		}
 		
-		if (fRedoRefactoring.canActionBeAdded()) {
+		if (fRedoRefactoring.isEnabled()) {
 			fRedoRefactoring.update();
 			manager.add(fRedoRefactoring);
 		}
 		
 	}
 	
-	private void createActions() {
+	private void createActions(ISelectionProvider selectionProvider) {
 		if (fIntitialized)
 			return;
 			
@@ -92,13 +76,18 @@ public class RefactoringGroup extends ContextMenuGroup {
 		
 		ITextBufferChangeCreator changeCreator= createChangeCreator();
 		
-		openWizardActions= new OpenRefactoringWizardAction[]{
-			createRenameParametersAction(changeCreator),
-			createRenameMethodAction(changeCreator),
-			createRenameTypeAction(changeCreator),
-			createRenameFieldAction(changeCreator)
+		fOpenWizardActions= new  	SelectionProviderAction[]{
+			createRenameParametersAction(selectionProvider, changeCreator)
 		};
 		fIntitialized= true;
+		
+		ISelection sel= selectionProvider.getSelection();
+		if (sel instanceof IStructuredSelection) {
+			IStructuredSelection structuredSelection= (IStructuredSelection)sel;
+			for (int i= 0; i < fOpenWizardActions.length; i++) {
+				fOpenWizardActions[i].selectionChanged(structuredSelection);
+			}
+		}
 	}
 	
 	private static ITextBufferChangeCreator createChangeCreator(){
@@ -107,41 +96,14 @@ public class RefactoringGroup extends ContextMenuGroup {
 	
 	// -------------------- method refactorings ----------------------
 	
-	private OpenRefactoringWizardAction createRenameParametersAction(final ITextBufferChangeCreator changeCreator) {
+	private OpenRefactoringWizardAction createRenameParametersAction(ISelectionProvider selectionProvider, final ITextBufferChangeCreator changeCreator) {
 		String label= RefactoringMessages.getString("RefactoringGroup.rename_parameters"); //$NON-NLS-1$
-		return new OpenRefactoringWizardAction(label, IMethod.class) {
+		return new OpenRefactoringWizardAction(selectionProvider, label, IMethod.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameParametersRefactoring(changeCreator, (IMethod)obj);
 			}
-		};
-	}
-	
-	private OpenRefactoringWizardAction createRenameMethodAction(final ITextBufferChangeCreator changeCreator) {
-		String label= RefactoringMessages.getString("RefactoringGroup.rename"); //$NON-NLS-1$
-		return new OpenRefactoringWizardAction(label, IMethod.class){
-			protected Refactoring createNewRefactoringInstance(Object obj) throws JavaModelException{
-				return RenameMethodRefactoring.createInstance(changeCreator, (IMethod)obj);
-			}
-		};
-	}
-	
-	// -------------------- type refactorings ----------------------
-	private OpenRefactoringWizardAction createRenameTypeAction(final ITextBufferChangeCreator changeCreator) {	
-		String label= RefactoringMessages.getString("RefactoringGroup.rename"); //$NON-NLS-1$
-		return new OpenRefactoringWizardAction(label, IType.class){
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new RenameTypeRefactoring(changeCreator, (IType)obj);
-			}
-		};		
-	}
-		
-	// -------------------- field refactorings ----------------------
-	
-	private OpenRefactoringWizardAction createRenameFieldAction(final ITextBufferChangeCreator changeCreator) {	
-		String label= RefactoringMessages.getString("RefactoringGroup.rename"); //$NON-NLS-1$
-		return new OpenRefactoringWizardAction(label, IField.class){
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new RenameFieldRefactoring(changeCreator, (IField)obj);
+			protected RefactoringWizard createWizard(){
+				return new RenameParametersWizard();
 			}
 		};
 	}

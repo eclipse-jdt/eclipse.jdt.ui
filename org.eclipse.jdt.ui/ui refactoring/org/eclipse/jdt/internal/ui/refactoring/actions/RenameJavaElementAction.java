@@ -17,6 +17,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
+import org.eclipse.jdt.internal.ui.reorg.IRefactoringRenameSupport;
+import org.eclipse.jdt.internal.ui.reorg.RefactoringSupportFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jface.action.Action;
@@ -30,7 +32,7 @@ public class RenameJavaElementAction extends Action implements IUpdate {
 	private ITextEditor fEditor;
 	
 	public RenameJavaElementAction(ITextEditor editor){
-		super("Rename");
+		super("Rename...");
 		Assert.isNotNull(editor);
 		fEditor= editor;
 	}
@@ -39,16 +41,21 @@ public class RenameJavaElementAction extends Action implements IUpdate {
 	 * @see Action#run()
 	 */
 	public void run() {
-		try{
-			RefactoringWizard wizard= createWizard();
-			if (wizard != null && canActivate(wizard.getRefactoring())){
-				new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();
-			} else 	{			
-				beep();
-			}	
-		}catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Exception", "Unexpected exception. See log for details.");
+		IJavaElement element=  JavaElementFinder.getJavaElement(getTextSelection());
+		if (element == null || !element.exists()){
+			beep();
+			return;
 		}	
+		IRefactoringRenameSupport refactoringSupport= RefactoringSupportFactory.createRenameSupport(element);
+		if (refactoringSupport == null){
+			beep();
+			return;
+		}	
+		if (! refactoringSupport.canRename(element)){
+			beep();
+			return;
+		}	
+		refactoringSupport.rename(element);
 	}
 	
 	/* non java-doc
@@ -79,24 +86,5 @@ public class RenameJavaElementAction extends Action implements IUpdate {
 	private ITextSelection getTextSelection() {
 		return (ITextSelection)fEditor.getSelectionProvider().getSelection();
 	}	
-	
-	private static ITextBufferChangeCreator getChangeCreator(){
-		return  new DocumentTextBufferChangeCreator(JavaPlugin.getDefault().getCompilationUnitDocumentProvider());
-	}
-	
-	private RefactoringWizard createWizard() throws JavaModelException{
-		IJavaElement element=  JavaElementFinder.getJavaElement(getTextSelection());
-		if (element == null || !element.exists())
-			return null;
-		switch (element.getElementType()){
-			case IJavaElement.FIELD: 
-				 	return RefactoringWizardFactory.createWizard(new RenameFieldRefactoring(getChangeCreator(), (IField)element));
-			case IJavaElement.METHOD:
-				 	return RefactoringWizardFactory.createWizard(RenameMethodRefactoring.createInstance(getChangeCreator(), (IMethod)element));
-			case IJavaElement.TYPE:
-				 	return RefactoringWizardFactory.createWizard(new RenameTypeRefactoring(getChangeCreator(), (IType)element));
-			default: return null;
-		} 
-	}
 }
 

@@ -1,51 +1,42 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 import java.util.Iterator;
 
+import java.util.List;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.actions.SelectionProviderAction;
 
-abstract class OpenRefactoringWizardAction extends Action{
+public abstract class OpenRefactoringWizardAction extends SelectionProviderAction{
 	
 	private Class fActivationType;
 	private Refactoring fRefactoring;
 	
-	OpenRefactoringWizardAction(String label, Class activatedOnType) {
-		super(label);
+	public OpenRefactoringWizardAction(ISelectionProvider p, String label, Class activatedOnType) {
+		super(p, label);
 		Assert.isNotNull(activatedOnType);
 		fActivationType= activatedOnType;
 	}
 	
 	/**
-	 * Tests if the action can be run on the current selection.
+	 *Set self's enablement based upon the currently selected resources
 	 */
-	public boolean canActionBeAdded() {
-		IStructuredSelection selection= getCurrentSelection();
-		if (selection == null || selection.isEmpty())
-			return false;
-		return isEnabled(selection);
+	public void selectionChanged(IStructuredSelection selection) {
+		setEnabled(canExecute(selection.toList()));
 	}
 	
-	private IStructuredSelection getCurrentSelection() {
-		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
-		if (window == null) 
-			return null;
-		ISelection selection= window.getSelectionService().getSelection();
-		if (selection instanceof IStructuredSelection)
-				return (IStructuredSelection) selection;
-		return null;
-	}
-	
-	private boolean isEnabled(IStructuredSelection selection) {
+	protected boolean canExecute(List selection){
 		for  (Iterator iter= selection.iterator(); iter.hasNext(); ) {
 			Object obj= iter.next();
 			if (!fActivationType.isInstance(obj) || !shouldAcceptElement(obj))
@@ -53,23 +44,21 @@ abstract class OpenRefactoringWizardAction extends Action{
 		}
 		return true;
 	}
-	
+		
 	/* non java-doc
 	 * @see Action#run()
 	 */
 	public void run() {
 		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), createWizard()).open();
 	}
-	
-	private Wizard createWizard(){
-		return RefactoringWizardFactory.createWizard(fRefactoring);
-	}
-	
+		
 	/**
 	 * Creates a new instance of <code>Refactoring</code>.
 	 * @param obj is guaranteed to be of the accepted type (passed in the constructor)
 	 */
 	protected abstract Refactoring createNewRefactoringInstance(Object obj) throws JavaModelException;	
+	
+	protected abstract RefactoringWizard createWizard();	
 	
 	/**
 	 * @param obj is guaranteed to be of the accepted type (passed in the constructor)

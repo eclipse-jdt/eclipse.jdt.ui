@@ -290,7 +290,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		return null;
 	}
 
-	boolean canExecute(List sel) {
+	protected boolean canExecute(List sel) {
 		return canActivate(createRefactoring(sel));
 	}
 	

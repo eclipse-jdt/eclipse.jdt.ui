@@ -29,7 +29,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 		fRefactoringSupport.rename(getStructuredSelection().getFirstElement());
 	}
 		
-	boolean canExecute(List selection) {
+	protected boolean canExecute(List selection) {
 		if (selection.size() != 1)
 			return false;
 

@@ -38,14 +38,18 @@ public abstract class ReorgAction extends SelectionProviderAction {
 	 */
 	public void update() {
 	}
-	
+
 	/**
 	 *Set self's enablement based upon the currently selected resources
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(canExecute(selection.toList()));
+		setEnabled(canBeEnabledOn(selection));
 	}
-	abstract boolean canExecute(List selection);
+		public boolean canBeEnabledOn(IStructuredSelection selection){
+		return canExecute(selection.toList());
+	}
+	
+	abstract boolean canExecute(List list);
 
 	boolean canActivate(Refactoring ref){
 		try {

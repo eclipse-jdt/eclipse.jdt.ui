@@ -78,7 +78,7 @@ public class DeleteAction extends ReorgAction {
 		return false;
 	}
 
-	boolean canExecute(List selection) {
+	protected boolean canExecute(List selection) {
 		return canActivate(new DeleteRefactoring(selection));
 	}
 	

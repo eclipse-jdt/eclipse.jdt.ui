@@ -19,7 +19,7 @@ public class RedoRefactoringAction extends UndoManagerAction {
 		setToolTipText(RefactoringMessages.getString("RedoRefactoringAction.tooltip")); //$NON-NLS-1$
 	}
 
-	public boolean canActionBeAdded() {
+	public boolean isEnabled(){
 		return Refactoring.getUndoManager().anythingToRedo();
 	}
 
