@@ -650,7 +650,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 					v.endTest(testId);
 				}
 				
-				if (fFailureCount + fErrorCount > 0) {
+				if (fFailureCount > 0) {
 					fNextAction.setEnabled(true);
 					fPreviousAction.setEnabled(true);
 				}
@@ -848,7 +848,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 
 		GridLayout gridLayout= new GridLayout();
 		gridLayout.marginWidth= 0;
-		gridLayout.marginHeight= 0;
 		parent.setLayout(gridLayout);
 
 		configureToolBar();
