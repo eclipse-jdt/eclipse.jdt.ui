@@ -84,8 +84,6 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
-import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -96,6 +94,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
@@ -595,9 +594,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private GotoErrorAction fNextError;
 	private TextOperationAction fShowJavadoc;
 	
-	private IAction fDeleteAction;
-	
 	private CompositeActionGroup fStandardActionGroups;
+	private CCPActionGroup fCCPActionGroup;
 	
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
@@ -714,8 +712,11 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 
 		// we must create the groups after we have set the selection provider to the site
 		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
-				new OpenViewActionGroup(this), new ShowActionGroup(this), 
-				new RefactorActionGroup(this, fOutlineViewer), new GenerateActionGroup(this)});
+				new OpenViewActionGroup(this), 
+				new ShowActionGroup(this), 
+				fCCPActionGroup= new CCPActionGroup(this),
+				new RefactorActionGroup(this), 
+				new GenerateActionGroup(this)});
 				
 		// register global actions
 		IActionBars bars= getSite().getActionBars();
@@ -725,9 +726,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_JAVA_DOC, fShowJavadoc);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
-		
-		fDeleteAction= ReorgGroup.createDeleteAction(UnifiedSite.create(getSite()), this);
-		bars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
 		
 		fStandardActionGroups.fillActionBars(bars);
 
@@ -739,9 +737,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		registerToolbarActions();
 				
-		fActionGroups= new ContextMenuGroup[] { new GenerateGroup(), new JavaSearchGroup(), new ReorgGroup(UnifiedSite.create(getSite())) };
-
-		ReorgGroup.addGlobalReorgActions(UnifiedSite.create(getSite()), getSite().getActionBars(), fOutlineViewer);
+		fActionGroups= new ContextMenuGroup[] { new GenerateGroup(), new JavaSearchGroup() };
 		
 		fOutlineViewer.setInput(fInput);	
 		fOutlineViewer.getControl().addKeyListener(new KeyAdapter() {
@@ -834,13 +830,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		}
 	}
 	 
-	private void addRefactoring(IMenuManager menu){
-		MenuManager refactoring= new MenuManager(JavaEditorMessages.getString("JavaOutlinePage.ContextMenu.refactoring.label")); //$NON-NLS-1$
-		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup(UnifiedSite.create(getSite())) }, fOutlineViewer);
-		if (!refactoring.isEmpty())
-			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactoring);
-	}
-	
 	private void addOpenPerspectiveItem(IMenuManager menu) {
 		ISelection s= getSelection();
 		if (s.isEmpty() || ! (s instanceof IStructuredSelection))
@@ -873,8 +862,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		// XXX fill the show menu. This is a workaround until we have converted all context menus to the
 		// new action groups.
 		fStandardActionGroups.get(1).fillContextMenu(menu);
-		
-		addRefactoring(menu);
+		fStandardActionGroups.get(2).fillContextMenu(menu);
+		fStandardActionGroups.get(3).fillContextMenu(menu);
 		addOpenPerspectiveItem(menu);	
 	}
 	
@@ -910,7 +899,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		IAction action= null;
 		if (event.character == SWT.DEL) {
-			action= fDeleteAction;
+			action= fCCPActionGroup.getDeleteAction();
 		}
 			
 		if (action != null && action.isEnabled())
