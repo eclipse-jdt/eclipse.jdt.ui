@@ -144,15 +144,16 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 						}
 					}
 				} else {
+					boolean isHierarchyOnType= (hierarchy.getType() != null);
 					boolean isClass= !Flags.isInterface(hierarchy.getCachedFlags(type));
-					if (isClass) {
+					if (isClass || isHierarchyOnType) {
 						for (int i= 0; i < types.length; i++) {
 							res.add(types[i]);
 						}
 					} else {
 						for (int i= 0; i < types.length; i++) {
 							IType curr= types[i];
-							// no classes implementing inetrfaces, only if anonymous
+							// no classes implementing interfaces, only if anonymous
 							if (Flags.isInterface(hierarchy.getCachedFlags(curr)) || isAnonymous(curr)) {
 								res.add(curr);
 							}
