@@ -389,8 +389,10 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		
 		int deltaOffset= event.getOffset() - currentPosition.getOffset();		
 
-		if (fListener != null)
-			fListener.setCurrentPosition(currentPosition, deltaOffset + event.getText().length());		
+		if (fListener != null) {
+			int length= event.getText() == null ? 0 : event.getText().length();
+			fListener.setCurrentPosition(currentPosition, deltaOffset + length);		
+		}
 
 		for (int i= 0; i != positions.length; i++) {
 			TypedPosition p= (TypedPosition) positions[i];			
@@ -448,6 +450,10 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	}
 
 	private boolean containsLineDelimiters(String string) {
+		
+		if (string == null)
+			return false;
+		
 		String[] delimiters= fDocument.getLegalLineDelimiters();
 
 		for (int i= 0; i != delimiters.length; i++)
