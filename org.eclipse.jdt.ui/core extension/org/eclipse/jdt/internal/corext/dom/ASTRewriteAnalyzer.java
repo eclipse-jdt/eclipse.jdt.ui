@@ -833,7 +833,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				if (isInsertOrRemove(returnType)) {
 					startPos= ASTResolving.getPositionAfter(getScanner(startPos), startPos, MODIFIERS);
 				}
-				rewriteNode(returnType, startPos, " ");
+				if (startPos == methodDecl.getName().getStartPosition()) {
+					rewriteNode(returnType, startPos, "");
+					if (isInserted(returnType)) {
+						doTextInsert(startPos, " ", getDescription(returnType));
+					}
+				} else {
+					rewriteNode(returnType, startPos, " ");
+				}
 			} catch (InvalidInputException e) {
 				JavaPlugin.log(e);
 			}
