@@ -10,6 +10,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -36,6 +39,8 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	private static final String CU_A_NAME= "A";
 	private static final String CU_B_NAME= "B";
 	private IFile faTxt;
+
+	private Clipboard fClipboard;
 	
 	public CopyResourcesToClipboardActionTest(String name) {
 		super(name);
@@ -57,7 +62,7 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		
+		fClipboard= new Clipboard(Display.getDefault());
 		fDefaultPackage= MySetup.getDefaultSourceFolder().createPackageFragment("", true, null);
 		
 		fCuA= createCU(getPackageP(), CU_A_NAME + ".java", "package p; class A{}");
@@ -78,7 +83,7 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		
+		fClipboard.dispose();
 		delete(fCuA);
 		delete(fCuB);
 		delete(fPackageQ_R);
@@ -103,13 +108,13 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	}
 
 	private void checkEnabled(Object[] elements) {
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elements), new MockSelectionProvider(elements));
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elements), new MockSelectionProvider(elements), fClipboard);
 		copyAction.update();
 		assertTrue("action should be enabled", copyAction.isEnabled());
 	}
 	
 	private void checkDisabled(Object[] elements) {
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elements), new MockSelectionProvider(elements));
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elements), new MockSelectionProvider(elements), fClipboard);
 		copyAction.update();
 		assertTrue("action should not be enabled", ! copyAction.isEnabled());
 	}

@@ -2,6 +2,9 @@ package org.eclipse.jdt.ui.tests.actions;
 
 import java.io.IOException;
 
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.widgets.Display;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -35,10 +38,11 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 	private ICompilationUnit fNewCuB;
 	private static final String CU_A_NAME= "A";
 	private static final String CU_B_NAME= "B";
+	private Clipboard fClipboard;
 		
 	protected void setUp() throws Exception{
 		super.setUp();
-		
+		fClipboard= new Clipboard(Display.getDefault());
 		fCuA= createCUfromTestFile(getPackageP(), CU_A_NAME);
 		fCuB= createCUfromTestFile(getPackageP(), CU_B_NAME);
 		assertTrue("A.java does not exist", fCuA.exists());
@@ -47,6 +51,7 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 	
 	protected void tearDown() throws Exception{
 		super.tearDown();
+		fClipboard.dispose();
 		if (fNewCuA != null && fNewCuA.exists())
 			fNewCuA.delete(false, null);		
 		if (fCuA != null && fCuA.exists())
@@ -72,10 +77,10 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 		IType typeA= fCuA.getType("A");
 		assertTrue("A does not exist", typeA.exists());
 
-		SourceReferenceTestUtil.copy(new IType[]{typeA});
+		SourceReferenceTestUtil.copy(new IType[]{typeA}, fClipboard);
 		
 		IType typeB= fCuB.getType("B");
-		SourceReferenceTestUtil.paste(new IType[]{typeB});
+		SourceReferenceTestUtil.paste(new IType[]{typeB}, fClipboard);
 		
 		check();
 	}
@@ -84,11 +89,11 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 		IType typeA= fCuA.getType("A");
 		assertTrue("A does not exist", typeA.exists());
 		
-		SourceReferenceTestUtil.copy(new IType[]{typeA});
+		SourceReferenceTestUtil.copy(new IType[]{typeA}, fClipboard);
 		SourceReferenceTestUtil.delete(new IType[]{typeA});
 		
 		IType typeB= fCuB.getType("B");
-		SourceReferenceTestUtil.paste(new IType[]{typeB});
+		SourceReferenceTestUtil.paste(new IType[]{typeB}, fClipboard);
 
 		check();
 	}
@@ -96,11 +101,11 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 	public void test2() throws Exception{
 		Object elem0= fCuA.getType("A").getField("y");
 				
-		SourceReferenceTestUtil.copy(new Object[]{elem0});
+		SourceReferenceTestUtil.copy(new Object[]{elem0}, fClipboard);
 		SourceReferenceTestUtil.delete(new Object[]{elem0});
 		
 		IType typeB= fCuB.getType("B");
-		SourceReferenceTestUtil.paste(new IType[]{typeB});
+		SourceReferenceTestUtil.paste(new IType[]{typeB}, fClipboard);
 
 		check();
 	}

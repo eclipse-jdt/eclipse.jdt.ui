@@ -1,5 +1,7 @@
 package org.eclipse.jdt.ui.tests.actions;
 
+import org.eclipse.swt.dnd.Clipboard;
+
 import junit.framework.Assert;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -46,15 +48,15 @@ class SourceReferenceTestUtil {
 //		cutAction.run();
 //	}	
 
-	static void copy(Object[] elems) {
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elems), new MockSelectionProvider(elems));
+	static void copy(Object[] elems, Clipboard clipboard) {
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elems), new MockSelectionProvider(elems), clipboard);
 		copyAction.update();
 		Assert.assertTrue("copy incorrectly disabled", copyAction.isEnabled());
 		copyAction.run();
 	}	
 
-	static void paste(Object[] elems) {
-		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(elems), new MockSelectionProvider(elems));
+	static void paste(Object[] elems, Clipboard clipboard) {
+		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(elems), new MockSelectionProvider(elems), clipboard);
 		pasteAction.update();
 		Assert.assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 		pasteAction.run();
