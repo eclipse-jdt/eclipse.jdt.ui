@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 
 public class DialogFieldExample {
 	private Shell fShell;
@@ -45,12 +46,15 @@ public class DialogFieldExample {
 		
 		Adapter adapter= new Adapter();
 		
-		StringDialogField string1= new StringDialogField();
+		StringButtonDialogField string1= new StringButtonDialogField(adapter);
 		string1.setLabelText("String1: ");
+		string1.setText("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 		
 		StringButtonDialogField stringbutton= new StringButtonDialogField(adapter);
 		stringbutton.setLabelText("StringButton: ");
 		stringbutton.setButtonLabel("Click");
+		stringbutton.setText("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+
 		
 		String[] addButtons= new String[] { 
 			/* 0 */ "Add1",
@@ -67,7 +71,9 @@ public class DialogFieldExample {
 		list.setRemoveButtonIndex(6);
 		list.setLabelText("List: ");
 		
-		list.addElement("firstxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		for (int i= 0; i < 30; i++) {
+				list.addElement(i + "firstxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		}
 		
 		SelectionButtonDialogField selButton= new SelectionButtonDialogField(SWT.PUSH);
 		selButton.setLabelText("Press Button");
@@ -82,7 +88,10 @@ public class DialogFieldExample {
 		
 		LayoutUtil.doDefaultLayout(fShell, new DialogField[] { string1, rdgroup2, stringbutton, selButton, list, rdgroup1 }, false);
 		
-		fShell.setSize(400,500);
+		((MGridData)string1.getTextControl(null).getLayoutData()).widthHint= 100;
+		((MGridData)stringbutton.getTextControl(null).getLayoutData()).widthHint= 100;
+		
+		fShell.setSize(fShell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		fShell.open ();
 		return this;
 	}

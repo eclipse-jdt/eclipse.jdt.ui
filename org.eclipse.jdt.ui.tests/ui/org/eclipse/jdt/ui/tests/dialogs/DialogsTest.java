@@ -33,7 +33,7 @@ import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
 
 import org.eclipse.jdt.internal.debug.ui.launcher.AddExceptionDialog;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.codemanipulation.CodeManipulationMessages;
+import org.eclipse.jdt.internal.corext.codegeneration.CodeGenerationMessages;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;

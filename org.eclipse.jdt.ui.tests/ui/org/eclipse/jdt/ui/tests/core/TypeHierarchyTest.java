@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class TypeHierarchyTest extends TestCase {
 	

@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
-import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOperation;
+import org.eclipse.jdt.internal.corext.codegeneration.AddUnimplementedMethodsOperation;
 public class AddUnimplementedMethodsTest extends TestCase {
 	
 	private IJavaProject fJavaProject;
