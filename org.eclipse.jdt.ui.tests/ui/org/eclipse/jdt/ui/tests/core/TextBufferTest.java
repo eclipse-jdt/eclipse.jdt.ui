@@ -47,6 +47,11 @@ public class TextBufferTest extends TestCase {
 			result.addTestSuite(THIS);
 		}
 		return result;
+		
+//		TestSuite result= new TestSuite();
+//		result.addTest(new TextBufferTest("testReplaceAndInsert1"));
+//		result.addTest(new TextBufferTest("testReplaceAndInsert2"));
+//		return result;
 	}
 	
 	protected void setUp() throws Exception {
@@ -452,6 +457,28 @@ public class TextBufferTest extends TestCase {
 		assertEquals("Buffer content", "05ab7412389", fBuffer.getContent());
 		doUndo(undo);
 	}
+	
+	public void testReplaceAndInsert1() throws Exception {
+		SimpleTextEdit e1= SimpleTextEdit.createReplace(0, 2, "xx");
+		fEditor.add(e1);
+		SimpleTextEdit e2= SimpleTextEdit.createInsert(0, "y");
+		fEditor.add(e2);	
+		assertTrue(fEditor.canPerformEdits());
+		UndoMemento undo= fEditor.performEdits(null);
+		assertEquals("Buffer content", "xxy23456789", fBuffer.getContent());
+	}
+	
+	public void testReplaceAndInsert2() throws Exception {
+		SimpleTextEdit e1= SimpleTextEdit.createDelete(0, 2);
+		fEditor.add(e1);
+		SimpleTextEdit e11= SimpleTextEdit.createInsert(0, "xx");
+		fEditor.add(e11);		
+		SimpleTextEdit e2= SimpleTextEdit.createInsert(0, "y");
+		fEditor.add(e2);	
+		assertTrue(fEditor.canPerformEdits());
+		UndoMemento undo= fEditor.performEdits(null);
+		assertEquals("Buffer content", "xxy23456789", fBuffer.getContent());
+	}	
 	
 	private void doUndo(UndoMemento undo) throws Exception {
 		fEditor.add(undo);
