@@ -29,7 +29,7 @@
       <wizard
             banner="icons/full/wizban/newjprjex_wiz.gif"
             name="%JUnitProjectExampleCreationWizard.title"
-            icon="icons/full/ctool16/newjprjex_wiz.gif"
+            icon="icons/full/etool16/newjprjex_wiz.gif"
             category="org.eclipse.ui.Examples/org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectCreationWizard"
             project="true"
