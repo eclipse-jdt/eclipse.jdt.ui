@@ -83,7 +83,7 @@ public class ReorgCorrectionsSubProcessor {
 			IPackageFragment newPack= root.getPackageFragment(newPackName);
 			
 			ICompilationUnit newCU= newPack.getCompilationUnit(cu.getElementName());
-			if (!newCU.exists()) {
+			if (!newCU.exists() && !cu.getResource().isLinked()) {
 				String label;
 				if (newPack.isDefaultPackage()) {
 					label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.movecu.default.description", cu.getElementName()); //$NON-NLS-1$
