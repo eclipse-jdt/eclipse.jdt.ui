@@ -420,7 +420,8 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		SelectionDialog dialog= JavaUI.createMainTypeDialog(getContainer().getShell(), getContainer(), searchScope, 0, false, ""); //$NON-NLS-1$
 		dialog.setTitle(JarPackagerMessages.getString("JarManifestWizardPage.mainTypeSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.mainTypeSelectionDialog.message")); //$NON-NLS-1$
-		dialog.setInitialSelections(new Object[] {fJarPackage.getMainClass()});
+		if (fJarPackage.getMainClass() != null)
+			dialog.setInitialSelections(new Object[] {fJarPackage.getMainClass()});
 
 		if (dialog.open() == dialog.OK) {
 			fJarPackage.setMainClass((IType)dialog.getResult()[0]);
