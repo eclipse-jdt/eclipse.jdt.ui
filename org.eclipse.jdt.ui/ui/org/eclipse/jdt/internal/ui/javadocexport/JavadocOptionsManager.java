@@ -643,8 +643,6 @@ public class JavadocOptionsManager {
 				currentSelection= JavaPlugin.getActiveWorkbenchWindow().getSelectionService().getSelection();
 				if (currentSelection instanceof IStructuredSelection)
 					structuredSelection= (IStructuredSelection) currentSelection;
-				else
-					return StructuredSelection.EMPTY;
 			}
 			List selectedElements= new ArrayList(structuredSelection.size());
 			Iterator iter= structuredSelection.iterator();

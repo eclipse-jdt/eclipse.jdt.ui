@@ -19,9 +19,12 @@ import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventListener;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -33,6 +36,7 @@ import org.eclipse.ui.IWorkbench;
 
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
@@ -59,6 +63,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private IWorkspaceRoot fRoot;
 
 	private IFile fXmlJavadocFile;
+	
+	//private ILaunchConfiguration fConfig;
 
 	public JavadocWizard() {
 		this(null);
@@ -104,7 +110,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			URL newURL= fDestination.toFile().toURL();
 
 			if (fStore.fromStandard() && ((currURL == null) || !(currURL.equals(newURL)))) {
-				String message=  "Do you want to update the Javadoc location for '{0}' with the chosen destination folder '{1}'?";
+				String message=  "Do you want to update the Javadoc location for ''{0}'' with the chosen destination folder ''{1}''?";
 				if (MessageDialog.openQuestion(getShell(), "Update Javadoc Location", MessageFormat.format(message, new String[] { fStore.getJavaProject().getElementName(), fStore.getDestination() }))) {
 					JavaDocLocations.setJavadocLocation(path, newURL);
 				}
@@ -148,9 +154,22 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 				IDebugEventListener listener= new JavadocDebugEventListener();
 				DebugPlugin.getDefault().addDebugEventListener(listener);
+				
+				ILaunchConfigurationWorkingCopy wc= null;
+			//	fConfig= null;
+				try {
+					ILaunchConfigurationType lcType= DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
+					String name= "Javadoc Export Wizard";// + System.currentTimeMillis();
+					wc= lcType.newInstance(null, name);
+					wc.setAttribute(IDebugUIConstants.ATTR_TARGET_RUN_PERSPECTIVE, (String) null);
+					//fConfig= wc.doSave();
 
-				ILaunch newLaunch= new Launch(null, ILaunchManager.RUN_MODE, null, iProcesses, null);
-				DebugPlugin.getDefault().getLaunchManager().addLaunch(newLaunch);
+					ILaunch newLaunch= new Launch(wc, ILaunchManager.RUN_MODE, null, iProcesses, null);
+					DebugPlugin.getDefault().getLaunchManager().addLaunch(newLaunch);
+
+				} catch (CoreException e) {
+					JavaPlugin.logErrorMessage(e.getMessage());
+				}
 
 				return true;
 
@@ -216,6 +235,13 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		public void handleDebugEvent(DebugEvent event) {
 			if (event.getKind() == DebugEvent.TERMINATE) {
 				try {
+//					if (fConfig != null) {
+//						try {
+//							fConfig.delete();
+//						} catch (CoreException e) {
+//							JavaPlugin.log(e);
+//						}
+//					}
 					if (!fWriteCustom) {
 						refresh(fDestination); //If destination of javadoc is in workspace then refresh workspace
 						spawnInBrowser();
