@@ -165,17 +165,19 @@ public class BuildPathSupport {
 
 	private static void updateContainerClasspath(IJavaProject jproject, IPath containerPath, IClasspathEntry newEntry, IProgressMonitor monitor) throws CoreException {
 		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
-		IClasspathEntry[] entries= container.getClasspathEntries();
-		IClasspathEntry[] newEntries= new IClasspathEntry[entries.length];
-		for (int i= 0; i < entries.length; i++) {
-			IClasspathEntry curr= entries[i];
-			if (curr.getEntryKind() == newEntry.getEntryKind() && curr.getPath().equals(newEntry.getPath())) {
-				newEntries[i]= newEntry;
-			} else {
-				newEntries[i]= curr;
+		if (container != null) {
+			IClasspathEntry[] entries= container.getClasspathEntries();
+			IClasspathEntry[] newEntries= new IClasspathEntry[entries.length];
+			for (int i= 0; i < entries.length; i++) {
+				IClasspathEntry curr= entries[i];
+				if (curr.getEntryKind() == newEntry.getEntryKind() && curr.getPath().equals(newEntry.getPath())) {
+					newEntries[i]= newEntry;
+				} else {
+					newEntries[i]= curr;
+				}
 			}
+			requestContainerUpdate(jproject, container, newEntries);
 		}
-		requestContainerUpdate(jproject, container, newEntries);
 		monitor.worked(1);
 	}
 
