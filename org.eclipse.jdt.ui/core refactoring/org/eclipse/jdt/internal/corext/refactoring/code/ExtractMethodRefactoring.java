@@ -472,7 +472,17 @@ public class ExtractMethodRefactoring extends Refactoring {
 		
 		ICodeFormatter formatter= ToolFactory.createCodeFormatter();
 		String result= formatter.format(code.toString(), firstLineIndent, null, delimiter);
-		return CodeFormatterUtil.removeLeadingIndents(result);
+		
+		// we have to do this after formatting
+		int pos= fSelectionStart + fSelectionLength;
+		TextRegion region= buffer.getLineInformationOfOffset(pos);
+		if (region.getOffset() == pos)
+			result= result + delimiter;
+		
+		region= buffer.getLineInformationOfOffset(fSelectionStart);
+		String selectedLine= buffer.getContent(region.getOffset(), fSelectionStart - region.getOffset());
+		int indent= CodeFormatterUtil.getIndent(selectedLine);
+		return CodeFormatterUtil.removeIndent(result,  indent, CodeFormatterUtil.getTabWidth());
 	}
 
 
