@@ -82,6 +82,18 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private String getInfoText(IJavaElement member) {
-		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
+		String label= JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
+		StringBuffer buf= new StringBuffer();
+		for (int i= 0; i < label.length(); i++) {
+			char ch= label.charAt(i);
+			if (ch == '<') {
+				buf.append("&lt;"); //$NON-NLS-1$
+			} else if (ch == '>') {
+				buf.append("&gt;"); //$NON-NLS-1$
+			} else {
+				buf.append(ch);
+			}
+		}
+		return buf.toString();
 	}
 }
