@@ -52,9 +52,13 @@ public class ExtendedBuffer {
 	 * starting at position <code>start</code>. The method overreads comments,
 	 * meaning that the character isn't found inside a comment.
 	 */
-	public int indexOf(int start, char search) {
-		int length= getLength();
-		for (int i= start; i < length && i != -1; i++) {
+	public int indexOf(char search, int start) {
+		return indexOf(search, start, getLength() - start);
+	}
+	
+	public int indexOf(char search, int start, int length) {
+		int last= start + length;
+		for (int i= start; i < last && i != -1; i++) {
 			char c= getChar(i);
 			if (c == search)
 				return i;

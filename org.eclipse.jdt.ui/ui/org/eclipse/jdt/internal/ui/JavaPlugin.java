@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.packageview.ErrorTickManager;
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;
@@ -356,7 +357,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		ImportOrganizePreferencePage.initDefaults();
 		RefactoringPreferencePage.initDefaults(store);		
-		
+		CodeFormatterPreferencePage.initDefaults(store);
 		initializeEditorSettings(store);
 		initializeJavaSettings(store);
 		

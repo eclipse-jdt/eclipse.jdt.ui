@@ -21,6 +21,12 @@ import org.eclipse.jdt.launching.JavaRuntime;
 public class JDK122Settings implements IRuntimeDefaultPreferences {
 
 	public boolean matches() {
+		File javaHome= new File (System.getProperty("java.home"));
+		File java= new File(javaHome, File.separator+"bin"+File.separator+"java");
+		File javaExe= new File(javaHome, File.separator+"bin"+File.separator+"java.exe");
+		if (!(java.isFile() || javaExe.isFile()))
+			return false;
+
 		String vendor= System.getProperty("java.vendor");
 		if (!(vendor.startsWith("Sun") || vendor.startsWith("IBM")))
 			return false;

@@ -79,54 +79,54 @@ class RenamePackageASTAnalyzer extends RefactoringASTAnalyzer {
 	}
 
 	public boolean visit(MessageSend messageSend, BlockScope scope) {
-		if (messageSend.receiver != ThisReference.ThisImplicit && sourceRangeOnList(messageSend.receiver) && nameDefinedInScope(fFirstNameSegment, scope)) {
-			addWarning(messageSend);
+		if (messageSend.receiver != ThisReference.ThisImplicit && sourceRangeOnList(messageSend.receiver) && nameDefinedInScope(fFirstNameSegmentArray, scope)) {
+			addError(messageSend);
 		}
 		return true;
 	}
 
 	public boolean visit(QualifiedNameReference qualifiedNameReference, BlockScope scope) {
-		if (super.sourceRangeOnList(qualifiedNameReference) && nameDefinedInScope(fFirstNameSegment, scope)) {
-			addWarning(qualifiedNameReference);
+		if (super.sourceRangeOnList(qualifiedNameReference) && nameDefinedInScope(fFirstNameSegmentArray, scope)) {
+			addError(qualifiedNameReference);
 		}
 		return true;
 	}
 	
 	public boolean visit(QualifiedTypeReference qualifiedTypeReference, ClassScope scope) {
-		if (super.sourceRangeOnList(qualifiedTypeReference) && nameDefinedInScope(fFirstNameSegment, scope)) {
-			addWarning(qualifiedTypeReference);
+		if (super.sourceRangeOnList(qualifiedTypeReference) && nameDefinedInScope(fFirstNameSegmentArray, scope)) {
+			addError(qualifiedTypeReference);
 		}
 		return true;
 	}
 	
 	public boolean visit(QualifiedTypeReference qualifiedTypeReference, BlockScope scope) {
-		if (super.sourceRangeOnList(qualifiedTypeReference) && nameDefinedInScope(fFirstNameSegment, scope)) {
-			addWarning(qualifiedTypeReference);
+		if (super.sourceRangeOnList(qualifiedTypeReference) && nameDefinedInScope(fFirstNameSegmentArray, scope)) {
+			addError(qualifiedTypeReference);
 		}
 		return true;
 	}
 
 	public boolean visit(CastExpression castExpression, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(castExpression.type, scope))
-			addWarning(castExpression);
+			addError(castExpression);
 		return true;
 	}
 
 	public boolean visit(ClassLiteralAccess classLiteral, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(classLiteral.type, scope))
-			addWarning(classLiteral);
+			addError(classLiteral);
 		return true;
 	}
 
 	public boolean visit(InstanceOfExpression instanceOfExpression, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(instanceOfExpression.type, scope))
-			addWarning(instanceOfExpression);
+			addError(instanceOfExpression);
 		return true;
 	}
 
 	public boolean visit(ArrayAllocationExpression arrayAllocationExpression, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(arrayAllocationExpression.type, scope))
-			addWarning(arrayAllocationExpression);
+			addError(arrayAllocationExpression);
 		return true;
 	}
 
@@ -139,21 +139,21 @@ class RenamePackageASTAnalyzer extends RefactoringASTAnalyzer {
 
 	public boolean visit(SingleTypeReference singleTypeReference, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
-			addWarning(singleTypeReference);
+			addError(singleTypeReference);
 		return true;
 	}
 
 	public boolean visit(ArrayTypeReference arrayTypeReference, BlockScope scope) {
 		if (sourceRangeOnList(arrayTypeReference.sourceStart, arrayTypeReference.sourceStart + arrayTypeReference.token.length) && localTypeExists(scope, fFirstNameSegmentArray)) {
-			addWarning(arrayTypeReference);
+			addError(arrayTypeReference);
 		}
 		return true;
 	}
 
 	//-----------------------------------------------------------
 	
-	private void addWarning(AstNode node){
-		addWarning("Possible problems in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + "). Name " + fFirstNameSegment + " is already used.");
+	private void addError(AstNode node){
+		addError("Possible problems in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + "). Name " + fFirstNameSegment + " is already used.");
 	}
 	
 	private boolean isNewNameHiddenByAnotherType(AstNode node, Scope scope) {
@@ -180,82 +180,6 @@ class RenamePackageASTAnalyzer extends RefactoringASTAnalyzer {
 		return false;
 	}
 	
-	
-	private static boolean nameDefinedInScope(String newName, CompilationUnitScope scope){
-		if (scope.topLevelTypes == null)
-			return false;
-		for (int i= 0; i < scope.topLevelTypes.length; i++){
-			if (newName.equals(new String(scope.topLevelTypes[i].sourceName)))
-				return true;
-		}		
-		return false;
-	}
-	
-	private static boolean nameDefinedInScope(String newName, ClassScope scope){
-		HackFinder.fixMeSoon("Rename Type analyzer needs this fix (CompilationUnitScope) too?");
-		if (scope == null)
-			return false;
-		if (nameDefinedInType(newName, scope.referenceContext.binding))
-			return true;
-		if (scope.parent instanceof ClassScope)	
-			return nameDefinedInScope(newName, (ClassScope)scope.parent);
-		else if (scope.parent instanceof BlockScope)	
-			return nameDefinedInScope(newName, (BlockScope)scope.parent);
-		else if (scope.parent instanceof CompilationUnitScope)
-			return nameDefinedInScope(newName, (CompilationUnitScope)scope.parent);
-		else	
-			return false;
-	}
-	
-	private static boolean nameDefinedInScope(String newName, BlockScope scope){
-		if (scope == null)
-			return false;
-		if (scope.locals != null){
-			for (int i= 0; i < scope.locals.length; i++){
-				if (scope.locals[i] != null){
-					String name= (scope.locals[i].name != null) ? new String(scope.locals[i].name) : "";
-					if (new String(name).equals(newName))
-						return true;
-				}	
-			}
-		}
-		if (scope.parent instanceof BlockScope)
-			return nameDefinedInScope(newName, (BlockScope)scope.parent);
-		else if (scope.parent instanceof ClassScope)
-			return nameDefinedInScope(newName, (ClassScope)scope.parent);
-		else 
-			return false;
-	}
-	
-	private static boolean nameDefinedInType(String newName, SourceTypeBinding sourceTypeBinding){
-		if (sourceTypeBinding.fields != null){
-			for (int i= 0; i < sourceTypeBinding.fields.length; i++){
-				if (newName.equals(new String(sourceTypeBinding.fields[i].name)))
-					return true;
-			}
-		}
-		if (sourceTypeBinding.memberTypes != null){
-			for (int i= 0; i < sourceTypeBinding.memberTypes.length; i++){
-				if (newName.equals(new String(sourceTypeBinding.memberTypes[i].sourceName)))
-					return true;
-			}
-		}
-		
-		if ((sourceTypeBinding.superclass != null)
-			&& (sourceTypeBinding.superclass instanceof SourceTypeBinding)
-			&& nameDefinedInType(newName, (SourceTypeBinding)sourceTypeBinding.superclass))
-				return true;
-				
-		if (sourceTypeBinding.superInterfaces != null){
-			for (int i= 0; i < sourceTypeBinding.superInterfaces.length; i++){
-				if ((sourceTypeBinding.superInterfaces[i] instanceof SourceTypeBinding)
-					&& nameDefinedInType(newName, (SourceTypeBinding)sourceTypeBinding.superInterfaces[i]))
-						return true;
-			}
-		}
-		
-		return false;
-	}
 	
 	private boolean typeUsedAsParameter(MethodDeclaration methodDeclaration){
 		if (methodDeclaration.arguments == null)

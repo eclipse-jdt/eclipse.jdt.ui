@@ -24,8 +24,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.dialogs.WizardExportPage;
 
-import org.eclipse.jdt.core.refactoring.code.Selection;
-
 /**
  *	Page 1 of the base resource export-to-file-system Wizard
  */

@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 
-class ExceptionAnalyzer {
+/* package */ class ExceptionAnalyzer {
 
 	private List fCurrentExceptions;
 	private Stack fTryStack;
@@ -96,7 +96,7 @@ class ExceptionAnalyzer {
 		}
 	}
 	
-	public String getThrowClause() {
+	public String getThrowSignature() {
 		if (fCurrentExceptions.size() == 0)
 			return "";
 			

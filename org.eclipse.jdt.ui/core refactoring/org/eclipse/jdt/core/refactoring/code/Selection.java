@@ -11,14 +11,14 @@ import org.eclipse.jdt.internal.compiler.ast.Block;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 
-public class Selection {
+/* package */ class Selection {
 	
 	public int start;		// inclusive
 	public int end;		// inclusive
 	
-	public Selection(int s, int e) {
+	public Selection(int s, int length) {
 		start= s;
-		end= e;
+		end= s + length - 1;
 		Assert.isTrue(start <= end);
 	}
 	
@@ -58,8 +58,8 @@ public class Selection {
 		return node.sourceStart <= end && end < node.sourceEnd;
 	}
 	
-	public boolean intersectsBlock(Block block) {
-		return block.sourceStart < start && start <= block.sourceEnd && block.sourceEnd <= end ||
-		       start <= block.sourceStart && block.sourceStart <= end && end < block.sourceEnd;
+	public boolean intersects(AstNode node) {
+		return node.sourceStart < start && start <= node.sourceEnd && node.sourceEnd <= end ||
+		       start <= node.sourceStart && node.sourceStart <= end && end < node.sourceEnd;
 	}
 }

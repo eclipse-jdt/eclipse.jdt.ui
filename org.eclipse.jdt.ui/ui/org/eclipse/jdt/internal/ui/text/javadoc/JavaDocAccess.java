@@ -5,6 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -106,6 +107,25 @@ public class JavaDocAccess {
 		}
 		return null;
 	}
+	
+	/**
+	 * Gets a text content for an IMember's JavaDoc comment
+	 * Returns null if the member does not contain a JavaDoc comment or
+	 * if no source is available.
+	 */
+	public static String getJavaDocText(IMember member) throws JavaModelException {
+		try {
+			Reader rd= getJavaDoc(member);
+			if (rd != null) {
+				JavaDocTextReader txtRd= new JavaDocTextReader(rd);
+				return txtRd.getString();
+			}
+		} catch (IOException e) {
+			throw new JavaModelException(e, IStatus.ERROR);
+		}
+		return null;
+	}
+	
 	
 	private static int findCommentEnd(IBuffer buffer, int start, int end) {
 		for (int i= start; i < end; i++) {

@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringASTAnalyzer;
@@ -63,50 +64,50 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 	}
 
 	public boolean visit(MessageSend messageSend, BlockScope scope) {
-		if (messageSend.receiver != ThisReference.ThisImplicit && sourceRangeOnList(messageSend.receiver) && nameDefinedInScope(fNewName, scope)) {
-			addWarning(messageSend);
+		if (messageSend.receiver != ThisReference.ThisImplicit && sourceRangeOnList(messageSend.receiver) && nameDefinedInScope(fNewNameArray, scope)) {
+			addError(messageSend);
 		}
 		return true;
 	}
 
 	public boolean visit(QualifiedNameReference qualifiedNameReference, BlockScope scope) {
-		if (sourceRangeOnList(qualifiedNameReference) && nameDefinedInScope(fNewName, scope)) {
-			addWarning(qualifiedNameReference);
+		if (sourceRangeOnList(qualifiedNameReference) && nameDefinedInScope(fNewNameArray, scope)) {
+			addError(qualifiedNameReference);
 		}
 		return true;
 	}
 
 	public boolean visit(CastExpression castExpression, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(castExpression.type, scope))
-			addWarning(castExpression);
+			addError(castExpression);
 		return true;
 	}
 
 	public boolean visit(ClassLiteralAccess classLiteral, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(classLiteral.type, scope))
-			addWarning(classLiteral);
+			addError(classLiteral);
 		return true;
 	}
 
 	public boolean visit(InstanceOfExpression instanceOfExpression, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(instanceOfExpression.type, scope))
-			addWarning(instanceOfExpression);
+			addError(instanceOfExpression);
 		return true;
 	}
 
 	public boolean visit(ArrayAllocationExpression arrayAllocationExpression, BlockScope scope) {
 		if (isNewNameHiddenByAnotherType(arrayAllocationExpression.type, scope))
-			addWarning(arrayAllocationExpression);
+			addError(arrayAllocationExpression);
 		return true;
 	}
 
 	public boolean doVisit(CompilationUnitDeclaration compilationUnitDeclaration, CompilationUnitScope scope) {
-		if (typeImported(compilationUnitDeclaration, fNewName))
-			addWarning(fNewName + " causes a name conflict in import declarations in \"" + cuFullPath() + "\"");
+		if (typeImported(compilationUnitDeclaration, fNewNameArray))
+			addError(fNewName + " causes a name conflict in import declarations in \"" + cuFullPath() + "\"");
 		if (!typeImported(compilationUnitDeclaration))
 			return true;	
-		if (typeDeclared(compilationUnitDeclaration, fNewName))
-			addWarning(cuFullPath() + " imports " + fType.getFullyQualifiedName() + " and declares a top-level type called " + fNewName);
+		if (typeDeclared(compilationUnitDeclaration, fNewNameArray))
+			addError(cuFullPath() + " imports " + fType.getFullyQualifiedName() + " and declares a top-level type called " + fNewName);
 		return true;
 	}
 
@@ -145,37 +146,37 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 
 	public boolean visit(SingleTypeReference singleTypeReference, BlockScope scope) {
 		if (referenceConflictsWithImport(singleTypeReference.token, scope))
-			addWarning(cuFullPath() + " refers to a type named " + fNewName + " (line number:" + getLineNumber(singleTypeReference) +") and imports (single-type-import) " + fType.getFullyQualifiedName());
+			addError(cuFullPath() + " refers to a type named " + fNewName + " (line number:" + getLineNumber(singleTypeReference) +") and imports (single-type-import) " + fType.getFullyQualifiedName());
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
-			addWarning(singleTypeReference);
+			addError(singleTypeReference);
 		return true;
 	}
 
 	public boolean visit(SingleTypeReference singleTypeReference, ClassScope scope) {
 		if (referenceConflictsWithImport(singleTypeReference.token, scope))
-			addWarning(cuFullPath() + " refers to a type named " + fNewName + "(line number:" + getLineNumber(singleTypeReference) + ") and imports (single-type-import) " + fType.getFullyQualifiedName());
+			addError(cuFullPath() + " refers to a type named " + fNewName + "(line number:" + getLineNumber(singleTypeReference) + ") and imports (single-type-import) " + fType.getFullyQualifiedName());
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
-			addWarning(singleTypeReference);
+			addError(singleTypeReference);
 		return true;
 	}
 
 	public boolean visit(ArrayTypeReference arrayTypeReference, BlockScope scope) {
 		if (referenceConflictsWithImport(arrayTypeReference.token, scope))
-			addWarning(cuFullPath() + " refers to a type named " + fNewName+ " (line number:" + getLineNumber(arrayTypeReference) + ") and imports (single-type-import) " + fType.getFullyQualifiedName());
+			addError(cuFullPath() + " refers to a type named " + fNewName+ " (line number:" + getLineNumber(arrayTypeReference) + ") and imports (single-type-import) " + fType.getFullyQualifiedName());
 		if (sourceRangeOnList(arrayTypeReference.sourceStart, arrayTypeReference.sourceStart + arrayTypeReference.token.length) && localTypeExists(scope, fNewNameArray)) {
-			addWarning(arrayTypeReference);
+			addError(arrayTypeReference);
 		}
 		return true;
 	}
 
 	public boolean visit(ArrayTypeReference arrayTypeReference, ClassScope scope) {
 		if (referenceConflictsWithImport(arrayTypeReference.token, scope))
-			addWarning(cuFullPath() + " refers to a type named " + fNewName + " (line number:" + getLineNumber(arrayTypeReference) + ") and imports (single-type-import) " + fType.getFullyQualifiedName());
+			addError(cuFullPath() + " refers to a type named " + fNewName + " (line number:" + getLineNumber(arrayTypeReference) + ") and imports (single-type-import) " + fType.getFullyQualifiedName());
 		return true;
 	}
 	//-----------------------------------------------------------
-	private void addWarning(AstNode node){
-		addWarning("Possible problems in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + "). Name " + fNewName + " is already used.");
+	private void addError(AstNode node){
+		addError("Possible problems in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + "). Name " + fNewName + " is already used.");
 	}
 	
 	private boolean isNewNameHiddenByAnotherType(AstNode node, Scope scope) {
@@ -185,7 +186,7 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 	}
 
 	private boolean referenceConflictsWithImport(char[] typeName, Scope scope) {
-		return fNewName.equals(new String(typeName)) && cuImportsType(scope, fType);
+		return CharOperation.equals(fNewNameArray, typeName) && cuImportsType(scope, fType);
 	}
 	
 	private static final boolean typeExists(Scope scope, char[] name){
@@ -215,13 +216,13 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 		return typeImported(((CompilationUnitScope)current).referenceContext, type);
 	}
 	
-	private static boolean typeImported(CompilationUnitDeclaration compilationUnitDeclaration, String simpleTypeName) {
+	private static boolean typeImported(CompilationUnitDeclaration compilationUnitDeclaration, char[] simpleTypeName) {
 		if (compilationUnitDeclaration.imports == null)
 			return false;
 		for (int i= 0; i < compilationUnitDeclaration.imports.length; i++){
 			if (! compilationUnitDeclaration.imports[i].onDemand){
 				char[][] tokens= compilationUnitDeclaration.imports[i].tokens;
-				if (new String(tokens[tokens.length -1]).equals(simpleTypeName))
+				if (CharOperation.equals(tokens[tokens.length -1], simpleTypeName))
 					return true;
 			}	
 		}
@@ -251,37 +252,11 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 		return false;
 	}
 	
-	private static boolean nameDefinedInScope(String newName, ClassScope scope){
-		if (scope == null)
-			return false;
-		if (nameDefinedInType(newName, scope.referenceContext.binding))
-			return true;
-		if (scope.parent instanceof ClassScope)	
-			return nameDefinedInScope(newName, (ClassScope)scope.parent);
-		else if (scope.parent instanceof BlockScope)	
-			return nameDefinedInScope(newName, (BlockScope)scope.parent);
-		else
-			return false;
-	}
-	
-	private static boolean nameDefinedInScope(String newName, BlockScope scope){
-		if (scope == null)
-			return false;
-		if (scope.locals != null){
-			for (int i= 0; i < scope.locals.length; i++){
-				if (scope.locals[i] != null){
-					String name= (scope.locals[i].name != null) ? new String(scope.locals[i].name) : "";
-					if (new String(name).equals(newName))
-						return true;
-				}	
-			}
-		}
-		if (scope.parent instanceof BlockScope)
-			return nameDefinedInScope(newName, (BlockScope)scope.parent);
-		else if (scope.parent instanceof ClassScope)
-			return nameDefinedInScope(newName, (ClassScope)scope.parent);
-		else 
-			return false;
+	/*
+	 * overriden
+	 */
+	protected boolean nameDefinedInScope(char[] newName, CompilationUnitScope scope){
+		return false;
 	}
 	
 	private void analyzeTypeDeclaration(TypeDeclaration typeDeclaration) {
@@ -291,50 +266,20 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 			if (fType.isClass()
 				&& typeDeclaration.superclass != null
 				&& sourceRangeOnList(typeDeclaration.superclass)
-				&& new String(typeDeclaration.name).equals(fNewName)
+				&& CharOperation.equals(typeDeclaration.name, fNewNameArray)
 				&& (typeDeclaration.superclass instanceof SingleTypeReference)) {
-				addWarning(fType + " has a subclass named " + fNewName);
+				addError(fType + " has a subclass named " + fNewName);
 			}
 			if (fType.isInterface()
 				&& typeDeclaration.superInterfaces != null
 				&& singleTypeReferenceInRange(typeDeclaration.superInterfaces)
-				&& nameInConflictWithSuperInterfaces(typeDeclaration, fNewName)) {
-				addWarning("Name " + fNewName + " is in conflict with superinterfaces list for type " + new String(typeDeclaration.name));
+				&& nameInConflictWithSuperInterfaces(typeDeclaration, fNewNameArray)) {
+				addError("Name " + fNewName + " is in conflict with superinterfaces list for type " + new String(typeDeclaration.name));
 			}
 		} catch (JavaModelException e) {
 			HackFinder.fixMeSoon("should we log it or ignore it?");
 			//ExceptionHandler.handle(e, "JavaModelException", "Exception during program analysis for refactoring");
 		}
-	}
-	
-	private static boolean nameDefinedInType(String newName, SourceTypeBinding sourceTypeBinding){
-		if (sourceTypeBinding.fields != null){
-			for (int i= 0; i < sourceTypeBinding.fields.length; i++){
-				if (newName.equals(new String(sourceTypeBinding.fields[i].name)))
-					return true;
-			}
-		}
-		if (sourceTypeBinding.memberTypes != null){
-			for (int i= 0; i < sourceTypeBinding.memberTypes.length; i++){
-				if (newName.equals(new String(sourceTypeBinding.memberTypes[i].sourceName)))
-					return true;
-			}
-		}
-		
-		if ((sourceTypeBinding.superclass != null)
-			&& (sourceTypeBinding.superclass instanceof SourceTypeBinding)
-			&& nameDefinedInType(newName, (SourceTypeBinding)sourceTypeBinding.superclass))
-				return true;
-				
-		if (sourceTypeBinding.superInterfaces != null){
-			for (int i= 0; i < sourceTypeBinding.superInterfaces.length; i++){
-				if ((sourceTypeBinding.superInterfaces[i] instanceof SourceTypeBinding)
-					&& nameDefinedInType(newName, (SourceTypeBinding)sourceTypeBinding.superInterfaces[i]))
-						return true;
-			}
-		}
-		
-		return false;
 	}
 	
 	/*
@@ -352,21 +297,21 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 		}
 		return false;
 	}
-	private static boolean nameInConflictWithSuperInterfaces(TypeDeclaration typeDeclaration, String name){
+	private static boolean nameInConflictWithSuperInterfaces(TypeDeclaration typeDeclaration, char[] name){
 		for (int i= 0; i < typeDeclaration.superInterfaces.length; i ++){
 			if (typeDeclaration.superInterfaces[i] instanceof SingleTypeReference
-				&& new String(typeDeclaration.superInterfaces[i].toStringExpression(0)).equals(name))
+				&& new String(name).equals(typeDeclaration.superInterfaces[i].toStringExpression(0)))
 					return true;
 		}
 		return false;
 	}
 		
-	private static boolean typeDeclared(CompilationUnitDeclaration compilationUnitDeclaration, String typeName){
+	private static boolean typeDeclared(CompilationUnitDeclaration compilationUnitDeclaration, char[] typeName){
 		TypeDeclaration[] types= compilationUnitDeclaration.types;
 		if (types == null)
 			return false;
 		for (int i= 0; i < types.length; i++){
-			if (new String(types[i].name).equals(typeName))
+			if (CharOperation.equals(types[i].name, typeName))
 				return true;
 		}
 		return false;

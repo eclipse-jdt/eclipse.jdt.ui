@@ -212,6 +212,11 @@
 		class="org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>	
+	<page name="Code Formatter"
+		id="org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"
+		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>
 </extension>
 
 <extension
@@ -344,14 +349,6 @@
 	<viewer
 		extensions="properties"
 		class="org.eclipse.jdt.internal.ui.compare.TextMergeViewerCreator">
-	</viewer>
-</extension>
-
-<extension
-	point="org.eclipse.compare.contentViewers">
-	<viewer
-		extensions="java,java2"
-		class="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator">
 	</viewer>
 </extension>
 

@@ -97,7 +97,7 @@ public class CUSavePolicy implements ISavePolicy {
 		final boolean[] confirmed= new boolean[] {false};
 		Runnable r= new Runnable() {
 			public void run() {
-				if (MessageDialog.openConfirm(shell, title, message)) {
+				if (MessageDialog.openQuestion(shell, title, message)) {
 					confirmed[0]= true;
 				}
 			}

@@ -5,8 +5,9 @@
  */
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
@@ -20,6 +21,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
@@ -28,6 +30,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
@@ -39,6 +42,7 @@ public class CompletionEvaluator {
 		"@author",
 		"@deprecated",
 		"@exception",
+		"@link",
 		"@param",
 		"@return",
 		"@see", "@serial", "@serialData", "@serialField", "@since",
@@ -50,7 +54,8 @@ public class CompletionEvaluator {
 		"<code>", "</code>",
 		"<br>",
 		"<b>", "</b>",
-		"<i>", "</i>"
+		"<i>", "</i>",
+		"<pre>", "</pre>"
 	};	
 	
 	private ICompilationUnit fCompilationUnit;
@@ -68,47 +73,35 @@ public class CompletionEvaluator {
 		
 		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT + JavaElementLabelProvider.SHOW_CONTAINER);
 	}
-		
-	private static int backFindWordBeginPos(IDocument doc, int lineBeginPos, int pos) {		
-		int currPos= pos;
-		int brackOpen= 0;
-		try {
-			while (currPos > lineBeginPos) {
-				currPos--;
-				char ch= doc.getChar(currPos);
-				if (Character.isWhitespace(ch)) {
-					return currPos + 1;
+	
+	private static boolean isWordPart(char ch) {
+		return Character.isJavaIdentifierPart(ch) || (ch == '#') || (ch == '.') || (ch == '/');
+	}
+			
+	private static int findCharBeforeWord(IDocument doc, int lineBeginPos, int pos) {		
+		int currPos= pos - 1;
+		if (currPos > lineBeginPos) {
+			try {
+				while (currPos > lineBeginPos && isWordPart(doc.getChar(currPos))) {
+					currPos--;
 				}
-				if (ch == '<') {
-					if (brackOpen == 0) {
-						return currPos;
-					} else {
-						brackOpen--;
-					}
-				} else if (ch == '>') {
-					brackOpen++;
-				}
+				return currPos;
+			} catch (BadLocationException e) {
 			}
-			return lineBeginPos;
-		} catch (BadLocationException e) {
-			return pos;
 		}
+		return pos;
 	}
 	
-	private static int backFindWordEndPos(IDocument doc, int lineBeginPos, int pos) {
-		int currPos= pos;
+	private static int findLastWhitespace(IDocument doc, int lineBeginPos, int pos) {
 		try {
-			while (currPos > lineBeginPos) {
+			int currPos= pos - 1;
+			while (currPos >= lineBeginPos && Character.isWhitespace(doc.getChar(currPos))) {
 				currPos--;
-				char ch= doc.getChar(currPos);
-				if (!Character.isWhitespace(ch)) {
-					return currPos + 1;
-				}
 			}
-			return lineBeginPos;
+			return currPos + 1;
 		} catch (BadLocationException e) {
-			return pos;
-		}		
+		}
+		return pos;	
 	}
 	
 	private static int findClosingCharacter(IDocument doc, int pos, int end, char endChar) throws BadLocationException {
@@ -170,23 +163,29 @@ public class CompletionEvaluator {
 			IRegion info= fDocument.getLineInformationOfOffset(fCurrentPos);
 			int lineBeginPos= info.getOffset();
 	
-			int word1Begin= backFindWordBeginPos(fDocument, lineBeginPos, fCurrentPos);
-			String prefix= fDocument.get(word1Begin, fCurrentPos - word1Begin);
-			if (prefix.length() > 0) {		
-				char firstChar= prefix.charAt(0);
-				if (firstChar == '@') {
-					addProposals(prefix, fgTagProposals, JavaPluginImages.IMG_OBJS_JAVADOCTAG);
-					return;
-				} else if (firstChar == '<') {
-					addProposals(prefix, fgHTMLProposals, JavaPluginImages.IMG_OBJS_HTMLTAG);
-					return;
-				}
+			int word1Begin= findCharBeforeWord(fDocument, lineBeginPos, fCurrentPos);
+			if (word1Begin == fCurrentPos) {
+				return;
 			}
+			char firstChar= fDocument.getChar(word1Begin);
+			if (firstChar == '@') {
+				String prefix= fDocument.get(word1Begin, fCurrentPos - word1Begin);
+				addProposals(prefix, fgTagProposals, JavaPluginImages.IMG_OBJS_JAVADOCTAG);
+				return;
+			} else if (firstChar == '<') {
+				String prefix= fDocument.get(word1Begin, fCurrentPos - word1Begin);
+				addProposals(prefix, fgHTMLProposals, JavaPluginImages.IMG_OBJS_HTMLTAG);
+				return;
+			} else if (!Character.isWhitespace(firstChar)) {
+				return;
+			}
+			String prefix= fDocument.get(word1Begin + 1, fCurrentPos - word1Begin - 1);
+				 
 			// could be a composed java doc construct (@param, @see ...)
-			int word2End= backFindWordEndPos(fDocument, lineBeginPos, word1Begin);
+			int word2End= findLastWhitespace(fDocument, lineBeginPos, word1Begin);
 			if (word2End != lineBeginPos) {
 				// find the word before the prefix
-				int word2Begin= backFindWordBeginPos(fDocument, lineBeginPos, word2End);
+				int word2Begin= findCharBeforeWord(fDocument, lineBeginPos, word2End);
 				if (fDocument.getChar(word2Begin) == '@') {
 					String tag= fDocument.get(word2Begin, word2End - word2Begin);
 					if (addArgumentProposals(tag, prefix)) {
@@ -205,14 +204,14 @@ public class CompletionEvaluator {
 		for (int i= 0; i < fgTagProposals.length; i++) {
 			String curr= fgTagProposals[i];
 			if (curr.startsWith(jdocPrefix)) {
-				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG)));
+				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), null));
 			}		
 		}
 		String htmlPrefix= "<" + prefix;
 		for (int i= 0; i < fgHTMLProposals.length; i++) {
 			String curr= fgHTMLProposals[i];
 			if (curr.startsWith(htmlPrefix)) {
-				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG)));
+				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG), null));
 			}		
 		}
 	}
@@ -221,7 +220,7 @@ public class CompletionEvaluator {
 		for (int i= 0; i < choices.length; i++) {
 			String curr= choices[i];
 			if (curr.startsWith(prefix)) {
-				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(imageName)));
+				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(imageName), null));
 			}
 		}
 	}
@@ -231,10 +230,23 @@ public class CompletionEvaluator {
 			IJavaElement elem= choices[i];
 			String curr= getReplaceString(elem);			
 			if (curr.startsWith(prefix)) {
-				fResult.add(createCompletion(curr, prefix, fLabelProvider.getText(elem), fLabelProvider.getImage(elem)));
+				String info= getProposalInfo(elem);
+				fResult.add(createCompletion(curr, prefix, fLabelProvider.getText(elem), fLabelProvider.getImage(elem), info));
 			}
 		}
 	}
+	
+	private String getProposalInfo(IJavaElement elem) {
+		if (elem instanceof IMember) {
+			try {
+				return JavaDocAccess.getJavaDocText((IMember)elem);
+			} catch (JavaModelException e) {
+				JavaPlugin.getDefault().log(e.getStatus());
+			}
+		}
+		return null;
+	}
+	
 	
 	private String getReplaceString(IJavaElement elem) {
 		if (elem instanceof IMethod) {
@@ -261,7 +273,7 @@ public class CompletionEvaluator {
 	 * Returns true if case is handeled
 	 */
 	private boolean addArgumentProposals(String tag, String argument) throws JavaModelException {	
-		if ("@see".equals(tag)) {
+		if ("@see".equals(tag) || "@link".equals(tag)) {
 			evalSeeTag(argument);
 			return true;
 		} else if ("@param".equals(tag)) {
@@ -278,7 +290,7 @@ public class CompletionEvaluator {
 				for (int i= 0; i < exceptions.length; i++) {
 					String curr= Signature.toString(exceptions[i]);
 					if (curr.startsWith(argument)) {
-						fResult.add(createCompletion(curr, argument, curr, JavaPluginImages.get(JavaPluginImages.IMG_MISC_DEFAULT)));
+						fResult.add(createCompletion(curr, argument, curr, JavaPluginImages.get(JavaPluginImages.IMG_MISC_DEFAULT), null));
 					}
 				}
 			}
@@ -288,7 +300,7 @@ public class CompletionEvaluator {
 			if (elem instanceof IField) {
 				JavaImageLabelProvider iprovider= new JavaImageLabelProvider(0);
 				String name= ((IField)elem).getElementName();
-				fResult.add(createCompletion(name, argument, name, fLabelProvider.getImage(elem)));
+				fResult.add(createCompletion(name, argument, name, fLabelProvider.getImage(elem), null));
 			}
 			return true;
 		}
@@ -390,10 +402,10 @@ public class CompletionEvaluator {
 	}
 
 
-	private ICompletionProposal createCompletion(String newText, String oldText, String labelText, Image image) {
+	private ICompletionProposal createCompletion(String newText, String oldText, String labelText, Image image, String info) {
 		int startpos= fCurrentPos - oldText.length();
 		int endPos= findReplaceEndPos(fDocument, newText, oldText, fCurrentPos);			
-		return new CompletionProposal(newText, startpos, endPos - startpos, newText.length(), image, labelText, null, null);
+		return new CompletionProposal(newText, startpos, endPos - startpos, newText.length(), image, labelText, null, info);
 	}
 
 }

@@ -27,7 +27,6 @@ abstract class FieldRefactoring extends Refactoring {
 	public FieldRefactoring(IJavaSearchScope scope, IField field){
 		super(scope);
 		fField= field;
-		Assert.isNotNull(field, "field");
 		Assert.isTrue(field.exists(), "field must exist");
 	}
 		

@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.compiler.IProblem;
@@ -24,7 +23,6 @@ import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.refactoring.ASTEndVisitAdapter;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
-import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.core.util.HackFinder;
 
 /**
@@ -45,16 +43,15 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	// internal state.
 	private int fMode;
 	private int fLastEnd;
-	private int fCheckIntersectStart= -1;
+	// private int fCheckIntersectStart= -1;
 	
 	private Statement fFirstSelectedStatement;
 	private Statement fLastSelectedStatement;
+	private boolean fNeedsSemicolon;
 	
 	private boolean fIsCompleteStatementRange;
 	
 	private AbstractMethodDeclaration fEnclosingMethod;
-	// private BlockScope fEnclosingScope;
-	// private BlockScope fInnerScope;
 	
 	private RefactoringStatus fStatus= new RefactoringStatus();
 	private LocalVariableAnalyzer fLocalVariableAnalyzer;
@@ -70,11 +67,11 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	private static final int DO_LENGTH=    "do".length();
 	private static final int ELSE_LENGTH=  "else".length();
 	 
-	public StatementAnalyzer(IBuffer buffer, int start, int length) {
+	public StatementAnalyzer(ExtendedBuffer buffer, int start, int length) {
 		// System.out.println("Start: " + start + " length: " + length);
-		fBuffer= new ExtendedBuffer(buffer);
+		fBuffer= buffer;
 		Assert.isTrue(fBuffer != null);
-		fSelection= new Selection(start, start + length - 1);
+		fSelection= new Selection(start, length);
 		fLocalVariableAnalyzer= new LocalVariableAnalyzer(this);
 		fLocalTypeAnalyzer= new LocalTypeAnalyzer();
 		fExceptionAnalyzer= new ExceptionAnalyzer();
@@ -129,8 +126,17 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 	
 	public String getSignature(String methodName) {
-		return fLocalVariableAnalyzer.getSignature(methodName)
-		       + fExceptionAnalyzer.getThrowClause();
+		return fLocalVariableAnalyzer.getCallSignature(methodName)
+		       + fExceptionAnalyzer.getThrowSignature();
+	}
+	
+	/**
+	 * Returns true if the last selected statement needs a semicolon to have correct
+	 * syntax. For example a block or a try / catch / finnally doesn't need a semicolon
+	 * at the end.
+	 */
+	public boolean getNeedsSemicolon() {
+		return fNeedsSemicolon;
 	}
 	
 	private void reset() {
@@ -140,7 +146,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 		fEnclosingMethod= null;
 		fStatus= new RefactoringStatus();
 		fIsCompleteStatementRange= false;
-		fCheckIntersectStart= -1;
+		fNeedsSemicolon= true;
 	}
 	
 	private boolean visitStatement(Statement statement, BlockScope scope) {
@@ -149,24 +155,12 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			case UNDEFINED:
 				return false;			
 			case BEFORE:
-				if (fLastEnd < fSelection.start) {
-					if (fSelection.covers(statement)) {
-						startFound(statement);
-						fIsCompleteStatementRange= true;
-					} else {
-						fCheckIntersectStart= -1;
-					}
+				if (fLastEnd < fSelection.start && fSelection.covers(statement)) {
+					startFound(statement);
+					fIsCompleteStatementRange= true;
 				}
 				break;
 			case SELECTED:
-				/*
-				if (fCheckIntersectStart != -1) {
-					if (fSelection.intersects(fCheckIntersectStart, statement.sourceStart - 1)) {
-						reset();
-						fLastEnd= Integer.MAX_VALUE;
-					}
-				} else 
-				*/
 				if (fSelection.endsIn(statement)) { // Selection ends in the middle of a statement
 					fMode= AFTER;
 					fLastSelectedStatement= statement;
@@ -175,6 +169,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 					fMode= AFTER;
 				} else {
 					fLastSelectedStatement= statement;
+					fNeedsSemicolon= true;
 				}
 				break;
 			case AFTER:
@@ -447,7 +442,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	public boolean visit(Block block, BlockScope scope) {
 		boolean result= visitStatement(block, scope);
 		
-		if (fSelection.intersectsBlock(block)) {
+		if (fSelection.intersects(block)) {
 			reset();
 			fLastEnd= Integer.MAX_VALUE;
 		} else {
@@ -459,6 +454,8 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 
 	public void endVisit(Block block, BlockScope scope) {
 		trackLastEnd(block);
+		if (fSelection.covers(block))
+			fNeedsSemicolon= false;
 	}
 
 	public boolean visit(Break breakStatement, BlockScope scope) {
@@ -572,7 +569,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			} else if (forStatement.initializations != null) {
 				start= forStatement.initializations[forStatement.initializations.length - 1].sourceEnd;
 			}
-			fLastEnd= fBuffer.indexOf(start + 1, ')');
+			fLastEnd= fBuffer.indexOf(')', start + 1);
 		}
 		return result;
 	}
@@ -600,7 +597,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 		int sourceStart;
 		int sourceEnd;
 		if (ifStatement.thenStatement != null) {
-			sourceStart= fBuffer.indexOf(ifStatement.condition.sourceEnd + 1, ')') + 1;
+			sourceStart= fBuffer.indexOf(')', ifStatement.condition.sourceEnd + 1) + 1;
 			if (ifStatement.elseStatement != null) {
 				sourceEnd= ifStatement.elseStatement.sourceStart - 1;
 			} else {
@@ -703,7 +700,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 		for (Iterator iter= cases.iterator(); iter.hasNext(); ) {
 			Statement kase= (Statement)iter.next();
 			Statement last= (Statement)iter.next();
-			int sourceStart= fBuffer.indexOf(kase.sourceEnd + 1, ':') + 1;
+			int sourceStart= fBuffer.indexOf(':', kase.sourceEnd + 1) + 1;
 			int sourceEnd= fBuffer.indexOfStatementCharacter(last.sourceEnd + 1) - 1;
 			if (fSelection.coveredBy(sourceStart, sourceEnd))
 				return sourceStart;
@@ -747,27 +744,35 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 		boolean result= visitStatement(tryStatement, scope);
 		fExceptionAnalyzer.visitTryStatement(tryStatement, scope, fMode);
 		
-		int lastEnd= Integer.MAX_VALUE;
-		if (fSelection.covers(tryStatement)) {
-			lastEnd= tryStatement.sourceEnd;
-		} else if (fSelection.enclosedBy(tryStatement.tryBlock)) {
-			lastEnd= tryStatement.tryBlock.sourceStart;
-		} else if (tryStatement.catchBlocks != null && (lastEnd= getCatchBodyStart(tryStatement.catchBlocks)) >= 0) {
-			// do nothing.
-		} else if (tryStatement.finallyBlock != null && fSelection.enclosedBy(tryStatement.finallyBlock)) {
-			lastEnd=tryStatement.finallyBlock.sourceStart;
-		} else {
+		if (fSelection.intersects(tryStatement)) {
 			reset();
+			fLastEnd= Integer.MAX_VALUE;
 			result= false;
+		} else {
+			int lastEnd;
+			
+			if (fSelection.covers(tryStatement)) {
+				lastEnd= tryStatement.sourceEnd;
+			} else if (fSelection.enclosedBy(tryStatement.tryBlock)) {
+				lastEnd= tryStatement.tryBlock.sourceStart;
+			} else if (tryStatement.catchBlocks != null && (lastEnd= getCatchBodyStart(tryStatement.catchBlocks)) >= 0) {
+				// do nothing.
+			} else if (tryStatement.finallyBlock != null && fSelection.enclosedBy(tryStatement.finallyBlock)) {
+				lastEnd=tryStatement.finallyBlock.sourceStart;
+			} else {
+				lastEnd= tryStatement.sourceEnd;
+			}
+			fLastEnd= lastEnd;
 		}
-		fLastEnd= lastEnd;
 		return result;
 	}
 
 	public void endVisit(TryStatement tryStatement, BlockScope scope) {
 		if (tryStatement.catchArguments != null)
 			fExceptionAnalyzer.visitCatchArguments(tryStatement.catchArguments, scope, fMode);
-		fExceptionAnalyzer.visitEndTryStatement(tryStatement, scope, fMode);	
+		fExceptionAnalyzer.visitEndTryStatement(tryStatement, scope, fMode);
+		if (fSelection.covers(tryStatement))
+			fNeedsSemicolon= false;
 	}
 	
 	private int getCatchBodyStart(Block[] catchBlocks) {
@@ -790,7 +795,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			if (whileStatement.condition != null) {
 				start= whileStatement.condition.sourceEnd;
 			}
-			fLastEnd= fBuffer.indexOf(start, ')');
+			fLastEnd= fBuffer.indexOf(')', start);
 		}
 		return result;
 	}

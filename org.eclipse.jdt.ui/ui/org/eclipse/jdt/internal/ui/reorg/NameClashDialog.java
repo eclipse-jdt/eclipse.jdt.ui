@@ -83,9 +83,7 @@ public class NameClashDialog extends StatusDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= 300;
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;
+		layout.minimumWidth= convertWidthInCharsToPixels(80);
 		layout.numColumns= 1;
 		composite.setLayout(layout);
 
@@ -100,7 +98,7 @@ public class NameClashDialog extends StatusDialog {
 		Control textControl= fNameDialogField.getTextControl(composite);
 		
 		MGridData gd= MGridUtil.createHorizontalFill();
-		gd.horizontalIndent= 16;
+		gd.horizontalIndent= convertHorizontalDLUsToPixels(15);
 		textControl.setLayoutData(gd);
 		return composite;
 	}

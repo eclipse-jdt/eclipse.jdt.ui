@@ -247,6 +247,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			} catch (JavaModelException x) {
 				throw new CoreException(x.getStatus());
 			}			
+		} else {
+			super.doSaveDocument(monitor, element, document);
 		}		
 	}
 	
@@ -316,6 +318,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			} catch (JavaModelException x) {
 				throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE, x));
 			}
+		} else {
+			super.resetDocument(element);
 		}
 	}
 	

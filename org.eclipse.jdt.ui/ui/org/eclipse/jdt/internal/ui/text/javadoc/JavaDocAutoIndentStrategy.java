@@ -11,6 +11,7 @@ import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITypedRegion;
 
 /**
  * Auto indent strategy for java doc comments
@@ -77,6 +78,20 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		}	
 	}	
 	
+	protected void jdocIndentForCommentEnd(IDocument d, DocumentCommand c) {
+		if (c.offset < 2 || d.getLength() == 0) {
+			return;
+		}
+		try {
+			if ("* ".equals(d.get(c.offset - 2, 2))) {
+				// modify document command
+				c.length++;
+				c.offset--;
+			}					
+		} catch (BadLocationException excp) {
+			// stop work
+		}
+	}
 
 	/*
 	 * @see IAutoIndentStrategy#customizeDocumentCommand
@@ -84,5 +99,8 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		if (c.length == 0 && c.text != null && endsWithDelimiter(d, c.text))
 			jdocIndentAfterNewLine(d, c);
+		else if ("/".equals(c.text)) {
+			jdocIndentForCommentEnd(d, c);
+		}
 	}
 }

@@ -14,6 +14,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -268,8 +269,9 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		});
 
 		GridData spec= new GridData();
-		spec.widthHint= convertWidthInCharsToPixels(40);
-		spec.heightHint= convertHeightInCharsToPixels(18);
+		Point initialSize= computeInitialSize();
+		spec.widthHint= initialSize.x;
+		spec.heightHint= initialSize.y;
 		spec.grabExcessVerticalSpace= true;
 		spec.grabExcessHorizontalSpace= true;
 		spec.horizontalAlignment= spec.FILL;
@@ -277,6 +279,10 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		fSelectionList.setLayoutData(spec);
 				
 		return contents;
+	}
+	
+	protected Point computeInitialSize() {
+		return new Point(convertWidthInCharsToPixels(40), convertHeightInCharsToPixels(18));
 	}
 
 	/*

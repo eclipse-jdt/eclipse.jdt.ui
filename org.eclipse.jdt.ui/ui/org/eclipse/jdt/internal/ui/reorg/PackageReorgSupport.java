@@ -25,6 +25,7 @@ public class PackageReorgSupport implements ICopySupport, IMoveSupport, INamingP
 	private static final String PREFIX= "reorg_policy.package.";
 	private static final String ERROR_DUPLICATE= "duplicate";
 	private static final String ERROR_INVALID_NAME= "invalid_name";
+	private static final String ERROR_EXCEPTION= "exception";
 	
 	public Object copyTo(Object element, Object dest, String newName, IProgressMonitor pm) throws JavaModelException {
 		IPackageFragment pkg= (IPackageFragment)element;
@@ -80,8 +81,13 @@ public class PackageReorgSupport implements ICopySupport, IMoveSupport, INamingP
 		// if the name is invalid.
 		if (!JavaConventions.validatePackageName(name).isOK())
 			return JavaPlugin.getResourceString(PREFIX+ERROR_INVALID_NAME);
-		if (root.getPackageFragment(name).exists())
-			return JavaPlugin.getResourceString(PREFIX+ERROR_DUPLICATE);
+		IPackageFragment pkg= root.getPackageFragment(name);
+		try {
+			if (pkg.exists() && pkg.hasChildren())
+				return JavaPlugin.getResourceString(PREFIX+ERROR_DUPLICATE);
+		} catch (JavaModelException e) {
+			return JavaPlugin.getResourceString(PREFIX+ERROR_EXCEPTION);
+		}
 		return null;
 	}
 

@@ -80,6 +80,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	final static int RESULT_INSPECT= 3;
 	
 	private IJavaProject fJavaProject;
+	private IEvaluationContext fEvaluationContext;
 	private IDebugTarget fVM;
 	private String[] fLaunchedClassPath;
 	private List fSnippetStateListeners;	
@@ -104,6 +105,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	
 	public void dispose() {
 		DebugPlugin.getDefault().removeDebugEventListener(this);
+		shutDownVM();
 		super.dispose();
 	}
 	/** 
@@ -202,10 +204,11 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 			
 	protected IEvaluationContext getEvaluationContext() {
-		if (fVM == null) {
-			return null;
+		if (fEvaluationContext == null) {
+			IJavaProject project= getJavaProject();
+			fEvaluationContext= project.newEvaluationContext();
 		}
-		return ((JDIDebugTarget)fVM).getEvaluationContext(getJavaProject());
+		return fEvaluationContext;
 	}
 	
 	public IJavaProject getJavaProject() {
@@ -228,9 +231,10 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 				ErrorDialog.openError(getShell(), "Can't shutdown VM", null, e.getStatus());
 				return;
 			}
-			//DebugPlugin.getDefault().getLaunchManager().deregisterLaunch(fVM.getLaunch());
+			DebugPlugin.getDefault().getLaunchManager().deregisterLaunch(fVM.getLaunch());
 			fVM= null;
 			fThread = null;
+			fEvaluationContext= null;
 			Action action= (Action)getAction("Stop");
 			action.setEnabled(false);
 			fireEvalStateChanged();
@@ -271,12 +275,12 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			return;
 		}
 		try {
-			getThread().evaluate(snippet, this, getJavaProject());
+			getThread().evaluate(snippet, this, getEvaluationContext());
 		} catch (DebugException e) {
-			e.printStackTrace();
+			ErrorDialog.openError(getShell(), "Problems evaluating expression", null, e.getStatus());
+		} finally {
 			evaluationEnds();
 		}
-
 	}
 
 	public void evaluationComplete(final IJavaEvaluationResult result) {
@@ -346,9 +350,14 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		String resultString= null;
 		if (result.getSignature() == null)
 			resultString= "(No explicit return value)";
-		else 
-			resultString= " ("+result.getReferenceTypeName()+") "+result.getValueString();
-		try {
+		else {
+			try {
+				resultString= " ("+result.getReferenceTypeName()+") "+result.evaluateToString();
+			} catch(DebugException e) {
+				ErrorDialog.openError(getShell(), "Problems evaluating toString of expression", null, e.getStatus());
+			}
+			
+		} try {
 			getSourceViewer().getDocument().replace(fSnippetEnd, 0, resultString);
 		} catch (BadLocationException e) {
 		}

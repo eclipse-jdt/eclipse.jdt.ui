@@ -160,7 +160,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		return result.toString();
 	}
 	
-	public String getSignature(String methodName) {
+	public String getCallSignature(String methodName) {
 		StringBuffer result= new StringBuffer(fReturnType);
 		result.append(" ");
 		result.append(methodName);

@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.refactoring.Refactoring;
 import org.eclipse.jdt.core.refactoring.cus.MoveCompilationUnitRefactoring;
+import org.eclipse.jdt.core.refactoring.fields.RenameNonPrivateFieldRefactoring;
 import org.eclipse.jdt.core.refactoring.fields.RenamePrivateFieldRefactoring;
 import org.eclipse.jdt.core.refactoring.fields.SafeDeletePrivateFieldRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenameMethodInInterfaceRefactoring;
@@ -99,6 +100,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 			createRenameTypeAction(provider, changeCreator),
 			createRenamePackageAction(provider, changeCreator),
 			createRenamePrivateFieldAction(provider, changeCreator),
+			createRenameNonPrivateFieldAction(provider, changeCreator),
 			createMoveCompilationUnitAction(provider, changeCreator),
 			
 			//not supported now
@@ -234,6 +236,18 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenamePrivateFieldRefactoring(changeCreator, (IField)obj);
+			}
+		};
+	}
+	
+	private AbstractOpenRefactoringWizardAction createRenameNonPrivateFieldAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
+		String label= RefactoringResources.getResourceString("Refactoring.RenameField.label");
+		return new AbstractOpenRefactoringWizardAction(provider, label, IField.class) {
+			protected Wizard createWizard() { 
+				return new RenameRefactoringWizard("Rename Field"); 
+			}
+			protected Refactoring createNewRefactoringInstance(Object obj){
+				return new RenameNonPrivateFieldRefactoring(changeCreator, (IField)obj);
 			}
 		};
 	}

@@ -7,9 +7,14 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
@@ -21,12 +26,20 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
@@ -42,11 +55,10 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
+import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction;
 import org.eclipse.jdt.internal.ui.reorg.CUSavePolicy;
-
-import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
-import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
 
 
 /**
@@ -255,5 +267,49 @@ public class CompilationUnitEditor extends JavaEditor {
 			getStatusLineManager().setErrorMessage("");
 			
 		}
+	}
+	
+	public void doSaveAs() {
+		
+		Shell shell= getSite().getShell();
+		
+		SaveAsDialog dialog= new SaveAsDialog(shell);
+		dialog.open();
+		IPath path= dialog.getResult();
+		
+		if (path == null)
+			return;
+			
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IFile file= workspace.getRoot().getFile(path);
+		final IEditorInput newInput= new FileEditorInput(file);
+		
+		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
+			public void execute(final IProgressMonitor monitor) throws CoreException {
+				getDocumentProvider().saveDocument(monitor, newInput, getDocumentProvider().getDocument(getEditorInput()));
+			}
+		};
+		
+		boolean success= false;
+		try {
+			
+			getDocumentProvider().aboutToChange(newInput);
+			new ProgressMonitorDialog(shell).run(false, true, op);
+			success= true;
+			
+		} catch (InterruptedException x) {
+		} catch (InvocationTargetException x) {
+			// String title= getResourceString("Error.save_as.title", "Error.save_as.title");
+			// String msg= getResourceString("Error.save_as.message", "Error.save_as.message");
+			// MessageDialog.openError(shell, title, msg + x.getTargetException().getMessage());
+		} finally {
+			getDocumentProvider().changed(newInput);
+			if (success)
+				setInput(newInput);
+		}
+	}
+	
+	public boolean isSaveAsAllowed() {
+		return true;
 	}
 }

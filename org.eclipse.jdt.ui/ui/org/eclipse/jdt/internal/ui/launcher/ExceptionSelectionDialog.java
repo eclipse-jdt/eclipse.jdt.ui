@@ -7,6 +7,7 @@
 package org.eclipse.jdt.internal.ui.launcher;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -74,5 +75,11 @@ public class ExceptionSelectionDialog extends ElementListSelectionDialog {
 	
 	public boolean isUncaughtEnabled() {
 		return fUncaught;
+	}
+	
+	protected Point computeInitialSize() {
+		Point size= super.computeInitialSize();
+		size.x= convertWidthInCharsToPixels(60);
+		return size;
 	}
 }

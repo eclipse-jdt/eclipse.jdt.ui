@@ -142,51 +142,5 @@ public class TextUtilities {
 				return false;
 		}
 		return true;
-	}
-	
-	/**
-	 * Tests if the given array of lines ends with a semicolon in a Java language sense.
-	 * This means that text like "; \/\* comment \*\/" ends with a semicolon.
-	 */
-	public static boolean endsWithSemicolon(String[] lines) {
-		boolean inComment= false;
-		boolean result= false;
-		nextLine: for (int z= 0; z < lines.length; z++) {
-			String line= lines[z];
-			int length= line.length();
-			for (int i= 0; i < length; i++) {
-				char c= line.charAt(i);
-				switch (c) {
-					case ';':
-						if (!inComment)
-							result= true;
-						break;
-					case '/':
-						if (i + 1 < length) {
-							char nextChar= line.charAt(i + 1);
-							if (nextChar == '*') {
-								inComment= true;
-								i++;
-							}
-							else if (nextChar == '/')
-								continue nextLine;
-						}	
-						break;
-					case '*':
-						if (i + 1 < length && line.charAt(i + 1) == '/') {
-							inComment= false;
-							i++;
-						}
-						break;
-					case ' ':
-					case '\t':
-						break;
-					default:
-						if (!inComment)
-							result= false;
-				}
-			}
-		}
-		return result;
 	}	
 }

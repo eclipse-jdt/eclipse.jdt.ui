@@ -28,8 +28,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ILabelProvider;
 
-import org.eclipse.jdt.core.refactoring.code.Selection;
-
 import org.eclipse.jdt.internal.ui.util.PortingFinder;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.util.TwoArrayQuickSort;

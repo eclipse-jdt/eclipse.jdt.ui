@@ -1,0 +1,18 @@
+/**
+* class Foo 
+*/
+ 
+public static void bar()
+{
+int k=0;
+if (k > 0)
+{
+}
+else if (k==0)
+{
+}
+else if (k <0)
+{
+}
+
+}

@@ -69,17 +69,11 @@ public class ProposalInfo {
 					member= type;
 				}
 				if (member != null) {
-					Reader reader= JavaDocAccess.getJavaDoc(member);
-					if (reader != null) {
-						JavaDocTextReader txtrd= new JavaDocTextReader(reader);
-						return txtrd.getString();
-					}
+					return JavaDocAccess.getJavaDocText(member);
 				}
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.getDefault().log(e.getStatus());
-		} catch (IOException e) {
-			JavaPlugin.getDefault().log(e);
 		}
 		return null;
 	}

@@ -22,11 +22,11 @@ import org.eclipse.jdt.core.refactoring.text.SimpleReplaceTextChange;
 import org.eclipse.jdt.core.refactoring.text.SimpleTextChange;
 
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.NameReference;
 import org.eclipse.jdt.internal.compiler.env.IConstants;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
+import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.core.util.HackFinder;
 
@@ -49,13 +49,12 @@ public class ExtractMethodRefactoring extends Refactoring{
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private int fSelectionStart;
 	private int fSelectionLength;
+	private int fSelectionEnd;
 	
 	private StatementAnalyzer fStatementAnalyzer;
-	private NameReference fNameReference;
+	private ExtendedBuffer fBuffer;
 	private String fMethodName;
 	private int fMethodFlags= IConstants.AccProtected;
-	private boolean fComputedSelectionEndsWithSemicolon;
-	private boolean fSelectionEndsWithSemicolon;
 	
 	/* (non-Javadoc)
 	 * Method declared in IRefactoring
@@ -79,6 +78,7 @@ public class ExtractMethodRefactoring extends Refactoring{
 		fMethodName= "extracted";
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
+		fSelectionEnd= fSelectionStart + fSelectionLength - 1;
 	}
 	
 	/**
@@ -97,7 +97,8 @@ public class ExtractMethodRefactoring extends Refactoring{
 				return mergeTextSelectionStatus(result);
 				
 			try {
-				fStatementAnalyzer= new StatementAnalyzer(fCUnit.getBuffer(), fSelectionStart, fSelectionLength);
+				fBuffer= new ExtendedBuffer(fCUnit.getBuffer());
+				fStatementAnalyzer= new StatementAnalyzer(fBuffer, fSelectionStart, fSelectionLength);
 				HackFinder.fixMeSoon("1GA9VPL: ITPJUI:WIN2000 - ICompilationUnit should provide method accept(Visitor)");
 				((CompilationUnit)fCUnit).accept(fStatementAnalyzer);
 			} catch (JavaModelException e) {
@@ -194,7 +195,6 @@ public class ExtractMethodRefactoring extends Refactoring{
 		// Inserting the new method
 		result.addSimpleTextChange(new SimpleReplaceTextChange("Extracted method", insertPosition) {
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
-				computeSelectionEndsWithSemicolon(buffer);
 				int line= buffer.getLineOfOffset(start);
 				String delimiter= buffer.getLineDelimiter(line);
 				int indent= TextUtilities.getIndent(buffer.getLineContentOfOffset(start), fTabWidth);	
@@ -206,7 +206,6 @@ public class ExtractMethodRefactoring extends Refactoring{
 		// Replacing the old statements with the new method call.
 		result.addSimpleTextChange(new SimpleReplaceTextChange("Changed method", fSelectionStart, fSelectionLength, null) {
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
-				computeSelectionEndsWithSemicolon(buffer);
 				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(start));
 				int indent= TextUtilities.getIndent(buffer.getLineContentOfOffset(start), fTabWidth);	
 				setText(computeCall(buffer, delimiter));
@@ -297,7 +296,7 @@ public class ExtractMethodRefactoring extends Refactoring{
 				result.append(line);
 			}
 		}
-		if (!fSelectionEndsWithSemicolon)
+		if (sourceNeedsSemicolon())
 			result.append(";");
 		result.append(delimiter);
 			
@@ -325,7 +324,7 @@ public class ExtractMethodRefactoring extends Refactoring{
 			result.append(TextUtilities.createIndentString(indent));
 		}
 		result.append(localAnalyzer.getCall(fMethodName));
-		if (fSelectionEndsWithSemicolon)
+		if (callNeedsSemicolon())
 			result.append(";");
 		if (endsSelectionWithLineDelimiter(lines))
 			result.append(delimiter);
@@ -336,14 +335,28 @@ public class ExtractMethodRefactoring extends Refactoring{
 		return lines[lines.length - 1].length() == 0;
 	}
 	
-	private void computeSelectionEndsWithSemicolon(ITextBuffer buffer) {
-		if (fComputedSelectionEndsWithSemicolon)
-			return;
+	
+	private boolean callNeedsSemicolon() {
 		int start= fStatementAnalyzer.getLastSelectedStatementEnd() + 1;
 		int length= fSelectionLength - (start - fSelectionStart);
-		fSelectionEndsWithSemicolon= true;
-		if (length <= 0 || !TextUtilities.endsWithSemicolon(buffer.convertIntoLines(start, length)))
-			fSelectionEndsWithSemicolon= false;
-		fComputedSelectionEndsWithSemicolon= true;	
+		if (length <= 0)
+			return true;
+		if (fBuffer.indexOf(';', start, length) != -1) {
+			return true;
+		} else {
+			return !fStatementAnalyzer.getNeedsSemicolon();
+		}
 	}
+	
+	private boolean sourceNeedsSemicolon() {
+		int start= fStatementAnalyzer.getLastSelectedStatementEnd() + 1;
+		int length= fSelectionLength - (start - fSelectionStart);
+		if (length <= 0)
+			return false;
+		if (fBuffer.indexOf(';', start, length) != -1) {
+			return false;
+		} else {
+			return fStatementAnalyzer.getNeedsSemicolon();
+		}
+	}	
 }

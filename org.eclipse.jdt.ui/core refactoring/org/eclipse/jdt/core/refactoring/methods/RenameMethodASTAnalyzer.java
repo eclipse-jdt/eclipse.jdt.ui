@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringASTAnalyzer;
@@ -59,7 +60,7 @@ class RenameMethodASTAnalyzer extends RefactoringASTAnalyzer {
 		if (! sourceRangeOnList(start, end))
 			return true;
 		if (nameDefinedInScope(scope))
-			addWarning("Possible problems in \"" + cuFullPath() + "\" (line number:" + getLineNumber(messageSend) + "). Name " + fNewName + " is already visible.");
+			addError("Possible problems in \"" + cuFullPath() + "\" (line number:" + getLineNumber(messageSend) + "). Name " + fNewName + " is already visible.");
 		return true;
 	}
 
@@ -72,7 +73,8 @@ class RenameMethodASTAnalyzer extends RefactoringASTAnalyzer {
 				if (methods[i].isPrivate())
 					continue;
 				int methodParamCount= methods[i].parameters == null ? 0 : methods[i].parameters.length;
-				if ((fParamCount == methodParamCount) && fNewName.equals(new String(methods[i].selector)))
+				if ((fParamCount == methodParamCount) 
+				&& CharOperation.equals(fNewNameArray, methods[i].selector))
 					return true;
 			}
 		}
@@ -105,7 +107,8 @@ class RenameMethodASTAnalyzer extends RefactoringASTAnalyzer {
 		for (int i= 0; i < typeDeclaration.methods.length; i++) {
 			AbstractMethodDeclaration method= typeDeclaration.methods[i];
 			int methodParamCount= method.arguments == null ? 0 : method.arguments.length;
-			if ((fParamCount == methodParamCount) && fNewName.equals(new String(method.selector))) {
+			if ((fParamCount == methodParamCount) 
+				&& CharOperation.equals(fNewNameArray, method.selector)){
 				return true;
 			}
 		}
