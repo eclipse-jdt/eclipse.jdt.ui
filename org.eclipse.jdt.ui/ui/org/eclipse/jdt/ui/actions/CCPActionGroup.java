@@ -25,7 +25,10 @@ import org.eclipse.ui.part.Page;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgActionFactory;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.CutAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
 
 /**
  * Action group that adds the copy, cut, paste actions to a view part's context
@@ -74,13 +77,13 @@ public class CCPActionGroup extends ActionGroup {
 	private CCPActionGroup(IWorkbenchSite site) {
 		fSite= site;
 		fClipboard= new Clipboard(site.getShell().getDisplay());
-		fPasteAction= ReorgActionFactory.createPasteAction(fSite, fClipboard);
-		fCopyAction= ReorgActionFactory.createCopyAction(fSite, fClipboard, fPasteAction);
+		fPasteAction= new PasteAction(fSite, fClipboard);
+		fCopyAction= new CopyToClipboardAction(fSite, fClipboard, fPasteAction);
 		fActions= new SelectionDispatchAction[] {	
-			fCutAction= ReorgActionFactory.createCutAction(fSite, fClipboard, fPasteAction),
+			fCutAction= new CutAction(fSite, fClipboard, fPasteAction),
 			fCopyAction,
 			fPasteAction,
-			fDeleteAction= ReorgActionFactory.createDeleteAction(fSite),
+			fDeleteAction= new DeleteAction(fSite),
 		};
 		registerActionsAsSelectionChangeListeners();
 	}
