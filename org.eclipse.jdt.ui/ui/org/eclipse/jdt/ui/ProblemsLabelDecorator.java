@@ -38,8 +38,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
@@ -181,9 +181,12 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 				return getErrorTicksFromMarkers((IResource) obj, IResource.DEPTH_INFINITE, null);
 			}
 		} catch (CoreException e) {
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);
+			if (e instanceof JavaModelException) {
+				if (((JavaModelException) e).isDoesNotExist()) {
+					return 0;
+				}
+			}
+			JavaPlugin.log(e);
 		}
 		return 0;
 	}
@@ -222,10 +225,6 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 	
 	private int getErrorTicksFromWorkingCopy(ICompilationUnit original, ISourceReference sourceElement) throws CoreException {
 		int info= 0;
-		if (!original.exists()) {
-			return 0;
-		}
-		
 		FileEditorInput editorInput= new FileEditorInput((IFile) original.getResource());
 		IAnnotationModel model= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getAnnotationModel(editorInput);
 		if (model != null) {
