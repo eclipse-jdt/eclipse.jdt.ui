@@ -45,7 +45,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 
@@ -381,8 +380,8 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		});
 	 }
 
-	private void postRefresh(final Object root, boolean updateIcon) {
-		if (!updateIcon) {
+	private void postRefresh(final Object root, boolean updateLabels) {
+		if (!updateLabels) {
 			postRefresh(root);
 			return;
 		}
