@@ -24,6 +24,8 @@ public class PerformanceTestSuite extends TestSuite {
 	}
 	
 	public PerformanceTestSuite() {
+		addTest(new OpenJavaEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
+		addTest(new OpenTextEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
 		addTestSuite(RevertTextEditorTest.class);
 		addTestSuite(RevertJavaEditorTest.class);
 		addTestSuite(ToggleCommentTest.class);
@@ -36,8 +38,6 @@ public class PerformanceTestSuite extends TestSuite {
 		addTestSuite(NonInitialTypingTest.class);
 		addTestSuite(OpenPreferencePageTest.class);
 		addTestSuite(ScrollAnnotatedJavaEditorTest.class);
-		addTest(new OpenJavaEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
-		addTest(new OpenTextEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
 		// TODO: enable when Bug 72244: "Posting mouse events locks up event handling" is fixed
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=72244
 //		addTestSuite(MouseScrollJavaEditorTest.class);
