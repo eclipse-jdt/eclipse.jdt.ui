@@ -19,24 +19,25 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.text.edits.CopySourceEdit;
+import org.eclipse.text.edits.CopyTargetEdit;
+import org.eclipse.text.edits.EditProcessor;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.MoveSourceEdit;
+import org.eclipse.text.edits.MoveTargetEdit;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditCopier;
+import org.eclipse.text.edits.UndoMemento;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.CopySourceEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.CopyTargetEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.EditProcessor;
-import org.eclipse.jdt.internal.corext.textmanipulation.MalformedTreeException;
-import org.eclipse.jdt.internal.corext.textmanipulation.MoveSourceEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.MoveTargetEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
-import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
 
 public class TextBufferTest extends TestCase {
 
@@ -276,8 +277,8 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(e2);
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getTextRange(), 2, 2);
-		assertEquals(e2.getTextRange(), 4, 4);
+		assertEquals(e1.getRegion(), 2, 2);
+		assertEquals(e2.getRegion(), 4, 4);
 		assertEquals("Buffer content", "01yy345656789", fDocument.get());
 		doUndoRedo(undo, "01yy345656789");
 	}
@@ -290,8 +291,8 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(e2);
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getTextRange(), 2, 2);
-		assertEquals(e2.getTextRange(), 4, 2);
+		assertEquals(e1.getRegion(), 2, 2);
+		assertEquals(e2.getRegion(), 4, 2);
 		assertEquals("Buffer content", "01yyxx23456789", fDocument.get());
 		doUndoRedo(undo, "01yyxx23456789");
 	}
@@ -306,9 +307,9 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(e3);
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getTextRange(), 0, 3);
-		assertEquals(e2.getTextRange(), 3, 2);
-		assertEquals(e3.getTextRange(), 5, 1);
+		assertEquals(e1.getRegion(), 0, 3);
+		assertEquals(e2.getRegion(), 3, 2);
+		assertEquals(e3.getRegion(), 5, 1);
 		assertEquals("Buffer content", "011xx2456789", fDocument.get());
 		doUndoRedo(undo, "011xx2456789");
 	}
@@ -319,7 +320,7 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer length", 12, fDocument.getLength());
-		assertEquals(e1.getTextRange(), 0, 2);
+		assertEquals(e1.getRegion(), 0, 2);
 		assertEquals("Buffer content", "xx0123456789", fDocument.get());
 		doUndoRedo(undo, "xx0123456789");
 	}
@@ -330,7 +331,7 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer length", 12, fDocument.getLength());
-		assertEquals(e1.getTextRange(), 10, 2);
+		assertEquals(e1.getRegion(), 10, 2);
 		assertEquals("Buffer content", "0123456789xx", fDocument.get());
 		doUndoRedo(undo, "0123456789xx");
 	}
@@ -342,8 +343,8 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(e2);
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getTextRange(), 4, 1);
-		assertEquals(e2.getTextRange(), 2, 2);
+		assertEquals(e1.getRegion(), 4, 1);
+		assertEquals(e2.getRegion(), 2, 2);
 		assertEquals("Buffer content", "01xxy3456789", fDocument.get());
 		doUndoRedo(undo, "01xxy3456789");
 	}
@@ -353,7 +354,7 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(e1);
 		assertTrue("Can perform edits", fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getTextRange(), 3, 0);
+		assertEquals(e1.getRegion(), 3, 0);
 		assertEquals("Buffer content", "012456789", fDocument.get());
 		doUndoRedo(undo, "012456789");
 	}
@@ -367,9 +368,9 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(e3);
 		assertTrue("Can perform edits", fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getTextRange(), 3, 0);
-		assertEquals(e2.getTextRange(), 3, 0);
-		assertEquals(e3.getTextRange(), 3, 0);
+		assertEquals(e1.getRegion(), 3, 0);
+		assertEquals(e2.getRegion(), 3, 0);
+		assertEquals(e3.getRegion(), 3, 0);
 		assertEquals("Buffer content", "0126789", fDocument.get());
 		doUndoRedo(undo, "0126789");
 	}
@@ -381,8 +382,8 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(e2);
 		assertTrue("Can perform edits", fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getTextRange(), 3, 1);
-		assertEquals(e2.getTextRange(), 4, 0);
+		assertEquals(e1.getRegion(), 3, 1);
+		assertEquals(e2.getRegion(), 4, 0);
 		assertEquals("Buffer content", "012x456789", fDocument.get());
 		doUndoRedo(undo, "012x456789");
 	}
@@ -413,8 +414,8 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "0142356789", fDocument.get());
-		assertEquals(s1.getTextRange(), 2, 0);
-		assertEquals(t1.getTextRange(), 3, 2);
+		assertEquals(s1.getRegion(), 2, 0);
+		assertEquals(t1.getRegion(), 3, 2);
 		doUndoRedo(undo, "0142356789");
 	}
 	
@@ -426,8 +427,8 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "0156234789", fDocument.get());
-		assertEquals(s1.getTextRange(), 7, 0);
-		assertEquals(t1.getTextRange(), 2, 2);
+		assertEquals(s1.getRegion(), 7, 0);
+		assertEquals(t1.getRegion(), 2, 2);
 		doUndoRedo(undo, "0156234789");
 	}
 
@@ -441,9 +442,9 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "01x5623789", fDocument.get());
-		assertEquals(s1.getTextRange(), 2, 0);
-		assertEquals(t1.getTextRange(), 5, 2);
-		assertEquals(e2.getTextRange(), 2, 1);
+		assertEquals(s1.getRegion(), 2, 0);
+		assertEquals(t1.getRegion(), 5, 2);
+		assertEquals(e2.getRegion(), 2, 1);
 		doUndoRedo(undo, "01x5623789");
 	}
 	
@@ -457,9 +458,9 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "0178234x69", fDocument.get());
-		assertEquals(s1.getTextRange(), 9, 0);
-		assertEquals(t1.getTextRange(), 2, 2);
-		assertEquals(e2.getTextRange(), 7, 1);
+		assertEquals(s1.getRegion(), 9, 0);
+		assertEquals(t1.getRegion(), 2, 2);
+		assertEquals(e2.getRegion(), 7, 1);
 		doUndoRedo(undo, "0178234x69");
 	}
 	
@@ -473,9 +474,9 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(t1);
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getTextRange(), 2, 0);
-		assertEquals(t1.getTextRange(), 2, 1);
-		assertEquals(e2.getTextRange(), 2, 1);
+		assertEquals(s1.getRegion(), 2, 0);
+		assertEquals(t1.getRegion(), 2, 1);
+		assertEquals(e2.getRegion(), 2, 1);
 		assertEquals("Buffer content", "01x3456789", fDocument.get());
 		doUndoRedo(undo, "01x3456789");
 	}
@@ -490,9 +491,9 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(t1);
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getTextRange(), 3, 0);
-		assertEquals(t1.getTextRange(), 2, 1);
-		assertEquals(e2.getTextRange(), 2, 1);
+		assertEquals(s1.getRegion(), 3, 0);
+		assertEquals(t1.getRegion(), 2, 1);
+		assertEquals(e2.getRegion(), 2, 1);
 		assertEquals("Buffer content", "01x3456789", fDocument.get());
 		doUndoRedo(undo,"01x3456789");
 	}
@@ -507,9 +508,9 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "01562x4789", fDocument.get());
-		assertEquals(s1.getTextRange(), 2, 0);
-		assertEquals(t1.getTextRange(), 4, 3);
-		assertEquals(e2.getTextRange(), 5, 1);
+		assertEquals(s1.getRegion(), 2, 0);
+		assertEquals(t1.getRegion(), 4, 3);
+		assertEquals(e2.getRegion(), 5, 1);
 		doUndoRedo(undo, "01562x4789");
 	}
 	
@@ -523,9 +524,9 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "05x7123489", fDocument.get());
-		assertEquals(s1.getTextRange(), 8, 0);
-		assertEquals(t1.getTextRange(), 1, 3);
-		assertEquals(e2.getTextRange(), 2, 1);
+		assertEquals(s1.getRegion(), 8, 0);
+		assertEquals(t1.getRegion(), 1, 3);
+		assertEquals(e2.getRegion(), 2, 1);
 		doUndoRedo(undo, "05x7123489");
 	}
 		
@@ -542,11 +543,11 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(t1);
 		assertTrue("Can perform edits", fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getTextRange(), 1, 0);
-		assertEquals(t1.getTextRange(), 2, 3);
+		assertEquals(s1.getRegion(), 1, 0);
+		assertEquals(t1.getRegion(), 2, 3);
 		
-		assertEquals(s2.getTextRange(), 2, 0);
-		assertEquals(t2.getTextRange(), 3, 1);
+		assertEquals(s2.getRegion(), 2, 0);
+		assertEquals(t2.getRegion(), 3, 1);
 		assertEquals("Buffer content", "0421356789", fDocument.get());
 		doUndoRedo(undo, "0421356789");
 	}
@@ -564,10 +565,10 @@ public class TextBufferTest extends TestCase {
 		
 		assertTrue("Can perform edits", fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getTextRange(), 4, 0);
-		assertEquals(t1.getTextRange(), 6, 2);		
-		assertEquals(s2.getTextRange(), 5, 0);
-		assertEquals(t2.getTextRange(), 1, 2);
+		assertEquals(s1.getRegion(), 4, 0);
+		assertEquals(t1.getRegion(), 6, 2);		
+		assertEquals(s2.getRegion(), 5, 0);
+		assertEquals(t2.getRegion(), 1, 2);
 		assertEquals("Buffer content", "0561472389", fDocument.get());
 		doUndoRedo(undo, "0561472389");		
 	}
@@ -585,9 +586,9 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "0142356789", fDocument.get());
-		assertEquals(s1.getTextRange(), 2, 0);
-		assertEquals(t1.getTextRange(), 3, 2);
-		assertEquals(marker.getTextRange(), 3, 2);
+		assertEquals(s1.getRegion(), 2, 0);
+		assertEquals(t1.getRegion(), 3, 2);
+		assertEquals(marker.getRegion(), 3, 2);
 		doUndoRedo(undo, "0142356789");
 	}
 	
@@ -601,9 +602,9 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "01589", fDocument.get());
-		assertEquals(s1.getTextRange(), 2, 0);
+		assertEquals(s1.getRegion(), 2, 0);
 		assertTrue(t1.isDeleted());
-		assertEquals(e2.getTextRange(), 3, 0);
+		assertEquals(e2.getRegion(), 3, 0);
 		doUndoRedo(undo, "01589");
 	}
 	
@@ -623,10 +624,10 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "0156234789", fDocument.get());
-		assertEquals(t1.getTextRange(), 2, 2);
-		assertEquals(marker.getTextRange(), 2, 2);
+		assertEquals(t1.getRegion(), 2, 2);
+		assertEquals(marker.getRegion(), 2, 2);
 		assertTrue(s1.isDeleted());
-		assertEquals(d1.getTextRange(), 7, 0);
+		assertEquals(d1.getRegion(), 7, 0);
 		doUndoRedo(undo, "0156234789");
 	}		
 	
@@ -647,11 +648,11 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "014x562378", fDocument.get());
-		assertEquals(s1.getTextRange(), 2, 0);
-		assertEquals(i1.getTextRange(), 3, 1);
-		assertEquals(t1.getTextRange(), 6, 2);
-		assertEquals(m1.getTextRange(), 6, 2);
-		assertEquals(d1.getTextRange(), 10, 0);
+		assertEquals(s1.getRegion(), 2, 0);
+		assertEquals(i1.getRegion(), 3, 1);
+		assertEquals(t1.getRegion(), 6, 2);
+		assertEquals(m1.getRegion(), 6, 2);
+		assertEquals(d1.getRegion(), 10, 0);
 		doUndoRedo(undo, "014x562378");
 	}		
 		
@@ -672,11 +673,11 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "0178234x56", fDocument.get());
-		assertEquals(s1.getTextRange(), 10, 0);
-		assertEquals(i1.getTextRange(), 7, 1);
-		assertEquals(t1.getTextRange(), 2, 2);
-		assertEquals(m1.getTextRange(), 2, 2);
-		assertEquals(d1.getTextRange(), 10, 0);
+		assertEquals(s1.getRegion(), 10, 0);
+		assertEquals(i1.getRegion(), 7, 1);
+		assertEquals(t1.getRegion(), 2, 2);
+		assertEquals(m1.getRegion(), 2, 2);
+		assertEquals(d1.getRegion(), 10, 0);
 		doUndoRedo(undo, "0178234x56");
 	}		
 		
@@ -696,10 +697,10 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "0145623789", fDocument.get());
-		assertEquals(d1.getTextRange(), 2, 0);
+		assertEquals(d1.getRegion(), 2, 0);
 		assertTrue(s1.isDeleted());
-		assertEquals(t1.getTextRange(), 5, 2);
-		assertEquals(m1.getTextRange(), 5, 2);
+		assertEquals(t1.getRegion(), 5, 2);
+		assertEquals(m1.getRegion(), 5, 2);
 		doUndoRedo(undo, "0145623789");
 	}		
 	
@@ -713,9 +714,9 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "017823yy569", fDocument.get());
-		assertEquals(s1.getTextRange(), 10, 0);
-		assertEquals(t1.getTextRange(), 2, 2);
-		assertEquals(m.getTextRange(), 6, 2);
+		assertEquals(s1.getRegion(), 10, 0);
+		assertEquals(t1.getRegion(), 2, 2);
+		assertEquals(m.getRegion(), 6, 2);
 		doUndoRedo(undo, "017823yy569");
 	}	
 	
@@ -729,9 +730,9 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "01yy5623789", fDocument.get());
-		assertEquals(s1.getTextRange(), 2, 0);
-		assertEquals(t1.getTextRange(), 6, 2);
-		assertEquals(m.getTextRange(), 2, 2);
+		assertEquals(s1.getRegion(), 2, 0);
+		assertEquals(t1.getRegion(), 6, 2);
+		assertEquals(m.getRegion(), 2, 2);
 		doUndoRedo(undo, "01yy5623789");
 	}	
 	
@@ -745,9 +746,9 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "0124536789", fDocument.get());
-		assertEquals(m.getTextRange(), 2, 6);
-		assertEquals(t1.getTextRange(), 3, 2);
-		assertEquals(s1.getTextRange(), 6, 0);		
+		assertEquals(m.getRegion(), 2, 6);
+		assertEquals(t1.getRegion(), 3, 2);
+		assertEquals(s1.getRegion(), 6, 0);		
 		doUndoRedo(undo, "0124536789");		
 	}
 	
@@ -761,9 +762,9 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "0142356789", fDocument.get());
-		assertEquals(m.getTextRange(), 2, 6);
-		assertEquals(t1.getTextRange(), 3, 2);
-		assertEquals(s1.getTextRange(), 2, 0);		
+		assertEquals(m.getRegion(), 2, 6);
+		assertEquals(t1.getRegion(), 3, 2);
+		assertEquals(s1.getRegion(), 2, 0);		
 		doUndoRedo(undo, "0142356789");		
 	}
 	
@@ -775,8 +776,8 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(t1);
 		assertTrue("Can perform edits", fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getTextRange(), 2, 3);
-		assertEquals(t1.getTextRange(), 8, 3);
+		assertEquals(s1.getRegion(), 2, 3);
+		assertEquals(t1.getRegion(), 8, 3);
 		String result= "0123456723489";
 		assertEquals("Buffer content", result, fDocument.get());
 		doUndoRedo(undo, result);		
@@ -790,8 +791,8 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(t1);
 		assertTrue("Can perform edits", fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getTextRange(), 9, 2);
-		assertEquals(t1.getTextRange(), 3, 2);
+		assertEquals(s1.getRegion(), 9, 2);
+		assertEquals(t1.getRegion(), 3, 2);
 		String result= "012783456789";
 		assertEquals("Buffer content", result, fDocument.get());
 		doUndoRedo(undo, result);		
@@ -809,10 +810,10 @@ public class TextBufferTest extends TestCase {
 		fProcessor.add(t2);
 		assertTrue("Can perform edits", fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getTextRange(), 7, 2);
-		assertEquals(t1.getTextRange(), 10, 2);
-		assertEquals(s2.getTextRange(), 7, 2);
-		assertEquals(t2.getTextRange(), 2, 2);
+		assertEquals(s1.getRegion(), 7, 2);
+		assertEquals(t1.getRegion(), 10, 2);
+		assertEquals(s2.getRegion(), 7, 2);
+		assertEquals(t2.getRegion(), 2, 2);
 		String result= "01562345675689";
 		assertEquals("Buffer content", result, fDocument.get());
 		doUndoRedo(undo, result);		
@@ -940,7 +941,7 @@ public class TextBufferTest extends TestCase {
 		assertBufferContent();
 	}
 	
-	private void assertEquals(TextRange r, int offset, int length) {
+	private void assertEquals(IRegion r, int offset, int length) {
 		assertEquals("Offset", offset, r.getOffset());
 		assertEquals("Length", length, r.getLength());	
 	}

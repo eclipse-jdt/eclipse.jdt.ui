@@ -20,13 +20,14 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditCopier;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 
 public abstract class TextChange extends AbstractTextChange {
@@ -53,13 +54,13 @@ public abstract class TextChange extends AbstractTextChange {
 		public TextChange getTextChange() {
 			return fTextChange;
 		}
-		public TextRange getTextRange() {
+		public IRegion getTextRange() {
 			return fDescription.getTextRange();
 		}
 		/* package */ GroupDescription getGroupDescription() {
 			return fDescription;
 		}
-		public boolean coveredBy(TextRange sourceRange) {
+		public boolean coveredBy(IRegion sourceRange) {
 			int sLength= sourceRange.getLength();
 			if (sLength == 0)
 				return false;
@@ -323,7 +324,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 * @param range the range describing the content to be returned
 	 * @return the current content denoted by the given <code>range</code>
 	 */	
-	public String getCurrentContent(TextRange range) throws CoreException {
+	public String getCurrentContent(IRegion range) throws CoreException {
 		TextBuffer buffer= null;
 		try {
 			buffer= acquireTextBuffer();
@@ -345,7 +346,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 * @param range the range denoting the resulting string.
 	 * @return the computed preview 
 	 */	
-	public String getPreviewContent(EditChange[] changes, TextRange range) throws CoreException {
+	public String getPreviewContent(EditChange[] changes, IRegion range) throws CoreException {
 		TextBuffer buffer= createTextBuffer();
 		LocalTextEditProcessor editor= new LocalTextEditProcessor(buffer);
 		addTextEdits(editor, changes);
@@ -395,12 +396,12 @@ public abstract class TextChange extends AbstractTextChange {
 	 * Note: API is under construction
 	 * </P>
 	 */
-	public TextRange getNewTextRange(TextEdit edit) {
+	public IRegion getNewTextRange(TextEdit edit) {
 		Assert.isNotNull(edit);
 		TextEdit result= getExecutedTextEdit(edit);
 		if (result == null)
 			return null;
-		return result.getTextRange();
+		return result.getRegion();
 	}
 	
 	/**
@@ -411,7 +412,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 * Note: API is under construction
 	 * </P>
 	 */
-	public TextRange getNewTextRange(TextEdit[] edits) {
+	public IRegion getNewTextRange(TextEdit[] edits) {
 		Assert.isTrue(edits != null && edits.length > 0);
 		if (!fKeepExecutedTextEdits || fCopier == null)
 			return null;		
@@ -429,7 +430,7 @@ public abstract class TextChange extends AbstractTextChange {
 	/**
 	 * Note: API is under construction
 	 */
-	public TextRange getNewTextRange(EditChange editChange) {
+	public IRegion getNewTextRange(EditChange editChange) {
 		return getNewTextRange(editChange.getGroupDescription().getTextEdits());
 	}
 	
@@ -504,7 +505,7 @@ public abstract class TextChange extends AbstractTextChange {
 	private String getContent(EditChange change, int surroundingLines, boolean preview) throws CoreException {
 		Assert.isTrue(change.getTextChange() == this);
 		TextBuffer buffer= createTextBuffer();
-		TextRange range= null;
+		IRegion range= null;
 		if (preview) {
 			LocalTextEditProcessor editor= new LocalTextEditProcessor(buffer);
 			boolean keepEdits= fKeepExecutedTextEdits;

@@ -8,10 +8,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
+package org.eclipse.text.edits;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 
 /**
  * A <tt>CopyRangeMarker</tt> can be used to track positions when executing 
@@ -38,7 +39,7 @@ public final class CopyRangeMarker extends TextEdit {
 	 * 
 	 * @param range the <code>TextRange</code> this text edit is "working on"
 	 */
-	public CopyRangeMarker(TextRange range) {
+	public CopyRangeMarker(IRegion range) {
 		super(range.getOffset(), range.getLength());
 	}
 	
@@ -53,7 +54,7 @@ public final class CopyRangeMarker extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
-	public final void perform(IDocument document) throws PerformEditException {
+	/* package */ final void perform(IDocument document) throws PerformEditException {
 		try {
 			fText= document.get(getOffset(), getLength());
 		} catch (BadLocationException e) {

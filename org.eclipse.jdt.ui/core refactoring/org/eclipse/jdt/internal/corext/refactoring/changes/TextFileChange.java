@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.text.edits.UndoMemento;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
@@ -26,7 +27,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
 
 public class TextFileChange extends TextChange  {
 

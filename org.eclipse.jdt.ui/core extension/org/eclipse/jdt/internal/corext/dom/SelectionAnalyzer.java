@@ -13,10 +13,13 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
  * Maps a selection to a set of AST nodes.
@@ -64,13 +67,13 @@ public class SelectionAnalyzer extends GenericVisitor {
 		return fSelectedNodes.get(0) instanceof Expression;
 	}
 	
-	public TextRange getSelectedNodeRange() {
+	public IRegion getSelectedNodeRange() {
 		if (fSelectedNodes == null || fSelectedNodes.isEmpty())
 			return null;
 		ASTNode firstNode= (ASTNode)fSelectedNodes.get(0);
 		ASTNode lastNode= (ASTNode)fSelectedNodes.get(fSelectedNodes.size() - 1);
 		int start= firstNode.getStartPosition();
-		return new TextRange(start, lastNode.getStartPosition() + lastNode.getLength() - start);
+		return new Region(start, lastNode.getStartPosition() + lastNode.getLength() - start);
 	}
 	
 	public ASTNode getLastCoveringNode() {

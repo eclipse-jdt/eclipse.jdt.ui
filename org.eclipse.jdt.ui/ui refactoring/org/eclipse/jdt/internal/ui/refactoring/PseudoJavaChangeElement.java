@@ -14,18 +14,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.util.Assert;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /* package */ class PseudoJavaChangeElement extends ChangeElement {
 
@@ -157,9 +158,9 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 		return result;
 	}
 	
-	public TextRange getTextRange() throws CoreException {
+	public IRegion getTextRange() throws CoreException {
 		ISourceRange range= ((ISourceReference)fJavaElement).getSourceRange();
-		return new TextRange(range.getOffset(), range.getLength());
+		return new Region(range.getOffset(), range.getLength());
 	}	
 }
 

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
+package org.eclipse.text.edits;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,6 +20,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 
 public final class MoveSourceEdit extends AbstractTransferEdit {
 
@@ -74,15 +75,15 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 	
 	protected void checkIntegrity() throws MalformedTreeException {
 		if (fTarget == null)
-			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.no_target")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, EditMessages.getString("MoveSourceEdit.no_target")); //$NON-NLS-1$
 		if (fTarget.getSourceEdit() != this)
-			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.different_source"));  //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, EditMessages.getString("MoveSourceEdit.different_source"));  //$NON-NLS-1$
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
-	public void perform(IDocument document) throws PerformEditException {
+	/* package */ void perform(IDocument document) throws PerformEditException {
 		fCounter++;
 		switch(fCounter) {
 			// Position of move source > position of move target.
@@ -108,7 +109,7 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 				performReplace(document, ""); //$NON-NLS-1$
 				if (!fTarget.isDeleted()) {
 					// Insert target
-					TextRange targetRange= fTarget.getTextRange();
+					IRegion targetRange= fTarget.getRegion();
 					fMode= INSERT;
 					performReplace(document, targetRange, fContent);
 				}
@@ -208,7 +209,7 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 	
 	private String getContent(IDocument document) throws PerformEditException {
 		try {
-			TextRange range= getTextRange();
+			IRegion range= getRegion();
 			String result= document.get(range.getOffset(), range.getLength());
 			if (fModifier != null) {
 				IDocument newDocument= new Document(result);

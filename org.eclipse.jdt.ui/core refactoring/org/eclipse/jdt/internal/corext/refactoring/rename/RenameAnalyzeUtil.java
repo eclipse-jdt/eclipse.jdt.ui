@@ -19,6 +19,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
@@ -29,7 +32,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 class RenameAnalyzeUtil {
@@ -83,7 +85,7 @@ class RenameAnalyzeUtil {
 		if (newGroup == null)
 			return false;
 		
-		TextRange oldEditRange= getCorrespondingEditChangeRange(searchResult, manager);
+		IRegion oldEditRange= getCorrespondingEditChangeRange(searchResult, manager);
 		if (oldEditRange == null)
 			return false;
 		
@@ -96,12 +98,12 @@ class RenameAnalyzeUtil {
 		return false;
 	}
 	
-	private static TextRange getCorrespondingEditChangeRange(SearchResult searchResult, TextChangeManager manager) throws CoreException{
+	private static IRegion getCorrespondingEditChangeRange(SearchResult searchResult, TextChangeManager manager) throws CoreException{
 		TextChange change= getTextChange(searchResult, manager);
 		if (change == null)
 			return null;
 		
-		TextRange oldMatchRange= createTextRange(searchResult);
+		IRegion oldMatchRange= createTextRange(searchResult);
 		EditChange[] editChanges= change.getTextEditChanges();	
 		for (int i= 0; i < editChanges.length; i++) {
 			if (oldMatchRange.equals(editChanges[i].getTextRange()))
@@ -120,9 +122,9 @@ class RenameAnalyzeUtil {
 		return manager.get(oldWorkingCopy);
 	}
 	
-	private static TextRange createTextRange(SearchResult searchResult) {
+	private static IRegion createTextRange(SearchResult searchResult) {
 		int start= searchResult.getStart();
-		return new TextRange(start, searchResult.getEnd() - start);
+		return new Region(start, searchResult.getEnd() - start);
 	}
 	private static SearchResultGroup findOccurrenceGroup(IResource resource, SearchResultGroup[] newOccurrences){
 		for (int i= 0; i < newOccurrences.length; i++) {

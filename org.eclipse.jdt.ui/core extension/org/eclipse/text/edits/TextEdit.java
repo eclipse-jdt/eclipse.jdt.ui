@@ -8,19 +8,21 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
+package org.eclipse.text.edits;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.eclipse.text.edits.TreeIterationInfo.Visitor;
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.jdt.internal.corext.textmanipulation.TreeIterationInfo.Visitor;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
 /**
  * A text edit describes an elementary text manipulation operation. Edits are
@@ -115,8 +117,8 @@ public abstract class TextEdit {
 	 * 
 	 * @return the manipulated region
 	 */
-	public final TextRange getTextRange() {
-		return new TextRange(fOffset, fLength);
+	public final IRegion getRegion() {
+		return new Region(fOffset, fLength);
 	}
 	
 	/**
@@ -128,7 +130,7 @@ public abstract class TextEdit {
 	 * 
 	 * @param region the new region this edit is manipulating
 	 */
-	public final void setRegion(TextRange region) {
+	public final void setRegion(IRegion region) {
 		Assert.isTrue(fParent == null && fChildren == null);
 		fOffset= region.getOffset();
 		fLength= region.getLength();
@@ -338,7 +340,7 @@ public abstract class TextEdit {
 	 * @return the text range spawned by the given array of edits or
 	 *  <code>null</code> if all edits are marked as deleted
 	 */
-	public static TextRange getTextRange(TextEdit[] edits) {
+	public static IRegion getTextRange(TextEdit[] edits) {
 		Assert.isTrue(edits != null && edits.length > 0);
 			
 		int offset= Integer.MAX_VALUE;
@@ -356,7 +358,7 @@ public abstract class TextEdit {
 		if (edits.length == deleted) {
 			return null;
 		} else {
-			return new TextRange(offset, end - offset);
+			return new Region(offset, end - offset);
 		}
 	}
 		
@@ -514,7 +516,7 @@ public abstract class TextEdit {
 	 * 
 	 * @see #apply(IDocument)
 	 */
-	protected abstract void perform(IDocument document) throws PerformEditException;
+	/* package */ abstract void perform(IDocument document) throws PerformEditException;
 	
 	
 	//---- Helpers -------------------------------------------------------------------------------------------
@@ -527,7 +529,7 @@ public abstract class TextEdit {
 		}
 	}
 	
-	/* package */ void performReplace(IDocument document, TextRange range, String text) throws PerformEditException {
+	/* package */ void performReplace(IDocument document, IRegion range, String text) throws PerformEditException {
 		try {
 			document.replace(range.getOffset(), range.getLength(), text);
 		} catch (BadLocationException e) {
@@ -569,7 +571,7 @@ public abstract class TextEdit {
 		if (child.isDeleted())
 			throw new MalformedTreeException(this, child, "Can't add deleted edit");
 		if (!covers(child))
-			throw new MalformedTreeException(this, child, TextManipulationMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
+			throw new MalformedTreeException(this, child, EditMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
 		if (fChildren == null) {
 			fChildren= new ArrayList(2);
 		}
@@ -593,7 +595,7 @@ public abstract class TextEdit {
 				continue;
 			if (end < childOffset)
 				return i;
-			throw new MalformedTreeException(this, edit, TextManipulationMessages.getString("TextEdit.overlapping")); //$NON-NLS-1$
+			throw new MalformedTreeException(this, edit, EditMessages.getString("TextEdit.overlapping")); //$NON-NLS-1$
 		}
 		return size;
 	}

@@ -8,22 +8,26 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
-
+package org.eclipse.text.edits;
 
 /**
- * Text edit to delete a range in a document.
+ * Text edit to replace a range in a document with a different
+ * string
  */
-public final class DeleteEdit extends SimpleTextEdit {
+public final class ReplaceEdit extends SimpleTextEdit {
+	
+	private String fText;
 	
 	/**
-	 * Constructs a new delete edit.
+	 * Constructs a new replace edit.
 	 * 
 	 * @param offset the offset of the range to replace
 	 * @param length the length of the range to replace
+	 * @param text the new text
 	 */
-	public DeleteEdit(int offset, int length) {
+	public ReplaceEdit(int offset, int length, String text) {
 		super(offset, length);
+		fText= text;
 	}
 	
 	/**
@@ -31,18 +35,19 @@ public final class DeleteEdit extends SimpleTextEdit {
 	 * 
 	 * @param other the edit to copy from
 	 */
-	private DeleteEdit(DeleteEdit other) {
+	private ReplaceEdit(ReplaceEdit other) {
 		super(other);
+		fText= other.fText;
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit#getText()
 	 */
 	public String getText() {
-		return ""; //$NON-NLS-1$
+		return fText;
 	}
 	
 	protected TextEdit doCopy() {
-		return new DeleteEdit(this);
-	}
+		return new ReplaceEdit(this);
+	}		
 }

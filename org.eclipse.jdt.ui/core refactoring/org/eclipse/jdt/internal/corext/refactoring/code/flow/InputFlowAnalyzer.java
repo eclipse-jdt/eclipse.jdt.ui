@@ -24,9 +24,10 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public class InputFlowAnalyzer extends FlowAnalyzer {
 	
@@ -192,9 +193,9 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		if (skipNode(node))
 			return;
 		SwitchData data= createSwitchData(node);
-		TextRange[] ranges= data.getRanges();
+		IRegion[] ranges= data.getRanges();
 		for (int i= 0; i < ranges.length; i++) {
-			TextRange range= ranges[i];
+			IRegion range= ranges[i];
 			if (fSelection.coveredBy(range)) {
 				GenericSequentialFlowInfo info= createSequential();
 				setFlowInfo(node, info);

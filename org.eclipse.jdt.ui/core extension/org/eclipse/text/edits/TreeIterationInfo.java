@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
+package org.eclipse.text.edits;
 
 import org.eclipse.jface.text.Assert;
 

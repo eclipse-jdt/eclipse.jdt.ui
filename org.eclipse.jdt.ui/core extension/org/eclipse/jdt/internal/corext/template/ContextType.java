@@ -18,11 +18,11 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 /**
  * A context type is a context factory.
@@ -174,7 +174,7 @@ public abstract class ContextType implements ITemplateEditor {
 		    
 			int[] offsets= new int[variable.getOffsets().length];
 			for (int j= 0; j != offsets.length; j++)
-				offsets[j]= ((TextEdit) iterator.next()).getTextRange().getOffset();
+				offsets[j]= ((TextEdit) iterator.next()).getRegion().getOffset();
 			
 		 	variable.setOffsets(offsets);   
 		}

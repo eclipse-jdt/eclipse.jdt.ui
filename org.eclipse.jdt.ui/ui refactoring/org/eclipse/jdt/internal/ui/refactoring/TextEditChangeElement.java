@@ -12,12 +12,12 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /* package */ class TextEditChangeElement extends ChangeElement {
 	
@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 		if (element != null) {
 			IChange change= element.getChange();
 			if (change instanceof TextChange) {
-				TextRange range= getTextRange(this);
+				IRegion range= getTextRange(this);
 				Object input= null;
 				if (range != null) {
 					input= TextChangePreviewViewer.createInput(new EditChange[] {fChange}, range);
@@ -101,7 +101,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 		return (DefaultChangeElement)element;
 	}
 	
-	private static TextRange getTextRange(ChangeElement element) throws CoreException {
+	private static IRegion getTextRange(ChangeElement element) throws CoreException {
 		if (element == null)
 			return null;
 		if (element instanceof PseudoJavaChangeElement) {

@@ -10,18 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**

@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -29,6 +31,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -36,11 +40,9 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class RefactoringAnalyzeUtil {
@@ -58,8 +60,8 @@ public class RefactoringAnalyzeUtil {
 		return wc;
 	}
 
-	public static TextRange[] getRanges(TextEdit[] edits, TextChange change){
-		TextRange[] result= new TextRange[edits.length];
+	public static IRegion[] getRanges(TextEdit[] edits, TextChange change){
+		IRegion[] result= new IRegion[edits.length];
 		for (int i= 0; i < edits.length; i++) {
 			result[i]= RefactoringAnalyzeUtil.getTextRange(edits[i], change);
 		}
@@ -78,7 +80,7 @@ public class RefactoringAnalyzeUtil {
 	public static TextEdit getFirstEdit(TextEdit[] edits){
 		Arrays.sort(edits, new Comparator(){
 			public int compare(Object o1, Object o2){
-				return ((TextEdit)o1).getTextRange().getOffset() - ((TextEdit)o2).getTextRange().getOffset();
+				return ((TextEdit)o1).getRegion().getOffset() - ((TextEdit)o2).getRegion().getOffset();
 			}
 		});
 		return edits[0];
@@ -170,16 +172,16 @@ public class RefactoringAnalyzeUtil {
 		return null;	
 	}
 
-	private static SimpleName getNameNode(TextRange range, CompilationUnit cuNode) {
+	private static SimpleName getNameNode(IRegion range, CompilationUnit cuNode) {
 		Selection sel= Selection.createFromStartLength(range.getOffset(), range.getLength());
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(sel, true);
 		cuNode.accept(analyzer);
 		return getSimpleName(analyzer.getFirstSelectedNode());
 	}
 
-	private static TextRange getTextRange(TextEdit edit, TextChange change){
+	private static IRegion getTextRange(TextEdit edit, TextChange change){
 		if (change == null)
-			return edit.getTextRange();
+			return edit.getRegion();
 		 else
 			return change.getNewTextRange(edit);
 	}

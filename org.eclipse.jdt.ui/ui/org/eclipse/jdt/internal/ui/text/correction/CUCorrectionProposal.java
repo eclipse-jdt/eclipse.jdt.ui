@@ -11,12 +11,17 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -31,19 +36,15 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
@@ -233,7 +234,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				enterLinkedMode(change, viewer, linked, selection);
 			} else if (selection != null && part instanceof ITextEditor) {
 				// select a result
-				TextRange range= change.getNewTextRange(selection.getTextEdits());
+				IRegion range= change.getNewTextRange(selection.getTextEdits());
 				((ITextEditor) part).selectAndReveal(range.getOffset(), range.getLength());
 
 			}
@@ -251,7 +252,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		for (int i= 0; i < linked.length; i++) {
 			GroupDescription curr= linked[i];
 			String name= curr.getName(); // name used as key for link mode proposals & as kind for linked mode
-			TextRange range= change.getNewTextRange(curr.getTextEdits());
+			IRegion range= change.getNewTextRange(curr.getTextEdits());
 			if (range != null && name != null) {
 				ICompletionProposal[] linkedModeProposals= getLinkedModeProposals(name);
 				if (linkedModeProposals != null && linkedModeProposals.length > 1) {
@@ -266,7 +267,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}
 			
 		if (selection != null) {
-			TextRange range= change.getNewTextRange(selection.getTextEdits());
+			IRegion range= change.getNewTextRange(selection.getTextEdits());
 			if (range != null) {
 				editor.setFinalCaretOffset(range.getOffset() + range.getLength());
 			}					

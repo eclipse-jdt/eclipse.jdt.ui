@@ -12,8 +12,9 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public class Selection {
 	
@@ -150,9 +151,9 @@ public class Selection {
 		return nodeStart <= fStart && fExclusiveEnd <= nodeStart + node.getLength();
 	}
 	
-	public boolean coveredBy(TextRange range) {
-		int rangeStart= range.getOffset();
-		return rangeStart <= fStart && fExclusiveEnd <= rangeStart + range.getLength();
+	public boolean coveredBy(IRegion region) {
+		int rangeStart= region.getOffset();
+		return rangeStart <= fStart && fExclusiveEnd <= rangeStart + region.getLength();
 	}
 	
 //	public boolean coveredBy(int sourceStart, int sourceEnd) {

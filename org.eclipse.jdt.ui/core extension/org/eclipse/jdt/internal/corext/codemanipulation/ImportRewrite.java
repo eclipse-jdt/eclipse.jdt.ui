@@ -15,13 +15,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.MalformedTreeException;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.ReplaceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
  * A rewriter for imports that considers the organize import 
@@ -38,7 +39,7 @@ public final class ImportRewrite {
 	}
 	
 	public final TextEdit createEdit(TextBuffer buffer) throws CoreException {
-		TextRange region= fImportsStructure.getReplaceRange(buffer);
+		IRegion region= fImportsStructure.getReplaceRange(buffer);
 		String text= fImportsStructure.getReplaceString(buffer, region);
 		if (text == null) {
 			return new MultiTextEdit(region.getOffset(), 0);
@@ -47,7 +48,7 @@ public final class ImportRewrite {
 	}
 	
 	public final void rewrite(TextBuffer buffer, TextEdit rootEdit) throws MalformedTreeException, CoreException {
-		TextRange region= fImportsStructure.getReplaceRange(buffer);
+		IRegion region= fImportsStructure.getReplaceRange(buffer);
 		String text= fImportsStructure.getReplaceString(buffer, region);
 		if (text != null) {
 			rootEdit.add(new ReplaceEdit(region.getOffset(), region.getLength(), text));

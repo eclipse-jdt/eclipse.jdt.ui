@@ -18,9 +18,11 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public class TempDeclarationFinder {
 
@@ -99,7 +101,7 @@ public class TempDeclarationFinder {
 		private boolean visitVariableDeclaration(VariableDeclaration vd) {
 			if (vd.getInitializer() != null){
 				int start= vd.getStartPosition();
-				TextRange declarationRange= new TextRange(start, vd.getInitializer().getStartPosition() - start);
+				IRegion declarationRange= new Region(start, vd.getInitializer().getStartPosition() - start);
 				if (getSelection().coveredBy(declarationRange))
 					return addNodeAndStop(vd);
 				else 

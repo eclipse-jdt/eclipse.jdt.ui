@@ -14,13 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
-import org.eclipse.jface.viewers.Viewer;
-
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.CompareViewerSwitchingPane;
@@ -33,9 +26,16 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.viewers.Viewer;
+
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public class TextChangePreviewViewer implements IChangePreviewViewer {
 
@@ -46,7 +46,7 @@ public class TextChangePreviewViewer implements IChangePreviewViewer {
 		int surroundingLines;
 		
 		EditChange[] changes;
-		TextRange range;
+		IRegion range;
 	}
 	
 	private static class ComparePreviewer extends CompareViewerSwitchingPane {
@@ -117,7 +117,7 @@ public class TextChangePreviewViewer implements IChangePreviewViewer {
 		return result;
 	}
 	
-	public static Object createInput(EditChange[] changes, TextRange range) {
+	public static Object createInput(EditChange[] changes, IRegion range) {
 		TextEditChangeInput result= new TextEditChangeInput();
 		result.changes= changes;
 		result.range= range;

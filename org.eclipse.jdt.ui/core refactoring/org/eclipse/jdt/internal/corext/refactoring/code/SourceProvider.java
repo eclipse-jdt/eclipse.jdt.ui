@@ -37,20 +37,22 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.Regions;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.UndoMemento;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
-import org.eclipse.jdt.internal.corext.textmanipulation.Regions;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
-import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -223,13 +225,13 @@ public class SourceProvider {
 		int size= ranges.size();
 		RangeMarker[] markers= new RangeMarker[size];
 		for (int i= 0; i < markers.length; i++) {
-			markers[i]= new RangeMarker((TextRange)ranges.get(i));
+			markers[i]= new RangeMarker((IRegion)ranges.get(i));
 		}
-		int split= size <= 1 ? Integer.MAX_VALUE : Regions.getExclusiveEnd((TextRange)ranges.get(0));
+		int split= size <= 1 ? Integer.MAX_VALUE : Regions.getExclusiveEnd((IRegion)ranges.get(0));
 		TextEdit[] edits= dummy.removeAll();
 		for (int i= 0; i < edits.length; i++) {
 			TextEdit edit= edits[i];
-			int pos= edit.getTextRange().getOffset() >= split ? 1 : 0;
+			int pos= edit.getRegion().getOffset() >= split ? 1 : 0;
 			markers[pos].add(edit);
 		}
 		MultiTextEdit root= new MultiTextEdit();
@@ -358,7 +360,7 @@ public class SourceProvider {
 				if (node.getNodeType() == ASTNode.RETURN_STATEMENT) {
 					rs= (ReturnStatement)node;
 				} else {
-					result.add(new TextRange(node.getStartPosition(), node.getLength()));
+					result.add(new Region(node.getStartPosition(), node.getLength()));
 				}
 				break;
 			default: {
@@ -374,23 +376,23 @@ public class SourceProvider {
 		}
 		if (rs != null) {
 			Expression exp= rs.getExpression();
-			result.add(new TextRange(exp.getStartPosition(), exp.getLength()));
+			result.add(new Region(exp.getStartPosition(), exp.getLength()));
 		}
 		return result;
 	}
 	
-	private TextRange createRange(List statements, int end) {
+	private IRegion createRange(List statements, int end) {
 		int start= ((ASTNode)statements.get(0)).getStartPosition();
 		ASTNode last= (ASTNode)statements.get(end);
 		int length = last.getStartPosition() - start + last.getLength();
-		TextRange range= new TextRange(start, length);
+		IRegion range= new Region(start, length);
 		return range;
 	}
 	
 	private String[] getBlocks(RangeMarker[] markers) {
 		String[] result= new String[markers.length];
 		for (int i= 0; i < markers.length; i++) {
-			TextRange range= markers[i].getTextRange();
+			IRegion range= markers[i].getRegion();
 			String content= fBuffer.getContent(range.getOffset(), range.getLength());
 			String lines[]= Strings.convertIntoLines(content);
 			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
+package org.eclipse.text.edits;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -64,15 +64,15 @@ public final class CopyTargetEdit extends AbstractTransferEdit {
 	
 	protected void checkIntegrity() throws MalformedTreeException {
 		if (fSource == null)
-			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.no_source")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, EditMessages.getString("CopyTargetEdit.no_source")); //$NON-NLS-1$
 		if (fSource.getTargetEdit() != this)
-			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.different_target")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, EditMessages.getString("CopyTargetEdit.different_target")); //$NON-NLS-1$
 	}
 	
-	public void perform(IDocument document) throws PerformEditException {
+	/* package */ void perform(IDocument document) throws PerformEditException {
 		if (++fSource.fCounter == 2 && !isDeleted()) {
 			try {
-				performReplace(document, getTextRange(), fSource.getContent());
+				performReplace(document, getRegion(), fSource.getContent());
 			} finally {
 				fSource.clearContent();
 			}

@@ -14,10 +14,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
@@ -33,9 +34,11 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -557,7 +560,7 @@ public class ImportsStructure implements IImportsStructure {
 		try {
 			buffer= aquireTextBuffer();
 			
-			TextRange textRange= getReplaceRange(buffer);
+			IRegion textRange= getReplaceRange(buffer);
 
 			String replaceString= getReplaceString(buffer, textRange);
 			if (replaceString != null) {
@@ -602,7 +605,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * Get the replace positons.
 	 * @param textBuffer The textBuffer
 	 */
-	public TextRange getReplaceRange(TextBuffer textBuffer) throws JavaModelException {
+	public IRegion getReplaceRange(TextBuffer textBuffer) throws JavaModelException {
 		synchronized (fCompilationUnit) {
 			fCompilationUnit.reconcile();
 		}
@@ -623,17 +626,17 @@ public class ImportsStructure implements IImportsStructure {
 					}
 				}
 			}
-			return new TextRange(startPos, endPos - startPos);
+			return new Region(startPos, endPos - startPos);
 		} else {
 			int start= getPackageStatementEndPos(textBuffer);
-			return new TextRange(start, 0);
+			return new Region(start, 0);
 		}		
 	}
 	
 	/**
 	 * Returns the replace string or <code>null</code> if no replace is needed.
 	 */
-	public String getReplaceString(TextBuffer textBuffer, TextRange textRange) throws JavaModelException {
+	public String getReplaceString(TextBuffer textBuffer, IRegion textRange) throws JavaModelException {
 		int importsStart=  textRange.getOffset();
 		int importsLen= textRange.getLength();
 				

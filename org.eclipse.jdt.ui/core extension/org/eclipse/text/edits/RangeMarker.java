@@ -8,9 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
+package org.eclipse.text.edits;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 
 /**
  * A <tt>RangeMarker</tt> can be used to track positions when executing 
@@ -34,7 +35,7 @@ public final class RangeMarker extends TextEdit {
 	 * 
 	 * @param range the <code>TextRange</code> this text edit is "working on"
 	 */
-	public RangeMarker(TextRange range) {
+	public RangeMarker(IRegion range) {
 		super(range.getOffset(), range.getLength());
 	}
 	
@@ -48,7 +49,7 @@ public final class RangeMarker extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
-	public final void perform(IDocument document)  {
+	/* package */ final void perform(IDocument document)  {
 	}
 	
 	/* non Java-doc

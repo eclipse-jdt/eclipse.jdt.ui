@@ -85,9 +85,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
  * Special flow analyzer to determine the return value of the extracted method
@@ -110,12 +112,12 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		public boolean hasDefaultCase() {
 			return fHasDefaultCase;
 		}
-		public void add(TextRange range, FlowInfo info) {
+		public void add(IRegion range, FlowInfo info) {
 			fRanges.add(range);
 			fInfos.add(info);
 		}
-		public TextRange[] getRanges() {
-			return (TextRange[]) fRanges.toArray(new TextRange[fRanges.size()]);	
+		public IRegion[] getRanges() {
+			return (IRegion[]) fRanges.toArray(new IRegion[fRanges.size()]);	
 		}
 		public FlowInfo[] getInfos() {
 			return (FlowInfo[]) fInfos.toArray(new FlowInfo[fInfos.size()]);
@@ -327,7 +329,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 					start= statement.getStartPosition();
 				} else {
 					if (info.isReturn() || info.isPartialReturn() || info.branches()) {
-						result.add(new TextRange(start, end - start + 1), info);
+						result.add(new Region(start, end - start + 1), info);
 						info= createSequential();
 						start= statement.getStartPosition();
 					}
@@ -337,7 +339,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			}
 			end= statement.getStartPosition() + statement.getLength() - 1;
 		}
-		result.add(new TextRange(start, end - start + 1), info);
+		result.add(new Region(start, end - start + 1), info);
 		return result;
 	}
 	

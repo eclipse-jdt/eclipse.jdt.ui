@@ -18,25 +18,26 @@ import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICodeFormatter;
+import org.eclipse.jdt.core.ToolFactory;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITypedRegion;
 
-import org.eclipse.jdt.core.ICodeFormatter;
-import org.eclipse.jdt.core.ToolFactory;
-
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplatePosition;
-import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
@@ -292,7 +293,7 @@ public class JavaFormatter implements ITemplateEditor {
 		    
 			int[] offsets= new int[variable.getOffsets().length];
 			for (int j= 0; j != offsets.length; j++)
-				offsets[j]= ((TextEdit) iterator.next()).getTextRange().getOffset();
+				offsets[j]= ((TextEdit) iterator.next()).getRegion().getOffset();
 			
 		 	variable.setOffsets(offsets);   
 		}

@@ -13,12 +13,13 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -29,14 +30,16 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 /**
  * Add javadoc stubs to members. All members must belong to the same compilation unit.
@@ -146,7 +149,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 				String indentedComment= Strings.changeIndent(comment, 0, tabWidth, indentString, lineDelim);
 
 				String insertString= indentedComment;
-				TextRange range= new TextRange(memberStartOffset, 0);
+				IRegion range= new Region(memberStartOffset, 0);
 				buffer.replace(range, insertString);
 
 				monitor.worked(1);

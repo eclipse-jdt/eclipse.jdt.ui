@@ -17,20 +17,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
  * A default content provider to present a hierarchy of <code>IChange</code>
@@ -176,7 +177,7 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 	}
 	
 	private IJavaElement getModifiedJavaElement(EditChange edit, ICompilationUnit cunit) throws JavaModelException {
-		TextRange range= edit.getTextRange();
+		IRegion range= edit.getTextRange();
 		if (range.getOffset() == 0 && range.getLength() == 0)
 			return cunit;
 		IJavaElement result= cunit.getElementAt(range.getOffset());
@@ -186,7 +187,7 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 		try {
 			while(true) {
 				ISourceReference ref= (ISourceReference)result;
-				TextRange sRange= new TextRange(ref.getSourceRange().getOffset(), ref.getSourceRange().getLength());
+				IRegion sRange= new Region(ref.getSourceRange().getOffset(), ref.getSourceRange().getLength());
 				if (result.getParent() == null || edit.coveredBy(sRange))
 					break;
 				result= result.getParent();

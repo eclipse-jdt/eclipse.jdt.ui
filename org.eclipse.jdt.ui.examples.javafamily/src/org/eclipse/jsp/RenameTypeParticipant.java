@@ -14,12 +14,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.text.edits.SimpleTextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.indexsearch.*;
+
+import org.eclipse.core.indexsearch.ISearchResultCollector;
 
 import org.eclipse.jdt.core.IType;
 
@@ -29,7 +32,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameParticipant;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
 
 public class RenameTypeParticipant extends RenameParticipant {

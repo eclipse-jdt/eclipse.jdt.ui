@@ -8,10 +8,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
+package org.eclipse.text.edits;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 
 public class MultiTextEdit extends TextEdit {
 
@@ -55,7 +56,7 @@ public class MultiTextEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
-	public final void perform(IDocument document) {
+	/* package */ final void perform(IDocument document) {
 		// do nothing.
 	}
 
@@ -70,7 +71,7 @@ public class MultiTextEdit extends TextEdit {
 	/* package */ void aboutToBeAdded(TextEdit parent) {
 		if (!fDefined) {
 			if (hasChildren()) {
-				TextRange region= getTextRange(getChildren());
+				IRegion region= getTextRange(getChildren());
 				setOffset(region.getOffset());
 				setLength(region.getLength());
 			} else {

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
+package org.eclipse.text.edits;
 
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -50,7 +50,7 @@ public abstract class SimpleTextEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#doPerform
 	 */
-	protected void perform(IDocument document) throws PerformEditException {
+	/* package */ void perform(IDocument document) throws PerformEditException {
 		String text= getText(); 		
 		if (text != null)
 			performReplace(document, text);

@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 
 public class GroupDescription {
@@ -57,10 +60,10 @@ public class GroupDescription {
 	 * group description. The method requires that the group description
 	 * manages at least one text edit.
 	 */
-	public TextRange getTextRange() {
+	public IRegion getTextRange() {
 		int size= fEdits.size();
 		if (size == 1) {
-			return ((TextEdit)fEdits.get(0)).getTextRange();
+			return ((TextEdit)fEdits.get(0)).getRegion();
 		} else {
 			return TextEdit.getTextRange((TextEdit[])fEdits.toArray(new TextEdit[fEdits.size()]));
 		}

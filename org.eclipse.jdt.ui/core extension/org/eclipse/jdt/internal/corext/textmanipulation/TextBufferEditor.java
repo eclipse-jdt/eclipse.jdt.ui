@@ -15,6 +15,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.text.edits.EditProcessor;
+import org.eclipse.text.edits.PerformEditException;
+import org.eclipse.text.edits.UndoMemento;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TextBufferEditor extends EditProcessor {

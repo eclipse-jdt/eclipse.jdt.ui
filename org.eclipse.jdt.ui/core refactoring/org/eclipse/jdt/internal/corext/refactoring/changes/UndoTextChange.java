@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
+import org.eclipse.text.edits.UndoMemento;
 
 abstract class UndoTextChange extends AbstractTextChange {
 

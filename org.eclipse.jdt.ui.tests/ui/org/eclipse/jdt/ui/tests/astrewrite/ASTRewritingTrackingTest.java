@@ -18,22 +18,40 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class ASTRewritingTrackingTest extends ASTRewritingTest {
 
@@ -141,7 +159,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
-			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
+			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
 			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
@@ -216,7 +234,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
-			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
+			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
 			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
@@ -298,7 +316,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
-			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
+			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
 			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
@@ -375,7 +393,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
-			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
+			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
 			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
@@ -449,7 +467,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
-			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
+			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
 			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
@@ -511,7 +529,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
-			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
+			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
 			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
@@ -577,7 +595,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
-			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
+			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
 			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}

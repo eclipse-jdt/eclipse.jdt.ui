@@ -14,14 +14,17 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
 
 public class TrackPositionTest extends TestCase {
@@ -76,7 +79,7 @@ public class TrackPositionTest extends TestCase {
 		}
 	}
 	
-	private static void assertEquals(TextRange r, int offset, int length) {
+	private static void assertEquals(IRegion r, int offset, int length) {
 		assertEquals("Offset", offset, r.getOffset());
 		assertEquals("Length", length, r.getLength());	
 	}	

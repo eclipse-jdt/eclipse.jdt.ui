@@ -8,12 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
+package org.eclipse.text.edits;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 
 public final class CopySourceEdit extends AbstractTransferEdit {
 
@@ -74,16 +75,16 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 	
 	protected void checkIntegrity() throws MalformedTreeException {
 		if (fTarget == null)
-			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.no_target")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, EditMessages.getString("CopySourceEdit.no_target")); //$NON-NLS-1$
 		if (fTarget.getSourceEdit() != this)
-			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.different_source")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, EditMessages.getString("CopySourceEdit.different_source")); //$NON-NLS-1$
 	}
 	
-	public void perform(IDocument document) throws PerformEditException {
+	/* package */ void perform(IDocument document) throws PerformEditException {
 		fContent= getContent(document);
 		if (++fCounter == 2 && !fTarget.isDeleted()) {
 			try {
-				performReplace(document, fTarget.getTextRange(), fContent);
+				performReplace(document, fTarget.getRegion(), fContent);
 			} finally {
 				clearContent();
 			}
@@ -92,7 +93,7 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 
 	private String getContent(IDocument document) throws PerformEditException {
 		try {
-			TextRange range= getTextRange();
+			IRegion range= getRegion();
 			String result= document.get(range.getOffset(), range.getLength());
 			if (fModifier != null) {
 				IDocument newDocument= new Document(result);

@@ -17,11 +17,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.Regions;
+import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -44,7 +50,8 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -65,17 +72,14 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUn
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.Regions;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 public class ExtractInterfaceRefactoring extends Refactoring {
 
@@ -316,7 +320,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				if(! cu.equals(typeCu))
 					continue;
 				ISourceRange sourceRange= cuRange.getSourceRange();
-				TextRange oldRange= getOldRange(edits, new TextRange(sourceRange.getOffset(), sourceRange.getLength()), change);
+				IRegion oldRange= getOldRange(edits, new Region(sourceRange.getOffset(), sourceRange.getLength()), change);
 				String typeName= fInputType.getElementName();
 				int offset= Regions.getExclusiveEnd(oldRange) - typeName.length();
 				TextEdit edit= SimpleTextEdit.createReplace(offset, typeName.length(), fNewInterfaceName);
@@ -358,11 +362,11 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return description;
 	}
 
-	private static TextRange getOldRange(TextEdit[] edits, TextRange newRange, TextChange change) {
+	private static IRegion getOldRange(TextEdit[] edits, IRegion newRange, TextChange change) {
 		for (int i= 0; i < edits.length; i++) {
 			TextEdit edit= edits[i];
 			if (change.getNewTextRange(edit).equals(newRange))
-				return edit.getTextRange();
+				return edit.getRegion();
 		}
 		Assert.isTrue(false, "original text range not found"); //$NON-NLS-1$
 		return newRange;

@@ -8,7 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
+package org.eclipse.text.edits;
+
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
 
 public class Regions {
@@ -33,7 +36,7 @@ public class Regions {
 	 * @return <code>true</code> if <code>thisRegion</code> covers <code>
 	 *  otherRegion</code>; otherwise <code>false</code> is returned.
 	 */
-	public static boolean covers(TextRange thisRegion, TextRange otherRegion) {
+	public static boolean covers(IRegion thisRegion, IRegion otherRegion) {
 		if (thisRegion.getLength() == 0) {	// an insertion point can't cover anything
 			return false;
 		} else {
@@ -41,11 +44,11 @@ public class Regions {
 		}		
 	}
 	
-	public static int getExclusiveEnd(TextRange region) {
+	public static int getExclusiveEnd(IRegion region) {
 		return region.getOffset() + region.getLength();
 	}
 	
-	public static TextRange intersect(TextRange op1, TextRange op2) {
+	public static IRegion intersect(IRegion op1, IRegion op2) {
 		int offset1= op1.getOffset();
 		int length1= op1.getLength();
 		int end1= offset1 + length1 - 1;
@@ -58,10 +61,10 @@ public class Regions {
 			return null;
 		if (offset1 < offset2) {
 			int end= Math.max(end1, end2);
-			return new TextRange(offset2, end - offset2 + 1);
+			return new Region(offset2, end - offset2 + 1);
 		} else {
 			int end= Math.max(end1, end2);
-			return new TextRange(offset1, end - offset1 + 1); 
+			return new Region(offset1, end - offset1 + 1); 
 		}
 	}
 }

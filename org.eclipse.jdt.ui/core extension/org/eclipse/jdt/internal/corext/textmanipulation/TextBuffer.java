@@ -325,7 +325,7 @@ public class TextBuffer {
 		}	
 	}
 	
-	public void replace(TextRange range, String text) throws CoreException {
+	public void replace(IRegion range, String text) throws CoreException {
 		replace(range.getOffset(), range.getLength(), text);
 	}
 

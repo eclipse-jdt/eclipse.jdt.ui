@@ -20,9 +20,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -60,6 +66,10 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -82,12 +92,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.InstanceMethodMover
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -1491,8 +1497,8 @@ class InstanceMethodMover {
 			return TextBuffer.create(getDeclaringCU().getBuffer().getContents());	
 		}
 		
-		private TextRange createTextRange() {
-			return new TextRange(fMethodNode.getStartPosition(), fMethodNode.getLength());	
+		private IRegion createTextRange() {
+			return new Region(fMethodNode.getStartPosition(), fMethodNode.getLength());	
 		}
 		
 		private ASTRewrite createRewrite() {
@@ -1741,12 +1747,12 @@ class InstanceMethodMover {
 		}
 		
 		public String getContent() {
-			TextRange range= fMarker.getTextRange();
+			IRegion range= fMarker.getRegion();
 			return fBuffer.getContent(range.getOffset(), range.getLength());	
 		}
 		
 		public String getUnindentedContentIgnoreFirstLine() {
-			TextRange range= fMarker.getTextRange();
+			IRegion range= fMarker.getRegion();
 			return Strings.changeIndent(
 				fBuffer.getContent(range.getOffset(), range.getLength()),
 				fBuffer.getLineIndent(fBuffer.getLineOfOffset(range.getOffset()), CodeFormatterUtil.getTabWidth()),
