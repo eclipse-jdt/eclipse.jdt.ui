@@ -73,8 +73,6 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.PreferencesAdapter;
-import org.eclipse.ui.texteditor.quickdiff.QuickDiff;
-import org.eclipse.ui.texteditor.quickdiff.ReferenceProviderDescriptor;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -152,6 +150,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private JavaTextTools fJavaTextTools;
 	private JavaEditorHoverConfigurationBlock fJavaEditorHoverConfigurationBlock;
 	
+	/**
+	 * Quick diff preferences. 
+	 * @since 3.0
+	 */
+	private QuickdiffConfigurationBlock fQuickDiffBlock;
+	
 	private Map fColorButtons= new HashMap();
 	
 	private Map fCheckBoxes= new HashMap();
@@ -227,22 +231,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private ArrayList fMasterSlaveListeners= new ArrayList();
 
 	/**
-	 * List for the reference provider default. 
-	 * @since 3.0
-	 */
-	private org.eclipse.swt.widgets.List fQuickDiffProviderList;
-	/**
-	 * The reference provider default's list model.
-	 * @since 3.0 
-	 */
-	private String[][] fQuickDiffProviderListModel;
-	/**
-	 * Button controlling default setting of the selected reference provider.
-	 * @since 3.0
-	 */
-	private Button fSetDefaultButton;
-
-	/**
 	 * Creates a new preference page.
 	 */
 	public JavaEditorPreferencePage() {
@@ -253,7 +241,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fKeys= createOverlayStoreKeys(markerAnnotationPreferences);
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), fKeys);
 		fAnnotationColorListModel= createAnnotationTypeListModel(markerAnnotationPreferences);
-		fQuickDiffProviderListModel= createQuickDiffReferenceListModel();
 	}
 	
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys(MarkerAnnotationPreferences preferences) {
@@ -396,6 +383,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.QUICK_DIFF_CHARACTER_MODE));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ExtendedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.QUICK_DIFF_SHOW_CHANGE_RULER));
 		
 
 		while (e.hasNext()) {
@@ -1022,34 +1010,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Iterator e= sortedPreferences.iterator();
 		while (e.hasNext()) {
 			AnnotationPreference info= (AnnotationPreference) e.next();
-			listModelItems.add(new String[] { info.getPreferenceLabel(), info.getColorPreferenceKey(), info.getTextPreferenceKey(), info.getOverviewRulerPreferenceKey(), info.getHighlightPreferenceKey(), info.getVerticalRulerPreferenceKey(), info.getTextStylePreferenceKey()});
+			if (info.isIncludeOnPreferencePage())
+				listModelItems.add(new String[] { info.getPreferenceLabel(), info.getColorPreferenceKey(), info.getTextPreferenceKey(), info.getOverviewRulerPreferenceKey(), info.getHighlightPreferenceKey(), info.getVerticalRulerPreferenceKey(), info.getTextStylePreferenceKey()});
 		}
 		String[][] items= new String[listModelItems.size()][];
 		listModelItems.toArray(items);
 		return items;
 	}	
 
-	private String[][] createQuickDiffReferenceListModel() {
-		java.util.List descriptors= new QuickDiff().getReferenceProviderDescriptors();
-		ArrayList listModelItems= new ArrayList();
-		for (Iterator it= descriptors.iterator(); it.hasNext();) {
-			ReferenceProviderDescriptor descriptor= (ReferenceProviderDescriptor) it.next();
-			String label= descriptor.getLabel();
-			int i= label.indexOf('&');
-			while (i >= 0) {
-				if (i < label.length())
-					label= label.substring(0, i) + label.substring(i+1);
-				else
-					label.substring(0, i);
-				i= label.indexOf('&');
-			}
-			listModelItems.add(new String[] { descriptor.getId(), label });
-		}
-		String[][] items= new String[listModelItems.size()][];
-		listModelItems.toArray(items);
-		return items;
-	}
-	
 	private Control createTypingPage(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -1466,7 +1434,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.title")); //$NON-NLS-1$
-		item.setControl(createQuickdiffPage(folder));
+		fQuickDiffBlock= new QuickdiffConfigurationBlock(fOverlayStore, "JavaEditorPreferencePage", new QuickdiffConfigurationBlock.IMessages() { //$NON-NLS-1$
+			public String getString(String key) {
+				return PreferenceMessages.getString(key);
+			}
+		});
+		item.setControl(fQuickDiffBlock.createControl(folder));
 		
 		initialize();
 		
@@ -1522,20 +1495,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		});
 		
-		for (int i= 0; i < fQuickDiffProviderListModel.length; i++) {
-			String label= fQuickDiffProviderListModel[i][1];
-			if (fOverlayStore.getString(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[i][0]))
-				label += " " + PreferenceMessages.getString("JavaEditorPreferencePage.quickdiff.defaultlabel"); //$NON-NLS-1$ //$NON-NLS-2$
-			fQuickDiffProviderList.add(label);
-		}
-		fQuickDiffProviderList.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				if (fQuickDiffProviderList != null && !fQuickDiffProviderList.isDisposed()) {
-					fQuickDiffProviderList.select(0);
-					handleProviderListSelection();
-				}
-			}
-		});
+		fQuickDiffBlock.initialize();
 	}
 	
 	private void initializeFields() {
@@ -1587,6 +1547,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
             SelectionListener listener= (SelectionListener)iter.next();
             listener.widgetSelected(null);
         }
+        
+        fQuickDiffBlock.initializeFields();
 	}
 
 	private void initializeDefaultColors() {	
@@ -1629,6 +1591,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 */
 	public boolean performOk() {
 		fJavaEditorHoverConfigurationBlock.performOk();
+		fQuickDiffBlock.performOk();
 		fOverlayStore.setValue(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, computeStateMask(fBrowserLikeLinksKeyModifierText.getText()));
 		fOverlayStore.propagate();
 		JavaPlugin.getDefault().savePluginPreferences();
@@ -1648,9 +1611,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		handleAppearanceColorListSelection();
 		handleAnnotationListSelection();
 		handleContentAssistColorListSelection();
-		handleProviderListSelection();
 
-		fJavaEditorHoverConfigurationBlock.performDefaults();		
+		fJavaEditorHoverConfigurationBlock.performDefaults();
+		fQuickDiffBlock.performDefaults();
 
 		super.performDefaults();
 
@@ -1803,102 +1766,4 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		StatusUtil.applyToStatusLine(this, status);
 	}
 	
-	private Control createQuickdiffPage(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout(); layout.numColumns= 2;
-		composite.setLayout(layout);
-
-		String label= PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.showForNewEditors"); //$NON-NLS-1$
-		addCheckBox(composite, label, ExtendedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON, 0);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.characterMode"); //$NON-NLS-1$
-		addCheckBox(composite, label, ExtendedTextEditorPreferenceConstants.QUICK_DIFF_CHARACTER_MODE, 0);
-
-		Label l= new Label(composite, SWT.LEFT );
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
-		l.setLayoutData(gd);
-		
-		l= new Label(composite, SWT.LEFT);
-		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.referenceProviderTitle")); //$NON-NLS-1$
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		l.setLayoutData(gd);
-
-		Composite editorComposite= new Composite(composite, SWT.NONE);
-		layout= new GridLayout();
-		layout.numColumns= 2;
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		editorComposite.setLayout(layout);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
-		gd.horizontalSpan= 2;
-		editorComposite.setLayoutData(gd);		
-
-		fQuickDiffProviderList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
-		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		gd.heightHint= convertHeightInCharsToPixels(4);
-		fQuickDiffProviderList.setLayoutData(gd);
-						
-		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
-		layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		layout.numColumns= 2;
-		stylesComposite.setLayout(layout);
-		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-		fSetDefaultButton= new Button(stylesComposite, SWT.PUSH);
-		fSetDefaultButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.setDefault")); //$NON-NLS-1$
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-		gd.horizontalSpan= 2;
-		fSetDefaultButton.setLayoutData(gd);
-		
-		fQuickDiffProviderList.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			
-			public void widgetSelected(SelectionEvent e) {
-				handleProviderListSelection();
-			}
-
-		});
-		
-		fSetDefaultButton.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			
-			public void widgetSelected(SelectionEvent e) {
-				int i= fQuickDiffProviderList.getSelectionIndex();
-				for (int j= 0; j < fQuickDiffProviderListModel.length; j++) {
-					if (fOverlayStore.getString(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[j][0])) {
-						fQuickDiffProviderList.remove(j);
-						fQuickDiffProviderList.add(fQuickDiffProviderListModel[j][1], j);
-					}
-					if (i == j) {
-						fQuickDiffProviderList.remove(j);
-						fQuickDiffProviderList.add(fQuickDiffProviderListModel[j][1] + " " + PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.defaultlabel"), j);  //$NON-NLS-1$//$NON-NLS-2$
-					}
-				}
-				fSetDefaultButton.setEnabled(false);
-				fQuickDiffProviderList.setSelection(i);
-				fQuickDiffProviderList.redraw();
-				
-				fOverlayStore.setValue(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER, fQuickDiffProviderListModel[i][0]);
-			}
-		});
-		
-		return composite;
-	}
-	
-	private void handleProviderListSelection() {
-		int i= fQuickDiffProviderList.getSelectionIndex();
-		
-		boolean b= getPreferenceStore().getString(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[i][0]);
-		fSetDefaultButton.setEnabled(!b);
-	}
 }
