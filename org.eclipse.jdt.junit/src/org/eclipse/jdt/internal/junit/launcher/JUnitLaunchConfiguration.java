@@ -19,7 +19,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-
 import org.eclipse.core.boot.BootLoader;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;

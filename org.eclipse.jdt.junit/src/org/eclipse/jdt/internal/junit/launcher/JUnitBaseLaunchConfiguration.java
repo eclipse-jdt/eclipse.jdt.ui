@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -113,6 +114,8 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 
 	public IType[] getTestTypes(ILaunchConfiguration configuration, IJavaProject javaProject, IProgressMonitor pm) throws CoreException {
 		String testTypeName = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
+		testTypeName= VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(testTypeName);
+
 		if (pm == null)
 			pm= new NullProgressMonitor();
 		
