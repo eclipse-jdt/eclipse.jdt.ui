@@ -133,9 +133,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 	private RemoteTestRunnerClient fTestRunnerClient;
 
 	final Image fStackViewIcon= TestRunnerViewPart.createImage("cview16/stackframe.gif");//$NON-NLS-1$
-	final Image fTestRunOKIcon= TestRunnerViewPart.createImage("cview16/junitsuc.gif"); //$NON-NLS-1$
+	final Image fTestRunOKIcon= TestRunnerViewPart.createImage("cview16/junitsucc.gif"); //$NON-NLS-1$
 	final Image fTestRunFailIcon= TestRunnerViewPart.createImage("cview16/juniterr.gif"); //$NON-NLS-1$
-	final Image fTestRunOKDirtyIcon= TestRunnerViewPart.createImage("cview16/junitsucq.gif"); //$NON-NLS-1$
+	final Image fTestRunOKDirtyIcon= TestRunnerViewPart.createImage("cview16/junitsuccq.gif"); //$NON-NLS-1$
 	final Image fTestRunFailDirtyIcon= TestRunnerViewPart.createImage("cview16/juniterrq.gif"); //$NON-NLS-1$
 	
 	Image fOriginalViewImage= null;

@@ -10,7 +10,7 @@ package org.eclipse.jdt.internal.junit.runner;
  * 
  * @see RemoteTestRunner
  */
-public class MessageIds {
+public class MessageIds { 
 	/**
 	 * The header length of a message, all messages
 	 * have a fixed header length
