@@ -27,10 +27,14 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		public int length;		
 	}
 	
+
+	
+		
 	private static class ExtendedFlattener extends ASTFlattener {
 		
 		private ArrayList fExistingNodes;
 		private ASTRewrite fRewrite;
+
 		
 		public ExtendedFlattener(ASTRewrite rewrite) {
 			fExistingNodes= new ArrayList();
@@ -90,11 +94,17 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	}
 	
 	private ASTRewrite fRewrite;
-
-	public ASTRewriteFormatter(ASTRewrite rewrite) {
+	private String fLineDelimiter;
+	
+	public ASTRewriteFormatter(ASTRewrite rewrite, String lineDelimiter) {
 		super();
 		fRewrite= rewrite;
+
+		fLineDelimiter= lineDelimiter;
 	}
+	
+
+		
 	
 	/**
 	 * Returns the string accumulated in the visit formatted using the default formatter.
@@ -102,7 +112,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	 *
 	 * @return the serialized and formatted code.
 	 */	
-	public String getFormattedResult(ASTNode node, int initialIndentationLevel, String lineDelimiter, Collection resultingMarkers) {
+	public String getFormattedResult(ASTNode node, int initialIndentationLevel, Collection resultingMarkers) {
 		
 		ExtendedFlattener flattener= new ExtendedFlattener(fRewrite);
 		node.accept(flattener);
@@ -128,7 +138,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		
 		Hashtable map= JavaCore.getOptions();
 		map.put(JavaCore.FORMATTER_LINE_SPLIT, String.valueOf(9999));
-		String formatted= CodeFormatterUtil.format(node, flattener.getResult(), initialIndentationLevel, positions, lineDelimiter, map);
+		String formatted= CodeFormatterUtil.format(node, flattener.getResult(), initialIndentationLevel, positions, fLineDelimiter, map);
 		
 		for (int i= 0, k= 0; i < nExistingNodes; i++) {
 			int startPos= positions[k++];
@@ -147,9 +157,72 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			}
 		}
 		return formatted;
+	}
+	
+	public static interface Prefix {
+		String getPrefix(int indent, String lineDelim, ASTNode node);
 	}	
 	
+	public static class ConstPrefix implements Prefix {
+		private String fPrefix;
+		
+		public ConstPrefix(String prefix) {
+			fPrefix= prefix;
+		}
+		
+		public String getPrefix(int indent, String lineDelim, ASTNode node) {
+			return fPrefix;
+		}
+	}
 	
+	private static class FormattingPrefix implements Prefix {
+		private int fKind;
+		private String fString;
+		private int fStart;
+		private int fEnd;
+		
+		public FormattingPrefix(String string, char start, char end, int kind) {
+			fStart= string.indexOf(start);
+			fEnd= string.lastIndexOf(end);
+			fString= string;
+			fKind= kind;
+		}
+		
+		public String getPrefix(int indent, String lineDelim, ASTNode node) {
+			int[] pos= new int[] { fStart, fEnd }; 
+			String res= CodeFormatterUtil.format(fKind, fString, indent, pos, lineDelim, null);
+			return res.substring(pos[0] + 1, pos[1]);
+		}
+	}
 	
+	private static class BlockFormattingPrefix implements Prefix {
+		private int fKind;
+		private String fString;
+		private int fStart;
+		
+		public BlockFormattingPrefix(String string, char start, int kind) {
+			fStart= string.indexOf(start);
+			fString= string;
+			fKind= kind;
+		}
+		
+		public String getPrefix(int indent, String lineDelim, ASTNode node) {
+			String s= fString + ASTNodes.asString(node);			
+			
+			int[] pos= new int[] { fStart, fString.length() }; 
+			String res= CodeFormatterUtil.format(fKind, s, indent, pos, lineDelim, null);
+			return res.substring(pos[0] + 1, pos[1]);
+		}
+	}	
+	
+	public final static Prefix NONE= new ConstPrefix(""); //$NON-NLS-1$
+	public final static Prefix SPACE= new ConstPrefix(" "); //$NON-NLS-1$
+	public final static Prefix ASSERT_COMMENT= new ConstPrefix(" : "); //$NON-NLS-1$
+	
+	public final static Prefix VAR_INITIALIZER= new FormattingPrefix("A a={};", 'a', '{' , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$
+	public final static Prefix METHOD_BODY= new FormattingPrefix("void a() {}", ')', '{' , CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS); //$NON-NLS-1$
+	public final static Prefix FINALLY_BLOCK= new FormattingPrefix("try {} finally {}", '}' , '{', CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$
+
+	public final static Prefix ELSE_BLOCK= new BlockFormattingPrefix("if (true) {} else", '}' , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$
 	
 }
