@@ -68,7 +68,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 public class AddTestMarkersAction extends Action implements IActionDelegate {
 
+	public static final String MARKER_TYPE= "org.eclipse.jdt.ui.tests.testmarker";
+	
 	private ICompilationUnit fCompilationUnit;
+	
+	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
@@ -129,7 +133,7 @@ public class AddTestMarkersAction extends Action implements IActionDelegate {
 		map.put(IMarker.CHAR_START, new Integer(offset));
 		map.put(IMarker.CHAR_END, new Integer(offset + len));
 	
-		MarkerUtilities.createMarker(cu.getResource(), map, "org.eclipse.jdt.ui.tests.testmarker");
+		MarkerUtilities.createMarker(cu.getResource(), map, MARKER_TYPE);
 	}	
 
 }

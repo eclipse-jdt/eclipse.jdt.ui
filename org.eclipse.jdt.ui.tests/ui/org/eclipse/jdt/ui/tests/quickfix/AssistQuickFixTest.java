@@ -108,7 +108,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -160,7 +160,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -229,7 +229,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -286,7 +286,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -351,7 +351,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -403,7 +403,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -450,7 +450,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -488,7 +488,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -532,7 +532,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -573,7 +573,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -613,7 +613,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -654,7 +654,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -714,7 +714,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -773,7 +773,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -841,7 +841,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -877,7 +877,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -914,7 +914,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -952,7 +952,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1014,7 +1014,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1053,7 +1053,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1089,7 +1089,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1122,7 +1122,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1153,7 +1153,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1184,7 +1184,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1217,7 +1217,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1250,7 +1250,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1283,7 +1283,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1319,7 +1319,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1354,7 +1354,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1373,7 +1373,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1405,7 +1405,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1425,7 +1425,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1459,7 +1459,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1480,7 +1480,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1517,7 +1517,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1540,7 +1540,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1578,7 +1578,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1600,7 +1600,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1639,7 +1639,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
@@ -1664,7 +1664,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1700,7 +1700,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1719,7 +1719,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1754,7 +1754,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
 
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1776,7 +1776,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
 
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1810,7 +1810,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1829,7 +1829,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1860,7 +1860,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
     }
     
@@ -1882,13 +1882,13 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
         
         context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
     }
     
@@ -1910,13 +1910,13 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
         
         context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
     }
     
@@ -1938,13 +1938,13 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
         
         context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
     }
     
@@ -1969,13 +1969,13 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
         
         context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
     }
     
@@ -1997,13 +1997,13 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
         
         context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
     }
     
@@ -2026,13 +2026,13 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
         
         context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
     }
     
@@ -2051,7 +2051,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
     }
     
@@ -2070,13 +2070,13 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
         
         context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 0);
+        assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
     }
     
@@ -2096,7 +2096,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2116,7 +2116,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2149,7 +2149,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2169,7 +2169,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2201,7 +2201,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2220,7 +2220,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2251,7 +2251,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2270,7 +2270,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2301,7 +2301,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         List proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2320,7 +2320,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
         proposals= collectAssists(context, FILTER_EQ);
         
-        assertNumberOf("proposals", proposals.size(), 1);
+        assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
         
         proposal= (CUCorrectionProposal) proposals.get(0);

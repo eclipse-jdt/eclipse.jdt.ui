@@ -216,10 +216,13 @@ public class QuickFixTest extends TestCase {
 		
 		ProblemLocation problem= new ProblemLocation(offset, length, curr.getID(), curr.getArguments(), true);
 		AssistContext context= new AssistContext(cu, offset, length);
-		assertCorrectContext(context, problem);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  new ProblemLocation[] { problem }, proposals);
+		if (!proposals.isEmpty()) {
+			assertCorrectContext(context, problem);
+		}
+		
 		return proposals;
 	}
 

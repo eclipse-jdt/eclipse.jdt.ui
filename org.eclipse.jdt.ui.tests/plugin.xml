@@ -61,7 +61,7 @@
          name="jdt-test-problem"
          point="org.eclipse.core.resources.markers">
       <super
-            type="org.eclipse.core.resources.problemmarker">
+            type="org.eclipse.core.resources.textmarker">
       </super>
    </extension>
    <extension
@@ -93,6 +93,7 @@
             class="org.eclipse.jdt.ui.examples.MyQuickFixProcessor"
             id="org.eclipse.jdt.ui.examples.MyQuickFixProcessor">
          <enablement>
+           <with variable="compilationUnit">
             <adapt
                   type="org.eclipse.core.resources.IResource">
                <test
@@ -100,6 +101,22 @@
                      property="org.eclipse.jdt.internal.ui.matchesPattern">
                </test>
             </adapt>
+           </with>
+         </enablement>
+      </quickFixProcessor>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.ui.quickAssistProcessors">
+      <quickFixProcessor
+            name="%exampleQuickAssistProcessor.name"
+            class="org.eclipse.jdt.ui.examples.MyQuickAssistProcessor"
+            id="org.eclipse.jdt.ui.examples.MyQuickAssistProcessor">
+         <enablement>
+           <with variable="projectNatures">
+              <iterate operator="or">
+                 <equals value="org.eclipse.jdt.core.javanature"/>
+              </iterate>
+           </with>
          </enablement>
       </quickFixProcessor>
    </extension>

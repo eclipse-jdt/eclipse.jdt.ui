@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.examples.AddTestMarkersAction;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -96,7 +97,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 
 	private IMarker createMarker(ICompilationUnit cu, int line, int offset, int len) throws CoreException {
 		IFile file= (IFile) cu.getResource();
-		IMarker marker= file.createMarker("org.eclipse.jdt.ui.tests.testmarker");
+		IMarker marker= file.createMarker(AddTestMarkersAction.MARKER_TYPE);
 		marker.setAttribute(IMarker.LOCATION, cu.getElementName());
 		marker.setAttribute(IMarker.MESSAGE, "Test marker");
 		marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
