@@ -344,7 +344,7 @@ public class JavaElementLabels {
 			
 			// qualification
 			if (getFlag(flags, M_FULLY_QUALIFIED)) {
-				getTypeLabel(method.getDeclaringType(), T_FULLY_QUALIFIED, buf);
+				getTypeLabel(method.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
 				buf.append('.');
 			}
 				
@@ -396,7 +396,7 @@ public class JavaElementLabels {
 			// post qualification
 			if (getFlag(flags, M_POST_QUALIFIED)) {
 				buf.append(CONCAT_STRING);
-				getTypeLabel(method.getDeclaringType(), T_FULLY_QUALIFIED, buf);
+				getTypeLabel(method.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
 			}			
 			
 		} catch (JavaModelException e) {
@@ -416,7 +416,7 @@ public class JavaElementLabels {
 			
 			// qualification
 			if (getFlag(flags, F_FULLY_QUALIFIED)) {
-				getTypeLabel(field.getDeclaringType(), T_FULLY_QUALIFIED, buf);
+				getTypeLabel(field.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
 				buf.append('.');
 			}
 			buf.append(field.getElementName());
@@ -429,7 +429,7 @@ public class JavaElementLabels {
 			// post qualification
 			if (getFlag(flags, F_POST_QUALIFIED)) {
 				buf.append(CONCAT_STRING);
-				getTypeLabel(field.getDeclaringType(), T_FULLY_QUALIFIED, buf);
+				getTypeLabel(field.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
 			}
 			
 		} catch (JavaModelException e) {
@@ -443,7 +443,7 @@ public class JavaElementLabels {
 	public static void getInitializerLabel(IInitializer initializer, int flags, StringBuffer buf) {
 		// qualification
 		if (getFlag(flags, I_FULLY_QUALIFIED)) {
-			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED, buf);
+			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED | (flags ^ P_COMPRESSED), buf);
 			buf.append('.');
 		}
 		buf.append(JavaUIMessages.getString("JavaElementLabels.initializer")); //$NON-NLS-1$
@@ -451,7 +451,7 @@ public class JavaElementLabels {
 		// post qualification
 		if (getFlag(flags, I_POST_QUALIFIED)) {
 			buf.append(CONCAT_STRING);
-			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED, buf);
+			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
 		}
 	}
 
@@ -460,7 +460,12 @@ public class JavaElementLabels {
 	 */		
 	public static void getTypeLabel(IType type, int flags, StringBuffer buf) {
 		if (getFlag(flags, T_FULLY_QUALIFIED)) {
-			buf.append(JavaModelUtil.getFullyQualifiedName(type));
+			IPackageFragment pack= type.getPackageFragment();
+			if (!pack.isDefaultPackage()) {
+				getPackageFragmentLabel(pack, (flags & P_COMPRESSED), buf);
+				buf.append('.');
+				buf.append(JavaModelUtil.getTypeQualifiedName(type));
+			}
 		} else if (getFlag(flags, T_CONTAINER_QUALIFIED)) {
 			buf.append(JavaModelUtil.getTypeQualifiedName(type));
 		} else {
@@ -471,9 +476,9 @@ public class JavaElementLabels {
 			buf.append(CONCAT_STRING);
 			IType declaringType= type.getDeclaringType();
 			if (declaringType != null) {
-				buf.append(JavaModelUtil.getFullyQualifiedName(declaringType));
+				getTypeLabel(declaringType, T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
 			} else {
-				getPackageFragmentLabel(type.getPackageFragment(), 0, buf);
+				getPackageFragmentLabel(type.getPackageFragment(), (flags & P_COMPRESSED), buf);
 			}
 		}
 	}
