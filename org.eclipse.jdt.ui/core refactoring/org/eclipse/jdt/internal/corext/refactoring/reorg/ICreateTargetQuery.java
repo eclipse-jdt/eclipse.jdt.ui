@@ -13,9 +13,5 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 
 public interface ICreateTargetQuery {
-	interface ICreatedTarget {
-		Object getNewElement();
-		Object getParentOfNew();
-	}
-	ICreatedTarget getCreatedTarget(Object selection);
+	Object getCreatedTarget(Object selection);
 }

@@ -28,7 +28,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery.ICreatedTarget;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
@@ -248,9 +247,9 @@ public class ReorgMoveWizard extends RefactoringWizard {
 
 		private void doNewButtonPressed() {
 			ICreateTargetQuery createTargetQuery= getJavaMoveProcessor().getCreateTargetQuery();
-			ICreatedTarget newElement= createTargetQuery.getCreatedTarget(fDestination);
+			Object newElement= createTargetQuery.getCreatedTarget(fDestination);
 			if (newElement != null)
-				addElementToTree(newElement.getNewElement(), newElement.getParentOfNew());
+				addElementToTree(newElement);
 		}
 	}
 }

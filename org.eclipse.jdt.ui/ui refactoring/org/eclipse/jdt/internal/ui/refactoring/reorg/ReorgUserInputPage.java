@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -142,8 +143,9 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		return treeViewer;
 	}
 	
-	protected void addElementToTree(Object newElement, Object parentElement) {
-		fViewer.refresh(parentElement);
+	protected void addElementToTree(Object newElement) {
+		ITreeContentProvider contentProvider= (ITreeContentProvider) fViewer.getContentProvider();
+		fViewer.refresh(contentProvider.getParent(newElement));
 		fViewer.setSelection(new StructuredSelection(newElement), true);
 	}
 }
