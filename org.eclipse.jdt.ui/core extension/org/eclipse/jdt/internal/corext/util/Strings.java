@@ -289,6 +289,41 @@ public class Strings {
 			return line.substring(0, end);
 	}
 	
+	/**
+	 * Returns the length of the string representing the number of 
+	 * indents in the given string <code>line</code>. Returns 
+	 * <code>-1<code> if the line isn't prefixed with an indent of
+	 * the given number of indents. 
+	 */
+	public static int computeIndentLength(String line, int numberOfIndents, int tabWidth) {
+		Assert.isTrue(numberOfIndents >= 0);
+		Assert.isTrue(tabWidth >= 0);
+		int size= line.length();
+		int result= -1;
+		int indents= 0;
+		int blanks= 0;
+		for (int i= 0; i < size && indents < numberOfIndents; i++) {
+			char c= line.charAt(i);
+			if (c == '\t') {
+				indents++;
+				result= i;
+				blanks= 0;
+			} else if (isIndentChar(c)) {
+				blanks++;
+				if (blanks == tabWidth) {
+					result= i;
+					indents++;
+					blanks= 0;
+				}
+			} else {
+				break;
+			}
+		}
+		if (indents < numberOfIndents)
+			return -1;
+		return result + 1;
+	}
+	
 	public static String[] removeTrailingEmptyLines(String[] sourceLines) {
 		int lastNonEmpty= findLastNonEmptyLineIndex(sourceLines);
 		String[] result= new String[lastNonEmpty + 1];

@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
@@ -46,9 +45,14 @@ public final class ImportEdit extends TextEdit {
 		}
 	}
 	
+	
+	/**
+	 * Copy constrcutor
+	 */
 	private ImportEdit(ImportEdit other) {
+		super(other);
 		fImportsStructure= other.fImportsStructure;
-		fRange= other.fRange.copy();
+		fRange= new TextRange(other.fRange);
 	}
 	
 	/* non Java-doc
@@ -139,7 +143,7 @@ public final class ImportEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	protected TextEdit copy0(TextEditCopier copier) {
+	protected TextEdit copy0() {
 		return new ImportEdit(this);
 	}
 	

@@ -16,25 +16,37 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.*;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.MoveIndentedSourceEdit;
+import org.eclipse.jdt.internal.corext.dom.SourceModifier;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 	
@@ -1622,18 +1634,19 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		int end= buf.toString().indexOf("return;") + "return;".length();
 		
 		TextRange range= TextRange.createFromStartAndExclusiveEnd(start, end);
+		String content= buffer.getContent(range.getOffset(), range.getLength());
+		SourceModifier modifier= SourceModifier.createMoveModifier(2, "    ", 4);
+		MultiTextEdit edit= new MultiTextEdit(0, content.length());
+		modifier.addEdits(content, edit);
 		
-		MultiTextEdit innerRoot= new MultiTextEdit();
-		TextEdit[] edits= MoveIndentedSourceEdit.getChangeIndentEdits(buffer, range, 2, 4, "    ");
-		for (int i= 0; i < edits.length; i++) {
-			innerRoot.add(edits[i]);
-		}
+		TextBuffer innerBuffer= TextBuffer.create(content);
+		TextBufferEditor innerEditor= new TextBufferEditor(innerBuffer);
+		innerEditor.add(edit);
+		innerEditor.performEdits(null);
+		assertTrue("Can perform edits", innerEditor.canPerformEdits().isOK());
 		
-		editor.add(innerRoot);
-		
-		assertTrue("Can perform edits", editor.canPerformEdits().isOK());
-		editor.performEdits(null);
-		
+		buffer.replace(range, innerBuffer.getContent());
+				
 		String preview= buffer.getContent();
 		
 		buf= new StringBuffer();
@@ -1674,17 +1687,18 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		int end= buf.toString().indexOf("return;") + "return;".length();
 		
 		TextRange range= TextRange.createFromStartAndExclusiveEnd(start, end);
+		String content= buffer.getContent(range.getOffset(), range.getLength());
+		SourceModifier modifier= SourceModifier.createMoveModifier(2, "            ", 4);
+		MultiTextEdit edit= new MultiTextEdit(0, content.length());
+		modifier.addEdits(content, edit);
 		
-		MultiTextEdit innerRoot= new MultiTextEdit();
-		TextEdit[] edits= MoveIndentedSourceEdit.getChangeIndentEdits(buffer, range, 2, 4, "            ");
-		for (int i= 0; i < edits.length; i++) {
-			innerRoot.add(edits[i]);
-		}
+		TextBuffer innerBuffer= TextBuffer.create(content);
+		TextBufferEditor innerEditor= new TextBufferEditor(innerBuffer);
+		innerEditor.add(edit);
+		innerEditor.performEdits(null);
+		assertTrue("Can perform edits", innerEditor.canPerformEdits().isOK());
 		
-		editor.add(innerRoot);
-		
-		assertTrue("Can perform edits", editor.canPerformEdits().isOK());
-		editor.performEdits(null);
+		buffer.replace(range, innerBuffer.getContent());
 		
 		String preview= buffer.getContent();
 		
@@ -1704,7 +1718,4 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 
 		assertEqualString(preview, expected);
 	}
-	
-			
-	
 }

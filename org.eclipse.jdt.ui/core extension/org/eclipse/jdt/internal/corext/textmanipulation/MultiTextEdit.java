@@ -46,9 +46,10 @@ public final class MultiTextEdit extends TextEdit {
 	}
 	
 	/**
-	 * Creates a copy of this given text edit.
+	 * Copy constructor.
 	 */
 	private MultiTextEdit(MultiTextEdit other) {
+		super(other);
 		if (other.fRange != null) {
 			fRange= new TextRange(other.fRange);
 		}
@@ -75,7 +76,7 @@ public final class MultiTextEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0(TextEditCopier copier) {
+	protected TextEdit copy0() {
 		Assert.isTrue(MultiTextEdit.class == getClass(), "Subclasses must reimplement copy0"); //$NON-NLS-1$
 		return new MultiTextEdit(this);
 	}

@@ -12,25 +12,27 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
-public class CopyTargetEdit extends AbstractTransferEdit {
+public final class CopyTargetEdit extends AbstractTransferEdit {
 
 	private CopySourceEdit fSource;
 
 	public CopyTargetEdit(int offset) {
-		this(new TextRange(offset, 0));
+		super(offset, 0);
 	}
 
 	public CopyTargetEdit(int offset, CopySourceEdit source) {
-		this(new TextRange(offset, 0));
+		this(offset);
 		setSourceEdit(source);
 	}
 
-	private CopyTargetEdit(TextRange range) {
-		super(range);
+	private CopyTargetEdit(CopyTargetEdit other) {
+		super(other);
 	}
 
+	public CopySourceEdit getSourceEdit() {
+		return fSource;
+	}
+		
 	public void setSourceEdit(CopySourceEdit edit) {
 		if (fSource != edit) {
 			fSource= edit;
@@ -41,9 +43,8 @@ public class CopyTargetEdit extends AbstractTransferEdit {
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0(TextEditCopier copier) {
-		Assert.isTrue(CopyTargetEdit.class == getClass(), "Subclasses must reimplement copy0"); //$NON-NLS-1$
-		return new CopyTargetEdit(getTextRange().copy());
+	protected TextEdit copy0() {
+		return new CopyTargetEdit(this);
 	}
 
 	/* non Java-doc
@@ -77,9 +78,5 @@ public class CopyTargetEdit extends AbstractTransferEdit {
 	 */
 	protected String getSourceContent() {
 		return fSource.getContent();
-	}
-		
-	/* package */ CopySourceEdit getSourceEdit() {
-		return fSource;
-	}	
+	}		
 }

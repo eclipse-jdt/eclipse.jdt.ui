@@ -34,18 +34,17 @@ public class SimpleTextEdit extends TextEdit {
 	}
 	
 	public SimpleTextEdit(int offset, int length, String text) {
-		this(new TextRange(offset, length), text);
-	}
-	
-	protected SimpleTextEdit() {
-		this(TextRange.UNDEFINED, ""); //$NON-NLS-1$
-	}
-	
-	protected SimpleTextEdit(TextRange range, String text) {
-		Assert.isNotNull(range);
-		Assert.isNotNull(text);
-		fRange= range;
+		fRange= new TextRange(offset, length);
 		fText= text;
+	}
+	
+	/**
+	 * Copy constructor
+	 */
+	protected SimpleTextEdit(SimpleTextEdit other) {
+		super(other);
+		fText= other.fText;
+		fRange= new TextRange(other.fRange);
 	}
 	
 	/**
@@ -102,9 +101,9 @@ public class SimpleTextEdit extends TextEdit {
 		return super.toString() + " <<" + fText; //$NON-NLS-1$
 	}
 	
-	protected TextEdit copy0(TextEditCopier copier) {
+	protected TextEdit copy0() {
 		Assert.isTrue(SimpleTextEdit.class == getClass(), "Subclasses must reimplement copy0"); //$NON-NLS-1$
-		return new SimpleTextEdit(getTextRange().copy(), getText());
+		return new SimpleTextEdit(this);
 	}		
 	
 	protected void updateTextRange(int delta, List executedEdits) {

@@ -85,7 +85,8 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 		fDocumentProvider.connect(input);
 		IDocument document= fDocumentProvider.getDocument(input);
 		IAnnotationModel annotationModel= fDocumentProvider.getAnnotationModel(input);
-		annotationModel.connect(document);
+		if (annotationModel != null)
+			annotationModel.connect(document);
 		value= new Value(new TextBuffer(document), input, document, annotationModel);
 		fFileValueMap.put(input, value);
 		fBufferValueMap.put(value.buffer, value);
@@ -100,8 +101,9 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 						
 		value.references--;
 		if (value.references == 0) {
-			buffer.release();	
-			value.annotationModel.disconnect(value.document);
+			buffer.release();
+			if (value.annotationModel != null)	
+				value.annotationModel.disconnect(value.document);
 			fDocumentProvider.disconnect(value.input);
 			fFileValueMap.remove(value.input);
 			fBufferValueMap.remove(buffer);

@@ -10,9 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.text.DocumentEvent;
 
@@ -22,13 +26,14 @@ public class MoveSourceEdit extends AbstractTransferEdit {
 
 	/* package */ int fCounter;
 	private MoveTargetEdit fTarget;
+	private ISourceModifier fModifier;
 	
 	private String fContent;
 	private TextRange fContentRange;
 	private List fContentChildren;
 	
 	public MoveSourceEdit(int offset, int length) {
-		super(new TextRange(offset, length));
+		super(offset, length);
 	}
 
 	public MoveSourceEdit(int offset, int length, MoveTargetEdit target) {
@@ -36,21 +41,37 @@ public class MoveSourceEdit extends AbstractTransferEdit {
 		setTargetEdit(target);
 	}
 
-	private MoveSourceEdit(TextRange range) {
-		super(range);
+	/**
+	 * Copy constructor
+	 */
+	protected MoveSourceEdit(MoveSourceEdit other) {
+		super(other);
+		if (other.fModifier != null)
+			fModifier= other.fModifier.copy();
 	}
-	
+
+	/**
+	 * Sets the target edit.
+	 * 
+	 * @param edit the target edit. The target edit must
+	 *  not be <code>null</code>
+	 */	
 	public void setTargetEdit(MoveTargetEdit edit) {
-		if (fTarget != edit) {
-			fTarget= edit;
-			fTarget.setSourceEdit(this);
-		}
+		fTarget= edit;
+		fTarget.setSourceEdit(this);
 	}
 	
-	private String getContent(TextBuffer buffer) {
-		TextRange range= getTextRange();
-		return buffer.getContent(range.getOffset(), range.getLength());
-	}	
+	public MoveTargetEdit getTargetEdit() {
+		return fTarget;
+	}
+	
+	public void setSourceModifier(ISourceModifier modifier) {
+		fModifier= modifier;
+	}
+	
+	public ISourceModifier getSourceModifier() {
+		return fModifier;
+	}
 	
 	protected void connect(TextBuffer buffer) throws TextEditException {
 		if (fTarget == null)
@@ -110,8 +131,8 @@ public class MoveSourceEdit extends AbstractTransferEdit {
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0(TextEditCopier copier) {
-		return new MoveSourceEdit(getTextRange().copy());
+	protected TextEdit copy0() {
+		return new MoveSourceEdit(this);
 	}
 
 	/* non Java-doc
@@ -183,7 +204,64 @@ public class MoveSourceEdit extends AbstractTransferEdit {
 		}
 	}
 	
-	/* package */ MoveTargetEdit getTargetEdit() {
-		return fTarget;
+	//---- content management ------------------------------------------
+	
+	private String getContent(TextBuffer buffer) {
+		TextRange range= getTextRange();
+		String result= buffer.getContent(range.getOffset(), range.getLength());
+		if (fModifier != null) {
+			TextBuffer newBuffer= TextBuffer.create(result);
+			Map editMap= new HashMap();
+			TextEdit newEdit= createEdit(editMap);
+			fModifier.addEdits(result, newEdit);
+			TextBufferEditor editor= new TextBufferEditor(newBuffer);
+			try {
+				editor.add(newEdit);
+				editor.performEdits(new NullProgressMonitor());
+			} catch (CoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			restorePositions(editMap, range.getOffset());
+			result= newBuffer.getContent();
+		}
+		return result;
 	}
+	
+	private TextEdit createEdit(Map editMap) {
+		TextRange range= getTextRange();
+		int delta= range.getOffset();
+		MultiTextEdit result= new MultiTextEdit(0, range.getLength());
+		// don't but the root edit into the edit map. The sourc edit
+		// will be updated by the perform method.
+		createEdit(this, result, editMap, delta);
+		return result;
+	}
+	
+	private static void createEdit(TextEdit source, TextEdit target, Map editMap, int delta) {
+		TextEdit[] children= source.getChildren();
+		for (int i= 0; i < children.length; i++) {
+			TextEdit child= children[i];
+			TextRange range= child.getTextRange();
+			RangeMarker marker= new RangeMarker(range.getOffset() - delta, range.getLength());
+			target.add(marker);
+			editMap.put(marker, child);
+			createEdit(child, marker, editMap, delta);
+		}
+	}
+	
+	private static void restorePositions(Map editMap, int delta) {
+		for (Iterator iter= editMap.keySet().iterator(); iter.hasNext();) {
+			TextEdit marker= (TextEdit)iter.next();
+			TextEdit edit= (TextEdit)editMap.get(marker);
+			TextRange markerRange= marker.getTextRange();
+			TextRange editRange= edit.getTextRange();
+			if (markerRange.isDeleted()) {
+				editRange.markAsDeleted();
+			} else {
+				edit.adjustOffset(markerRange.getOffset() - editRange.getOffset() + delta);
+				edit.adjustLength(markerRange.getLength() - editRange.getLength());
+			}
+		}
+	}		
 }

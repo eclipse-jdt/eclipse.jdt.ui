@@ -39,6 +39,14 @@ public final class RangeMarker extends TextEdit {
 	public RangeMarker(TextRange range) {
 		fTextRange= range;
 	}
+	
+	/**
+	 * Copy constructor
+	 */
+	private RangeMarker(RangeMarker other) {
+		super(other);
+		fTextRange= new TextRange(other.fTextRange);
+	}
 
 	/* non Java-doc
 	 * @see TextEdit#getTextRange
@@ -56,7 +64,7 @@ public final class RangeMarker extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0(TextEditCopier copier) {
-		return new RangeMarker(fTextRange.copy());
+	protected TextEdit copy0() {
+		return new RangeMarker(this);
 	}	
 }

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -28,7 +29,12 @@ public class TextEditCopier {
 	}
 
 	public TextEdit copy() {
-		return fEdit.copy(this);
+		TextEdit result= fEdit.copy(this);
+		for (Iterator iter= fCopies.keySet().iterator(); iter.hasNext();) {
+			TextEdit edit= (TextEdit)iter.next();
+			edit.postProcessCopy(this);
+		}
+		return result;
 	}
 	
 	public TextEdit getCopy(TextEdit original) {
@@ -39,5 +45,5 @@ public class TextEditCopier {
 	
 	/* package */ void addCopy(TextEdit original, TextEdit copy) {
 		fCopies.put(original, copy);
-	}
+	}	
 }

@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.text.DocumentEvent;
 
@@ -22,9 +23,10 @@ public class CopySourceEdit extends AbstractTransferEdit {
 	private String fContent;
 	private CopyTargetEdit fTarget;
 	/* package */ int fCounter;
+	private ISourceModifier fModifier;
 
 	public CopySourceEdit(int offset, int length) {
-		this(new TextRange(offset, length));
+		super(offset, length);
 	}
 
 	public CopySourceEdit(int offset, int length, CopyTargetEdit target) {
@@ -32,10 +34,16 @@ public class CopySourceEdit extends AbstractTransferEdit {
 		setTargetEdit(target);
 	}
 
-	private CopySourceEdit(TextRange range) {
-		super(range);
+	protected CopySourceEdit(CopySourceEdit other) {
+		super(other);
+		if (other.fModifier != null)
+			fModifier= other.fModifier.copy();
 	}
 
+	public CopyTargetEdit getTargetEdit() {
+		return fTarget;
+	}
+	
 	public void setTargetEdit(CopyTargetEdit edit) {
 		if (fTarget != edit) {
 			fTarget= edit;
@@ -43,11 +51,19 @@ public class CopySourceEdit extends AbstractTransferEdit {
 		}
 	}
 	
+	public void setSourceModifier(ISourceModifier modifier) {
+		fModifier= modifier;
+	}
+	
+	public ISourceModifier getSourceModifier() {
+		return fModifier;
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0(TextEditCopier copier) {
-		return new CopySourceEdit(getTextRange().copy());
+	protected TextEdit copy0() {
+		return new CopySourceEdit(this);
 	}
 
 	/* non Java-doc
@@ -67,7 +83,7 @@ public class CopySourceEdit extends AbstractTransferEdit {
 	}
 	
 	public void perform(TextBuffer buffer) throws CoreException {
-		fContent= computeContent(buffer);
+		fContent= getContent(buffer);
 		TextRange targetRange= fTarget.getTextRange();
 		if (++fCounter == 2 && !targetRange.isDeleted()) {
 			try {
@@ -78,9 +94,24 @@ public class CopySourceEdit extends AbstractTransferEdit {
 		}
 	}
 
-	protected String computeContent(TextBuffer buffer) {
+	private String getContent(TextBuffer buffer) {
 		TextRange range= getTextRange();
-		return buffer.getContent(range.getOffset(), range.getLength());
+		String result= buffer.getContent(range.getOffset(), range.getLength());
+		if (fModifier != null) {
+			TextBuffer newBuffer= TextBuffer.create(result);
+			TextEdit newEdit= new MultiTextEdit(0, range.getLength());
+			fModifier.addEdits(result, newEdit);
+			TextBufferEditor editor= new TextBufferEditor(newBuffer);
+			try {
+				editor.add(newEdit);
+				editor.performEdits(new NullProgressMonitor());
+			} catch (CoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			result= newBuffer.getContent();
+		}
+		return result;
 	}
 	
 	protected void updateTextRange(int delta, List executedEdits) {
@@ -106,9 +137,5 @@ public class CopySourceEdit extends AbstractTransferEdit {
 	
 	/* package */ void checkRange(DocumentEvent event) {
 		fTarget.checkRange(event);
-	}
-	
-	/* package */ CopyTargetEdit getTargetEdit() {
-		return fTarget;
-	}		
+	}	
 }

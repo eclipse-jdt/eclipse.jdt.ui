@@ -11,6 +11,10 @@
 
 package org.eclipse.jdt.ui.tests.core;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -26,6 +30,8 @@ import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEditException;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
@@ -191,6 +197,73 @@ public class TextBufferTest extends TestCase {
 			exception= true;
 		}
 		assertTrue(exception);
+	}
+	
+	public void testCopy1() throws Exception {
+		MultiTextEdit root= new MultiTextEdit();
+		SimpleTextEdit e1= SimpleTextEdit.createInsert(2, "yy");
+		SimpleTextEdit e2= SimpleTextEdit.createReplace(2, 3, "3456");
+		root.add(e1);
+		root.add(e2);
+		List org= flatten(root);
+		TextEditCopier copier= new TextEditCopier(root);
+		List copy= flatten(copier.copy());
+		compare(copier, org, copy);
+	}
+	
+	public void testCopy2() throws Exception {
+		MultiTextEdit root= new MultiTextEdit();
+		CopySourceEdit s1= new CopySourceEdit(5, 2);
+		CopyTargetEdit t1= new CopyTargetEdit(8, s1);
+		CopySourceEdit s2= new CopySourceEdit(5, 2);
+		CopyTargetEdit t2= new CopyTargetEdit(2, s2);
+		s1.add(s2);
+		root.add(s1);
+		root.add(t1);
+		root.add(t2);
+		List org= flatten(root);
+		TextEditCopier copier= new TextEditCopier(root);
+		List copy= flatten(copier.copy());
+		compare(copier, org, copy);
+	}
+		
+	private List flatten(TextEdit edit) {
+		List result= new ArrayList();
+		flatten(result, edit);
+		return result;
+	}
+	
+	private static void flatten(List result, TextEdit edit) {
+		result.add(edit);
+		TextEdit[] children= edit.getChildren();
+		for (int i= 0; i < children.length; i++) {
+			flatten(result, children[i]);
+		}
+	}
+	
+	private static void compare(TextEditCopier copier, List org, List copy) {
+		assertTrue("Same length", org.size() == copy.size());
+		for (Iterator iter= copy.iterator(); iter.hasNext();) {
+			TextEdit edit= (TextEdit)iter.next();
+			assertTrue("Original is part of copy list", !org.contains(edit));
+			if (edit instanceof MoveSourceEdit) {
+				MoveSourceEdit source= (MoveSourceEdit)edit;
+				assertTrue("Target edit isn't a copy", copy.contains(source.getTargetEdit()));
+				assertTrue("Traget edit is a original", !org.contains(source.getTargetEdit()));
+			} else if (edit instanceof MoveTargetEdit) {
+				MoveTargetEdit target= (MoveTargetEdit)edit;
+				assertTrue("Source edit isn't a copy", copy.contains(target.getSourceEdit()));
+				assertTrue("Source edit is a original", !org.contains(target.getSourceEdit()));
+			} else if (edit instanceof CopySourceEdit) {
+				CopySourceEdit source= (CopySourceEdit)edit;
+				assertTrue("Target edit isn't a copy", copy.contains(source.getTargetEdit()));
+				assertTrue("Traget edit is a original", !org.contains(source.getTargetEdit()));
+			} else if (edit instanceof CopyTargetEdit) {
+				CopyTargetEdit target= (CopyTargetEdit)edit;
+				assertTrue("Source edit isn't a copy", copy.contains(target.getSourceEdit()));
+				assertTrue("Source edit is a original", !org.contains(target.getSourceEdit()));
+			}
+		}
 	}
 		
 	public void testInsert1() throws Exception {

@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public final class DeleteSourceReferenceEdit extends SimpleTextEdit {
@@ -58,7 +57,7 @@ public final class DeleteSourceReferenceEdit extends SimpleTextEdit {
 	/*
 	 * @see TextEdit#copy0()
 	 */
-	protected TextEdit copy0(TextEditCopier copier) {
+	protected TextEdit copy0() {
 		TextRange range= getTextRange();
 		return new DeleteSourceReferenceEdit(fSourceReference, fCu, range.getOffset(), range.getLength());
 	}

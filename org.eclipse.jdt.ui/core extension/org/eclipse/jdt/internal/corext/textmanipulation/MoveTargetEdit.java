@@ -23,7 +23,7 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 	private MoveSourceEdit fSource;
 
 	public MoveTargetEdit(int offset) {
-		super(new TextRange(offset, 0));
+		super(offset, 0);
 	}
 
 	public MoveTargetEdit(int offset, MoveSourceEdit source) {
@@ -31,10 +31,17 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		setSourceEdit(source);
 	}
 
-	private MoveTargetEdit(TextRange range) {
-		super(range);
+	/**
+	 * Copy constructor
+	 */
+	private MoveTargetEdit(MoveTargetEdit other) {
+		super(other);
 	}
 
+	public MoveSourceEdit getSourceEdit() {
+		return fSource;
+	}
+					
 	public void setSourceEdit(MoveSourceEdit edit) {
 		if (fSource != edit) {
 			fSource= edit;
@@ -71,8 +78,8 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 	/* non Java-doc
 	 * @see TextEdit#copy0
 	 */	
-	public TextEdit copy0(TextEditCopier copier) {
-		return new MoveTargetEdit(getTextRange().copy());
+	public TextEdit copy0() {
+		return new MoveTargetEdit(this);
 	}
 	
 	/* non Java-doc
@@ -109,9 +116,5 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		} else {
 			super.checkRange(event);
 		}
-	}
-	
-	/* package */ MoveSourceEdit getSourceEdit() {
-		return fSource;
-	}				
+	}	
 }

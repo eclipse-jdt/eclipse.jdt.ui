@@ -66,18 +66,36 @@ public abstract class TextEdit {
 	/* package */ static final int ACTIVE= 1;
 	/* package */ static final int SAME_AS_PARENT= 2;
 
+	/**
+	 * Create a new text edit. Parent is initialized to <code>
+	 * null<code> and the edit doesn't have any children.
+	 */
 	protected TextEdit() {
 		fActiveState= SAME_AS_PARENT;
 	}
+	
+	/**
+	 * Copy constrcutor
+	 */
+	protected TextEdit(TextEdit source) {
+		fActiveState= source.fActiveState;
+	}
 
+	/**
+	 * Returns the edit's parent. The method returns
+	 * <code>null</code> if this edit hasn't been
+	 * add to another edit.
+	 * 
+	 * @return the edit's parent
+	 */
 	public TextEdit getParent() {
 		return fParent;
 	}
 	
-	public int size() {
-		if (fChildren == null)
-			return 0;
-		return fChildren.size();
+	/* package */ void setParent(TextEdit parent) {
+		if (parent != null)
+			Assert.isTrue(fParent == null);
+		fParent= parent;
 	}
 	
 	/**
@@ -132,12 +150,6 @@ public abstract class TextEdit {
 		return result;
 	}
 	
-	public TextEdit[] getChildren() {
-		if (fChildren == null)
-			return EMPTY_ARRAY;
-		return (TextEdit[])fChildren.toArray(new TextEdit[fChildren.size()]);
-	}
-	
 	public boolean isActive() {
 		switch (fActiveState) {
 			case INACTIVE:
@@ -186,6 +198,12 @@ public abstract class TextEdit {
 		return fChildren != null && ! fChildren.isEmpty();
 	}
 
+	public TextEdit[] getChildren() {
+		if (fChildren == null)
+			return EMPTY_ARRAY;
+		return (TextEdit[])fChildren.toArray(new TextEdit[fChildren.size()]);
+	}
+	
 	/**
 	 * Returns the <code>TextRange</code> that this text edit is going to
 	 * manipulate. If this method is called before the <code>TextEdit</code>
@@ -237,31 +255,34 @@ public abstract class TextEdit {
 	}
 		
 	/**
-     * Creates and returns a copy of this object. The copy method should
-     * be implemented in a way so that the copy can be added to a different 
-     * <code>TextBufferEditor</code> without causing any harm to the object 
-     * from which the copy has been created.
-     * 
-     * @return a copy of this object.
-     */
-	/* package */ final TextEdit copy(TextEditCopier copier) {
-		TextEdit result= copy0(copier);
+	 * Creates and returns a copy of this object. The copy method should
+	 * be implemented in a way so that the copy can be added to a different 
+	 * <code>TextBufferEditor</code> without causing any harm to the object 
+	 * from which the copy has been created.
+	 * 
+	 * @return a copy of this object.
+	 */
+	protected abstract TextEdit copy0();
+	
+	protected void postProcessCopy(TextEditCopier copier) {
+	}
+	
+	/* package */ TextEdit copy(TextEditCopier copier) {
+		TextEdit result= copy0();
 		copier.addCopy(this, result);
-		result.fActiveState= fActiveState;
 		if (fChildren != null) {
-			List children= new ArrayList(fChildren.size());
+			List newChildren= new ArrayList(fChildren.size());
 			for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
 				TextEdit element= (TextEdit)iter.next();
 				TextEdit copy= element.copy(copier);
-				copy.fActiveState= element.fActiveState;
 				copy.setParent(result);
-				children.add(copy);
+				newChildren.add(copy);
 			}
-			result.internalSetChildren(children);
+			result.internalSetChildren(newChildren);
 		}
-		executePostProcessCopy(copier);
 		return result;
 	}
+	
 	
 	/**
 	 * Returns the element modified by this text edit. The method
@@ -318,18 +339,6 @@ public abstract class TextEdit {
 		}
 	}	
 	
-	/**
-	 * @deprecated Use copy0(Copier instead)
-	 */
-	protected final TextEdit copy0() {
-		return null;
-	}
-	
-	protected abstract TextEdit copy0(TextEditCopier copier);
-	
-	protected void postProcessCopy(TextEditCopier copier) {
-	}
-	
 	protected TextRange getChildrenTextRange() {
 		int size= fChildren != null ? fChildren.size() : 0;
 		if (size == 0)
@@ -379,12 +388,6 @@ public abstract class TextEdit {
 	/* package */ void aboutToBeAdded(TextEdit parent) {
 	}
 	
-	/* package */ void setParent(TextEdit parent) {
-		if (parent != null)
-			Assert.isTrue(fParent == null);
-		fParent= parent;
-	}
-	
 	/* package */ List internalGetChildren() {
 		return fChildren;
 	}
@@ -399,7 +402,7 @@ public abstract class TextEdit {
 		if (eRange.isUndefined() || eRange.isDeleted())
 			throw new TextEditException(this, edit, "Can't add undefined or deleted edit");
 		TextRange range= getTextRange();
-		if (!covers(range, eRange))
+		if (!Regions.covers(range, eRange))
 			throw new TextEditException(this, edit, TextManipulationMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
 		if (fChildren == null) {
 			fChildren= new ArrayList(2);
@@ -502,14 +505,6 @@ public abstract class TextEdit {
 			edit.childExecuted(delta);
 			edit= edit.getParent();
 		}
-	}
-	
-	private static boolean covers(TextRange thisRange, TextRange otherRange) {
-		if (thisRange.getLength() == 0) {	// an insertion point can't cover anything
-			return false;
-		} else {
-			return thisRange.getOffset() <= otherRange.getOffset() && otherRange.getExclusiveEnd() <= thisRange.getExclusiveEnd();
-		}		
 	}	
 }
 

@@ -3,7 +3,7 @@ class A {
 	private final class Inner extends A {
 		public void bar() {
 				// TODO the return is misaligned
-		return;
+return;
 		}
 	}
 

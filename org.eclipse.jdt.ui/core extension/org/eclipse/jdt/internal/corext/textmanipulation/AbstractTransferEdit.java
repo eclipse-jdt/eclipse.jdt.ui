@@ -24,9 +24,17 @@ import org.eclipse.jdt.internal.corext.Assert;
 	/* package */ final static int INSERT= 1;
 	/* package */ final static int DELETE= 2;
 
-	protected AbstractTransferEdit(TextRange range) {
-		Assert.isNotNull(range);
-		fRange= range;
+	protected AbstractTransferEdit(int offset, int length) {
+		fRange= new TextRange(offset, length);
+	}
+	
+	/**
+	 * Copy constructor
+	 */
+	protected AbstractTransferEdit(AbstractTransferEdit other) {
+		super(other);
+		fRange= new TextRange(other.fRange);
+		
 	}
 
 	/* non Java-doc
@@ -76,5 +84,5 @@ import org.eclipse.jdt.internal.corext.Assert;
 				move(element.internalGetChildren(), delta);
 			}
 		}
-	}		
+	}	
 }

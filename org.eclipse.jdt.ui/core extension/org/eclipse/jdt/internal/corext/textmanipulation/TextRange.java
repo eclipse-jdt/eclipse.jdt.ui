@@ -47,6 +47,9 @@ public final class TextRange {
 		Assert.isTrue(fLength >= 0);
 	}
 	
+	/**
+	 * Copy constrcutor
+	 */
 	public TextRange(TextRange other) {
 		fOffset= other.fOffset;
 		fLength= other.fLength;
