@@ -19,7 +19,7 @@ class SourceReferenceTestUtil {
 		ISelectionProvider provider= new FakeSelectionProvider(elems);
 
 		DeleteSourceReferencesAction deleteAction= new DeleteSourceReferencesAction(provider){
-			protected boolean isOkToDeleteCus(ICompilationUnit[] cusToDelete) {
+			protected boolean confirmCusDelete(ICompilationUnit[] cusToDelete) {
 				return false;
 			}
 			protected boolean confirmDelete() {
