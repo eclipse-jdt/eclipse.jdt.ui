@@ -69,8 +69,8 @@ public class ProfileStore {
 
 			if (qName.equals(XML_NODE_SETTING)) {
 
-				final String key= attributes.getValue(XML_ATTRIBUTE_NAME);
-				final String value= attributes.getValue(XML_ATTRIBUTE_NAME);
+				final String key= attributes.getValue(XML_ATTRIBUTE_ID);
+				final String value= attributes.getValue(XML_ATTRIBUTE_VALUE);
 				fSettings.put(key, value);
 
 			} else if (qName.equals(XML_NODE_PROFILE)) {
