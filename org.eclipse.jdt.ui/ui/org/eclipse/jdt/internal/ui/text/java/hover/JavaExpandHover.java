@@ -55,12 +55,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
  * @since 3.0
  */
 public class JavaExpandHover extends AnnotationExpandHover {
+	
 	/** Id of the no breakpoint fake annotation */
 	public static final String NO_BREAKPOINT_ANNOTATION= "org.eclipse.jdt.internal.ui.NoBreakpointAnnotation"; //$NON-NLS-1$
 
 	private static class NoBreakpointAnnotation extends Annotation implements IAnnotationPresentation {
 		
-		NoBreakpointAnnotation() {
+		public NoBreakpointAnnotation() {
 			super(NO_BREAKPOINT_ANNOTATION, false, "Add a breakpoint");
 		}
 		
@@ -76,28 +77,18 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	
 	private AnnotationPreferenceLookup fLookup= new AnnotationPreferenceLookup();
 	
-	/**
-	 * @param ruler
-	 * @param listener
-	 * @param doubleClickListener
-	 * @param access
-	 */
 	public JavaExpandHover(IVerticalRulerInfo ruler, IAnnotationListener listener, IDoubleClickListener doubleClickListener, IAnnotationAccess access) {
 		super(ruler, listener, doubleClickListener, access);
 	}
 
-	/**
-	 * @param ruler
-	 * @param access
-	 */
 	public JavaExpandHover(IVerticalRulerInfo ruler, IAnnotationAccess access) {
 		super(ruler, access);
 	}
 	
 	/*
-	 * @see org.eclipse.ui.internal.texteditor.AnnotationExpandHover#getHoverInfo2(org.eclipse.jface.text.source.ISourceViewer, int)
+	 * @see org.eclipse.ui.internal.texteditor.AnnotationExpandHover#getHoverInfoForLine(org.eclipse.jface.text.source.ISourceViewer, int)
 	 */
-	public Object getHoverInfo2(final ISourceViewer viewer, final int line) {
+	protected Object getHoverInfoForLine(final ISourceViewer viewer, final int line) {
 		IAnnotationModel model= viewer.getAnnotationModel();
 		IDocument document= viewer.getDocument();
 		
@@ -175,7 +166,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		input.redoAction= new AnnotationExpansionControl.ICallback() {
 
 			public void run(IInformationControlExtension2 control) {
-				control.setInput(getHoverInfo2(viewer, line));
+				control.setInput(getHoverInfoForLine(viewer, line));
 			}
 			
 		};
