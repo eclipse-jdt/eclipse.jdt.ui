@@ -49,6 +49,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		fLabelProvider= new HierarchyLabelProvider(lifeCycle);
 	
 		setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true));
+		setUseHashlookup(true);
 			
 		setContentProvider(contentProvider);
 		setSorter(new HierarchyViewerSorter(lifeCycle));
