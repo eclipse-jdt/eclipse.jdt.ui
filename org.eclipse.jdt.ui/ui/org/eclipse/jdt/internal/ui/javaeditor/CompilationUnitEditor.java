@@ -1313,7 +1313,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		// Note that the previous code could result in a reconcile as side effect. Should check if that
 		// is still required.
 		return element;
-		}
+	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getInputElement()
@@ -1761,7 +1761,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * Tells whether this is the active editor in the active page.
 	 *
 	 * @return <code>true</code> if this is the active editor in the active page
-	 * @see IWorkbenchPage#getActiveEditor();
+	 * @see IWorkbenchPage#getActiveEditor
 	 */
 	protected final boolean isActiveEditor() {
 		IWorkbenchWindow window= getSite().getWorkbenchWindow();
