@@ -81,6 +81,17 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 		/** Does the word start a new sentence? */
 		private boolean fSentence;
 
+		/**
+		 * Initialize with the given parameters.
+		 * 
+		 * @param start the start offset
+		 * @param end the end offset
+		 * @param line the line
+		 * @param message the message
+		 * @param word the word
+		 * @param match <code>true</code> iff the word was found in the dictionary
+		 * @param sentence <code>true</code> iff the word starts a sentence
+		 */
 		public CoreSpellingProblem(int start, int end, int line, String message, String word, boolean match, boolean sentence) {
 			super();
 			fSourceStart= start;
@@ -190,6 +201,10 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 		}
 	}
 
+	/**
+	 * Spelling problem collector that forwards {@link SpellingProblem}s as
+	 * {@link IProblem}s to the {@link IProblemRequestor}.
+	 */
 	private class SpellingProblemCollector implements ISpellingProblemCollector {
 
 		/** Annotation model */
@@ -299,16 +314,22 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
 	public void reconcile(IRegion region) {
+		IAnnotationModel model= getAnnotationModel();
+		if (model == null)
+			return;
+		
 		SpellingContext context= new SpellingContext();
 		context.setContentType(getContentType());
-		PropertiesSpellingReconcileStrategy.SpellingProblemCollector collector= new SpellingProblemCollector(getAnnotationModel());
+		PropertiesSpellingReconcileStrategy.SpellingProblemCollector collector= new SpellingProblemCollector(model);
 		EditorsUI.getSpellingService().check(fDocument, context, collector, fProgressMonitor);
 	}
 
-	private IAnnotationModel getAnnotationModel() {
-		return fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
-	}
-
+	/**
+	 * Returns the content type of the underlying editor input.
+	 * 
+	 * @return the content type of the underlying editor input or
+	 *         <code>null</code> if none could be determined
+	 */
 	private IContentType getContentType() {
 		IDocumentProvider documentProvider= fEditor.getDocumentProvider();
 		if (documentProvider instanceof IDocumentProviderExtension4) {
@@ -335,5 +356,15 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 	 */
 	public void setProgressMonitor(IProgressMonitor monitor) {
 		fProgressMonitor= monitor;
+	}
+
+	/**
+	 * Returns the annotation model of the underlying editor input.
+	 * 
+	 * @return the annotation model of the underlying editor input or
+	 *         <code>null</code> if none could be determined
+	 */
+	private IAnnotationModel getAnnotationModel() {
+		return fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 	}
 }
