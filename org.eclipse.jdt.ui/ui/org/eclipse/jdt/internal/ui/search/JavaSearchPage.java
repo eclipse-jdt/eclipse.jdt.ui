@@ -161,8 +161,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				return null;
 			}
 			IJavaElement elem= JavaCore.create(settings.get("javaElement")); //$NON-NLS-1$
-			if (elem == null) {
-				return null;
+			if (elem != null && !elem.exists()) {
+				elem= null;
 			}
 			String[] wsIds= settings.getArray("workingSets"); //$NON-NLS-1$
 			IWorkingSet[] workingSets= null;
@@ -353,7 +353,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		int patternCount= fPreviousSearchPatterns.size();
 		String [] patterns= new String[patternCount];
 		for (int i= 0; i < patternCount; i++)
-			patterns[i]= ((SearchPatternData) fPreviousSearchPatterns.get(patternCount - 1 - i)).getPattern();
+			patterns[i]= ((SearchPatternData) fPreviousSearchPatterns.get(i)).getPattern();
 		return patterns;
 	}
 	
@@ -400,7 +400,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				getContainer().getSelectedScope(),
 				getContainer().getSelectedWorkingSets());
 			
-		fPreviousSearchPatterns.add(match);
+		fPreviousSearchPatterns.add(0, match); // insert on top
 		return match;
 	}
 
@@ -598,29 +598,32 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 
 	private void handlePatternSelected() {
-		if (fPattern.getSelectionIndex() < 0)
+		int selectionIndex= fPattern.getSelectionIndex();
+		if (selectionIndex < 0 || selectionIndex >= fPreviousSearchPatterns.size())
 			return;
-		int index= fPreviousSearchPatterns.size() - 1 - fPattern.getSelectionIndex();
-		fInitialData= (SearchPatternData) fPreviousSearchPatterns.get(index);
+		
+		SearchPatternData initialData= (SearchPatternData) fPreviousSearchPatterns.get(selectionIndex);
 		for (int i= 0; i < fSearchFor.length; i++)
 			fSearchFor[i].setSelection(false);
 		for (int i= 0; i < fLimitTo.length; i++)
 			fLimitTo[i].setSelection(false);
-		fSearchFor[fInitialData.getSearchFor()].setSelection(true);
-		setLimitTo(fInitialData.getSearchFor());
-		fLimitTo[fInitialData.getLimitTo()].setSelection(true);
+		fSearchFor[initialData.getSearchFor()].setSelection(true);
+		setLimitTo(initialData.getSearchFor());
+		fLimitTo[initialData.getLimitTo()].setSelection(true);
 
-		fPattern.setText(fInitialData.getPattern());
-		fIsCaseSensitive= fInitialData.isCaseSensitive();
-		fJavaElement= fInitialData.getJavaElement();
+		fPattern.setText(initialData.getPattern());
+		fIsCaseSensitive= initialData.isCaseSensitive();
+		fJavaElement= initialData.getJavaElement();
 		fCaseSensitive.setEnabled(fJavaElement == null);
-		fCaseSensitive.setSelection(fInitialData.isCaseSensitive());
+		fCaseSensitive.setSelection(initialData.isCaseSensitive());
 
 		
-		if (fInitialData.getWorkingSets() != null)
-			getContainer().setSelectedWorkingSets(fInitialData.getWorkingSets());
+		if (initialData.getWorkingSets() != null)
+			getContainer().setSelectedWorkingSets(initialData.getWorkingSets());
 		else
-			getContainer().setSelectedScope(fInitialData.getScope());
+			getContainer().setSelectedScope(initialData.getScope());
+		
+		fInitialData= initialData;
 	}
 
 	private Control createSearchFor(Composite parent) {
@@ -811,7 +814,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	
 	private SearchPatternData getDefaultInitValues() {
 		if (!fPreviousSearchPatterns.isEmpty()) {
-			return (SearchPatternData) fPreviousSearchPatterns.get(fPreviousSearchPatterns.size() - 1);
+			return (SearchPatternData) fPreviousSearchPatterns.get(0);
 		}
 		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null); //$NON-NLS-1$
 	}	
