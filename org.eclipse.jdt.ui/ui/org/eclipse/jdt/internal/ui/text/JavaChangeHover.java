@@ -19,6 +19,7 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.LineChangeHover;
 
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -42,7 +43,7 @@ public class JavaChangeHover extends LineChangeHover  {
 	}
 	
 	/*
-	 * @see org.eclipse.jface.text.ITextHoverExtension#getInformationControlCreator()
+	 * @see org.eclipse.jface.text.source.IAnnotationHoverExtension#getInformationControlCreator()
 	 */
 	public IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
@@ -54,12 +55,12 @@ public class JavaChangeHover extends LineChangeHover  {
 	}
 	
 	/*
-	 * @see org.eclipse.jface.text.source.IAnnotationHoverExtension#getLineRange(org.eclipse.jface.text.source.ISourceViewer, int, int, int)
+	 * @see org.eclipse.jface.text.source.LineChangeHover#computeLineRange(org.eclipse.jface.text.source.ISourceViewer, int, int, int)
 	 */
-	public ITextSelection getLineRange(ISourceViewer viewer, int line, int first, int number) {
-		ITextSelection lineRange= super.getLineRange(viewer, line, first, number);
+	protected Point computeLineRange(ISourceViewer viewer, int line, int first, int number) {
+		Point lineRange= super.computeLineRange(viewer, line, first, number);
 		if (lineRange != null) {
-			fPartition= getPartition(viewer, lineRange.getStartLine());
+			fPartition= getPartition(viewer, lineRange.x);
 		} else {
 			fPartition= IDocument.DEFAULT_CONTENT_TYPE;
 		}

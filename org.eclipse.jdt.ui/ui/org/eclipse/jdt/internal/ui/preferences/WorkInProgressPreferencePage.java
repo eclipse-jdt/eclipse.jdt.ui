@@ -68,9 +68,9 @@ WorkInProgressPreferencePage
 	private org.eclipse.swt.widgets.List fColorList;
 	/** Preferences keys and label text for the color list */
 	final static String[][] fColorModels= new String[][] {
-		{PreferencesMessages.getString(PREFIX + "editor.changedLineColor"), PreferenceConstants.LINE_NUMBER_CHANGED_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString(PREFIX + "editor.addedLineColor"), PreferenceConstants.LINE_NUMBER_ADDED_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString(PREFIX + "editor.deletedLineColor"), PreferenceConstants.LINE_NUMBER_DELETED_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString(PREFIX + "quickdiff.changedLineColor"), PreferenceConstants.QUICK_DIFF_CHANGED_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString(PREFIX + "quickdiff.addedLineColor"), PreferenceConstants.QUICK_DIFF_ADDED_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString(PREFIX + "quickdiff.deletedLineColor"), PreferenceConstants.QUICK_DIFF_DELETED_COLOR}, //$NON-NLS-1$
 	};
 	
 	/**
@@ -137,9 +137,8 @@ WorkInProgressPreferencePage
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setText(PreferencesMessages.getString(PREFIX + "editor")); //$NON-NLS-1$
+		group.setText(PreferencesMessages.getString(PREFIX + "quickdiff")); //$NON-NLS-1$
 		
-		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "editor.lineChangeRuler"), PreferenceConstants.LINE_NUMBER_RULER_QUICK_DIFF); //$NON-NLS-1$
 		Label l= new Label(group, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
@@ -147,7 +146,7 @@ WorkInProgressPreferencePage
 		l.setLayoutData(gd);
 	
 		l= new Label(group, SWT.LEFT);
-		l.setText(PreferencesMessages.getString(PREFIX + "editor.appearanceOptions")); //$NON-NLS-1$
+		l.setText(PreferencesMessages.getString(PREFIX + "quickdiff.appearanceOptions")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
@@ -287,9 +286,9 @@ WorkInProgressPreferencePage
 			text.setText(store.getDefaultString(key));
 		}
 		// color table
-		store.setToDefault(PreferenceConstants.LINE_NUMBER_CHANGED_COLOR);
-		store.setToDefault(PreferenceConstants.LINE_NUMBER_ADDED_COLOR);
-		store.setToDefault(PreferenceConstants.LINE_NUMBER_DELETED_COLOR);
+		store.setToDefault(PreferenceConstants.QUICK_DIFF_CHANGED_COLOR);
+		store.setToDefault(PreferenceConstants.QUICK_DIFF_ADDED_COLOR);
+		store.setToDefault(PreferenceConstants.QUICK_DIFF_DELETED_COLOR);
 		handleListSelection();
 		
 		super.performDefaults();

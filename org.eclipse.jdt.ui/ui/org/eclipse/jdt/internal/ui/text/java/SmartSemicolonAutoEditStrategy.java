@@ -152,6 +152,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 				|| looksLike(doc, pos, "]") //$NON-NLS-1$
 				|| looksLike(doc, pos, "try") //$NON-NLS-1$
 				|| looksLike(doc, pos, "else") //$NON-NLS-1$
+				|| looksLike(doc, pos, "synchronized") //$NON-NLS-1$
+				|| looksLike(doc, pos, "static") //$NON-NLS-1$
 				|| looksLike(doc, pos, "do")) //$NON-NLS-1$
 					return new String(new char[] { ' ', character });
 			}
@@ -268,12 +270,13 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 	/**
 	 * Computes an insert position for an opening brace if <code>offset</code> maps to a position in
-	 * <code>document</code> involving a <code>try, do,</code> or <code>else</code> keyword.
+	 * <code>document</code> involving a keyword taking a block after it. These are: <code>try</code>, 
+	 * <code>do</code>, <code>synchronized</code>, <code>static</code>, or <code>else</code>.
 	 * 
 	 * @param document the document being modified
 	 * @param line the current line under investigation
 	 * @param offset the offset of the caret position, relative to the line start.
-	 * @return an insert position  relative to the line start if <code>line</code> contains one of the keywords <code>try, do,</code> or <code>else</code> at or before <code>offset</code>, -1 otherwise
+	 * @return an insert position  relative to the line start if <code>line</code> contains one of the above keywords at or before <code>offset</code>, -1 otherwise
 	 */
 	private static int computeAfterTryDoElse(IDocument doc, ITextSelection line, int offset) {
 		// search backward while WS, find 'try', 'do', 'else' in default partition
@@ -283,7 +286,11 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			return -1;
 		p--;
 
-		if (looksLike(doc, p, "try") || looksLike(doc, p, "do") || looksLike(doc, p, "else")) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (looksLike(doc, p, "try") //$NON-NLS-1$
+				|| looksLike(doc, p, "do")  //$NON-NLS-1$
+				|| looksLike(doc, p, "synchronized")  //$NON-NLS-1$
+				|| looksLike(doc, p, "static")  //$NON-NLS-1$
+				|| looksLike(doc, p, "else"))  //$NON-NLS-1$
 			return p + 1 - line.getOffset();
 
 		return -1;
@@ -647,14 +654,13 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	}
 
 	/**
-	 * Checks whether <code>document</code> contains one of the keywords <code>if</code>, 
-	 * <code>while</code>, <code>catch</code>, <code>for</code> plus any additional whitespace
-	 * to the left of <code>position</code>.
+	 * Checks whether, to the left of <code>position</code> and separated only by whitespace, 
+	 * <code>document</code> contains a keyword taking a parameter list and a block after it.
+	 * These are: <code>if</code>, <code>while</code>, <code>catch</code>, <code>for</code>, <code>synchronized</code>. 
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
-	 * @return <code>true</code> if <code>document</code> contains <code>if</code>, 
-	 * <code>while</code>, <code>catch</code>, <code>for</code> to the left of <code>position</code>, <code>false</code> otherwise
+	 * @return <code>true</code> if <code>document</code> contains any of the above keywords to the left of <code>position</code>, <code>false</code> otherwise
 	 */
 	private static boolean looksLikeIfWhileForCatch(IDocument document, int position) {
 		position= firstNonWhitespaceBackward(document, position, -1);
@@ -664,6 +670,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		return looksLike(document, position, "if") //$NON-NLS-1$
 				|| looksLike(document, position, "while") //$NON-NLS-1$
 				|| looksLike(document, position, "catch") //$NON-NLS-1$
+				|| looksLike(document, position, "synchronized") //$NON-NLS-1$
 				|| looksLike(document, position, "for"); //$NON-NLS-1$
 	}
 
@@ -707,27 +714,57 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @return <code>true</code> if the content of <code>document</code> looks like a method definition, <code>false</code> otherwise
 	 */
-	private static boolean looksLikeMethodDecl(IDocument document, int pos) {
-
-		pos= eatIdentToLeft(document, pos);
-		if (pos < 1)
+	private static boolean looksLikeMethodDecl(IDocument document, int position) {
+		
+		// method name
+		position= eatIdentToLeft(document, position);
+		if (position < 1)
 			return false;
+			
+		position= eatBrackets(document, position - 1);
+		if (position < 1)
+			return false;
+		
+		position= eatIdentToLeft(document, position - 1);
 
-		pos= eatIdentToLeft(document, pos - 1);
+		return position != -1;
+	}
 
-		return pos != -1;
+	/**
+	 * From <code>position</code> to the left, eats any whitespace and then a pair of brackets
+	 * as used to declare an array return type like <pre>String [ ]</pre>.
+	 * The return value is either the position of the opening bracket or <code>position</code> if no 
+	 * pair of brackets can be parsed. 
+	 * 
+	 * @param document the document being modified
+	 * @param position the first character position in <code>document</code> to be considered
+	 * @return the smallest character position of bracket pair or <code>position</code>
+	 */
+	private static int eatBrackets(IDocument document, int position) {
+		// accept array return type
+		int pos= firstNonWhitespaceBackward(document, position, -1);
+		try {
+			if (pos > 1 && document.getChar(pos) == ']') {
+				pos= firstNonWhitespaceBackward(document, pos - 1, -1);
+				if (pos > 0 && document.getChar(pos) == '[')
+					return pos;
+			}
+		} catch (BadLocationException e) {
+			// won't happen
+		}
+		return position;
 	}
 
 	/**
 	 * From <code>position</code> to the left, eats any whitespace and the first identifier, returning 
-	 * the positionition of the first identifier character (in normal read order).
+	 * the position of the first identifier character (in normal read order).
 	 * <p>When called on a document with content <code>" some string  "</code> and positionition 13, the
 	 * return value will be 6 (the first letter in <code>string</code>).
 	 * </p>
 	 * 
 	 * @param document the document being modified
-	 * @param position the first character positionition in <code>document</code> to be considered
-	 * @return the smallest character positionition of an identifier or -1 if none can be found; always &lt;= <code>position</code>
+	 * @param position the first character position in <code>document</code> to be considered
+	 * @return the smallest character position of an identifier or -1 if none can be found; always &lt;= <code>position</code>
 	 */
 	private static int eatIdentToLeft(IDocument document, int position) {
 		if (position < 0)

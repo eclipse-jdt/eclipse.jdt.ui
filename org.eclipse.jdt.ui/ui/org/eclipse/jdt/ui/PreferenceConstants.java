@@ -1743,14 +1743,6 @@ public class PreferenceConstants {
 	
 	
 	/**
-	 * A named preference that controls whether line number ruler quick diff colors are shown.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * @since 3.0
-	 */
-	public static String LINE_NUMBER_RULER_QUICK_DIFF= "lineNumberBar.quickdiff"; //$NON-NLS-1$
-
-	/**
 	 * A named preference that controls the background color for changed lines in the line number bar.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -1761,7 +1753,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.0
 	 */
-	public static final String LINE_NUMBER_CHANGED_COLOR= "lineNumberBar.colors.changed"; //$NON-NLS-1$
+	public static final String QUICK_DIFF_CHANGED_COLOR= "lineNumberBar.colors.changed"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls the background color for added lines in the line number bar.
@@ -1774,7 +1766,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.0
 	 */
-	public static final String LINE_NUMBER_ADDED_COLOR= "lineNumberBar.colors.added"; //$NON-NLS-1$
+	public static final String QUICK_DIFF_ADDED_COLOR= "lineNumberBar.colors.added"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls the color for the deleted lines indicator in the line number bar.
@@ -1787,7 +1779,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.0
 	 */
-	public static final String LINE_NUMBER_DELETED_COLOR= "lineNumberBar.colors.deleted"; //$NON-NLS-1$
+	public static final String QUICK_DIFF_DELETED_COLOR= "lineNumberBar.colors.deleted"; //$NON-NLS-1$
 
 
 
@@ -1991,10 +1983,9 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, ctrl);
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, SWT.CTRL);
 		
-		store.setDefault(PreferenceConstants.LINE_NUMBER_RULER_QUICK_DIFF, false);
-		PreferenceConverter.setDefault(store, PreferenceConstants.LINE_NUMBER_CHANGED_COLOR, new RGB(255, 230, 230));
-		PreferenceConverter.setDefault(store, PreferenceConstants.LINE_NUMBER_ADDED_COLOR, new RGB(230, 230, 255));
-		PreferenceConverter.setDefault(store, PreferenceConstants.LINE_NUMBER_DELETED_COLOR, new RGB(0, 0, 0));
+		PreferenceConverter.setDefault(store, PreferenceConstants.QUICK_DIFF_CHANGED_COLOR, new RGB(255, 230, 230));
+		PreferenceConverter.setDefault(store, PreferenceConstants.QUICK_DIFF_ADDED_COLOR, new RGB(230, 230, 255));
+		PreferenceConverter.setDefault(store, PreferenceConstants.QUICK_DIFF_DELETED_COLOR, new RGB(0, 0, 0));
 
 		
 		// work in progress
