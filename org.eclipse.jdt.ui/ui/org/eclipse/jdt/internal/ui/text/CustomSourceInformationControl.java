@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
+import java.util.Arrays;
+
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
@@ -163,15 +165,9 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 	 *         be scrolled at least <code>fHorizontalScrollPixel</code>
 	 */
 	private String getSpacesForHorizontalScrolling() {
-		StyledText widget= getViewer().getTextWidget();
-		GC gc= new GC(widget);
-		StringBuffer spaces= new StringBuffer();
-		Point spaceSize= gc.stringExtent(" "); //$NON-NLS-1$
-		gc.dispose();
-		int n= fHorizontalScrollPixel / spaceSize.x + 1; 
-		for (int i= 0; i < n; i++)
-			spaces.append(' ');
-		return spaces.toString();
+		char[] spaces= new char[300];
+		Arrays.fill(spaces, ' ');
+		return new String(spaces);
 	}
 	
 	/**
