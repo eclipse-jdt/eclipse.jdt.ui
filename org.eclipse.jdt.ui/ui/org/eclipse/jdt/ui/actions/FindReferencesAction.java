@@ -71,23 +71,6 @@ public class FindReferencesAction extends FindAction {
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 	}
 
-	boolean canOperateOn(IJavaElement element) {
-		if (super.canOperateOn(element)) {
-			if (element.getElementType() == IJavaElement.FIELD) {
-				IField field= (IField)element;
-				int flags;
-				try {
-					flags= field.getFlags();
-				} catch (JavaModelException ex) {
-					return true;
-				}
-				return !field.isBinary() || !(Flags.isStatic(flags) && Flags.isFinal(flags) && isPrimitive(field));
-			}
-			return true;
-		}
-		return false;
-	}
-
 	int getLimitTo() {
 		return IJavaSearchConstants.REFERENCES;
 	}	
