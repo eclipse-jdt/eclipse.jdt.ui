@@ -183,6 +183,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Label fAutoInsertJavaTriggerLabel;
 	private Label fAutoInsertJavaDocTriggerLabel;
 	private Button fShowInTextCheckBox;
+	private Button fHighlightInTextCheckBox;
 	private Button fShowInOverviewRulerCheckBox;
 	private Text fBrowserLikeLinksKeyModifierText;
 	private Button fBrowserLikeLinksCheckBox;
@@ -329,6 +330,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			AnnotationPreference info= (AnnotationPreference) e.next();
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, info.getColorPreferenceKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getTextPreferenceKey()));
+			if (info.getHighlightPreferenceKey() != null)
+				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getHighlightPreferenceKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getOverviewRulerPreferenceKey()));
 		}
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
@@ -381,7 +384,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fShowInTextCheckBox.setSelection(fOverlayStore.getBoolean(key));
 		
 		key= fAnnotationColorListModel[i][3];
-		fShowInOverviewRulerCheckBox.setSelection(fOverlayStore.getBoolean(key));				
+		fShowInOverviewRulerCheckBox.setSelection(fOverlayStore.getBoolean(key));
+		
+		key= fAnnotationColorListModel[i][4];
+		if (key != null) {
+			fHighlightInTextCheckBox.setSelection(fOverlayStore.getBoolean(key));
+			fHighlightInTextCheckBox.setEnabled(true);
+		} else
+			fHighlightInTextCheckBox.setEnabled(false);
+		
 	}
 	
 	private Control createSyntaxPage(Composite parent) {
@@ -689,6 +700,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
         gd.horizontalSpan= 2;
 		fShowInTextCheckBox.setLayoutData(gd);
 		
+		fHighlightInTextCheckBox= new Button(optionsComposite, SWT.CHECK);
+		fHighlightInTextCheckBox.setText(PreferencesMessages.getString("TextEditorPreferencePage.annotations.highlightInText")); //$NON-NLS-1$
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+		gd.horizontalSpan= 2;
+		fHighlightInTextCheckBox.setLayoutData(gd);
+		
 		fShowInOverviewRulerCheckBox= new Button(optionsComposite, SWT.CHECK);
         fShowInOverviewRulerCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotations.showInOverviewRuler")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
@@ -730,6 +748,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		});
 		
+		fHighlightInTextCheckBox.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			
+			public void widgetSelected(SelectionEvent e) {
+				int i= fAnnotationList.getSelectionIndex();
+				String key= fAnnotationColorListModel[i][4];
+				fOverlayStore.setValue(key, fHighlightInTextCheckBox.getSelection());
+			}
+		});
+		
 		fShowInOverviewRulerCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -762,7 +792,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Iterator e= preferences.getAnnotationPreferences().iterator();
 		while (e.hasNext()) {
 			AnnotationPreference info= (AnnotationPreference) e.next();
-			listModelItems.add(new String[] { info.getPreferenceLabel(), info.getColorPreferenceKey(), info.getTextPreferenceKey(), info.getOverviewRulerPreferenceKey()});
+			listModelItems.add(new String[] { info.getPreferenceLabel(), info.getColorPreferenceKey(), info.getTextPreferenceKey(), info.getOverviewRulerPreferenceKey(), info.getHighlightPreferenceKey()});
 		}
 		String[][] items= new String[listModelItems.size()][];
 		listModelItems.toArray(items);
