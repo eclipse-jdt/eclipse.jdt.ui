@@ -57,7 +57,7 @@ public abstract class JUnitRenameParticipant extends RenameParticipant {
 	}
 
 	protected String getChangeName() {
-		return JUnitMessages.getString("TypeRenameParticipant.change.name");
+		return JUnitMessages.getString("TypeRenameParticipant.change.name"); //$NON-NLS-1$
 	}
 
 	protected abstract void createChangeForConfigs(List changes, ILaunchConfiguration[] configs) throws CoreException;
