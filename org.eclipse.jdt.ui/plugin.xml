@@ -3205,6 +3205,14 @@
 		class= "org.eclipse.jdt.internal.ui.filters.NonPublicFilter"
 		enabled= "false">
 	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.LocalTypesFilter"
+		name= "%HideLocalTypes.label"
+		description= "%HideLocalTypes.description"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.LocalTypesFilter"
+		enabled= "false">
+	</filter>
 
 	<!-- Types view -->
 	<filter
