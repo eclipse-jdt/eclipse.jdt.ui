@@ -86,9 +86,6 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @param implementations <code>true</code> to favor implementation methods, <code>false</code> otherwise
 	 */
 	private static void getOriginalMethods(final IMethodBinding binding, final ITypeBinding type, final Collection originals, final boolean implementations) {
-		Assert.isNotNull(binding);
-		Assert.isNotNull(type);
-		Assert.isNotNull(originals);
 		final ITypeBinding ancestor= type.getSuperclass();
 		if (!implementations) {
 			final ITypeBinding[] types= type.getInterfaces();
@@ -319,7 +316,6 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @param binding the method binding
 	 */
 	private void endVisit(final IMethodBinding binding) {
-		Assert.isNotNull(binding);
 		IMethodBinding method= null;
 		ConstraintVariable2 ancestor= null;
 		final ConstraintVariable2 descendant= fModel.createReturnTypeVariable(binding);
@@ -343,8 +339,6 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @param descendant the constraint variable of the invocation expression
 	 */
 	private void endVisit(final IMethodBinding binding, final ConstraintVariable2 descendant) {
-		Assert.isNotNull(binding);
-		Assert.isNotNull(descendant);
 		ITypeBinding declaring= null;
 		IMethodBinding method= null;
 		final Collection originals= getOriginalMethods(binding);
@@ -721,7 +715,6 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @return the original methods (element type: <code>IMethodBinding</code>)
 	 */
 	private Collection getOriginalMethods(final IMethodBinding binding) {
-		Assert.isNotNull(binding);
 		final Collection originals= new ArrayList();
 		final ITypeBinding type= binding.getDeclaringClass();
 		getOriginalMethods(binding, type, originals, false);
