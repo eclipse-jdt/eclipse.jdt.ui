@@ -941,7 +941,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			try {
 				int startPos= methodDecl.getStartPosition();
 				if (isInsertOrRemove(returnType)) {
-					startPos= getScanner().getTokenEndOffset(MODIFIERS, startPos, startPos);
+					startPos= getScanner().readAfterTokens(MODIFIERS, true, startPos, startPos);
 				}
 				if (startPos == methodDecl.getName().getStartPosition()) {
 					rewriteNode(returnType, startPos, ""); //$NON-NLS-1$
