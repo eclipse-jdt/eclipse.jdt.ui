@@ -7,26 +7,39 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaConventions;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
 public class NameProposer {
 	
 	private String[] fNamePrefixes;
 	private String[] fNameSuffixes;
+	
+	public static final String GETTER_NAME= "get";
+	public static final String SETTER_NAME= "set";
 
 	public NameProposer(String[] prefixes, String[] suffixes) {
 		fNamePrefixes= prefixes;
 		fNameSuffixes= suffixes;
 	}
 	
-	public String proposeAccessorName(IField field) {
-		String name= removePrefixAndSuffix(field.getElementName());
+	public String proposeGetterName(String fieldName){
+		return GETTER_NAME + proposeAccessorName(fieldName);
+	}
+	
+	public String proposeSetterName(String fieldName){
+		return SETTER_NAME + proposeAccessorName(fieldName);
+	}
+	
+	public String proposeAccessorName(String fieldName) {
+		String name= removePrefixAndSuffix(fieldName);
 		if (name.length() > 0 && Character.isLowerCase(name.charAt(0))) {
 			name= String.valueOf(Character.toUpperCase(name.charAt(0))) + name.substring(1);
 		}
 		return name;
 	}
-	
+
+	public String proposeAccessorName(IField field) {
+		return proposeAccessorName(field.getElementName());
+	}
+		
 	public String proposeArgName(IField field) {
 		String name= removePrefixAndSuffix(field.getElementName());
 		if (name.length() > 0) {
