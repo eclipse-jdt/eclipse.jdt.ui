@@ -461,8 +461,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			IJavaProject[] currProjects= (IJavaProject[]) fWizard.getSelectedProjects().toArray(new IJavaProject[fWizard.getSelectedProjects().size()]);
 
 			findRE(referencedClasses, currProjects, visited);
-			fListDialogField.removeAllElements();
-			fListDialogField.addElements(referencedClasses);
+			fListDialogField.setElements(referencedClasses);
 			//compare with elements in list with those that are checked.
 			checkListDialogFieldElements(referencedClasses, currProjects);
 

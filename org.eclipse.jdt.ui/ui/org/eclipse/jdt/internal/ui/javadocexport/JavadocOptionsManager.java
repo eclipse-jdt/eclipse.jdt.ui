@@ -92,6 +92,8 @@ public class JavadocOptionsManager {
 	private boolean fAuthor;
 	private boolean fVersion;
 	private boolean fUse;
+	
+	private boolean fJDK14Mode;
 
 	private boolean fOpenInBrowser;
 
@@ -138,6 +140,9 @@ public class JavadocOptionsManager {
 	public final String PATH= "path"; //$NON-NLS-1$
 	private final String FROMSTANDARD= "fromStandard"; //$NON-NLS-1$
 	private final String ANTPATH= "antpath"; //$NON-NLS-1$
+	public final String SOURCE= "source"; //$NON-NLS-1$
+	
+	
 
 	/**
 	 * @param xmlJavadocFile The ant file to take initl values from or null, if not started from an ant file.
@@ -241,6 +246,8 @@ public class JavadocOptionsManager {
 			fNotree= loadbutton(settings.get(NOTREE));
 			fSplitindex= loadbutton(settings.get(SPLITINDEX));
 			fOpenInBrowser= loadbutton(settings.get(OPENINBROWSER));
+			
+			fJDK14Mode= loadbutton(settings.get(SOURCE));
 
 			//get the set of project specific data
 			loadLinksFromDialogSettings(settings);
@@ -359,6 +366,7 @@ public class JavadocOptionsManager {
 		fNotree= false;
 		fSplitindex= true;
 		fOpenInBrowser= false;
+		fJDK14Mode= false;
 
 		//by default it is empty all project map to the empty string
 		fFromStandard= true;
@@ -717,6 +725,11 @@ public class JavadocOptionsManager {
 		args.add("-" + fAccess); //$NON-NLS-1$
 
 		if (fFromStandard) {
+			if (fJDK14Mode) {
+				args.add("-source"); //$NON-NLS-1$
+				args.add("1.4"); //$NON-NLS-1$
+			}			
+			
 			if (fUse)
 				args.add("-use"); //$NON-NLS-1$
 			if (fVersion)
@@ -740,6 +753,7 @@ public class JavadocOptionsManager {
 				args.add("-doctitle"); //$NON-NLS-1$
 				args.add(fTitle);
 			}
+
 
 			if (!fStylesheet.equals("")) { //$NON-NLS-1$
 				args.add("-stylesheetfile"); //$NON-NLS-1$
@@ -847,6 +861,7 @@ public class JavadocOptionsManager {
 		settings.put(NOTREE, fNotree);
 		settings.put(NONAVBAR, fNonavbar);
 		settings.put(OPENINBROWSER, fOpenInBrowser);
+		settings.put(SOURCE, fJDK14Mode);
 
 		if (!fAntpath.equals("")) //$NON-NLS-1$
 			settings.put(ANTPATH, fAntpath);
@@ -1000,6 +1015,14 @@ public class JavadocOptionsManager {
 		else if (flag.equals(NONAVBAR))
 			this.fNonavbar= value;
 	}
+	
+	public boolean isJDK14Mode() {
+		return fJDK14Mode;
+	}
+
+	public void setJDK14Mode(boolean jdk14Mode) {
+		fJDK14Mode= jdk14Mode;
+	}	
 
 	private List getValidSelection(ISelection currentSelection) {
 
@@ -1183,5 +1206,7 @@ public class JavadocOptionsManager {
 		}
 
 	}
+
+
 
 }

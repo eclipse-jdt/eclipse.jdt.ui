@@ -39,6 +39,8 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	protected Button fOverViewButton;
 	private Button fOverViewBrowseButton;
 	protected Button fAntButton;
+	private Button fJDK14Button;
+	
 	private Composite fLowerComposite;
 	protected Text fOverViewText;
 	protected Text fExtraOptionsText;
@@ -117,6 +119,10 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 		str= fStore.getAdditionalParams();
 		fExtraOptionsText.setText(str);
+
+		fJDK14Button= createButton(composite, SWT.CHECK, JavadocExportMessages.getString("JavadocSpecificsWizardPage.jdk14mode.label"), createGridData(3)); //$NON-NLS-1$
+		fJDK14Button.setSelection(fStore.isJDK14Mode());
+		
 
 		//Listeners
 		fOverViewButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fOverViewBrowseButton, fOverViewText }) {
@@ -263,6 +269,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 				fStore.setSpecificAntpath((IJavaProject) fWizard.getSelectedProjects().iterator().next(), fAntText.getText());
 		}
 		fStore.setOpenInBrowser(fCheckbrowser.getSelection());
+		fStore.setJDK14Mode(fJDK14Button.getSelection());
 
 	}
 
