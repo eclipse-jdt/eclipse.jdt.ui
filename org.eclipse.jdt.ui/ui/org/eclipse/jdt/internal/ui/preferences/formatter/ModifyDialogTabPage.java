@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -18,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
@@ -35,8 +39,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -44,9 +51,13 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public abstract class ModifyDialogTabPage {
 	
+	private static final int RIGHT_SIDE_WIDTH_HINT_CHARS= 55;
+	private static final int LEFT_SIDE_WIDTH_HINT_CHARS= 65;
+
+	
 	protected final Observer fUpdater= new Observer() {
 		public void update(Observable o, Object arg) {
-			updatePreview();
+			doUpdatePreview();
 		}
 	};
 	
@@ -84,6 +95,13 @@ public abstract class ModifyDialogTabPage {
 	    public final String getKey() {
 	        return fKey;
 	    }
+	    
+	    /**
+	     * Returns the main control of a preference, which is mainly used to 
+	     * manage the focus. This may be <code>null</code> if the preference doesn't
+	     * have a control which can get the focus. 
+	     */
+	    public abstract Control getControl();
 	    
 	    protected abstract void updateWidget();
 	}
@@ -132,6 +150,10 @@ public abstract class ModifyDialogTabPage {
 		
 		public boolean getChecked() {
 			return fValues[1].equals(getPreferences().get(getKey()));
+		}
+		
+		public Control getControl() {
+			return fCheckbox;
 		}
 	}
 	
@@ -188,6 +210,10 @@ public abstract class ModifyDialogTabPage {
 				}
 			}
 			return ""; //$NON-NLS-1$
+		}
+		
+		public Control getControl() {
+			return fCombo;
 		}
 	}
 	
@@ -291,17 +317,6 @@ public abstract class ModifyDialogTabPage {
 			notifyObservers();
 		}
 		
-//		private void updateNumberText() {
-//			try { 
-//				int old= Integer.parseInt(fNumberText.getText());
-//				if (fSelected == old) {
-//					return;
-//				}
-//			} catch (Exception e) {}
-//			fNumberText.setText(Integer.toString(fSelected));
-//		}
-//		
-		
 		protected void updateWidget() {
 		    final boolean hasKey= getKey() != null;
 
@@ -322,8 +337,79 @@ public abstract class ModifyDialogTabPage {
 			    fNumberText.setText(""); //$NON-NLS-1$
 			}
 		}
+		
+		public Control getControl() {
+			return fNumberText;
+		}
 	}
 
+	
+	/**
+	 * This class provides the default way to preserve and re-establish the focus
+	 * over multiple modify sessions. Each ModifyDialogTabPage has its own instance,
+	 * and it should add all relevant controls upon creation, always in the same sequence.
+	 * This established a mapping of controls to indexes, which allows to restore the focus
+	 * in a later session. 
+	 * The index is saved in the dialog settings, and there is only one common preference for 
+	 * all tab pages. It is always the currently active tab page which stores its focus
+	 * index. 
+	 */
+	protected final static class DefaultFocusManager extends FocusAdapter {
+		
+		private final static String PREF_LAST_FOCUS_INDEX= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog_tab_page.last_focus_index"; //$NON-NLS-1$ 
+		
+		private final IDialogSettings fDialogSettings;
+		
+		private final Map fItemMap;
+		private final List fItemList;
+		
+		private int fIndex;
+		
+		public DefaultFocusManager() {
+			fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
+			fItemMap= new HashMap();
+			fItemList= new ArrayList();
+			fIndex= 0;
+		}
+
+		public void focusGained(FocusEvent e) {
+			fDialogSettings.put(PREF_LAST_FOCUS_INDEX, ((Integer)fItemMap.get(e.widget)).intValue());
+		}
+		
+		public void add(Control control) {
+			control.addFocusListener(this);
+			fItemList.add(fIndex, control);
+			fItemMap.put(control, new Integer(fIndex++));
+		}
+		
+		public void add(Preference preference) {
+			final Control control= preference.getControl();
+			if (control != null) 
+				add(control);
+		}
+		
+		public boolean isUsed() {
+			return fIndex != 0;
+		}
+		
+		public void restoreFocus() {
+			int index= 0;
+			try {
+				index= fDialogSettings.getInt(PREF_LAST_FOCUS_INDEX);
+				// make sure the value is within the range
+				if ((index >= 0) && (index <= fItemList.size() - 1)) {
+					((Control)fItemList.get(index)).setFocus();
+				}
+			} catch (NumberFormatException ex) {
+				// this is the first time
+			}
+		}
+	}
+
+	
+	protected final DefaultFocusManager fDefaultFocusManager;
+	
+	
 	
 	/**
 	 * Constant array for boolean selection 
@@ -340,18 +426,29 @@ public abstract class ModifyDialogTabPage {
 	 */
 	protected PixelConverter fPixelConverter;
 	
+	/**
+	 * The Java preview.
+	 */
 	protected final JavaPreview fJavaPreview;
 
+	/**
+	 * The map where the current settings are stored.
+	 */
 	protected final Map fWorkingValues;
+	
+	/**
+	 * The modify dialog where we can display status messages.
+	 */
 	private final ModifyDialog fModifyDialog;
-	
-	
+
+
 	/*
 	 * Create a new <code>ModifyDialogTabPage</code>
 	 */
 	public ModifyDialogTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		fWorkingValues= workingValues;
 		fModifyDialog= modifyDialog;
+		fDefaultFocusManager= new DefaultFocusManager();
 		fJavaPreview= new JavaPreview(fWorkingValues);
 	}
 	
@@ -362,11 +459,9 @@ public abstract class ModifyDialogTabPage {
 	 */
 	public final Composite createContents(Composite parent) {
 		
-		GridData gd;
-		
 		fPixelConverter = new PixelConverter(parent);
 		
-		final Composite page= new Composite(parent, SWT.NONE);
+		final Composite page = new Composite(parent, SWT.NONE);
 		
 		final GridLayout pageLayout= createGridLayout(2, true);
 		pageLayout.horizontalSpacing= 3 * IDialogConstants.HORIZONTAL_SPACING;
@@ -374,17 +469,16 @@ public abstract class ModifyDialogTabPage {
 		
 		final Composite settingsPane= doCreatePreferences(page);
 		settingsPane.setParent(page);
-		gd= new GridData(GridData.FILL_VERTICAL | GridData.HORIZONTAL_ALIGN_FILL);
-		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
-		settingsPane.setLayoutData(gd);
+		final GridData settingsGd= new GridData(GridData.FILL_VERTICAL | GridData.HORIZONTAL_ALIGN_FILL);
+		settingsGd.widthHint= fPixelConverter.convertWidthInCharsToPixels(LEFT_SIDE_WIDTH_HINT_CHARS);
+		settingsPane.setLayoutData(settingsGd);
 		
 		final Composite previewPane= doCreatePreview(page);
 		previewPane.setParent(page);
-		gd= new GridData(GridData.FILL_BOTH);
-		previewPane.setLayoutData(gd);
+		final GridData previewGd= new GridData(GridData.FILL_BOTH);
+		previewGd.widthHint= fPixelConverter.convertWidthInCharsToPixels(RIGHT_SIDE_WIDTH_HINT_CHARS);
+		previewPane.setLayoutData(previewGd);
 	
-		doInitializeControls();
-		
 		return page;
 	}
 	
@@ -393,14 +487,6 @@ public abstract class ModifyDialogTabPage {
 	 * Create the left side of the modify dialog. This is meant to be implemented by subclasses. 
 	 */
 	protected abstract Composite doCreatePreferences(Composite parent);
-	
-	
-	/**
-	 * Can be used to initialize controls as well as listeners. This is guaranteed to be called
-	 * after <code>createContents</code>.
-	 */
-	protected void doInitializeControls() {
-	}
 	
 
 	/**
@@ -415,6 +501,7 @@ public abstract class ModifyDialogTabPage {
 		createLabel(numColumns, composite, FormatterMessages.getString("ModifyDialogTabPage.preview.label.text"));  //$NON-NLS-1$
 		
 		final Control control= fJavaPreview.createContents(composite);
+		fDefaultFocusManager.add(control);
 		final GridData gd= createGridData(numColumns, GridData.FILL_BOTH);
 		gd.widthHint= 0;
 		gd.heightHint=0;
@@ -425,11 +512,34 @@ public abstract class ModifyDialogTabPage {
 
 	
 	/**
+	 * This is called when the page becomes visible. 
+	 * Common tasks to do include:
+	 * <ul><li>Updating the preview.</li>
+	 * <li>Setting the focus</li>
+	 * </ul>
+	 */
+	final public void makeVisible() {
+		doUpdatePreview();
+	}
+	
+	/**
 	 * Update the preview.
 	 */
-	protected void updatePreview() {
+	protected void doUpdatePreview() {
 		fJavaPreview.update();
 	}
+	
+	/**
+	 * To be implemented by children. Each children should remember where its last focus was, and
+	 * reset it correctly within this method. This method is only called after initialization on the 
+	 * first tab page to be displayed in order to restore the focus of the last session.
+	 */
+	public void setInitialFocus() {
+		if (fDefaultFocusManager.isUsed()) {
+			fDefaultFocusManager.restoreFocus();
+		}
+	}
+	
 
 
 	protected void updateStatus(IStatus status) {
@@ -510,10 +620,11 @@ public abstract class ModifyDialogTabPage {
 	 */
 	protected NumberPreference createNumberPref(Composite composite, int numColumns, String name, String key,
 												int minValue, int maxValue) {
-		final NumberPreference numPref= new NumberPreference(composite, numColumns, fWorkingValues, 
-				key, minValue, maxValue, name);
-		numPref.addObserver(fUpdater);
-		return numPref;
+		final NumberPreference pref= new NumberPreference(composite, numColumns, fWorkingValues, 
+			key, minValue, maxValue, name);
+		fDefaultFocusManager.add(pref);
+		pref.addObserver(fUpdater);
+		return pref;
 	}
 	
 	/**
@@ -521,10 +632,11 @@ public abstract class ModifyDialogTabPage {
 	 */
 	protected ComboPreference createComboPref(Composite composite, int numColumns, String name, 
 											  String key, String [] values, String [] items) {
-		final ComboPreference comboPref= new ComboPreference(composite, numColumns, 
-				fWorkingValues, key, values, name, items);
-		comboPref.addObserver(fUpdater);
-		return comboPref;
+		final ComboPreference pref= new ComboPreference(composite, numColumns, 
+			fWorkingValues, key, values, name, items);
+		fDefaultFocusManager.add(pref);
+		pref.addObserver(fUpdater);
+		return pref;
 	}
 
 	/**
@@ -532,10 +644,11 @@ public abstract class ModifyDialogTabPage {
 	 */
 	protected CheckboxPreference createCheckboxPref(Composite composite, int numColumns, String name, String key,
 													String [] values) {
-		final CheckboxPreference cp= new CheckboxPreference(composite, numColumns, 
-				fWorkingValues, key, values, name);
-		cp.addObserver(fUpdater);
-		return cp;
+		final CheckboxPreference pref= new CheckboxPreference(composite, numColumns, 
+			fWorkingValues, key, values, name);
+		fDefaultFocusManager.add(pref);
+		pref.addObserver(fUpdater);
+		return pref;
 	}
 	
 

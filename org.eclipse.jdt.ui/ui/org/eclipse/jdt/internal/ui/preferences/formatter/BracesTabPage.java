@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class BracesTabPage extends ModifyDialogTabPage {
 	
-	private final String fPreview=
+	private final static String fPreview=
 	createPreviewHeader(FormatterMessages.getString("BracesTabPage.preview.header")) + //$NON-NLS-1$
 	"class Empty {}\n" + //$NON-NLS-1$
 	"\n" + //$NON-NLS-1$
@@ -45,20 +45,20 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	
 	
 	
-	private final String [] fBracePositions= {
+	private final static String [] fBracePositions= {
 	    DefaultCodeFormatterConstants.END_OF_LINE,
 	    DefaultCodeFormatterConstants.NEXT_LINE,
 	    DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED
 	};
 	
-	private final String [] fBracePositionNames= {
+	private final static String [] fBracePositionNames= {
 	    FormatterMessages.getString("BracesTabPage.position.same_line"), //$NON-NLS-1$
 	    FormatterMessages.getString("BracesTabPage.position.next_line"), //$NON-NLS-1$
 	    FormatterMessages.getString("BracesTabPage.position.next_line_indented") //$NON-NLS-1$
 	};
 	
-	private final int NUM_COLUMNS= 4; 
-
+	private final static int NUM_COLUMNS= 4;
+	
 	
 	/**
 	 * Create a new BracesTabPage.
@@ -69,24 +69,23 @@ public class BracesTabPage extends ModifyDialogTabPage {
 		super(modifyDialog, workingValues);
 		fJavaPreview.setPreviewText(fPreview);
 	}
-
+	
 	protected Composite doCreatePreferences(Composite parent) {
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
 		
 		final Group bracesGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BracesTabPage.group.brace_positions.title")); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.class_declaration"), DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.anonymous_class_declaration"), DefaultCodeFormatterConstants.FORMATTER_ANONYMOUS_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.method_declaration"), DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.blocks"), DefaultCodeFormatterConstants.FORMATTER_BLOCK_BRACE_POSITION); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.switch_case"), DefaultCodeFormatterConstants.FORMATTER_SWITCH_BRACE_POSITION); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.array_initializer"), DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_BRACE_POSITION); //$NON-NLS-1$
-
+		createBracesCombo(bracesGroup, "BracesTabPage.option.class_declaration", DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, "BracesTabPage.option.anonymous_class_declaration", DefaultCodeFormatterConstants.FORMATTER_ANONYMOUS_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, "BracesTabPage.option.method_declaration", DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, "BracesTabPage.option.blocks", DefaultCodeFormatterConstants.FORMATTER_BLOCK_BRACE_POSITION); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, "BracesTabPage.option.switch_case", DefaultCodeFormatterConstants.FORMATTER_SWITCH_BRACE_POSITION); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, "BracesTabPage.option.array_initializer", DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_BRACE_POSITION); //$NON-NLS-1$
 		
 		return composite;
 	}
 	
-	private void createBracesCombo(Composite composite, String name, String key) {
-		createComboPref(composite, NUM_COLUMNS, name, key, fBracePositions, fBracePositionNames);
+	private void createBracesCombo(Composite composite, String messagesKey, String key) {
+		createComboPref(composite, NUM_COLUMNS, FormatterMessages.getString(messagesKey), key, fBracePositions, fBracePositionNames);
 	}
 }

@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	
-	private final String fPreview=
+	private final static String fPreview=
 	createPreviewHeader(FormatterMessages.getString("ControlStatementsTabPage.preview.header")) + //$NON-NLS-1$
 	"class Example {" +	//$NON-NLS-1$	
 	"  void bar() {" +	//$NON-NLS-1$
@@ -56,13 +56,13 @@ public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	
 	
 	
-	private final String [] NOTINSERT_INSERT= {
+	private final static String [] NOTINSERT_INSERT= {
 	    JavaCore.DO_NOT_INSERT,
 	    JavaCore.INSERT
 	}; 
 	
 
-	private final int NUM_COLUMNS= 4; 
+	private final static int NUM_COLUMNS= 4; 
 	
 	
 	
@@ -97,6 +97,8 @@ public class ControlStatementsTabPage extends ModifyDialogTabPage {
 			}
 			
 		});
+		
+		fSimpleIfPref.setEnabled(!fThenStatementPref.getChecked());
 		
 		createOption(ifElseGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_else_on_same_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_ELSE_STATEMENT_ON_SAME_LINE, FALSE_TRUE); //$NON-NLS-1$
 		createCheckboxPref(ifElseGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_else_if_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF, FALSE_TRUE); //$NON-NLS-1$

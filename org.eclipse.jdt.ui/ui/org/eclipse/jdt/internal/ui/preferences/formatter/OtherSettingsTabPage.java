@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class OtherSettingsTabPage extends ModifyDialogTabPage {
 	
-	private final String fPreview=
+	private final static String fPreview=
 		createPreviewHeader(FormatterMessages.getString("OtherSettingsTabPage.preview.header")) + //$NON-NLS-1$
 		"class Example {" + //$NON-NLS-1$
 		"int theInt= 1;" + //$NON-NLS-1$
@@ -32,12 +32,12 @@ public class OtherSettingsTabPage extends ModifyDialogTabPage {
 		"}" + //$NON-NLS-1$
 		"}"; //$NON-NLS-1$
 		
-	private final String [] MULTI_ALIGN_VALUES= {
+	private final static String [] MULTI_ALIGN_VALUES= {
 	    DefaultCodeFormatterConstants.FORMATTER_NO_ALIGNMENT,
 	    DefaultCodeFormatterConstants.FORMATTER_MULTICOLUMN
 	};
 	
-	private final int NUM_COLUMNS= 4;
+	private final static int NUM_COLUMNS= 4;
 	
 	/**
 	 * Create a new GeneralSettingsTabPage.
@@ -53,7 +53,6 @@ public class OtherSettingsTabPage extends ModifyDialogTabPage {
 		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
 
 		final Group generalGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("OtherSettingsTabPage.general_group.title")); //$NON-NLS-1$
-		createNumberPref(generalGroup, NUM_COLUMNS, FormatterMessages.getString("OtherSettingsTabPage.general_group.option.max_line_width"), DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, Integer.MAX_VALUE); //$NON-NLS-1$
 		createNumberPref(generalGroup, NUM_COLUMNS, FormatterMessages.getString("OtherSettingsTabPage.general_group.option.tab_size"), DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 999); //$NON-NLS-1$
 		createCheckboxPref(generalGroup, NUM_COLUMNS, FormatterMessages.getString("OtherSettingsTabPage.general_group.option.use_tab_char"), DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, new String [] {JavaCore.SPACE, JavaCore.TAB}); //$NON-NLS-1$
 		

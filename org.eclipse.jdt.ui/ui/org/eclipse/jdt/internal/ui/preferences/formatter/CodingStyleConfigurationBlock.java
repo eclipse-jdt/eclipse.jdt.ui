@@ -198,12 +198,17 @@ public class CodingStyleConfigurationBlock {
 		}
 		
 		private void modifyButtonPressed() {
-			final ModifyDialog modifyDialog= new ModifyDialog(fComposite.getShell(), fProfileManager.getSelected());
+			final ModifyDialog modifyDialog= new ModifyDialog(fComposite.getShell(), fProfileManager.getSelected(), false);
 			modifyDialog.open();
 		}
 		
 		private void deleteButtonPressed() {
-			fProfileManager.deleteSelected();
+			if (MessageDialog.openQuestion(
+				fComposite.getShell(), 
+				FormatterMessages.getString("CodingStyleConfigurationBlock.delete_confirmation.title"), //$NON-NLS-1$
+				FormatterMessages.getFormattedString("CodingStyleConfigurationBlock.delete_confirmation.question", fProfileManager.getSelected().getName()))) { //$NON-NLS-1$
+				fProfileManager.deleteSelected();
+			}
 		}
 		
 		private void newButtonPressed() {
@@ -212,7 +217,7 @@ public class CodingStyleConfigurationBlock {
 				return;
 			if (!p.openEditDialog()) 
 				return;
-			final ModifyDialog modifyDialog= new ModifyDialog(fComposite.getShell(), p.getCreatedProfile());
+			final ModifyDialog modifyDialog= new ModifyDialog(fComposite.getShell(), p.getCreatedProfile(), true);
 			modifyDialog.open();
 		}
 		

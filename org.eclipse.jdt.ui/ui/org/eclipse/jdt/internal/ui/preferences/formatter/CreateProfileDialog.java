@@ -55,7 +55,9 @@ public class CreateProfileDialog extends StatusDialog {
 	private Combo fProfileCombo;
 	private Button fEditCheckbox;
 	
-	private final StatusInfo fOk, fEmpty, fDuplicate;
+	private final static StatusInfo fOk= new StatusInfo();
+	private final static StatusInfo fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("CreateProfileDialog.status.message.profile_name_is_empty")); //$NON-NLS-1$
+	private final static StatusInfo fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("CreateProfileDialog.status.message.profile_with_this_name_already_exists")); //$NON-NLS-1$;
 
 	private final ProfileManager fProfileManager;
 	private final List fSortedProfiles;
@@ -72,9 +74,6 @@ public class CreateProfileDialog extends StatusDialog {
 		fProfileManager= profileManager;
 		fSortedProfiles= fProfileManager.getSortedProfiles();
 		fSortedNames= fProfileManager.getSortedNames();
-		fOk= new StatusInfo();
-		fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("CreateProfileDialog.status.message.profile_with_this_name_already_exists")); //$NON-NLS-1$
-		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("CreateProfileDialog.status.message.profile_name_is_empty")); //$NON-NLS-1$
 	}
 	
 	

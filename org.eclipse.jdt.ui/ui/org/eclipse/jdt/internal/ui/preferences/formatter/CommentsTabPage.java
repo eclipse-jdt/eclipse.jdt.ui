@@ -32,7 +32,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 public class CommentsTabPage extends ModifyDialogTabPage {
 	
 	
-	private final class Controller implements Observer {
+	private final static class Controller implements Observer {
 		
 		private final Collection fMasters;
 		private final Collection fSlaves;
@@ -65,10 +65,10 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 	}
 	
 	
-	final int NUM_COLUMNS= 4;
+	private final static int NUM_COLUMNS= 4;
 	
 
-	final String fPreview=
+	private final static String fPreview=
 		createPreviewHeader("An example for comment formatting. This example is meant to illustrate the various possiblilities offered by <i>Eclipse</i> in order to format comments.") +	//$NON-NLS-1$
 		"package mypackage;\n" + //$NON-NLS-1$
 		"/**\n" + //$NON-NLS-1$
@@ -97,8 +97,8 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		fJavaPreview.setPreviewText(fPreview);
 	}
 
-	public void updatePreview() {
-	    super.updatePreview();
+	public void doUpdatePreview() {
+	    super.doUpdatePreview();
 	}
 	
 	protected Composite doCreatePreferences(Composite parent) {
@@ -175,6 +175,6 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 	}
 	
 	private CheckboxPreference createPref(Composite composite, String text, String key) {
-	    return createCheckboxPref(composite, NUM_COLUMNS, text, key, FALSE_TRUE);
+		return createCheckboxPref(composite, NUM_COLUMNS, text, key, FALSE_TRUE);
 	}
 }

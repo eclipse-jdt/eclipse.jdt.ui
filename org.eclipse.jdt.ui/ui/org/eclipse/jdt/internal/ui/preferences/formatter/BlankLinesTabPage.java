@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class BlankLinesTabPage extends ModifyDialogTabPage {
 
-	private final String fPreview=
+	private final static String fPreview=
 	createPreviewHeader(FormatterMessages.getString("BlankLinesTabPage.preview.header")) + //$NON-NLS-1$
 	"package foo.bar.baz;" + //$NON-NLS-1$
 	"import java.util.List;" + //$NON-NLS-1$
@@ -47,10 +47,10 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 	"}" + //$NON-NLS-1$
 	"}"; //$NON-NLS-1$
 	
-	private final int MIN_NUMBER_LINES= 0;
-	private final int MAX_NUMBER_LINES= 99;
+	private final static int MIN_NUMBER_LINES= 0;
+	private final static int MAX_NUMBER_LINES= 99;
 	
-	private final int NUM_COLUMNS= 4;
+	private final static int NUM_COLUMNS= 4;
 	
 	
 	/**
@@ -74,34 +74,32 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
 		
 		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.package.group.title")); //$NON-NLS-1$
-		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.package.option.before"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_PACKAGE); //$NON-NLS-1$
-		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.package.option.after"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_PACKAGE); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.package.option.before", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_PACKAGE); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.package.option.after", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_PACKAGE); //$NON-NLS-1$
 		
 		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.import.group.title")); //$NON-NLS-1$
-		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.import.option.before"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS); //$NON-NLS-1$
-		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.import.option.after"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_IMPORTS); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.import.option.before", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.import.option.after", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_IMPORTS); //$NON-NLS-1$
 		
 		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.class.group.title")); //$NON-NLS-1$
-		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.class.option.before_first_decl"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION); //$NON-NLS-1$
-		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.class.option.before_decls_of_same_kind"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK); //$NON-NLS-1$
-		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.class.option.before_member_class_decls"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE); //$NON-NLS-1$
-		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.class.option.before_field_decls"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD); //$NON-NLS-1$
-		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.class.option.before_method_decls"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_first_decl", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_decls_of_same_kind", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_member_class_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_field_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_method_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD); //$NON-NLS-1$
 
 		createLabel(NUM_COLUMNS, composite,""); //$NON-NLS-1$
 		
 		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.blank_lines.group.title")); //$NON-NLS-1$
-		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.blank_lines.option.empty_lines_to_preserve"), DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.blank_lines.option.empty_lines_to_preserve", DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE); //$NON-NLS-1$
 		return composite;
 	}
 	
 	/**
 	 * A helper method to create a number preference for blank lines.
 	 */
-	protected void createBlankLineTextField(Composite composite, String name, String key) {
-		final NumberPreference numPref= new NumberPreference(composite, NUM_COLUMNS, fWorkingValues, 
-				key, MIN_NUMBER_LINES, MAX_NUMBER_LINES, name);
-		numPref.addObserver(fUpdater);
+	protected void createBlankLineTextField(Composite composite, String messagesKey, String key) {
+		createNumberPref(composite, NUM_COLUMNS, FormatterMessages.getString(messagesKey), key, MIN_NUMBER_LINES, MAX_NUMBER_LINES);
 	}
 }
 

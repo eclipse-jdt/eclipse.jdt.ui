@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
@@ -19,7 +21,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -39,28 +40,38 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 public class ModifyDialog extends StatusDialog {
     
     /**
-     * The keys to retrieve the preferred width and height from the dialog settings.
+     * The keys to retrieve the preferred area from the dialog settings.
      */
-    private static final String DS_KEY_PREFERRED_WIDTH = JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.preferred_width"; //$NON-NLS-1$
-    private static final String DS_KEY_PREFERRED_HEIGHT = JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.preferred_height"; //$NON-NLS-1$
-
+    private static final String DS_KEY_PREFERRED_WIDTH= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.preferred_width"; //$NON-NLS-1$
+    private static final String DS_KEY_PREFERRED_HEIGHT= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.preferred_height"; //$NON-NLS-1$
+    private static final String DS_KEY_PREFERRED_X= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.preferred_x"; //$NON-NLS-1$
+    private static final String DS_KEY_PREFERRED_Y= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.preferred_y"; //$NON-NLS-1$
+    
+    
     /**
-     * These are used if no user defined settings are available.
+     * The key to store the number (beginning at 0) of the tab page which had the 
+     * focus last time.
      */
-    private final static int PREFERRED_WIDTH_CHARS= 150;
-    private final static int PREFERRED_HEIGHT_CHARS= 40;
+    private static final String DS_KEY_LAST_FOCUS= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog.last_focus"; //$NON-NLS-1$ 
 
 	
 	private final String fTitle;
+	
+	private final boolean fNewProfile;
 
 	private final Profile fProfile;
 	private final Map fWorkingValues;
 	
 	private final IStatus fOkStatus;
 	
+	protected final List fTabPages;
+	
+	final IDialogSettings fDialogSettings;
+	private TabFolder fTabFolder;
 		
-	protected ModifyDialog(Shell parentShell, Profile profile) {
+	protected ModifyDialog(Shell parentShell, Profile profile, boolean newProfile) {
 		super(parentShell);
+		fNewProfile= newProfile;
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX );
 		fProfile= profile;
 		fWorkingValues= new HashMap(fProfile.getSettings());
@@ -68,56 +79,59 @@ public class ModifyDialog extends StatusDialog {
 		updateStatus(fOkStatus);
 		fTitle= FormatterMessages.getFormattedString("ModifyDialog.dialog.title", profile.getName()); //$NON-NLS-1$
 		setStatusLineAboveButtons(false);
+		fTabPages= new ArrayList();
+		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();	
 	}
 	
+	public void create() {
+		super.create();
+		int lastFocusNr= 0;
+		try {
+			lastFocusNr= fDialogSettings.getInt(DS_KEY_LAST_FOCUS);
+			if (lastFocusNr < 0) lastFocusNr= 0;
+			if (lastFocusNr > fTabPages.size() - 1) lastFocusNr= fTabPages.size() - 1;
+		} catch (NumberFormatException x) {
+			lastFocusNr= 0;
+		}
+		
+		if (!fNewProfile) {
+			fTabFolder.setSelection(lastFocusNr);
+			((ModifyDialogTabPage)fTabFolder.getSelection()[0].getData()).setInitialFocus();
+		}
+	}
 	
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(fTitle);
 	}
 
-	
-	protected void okPressed() {
-		fProfile.setSettings(fWorkingValues);
-		final Rectangle shell= getShell().getBounds();
-		final IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
-        settings.put(DS_KEY_PREFERRED_WIDTH, shell.width);
-        settings.put(DS_KEY_PREFERRED_HEIGHT, shell.height);
-	
-		super.okPressed();
-	}
-	
 	protected Control createDialogArea(Composite parent) {
-		
-		GridData gd;
 		
 		final Composite composite= (Composite)super.createDialogArea(parent);
 		
-		final TabFolder tabFolder= new TabFolder(composite, SWT.NONE);
-		gd= new GridData(GridData.FILL_BOTH);
-		tabFolder.setLayoutData(gd);
+		fTabFolder = new TabFolder(composite, SWT.NONE);
+		fTabFolder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		addTabPage(tabFolder, FormatterMessages.getString("ModifyDialog.tabpage.braces.title"), new BracesTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(tabFolder, FormatterMessages.getString("ModifyDialog.tabpage.indentation.title"), new IndentationTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(tabFolder, FormatterMessages.getString("ModifyDialog.tabpage.whitespace.title"), new WhiteSpaceTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(tabFolder, FormatterMessages.getString("ModifyDialog.tabpage.blank_lines.title"), new BlankLinesTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(tabFolder, FormatterMessages.getString("ModifyDialog.tabpage.new_lines.title"), new NewLinesTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(tabFolder, FormatterMessages.getString("ModifyDialog.tabpage.control_statements.title"), new ControlStatementsTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(tabFolder, FormatterMessages.getString("ModifyDialog.tabpage.line_wrapping.title"), new LineWrappingTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(tabFolder, FormatterMessages.getString("ModifyDialog.tabpage.comments.title"), new CommentsTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(tabFolder, FormatterMessages.getString("ModifyDialog.tabpage.other.title"), new OtherSettingsTabPage(this, fWorkingValues)); //$NON-NLS-1$
+		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.indentation.title"), new IndentationTabPage(this, fWorkingValues)); //$NON-NLS-1$
+		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.braces.title"), new BracesTabPage(this, fWorkingValues)); //$NON-NLS-1$
+		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.whitespace.title"), new WhiteSpaceTabPage(this, fWorkingValues)); //$NON-NLS-1$
+		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.blank_lines.title"), new BlankLinesTabPage(this, fWorkingValues)); //$NON-NLS-1$
+		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.new_lines.title"), new NewLinesTabPage(this, fWorkingValues)); //$NON-NLS-1$
+		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.control_statements.title"), new ControlStatementsTabPage(this, fWorkingValues)); //$NON-NLS-1$
+		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.line_wrapping.title"), new LineWrappingTabPage(this, fWorkingValues)); //$NON-NLS-1$
+		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.comments.title"), new CommentsTabPage(this, fWorkingValues)); //$NON-NLS-1$
 		
 		applyDialogFont(composite);
 		
-		tabFolder.addSelectionListener(new SelectionListener() {
+		fTabFolder.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {}
 			public void widgetSelected(SelectionEvent e) {
-				final TabItem t= (TabItem)e.item;
-				final ModifyDialogTabPage page= (ModifyDialogTabPage)t.getData();
-				page.updatePreview();
+				final TabItem tabItem= (TabItem)e.item;
+				final ModifyDialogTabPage page= (ModifyDialogTabPage)tabItem.getData();
+				fDialogSettings.put(DS_KEY_LAST_FOCUS, fTabPages.indexOf(page));
+				page.makeVisible();
 			}
 		});
-		
 		return composite;
 	}
 	
@@ -127,43 +141,48 @@ public class ModifyDialog extends StatusDialog {
 
     protected void constrainShellSize() {
         
-        final IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
-
         final Shell shell= getShell();
-        final Rectangle displayBounds= shell.getDisplay().getClientArea();
         
-        int preferredWidth;
-        int preferredHeight;
         try {
-            preferredWidth= settings.getInt(DS_KEY_PREFERRED_WIDTH);
-            preferredHeight= settings.getInt(DS_KEY_PREFERRED_HEIGHT);
-        } catch (NumberFormatException x) {
-            preferredWidth= convertWidthInCharsToPixels(PREFERRED_WIDTH_CHARS);
-            preferredHeight= convertHeightInCharsToPixels(PREFERRED_HEIGHT_CHARS);
+        	final int x= fDialogSettings.getInt(DS_KEY_PREFERRED_X);
+        	final int y= fDialogSettings.getInt(DS_KEY_PREFERRED_Y);
+        	final int width= fDialogSettings.getInt(DS_KEY_PREFERRED_WIDTH);
+            final int height= fDialogSettings.getInt(DS_KEY_PREFERRED_HEIGHT);
+            
+            shell.setLocation(x, y);
+            shell.setSize(width, height);
+            
+        } catch (NumberFormatException ex) {
+        	// there are no values saved, so just leave the defaults
         }
-        
-        final Point shellSize= new Point(preferredWidth, preferredHeight);
-        
-        shellSize.x= Math.min(shellSize.x, displayBounds.width);
-        shellSize.y= Math.min(shellSize.y, displayBounds.height);
-        
-        Point shellLocation= shell.getLocation();
 
-        shellLocation.x= Math.max(0, Math.min(displayBounds.x + displayBounds.width  - shellSize.x, shellLocation.x));
-        shellLocation.y= Math.max(0, Math.min(displayBounds.y + displayBounds.height - shellSize.y, shellLocation.y));
-        
-        shell.setLocation(shellLocation);
-        shell.setSize(shellSize);
+        // make sure we're on the display:
+        super.constrainShellSize();
     }
     
+	public boolean close()
+	{
+		fProfile.setSettings(fWorkingValues);
+		
+		final Rectangle shell= getShell().getBounds();
+		
+		fDialogSettings.put(DS_KEY_PREFERRED_WIDTH, shell.width);
+		fDialogSettings.put(DS_KEY_PREFERRED_HEIGHT, shell.height);
+		fDialogSettings.put(DS_KEY_PREFERRED_X, shell.x);
+		fDialogSettings.put(DS_KEY_PREFERRED_Y, shell.y);
+		
+		return super.close();
+	}
+    
+    
 	
-	
-	private final static void addTabPage(TabFolder tabFolder, String title, ModifyDialogTabPage tabPage) {
+	private final void addTabPage(TabFolder tabFolder, String title, ModifyDialogTabPage tabPage) {
 		final TabItem tabItem= new TabItem(tabFolder, SWT.NONE);
 		applyDialogFont(tabItem.getControl());
 		tabItem.setText(title);
 		tabItem.setData(tabPage);
 		tabItem.setControl(tabPage.createContents(tabFolder));
+		fTabPages.add(tabPage);
 	}
 	
 	

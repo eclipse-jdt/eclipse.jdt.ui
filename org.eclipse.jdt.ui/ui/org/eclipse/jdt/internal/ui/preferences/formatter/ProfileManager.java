@@ -180,7 +180,7 @@ public class ProfileManager extends Observable {
 	/**
 	 * The key of the preference where the selected profile is stored.
 	 */
-	private final String PROFILE_KEY= PreferenceConstants.FORMATTER_PROFILE; 
+	private final static String PROFILE_KEY= PreferenceConstants.FORMATTER_PROFILE; 
 
 	
 	
@@ -246,11 +246,11 @@ public class ProfileManager extends Observable {
 	/**
 	 * Notify observers with a message. The message must be one of the following:
 	 * 
-	 * @see SELECTION_CHANGED_EVENT
-	 * @see PROFILE_DELETED_EVENT
-	 * @see PROFILE_RENAMED_EVENT
-	 * @see PROFILE_CREATED_EVENT
-	 * @see SETTINGS_CHANGED_EVENT
+	 * @see #SELECTION_CHANGED_EVENT
+	 * @see #PROFILE_DELETED_EVENT
+	 * @see #PROFILE_RENAMED_EVENT
+	 * @see #PROFILE_CREATED_EVENT
+	 * @see #SETTINGS_CHANGED_EVENT
 	 */
 	protected void notifyObservers(int message) {
 		setChanged();
@@ -319,7 +319,6 @@ public class ProfileManager extends Observable {
 	 */
 	public static Map getJavaSettings() {
 		final Map options= DefaultCodeFormatterOptions.getJavaConventionsSettings().getMap();
-			// TODO: change to DefaultCodeFormatterConstants.getJavaConventionsSettings();
 		new CommentFormattingContext().storeToMap(getUIPreferenceStore(), options, true);
 		return options;
 	}
@@ -341,7 +340,7 @@ public class ProfileManager extends Observable {
 	/** 
 	 * Get a list of all profiles, sorted alphabetically. Unless the set of profiles has been modified between
 	 * the two calls, the sequence is guaranteed to correspond to the one returned by <code>getSortedNames</code>. 
-	 * @see getSortedNames
+	 * @see #getSortedNames()
 	 */
 	public List getSortedProfiles() {
 		return new ArrayList(fProfilesByName);
@@ -351,7 +350,7 @@ public class ProfileManager extends Observable {
 	 * Get the names of all profiles stored in this profile manager, sorted alphabetically. Unless the set of 
 	 * profiles has been modified between the two calls, the sequence is guaranteed to correspond to the one 
 	 * returned by <code>getSortedProfiles</code>.
-	 * @see getSortedProfiles  
+	 * @see #getSortedProfiles()  
 	 */	
 	public String [] getSortedNames() {
 		final String [] sortedNames= new String[fProfilesByName.size()];
