@@ -4,6 +4,9 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,6 +24,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -36,6 +40,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -73,6 +78,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private String fMethodName;
 	private boolean fThrowRuntimeExceptions;
 	private int fMethodFlags= Modifier.PROTECTED;
+	private List fParameterInfos;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
 	private static final String BLANK= " "; //$NON-NLS-1$
@@ -144,6 +150,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				setVisibility(visibility);
 				
 			}
+			createParameterInfos();
 			return result;
 		} catch (CoreException e){	
 			throw new JavaModelException(e);
@@ -192,6 +199,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 */
 	public String getVisibility() {
 		return fVisibility;
+	}
+	
+	/**
+	 * Returns the parameter infos.	 * @return a list of parameter infos.	 */
+	public List getParameterInfos() {
+		return fParameterInfos;
 	}
 	
 	/**
@@ -333,6 +346,21 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	//---- Helper methods ------------------------------------------------------------------------
 	
+	private void createParameterInfos() {
+		IVariableBinding[] arguments= fAnalyzer.getArguments();
+		fParameterInfos= new ArrayList(arguments.length);
+		ASTNode root= fAnalyzer.getEnclosingMethod();
+		for (int i= 0; i < arguments.length; i++) {
+			IVariableBinding argument= arguments[i];
+			if (argument == null)
+				continue;
+			VariableDeclaration declaration= ASTNodes.findVariableDeclaration(argument, root);
+			ParameterInfo info= new ParameterInfo(getType(declaration), argument.getName(), i);
+			info.setData(argument);
+			fParameterInfos.add(info);
+		}
+	}
+	
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {
 		status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodRefactoring.no_set_of_statements")); //$NON-NLS-1$
 		return status;	
@@ -410,15 +438,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 				break;
 		}
 		
-		IVariableBinding[] arguments= fAnalyzer.getArguments();
 		code.append(fMethodName);
 		code.append("("); //$NON-NLS-1$
-		for (int i= 0; i < arguments.length; i++) {
-			if (arguments[i] == null)
-				continue;
+		for (int i= 0; i < fParameterInfos.size(); i++) {
 			if (i > 0)
 				code.append(COMMA_BLANK);
-			code.append(arguments[i].getName());
+			code.append(((ParameterInfo)fParameterInfos.get(i)).getNewName());
 		}		
 		code.append(")"); //$NON-NLS-1$
 						
@@ -462,17 +487,31 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	private void appendArguments(StringBuffer buffer) {
 		buffer.append('('); //$NON-NLS-1$
-		IVariableBinding[] arguments= fAnalyzer.getArguments();
-		for (int i= 0; i < arguments.length; i++) {
-			IVariableBinding argument= arguments[i];
-			if (argument == null)
-				continue;
-				
+		int size= fParameterInfos.size();
+		for (int i= 0; i < size; i++) {
+			ParameterInfo info= (ParameterInfo)fParameterInfos.get(i);
 			if (i > 0)
 				buffer.append(COMMA_BLANK);
-			appendLocalDeclaration(buffer, argument);
+			appendModifiers(buffer, info);
+			buffer.append(info.getType());
+			buffer.append(BLANK);
+			buffer.append(info.getNewName());
 		}
 		buffer.append(')'); //$NON-NLS-1$
+	}
+	
+	private void appendModifiers(StringBuffer buffer, ParameterInfo parameter) {
+		ASTNode root= fAnalyzer.getEnclosingMethod();
+		VariableDeclaration declaration= ASTNodes.findVariableDeclaration((IVariableBinding)parameter.getData(), root);
+		appendModifiers(buffer, declaration);
+	}
+	
+	private void appendModifiers(StringBuffer buffer, VariableDeclaration declaration) {
+		String modifiers= ASTNodes.modifierString(ASTNodes.getModifiers(declaration));
+		if (modifiers.length() > 0) {
+			buffer.append(modifiers);
+			buffer.append(BLANK);
+		}
 	}
 	
 	private void appendThrownExceptions(StringBuffer buffer) {
@@ -492,21 +531,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private void appendLocalDeclaration(StringBuffer buffer, IVariableBinding local) {
 		ASTNode root= fAnalyzer.getEnclosingMethod();
 		VariableDeclaration declaration= ASTNodes.findVariableDeclaration(local, root);
-		String modifiers= ASTNodes.modifierString(ASTNodes.getModifiers(declaration));
-		if (modifiers.length() > 0) {
-			buffer.append(modifiers);
-			buffer.append(BLANK);
-		}
+		appendModifiers(buffer, declaration);
 		buffer.append(getType(declaration));
 		buffer.append(BLANK);
 		buffer.append(local.getName());
-	}
-	
-	private void appendLocalDeclaration(StringBuffer buffer, String indent, IVariableBinding local, String delimiter) {
-		buffer.append(indent);
-		appendLocalDeclaration(buffer, local);
-		buffer.append(SEMICOLON);
-		buffer.append(delimiter);
 	}
 	
 	private String getLocalDeclaration(IVariableBinding local) {
@@ -517,15 +545,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	private String getType(VariableDeclaration declaration) {
-		Type type= ASTNodes.getType(declaration);
-		StringBuffer result= new StringBuffer();
-		result.append(ASTNodes.asString(type));
-		int extraDim= 0;
-		if (declaration.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT)
-			extraDim= ((VariableDeclarationFragment)declaration).getExtraDimensions();
-		for (int i= 0; i < extraDim; i++) {
-			result.append("[]"); //$NON-NLS-1$
-		}
-		return result.toString();
+		return ASTNodes.asString(ASTNodes.getType(declaration));
 	}
 }

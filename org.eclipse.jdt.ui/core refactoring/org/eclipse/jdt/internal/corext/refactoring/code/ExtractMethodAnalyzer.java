@@ -191,15 +191,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 			case ACCESS_TO_LOCAL:
 				VariableDeclaration declaration= ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingMethod);
 				fReturnType= ASTNodes.getType(declaration);
-				if (declaration.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-					int dim= ((VariableDeclarationFragment)declaration).getExtraDimensions();
-					if (dim > 0) {
-						fReturnType= (Type)ASTNode.copySubtree(ast, fReturnType);
-						for (int i= 0; i < dim; i++) {
-							fReturnType= ast.newArrayType(fReturnType);
-						}
-					}
-				}
 				break;
 			case EXPRESSION:
 				Expression expression= (Expression)getFirstSelectedNode();

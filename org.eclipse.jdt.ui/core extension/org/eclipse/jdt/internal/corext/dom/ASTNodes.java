@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -121,22 +122,35 @@ public class ASTNodes {
 	}
 	
 	/**
-	 * Returns the type for the given declaration. If the declaration is
-	 * a <code>VariableDeclarationFragment</code> it doesn't
-	 * contain any extra array dimensions. This would require creating
-	 * a new Type node which would invalidate bindings on the AST.
+	 * Returns the type node for the given declaration. The returned node
+	 * is a copy and is owned by a different AST. The returned node contains
+	 * any extra dimensions.
 	 */
 	public static Type getType(VariableDeclaration declaration) {
+		AST ast= new AST();
+		Type type= null;
 		if (declaration instanceof SingleVariableDeclaration) {
-			return ((SingleVariableDeclaration)declaration).getType();
+			type= ((SingleVariableDeclaration)declaration).getType();
 		} else if (declaration instanceof VariableDeclarationFragment) {
 			ASTNode parent= ((VariableDeclarationFragment)declaration).getParent();
 			if (parent instanceof VariableDeclarationExpression)
-				return ((VariableDeclarationExpression)parent).getType();
+				type= ((VariableDeclarationExpression)parent).getType();
 			else if (parent instanceof VariableDeclarationStatement)
-				return ((VariableDeclarationStatement)parent).getType();
+				type= ((VariableDeclarationStatement)parent).getType();
 		}
-		return null;		
+		if (type == null)
+			return null;
+		type= (Type)ASTNode.copySubtree(ast, type);
+		int extraDim= 0;
+		if (declaration.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			extraDim= ((VariableDeclarationFragment)declaration).getExtraDimensions();
+		} else if (declaration.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
+			extraDim= ((SingleVariableDeclaration)declaration).getExtraDimensions();
+		}
+		for (int i= 0; i < extraDim; i++) {
+			type= ast.newArrayType(type);
+		}
+		return type;		
 	}
 	
 	public static int getModifiers(VariableDeclaration declaration) {

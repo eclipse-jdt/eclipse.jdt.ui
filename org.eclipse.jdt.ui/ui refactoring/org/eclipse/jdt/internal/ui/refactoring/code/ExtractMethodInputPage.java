@@ -19,10 +19,13 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.refactoring.ChangeParametersControl;
+import org.eclipse.jdt.internal.ui.refactoring.ParameterChangeListener;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
@@ -104,6 +107,19 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 		}
 		layouter.perform(label, group, 1);
 		
+		ChangeParametersControl cp= new ChangeParametersControl(result, SWT.NULL, "Parameters", new ParameterChangeListener() {
+			public void paramterChanged(ParameterInfo parameter) {
+				updatePreview(getText());
+			}
+			public void parameterReordered() {
+				updatePreview(getText());
+			}
+		}, false);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
+		gd.horizontalSpan= 2;
+		cp.setLayoutData(gd);
+		cp.setInput(fRefactoring.getParameterInfos());
+		
 		Button checkBox= new Button(result, SWT.CHECK);
 		checkBox.setText(RefactoringMessages.getString("ExtractMethodInputPage.throwRuntimeExceptions")); //$NON-NLS-1$
 		checkBox.setSelection(fSettings.getBoolean(THROW_RUNTIME_EXCEPTIONS));
@@ -119,7 +135,7 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 		layouter.perform(label);
 		
 		label= new Label(result, SWT.NONE);
-		GridData gd= new GridData();
+		gd= new GridData();
 		gd.verticalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
 		label.setText(RefactoringMessages.getString("ExtractMethodInputPage.signature_preview")); //$NON-NLS-1$
