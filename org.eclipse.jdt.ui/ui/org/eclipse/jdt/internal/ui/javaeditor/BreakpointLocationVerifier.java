@@ -94,7 +94,7 @@ public class BreakpointLocationVerifier {
 			}
 		}
 		// add 1 to the line number - Document is 0 based, JDI is 1 based
-		return lineNumber++;
+		return lineNumber + 1;
 	}
 	
 	
