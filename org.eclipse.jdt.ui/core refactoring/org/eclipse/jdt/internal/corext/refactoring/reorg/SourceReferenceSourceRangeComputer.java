@@ -95,19 +95,17 @@ public class SourceReferenceSourceRangeComputer {
 					case ITerminalSymbols.TokenNameSEMICOLON:
 						break;	
 					case ITerminalSymbols.TokenNameCOMMENT_LINE :
-						break;
-						
-					default:{
-						int currentTokenStartLine= buff.getLineOfOffset(scanner.getCurrentTokenStartPosition() + 1);
-						int currentTokenEndLine= buff.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
-						if (endOnCurrentTokenStart(startLine, currentTokenStartLine, currentTokenEndLine))
-							return scanner.getCurrentTokenEndPosition() - scanner.getCurrentTokenSource().length + 1;
-						TextRegion tokenStartLine= buff.getLineInformation(currentTokenStartLine);
-						if (tokenStartLine != null)
-							return tokenStartLine.getOffset();
+						if (startLine == getCurrentTokenStartLine(scanner, buff))
+							break;
 						else
-							return end; //fallback	
-					}	
+							return stopProcessing(end, scanner, buff, startLine);
+					case ITerminalSymbols.TokenNameCOMMENT_BLOCK :
+						if (startLine == getCurrentTokenStartLine(scanner, buff))
+							break;
+						else	
+							return stopProcessing(end, scanner, buff, startLine);
+					default:
+						return stopProcessing(end, scanner, buff, startLine);
 				}
 				token= scanner.getNextToken();
 			}
@@ -115,6 +113,22 @@ public class SourceReferenceSourceRangeComputer {
 		} catch (InvalidInputException e){
 			return end;//fallback
 		}
+	}
+
+	private int stopProcessing(int end, IScanner scanner, TextBuffer buff, int startLine) {
+		int currentTokenStartLine= getCurrentTokenStartLine(scanner, buff);
+		int currentTokenEndLine= buff.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
+		if (endOnCurrentTokenStart(startLine, currentTokenStartLine, currentTokenEndLine))
+			return scanner.getCurrentTokenEndPosition() - scanner.getCurrentTokenSource().length + 1;
+		TextRegion tokenStartLine= buff.getLineInformation(currentTokenStartLine);
+		if (tokenStartLine != null)
+			return tokenStartLine.getOffset();
+		else
+			return end; //fallback	
+	}
+
+	private int getCurrentTokenStartLine(IScanner scanner, TextBuffer buff) {
+		return buff.getLineOfOffset(scanner.getCurrentTokenStartPosition() + 1);
 	}
 
 	private boolean endOnCurrentTokenStart(int startLine, int currentTokenStartLine,int currentTokenEndLine) {
@@ -139,10 +153,6 @@ public class SourceReferenceSourceRangeComputer {
 						break;
 					case ITerminalSymbols.TokenNameSEMICOLON:
 						break;	
-					case ITerminalSymbols.TokenNameCOMMENT_LINE :
-						break;
-					case ITerminalSymbols.TokenNameCOMMENT_BLOCK :
-						break;			
 					default:
 						if (scanner.getCurrentTokenStartPosition() == offset)
 							return lineOffset;
