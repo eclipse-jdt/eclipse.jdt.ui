@@ -283,7 +283,7 @@ public class NewNameQueries implements INewNameQueries {
 						dialog.open();
 						result[0]= resultId[dialog.getReturnCode()];
 					} catch (JavaModelException e) {
-						ExceptionHandler.handle(e, parentShell, "Error", "Internal error occurred. See log for details.");
+						ExceptionHandler.handle(e, parentShell, ReorgMessages.getString("NewNameQueries.21"), ReorgMessages.getString("NewNameQueries.22")); //$NON-NLS-1$ //$NON-NLS-2$
 						result[0]= IDialogConstants.NO_ID;
 					}
 				}

@@ -45,8 +45,8 @@ public class DeleteAction extends SelectionDispatchAction{
 
 	public DeleteAction(IWorkbenchSite site) {
 		super(site);
-		setText("&Delete");
-		setDescription("Deletes the selected elements");
+		setText(ReorgMessages.getString("DeleteAction.3")); //$NON-NLS-1$
+		setDescription(ReorgMessages.getString("DeleteAction.4")); //$NON-NLS-1$
 		fSuggestGetterSetterDeletion= true;//default
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE_DISABLED));

@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 public class ReorgMoveWizard extends RefactoringWizard{
 
 	public ReorgMoveWizard(MoveRefactoring ref) {
-		super(ref, "Move");
+		super(ref, ReorgMessages.getString("ReorgMoveWizard.3")); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
@@ -90,7 +90,7 @@ public class ReorgMoveWizard extends RefactoringWizard{
 				refactoringStatus= refactoring.setDestination((IJavaElement)selected);
 			else if (selected instanceof IResource)
 				refactoringStatus= refactoring.setDestination((IResource)selected);
-			else refactoringStatus= RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this operation.");
+			else refactoringStatus= RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("ReorgMoveWizard.4")); //$NON-NLS-1$
 			
 			updateUIStatus();
 			return refactoringStatus;

@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.MessageInputPage;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -32,7 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 public class DeleteWizard extends RefactoringWizard{
 	
 	public DeleteWizard(DeleteRefactoring ref) {
-		super(ref, "Confirm Delete");
+		super(ref, RefactoringMessages.getString("DeleteWizard.1")); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
@@ -110,7 +111,7 @@ public class DeleteWizard extends RefactoringWizard{
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 				setPageComplete(false);
-				return "Internal error. See log for details.";
+				return RefactoringMessages.getString("DeleteWizard.2"); //$NON-NLS-1$
 			}
 		}
 
@@ -147,21 +148,21 @@ public class DeleteWizard extends RefactoringWizard{
 			if (elements.length == 1){
 				IJavaElement element= elements[0];
 				if (isDefaultPackageWithLinkedFiles(element))	
-					return "Are you sure you want to delete linked resource ''{0}''?\nOnly the workspace link will be deleted. Link target will remain unchanged.";
+					return RefactoringMessages.getString("DeleteWizard.3"); //$NON-NLS-1$
 	
 				if (! isLinkedResource(element))
-					return "Are you sure you want to delete {0}?";
+					return RefactoringMessages.getString("DeleteWizard.4"); //$NON-NLS-1$
 		
 				if (! isLinkedPackageOrPackageFragmentRoot(element))	
-					return "Are you sure you want to delete linked resource ''{0}''?\nOnly the workspace link will be deleted. Link target will remain unchanged.";
+					return RefactoringMessages.getString("DeleteWizard.5"); //$NON-NLS-1$
 
 				//XXX workaround for jcore bugs - linked packages or source folders cannot be deleted properly		
-				return "Are you sure you want to delete linked resource ''{0}''?\nOnly the workspace link will be deleted. Link target will remain unchanged.\n\nNote that all subelements of the selected linked packages and package fragment roots will be removed from the workspace as well.";
+				return RefactoringMessages.getString("DeleteWizard.6"); //$NON-NLS-1$
 			} else {
 				if (isLinked(getSelectedResources()[0]))//checked before that this will work
-					return "Are you sure you want to delete linked resource ''{0}''?\nOnly the workspace link will be deleted. Link target will remain unchanged.";				
+					return RefactoringMessages.getString("DeleteWizard.7");				 //$NON-NLS-1$
 				else
-					return "Are you sure you want to delete {0}?";
+					return RefactoringMessages.getString("DeleteWizard.8"); //$NON-NLS-1$
 			}
 		}
 
@@ -169,13 +170,13 @@ public class DeleteWizard extends RefactoringWizard{
 			IResource[] resources= getSelectedResources();
 			IJavaElement[] javaElements= getSelectedJavaElements();
 			if (! containsLinkedResources(resources, javaElements))
-				return "Are you sure you want to delete these {0} elements?";
+				return RefactoringMessages.getString("DeleteWizard.9"); //$NON-NLS-1$
 
 			if (! containsLinkedPackagesOrPackageFragmentRoots(javaElements))	
-				return "Are you sure you want to delete these {0} elements?\n\nSelection contains linked resources.\nOnly the workspace links will be deleted. Link targets will remain unchanged.";
+				return RefactoringMessages.getString("DeleteWizard.10"); //$NON-NLS-1$
 
 			//XXX workaround for jcore bugs - linked packages or source folders cannot be deleted properly
-			return "Are you sure you want to delete these {0} elements?\n\nSelection contains linked packages.\nOnly the workspace links will be deleted. Link targets will remain unchanged.\n\nNote that all subelements of linked packages and package fragment roots will be removed from the workspace as well.";
+			return RefactoringMessages.getString("DeleteWizard.11"); //$NON-NLS-1$
 		}
 
 		private static boolean isLinkedPackageOrPackageFragmentRoot(IJavaElement element) {

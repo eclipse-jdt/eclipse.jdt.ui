@@ -42,8 +42,8 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 
 	public ReorgMoveAction(IWorkbenchSite site) {
 		super(site);
-		setText("&Move...");
-		setDescription("Move the selected elements");
+		setText(ReorgMessages.getString("ReorgMoveAction.3")); //$NON-NLS-1$
+		setDescription(ReorgMessages.getString("ReorgMoveAction.4")); //$NON-NLS-1$
 
 		update(getSelection());
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);

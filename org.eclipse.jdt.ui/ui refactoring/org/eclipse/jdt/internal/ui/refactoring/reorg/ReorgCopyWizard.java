@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 public class ReorgCopyWizard extends RefactoringWizard {
 
 	public ReorgCopyWizard(CopyRefactoring ref) {
-		super(ref, "Copy");
+		super(ref, ReorgMessages.getString("ReorgCopyWizard.1")); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
@@ -62,7 +62,7 @@ public class ReorgCopyWizard extends RefactoringWizard {
 				return getCopyRefactoring().setDestination((IJavaElement)selected);
 			if (selected instanceof IResource)
 				return getCopyRefactoring().setDestination((IResource)selected);
-			return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this operation.");
+			return RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("ReorgCopyWizard.2")); //$NON-NLS-1$
 		}		
 	}
 }

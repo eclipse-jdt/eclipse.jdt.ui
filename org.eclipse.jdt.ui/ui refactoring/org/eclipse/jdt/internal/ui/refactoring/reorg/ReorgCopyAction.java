@@ -42,8 +42,8 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 
 	public ReorgCopyAction(IWorkbenchSite site) {
 		super(site);
-		setText("&Copy...");
-		setDescription("Copy the selected elements");
+		setText(ReorgMessages.getString("ReorgCopyAction.3")); //$NON-NLS-1$
+		setDescription(ReorgMessages.getString("ReorgCopyAction.4")); //$NON-NLS-1$
 
 		update(getSelection());
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.COPY_ACTION);

@@ -153,7 +153,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			}
 			fTableViewer.refresh();
 			if (noSupertypeCanBeUsed()){
-				setMessage("No updates are possible for any of the supertypes", IMessageProvider.INFORMATION);
+				setMessage(RefactoringMessages.getString("UseSupertypeWizard.10"), IMessageProvider.INFORMATION); //$NON-NLS-1$
 				setPageComplete(false);	
 			}
 		}

@@ -56,7 +56,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		verifyDestination(initialSelection, true);
 
 		Label label= new Label(result, SWT.NONE);
-		label.setText("Select destination:");
+		label.setText(ReorgMessages.getString("ReorgUserInputPage.0")); //$NON-NLS-1$
 		label.setLayoutData(new GridData());
 		
 		fViewer= createViewer(result);

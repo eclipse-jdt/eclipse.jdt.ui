@@ -10,13 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -36,8 +31,9 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -45,6 +41,9 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 
 public class ExtractInterfaceWizard extends RefactoringWizard {
 	
@@ -221,8 +220,8 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		}
 		
 		private void addDeclareAsPublicCheckbox(Composite result) {
-			String[] keys= {"&public"};
-			String title= MessageFormat.format("Declare interface methods as ''{0}''", keys);
+			String[] keys= {"&public"}; //$NON-NLS-1$
+			String title= RefactoringMessages.getFormattedString("ExtractInterfaceWizard.12", keys); //$NON-NLS-1$
 			boolean defaultValue= getExtractInterfaceRefactoring().getMarkInterfaceMethodsAsPublic();
 			fDeclarePublicCheckbox= createCheckbox(result,  title, defaultValue);
 			getExtractInterfaceRefactoring().setMarkInterfaceMethodsAsPublic(fDeclarePublicCheckbox.getSelection());
@@ -234,8 +233,8 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		}
 
 		private void addDeclareAsAbstractCheckbox(Composite result) {
-			String[] keys= {"&abstract"};
-			String title= MessageFormat.format("Declare interface methods as ''{0}''", keys);
+			String[] keys= {"&abstract"}; //$NON-NLS-1$
+			String title= RefactoringMessages.getFormattedString("ExtractInterfaceWizard.12", keys); //$NON-NLS-1$
 			boolean defaultValue= getExtractInterfaceRefactoring().getMarkInterfaceMethodsAsAbstract();
 			fDeclareAbstractCheckbox= createCheckbox(result,  title, defaultValue);
 			getExtractInterfaceRefactoring().setMarkInterfaceMethodsAsAbstract(fDeclareAbstractCheckbox.getSelection());

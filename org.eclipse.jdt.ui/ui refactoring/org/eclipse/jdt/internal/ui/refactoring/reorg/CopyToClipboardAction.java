@@ -67,8 +67,8 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 
 	public CopyToClipboardAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
 		super(site);
-		setText("&Copy");
-		setDescription("Copy the selected elements to the clipboard");
+		setText(ReorgMessages.getString("CopyToClipboardAction.0")); //$NON-NLS-1$
+		setDescription(ReorgMessages.getString("CopyToClipboardAction.1")); //$NON-NLS-1$
 		Assert.isNotNull(clipboard);
 		fClipboard= clipboard;
 		fPasteAction= pasteAction;
@@ -121,7 +121,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			if (elements.size() == resources.length + javaElements.length && canEnable(resources, javaElements)) 
 				doRun(resources, javaElements);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), "Copy To Clipboard", "Internal error. See log for details.");
+			ExceptionHandler.handle(e, getShell(), ReorgMessages.getString("CopyToClipboardAction.2"), ReorgMessages.getString("CopyToClipboardAction.3")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -242,7 +242,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 						// do nothing.
 					}
 				}
-				if (fAutoRepeatOnFailure || MessageDialog.openQuestion(fShell, "Problem Copying to Clipboard", "There was a problem when accessing the system clipboard. Retry?"))
+				if (fAutoRepeatOnFailure || MessageDialog.openQuestion(fShell, ReorgMessages.getString("CopyToClipboardAction.4"), ReorgMessages.getString("CopyToClipboardAction.5"))) //$NON-NLS-1$ //$NON-NLS-2$
 					copyToClipboard(resources, fileNames, names, javaElements, typedSources, repeat+1);
 			}
 		}

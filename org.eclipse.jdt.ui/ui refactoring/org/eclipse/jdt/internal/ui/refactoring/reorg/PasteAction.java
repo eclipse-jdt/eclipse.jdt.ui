@@ -64,8 +64,8 @@ public class PasteAction extends SelectionDispatchAction{
 		Assert.isNotNull(clipboard);
 		fClipboard= clipboard;
 		
-		setText("&Paste");
-		setDescription("Pastes elements from the clipboard");
+		setText(ReorgMessages.getString("PasteAction.4")); //$NON-NLS-1$
+		setDescription(ReorgMessages.getString("PasteAction.5")); //$NON-NLS-1$
 
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_PASTE_DISABLED));

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
@@ -162,7 +160,7 @@ public class ParameterEditDialog extends StatusDialog {
 		String typeName= fType.getText();
 		if (ChangeSignatureRefactoring.isValidParameterTypeName(typeName))
 			return createOkStatus();
-		String msg= MessageFormat.format("''{0}'' is not a valid parameter type name", new String[]{typeName});
+		String msg= RefactoringMessages.getFormattedString("ParameterEditDialog.9", new String[]{typeName}); //$NON-NLS-1$
 		return createErrorStatus(msg); 
 	}
 	
