@@ -94,7 +94,19 @@ public final class ImportRewrite {
 	 * The type name can contain dimensions.
 	 */
 	public String addImport(String qualifiedTypeName) {
-		return fImportsStructure.addImport(qualifiedTypeName);
+		return fImportsStructure.addImport(qualifiedTypeName, false);
+	}
+	
+	/**
+	 * Adds a new static import declaration that is sorted in the structure using
+	 * a best match algorithm. 
+	 * @param qualifiedTypeName The fully qualified import name of the static member
+	 * @return Returns the simple type name that can be used in the code or the
+	 * fully qualified type name if an import conflict prevented the import.
+	 * The type name can contain dimensions.
+	 */
+	public String addStaticImport(String qualifiedTypeName) {
+		return fImportsStructure.addImport(qualifiedTypeName, true);
 	}
 	
 	/**
@@ -142,6 +154,15 @@ public final class ImportRewrite {
 	 */
 	public boolean removeImport(String qualifiedTypeName) {
 		return fImportsStructure.removeImport(qualifiedTypeName, false);
+	}
+	
+	/**
+	 * Removes an static import declaration for a static member or a static on-demand import.
+	 * @param qualifiedName The qualified name the static member to be removed as import
+	 * @return Returns true if an import for the given type existed.
+	 */
+	public boolean removeStaticImport(String qualifiedName) {
+		return fImportsStructure.removeImport(qualifiedName, true);
 	}
 	
 	/**
