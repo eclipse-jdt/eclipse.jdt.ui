@@ -418,7 +418,13 @@ public class EditTemplateDialog extends StatusDialog {
 	
 	private String getPrefix() {
 		String prefix;
-		int idx= getIndex(getContextId(fContextCombo.getText()));
+		final String context= fContextCombo.getText();
+		String id;
+		if (context.trim().length() == 0)
+			id= fTemplate.getContextTypeId();
+		else
+			id= getContextId(context);
+		int idx= getIndex(id);
 		if (idx != -1)
 			prefix= fContextTypes[idx][2];
 		else
