@@ -7,6 +7,9 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class WorkingCopyUtil {
 
@@ -25,6 +28,21 @@ public class WorkingCopyUtil {
 				return wcs[i];
 		}
 		return cu;
+	}
+	
+	public static IMember getWorkingCopyIfExists(IMember member) throws JavaModelException {
+		if (member == null)
+			return null;
+		if (member.getCompilationUnit().isWorkingCopy())
+			return member;
+			
+		ICompilationUnit workingCopy= getWorkingCopyIfExists(member.getCompilationUnit());
+		if (workingCopy == null)
+			return null;
+		if (!workingCopy.isWorkingCopy())
+			return member;
+			
+		return JavaModelUtil.findMemberInCompilationUnit(workingCopy, member);
 	}
 	
 	public static IJavaElement getOriginal(IMember member){

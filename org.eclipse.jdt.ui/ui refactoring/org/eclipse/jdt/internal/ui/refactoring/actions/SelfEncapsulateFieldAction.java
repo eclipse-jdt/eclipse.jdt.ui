@@ -4,12 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
@@ -23,7 +26,17 @@ public class SelfEncapsulateFieldAction extends RefactoringAction {
 	}
 	
 	public void run() {
-		IField field= (IField)SelectionUtil.getSingleElement(getStructuredSelection());
+		IField selectedField= (IField)SelectionUtil.getSingleElement(getStructuredSelection());
+		IField field= null;
+		try {
+			field= (IField)WorkingCopyUtil.getWorkingCopyIfExists(selectedField);
+		} catch (JavaModelException e) {
+		}
+		if (field == null) {
+			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Self Encapsulate Field", "Field '" + selectedField.getElementName() + "' doesn't exist in editor buffer anymore.");
+			return;
+		}
+			
 		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, JavaPreferencesSettings.getCodeGenerationSettings());
 		try  {	
 			new RefactoringStarter().activate(
