@@ -65,7 +65,7 @@ public class AllTypesCacheTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -255,6 +255,7 @@ public class AllTypesCacheTest extends TestCase {
 			
 			part.doSave(null);
 			
+			res1.clear();
 			AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
 			assertNotNull("A not found", findTypeRef(res1, "junit.framework.A"));
 			TypeInfo ref2= findTypeRef(res1, "junit.framework.TestCase");
@@ -295,6 +296,7 @@ public class AllTypesCacheTest extends TestCase {
 			ISourceRange range= type.getNameRange();
 			document.replace(range.getOffset(), range.getLength(), "A");
 			
+			res1.clear();
 			AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
 			assertNotNull("A not found", findTypeRef(res1, "junit.framework.A"));
 			assertNull("TestCase still found", findTypeRef(res1, "junit.framework.TestCase"));
