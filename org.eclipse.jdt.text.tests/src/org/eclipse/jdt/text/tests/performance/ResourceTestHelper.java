@@ -21,7 +21,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -84,6 +86,13 @@ public class ResourceTestHelper {
 		}
 	}
 
+	public static void copy(String src, String dest, String srcName, String destName) throws IOException, CoreException {
+		StringBuffer buf= read(src);
+		List positions= identifierPositions(buf, srcName);
+		replacePositions(buf, srcName.length(), destName, positions);
+		write(dest, buf.toString());
+	}
+
 	private static void replacePositions(StringBuffer c, int origLength, String string, List positions) {
 		int offset= 0;
 		for (Iterator iter= positions.iterator(); iter.hasNext();) {
@@ -111,5 +120,29 @@ public class ResourceTestHelper {
 
 	private static IWorkspaceRoot getRoot() {
 		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+
+	public static boolean enableAutoBuilding() {
+		IWorkspaceDescription description= ResourcesPlugin.getWorkspace().getDescription();
+		boolean wasOff= !description.isAutoBuilding();
+		if (wasOff)
+			description.setAutoBuilding(true);
+		return wasOff;
+	}
+
+	public static void incrementalBuild() throws CoreException {
+		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+	}
+
+	public static void fullBuild() throws CoreException {
+		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+	}
+
+	public static boolean disableAutoBuilding() {
+		IWorkspaceDescription description= ResourcesPlugin.getWorkspace().getDescription();
+		boolean wasOn= description.isAutoBuilding();
+		if (wasOn)
+			description.setAutoBuilding(false);
+		return wasOn;
 	}
 }

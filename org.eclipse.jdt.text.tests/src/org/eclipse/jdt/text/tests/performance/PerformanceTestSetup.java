@@ -22,7 +22,6 @@ import junit.framework.Test;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -62,15 +61,11 @@ public class PerformanceTestSetup extends TestSetup {
 		
 		workbench.showPerspective(PERSPECTIVE, activeWindow);
 		
-		boolean autobuild= ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding();
-		if (autobuild)
-			ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(false);
-		
+		boolean wasAutobuilding= ResourceTestHelper.disableAutoBuilding();
 		setUpProject();
-		
-		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
-		if (autobuild)
-			ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(true);
+		ResourceTestHelper.fullBuild();
+		if (wasAutobuilding)
+			ResourceTestHelper.enableAutoBuilding();
 	}
 	
 	/*
