@@ -27,9 +27,9 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
 
@@ -2386,7 +2386,7 @@ public class PreferenceConstants {
 	 * @see #REFACTOR_INFO_SEVERITY
 	 * @see #REFACTOR_OK_SEVERITY
 	 * 
-	 * @deprecated Use method {@link org.eclipse.ltk.ui.refactoring.RefactoringUI#getConditionCheckingFailedSeverity()}.
+	 * @deprecated Use method {@link org.eclipse.ltk.core.refactoring.RefactoringCore#getConditionCheckingFailedSeverity()}.
 	 */
 	public static final String REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= "Refactoring.ErrorPage.severityThreshold"; //$NON-NLS-1$
 
@@ -2486,7 +2486,6 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */	
 	public static final String FORMATTER_PROFILE = "formatter_profile"; //$NON-NLS-1$
-	
 	
 	/**
 	 * A named preference that controls whether annotation roll over is used or not.
@@ -2804,6 +2803,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 80);
 		
 		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, ProfileManager.JAVA_PROFILE);
+		ProfileStore.checkCurrentOptionsVersion();
 		
 		// mark occurrences
 		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);

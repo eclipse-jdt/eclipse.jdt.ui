@@ -50,6 +50,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -115,9 +117,16 @@ public class ProfileStore {
 	}
 
 	/**
-	 * Preference constant
+	 * Preference key where all profiles are stored
 	 */
 	private static final String PREF_FORMATTER_PROFILES= "org.eclipse.jdt.ui.formatterprofiles"; //$NON-NLS-1$
+	
+	/**
+	 * Preference key where all profiles are stored
+	 */
+	private static final String PREF_FORMATTER_PROFILES_VERSION= "org.eclipse.jdt.ui.formatterprofiles.version"; //$NON-NLS-1$
+	
+	
 	
 	/**
 	 * Identifiers for the XML file.
@@ -131,10 +140,16 @@ public class ProfileStore {
 	private final static String XML_ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	private final static String XML_ATTRIBUTE_VALUE= "value"; //$NON-NLS-1$
 		
-	public ProfileStore() {
+	private ProfileStore() {
 	}
-		
-	public List readProfiles() throws CoreException {
+	
+	/**
+	 * @return Returns the collection of profiles currently stored in the preference store or
+	 * <code>null</code> if the loading failed. The elements are of type {@link CustomProfile}
+	 * and are all updated to the latest version.
+	 * @throws CoreException
+	 */
+	public static List readProfiles() throws CoreException {
 		List res= readProfilesFromPreferences(PREF_FORMATTER_PROFILES);
 		if (res == null) {
 			return readOldForCompatibility();
@@ -142,18 +157,19 @@ public class ProfileStore {
 		return res;
 	}
 	
-	public void writeProfiles(Collection profiles) throws CoreException {
+	public static void writeProfiles(Collection profiles) throws CoreException {
 		ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
 		try {
 			writeProfilesToStream(profiles, stream);
-			byte[] bytes= stream.toByteArray();
 			String val;
 			try {
-				val= new String(bytes, "UTF-8"); //$NON-NLS-1$
+				val= stream.toString("UTF-8"); //$NON-NLS-1$
 			} catch (UnsupportedEncodingException e) {
-				val= new String(bytes);
+				val= stream.toString(); //$NON-NLS-1$
 			}
-			PreferenceConstants.getPreferenceStore().setValue(PREF_FORMATTER_PROFILES, val);
+			IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
+			preferenceStore.setValue(PREF_FORMATTER_PROFILES, val);
+			preferenceStore.setValue(PREF_FORMATTER_PROFILES_VERSION, ProfileVersioner.CURRENT_VERSION);
 			JavaPlugin.getDefault().savePluginPreferences();
 		} finally {
 			try { stream.close(); } catch (IOException e) { /* ignore */ }
@@ -171,7 +187,13 @@ public class ProfileStore {
 			}
 			InputStream is= new ByteArrayInputStream(bytes);
 			try {
-				return readProfilesFromStream(new InputSource(is));
+				List res= readProfilesFromStream(new InputSource(is));
+				if (res != null) {
+					for (int i= 0; i < res.size(); i++) {
+						ProfileVersioner.updateAndComplete((CustomProfile) res.get(i));
+					}
+				}
+				return res;
 			} finally {
 				try { is.close(); } catch (IOException e) { /* ignore */ }
 			}
@@ -183,7 +205,7 @@ public class ProfileStore {
 	 * Read the available profiles from the internal XML file and return them
 	 * as collection.
 	 */
-	private List readOldForCompatibility() {
+	private static List readOldForCompatibility() {
 		
 		// in 3.0 M9 and less the profiles were stored in a file in the plugin's meta data
 		final String STORE_FILE= "code_formatter_profiles.xml"; //$NON-NLS-1$
@@ -329,6 +351,27 @@ public class ProfileStore {
 			}
 		}
 		return element;
+	}
+	
+	public static void checkCurrentOptionsVersion() {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		int version= store.getInt(PREF_FORMATTER_PROFILES_VERSION);
+		if (version >= ProfileVersioner.CURRENT_VERSION) {
+			return; // is up to date
+		}
+		try {
+			List profiles= ProfileStore.readProfiles();
+			if (profiles != null && !profiles.isEmpty()) {
+				ProfileManager manager= new ProfileManager(profiles);
+				Profile selected= manager.getSelected();
+				if (selected instanceof CustomProfile) {
+					manager.commitChanges(); // updates JavaCore options
+				}
+			}
+			store.setValue(PREF_FORMATTER_PROFILES_VERSION, ProfileVersioner.CURRENT_VERSION);
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
 	}
 	
 		

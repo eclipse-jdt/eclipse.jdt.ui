@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -71,7 +70,7 @@ public class CodingStyleConfigurationBlock {
 			case ProfileManager.PROFILE_CREATED_EVENT:
 			case ProfileManager.SETTINGS_CHANGED_EVENT:
 				try {
-					fProfileStore.writeProfiles(fProfileManager.getSortedProfiles());
+					ProfileStore.writeProfiles(fProfileManager.getSortedProfiles());
 				} catch (CoreException x) {
 					JavaPlugin.log(x);
 				}
@@ -320,13 +319,6 @@ public class CodingStyleConfigurationBlock {
 	 */
 	protected final ProfileManager fProfileManager;
 	
-	
-	/**
-	 * Utility class to manage profile files. 
-	 */
-	protected final ProfileStore fProfileStore;
-	
-
 	/**
 	 * The JavaPreview.
 	 */
@@ -338,24 +330,15 @@ public class CodingStyleConfigurationBlock {
 	 * Create a new <code>CodeFormatterPreferencePage</code>.
 	 */
 	public CodingStyleConfigurationBlock() {
-
-		fProfileStore= new ProfileStore();
-		
 		List profiles= null;
-
 		try {
-		    profiles= fProfileStore.readProfiles();
+		    profiles= ProfileStore.readProfiles();
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
 		
 		if (profiles == null) 
 		    profiles= new ArrayList();
-
-		for (final Iterator iter= profiles.iterator(); iter.hasNext(); ) {
-			final CustomProfile profile= (CustomProfile) iter.next();
-			ProfileVersioner.updateAndComplete(profile);
-		}
 		
 		fProfileManager= new ProfileManager(profiles);
 
