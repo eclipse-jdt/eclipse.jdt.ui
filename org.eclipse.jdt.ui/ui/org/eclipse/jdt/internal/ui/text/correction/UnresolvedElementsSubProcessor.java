@@ -292,11 +292,13 @@ public class UnresolvedElementsSubProcessor {
 				if (inv.getExpression() == node) {
 					methodSenderName= inv.getName().getIdentifier();
 				}
+				break;
 			case ASTNode.QUALIFIED_NAME:
 				QualifiedName qualName= (QualifiedName) parent;
 				if (qualName.getQualifier() == node) {
 					fieldSenderName= qualName.getName().getIdentifier();
 				}
+				break;
 			}
 				
 			
