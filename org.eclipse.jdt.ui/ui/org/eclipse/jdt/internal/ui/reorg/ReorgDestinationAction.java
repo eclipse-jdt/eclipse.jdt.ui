@@ -163,7 +163,8 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		if (dialog.open() != dialog.OK)
 			return false;
 		
-		IRunnableWithProgress r= createSaveEditorOperation(dialog.getResult(), elements, unsavedEditors);
+		IEditorPart[] unsavedEditorArray= (IEditorPart[]) unsavedEditors.toArray(new IEditorPart[unsavedEditors.size()]);
+		IRunnableWithProgress r= createSaveEditorOperation(dialog.getResult(), unsavedEditorArray);
 		try {
 			new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell()).run(false, false, r);
 		} catch (InvocationTargetException e) {
@@ -191,17 +192,28 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		return (IFile[]) result.toArray(new IFile[result.size()]);
 	}
 
-	private static IRunnableWithProgress createSaveEditorOperation(final Object[] elementsToSave, final List elements, final List unsavedEditors) {
+	private static IRunnableWithProgress createSaveEditorOperation(final Object[] elementsToSave, final IEditorPart[] unsavedEditors) {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) {
 				pm.beginTask(ReorgMessages.getString("ReorgAction.task.saving"), elementsToSave.length); //$NON-NLS-1$
 				for (int i= 0; i < elementsToSave.length; i++) {
-					IEditorPart editor= (IEditorPart)unsavedEditors.get(elements.indexOf(elementsToSave[i]));
-					editor.doSave(new SubProgressMonitor(pm, 1));
+					IEditorPart editor= findEditor(elementsToSave[i], unsavedEditors);
+					if (editor != null)
+						editor.doSave(new SubProgressMonitor(pm, 1));
+					else
+						pm.worked(1);
 				}
 				pm.done();
 			}
 		};
+	}
+	
+	private static IEditorPart findEditor(Object element, IEditorPart[] unsavedEditors){
+		for (int i= 0; i < unsavedEditors.length; i++) {
+			if (EditorUtility.isEditorInput(element, unsavedEditors[i]))
+				return unsavedEditors[i];
+		}
+		return null;
 	}
 
 	private static ListSelectionDialog createUnsavedEditorDialog(List unsavedElements) {
