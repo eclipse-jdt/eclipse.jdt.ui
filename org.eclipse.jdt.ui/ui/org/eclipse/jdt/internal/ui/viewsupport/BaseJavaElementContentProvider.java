@@ -47,6 +47,22 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 		fProvideMembers= provideMembers;
 	}
 	
+	/**
+	 * Returns whether the members are provided when asking
+	 * for a CU's or ClassFile's children.
+	 */
+	public boolean getProvideMembers() {
+		return fProvideMembers;
+	}
+
+	/**
+	 * Returns whether the members are provided when asking
+	 * for a CU's or ClassFile's children.
+	 */
+	public void setProvideMembers(boolean b) {
+		fProvideMembers= b;
+	}
+
 	/* (non-Javadoc)
 	 * Method declared on IStructuredContentProvider.
 	 */

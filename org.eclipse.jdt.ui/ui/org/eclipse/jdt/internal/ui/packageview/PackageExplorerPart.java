@@ -38,11 +38,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.IPreferencesConstants;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
@@ -60,6 +62,8 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -121,7 +125,7 @@ import org.eclipse.ui.views.internal.framelist.UpAction;
  * view the corresponding editor is activated. 
  */
 
-public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget, IMenuListener, IPackagesViewPart {
+public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget, IMenuListener, IPackagesViewPart,  IPropertyChangeListener {
 	
 	public final static String VIEW_ID= JavaUI.ID_PACKAGES;
 				
@@ -243,6 +247,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (fContextMenu != null && !fContextMenu.isDisposed())
 			fContextMenu.dispose();
 		getSite().getPage().removePartListener(fPartListener);
+		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		if (fViewer != null)
 			fViewer.removeTreeListener(fExpansionListener);
 		super.dispose();	
@@ -257,7 +262,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.setContentProvider(new JavaElementContentProvider(showCUChildren));
 		
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fViewer);		
-
+		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
+		
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
 					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE | JavaElementLabelProvider.SHOW_PARAMETERS;
 		JavaElementLabelProvider labelProvider = new JavaElementLabelProvider(labelFlags);
@@ -671,10 +677,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		Object element= null;
 
 		if (selection.size() == 1) {
-			if (obj instanceof ISourceReference) 
-				element= getResourceFor(obj);
-			else if (obj instanceof IClassFile) 
-				element= obj;
+			if (obj instanceof IJavaElement) {
+				IJavaElement cu= JavaModelUtil.findParentOfKind((IJavaElement)obj, IJavaElement.COMPILATION_UNIT);
+				if (cu != null)
+					element= getResourceFor(cu);
+				if (element == null)
+					element= JavaModelUtil.findParentOfKind((IJavaElement)obj, IJavaElement.CLASS_FILE);
+			}
 			else if (obj instanceof IFile)
 				element= obj;
 				
@@ -1064,4 +1073,20 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			fViewer.setLabelProvider(new DecoratingLabelProvider(javaProvider, decorator));
 		}
 	}
+	
+	/*
+	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getProperty() != IPreferencesConstants.SHOW_CU_CHILDREN) 
+			return;
+					
+		if (fViewer != null) {
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			boolean b= store.getBoolean(IPreferencesConstants.SHOW_CU_CHILDREN);
+			((JavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(b);
+			fViewer.refresh();
+		}
+	}
+
 }
