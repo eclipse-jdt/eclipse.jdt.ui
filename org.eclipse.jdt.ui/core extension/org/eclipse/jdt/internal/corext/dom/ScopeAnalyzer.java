@@ -133,6 +133,8 @@ public class ScopeAnalyzer {
 		ITypeBinding superClass= binding.getSuperclass();
 		if (superClass != null) {
 			addInherited(superClass, flags); // recursive
+		} else if (binding.isArray()) {
+			addInherited(fRoot.getAST().resolveWellKnownType("java.lang.Object"), flags); //$NON-NLS-1$
 		}
 		
 		if (hasFlag(TYPES | VARIABLES, flags)) {

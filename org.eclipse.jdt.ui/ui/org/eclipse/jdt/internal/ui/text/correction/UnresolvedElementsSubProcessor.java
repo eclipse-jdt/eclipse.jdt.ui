@@ -160,7 +160,7 @@ public class UnresolvedElementsSubProcessor {
 		boolean isWriteAccess= ASTResolving.isWriteAccess(node);
 		
 		// similar variables
-		addSimilarVariableProposals(cu, astRoot, simpleName, isWriteAccess, proposals);
+		addSimilarVariableProposals(cu, astRoot, binding, simpleName, isWriteAccess, proposals);	
 		
 		// new fields
 		addNewFieldProposals(cu, astRoot, binding, declaringTypeBinding, simpleName, isWriteAccess, proposals);
@@ -261,7 +261,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, SimpleName node, boolean isWriteAccess, Collection proposals) {
+	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding, SimpleName node, boolean isWriteAccess, Collection proposals) {
 		IBinding[] varsInScope= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(node, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);
 		if (varsInScope.length > 0) {
 			// avoid corrections like int i= i;
@@ -310,8 +310,14 @@ public class UnresolvedElementsSubProcessor {
 						proposals.add(new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), currName, relevance));
 					}
 				}
-			}			
+			}
 		}
+		if (binding != null && binding.isArray()) {
+			String idLength= "length"; //$NON-NLS-1$
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", idLength); //$NON-NLS-1$
+			proposals.add(new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), idLength, 8)); //$NON-NLS-1$
+		}
+		
 	}
 
 	public static void getTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
@@ -1161,6 +1167,35 @@ public class UnresolvedElementsSubProcessor {
 				proposals.add(proposal);		
 			}
 		}
-	}	
+	}
+	
+	public static void getArrayAccessProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		
+		CompilationUnit root= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(root);
+		if (!(selectedNode instanceof MethodInvocation)) {
+			return;
+		}
+		
+		MethodInvocation decl= (MethodInvocation) selectedNode;
+		SimpleName nameNode= decl.getName();
+		String methodName= nameNode.getIdentifier();
+		
+		IBinding[] bindings= (new ScopeAnalyzer(root)).getDeclarationsInScope(nameNode, ScopeAnalyzer.METHODS);
+		for (int i= 0; i < bindings.length; i++) {
+			String currName= bindings[i].getName();
+			if (NameMatcher.isSimilarName(methodName, currName)) {
+				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.arraychangetomethod.description", currName); //$NON-NLS-1$
+				proposals.add(new RenameNodeCompletionProposal(label, context.getCompilationUnit(), nameNode.getStartPosition(), nameNode.getLength(), currName, 6));
+			}
+		}
+		// always suggest 'length'
+		String lengthId= "length"; //$NON-NLS-1$
+		String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.arraychangetolength.description"); //$NON-NLS-1$
+		int offset= nameNode.getStartPosition();
+		int length= decl.getStartPosition() + decl.getLength() - offset;
+		proposals.add(new RenameNodeCompletionProposal(label, context.getCompilationUnit(), offset, length, lengthId, 7));
+	}
+
 	
 }

@@ -155,6 +155,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
 			case IProblem.IncompatibleReturnType:
 			case IProblem.IncompatibleExceptionInThrowsClause:
+			case IProblem.NoMessageSendOnArrayType:
 				return true;
 			default:
 				return false;
@@ -422,6 +423,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ArgumentHidingLocalVariable:
 			case IProblem.ArgumentHidingField:
 				LocalCorrectionsSubProcessor.addHidingVariablesProposals(context, problem, proposals);
+				break;
+			case IProblem.NoMessageSendOnArrayType:
+				UnresolvedElementsSubProcessor.getArrayAccessProposals(context, problem, proposals); 
 				break;
 			default:
 		}

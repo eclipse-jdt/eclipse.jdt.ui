@@ -52,7 +52,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -2773,5 +2773,54 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		assertEqualString(preview1, expected1);
 	}
+	
+	public void testArrayAccess() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static Object obj;\n");
+		buf.append("    public String foo(Object[] array) {\n");
+		buf.append("        return array.tostring();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static Object obj;\n");
+		buf.append("    public String foo(Object[] array) {\n");
+		buf.append("        return array.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();	
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static Object obj;\n");
+		buf.append("    public String foo(Object[] array) {\n");
+		buf.append("        return array.length;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
+	}
+
 
 }
