@@ -28,7 +28,6 @@ import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -53,13 +52,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
 
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
@@ -234,11 +231,11 @@ public class JavadocView extends AbstractInfoView {
 	}
 
 	/*
-	 * @see AbstractInfoView#setInput(Object)
+	 * @see AbstractInfoView#computeInput(Object)
 	 */
-	protected boolean setInput(Object input) {
+	protected Object computeInput(Object input) {
 		if (fText == null || ! (input instanceof IJavaElement))
-			return false;
+			return null;
 
 		IJavaElement je= (IJavaElement)input;
 		String javadocHtml= null;
@@ -246,27 +243,30 @@ public class JavadocView extends AbstractInfoView {
 			try {
 				javadocHtml= getJavadocHtml(((ICompilationUnit)je).getTypes());
 			} catch (JavaModelException ex) {
-				return false;
+				return null;
 			}
 		} else
 			javadocHtml= getJavadocHtml(new IJavaElement[] { je });
 
+		return javadocHtml;
+	}
+
+	/*
+	 * @see AbstractInfoView#setInput(Object)
+	 */
+	protected void setInput(Object input) {
+		String javadocHtml= (String)input;
+		
 		fPresentation.clear();
 		Point size= fText.getSize();
 		try {
 			javadocHtml= fPresenter.updatePresentation(getSite().getShell().getDisplay(), javadocHtml, fPresentation, size.x, size.y);
 		} catch (IllegalArgumentException ex) {
 			// the javadoc might no longer be valid
-			return false;
+			return;
 		}
-
-		if (javadocHtml == null)
-			return false;
-
 		fText.setText(javadocHtml);
 		TextPresentation.applyTextPresentation(fPresentation, fText);
-		
-		return true;
 	}
 
 	/**
@@ -336,33 +336,32 @@ public class JavadocView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#findSelectedJavaElement(IWorkbenchPart) 
 	 */
-	protected IJavaElement findSelectedJavaElement(IWorkbenchPart part) {
-		Object element;
+	protected IJavaElement findSelectedJavaElement(IWorkbenchPart part, ISelection selection) {
+		IJavaElement element;
 		try {
-			IStructuredSelection sel= SelectionConverter.getStructuredSelection(part);
+			element= super.findSelectedJavaElement(part, selection);
 		
-			if (sel.isEmpty() && part instanceof JavaEditor) {
+			if (element == null && part instanceof JavaEditor && selection instanceof ITextSelection) {
 			
 				JavaEditor editor= (JavaEditor)part;
+				ITextSelection textSelection= (ITextSelection)selection;
 
 				IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
 				if (document == null)
 					return null;
 				
-				ITypedRegion typedRegion= document.getPartition(((ITextSelection)editor.getSelectionProvider().getSelection()).getOffset());
+				ITypedRegion typedRegion= document.getPartition(textSelection.getOffset());
 				if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType()))
-					element= SelectionConverter.getElementAtOffset((JavaEditor)part);
+					return TextSelectionConverter.getElementAtOffset((JavaEditor)part, textSelection);
 				else
 					return null;
 			} else
-				element= SelectionUtil.getSingleElement(sel);
+				return element;
 		} catch (JavaModelException e) {
 			return null;
 		} catch (BadLocationException e) {
 			return null;
 		}
-		
-		return findJavaElement(element);
 	}
 
 	/*

@@ -253,19 +253,19 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	 */
 	private IStructuredSelection convertToJavaElementSelection(ISelection selection) {
 		
-		if (!(selection instanceof ITextSelection && fCurrentInput instanceof ISourceReference))
+		if (!(selection instanceof ITextSelection && fCurrentViewInput instanceof ISourceReference))
 			return StructuredSelection.EMPTY;
 
 		ITextSelection textSelection= (ITextSelection)selection;
 	
-		Object codeAssist= fCurrentInput.getAncestor(IJavaElement.COMPILATION_UNIT); 
+		Object codeAssist= fCurrentViewInput.getAncestor(IJavaElement.COMPILATION_UNIT); 
 		if (codeAssist == null)
-			codeAssist= fCurrentInput.getAncestor(IJavaElement.CLASS_FILE);
+			codeAssist= fCurrentViewInput.getAncestor(IJavaElement.CLASS_FILE);
 
 		if (codeAssist instanceof ICodeAssist) {
 			IJavaElement[] elements= null;
 			try {
-				ISourceRange range= ((ISourceReference)fCurrentInput).getSourceRange();
+				ISourceRange range= ((ISourceReference)fCurrentViewInput).getSourceRange();
 				elements= ((ICodeAssist)codeAssist).codeSelect(range.getOffset() + getOffsetInUnclippedDocument(textSelection), textSelection.getLength());
 			} catch (JavaModelException e) {
 				return StructuredSelection.EMPTY;
@@ -290,7 +290,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	private int getOffsetInUnclippedDocument(ITextSelection textSelection) {
 		IDocument unclippedDocument= null;
 		try {
-			unclippedDocument= new Document(((ISourceReference)fCurrentInput).getSource());
+			unclippedDocument= new Document(((ISourceReference)fCurrentViewInput).getSource());
 		} catch (JavaModelException e) {
 			return -1;
 		}
@@ -322,18 +322,18 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	}
 	
 	/*
-	 * @see AbstractInfoView#setInput(Object)
+	 * @see AbstractInfoView#computeInput(Object)
 	 */
-	protected boolean setInput(Object input) {
+	protected Object computeInput(Object input) {
 
 		if (fViewer == null || !(input instanceof ISourceReference))
-			return false;
+			return null;
 
 		ISourceReference sourceRef= (ISourceReference)input;
 		
 		if (fLastOpenedElement != null && input instanceof IJavaElement && ((IJavaElement)input).getHandleIdentifier().equals(fLastOpenedElement.getHandleIdentifier())) {
 			fLastOpenedElement= null;
-			return false;
+			return null;
 		} else {
 			fLastOpenedElement= null;
 		}
@@ -342,11 +342,11 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		try {
 			source= sourceRef.getSource();
 		} catch (JavaModelException ex) {
-			return false;
+			return null;
 		}
 		
 		if (source == null)
-			return false;
+			return null;
 
 		source= removeLeadingComments(source);
 		String delim= null;
@@ -375,9 +375,14 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			doc.setDocumentPartitioner(dp);
 			dp.connect(doc);
 		}
-		fViewer.setInput(doc);
-		
-		return true;
+		return doc;
+	}
+
+	/*
+	 * @see AbstractInfoView#setInput(Object)
+	 */
+	protected void setInput(Object input) {
+		fViewer.setInput(input);
 	}
 
 	/**

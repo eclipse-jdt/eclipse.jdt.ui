@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -27,6 +28,8 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IPartListener2;
@@ -47,7 +50,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -86,7 +89,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		}
 		public void partInputChanged(IWorkbenchPartReference ref) {
 			if (!ref.getId().equals(getSite().getId()))
-				setInputFrom(ref.getPart(false));
+				computeAndSetInput(ref.getPart(false));
 		}
 		public void partActivated(IWorkbenchPartReference ref) {
 		}
@@ -102,11 +105,13 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 
 
 	/** The current input. */
-	protected IJavaElement fCurrentInput;
+	protected IJavaElement fCurrentViewInput;
 	/** The copy to clipboard action. */
 	private SelectionDispatchAction fCopyToClipboardAction;
 	/** The goto input action. */
 	private GotoInputAction fGotoInputAction;
+	/** Counts the number of background computation requests. */
+	private volatile int fComputeCount;
 
 
 	/**
@@ -115,7 +120,15 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * @param input the input object
 	 * @return	<code>true</code> if the input was set successfully 
 	 */
-	abstract protected boolean setInput(Object input);
+	abstract protected void setInput(Object input);
+
+	/**
+	 * Computes the input for this view based on the given element.
+	 *  
+	 * @param element the element from which to compute the input
+	 * @return	the input or <code>null</code> if the input was not computed successfully 
+	 */
+	abstract protected Object computeInput(Object element);
 
 	/**
 	 * Create the part control.
@@ -197,7 +210,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * @return input the input object or <code>null</code> if not input is set 
 	 */
 	protected IJavaElement getInput() {
-		return fCurrentInput;
+		return fCurrentViewInput;
 	}
 
 	// Helper method
@@ -261,7 +274,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		if (part.equals(this))
 			return;
 
-		setInputFrom(part);
+		computeAndSetInput(part);
 	}
 
 	/**
@@ -280,11 +293,20 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * @param part the workbench part for which to find the selected Java element
 	 * @return the selected Java element
 	 */
-	protected IJavaElement findSelectedJavaElement(IWorkbenchPart part) {
+	protected IJavaElement findSelectedJavaElement(IWorkbenchPart part, ISelection selection) {
 		Object element;
 		try {
-			IStructuredSelection sel= SelectionConverter.getStructuredSelection(part);
-			element= SelectionUtil.getSingleElement(sel);
+			if (part instanceof JavaEditor && selection instanceof ITextSelection) {
+				IJavaElement[] elements= TextSelectionConverter.codeResolve((JavaEditor)part, (ITextSelection)selection);
+				if (elements != null && elements.length > 0)
+					return elements[0];
+				else
+					return null;
+			} else if (selection instanceof IStructuredSelection) {
+				element= element= SelectionUtil.getSingleElement(selection);
+			} else {
+				return null;
+			}
 		} catch (JavaModelException e) {
 			return null;
 		}
@@ -298,7 +320,10 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * @param element an object
 	 * @return the Java element represented by the given element or <code>null</code>
 	 */
-	protected IJavaElement findJavaElement(Object element) {
+	private IJavaElement findJavaElement(Object element) {
+
+		if (element == null)
+			return null;
 
 		if (SearchUtil.isISearchResultViewEntry(element)) {
 			IJavaElement je= SearchUtil.getJavaElement(element);
@@ -347,32 +372,13 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		}
 	}	
 
-	/**
-	 * Sets this view's input based on the selection in the given part.
-	 * 
-	 * @param part the part from which to get the selected Java element
-	 */
-	private void setInputFrom(IWorkbenchPart part) {
-		IJavaElement je= findSelectedJavaElement(part);
-
-		if (!isIgnoringEqualInput() && fCurrentInput != null && fCurrentInput.equals(je))
-			return;
-		
-		if (!setInput(je))
-			return;
-
-		fCurrentInput= je;
-		fGotoInputAction.setEnabled(true);
-		
-		String title= InfoViewMessages.getFormattedString("AbstractInfoView.compoundTitle", getSite().getRegisteredName(), JavaElementLabels.getElementLabel(je, TITLE_LABEL_FLAGS)); //$NON-NLS-1$
-		setTitle(title);
-		setTitleToolTip(JavaElementLabels.getElementLabel(je, TOOLTIP_LABEL_FLAGS));  //$NON-NLS-1$//$NON-NLS-2$
-	}
-
 	/*
 	 * @see IWorkbenchPart#dispose()
 	 */
 	final public void dispose() {
+		// cancel possiblle running computation
+		fComputeCount++;
+
 		getSite().getWorkbenchWindow().getPartService().removePartListener(fPartListener);
 		getSelectionProvider().removeSelectionChangedListener(fCopyToClipboardAction);
 		internalDispose();
@@ -382,5 +388,75 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * @see IWorkbenchPart#dispose()
 	 */
 	protected void internalDispose() {
+	}
+	
+	/**
+	 * Determines all necessary details and delegates the computation into
+	 * a background thread.
+	 */
+	private void computeAndSetInput(final IWorkbenchPart part) {
+
+		final int currentCount= ++fComputeCount;
+
+		ISelectionProvider provider= part.getSite().getSelectionProvider();
+		if (provider == null)
+			return;
+				
+		final ISelection selection= provider.getSelection();
+		if (selection == null || selection.isEmpty())
+			return;
+		
+		Thread thread= new Thread("Info view input computer") { //$NON-NLS-1$
+			public void run() {
+				if (currentCount != fComputeCount)
+					return;
+				
+				final IJavaElement je= findSelectedJavaElement(part, selection);
+
+				if (!isIgnoringEqualInput() && fCurrentViewInput != null && fCurrentViewInput.equals(je))
+					return;
+
+				// The actual computation		
+				final Object input= computeInput(je);
+				if (input == null)
+					return;
+
+				Shell shell= getSite().getShell();
+				if (shell.isDisposed())
+					return;
+				
+				Display display= shell.getDisplay();
+				if (display.isDisposed())
+					return; 
+				
+				display.asyncExec(new Runnable() {
+					/*
+					 * @see java.lang.Runnable#run()
+					 */
+					public void run() {
+						
+						if (fComputeCount != currentCount || getViewSite().getShell().isDisposed())
+							return;
+
+						fCurrentViewInput= je;
+						doSetInput(input);						
+					}
+				});
+			}
+		};
+		
+		thread.setDaemon(true);
+		thread.setPriority(Thread.MIN_PRIORITY);
+		thread.start();
+	}
+	
+	private void doSetInput(Object input) {
+		setInput(input);
+
+		fGotoInputAction.setEnabled(true);
+
+		String title= InfoViewMessages.getFormattedString("AbstractInfoView.compoundTitle", getSite().getRegisteredName(), JavaElementLabels.getElementLabel(fCurrentViewInput, TITLE_LABEL_FLAGS)); //$NON-NLS-1$
+		setTitle(title);
+		setTitleToolTip(JavaElementLabels.getElementLabel(fCurrentViewInput, TOOLTIP_LABEL_FLAGS));
 	}
 }
