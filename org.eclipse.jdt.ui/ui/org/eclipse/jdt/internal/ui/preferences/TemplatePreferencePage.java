@@ -404,9 +404,9 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 		if (selection.size() == 1) {
 			Template template= (Template) selection.getFirstElement();
-			fPatternViewer.getTextWidget().setText(template.getPattern());
+			fPatternViewer.getDocument().set(template.getPattern());
 		} else {		
-			fPatternViewer.getTextWidget().setText(""); //$NON-NLS-1$
+			fPatternViewer.getDocument().set(""); //$NON-NLS-1$
 		}
 		
 		updateButtons();

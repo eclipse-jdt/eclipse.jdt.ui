@@ -306,9 +306,9 @@ public class CodeTemplateBlock {
 		}
 		if (selection.size() == 1 && selection.get(0) instanceof Template) {
 			Template template= (Template) selection.get(0);
-			fPatternViewer.getTextWidget().setText(template.getPattern());
-		} else {		
-			fPatternViewer.getTextWidget().setText(""); //$NON-NLS-1$
+			fPatternViewer.getDocument().set(template.getPattern());
+		} else {
+			fPatternViewer.getDocument().set("");
 		}		
 	}
 	
