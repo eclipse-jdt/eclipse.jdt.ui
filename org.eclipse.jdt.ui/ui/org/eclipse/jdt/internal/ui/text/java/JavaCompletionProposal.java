@@ -459,12 +459,14 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	}
 	
 	private void repairPresentation(ITextViewer viewer) {
-		if (fRememberedStyleRange != null && viewer instanceof ITextViewerExtension2) {
-			// attempts to reduce the redraw area
-			ITextViewerExtension2 viewer2= (ITextViewerExtension2) viewer;
-			viewer2.invalidateTextPresentation(fRememberedStyleRange.start, fRememberedStyleRange.length);
-		} else
-			viewer.invalidateTextPresentation();
+		if (fRememberedStyleRange != null) {
+			if (viewer instanceof ITextViewerExtension2) {
+				// attempts to reduce the redraw area
+				ITextViewerExtension2 viewer2= (ITextViewerExtension2) viewer;
+				viewer2.invalidateTextPresentation(fRememberedStyleRange.start, fRememberedStyleRange.length);
+			} else
+				viewer.invalidateTextPresentation();
+		}
 	}
 
 	private void updateStyle(ITextViewer viewer) {
@@ -473,7 +475,6 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		if (text == null || text.isDisposed())
 			return;
 
-		fRememberedStyleRange= null;
 		IRegion visibleRegion= viewer.getVisibleRegion();			
 		int caretOffset= text.getCaretOffset() + visibleRegion.getOffset();
 
