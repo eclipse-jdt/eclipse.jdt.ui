@@ -86,8 +86,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private final int IDX_ADDFOL= 4;
 	
 	private final int IDX_EDIT= 6;
-	
-	private final int IDX_REMOVE= 8;
+	private final int IDX_REMOVE= 7;
 	
 		
 	public LibrariesWorkbookPage(IWorkspaceRoot root, ListDialogField classPathList) {
@@ -105,7 +104,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			/* IDX_ADDFOL */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addclassfolder.button"), //$NON-NLS-1$
 			/* */ null,  
 			/* IDX_EDIT */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.edit.button"), //$NON-NLS-1$
-			/* */ null,  
 			/* IDX_REMOVE */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.remove.button") //$NON-NLS-1$
 		};		
 				

@@ -66,11 +66,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	private SelectionButtonDialogField fUseFolderOutputs;
 	
-	private final int IDX_ADDNEW= 0;
-	private final int IDX_ADDEXIST= 1;
-	private final int IDX_EDIT= 3;
-	
-	private final int IDX_REMOVE= 5;	
+	private final int IDX_ADD= 0;
+	private final int IDX_EDIT= 2;
+	private final int IDX_REMOVE= 3;	
 
 	public SourceContainerWorkbookPage(IWorkspaceRoot root, ListDialogField classPathList, StringDialogField outputLocationField) {
 		fWorkspaceRoot= root;
@@ -85,12 +83,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		String[] buttonLabels;
 		int removeIndex;
 		buttonLabels= new String[] { 
-			/* 0 = IDX_ADDNEW */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button"), //$NON-NLS-1$
-			/* 1 = IDX_ADDEXIST */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.addexisting.button"), //$NON-NLS-1$
-			/* 2 */ null,
-			/* 3 = IDX_EDIT */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.edit.button"), //$NON-NLS-1$
-			/* 4 */ null,			
-			/* 5 = IDX_REMOVE */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button") //$NON-NLS-1$
+			/* 0 = IDX_ADDEXIST */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.add.button"), //$NON-NLS-1$
+			/* 1 */ null,
+			/* 2 = IDX_EDIT */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.edit.button"), //$NON-NLS-1$
+			/* 3 = IDX_REMOVE */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button") //$NON-NLS-1$
 		};
 		removeIndex= IDX_REMOVE;
 		
@@ -140,17 +136,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fFoldersList.setButtonsMinWidth(buttonBarWidth);
-//		
-//		
-//		
-//		GridLayout layout= new GridLayout();
-//		layout.numColumns= 2;		
-//		composite.setLayout(layout);
-//
-//		fFoldersList.doFillIntoGrid(composite, 3);
-//		LayoutUtil.setHorizontalSpan(fFoldersList.getLabelControl(null), 2);
-//		
-//		fUseFolderOutputs.doFillIntoGrid(composite, 2);
 			
 		fSWTControl= composite;
 		
@@ -220,19 +205,22 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (field == fFoldersList) {
 			List elementsToAdd= new ArrayList(10);
 			switch (index) {
-			case IDX_ADDNEW: /* add new */
-				CPListElement srcentry= openNewSourceContainerDialog(null);
-				if (srcentry != null) {
-					elementsToAdd.add(srcentry);
-				}
-				break;
-			case IDX_ADDEXIST: /* add existing */
-				CPListElement[] srcentries= openSourceContainerDialog(null);
-				if (srcentries != null) {
-					for (int i= 0; i < srcentries.length; i++) {
-						elementsToAdd.add(srcentries[i]);
+			case IDX_ADD: /* add */
+				
+				if (fCurrJProject.exists()) {
+					CPListElement[] srcentries= openSourceContainerDialog(null);
+					if (srcentries != null) {
+						for (int i= 0; i < srcentries.length; i++) {
+							elementsToAdd.add(srcentries[i]);
+						}
+					}						
+				} else {
+					CPListElement entry= openNewSourceContainerDialog(null);
+					if (entry != null) {
+						elementsToAdd.add(entry);
 					}
 				}
+			
 				break;
 			case IDX_EDIT: /* add existing */
 				editEntry();
@@ -379,10 +367,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		String title= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.new.title") : NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		IProject proj= fCurrJProject.getProject();
-		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, proj, getExistingContainers(existing), existing);
+		NewSourceFolderDialog dialog= new NewSourceFolderDialog(getShell(), title, proj, getExistingContainers(existing), existing);
 		dialog.setMessage(NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.NewSourceFolderDialog.description", fProjPath.toString())); //$NON-NLS-1$
 		if (dialog.open() == NewContainerDialog.OK) {
-			IFolder folder= dialog.getFolder();
+			IResource folder= dialog.getSourceFolder();
 			return newCPSourceElement(folder);
 		}
 		return null;

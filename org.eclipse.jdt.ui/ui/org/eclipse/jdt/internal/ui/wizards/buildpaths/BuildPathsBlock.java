@@ -305,6 +305,7 @@ public class BuildPathsBlock {
 		
 		// inits the dialog field
 		fBuildPathDialogField.setText(outputLocation.makeRelative().toString());
+		fBuildPathDialogField.enableButton(fCurrJProject.exists());
 		fClassPathList.setElements(newClassPath);
 		fClassPathList.setCheckedElements(exportedEntries);
 
