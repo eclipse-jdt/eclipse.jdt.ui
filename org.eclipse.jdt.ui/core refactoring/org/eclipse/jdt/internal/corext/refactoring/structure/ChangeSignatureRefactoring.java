@@ -109,7 +109,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private static final String DEFAULT_NEW_PARAM_TYPE= "int";//$NON-NLS-1$
 	private static final String DEFAULT_NEW_PARAM_VALUE= "0"; //$NON-NLS-1$
 
-	public ChangeSignatureRefactoring(IMethod method, CodeGenerationSettings codeGenerationSettings){
+	public ChangeSignatureRefactoring(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
 		Assert.isNotNull(method);
 		fMethod= method;
 		fParameterInfos= createParameterInfoList(method);
@@ -118,14 +118,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		fDescriptionGroups= new HashSet(0);
 		fCodeGenerationSettings= codeGenerationSettings;
 		fImportEditManager= new ImportEditManager(fCodeGenerationSettings);
-		try {
-			fReturnTypeName= getInitialReturnTypeName();
-			fVisibility= getInitialMethodVisibility();
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			fVisibility= JdtFlags.VISIBILITY_CODE_INVALID;
-			fReturnTypeName= ""; //$NON-NLS-1$
-		}
+		fReturnTypeName= getInitialReturnTypeName();
+		fVisibility= getInitialMethodVisibility();
 	}
 	
 	private String getInitialReturnTypeName() throws JavaModelException{
