@@ -96,8 +96,8 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase {
 
 		protected void tearDown () throws Exception {
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			store.setValue(PreferenceConstants.EDITOR_CLOSE_JAVADOCS, true);
-			store.setValue(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
+			store.setToDefault(PreferenceConstants.EDITOR_CLOSE_JAVADOCS);
+			store.setToDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS);
 
 			EditorTestHelper.closeAllEditors();
 			
