@@ -10,11 +10,11 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPerspectiveDescriptor;
@@ -36,8 +36,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -46,22 +44,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 public class OpenTypeHierarchyUtil {
 	
 	private OpenTypeHierarchyUtil() {
 	}
 
-	/**
-	 * @deprecated Use org.eclipse.jdt.ui.actions.OpenTypeHierarchyAction directly
-	 */
-	public static boolean canOperateOn(ISelection s) {
-		Object element= getElement(s);
-			
-		return (element != null) 
-			? (getCandidates(element) != null) 
-			: false;
-	}
-	
 	public static TypeHierarchyViewPart open(IJavaElement element, IWorkbenchWindow window) {
 		IJavaElement[] candidates= getCandidates(element);
 		if (candidates != null) {
@@ -214,7 +203,7 @@ public class OpenTypeHierarchyUtil {
 				case IJavaElement.CLASS_FILE:
 					return new IJavaElement[] { ((IClassFile)input).getType() };				
 				case IJavaElement.COMPILATION_UNIT: {
-						ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
+					ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
 					if (cu != null) {
 						IType[] types= cu.getTypes();
 						if (types.length > 0) {
@@ -229,5 +218,5 @@ public class OpenTypeHierarchyUtil {
 			JavaPlugin.log(e);
 		}
 		return null;	
-	}	
+	}
 }
