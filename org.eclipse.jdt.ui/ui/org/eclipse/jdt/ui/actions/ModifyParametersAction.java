@@ -123,8 +123,17 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		
 	private boolean canRun(ITextSelection selection){
 		IJavaElement[] elements= resolveElements();
-		if (elements.length != 1)
+		if (elements.length > 1)
 			return false;
+		if (elements.length == 0){
+			try {
+				IJavaElement selected= SelectionConverter.getInputAsCompilationUnit(fEditor).getElementAt(selection.getOffset());
+				return (selected instanceof IMethod && shouldAcceptElement((IMethod)selected));
+			} catch (JavaModelException e) {
+				ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+				return false;
+			}
+		}		
 
 		return (elements[0] instanceof IMethod) && shouldAcceptElement((IMethod)elements[0]);
 	}
