@@ -441,7 +441,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			public void run() {
 				if(isDisposed()) 
 					return;	
-				fStopAction.setEnabled(false);
+				fStopAction.setEnabled(lastLaunchIsKeptAlive());
 				if (fFailures.size() > 0) {
 					selectFirstFailure();
 				}
