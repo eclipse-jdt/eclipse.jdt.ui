@@ -11,19 +11,26 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.eclipse.ui.PartInitException;
 
 public class UndoJavaEditorTest extends UndoEditorTest {
 	
+	private static final Class THIS= UndoJavaEditorTest.class;
+	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
 
-	private static final int N_OF_RUNS= 2;
+	private static final int N_OF_RUNS= 4;
 
-	public void testUndoJavaEditor1() throws PartInitException {
-		measureUndo(ResourceTestHelper.findFile(FILE), N_OF_RUNS);
+	private static final int N_OF_COLD_RUNS= 2;
+
+	public static Test suite() {
+		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-
+	
 	public void testUndoJavaEditor2() throws PartInitException {
-		measureUndo(ResourceTestHelper.findFile(FILE), N_OF_RUNS);
+		measureUndo(ResourceTestHelper.findFile(FILE), N_OF_RUNS, N_OF_COLD_RUNS);
 	}
 }

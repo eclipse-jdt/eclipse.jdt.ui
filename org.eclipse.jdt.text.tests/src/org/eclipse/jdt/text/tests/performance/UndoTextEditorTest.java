@@ -11,9 +11,14 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.eclipse.ui.PartInitException;
 
 public class UndoTextEditorTest extends UndoEditorTest {
+	
+	private static final Class THIS= UndoTextEditorTest.class;
 	
 	private static final String FILE_PREFIX= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText";
 	
@@ -21,8 +26,14 @@ public class UndoTextEditorTest extends UndoEditorTest {
 
 	private static final String FILE= FILE_PREFIX + ".txt";
 
-	private static final int N_OF_RUNS= 2;
+	private static final int N_OF_RUNS= 4;
 
+	private static final int N_OF_COLD_RUNS= 2;
+
+	public static Test suite() {
+		return new PerformanceTestSetup(new TestSuite(THIS));
+	}
+	
 	protected void setUp() throws Exception {
 		ResourceTestHelper.copy(ORIG_FILE, FILE);
 		super.setUp();
@@ -33,11 +44,7 @@ public class UndoTextEditorTest extends UndoEditorTest {
 		ResourceTestHelper.delete(FILE);
 	}
 	
-	public void testUndoTextEditor1() throws PartInitException {
-		measureUndo(ResourceTestHelper.findFile(FILE), N_OF_RUNS);
-	}
-
 	public void testUndoTextEditor2() throws PartInitException {
-		measureUndo(ResourceTestHelper.findFile(FILE), N_OF_RUNS);
+		measureUndo(ResourceTestHelper.findFile(FILE), N_OF_RUNS, N_OF_COLD_RUNS);
 	}
 }

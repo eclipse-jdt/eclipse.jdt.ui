@@ -39,7 +39,7 @@ public abstract class UndoEditorTest extends TestCase {
 		fPerformanceMeter.dispose();
 	}
 	
-	protected void measureUndo(IFile file, int nOfRuns) throws PartInitException {
+	protected void measureUndo(IFile file, int nOfRuns, int nOfColdRuns) throws PartInitException {
 		AbstractDecoratedTextEditor editor= (AbstractDecoratedTextEditor) EditorTestHelper.openInEditor(file, true);
 		editor.showChangeInformation(false); // TODO: remove when undo does no longer trigger timing issue
 		
@@ -51,9 +51,11 @@ public abstract class UndoEditorTest extends TestCase {
 			runAction(shiftRight);
 			sleep(5000);
 			EditorTestHelper.runEventQueue();
-			fPerformanceMeter.start();
+			if (i >= nOfColdRuns)
+				fPerformanceMeter.start();
 			runAction(undo);
-			fPerformanceMeter.stop();
+			if (i >= nOfColdRuns)
+				fPerformanceMeter.stop();
 			sleep(5000); // NOTE: runnables posted from other threads, while the main thread waits here, are not measured at all
 		}
 		fPerformanceMeter.commit();
