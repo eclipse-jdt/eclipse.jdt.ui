@@ -108,7 +108,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	private static boolean isOkToDeleteCus(ICompilationUnit[] cusToDelete) {
 		String message;
 		if (cusToDelete.length == 1) 
-			message= "After the delete operation the compilation unit " + cusToDelete[0].getElementName() + " contains no types. \nOK to delete it as well?";
+			message= "After the delete operation the compilation unit \'" + cusToDelete[0].getElementName() + "\' contains no types. \nOK to delete it as well?";
 		else
 			message= "After the delete operation " + cusToDelete.length + " compilation units contain no types. \nOK to delete them as well?";	
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), "Delete", message);
