@@ -262,28 +262,29 @@ public class PullUpTests extends RefactoringTest {
 	}
 	
 	public void test12() throws Exception{
-		printTestDisabledMessage("bug#6779 searchDeclarationsOfReferencedTyped - missing exception  types");
-//		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
-//		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
-//
-//		try{
-//			String[] methodNames= new String[]{"m"};
-//			String[][] signatures= new String[][]{new String[0]};
-//			
-//			IType type= getType(cuB, "B");
-//			IMethod[] methods= getMethods(type, methodNames, signatures);
-//			PullUpMethodRefactoring ref= createRefactoring(methods);
-//			ref.setMethodsToDelete(ref.getMatchingMethods());
-//		
-//			RefactoringStatus result= performRefactoring(ref);
-//			assertEquals("precondition was supposed to pass", null, result);
-//			
-//			assertEquals("incorrect modification in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());		
-//			assertEquals("incorrect modification in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());		
-//		} finally{
-//			cuA.delete(false, null);
-//			cuB.delete(false, null);
-//		}							
+		//printTestDisabledMessage("bug#6779 searchDeclarationsOfReferencedTyped - missing exception  types");
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+
+		try{
+			String[] methodNames= new String[]{"m"};
+			String[][] signatures= new String[][]{new String[0]};
+			
+			IType type= getType(cuB, "B");
+			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
+			PullUpRefactoring ref= createRefactoring(methods);
+			//ref.setMethodsToDelete(ref.getMatchingMethods());
+			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor())));
+		
+			RefactoringStatus result= performRefactoring(ref);
+			assertEquals("precondition was supposed to pass", null, result);
+			
+			assertEquals("incorrect modification in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());		
+			assertEquals("incorrect modification in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());		
+		} finally{
+			cuA.delete(false, null);
+			cuB.delete(false, null);
+		}							
 	}
 	
 	public void test13() throws Exception{
