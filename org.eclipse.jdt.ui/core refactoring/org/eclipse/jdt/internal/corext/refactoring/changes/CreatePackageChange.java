@@ -1,7 +1,6 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -38,7 +37,7 @@ public class CreatePackageChange extends Change {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) fPackageFragment.getParent();
 				root.createPackageFragment(fPackageFragment.getElementName(), false, pm);
 				
-				fUndoChange= new DeleteFolderChange((IFolder) fPackageFragment.getUnderlyingResource());
+				fUndoChange= new DeleteSourceManipulationChange(fPackageFragment);
 			}		
 		} catch (CoreException e) {
 			handleException(context, e);
