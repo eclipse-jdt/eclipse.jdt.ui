@@ -61,6 +61,11 @@ public class SelectionListenerWithASTManager {
 		private ISelectionChangedListener fSelectionListener, fPostSelectionListener;
 		private Job fCurrentJob;
 		private ListenerList fAstListeners;
+		/**
+		 * Lock to avoid having more than one calculateAndInform job in parallel.
+		 * Only jobs may synchronize on this as otherwise deadlocks are possible.
+		 */
+		private final Object fJobLock= new Object();
 		
 		public PartListenerGroup(ITextEditor part) {
 			fPart= part;
@@ -132,7 +137,7 @@ public class SelectionListenerWithASTManager {
 					if (monitor == null) {
 						monitor= new NullProgressMonitor();
 					}
-					synchronized (PartListenerGroup.this) {
+					synchronized (fJobLock) {
 						return calculateASTandInform(input, selection, monitor);
 					}
 				}
@@ -146,8 +151,8 @@ public class SelectionListenerWithASTManager {
 			IEditorInput editorInput= fPart.getEditorInput();
 			if (editorInput != null)
 				return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
-			else
-				return null;
+
+			return null;
 		}
 		
 		protected IStatus calculateASTandInform(IJavaElement input, ITextSelection selection, IProgressMonitor monitor) {
@@ -159,7 +164,10 @@ public class SelectionListenerWithASTManager {
 				CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(input, true, monitor);
 			
 				if (astRoot != null && !monitor.isCanceled()) {
-					Object[] listeners= fAstListeners.getListeners();
+					Object[] listeners;
+					synchronized (PartListenerGroup.this) {
+						listeners= fAstListeners.getListeners();
+					}
 					for (int i= 0; i < listeners.length; i++) {
 						((ISelectionListenerWithAST) listeners[i]).selectionChanged(fPart, selection, astRoot);
 						if (monitor.isCanceled()) {
@@ -188,12 +196,14 @@ public class SelectionListenerWithASTManager {
 	 * @param listener The listener to register.
 	 */
 	public void addListener(ITextEditor part, ISelectionListenerWithAST listener) {
-		PartListenerGroup partListener= (PartListenerGroup) fListenerGroups.get(part);
-		if (partListener == null) {
-			partListener= new PartListenerGroup(part);
-			fListenerGroups.put(part, partListener);
+		synchronized (this) {
+			PartListenerGroup partListener= (PartListenerGroup) fListenerGroups.get(part);
+			if (partListener == null) {
+				partListener= new PartListenerGroup(part);
+				fListenerGroups.put(part, partListener);
+			}
+			partListener.install(listener);
 		}
-		partListener.install(listener);
 	}
 
 	/**
@@ -202,11 +212,13 @@ public class SelectionListenerWithASTManager {
 	 * @param listener The listener to unregister.
 	 */
 	public void removeListener(ITextEditor part, ISelectionListenerWithAST listener) {
-		PartListenerGroup partListener= (PartListenerGroup) fListenerGroups.get(part);
-		if (partListener != null) {
-			partListener.uninstall(listener);
-			if (partListener.isEmpty()) {
-				fListenerGroups.remove(part);
+		synchronized (this) {
+			PartListenerGroup partListener= (PartListenerGroup) fListenerGroups.get(part);
+			if (partListener != null) {
+				partListener.uninstall(listener);
+				if (partListener.isEmpty()) {
+					fListenerGroups.remove(part);
+				}
 			}
 		}
 	}
@@ -215,10 +227,14 @@ public class SelectionListenerWithASTManager {
 	 * Forces a selection changed event that is sent to all listeners registered to the given editor
 	 * part. The event is sent from a background thread: this method call can return before the listeners
 	 * are informed.
+	 * @param part The editor part that has a changed selection
+	 * @param selection The new text selection
 	 */
 	public void forceSelectionChange(ITextEditor part, ITextSelection selection) {
-		PartListenerGroup partListener= (PartListenerGroup) fListenerGroups.get(part);
-		if (partListener != null) {
-			partListener.firePostSelectionChanged(selection);
+		synchronized (this) {
+			PartListenerGroup partListener= (PartListenerGroup) fListenerGroups.get(part);
+			if (partListener != null) {
+				partListener.firePostSelectionChanged(selection);
+			}
 		}
 	}}
