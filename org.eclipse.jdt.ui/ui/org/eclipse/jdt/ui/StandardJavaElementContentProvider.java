@@ -265,7 +265,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		return concatenate(fragments, nonJavaResources);
 	}
 	
-	private Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
+	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		if (!project.getProject().isOpen())
 			return NO_CHILDREN;
 			
