@@ -277,7 +277,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	 * if a package fragment with this name exists and has java resources,
 	 * then the name is not ok.
 	 */
-	private boolean isPackageNameOkInRoot(String newName, IPackageFragmentRoot root) throws JavaModelException{
+	public static boolean isPackageNameOkInRoot(String newName, IPackageFragmentRoot root) throws JavaModelException{
 		IPackageFragment pack= root.getPackageFragment(newName);
 		if (! pack.exists())
 			return true;
