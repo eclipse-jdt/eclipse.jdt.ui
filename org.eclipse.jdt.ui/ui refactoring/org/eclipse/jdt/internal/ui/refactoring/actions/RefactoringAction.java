@@ -26,6 +26,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 
@@ -50,10 +51,14 @@ public abstract class RefactoringAction extends Action {
 
 	private StructuredSelectionProvider fProvider;
 
+	protected RefactoringAction(String text, ISelectionProvider selectionProvider){
+		this(text, StructuredSelectionProvider.createFrom(selectionProvider));
+	}
+	
 	protected RefactoringAction(String text, StructuredSelectionProvider provider) {
 		super(text);
+		Assert.isNotNull(provider);
 		fProvider= provider;
-		Assert.isNotNull(fProvider);
 	}
 	
 	protected StructuredSelectionProvider getProvider() {
