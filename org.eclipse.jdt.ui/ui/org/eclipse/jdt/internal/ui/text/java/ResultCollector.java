@@ -11,12 +11,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.ImageRegistry;
 
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -38,18 +36,23 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	private final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
 	private final static char[] TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', ' ' };
 	private final static char[] VAR_TRIGGER= new char[] { '\t', ' ', '=', ';' };
-	
-	private ArrayList fFields= new ArrayList(), fKeywords= new ArrayList(10), 
-						fLabels= new ArrayList(10), fMethods= new ArrayList(),
-						fModifiers= new ArrayList(10), fPackages= new ArrayList(),
-						fTypes= new ArrayList(), fVariables= new ArrayList();
 
-	private IProblem fLastProblem;
+	protected IJavaProject fJavaProject;
+	protected ICompilationUnit fCompilationUnit; // set when imports can be added
+	protected int fCodeAssistOffset;
+	protected int fContextOffset;
 	
-	private IJavaProject fJavaProject;
-	private ICompilationUnit fCompilationUnit; // set when imports can be added
-	private int fCodeAssistOffset;
-	private int fContextOffset;
+	private ArrayList fFields=
+		new ArrayList(),
+		fKeywords= new ArrayList(10), 
+		fLabels= new ArrayList(10),
+		fMethods= new ArrayList(),
+		fModifiers= new ArrayList(10),
+		fPackages= new ArrayList(),
+		fTypes= new ArrayList(),
+		fVariables= new ArrayList();
+
+	private IProblem fLastProblem;	
 	private ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	
 	private ArrayList[] fResults = new ArrayList[] {
@@ -165,7 +168,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 		fVariables.add(proposal);
 	}
 	
-	private String getParameterSignature(char[][] parameterTypeNames, char[][] parameterNames) {
+	protected String getParameterSignature(char[][] parameterTypeNames, char[][] parameterNames) {
 		StringBuffer buf = new StringBuffer();
 		if (parameterTypeNames != null) {
 			for (int i = 0; i < parameterTypeNames.length; i++) {
@@ -194,7 +197,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 		if (completionName == null)
 			return;
 	
-		JavaCompletionProposal proposal= createMethodCallCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end, relevance);
+		JavaCompletionProposal proposal= createMethodCallCompletion(declaringTypeName, name, parameterPackageNames, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end, relevance);
 		boolean isConstructor= returnTypeName == null ? true : returnTypeName.length == 0;
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, isConstructor));
 
@@ -334,7 +337,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 		return nameBuffer;
 	}
 
-	protected JavaCompletionProposal createMethodCallCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
+	protected JavaCompletionProposal createMethodCallCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypePackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
 		ImageDescriptor descriptor= getMemberDescriptor(modifiers);
 		StringBuffer nameBuffer= getMethodDisplayString(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName);
 		return createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString(), relevance);
