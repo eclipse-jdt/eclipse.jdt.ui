@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  */
 /* package */ class ReferenceAnalyzer extends MoveStaticMemberAnalyzer {
 	
-	public ReferenceAnalyzer(MoveStaticMembersRefactoring.ASTData ast, IBinding[] members, ITypeBinding target, ITypeBinding source) {
+	public ReferenceAnalyzer(MoveStaticMembersProcessor.ASTData ast, IBinding[] members, ITypeBinding target, ITypeBinding source) {
 		super(ast, members, source, target);
 	}
 	

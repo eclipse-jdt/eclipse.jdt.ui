@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 //	  - if originally resolved by qualification -> no problem
 //	  - if originally resolved by import -> must add import in target too (qualify if import ambiguous)
 	
-	public MovedMemberAnalyzer(MoveStaticMembersRefactoring.ASTData ast,
+	public MovedMemberAnalyzer(MoveStaticMembersProcessor.ASTData ast,
 			IBinding[] members, ITypeBinding source, ITypeBinding target) {
 		super(ast, members, source, target);
 	}

@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -155,9 +155,9 @@ public class MoveAction extends SelectionDispatchAction{
 		if (element == null || !(element instanceof IMember))
 			return false;
 		IMember[] array= new IMember[]{(IMember)element};
-		if (! MoveStaticMembersRefactoring.isAvailable(array))	
+		if (! MoveStaticMembersProcessor.isAvailable(array))	
 			return false;
-		MoveStaticMembersRefactoring refactoring= MoveStaticMembersRefactoring.create(array, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveStaticMembersProcessor refactoring= MoveStaticMembersProcessor.create(array, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (refactoring == null)
 			return false;
 		fMoveStaticMembersAction.run(selection);
@@ -185,9 +185,9 @@ public class MoveAction extends SelectionDispatchAction{
 
 	private boolean tryMoveStaticMembers(IStructuredSelection selection) throws JavaModelException{
 		IMember[] array= getSelectedMembers(selection);
-		if (! MoveStaticMembersRefactoring.isAvailable(array))	
+		if (! MoveStaticMembersProcessor.isAvailable(array))	
 			return false;
-		MoveStaticMembersRefactoring refactoring= MoveStaticMembersRefactoring.create(array, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveStaticMembersProcessor refactoring= MoveStaticMembersProcessor.create(array, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (refactoring == null)
 			return false;
 		fMoveStaticMembersAction.run(selection);

@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
@@ -27,7 +28,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -43,6 +44,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class MoveStaticMembersAction extends SelectionDispatchAction{
@@ -91,7 +93,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		IJavaElement element= selection.resolveEnclosingElement();
 		if (! (element instanceof IMember))
 			return false;
-		return MoveStaticMembersRefactoring.isAvailable(new IMember[] {(IMember)element});
+		return MoveStaticMembersProcessor.isAvailable(new IMember[] {(IMember)element});
 	}
 	
 	public void run(IStructuredSelection selection) {
@@ -141,7 +143,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 	}
 	
 	private static boolean canEnable(IMember[] members) throws JavaModelException {
-		return MoveStaticMembersRefactoring.isAvailable(members);
+		return MoveStaticMembersProcessor.isAvailable(members);
 	}
 	
 	private IMember getSelectedMember() throws JavaModelException{
@@ -150,26 +152,32 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 			return null;
 		return (IMember)element;
 	}
-
-	private static MoveStaticMembersRefactoring createNewRefactoringInstance(Object[] elements) throws JavaModelException{
-		Set memberSet= new HashSet();
-		memberSet.addAll(Arrays.asList(elements));
-		IMember[] methods= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-		return MoveStaticMembersRefactoring.create(methods, JavaPreferencesSettings.getCodeGenerationSettings());
-	}
-
-	private static RefactoringWizard createWizard(MoveStaticMembersRefactoring refactoring){
-		return new MoveMembersWizard(refactoring);
-	}
 	
 	private void startRefactoring(IMember[] members) throws JavaModelException {
-		MoveStaticMembersRefactoring refactoring= createNewRefactoringInstance(members);
+		MoveRefactoring refactoring= createNewRefactoringInstance(members);
 		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), refactoring.getMembersToMove()[0]))
+		if (!ActionUtil.isProcessable(getShell(), getSourceCompilationUnit(refactoring)))
 			return;
 		
 		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), 
 			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
+	}
+	
+	private static MoveRefactoring createNewRefactoringInstance(Object[] elements) throws JavaModelException{
+		Set memberSet= new HashSet();
+		memberSet.addAll(Arrays.asList(elements));
+		IMember[] methods= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
+		return new MoveRefactoring(MoveStaticMembersProcessor.create(
+			methods, JavaPreferencesSettings.getCodeGenerationSettings()));
+	}
+
+	private static RefactoringWizard createWizard(MoveRefactoring refactoring) {
+		return new MoveMembersWizard(refactoring);
+	}
+	
+	private static ICompilationUnit getSourceCompilationUnit(MoveRefactoring refactoring) {
+		return ((MoveStaticMembersProcessor)refactoring.getAdapter(MoveStaticMembersProcessor.class)).
+			getMembersToMove()[0].getCompilationUnit();
 	}
 }

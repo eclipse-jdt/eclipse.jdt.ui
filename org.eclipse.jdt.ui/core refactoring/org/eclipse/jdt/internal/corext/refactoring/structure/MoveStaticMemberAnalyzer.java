@@ -42,7 +42,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	
 	protected ITypeBinding fSource;
 	protected ITypeBinding fTarget;
-	protected MoveStaticMembersRefactoring.ASTData fAst;
+	protected MoveStaticMembersProcessor.ASTData fAst;
 	protected IBinding[] fMembers;
 	
 	protected boolean fNeedsImport;
@@ -53,7 +53,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	
 	protected static final String REFERENCE_UPDATE= RefactoringCoreMessages.getString("MoveMembersRefactoring.referenceUpdate"); //$NON-NLS-1$
 	
-	public MoveStaticMemberAnalyzer(MoveStaticMembersRefactoring.ASTData ast, IBinding[] members, ITypeBinding source, ITypeBinding target) {
+	public MoveStaticMemberAnalyzer(MoveStaticMembersProcessor.ASTData ast, IBinding[] members, ITypeBinding source, ITypeBinding target) {
 		super(true);
 		fStatus= new RefactoringStatus();
 		fAst= ast;

@@ -23,11 +23,13 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 public class MoveMembersTests extends RefactoringTest {
 
@@ -52,8 +54,16 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 
 	//---
-	private static MoveStaticMembersRefactoring createRefactoring(IMember[] members) throws JavaModelException{
-		return MoveStaticMembersRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings());
+	private static MoveRefactoring createRefactoring(IMember[] members, IType destination) throws JavaModelException{
+		return createRefactoring(members, destination.getFullyQualifiedName());
+	}
+	
+	private static MoveRefactoring createRefactoring(IMember[] members, String destination) throws JavaModelException{
+		MoveStaticMembersProcessor processor= MoveStaticMembersProcessor.create(members, JavaPreferencesSettings.getCodeGenerationSettings());
+		if (processor == null)
+			return null;
+		processor.setDestinationTypeFullyQualifiedName(destination);
+		return new MoveRefactoring(processor);
 	}
 	
 	protected void setUp() throws Exception {
@@ -63,6 +73,7 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 	
 	private void fieldMethodTypePackageHelper_passing(String[] fieldNames, String[] methodNames, String[][] signatures, String[] typeNames, IPackageFragment packForA, IPackageFragment packForB) throws Exception {
+		ParticipantTesting.reset();
 		ICompilationUnit cuA= createCUfromTestFile(packForA, "A");
 		ICompilationUnit cuB= createCUfromTestFile(packForB, "B");
 		IType typeA= getType(cuA, "A");
@@ -71,12 +82,18 @@ public class MoveMembersTests extends RefactoringTest {
 		IMethod[] methods= getMethods(typeA, methodNames, signatures);
 		IType[] types= getMemberTypes(typeA, typeNames);
 	
-		MoveStaticMembersRefactoring ref= createRefactoring(merge(methods, fields, types));
 		IType destinationType= typeB;
-		ref.setDestinationTypeFullyQualifiedName(destinationType.getFullyQualifiedName());
+		IMember[] members= merge(methods, fields, types);
+		String[] handles= ParticipantTesting.createHandles(members);
+		MoveArguments[] args= new MoveArguments[handles.length];
+		for (int i = 0; i < args.length; i++) {
+			args[i]= new MoveArguments(destinationType, true);
+		}
+		MoveRefactoring ref= createRefactoring(members, destinationType);
 	
 		RefactoringStatus result= performRefactoringWithStatus(ref);
 		assertTrue("precondition was supposed to pass", result.getSeverity() <= RefactoringStatus.WARNING);
+		ParticipantTesting.testMove(handles, args);
 	
 		String expected;
 		String actual;
@@ -100,6 +117,7 @@ public class MoveMembersTests extends RefactoringTest {
 
 	/** Move members from p.A to r.B under presence of other.C */
 	private void fieldMethodType3CUsHelper_passing(String[] fieldNames, String[] methodNames, String[][] signatures, String[] typeNames) throws Exception {
+		ParticipantTesting.reset();
 		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
 		IPackageFragment packageForC= getRoot().createPackageFragment("other", false, null);
 
@@ -114,12 +132,18 @@ public class MoveMembersTests extends RefactoringTest {
 		IMethod[] methods= getMethods(typeA, methodNames, signatures);
 		IType[] types= getMemberTypes(typeA, typeNames);
 	
-		MoveStaticMembersRefactoring ref= createRefactoring(merge(methods, fields, types));
 		IType destinationType= typeB;
-		ref.setDestinationTypeFullyQualifiedName(destinationType.getFullyQualifiedName());
+		IMember[] members= merge(methods, fields, types);
+		String[] handles= ParticipantTesting.createHandles(members);
+		MoveArguments[] args= new MoveArguments[handles.length];
+		for (int i = 0; i < args.length; i++) {
+			args[i]= new MoveArguments(destinationType, true);
+		}
+		MoveRefactoring ref= createRefactoring(members, destinationType);
 	
 		RefactoringStatus result= performRefactoringWithStatus(ref);
 		assertTrue("precondition was supposed to pass", result.getSeverity() <= RefactoringStatus.WARNING);
+		ParticipantTesting.testMove(handles, args);
 	
 		String expected;
 		String actual;
@@ -170,12 +194,11 @@ public class MoveMembersTests extends RefactoringTest {
 			IMethod[] methods= getMethods(typeA, methodNames, signatures);
 			IType[] types= getMemberTypes(typeA, typeNames);
 		
-			MoveStaticMembersRefactoring ref= createRefactoring(merge(methods, fields, types));
+			MoveRefactoring ref= createRefactoring(merge(methods, fields, types), destinationTypeName);
 			if (ref == null){
 				assertEquals(errorLevel, RefactoringStatus.FATAL);
 				return;
 			}
-			ref.setDestinationTypeFullyQualifiedName(destinationTypeName);
 		
 			RefactoringStatus result= performRefactoring(ref);
 			if (fIsVerbose)

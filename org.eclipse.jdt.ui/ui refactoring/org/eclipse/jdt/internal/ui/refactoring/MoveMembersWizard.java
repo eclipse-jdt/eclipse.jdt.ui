@@ -46,7 +46,7 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
@@ -59,12 +59,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 public class MoveMembersWizard extends RefactoringWizard {
 
-	public MoveMembersWizard(MoveStaticMembersRefactoring ref) {
+	public MoveMembersWizard(MoveRefactoring ref) {
 		super(ref, DIALOG_BASED_UESR_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.getString("MoveMembersWizard.page_title")); //$NON-NLS-1$
 	}
@@ -92,8 +93,8 @@ public class MoveMembersWizard extends RefactoringWizard {
 		public void setVisible(boolean visible){
 			if (visible){
 				String message= RefactoringMessages.getFormattedString("MoveMembersInputPage.descriptionKey", //$NON-NLS-1$
-					new String[]{new Integer(getMoveRefactoring().getMembersToMove().length).toString(),
-								 JavaModelUtil.getFullyQualifiedName(getMoveRefactoring().getDeclaringType())});
+					new String[]{new Integer(getMoveProcessor().getMembersToMove().length).toString(),
+								 JavaModelUtil.getFullyQualifiedName(getMoveProcessor().getDeclaringType())});
 				setDescription(message);
 			}	
 			super.setVisible(visible);	
@@ -115,7 +116,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 
 		private void addLabel(Composite parent) {
 			Label label= new Label(parent, SWT.NONE);
-			IMember[] members= getMoveRefactoring().getMembersToMove();
+			IMember[] members= getMoveProcessor().getMembersToMove();
 			if (members.length == 1) {
 				label.setText(RefactoringMessages.getFormattedString(
 						"MoveMembersInputPage.destination_single", //$NON-NLS-1$
@@ -145,7 +146,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 						error(status.getMessage());
 					} else {
 						try {
-							IType resolvedType= getMoveRefactoring().getDeclaringType().getJavaProject().findType(fDestinationField.getText());
+							IType resolvedType= getMoveProcessor().getDeclaringType().getJavaProject().findType(fDestinationField.getText());
 							IStatus validationStatus= validateDestinationType(resolvedType, fDestinationField.getText());
 							if (validationStatus.isOK()){
 								setErrorMessage(null);
@@ -170,7 +171,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 				setPageComplete(false);
 			}
 			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(false, false);
-			IPackageFragment context= (IPackageFragment) getMoveRefactoring().getDeclaringType().getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+			IPackageFragment context= (IPackageFragment) getMoveProcessor().getDeclaringType().getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 			processor.setPackageFragment(context);
 			ControlContentAssistHelper.createComboContentAssistant(fDestinationField, processor);
 			
@@ -202,14 +203,14 @@ public class MoveMembersWizard extends RefactoringWizard {
 					fgMruDestinations.remove(fgMruDestinations.size() - 1);
 				fgMruDestinations.add(0, destination);
 				
-				getMoveRefactoring().setDestinationTypeFullyQualifiedName(destination);
+				getMoveProcessor().setDestinationTypeFullyQualifiedName(destination);
 			} catch(JavaModelException e) {
 				ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("MoveMembersInputPage.move_Member"), RefactoringMessages.getString("MoveMembersInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	
 		private IJavaSearchScope createWorkspaceSourceScope(){
-			IJavaElement[] project= new IJavaElement[] { getMoveRefactoring().getDeclaringType().getJavaProject() };
+			IJavaElement[] project= new IJavaElement[] { getMoveProcessor().getDeclaringType().getJavaProject() };
 			return SearchEngine.createJavaSearchScope(project, IJavaSearchScope.REFERENCED_PROJECTS | IJavaSearchScope.SOURCES);
 		}
 	
@@ -250,7 +251,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			if (! fDestinationField.getText().trim().equals("")) //$NON-NLS-1$
 				return fDestinationField.getText();
 			else
-				return getMoveRefactoring().getDeclaringType().getElementName();
+				return getMoveProcessor().getDeclaringType().getElementName();
 		}
 	
 		private static IStatus validateDestinationType(IType type, String typeName){
@@ -261,8 +262,8 @@ public class MoveMembersWizard extends RefactoringWizard {
 			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 		}
 	
-		private MoveStaticMembersRefactoring getMoveRefactoring(){
-			return (MoveStaticMembersRefactoring)getRefactoring();
+		private MoveStaticMembersProcessor getMoveProcessor() {
+			return (MoveStaticMembersProcessor)getRefactoring().getAdapter(MoveStaticMembersProcessor.class);
 		}
 	}
 }

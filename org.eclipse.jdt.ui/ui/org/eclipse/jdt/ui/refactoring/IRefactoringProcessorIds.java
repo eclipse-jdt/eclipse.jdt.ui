@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
 /**
- * Interface to define the processor id provided by the JDT refactoring
+ * Interface to define the processor ids provided by the JDT refactoring.
  * 
  * @since 3.0
  */
@@ -77,13 +77,19 @@ public interface IRefactoringProcessorIds {
 	public static String RENAME_RESOURCE_PROCESSOR= RenameResourceProcessor.IDENTIFIER;
 	
 	/**
-	 * Processor ID of the rename resource processor
+	 * Processor ID of the move resource processor
 	 * (value <code>"org.eclipse.jdt.ui.MoveProcessor"</code>)
 	 */
 	public static String MOVE_PROCESSOR= JavaMoveProcessor.IDENTIFIER;
 	
 	/**
-	 * Processor ID of the rename resource processor
+	 * Processor ID of the move static member processor
+	 * (value <code>"org.eclipse.jdt.ui.MoveStaticMemberProcessor"</code>)
+	 */
+	public static String MOVE_STATIC_MEMBERS_PROCESSOR= "org.eclipse.jdt.ui.MoveStaticMemberProcessor"; //$NON-NLS-1$
+	
+	/**
+	 * Processor ID of the delete resource processor
 	 * (value <code>"org.eclipse.jdt.ui.DeleteProcessor"</code>)
 	 */
 	public static String DELETE_PROCESSOR= JavaDeleteProcessor.IDENTIFIER;

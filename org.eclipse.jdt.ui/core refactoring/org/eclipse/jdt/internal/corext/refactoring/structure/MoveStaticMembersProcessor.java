@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -71,6 +72,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -81,14 +83,22 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
+import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
-public class MoveStaticMembersRefactoring extends Refactoring {
+public class MoveStaticMembersProcessor extends MoveProcessor {
 	
 	private IMember[] fMembersToMove;
 	private IType fDestinationType;
@@ -177,17 +187,17 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		}
 	}
 
-	private MoveStaticMembersRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings) {
+	private MoveStaticMembersProcessor(IMember[] elements, CodeGenerationSettings preferenceSettings) {
 		Assert.isNotNull(elements);
 		Assert.isNotNull(preferenceSettings);
 		fMembersToMove= elements;
 		fPreferences= preferenceSettings;
 	}
 	
-	public static MoveStaticMembersRefactoring create(IMember[] elements, CodeGenerationSettings preferenceSettings) throws JavaModelException{
+	public static MoveStaticMembersProcessor create(IMember[] elements, CodeGenerationSettings preferenceSettings) throws JavaModelException{
 		if (! isAvailable(elements))
 			return null;
-		return new MoveStaticMembersRefactoring(elements, preferenceSettings);
+		return new MoveStaticMembersProcessor(elements, preferenceSettings);
 	}
 	
 	public static boolean isAvailable(IMember[] elements) throws JavaModelException{
@@ -254,10 +264,50 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return true;
 	}
 	
+	//---- Move Processor -------------------------------------------------
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isApplicable() throws CoreException {
+		return isAvailable(fMembersToMove);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object[] getElements() {
+		Object[] result= new Object[fMembersToMove.length];
+		System.arraycopy(fMembersToMove, 0, result, 0, fMembersToMove.length);
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getIdentifier() {
+		return IRefactoringProcessorIds.MOVE_STATIC_MEMBERS_PROCESSOR;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants sharedParticipants) throws CoreException {
+		List result= new ArrayList();
+		MoveArguments args= new MoveArguments(fDestinationType, true);
+		String[] natures= JavaProcessors.computeAffectedNaturs(fMembersToMove);
+		for (int i= 0; i < fMembersToMove.length; i++) {
+			IMember member= fMembersToMove[i];
+			result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(
+				status, this, member, args, natures, sharedParticipants)));
+		}
+		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
+	}
+	
 	/*
 	 * @see IRefactoring#getName()
 	 */
-	public String getName() {
+	public String getProcessorName() {
 		return RefactoringCoreMessages.getString("MoveMembersRefactoring.Move_Members"); //$NON-NLS-1$
 	}
 
@@ -285,8 +335,6 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return getDeclaringType().getJavaProject().findType(fullyQualifiedTypeName);
 	}
 	
-	//---- Activation checking ------------------------------------
-
 	//---- Activation checking ------------------------------------
 	
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
@@ -338,7 +386,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	
 	//---- Input checking ------------------------------------
 
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("MoveMembersRefactoring.Checking_preconditions"), 10); //$NON-NLS-1$
 			
@@ -371,13 +419,36 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 			
-			createChange(result, new SubProgressMonitor(pm, 7));
+			List modifiedCus= new ArrayList();
+			createChange(modifiedCus, result, new SubProgressMonitor(pm, 7));
+			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
+			if (checker != null) {
+				checker.addFiles(getAllFilesToModify(modifiedCus));
+			}
 			return result;
 		} finally {
 			pm.done();
 		}	
 	}
 	
+	private IFile[] getAllFilesToModify(List modifiedCus) {
+		Set result= new HashSet();
+		IResource resource= fDestinationType.getCompilationUnit().getResource();
+		if (result != null)
+			result.add(resource);
+		for (int i= 0; i < fMembersToMove.length; i++) {
+			resource= fMembersToMove[i].getCompilationUnit().getResource();
+			if (resource != null)
+				result.add(resource);
+		}
+		for (Iterator iter= modifiedCus.iterator(); iter.hasNext();) {
+			ICompilationUnit unit= (ICompilationUnit)iter.next();
+			if (unit.getResource() != null)
+				result.add(unit.getResource());
+		}
+		return (IFile[]) result.toArray(new IFile[result.size()]);
+	}
+
 	private RefactoringStatus checkDestinationType() throws JavaModelException {			
 		if (fDestinationType == null){
 			String message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.not_found", fDestinationTypeName);//$NON-NLS-1$
@@ -742,7 +813,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return fChange;
 	}
 	
-	private void createChange(RefactoringStatus status, IProgressMonitor pm) throws CoreException {
+	private void createChange(List modifiedCus, RefactoringStatus status, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
 		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_members")); //$NON-NLS-1$
 		fTarget= getASTData(fDestinationType.getCompilationUnit());
@@ -763,6 +834,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
 			new SubProgressMonitor(pm, 1), RefactoringScopeFactory.create(fMembersToMove),
 			RefactoringSearchEngine.createSearchPattern(fMembersToMove, IJavaSearchConstants.REFERENCES));
+		modifiedCus.addAll(Arrays.asList(affectedCUs));
 		SubProgressMonitor sub= new SubProgressMonitor(pm, 1);
 		sub.beginTask("", affectedCUs.length); //$NON-NLS-1$
 		for (int i= 0; i < affectedCUs.length; i++) {
@@ -933,5 +1005,5 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			ASTNodes.getParent(
 				NodeFinder.perform(fTarget.root, fDestinationType.getNameRange()),
 				TypeDeclaration.class);
-	}	
+	}
 }
