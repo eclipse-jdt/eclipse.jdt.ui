@@ -12,11 +12,9 @@ package org.eclipse.jdt.internal.ui.filters;
 
 
 import org.eclipse.core.resources.IProject;
-
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
-
-import org.eclipse.jdt.core.IJavaProject;
 
 /**
  * Filters closed projects
@@ -27,11 +25,11 @@ public class ClosedProjectFilter extends ViewerFilter {
 	 * @see ViewerFilter
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
-		if (element instanceof IProject)
-			return ((IProject)element).isOpen();
-		else if  (element instanceof IJavaProject)
-			return ((IJavaProject)element).isOpen();
-		
-		return true;
+		if (!(element instanceof IAdaptable))
+			return false;
+		IProject project= (IProject)((IAdaptable)element).getAdapter(IProject.class);
+		if (project == null)
+			return false;
+		return project.isOpen();
 	}
 }
