@@ -303,7 +303,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				getContainer().setPerformActionEnabled(fPattern.getText().length() > 0);
 			}
 		});
-		fPattern.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.widthHint= convertWidthInCharsToPixels(30);
+		fPattern.setLayoutData(gd);
 		
 		// Pattern info
 		Label label= new Label(result, SWT.LEFT);
