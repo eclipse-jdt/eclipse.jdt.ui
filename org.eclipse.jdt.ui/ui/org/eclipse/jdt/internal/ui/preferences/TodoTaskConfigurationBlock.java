@@ -101,7 +101,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 			if (columnIndex == 0) {
 				String name= task.name;
 				if (isDefaultTask(task)) {
-					name= name + " (default)"; //$NON-NLS-1$
+					name=PreferencesMessages.getFormattedString("TodoTaskConfigurationBlock.tasks.default", name); //$NON-NLS-1$
 				}
 				return name;
 			} else {
