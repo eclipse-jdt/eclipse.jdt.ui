@@ -55,8 +55,8 @@ public final class RefactoringSearchEngine2 {
 	/** Default implementation of a search requestor */
 	private static class DefaultSearchRequestor implements IRefactoringSearchRequestor {
 
-		public final boolean acceptSearchMatch(final SearchMatch match) {
-			return true;
+		public final SearchMatch acceptSearchMatch(final SearchMatch match) {
+			return match;
 		}
 	}
 
@@ -74,10 +74,11 @@ public final class RefactoringSearchEngine2 {
 
 		public final void acceptSearchMatch(final SearchMatch match) throws CoreException {
 			Assert.isNotNull(match);
-			if (fRequestor.acceptSearchMatch(match)) {
-				fCollectedMatches.add(match);
+			final SearchMatch accepted= fRequestor.acceptSearchMatch(match);
+			if (accepted != null) {
+				fCollectedMatches.add(accepted);
 				if (fBinary) {
-					final IResource resource= match.getResource();
+					final IResource resource= accepted.getResource();
 					final IJavaElement element= JavaCore.create(resource);
 					if (!(element instanceof ICompilationUnit)) {
 						final IProject project= resource.getProject();
@@ -89,11 +90,11 @@ public final class RefactoringSearchEngine2 {
 					}
 				}
 				if (fInaccurate) {
-					final IResource resource= match.getResource();
-					if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
-						if (!fInaccurateMatches.contains(match)) {
+					final IResource resource= accepted.getResource();
+					if (accepted.getAccuracy() == SearchMatch.A_INACCURATE) {
+						if (!fInaccurateMatches.contains(accepted)) {
 							fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.inaccurate.match", resource.getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
-							fInaccurateMatches.add(match);
+							fInaccurateMatches.add(accepted);
 						}
 					}
 				}
@@ -256,6 +257,15 @@ public final class RefactoringSearchEngine2 {
 			result[index++]= new SearchResultGroup(resource, ((SearchMatch[]) matches.toArray(new SearchMatch[matches.size()])));
 		}
 		return result;
+	}
+
+	/**
+	 * Returns the search pattern currently used for searching.
+	 * 
+	 * @return the search pattern
+	 */
+	public final SearchPattern getPattern() {
+		return fPattern;
 	}
 
 	/**
@@ -433,6 +443,20 @@ public final class RefactoringSearchEngine2 {
 	}
 
 	/**
+	 * Sets the conjunction of search patterns to be used during search.
+	 * <p>
+	 * This method must be called before {@link RefactoringSearchEngine2#searchPattern(IProgressMonitor)}
+	 * 
+	 * @param first the first search pattern to set
+	 * @param second the second search pattern to set
+	 */
+	public final void setAndPattern(final SearchPattern first, final SearchPattern second) {
+		Assert.isNotNull(first);
+		Assert.isNotNull(second);
+		fPattern= SearchPattern.createAndPattern(first, second);
+	}
+
+	/**
 	 * Determines how search matches are filtered.
 	 * <p>
 	 * This method must be called before start searching. The default is to filter inaccurate matches only.
@@ -454,6 +478,20 @@ public final class RefactoringSearchEngine2 {
 	 */
 	public final void setGrouping(final boolean grouping) {
 		fGrouping= grouping;
+	}
+
+	/**
+	 * Sets the disjunction of search patterns to be used during search.
+	 * <p>
+	 * This method must be called before {@link RefactoringSearchEngine2#searchPattern(IProgressMonitor)}
+	 * 
+	 * @param first the first search pattern to set
+	 * @param second the second search pattern to set
+	 */
+	public final void setOrPattern(final SearchPattern first, final SearchPattern second) {
+		Assert.isNotNull(first);
+		Assert.isNotNull(second);
+		fPattern= SearchPattern.createOrPattern(first, second);
 	}
 
 	/**
