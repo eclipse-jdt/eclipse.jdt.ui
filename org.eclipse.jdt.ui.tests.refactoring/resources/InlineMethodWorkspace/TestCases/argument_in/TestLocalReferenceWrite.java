@@ -1,9 +1,11 @@
 package argument_in;
 
-public class TestLocalReference {
+public class TestLocalReferenceWrite {
 	public void main() {
 		int i= 10;
 		/*]*/foo(i);/*[*/
+		i= 10;
+		System.out.println(i);
 	}
 	
 	public void foo(int x) {

@@ -42,6 +42,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
@@ -54,7 +56,7 @@ public class CallInliner {
 
 	private ICompilationUnit fCUnit;
 	private TextBuffer fBuffer;
-	private SourceContext fSourceContext;
+	private SourceProvider fSourceProvider;
 	
 	private MethodInvocation fInvocation;
 	private List fUsedNames;
@@ -62,7 +64,8 @@ public class CallInliner {
 	private List fStatements;
 	private int fInsertionIndex;
 	private ASTNode fTargetNode;
-	private IVariableBinding[] fReusableLocals;
+	private FlowContext fFlowContext;
+	private FlowInfo fFlowInfo;
 
 	private static class NameCollector extends GenericVisitor {
 		List names= new ArrayList();
@@ -102,26 +105,58 @@ public class CallInliner {
 		}
 	}
 
-	public CallInliner(ICompilationUnit unit, SourceContext sourceContext) throws CoreException {
+	public CallInliner(ICompilationUnit unit, SourceProvider sourceContext) throws CoreException {
 		super();
 		fCUnit= unit;
 		fBuffer= TextBuffer.acquire(getFile(fCUnit));
-		fSourceContext= sourceContext;
+		fSourceProvider= sourceContext;
 	}
 
 	public void dispose() {
 		TextBuffer.release(fBuffer);
 	}
 	
-	public TextEdit perform(MethodInvocation invocation) throws CoreException {
+	public RefactoringStatus initialize(MethodInvocation invocation) {
+		RefactoringStatus result= new RefactoringStatus();
 		fInvocation= invocation;
-		fRewriter= new ASTRewrite(ASTNodes.getParent(fInvocation, ASTNode.BLOCK));
-		initializeState(fSourceContext.getNumberOfStatements());
-		List arguments= invocation.arguments();
+		initializeState(fSourceProvider.getNumberOfStatements());
+		int nodeType= fTargetNode.getNodeType();
+		if (nodeType == ASTNode.EXPRESSION_STATEMENT) {
+			if (fSourceProvider.isExecutionFlowInterrupted()) {
+				result.addFatalError(
+					"Can't inline call. Return statement in method declaration interrupts execution flow.", 
+					JavaSourceContext.create(fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration()));	
+			}
+		} else if (nodeType == ASTNode.METHOD_INVOCATION) {
+			if (!(isValidParent(fTargetNode.getParent()) || fSourceProvider.getNumberOfStatements() == 1)) {
+				result.addFatalError(
+					"Can only inline simple functions (consisting of a return statement) or functions used in an assignment.",
+					JavaSourceContext.create(fCUnit, fInvocation));
+			}
+		}
+		return result;
+	}
+	
+	private boolean isValidParent(ASTNode parent) {
+		int nodeType= parent.getNodeType();
+		if (nodeType == ASTNode.ASSIGNMENT)
+			return true;
+		if (nodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			parent= parent.getParent();
+			if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
+				VariableDeclarationStatement vs= (VariableDeclarationStatement)parent;
+				return vs.fragments().size() == 1;
+			}
+		}
+		return false;
+	}
+	
+	public TextEdit perform() throws CoreException {
+		List arguments= fInvocation.arguments();
 		String[] newArgs= new String[arguments.size()];
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression expression= (Expression)arguments.get(i);
-			ParameterData parameter= fSourceContext.getParameterData(i);
+			ParameterData parameter= fSourceProvider.getParameterData(i);
 			if ((ASTNodes.isLiteral(expression) && parameter.isReadOnly()) || canInline(expression)) {
 				newArgs[i]= getContent(expression);
 			} else {
@@ -130,7 +165,8 @@ public class CallInliner {
 				addLocalDeclaration(parameter, name, expression);
 			}
 		}
-		ASTNode[] nodes= fSourceContext.getInlineNodes(newArgs, fRewriter, fUsedNames);
+		CallContext context= new CallContext(newArgs, fRewriter, fUsedNames, fTargetNode.getNodeType());
+		ASTNode[] nodes= fSourceProvider.getInlineNodes(context);
 		if (nodes.length == 0) {
 			fRewriter.markAsRemoved(fTargetNode);
 		} else {
@@ -147,7 +183,11 @@ public class CallInliner {
 		return result;
 	}
 	
-	public void addLocalDeclaration(ParameterData parameter, String name, Expression initializer) {
+	public void performed() {
+		fRewriter.removeModifications();
+	}
+	
+	private void addLocalDeclaration(ParameterData parameter, String name, Expression initializer) {
 		VariableDeclarationStatement decl= (VariableDeclarationStatement)ASTNodeFactory.newStatement(
 			fInvocation.getAST(), parameter.getTypeName() + " " + name + ";");
 		fRewriter.markAsInserted(decl);
@@ -156,6 +196,7 @@ public class CallInliner {
 	}
 
 	private  void initializeState(int sourceStatements) {
+		fRewriter= new ASTRewrite(ASTNodes.getParent(fInvocation, ASTNode.BLOCK));
 		fUsedNames= collectUsedNames();
 		ASTNode parent= fInvocation.getParent();
 		if (parent.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
@@ -170,12 +211,11 @@ public class CallInliner {
 		
 		MethodDeclaration decl= (MethodDeclaration)ASTNodes.getParent(fInvocation, ASTNode.METHOD_DECLARATION);
 		int numberOfLocals= LocalVariableIndex.perform(decl);
-		FlowContext context= new FlowContext(0, numberOfLocals + 1);
-		context.setConsiderAccessMode(true);
-		context.setComputeMode(FlowContext.ARGUMENTS);
+		fFlowContext= new FlowContext(0, numberOfLocals + 1);
+		fFlowContext.setConsiderAccessMode(true);
+		fFlowContext.setComputeMode(FlowContext.ARGUMENTS);
 		Selection selection= Selection.createFromStartLength(fInvocation.getStartPosition(), fInvocation.getLength());
-		FlowInfo info= new InputFlowAnalyzer(context, selection).perform(decl);
-		fReusableLocals=  info.get(context, FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNUSED);
+		fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform(decl);
 	}
 
 	private boolean canInline(Expression expression) {
@@ -184,11 +224,7 @@ public class CallInliner {
 			if (binding instanceof IVariableBinding) {
 				IVariableBinding vb= (IVariableBinding)binding;
 				if (!vb.isField()) {
-					for (int i= 0; i < fReusableLocals.length; i++) {
-						if (vb == fReusableLocals[i])
-							return true;
-					}
-					return false;
+					return fFlowInfo.hasAccessMode(fFlowContext, vb, FlowInfo.UNUSED | FlowInfo.WRITE);
 				}
 			}
 			return true;

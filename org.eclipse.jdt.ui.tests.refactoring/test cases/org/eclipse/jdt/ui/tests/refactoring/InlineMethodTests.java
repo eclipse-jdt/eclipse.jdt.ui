@@ -72,6 +72,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performInvalidTest();
 	}
 	
+	public void testInterruptedStatement() throws Exception {
+		performInvalidTest();
+	}
+	
+	public void testComplexBody() throws Exception {
+		performInvalidTest();
+	}
+	
 	/************************ Simple Tests ********************************/
 		
 	private void performSimpleTest() throws Exception {
@@ -92,7 +100,19 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTest(fgTestSetup.getArgumentPackage(), getName(), COMPARE_WITH_OUTPUT, "argument_out");
 	}
 	
-	public void testLocalReference() throws Exception {
+	public void testLocalReferenceUnused() throws Exception {
+		performArgumentTest();
+	}	
+	
+	public void testLocalReferenceRead() throws Exception {
+		performArgumentTest();
+	}	
+	
+	public void testLocalReferenceWrite() throws Exception {
+		performArgumentTest();
+	}	
+	
+	public void testLocalReferenceLoop() throws Exception {
 		performArgumentTest();
 	}	
 	
@@ -160,5 +180,37 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	
 	public void testFieldInType() throws Exception {
 		performNameConflictTest();
+	}
+
+	/************************ Call Tests ********************************/
+		
+	private void performCallTest() throws Exception {
+		performTest(fgTestSetup.getCallPackage(), getName(), COMPARE_WITH_OUTPUT, "call_out");
+	}
+	
+	public void testExpressionStatement() throws Exception {
+		performCallTest();
+	}
+
+	public void testExpressionStatementWithReturn() throws Exception {
+		performCallTest();
+	}
+	
+	/************************ Expression Tests ********************************/
+		
+	private void performExpressionTest() throws Exception {
+		performTest(fgTestSetup.getExpressionPackage(), getName(), COMPARE_WITH_OUTPUT, "expression_out");
+	}
+	
+	public void testSimpleExpression() throws Exception {
+		performExpressionTest();
+	}
+	
+	public void testSimpleExpressionWithStatements() throws Exception {
+		performExpressionTest();
+	}
+	
+	public void testSimpleBody() throws Exception {
+		performExpressionTest();
 	}
 }

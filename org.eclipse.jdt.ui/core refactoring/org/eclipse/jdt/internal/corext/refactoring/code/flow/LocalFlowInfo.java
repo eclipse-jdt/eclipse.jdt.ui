@@ -14,7 +14,7 @@ class LocalFlowInfo extends FlowInfo {
 		super(NO_RETURN);
 		fVariableId= binding.getVariableId();
 		if (context.considerAccessMode()) {
-			fAccessModes= new int[context.getArrayLength()];
+			createAccessModeArray(context);
 			fAccessModes[fVariableId - context.getStartingIndex()]= localAccessMode;
 			context.manageLocal(binding);
 		}

@@ -35,6 +35,8 @@ public class InlineMethodTestSetup extends TestSetup {
 	private IPackageFragment fSimple;
 	private IPackageFragment fArgument;
 	private IPackageFragment fNameConflict;
+	private IPackageFragment fCall;
+	private IPackageFragment fExpression;
 
 	public InlineMethodTestSetup(Test test) {
 		super(test);
@@ -61,6 +63,8 @@ public class InlineMethodTestSetup extends TestSetup {
 		fSimple= fRoot.createPackageFragment("simple_in", true, null);		
 		fArgument= fRoot.createPackageFragment("argument_in", true, null);
 		fNameConflict= fRoot.createPackageFragment("nameconflict_in", true, null);
+		fCall= fRoot.createPackageFragment("call_in", true, null);
+		fExpression= fRoot.createPackageFragment("expression_in", true, null);
 	}
 
 	protected void tearDown() throws Exception {
@@ -83,5 +87,13 @@ public class InlineMethodTestSetup extends TestSetup {
 
 	public IPackageFragment getNameConflictPackage() {
 		return fNameConflict;
+	}
+
+	public IPackageFragment getCallPackage() {
+		return fCall;
+	}
+
+	public IPackageFragment getExpressionPackage() {
+		return fExpression;
 	}
 }

@@ -27,14 +27,14 @@ public abstract class FlowInfo {
 	protected static final int THROW=			6;
 
 	// Local access handling.
-	public static final int UNUSED=				0;
-	public static final int READ= 				1 << 0;
-	public static final int READ_POTENTIAL=		1 << 1;
-	public static final int WRITE= 				1 << 2;
-	public static final int WRITE_POTENTIAL=	1 << 3;
-	public static final int UNKNOWN= 			1 << 4;
+	public static final int UNUSED=				1 << 0;
+	public static final int READ= 				1 << 1;
+	public static final int READ_POTENTIAL=		1 << 2;
+	public static final int WRITE= 				1 << 3;
+	public static final int WRITE_POTENTIAL=     1 << 4;
+	public static final int UNKNOWN= 			1 << 5;
 	
-	// Table to merge access modes for condition statements. 
+	// Table to merge access modes for condition statements (e.g branch[x] || branch[y]). 
 	private static final int[][] ACCESS_MODE_CONDITIONAL_TABLE= {
 	/*	  					  UNUSED		   READ			    READ_POTENTIAL   WRTIE			  WRITE_POTENTIAL  UNKNOWN */
 	/* UNUSED */			{ UNUSED,		   READ_POTENTIAL,  READ_POTENTIAL,  WRITE_POTENTIAL, WRITE_POTENTIAL, UNKNOWN },
@@ -60,7 +60,7 @@ public abstract class FlowInfo {
 	/* PARTIAL_RETURN */	{ NOT_POSSIBLE,		PARTIAL_RETURN,	PARTIAL_RETURN,	PARTIAL_RETURN, PARTIAL_RETURN, PARTIAL_RETURN, PARTIAL_RETURN	},
 	/* VOID_RETURN */		{ NOT_POSSIBLE,		VOID_RETURN,	PARTIAL_RETURN,	PARTIAL_RETURN, VOID_RETURN,	NOT_POSSIBLE,	VOID_RETURN		},
 	/* VALUE_RETURN */		{ NOT_POSSIBLE,		VALUE_RETURN,	PARTIAL_RETURN, PARTIAL_RETURN, NOT_POSSIBLE,	VALUE_RETURN,	VALUE_RETURN	},
-	/* THROW */					{ NOT_POSSIBLE,		THROW,			NO_RETURN,		PARTIAL_RETURN, VOID_RETURN,	VALUE_RETURN,	THROW			}
+	/* THROW */				{ NOT_POSSIBLE,		THROW,			NO_RETURN,		PARTIAL_RETURN, VOID_RETURN,	VALUE_RETURN,	THROW			}
 	};
 		
 	// Table to merge return modes for sequential statements (y: fReturnKind, x: other.fReturnKind)
@@ -72,7 +72,7 @@ public abstract class FlowInfo {
 	/* PARTIAL_RETURN */	{ NOT_POSSIBLE,		PARTIAL_RETURN,	PARTIAL_RETURN,	PARTIAL_RETURN,	VOID_RETURN,	VALUE_RETURN,	THROW			},
 	/* VOID_RETURN */		{ NOT_POSSIBLE,		VOID_RETURN,	VOID_RETURN,	PARTIAL_RETURN,	VOID_RETURN,	NOT_POSSIBLE,	NOT_POSSIBLE	},
 	/* VALUE_RETURN */		{ NOT_POSSIBLE,		VALUE_RETURN,	VALUE_RETURN,	PARTIAL_RETURN,	NOT_POSSIBLE,	VALUE_RETURN,	NOT_POSSIBLE	},
-	/* THROW */					{ NOT_POSSIBLE,		THROW,			THROW,			PARTIAL_RETURN,	VOID_RETURN,	VALUE_RETURN,	THROW			}
+	/* THROW */				{ NOT_POSSIBLE,		THROW,			THROW,			PARTIAL_RETURN,	VOID_RETURN,	VALUE_RETURN,	THROW			}
 	};
 		
 	protected static final String UNLABELED = "@unlabeled"; //$NON-NLS-1$
@@ -297,6 +297,8 @@ public abstract class FlowInfo {
 	 * 	<code>False</code> otherwise
 	 */
 	public boolean hasAccessMode(FlowContext context, IVariableBinding local, int mode) {
+		if (fAccessModes == null && (mode & UNUSED) != 0)
+			return true;
 		int index= context.getIndexFromLocal(local);
 		if (index == -1)
 			return false;
@@ -307,6 +309,8 @@ public abstract class FlowInfo {
 	 * Returns the access mode of the local variable identified by the given binding.
 	 * 	 * @param context the flow context used during flow analysis	 * @param local the local variable of interest	 * @return the access mode of the local variable	 */
 	public int getAccessMode(FlowContext context, IVariableBinding local) {
+		if (fAccessModes == null)
+			return UNUSED;
 		int index= context.getIndexFromLocal(local);
 		if (index == -1)
 			return UNKNOWN;
@@ -381,6 +385,13 @@ public abstract class FlowInfo {
 		}
 	}
 	
+	protected void createAccessModeArray(FlowContext context) {
+		fAccessModes= new int[context.getArrayLength()];
+		for (int i= 0; i < fAccessModes.length; i++) {
+			fAccessModes[i]= UNUSED;
+		}
+	}
+	
 	protected void mergeAccessModeConditional(FlowInfo otherInfo, FlowContext context) {
 		if (!context.considerAccessMode())
 			return;
@@ -391,7 +402,7 @@ public abstract class FlowInfo {
 			if (others != null)
 				fAccessModes= others;
 			else
-				fAccessModes= new int[context.getArrayLength()];
+				createAccessModeArray(context);
 			return;
 		} else {	
 			if (others == null) {
@@ -419,7 +430,7 @@ public abstract class FlowInfo {
 			return;
 			
 		if (fAccessModes == null) {
-			fAccessModes= new int[context.getArrayLength()];
+			createAccessModeArray(context);
 			return;
 		}
 		
@@ -448,7 +459,7 @@ public abstract class FlowInfo {
 		 		return 5;
 		 }
 		 return -1;
-	}	
+	}
 }
 
 

@@ -102,8 +102,43 @@ public abstract class TextEdit {
 		return fParent;
 	}
 	
+	public int size() {
+		if (fChildren == null)
+			return 0;
+		return fChildren.size();
+	}
+	
 	public void add(TextEdit edit) {
 		internalAdd(edit);
+	}
+	
+	public void addAll(TextEdit[] edits) {
+		for (int i= 0; i < edits.length; i++) {
+			internalAdd(edits[i]);
+		}
+	}
+	
+	public TextEdit remove(int index) {
+		if (fChildren == null)
+			return null;
+		TextEdit result= (TextEdit) fChildren.remove(index);
+		result.setParent(null);
+		if (fChildren.isEmpty())
+			fChildren= null;
+		return result;
+	}
+	
+	public TextEdit[] removeAll() {
+		if (fChildren == null)
+			return new TextEdit[0];
+		int size= fChildren.size();
+		TextEdit[] result= new TextEdit[size];
+		for (int i= 0; i < size; i++) {
+			result[i]= (TextEdit)fChildren.get(i);
+			result[i].setParent(null);
+		}
+		fChildren= null;
+		return result;
 	}
 	
 	public boolean isActive() {
@@ -312,14 +347,6 @@ public abstract class TextEdit {
 	}
 	
 	//---- Setter and Getters -------------------------------------------------------------------------------
-	
-	/* package */ TextEdit remove(int index) {
-		if (fChildren == null)
-			return null;
-		TextEdit result= (TextEdit) fChildren.remove(index);
-		result.setParent(null);
-		return result;
-	}
 	
 	/* package */ void setParent(TextEdit parent) {
 		if (parent != null)

@@ -66,7 +66,6 @@ class SourceAnalyzer  {
 		public boolean visit(ReturnStatement node) {
 			if (node != fLastNode) {
 				fInterruptedExecutionFlow= true;
-				status.addFatalError("Return statement interrupts execution flow of method to be inlined.");
 				return false;
 			}
 			return true;

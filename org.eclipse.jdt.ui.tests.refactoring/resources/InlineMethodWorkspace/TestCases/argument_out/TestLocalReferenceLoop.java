@@ -1,10 +1,13 @@
 package argument_out;
 
-public class TestLocalReference {
+public class TestLocalReferenceLoop {
 	public void main() {
 		int i= 10;
-		/*]*/i= i + 10;
-		bar(i);/*[*/
+		for (int z= 0; z < i; z++) {
+			int x = i;
+			/*]*/x= x + 10;
+			bar(x);/*[*/
+		}
 	}
 	
 	public void foo(int x) {

@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -32,15 +31,15 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
-import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 
 /**
@@ -57,7 +56,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
  */
 public class InlineMethodRefactoring extends Refactoring {
 
-	private SourceContext fSourceContext;
+	private TextChangeManager fChangeManager;
+	private SourceProvider fSourceProvider;
 	private Selection fSelection;
 	private MethodInvocation fInvocation;
 	private boolean fSaveChanges;
@@ -80,6 +80,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		Assert.isNotNull(cu);
 		Assert.isNotNull(invocation);
 		invocation.setProperty(SOURCE, cu);
+		fChangeManager= new TextChangeManager();
 		fInvocation= invocation;
 		fSaveChanges= false;
 	}
@@ -123,38 +124,42 @@ public class InlineMethodRefactoring extends Refactoring {
 				"Can't inline call that is used inside a field initializer.", 
 				JavaSourceContext.create(getCorrespondingCompilationUnit(fInvocation), fInvocation));
 		}
-		if (fSourceContext == null) {
+		if (fSourceProvider == null) {
 			resolveSourceContext(result);
 		}
 		if (result.hasFatalError())
 			return result;
-		if (fSourceContext == null)
+		if (fSourceProvider == null)
 			result.addFatalError("Unable to resolve corresponding method declaration.");
-		result.merge(fSourceContext.checkActivation());
+		result.merge(fSourceProvider.checkActivation());
 		return result;
 	}
 
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		fSourceContext.initialize();
-		return result;
-	}
-
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		fSourceProvider.initialize();
 		ICompilationUnit cu= getCorrespondingCompilationUnit(fInvocation);
 		CallInliner inliner= null;
 		try {
-			inliner= new CallInliner(cu, fSourceContext);
-			CompilationUnitChange result= new CompilationUnitChange("", cu);
-			result.setSave(fSaveChanges);
-			result.setEdit(inliner.perform(fInvocation));
-			return result;
+			inliner= new CallInliner(cu, fSourceProvider);
+			result.merge(inliner.initialize(fInvocation));
+			if (!result.hasFatalError()) {
+				CompilationUnitChange change= (CompilationUnitChange) fChangeManager.get(cu);
+				change.setSave(fSaveChanges);
+				change.setEdit(inliner.perform());
+			}
+			inliner.performed();
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		} finally {
 			if (inliner != null)
 				inliner.dispose();
 		}
+		return result;
+	}
+
+	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		return new CompositeChange("Inline Call", fChangeManager.getAllChanges());
 	}
 	
 	private void resolveSourceContext(RefactoringStatus status) throws JavaModelException {
@@ -165,9 +170,11 @@ public class InlineMethodRefactoring extends Refactoring {
 		IMethodBinding methodBinding= (IMethodBinding)fInvocation.getName().resolveBinding();
 		MethodDeclaration declaration= (MethodDeclaration)root.findDeclaringNode(methodBinding);
 		if (declaration != null) {
-			fSourceContext= new SourceContext(cunit, declaration);
+			fSourceProvider= new SourceProvider(cunit, declaration);
 			return;
 		}
+		status.addFatalError("Current limitation: can online inline call if method declaration and call reside in the same compilation unit.");
+		/*
 		IMethod method= Binding2JavaModel.find(methodBinding, cunit.getJavaProject());
 		if (method != null) {
 			cunit= method.getCompilationUnit();
@@ -180,6 +187,7 @@ public class InlineMethodRefactoring extends Refactoring {
 				fSourceContext= new SourceContext(cunit, declaration);
 			}
 		}
+		*/
 	}
 	
 	private static IFile getFile(ICompilationUnit cu) throws CoreException {
