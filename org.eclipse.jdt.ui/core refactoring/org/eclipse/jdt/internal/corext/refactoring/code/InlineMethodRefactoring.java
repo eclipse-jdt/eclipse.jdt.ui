@@ -311,12 +311,18 @@ public class InlineMethodRefactoring extends Refactoring {
 	
 	private static ASTNode getTargetNode(ICompilationUnit unit, int offset, int length) {
 		CompilationUnit root= AST.parseCompilationUnit(unit, true);
-		ASTNode node;
+		ASTNode node= null;
 		try {
-			node= NodeFinder.perform(root, offset, length, unit);
-		} catch (JavaModelException e) {
-			node= NodeFinder.perform(root, offset, length);
+			node= checkNode(NodeFinder.perform(root, offset, length, unit));
+		} catch(JavaModelException e) {
+			node = null;
 		}
+		if (node != null)
+			return node;
+		return checkNode(NodeFinder.perform(root, offset, length));
+	}
+	
+	private static ASTNode checkNode(ASTNode node) {
 		if (node == null)
 			return null;
 		if (node.getNodeType() == ASTNode.SIMPLE_NAME) {
@@ -324,7 +330,13 @@ public class InlineMethodRefactoring extends Refactoring {
 		} else if (node.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
 			node= ((ExpressionStatement)node).getExpression();
 		}
-		return node;
+		switch(node.getNodeType()) {
+			case ASTNode.METHOD_INVOCATION:
+			case ASTNode.METHOD_DECLARATION:
+			case ASTNode.SUPER_METHOD_INVOCATION:
+				return node;
+		}
+		return null;
 	}
 	
 	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {
