@@ -92,10 +92,12 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
+import org.eclipse.jdt.ui.actions.ShowInNavigatorViewAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -113,11 +115,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
-import org.eclipse.jdt.internal.ui.packageview.OpenResourceAction;
 import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
-import org.eclipse.jdt.internal.ui.packageview.ShowInNavigatorAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
@@ -142,7 +142,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private BuildGroup fBuildGroup;
 	private ContextMenuGroup[] fStandardGroups;
 	private CompositeActionGroup fStandardActionGroups;
-	private OpenResourceAction fOpenCUAction;
+	private OpenAction fOpenAction;
 	private Action fOpenToAction;
 	private Action fShowNavigatorAction;
 	protected PropertyDialogAction fPropertyDialogAction;
@@ -374,15 +374,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	protected void fillToolBar(IToolBarManager tbm) {
 	}	
 
-//	protected void setContextMenuContributor(final IContextMenuContributor contributor) {
-//		// Make sure we are doing it in the right thread.
-//		getDisplay().syncExec(new Runnable() {
-//			public void run() {
-////				getViewer().setContextMenuTarget(contributor);
-//			}
-//		});
-//	}
-
 	/**
 	 * Called when the context menu is about to open.
 	 * Override to add your own context dependent menu contributions.
@@ -399,9 +390,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		new NewWizardMenu(newMenu, getSite().getWorkbenchWindow(), false);
 
 		// Open menus
-		fOpenCUAction.update();
-		if (fOpenCUAction.isEnabled())
-			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenCUAction);
+		fOpenAction.update();
+		if (fOpenAction.isEnabled())
+			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenAction);
 		addOpenWithMenu(menu, selection);
 		if (size == 1)
 			addOpenNewWindowAction(menu, selection.getFirstElement());
@@ -437,9 +428,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	private void createActions() {
 		ISelectionProvider provider= getSelectionProvider();
-		fOpenCUAction= new OpenResourceAction(provider);
+		fOpenAction= new OpenAction(getViewSite());
 		fPropertyDialogAction= new PropertyDialogAction(getShell(), provider);
-		fShowNavigatorAction= new ShowInNavigatorAction(provider);
+		fShowNavigatorAction= new ShowInNavigatorViewAction(getViewSite());
 		
 		fBuildGroup= new BuildGroup(this, true);
 		fStandardGroups= new ContextMenuGroup[] {
