@@ -1,5 +1,5 @@
-Here is an incoming change
+Here is an incoming change.
 
-This line is modified by two people
+This line is modified by two people.
 
 Here is an outgoing change
