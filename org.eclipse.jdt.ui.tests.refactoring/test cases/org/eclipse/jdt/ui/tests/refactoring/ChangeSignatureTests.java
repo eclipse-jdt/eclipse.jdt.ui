@@ -37,6 +37,9 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
+/**
+ * @see org.eclipse.jdt.core.Signature for encoding of signature strings.
+ */
 public class ChangeSignatureTests extends RefactoringTest {
 	private static final Class clazz= ChangeSignatureTests.class;
 	private static final String REFACTORING_PATH= "ChangeSignature/";
@@ -122,6 +125,27 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
 		assertEqualLines("invalid renaming", expectedFileContents, newcu.getSource());
+	}
+	
+	/**
+	 * Rename method 'A.m(signature)' to 'A.newMethodName(signature)'
+	 */
+	private void helperRenameMethod(String[] signature, String newMethodName) throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		IType classA= getType(cu, "A");
+		IMethod method = classA.getMethod("m", signature);
+		assertTrue("method m does not exist in A", method.exists());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ref.setNewMethodName(newMethodName);
+		RefactoringStatus result= performRefactoring(ref);
+		assertEquals("precondition was supposed to pass", null, result);
+		
+		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		String expectedFileContents= getFileContents(getTestFileName(true, false));
+		assertEqualLines("invalid change of method name", expectedFileContents, newcu.getSource());
 	}
 
 	private void helperDoAll(String typeName, 
@@ -1228,4 +1252,15 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String newReturnTypeName= null;
 		helperDoAll("Example", "getExample", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deleted, newReturnTypeName);
 	}
+	
+	public void testName01() throws Exception {
+		String[] signature= {"QString;"};
+		helperRenameMethod(signature, "newName");
+	}
+
+	public void testName02() throws Exception {
+		String[] signature= {"QString;"};
+		helperRenameMethod(signature, "newName");
+	}
+
 }

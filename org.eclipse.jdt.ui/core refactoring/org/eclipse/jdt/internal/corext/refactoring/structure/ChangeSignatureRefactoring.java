@@ -18,15 +18,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -63,7 +58,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
@@ -102,8 +96,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 
 public class ChangeSignatureRefactoring extends Refactoring {
 	
@@ -118,6 +113,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private IMethod[] fRippleMethods;
 	private SearchResultGroup[] fOccurrences;
 	private String fReturnTypeName;
+	private String fMethodName;
 	private int fVisibility;
 	private static final String CONST_CLASS_DECL = "class A{";//$NON-NLS-1$
 	private static final String CONST_ASSIGN = " i=";		//$NON-NLS-1$
@@ -133,6 +129,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		fCodeGenerationSettings= codeGenerationSettings;
 		fImportManager= new ImportRewriteManager(fCodeGenerationSettings);
 		fReturnTypeName= getInitialReturnTypeName();
+		fMethodName= getInitialMethodName();
 		fVisibility= getInitialMethodVisibility();
 	}
 	
@@ -152,6 +149,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return Signature.toString(Signature.getReturnType(fMethod.getSignature()));
 	}
 	
+	private String getInitialMethodName() {
+		return fMethod.getElementName();
+	}
+
 	private int getInitialMethodVisibility() throws JavaModelException{
 		return JdtFlags.getVisibilityCode(fMethod);
 	}
@@ -182,12 +183,21 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return fMethod;
 	}
 	
+	public String getMethodName() {
+		return fMethodName;
+	}
+	
+	public void setNewMethodName(String newMethodName){
+		Assert.isNotNull(newMethodName);
+		fMethodName= newMethodName;
+	}
+	
 	public void setNewReturnTypeName(String newReturnTypeName){
 		Assert.isNotNull(newReturnTypeName);
 		fReturnTypeName= newReturnTypeName;
 	}
 	
-	public boolean canChangeReturnType(){
+	public boolean canChangeNameAndReturnType(){
 		try {
 			return ! fMethod.isConstructor();
 		} catch (JavaModelException e) {
@@ -242,21 +252,26 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return fExceptionInfos;
 	}
 	
-	public RefactoringStatus checkSignature() throws JavaModelException{
+	public RefactoringStatus checkSignature() {
 		RefactoringStatus result= new RefactoringStatus();
-		checkForDuplicateNames(result);
+		checkForDuplicateParameterNames(result);
 		if (result.hasFatalError())
 			return result;
 		checkParameters(result);
 		if (result.hasFatalError())
 			return result;
 		checkReturnType(result);
+		if (result.hasFatalError())
+			return result;
+		checkMethodName(result);
 		//exceptions are ok
 		return result;
 	}
     
 	public boolean isSignatureSameAsInitial() throws JavaModelException {
 		if (! isVisibilitySameAsInitial())
+			return false;
+		if (! isMethodNameSameAsInitial())
 			return false;
 		if (! isReturnTypeSameAsInitial())
 			return false;
@@ -284,6 +299,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private boolean isReturnTypeSameAsInitial() throws JavaModelException {
 		return fReturnTypeName.equals(getInitialReturnTypeName());
+	}
+	
+	private boolean isMethodNameSameAsInitial() {
+		return fMethodName.equals(getInitialMethodName());
 	}
 	
 	private boolean areAnyParametersDeleted() {
@@ -325,6 +344,16 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type", new String[]{fReturnTypeName}); //$NON-NLS-1$
 			result.addFatalError(msg);
 		}	
+	}
+
+	private void checkMethodName(RefactoringStatus result) {
+		if (isMethodNameSameAsInitial() || ! canChangeNameAndReturnType())
+			return;
+		result.merge(Checks.checkMethodName(fMethodName));
+		if (fMethodName.equals(fMethod.getDeclaringType().getElementName())) {
+			String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.constructor_name"); //$NON-NLS-1$
+			result.addFatalError(msg);
+		}
 	}
 
 	private void checkParameterDefaultValue(RefactoringStatus result, ParameterInfo info) {
@@ -451,7 +480,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (result.hasFatalError())
 					return result;
 			}
-			fCU= AST.parseCompilationUnit(getCu(), true);
+			fCU= AST.parseCompilationUnit(getCu(), true, null, null);
 			fExceptionInfos= createExceptionInfoList();
 			
 			return result;
@@ -487,7 +516,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 7); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 8); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			clearManagers();
 
@@ -514,10 +543,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				result.merge(checkRenamings(new SubProgressMonitor(pm, 1)));
 			else
 				pm.worked(1);
-			
 			if (result.hasFatalError())
 				return result;
-
+			
 			result.merge(collectAndCheckImports(new SubProgressMonitor(pm, 1)));
 
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
@@ -638,7 +666,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (cu.equals(getCu()))
 				cuNode= fCU;
 			else
-				cuNode= AST.parseCompilationUnit(cu, true);
+				cuNode= AST.parseCompilationUnit(cu, true, null, null);
 			ASTNode[] methodOccurrences= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), cuNode);
 			for (int j= 0; j < methodOccurrences.length; j++) {
 				ASTNode methodOccurrence= methodOccurrences[j];
@@ -697,7 +725,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			buff.append(getReturnTypeString())
 				.append(' ');
 
-		buff.append(getMethod().getElementName())
+		buff.append(getMethodName())
 			.append(Signature.C_PARAM_START)
 			.append(getMethodParameters())
 			.append(Signature.C_PARAM_END);
@@ -714,7 +742,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return visibilityString + ' ';
 	}
 
-	private String getMethodThrows() throws JavaModelException {
+	private String getMethodThrows() {
 		final String throwsString= " throws "; //$NON-NLS-1$
 		StringBuffer buff= new StringBuffer(throwsString);
 		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
@@ -731,7 +759,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	
-	private void checkForDuplicateNames(RefactoringStatus result){
+	private void checkForDuplicateParameterNames(RefactoringStatus result){
 		Set found= new HashSet();
 		Set doubled= new HashSet();
 		for (Iterator iter = getNotDeletedInfos().iterator(); iter.hasNext();) {
@@ -765,7 +793,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		ICompilationUnit cu= getCu();
 		TextChange change= fChangeManager.get(cu);
 		String newCuSource= change.getPreviewContent();
-		CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), cu.getElementName(), cu.getJavaProject());
+		CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), cu.getElementName(), cu.getJavaProject(), null, null);
 		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCU);
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problems.length; i++) {
@@ -788,7 +816,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return fReturnTypeName;
 	}	
 
-	private String getMethodParameters() throws JavaModelException {
+	private String getMethodParameters() {
 		StringBuffer buff= new StringBuffer();
 		int i= 0;
 		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
@@ -920,16 +948,16 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return result;
 	}
 
-	private IFile[] getAllFilesToModify() throws CoreException{
+	private IFile[] getAllFilesToModify(){
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
-	private RefactoringStatus validateModifiesFiles() throws CoreException{
+	private RefactoringStatus validateModifiesFiles(){
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 
 	//--  changes ----
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public IChange createChange(IProgressMonitor pm) {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new ValidationStateChange(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.restructure_parameters"), fChangeManager.getAllChanges()); //$NON-NLS-1$
@@ -959,7 +987,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (cu.equals(getCu()))
 				cuNode= fCU;
 			else
-				cuNode= AST.parseCompilationUnit(cu, true);
+				cuNode= AST.parseCompilationUnit(cu, true, null, null);
 			ASTRewrite rewrite= new ASTRewrite(cuNode);
 			ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), cuNode);
 			for (int j= 0; j < nodes.length; j++) {
@@ -1103,7 +1131,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			resultingEdits.addChild(fImportManager.getImportRewrite(cu).createEdit(textBuffer));
 		if (resultingEdits.hasChildren() || manager.containsChangesIn(cu)) {
 		    TextChange textChange= manager.get(cu);
-		    TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits);
+		    TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
 		}
 		rewrite.removeModifications();
 	}
@@ -1113,8 +1141,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		if (methodDeclaration == null) //can be null - see bug 27236
 			return;
 		changeParameterNames(methodDeclaration, rewrite);
-		if (! methodDeclaration.isConstructor())
+		if (canChangeNameAndReturnType()) {
+			changeMethodName(methodDeclaration, rewrite);
 			changeReturnType(methodDeclaration, rewrite);
+		}
 		changeParameterTypes(methodDeclaration, rewrite);
 				
 		if (needsVisibilityUpdate(methodDeclaration))
@@ -1150,6 +1180,16 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	        replaceTypeNode(methodDeclaration.getReturnType(), fReturnTypeName, rewrite);
 	}
 
+	private void replaceNameNode(SimpleName nameNode, String newName, ASTRewrite rewrite){
+		SimpleName newNameNode= nameNode.getAST().newSimpleName(newName);
+		rewrite.markAsReplaced(nameNode, newNameNode);
+	}
+
+	private void changeMethodName(MethodDeclaration methodDeclaration, ASTRewrite rewrite) {
+	    if (! isMethodNameSameAsInitial())
+	        replaceNameNode(methodDeclaration.getName(), fMethodName, rewrite);
+	}
+
 	private void changeVisibility(MethodDeclaration methodDeclaration, ASTRewrite rewrite) {
 		int newModifiers= getNewModifiers(methodDeclaration);
 		rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
@@ -1157,6 +1197,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 	private void updateReferenceNode(ASTNode methodOccurrence, ASTRewrite rewrite) {
 		reshuffleElements(methodOccurrence, getArguments(methodOccurrence), rewrite);
+		if (! isMethodNameSameAsInitial())
+			replaceNameNode(getMethodNameNode(methodOccurrence), fMethodName, rewrite);
 	}
 	
 	private void reshuffleElements(ASTNode methodOccurrence, List elementList, ASTRewrite rewrite) {
@@ -1260,7 +1302,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 	
-	private void changeParameterNames(MethodDeclaration methodDeclaration, ASTRewrite rewrite) throws JavaModelException {
+	private void changeParameterNames(MethodDeclaration methodDeclaration, ASTRewrite rewrite) {
 		for (Iterator iterator = getParameterInfos().iterator(); iterator.hasNext();) {
 			ParameterInfo info= (ParameterInfo)iterator.next();
 			if (info.isAdded() || ! info.isRenamed())
@@ -1347,6 +1389,25 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return info.getNewTypeName() + " " + info.getNewName(); //$NON-NLS-1$
 	}
 
+	private static SimpleName getMethodNameNode(ASTNode node) {
+		if (node instanceof SimpleName && node.getParent() instanceof MethodInvocation)
+			return ((MethodInvocation)node.getParent()).getName();
+			
+		if (node instanceof SimpleName && node.getParent() instanceof SuperMethodInvocation)
+			return ((SuperMethodInvocation)node.getParent()).getName();
+			
+		if (node instanceof ExpressionStatement && isReferenceNode(((ExpressionStatement)node).getExpression()))
+			return getMethodNameNode(((ExpressionStatement)node).getExpression());
+			
+		if (node instanceof MethodInvocation)	
+			return ((MethodInvocation)node).getName();
+			
+		if (node instanceof SuperMethodInvocation)	
+			return ((SuperMethodInvocation)node).getName();
+			
+		return null;	
+	}
+	
 	private static List getArguments(ASTNode node) {
 		if (node instanceof SimpleName && node.getParent() instanceof MethodInvocation)
 			return ((MethodInvocation)node.getParent()).arguments();

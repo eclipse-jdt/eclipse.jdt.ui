@@ -13,31 +13,11 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.Document;
-
-import org.eclipse.ui.help.WorkbenchHelp;
-
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
-
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
@@ -45,9 +25,26 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssis
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 public class ChangeSignatureWizard extends RefactoringWizard {
 
@@ -83,23 +80,8 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			initializeDialogUnits(composite);
 		
 			try {
-				int[] availableVisibilities= getChangeMethodSignatureRefactoring().getAvailableVisibilities();
-				int currectVisibility= getChangeMethodSignatureRefactoring().getVisibility();
-				IVisibilityChangeListener visibilityChangeListener= new IVisibilityChangeListener(){
-					public void visibilityChanged(int newVisibility) {
-						getChangeMethodSignatureRefactoring().setVisibility(newVisibility);
-						update(true);
-					}
+				createHeadControls(composite);
 
-					public void modifierChanged(int modifier, boolean isChecked) {
-					}
-				};
-
-				Composite visibilityComposite= VisibilityControlUtil.createVisibilityControl(composite, visibilityChangeListener, availableVisibilities, currectVisibility);
-				if (visibilityComposite != null)
-					visibilityComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-				if ( getChangeMethodSignatureRefactoring().canChangeReturnType())
-					createReturnTypeControl(composite);
 				createParameterExceptionsFolder(composite);
 				Label sep= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 				sep.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
@@ -114,31 +96,129 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.MODIFY_PARAMETERS_WIZARD_PAGE);
 		}
 
-		private void createReturnTypeControl(Composite parent) throws JavaModelException {
-				Composite composite= new Composite(parent, SWT.NONE);
-				composite.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
-				GridLayout layout= new GridLayout();
-				layout.numColumns= 2; layout.marginWidth= 0;
-				composite.setLayout(layout);
+		private void createHeadControls(Composite parent) throws JavaModelException {
+			//must create controls column-wise to get mnemonics working:
+			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			GridLayout layout= new GridLayout(3, false);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			composite.setLayout(layout);
 			
-				Label label= new Label(composite, SWT.NONE);
-				label.setText(RefactoringMessages.getString("ChangeSignatureInputPage.return_type")); //$NON-NLS-1$
-				label.setLayoutData((new GridData()));
+			createAccessControl(composite);
+			createReturnTypeControl(composite);
+			createNameControl(composite);
+		}
+
+		private void createAccessControl(Composite parent) throws JavaModelException {
+			Composite access= new Composite(parent, SWT.NONE);
+			GridLayout layout= new GridLayout();
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			access.setLayout(layout);
 			
-				final Text text= new Text(composite, SWT.BORDER);
-				text.setText(getChangeMethodSignatureRefactoring().getReturnTypeString());
-				text.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
+			final int[] availableVisibilities= getChangeMethodSignatureRefactoring().getAvailableVisibilities();
+			int currentVisibility= getChangeMethodSignatureRefactoring().getVisibility();
+						
+			Label label= new Label(access, SWT.NONE);
+			label.setText(RefactoringMessages.getString("ChangeSignatureInputPage.access_modifier")); //$NON-NLS-1$
+
+			final Combo combo= new Combo(access, SWT.DROP_DOWN | SWT.READ_ONLY);
+			if (availableVisibilities.length == 0) {
+				combo.setEnabled(false);
+			} else {
+				for (int i= 0; i < availableVisibilities.length; i++) {
+					combo.add(getAccessModifierString(availableVisibilities[i]));
+				}
+				combo.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						int newVisibility= availableVisibilities[combo.getSelectionIndex()];
+						getChangeMethodSignatureRefactoring().setVisibility(newVisibility);
+						update(true);
+					}
+				});
+			}
+			combo.setText(getAccessModifierString(currentVisibility));
+			combo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 			
+			// ensure that "Access modifier:" and "Return type:" Labels are not too close: 
+			access.pack();
+			int minLabelWidth= label.getSize().x + 3 * layout.horizontalSpacing;
+			if (minLabelWidth > combo.getSize().x)
+				label.setLayoutData(new GridData(minLabelWidth, label.getSize().y));
+		}
+		
+		private String getAccessModifierString(int modifier) {
+			switch (modifier) {
+				case Modifier.PUBLIC :
+					return JdtFlags.VISIBILITY_STRING_PUBLIC;
+				case Modifier.PROTECTED :
+					return JdtFlags.VISIBILITY_STRING_PROTECTED;
+				case Modifier.NONE :
+					return RefactoringMessages.getString("ChangeSignatureInputPage.default"); //$NON-NLS-1$
+				case Modifier.PRIVATE :
+					return JdtFlags.VISIBILITY_STRING_PRIVATE;
+				default :
+					throw new IllegalArgumentException("\"" + modifier + "\" is not a Modifier constant"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+
+		private void createReturnTypeControl(Composite parent) {
+			Composite returnType= new Composite(parent, SWT.NONE);
+			returnType.setLayoutData(new GridData(GridData.FILL_BOTH));
+			GridLayout layout= new GridLayout(1, false);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			returnType.setLayout(layout);
+
+			Label label= new Label(returnType, SWT.NONE);
+			label.setText(RefactoringMessages.getString("ChangeSignatureInputPage.return_type")); //$NON-NLS-1$
+
+			final Text text= new Text(returnType, SWT.BORDER);
+			text.setText(getChangeMethodSignatureRefactoring().getReturnTypeString());
+			text.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
+
+			if (getChangeMethodSignatureRefactoring().canChangeNameAndReturnType()) {
 				text.addModifyListener(new ModifyListener(){
 					public void modifyText(ModifyEvent e) {
 						getChangeMethodSignatureRefactoring().setNewReturnTypeName(text.getText());
 						update(true);
 					}
 				});
-				
-				JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, true);
-				processor.setPackageFragment(getPackageFragment());
-				ControlContentAssistHelper.createTextContentAssistant(text, processor);
+			} else {
+				text.setEnabled(false);
+			}
+			
+			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, true);
+			processor.setPackageFragment(getPackageFragment());
+			ControlContentAssistHelper.createTextContentAssistant(text, processor);
+		}
+
+		private void createNameControl(Composite parent) {
+			Composite name= new Composite(parent, SWT.NONE);
+			name.setLayoutData(new GridData(GridData.FILL_BOTH));
+			GridLayout layout= new GridLayout(1, false);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			name.setLayout(layout);
+
+			Label label= new Label(name, SWT.NONE);
+			label.setText(RefactoringMessages.getString("ChangeSignatureInputPage.method_name")); //$NON-NLS-1$
+			
+			final Text text= new Text(name, SWT.BORDER);
+			text.setText(getChangeMethodSignatureRefactoring().getMethodName());
+			text.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
+
+			if (getChangeMethodSignatureRefactoring().canChangeNameAndReturnType()) {
+				text.addModifyListener(new ModifyListener(){
+					public void modifyText(ModifyEvent e) {
+						getChangeMethodSignatureRefactoring().setNewMethodName(text.getText());
+						update(true);
+					}
+				});
+			} else {
+				text.setEnabled(false);
+			}
 		}
 
 		private void createParameterExceptionsFolder(Composite composite) {
