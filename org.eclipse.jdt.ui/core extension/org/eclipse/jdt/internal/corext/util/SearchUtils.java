@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 public class SearchUtils {
 
 	/**
+	 * @param match
 	 * @return the enclosing {@link IJavaElement}, or null iff none
 	 */
 	public static IJavaElement getEnclosingJavaElement(SearchMatch match) {
@@ -30,17 +31,8 @@ public class SearchUtils {
 			return null;
 	}
 	
-	/** @deprecated TODO change callers to use getOffset() + getLength() */
-	public static int getEnd(SearchMatch match) {
-		int offset = match.getOffset();
-		int length = match.getLength();
-		if (offset == -1 || length == -1)
-			return -1;
-		else
-			return offset + length;
-	}
-
 	/**
+	 * @param match
 	 * @return the enclosing {@link ICompilationUnit} of the given match, or null iff none
 	 */
 	public static ICompilationUnit getCompilationUnit(SearchMatch match) {
