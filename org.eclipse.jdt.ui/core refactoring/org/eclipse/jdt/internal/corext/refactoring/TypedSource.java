@@ -166,7 +166,16 @@ public class TypedSource {
 		Assert.isTrue(elem.getElementType() != IJavaElement.IMPORT_CONTAINER);
 		ASTNode[] nodes= ASTNodeSearchUtil.getDeclarationNodes(elem, cuNode);
 		if (nodes != null && nodes.length == 1) {
-			return trimIndent(cu.getBuffer().getText(nodes[0].getStartPosition(), nodes[0].getLength()));
+			// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66880
+			ASTNode node = nodes[0];
+			int start= cuNode.getExtendedStartPosition(node);
+			if (start == -1)
+				start= node.getStartPosition();
+			int length= cuNode.getExtendedLength(node);
+			if (length == 0)
+				length= node.getLength();
+			return trimIndent(cu.getBuffer().getText(start, length));
+			// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66880
 		} else 
 			return ""; //$NON-NLS-1$
 	}
