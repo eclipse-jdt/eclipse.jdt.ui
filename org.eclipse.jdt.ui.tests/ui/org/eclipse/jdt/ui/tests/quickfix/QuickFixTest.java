@@ -76,7 +76,7 @@ public class QuickFixTest extends TestCase {
 	
 	public static void assertCorrectContext(IAssistContext context, ProblemLocation problem) {
 		if (problem.getProblemId() != 0) {
-			assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problem.getProblemId()));
+			assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getCompilationUnit(), problem.getProblemId()));
 		}
 	}	
 	

@@ -91,7 +91,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				JavaPlugin.log(status);
 			}
 		}
-		return (ContributedProcessorDescriptor[]) res.toArray(new ContributedProcessorDescriptor[res.size()]);;		
+		return (ContributedProcessorDescriptor[]) res.toArray(new ContributedProcessorDescriptor[res.size()]);		
 	}
 	
 	private static ContributedProcessorDescriptor[] getCorrectionProcessors() {
