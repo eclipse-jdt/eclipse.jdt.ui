@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -543,78 +544,6 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 		}
 
-		private static boolean doesParentQualify(Name fieldName) {
-			ASTNode parent= fieldName.getParent();
-			Assert.isNotNull(parent);
-
-			if (parent instanceof FieldAccess && ((FieldAccess) parent).getName() == fieldName)
-				return true;
-
-			if (parent instanceof QualifiedName && ((QualifiedName) parent).getName() == fieldName)
-				return true;
-
-			if (parent instanceof MethodInvocation && ((MethodInvocation) parent).getName() == fieldName)
-				return true;
-
-			return false;
-		}
-
-		private static InlineTargetCompilationUnit[] findTargetsForAllReferences(InlineConstantRefactoring refactoring, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-			IField field= refactoring.getField();
-			Assert.isNotNull(field);
-
-			SearchResultGroup[] searchResultGroups= search(field, pm, status);
-
-			InlineTargetCompilationUnit[] result= new InlineTargetCompilationUnit[searchResultGroups.length];
-			for (int i= 0; i < searchResultGroups.length; i++)
-				result[i]= new InlineTargetCompilationUnit(searchResultGroups[i], refactoring.getInitializer(), refactoring.getDeclaringCompilationUnit());
-
-			return result;
-		}
-
-		private static Expression getQualifiedReference(Name fieldName) {
-			if (doesParentQualify(fieldName))
-				return (Expression) fieldName.getParent();
-
-			return fieldName;
-		}
-
-		private static InlineTargetCompilationUnit getTargetForOnlySelectedReference(InlineConstantRefactoring refactoring) throws JavaModelException {
-			Assert.isTrue(!refactoring.isDeclarationSelected());
-			return new InlineTargetCompilationUnit(refactoring.fCu, refactoring.getConstantNameNode(), refactoring.getInitializer(), refactoring.getDeclaringCompilationUnit());
-		}
-
-		public static InlineTargetCompilationUnit[] prepareTargets(InlineConstantRefactoring refactoring, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException, CoreException {
-			Assert.isNotNull(refactoring);
-			Assert.isNotNull(pm);
-
-			InlineTargetCompilationUnit[] results= prepareTargetsUnchecked(refactoring, pm, status);
-			return results;
-		}
-
-		private static InlineTargetCompilationUnit[] prepareTargetsUnchecked(InlineConstantRefactoring refactoring, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-			if (refactoring.getReplaceAllReferences())
-				return findTargetsForAllReferences(refactoring, pm, status);
-			else
-				return new InlineTargetCompilationUnit[] { getTargetForOnlySelectedReference(refactoring)};
-		}
-
-		private static SearchResultGroup[] search(IField field, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-			Assert.isNotNull(pm);
-			Assert.isNotNull(field);
-			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES));
-			engine.setFiltering(true, true);
-			engine.setScope(RefactoringScopeFactory.create(field));
-			engine.setStatus(status);
-			engine.setRequestor(new IRefactoringSearchRequestor() {
-				public boolean acceptSearchMatch(SearchMatch match) {
-					return ! match.isInsideDocComment();
-				}
-			});
-			engine.searchPattern(new SubProgressMonitor(pm, 1));
-			return (SearchResultGroup[]) engine.getResults();
-		}
-
 		private RefactoringStatus fEditProblems;
 
 		private ImportRewrite fImportRewrite;
@@ -666,6 +595,29 @@ public class InlineConstantRefactoring extends Refactoring {
 
 		private InlineTargetCompilationUnit(SearchResultGroup group, Expression initializer, ICompilationUnit initializerUnit) {
 			this(group.getCompilationUnit(), group.getSearchResults(), initializer, initializerUnit);
+		}
+
+		private static Expression getQualifiedReference(Name fieldName) {
+			if (doesParentQualify(fieldName))
+				return (Expression) fieldName.getParent();
+
+			return fieldName;
+		}
+
+		private static boolean doesParentQualify(Name fieldName) {
+			ASTNode parent= fieldName.getParent();
+			Assert.isNotNull(parent);
+
+			if (parent instanceof FieldAccess && ((FieldAccess) parent).getName() == fieldName)
+				return true;
+
+			if (parent instanceof QualifiedName && ((QualifiedName) parent).getName() == fieldName)
+				return true;
+
+			if (parent instanceof MethodInvocation && ((MethodInvocation) parent).getName() == fieldName)
+				return true;
+
+			return false;
 		}
 
 		private void addEditsToInline(Expression reference) throws CoreException {
@@ -780,13 +732,6 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	// ---- End InlineTargetCompilationUnit ----------------------------------------------------------------------------------------------
 
-	public static InlineConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
-		InlineConstantRefactoring ref= new InlineConstantRefactoring(cu, selectionStart, selectionLength);
-		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
-			return null;
-		return ref;
-	}
-
 	private static SimpleName getLeftmost(Name name) {
 		if (name instanceof SimpleName)
 			return (SimpleName) name;
@@ -794,36 +739,26 @@ public class InlineConstantRefactoring extends Refactoring {
 		return getLeftmost(((QualifiedName) name).getQualifier());
 	}
 
-	public static boolean isAvailable(IField field) throws JavaModelException {
-		return Checks.isAvailable(field) && JdtFlags.isStatic(field) && JdtFlags.isFinal(field) && !JdtFlags.isEnum(field);
-	}
-
-	private CompilationUnit fCompilationUnitNode;
-
+	private final int fSelectionStart;
+	private final int fSelectionLength;
+	
 	private final ICompilationUnit fCu;
+	private CompilationUnitRewrite fCuRewrite;
+	private Name fSelectedConstantName;
 
 	private boolean fDeclarationSelected;
-
 	private boolean fDeclarationSelectedChecked= false;
 
 	private Expression fInitializer;
-
 	private boolean fInitializerAllStaticFinal;
-
 	private boolean fInitializerChecked= false;
-
 	private boolean fInitializerFound= false;
 
 	private boolean fRemoveDeclaration= false;
-
 	private boolean fReplaceAllReferences= true;
 
-	private final int fSelectionLength;
-
-	private final int fSelectionStart;
-
-	private InlineTargetCompilationUnit[] fTargetCompilationUnits;
-
+	private CompilationUnitChange[] fChanges;
+	
 	private InlineConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
@@ -831,51 +766,58 @@ public class InlineConstantRefactoring extends Refactoring {
 		fCu= cu;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
+		fCuRewrite= new CompilationUnitRewrite(fCu);
+		fSelectedConstantName= findConstantNameNode();
 	}
 
-	private void addRemoveConstantDeclarationIfNecessary(List changes) throws CoreException {
-		TextEdit edit= getRemoveConstantDeclarationEdit();
-		if (edit == null)
-			return;
+	private Name findConstantNameNode() {
+		ASTNode node= NodeFinder.perform(fCuRewrite.getRoot(), fSelectionStart, fSelectionLength);
+		if (node == null)
+			return null;
+		if (node instanceof FieldAccess)
+			node= ((FieldAccess) node).getName();
+		if (node.getParent() instanceof EnumConstantDeclaration)
+			return null;
+		if (!(node instanceof Name))
+			return null;
+		Name name= (Name) node;
+		IBinding binding= name.resolveBinding();
+		if (!(binding instanceof IVariableBinding))
+			return null;
+		IVariableBinding variableBinding= (IVariableBinding) binding;
+		if (!variableBinding.isField() || variableBinding.isEnumConstant())
+			return null;
+		int modifiers= binding.getModifiers();
+		if (! (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)))
+			return null;
 
-		TextChange change= findOrAddDeclaringCUChange(changes);
-		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("InlineConstantRefactoring.remove_declaration"), edit); //$NON-NLS-1$
+		return name;
 	}
 
-	private void addReplaceReferencesWithExpression(List changes) throws JavaModelException, CoreException {
-		for (int i= 0; i < fTargetCompilationUnits.length; i++)
-			changes.add(fTargetCompilationUnits[i].getChange());
+	public static InlineConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(cu, selectionStart, selectionLength);
+		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
+			return null;
+		return ref;
+	}
+
+	private RefactoringStatus checkStaticFinalConstantNameSelected() {
+		if (fSelectedConstantName == null)
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.static_final_field"), null, Corext.getPluginId(), RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED, null); //$NON-NLS-1$
+
+		return new RefactoringStatus();
+	}
+
+	public static boolean isAvailable(IField field) throws JavaModelException {
+		return Checks.isAvailable(field) && JdtFlags.isStatic(field) && JdtFlags.isFinal(field) && !JdtFlags.isEnum(field);
 	}
 
 	private void checkDeclarationSelected() {
-		Assert.isNotNull(getConstantNameNode());
-
 		fDeclarationSelected= false;
 		VariableDeclarationFragment parentDeclaration= getParentDeclaration();
-		if (parentDeclaration != null && parentDeclaration.getName() == getConstantNameNode())
+		if (parentDeclaration != null && parentDeclaration.getName() == fSelectedConstantName)
 			fDeclarationSelected= true;
 		fDeclarationSelectedChecked= true;
-	}
-
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		RefactoringStatus result= new RefactoringStatus();
-
-		fTargetCompilationUnits= InlineTargetCompilationUnit.prepareTargets(this, pm, result);
-
-		for (int i= 0; i < fTargetCompilationUnits.length; i++)
-			fTargetCompilationUnits[i].checkReferences(result);
-
-		if (result.hasFatalError())
-			return result;
-
-		ICompilationUnit[] cus= new ICompilationUnit[fTargetCompilationUnits.length + 1];
-		for (int i= 0; i < fTargetCompilationUnits.length; i++) {
-			cus[i]= fTargetCompilationUnits[i].fUnit;
-		}
-		cus[cus.length - 1]= fCu;
-		result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(cus), getValidationContext()));
-
-		return result;
 	}
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
@@ -939,38 +881,6 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 	}
 
-	private RefactoringStatus checkStaticFinalConstantNameSelected() {
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
-
-		if (getConstantNameNode() == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.static_final_field"), null, Corext.getPluginId(), RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED, null); //$NON-NLS-1$
-
-		return new RefactoringStatus();
-	}
-
-	public Change createChange(IProgressMonitor pm) throws CoreException {
-		try {
-			pm.beginTask(RefactoringCoreMessages.getString("InlineConstantRefactoring.preview"), 2); //$NON-NLS-1$
-
-			Change[] cuChanges= createCompilationUnitChanges(pm);
-
-			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.getString("InlineConstantRefactoring.inline")); //$NON-NLS-1$
-			result.addAll(cuChanges);
-			return result;
-		} finally {
-			pm.done();
-		}
-	}
-
-	private CompilationUnitChange[] createCompilationUnitChanges(IProgressMonitor pm) throws JavaModelException, CoreException {
-		List changes= new ArrayList();
-		addReplaceReferencesWithExpression(changes);
-		pm.worked(1);
-		addRemoveConstantDeclarationIfNecessary(changes);
-		pm.worked(1);
-		return (CompilationUnitChange[]) changes.toArray(new CompilationUnitChange[changes.size()]);
-	}
-
 	private RefactoringStatus findInitializer() throws JavaModelException {
 		VariableDeclarationFragment declaration= getDeclaration();
 		if (declaration == null)
@@ -981,6 +891,85 @@ public class InlineConstantRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
+	
+		// prepareTargets:
+		InlineTargetCompilationUnit[] targetCompilationUnits= null;
+		if (getReplaceAllReferences()) {
+			SearchResultGroup[] searchResultGroups= findReferences(pm, result);
+			targetCompilationUnits= new InlineTargetCompilationUnit[searchResultGroups.length];
+			for (int i= 0; i < searchResultGroups.length; i++) {
+				InlineTargetCompilationUnit targetCompilationUnit= new InlineTargetCompilationUnit(searchResultGroups[i], getInitializer(), getDeclaringCompilationUnit());
+				targetCompilationUnit.checkReferences(result);
+				targetCompilationUnits[i]= targetCompilationUnit;
+			}
+			
+		} else {
+			Assert.isTrue(!isDeclarationSelected());
+			InlineTargetCompilationUnit targetForOnlySelectedReference= new InlineTargetCompilationUnit(fCu, fSelectedConstantName, getInitializer(), getDeclaringCompilationUnit());
+			targetForOnlySelectedReference.checkReferences(result);
+			targetCompilationUnits= new InlineTargetCompilationUnit[] { targetForOnlySelectedReference };
+		}
+	
+		if (result.hasFatalError())
+			return result;
+	
+		ICompilationUnit[] cus= new ICompilationUnit[targetCompilationUnits.length + 1];
+		for (int i= 0; i < targetCompilationUnits.length; i++) {
+			cus[i]= targetCompilationUnits[i].fUnit;
+		}
+		cus[cus.length - 1]= fCu;
+		result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(cus), getValidationContext()));
+		
+		//createCompilationUnitChanges:
+		List changes= new ArrayList();
+		//addReplaceReferencesWithExpression:
+		for (int i= 0; i < targetCompilationUnits.length; i++)
+			changes.add(targetCompilationUnits[i].getChange());
+		pm.worked(1);
+		//addRemoveConstantDeclarationIfNecessary:
+		TextEdit edit= getRemoveConstantDeclarationEdit();
+		if (edit != null) {
+			TextChange change= findOrAddDeclaringCUChange(changes);
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("InlineConstantRefactoring.remove_declaration"), edit); //$NON-NLS-1$
+		}
+		pm.worked(1);
+		
+		
+		fChanges= (CompilationUnitChange[]) changes.toArray(new CompilationUnitChange[changes.size()]);
+	
+		return result;
+	}
+
+	public Change createChange(IProgressMonitor pm) throws CoreException {
+		try {
+			pm.beginTask(RefactoringCoreMessages.getString("InlineConstantRefactoring.preview"), 2); //$NON-NLS-1$
+			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.getString("InlineConstantRefactoring.inline")); //$NON-NLS-1$
+			result.addAll(fChanges);
+			return result;
+		} finally {
+			pm.done();
+			fChanges= null;
+		}
+	}
+
+	private SearchResultGroup[] findReferences(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+		IField field= getField();
+		Assert.isNotNull(field);
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES));
+		engine.setFiltering(true, true);
+		engine.setScope(RefactoringScopeFactory.create(field));
+		engine.setStatus(status);
+		engine.setRequestor(new IRefactoringSearchRequestor() {
+			public boolean acceptSearchMatch(SearchMatch match) {
+				return ! match.isInsideDocComment();
+			}
+		});
+		engine.searchPattern(new SubProgressMonitor(pm, 1));
+		return (SearchResultGroup[]) engine.getResults();
+	}
+	
 	private TextChange findOrAddDeclaringCUChange(List changes) throws JavaModelException, CoreException {
 		ICompilationUnit declaringCU= getDeclaringCompilationUnit();
 		Assert.isNotNull(declaringCU);
@@ -997,36 +986,10 @@ public class InlineConstantRefactoring extends Refactoring {
 		return newChange;
 	}
 
-	private Name getConstantNameNode() {
-		ASTNode node= NodeFinder.perform(fCompilationUnitNode, fSelectionStart, fSelectionLength);
-		if (node == null)
-			return null;
-		if (node instanceof FieldAccess)
-			node= ((FieldAccess) node).getName();
-		if (node.getParent() instanceof EnumConstantDeclaration)
-			return null;
-		if (!(node instanceof Name))
-			return null;
-		Name name= (Name) node;
-		IBinding binding= name.resolveBinding();
-		if (!(binding instanceof IVariableBinding))
-			return null;
-		IVariableBinding variableBinding= (IVariableBinding) binding;
-		if (!variableBinding.isField() || variableBinding.isEnumConstant())
-			return null;
-		int modifiers= binding.getModifiers();
-		if (! (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)))
-			return null;
-
-		return name;
-	}
-
 	/*
 	 * Returns the variable declaration fragment corresponding to the selected static final field name, or null if the constant is declared in a class file.
 	 */
 	private VariableDeclarationFragment getDeclaration() throws JavaModelException {
-		Assert.isNotNull(getConstantNameNode());
-
 		VariableDeclarationFragment result;
 
 		if (isDeclarationSelected()) {
@@ -1035,7 +998,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			return result;
 		}
 
-		result= (VariableDeclarationFragment) fCompilationUnitNode.findDeclaringNode(getConstantNameNode().resolveBinding());
+		result= (VariableDeclarationFragment) fCuRewrite.getRoot().findDeclaringNode(fSelectedConstantName.resolveBinding());
 		if (result != null)
 			return result;
 
@@ -1063,8 +1026,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	}
 
 	private IField getField() throws JavaModelException {
-		Assert.isNotNull(getConstantNameNode());
-		IField result= Bindings.findField((IVariableBinding) getConstantNameNode().resolveBinding(), fCu.getJavaProject());
+		IField result= Bindings.findField((IVariableBinding) fSelectedConstantName.resolveBinding(), fCu.getJavaProject());
 		if (result != null && !result.exists())
 			return null;
 
@@ -1097,8 +1059,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	}
 
 	private VariableDeclarationFragment getParentDeclaration() {
-		Assert.isNotNull(getConstantNameNode());
-		ASTNode parent= getConstantNameNode().getParent();
+		ASTNode parent= fSelectedConstantName.getParent();
 		if (parent instanceof VariableDeclarationFragment)
 			return (VariableDeclarationFragment) parent;
 		else
@@ -1115,7 +1076,9 @@ public class InlineConstantRefactoring extends Refactoring {
 		ASTRewrite rewrite= ASTRewrite.create(toRemove.getRoot().getAST());
 
 		rewrite.remove(toRemove, null);
-
+		
+		//TODO: remove unused imports - use CompilationUnitRewrite
+		
 		try {
 			final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(getDeclaringCompilationUnit());
 			return rewrite.rewriteAST(buffer.getDocument(), getDeclaringCompilationUnit().getJavaProject().getOptions(true));
