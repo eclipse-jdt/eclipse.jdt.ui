@@ -649,9 +649,18 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			for (int l= document.computeNumberOfLines(prefix); l < lines; l++) { // we don't change the number of lines while adding indents
 				IRegion r= temp.getLineInformation(l);
 				lineOffset= r.getOffset();
+				int lineLength= r.getLength();
 				
-				if (r.getLength() == 0) // don't format empty lines
+				if (lineLength == 0) // don't format empty lines
 					continue;
+				
+				if (lineOffset < temp.getLength() - 1) {
+					// special single line comment handling: if comment starts at the start of the line, leave it alone.
+					String s= temp.get(lineOffset, 2);
+					if ("//".equals(s)) { //$NON-NLS-1$
+						continue;
+					}
+				}
 				
 				String indent= indenter.computeIndentation(lineOffset);
 				if (indent == null) // bail out
@@ -663,19 +672,10 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
 					if (partition.getOffset() != lineOffset) // not for first line
 						indent += ' ';
-				
-				endOfWS= scanner.findNonWhitespaceForwardInAnyPartition(lineOffset, lineOffset + r.getLength());
+					
+				endOfWS= scanner.findNonWhitespaceForwardInAnyPartition(lineOffset, lineOffset + lineLength);
 				if (endOfWS == JavaHeuristicScanner.NOT_FOUND)
-					endOfWS= lineOffset + r.getLength();
-				
-				if (lineOffset < temp.getLength() - 1) {
-					// special single line comment handling
-					String s= temp.get(lineOffset, 2);
-					if ("//".equals(s)) { //$NON-NLS-1$
-						endOfWS= scanner.findNonWhitespaceForwardInAnyPartition(lineOffset + 2, lineOffset + r.getLength());
-						lineOffset += 2;
-					}
-				}
+					endOfWS= lineOffset + lineLength;
 				
 				int wsLen= Math.max(endOfWS - lineOffset, 0);
 				temp.replace(lineOffset, wsLen, indent);
