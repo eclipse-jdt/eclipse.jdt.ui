@@ -54,7 +54,9 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 			fChanged= true;
 		}
 		public void remove(int index) {
-			fChanged= fChanged || fElements.remove(index) != null;
+			if (fElements.remove(index) != null) {
+				fChanged= true;
+			}
 		}
 		public void process() {
 			if (fChanged) {
