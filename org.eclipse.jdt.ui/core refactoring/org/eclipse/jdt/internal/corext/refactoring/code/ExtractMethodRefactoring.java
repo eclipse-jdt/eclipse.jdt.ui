@@ -82,14 +82,11 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private int fSelectionStart;
 	private int fSelectionLength;
 	private int fSelectionEnd;
-	private boolean fCallOnDeclarationLine= true;
-	
 	private AST fAST;
 	private ExtractMethodAnalyzer fAnalyzer;
 	private String fVisibility;
 	private String fMethodName;
 	private boolean fThrowRuntimeExceptions;
-	private int fMethodFlags= Modifier.PROTECTED;
 	private List fParameterInfos;
 	private Set fUsedNames;
 

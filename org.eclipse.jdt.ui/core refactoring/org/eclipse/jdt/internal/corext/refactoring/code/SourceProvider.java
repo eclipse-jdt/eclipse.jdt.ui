@@ -280,15 +280,6 @@ public class SourceProvider {
 		return (ASTNode)statements.get(statements.size() - 1);
 	}
 
-	private String proposeName(List used, String start) {
-		int i= 1;
-		String result= start + i++;
-		while (used.contains(result)) {
-			result= start + i++;
-		}
-		return result;
-	}
-
 	private List getReturnStatementRanges() {
 		List result= new ArrayList(1);
 		List statements= fDeclaration.getBody().statements();
