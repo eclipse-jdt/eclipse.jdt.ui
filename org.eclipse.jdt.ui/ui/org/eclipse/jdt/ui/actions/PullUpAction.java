@@ -130,11 +130,17 @@ public class PullUpAction extends SelectionDispatchAction{
 	}
 		
 	private boolean canRun(ITextSelection selection){
-		IJavaElement[] elements= resolveElements();
-		if (elements.length != 1)
+		try {
+			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+			if (element == null)
+				return false;
+			return (element instanceof IMember) && shouldAcceptElements(new IJavaElement[]{element});
+		} catch (JavaModelException e) {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
 			return false;
-
-		return (elements[0] instanceof IMember) && shouldAcceptElements(elements);
+		}
 	}
 
 	private PullUpRefactoring createNewRefactoringInstance(Object[] obj){
@@ -159,10 +165,6 @@ public class PullUpAction extends SelectionDispatchAction{
 		}	
 	}
 		
-	private IJavaElement[] resolveElements() {
-		return SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"));  //$NON-NLS-1$
-	}
-
 	private RefactoringWizard createWizard(){
 		String title= RefactoringMessages.getString("RefactoringGroup.pull_up"); //$NON-NLS-1$
 		String helpId= IJavaHelpContextIds.PULL_UP_ERROR_WIZARD_PAGE;

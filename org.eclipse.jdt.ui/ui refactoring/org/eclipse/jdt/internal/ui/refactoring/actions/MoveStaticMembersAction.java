@@ -107,7 +107,9 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 				return false;
 			return (element instanceof IMember) && shouldAcceptElements(new IJavaElement[]{element});
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
 			return false;
 		}
 	}

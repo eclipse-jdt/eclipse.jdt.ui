@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * This action moves Java elements to a new location. The action prompts
@@ -146,19 +148,21 @@ public class MoveAction extends SelectionDispatchAction{
 	
 	private boolean tryMoveStaticMembers(ITextSelection selection) {
 		try {
-			IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"));  //$NON-NLS-1$
-			if (elements.length != 1)
+			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+			if (element == null)
 				return false;
-			
-			if (! (elements[0] instanceof IMember))
+			if (!(element instanceof IMember))
 				return false;
-			
-			MoveStaticMembersRefactoring refactoring= new MoveStaticMembersRefactoring(new IMember[]{(IMember)elements[0]}, JavaPreferencesSettings.getCodeGenerationSettings());
+
+			MoveStaticMembersRefactoring refactoring= new MoveStaticMembersRefactoring(new IMember[]{(IMember)element}, JavaPreferencesSettings.getCodeGenerationSettings());
 			if (! refactoring.checkPreactivation().isOK())
 				return false;
 			fMoveStaticMembersAction.run(selection);
-			return true;
+			return true;			
 		} catch (JavaModelException e) {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
 			return false;
 		}
 	}

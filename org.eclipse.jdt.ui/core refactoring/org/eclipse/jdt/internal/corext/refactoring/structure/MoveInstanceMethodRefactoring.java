@@ -21,17 +21,17 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 
 public class MoveInstanceMethodRefactoring extends Refactoring {
@@ -93,13 +93,16 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 	
 	private MethodDeclaration findMethodDeclaration(RefactoringStatus status) {
 		CompilationUnit root=  AST.parseCompilationUnit(fCU, true);
-		ASTNode node= NodeFinder.perform(root, fSelectionStart, fSelectionLength);
-		if (node instanceof SimpleName)
-			node= node.getParent();
 		
+		ASTNode node= NodeFinder.perform(root, fSelectionStart, fSelectionLength);
+
 		if(node instanceof MethodDeclaration)
 			return (MethodDeclaration) node;
-
+		
+		ASTNode parentNode= ASTNodes.getParent(node, MethodDeclaration.class);
+		if(parentNode != null)
+			return (MethodDeclaration) parentNode;
+		
 		status.merge(RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.method_declaration"), null, null, RefactoringStatusCodes.METHOD_NOT_SELECTED)); //$NON-NLS-1$
 		return null;
 	} 
