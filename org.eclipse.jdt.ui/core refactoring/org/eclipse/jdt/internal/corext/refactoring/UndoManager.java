@@ -7,12 +7,11 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.Stack;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -238,8 +237,7 @@ public class UndoManager implements IUndoManager {
 			if (status.hasError())
 				return;
 				
-			IWorkspace workspace= ResourcesPlugin.getWorkspace();
-			workspace.run(
+			JavaCore.run(
 				new IWorkspaceRunnable() {
 					public void run(IProgressMonitor innerPM) throws CoreException {
 						change.perform(context, innerPM);

@@ -24,8 +24,14 @@ public interface IJavaStatusConstants {
 	public static final int TEMPLATE_IO_EXCEPTION = 10002;
 	
 	/**
-	 * Status constant indication that an validateEdit call has 
-	 * changed the content of a file on disk.
+	 * Status constant indicating that an validateEdit call has changed the
+	 * content of a file on disk.
 	 */
-	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003; 
+	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
+	
+	/**
+	 * Status constant indicating that a <tt>ChangeAbortException</tt> has been
+	 * caught.
+ 	 */
+	public static final int CHANGE_ABORTED= 10004;
  }

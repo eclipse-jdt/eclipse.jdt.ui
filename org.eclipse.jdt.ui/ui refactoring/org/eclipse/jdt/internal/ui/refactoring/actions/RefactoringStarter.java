@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.*;
 import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
@@ -96,7 +97,7 @@ public class RefactoringStarter {
 			}
 			renameRefactoring.setNewName(dialog.getValue());
 			PerformChangeOperation pco= new PerformChangeOperation(new CreateChangeOperation(refactoring, CheckConditionsOperation.PRECONDITIONS));
-			PerformRefactoringUtil.performRefactoring(pco, refactoring);
+			PerformRefactoringUtil.performRefactoring(pco, refactoring, JavaPlugin.getActiveWorkbenchWindow(), parent);
 			return null;
 		} 		
 	}

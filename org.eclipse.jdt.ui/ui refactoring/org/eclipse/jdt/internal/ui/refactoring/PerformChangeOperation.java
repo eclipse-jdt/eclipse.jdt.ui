@@ -1,32 +1,43 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
-
+/*******************************************************************************
+ * Copyright (c) 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+
+import org.eclipse.ui.IEditorPart;
+
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Operation that, when performed, performes a change to the workbench.
@@ -140,12 +151,14 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 				executeChange(pm);
 				fChangeExecuted= true;
 			}
+		} catch (CoreException e) {
+			throw new InvocationTargetException(e);
 		} finally{
 			pm.done();
 		}	
 	}
 	
-	private void executeChange(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
+	private void executeChange(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fChangeContext);
 		IRewriteTarget[] targets= null;
 		try {
@@ -154,17 +167,20 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 			// Since we have done precondition checking this check should be fast. No PM.
 			// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 			fChange.aboutToPerform(fChangeContext, new NullProgressMonitor());
-			(new WorkspaceModifyOperation() {
-				protected void execute(IProgressMonitor pm) throws CoreException, InvocationTargetException {
+			IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+				public void run(IProgressMonitor monitor) throws CoreException {
 					try {
-						fChange.perform(fChangeContext, pm);
+						fChange.perform(fChangeContext, monitor);
 					} catch (ChangeAbortException e) {
-						throw new InvocationTargetException(e);
-					} finally {
-						pm.done();
+						throw new CoreException(
+							new Status(
+								IStatus.ERROR, 
+								JavaPlugin.getPluginId(), IJavaStatusConstants.CHANGE_ABORTED, 
+								RefactoringMessages.getString("PerformChangeOperation.unrecoverable_error"), e)); //$NON-NLS-1$
 					}
 				}
-			}).run(pm);
+			};
+			JavaCore.run(runnable, pm);
 		} finally {
 			fChange.performed();
 			if (targets != null)
