@@ -34,9 +34,9 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.ProposalPosition;
 
 import org.eclipse.ui.IEditorPart;
@@ -44,7 +44,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -55,6 +54,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ITrackedNodePosition;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
@@ -230,6 +230,10 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		}
 
 		model.forceInstall();
+		JavaEditor editor= getJavaEditor();
+		if (editor != null) {
+			model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
+		}
 		
 		if (added) { // only set up UI if there are any positions set
 			LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
@@ -249,7 +253,20 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		}
 	}
 	
-	
+	/**
+	 * Returns the currently active java editor, or <code>null</code> if it 
+	 * cannot be determined.
+	 * 
+	 * @return  the currently active java editor, or <code>null</code>
+	 */
+	private JavaEditor getJavaEditor() {
+		IEditorPart part= JavaPlugin.getActivePage().getActiveEditor();
+		if (part instanceof JavaEditor)
+			return (JavaEditor) part;
+		else
+			return null;
+	}
+
 	private static class LinkedModeProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
 
 		private String fProposal;

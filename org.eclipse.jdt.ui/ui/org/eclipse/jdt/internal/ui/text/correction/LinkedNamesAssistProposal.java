@@ -25,14 +25,14 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedModeUI;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -43,6 +43,8 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * A template proposal.
@@ -118,6 +120,10 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			LinkedModeModel model= new LinkedModeModel();
 			model.addGroup(group);
 			model.forceInstall();
+			JavaEditor editor= getJavaEditor();
+			if (editor != null) {
+				model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
+			}
 			
 			LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
 //			ui.setInitialOffset(offset);
@@ -129,6 +135,20 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			JavaPlugin.log(e);
 		}
 	}	
+
+	/**
+	 * Returns the currently active java editor, or <code>null</code> if it 
+	 * cannot be determined.
+	 * 
+	 * @return  the currently active java editor, or <code>null</code>
+	 */
+	private JavaEditor getJavaEditor() {
+		IEditorPart part= JavaPlugin.getActivePage().getActiveEditor();
+		if (part instanceof JavaEditor)
+			return (JavaEditor) part;
+		else
+			return null;
+	}
 
 	/*
 	 * @see ICompletionProposal#apply(IDocument)

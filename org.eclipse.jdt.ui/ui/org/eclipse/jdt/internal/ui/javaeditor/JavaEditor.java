@@ -3458,7 +3458,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 		
 		removeOccurrenceAnnotations();
-	}	
+	}
+	
+	protected boolean isMarkingOccurrences() {
+		return fMarkOccurrenceAnnotations;
+	}
 	
 	void removeOccurrenceAnnotations() {
 		IDocumentProvider documentProvider= getDocumentProvider();

@@ -47,6 +47,7 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -56,6 +57,8 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -190,6 +193,11 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			
 			if (hasPositions) {
 				model.forceInstall();
+				JavaEditor editor= getJavaEditor();
+				if (editor != null) {
+					model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
+				}
+				
 				LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
 				ui.setExitPosition(viewer, getCaretOffset(templateBuffer) + start, 0, Integer.MAX_VALUE);
 				ui.enter();
@@ -210,6 +218,20 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 
 	}	
 	
+	/**
+	 * Returns the currently active java editor, or <code>null</code> if it 
+	 * cannot be determined.
+	 * 
+	 * @return  the currently active java editor, or <code>null</code>
+	 */
+	private JavaEditor getJavaEditor() {
+		IEditorPart part= JavaPlugin.getActivePage().getActiveEditor();
+		if (part instanceof JavaEditor)
+			return (JavaEditor) part;
+		else
+			return null;
+	}
+
 	/**
 	 * Returns the offset of the range in the document that will be replaced by
 	 * applying this template.

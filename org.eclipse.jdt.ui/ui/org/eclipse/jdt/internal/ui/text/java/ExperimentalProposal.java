@@ -22,14 +22,17 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedModeUI;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * An experimental proposal.
@@ -77,6 +80,10 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 				}
 				
 				model.forceInstall();
+				JavaEditor editor= getJavaEditor();
+				if (editor != null) {
+					model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
+				}
 				
 				LinkedModeUI ui= new EditorLinkedModeUI(model, fViewer);
 				ui.setExitPosition(fViewer, replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
@@ -93,6 +100,20 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 			fSelectedRegion= new Region(replacementOffset + replacementString.length(), 0);
 	}
 	
+	/**
+	 * Returns the currently active java editor, or <code>null</code> if it 
+	 * cannot be determined.
+	 * 
+	 * @return  the currently active java editor, or <code>null</code>
+	 */
+	private JavaEditor getJavaEditor() {
+		IEditorPart part= JavaPlugin.getActivePage().getActiveEditor();
+		if (part instanceof JavaEditor)
+			return (JavaEditor) part;
+		else
+			return null;
+	}
+
 	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */

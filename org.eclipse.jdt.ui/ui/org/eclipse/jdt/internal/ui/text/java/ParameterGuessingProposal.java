@@ -35,6 +35,7 @@ import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.ProposalPosition;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -44,6 +45,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * This is a {@link org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal} which includes templates 
@@ -170,7 +173,11 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				}
 				
 				model.forceInstall();
-				
+				JavaEditor editor= getJavaEditor();
+				if (editor != null) {
+					model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
+				}
+								
 				LinkedModeUI ui= new EditorLinkedModeUI(model, fViewer);
 				ui.setExitPosition(fViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setExitPolicy(new ExitPolicy(')'));
@@ -198,6 +205,20 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		}
 	}
 	
+	/**
+	 * Returns the currently active java editor, or <code>null</code> if it 
+	 * cannot be determined.
+	 * 
+	 * @return  the currently active java editor, or <code>null</code>
+	 */
+	private JavaEditor getJavaEditor() {
+		IEditorPart part= JavaPlugin.getActivePage().getActiveEditor();
+		if (part instanceof JavaEditor)
+			return (JavaEditor) part;
+		else
+			return null;
+	}
+
 	private ICompletionProposal[][] guessParameters(int offset, IDocument document, Position[] positions) throws JavaModelException {
 		// find matches in reverse order.  Do this because people tend to declare the variable meant for the last
 		// parameter last.  That is, local variables for the last parameter in the method completion are more
