@@ -533,6 +533,13 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "Bag", true, names, signatures, fieldNames);
 	}
 
+	public void testPaperExample1() throws Exception{
+		String[] names= new String[]{"add", "addAll", "iterator"};
+		String[][] signatures= new String[][]{new String[]{"QComparable;"}, new String[]{"QA;"}, new String[0]};
+		String[] fieldNames= null;
+		validatePassingTest("A", new String[]{"A"}, "Bag", true, names, signatures, fieldNames);
+	}
+
 	public void testPaperExampleSimplified0() throws Exception{
 		String[] names= new String[]{};
 		String[][] signatures= {{}};
