@@ -61,6 +61,7 @@ public class FiltersDialog extends SelectionStatusDialog {
 		super(page.getSite().getShell());
 		setTitle(org.eclipse.jdt.internal.ui.search.SearchMessages.getString("FiltersDialog.title")); //$NON-NLS-1$
 		setStatusLineAboveButtons(true);
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 		fPage = page;
 	}
 
@@ -87,6 +88,7 @@ public class FiltersDialog extends SelectionStatusDialog {
 	 */
 	protected Control createDialogArea(Composite composite) {
 		Composite parent = (Composite) super.createDialogArea(composite);
+		initializeDialogUnits(composite);
 
 		createTableLimit(parent);
 		// Create list viewer
@@ -97,6 +99,7 @@ public class FiltersDialog extends SelectionStatusDialog {
 		listViewer = new CheckboxTableViewer(table);
 
 		GridData data = new GridData(GridData.FILL_BOTH);
+		data.minimumHeight= convertHeightInCharsToPixels(8);
 		table.setLayoutData(data);
 
 		listViewer.setLabelProvider(new LabelProvider() {
