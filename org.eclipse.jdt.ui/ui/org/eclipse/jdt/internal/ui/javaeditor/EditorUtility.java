@@ -35,6 +35,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
  * A number of routines for working with JavaElements in editors
@@ -123,20 +124,34 @@ public class EditorUtility {
 		if (file != null) {
 			IWorkbenchPage p= JavaPlugin.getDefault().getActivePage();
 			if (p != null) {
-				IEditorPart e= p.openEditor(file, null, activate);
-				return e;
+				IEditorPart editorPart= p.openEditor(file, null, activate);
+				initializeHighlightRange(editorPart);
+				return editorPart;
 			}
 		}
 		return null;
 	}
-	
+
 	private static IEditorPart openInEditor(IEditorInput input, String editorID, boolean activate) throws PartInitException {
 		if (input != null) {
 			IWorkbenchPage p= JavaPlugin.getDefault().getActivePage();
-			if (p != null)
-				return p.openEditor(input, editorID, activate);
+			if (p != null) {
+				IEditorPart editorPart= p.openEditor(input, editorID, activate);
+				initializeHighlightRange(editorPart);
+				return editorPart;
+			}
 		}
 		return null;
+	}
+
+	private static void initializeHighlightRange(IEditorPart editorPart) {
+		if (editorPart instanceof ITextEditor) {
+			TogglePresentationAction toggleAction= new TogglePresentationAction();
+			// Initialize editor
+			toggleAction.setEditor((ITextEditor)editorPart);
+			// Reset action
+			toggleAction.setEditor(null);
+		}
 	}
 	
 	/**
