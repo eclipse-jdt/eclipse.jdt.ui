@@ -58,7 +58,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	{
 		ICommandManager commandManager= PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
 		fCommand= commandManager.getCommand(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
-		if (fCommand.isDefined())
+		if (!fCommand.isDefined())
 			fCommand= null;
 	}
 
