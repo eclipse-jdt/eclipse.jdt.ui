@@ -216,6 +216,8 @@ public class JavaElementSorter extends ViewerSorter {
 					return p1 - p2;
 				}
 			}
+			e1= root1; // normalize classpath container to root
+			e2= root2;
 		}
 		// non - java resources are sorted using the label from the viewers label provider
 		if (cat1 == PROJECTS || cat1 == RESOURCES || cat1 == RESOURCEFOLDERS || cat1 == STORAGE || cat1 == OTHERS) {
