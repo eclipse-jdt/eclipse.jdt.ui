@@ -109,10 +109,10 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 			IMethod curr= (IMethod) element;
 			IMember declaringType= JavaModelUtil.toOriginal(curr.getDeclaringType());
 			
-			if (!declaringType.equals(fMethodsViewer.getInput())) {
+			if (declaringType.equals(fMethodsViewer.getInput())) {
 				if (fResolvedBackground == null) {
 					Display display= Display.getCurrent();
-					fResolvedBackground= display.getSystemColor(SWT.COLOR_DARK_GRAY);
+					fResolvedBackground= display.getSystemColor(SWT.COLOR_DARK_BLUE);
 				}
 				return fResolvedBackground;
 			}
