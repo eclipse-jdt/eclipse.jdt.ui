@@ -10,8 +10,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.DND;
@@ -27,6 +25,9 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -34,6 +35,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.ListenerList;
@@ -56,6 +58,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.internal.model.WorkbenchAdapter;
+import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -75,12 +79,12 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
-
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
@@ -94,20 +98,21 @@ import org.eclipse.jdt.ui.actions.ShowActionGroup;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+
+
+
 
 
 /**
@@ -118,6 +123,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  */
 class JavaOutlinePage extends Page implements IContentOutlinePage {
 
+			static Object[] NO_CHILDREN= new Object[0];
+   
 			/**
 			 * The element change listener of the java outline viewer.
 			 * @see IElementChangedListener
@@ -133,7 +140,17 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					if (d != null) {
 						d.asyncExec(new Runnable() {
 							public void run() {
-								IJavaElementDelta delta= findElement( (ICompilationUnit) fInput, e.getDelta());
+								ICompilationUnit cu= (ICompilationUnit) fInput;
+								IJavaElement base= cu;
+								if (fTopLevelTypeOnly) {
+									base= getMainType(cu);
+									if (base == null) {
+										if (fOutlineViewer != null)
+											fOutlineViewer.refresh();
+										return;
+									}
+								}
+								IJavaElementDelta delta= findElement(base, e.getDelta());
 								if (delta != null && fOutlineViewer != null) {
 									fOutlineViewer.reconcile(delta);
 								}
@@ -142,7 +159,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					}
 				}
 				
-				protected IJavaElementDelta findElement(ICompilationUnit unit, IJavaElementDelta delta) {
+				protected IJavaElementDelta findElement(IJavaElement unit, IJavaElementDelta delta) {
 					
 					if (delta == null || unit == null)
 						return null;
@@ -168,6 +185,22 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					return null;
 				}
 			};
+         
+			static class NoClassElement extends WorkbenchAdapter implements IAdaptable {
+				/*
+				 * @see java.lang.Object#toString()				 */
+				public String toString() {
+					return JavaEditorMessages.getString("JavaOutlinePage.error.NoTopLevelType"); //$NON-NLS-1$
+				}
+		
+				/*
+				 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(Class)				 */
+				public Object getAdapter(Class clas) {
+					if (clas == IWorkbenchAdapter.class)
+						return this;
+					return null;
+				}
+			}
 			
 			/**
 			 * Content provider for the children of an ICompilationUnit or
@@ -175,7 +208,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			 * @see ITreeContentProvider
 			 */
 			class ChildrenProvider implements ITreeContentProvider {
-				
+            
+				private Object[] NO_CLASS= new Object[] {new NoClassElement()};
 				private ElementChangedListener fListener;
 				
 				protected boolean matches(IJavaElement element) {
@@ -216,13 +250,30 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 						try {
 							return filter(c.getChildren());
 						} catch (JavaModelException x) {
-							JavaPlugin.log(x); //$NON-NLS-1$
+							JavaPlugin.log(x);
 						}
 					}
-					return new Object[0];
+					return NO_CHILDREN;
 				}
 				
 				public Object[] getElements(Object parent) {
+					if (fTopLevelTypeOnly) {
+						if (parent instanceof ICompilationUnit) {
+							try {
+								IType type= getMainType((ICompilationUnit) parent);
+								return type != null ? type.getChildren() : NO_CLASS;
+							} catch (JavaModelException e) {
+								JavaPlugin.log(e);
+							}
+						} else if (parent instanceof IClassFile) {
+							try {
+								IType type= getMainType((IClassFile) parent);
+								return type != null ? type.getChildren() : NO_CLASS;
+							} catch (JavaModelException e) {
+								JavaPlugin.log(e);
+							}							
+						}
+					}
 					return getChildren(parent);
 				}
 				
@@ -296,9 +347,17 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				 */
 				public void reconcile(IJavaElementDelta delta) {
 					if (getSorter() == null) {
-						Widget w= findItem(fInput);
-						if (w != null && !w.isDisposed())
-							update(w, delta);
+						if (fTopLevelTypeOnly
+							&& delta.getElement() instanceof IType
+							&& (delta.getKind() & IJavaElementDelta.ADDED) != 0)
+						{
+							refresh();
+
+						} else {
+							Widget w= findItem(fInput);
+							if (w != null && !w.isDisposed())
+								update(w, delta);
+						}
 					} else {
 						// just for now
 						refresh();
@@ -623,6 +682,39 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				}
 			};
 
+		class ClassOnlyAction extends Action {
+
+			public ClassOnlyAction() {
+				super();
+				setText(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.label")); //$NON-NLS-1$
+				setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.tooltip")); //$NON-NLS-1$
+				setDescription(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.description")); //$NON-NLS-1$
+				JavaPluginImages.setLocalImageDescriptors(this, "class_obj.gif"); //$NON-NLS-1$
+
+				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+				boolean showclass= preferenceStore.getBoolean("GoIntoTopLevelTypeAction.isChecked"); //$NON-NLS-1$
+				setTopLevelTypeOnly(showclass);
+			}
+
+			/*
+			 * @see org.eclipse.jface.action.Action#run()
+			 */
+			public void run() {
+				setTopLevelTypeOnly(!fTopLevelTypeOnly);
+			}
+
+			private void setTopLevelTypeOnly(boolean show) {
+				fTopLevelTypeOnly= show;
+				setChecked(show);
+				fOutlineViewer.refresh();
+				
+				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore(); 
+				preferenceStore.setValue("GoIntoTopLevelTypeAction.isChecked", show); //$NON-NLS-1$
+			}
+		};
+
+	/** A flag to show contents of top level type only */
+	private boolean fTopLevelTypeOnly;
 			
 	private IJavaElement fInput;
 	private String fContextMenuID;
@@ -677,6 +769,39 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			}
 		};
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
+	}
+   
+	/**
+	 * Returns the primary type of a compilation unit (has the same
+	 * name as the compilation unit).
+	 * 
+	 * @param compilationUnit the compilation unit
+	 * @return returns the primary type of the compilation unit, or
+	 * <code>null</code> if is does not have one
+	 */
+	protected IType getMainType(ICompilationUnit compilationUnit) {
+		String name= compilationUnit.getElementName();
+		int index= name.indexOf('.');
+		if (index != -1)
+			name= name.substring(0, index);
+		IType type= compilationUnit.getType(name);
+		return type.exists() ? type : null;
+	}
+
+	/**
+	 * Returns the primary type of a class file.
+	 * 
+	 * @param classFile the class file
+	 * @return returns the primary type of the class file, or <code>null</code>
+	 * if is does not have one
+	 */
+	protected IType getMainType(IClassFile classFile) {
+		try {
+			IType type= classFile.getType();
+			return type.exists() ? type : null;
+		} catch (JavaModelException e) {
+			return null;	
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -734,10 +859,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private void registerToolbarActions() {
 		
 		IToolBarManager toolBarManager= getSite().getActionBars().getToolBarManager();
-		if (toolBarManager != null) {
-			
-			Action action= new LexicalSortingAction();
-			toolBarManager.add(action);
+		if (toolBarManager != null) {	
+			toolBarManager.add(new ClassOnlyAction());		
+			toolBarManager.add(new LexicalSortingAction());
 			
 			fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "JavaOutlineViewer"); //$NON-NLS-1$
 			fMemberFilterActionGroup.contributeToToolBar(toolBarManager);
