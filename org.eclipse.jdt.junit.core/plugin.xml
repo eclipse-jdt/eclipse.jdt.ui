@@ -208,14 +208,20 @@
                id="org.eclipse.debug.ui.DebugPerspective">
          </perspective>
       </shortcut>
-	</extension>
-	<extension
-		point="org.eclipse.jdt.core.classpathVariableInitializer">
-		<classpathVariableInitializer
-			variable="JUNIT_HOME"
-			class="org.eclipse.jdt.internal.junit.ui.JUnitHomeInitializer">
-		</classpathVariableInitializer>
    </extension>
-   
-
+   <extension
+         point="org.eclipse.jdt.core.classpathVariableInitializer">
+      <classpathVariableInitializer
+            variable="JUNIT_HOME"
+            class="org.eclipse.jdt.internal.junit.ui.JUnitHomeInitializer">
+      </classpathVariableInitializer>
+   </extension>
+   <extension
+      point="org.eclipse.jdt.ui.quickFixProcessors">
+   <quickFixProcessor
+         id= "org.eclipse.jdt.internal.junit.ui.JUnitQuickFixProcessor"
+         class="org.eclipse.jdt.internal.junit.ui.JUnitQuickFixProcessor"
+         name="%junitQuickFixProcessor">
+   </quickFixProcessor>
+</extension>
 </plugin>

@@ -684,7 +684,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fContainerStatus= status;
 	}
 	
-	private void addJUnitToBuildPath(IJavaProject project) throws JavaModelException {
+	public static void addJUnitToBuildPath(IJavaProject project) throws JavaModelException {
 		IPath junitHome= new Path(JUnitPlugin.JUNIT_HOME);
 		IClasspathEntry entry= JavaCore.newVariableEntry(
 			junitHome.append("junit.jar"),  //$NON-NLS-1$
