@@ -5,33 +5,54 @@
  content="text/html; charset=iso-8859-1">
   <meta name="Author" content="IBM">
   <title>JDT UI Breaking API changes</title>
+<link rel="stylesheet" href="http://dev.eclipse.org/default_style.css" type="text/css">
 </head>
 <body text="#000000" bgcolor="#ffffff">
-&nbsp;
+<font size="-2" color="#8080ff">java development tooling ui</font>
+<p>
+This document lists the breaking API changes that occurred between R3.0 and R3.1 and
+how to migrate from the R3.0 API to the R3.1 API.
+</p>
+<p></p>
 <table border="0" cellspacing="5" cellpadding="2" width="100%">
   <tbody>
     <tr>
       <td align="left" width="72%"> <font size="+3"><b>jdt ui -
-Breaking API changes from R2.1 to R3.0</b></font> <br>
-      <font size="-2" color="#8080ff">java development tooling ui</font></td>
+Breaking API changes from R3.0 to R3.1</b></font> <br>
     </tr>
 	<tr>
       <td>
       <ul>
-        <li><span style="font-weight: bold; font-style: italic;">org.eclipse.jdt.ui.actions.SelectionDispatchAction</span>:
-changed visibility of the run and selectionChanged methods from
-protected to public (see bug for&nbsp;<a
- href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=37846">37846</a>
-details). As an effect subclasses reimplementing one of the run or
-selectionChanged methods will not compile anymore. To fix the compile
-errors make the corresponding methods in the subclasses public as well.</li>
       </ul>
       </td>
     </tr>
+  </tbody>
+</table>
+<p> </p>
+<table border="0" cellspacing="5" cellpadding="2" width="100%">
+  <tbody>
     <tr>
-	<td> 	 <font size="-1"> 	  This document lists the breaking API
-changes that occurred between R2.1 and R3.0 and how to migrate from the
-R2.1 API to 	  the R3.0 API. 	 </font> 	</td>
+      <td align="left" width="72%"> <font size="+3"><b>jdt ui -
+Non-breaking API changes from R3.0 to R3.1</b></font> <br>
+    </tr>
+	<tr>
+      <td>
+      <ul>
+        <li><span style="font-weight: bold; font-style: italic;">org.eclipse.jdt.ui.PreferenceConstants</span>:
+        	<ul>
+        		<li>The Java editor hyperlinking has been generalized and pushed down to Platform Text. For that reason
+        			the following constants are now deprecated and should be replaced with the new one. The JDT UI
+        			preference store will return the default-default value for those deprecated constants.
+	        		<ul>
+		        		<li><code>EDITOR_LINK_COLOR</code>, replaced by <code>AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINK_COLOR</code></li>
+		        		<li><code>EDITOR_BROWSER_LIKE_LINKS</code>, replaced by <code>AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINKS_ENABLED</code></li>
+		        		<li><code>EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER</code>, replaced by <code>AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINK_KEY_MODIFIER</code></li>
+		        		<li><code>EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK</code>, replaced by <code>AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINK_KEY_MODIFIER_MASK</code></li>
+					</ul>
+				</li>
+			</ul>
+      </ul>
+      </td>
     </tr>
   </tbody>
 </table>
