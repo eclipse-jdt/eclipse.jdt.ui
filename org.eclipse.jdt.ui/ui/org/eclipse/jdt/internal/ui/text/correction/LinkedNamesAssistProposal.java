@@ -114,14 +114,14 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		return "Linked rename";
+		return CorrectionMessages.getString("LinkedNamesAssistProposal.proposalinfo"); //$NON-NLS-1$
 	}
 
 	/*
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return "Rename";
+		return CorrectionMessages.getString("LinkedNamesAssistProposal.description"); //$NON-NLS-1$
 	}
 
 	/*
