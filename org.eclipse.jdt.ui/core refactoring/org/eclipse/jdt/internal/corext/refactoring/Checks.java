@@ -370,7 +370,7 @@ public class Checks {
 	public static IMethod findMethod(IMethod method, IType type) throws JavaModelException {
 		return findMethod(method.getElementName(), method.getParameterTypes().length, method.isConstructor(), type.getMethods());
 	}
-	
+
 	/**
 	 * Finds a method in an array of methods
 	 * This searches for a method with the same name and signature. Parameter types are only
@@ -394,7 +394,21 @@ public class Checks {
 		}
 		return null;
 	}
-	
+
+	public static IMethod findSimilarMethod(IMethod method, IType type) throws JavaModelException {
+		return findSimilarMethod(method, type.getMethods());
+	}
+
+	public static IMethod findSimilarMethod(IMethod method, IMethod[] methods) throws JavaModelException {
+		boolean isConstructor= method.isConstructor();
+		for (int i= 0; i < methods.length; i++) {
+			IMethod otherMethod= methods[i];
+			if (otherMethod.isConstructor() == isConstructor && method.isSimilar(otherMethod))
+				return otherMethod;
+		}
+		return null;
+	}
+				
 	/*
 	 * Compare two parameter signatures
 	 */
