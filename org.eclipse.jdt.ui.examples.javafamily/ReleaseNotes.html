@@ -1,21 +1,17 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-  <meta http-equiv="Content-Type"
- content="text/html; charset=iso-8859-1">
-  <title>Javafamily Release Notes</title>
-</head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"><title>Javafamily Release Notes</title></head>
+
 <body>
 <h1 style="text-align: left;">Release Notes</h1>
 Daniel Megert, Andre; Weinand<br>
 June 15, 2003<br>
 <br>
-The javafamily plugin is a collection of prototypes that illustrate how
+The javafamily plug-in is a collection of prototypes that illustrate how
 the existing (mostly Java) infrastructure can be extended to support
 Java-like languages like JSP. Since this is a first cut, the project
 still contains a number of workarounds and duplications. However, it is
 our ultimate goal to eliminate all of these in order to make
-supportinmg Java-like languages smooth and simple.<br>
+supporting Java-like languages smooth and simple.<br>
 <br>
 This initial release contains:<br>
 <ul>
@@ -177,11 +173,8 @@ IProgressMonitor progressMonitor, int waitingPolicy);<br>
 <h4>Search query: interface <code>IIndexQuery</code></h4>
 An IIndexQuery is used to perform a query against the searching
 framework.<br>
-<pre>/**<br>&nbsp;* Compute the list of paths which are keying index files and add them to the given list.<br>&nbsp;*/<br>void <span
- style="font-weight: bold;">computePathsKeyingIndexFiles</span>(ArrayList requiredIndexKeys);<br></pre>
-<pre>/**<br>&nbsp;* Perform the query on the given index and adds the paths of all found documents to the given collector.<br> */<br>void <span
- style="font-weight: bold;">findIndexMatches</span>(IIndex index, PathCollector collector, IProgressMonitor progressMonitor) throws IOException;<br><br>/**<br>&nbsp;* Locate all matches of this query in the given file candidate and return them via the resultcollector. <br>&nbsp;*/<br>void <span
- style="font-weight: bold;">locateMatches</span>(IFile candidate, ISearchResultCollector resultCollector);</pre>
+<pre>/**<br>&nbsp;* Compute the list of paths which are keying index files and add them to the given list.<br>&nbsp;*/<br>void <span style="font-weight: bold;">computePathsKeyingIndexFiles</span>(ArrayList requiredIndexKeys);<br></pre>
+<pre>/**<br>&nbsp;* Perform the query on the given index and adds the paths of all found documents to the given collector.<br> */<br>void <span style="font-weight: bold;">findIndexMatches</span>(IIndex index, PathCollector collector, IProgressMonitor progressMonitor) throws IOException;<br><br>/**<br>&nbsp;* Locate all matches of this query in the given file candidate and return them via the resultcollector. <br>&nbsp;*/<br>void <span style="font-weight: bold;">locateMatches</span>(IFile candidate, ISearchResultCollector resultCollector);</pre>
 <h4>Search results: interface <code>ISearchResultCollector</code></h4>
 <ul>
   <li>search results reported via ISearchResultCollector</li>
@@ -210,7 +203,7 @@ the buffer and not in the underlying resource. Two options to make
 buffers available to SearchEngine:</li>
   <ul>
     <li>&nbsp; as argument to search(...) method</li>
-    <li>&nbsp; whenver buffer is created or deleted it is registered
+    <li>&nbsp; whenever buffer is created or deleted it is registered
 with the SearchEngine</li>
   </ul>
   <li>No common abstraction for the "content" being indexed:<br>
@@ -222,5 +215,4 @@ content access.</li>
 </ul>
 <br>
 <br>
-</body>
-</html>
+</body></html>
