@@ -99,7 +99,7 @@ public class SelectionConverter {
 		IJavaElement input= getInput(editor);
 		ITextSelection selection= (ITextSelection)editor.getSelectionProvider().getSelection();
 		IJavaElement[] result= codeResolve(input, selection);
-		if (result.length == 0 && selection.getLength() == 0) {
+		if (result.length == 0) {
 			result= new IJavaElement[] {input};
 		}
 		return result;
