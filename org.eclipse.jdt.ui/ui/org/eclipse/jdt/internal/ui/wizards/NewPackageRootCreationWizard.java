@@ -20,7 +20,7 @@ public class NewPackageRootCreationWizard extends NewElementWizard {
 
 	public NewPackageRootCreationWizard() {
 		super();
-		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(NewWizardMessages.getString("NewPackageRootCreationWizard.title")); //$NON-NLS-1$
 	}
