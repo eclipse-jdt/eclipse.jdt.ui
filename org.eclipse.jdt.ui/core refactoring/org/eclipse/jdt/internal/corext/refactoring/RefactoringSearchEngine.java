@@ -137,4 +137,19 @@ public class RefactoringSearchEngine {
 		else 	
 			return  new SearchEngine(workingCopies);
 	}
+	
+	public static ISearchPattern createSearchPattern(IJavaElement[] elements, int limitTo) {
+		if (elements == null || elements.length == 0)
+			return null;
+		ISearchPattern pattern= createSearchPattern(elements[0], limitTo);
+		for (int i= 1; i < elements.length; i++) {
+			pattern= SearchEngine.createOrSearchPattern(pattern, createSearchPattern(elements[i], limitTo));
+		}
+		return pattern;
+	}
+
+	private static ISearchPattern createSearchPattern(IJavaElement element, int limitTo) {
+		return SearchEngine.createSearchPattern(element, limitTo);
+	}
+	
 }
