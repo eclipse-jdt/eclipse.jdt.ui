@@ -192,6 +192,14 @@ public class InlineConstantTests extends RefactoringTest {
 	public void test13() throws Exception {
 		helper1(new String[] {"p1.A", "p2.InlineSite"}, "p2.InlineSite", 8, 19, 8, 29, false, false);
 	}
+	
+	public void test14() throws Exception {
+		helper1("cantonzuerich.GrueziWohl", 7, 35, 7, 35, true, false);
+	}
+	
+	public void test15() throws Exception {
+		helper1("schweiz.zuerich.zuerich.Froehlichkeit", 14, 16, 14, 32, true, false);
+	}
 		
 	// -- testing failing preconditions
 	public void testFail0() throws Exception {

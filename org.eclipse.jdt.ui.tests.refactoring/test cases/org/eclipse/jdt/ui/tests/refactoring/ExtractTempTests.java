@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
@@ -78,15 +79,21 @@ public class ExtractTempTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength(), 
-																									JavaPreferencesSettings.getCodeGenerationSettings());
-		
+		                                                       JavaPreferencesSettings.getCodeGenerationSettings());
+																
+		RefactoringStatus activationResult= ref.checkActivation(new NullProgressMonitor());	
+		assertTrue("activation was supposed to be successful", activationResult.isOK());																
+																									
 		ref.setReplaceAllOccurrences(replaceAll);
 		ref.setDeclareFinal(makeFinal);
 		ref.setTempName(tempName);
 
-		RefactoringStatus result= performRefactoring(ref);
-		assertEquals("precondition was supposed to pass", null, result);
 		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempName());
+
+		RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass", checkInputResult.isOK());
+	
+		performChange(ref.createChange(new NullProgressMonitor()));
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
@@ -355,7 +362,23 @@ public class ExtractTempTests extends RefactoringTest {
 //		printTestDisabledMessage("test for bug#26036");
 		helper1(15, 47, 15, 60, true, false, "valueOnIndexI");
 	}
+
+	public void test53() throws Exception{
+		helper1(6, 17, 6, 22, true, false, "temp");
+	}
 	
+	public void test54() throws Exception{
+		helper1(6, 37, 6, 43, true, false, "temp");
+	}
+
+	public void test55() throws Exception{
+		helper1(6, 19, 6, 24, true, false, "temp");
+	}
+	
+	public void test56() throws Exception{
+		helper1(6, 24, 6, 29, true, false, "temp");
+	}	
+		
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
 		failHelper1(5, 16, 5, 17, false, false, "temp", RefactoringStatus.ERROR);

@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
@@ -81,17 +82,21 @@ public class ExtractConstantTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractConstantRefactoring ref= new ExtractConstantRefactoring(cu, selection.getOffset(), selection.getLength(), 
 																									JavaPreferencesSettings.getCodeGenerationSettings());
+		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());
+		assertTrue("activation was supposed to be successful", preconditionResult.isOK());
+
+		if(!allowLoadtime)
+			assertTrue("The selected expression has been erroneously reported to contain references to non-static or non-final fields.", ref.selectionAllStaticFinal());		
 		
 		ref.setReplaceAllOccurrences(replaceAll);
 		ref.setConstantName(constantName);
 
-		RefactoringStatus result= performRefactoring(ref);
-		
-		if(!allowLoadtime)
-			assertTrue("The selected expression has been erroneously reported to contain references to non-static or non-final fields.", ref.selectionAllStaticFinal());
-		
-		assertEquals("precondition was supposed to pass", null, result);
 		assertEquals("constant name incorrectly guessed", guessedConstantName, ref.guessConstantName());
+
+		RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
+		
+		performChange(ref.createChange(new NullProgressMonitor()));
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);

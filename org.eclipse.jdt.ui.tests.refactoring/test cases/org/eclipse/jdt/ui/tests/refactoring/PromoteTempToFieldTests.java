@@ -22,7 +22,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
-public class PromoteTempToFieldTests extends RefactoringTest{
+
+public class PromoteTempToFieldTests extends RefactoringTest{
 	
 	private static final Class clazz= PromoteTempToFieldTests.class;
 	private static final String REFACTORING_PATH= "PromoteTempToField/";
@@ -106,10 +107,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
         PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength());
 
-		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());	
-		if (preconditionResult.isOK())
-			preconditionResult= null;
-		assertEquals("activation was supposed to be successful", null, preconditionResult);
+		RefactoringStatus activationResult= ref.checkActivation(new NullProgressMonitor());	
+		assertTrue("activation was supposed to be successful", activationResult.isOK());
 
         ref.setFieldName(newName);
         ref.setDeclareFinal(declareFinal);
@@ -117,13 +116,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
         ref.setInitializeIn(initializeIn);
         ref.setVisibility(accessModifier);
 		
-		if (preconditionResult == null)
-			preconditionResult= ref.checkInput(new NullProgressMonitor());
-		else	
-			preconditionResult.merge(ref.checkInput(new NullProgressMonitor()));
-		if (preconditionResult.isOK())
-			preconditionResult= null;
-		assertEquals("precondition was supposed to pass", null, preconditionResult);
+		RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass", checkInputResult.isOK());
 
 		performChange(ref.createChange(new NullProgressMonitor()));
         		

@@ -6,6 +6,6 @@ import p3.C;
 
 public class A {
 	void f() {
-		int j= 4 * 4*C.BEGRIFF + p3.C.BEGRIFF + 1;	
+		int j= 4 * (4*C.BEGRIFF + p3.C.BEGRIFF) + 1;	
 	}	
 }
