@@ -181,6 +181,9 @@ public abstract class BlockCommentAction extends TextEditorAction {
 		if (!isValidSelection(selection))
 			return;
 		
+		if (!validateEdit())
+			return;
+		
 		IDocumentProvider docProvider= editor.getDocumentProvider();
 		IEditorInput input= editor.getEditorInput();
 		if (docProvider == null || input == null)
@@ -260,7 +263,7 @@ public abstract class BlockCommentAction extends TextEditorAction {
 		super.update();
 		
 		if (isEnabled()) {
-			if (!isValidSelection(getCurrentSelection()))
+			if (!canModifyEditor() || !isValidSelection(getCurrentSelection()))
 				setEnabled(false);
 		}
 	}

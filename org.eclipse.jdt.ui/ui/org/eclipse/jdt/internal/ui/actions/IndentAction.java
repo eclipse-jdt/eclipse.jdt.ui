@@ -77,7 +77,7 @@ public class IndentAction extends TextEditorAction {
 	 */
 	public void run() {
 		// update has been called by the framework
-		if (!isEnabled())
+		if (!isEnabled() || !validateEdit())
 			return;
 		
 		ITextSelection selection= getSelection();
@@ -250,7 +250,7 @@ public class IndentAction extends TextEditorAction {
 		super.update();
 		
 		if (isEnabled())
-			setEnabled(!getSelection().isEmpty());
+			setEnabled(canModifyEditor() && !getSelection().isEmpty());
 	}
 	
 	/**
