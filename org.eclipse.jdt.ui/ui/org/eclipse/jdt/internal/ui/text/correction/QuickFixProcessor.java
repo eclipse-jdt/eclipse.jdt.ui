@@ -147,6 +147,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidOperator:
 			case IProblem.MissingSerialVersion:
 			case IProblem.UnnecessaryElse:
+			case IProblem.SuperclassMustBeAClass:
 				return true;
 			default:
 				return false;
@@ -415,6 +416,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnnecessaryElse:
 				LocalCorrectionsSubProcessor.getUnnecessaryElseProposals(context, problem, proposals);
 				break;
+			case IProblem.SuperclassMustBeAClass:
+				LocalCorrectionsSubProcessor.getInterfaceExtendsClassProposals(context, problem, proposals);
 			default:
 		}
 	}

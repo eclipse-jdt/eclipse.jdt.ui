@@ -688,5 +688,46 @@ public class LocalCorrectionsSubProcessor {
 		proposals.add(proposal);
 	}
 
+
+	public static void getInterfaceExtendsClassProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		CompilationUnit root= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(root);
+		if (selectedNode == null) {
+			return;
+		}
+		while (selectedNode.getParent() instanceof Type) {
+			selectedNode= selectedNode.getParent();
+		}
+		
+		StructuralPropertyDescriptor locationInParent= selectedNode.getLocationInParent();
+		if (locationInParent != TypeDeclaration.SUPERCLASS_TYPE_PROPERTY) {
+			return;
+		}
+		
+		TypeDeclaration typeDecl= (TypeDeclaration) selectedNode.getParent();
+		{
+			ASTRewrite rewrite= ASTRewrite.create(root.getAST());
+			ASTNode placeHolder= rewrite.createMoveTarget(selectedNode);
+			ListRewrite interfaces= rewrite.getListRewrite(typeDecl, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
+			interfaces.insertFirst(placeHolder, null);
+			
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.extendstoimplements.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image); //$NON-NLS-1$
+			proposals.add(proposal);
+		}
+		{
+			ASTRewrite rewrite= ASTRewrite.create(root.getAST());
+			
+			rewrite.set(typeDecl, TypeDeclaration.INTERFACE_PROPERTY, Boolean.TRUE, null);
+			
+			String typeName= typeDecl.getName().getIdentifier();
+			String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.classtointerface.description", typeName); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 3, image); //$NON-NLS-1$
+			proposals.add(proposal);
+		}
+	}
+
 	
 }
