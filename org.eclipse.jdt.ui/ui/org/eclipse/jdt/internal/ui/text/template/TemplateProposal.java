@@ -4,17 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.text.template;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
+import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.changes.TextBuffer;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DefaultLineTracker;
-import org.eclipse.jface.text.GapTextStore;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ILineTracker;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
@@ -63,11 +61,9 @@ public class TemplateProposal implements ICompletionProposal {
 
 		String pattern= fTemplate.getPattern();
 
+		// interpolate
 		pattern= fInterpolator.interpolate(pattern, fArgumentEvaluator);		
 		pattern= fInterpolator.interpolate(pattern, fLocalVariableEvaluator);
-		
-		pattern= indent(pattern, indentationLevel);
-
 		fCursorSelectionEvaluator.reset();
 		pattern= fInterpolator.interpolate(pattern, fCursorSelectionEvaluator);
 
@@ -77,13 +73,49 @@ public class TemplateProposal implements ICompletionProposal {
 			fSelectionStart= pattern.length();
 			fSelectionEnd= fSelectionStart;
 		} else {		
-			fSelectionStart= fCursorSelectionEvaluator.getStart();
+			fSelectionStart= start;
 			fSelectionEnd= fCursorSelectionEvaluator.getEnd();			
 		}
+
+		boolean format= TemplatePreferencePage.useCodeFormatter();
+		if (format) {
+			CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
+			formatter.setPositionsToMap(new int[] {fSelectionStart, fSelectionEnd});
+			formatter.setInitialIndentationLevel(indentationLevel);
+
+			pattern= formatter.formatSourceString(pattern);
+			
+			int[] positions= formatter.getMappedPositions();
+			fSelectionStart= positions[0];
+			fSelectionEnd= positions[1];
+		} else {
+			CodeIndentator indentator= new CodeIndentator();
+			indentator.setPositionsToMap(new int[] {fSelectionStart, fSelectionEnd});
+			indentator.setIndentationLevel(indentationLevel);
+			
+			pattern= indentator.indentate(pattern);
+
+			int[] positions= indentator.getMappedPositions();
+			fSelectionStart= positions[0];
+			fSelectionEnd= positions[1];	
+		}
+
+		// strip indentation on first line
+		String finalString= trimBegin(pattern);
+		int charactersRemoved= pattern.length() - finalString.length();
+		fSelectionStart -= charactersRemoved;
+		fSelectionEnd -= charactersRemoved;
 		
 		try {
-			document.replace(fStart, fEnd - fStart, pattern);
+			document.replace(fStart, fEnd - fStart, finalString);
 		} catch (BadLocationException x) {} // ignore
+	}
+	
+	private static String trimBegin(String string) {
+		int i= 0;
+		while ((i != string.length()) && Character.isWhitespace(string.charAt(i)))
+			i++;
+		return string.substring(i);
 	}
 
 	/**
@@ -132,52 +164,6 @@ public class TemplateProposal implements ICompletionProposal {
 		return TextUtilities.getIndent(line, CodeFormatterPreferencePage.getTabSize());
 	}
 
-	private static String indent(String string, int indentationLevel) {
-		StringBuffer buffer = new StringBuffer(string.length());
-		
-		String indentation= TextUtilities.createIndentString(indentationLevel);
-		String[] lines= splitIntoLines(string);		
-
-		buffer.append(lines[0]);
-		for (int i= 1; i != lines.length; i++) {
-			buffer.append(indentation);
-			buffer.append(lines[i]);
-		}
-		
-		return buffer.toString();		
-	}
-	
-	private static String[] splitIntoLines(String text) {
-		try {
-			ITextStore store= new GapTextStore(0, 1);
-			store.set(text);
-			
-			ILineTracker tracker= new DefaultLineTracker();
-			tracker.set(text);
-			
-			int size= tracker.getNumberOfLines();
-			String result[]= new String[size];
-			for (int i= 0; i < size; i++) {
-				String lineDelimiter= null;
-				try {
-					lineDelimiter= tracker.getLineDelimiter(i);
-				} catch (BadLocationException e) {}
-				
-				IRegion region= tracker.getLineInformation(i);
-				
-				if (lineDelimiter == null) {
-					result[i]= store.get(region.getOffset(), region.getLength());
-				} else {
-					result[i]= store.get(region.getOffset(), region.getLength()) +
-						lineDelimiter;
-				}
-			}
-			return result;
-		} catch (BadLocationException e) {
-			return null;
-		}
-	}
-	
 	private static String textToHTML(String string) {
 		StringBuffer buffer= new StringBuffer(string.length());
 		buffer.append("<pre>"); // $NON-NLS-1$

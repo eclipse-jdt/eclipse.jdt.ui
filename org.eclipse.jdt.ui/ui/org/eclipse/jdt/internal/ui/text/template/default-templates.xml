@@ -65,7 +65,7 @@ All Rights Reserved.
 
   <template description="instanceof(object, type)" name="instanceof" context="java"
 >if (${0} instanceof ${1}) {
-	${1} ${cursor}description${cursor-end}= (${1}) ${0};
+	${1} ${cursor}name${cursor-end}= (${1}) ${0};
 	
 }</template>
 
@@ -74,7 +74,7 @@ All Rights Reserved.
 
   <template description="copyright information" name="copyright" context="java"
 >/*
- * (c) Copyright ${cursor}IBM${cursor-end} Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
 </template>

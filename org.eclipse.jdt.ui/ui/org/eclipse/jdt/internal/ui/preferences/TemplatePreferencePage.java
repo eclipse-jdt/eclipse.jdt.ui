@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.text.template.Template;
@@ -14,20 +15,22 @@ import org.eclipse.jdt.internal.ui.text.template.TemplateLabelProvider;
 import org.eclipse.jdt.internal.ui.text.template.TemplateMessages;
 import org.eclipse.jdt.internal.ui.text.template.TemplateSet;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jface.dialogs.ControlEnableState;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
@@ -45,6 +48,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
@@ -55,18 +60,19 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 public class TemplatePreferencePage	extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private CheckboxTableViewer fTableViewer;
+	// preference store keys
+	private static final String PREF_FORMAT_TEMPLATES= JavaUI.ID_PLUGIN + ".template.format"; //$NON-NLS-1$
+
+	private /*Checkbox*/ TableViewer fTableViewer;
 	private Button fAddButton;
 	private Button fRemoveButton;
-	private Label fNameLabel;
-	private Label fDescriptionLabel;
-	private Label fContextLabel;
-	private Label fPatternLabel;
 	private Group fEditor;
 	private Text fNameText;
 	private Text fDescriptionText;
 	private Combo fContextCombo;
 	private SourceViewer fPatternEditor;
+	private Button fFormatButton;
+	private ControlEnableState fEditorEnabler;
 	
 	private List fEditorComponents;
 	
@@ -74,6 +80,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	
 	public TemplatePreferencePage() {
 		super();
+		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(TemplateMessages.getString("TemplatePreferencePage.message")); //$NON-NLS-1$
 	}
 
@@ -84,10 +91,26 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		Composite parent= new Composite(ancestor, SWT.NULL);
 
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		
 		parent.setLayout(layout);		
-				
-		fTableViewer= new CheckboxTableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+
+		TabFolder folder= new TabFolder(parent, SWT.NONE);
+		folder.setLayout(new TabFolderLayout());	
+		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		Composite firstPage= new Composite(folder, SWT.NONE);
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		firstPage.setLayout(layout);		
+		
+		TabItem item= new TabItem(folder, SWT.NONE);
+		item.setText(TemplateMessages.getString("TemplatePreferencePage.tab.edit")); //$NON-NLS-1$
+		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
+		item.setControl(firstPage);
+		
+		fTableViewer= new /*Checkbox*/ TableViewer(firstPage, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		Table table= fTableViewer.getTable();
 		
 		GridData data= new GridData(GridData.FILL_BOTH);
@@ -101,7 +124,8 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		TableLayout tableLayout= new TableLayout();
 		table.setLayout(tableLayout);
 		
-		TableColumn column1= table.getColumn(0);
+		TableColumn column1= new TableColumn(table, SWT.NULL);
+//		TableColumn column1= table.getColumn(0);
 		column1.setText(TemplateMessages.getString("TemplatePreferencePage.column.name")); //$NON-NLS-1$
 	
 		TableColumn column2= new TableColumn(table, SWT.NULL);
@@ -136,7 +160,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 				selectionChanged1();
 			}
 		});
-
+/*
 		fTableViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				Template template=  (Template) event.getElement();
@@ -144,8 +168,8 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 				fTableViewer.setCheckedElements(new Object[] {template});
 			}
 		});
-
-		Composite buttons= new Composite(parent, SWT.NULL);
+*/
+		Composite buttons= new Composite(firstPage, SWT.NULL);
 		buttons.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -170,14 +194,14 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			}
 		});
 
-		fEditor= new Group(parent, SWT.NULL);
+		fEditor= new Group(firstPage, SWT.NULL);
 		fEditor.setText(TemplateMessages.getString("TemplatePreferencePage.editor")); //$NON-NLS-1$
 		fEditor.setLayoutData(new GridData(GridData.FILL_BOTH));
 		layout= new GridLayout();
 		layout.numColumns= 2;
 		fEditor.setLayout(layout);
 
-		fNameLabel= createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.name")); //$NON-NLS-1$
+		createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.name")); //$NON-NLS-1$
 		
 		Composite composite= new Composite(fEditor, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -199,7 +223,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			}
 		});
 
-		fContextLabel= createLabel(composite, TemplateMessages.getString("TemplatePreferencePage.context")); //$NON-NLS-1$		
+		createLabel(composite, TemplateMessages.getString("TemplatePreferencePage.context")); //$NON-NLS-1$		
 		fContextCombo= new Combo(composite, SWT.READ_ONLY);
 		fContextCombo.setItems(new String[] {"java", "javadoc"}); //$NON-NLS-1$ //$NON-NLS-2$
 		fContextCombo.addModifyListener(new ModifyListener() {
@@ -212,7 +236,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			}
 		});
 		
-		fDescriptionLabel= createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.description")); //$NON-NLS-1$		
+		createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.description")); //$NON-NLS-1$		
 		fDescriptionText= createText(fEditor);
 		fDescriptionText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -224,8 +248,8 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			}
 		});
 
-		fPatternLabel= createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.pattern")); //$NON-NLS-1$
-		fPatternLabel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
+		Label patternLabel= createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.pattern")); //$NON-NLS-1$
+		patternLabel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		fPatternEditor= createEditor(fEditor);
 		StyledText text= fPatternEditor.getTextWidget();
 		text.addModifyListener(new ModifyListener() {
@@ -236,6 +260,22 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 				fCurrent.setPattern(fPatternEditor.getTextWidget().getText());				
 			}
 		});
+
+		Composite secondPage= new Composite(folder, SWT.NONE);
+		layout= new GridLayout();
+		layout.numColumns= 1;
+		secondPage.setLayout(layout);		
+
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(TemplateMessages.getString("TemplatePreferencePage.tab.options")); //$NON-NLS-1$
+		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
+		item.setControl(secondPage);
+				
+		fFormatButton= new Button(secondPage, SWT.CHECK);
+		fFormatButton.setText(TemplateMessages.getString("TemplatePreferencePage.use.code.formatter")); //$NON-NLS-1$
+
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		fFormatButton.setSelection(prefs.getBoolean(PREF_FORMAT_TEMPLATES));
 		
 		fTableViewer.setInput(TemplateSet.getInstance());
 		updateButtons();
@@ -326,17 +366,9 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		fDescriptionText.setText(template.getDescription());
 		fContextCombo.select(getIndex(template.getContext()));
 		fPatternEditor.getDocument().set(template.getPattern());
-		
-		fEditor.setEnabled(true);
-		fNameLabel.setEnabled(true);
-		fDescriptionLabel.setEnabled(true);
-		fContextLabel.setEnabled(true);
-		fPatternLabel.setEnabled(true);
-		
-		fNameText.setEnabled(true);
-		fDescriptionText.setEnabled(true);
-		fContextCombo.setEnabled(true);
-		fPatternEditor.getTextWidget().setEnabled(true);			
+
+		if (fEditorEnabler != null)
+			fEditorEnabler.restore();	
 	}
 	
 	private void leaveEditor() {
@@ -347,16 +379,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		fContextCombo.select(getIndex("")); //$NON-NLS-1$
 		fPatternEditor.getDocument().set(""); //$NON-NLS-1$
 
-		fEditor.setEnabled(false);
-		fNameLabel.setEnabled(false);
-		fDescriptionLabel.setEnabled(false);
-		fContextLabel.setEnabled(false);
-		fPatternLabel.setEnabled(false);
-		
-		fNameText.setEnabled(false);
-		fDescriptionText.setEnabled(false);
-		fContextCombo.setEnabled(false);
-		fPatternEditor.getTextWidget().setEnabled(false);
+		fEditorEnabler= ControlEnableState.disable(fEditor);		
 	}
 	
 	private void add() {
@@ -401,6 +424,9 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		fFormatButton.setSelection(prefs.getDefaultBoolean(PREF_FORMAT_TEMPLATES));
+
 		TemplateSet.getInstance().restoreDefaults();		
 		fTableViewer.refresh();
 	}
@@ -409,7 +435,11 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	 * @see PreferencePage#performOk()
 	 */	
 	public boolean performOk() {
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		prefs.setValue(PREF_FORMAT_TEMPLATES, fFormatButton.getSelection());
+
 		TemplateSet.getInstance().save();
+		
 		return super.performOk();
 	}	
 	
@@ -419,6 +449,19 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	public boolean performCancel() {
 		TemplateSet.getInstance().reset();
 		return super.performCancel();
-	}	
+	}
+	
+	/**
+	 * Initializes the default values of this page in the preference bundle.
+	 * Will be called on startup of the JavaPlugin
+	 */
+	public static void initDefaults(IPreferenceStore prefs) {
+		prefs.setDefault(PREF_FORMAT_TEMPLATES, true);
+	}
 
+	public static boolean useCodeFormatter() {
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		return prefs.getBoolean(PREF_FORMAT_TEMPLATES);
+	}
+	
 }
