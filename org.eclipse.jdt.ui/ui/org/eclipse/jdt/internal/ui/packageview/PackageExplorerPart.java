@@ -383,9 +383,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (fMemento != null)
 			restoreState(fMemento);
 		fMemento= null;
+
 		// Set help for the view 
-		// fixed for 1GETAYN: ITPJUI:WIN - F1 help does nothing
-		WorkbenchHelp.setHelp(fViewer.getControl(), IJavaHelpContextIds.PACKAGE_VIEW);
+		WorkbenchHelp.setHelp(fViewer.getControl(), IJavaHelpContextIds.MEMBERS_VIEW);
 		
 		fillActionBars();
 
@@ -1264,13 +1264,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 *
 	 * @param decorator a label decorator or <code>null</code> for no decorations.
 	 */
-	public void setLabelDecorator(ILabelDecorator decorator) {
-		fJavaElementLabelProvider= new PackageExplorerLabelProvider();
-		if (decorator == null)
-			fViewer.setLabelProvider(fJavaElementLabelProvider);
-		else
-			fViewer.setLabelProvider(new DecoratingLabelProvider(fJavaElementLabelProvider, decorator));
-	}
+//	public void setLabelDecorator(ILabelDecorator decorator) {
+//		fJavaElementLabelProvider= new PackageExplorerLabelProvider();
+//		if (decorator == null)
+//			fViewer.setLabelProvider(fJavaElementLabelProvider);
+//		else
+//			fViewer.setLabelProvider(new DecoratingLabelProvider(fJavaElementLabelProvider, decorator));
+//	}
 	
 	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
