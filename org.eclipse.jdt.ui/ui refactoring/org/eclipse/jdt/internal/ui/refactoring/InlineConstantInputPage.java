@@ -45,15 +45,16 @@ public class InlineConstantInputPage extends UserInputWizardPage {
 		fInlineMode.setLayout(new GridLayout());
 		fInlineMode.setText("Inline");
 		
-		Button radio= new Button(fInlineMode, SWT.RADIO);
-		radio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		radio.setText("All references");
-		radio.setSelection(fRefactoring.getReplaceAllReferences());
-		radio.addSelectionListener(new SelectionAdapter() {
+		final Button all= new Button(fInlineMode, SWT.RADIO);
+		all.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		all.setText("&All references");
+		all.setSelection(fRefactoring.getReplaceAllReferences());
+		all.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
+			    if (! all.getSelection())
+			    	return;
 				fRemove.setEnabled(true);
-				if (((Button)event.widget).getSelection())
-					fRefactoring.setReplaceAllReferences(true);
+				fRefactoring.setReplaceAllReferences(true);
 			}
 		});
 
@@ -61,30 +62,36 @@ public class InlineConstantInputPage extends UserInputWizardPage {
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalIndent= convertWidthInCharsToPixels(3);
 		fRemove.setLayoutData(gd);
-		fRemove.setText("Delete constant declaration");
-		fRemove.setEnabled(radio.getSelection());
+		fRemove.setText("&Delete constant declaration");
+		fRemove.setEnabled(all.getSelection());
 		fRemove.setSelection(fRefactoring.getRemoveDeclaration());
 		fRemove.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				fRefactoring.setRemoveDeclaration(((Button)e.widget).getSelection());
+			    fRefactoring.setRemoveDeclaration(fRemove.getSelection());
 			}
 		});
 
 		
-		radio= new Button(fInlineMode, SWT.RADIO);
-		radio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		radio.setText("Only the selected reference");
-		radio.setSelection(!fRefactoring.getReplaceAllReferences());
-		radio.setEnabled(!fRefactoring.isDeclarationSelected());
-		radio.addSelectionListener(new SelectionAdapter() {
+		final Button onlySelected= new Button(fInlineMode, SWT.RADIO);
+		onlySelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		onlySelected.setText("&Only the selected reference");
+		onlySelected.setSelection(!fRefactoring.getReplaceAllReferences());
+		onlySelected.setEnabled(!fRefactoring.isDeclarationSelected());
+		onlySelected.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
+			    if (! onlySelected.getSelection())
+			        return;
 				fRemove.setSelection(false);
 				fRemove.setEnabled(false);
-				if (((Button)event.widget).getSelection())
-					fRefactoring.setReplaceAllReferences(true);
+			    fRefactoring.setRemoveDeclaration(false);
+				fRefactoring.setReplaceAllReferences(false);
 			}
 		});		
 	}
+
+    private void updateRemoveDeclarationState() {
+        fRefactoring.setRemoveDeclaration(fRemove.getSelection());
+    }
 	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#restoreMessage()
