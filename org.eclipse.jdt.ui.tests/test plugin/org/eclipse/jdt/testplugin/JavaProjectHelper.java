@@ -342,12 +342,15 @@ public class JavaProjectHelper {
 
 	/**
 	 * Sets autobuilding state for the test workspace.
-	 */	public static void setAutoBuilding(boolean state) throws CoreException {
+	 */
+	public static boolean setAutoBuilding(boolean state) throws CoreException {
 		// disable auto build
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IWorkspaceDescription desc= workspace.getDescription();
+		boolean result= desc.isAutoBuilding();
 		desc.setAutoBuilding(state);
 		workspace.setDescription(desc);
+		return result;
 	}
 
 	public static void addToClasspath(IJavaProject jproject, IClasspathEntry cpe) throws JavaModelException {
@@ -426,6 +429,30 @@ public class JavaProjectHelper {
 		public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
 		}
 	}
-	
+
+	/**
+	 * Adds a source container to a IJavaProject and imports all files contained
+	 * in the given Zip file.
+	 */		
+	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile) throws InvocationTargetException, CoreException, IOException {
+		return addSourceContainerWithImport(jproject, containerName, zipFile, new Path[0]);
+	}
+
+	/**
+	 * Adds a source container to a IJavaProject and imports all files contained
+	 * in the given Zip file.
+	 */		
+	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile, IPath[] exclusionFilters) throws InvocationTargetException, CoreException, IOException {
+		ZipFile file= new ZipFile(zipFile);
+		try {
+			IPackageFragmentRoot root= addSourceContainer(jproject, containerName, exclusionFilters);
+			importFilesFromZip(file, root.getPath(), null);
+			return root;
+		} finally {
+			if (file != null) {
+				file.close();
+			}
+		}
+	}
 }
 

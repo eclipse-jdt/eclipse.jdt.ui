@@ -14,8 +14,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodRefactoring;
 
 
 public class AbstractRenameMethodPerfTest extends RepeatingRefactoringPerformanceTestCase {
@@ -27,9 +26,9 @@ public class AbstractRenameMethodPerfTest extends RepeatingRefactoringPerformanc
 	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
 		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IMethod method= cunit.findPrimaryType().getMethod("foo", new String[0]);
-		RenameVirtualMethodProcessor processor= new RenameVirtualMethodProcessor(method);
-		processor.setNewElementName("foo2");
-		executeRefactoring(new RenameRefactoring(processor), measure);
+		RenameMethodRefactoring refactoring= RenameMethodRefactoring.createInstance(method);
+		refactoring.setNewName("foo2");
+		executeRefactoring(refactoring, measure);
 	}
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {

@@ -14,8 +14,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeRefactoring;
 
 
 public class AbstractRenameTypePerfTest extends RepeatingRefactoringPerformanceTestCase {
@@ -27,9 +26,9 @@ public class AbstractRenameTypePerfTest extends RepeatingRefactoringPerformanceT
 	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
 		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IType type= cunit.findPrimaryType();
-		RenameTypeProcessor processor= new RenameTypeProcessor(type);
-		processor.setNewElementName("B");
-		executeRefactoring(new RenameRefactoring(processor), measure);
+		RenameTypeRefactoring refactoring= new RenameTypeRefactoring(type);
+		refactoring.setNewName("B");
+		executeRefactoring(refactoring, measure);
 	}
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {

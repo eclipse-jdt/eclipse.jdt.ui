@@ -15,11 +15,9 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 
 public class AbstractMoveStaticMemberPrefTest extends RepeatingRefactoringPerformanceTestCase {
@@ -32,7 +30,7 @@ public class AbstractMoveStaticMemberPrefTest extends RepeatingRefactoringPerfor
 		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IType type= cunit.findPrimaryType();
 		IMember member= type.getField("VALUE");
-		MoveStaticMembersProcessor processor= MoveStaticMembersProcessor.create(
+		MoveStaticMembersRefactoring refactoring= new MoveStaticMembersRefactoring(
 			new IMember[] {member},
 			JavaPreferencesSettings.getCodeGenerationSettings());
 		IPackageFragment destPack= fTestProject.getSourceFolder().createPackageFragment("destination", false, null);
@@ -42,8 +40,8 @@ public class AbstractMoveStaticMemberPrefTest extends RepeatingRefactoringPerfor
 		buf.append("}\n");
 		ICompilationUnit destination= destPack.createCompilationUnit("Dest.java", buf.toString(), false, null);
 		
-		processor.setDestinationTypeFullyQualifiedName(destination.findPrimaryType().getFullyQualifiedName());
-		executeRefactoring(new MoveRefactoring(processor), measure);
+		refactoring.setDestinationTypeFullyQualifiedName(destination.findPrimaryType().getFullyQualifiedName());
+		executeRefactoring(refactoring, measure);
 	}
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {

@@ -19,12 +19,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameMethodWithHidingPerfTests extends RepeatingRefactoringPerformanceTestCase {
 
@@ -56,9 +54,9 @@ public class RenameMethodWithHidingPerfTests extends RepeatingRefactoringPerform
 	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
 		ICompilationUnit cunit= generateSources(fTestProject);
 		IMethod method= cunit.findPrimaryType().getMethod("setString", new String[] {"QString;"});
-		RenameVirtualMethodProcessor processor= new RenameVirtualMethodProcessor(method);
-		processor.setNewElementName("set");
-		executeRefactoring(new RenameRefactoring(processor), measure, RefactoringStatus.ERROR);
+		RenameMethodRefactoring refactoring= RenameMethodRefactoring.createInstance(method);
+		refactoring.setNewName("set");
+		executeRefactoring(refactoring, measure, RefactoringStatus.ERROR);
 	}
 	
 	private ICompilationUnit generateSources(TestProject testProject) throws Exception {

@@ -21,13 +21,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeRefactoring;
 
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.SWTProjectTestSetup;
-
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCase {
 	
@@ -57,16 +55,16 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 	
 	public void testCold() throws Exception {
 		IType control= fProject.findType("org.eclipse.swt.widgets.Control");
-		RenameTypeProcessor processor= new RenameTypeProcessor(control);
-		processor.setNewElementName("Control2");
-		executeRefactoring(new RenameRefactoring(processor), false);
+		RenameTypeRefactoring refactoring= new RenameTypeRefactoring(control);
+		refactoring.setNewName("Control2");
+		executeRefactoring(refactoring, false);
 	}
 	
 	public void testWarm() throws Exception {
 		tagAsGlobalSummary("Rename of Control", new Dimension[] {Dimension.CPU_TIME, Dimension.USED_JAVA_HEAP});
 		IType control= fProject.findType("org.eclipse.swt.widgets.Control2");
-		RenameTypeProcessor processor= new RenameTypeProcessor(control);
-		processor.setNewElementName("Control");
-		executeRefactoring(new RenameRefactoring(processor), true);
+		RenameTypeRefactoring refactoring= new RenameTypeRefactoring(control);
+		refactoring.setNewName("Control");
+		executeRefactoring(refactoring, true);
 	}
 }

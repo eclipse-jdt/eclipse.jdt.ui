@@ -13,21 +13,15 @@ package org.eclipse.jdt.ui.tests.performance;
 
 import java.util.ArrayList;
 
-import org.eclipse.test.performance.PerformanceTestCase;
-
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
-
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
-
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+import org.eclipse.test.performance.PerformanceTestCase;
 
 public class JdtPerformanceTestCase extends PerformanceTestCase {
 
@@ -47,21 +41,13 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 	}
 	
 	protected void joinBackgroudActivities() throws CoreException {
-		// Join Building
-		boolean interrupted= true;
-		while (interrupted) {
-			try {
-				Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
-				interrupted= false;
-			} catch (InterruptedException e) {
-				interrupted= true;
-			}
-		}
 		// Join indexing
 		new SearchEngine().searchAllTypeNames(
+			ResourcesPlugin.getWorkspace(),
 			null,
 			null,
-			SearchPattern.R_EXACT_MATCH,
+			IJavaSearchConstants.EXACT_MATCH,
+			IJavaSearchConstants.CASE_SENSITIVE,
 			IJavaSearchConstants.CLASS,
 			SearchEngine.createJavaSearchScope(new IJavaElement[0]),
 			new Requestor(),

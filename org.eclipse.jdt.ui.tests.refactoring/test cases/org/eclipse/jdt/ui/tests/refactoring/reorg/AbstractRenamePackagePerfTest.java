@@ -12,8 +12,7 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageRefactoring;
 
 public class AbstractRenamePackagePerfTest extends RepeatingRefactoringPerformanceTestCase {
 
@@ -23,9 +22,9 @@ public class AbstractRenamePackagePerfTest extends RepeatingRefactoringPerforman
 
 	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
 		IPackageFragment pack= generateSources(numberOfCus, numberOfRefs);
-		RenamePackageProcessor processor= new RenamePackageProcessor(pack);
-		processor.setNewElementName("pack2");
-		executeRefactoring(new RenameRefactoring(processor), measure);
+		RenamePackageRefactoring refactoring= new RenamePackageRefactoring(pack);
+		refactoring.setNewName("pack2");
+		executeRefactoring(refactoring, measure);
 	}
 
 	private IPackageFragment generateSources(int numberOfCus, int numberOfRefs) throws Exception {
