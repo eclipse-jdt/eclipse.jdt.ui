@@ -30,6 +30,8 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
@@ -1958,6 +1960,66 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		clearRewrite(rewrite);
 	}
 	
+	public void testIfStatement_bug48988() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void doit() {\n");
+		buf.append("        int var;\n");
+		buf.append("        if (true)\n");
+		buf.append("            var = 17;\n");
+		buf.append("        else if (var == 18)\n");
+		buf.append("            if (1 < var && var < 17)\n");
+		buf.append("                var = 1;\n");
+		buf.append("            else\n");
+		buf.append("                var++;\n");
+		buf.append("        else\n");
+		buf.append("            return;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		
+		String str= "if (1 < var && var < 17)";
+		int idx= buf.indexOf(str);
+		ASTNode node = NodeFinder.perform(astRoot, idx, str.length());
+		assertTrue(node instanceof IfStatement);
+		
+		{ // replace else statement by a block containing the old then statement
+			IfStatement ifStatement= (IfStatement) node;
+			ASTNode placeholder = rewrite.createMove(ifStatement);
+			Block newBlock = ast.newBlock();
+			newBlock.statements().add(placeholder);
+			rewrite.markAsReplaced(ifStatement, newBlock);
+		}
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void doit() {\n");
+		buf.append("        int var;\n");
+		buf.append("        if (true)\n");
+		buf.append("            var = 17;\n");
+		buf.append("        else if (var == 18) {\n");
+		buf.append("            if (1 < var && var < 17)\n");
+		buf.append("                var = 1;\n");
+		buf.append("            else\n");
+		buf.append("                var++;\n");
+		buf.append("        } else\n");
+		buf.append("            return;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
 	
 	
 	public void testIfStatementReplaceElse1() throws Exception {
@@ -3392,7 +3454,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		{ // replace while statement with comment, insert new statement
 			WhileStatement whileStatement= (WhileStatement) statements.get(0);
 			String comment= "//hello";
-			ASTNode placeHolder= rewrite.createPlaceholder(comment, ASTRewrite.STATEMENT);
+			ASTNode placeHolder= rewrite.createPlaceholder(comment, NewASTRewrite.STATEMENT);
 			
 			rewrite.markAsReplaced(whileStatement, placeHolder);
 			
@@ -3401,7 +3463,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			buf1.append("    System.beep();\n");
 			buf1.append("}");
 			
-			ASTNode placeHolder2= rewrite.createPlaceholder(buf1.toString(), ASTRewrite.STATEMENT);
+			ASTNode placeHolder2= rewrite.createPlaceholder(buf1.toString(), NewASTRewrite.STATEMENT);
 			rewrite.markAsInserted(placeHolder2);
 			
 			statements.add(placeHolder2);
