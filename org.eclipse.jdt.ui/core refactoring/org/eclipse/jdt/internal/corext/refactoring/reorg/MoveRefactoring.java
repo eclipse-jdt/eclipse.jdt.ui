@@ -223,6 +223,20 @@ public class MoveRefactoring extends ReorgRefactoring {
 				}
 			};
 			
+			//XX workaround for bug 13558
+			//<workaround>
+			if (fChangeManager == null){
+				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
+				try {
+					RefactoringStatus status= validateModifiesFiles();
+					if (status.hasFatalError())
+						fChangeManager= new TextChangeManager();
+				} catch(CoreException e) {
+					throw new JavaModelException(e);
+				}
+			}	
+			//</workaround>
+				
 			addAllChildren(composite, new CompositeChange("Reorganize elements", fChangeManager.getAllChanges()));
 			
 			IChange fileMove= super.createChange(new SubProgressMonitor(pm, 1));
