@@ -23,12 +23,12 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 public class HistoryAction extends Action {
 
 	private TypeHierarchyViewPart fViewPart;
-	private int fIndex;
+	private IType fType;
 	
-	public HistoryAction(TypeHierarchyViewPart viewPart, int index, IType type) {
+	public HistoryAction(TypeHierarchyViewPart viewPart, IType type) {
 		super();
 		fViewPart= viewPart;
-		fIndex= index;		
+		fType= type;		
 		
 		String fullTypeName= JavaModelUtil.getFullyQualifiedName(type);
 		setText(fullTypeName);
@@ -50,7 +50,7 @@ public class HistoryAction extends Action {
 	 * @see Action#run()
 	 */
 	public void run() {
-		fViewPart.gotoHistoryEntry(fIndex);
+		fViewPart.gotoHistoryEntry(fType);
 	}
 	
 }

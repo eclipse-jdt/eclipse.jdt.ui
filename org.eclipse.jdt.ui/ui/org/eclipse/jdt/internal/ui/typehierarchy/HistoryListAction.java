@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -18,6 +19,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
@@ -33,9 +35,9 @@ public class HistoryListAction extends Action {
 		
 		private ListDialogField fHistoryList;
 		private IStatus fHistoryStatus;
-		private Object fResult;
+		private IType fResult;
 		
-		private HistoryListDialog(Shell shell, ArrayList elements) {
+		private HistoryListDialog(Shell shell, IType[] elements) {
 			super(shell);
 			setTitle(TypeHierarchyMessages.getString("HistoryListDialog.title"));
 			
@@ -50,17 +52,17 @@ public class HistoryListAction extends Action {
 					doSelectionChanged();
 				}
 			};
-			
+		
 			JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
 			
 			fHistoryList= new ListDialogField(adapter, buttonLabels, labelProvider);
 			fHistoryList.setLabelText(TypeHierarchyMessages.getString("HistoryListDialog.label")); //$NON-NLS-1$
 			fHistoryList.setRemoveButtonIndex(0);
-			fHistoryList.setElements(elements);
+			fHistoryList.setElements(Arrays.asList(elements));
 			
 			ISelection sel;
-			if (elements.size() > 0) {
-				sel= new StructuredSelection(elements.get(0));
+			if (elements.length > 0) {
+				sel= new StructuredSelection(elements[0]);
 			} else {
 				sel= new StructuredSelection();
 			}
@@ -91,15 +93,20 @@ public class HistoryListAction extends Action {
 				status.setError("");
 				fResult= null;
 			} else {
-				fResult= selected.get(0);
+				fResult= (IType) selected.get(0);
 			}
 			fHistoryStatus= status;
 			updateStatus(status);	
 		}
-		
-		public Object getResult() {
+				
+		public IType getResult() {
 			return fResult;
 		}
+		
+		public IType[] getRemaining() {
+			List elems= fHistoryList.getElements();
+			return (IType[]) elems.toArray(new IType[elems.size()]);
+		}	
 		
 	}
 	
@@ -116,20 +123,11 @@ public class HistoryListAction extends Action {
 	 * @see IAction#run()
 	 */
 	public void run() {
-		ArrayList elements= new ArrayList();
-		int i= 0;
-		while (true) {
-			Object elem= fView.getHistoryEntry(i++);
-			if (elem != null) {
-				elements.add(elem);
-			} else {
-				break;
-			}
-		}
-		HistoryListDialog dialog= new HistoryListDialog(JavaPlugin.getActiveWorkbenchShell(), elements);
+		IType[] historyEntries= fView.getHistoryEntries();
+		HistoryListDialog dialog= new HistoryListDialog(JavaPlugin.getActiveWorkbenchShell(), historyEntries);
 		if (dialog.open() == dialog.OK) {
-			int index= elements.indexOf(dialog.getResult());
-			fView.gotoHistoryEntry(index);
+			fView.setHistoryEntries(dialog.getRemaining());
+			fView.setInput(dialog.getResult());
 		}
 	}
 

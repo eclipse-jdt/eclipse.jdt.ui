@@ -123,7 +123,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private IMemento fMemento;
 	
 	private ArrayList fInputHistory;
-	private int fCurrHistoryIndex;
 	
 	private IProblemChangedListener fHierarchyProblemListener;
 	
@@ -181,7 +180,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fIsEnableMemberFilter= false;
 		
 		fInputHistory= new ArrayList();
-		fCurrHistoryIndex= -1;
 		fAllViewers= null;
 				
 		fViewActions= new ToggleViewAction[] {
@@ -223,6 +221,53 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}	
 		
 	/**
+	 * Adds the entry if new. Inserted at the beginning of the history entries list.
+	 */		
+	private void addHistoryEntry(IType entry) {
+		if (fInputHistory.contains(entry)) {
+			fInputHistory.remove(entry);
+		}
+		fInputHistory.add(0, entry);
+	}
+	
+	private void updateHistoryEntries() {
+		for (int i= fInputHistory.size() - 1; i >= 0; i--) {
+			IType type= (IType) fInputHistory.get(i);
+			if (!type.exists()) {
+				fInputHistory.remove(i);
+			}
+		}		
+	}
+	
+	/**
+	 * Goes to the selected entry, without updating the order of history entries.
+	 */	
+	public void gotoHistoryEntry(IType entry) {
+		if (fInputHistory.contains(entry)) {
+			updateInput(entry);
+		}
+	}	
+	
+	/**
+	 * Gets all history entries.
+	 */
+	public IType[] getHistoryEntries() {
+		updateHistoryEntries();
+		return (IType[]) fInputHistory.toArray(new IType[fInputHistory.size()]);
+	}
+	
+	/**
+	 * Sets the history entries
+	 */
+	public void setHistoryEntries(IType[] elems) {
+		fInputHistory.clear();
+		for (int i= 0; i < elems.length; i++) {
+			fInputHistory.add(elems[i]);
+		}
+		updateHistoryEntries();
+	}
+	
+	/**
 	 * Selects an member in the methods list
 	 */	
 	public void selectMember(IMember member) {
@@ -235,48 +280,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */	
 	public IType getInput() {
 		return fInput;
-	}	
-	
-	private void addHistoryEntry(IType entry) {
-		fCurrHistoryIndex= fInputHistory.size();
-		fInputHistory.add(entry);
-	}
-	
-	/**
-	 * Gets the entry at the given index.
-	 * @param index The index of the entry
-	 * @return The entry from the index or null if no entry available
-	 */
-	public IType getHistoryEntry(int index) {
-		while (index >= 0 && index < fInputHistory.size()) {
-			IType type= (IType) fInputHistory.get(index);
-			if (type.exists()) {
-				return type;
-			} else {
-				fInputHistory.remove(index);
-				if (fCurrHistoryIndex >= index && fCurrHistoryIndex > 0) {
-					fCurrHistoryIndex--;
-				}	
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Goes to the next or previous entry from the history
-	 */	
-	public void gotoHistoryEntry(int index) {
-		IType elem= getHistoryEntry(index);
-		if (elem != null) {
-			updateInput(elem);
-			fCurrHistoryIndex= index;
-		}
-	}
-	
-	public int getCurrentHistoryIndex() {
-		return fCurrHistoryIndex;
-	}
-	
+	}		
+		
 	/**
 	 * Sets the input to a new type
 	 */

@@ -45,27 +45,28 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 
 	public Menu getMenu(Control parent) {
 		Menu menu= new Menu(parent);
-		boolean complete= addEntries(menu);
-		if (!complete) {
+		IType[] types= fHierarchyView.getHistoryEntries();
+		boolean checked= addEntries(menu, types);
+		if (types.length > RESULTS_IN_DROP_DOWN) {
 			new MenuItem(menu, SWT.SEPARATOR);
 			Action others= new HistoryListAction(fHierarchyView);
-			others.setChecked(fHierarchyView.getCurrentHistoryIndex() >= RESULTS_IN_DROP_DOWN);
+			others.setChecked(checked);
 			addActionToMenu(menu, others);
 		}
 		return menu;
 	}
 	
-	private boolean addEntries(Menu menu) {
-		for (int i= 0; i < RESULTS_IN_DROP_DOWN; i++) {
-			IType type= fHierarchyView.getHistoryEntry(i);
-			if (type == null) {
-				return true;
-			}
-			HistoryAction action= new HistoryAction(fHierarchyView, i, type);
-			action.setChecked(i == fHierarchyView.getCurrentHistoryIndex());
+	private boolean addEntries(Menu menu, IType[] types) {
+		boolean checked= false;
+		
+		int min= Math.min(types.length, RESULTS_IN_DROP_DOWN);
+		for (int i= 0; i < min; i++) {
+			HistoryAction action= new HistoryAction(fHierarchyView, types[i]);
+			action.setChecked(types[i].equals(fHierarchyView.getInput()));
+			checked= checked || action.isChecked();
 			addActionToMenu(menu, action);
 		}	
-		return false;
+		return checked;
 	}
 	
 
