@@ -19,12 +19,17 @@ import org.eclipse.jdt.internal.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 
-class MoveCompilationUnitChange extends CompilationUnitChange {
-
-	private String fPackageHandle;
+public class MoveCompilationUnitChange extends CompilationUnitChange {
+	private String fPackageHandle;
+	private String fNewName;
+	
+	public MoveCompilationUnitChange(ICompilationUnit cu, IPackageFragment newPackage, String newName){
+		this((IPackageFragment)cu.getParent(), cu.getElementName(), newPackage);
+		fNewName= newName;
+	}
 		
 	public MoveCompilationUnitChange(ICompilationUnit cu, IPackageFragment newPackage){
-		this((IPackageFragment)cu.getParent(), cu.getElementName(), newPackage);
+		this(cu, newPackage, null);
 	}
 	
 	private MoveCompilationUnitChange(IPackageFragment oldPackage, String cuName, IPackageFragment newPackage){
@@ -50,7 +55,7 @@ class MoveCompilationUnitChange extends CompilationUnitChange {
 	public String getName() {
 		return RefactoringCoreMessages.getFormattedString("MoveCompilationUnitChange.name", new String[]{getCorrespondingJavaElement().getElementName(), getPackageName(getNewPackage())}); //$NON-NLS-1$
 	}
-
+
 	public IChange getUndoChange() {
 		if (!isActive())
 			return new NullChange();
@@ -65,11 +70,13 @@ class MoveCompilationUnitChange extends CompilationUnitChange {
 			pm.beginTask("", 1);	 //$NON-NLS-1$
 			pm.subTask(RefactoringCoreMessages.getString("MoveCompilationUnitChange.moving")); //$NON-NLS-1$
 			ICompilationUnit cu= (ICompilationUnit)getCorrespondingJavaElement();
-			cu.move(getNewPackage(), null, null, false, new SubProgressMonitor(pm, 1));
+			cu.move(getNewPackage(), null, fNewName, false, new SubProgressMonitor(pm, 1));
 			pm.done();
 		} catch (Exception e) {
 			handleException(context, e);
 			setActive(false);
+		} finally {
+			pm.done();
 		}
 	}
 }
