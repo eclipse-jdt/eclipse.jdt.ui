@@ -419,7 +419,7 @@ public class MarkOccurrenceTest extends TestCase {
 			}
 			assertTrue(System.currentTimeMillis() < timeOut);
 		}
-		assertEquals(1, fOccurrences);
+		assertEquals(2, fOccurrences);
 		assertOccurrencesInWidget();
 	}
 	
