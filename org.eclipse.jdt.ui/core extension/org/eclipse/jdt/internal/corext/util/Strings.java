@@ -200,7 +200,7 @@ public class Strings {
 					}
 			} else {
 				// Assert.isTrue(false, "Line does not have requested number of indents"); //$NON-NLS-1$
-				start= i + 1;
+				start= i;
 				break; 
 			}
 			if (indents == indentsToRemove) {
