@@ -410,19 +410,7 @@ public class DeleteRefactoring2 extends Refactoring{
 	//----------- empty CUs related method
 	private void addEmptyCusToDelete() throws JavaModelException {
 		Set cusToEmpty= getCusToEmpty();
-		String queryTitle= "Confirm Delete of Empty Compilation Units";
-		IConfirmQuery deleteEmptyCusQuery= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, IReorgQueries.DELETE_EMPTY_CUS);
-		List newCusToDelete= new ArrayList(cusToEmpty.size());
-		for (Iterator iter= cusToEmpty.iterator(); iter.hasNext();) {
-			ICompilationUnit cu= (ICompilationUnit) iter.next();
-			String pattern= "After the delete operation the compilation unit ''{0}'' contains no types. \nOK to delete it as well?";
-			Object[] args= {cu.getElementName()};
-			String message= MessageFormat.format(pattern, args);
-			if (deleteEmptyCusQuery.confirm(message))
-				newCusToDelete.add(cu);
-		}
-		
-		addToSetToDelete((ICompilationUnit[]) newCusToDelete.toArray(new ICompilationUnit[newCusToDelete.size()]));
+		addToSetToDelete((ICompilationUnit[]) cusToEmpty.toArray(new ICompilationUnit[cusToEmpty.size()]));
 	}
 
 	private Set getCusToEmpty() throws JavaModelException {
@@ -440,8 +428,7 @@ public class DeleteRefactoring2 extends Refactoring{
 		Set elementSet= new HashSet(Arrays.asList(fJavaElements));
 		IType[] topLevelTypes= cu.getTypes();
 		for (int i= 0; i < topLevelTypes.length; i++) {
-			IType type= topLevelTypes[i];
-			if (! elementSet.contains(type))
+			if (! elementSet.contains(topLevelTypes[i]))
 				return false;
 		}
 		return true;
