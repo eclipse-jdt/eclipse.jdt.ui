@@ -27,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.Socket;
+import java.util.IdentityHashMap;
 import java.util.Vector;
 
 import junit.extensions.TestDecorator;
@@ -124,6 +125,13 @@ public class RemoteTestRunner implements TestListener {
 	private ReaderThread fReaderThread;
 
 	private String fRerunTest;
+	
+	/**
+	 * Map to map tests to unique IDs
+	 */
+	private IdentityHashMap fIdMap;
+	private int	fNextId= 1;
+	
 	/**
 	 * Reader thread that processes messages from the client.
 	 */
@@ -400,6 +408,8 @@ public class RemoteTestRunner implements TestListener {
 		
 		// count all testMethods and inform ITestRunListeners		
 		int count= countTests(suites);
+		fIdMap= new IdentityHashMap(count);
+		
 		notifyTestRunStarted(count);
 		
 		if (count == 0) {
@@ -608,7 +618,13 @@ public class RemoteTestRunner implements TestListener {
 	}
 
 	private String getTestId(Test test) {
-		return Integer.toString(System.identityHashCode(test));
+		Object id= fIdMap.get(test);
+		if (id != null) {
+			return (String)id;
+		}
+		String newId= Integer.toString(fNextId++);
+		fIdMap.put(test, newId);
+		return newId;
 	}
 	
 	private String getTestName(Test test) {
