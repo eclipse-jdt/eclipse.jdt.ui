@@ -84,19 +84,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"</code>).
 	 */
 	public static final String CORRECTION_ASSIST_PROPOSALS= "org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"; //$NON-NLS-1$
-	
-	/**
-	 * Action definition ID of the edit -> content assist proposal action
-	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.content.assist.proposals"</code>).
-	 */
-	public static final String CONTENT_ASSIST_PROPOSALS= "org.eclipse.jdt.ui.edit.text.java.content.assist.proposals"; //$NON-NLS-1$
-	
-	/**
-	 * Action definition ID of the edit -> content assist context information action
-	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.content.assist.context.information"</code>).
-	 */
-	public static final String CONTENT_ASSIST_CONTEXT_INFORMATION= "org.eclipse.jdt.ui.edit.text.java.content.assist.context.information"; //$NON-NLS-1$
-	
+		
 	/**
 	 * Action definition ID of the edit -> show Javadoc action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.show.javadoc"</code>).
