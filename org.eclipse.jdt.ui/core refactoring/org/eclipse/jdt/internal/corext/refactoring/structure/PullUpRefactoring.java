@@ -230,16 +230,16 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
-			RefactoringStatus result= new RefactoringStatus();
-						
-			result.merge(checkAllElements());
-			if (result.hasFatalError())
-				return result;
-			
-			if (! haveCommonDeclaringType())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.same_declaring_type"));			 //$NON-NLS-1$
+		RefactoringStatus result= new RefactoringStatus();
+					
+		result.merge(checkAllElements());
+		if (result.hasFatalError())
+			return result;
+		
+		if (! haveCommonDeclaringType())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.same_declaring_type"));			 //$NON-NLS-1$
 
-			return new RefactoringStatus();
+		return new RefactoringStatus();
 	}
 		
 	/*
