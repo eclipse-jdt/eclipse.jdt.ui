@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jface.dialogs.DialogSettings;
+import org.eclipse.jface.dialogs.IDialogSettings;
 
 /**
  * A wizard for creating test cases.
@@ -19,12 +21,21 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 	private NewTestCaseCreationWizardPage fPage;
 	private NewTestCaseCreationWizardPage2 fPage2;
+
+	private static String DIALOG_SETTINGS_KEY= "NewTestCaseCreationWizardPage";
 	
 	public NewTestCaseCreationWizard() {
 		super();
 		//setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
 		//setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle("JUnit TestCase");
+		IDialogSettings pluginSettings= JUnitPlugin.getDefault().getDialogSettings();
+		IDialogSettings wizardSettings= pluginSettings.getSection(DIALOG_SETTINGS_KEY);
+		if (wizardSettings == null) {
+			wizardSettings= new DialogSettings(DIALOG_SETTINGS_KEY);
+			pluginSettings.addSection(wizardSettings);
+		}
+		setDialogSettings(wizardSettings);
 	}
 
 	/*
@@ -60,6 +71,8 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 				JUnitPlugin.log(e);
 				// let pass, only reveal and open will fail
 			}
+			fPage.saveWidgetValues();
+			
 			return true;
 		}
 		return false;		

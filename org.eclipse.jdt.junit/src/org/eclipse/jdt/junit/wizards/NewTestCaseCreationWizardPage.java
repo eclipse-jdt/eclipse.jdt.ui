@@ -1,5 +1,6 @@
 package org.eclipse.jdt.junit.wizards;
 
+import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.ListIterator;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -64,6 +66,11 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	protected final static String TEST_SUFFIX= "Test"; //$NON-NLS-1$
 	protected final static String SETUP= "setUp"; //$NON-NLS-1$
 	protected final static String TEARDOWN= "tearDown"; //$NON-NLS-1$
+
+	protected final static String STORE_GENERATE_MAIN= PAGE_NAME + ".GENERATE_MAIN"; //$NON-NLS-1$
+	protected final static String STORE_USE_TESTRUNNER= PAGE_NAME + ".USE_TESTRUNNER";	//$NON-NLS-1$
+	protected final static String STORE_TESTRUNNER_TYPE= PAGE_NAME + ".TESTRUNNER_TYPE";
+
 	
 	private String fDefaultClassToTest;
 	private NewTestCaseCreationWizardPage2 fPage2;
@@ -236,6 +243,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			
 		//set default and focus
 		fClassToTestText.setText(fDefaultClassToTest);
+		restoreWidgetValues();
 		setFocus();
 	}
 
@@ -838,4 +846,36 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	protected void setFocus() {
 		fTestClassText.setFocus();
 	}
+	
+	/**
+	 *	Use the dialog store to restore widget values to the values that they held
+	 *	last time this wizard was used to completion
+	 */
+	private void restoreWidgetValues() {
+		
+		IDialogSettings settings= getDialogSettings();
+		if (settings != null) {
+			boolean generateMain= settings.getBoolean(STORE_GENERATE_MAIN);
+			fMethodStubsButtons.setSelection(0, generateMain);
+			fMethodStubsButtons.setEnabled(1, generateMain);
+			fMethodStubsButtons.setSelection(1,settings.getBoolean(STORE_USE_TESTRUNNER));
+			try {
+				fMethodStubsButtons.setComboSelection(settings.getInt(STORE_TESTRUNNER_TYPE));
+			} catch(NumberFormatException e) {}
+		}		
+	}	
+
+	/**
+	 * 	Since Finish was pressed, write widget values to the dialog store so that they
+	 *	will persist into the next invocation of this wizard page
+	 */
+	void saveWidgetValues() {
+		IDialogSettings settings= getDialogSettings();
+		if (settings != null) {
+			settings.put(STORE_GENERATE_MAIN, fMethodStubsButtons.isSelected(0));
+			settings.put(STORE_USE_TESTRUNNER, fMethodStubsButtons.isSelected(1));
+			settings.put(STORE_TESTRUNNER_TYPE, fMethodStubsButtons.getComboSelection());
+		}
+	}
+
 }

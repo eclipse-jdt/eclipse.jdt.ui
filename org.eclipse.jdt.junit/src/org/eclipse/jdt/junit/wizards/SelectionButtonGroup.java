@@ -309,6 +309,10 @@ public class SelectionButtonGroup {
 	public int getComboSelection() {
 		return fMainCombo.getSelectionIndex();
 	}
+	
+	public void setComboSelection(int index) {
+		fMainCombo.select(index);
+	}
 
 
 	/**
