@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -160,4 +161,11 @@ public class JavaElementUtil {
 		return (IJavaProject[]) result.toArray(new IJavaProject[result.size()]);
 	}	
 	
+	public static IMember[] merge(IMember[] a1, IMember[] a2){
+		Set result= new HashSet(a1.length + a2.length);
+		result.addAll(Arrays.asList(a1));
+		result.addAll(Arrays.asList(a2));
+		return (IMember[]) result.toArray(new IMember[result.size()]);
+	}
+
 }
