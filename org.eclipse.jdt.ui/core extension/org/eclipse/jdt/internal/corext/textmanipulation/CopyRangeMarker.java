@@ -13,39 +13,42 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- * A <tt>RangeMarker</tt> can be used to track positions when executing 
- * text edits.
+ * A <tt>CopyRangeMarker</tt> can be used to track positions when executing 
+ * text edits. Additionally a copy range marker stores a local copy of the text 
+ * it captures when it gets executed.
  */
-public final class RangeMarker extends TextEdit {
+public final class CopyRangeMarker extends TextEdit {
 	
 	private TextRange fRange;
+	private String fText;
 	
 	/**
-	 * Creates a new <tt>RangeMarker</tt> for the given
+	 * Creates a new <tt>CopyRangeMarker</tt> for the given
 	 * offset and length.
 	 * 
 	 * @param offset the starting offset this text edit is "working on"
 	 * @param length the length this text edit is "working on"
 	 */
-	public RangeMarker(int offset, int length) {
+	public CopyRangeMarker(int offset, int length) {
 		fRange= new TextRange(offset, length);
 	}
 	
 	/**
-	 * Creates a new <tt>RangeMarker</tt> for the given range.
+	 * Creates a new <tt>CopyRangeMarker</tt> for the given range.
 	 * 
 	 * @param range the <code>TextRange</code> this text edit is "working on"
 	 */
-	public RangeMarker(TextRange range) {
+	public CopyRangeMarker(TextRange range) {
 		fRange= new TextRange(range);
 	}
 	
 	/**
 	 * Copy constructor
 	 */
-	private RangeMarker(RangeMarker other) {
+	private CopyRangeMarker(CopyRangeMarker other) {
 		super(other);
 		fRange= new TextRange(other.fRange);
+		fText= other.fText;
 	}
 
 	/* non Java-doc
@@ -59,12 +62,13 @@ public final class RangeMarker extends TextEdit {
 	 * @see TextEdit#perform
 	 */	
 	public final void perform(TextBuffer buffer) throws CoreException {
+		fText= buffer.getContent(fRange.getOffset(), fRange.getLength());
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
 	protected TextEdit copy0() {
-		return new RangeMarker(this);
+		return new CopyRangeMarker(this);
 	}	
 }
