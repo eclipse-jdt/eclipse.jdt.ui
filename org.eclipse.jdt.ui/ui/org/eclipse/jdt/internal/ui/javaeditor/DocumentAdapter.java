@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,8 +44,53 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class DocumentAdapter implements IBuffer, IDocumentListener {
 	
+	/**
+	 *  Executes a document set content call in the ui thread.
+	 */
+	protected class DocumentSetCommand implements Runnable {
+		
+		private String fContents;
+		
+		public void run() {
+			fDocument.set(fContents);
+		}
+	
+		public void set(String contents) {
+			fContents= contents;
+			Display.getDefault().syncExec(this);
+		}
+	};
+	
+	/**
+	 * Executes a document replace call in the ui thread.
+	 */
+	protected class DocumentReplaceCommand implements Runnable {
+		
+		private int fOffset;
+		private int fLength;
+		private String fText;
+		
+		public void run() {
+			try {
+				fDocument.replace(fOffset, fLength, fText);
+			} catch (BadLocationException x) {
+				// ignore
+			}
+		}
+		
+		public void replace(int offset, int length, String text) {
+			fOffset= offset;
+			fLength= length;
+			fText= text;
+			Display.getDefault().syncExec(this);
+		}
+	};
+	
 	private IOpenable fOwner;
 	private IDocument fDocument;
+	private DocumentSetCommand fSetCmd= new DocumentSetCommand();
+	private DocumentReplaceCommand fReplaceCmd= new DocumentReplaceCommand();
+	
 	private Object fProviderKey;
 	private CompilationUnitDocumentProvider fProvider;
 	private String fLineDelimiter;
@@ -178,21 +225,13 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * @see IBuffer#append(String) 
 	 */
 	public void append(String text) {
-		try {
-			fDocument.replace(fDocument.getLength(), 0, normalize(text));
-		} catch (BadLocationException x) {
-			// cannot happen
-		}
+		fReplaceCmd.replace(fDocument.getLength(), 0, normalize(text));
 	}
 	
 	/*
 	 * @see IBuffer#close()
 	 */
 	public void close() {
-		
-		// workaround for http://dev.eclipse.org/bugs/show_bug.cgi?id=12353
-		if (true)
-			return;
 		
 		if (isClosed())
 			return;
@@ -296,11 +335,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * @see IBuffer#replace(int, int, String)
 	 */
 	public void replace(int position, int length, String text) {
-		try {
-			fDocument.replace(position, length, normalize(text));
-		} catch (BadLocationException x) {
-			throw new ArrayIndexOutOfBoundsException();
-		}
+		fReplaceCmd.replace(position, length, normalize(text));
 	}
 	
 	/*
@@ -332,15 +367,16 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 		if (contents == null) {
 			
 			if (oldLength != 0)
-				fDocument.set(""); //$NON-NLS-1$
+				fSetCmd.set(""); //$NON-NLS-1$
 		
 		} else {
-		
+			
+			// set only if different
 			String newContents= normalize(contents);
 			int newLength= newContents.length();
 			
 			if (oldLength != newLength || !newContents.equals(fDocument.get()))
-				fDocument.set(newContents);
+				fSetCmd.set(newContents);
 		}
 	}
 	
