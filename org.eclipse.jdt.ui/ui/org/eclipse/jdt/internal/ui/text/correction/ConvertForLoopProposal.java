@@ -187,7 +187,11 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 						// even if the Index is referenced within an ArrayAccess
 						// it could happen that the Array is not the same as the
 						// inferred Array
-						isIndexReferenced[0]= isAccessToADifferentArray((ArrayAccess)parent);
+						
+						// On fixing bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=73890
+						// had to treat the case when indexNotReferenced flag does not get overriden
+						// by subsequent passes through this loop
+						isIndexReferenced[0]= isIndexReferenced[0] || isAccessToADifferentArray((ArrayAccess)parent);
 					}
 					else {
 						//otherwise the Index is referenced outside ArrayAccess

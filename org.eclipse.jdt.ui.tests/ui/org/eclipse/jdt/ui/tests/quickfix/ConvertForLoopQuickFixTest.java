@@ -729,6 +729,27 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 	}
+	
+	public void testIndexReadOutsideArrayAccess_StringConcatenation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("		int[] array = {1,2,3,4};\n");
+		buf.append("		for (int i = 0; i < array.length; i++){\n");
+		buf.append("			System.out.println(i + array[i]);");
+		buf.append("		}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List proposals= fecthConvertingProposal(buf, cu);
+
+		assertNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+	}
 
 	public void testIndexReadOutsideInferredArrayAccess() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
