@@ -23,16 +23,22 @@ import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewProjectCreationWizard;
@@ -63,6 +69,16 @@ public class LeakTests extends TestCase {
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 	}
 
+	private ICompilationUnit createTestCU() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public class List1 {\n");
+		return pack2.createCompilationUnit("List1.java", buf.toString(), false, null);
+	}
+
 
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
@@ -86,14 +102,7 @@ public class LeakTests extends TestCase {
 	}
 	
 	public void testJavaEditor() throws Exception {
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-
-		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package pack0;\n");
-		buf.append("public class List1 {\n");
-		buf.append("}\n");
-		ICompilationUnit unit= pack2.createCompilationUnit("List1.java", buf.toString(), false, null);
+		ICompilationUnit unit= createTestCU();
 		IEditorPart part= EditorUtility.openInEditor(unit);
 
 		WeakReference ref= new WeakReference(part);
@@ -106,6 +115,31 @@ public class LeakTests extends TestCase {
 		garbageCollect();
 		assertTrue(ref.get() == null);
 	}
+	
+	public void testTypeHierarchy() throws Exception {
+		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.OPEN_TYPE_HIERARCHY, PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);
+		
+		ICompilationUnit unit= createTestCU();
+		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
+		IWorkbenchPage oldPage= window.getActivePage();
+		
+		TypeHierarchyViewPart part= OpenTypeHierarchyUtil.open(unit, window);
+
+		assertTrue(!oldPage.equals(part.getSite().getWorkbenchWindow().getActivePage()));
+		
+		WeakReference ref= new WeakReference(part);
+		garbageCollect();
+		assertTrue(ref.get() != null);
+
+		window.close();
+		window= null;
+		part= null;
+		
+		garbageCollect();
+		assertTrue(ref.get() == null);
+	}
+	
+	
 	
 	public void testNewClassWizard() throws Exception {
 		doWizardLeakTest(new NewClassCreationWizard());
