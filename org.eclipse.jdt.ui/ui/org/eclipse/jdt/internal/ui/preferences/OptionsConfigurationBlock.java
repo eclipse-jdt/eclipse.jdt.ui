@@ -639,6 +639,15 @@ public abstract class OptionsConfigurationBlock {
 		updateControls();
 		validateSettings(null, null, null);
 	}
+
+	/**
+	 * @since 3.1
+	 */
+	public void performRevert() {
+		fWorkingValues= getOptions();
+		updateControls();
+		validateSettings(null, null, null);
+	}
 	
 	public void dispose() {
 	}
