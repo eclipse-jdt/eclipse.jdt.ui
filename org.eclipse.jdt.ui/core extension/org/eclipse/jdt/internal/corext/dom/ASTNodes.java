@@ -11,7 +11,7 @@
  *       bug "inline method - doesn't handle implicit cast" (see
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
- *       bug Encapuslate field can fail when two variables in one variable declaration (see
+ *       bug Encapsulate field can fail when two variables in one variable declaration (see
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=51540).
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
@@ -348,7 +348,7 @@ public class ASTNodes {
 	 * E.g. <code> if (x) do(); -> if (x) { do1(); do2() } </code>
 	 *
 	 * @param locationInParent Location of the body node
-	 * @return Returns true if the location is a bod node location of a control statement.
+	 * @return Returns true if the location is a body node location of a control statement.
 	 */
 	public static boolean isControlStatementBody(StructuralPropertyDescriptor locationInParent) {
 		return locationInParent == IfStatement.THEN_STATEMENT_PROPERTY
@@ -783,7 +783,7 @@ public class ASTNodes {
 	}
 	
 	/**
-	 * Adds flags to the given node and all its decendants.
+	 * Adds flags to the given node and all its descendants.
 	 * @param root The root node
 	 * @param flags The flags to set
 	 */
