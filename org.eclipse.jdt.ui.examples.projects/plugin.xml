@@ -48,7 +48,7 @@
             </nature>
             <import
                   dest=""
-                  src="archive/junit/junit37src.jar">
+                  src="archive/junit/junit381src.jar">
             </import>
          </projectsetup>
       </wizard>
