@@ -4,33 +4,21 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
+import org.eclipse.core.resources.IContainer;
 
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-
+import org.eclipse.ui.actions.CopyFilesAndFoldersOperation;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
-import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
-import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -41,8 +29,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * Adapter to handle file drop from other applications.
@@ -128,69 +114,8 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements IOverwrite
 		if (target == null)
 			return;
 		
-		List files= checkFiles(SWTUtil.getShell(event.widget),(String[])data, target.getLocation());
-		if (files.size() > 0) {
-			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			
-			ImportOperation op= new ImportOperation(target.getFullPath(), FileSystemStructureProvider.INSTANCE, this, files);
-			op.setCreateContainerStructure(false);
-									
-			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
-			
-			try {
-				dialog.run(true, true, op);
-			} catch (InvocationTargetException e) {
-				String title= PackagesMessages.getString("DropAdapter.errorTitle"); //$NON-NLS-1$
-				String message= PackagesMessages.getString("DropAdapter.errorMessage"); //$NON-NLS-1$
-				ExceptionHandler.handle(e, title, message);
-				return;
-			} catch (InterruptedException e) {
-				return;
-			}
-			// Special case since ImportOperation doesn't throw a CoreException on
-			// failure.
-			IStatus status= op.getStatus();
-			if (! status.isOK()) {
-				String title= PackagesMessages.getString("DropAdapter.errorTitle"); //$NON-NLS-1$
-				String message= PackagesMessages.getString("DropAdapter.errorMessage"); //$NON-NLS-1$
-				ErrorDialog.openError(shell,
-					title,
-					message,
-					status, IStatus.ERROR | IStatus.WARNING);
-				return;
-			}
-			// The files we have really handled.
-			event.data= files.toArray(new String[files.size()]);
-			// Import always performs a copy.
-			event.detail= DND.DROP_COPY;
-			return;
-		} else {
-			event.data= null;
-			return;
-		}
+		new CopyFilesAndFoldersOperation(JavaPlugin.getActiveWorkbenchShell()).copyFiles((String[])data, target);
+		// Import always performs a copy.
+		event.detail= DND.DROP_COPY;
 	}
-	
-	private List checkFiles(Shell shell, String[] files, IPath target) {
-		List result= new ArrayList(10);
-		int lengthCompare= target.segmentCount() + 1;
-		for (int i= 0; i < files.length; i++) {
-			String file= files[i];
-			IPath path= new Path(file);
-			String error= null;
-			if (path.equals(target)) {
-				error= PackagesMessages.getFormattedString("DropAdapter.errorSame", target.lastSegment()); //$NON-NLS-1$
-			} else if (path.isPrefixOf(target)) {
-				error= PackagesMessages.getFormattedString("DropAdapter.errorSubfolder", path.lastSegment()); //$NON-NLS-1$
-			}
-			if (error != null) {
-				MessageDialog.openError(shell, PackagesMessages.getString("DropAdapter.errorTitle"), error); //$NON-NLS-1$
-				return new ArrayList(0);
-			}
-			// A copy onto itself ?
-			if (target.isPrefixOf(path) && lengthCompare == path.segmentCount())
-				continue;
-			result.add(new File(file));
-		}
-		return result;
-	}	
 }
