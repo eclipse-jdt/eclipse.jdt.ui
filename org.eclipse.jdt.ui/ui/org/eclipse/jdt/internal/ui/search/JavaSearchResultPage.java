@@ -489,7 +489,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 
 	public String getLabel() {
 		String label= super.getLabel();
-		if (getMatchFilters().length > 0) {
+		int matchFilterCount= getMatchFiltersCount();
+		if (matchFilterCount > 0) {
 			if (isQueryRunning()) {
 				String message= SearchMessages.getString("JavaSearchResultPage.filtered.message"); //$NON-NLS-1$
 				return MessageFormat.format(message, new Object[] { label });
@@ -500,6 +501,19 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 			}
 		}
 		return label;
+	}
+
+	private int getMatchFiltersCount() {
+		MatchFilter[] filters= getMatchFilters();
+		AbstractTextSearchResult result= getInput();
+		if (result == null)
+			return 0;
+		int filterCount= 0;
+		for (int i= 0; i < filters.length; i++) {
+			if (filters[i].isApplicable((JavaSearchQuery) result.getQuery()))
+				filterCount++;
+		}
+		return filterCount;
 	}
 
 	private int getFilteredMatchCount() {
