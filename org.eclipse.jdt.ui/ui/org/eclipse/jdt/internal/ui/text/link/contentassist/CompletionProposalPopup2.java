@@ -434,10 +434,6 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 			fLastProposal= null;
 		}
 
-		if (fAdditionalInfoController != null) {
-			fAdditionalInfoController.dispose();
-		}
-		
 		fFilteredProposals= null;
 		
 		fContentAssistant.possibleCompletionsClosed();
