@@ -15,19 +15,27 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.swt.SWT;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICodeFormatter;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.Template;
@@ -39,8 +47,12 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.swt.SWT;
 
 public class StubUtility {
 	
@@ -656,18 +668,15 @@ public class StubUtility {
 	}
 
 	/**
-	 * Searches for unimplemented methods of a type.
-	 * @param isSubType If set, the evaluation is for a subtype of the given type. If not set, the
-	 * evaluation is for the type itself.
-	 * @param settings Options for comment generation
-	 * @param selectionQuery If not null will select the methods to implement.
-	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
-	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
+	 * Returns all overridable methods of a type
+	 * @param type The type to search the overridable methods for 
+	 * @param hierarchy The type hierarchy of the type
+ 	 * @param isSubType If set, the result can include methods of the passed type, if not only methods from super
+	 * types are considered
+	 * @return Returns the all methods that can be overridden
 	 */
-	public static String[] evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, CodeGenerationSettings settings, 
-				IOverrideMethodQuery selectionQuery, IImportsStructure imports) throws CoreException {
+	public static IMethod[] getOverridableMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType) throws JavaModelException {
 		List allMethods= new ArrayList();
-		List toImplement= new ArrayList();
 
 		IMethod[] typeMethods= type.getMethods();
 		for (int i= 0; i < typeMethods.length; i++) {
@@ -690,15 +699,6 @@ public class StubUtility {
 			}
 		}
 
-		// do not call super
-		for (int i= 0; i < allMethods.size(); i++) {
-			IMethod curr= (IMethod) allMethods.get(i);
-			if ((Flags.isAbstract(curr.getFlags()) || curr.getDeclaringType().isInterface()) && (isSubType || !type.equals(curr.getDeclaringType()))) {
-				// implement all abstract methods
-				toImplement.add(curr);
-			}
-		}
-
 		IType[] superInterfaces= hierarchy.getAllSuperInterfaces(type);
 		for (int i= 0; i < superInterfaces.length; i++) {
 			IMethod[] methods= superInterfaces[i].getMethods();
@@ -715,37 +715,40 @@ public class StubUtility {
 						}
 						// implement an interface method when it does not exist in the hierarchy
 						// or when it throws less exceptions that the implemented
-						toImplement.add(curr);
 						allMethods.add(curr);
 					}
 				}
 			}
 		}
-		IMethod[] toImplementArray= (IMethod[]) toImplement.toArray(new IMethod[toImplement.size()]);
-		if (selectionQuery != null) {
-			if (!isSubType) {
-				allMethods.removeAll(Arrays.asList(typeMethods));
-			}
-			// remove finals
-			for (int i= allMethods.size() - 1; i >= 0; i--) {
-				IMethod curr= (IMethod) allMethods.get(i);
-				if (Flags.isFinal(curr.getFlags())) {
-					allMethods.remove(i);
-				}
-			}
-			IMethod[] choice= (IMethod[]) allMethods.toArray(new IMethod[allMethods.size()]);
-			toImplementArray= selectionQuery.select(choice, toImplementArray, hierarchy);
-			if (toImplementArray == null) {
-				//cancel pressed
-				return null;
+		if (!isSubType) {
+			allMethods.removeAll(Arrays.asList(typeMethods));
+		}
+		// remove finals
+		for (int i= allMethods.size() - 1; i >= 0; i--) {
+			IMethod curr= (IMethod) allMethods.get(i);
+			if (Flags.isFinal(curr.getFlags())) {
+				allMethods.remove(i);
 			}
 		}
+		return (IMethod[]) allMethods.toArray(new IMethod[allMethods.size()]);
+	}
+	
+	/**
+	 * Generate method stubs for methods to overrride
+	 * @param type The type to search the overridable methods for 
+	 * @param hierarchy The type hierarchy of the type
+	 * @param methodsToImplement Methods to override or implement
+	 * @param settings Options for comment generation
+	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
+	 * @return Returns the generated stubs
+	 */
+	public static String[] genOverrideStubs(IMethod[] methodsToImplement, IType type, ITypeHierarchy hierarchy, CodeGenerationSettings settings, IImportsStructure imports) throws CoreException {
 		GenStubSettings genStubSettings= new GenStubSettings(settings);
 		genStubSettings.methodOverwrites= true;
 		ICompilationUnit cu= type.getCompilationUnit();
-		String[] result= new String[toImplementArray.length];
-		for (int i= 0; i < toImplementArray.length; i++) {
-			IMethod curr= toImplementArray[i];
+		String[] result= new String[methodsToImplement.length];
+		for (int i= 0; i < methodsToImplement.length; i++) {
+			IMethod curr= methodsToImplement[i];
 			IMethod overrides= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
 			if (overrides != null) {
 				genStubSettings.callSuper= true;
@@ -758,6 +761,39 @@ public class StubUtility {
 			result[i]= genStub(cu, type.getElementName(), curr, desc.getDeclaringType(), genStubSettings, imports);
 		}
 		return result;
+	}
+	/**
+	 * Searches for unimplemented methods of a type.
+	 * @param isSubType If set, the evaluation is for a subtype of the given type. If not set, the
+	 * evaluation is for the type itself.
+	 * @param settings Options for comment generation
+	 * @param selectionQuery If not null will select the methods to implement.
+	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
+	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
+	 */
+	public static String[] evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, CodeGenerationSettings settings, 
+				IOverrideMethodQuery selectionQuery, IImportsStructure imports) throws CoreException {
+					
+		IMethod[] inheritedMethods= getOverridableMethods(type, hierarchy, isSubType);
+		
+		List toImplement= new ArrayList();
+		for (int i= 0; i < inheritedMethods.length; i++) {
+			IMethod curr= inheritedMethods[i];
+			if (JdtFlags.isAbstract(curr)) {
+				toImplement.add(curr);
+			}
+		}
+		IMethod[] toImplementArray= (IMethod[]) toImplement.toArray(new IMethod[toImplement.size()]);		
+		
+		if (selectionQuery != null) {
+			toImplementArray= selectionQuery.select(inheritedMethods, toImplementArray, hierarchy);
+			if (toImplementArray == null) {
+				//cancel pressed
+				return null;
+			}
+		}		
+		
+		return genOverrideStubs(toImplementArray, type, hierarchy, settings, imports);
 	}
 
 	/**
