@@ -257,10 +257,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected IStatus fSuperInterfacesStatus;	
 	
 	private boolean fIsClass;
-	private int fStaticMdfIndex;
 	
 	private final int PUBLIC_INDEX= 0, DEFAULT_INDEX= 1, PRIVATE_INDEX= 2, PROTECTED_INDEX= 3;
-	private final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1;
+	private final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1, STATIC_INDEX= 2;
 
 	/**
 	 * Creates a new <code>NewTypeWizardPage</code>
@@ -329,12 +328,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				/* 1 == FINAL_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.final"), //$NON-NLS-1$
 				/* 2 */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.static") //$NON-NLS-1$
 			};
-			fStaticMdfIndex= 2; // index of the static checkbox is 2
 		} else {
-			buttonNames2= new String[] {
-				NewWizardMessages.getString("NewTypeWizardPage.modifiers.static") //$NON-NLS-1$
-			};
-			fStaticMdfIndex= 0; // index of the static checkbox is 0
+			buttonNames2= new String[] {};
 		}
 
 		fOtherMdfButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames2, 4);
@@ -342,7 +337,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		fAccMdfButtons.enableSelectionButton(PRIVATE_INDEX, false);
 		fAccMdfButtons.enableSelectionButton(PROTECTED_INDEX, false);
-		fOtherMdfButtons.enableSelectionButton(fStaticMdfIndex, false);
+		fOtherMdfButtons.enableSelectionButton(STATIC_INDEX, false);
 
 		fCurrPackageCompletionProcessor= new JavaPackageCompletionProcessor();
 		fEnclosingTypeCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
@@ -516,14 +511,16 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		DialogField.createEmptySpace(composite);
 		
-		DialogField.createEmptySpace(composite);
-		
-		control= fOtherMdfButtons.getSelectionButtonsGroup(composite);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= nColumns - 2;
-		control.setLayoutData(gd);		
-
-		DialogField.createEmptySpace(composite);
+		if (fIsClass) {
+			DialogField.createEmptySpace(composite);
+			
+			control= fOtherMdfButtons.getSelectionButtonsGroup(composite);
+			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			gd.horizontalSpan= nColumns - 2;
+			control.setLayoutData(gd);		
+	
+			DialogField.createEmptySpace(composite);
+		}
 	}
 
 	/**
@@ -643,13 +640,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					fAccMdfButtons.setSelection(PROTECTED_INDEX, false); 
 					fAccMdfButtons.setSelection(PUBLIC_INDEX, true);
 				}
-				if (fOtherMdfButtons.isSelected(fStaticMdfIndex)) {
-					fOtherMdfButtons.setSelection(fStaticMdfIndex, false);
+				if (fOtherMdfButtons.isSelected(STATIC_INDEX)) {
+					fOtherMdfButtons.setSelection(STATIC_INDEX, false);
 				}
 			}
 			fAccMdfButtons.enableSelectionButton(PRIVATE_INDEX, isEnclosedType);
 			fAccMdfButtons.enableSelectionButton(PROTECTED_INDEX, isEnclosedType);
-			fOtherMdfButtons.enableSelectionButton(fStaticMdfIndex, isEnclosedType);
+			fOtherMdfButtons.enableSelectionButton(STATIC_INDEX, isEnclosedType);
 			fTypeNameStatus= typeNameChanged();
 			fSuperClassStatus= superClassChanged();
 			fieldName= ENCLOSINGSELECTION;
@@ -830,13 +827,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		} else if (fAccMdfButtons.isSelected(PROTECTED_INDEX)) {	
 			mdf+= F_PROTECTED;
 		}
-		if (fOtherMdfButtons.isSelected(ABSTRACT_INDEX) && (fStaticMdfIndex != 0)) {	
+		if (fOtherMdfButtons.isSelected(ABSTRACT_INDEX)) {	
 			mdf+= F_ABSTRACT;
 		}
 		if (fOtherMdfButtons.isSelected(FINAL_INDEX)) {	
 			mdf+= F_FINAL;
 		}
-		if (fOtherMdfButtons.isSelected(fStaticMdfIndex)) {	
+		if (fOtherMdfButtons.isSelected(STATIC_INDEX)) {	
 			mdf+= F_STATIC;
 		}
 		return mdf;
@@ -869,7 +866,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			fOtherMdfButtons.setSelection(FINAL_INDEX, true);
 		}		
 		if (Flags.isStatic(modifiers)) {
-			fOtherMdfButtons.setSelection(fStaticMdfIndex, true);
+			fOtherMdfButtons.setSelection(STATIC_INDEX, true);
 		}
 		
 		fAccMdfButtons.setEnabled(canBeModified);
