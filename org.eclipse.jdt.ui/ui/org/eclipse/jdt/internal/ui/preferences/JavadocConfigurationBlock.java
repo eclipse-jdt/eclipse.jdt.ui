@@ -145,6 +145,8 @@ public class JavadocConfigurationBlock {
 	}
 	
 	public Control createContents(Composite parent) {
+		fShell= parent.getShell();
+		
 		PixelConverter converter= new PixelConverter(parent);
 		Composite topComp= new Composite(parent, SWT.NONE);
 		GridLayout topLayout= new GridLayout();
