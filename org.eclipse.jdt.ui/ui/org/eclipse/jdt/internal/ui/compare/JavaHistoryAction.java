@@ -49,10 +49,10 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 	IMember getEditionElement(ISelection selection) {
 		
 		if (selection instanceof IStructuredSelection) {
-			Object[] o= ((IStructuredSelection)selection).toArray();
-			if (o != null && o.length == 1 && o[0] instanceof IMember) {
-				IMember m= (IMember) o[0];
-				if (!m.isBinary() && JavaStructureCreator.hasEdition((IJavaElement) o[0]))
+			Object o= ((IStructuredSelection)selection).getFirstElement();
+			if (o instanceof IMember) {
+				IMember m= (IMember) o;
+				if (!m.isBinary() && JavaStructureCreator.hasEdition(m))
 					return m;
 			}
 		}

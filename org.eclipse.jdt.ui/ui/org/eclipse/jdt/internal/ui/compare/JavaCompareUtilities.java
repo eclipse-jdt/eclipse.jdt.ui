@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocumentPartitioner;
@@ -80,5 +81,45 @@ class JavaCompareUtilities {
 			}
 		}
 		return null;
-	}	
+	}
+	
+	/**
+	 * Breaks the given string into lines and strips off the line terminator.
+	 */
+	static String[] readLines(InputStream is) {
+		
+		String[] lines= null;
+		try {
+			StringBuffer sb= null;
+			List list= new ArrayList();
+			while (true) {
+				int c= is.read();
+				if (c == -1)
+					break;
+				if (c == '\n' || c == '\r') {
+					if (sb != null)
+						list.add(sb.toString());
+					sb= null;
+				} else {
+					if (sb == null)
+						sb= new StringBuffer();
+					sb.append((char)c);
+				}
+			}
+			if (sb != null)
+				list.add(sb.toString());
+			return (String[]) list.toArray(new String[list.size()]);
+
+		} catch (IOException ex) {
+			return null;
+
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException ex) {
+				}
+			}
+		}
+	}
 }

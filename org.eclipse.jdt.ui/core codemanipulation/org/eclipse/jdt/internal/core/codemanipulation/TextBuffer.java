@@ -208,31 +208,7 @@ public class TextBuffer {
 	 * @return the line indent for the given line number of <code>-1</code>
 	 */
 	public int getLineIndent(int lineNumber, int tabWidth) {
-		String line= getLineContent(lineNumber);
-		if (line == null)
-			return -1;
-		int result= 0;
-		int blanks= 0;
-		int size= line.length();
-		for (int i= 0; i < size; i++) {
-			char c= line.charAt(i);
-			switch (c) {
-				case '\t':
-					result++;
-					blanks= 0;
-					break;
-				case	' ':
-					blanks++;
-					if (blanks == tabWidth) {
-						result++;
-						blanks= 0;
-					}
-					break;
-				default:
-					return result;
-			}
-		}
-		return result;			
+		return getIndent(getLineContent(lineNumber), tabWidth);
 	}
 	
 	/**
@@ -363,6 +339,78 @@ public class TextBuffer {
 	
 	void setCurrentPositions(TextPosition[] positions) {
 		fUpdater.setCurrentPositions(positions);
+	}
+	
+	//---- Utility methods
+	
+	/**
+	 * Returns the indent for the given line.
+	 * If line is <code>null</code>, <code>-1</code> is returned.
+	 * 
+	 * @param line the line for which the indent is determined
+	 * @return the line indent for the given line number or <code>-1</code>
+	 */
+	public static int getIndent(String line, int tabWidth) {
+		if (line == null)
+			return -1;
+		int indent= 0;
+		int blanks= 0;
+		int size= line.length();
+		for (int i= 0; i < size; i++) {
+			switch (line.charAt(i)) {
+			case '\t':
+				indent++;
+				blanks= 0;
+				continue;
+			case	' ':
+				blanks++;
+				if (blanks == tabWidth) {
+					indent++;
+					blanks= 0;
+				}
+				continue;
+			default:
+				break;
+			}
+		}
+		return indent;			
+	}
+	
+	/**
+	 * Returns a copy of the line with the given number of identations
+	 * removed from the beginning.
+	 * If the count is zero, the line is returned.
+	 */
+	public static String removeIndent(String line, int indentsToRemove, int tabWidth) {
+		if (line != null) {
+			int indent= 0;
+			int blanks= 0;
+			int size= line.length();
+			for (int i= 0; i < size; i++) {
+				
+				if (indent >= indentsToRemove) {
+					line= line.substring(i);
+					break;
+				}
+				
+				switch (line.charAt(i)) {
+				case '\t':
+					indent++;
+					blanks= 0;
+					continue;
+				case ' ':
+					blanks++;
+					if (blanks == tabWidth) {
+						indent++;
+						blanks= 0;
+					}
+					continue;
+				default:
+					break;
+				}
+			}
+		}
+		return line;
 	}
 	
 	//---- Factory methods ----------------------------------------------------------------
