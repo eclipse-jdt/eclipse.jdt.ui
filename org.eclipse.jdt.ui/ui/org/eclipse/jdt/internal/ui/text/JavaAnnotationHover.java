@@ -72,7 +72,9 @@ public class JavaAnnotationHover implements IAnnotationHover {
 			}
 		}
 		
-		return select(exact, including);
+		// don't accept including because of "1GEUOZ9: ITPJUI:ALL - Confusing UI for multiline Bookmarks and Tasks"
+		// return select(exact, including);
+		return select(exact, exact);
 	}
 
 		
