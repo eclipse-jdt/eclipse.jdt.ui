@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -56,9 +57,18 @@ public class MethodExitsFinder extends ASTVisitor {
 	public String initialize(CompilationUnit root, int offset, int length) {
 		fAST= root.getAST();
 		ASTNode node= NodeFinder.perform(root, offset, length);
-		if (!(node instanceof Type))
+		Type type= null;
+		if (node instanceof Type) {
+			type= (Type)node;
+		} else  if (node instanceof Name) {
+			Name name= ASTNodes.getTopMostName((Name)node);
+			if (name.getParent() instanceof Type) {
+				type= (Type)name.getParent();
+			}
+		}
+		if (type == null)
 			return SearchMessages.getString("MethodExitsFinder.no_return_type_selected"); //$NON-NLS-1$
-		Type type= ASTNodes.getTopMostType((Type)node);
+		type= ASTNodes.getTopMostType(type);
 		if (!(type.getParent() instanceof MethodDeclaration))
 			return SearchMessages.getString("MethodExitsFinder.no_return_type_selected"); //$NON-NLS-1$
 		fMethodDeclaration= (MethodDeclaration)type.getParent();
