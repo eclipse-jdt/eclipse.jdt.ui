@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -42,6 +43,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.SourceModifier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
@@ -72,7 +74,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMoveCodeTest("testAddIndents"));
+			suite.addTest(new ASTRewritingMoveCodeTest("testNestedCopies"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -1724,4 +1726,50 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 
 		assertEqualString(preview, expected);
 	}
+	
+	public void testNestedCopies() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object o) {\n");
+		buf.append("        int i= (String) o.indexOf('1');\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		AST ast= astRoot.getAST();
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		
+		String str= "(String) o.indexOf('1')";
+		CastExpression expression= (CastExpression) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
+		MethodInvocation invocation= (MethodInvocation) expression.getExpression();
+		
+		CastExpression newCast= ast.newCastExpression();
+		newCast.setType((Type) rewrite.createCopy(expression.getType()));
+		newCast.setExpression((Expression) rewrite.createCopy(invocation.getExpression()));
+		ParenthesizedExpression parents= ast.newParenthesizedExpression();
+		parents.setExpression(newCast);
+		
+		ASTNode node= rewrite.createCopy(invocation);
+		rewrite.markAsReplaced(expression, node);
+		rewrite.markAsReplaced(invocation.getExpression(), parents);
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object o) {\n");
+		buf.append("        int i= ((String) o).indexOf('1');\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();		
+
+		assertEqualString(preview, expected);
+	}
+	
 }
