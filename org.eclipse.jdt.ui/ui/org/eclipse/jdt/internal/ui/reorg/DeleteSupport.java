@@ -5,18 +5,19 @@
 
 package org.eclipse.jdt.internal.ui.reorg;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.ISourceManipulation;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.ISourceManipulation;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;
 
 public class DeleteSupport implements IDeleteSupport {
 	public boolean canDelete(Object o) {
+		try {
+			if (o instanceof IPackageFragmentRoot && 
+					ReorgSupport.isClasspathDelete((IPackageFragmentRoot)o)) {
+						return true;
+			}
+		} catch (CoreException e) {
+			// we can't delete.
+			return false;
+		}
 		if (o instanceof IPackageFragment) {
 			IPackageFragment fragment= (IPackageFragment)o;
 			if (fragment.isDefaultPackage())
@@ -48,9 +49,17 @@ public class DeleteSupport implements IDeleteSupport {
 	}
 
 	public void delete(Object o, IProgressMonitor pm) throws JavaModelException, CoreException {
+		IProgressMonitor subPM= new SubProgressMonitor(pm, 10);
+		if (o instanceof IPackageFragmentRoot) {
+			IPackageFragmentRoot root= (IPackageFragmentRoot)o;
+			if (ReorgSupport.isClasspathDelete(root)) {
+				deleteFromClasspath(root, subPM);
+			}
+		}
+		pm.subTask(getElementName(o));
 		if (o instanceof ISourceManipulation) {
 			ISourceManipulation element= (ISourceManipulation)o;
-			element.delete(true, pm);
+			element.delete(true, subPM);
 			return;
 		}
 		if (o instanceof IJavaElement) {
@@ -63,7 +72,7 @@ public class DeleteSupport implements IDeleteSupport {
 			IResource res= (IResource)o;
 			if (!res.exists())
 				return;
-			res.delete(true, pm);
+			res.delete(true, subPM);
 		}
 	}
 	
@@ -87,5 +96,26 @@ public class DeleteSupport implements IDeleteSupport {
 			return ((IResource)element).getName();
 		}
 		return null;
+	}
+	
+	private void deleteFromClasspath(IPackageFragmentRoot root, IProgressMonitor pm) throws JavaModelException {
+		pm.subTask(getElementName(root)+" (Removing from classpath)");
+		IPath path= root.getPath();
+		IJavaProject project= root.getJavaProject();
+		IClasspathEntry[] cp= project.getRawClasspath();
+		IClasspathEntry[] newCp= new IClasspathEntry[cp.length-1];
+		int i= 0; 
+		int j= 0;
+		
+		while (j < newCp.length) {
+			if (path.equals(JavaCore.getResolvedClasspathEntry(cp[i]).getPath())) {
+				i++;
+			} 
+
+			newCp[j]= cp[i];
+			i++;
+			j++;
+		} 
+		project.setRawClasspath(newCp, pm);
 	}
 }

@@ -5,19 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IStorage;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.util.Utilities;
+import java.util.Iterator;import java.util.List;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IStorage;import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.util.Utilities;
 
 public class ReorgSupport {
 
@@ -120,4 +108,14 @@ public class ReorgSupport {
 		}
 		return null;
 	}
+
+	protected static boolean isClasspathDelete(IPackageFragmentRoot pkgRoot) throws JavaModelException {
+		IResource res= pkgRoot.getUnderlyingResource();
+		if (res == null)
+			return true;
+		IProject definingProject= res.getProject();
+		IProject occurringProject= pkgRoot.getJavaProject().getProject();
+		return !definingProject.equals(occurringProject);
+	}
+
 }

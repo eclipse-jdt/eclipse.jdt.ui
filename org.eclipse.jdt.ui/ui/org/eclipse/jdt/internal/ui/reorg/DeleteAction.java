@@ -5,33 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ResourceBundle;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIException;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
+import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Collections;import java.util.Comparator;import java.util.Iterator;import java.util.List;import java.util.ResourceBundle;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaUIException;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 /** 
  * Action for deleting elements in a delete target.
@@ -66,9 +40,14 @@ public class DeleteAction extends ReorgAction {
 		final List elements= new ArrayList();
 		while (iter.hasNext())
 			elements.add(iter.next());
-
-		if (!MessageDialog.openConfirm(activeShell, title, label))
+		
+		try {
+			if (!isClasspathDelete(elements) && !MessageDialog.openConfirm(activeShell, title, label))
+				return;
+		} catch (CoreException e) {
+			ExceptionHandler.handle(e, "Delete", "An exception occured while deleting elements");
 			return;
+		}
 		if (!confirmIfUnsaved(elements))
 			return;
 
@@ -89,11 +68,9 @@ public class DeleteAction extends ReorgAction {
 				Collections.sort(elements, lengthComparator);
 				
 				for (int i= 0; i < size; i++) {
-					IProgressMonitor subPM= new SubProgressMonitor(pm, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 					Object o= elements.get(i);
-					pm.subTask(support.getElementName(o));
 					try {
-						support.delete(o, subPM);
+						support.delete(o, pm);
 					} catch (CoreException e) {
 						status.merge(e.getStatus());
 					}
@@ -136,5 +113,17 @@ public class DeleteAction extends ReorgAction {
 	protected String getActionName() {
 		return JavaPlugin.getResourceString(ACTION_NAME);
 	}
-
+	
+	protected boolean isClasspathDelete(List elements) throws CoreException {
+		Iterator iter= elements.iterator();
+		while (iter.hasNext()) {
+			Object o= iter.next();
+			if (!(o instanceof IPackageFragmentRoot))
+				return false;
+			if (!ReorgSupport.isClasspathDelete((IPackageFragmentRoot)o))
+				return false;
+		}
+		return true;
+	}
+	
 }
