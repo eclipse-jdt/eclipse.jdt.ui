@@ -108,7 +108,7 @@ public class RefactoringScanner {
 	}
 	
 	private void parseCurrentToken(Set result, final IScanner scanner) throws  InvalidInputException {
-		String value = new String(scanner.getCurrentTokenSource());
+		String value = new String(scanner.getRawTokenSource());
 		int start= scanner.getCurrentTokenStartPosition();
 		int index= value.indexOf(fPattern);
 		while (index != -1) {
