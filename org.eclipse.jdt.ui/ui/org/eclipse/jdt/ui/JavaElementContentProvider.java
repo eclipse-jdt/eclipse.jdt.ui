@@ -66,7 +66,8 @@ Java model (<code>IJavaModel</code>)
 public class JavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
 	private TreeViewer fViewer;
-
+	private Object fInput;
+	
 	/**
 	 * Creates a new content provider for Java elements.
 	 */
@@ -90,6 +91,7 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 		} else if (oldInput != null && newInput == null) {
 			JavaCore.removeElementChangedListener(this); 
 		}
+		fInput= newInput;
 	}
 	
 	/* (non-Javadoc)
@@ -187,7 +189,14 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 			// we are filtering out empty subpackages, so we
 			// have to handle additions to them specially. 
 			if (parent instanceof IPackageFragment) {
-				postRefresh(internalGetParent(parent));
+				Object grandparent= internalGetParent(parent);
+				// 1GE8SI6: ITPJUI:WIN98 - Rename is not shown in Packages View
+				// avoid posting a refresh to an unvisible parent
+				if (parent.equals(fInput)) {
+					postRefresh(parent);
+				} else {
+					postRefresh(grandparent);
+				}
 			} else {  
 				postAdd(parent, element);
 			}						
@@ -215,7 +224,13 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 			// a package fragment might become non empty refresh from the parent
 			if (element instanceof IPackageFragment) {
 				IJavaElement parent= (IJavaElement)internalGetParent(element);
-				postRefresh(parent);
+				// 1GE8SI6: ITPJUI:WIN98 - Rename is not shown in Packages View
+				// avoid posting a refresh to an unvisible parent
+				if (element.equals(fInput)) {
+					postRefresh(element);
+				} else {
+					postRefresh(parent);
+				}
 				return;
 			}
 			// more than one child changed, refresh from here downwards
