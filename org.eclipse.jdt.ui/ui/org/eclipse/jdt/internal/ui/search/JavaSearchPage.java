@@ -169,8 +169,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				IProject[] projects= JavaSearchScopeFactory.getInstance().getJavaProjects(scope);
 				if (projects.length > 1)
 					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
-				else
+				else if (projects.length == 1)
 					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectScope", projects[0].getName()); //$NON-NLS-1$
+				else 
+					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
 				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
