@@ -45,6 +45,10 @@ public class ResourceTestHelper {
 	
 	public static final int SKIP_IF_EXISTS= 2;
 
+	private static final int DELETE_MAX_RETRY= 5;
+
+	private static final long DELETE_RETRY_DELAY= 1000;
+
 	public static void replicate(String src, String destPrefix, String destSuffix, int n, int ifExists) throws CoreException {
 		for (int i= 0; i < n; i++)
 			copy(src, destPrefix + i + destSuffix, ifExists);
@@ -68,7 +72,7 @@ public class ResourceTestHelper {
 				return true;
 			case OVERWRITE_IF_EXISTS:
 				if (destFile.exists())
-					destFile.delete(true, null);
+					delete(destFile);
 				return true;
 			case SKIP_IF_EXISTS:
 				if (destFile.exists())
@@ -84,7 +88,25 @@ public class ResourceTestHelper {
 	}
 
 	public static void delete(String file) throws CoreException {
-		getFile(file).delete(true, null);
+		delete(getFile(file));
+	}
+
+	private static void delete(IFile file) throws CoreException {
+		CoreException x= null;
+		for (int i= 0; i < DELETE_MAX_RETRY; i++) {
+			try {
+				file.delete(true, null);
+				return;
+			} catch (CoreException x0) {
+				x= x0;
+				try {
+					Thread.sleep(DELETE_RETRY_DELAY);
+				} catch (InterruptedException x1) {
+					// should not happen
+				}
+			}
+		}
+		throw x;
 	}
 
 	public static void delete(String prefix, String suffix, int n) throws CoreException {
