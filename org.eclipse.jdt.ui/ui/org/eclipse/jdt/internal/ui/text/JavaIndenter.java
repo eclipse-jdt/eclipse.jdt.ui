@@ -157,7 +157,7 @@ public class JavaIndenter {
 	 * @param indent the indentation to be modified
 	 */
 	private void unindent(StringBuffer indent) {
-		CharSequence oneIndent= createIndent(1);
+		CharSequence oneIndent= createIndent();
 		int i= indent.lastIndexOf(oneIndent.toString()); //$NON-NLS-1$
 		if (i != -1) {
 			indent.delete(i, i + oneIndent.length());
@@ -220,17 +220,29 @@ public class JavaIndenter {
 	 * 
 	 * @return the indentation specified by <code>indent</code>
 	 */
-	private CharSequence createIndent(int indent) {
+	private StringBuffer createIndent(int indent) {
+		StringBuffer oneIndent= createIndent();			
+
+		StringBuffer ret= new StringBuffer();
+		while (indent-- > 0)
+			ret.append(oneIndent);
+		
+		return ret;
+	}
+	
+	/**
+	 * Creates a string that represents one indent (can be
+	 * spaces or tabs..)
+	 * 
+	 * @return one indentation
+	 */
+	private StringBuffer createIndent() {
 		// get a sensible default when running without the infrastructure for testing
+		StringBuffer oneIndent= new StringBuffer();
 		JavaCore plugin= JavaCore.getJavaCore();
 		if (plugin == null) {
-			StringBuffer ret= new StringBuffer();
-			while (indent-- > 0)
-				ret.append('\t');
-			
-			return ret;
+			oneIndent.append('\t');
 		} else {
-			StringBuffer oneIndent= new StringBuffer();
 			if (JavaCore.SPACE.equals(JavaCore.getOption(JavaCore.FORMATTER_TAB_CHAR))) {
 				int tabLen= Integer.parseInt(JavaCore.getOption(JavaCore.FORMATTER_TAB_SIZE));
 				for (int i= 0; i < tabLen; i++)
@@ -239,16 +251,10 @@ public class JavaIndenter {
 				oneIndent.append('\t');
 			else
 				oneIndent.append('\t'); // default
-			
-			StringBuffer ret= new StringBuffer();
-			for (int i= 0; i < indent; i++)
-				ret.append(oneIndent);
-			
-			return ret;
 		}
-		
+		return oneIndent;
 	}
-	
+
 	/**
 	 * Returns the reference position regarding to indentation for <code>offset</code>,
 	 * or <code>NOT_FOUND</code>. This method calls
@@ -358,11 +364,11 @@ public class JavaIndenter {
 	 * the absolute position of the alignment reference in <code>fDocument</code>,
 	 * otherwise <code>fAlign</code> is set to <code>JavaHeuristicScanner.NOT_FOUND</code>.
 	 * 
-	 * @param position the position for which the reference is computed
+	 * @param offset the offset for which the reference is computed
 	 * @param danglingElse whether a dangling else should be assumed at <code>position</code>
 	 * @param matchBrace whether the position of the matching brace should be
 	 *            returned instead of doing code analysis
-	 * @param matchBrace whether the position of the matching parenthesis
+	 * @param matchParen whether the position of the matching parenthesis
 	 *            should be returned instead of doing code analysis
 	 * @param matchCase whether the position of a switch statement reference
 	 *            should be returned (either an earlier case statement or the
@@ -523,13 +529,18 @@ public class JavaIndenter {
 				case Symbols.TokenLBRACKET:
 				case Symbols.TokenSEMICOLON:
 				case Symbols.TokenEOF:
-				case Symbols.TokenCOLON:
 					return fPreviousPos;
+					
+				case Symbols.TokenCOLON:
+					int pos= fPreviousPos;
+					if (!isConditional())
+						return pos;
+					break;
 				
 				case Symbols.TokenRBRACE:
 					// RBRACE is a little tricky: it can be the end of an array definition, but
 					// usually it is the end of a previous block
-					int pos= fPreviousPos; // store state
+					pos= fPreviousPos; // store state
 					if (skipScope() && looksLikeArrayInitializerIntro())
 						continue; // it's an array
 					else
@@ -584,6 +595,29 @@ public class JavaIndenter {
 		}
 	}
 	
+	/**
+	 * Returns true if the colon at the current position is part of a conditional
+	 * (ternary) expression, false otherwise.
+	 * 
+	 * @return true if the colon at the current position is part of a conditional
+	 */
+	private boolean isConditional() {
+		while (true) {
+			nextToken();
+			switch (fToken) {
+				
+				// search for case, otherwise return true
+				case Symbols.TokenIDENT:
+					continue;
+				case Symbols.TokenCASE:
+					return false;
+					
+				default:
+					return true;
+			}
+		}
+	}
+
 	/**
 	 * Returns as a reference any previous <code>switch</code> labels (<code>case</code>
 	 * or <code>default</code>) or the offset of the brace that scopes the switch 
@@ -671,6 +705,14 @@ public class JavaIndenter {
 					
 				case Symbols.TokenSEMICOLON:
 					return fPosition;
+				case Symbols.TokenQUESTIONMARK:
+					if (prefTernaryDeepAlign()) {
+						setFirstElementAlignment(fPosition - 1, fPosition + 1);
+						return fPosition;
+					} else {
+						fIndent= prefTernaryIndent();
+						return fPosition;
+					}
 				case Symbols.TokenEOF:
 					return 0;
 					
@@ -992,9 +1034,10 @@ public class JavaIndenter {
 		}
 	}
 
+	// TODO adjust once there are per-project settings
+	
 	private int prefTabLength() {
 		int tabLen;
-		// TODO adjust once this is a per-project setting
 		JavaCore core= JavaCore.getJavaCore();
 		JavaPlugin plugin= JavaPlugin.getDefault();
 		if (core != null && plugin != null)
@@ -1011,8 +1054,6 @@ public class JavaIndenter {
 		return tabLen;
 	}
 	
-	// TODO add preference lookup or probing
-
 	private boolean prefArrayDimensionsDeepIndent() {
 		return true; // sensible default
 	}
@@ -1052,11 +1093,37 @@ public class JavaIndenter {
 	}
 
 	private boolean prefTernaryDeepAlign() {
-		return true; // sensible default
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_CONDITIONAL_EXPRESSION_ALIGNMENT);
+			try {
+				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN)) != 0)
+					return true;
+				else
+					return false;
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+		}
+		
+		return false;
 	}
 
 	private int prefTernaryIndent() {
-		return 2; // default: double indent conditional expressions
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_CONDITIONAL_EXPRESSION_ALIGNMENT);
+			try {
+				if ((Integer.parseInt(option) & Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_BY_ONE)) != 0)
+					return 1;
+				else
+					return prefContinuationIndent();
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+		}
+		
+		return prefContinuationIndent();
 	}
 
 	private int prefCaseIndent() {

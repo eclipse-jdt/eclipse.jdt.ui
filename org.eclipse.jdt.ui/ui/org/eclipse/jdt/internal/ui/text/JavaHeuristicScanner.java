@@ -337,7 +337,7 @@ public class JavaHeuristicScanner implements Symbols {
 			int from= pos, to;
 			pos= scanForward(pos + 1, bound, fNonIdent);
 			if (pos == NOT_FOUND)
-				to= bound;
+				to= bound == UNBOUND ? fDocument.getLength() : bound;
 			else
 				to= pos;
 			
@@ -405,7 +405,7 @@ public class JavaHeuristicScanner implements Symbols {
 			int from, to= pos + 1;
 			pos= scanBackward(pos - 1, bound, fNonIdent);
 			if (pos == NOT_FOUND)
-				from= bound + 1;
+				from= bound == UNBOUND ? 0 : bound + 1;
 			else
 				from= pos + 1;
 			

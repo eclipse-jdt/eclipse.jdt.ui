@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.text.java;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentCommand;
@@ -61,12 +60,15 @@ import org.eclipse.jdt.internal.ui.text.Symbols;
  */
 public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		
+	/** The line comment introducer. Value is "{@value}" */
+	private static final String LINE_COMMENT= "//"; //$NON-NLS-1$
+	
 		private static class CompilationUnitInfo {
 			
-			public char[] buffer;
-			public int delta;
+			char[] buffer;
+			int delta;
 			
-			public CompilationUnitInfo(char[] buffer, int delta) {
+			CompilationUnitInfo(char[] buffer, int delta) {
 				this.buffer= buffer;
 				this.delta= delta;
 			}
@@ -558,7 +560,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 	
 	/**
-	 * @param document
+	 * Installs a java partitioner with <code>document</code>.
+	 * 
+	 * @param document the document
 	 */
 	private static void installJavaStuff(Document document) {
 		String[] types= new String[] {
@@ -581,114 +585,244 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int offset= command.offset;
 			
 			// reference position to get the indent from
-			int refPos= indenter.findReferencePosition(offset);
-			if (refPos == JavaHeuristicScanner.NOT_FOUND)
+			int refOffset= indenter.findReferencePosition(offset);
+			if (refOffset == JavaHeuristicScanner.NOT_FOUND)
 				return;
-			int peerPos= getPeerPosition(document, command);
-			peerPos= indenter.findReferencePosition(peerPos);
-			refPos= Math.min(refPos, peerPos);
+			int peerOffset= getPeerPosition(document, command);
+			peerOffset= indenter.findReferencePosition(peerOffset);
+			refOffset= Math.min(refOffset, peerOffset);
 			
-			IRegion region= document.getLineInformationOfOffset(refPos);
-			int lineOffset= region.getOffset();
-			
-			// get the base indentation from the reference position
-			int endOfWS= scanner.findNonWhitespaceForwardInAnyPartition(lineOffset, JavaHeuristicScanner.UNBOUND);
-			if (endOfWS == JavaHeuristicScanner.NOT_FOUND)
-				endOfWS= lineOffset;
-			String baseIndent= document.get(lineOffset, endOfWS - lineOffset);
-			if (refPos == JavaHeuristicScanner.NOT_FOUND)
-				return;
-
 			// eat any WS before the insertion to the beginning of the line 
-			region= document.getLineInformationOfOffset(offset);
-			String notSelected= document.get(region.getOffset(), offset - region.getOffset());
+			IRegion line= document.getLineInformationOfOffset(offset);
+			String notSelected= document.get(line.getOffset(), offset - line.getOffset());
 			if (notSelected.trim().length() == 0) {
 				command.length += notSelected.length();
-				command.offset= region.getOffset();
+				command.offset= line.getOffset();
 			}
 			
 			// prefix: the part we need for formatting but won't paste
-			String prefix= baseIndent + document.get(refPos, command.offset - refPos);
+			IRegion refLine= document.getLineInformationOfOffset(refOffset);
+			String prefix= document.get(refLine.getOffset(), command.offset - refLine.getOffset());
+			
+			// handle the indentation computation inside a temporary document
 			Document temp= new Document(prefix + command.text);
-			
-			// eat any WS after the insertion, up to the delimiter, if the pasted text ends with
-			// a newline (with optional WS on the new line).
-			region= temp.getLineInformation(temp.getNumberOfLines() - 1);
-			boolean eatAfterSpace= temp.get(region.getOffset(), region.getLength()).trim().length() == 0;
-			String afterContent= new String();
-			if (eatAfterSpace) {
-				int selectionEnd= command.offset + command.length;
-				region= document.getLineInformationOfOffset(selectionEnd);
-				endOfWS= scanner.findNonWhitespaceForwardInAnyPartition(selectionEnd, region.getOffset() + region.getLength());
-				if (endOfWS != JavaHeuristicScanner.NOT_FOUND) {
-					int token= scanner.nextToken(selectionEnd, region.getOffset() + region.getLength());
-					if (token != Symbols.TokenEOF && token != Symbols.TokenCASE) { // doesn't work nicely with case
-						command.length += endOfWS - selectionEnd;
-						afterContent= document.get(endOfWS, scanner.getPosition() - endOfWS);
-					}
-				} else {
-					// simulate something to get the indentation
-					command.length += region.getOffset() + region.getLength() - selectionEnd;
-					afterContent= "x"; //$NON-NLS-1$
-				}
-			}
-			
-			// add context behind the insertion
-			temp.replace(temp.getLength(), 0, afterContent);
-			
 			scanner= new JavaHeuristicScanner(temp);
 			indenter= new JavaIndenter(temp, scanner);
 			installJavaStuff(temp);
 			
+			// indent the first and second line
+			// compute the relative indentation difference from the second line
+			// (as the first might be partially selected) and use the value to
+			// indent all other lines.
+			boolean isIndentDetected= false;
+			StringBuffer addition= new StringBuffer();
+			int insertLength= 0;
+			int first= document.computeNumberOfLines(prefix);
 			int lines= temp.getNumberOfLines();
-			for (int l= document.computeNumberOfLines(prefix); l < lines; l++) { // we don't change the number of lines while adding indents
+			for (int l= first; l < lines; l++) { // we don't change the number of lines while adding indents
+				
 				IRegion r= temp.getLineInformation(l);
-				lineOffset= r.getOffset();
+				int lineOffset= r.getOffset();
 				int lineLength= r.getLength();
 				
-				if (lineLength == 0) // don't format empty lines
+				if (lineLength == 0) // don't modify empty lines
 					continue;
 				
-				if (lineOffset < temp.getLength() - 1) {
-					// special single line comment handling: if comment starts at the start of the line, leave it alone.
-					String s= temp.get(lineOffset, 2);
-					if ("//".equals(s)) { //$NON-NLS-1$
-						continue;
-					}
+				if (!isIndentDetected){
+					
+					// indent the first pasted line
+					String current= getCurrentIndent(temp, l);
+					StringBuffer correct= indenter.computeIndentation(lineOffset);
+					if (correct == null)
+						return; // bail out
+					
+					insertLength= subtractIndent(correct, current, addition);
+					if (l != first)
+						isIndentDetected= true;
 				}
 				
-				StringBuffer indent= indenter.computeIndentation(lineOffset);
-				if (indent == null) // bail out
-					return;
+				// relatively indent all pasted lines 
+				if (insertLength > 0)
+					addIndent(temp, l, addition);
+				else if (insertLength < 0)
+					cutIndent(temp, l, -insertLength);
 				
-				// add single character for *-ed multiline comments
-				ITypedRegion partition= temp.getPartition(IJavaPartitions.JAVA_PARTITIONING, lineOffset);
-				String type= partition.getType();
-				if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
-					if (partition.getOffset() != lineOffset) // not for first line
-						indent.append(' ');
-					
-				endOfWS= scanner.findNonWhitespaceForwardInAnyPartition(lineOffset, lineOffset + lineLength);
-				if (endOfWS == JavaHeuristicScanner.NOT_FOUND)
-					endOfWS= lineOffset + lineLength;
-				
-				int wsLen= Math.max(endOfWS - lineOffset, 0);
-				temp.replace(lineOffset, wsLen, indent.toString());
 			}
 			
-			temp.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, null);
-
-			command.text= temp.get(prefix.length(), temp.getLength() - prefix.length() - afterContent.length());
+			// modify the command
+			command.text= temp.get(prefix.length(), temp.getLength() - prefix.length());
 			
 		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		} catch (BadPartitioningException e) {
 			JavaPlugin.log(e);
 		}
 
 	}
 
-    private static int getPeerPosition(IDocument document, DocumentCommand command) {
+	/**
+	 * Returns the indentation of the line <code>line</code> in <code>document</code>.
+	 * The returned string may contain pairs of leading slashes that are considered
+	 * part of the indentation. The space before the asterix in a javadoc-like
+	 * comment is not considered part of the indentation.
+	 * 
+	 * @param document the document
+	 * @param line the line
+	 * @return the indentation of <code>line</code> in <code>document</code>
+	 * @throws BadLocationException if the document is changed concurrently
+	 */
+	private static String getCurrentIndent(Document document, int line) throws BadLocationException {
+		IRegion region= document.getLineInformation(line);
+		int from= region.getOffset();
+		int endOffset= region.getOffset() + region.getLength();
+		
+		// go behind line comments
+		int to= from;
+		while (to < endOffset - 2 && document.get(to, 2).equals(LINE_COMMENT))
+			to += 2;
+		
+		while (to < endOffset) {
+			char ch= document.getChar(to);
+			if (!Character.isWhitespace(ch))
+				break;
+			to++;
+		}
+		
+		// don't count the space before javadoc like, asterix-style comment lines
+		if (to > from && to < endOffset - 1 && document.get(to - 1, 2).equals(" *")) { //$NON-NLS-1$
+			String type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, to);
+			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
+				to--;
+		}
+		
+		return document.get(from, to - from);
+	}
+
+	/**
+	 * Computes the difference of two indentations and returns the difference in
+	 * length of current and correct. If the return value is positive, <code>addition</code>
+	 * is initialized with a substring of that length of <code>correct</code>.
+	 * 
+	 * @param correct the correct indentation
+	 * @param current the current indentation (migth contain non-whitespace)
+	 * @param difference a string buffer - if the return value is positive, it will be cleared and set to the substring of <code>current</code> of that length
+	 * @return the difference in lenght of <code>correct</code> and <code>current</code> 
+	 */
+	private static int subtractIndent(CharSequence correct, CharSequence current, StringBuffer difference) {
+		int c1= computeVisualLength(correct);
+		int c2= computeVisualLength(current);
+		int diff= c1 - c2;
+		if (diff <= 0)
+			return diff;
+		
+		difference.setLength(0);
+		int len= 0, i= 0;
+		while (len < diff) {
+			char c= correct.charAt(i++);
+			difference.append(c);
+			len += computeVisualLength(c);
+		}
+		
+		
+		return diff;
+	}
+
+	/**
+	 * Indents line <code>line</code> in <code>document</code> with <code>indent</code>.
+	 * Leaves leading comment signs alone.
+	 * 
+	 * @param document the document
+	 * @param line the line
+	 * @param indent the indentation to insert
+	 * @throws BadLocationException on concurrent document modification
+	 */
+	private static void addIndent(Document document, int line, CharSequence indent) throws BadLocationException {
+		IRegion region= document.getLineInformation(line);
+		int insert= region.getOffset();
+		int endOffset= region.getOffset() + region.getLength();
+		
+		// go behind line comments
+		while (insert < endOffset - 2 && document.get(insert, 2).equals(LINE_COMMENT))
+			insert += 2;
+		
+		// insert indent
+		document.replace(insert, 0, indent.toString());
+	}
+
+	/**
+	 * Cuts the visual equivalent of <code>toDelete</code> characters out of the
+	 * indentation of line <code>line</code> in <code>document</code>. Leaves
+	 * leading comment signs alone.
+	 * 
+	 * @param document the document
+	 * @param line the line
+	 * @param toDelete the number of space equivalents to delete.
+	 * @throws BadLocationException on concurrent document modification
+	 */
+	private static void cutIndent(Document document, int line, int toDelete) throws BadLocationException {
+		IRegion region= document.getLineInformation(line);
+		int from= region.getOffset();
+		int endOffset= region.getOffset() + region.getLength();
+		
+		// go behind line comments
+		while (from < endOffset - 2 && document.get(from, 2).equals(LINE_COMMENT))
+			from += 2;
+		
+		int to= from;
+		while (toDelete > 0 && to < endOffset) {
+			char ch= document.getChar(to);
+			if (!Character.isWhitespace(ch))
+				break;
+			toDelete -= computeVisualLength(ch);
+			to++;
+		}
+		
+		document.replace(from, to - from, null);
+	}
+
+	/**
+	 * Returns the visual length of a given <code>CharSequence</code> taking into
+	 * account the visual tabulator length.
+	 * 
+	 * @param seq the string to measure
+	 * @return the visual length of <code>seq</code>
+	 */
+	private static int computeVisualLength(CharSequence seq) {
+		int size= 0;
+		int tablen= getVisualTabLengthPreference();
+		
+		for (int i= 0; i < seq.length(); i++) {
+			char ch= seq.charAt(i);
+			if (ch == '\t')
+				size += tablen - size % tablen;
+			else
+				size++;
+		}
+		return size;
+	}
+	
+	/**
+	 * Returns the visual length of a given character taking into
+	 * account the visual tabulator length.
+	 * 
+	 * @param ch the character to measure
+	 * @return the visual length of <code>ch</code>
+	 */
+	private static int computeVisualLength(char ch) {
+		if (ch == '\t')
+			return getVisualTabLengthPreference();
+		else
+			return 1;
+	}
+
+	/**
+	 * The preference setting for the visual tabulator display.
+	 *  
+	 * @return the number of spaces displayed for a tabulator in the editor
+	 */
+	private static int getVisualTabLengthPreference() {
+		return JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
+	}
+
+	private static int getPeerPosition(IDocument document, DocumentCommand command) {
     	/*
     	 * Search for scope closers in the pasted text and find their opening peers
     	 * in the document. 
