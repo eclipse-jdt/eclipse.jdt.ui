@@ -17,6 +17,8 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
@@ -27,6 +29,11 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ExtractConstantTests extends RefactoringTest {
@@ -35,6 +42,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	private static final String REFACTORING_PATH = "ExtractConstant/";
 
 	private Object fCompactPref; 
+	private boolean fAddComments; 
 		
 	public ExtractConstantTests(String name) {
 		super(name);
@@ -77,13 +85,20 @@ public class ExtractConstantTests extends RefactoringTest {
 		fCompactPref= options.get(setting);
 		options.put(setting, DefaultCodeFormatterConstants.TRUE);
 		JavaCore.setOptions(options);
+		
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		fAddComments= store.getBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS);
+		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 	}
 	
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		Hashtable options= JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, fCompactPref);
-		JavaCore.setOptions(options);	
+		JavaCore.setOptions(options);
+		
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, fAddComments);
 	}
 
 	private void guessHelper(int startLine, int startColumn, int endLine, int endColumn, String expectedGuessedName) throws Exception {

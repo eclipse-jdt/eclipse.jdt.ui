@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -60,6 +61,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
@@ -74,6 +76,10 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+import org.eclipse.jdt.ui.CodeGeneration;
+
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
 public class ExtractConstantRefactoring extends Refactoring {
@@ -434,7 +440,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		}
 	}
 
-	private void createConstantDeclaration() throws JavaModelException {
+	private void createConstantDeclaration() throws CoreException {
 		IExpressionFragment fragment= getSelectedExpression();
 		String initializerSource= fCu.getBuffer().getText(fragment.getStartPosition(), fragment.getLength());
 		
@@ -458,6 +464,15 @@ public class ExtractConstantRefactoring extends Refactoring {
 			fieldDeclaration.modifiers().add(ast.newModifier(accessModifier));
 		fieldDeclaration.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.STATIC_KEYWORD));
 		fieldDeclaration.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.FINAL_KEYWORD));
+		
+		boolean createComments= JavaPreferencesSettings.getCodeGenerationSettings(fCu.getJavaProject()).createComments;
+		if (createComments) {
+			String comment= CodeGeneration.getFieldComment(fCu, typeBinding.getName(), fConstantName, StubUtility.getLineDelimiterUsed(fCu));
+			if (comment != null && comment.length() > 0) {
+				Javadoc doc= (Javadoc) fCuRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC);
+				fieldDeclaration.setJavadoc(doc);
+			}
+		}
 		
 		AbstractTypeDeclaration parent= getContainingTypeDeclarationNode();
 		ListRewrite listRewrite= fCuRewrite.getASTRewrite().getListRewrite(parent, parent.getBodyDeclarationsProperty());
@@ -688,7 +703,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return fSelectedExpression;
 	}
 
-	//returns non-null
 	private AbstractTypeDeclaration getContainingTypeDeclarationNode() throws JavaModelException {
 		AbstractTypeDeclaration result= (AbstractTypeDeclaration) ASTNodes.getParent(getSelectedExpression().getAssociatedNode(), AbstractTypeDeclaration.class);  
 		Assert.isNotNull(result);
