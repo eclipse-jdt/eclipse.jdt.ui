@@ -4,23 +4,17 @@
  */
 package org.eclipse.jdt.internal.ui.snippeteditor;
 
-import java.util.ResourceBundle;
-
+import org.eclipse.jdt.internal.ui.javaeditor.BasicEditorActionContributor;
+import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
-
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.BasicEditorActionContributor;
-
 
 /**
- * Contributions of the Evaluation Editor to the Workbench's tool and menu bar.
+ * Contributions of the Snippet Editor to the Workbench's tool and menu bar.
  */
 public class SnippetEditorActionContributor extends BasicEditorActionContributor {
  	
