@@ -10,10 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -24,29 +20,18 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.refactoring.ModifyParametersWizard;
-import org.eclipse.jdt.internal.ui.refactoring.PullUpWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractTempAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.InlineTempAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.ModifyParamatersAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.MoveAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.OpenRefactoringWizardAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.PullUpAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameAction;
 
 /**
@@ -106,6 +91,12 @@ public class RefactorActionGroup extends ActionGroup {
 
 		fExtractMethodAction= new ExtractMethodAction(editor);
 		initAction(fExtractMethodAction, editor.getSelectionProvider());
+		
+		fModifyParametersAction= new ModifyParamatersAction(editor);
+		initAction(fModifyParametersAction, editor.getSelectionProvider());
+
+		fPullUpAction= new PullUpAction(editor);
+		initAction(fPullUpAction, editor.getSelectionProvider());		
 	}
 
 	private RefactorActionGroup(UnifiedSite site) {
@@ -116,10 +107,10 @@ public class RefactorActionGroup extends ActionGroup {
 		fRenameAction= new RenameAction(site);
 		initAction(fRenameAction, fSite.getSelectionProvider());
 		
-		fModifyParametersAction= RefactorActionGroup.createModifyParametersAction(fSite);
+		fModifyParametersAction= new ModifyParamatersAction(fSite);
 		initAction(fModifyParametersAction, fSite.getSelectionProvider());
 		
-		fPullUpAction= RefactorActionGroup.createPullUpAction(fSite);
+		fPullUpAction= new PullUpAction(fSite);
 		initAction(fPullUpAction, fSite.getSelectionProvider());
 		
 		fSelfEncapsulateField= new SelfEncapsulateFieldAction(fSite);
@@ -176,48 +167,4 @@ public class RefactorActionGroup extends ActionGroup {
 		if (action.isEnabled())
 			menu.add(action);
 	}
-	
-	//----
-	private static OpenRefactoringWizardAction createModifyParametersAction(UnifiedSite site) {
-		String label= RefactoringMessages.getString("RefactoringGroup.modify_Parameters_label"); //$NON-NLS-1$
-		return new OpenRefactoringWizardAction(label, site, IMethod.class) {
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new ModifyParametersRefactoring((IMethod)obj);
-			}
-			protected boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
-				return ((ModifyParametersRefactoring)refactoring).checkPreactivation().isOK();
-			}
-			protected RefactoringWizard createWizard(Refactoring ref){
-				String title= RefactoringMessages.getString("RefactoringGroup.modify_method_parameters"); //$NON-NLS-1$
-				//FIX ME: wrong
-				String helpId= IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE;
-				return new ModifyParametersWizard((ModifyParametersRefactoring)ref, title, helpId);
-			}
-		};
-	}
-
-	private static OpenRefactoringWizardAction createPullUpAction(UnifiedSite site) {
-		String label= RefactoringMessages.getString("RefactoringGroup.pull_Up_label"); //$NON-NLS-1$
-		return new OpenRefactoringWizardAction(label, site, IMember.class) {
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				Set memberSet= new HashSet();
-				memberSet.addAll(Arrays.asList((Object[])obj));
-				IMember[] members= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-				return new PullUpRefactoring(members, JavaPreferencesSettings.getCodeGenerationSettings());
-			}
-			protected boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
-				return ((PullUpRefactoring)refactoring).checkPreactivation().isOK();
-			}
-			protected boolean canOperateOnMultiSelection(){
-				return true;
-			}	
-			protected RefactoringWizard createWizard(Refactoring ref){
-				String title= RefactoringMessages.getString("RefactoringGroup.pull_up"); //$NON-NLS-1$
-				//FIX ME: wrong
-				String helpId= "HELPID"; //$NON-NLS-1$
-				return new PullUpWizard((PullUpRefactoring)ref, title, helpId);
-			}
-		};
-	}
-	
 }
