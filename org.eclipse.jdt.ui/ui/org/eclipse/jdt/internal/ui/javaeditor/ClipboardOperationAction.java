@@ -320,6 +320,14 @@ public final class ClipboardOperationAction extends TextEditorAction {
 					datas.add(rtfData);
 					transfers.add(RTFTransfer.getInstance());
 				}
+				
+				/*
+				 * Don't add if we didn't get any data from the clipboard
+				 * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=70077
+				 */
+				if (datas.isEmpty())
+					return;
+
 				datas.add(clipboardData);
 				transfers.add(fgTransferInstance);
 	
