@@ -38,14 +38,11 @@ public abstract class StatusDialog extends Dialog {
 	private String fTitle;
 	private Image fImage;
 	
-	private boolean fStatusLineAboveButtons;
-	
 	/**
 	 * Creates an instane of a status dialog.
 	 */
 	public StatusDialog(Shell parent) {
 		super(parent);
-		fStatusLineAboveButtons= false;
 		fLastStatus= new StatusInfo();
 	}
 	
@@ -57,7 +54,6 @@ public abstract class StatusDialog extends Dialog {
 	 * 	<code>false</code> to the right
 	 */
 	public void setStatusLineAboveButtons(boolean aboveButtons) {
-		fStatusLineAboveButtons= aboveButtons;
 	}	
 	
 	/**

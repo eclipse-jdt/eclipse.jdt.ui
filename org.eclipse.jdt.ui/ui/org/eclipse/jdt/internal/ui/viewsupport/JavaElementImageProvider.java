@@ -70,12 +70,10 @@ public class JavaElementImageProvider {
 
 	private static ImageDescriptor DESC_OBJ_PROJECT_CLOSED;	
 	private static ImageDescriptor DESC_OBJ_PROJECT;	
-	private static ImageDescriptor DESC_OBJ_FOLDER;
 	{
 		ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages(); 
 		DESC_OBJ_PROJECT_CLOSED= images.getImageDescriptor(ISharedImages.IMG_OBJ_PROJECT_CLOSED);
 		DESC_OBJ_PROJECT= 		 images.getImageDescriptor(ISharedImages.IMG_OBJ_PROJECT);
-		DESC_OBJ_FOLDER= 		 images.getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER);
 	}
 	
 	private ImageDescriptorRegistry fRegistry;
