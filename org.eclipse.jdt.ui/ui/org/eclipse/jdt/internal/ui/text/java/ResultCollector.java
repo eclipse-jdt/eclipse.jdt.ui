@@ -293,6 +293,8 @@ public class ResultCollector extends CompletionRequestor {
 		
 		String name= String.valueOf(proposal.getName());
 		String[] paramTypes= Signature.getParameterTypes(String.valueOf(proposal.getSignature()));
+		for (int index= 0; index < paramTypes.length; index++)
+			paramTypes[index]= Signature.toString(paramTypes[index]);
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(start, proposal.getReplaceEnd());
