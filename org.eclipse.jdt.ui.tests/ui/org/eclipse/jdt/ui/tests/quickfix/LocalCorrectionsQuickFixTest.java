@@ -816,6 +816,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testInvisibleFieldRequestedInSamePackage2() throws Exception {
+		if (true) {
+			System.out.println("testInvisibleFieldRequestedInSamePackage2: Waiting for release fo bug fix 24406");	
+			return;
+		}	
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -955,7 +959,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	
 	public void testInvisibleTypeRequestedInDifferentPackage() throws Exception {
 		if (true) {
-			System.out.println("testInvisibleTypeRequestedInDifferenetPackage: Waiting for release fo bug fix 24406");	
+			System.out.println("testInvisibleTypeRequestedInDifferentPackage: Waiting for release fo bug fix 24406");	
 			return;
 		}		
 		

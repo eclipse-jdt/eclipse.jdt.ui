@@ -227,34 +227,43 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 	
-	/**
-	 * Method addStaticMethodRequestedProposal.
-	 * @param problemPos
-	 * @param proposals
-	 */
-	public static void addStaticMethodRequestedProposal(ProblemPosition problemPos, ArrayList proposals) throws JavaModelException {
+	public static void addModfierChangeProposal(ProblemPosition problemPos, ArrayList proposals, boolean visibilityChange) throws JavaModelException {
 		ICompilationUnit cu= problemPos.getCompilationUnit();
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode == null) {
+			return;
+		}
 		
 		IBinding binding=null;
-		if (selectedNode instanceof SimpleName) {
-			binding= ((SimpleName) selectedNode).resolveBinding();
-		} else if (selectedNode instanceof QualifiedName) {
-			binding= ((QualifiedName) selectedNode).resolveBinding();
-		} else if (selectedNode instanceof SimpleType) {
-			binding= ((SimpleType) selectedNode).resolveBinding();
-		} else if (selectedNode instanceof MethodInvocation) {
-			binding= ((MethodInvocation) selectedNode).getName().resolveBinding();
-		} else if (selectedNode instanceof SuperMethodInvocation) {
-			binding= ((SuperMethodInvocation) selectedNode).getName().resolveBinding();
-		} else if (selectedNode instanceof SuperFieldAccess) {
-			binding= ((SuperFieldAccess) selectedNode).getName().resolveBinding();	
-		} else if (selectedNode instanceof ClassInstanceCreation) {
-			binding= ((ClassInstanceCreation) selectedNode).resolveConstructorBinding();	
-		} else if (selectedNode instanceof SuperConstructorInvocation) {
-			binding= ((SuperConstructorInvocation) selectedNode).resolveConstructorBinding();
+		switch (selectedNode.getNodeType()) {
+			case ASTNode.SIMPLE_NAME:
+				binding= ((SimpleName) selectedNode).resolveBinding();
+				break;
+			case ASTNode.QUALIFIED_NAME:
+				binding= ((QualifiedName) selectedNode).resolveBinding();
+				break;
+			case ASTNode.SIMPLE_TYPE:
+				binding= ((SimpleType) selectedNode).resolveBinding();
+				break;
+			case ASTNode.METHOD_INVOCATION:
+				binding= ((MethodInvocation) selectedNode).getName().resolveBinding();
+				break;
+			case ASTNode.SUPER_METHOD_INVOCATION:
+				binding= ((SuperMethodInvocation) selectedNode).getName().resolveBinding();
+				break;								
+			case ASTNode.SUPER_FIELD_ACCESS:
+				binding= ((SuperFieldAccess) selectedNode).getName().resolveBinding();
+				break;				
+			case ASTNode.CLASS_INSTANCE_CREATION:
+				binding= ((ClassInstanceCreation) selectedNode).resolveConstructorBinding();
+				break;
+			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
+				binding= ((SuperConstructorInvocation) selectedNode).resolveConstructorBinding();
+				break;							
+			default:
+				return;
 		}
 		ITypeBinding typeBinding= null;
 		String name;
@@ -274,21 +283,13 @@ public class LocalCorrectionsSubProcessor {
 			int includedModifiers= 0;
 			int excludedModifiers= 0;
 			String label;
-			switch (problemPos.getId()) {
-			case IProblem.StaticMethodRequested:
-				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changemodifiertostatic.description", name);
-				includedModifiers= Modifier.STATIC;
-				break;
-			case IProblem.NotVisibleMethod:
-			case IProblem.NotVisibleConstructor:
-			case IProblem.NotVisibleField:
-			case IProblem.NotVisibleType:
+			if (visibilityChange) {
 				excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
 				includedModifiers= getNeededVisibility(selectedNode, typeBinding);
 				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changevisibility.description", new String[] { name, getVisibilityString(includedModifiers) });
-				break;
-			default:
-				return;
+			} else {				
+				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changemodifiertostatic.description", name);
+				includedModifiers= Modifier.STATIC;
 			}
 			ICompilationUnit targetCU= Binding2JavaModel.findCompilationUnit(typeBinding, cu.getJavaProject());
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -316,7 +317,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 			curr= curr.getSuperclass();
 		}
-		if (currNodeBinding.getPackage().getKey().equals(targetType.getKey())) {
+		if (currNodeBinding.getPackage().getKey().equals(targetType.getPackage().getKey())) {
 			return 0;
 		}
 		return Modifier.PUBLIC;

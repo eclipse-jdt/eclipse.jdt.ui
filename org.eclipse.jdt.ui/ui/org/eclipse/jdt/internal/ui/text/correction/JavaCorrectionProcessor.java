@@ -52,6 +52,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		switch (problemId) {
 			case IProblem.UnterminatedString:
 			case IProblem.UnusedImport:
+			case IProblem.DuplicateImport:
+			case IProblem.CannotImportPackage:
+			case IProblem.ConflictingImport:			
 			case IProblem.UndefinedMethod:
 			case IProblem.UndefinedConstructor:
 			case IProblem.ParameterMismatch:
@@ -80,6 +83,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.NotVisibleConstructor:
 			case IProblem.NotVisibleField:
 			case IProblem.NonStaticFieldFromStaticInvocation:
+			case IProblem.InstanceMethodDuringConstructorInvocation:
+			case IProblem.InstanceFieldDuringConstructorInvocation:			
 				return true;
 			default:
 				return false;
@@ -177,6 +182,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					proposals.add(new InsertCorrectionProposal(quoteLabel, problemPos.getCompilationUnit(), pos, "\"", 0)); //$NON-NLS-1$ 
 					break;
 				case IProblem.UnusedImport:
+				case IProblem.DuplicateImport:
+				case IProblem.CannotImportPackage:
+				case IProblem.ConflictingImport:
 					ReorgCorrectionsSubProcessor.removeImportStatementProposals(problemPos, proposals);
 					break;
 				case IProblem.UndefinedMethod:
@@ -233,6 +241,11 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					LocalCorrectionsSubProcessor.addAccessToStaticProposals(problemPos, proposals);
 					break;
 				case IProblem.StaticMethodRequested:
+				case IProblem.NonStaticFieldFromStaticInvocation:
+				case IProblem.InstanceMethodDuringConstructorInvocation:
+				case IProblem.InstanceFieldDuringConstructorInvocation:
+					LocalCorrectionsSubProcessor.addModfierChangeProposal(problemPos, proposals, false); 
+					break;				
 				case IProblem.NotVisibleMethod:
 				case IProblem.NotVisibleConstructor:
 				case IProblem.NotVisibleType:
@@ -243,8 +256,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.ReturnTypeNotVisible:
 				case IProblem.ExceptionTypeNotVisible:
 				case IProblem.NotVisibleField:
-				case IProblem.NonStaticFieldFromStaticInvocation:
-					LocalCorrectionsSubProcessor.addStaticMethodRequestedProposal(problemPos, proposals); 
+					LocalCorrectionsSubProcessor.addModfierChangeProposal(problemPos, proposals, true); 
 					break;
 				default:
 			}
