@@ -20,11 +20,16 @@
   
  <extension 
 	point="org.eclipse.ui.newWizards">
+	<category
+	   id = "org.eclipse.jdt.examples.projects"
+	   parentCategory="org.eclipse.ui.Examples"
+	   name="Java">
+	</category>		
 	<wizard 
 		id="org.eclipse.jdt.examples.projects.JUnitProjectExampleCreationWizard"
 		name="%JUnitProjectExampleCreationWizard.title"
 		class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectCreationWizard"
-		category="org.eclipse.jdt.ui.java"
+		category="org.eclipse.ui.Examples/org.eclipse.jdt.examples.projects"
 		project="true"
 		finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
 		icon="icons/full/ctool16/newjprjex_wiz.gif">
