@@ -47,6 +47,8 @@ public class VariableBlock {
 		fReservedList.setDialogFieldListener(adapter);
 		fReservedList.setLabelText(JavaPlugin.getResourceString(RESERVED + ".label"));
 		
+		fVariablesList.enableCustomButton(1, false);
+		
 		CPVariableElement initSelectedElement= null;
 		
 		String[] reservedName= getReservedVariableNames();
