@@ -194,7 +194,7 @@ public class NLSRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(fCu.getElementName() + NLSMessages.getString("NLSrefactoring.read_only"));	 //$NON-NLS-1$
 		
 		if (NLSHolder.create(fCu).getSubstitutions().length == 0)	
-			return RefactoringStatus.createFatalErrorStatus(NLSMessages.getString("NLSrefactoring.none_found")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus("No strings to externalize found in '" + fCu.getElementName() + "'");
 		
 		return new RefactoringStatus();
 	}
