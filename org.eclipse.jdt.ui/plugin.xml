@@ -914,6 +914,11 @@
 			tooltip="%OpenTypeAction.tooltip"
 			icon="icons/full/ctool16/opentype.gif"
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeAction"/>
+		<action id="exportJavadoc"
+			definitionId="org.eclipse.jdt.ui.generate.javadoc"
+			menubarPath="project/additions"
+			label="%GenerateJavadocAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.GenerateJavadocAction"/>
 	</actionSet>
 </extension>
 
@@ -1832,6 +1837,13 @@
 		id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
 		name= "%ActionDefinition.implementorsInWorkingSet.name"
 		description="%ActionDefinition.implementorsInWorkingSet.description"
+	/>
+	
+	<!-- Project --> 
+	<actionDefinition
+		id="org.eclipse.jdt.ui.generate.javadoc"
+		name= "%ActionDefinition.generateJavadoc.name"
+		description="%ActionDefinition.generateJavadoc.description"
 	/>
 
 	<!-- miscellaenous -->
