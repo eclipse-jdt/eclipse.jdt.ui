@@ -20,15 +20,15 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
+
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -55,8 +55,12 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
+		return new Java15Setup(new TestSuite(clazz));
 	}
+	
+	public static Test setUpTest(Test someTest) {
+		return new Java15Setup(someTest);
+	}	
 
 	private String getSimpleName(String qualifiedName) {
 		return qualifiedName.substring(qualifiedName.lastIndexOf('.') + 1);
@@ -71,9 +75,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		ICompilationUnit[] cus= new ICompilationUnit[qualifiedNames.length];
 		for(int i= 0; i < qualifiedNames.length; i++) {
 			Assert.isNotNull(qualifiedNames[i]);
-
-			cus[i]= createCUfromTestFile(getRoot().createPackageFragment(getQualifier(qualifiedNames[i]), true, null),
-													  getSimpleName(qualifiedNames[i]));
+			cus[i]= createCUfromTestFile(getRoot().createPackageFragment(getQualifier(qualifiedNames[i]), true, null), getSimpleName(qualifiedNames[i]));
 		}
 		return cus;
 	}
@@ -91,27 +93,25 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(cuQNames, selectionCuIndex, startLine, startColumn, endLine, endColumn, newReceiverType, newReceiverName, null, inlineDelegator, removeDelegator);
 	}
 	
-	private static void chooseNewReceiver(MoveInstanceMethodRefactoring ref, int newReceiverType, String newReceiverName) {
-		INewReceiver chosen= null;
-		INewReceiver[] possibleNewReceivers= ref.getPossibleNewReceivers();
-		for(int i= 0; i < possibleNewReceivers.length; i++)  {
-			INewReceiver candidate= possibleNewReceivers[i];
-			if(   candidate.getName().equals(newReceiverName)
-			   && typeMatches(newReceiverType, candidate)) {
-				assertNull(chosen);
-				chosen= candidate;
+	private static void chooseNewTarget(MoveInstanceMethodRefactoring ref, int newTargetType, String newTargetName) {
+		IVariableBinding target= null;
+		IVariableBinding[] targets= ref.getMoveMethodProcessor().getPossibleTargets();
+		for(int i= 0; i < targets.length; i++)  {
+			IVariableBinding candidate= targets[i];
+			if(candidate.getName().equals(newTargetName) && typeMatches(newTargetType, candidate)) {
+				target= candidate;
+				break;
 			}
 		}
-		assertNotNull("Expected new receiver not available.", chosen);
-		ref.chooseNewReceiver(chosen);		
+		assertNotNull("Expected new target not available.", target);
+		ref.getMoveMethodProcessor().setTarget(target);
 	}
 	
-	private static boolean typeMatches(int newReceiverType, INewReceiver newReceiver) {
-		return    newReceiverType == PARAMETER && newReceiver.isParameter()
-		        || newReceiverType == FIELD && newReceiver.isField();
+	private static boolean typeMatches(int newTargetType, IVariableBinding newTarget) {
+		return newTargetType == PARAMETER && !newTarget.isField() || newTargetType == FIELD && newTarget.isField();
 	}
 	
-	private void helper1(String[] cuQNames, int selectionCuIndex, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, String newMethodName, boolean inlineDelegator, boolean removeDelegator) throws Exception{
+	private void helper1(String[] cuQNames, int selectionCuIndex, int startLine, int startColumn, int endLine, int endColumn, int newTargetType, String newTargetName, String newMethodName, boolean inlineDelegator, boolean removeDelegator) throws Exception{
 		Assert.isTrue(0 <= selectionCuIndex && selectionCuIndex < cuQNames.length);
 
 		toSucceed= true;
@@ -129,12 +129,12 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 
 		assertTrue("activation was supposed to be successful", preconditionResult.isOK());
 
-		chooseNewReceiver(ref, newReceiverType, newReceiverName);
-		
-		ref.setRemoveDelegator(removeDelegator);
-		ref.setInlineDelegator(inlineDelegator);
+		chooseNewTarget(ref, newTargetType, newTargetName);
+		MoveInstanceMethodProcessor processor= ref.getMoveMethodProcessor();
+		processor.setRemoveDelegator(removeDelegator);
+		processor.setInlineDelegator(inlineDelegator);
 		if(newMethodName != null)
-			ref.setNewMethodName(newMethodName);
+			processor.setMethodName(newMethodName);
 
 		preconditionResult.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 
@@ -148,20 +148,20 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		}
 	}
 
-	private void failHelper1(String cuQName, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, boolean inlineDelegator, boolean removeDelegator, int errorCode) throws Exception {
-		failHelper1(new String[] {cuQName}, cuQName, startLine, startColumn, endLine, endColumn, newReceiverType, newReceiverName, inlineDelegator, removeDelegator, errorCode);
+	private void failHelper1(String cuQName, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, boolean inlineDelegator, boolean removeDelegator) throws Exception {
+		failHelper1(new String[] {cuQName}, cuQName, startLine, startColumn, endLine, endColumn, newReceiverType, newReceiverName, inlineDelegator, removeDelegator);
 	}
-	private void failHelper1(String[] cuQNames, String selectionCuQName, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, boolean inlineDelegator, boolean removeDelegator, int errorCode) throws Exception {
+	private void failHelper1(String[] cuQNames, String selectionCuQName, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, boolean inlineDelegator, boolean removeDelegator) throws Exception {
 		int selectionCuIndex= firstIndexOf(selectionCuQName, cuQNames);
 		Assert.isTrue(selectionCuIndex != -1, "parameter selectionCuQName must match some String in cuQNames.");
-		failHelper1(cuQNames, selectionCuIndex, startLine, startColumn, endLine, endColumn, newReceiverType, newReceiverName, null, null, inlineDelegator, removeDelegator, errorCode);
+		failHelper1(cuQNames, selectionCuIndex, startLine, startColumn, endLine, endColumn, newReceiverType, newReceiverName, null, null, inlineDelegator, removeDelegator);
 	}
-	private void failHelper2(String[] cuQNames, String selectionCuQName, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, String originalReceiverParameterName, boolean inlineDelegator, boolean removeDelegator, int errorCode) throws Exception {
+	private void failHelper2(String[] cuQNames, String selectionCuQName, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, String originalReceiverParameterName, boolean inlineDelegator, boolean removeDelegator) throws Exception {
 		int selectionCuIndex= firstIndexOf(selectionCuQName, cuQNames);
 		Assert.isTrue(selectionCuIndex != -1, "parameter selectionCuQName must match some String in cuQNames.");
-		failHelper1(cuQNames, selectionCuIndex, startLine, startColumn, endLine, endColumn, newReceiverType, newReceiverName, null, originalReceiverParameterName, inlineDelegator, removeDelegator, errorCode);
+		failHelper1(cuQNames, selectionCuIndex, startLine, startColumn, endLine, endColumn, newReceiverType, newReceiverName, null, originalReceiverParameterName, inlineDelegator, removeDelegator);
 	}
-	private void failHelper1(String[] cuQNames, int selectionCuIndex, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, String newMethodName, String originalReceiverParameterName, boolean inlineDelegator, boolean removeDelegator, int errorCode) throws Exception {
+	private void failHelper1(String[] cuQNames, int selectionCuIndex, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, String newMethodName, String newTargetName, boolean inlineDelegator, boolean removeDelegator) throws Exception {
 		Assert.isTrue(0 <= selectionCuIndex && selectionCuIndex < cuQNames.length);
 
 		toSucceed= false;
@@ -172,33 +172,26 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
 		IMethod method= getMethod(selectionCu, selection);
 		assertNotNull(method);
-		MoveInstanceMethodRefactoring ref= MoveInstanceMethodRefactoring.create(method,
-																									JavaPreferencesSettings.getCodeGenerationSettings());
-		if (ref == null) {
-			assertTrue(errorCode != 0);
-		} else  {
-			RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
+		MoveInstanceMethodRefactoring ref= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
+		if (!result.isOK())
+			return;
+		else {
+			chooseNewTarget(ref, newReceiverType, newReceiverName);
 
-			if(!result.isOK()) {
-				assertEquals(errorCode, result.getEntryMatchingSeverity(RefactoringStatus.ERROR).getCode());
-				return;
-			} else {
-				chooseNewReceiver(ref, newReceiverType, newReceiverName);
-	
-				if (originalReceiverParameterName != null)
-					ref.setOriginalReceiverParameterName(originalReceiverParameterName);
-				ref.setRemoveDelegator(removeDelegator);			
-				ref.setInlineDelegator(inlineDelegator);
-				if(newMethodName != null)
-					ref.setNewMethodName(newMethodName);
-	
-				result.merge(ref.checkFinalConditions(new NullProgressMonitor()));
-	
-				assertTrue("precondition checking is expected to fail.", !result.isOK());
-				assertEquals(errorCode, result.getEntryMatchingSeverity(RefactoringStatus.ERROR).getCode());
-			}
+			MoveInstanceMethodProcessor processor= ref.getMoveMethodProcessor();
+			if (newTargetName != null)
+				processor.setTargetName(newTargetName);
+			processor.setInlineDelegator(inlineDelegator);
+			processor.setRemoveDelegator(removeDelegator);
+			if (newMethodName != null)
+				processor.setMethodName(newMethodName);
+
+			result.merge(ref.checkFinalConditions(new NullProgressMonitor()));
+
+			assertTrue("precondition checking is expected to fail.", !result.isOK());
 		}
-	}	
+	}
 
 	private static IMethod getMethod(ICompilationUnit cu, ISourceRange sourceRange) throws JavaModelException {
 		IJavaElement[] jes= cu.codeSelect(sourceRange.getOffset(), sourceRange.getLength());
@@ -257,19 +250,19 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	}
 	
 	// multiple parameters, some left of new receiver parameter, some right of it,
-	// "this" is passed as first argument
+	// "this" is passed as argument
 	public void test9() throws Exception {
 		helper1(new String[] {"p1.A", "p2.B"}, "p1.A", 6, 17, 6, 17, PARAMETER, "b", false, false);
 	}	
 	
 	// multiple parameters, some left of new receiver parameter, some right of it,
-	// "this" is NOT passed as first argument, (since it's not used in the method)
+	// "this" is NOT passed as argument, (since it's not used in the method)
 	public void test10() throws Exception {
 		helper1(new String[] {"p1.A", "p2.B"}, "p1.A", 6, 17, 6, 17, PARAMETER, "b", false, false);
 	}
 	
 	//move to field, method has parameters, choice of fields, some non-class type fields
-	// ("this" is passed as first argument)
+	// ("this" is passed as argument)
 	public void test11() throws Exception {
 		helper1(new String[] {"p1.A", "p2.B"}, "p1.A", 11, 17, 11, 17, FIELD, "fB", false, false);
 	}	
@@ -345,69 +338,69 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 
 	// Cannot move interface method declaration
 	public void testFail0() throws Exception {
-		failHelper1("p1.IA", 5, 17, 5, 20, PARAMETER, "b", true, true, RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION);	
+		failHelper1("p1.IA", 5, 17, 5, 20, PARAMETER, "b", true, true);	
 	}
 	
 	// Cannot move abstract method declaration
 	public void testFail1() throws Exception {
-		failHelper1("p1.A", 5, 26, 5, 29, PARAMETER, "b", true, true, RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION);
+		failHelper1("p1.A", 5, 26, 5, 29, PARAMETER, "b", true, true);
 	}
 	
 	// Cannot move static method
 	public void testFail2() throws Exception {
-		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 6, 23, 6, 24, PARAMETER, "b", true, true, RefactoringStatusCodes.CANNOT_MOVE_STATIC);
+		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 6, 23, 6, 24, PARAMETER, "b", true, true);
 	}
 	
 	// Cannot move native method
 	public void testFail3() throws Exception {
-		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 6, 23, 6, 24, PARAMETER, "b", true, true, RefactoringStatusCodes.CANNOT_MOVE_NATIVE);
+		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 6, 23, 6, 24, PARAMETER, "b", true, true);
 	}
 	
 	// Cannot move method that references "super"
 	public void testFail4() throws Exception {
-		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 11, 20, 11, 21, PARAMETER, "b", true, true, RefactoringStatusCodes.SUPER_REFERENCES_NOT_ALLOWED);
+		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 11, 20, 11, 21, PARAMETER, "b", true, true);
 	}
 	
 	// Cannot move method that references an enclosing instance
 	public void testFail5() throws Exception {
-		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 8, 21, 8, 21, PARAMETER, "b", true, true, RefactoringStatusCodes.ENCLOSING_INSTANCE_REFERENCES_NOT_ALLOWED);
+		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 8, 21, 8, 21, PARAMETER, "b", true, true);
 	}
 	
 	// Cannot move potentially directly recursive method
 	public void testFail6() throws Exception {
-		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 6, 16, 6, 17, PARAMETER, "b", true, true, RefactoringStatusCodes.CANNOT_MOVE_RECURSIVE);
+		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 6, 16, 6, 17, PARAMETER, "b", true, true);
 	}
 	
 	// Cannot move to local class
 	public void testFail7() throws Exception {
 		printTestDisabledMessage("not implemented yet - jcore does not have elements for local types");
-//		failHelper1("p1.A", 9, 25, 9, 26, PARAMETER, "p", true, true, RefactoringStatusCodes.CANNOT_MOVE_TO_LOCAL);
+//		failHelper1("p1.A", 9, 25, 9, 26, PARAMETER, "p", true, true);
 	}		
 
 	// Cannot move synchronized method
 	public void testFail8() throws Exception {
-		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 6, 29, 6, 29, PARAMETER, "b", true, true, RefactoringStatusCodes.CANNOT_MOVE_SYNCHRONIZED);
+		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 6, 29, 6, 29, PARAMETER, "b", true, true);
 	}
 
 	// Cannot move method if there's no new potential receiver
 	public void testFail9() throws Exception {
-		failHelper1(new String[] {"p1.A", "p2.B", "p3.C"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", true, true, RefactoringStatusCodes.NO_NEW_RECEIVERS);	
+		failHelper1(new String[] {"p1.A", "p2.B", "p3.C"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", true, true);	
 	}
 
 	// Cannot move method if there's no new potential receiver
 	public void testFail10() throws Exception {
-		failHelper1(new String[] {"p1.A", "p2.B", "p3.C"}, "p1.A", 8, 17, 8, 20, PARAMETER, "b", true, true, RefactoringStatusCodes.NO_NEW_RECEIVERS);	
+		failHelper1(new String[] {"p1.A", "p2.B", "p3.C"}, "p1.A", 8, 17, 8, 20, PARAMETER, "b", true, true);	
 	}
 	
 	// Cannot move method - parameter name conflict
 	public void testFail11() throws Exception {
-		failHelper2(new String[] {"p1.A", "p2.B"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", "a", true, true, RefactoringStatusCodes.PARAM_NAME_ALREADY_USED);	
+		failHelper2(new String[] {"p1.A", "p2.B"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", "a", true, true);	
 	}
 
 	// Cannot move method if there's no new potential receiver (because of null bindings here)
 	public void testFail12() throws Exception {
 //		printTestDisabledMessage("bug 39871");
-		failHelper1(new String[] {"p1.A"}, "p1.A", 5, 10, 5, 16, PARAMETER, "b", true, true, RefactoringStatusCodes.NO_NEW_RECEIVERS);	
+		failHelper1(new String[] {"p1.A"}, "p1.A", 5, 10, 5, 16, PARAMETER, "b", true, true);	
 	}
 
 }

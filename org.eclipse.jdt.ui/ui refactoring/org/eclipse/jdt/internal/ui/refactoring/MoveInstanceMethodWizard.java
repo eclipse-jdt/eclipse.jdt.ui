@@ -10,17 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
@@ -28,230 +26,346 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
-public class MoveInstanceMethodWizard extends RefactoringWizard {
+/**
+ * Refactoring wizard for the 'move instance method' refactoring.
+ */
+public final class MoveInstanceMethodWizard extends RefactoringWizard {
 
-	public MoveInstanceMethodWizard(MoveInstanceMethodRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE); 
-		setDefaultPageTitle(RefactoringMessages.getString("MoveInstanceMethodWizard.Move_Method")); //$NON-NLS-1$
-	}
+	/**
+	 * The input wizard page of the 'move instance method' refactoring.
+	 */
+	public final class MoveInstanceMethodPage extends UserInputWizardPage {
 
-	/* non java-doc
-	 * @see RefactoringWizard#addUserInputPages
-	 */ 
-	protected void addUserInputPages(){
-		addPage(new MoveInstanceMethodInputPage());
-	}
-	
-	private static class MoveInstanceMethodInputPage extends UserInputWizardPage {
+		/** The page name */
+		protected static final String PAGE_NAME= "MoveInstanceMethodPage"; //$NON-NLS-1$
 
-		private static final class NewReceiverLabelProvider extends LabelProvider implements ITableLabelProvider {
-		
-			private final MoveInstanceMethodRefactoring fRefactoring;
-			NewReceiverLabelProvider(MoveInstanceMethodRefactoring refactoring){
-				fRefactoring= refactoring;
-			}
-			private final ILabelProvider fJavaElementLabelProvider= new JavaElementLabelProvider();
+		/** The inline method references button */
+		protected Button fInlineButton= null;
 
-			/*
-			 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
-			 */
-			public void dispose() {
-				super.dispose();
-				fJavaElementLabelProvider.dispose();
-			}
-			/*
-			 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-			 */
-			public Image getColumnImage(Object element, int columnIndex) {
-				INewReceiver newReceiver= (INewReceiver)element;
-				switch (columnIndex) {
-					case 0 :
-						if (newReceiver.isParameter())
-							return JavaPlugin.getImageDescriptorRegistry().get(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
-						Assert.isTrue(newReceiver.isField());
-						IField field= getField(newReceiver);
-						if (field == null)
-							return null;
-						return fJavaElementLabelProvider.getImage(field);
-					case 1 : return null;
-					default :
-						Assert.isTrue(false);
-						return null;
-				}
-			}
-		
-			private IField getField(INewReceiver newReceiver) {
-				if (! (newReceiver.getBinding() instanceof IVariableBinding))
-					return null;
-				try {
-					return Bindings.findField((IVariableBinding)newReceiver.getBinding(), fRefactoring.getSourceCU().getJavaProject());
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-					return null;
-				}
-			}
+		/** The method name text field */
+		protected Text fMethodNameField= null;
 
-			/*
-			 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-			 */
-			public String getColumnText(Object element, int columnIndex) {
-				INewReceiver newReceiver= (INewReceiver)element;
-				switch (columnIndex) {
-					case 0 :
-						return newReceiver.getName();
-					case 1 :
-						return Bindings.getFullyQualifiedName(newReceiver.getType());
-					default :
-						Assert.isTrue(false);
-						return null;
-				}
-			}
-		}
-		private static final String PAGE_NAME= "MOVE_INSTANCE_METHOD_INPUT_PAGE";  //$NON-NLS-1$
-		private static final int ROW_COUNT= 7;
-		private static final long LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
-				| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_NAMES;
-	
-		public MoveInstanceMethodInputPage() {
+		/** The current method name status */
+		protected RefactoringStatus fMethodNameStatus= new RefactoringStatus();
+
+		/** The remove method declaration button */
+		protected Button fRemoveButton= null;
+
+		/** The target name text field */
+		protected Text fTargetNameField= null;
+
+		/** The current target name status */
+		protected RefactoringStatus fTargetNameStatus= new RefactoringStatus();
+
+		/** The current target type status */
+		protected RefactoringStatus fTargetTypeStatus= new RefactoringStatus();
+
+		/**
+		 * Creates a new move instance method page.
+		 */
+		public MoveInstanceMethodPage() {
 			super(PAGE_NAME);
 		}
 
-		public void createControl(Composite parent) {
-			Composite result= new Composite(parent, SWT.NONE);
-			setControl(result);
-			GridLayout gl= new GridLayout();
-			gl.numColumns= 2;
-			result.setLayout(gl);
-		
-			createNewReceiverList(result);
-			createNewMethodNameField(result);
-			createOriginalReceiverParameterNameField(result);
-			Dialog.applyDialogFont(result);
-			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);		
-		}
-	
-		private void createOriginalReceiverParameterNameField(Composite result) {
-			Label label= new Label(result, SWT.SINGLE);
-			label.setText(RefactoringMessages.getString("MoveInstanceMethodInputPage.Original_parameter")); //$NON-NLS-1$
-			label.setLayoutData(new GridData());
-		
-			final Text text= new Text(result, SWT.SINGLE | SWT.BORDER);
-			text.setText(getMoveRefactoring().getOriginalReceiverParameterName());
-			text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			text.addModifyListener(new ModifyListener(){
-				public void modifyText(ModifyEvent arg0) {
-					RefactoringStatus status= getMoveRefactoring().setOriginalReceiverParameterName(text.getText());
-					setPageComplete(status);
-				}
-			});
-		}
-	
-		private void createNewMethodNameField(Composite result) {
-			Label label= new Label(result, SWT.SINGLE);
-			label.setText(RefactoringMessages.getString("MoveInstanceMethodInputPage.New_name")); //$NON-NLS-1$
-			label.setLayoutData(new GridData());
+		/*
+		 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+		 */
+		public void createControl(final Composite parent) {
+			Assert.isNotNull(parent);
+			final Composite control= new Composite(parent, SWT.NONE);
+			setControl(control);
 
-			final Text text= new Text(result, SWT.SINGLE | SWT.BORDER);
-			text.setText(getMoveRefactoring().getNewMethodName());
-			text.selectAll();
-			text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			text.setFocus();
-			text.addModifyListener(new ModifyListener(){
-				public void modifyText(ModifyEvent arg0) {
-					RefactoringStatus status= getMoveRefactoring().setNewMethodName(text.getText());
-					setPageComplete(status);
-				}
-			});
-		}
+			final GridLayout layout= new GridLayout();
+			layout.numColumns= 2;
+			control.setLayout(layout);
 
-		private void createNewReceiverList(Composite result) {
-			Label label= new Label(result, SWT.SINGLE);
-			IMethod method= getMoveRefactoring().getMethodToMove();
-			label.setText(RefactoringMessages.getFormattedString(
-					"MoveInstanceMethodInputPage.New_receiver", //$NON-NLS-1$
-					JavaElementLabels.getElementLabel(method, LABEL_FLAGS)));
-			GridData gd0= new GridData();
-			gd0.horizontalSpan= 2;
-			label.setLayoutData(gd0);
+			Label label= new Label(control, SWT.SINGLE);
+			label.setText(RefactoringMessages.getFormattedString("MoveInstanceMethodPage.New_receiver", JavaElementLabels.getElementLabel(fProcessor.getMethod(), JavaElementLabels.ALL_DEFAULT | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.M_PARAMETER_NAMES))); //$NON-NLS-1$
 
-			TableLayoutComposite layouter= new TableLayoutComposite(result, SWT.NULL);
-			addColumnLayoutData(layouter);
+			GridData data= new GridData();
+			data.horizontalSpan= 2;
+			label.setLayoutData(data);
 
-			Table table= new Table(layouter, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
+			final TableLayoutComposite composite= new TableLayoutComposite(control, SWT.NULL);
+			composite.addColumnData(new ColumnWeightData(40, true));
+			composite.addColumnData(new ColumnWeightData(60, true));
+
+			final Table table= new Table(composite, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
 			table.setHeaderVisible(true);
-			table.setLinesVisible(false);		
+			table.setLinesVisible(false);
 
-			TableColumn column0= new TableColumn(table, SWT.NONE);		
-			column0.setText(RefactoringMessages.getString("MoveInstanceMethodInputPage.Name")); //$NON-NLS-1$
-			column0.setResizable(true); 
+			TableColumn column= new TableColumn(table, SWT.NONE);
+			column.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Name")); //$NON-NLS-1$
+			column.setResizable(true);
 
-			TableColumn column1= new TableColumn(table, SWT.NONE);
-			column1.setText(RefactoringMessages.getString("MoveInstanceMethodInputPage.Type_Name")); //$NON-NLS-1$
-			column1.setResizable(true);
-		 
-			TableViewer viewer= new TableViewer(table);
+			column= new TableColumn(table, SWT.NONE);
+			column.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Type")); //$NON-NLS-1$
+			column.setResizable(true);
+
+			final TableViewer viewer= new TableViewer(table);
 			viewer.setContentProvider(new ArrayContentProvider());
-			viewer.setLabelProvider(new NewReceiverLabelProvider(getMoveRefactoring()));
-			INewReceiver[] possibleNewReceivers= getMoveRefactoring().getPossibleNewReceivers();
-			Assert.isTrue(possibleNewReceivers.length > 0);
-			viewer.setInput(possibleNewReceivers);
-			INewReceiver chosen= possibleNewReceivers[0];
-			viewer.setSelection(new StructuredSelection(new Object[]{chosen}));
-			getMoveRefactoring().chooseNewReceiver(chosen);
-		
-			viewer.addSelectionChangedListener(new ISelectionChangedListener(){
-				public void selectionChanged(SelectionChangedEvent event) {
-					Object first= ((IStructuredSelection)event.getSelection()).getFirstElement();
-					if (! (first instanceof INewReceiver))
-						return;
-					getMoveRefactoring().chooseNewReceiver((INewReceiver)first);
+			viewer.setLabelProvider(new TargetLabelProvider());
+
+			final IVariableBinding[] candidateTargets= fProcessor.getCandidateTargets();
+			viewer.setInput(candidateTargets);
+			final IVariableBinding[] possibleTargets= fProcessor.getPossibleTargets();
+			viewer.setSelection(new StructuredSelection(new Object[] { possibleTargets[0]}));
+			fProcessor.setTarget(possibleTargets[0]);
+
+			viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+
+				public final void selectionChanged(final SelectionChangedEvent event) {
+					final Object element= ((IStructuredSelection) event.getSelection()).getFirstElement();
+					if (element instanceof IVariableBinding) {
+						final IVariableBinding target= (IVariableBinding) element;
+						final IVariableBinding[] targets= fProcessor.getPossibleTargets();
+						boolean success= false;
+						for (int index= 0; index < targets.length; index++) {
+							if (Bindings.equals(target, targets[index])) {
+								fProcessor.setTarget(target);
+								success= true;
+								break;
+							}
+						}
+						if (!success)
+							fTargetTypeStatus= RefactoringStatus.createWarningStatus(RefactoringMessages.getFormattedString("MoveInstanceMethodPage.invalid.target", target.getName())); //$NON-NLS-1$
+						else
+							fTargetTypeStatus= new RefactoringStatus();
+						handleStatusChanged();
+					}
 				}
 			});
 
-			GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
-			gd.heightHint= SWTUtil.getTableHeightHint(table, ROW_COUNT);
-			gd.horizontalSpan= 2;
-			layouter.setLayoutData(gd);
+			data= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
+			data.heightHint= SWTUtil.getTableHeightHint(table, 7);
+			data.horizontalSpan= 2;
+			composite.setLayoutData(data);
+
+			label= new Label(control, SWT.SINGLE);
+			label.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Method_name")); //$NON-NLS-1$
+			label.setLayoutData(new GridData());
+
+			fMethodNameField= new Text(control, SWT.SINGLE | SWT.BORDER);
+			fMethodNameField.setText(fProcessor.getMethodName());
+			fMethodNameField.selectAll();
+			fMethodNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			fMethodNameField.setFocus();
+			fMethodNameField.addModifyListener(new ModifyListener() {
+
+				public final void modifyText(final ModifyEvent event) {
+					fMethodNameStatus= fProcessor.setMethodName(fMethodNameField.getText());
+					handleStatusChanged();
+				}
+			});
+
+			label= new Label(control, SWT.SINGLE);
+			label.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Target_name")); //$NON-NLS-1$
+			label.setLayoutData(new GridData());
+
+			fTargetNameField= new Text(control, SWT.SINGLE | SWT.BORDER);
+			final String name= fProcessor.getTargetName();
+			if (name != null && name.length() > 0)
+				fTargetNameField.setText(fProcessor.getTargetName());
+			else {
+				setPageComplete(RefactoringStatus.createInfoStatus(RefactoringCoreMessages.getString("Checks.Choose_name"))); //$NON-NLS-1$
+				setPageComplete(false);
+			}
+			fTargetNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			fTargetNameField.addModifyListener(new ModifyListener() {
+
+				public final void modifyText(final ModifyEvent event) {
+					fTargetNameStatus= fProcessor.setTargetName(fTargetNameField.getText());
+					handleStatusChanged();
+				}
+			});
+
+			label= new Label(control, SWT.NONE);
+
+			data= new GridData();
+			data.horizontalSpan= 2;
+			label.setLayoutData(data);
+
+			fInlineButton= new Button(control, SWT.CHECK);
+			fInlineButton.setSelection(DEFAULT_INLINE_SETTING);
+			fInlineButton.setEnabled(true);
+			fInlineButton.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Inline_button_name")); //$NON-NLS-1$
+			fInlineButton.addSelectionListener(new SelectionAdapter() {
+
+				public final void widgetDefaultSelected(final SelectionEvent event) {
+					widgetSelected(event);
+				}
+
+				public final void widgetSelected(final SelectionEvent event) {
+					fRemoveButton.setEnabled(fInlineButton.getSelection());
+					if (!fInlineButton.getSelection())
+						fRemoveButton.setSelection(false);
+					fProcessor.setInlineDelegator(fInlineButton.getSelection());
+				}
+			});
+
+			data= new GridData();
+			data.horizontalSpan= 2;
+			fInlineButton.setLayoutData(data);
+
+			fRemoveButton= new Button(control, SWT.CHECK);
+			fRemoveButton.setSelection(DEFAULT_REMOVE_SETTING);
+			fRemoveButton.setEnabled(DEFAULT_INLINE_SETTING);
+			fRemoveButton.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Remove_button_name")); //$NON-NLS-1$
+			fRemoveButton.addSelectionListener(new SelectionAdapter() {
+
+				public final void widgetSelected(final SelectionEvent event) {
+					fProcessor.setRemoveDelegator(fRemoveButton.getSelection());
+				}
+			});
+
+			fProcessor.setInlineDelegator(DEFAULT_INLINE_SETTING);
+			fProcessor.setRemoveDelegator(DEFAULT_REMOVE_SETTING);
+
+			data= new GridData();
+			data.horizontalSpan= 2;
+			data.horizontalIndent= IDialogConstants.INDENT;
+			fRemoveButton.setLayoutData(data);
+
+			Dialog.applyDialogFont(control);
+			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
 		}
-	
-		private void addColumnLayoutData(TableLayoutComposite layouter) {
-			layouter.addColumnData(new ColumnWeightData(40, true));
-			layouter.addColumnData(new ColumnWeightData(60, true));
+
+		/**
+		 * Handles the status changed event.
+		 */
+		protected final void handleStatusChanged() {
+			final RefactoringStatus status= new RefactoringStatus();
+			status.merge(fMethodNameStatus);
+			status.merge(fTargetNameStatus);
+			status.merge(fTargetTypeStatus);
+			if (!fTargetTypeStatus.isOK())
+				setPageComplete(false);
+			else
+				setPageComplete(status);
 		}
-	
-		private MoveInstanceMethodRefactoring getMoveRefactoring(){
-			return (MoveInstanceMethodRefactoring)getRefactoring();
-		}	
+	}
+
+	/**
+	 * Table label provider for the target selection table.
+	 */
+	public static class TargetLabelProvider extends JavaElementLabelProvider implements ITableLabelProvider {
+
+		/**
+		 * Creates a new target label provider.
+		 */
+		public TargetLabelProvider() {
+			super(SHOW_OVERLAY_ICONS);
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
+		 */
+		public Image getColumnImage(final Object element, final int column) {
+			Assert.isTrue(element instanceof IVariableBinding);
+			Assert.isTrue(column >= 0 && column <= 1);
+			final IVariableBinding binding= (IVariableBinding) element;
+			switch (column) {
+				case 0:
+					final IJavaElement item= binding.getJavaElement();
+					if (item != null)
+						return getImage(item);
+					else {
+						final ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
+						if (binding.getDeclaringClass() != null) {
+							final int flags= binding.getModifiers();
+							if (Flags.isPublic(flags))
+								return registry.get(JavaPluginImages.DESC_FIELD_PUBLIC);
+							if (Flags.isProtected(flags))
+								return registry.get(JavaPluginImages.DESC_FIELD_PROTECTED);
+							if (Flags.isPrivate(flags))
+								return registry.get(JavaPluginImages.DESC_FIELD_PRIVATE);
+							return registry.get(JavaPluginImages.DESC_FIELD_DEFAULT);
+						} else
+							return registry.get(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
+					}
+				default:
+					return null;
+			}
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
+		 */
+		public String getColumnText(final Object element, final int column) {
+			Assert.isTrue(element instanceof IVariableBinding);
+			Assert.isTrue(column >= 0 && column <= 1);
+			final IVariableBinding binding= (IVariableBinding) element;
+			switch (column) {
+				case 0:
+					return binding.getName();
+				case 1:
+					return Bindings.getFullyQualifiedName(binding.getType());
+				default:
+					return null;
+			}
+		}
+	}
+
+	/** The default inline setting */
+	protected static boolean DEFAULT_INLINE_SETTING= true;
+
+	/** The default remove setting */
+	protected static boolean DEFAULT_REMOVE_SETTING= true;
+
+	/** The associated move instance method processor */
+	protected final MoveInstanceMethodProcessor fProcessor;
+
+	/**
+	 * Creates a new move instance method wizard.
+	 * 
+	 * @param refactoring the refactoring to host
+	 */
+	public MoveInstanceMethodWizard(final MoveInstanceMethodRefactoring refactoring) {
+		super(refactoring, DIALOG_BASED_UESR_INTERFACE);
+		fProcessor= refactoring.getMoveMethodProcessor();
+		setDefaultPageTitle(RefactoringMessages.getString("MoveInstanceMethodWizard.Move_Method")); //$NON-NLS-1$
+	}
+
+	/*
+	 * @see RefactoringWizard#addUserInputPages
+	 */
+	protected void addUserInputPages() {
+		addPage(new MoveInstanceMethodPage());
 	}
 }

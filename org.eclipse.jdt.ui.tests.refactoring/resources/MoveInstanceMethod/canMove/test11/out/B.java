@@ -7,6 +7,12 @@ public class B {
 	
 	public void mB2() {}
 
+	/**
+	 * @param a
+	 * @param j
+	 * @param foo
+	 * @param bar
+	 */
 	public void mA1(A a, float j, int foo, String bar) {
 		mB1();
 		System.out.println(bar + j + a);

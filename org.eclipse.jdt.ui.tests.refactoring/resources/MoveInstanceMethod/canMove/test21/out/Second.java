@@ -10,6 +10,9 @@ class Second {
 	public void go(int i, int j) {
 	}
 
+	/**
+	 * @param a
+	 */
 	public void print(A a) {
 		foo(this);
 		bar();

@@ -14,6 +14,9 @@ public class B {
 
 	public class Inner {
 
+		/**
+		 * @param b
+		 */
 		public void print(B b) {
 			b.count++;
 			System.out.println(this);

@@ -4,6 +4,9 @@ import p1.A;
 
 public class B {
 
+	/**
+	 * @param a
+	 */
 	public void mA1(A a) {
 		System.out.println(A.fgHello);
 		A.talk(this);

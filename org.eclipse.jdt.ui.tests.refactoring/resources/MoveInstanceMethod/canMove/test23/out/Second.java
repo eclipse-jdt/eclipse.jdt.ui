@@ -3,6 +3,9 @@ class Second {
 	public String str;
 	public void foo(Second s) {
 	}
+	/**
+	 * @param a
+	 */
 	public void print(A a) {
 		foo(this);
 		int s= 17;

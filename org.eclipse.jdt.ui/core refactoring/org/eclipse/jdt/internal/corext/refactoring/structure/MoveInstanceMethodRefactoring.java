@@ -10,188 +10,75 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+/**
+ * Refactoring to move an instance method to another class.
+ */
+public final class MoveInstanceMethodRefactoring extends MoveRefactoring {
 
-
-public class MoveInstanceMethodRefactoring extends Refactoring {
-	
-	public static interface INewReceiver {
-		public String getName();
-		
-		public ITypeBinding getType();
-		
-		public IBinding getBinding();
-		
-		public boolean isField();
-		
-		public boolean isParameter();
-	}
-	
-	private final IMethod fMethod;
-	private final ICompilationUnit fCU;
-	private final int fSelectionStart, fSelectionLength;
-	private CodeGenerationSettings fCodeGenerationSettings;
-
-	private InstanceMethodMover fMover;
-	
-	public static boolean isAvailable(IMethod method) throws JavaModelException {
-		return method.exists() && !method.isConstructor() && !method.isBinary()
-				&& method.getCompilationUnit() != null && !JdtFlags.isStatic(method)
-				&& !method.getDeclaringType().isLocal();
-	}
-
-	public static MoveInstanceMethodRefactoring create(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {		
-		if (! isAvailable(method))	
-			return null;
-		return new MoveInstanceMethodRefactoring(method, method.getCompilationUnit(), method.getNameRange().getOffset(), method.getNameRange().getLength(), codeGenerationSettings);
-	}
-	
-	private MoveInstanceMethodRefactoring(IMethod method, ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings) {
-		fMethod= method;
-		fCU= cu;
-		fSelectionStart= selectionStart;
-		fSelectionLength= selectionLength;
-		fCodeGenerationSettings= codeGenerationSettings;		
-	}
-	
-	public ICompilationUnit getSourceCU(){
-		return fCU;
-	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
+	/**
+	 * Creates a new move instance method refactoring.
+	 * 
+	 * @param method
+	 *        the method to move
+	 * @param settings
+	 *        the code generation settings to apply
+	 * @return the created refactoring
+	 * @throws JavaModelException
+	 *         if the the refactoring could not be tested for availability
 	 */
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		RefactoringStatus status= initializeMover();
-		if(status.hasFatalError())
-			return status;
-		status.merge(fMover.checkInitialState());
-		return status;
-	}
-	
-	private RefactoringStatus initializeMover() {
-		RefactoringStatus status= new RefactoringStatus();
-		MethodDeclaration declaration= findMethodDeclaration(status);
-		if(status.hasFatalError())
-			return status;
-		Assert.isNotNull(declaration);
-		fMover= InstanceMethodMover.create(declaration, fCU, fCodeGenerationSettings);
-		if (fMover == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.2")); //$NON-NLS-1$
-		return new RefactoringStatus();
-	}
-	
-	private MethodDeclaration findMethodDeclaration(RefactoringStatus status) {
-		CompilationUnit root=  new RefactoringASTParser(AST.JLS3).parse(fCU, true);
-		
-		ASTNode node= NodeFinder.perform(root, fSelectionStart, fSelectionLength);
-
-		if(node instanceof MethodDeclaration)
-			return (MethodDeclaration) node;
-		
-		ASTNode parentNode= ASTNodes.getParent(node, MethodDeclaration.class);
-		if(parentNode != null)
-			return (MethodDeclaration) parentNode;
-		
-		status.merge(RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.method_declaration"), null, Corext.getPluginId(), RefactoringStatusCodes.METHOD_NOT_SELECTED, null)); //$NON-NLS-1$
-		return null;
-	} 
-	
-	public IMethod getMethodToMove() {
-		return fMethod;
-	}
-	
-	public String getNewMethodName() {
-		return fMover.getNewMethodName();
-	}
-	
-	public RefactoringStatus setNewMethodName(String newMethodName) {
-		Assert.isNotNull(newMethodName);
-		
-		RefactoringStatus status= Checks.checkMethodName(newMethodName);
-		if(status.hasFatalError())
-			return status;
-		
-		fMover.setNewMethodName(newMethodName);
-		return status;
-	}
-	
-	public String getOriginalReceiverParameterName() {
-		return fMover.getOriginalReceiverParameterName();
-	}
-	
-	public RefactoringStatus setOriginalReceiverParameterName(String originalReceiverParameterName) {
-		RefactoringStatus status= Checks.checkTempName(originalReceiverParameterName);
-		if(status.hasFatalError())
-			return status;
-		fMover.setOriginalReceiverParameterName(originalReceiverParameterName);
-		return status;
-	}
-
-	public void setInlineDelegator(boolean inlineDelegator) {
-		fMover.setInlineDelegator(inlineDelegator);
-	}
-
-	public void setRemoveDelegator(boolean removeDelegator) {
-		fMover.setRemoveDelegator(removeDelegator);
-	}
-
-	public INewReceiver[] getPossibleNewReceivers() {
-		return fMover.getPossibleNewReceivers();
+	public static MoveInstanceMethodRefactoring create(final IMethod method, final CodeGenerationSettings settings) throws JavaModelException {
+		Assert.isNotNull(method);
+		Assert.isNotNull(settings);
+		Assert.isTrue(method.exists() && !method.isConstructor() && !method.isBinary() && !method.isReadOnly());
+		return new MoveInstanceMethodRefactoring(new MoveInstanceMethodProcessor(method, settings));
 	}
 
 	/**
-	 * @param chosen	Must be a element of the result
-	 * of a call to getPossibleNewReceivers()
+	 * Is this refactoring available for the specified method?
+	 * 
+	 * @param method
+	 *        the method to test
+	 * @return <code>true</code> if this refactoring is available, <code>false</code> otherwise
+	 * @throws JavaModelException
+	 *         if the method could not be tested
 	 */
-	public void chooseNewReceiver(INewReceiver chosen) {
-		fMover.chooseNewReceiver(chosen);
-	}	
-	
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		return fMover.checkInput(pm, getValidationContext());
+	public static boolean isAvailable(final IMethod method) throws JavaModelException {
+		Assert.isNotNull(method);
+		return method.exists() && !method.isConstructor() && !method.isBinary() && !method.getDeclaringType().isLocal() && !method.isReadOnly() && !JdtFlags.isStatic(method);
 	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
+
+	/**
+	 * Creates a new move instance method refactoring.
+	 * 
+	 * @param processor
+	 *        the processor to use
 	 */
-	public Change createChange(IProgressMonitor pm) throws CoreException {
-		return fMover.createChange(pm);
+	private MoveInstanceMethodRefactoring(final MoveInstanceMethodProcessor processor) {
+		super(processor);
 	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
+
+	/**
+	 * Returns the move instance method processor
+	 * 
+	 * @return the move processor
 	 */
-	public String getName() {
+	public final MoveInstanceMethodProcessor getMoveMethodProcessor() {
+		return (MoveInstanceMethodProcessor) getMoveProcessor();
+	}
+
+	/*
+	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
+	 */
+	public final String getName() {
 		return RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.name"); //$NON-NLS-1$
 	}
 }

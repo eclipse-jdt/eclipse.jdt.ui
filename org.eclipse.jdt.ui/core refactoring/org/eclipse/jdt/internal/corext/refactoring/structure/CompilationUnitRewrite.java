@@ -62,7 +62,11 @@ public class CompilationUnitRewrite {
 			fRewrite.removeModifications();
 		fTextEditGroups= new ArrayList();
 	}
-	
+
+	public void clearImportRewrites() {
+		fImportRewrite= null;
+	}
+
 	public void clearASTAndImportRewrites() {
 		clearASTRewrite();
 		fImportRewrite= null;

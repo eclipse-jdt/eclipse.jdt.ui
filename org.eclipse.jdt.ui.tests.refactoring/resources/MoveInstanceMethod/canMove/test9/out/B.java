@@ -7,7 +7,13 @@ public class B {
 	
 	public void mB2() {}
 
-	public void mA1(A a, float j, int foo, String bar) {
+	/**
+	 * @param j
+	 * @param a
+	 * @param foo
+	 * @param bar
+	 */
+	public void mA1(float j, A a, int foo, String bar) {
 		mB1();
 		a.mA2();
 		mB2();

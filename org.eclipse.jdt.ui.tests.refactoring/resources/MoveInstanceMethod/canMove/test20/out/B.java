@@ -11,6 +11,9 @@ public class B {
 		return fName;
 	}
 
+	/**
+	 * 
+	 */
 	public void print() {
 		System.out.println(
 			new StarDecorator() {

@@ -23,6 +23,9 @@ class Second {
 	public String toString() {
 		return fName;
 	}
+	/**
+	 * @param a
+	 */
 	public void print(A a) {
 		System.out.println(this + ": " + a.fMagic);
 	}

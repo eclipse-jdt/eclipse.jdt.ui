@@ -21,6 +21,9 @@ public class Rectangle {
 		return height;
 	}
 
+	/**
+	 * @return
+	 */
 	public int area() {
 		int width= getWidth();
 		int height= getHeight();
