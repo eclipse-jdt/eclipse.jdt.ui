@@ -396,11 +396,10 @@ public final class TypeConstraints {
 
 	private static ITypeConstraint[] createConstraintsForAccessToField(IVariableBinding fieldBinding, Expression qualifier, Expression accessExpression){
 		Assert.isTrue(fieldBinding.isField());
-		//XXX this is wrong
-		ConstraintVariable declaringTypeVar= new DeclaringTypeVariable(fieldBinding);
-		ITypeConstraint defines= SimpleTypeConstraint.createDefinesConstraint(new ExpressionVariable(accessExpression), declaringTypeVar);
+		ITypeConstraint defines= SimpleTypeConstraint.createDefinesConstraint(new ExpressionVariable(accessExpression), new RawBindingVariable(fieldBinding.getType()));
 		if (qualifier == null)
 			return new ITypeConstraint[]{defines};
+		ConstraintVariable declaringTypeVar= new DeclaringTypeVariable(fieldBinding);
 		ITypeConstraint subType= SimpleTypeConstraint.createSubtypeConstraint(new ExpressionVariable(qualifier), declaringTypeVar);
 		return new ITypeConstraint[]{defines, subType};		
 	}
