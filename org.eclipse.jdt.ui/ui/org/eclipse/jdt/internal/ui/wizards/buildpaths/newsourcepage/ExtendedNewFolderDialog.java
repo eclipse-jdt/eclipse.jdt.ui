@@ -55,7 +55,8 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
-import org.eclipse.ui.internal.ide.dialogs.PathVariableSelectionDialog;
+
+import org.eclipse.ui.ide.dialogs.PathVariableSelectionDialog;
 
 import org.eclipse.jdt.ui.JavaUI;
 
