@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -94,12 +95,18 @@ public class JavaElementImageProvider {
 	}
 
 	private ImageDescriptor computeDescriptor(Object element, int flags){
-		if (element instanceof IJavaElement)
+		if (element instanceof IJavaElement) {
 			return getJavaImageDescriptor((IJavaElement) element, flags);
-		else if (element instanceof IAdaptable)
+		} else if (element instanceof IFile) {
+			IFile file= (IFile) element;
+			if ("java".equals(file.getFileExtension())) {
+				return getCUResourceImageDescriptor(file, flags); // image for a CU not on the build path
+			}
+			return getWorkbenchImageDescriptor(file, flags);
+		} else if (element instanceof IAdaptable) {
 			return getWorkbenchImageDescriptor((IAdaptable) element, flags);
+		}
 		return null;
-		
 	}
 	
 	private static boolean showOverlayIcons(int flags) {
@@ -113,7 +120,16 @@ public class JavaElementImageProvider {
 	private static boolean useLightIcons(int flags) {
 		return (flags & LIGHT_TYPE_ICONS) != 0;
 	}	
-	
+
+	/**
+	 * Returns an image descriptor for a compilatio unit not on the class path.
+	 * The descriptor includes overlays, if specified.
+	 */
+	public ImageDescriptor getCUResourceImageDescriptor(IFile file, int flags) {
+		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
+		return new JavaElementImageDescriptor(JavaPluginImages.DESC_OBJS_CUNIT_RESOURCE, 0, size);
+	}	
+		
 	/**
 	 * Returns an image descriptor for a java element. The descriptor includes overlays, if specified.
 	 */

@@ -67,6 +67,7 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_INTERFACEALT= NAME_PREFIX + "intf_obj.gif"; 			//$NON-NLS-1$	
 	public static final String IMG_OBJS_INTERFACE_DEFAULT= NAME_PREFIX + "int_default_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_OBJS_CUNIT= NAME_PREFIX + "jcu_obj.gif"; 				//$NON-NLS-1$
+	public static final String IMG_OBJS_CUNIT_RESOURCE= NAME_PREFIX + "jcu_resource_obj.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_CFILE= NAME_PREFIX + "classf_obj.gif";  			//$NON-NLS-1$
 	public static final String IMG_OBJS_CFILECLASS= NAME_PREFIX + "class_obj.gif";  		//$NON-NLS-1$
 	public static final String IMG_OBJS_CFILEINT= NAME_PREFIX + "int_obj.gif";  			//$NON-NLS-1$
@@ -149,6 +150,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_SEARCH_DECL= createManaged(T_OBJ, IMG_OBJS_SEARCH_DECL);
 	public static final ImageDescriptor DESC_OBJS_SEARCH_REF= createManaged(T_OBJ, IMG_OBJS_SEARCH_REF);
 	public static final ImageDescriptor DESC_OBJS_CUNIT= createManaged(T_OBJ, IMG_OBJS_CUNIT);
+	public static final ImageDescriptor DESC_OBJS_CUNIT_RESOURCE= createManaged(T_OBJ, IMG_OBJS_CUNIT_RESOURCE);
 	public static final ImageDescriptor DESC_OBJS_CFILE= createManaged(T_OBJ, IMG_OBJS_CFILE); 
 	public static final ImageDescriptor DESC_OBJS_CFILECLASS= createManaged(T_OBJ, IMG_OBJS_CFILECLASS); 
 	public static final ImageDescriptor DESC_OBJS_CFILEINT= createManaged(T_OBJ, IMG_OBJS_CFILEINT); 
