@@ -17,22 +17,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.jface.text.Document;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -60,7 +55,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -68,7 +62,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
@@ -85,10 +78,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -545,15 +536,8 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 		}
 
-		private RefactoringStatus fEditProblems;
-
-		private ImportRewrite fImportRewrite;
-
 		private final Expression fInitializer;
-
 		private final ICompilationUnit fInitializerUnit;
-
-		private List fInlineEdits;
 
 		/** The references in this compilation unit, represented as AST Nodes in the parsed representation of the compilation unit */
 		private final Expression[] fReferences;
@@ -616,157 +600,69 @@ public class InlineConstantRefactoring extends Refactoring {
 			return false;
 		}
 
-		private void addEditsToInline(Expression reference) throws CoreException {
+		private CompilationUnitChange getChange() throws CoreException {
+			for (int i= 0; i < fReferences.length; i++)
+				inlineReference(fReferences[i]);
+			
+			if (fCuRewrite.getCu().equals(fInitializerUnit))
+				removeConstantDeclarationIfNecessary();
+			
+			fCuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
+				public SourceRange computeSourceRange(ASTNode node) {
+					return new TargetSourceRangeComputer.SourceRange(node.getStartPosition(), node.getLength());
+				}
+			});
+			return fCuRewrite.createChange();
+		}
+
+		private void inlineReference(Expression reference) throws CoreException {
 			Set newTypes= new HashSet();
 			
 			ASTNode importDecl= ASTNodes.getParent(reference, ImportDeclaration.class);
 			if (importDecl != null)
 				return; // don't inline into static imports
 
-			String modifiedInitializer= prepareInitializerFor(reference, newTypes, fEditProblems);
-
+			String modifiedInitializer= prepareInitializerFor(reference, newTypes, new RefactoringStatus()); //TODO: collect problems?
 			if (modifiedInitializer == null)
 				return;
 
-			fInlineEdits.add(createSubstituteStringForExpressionEdit(modifiedInitializer, reference));
+			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.getString("InlineConstantRefactoring.Inline")); //$NON-NLS-1$
+			ASTNode newReference= fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
+			fCuRewrite.getASTRewrite().replace(reference, newReference, msg);
+			
 			addImportsForTypesInOriginalInitializer();
 			addImportsForNewTypes(newTypes);
 		}
 
-		private void addImportForType(ITypeBinding type) {
-			fImportRewrite.addImport(type);
+		private String prepareInitializerFor(Expression reference, Set newTypes, RefactoringStatus status) throws JavaModelException {
+			return InitializerExpressionRelocationPreparer.prepareInitializerForLocation(fInitializer, fInitializerUnit, reference, fCuRewrite.getCu(), newTypes, status);
 		}
-
+		
 		private void addImportsForNewTypes(Set newTypes) {
 			for (Iterator it= newTypes.iterator(); it.hasNext();)
-				addImportForType((ITypeBinding) it.next());
+				fCuRewrite.getImportRewrite().addImport(((ITypeBinding) it.next()));
 		}
 
 		private void addImportsForTypesInOriginalInitializer() {
 			ITypeBinding[] types= TypeReferenceFinder.getReferencedTopLevelTypes(fInitializer);
 			for (int i= 0; i < types.length; i++)
-				addImportForType(types[i]);
+				fCuRewrite.getImportRewrite().addImport(types[i]);
 		}
 
-		public void perform(RefactoringStatus result) throws CoreException {
-			Assert.isNotNull(result);
-			getEdits(result);
-		}
-
-		private TextEdit createSubstituteStringForExpressionEdit(String string, Expression expression) throws CoreException {
-			ASTRewrite rewrite= ASTRewrite.create(expression.getRoot().getAST());
-			rewrite.setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
-				public SourceRange computeSourceRange(ASTNode node) {
-					return new TargetSourceRangeComputer.SourceRange(node.getStartPosition(), node.getLength());
-				}
-			});
-			rewrite.replace(expression, rewrite.createStringPlaceholder(string, expression.getNodeType()), null);
-
-			try {
-				final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCuRewrite.getCu());
-				return rewrite.rewriteAST(buffer.getDocument(), fInitializerUnit.getJavaProject().getOptions(true));
-			} finally {
-				RefactoringFileBuffers.release(fCuRewrite.getCu());
-			}
-		}
-
-		private List getAllEdits() throws CoreException {
-			List allEdits= new ArrayList(fInlineEdits);
-			if (!fImportRewrite.isEmpty()) {
-				allEdits.add(fImportRewrite.createEdit(new Document(fImportRewrite.getCompilationUnit().getBuffer().getContents())));
-			}
-			return allEdits;
-		}
-
-		private TextEdit[] getAllEditsAsArray() throws CoreException {
-			List allEdits= getAllEdits();
-			return (TextEdit[]) allEdits.toArray(new TextEdit[allEdits.size()]);
-		}
-
-		public CompilationUnitChange getChange() throws CoreException {
-			return getChange(new RefactoringStatus());
-		}
-
-		public CompilationUnitChange getChange(RefactoringStatus status) throws CoreException {
-			CompilationUnitChange change= new CompilationUnitChange(fCuRewrite.getCu().getElementName(), fCuRewrite.getCu());
-			TextEdit[] edits= getEdits(status);
-			for (int i= 0; i < edits.length; i++)
-				TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("InlineConstantRefactoring.Inline"), edits[i]); //$NON-NLS-1$
-			
-			if (fCuRewrite.getCu().equals(fInitializerUnit))
-				removeConstantDeclarationIfNecessary(change);
-			return change;
-		}
-
-		private void removeConstantDeclarationIfNecessary(CompilationUnitChange change) throws CoreException {
-			TextEdit edit= getRemoveConstantDeclarationEdit();
-			if (edit != null) {
-				TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("InlineConstantRefactoring.remove_declaration"), edit); //$NON-NLS-1$
-			}
-		}
-
-		private TextEdit getRemoveConstantDeclarationEdit() throws CoreException {
+		private void removeConstantDeclarationIfNecessary() throws CoreException {
 			if (! fRefactoring.getRemoveDeclaration())
-				return null;
+				return;
 
-			ASTNode toRemove= getNodeToRemoveForConstantDeclarationRemoval();
-			Assert.isNotNull(toRemove);
-
-			ASTRewrite rewrite= ASTRewrite.create(toRemove.getRoot().getAST());
-
-			rewrite.remove(toRemove, null);
-			
-			//TODO: remove unused imports - use CompilationUnitRewrite
-			
-			try {
-				final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fInitializerUnit);
-				return rewrite.rewriteAST(buffer.getDocument(), fInitializerUnit.getJavaProject().getOptions(true));
-			} finally {
-				RefactoringFileBuffers.release(fInitializerUnit);
-			}
-		}
-		
-		private ASTNode getNodeToRemoveForConstantDeclarationRemoval() throws JavaModelException {
 			VariableDeclarationFragment declaration= fRefactoring.getDeclaration();
 			FieldDeclaration parentDeclaration= (FieldDeclaration) declaration.getParent();
+			ASTNode toRemove;
 			if (parentDeclaration.fragments().size() == 1)
-				return parentDeclaration;
+				toRemove= parentDeclaration;
 			else
-				return declaration;
-		}
+				toRemove= declaration;
 
-		public TextEdit[] getEdits() throws CoreException {
-			return getEdits(new RefactoringStatus());
-		}
-
-		public TextEdit[] getEdits(RefactoringStatus status) throws CoreException {
-			if (fInlineEdits != null) {
-				Assert.isNotNull(fImportRewrite);
-				Assert.isNotNull(fEditProblems);
-
-				status.merge(fEditProblems);
-				return getAllEditsAsArray();
-			}
-
-			fInlineEdits= new ArrayList();
-			fImportRewrite= new ImportRewrite(fCuRewrite.getCu());
-			fEditProblems= new RefactoringStatus();
-
-			if (fCuRewrite.getCu().getSource() == null) {
-				String[] keys= { fCuRewrite.getCu().getElementName()};
-				String msg= RefactoringCoreMessages.getFormattedString("InlineConstantRefactoring.source_code_unavailable", keys); //$NON-NLS-1$
-				fEditProblems.merge(RefactoringStatus.createStatus(RefactoringStatus.INFO, msg, null, Corext.getPluginId(), RefactoringStatusCodes.REFERENCE_IN_CLASSFILE, null));
-			} else {
-				for (int i= 0; i < fReferences.length; i++)
-					addEditsToInline(fReferences[i]);
-			}
-
-			status.merge(fEditProblems);
-			return getAllEditsAsArray();
-		}
-
-		private String prepareInitializerFor(Expression reference, Set newTypes, RefactoringStatus status) throws JavaModelException {
-			return InitializerExpressionRelocationPreparer.prepareInitializerForLocation(fInitializer, fInitializerUnit, reference, fCuRewrite.getCu(), newTypes, status);
+			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.getString("InlineConstantRefactoring.remove_declaration")); //$NON-NLS-1$
+			fCuRewrite.getASTRewrite().remove(toRemove, msg);
 		}
 	}
 
@@ -967,7 +863,6 @@ public class InlineConstantRefactoring extends Refactoring {
 					SearchMatch[] searchResults= group.getSearchResults();
 					InlineTargetCompilationUnit targetCompilationUnit= new InlineTargetCompilationUnit(
 							getCuRewrite(cu), searchResults, this);
-					targetCompilationUnit.perform(result);
 					changes.add(targetCompilationUnit.getChange());
 				}
 
@@ -975,7 +870,6 @@ public class InlineConstantRefactoring extends Refactoring {
 				Assert.isTrue(! isDeclarationSelected());
 				InlineTargetCompilationUnit targetForOnlySelectedReference= new InlineTargetCompilationUnit(
 						fSelectionCuRewrite, fSelectedConstantName, this);
-				targetForOnlySelectedReference.perform(result);
 				changes.add(targetForOnlySelectedReference.getChange());
 			}
 
@@ -994,7 +888,6 @@ public class InlineConstantRefactoring extends Refactoring {
 				if (! declarationRemoved) {
 					InlineTargetCompilationUnit targetForDeclaration= new InlineTargetCompilationUnit(
 							fDeclarationCuRewrite, new SearchMatch[0], this);
-					targetForDeclaration.perform(result);
 					changes.add(targetForDeclaration.getChange());
 				}
 			}
@@ -1041,22 +934,6 @@ public class InlineConstantRefactoring extends Refactoring {
 		});
 		engine.searchPattern(new SubProgressMonitor(pm, 1));
 		return (SearchResultGroup[]) engine.getResults();
-	}
-	
-	private TextChange findOrAddDeclaringCUChange(List changes) throws JavaModelException, CoreException {
-		ICompilationUnit declaringCU= getDeclaringCompilationUnit();
-		Assert.isNotNull(declaringCU);
-		Assert.isTrue(declaringCU.exists());
-
-		for (Iterator it= changes.iterator(); it.hasNext();) {
-			CompilationUnitChange change= (CompilationUnitChange) it.next();
-			if (change.getCompilationUnit().equals(declaringCU))
-				return change;
-		}
-
-		CompilationUnitChange newChange= new CompilationUnitChange(declaringCU.getElementName(), declaringCU);
-		changes.add(newChange);
-		return newChange;
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
