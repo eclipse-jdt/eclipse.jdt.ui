@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 /**
  * Problem information for quick fix and quick assist processors.
  * This interface is not intended to be implemented.
+ *
  * @since 3.0
  */
 public interface IProblemLocation {

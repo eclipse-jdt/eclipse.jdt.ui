@@ -19,13 +19,18 @@ import org.eclipse.jdt.core.ICompilationUnit;
 /**
  * Interface to be implemented by contributors to the extension point
  * <code>org.eclipse.jdt.ui.quickFixProcessors</code>.
+ *
  * @since 3.0
  */
 public interface IQuickFixProcessor {
 
 	/**
 	 * Returns true if the processor has proposals for the given problem. This test should be an
-	 * optimistic guess and be very cheap. 
+	 * optimistic guess and be very cheap.
+	 * 
+	 * @param unit the compilation unit
+	 * @param problemId the problem Id
+	 * @return <code>true</code> if the processor has proposals for the given problem
 	 */
 	boolean hasCorrections(ICompilationUnit unit, int problemId);
 	
@@ -33,8 +38,9 @@ public interface IQuickFixProcessor {
 	 * Collects corrections or code manipulations for the given context
 	 * @param context Defines current compilation unit, position and a shared AST.
 	 * @param locations Problems are the current location.
-	 * @return Returns the corrections applicable at the location or <code>null</code> if no proposals
-	 * can be offered.
+	 * @return the corrections applicable at the location or <code>null</code> if no proposals
+	 * 			can be offered.
+	 * @throws CoreException if this operation fails
 	 */
 	IJavaCompletionProposal[] getCorrections(IInvocationContext context, IProblemLocation[] locations) throws CoreException;
 	

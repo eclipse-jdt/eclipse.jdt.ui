@@ -117,48 +117,43 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
 	private JavaTextTools fJavaTextTools;
 	private ITextEditor fTextEditor;
+	/**
+	 * The document partitioning.
+	 * @since 3.0
+	 */
 	private String fDocumentPartitioning;
-	
-
 	/**
 	 * The Java source code scanner
-	 *
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fCodeScanner;
 	/** 
-	 * The Java multiline comment scanner 
-	 *
+	 * The Java multi-line comment scanner 
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fMultilineCommentScanner;
 	/**
-	 * The Java singleline comment scanner
-	 *
+	 * The Java single-line comment scanner
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fSinglelineCommentScanner;
 	/**
 	 * The Java string scanner
-	 *
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fStringScanner;
 	/**
-	 * The JavaDoc scanner
-	 *
+	 * The Javadoc scanner
 	 * @since 3.0
 	 */
 	private AbstractJavaScanner fJavaDocScanner;
 	/**
 	 * The combined preference store
-	 *
 	 * @since 3.0
 	 */
 	private IPreferenceStore fCombinedPreferenceStore;
 	/**
 	 * The color manager
-	 *
 	 * @since 3.0
 	 */
 	private IColorManager fColorManager;
@@ -351,9 +346,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Creates and returns a preference store which combines the preference
 	 * stores from the text tools.
 	 *
-	 * @param tools Text tools
 	 * @return the combined preference store, which is read-only
-	 * 
 	 * @since 3.0
 	 */
 	private IPreferenceStore createCombinedPreferenceStore() {
@@ -639,6 +632,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getConfiguredDocumentPartitioning(org.eclipse.jface.text.source.ISourceViewer)
+	 * @since 3.0
 	 */
 	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
 		if (fDocumentPartitioning != null)
@@ -699,6 +693,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * for <code>JavaOutlineInformationControl</code> instances.
 	 * 
 	 * @param sourceViewer the source viewer to be configured by this configuration
+	 * @param commandId the ID of the command that opens this control
 	 * @return an information control creator
 	 * @since 2.1
 	 */
@@ -796,7 +791,6 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * 
 	 * @param event the event to be investigated
 	 * @return <code>true</code> if event causes a behavioral change
-	 * 
 	 * @since 3.0
 	 */
 	public boolean affectsTextPresentation(PropertyChangeEvent event) {

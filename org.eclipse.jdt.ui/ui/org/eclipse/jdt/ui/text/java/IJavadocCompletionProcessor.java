@@ -55,7 +55,7 @@ public interface IJavadocCompletionProcessor {
 	 * 				completion request has been called.
 	 * @param	offset an offset within the compilation unit for which
 	 * 				completion proposals should be computed
-	 * @param	the length of the current selection.
+	 * @param	length the length of the current selection.
 	 * @param	flags settings for the code assist. Flags as defined in this interface,
 	 *				e.g. <code>RESTRICT_TO_MATCHING_CASE</code>.
 	 * @return an array of completion proposals or <code>null</code> if

@@ -53,21 +53,18 @@ public interface IJavaColorConstants {
 
 	/** The color key for method names in Java code
 	 * (value <code>"java_method_name"</code>).
-	 * 
 	 * @since 3.0
 	 */
 	String JAVA_METHOD_NAME= "java_method_name"; //$NON-NLS-1$
 
 	/** The color key for keyword 'return' in Java code
 	 * (value <code>"java_keyword_return"</code>).
-	 * 
 	 * @since 3.0
 	 */
 	String JAVA_KEYWORD_RETURN= "java_keyword_return"; //$NON-NLS-1$
 
 	/** The color key for operators and brackets in Java code
 	 * (value <code>"java_operator"</code>).
-	 * 
 	 * @since 3.0
 	 */
 	String JAVA_OPERATOR= "java_operator"; //$NON-NLS-1$
