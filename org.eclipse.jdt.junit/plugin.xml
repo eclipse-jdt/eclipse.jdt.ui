@@ -9,7 +9,7 @@
    <runtime>
       <library name="junitsupport.jar">
          <export name="*"/>
-         <packages prefixes="org.eclipse.jdt.internal.junit"/>
+         <packages prefixes="org.eclipse.jdt.internal.junit,org.eclipse.jdt.junit"/>
       </library>
    </runtime>
    <requires>
@@ -26,6 +26,8 @@
       <import plugin="org.junit"/>
    </requires>
 
+
+   <extension-point id="testRunListeners" name="Test Run Listeners" schema="schema/testRunListeners.exsd"/>
 
    <extension
          point="org.eclipse.ui.views">
@@ -120,11 +122,11 @@
             id="org.eclipse.jdt.junit">
       </category>
       <wizard
+            javatype="true"
             name="%TestCaseWizard.name"
             icon="icons/full/ctool16/new_testcase.gif"
             category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
             class="org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizard"
-			javatype="true"
             id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
          <description>
             %TestWizard.description

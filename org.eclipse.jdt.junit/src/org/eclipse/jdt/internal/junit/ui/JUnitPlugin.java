@@ -1,7 +1,15 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *   Julien Ruaux: jruaux@octo.com
+ * 	 Vincent Massol: vmassol@octo.com
+ ******************************************************************************/
+
 package org.eclipse.jdt.internal.junit.ui;
 
 import java.lang.reflect.InvocationTargetException;
@@ -12,13 +20,18 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -33,6 +46,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -58,6 +72,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	private static JUnitPlugin fgPlugin= null;
 	
 	public static final String PLUGIN_ID = "org.eclipse.jdt.junit" ; //$NON-NLS-1$
+	public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS= PLUGIN_ID + "." + "testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	public final static String TEST_SUPERCLASS_NAME= "junit.framework.TestCase"; //$NON-NLS-1$
 	public final static String TEST_INTERFACE_NAME= "junit.framework.Test"; //$NON-NLS-1$
@@ -70,7 +85,12 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * Once a test runner is connected it is removed from the set.
 	 */
 	private AbstractSet fTrackedLaunches= new HashSet(20);
-	
+
+	/**
+	 * Vector storing the registered test run listeners
+	 */
+	private Vector testRunListeners;
+		
 	public JUnitPlugin(IPluginDescriptor desc) {
 		super(desc);
 		fgPlugin= this;
@@ -308,5 +328,50 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		dialog.setIgnoreCase(false);
 		dialog.setElements(packageList.toArray()); // XXX inefficient
 		return dialog;
+	}
+	
+	/**
+	 * Initializes TestRun Listener extensions
+	 */
+	private void loadTestRunListeners() {
+		testRunListeners= new Vector();
+		IExtensionPoint extensionPoint= Platform.getPluginRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
+		if (extensionPoint == null) {
+			return;
+		}
+		IConfigurationElement[] configs= extensionPoint.getConfigurationElements();
+		MultiStatus status= new MultiStatus(PLUGIN_ID, IStatus.OK, "Could not load some testRunner extension points", null); //$NON-NLS-1$ 	
+
+		for (int i= 0; i < configs.length; i++) {
+			try {
+				ITestRunListener testRunListener= (ITestRunListener) configs[i].createExecutableExtension("class"); //$NON-NLS-1$
+				testRunListeners.add(testRunListener);
+			} catch (CoreException e) {
+				status.add(e.getStatus());
+			}
+		}
+		if (!status.isOK()) {
+			JUnitPlugin.log(status);
+		}
+	}
+
+	/**
+	 * Returns an array of all TestRun listeners
+	 */
+	public Vector getTestRunListeners() {
+		if (testRunListeners == null) {
+			loadTestRunListeners();
+		}
+		return testRunListeners;
+	}
+
+	/**
+	 * Adds a TestRun listener to the collection of listeners
+	 */
+	public void addTestRunListener(ITestRunListener newListener) {
+		if (testRunListeners == null) {
+			loadTestRunListeners();
+		}
+		testRunListeners.add(newListener);
 	}	
 }

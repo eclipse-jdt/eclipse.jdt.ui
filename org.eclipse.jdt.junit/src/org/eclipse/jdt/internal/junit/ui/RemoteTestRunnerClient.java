@@ -1,7 +1,14 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *   Julien Ruaux: jruaux@octo.com
+ * 	 Vincent Massol: vmassol@octo.com
+ ******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
 import java.io.BufferedReader;
@@ -12,18 +19,27 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
-import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
+import org.eclipse.jdt.junit.ITestRunListener;
 
 /**
  * The client side of the RemoteTestRunner. Handles the
  * marshalling of th different messages.
  */
 public class RemoteTestRunnerClient {
+	public abstract class ListenerSafeRunnable implements ISafeRunnable {
+		public void handleException(Throwable exception) {
+			JUnitPlugin.log(exception);
+		}
+	}
+	
 	/**
-	 * A listener that is informed about test events.
+	 * An array of listeners that are informed about test events.
 	 */
-	private ITestRunListener fListener;
+	private ITestRunListener[] fListeners;
+
 	/**
 	 * The server socket
 	 */
@@ -91,7 +107,7 @@ public class RemoteTestRunnerClient {
 				while(fBufferedReader != null && (message= readMessage(fBufferedReader)) != null)
 					receiveMessage(message);
 			} catch (SocketException e) {
-				fListener.testRunTerminated();
+				notifyTestRunTerminated();
 			} catch (IOException e) {
 				System.out.println(e);
 				// fall through
@@ -104,11 +120,13 @@ public class RemoteTestRunnerClient {
 	 * Start listening to a test run. Start a server connection that
 	 * the RemoteTestRunner can connect to.
 	 */
-	public synchronized void startListening(ITestRunListener listener, int port) {
-		fListener= listener;
-		fPort= port;
-		ServerConnection connection= new ServerConnection(port);
-		connection.start();		
+	public synchronized void startListening(
+		ITestRunListener[] listeners,
+		int port) {
+		fListeners = listeners;
+		fPort = port;
+		ServerConnection connection = new ServerConnection(port);
+		connection.start();
 	}
 	
 	/**
@@ -177,9 +195,11 @@ public class RemoteTestRunnerClient {
 			return;
 		}
 		if (message.startsWith(MessageIds.TRACE_END)) {
-			fInReadTrace= false;
-			fListener.testFailed(fFailureKind, fFailedTest, fFailedTrace);
-			fFailedTrace= ""; //$NON-NLS-1$
+			fInReadTrace = false;
+
+			notifyTestFailed();
+
+			fFailedTrace = ""; //$NON-NLS-1$
 			return;
 		}
 		if (fInReadTrace) {
@@ -203,16 +223,16 @@ public class RemoteTestRunnerClient {
 
 		String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
 		if (message.startsWith(MessageIds.TEST_RUN_START)) {
-			int count= Integer.parseInt(arg);
-			fListener.testRunStarted(count);
+			int count = Integer.parseInt(arg);
+			notifyTestRunStarted(count);
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_START)) {
-			fListener.testStarted(arg);
+			notifyTestStarted(arg);
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_END)) {
-			fListener.testEnded(arg);
+			notifyTestEnded(arg);
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_ERROR)) {
@@ -226,18 +246,19 @@ public class RemoteTestRunnerClient {
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_RUN_END)) {
-			long elapsedTime= Long.parseLong(arg);
-			fListener.testRunEnded(elapsedTime);
+			long elapsedTime = Long.parseLong(arg);
+			testRunEnded(elapsedTime);
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_STOPPED)) {
-			long elapsedTime= Long.parseLong(arg);
-			fListener.testRunStopped(elapsedTime);
+			long elapsedTime = Long.parseLong(arg);
+			notifyTestRunStopped(elapsedTime);
+
 			shutDown();
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_TREE)) {
-			fListener.testTreeEntry(arg);
+			notifyTestTreeEntry(arg);
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_RERAN)) {
@@ -256,8 +277,108 @@ public class RemoteTestRunnerClient {
 				
 			String trace= ""; //$NON-NLS-1$
 			if (statusCode != ITestRunListener.STATUS_OK)
-				trace= fFailedRerunTrace; // assumption a rerun trace was sent before
-			fListener.testReran(className, testName, statusCode, trace);
+				trace = fFailedRerunTrace;
+			// assumption a rerun trace was sent before
+			notifyTestReran(className, testName, statusCode, trace);
+		}
+	}
+
+	private void notifyTestReran(final String className, final String testName, final int statusCode, final String trace) {
+		for (int i= 0; i < fListeners.length; i++) {
+			final ITestRunListener listener= fListeners[i];
+			Platform.run(new ListenerSafeRunnable() { 
+				public void run() {
+					listener.testReran(className, testName, statusCode, trace);
+				}
+			});
+		}
+	}
+
+	private void notifyTestTreeEntry(final String treeEntry) {
+		for (int i= 0; i < fListeners.length; i++) {
+			final ITestRunListener listener= fListeners[i];
+			Platform.run(new ListenerSafeRunnable() { 
+				public void run() {
+					listener.testTreeEntry(treeEntry);
+				}
+			});
+		}
+	}
+
+	private void notifyTestRunStopped(final long elapsedTime) {
+		for (int i= 0; i < fListeners.length; i++) {
+			final ITestRunListener listener= fListeners[i];
+			Platform.run(new ListenerSafeRunnable() { 
+				public void run() {
+					listener.testRunStopped(elapsedTime);
+				}
+			});
+		}
+	}
+
+	private void testRunEnded(final long elapsedTime) {
+		for (int i= 0; i < fListeners.length; i++) {
+			final ITestRunListener listener= fListeners[i];
+			Platform.run(new ListenerSafeRunnable() { 
+				public void run() {
+					listener.testRunEnded(elapsedTime);
+				}
+			});
+		}
+	}
+
+	private void notifyTestEnded(final String test) {
+		for (int i= 0; i < fListeners.length; i++) {
+			final ITestRunListener listener= fListeners[i];
+			Platform.run(new ListenerSafeRunnable() { 
+				public void run() {
+					listener.testEnded(test);
+				}
+			});
+		}
+	}
+
+	private void notifyTestStarted(final String test) {
+		for (int i= 0; i < fListeners.length; i++) {
+			final ITestRunListener listener= fListeners[i];
+			Platform.run(new ListenerSafeRunnable() { 
+				public void run() {
+					listener.testStarted(test);
+				}
+			});
+		}
+	}
+
+	private void notifyTestRunStarted(final int count) {
+		for (int i= 0; i < fListeners.length; i++) {
+			final ITestRunListener listener= fListeners[i];
+			Platform.run(new ListenerSafeRunnable() { 
+				public void run() {
+					listener.testRunStarted(count);
+				}
+			});
+		}
+	}
+
+	private void notifyTestFailed() {
+		for (int i= 0; i < fListeners.length; i++) {
+			final ITestRunListener listener= fListeners[i];
+			Platform.run(new ListenerSafeRunnable() { 
+				public void run() {
+					listener.testFailed(fFailureKind, fFailedTest, fFailedTrace);
+				}
+			});
+		}
+	}
+	
+	private void notifyTestRunTerminated() {
+		for (int i= 0; i < fListeners.length; i++) {
+			final ITestRunListener listener= fListeners[i];
+			Platform.run(new ListenerSafeRunnable() { 
+				public void run() {
+					listener.testRunTerminated();
+				}
+			});
 		}
 	}
 }

@@ -27,7 +27,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 
-import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
+import org.eclipse.jdt.junit.ITestRunListener;
 
 
 /**

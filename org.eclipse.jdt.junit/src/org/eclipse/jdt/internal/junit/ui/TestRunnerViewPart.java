@@ -1,7 +1,14 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *   Julien Ruaux: jruaux@octo.com
+ * 	 Vincent Massol: vmassol@octo.com
+ ******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
 import java.net.MalformedURLException;
@@ -64,7 +71,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
-import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
+import org.eclipse.jdt.junit.ITestRunListener;
 
 /**
  * A ViewPart that shows the results of a test run.
@@ -459,7 +466,15 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 			stopTest();
 		}
 		fTestRunnerClient= new RemoteTestRunnerClient();
-		fTestRunnerClient.startListening(this, port);
+		
+		// add the TestRunnerViewPart to the list of registered listeners
+		Vector listeners= JUnitPlugin.getDefault().getTestRunListeners();	
+		ITestRunListener[] listenerArray= new ITestRunListener[listeners.size()+1];
+		listeners.copyInto(listenerArray);
+		System.arraycopy(listenerArray, 0, listenerArray, 1, listenerArray.length-1);
+		listenerArray[0]= this;
+		fTestRunnerClient.startListening(listenerArray, port);
+		
 		fLastLaunch= launch;
 		String title= JUnitMessages.getFormattedString("TestRunnerViewPart.title", type.getElementName()); //$NON-NLS-1$
 		setTitle(title);

@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.junit.runner;
+package org.eclipse.jdt.junit;
   
 /**
  * A listener interface for observing the
