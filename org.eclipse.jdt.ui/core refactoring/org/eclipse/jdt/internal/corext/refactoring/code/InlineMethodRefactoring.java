@@ -78,17 +78,18 @@ public class InlineMethodRefactoring extends Refactoring {
 		Assert.isNotNull(settings);
 		fInitialCUnit= unit;
 		fInitialNode= node;
+		fCurrentMode= node.getNodeType();
 		fCodeGenerationSettings= settings;
 	}
 
-	public InlineMethodRefactoring(ICompilationUnit unit, MethodInvocation node, CodeGenerationSettings settings) {
+	private InlineMethodRefactoring(ICompilationUnit unit, MethodInvocation node, CodeGenerationSettings settings) {
 		this(unit, (ASTNode)node, settings);
 		fTargetProvider= TargetProvider.create(unit, node);
 		fSaveChanges= true;
 		fRemoveSource= false;
 	}
 
-	public InlineMethodRefactoring(ICompilationUnit unit, MethodDeclaration node, CodeGenerationSettings settings) {
+	private InlineMethodRefactoring(ICompilationUnit unit, MethodDeclaration node, CodeGenerationSettings settings) {
 		this(unit, (ASTNode)node, settings);
 		fSourceProvider= new SourceProvider(unit, node);
 		fTargetProvider= TargetProvider.create(unit, node);
@@ -109,7 +110,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 	
 	public String getName() {
-		return "Inine Method Refactoring";
+		return "Inline Method Refactoring";
 	}
 	
 	public void setSaveChanges(boolean save) {
