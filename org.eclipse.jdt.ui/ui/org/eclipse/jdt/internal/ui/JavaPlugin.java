@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.GroupMarker;
@@ -111,16 +112,46 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	public static Shell getActiveWorkbenchShell() {
-		return getActiveWorkbenchWindow().getShell();
+		IWorkbenchWindow window= getActiveWorkbenchWindow();
+		if (window == null)
+			return null;
+		return window.getShell();
+	}
+
+	/**
+	 * Returns an array of all editors that have an unsaved content. If the identical content is 
+	 * presented in more than one editor, only one of those editor parts is part of the result.
+	 * 
+	 * @return an array of all dirty editor parts.
+	 * @deprecated	reason: the method is deprecated because it can fail (bug 12996)
+	 * 					use #getDirtyEditors(Shell parent) instead
+	 * 					
+	 */
+	public static IEditorPart[] getDirtyEditors() {
+		return internalGetDirtyEditors();
 	}
 	
 	/**
 	 * Returns an array of all editors that have an unsaved content. If the identical content is 
 	 * presented in more than one editor, only one of those editor parts is part of the result.
 	 * 
+	 * @param	parent the shell in which context the code is run
 	 * @return an array of all dirty editor parts.
 	 */
-	public static IEditorPart[] getDirtyEditors() {
+	public static IEditorPart[] getDirtyEditors(Shell parent) {
+		Display display= parent.getDisplay();
+		final Object[] result= new Object[1];
+		display.syncExec(
+			new Runnable() {
+				public void run() {
+					result[0]= internalGetDirtyEditors();
+				}
+			}
+		);
+		return (IEditorPart[])result[0];
+	}
+
+	private static IEditorPart[] internalGetDirtyEditors() {
 		Set inputs= new HashSet(7);
 		List result= new ArrayList(0);
 		IWorkbench workbench= getDefault().getWorkbench();
