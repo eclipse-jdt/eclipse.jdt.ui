@@ -10,8 +10,11 @@ import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.internal.ui.JavaP
 public class ProjectNamingPolicy implements INamingPolicy {
 	private static final String PREFIX= "reorg_policy.project.";
 	private static final String ERROR_DUPLICATE= "duplicate";
+	private static final String ERROR_INVALID_NAME= "invalid_name";
 	
 	public String isValidNewName(Object original, Object parent, String name) {
+		if ("".equals(name))
+			return JavaPlugin.getResourceString(PREFIX+ERROR_INVALID_NAME);
 		IJavaModel jm= (IJavaModel)parent;
 			if (jm.getJavaProject(name).exists())
 				return JavaPlugin.getResourceString(PREFIX+ERROR_DUPLICATE);
