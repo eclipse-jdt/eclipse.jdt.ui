@@ -237,19 +237,19 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	}
 
 	/**
+	 * Renders array of elements into an array of strings and sorts
+	 * both arrays.
 	 * 
 	 * @return java.lang.String[]
 	 * @param p org.eclipse.jface.elements.IIndexedProperty
 	 */
-	private String[] renderStrings(Object[] p) {
-		String[] strings= new String[p.length];
-		int size= strings.length;
-		for (int i= 0; i < size; i++) {
-			strings[i]= fElementRenderer.getText(p[i]);
-		}
+	private String[] renderStrings(Object[] elements) {
+		String[] strings= new String[elements.length];
+		for (int i= 0; i < strings.length; i++)
+			strings[i]= fElementRenderer.getText(elements[i]);
 		
 		TwoArrayQuickSorter sorter = new TwoArrayQuickSorter(fIgnoreCase);
-		sorter.sort(strings, p);
+		sorter.sort(strings, elements);
 		
 		return strings;
 	}
