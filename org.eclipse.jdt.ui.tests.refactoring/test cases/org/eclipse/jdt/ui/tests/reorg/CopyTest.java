@@ -65,7 +65,7 @@ public class CopyTest extends RefactoringTest {
 		return refactoring2;
 	}
 
-	private void verifyInvalidDestination(CopyRefactoring2 ref, Object destination) {
+	private void verifyInvalidDestination(CopyRefactoring2 ref, Object destination) throws Exception {
 		RefactoringStatus status= null;
 		if (destination instanceof IResource)
 			status= ref.setDestination((IResource)destination);
@@ -76,7 +76,7 @@ public class CopyTest extends RefactoringTest {
 		assertEquals("destination was expected to be not valid",  RefactoringStatus.FATAL, status.getSeverity());
 	}
 	
-	private void verifyValidDestination(CopyRefactoring2 ref, Object destination) {
+	private void verifyValidDestination(CopyRefactoring2 ref, Object destination) throws Exception {
 		RefactoringStatus status= null;
 		if (destination instanceof IResource)
 			status= ref.setDestination((IResource)destination);
@@ -452,8 +452,8 @@ public class CopyTest extends RefactoringTest {
 			IResource[] resources= {folder};
 			CopyRefactoring2 ref= verifyEnabled(resources, javaElements);
 
-			Object destination= folder;
-			verifyInvalidDestination(ref, destination);			
+			Object destination= folder;//same folder
+			verifyInvalidDestination(ref, destination);	
 		}finally{
 			performDummySearch();
 			folder.delete(true, false, null);
@@ -594,7 +594,6 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
 			CopyRefactoring2 ref= verifyEnabled(resources, javaElements);
-
 			Object destination= cu1;
 			verifyValidDestination(ref, destination);			
 		}finally{
@@ -675,7 +674,7 @@ public class CopyTest extends RefactoringTest {
 			CopyRefactoring2 ref= verifyEnabled(resources, javaElements);
 
 			Object destination= simpleProject;
-			verifyValidDestination(ref, destination);			
+			verifyValidDestination(ref, destination);
 		}finally{
 			performDummySearch();
 			cu1.delete(true, new NullProgressMonitor());
@@ -1030,7 +1029,7 @@ public class CopyTest extends RefactoringTest {
 		CopyRefactoring2 ref= verifyEnabled(resources, javaElements);
 
 		Object destination= getRoot().getJavaProject();
-		verifyValidDestination(ref, destination);						
+		verifyValidDestination(ref, destination);
 	}
 	
 	public void testDestination_root_yes_1() throws Exception{
