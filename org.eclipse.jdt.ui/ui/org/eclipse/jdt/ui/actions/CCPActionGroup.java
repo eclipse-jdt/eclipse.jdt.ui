@@ -13,15 +13,17 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
+import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.IUpdate;
 
-import org.eclipse.jdt.internal.ui.actions.GroupContext;
-import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 
 /**
@@ -34,41 +36,34 @@ public class CCPActionGroup extends ActionGroup {
 
 	private UnifiedSite fSite;
 
-	private ReorgGroup fOldReorgGroup;
-	private GroupContext fOldContext;
- 	private IAction fDeleteAction;
+ 	private SelectionDispatchAction[] fActions;
+
+ 	private SelectionDispatchAction fDeleteAction;
+	private SelectionDispatchAction fCopyAction;
+	private SelectionDispatchAction fPasteAction;
+	private SelectionDispatchAction fCutAction;
 	
 	/**
 	 * Creates a new <code>CCPActionGroup</code>.
 	 * 
 	 * @param part the view part that owns this action group
-	 * <p>
-	 * Note: this constructor will go away. The final constructor will only take
-	 *  an <code>IViewPart</code>
-	 * </p>
 	 */
-	public CCPActionGroup(IViewPart  part, IInputSelectionProvider provider) {
-		this(UnifiedSite.create(part.getSite()), provider);
+	public CCPActionGroup(IViewPart  part) {
+		this(UnifiedSite.create(part.getSite()));
 	}
 	
-	/**
-	 * Creates a new <code>CCPActionGroup</code>.
-	 * 
-	 * @param page the page that owns this action group
-	 * <p>
-	 * Note: this constructor will go away. The final constructor will only take
-	 *  an <code>IViewPart</code>
-	 * </p>
-	 */
-	public CCPActionGroup(Page page, IInputSelectionProvider provider) {
-		this(UnifiedSite.create(page.getSite()), provider);
+	public CCPActionGroup(Page page) {
+		this(UnifiedSite.create(page.getSite()));
 	}
-	
-	private CCPActionGroup(UnifiedSite site, IInputSelectionProvider provider) {
+
+	private CCPActionGroup(UnifiedSite site) {
 		fSite= site;
-		fOldReorgGroup= new ReorgGroup(site);
-		fOldContext= new GroupContext(provider);
-		fDeleteAction= ReorgGroup.createDeleteAction(site, provider);
+		fActions= new SelectionDispatchAction[] {	
+			fCutAction= ReorgGroup.createCutAction(fSite, fSite.getSelectionProvider()),
+			fCopyAction= ReorgGroup.createCopyAction(fSite, fSite.getSelectionProvider()),
+			fPasteAction= ReorgGroup.createPasteAction(fSite, fSite.getSelectionProvider()),
+			fDeleteAction= ReorgGroup.createDeleteAction(fSite, fSite.getSelectionProvider()),
+		};
 	}
 	
 	/**
@@ -88,7 +83,9 @@ public class CCPActionGroup extends ActionGroup {
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
-		ReorgGroup.addGlobalReorgActions(fSite, actionBars, fSite.getSelectionProvider());
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.COPY, fCopyAction);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.CUT, fCutAction);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PASTE, fPasteAction);
 	}
 	
 	/* (non-Javadoc)
@@ -96,6 +93,9 @@ public class CCPActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		fOldReorgGroup.fill(menu, fOldContext);
-	}	
+		for (int i= 0; i < fActions.length; i++) {
+			fActions[i].update();
+			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fActions[i]);
+		}		
+	}		
 }
