@@ -66,13 +66,21 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 		/** The misspelled word */
 		private String fWord;
 
-		public CoreSpellingProblem(int start, int end, int line, String message, String word) {
+		/** Was the word found in the dictionary? */
+		private boolean fMatch;
+
+		/** Does the word start a new sentence? */
+		private boolean fSentence;
+
+		public CoreSpellingProblem(int start, int end, int line, String message, String word, boolean match, boolean sentence) {
 			super();
 			fSourceStart= start;
 			fSourceEnd= end;
 			fLineNumber= line;
 			fMessage= message;
 			fWord= word;
+			fMatch= match;
+			fSentence= sentence;
 		}
 		/*
 		 * @see org.eclipse.jdt.core.compiler.IProblem#getArguments()
@@ -92,8 +100,7 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 			} catch (BadLocationException exception) {
 				// Do nothing
 			}
-			// XXX: lost functionality through missing 'sentence' and 'match' flag?
-			return new String[] { fWord, prefix, postfix, Boolean.toString(false), Boolean.toString(false)};
+			return new String[] { fWord, prefix, postfix, fSentence ? Boolean.toString(true) : Boolean.toString(false), fMatch ? Boolean.toString(true) : Boolean.toString(false) };
 		}
 
 		/*
@@ -184,7 +191,13 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 				try {
 					int line= fDocument.getLineOfOffset(problem.getOffset()) + 1;
 					String word= fDocument.get(problem.getOffset(), problem.getLength());
-					CoreSpellingProblem iProblem= new CoreSpellingProblem(problem.getOffset(), problem.getOffset() + problem.getLength() - 1, line, problem.getMessage(), word);
+					boolean dictionaryMatch= false;
+					boolean sentenceStart= false;
+					if (problem instanceof JavaSpellingProblem) {
+						dictionaryMatch= ((JavaSpellingProblem)problem).isDictionaryMatch();
+						sentenceStart= ((JavaSpellingProblem) problem).isSentenceStart();
+					}
+					CoreSpellingProblem iProblem= new CoreSpellingProblem(problem.getOffset(), problem.getOffset() + problem.getLength() - 1, line, problem.getMessage(), word, dictionaryMatch, sentenceStart);
 					fRequester.acceptProblem(iProblem);
 				} catch (BadLocationException x) {
 					// drop this SpellingProblem

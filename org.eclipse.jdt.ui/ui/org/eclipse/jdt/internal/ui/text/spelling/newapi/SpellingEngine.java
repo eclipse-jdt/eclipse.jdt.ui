@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling.newapi;
 
-import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,16 +19,13 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.ui.texteditor.spelling.ISpellingEngine;
-import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.eclipse.ui.texteditor.spelling.SpellingContext;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
@@ -42,45 +38,6 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
  */
 public abstract class SpellingEngine implements ISpellingEngine {
 
-	private static class SpellingProblemAdapter extends SpellingProblem {
-		
-		private ISpellEvent fSpellEvent;
-		
-		public SpellingProblemAdapter(ISpellEvent spellEvent) {
-			super();
-			fSpellEvent= spellEvent;
-		}
-		
-		/*
-		 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getOffset()
-		 */
-		public int getOffset() {
-			return fSpellEvent.getBegin();
-		}
-		
-		/*
-		 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getLength()
-		 */
-		public int getLength() {
-			return fSpellEvent.getEnd() - fSpellEvent.getBegin() + 1;
-		}
-		
-		/*
-		 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getMessage()
-		 */
-		public String getMessage() {
-			return MessageFormat.format(JavaUIMessages.getString("Spelling.error.label"), new String[] { fSpellEvent.getWord() }); //$NON-NLS-1$
-		}
-		
-		/*
-		 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getProposals()
-		 */
-		public ICompletionProposal[] getProposals() {
-			// TODO: implement
-			return new ICompletionProposal[0];
-		}
-	}
-	
 	protected static class SpellEventListener implements ISpellEventListener {
 		
 		private ISpellingProblemCollector fCollector;
@@ -94,7 +51,7 @@ public abstract class SpellingEngine implements ISpellingEngine {
 		 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener#handle(org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent)
 		 */
 		public void handle(ISpellEvent event) {
-			fCollector.accept(new SpellingProblemAdapter(event));
+			fCollector.accept(new JavaSpellingProblem(event));
 		}
 	}
 
