@@ -206,8 +206,12 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			postRunnable(new Runnable() {
 				public void run() {
 					Control ctrl= fViewer.getControl();
-					if (ctrl != null && !ctrl.isDisposed()) 
-						fViewer.setSelection(selection);
+					if (ctrl != null && !ctrl.isDisposed()) {
+						// 19431
+						// if the item is already visible then select it
+						if (fViewer.testFindItem(addedElement) != null)
+							fViewer.setSelection(selection);
+					}
 				}
 			});	
 		}	
