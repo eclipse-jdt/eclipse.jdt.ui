@@ -313,7 +313,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			return false;
 		
 		int replacementLength= fReplacementString == null ? 0 : fReplacementString.length();
-		if (offset >=  fReplacementOffset + replacementLength)
+		if (offset >  fReplacementOffset + replacementLength)
 			return false;
 		
 		try {
