@@ -18,12 +18,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -37,7 +34,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
-import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
@@ -49,6 +45,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
 public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 
+	private static final String FIND_STRINGS_CHECKBOX= "FindStringAction.checkbox"; //$NON-NLS-1$
 	/*
 	 * @see IWorkbenchWindowActionDelegate#dispose()
 	 */
@@ -213,9 +210,14 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 			Composite result= (Composite)super.createDialogArea(parent);
 			fCheckbox= new Button(result, SWT.CHECK);
 			fCheckbox.setText("Show only compilation units with not externalized strings");
-			fCheckbox.setSelection(false);
+			fCheckbox.setSelection(loadCheckboxState(false));
+
+			if (fCheckbox.getSelection() && ! NonNLSListDialog.this.hasFilters())
+				getTableViewer().addFilter(new ZeroStringsFilter());
+				
 			fCheckbox.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
+					storeCheckboxState(NonNLSListDialog.this.fCheckbox.getSelection());
 					boolean showAll= ! NonNLSListDialog.this.fCheckbox.getSelection();
 					if  (showAll && NonNLSListDialog.this.hasFilters())
 						NonNLSListDialog.this.getTableViewer().resetFilters();
@@ -230,8 +232,18 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 				}
 			});
 			return result;
-		}
-		
+		}	
+	}
+	
+	private static boolean loadCheckboxState(boolean defaultValue){
+		String res= JavaPlugin.getDefault().getDialogSettings().get(FIND_STRINGS_CHECKBOX);
+		if (res == null)
+			return defaultValue;
+		return Boolean.valueOf(res).booleanValue();	
+	}
+	
+	private static void storeCheckboxState(boolean selected){
+		JavaPlugin.getDefault().getDialogSettings().put(FIND_STRINGS_CHECKBOX, selected);	
 	}
 	
 	private static class NonNLSElement{
