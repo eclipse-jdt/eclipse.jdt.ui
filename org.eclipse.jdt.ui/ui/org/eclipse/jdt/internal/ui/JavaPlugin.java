@@ -244,6 +244,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	private IWorkbenchPage internalGetActivePage() {
+		IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
+		if (window == null)
+			return null;
 		return getWorkbench().getActiveWorkbenchWindow().getActivePage();
 	}
 		
