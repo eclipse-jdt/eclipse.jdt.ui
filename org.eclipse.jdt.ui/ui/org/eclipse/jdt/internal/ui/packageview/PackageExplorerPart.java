@@ -172,6 +172,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private ShowBinariesAction fShowBinariesAction;
 	private IMemento fMemento;
 	
+	private ISelectionChangedListener fSelectionListener;
+	
 	private IPartListener fPartListener= new IPartListener() {
 		public void partActivated(IWorkbenchPart part) {
 			if (part instanceof IEditorPart)
@@ -199,7 +201,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 	};
 
-
+	
 	public PackageExplorerPart() {
 	}
 
@@ -299,11 +301,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		makeActions(); // call before registering for selection changes
 			
-		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		fSelectionListener= new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				handleSelectionChanged(event);
 			}
-		});
+		};
+		fViewer.addSelectionChangedListener(fSelectionListener);
+		
 		fViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				handleDoubleClick(event);
@@ -679,7 +683,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private void linkToEditor(IStructuredSelection selection) {	
 		//if (!isLinkingEnabled())
 		//	return; 
-
+				
 		Object obj= selection.getFirstElement();
 		Object element= null;
 
@@ -917,7 +921,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			}
 			ISelection newSelection= new StructuredSelection(element);
 			if (!fViewer.getSelection().equals(newSelection)) {
-				 fViewer.setSelection(newSelection);
+				try {
+					fViewer.removeSelectionChangedListener(fSelectionListener);
+					fViewer.setSelection(newSelection);
+				} finally {
+					fViewer.addSelectionChangedListener(fSelectionListener);
+				}
 			}
 		}
 	}
