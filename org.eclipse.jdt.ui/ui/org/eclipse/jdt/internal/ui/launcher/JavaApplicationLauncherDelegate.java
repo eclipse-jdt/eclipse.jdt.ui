@@ -186,7 +186,7 @@ public class JavaApplicationLauncherDelegate implements ILauncherDelegate {
 				return false;
 			}
 			if (result[0] != null) {
-				ISourceLocator sourceLocator= new ProjectSourceLocator(jproject);
+				ISourceLocator sourceLocator= new JavaUISourceLocator(jproject);
 				Launch newLaunch= new Launch(launcherProxy, mode, mainType, sourceLocator, result[0].getProcesses(), result[0].getDebugTarget());
 				registerLaunch(newLaunch);
 			}
