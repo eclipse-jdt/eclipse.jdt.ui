@@ -118,14 +118,14 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		}
 		
 		Block body= null;
-/*		if (!fSenderBinding.isInterface()) {
+		if (!fSenderBinding.isInterface()) {
 			body= ast.newBlock();
-			String todoTask= StubUtility.getTodoTaskTag(getCompilationUnit().getJavaProject());
+			/**String todoTask= StubUtility.getTodoTaskTag(getCompilationUnit().getJavaProject());
 			if (todoTask != null) {
 				ASTNode todoNode= rewrite.createPlaceholder("// " + todoTask, ASTRewrite.STATEMENT);
 				body.statements().add(todoNode);
-			}			
-		}*/
+			}*/			
+		}
 		if (!isConstructor()) {
 			Type returnType= evaluateMethodType(ast);
 			if (returnType == null) {
