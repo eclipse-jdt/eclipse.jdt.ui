@@ -44,13 +44,15 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
+import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
+import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -76,25 +78,22 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	private static abstract class ExpressionChecker extends ASTVisitor {
 
-		private final Expression fExpression;
+		private final IExpressionFragment fExpression;
 		protected boolean fResult= true;
 
-		public ExpressionChecker(Expression ex) {
+		public ExpressionChecker(IExpressionFragment ex) {
 			fExpression= ex;
 		}
 		public boolean check() {
 			fResult= true;
-			fExpression.accept(this);
+			fExpression.getAssociatedNode().accept(this);
 			return fResult;
 		}
 	}
 
 	private static class LoadTimeConstantChecker extends ExpressionChecker {
-		private final ITypeBinding fContainingType;
-		
-		public LoadTimeConstantChecker(Expression ex, ITypeBinding containingType) {
+		public LoadTimeConstantChecker(IExpressionFragment ex) {
 			super(ex);
-			fContainingType= containingType;
 		}
 
 		public boolean visit(SuperFieldAccess node) {
@@ -110,14 +109,14 @@ public class ExtractConstantRefactoring extends Refactoring {
 			return false;
 		}
 		public boolean visit(FieldAccess node) {
-			fResult= new LoadTimeConstantChecker(node.getExpression(), fContainingType).check();
+			fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
 			return false;
 		}
 		public boolean visit(MethodInvocation node) {
 			if(node.getExpression() == null) {
 				visitName(node.getName());	
 			} else {
-				fResult= new LoadTimeConstantChecker(node.getExpression(), fContainingType).check();
+				fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
 			}
 			
 			return false;
@@ -159,11 +158,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 		private boolean isMemberReferenceValidInClassInitialization(Name name) {
 			IBinding binding= name.resolveBinding();
 			Assert.isTrue(binding instanceof IVariableBinding || binding instanceof IMethodBinding);
-			
-			if(binding instanceof IVariableBinding) {
-				if(isInstanceOfContainingClass((IVariableBinding) binding))
-					return false;
-			}
 
 			if(name instanceof SimpleName)
 				return Modifier.isStatic(binding.getModifiers());
@@ -172,14 +166,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 				return checkName(((QualifiedName) name).getQualifier());
 			}
 		}
-		
-		private boolean isInstanceOfContainingClass(IVariableBinding varBinding) {
-			return varBinding.getType() == fContainingType;
-		}
 	}
 
 	private static class StaticFinalConstantChecker extends ExpressionChecker {
-		public StaticFinalConstantChecker(Expression ex) {
+		public StaticFinalConstantChecker(IExpressionFragment ex) {
 			super(ex);
 		}
 		
@@ -248,7 +238,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private final ICompilationUnit fCu;
 	private final CodeGenerationSettings fSettings;
 
-	private Expression fSelectedExpression;
+	private IExpressionFragment fSelectedExpression;
 	private boolean fReplaceAllOccurrences= true; //default value
 
 	private String fAccessModifier= PRIVATE; //default value
@@ -338,47 +328,30 @@ public class ExtractConstantRefactoring extends Refactoring {
 		fAllStaticFinalCheckPerformed= true;
 	}
 
-	private static boolean isStaticFinalConstant(Expression ex) {
+	private static boolean isStaticFinalConstant(IExpressionFragment ex) {
 		return new StaticFinalConstantChecker(ex).check();
 	}
 	
-	private boolean isLoadTimeConstant(Expression ex) 
+	private static boolean isLoadTimeConstant(IExpressionFragment ex) 
 		throws JavaModelException
 	{
-		return new LoadTimeConstantChecker(ex, getContainingTypeBinding()).check();
+		return new LoadTimeConstantChecker(ex).check();
 	}
 
 	private String getModifier() {
 		return getAccessModifier() + " " + MODIFIER;	
 	}
 	
-	private static boolean isJustWhitespace(int start, int end, ICompilationUnit cu) throws JavaModelException {
-		return 0 == cu.getBuffer().getText(start, end - start).trim().length();
-	}
-	
-	private boolean selectionIncludesExtraneousText() throws JavaModelException {
-		Expression selectedExpression= getSelectedExpression();
-		if(!isJustWhitespace(fSelectionStart, selectedExpression.getStartPosition(), fCu))
-			return true;
-		if(!isJustWhitespace(selectedExpression.getStartPosition() + selectedExpression.getLength(), fSelectionStart + fSelectionLength, fCu))				
-			return true;
-		return false;
-	}
-	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try {
-			pm.beginTask("", 3); //$NON-NLS-1$
+			pm.beginTask("", 2); //$NON-NLS-1$
 
-			Expression selectedExpression= getSelectedExpression();
+			IExpressionFragment selectedExpression= getSelectedExpression();
 
 			if (selectedExpression == null) {
 				String message= RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"); //$NON-NLS-1$
 				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
 			}
-			pm.worked(1);
-
-			if(selectionIncludesExtraneousText())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.extraneous_text_selected"), null, null, RefactoringStatusCodes.EXTRANEOUS_TEXT); //$NON-NLS-1$
 			pm.worked(1);
 
 			RefactoringStatus result= new RefactoringStatus();
@@ -394,15 +367,22 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus checkExpressionBinding() throws JavaModelException {
+		return checkExpressionFragmentIsRValue(getSelectedExpression());
+
+		
+	}
+	
+	private RefactoringStatus checkExpressionFragmentIsRValue(IExpressionFragment ex) 
+		throws JavaModelException
+	{
 		/* Moved this functionality to Checks, to allow sharing with
 		   ExtractTempRefactoring, others */
-		switch(Checks.checkExpressionIsRValue(getSelectedExpression())) {
+		switch(Checks.checkExpressionIsRValue(getSelectedExpression().getAssociatedExpression())) {
 			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE);
 			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.no_void"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID);
 			case Checks.IS_RVALUE:			return new RefactoringStatus();
 			default:						Assert.isTrue(false); return null;
-		}
-		
+		}		
 	}
 
 	// !!! --
@@ -417,8 +397,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 			return result;
 		checkAllStaticFinal();
 
-		Expression selectedExpression= getSelectedExpression();
-		if (selectedExpression instanceof NullLiteral)
+		IExpressionFragment selectedExpression= getSelectedExpression();
+		if (selectedExpression.getAssociatedExpression() instanceof NullLiteral)
 			result.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.null_literals"))); //$NON-NLS-1$
 		else if (!isLoadTimeConstant(selectedExpression))
 			result.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.not_load_time_constant"))); //$NON-NLS-1$
@@ -545,9 +525,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return SimpleTextEdit.createInsert(insertOffset, text);
 	}
 	
-	// !! identical to version in ExtractTempRefactoring
+	// !! almost identical to version in ExtractTempRefactoring
 	private TextEdit createImportEditIfNeeded() throws JavaModelException {
-		ITypeBinding type= getSelectedExpression().resolveTypeBinding();
+		ITypeBinding type= getSelectedExpression().getAssociatedExpression().resolveTypeBinding();
 		if (type.isPrimitive())
 			return null;
 
@@ -561,12 +541,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	// !!! very similar to (same as) equivalent in ExtractTempRefactoring
 	private TextEdit[] createReplaceExpressionWithConstantEdits() throws JavaModelException {
-		ASTNode[] nodesToReplace= getNodesToReplace();
-		TextEdit[] result= new TextEdit[nodesToReplace.length];
-		for (int i= 0; i < nodesToReplace.length; i++) {
-			ASTNode astNode= nodesToReplace[i];
-			int offset= astNode.getStartPosition();
-			int length= astNode.getLength();
+		IASTFragment[] fragmentsToReplace= getFragmentsToReplace();
+		TextEdit[] result= new TextEdit[fragmentsToReplace.length];
+		for (int i= 0; i < fragmentsToReplace.length; i++) {
+			IASTFragment fragment= fragmentsToReplace[i];
+			int offset= fragment.getStartPosition();
+			int length= fragment.getLength();
 			result[i]= SimpleTextEdit.createReplace(offset, length, fConstantName);
 		}
 		return result;
@@ -631,7 +611,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 	
 	/** bd is a static field declaration or static initializer */
-	private static boolean depends(Expression selected, BodyDeclaration bd) {
+	private static boolean depends(IExpressionFragment selected, BodyDeclaration bd) {
 		/* We currently consider selected to depend on bd only if db includes a declaration
 		 * of a static field on which selected depends.
 		 * 
@@ -650,7 +630,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			for(Iterator fragments = fieldDecl.fragments().iterator(); fragments.hasNext();) {
 				VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragments.next();
 				SimpleName staticFieldName = fragment.getName();
-				if(AstMatchingNodeFinder.findMatchingNodes(selected, staticFieldName).length != 0)
+				if(selected.getSubFragmentsMatching(ASTFragmentFactory.createFragmentForFullSubtree(staticFieldName)).length != 0)
 					return true;
 			}
 		}
@@ -699,7 +679,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	// !!! Almost duplicates getTempTypeName() in ExtractTempRefactoring
 	private String getConstantTypeName() throws JavaModelException {
-		Expression expression= getSelectedExpression();
+		IExpressionFragment selection= getSelectedExpression();
+		Expression expression= selection.getAssociatedExpression();
 		String name= expression.resolveTypeBinding().getName();
 		if (!"".equals(name) || !(expression instanceof ClassInstanceCreation)) //$NON-NLS-1$
 			return name;
@@ -799,34 +780,35 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return scope.iterator();
 	}
 
-	private ASTNode[] getNodesToReplace() throws JavaModelException {
+	private IASTFragment[] getFragmentsToReplace() throws JavaModelException {
 		List toReplace = new ArrayList();
 		if (fReplaceAllOccurrences) {
 			Iterator replacementScope = getReplacementScope();
 			while(replacementScope.hasNext()) {
 				BodyDeclaration bodyDecl = (BodyDeclaration) replacementScope.next();
-				ASTNode[] allMatches= AstMatchingNodeFinder.findMatchingNodes(bodyDecl, getSelectedExpression());
-				ASTNode[] replaceableMatches = retainOnlyReplacableMatches(allMatches);
+				IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(bodyDecl).getSubFragmentsMatching(getSelectedExpression());
+				IASTFragment[] replaceableMatches = retainOnlyReplacableMatches(allMatches);
 				for(int i = 0; i < replaceableMatches.length; i++)
 					toReplace.add(replaceableMatches[i]);
 			}
 		} else if (canReplace(getSelectedExpression()))
 			toReplace.add(getSelectedExpression());
-		return (ASTNode[]) toReplace.toArray(new ASTNode[toReplace.size()]);
+		return (IASTFragment[]) toReplace.toArray(new IASTFragment[toReplace.size()]);
 	}
 
 	// !! - like one in ExtractTempRefactoring
-	private static ASTNode[] retainOnlyReplacableMatches(ASTNode[] allMatches) {
+	private static IASTFragment[] retainOnlyReplacableMatches(IASTFragment[] allMatches) {
 		List result= new ArrayList(allMatches.length);
 		for (int i= 0; i < allMatches.length; i++) {
 			if (canReplace(allMatches[i]))
 				result.add(allMatches[i]);
 		}
-		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
+		return (IASTFragment[]) result.toArray(new IASTFragment[result.size()]);
 	}
 
 	// !! - like one in ExtractTempRefactoring
-	private static boolean canReplace(ASTNode node) {
+	private static boolean canReplace(IASTFragment fragment) {
+		ASTNode node= fragment.getAssociatedNode();
 		if (node.getParent() instanceof VariableDeclarationFragment) {
 			VariableDeclarationFragment vdf= (VariableDeclarationFragment) node.getParent();
 			if (node.equals(vdf.getName()))
@@ -837,22 +819,21 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return true;
 	}
 
-	private Expression getSelectedExpression() throws JavaModelException {
+	private IExpressionFragment getSelectedExpression() throws JavaModelException {
 		if(fSelectedExpression != null)
 			return fSelectedExpression;
 		
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(fSelectionStart, fSelectionLength), true);
-		fCompilationUnitNode.accept(analyzer);
-		ASTNode selectedNode= analyzer.getFirstSelectedNode();
-		if (selectedNode instanceof Expression)
-			return fSelectedExpression = (Expression) selectedNode;
+		IASTFragment selectedFragment= ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(fSelectionStart, fSelectionLength), fCompilationUnitNode, fCu);
+		
+		if (selectedFragment instanceof IExpressionFragment)
+			return fSelectedExpression= (IExpressionFragment) selectedFragment;
 		else
 			return null;
 	}
 
 	//returns non-null
 	private TypeDeclaration getContainingTypeDeclarationNode() throws JavaModelException {
-		TypeDeclaration result= (TypeDeclaration) ASTNodes.getParent(getSelectedExpression(), TypeDeclaration.class);  
+		TypeDeclaration result= (TypeDeclaration) ASTNodes.getParent(getSelectedExpression().getAssociatedNode(), TypeDeclaration.class);  
 		Assert.isNotNull(result);
 		return result;
 	}
