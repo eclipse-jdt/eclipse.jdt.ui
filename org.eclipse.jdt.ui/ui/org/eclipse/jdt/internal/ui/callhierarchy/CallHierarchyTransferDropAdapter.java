@@ -29,6 +29,7 @@ class CallHierarchyTransferDropAdapter extends SelectionTransferDropAdapter {
 
 	public CallHierarchyTransferDropAdapter(CallHierarchyViewPart viewPart, StructuredViewer viewer) {
 		super(viewer);
+		setFullWidthMatchesItem(false);
 		fCallHierarchyViewPart= viewPart;
 	}
 

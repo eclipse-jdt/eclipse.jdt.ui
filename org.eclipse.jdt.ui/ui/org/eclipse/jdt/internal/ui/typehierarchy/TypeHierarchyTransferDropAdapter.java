@@ -29,6 +29,7 @@ public class TypeHierarchyTransferDropAdapter extends SelectionTransferDropAdapt
 
 	public TypeHierarchyTransferDropAdapter(TypeHierarchyViewPart viewPart, AbstractTreeViewer viewer) {
 		super(viewer);
+		setFullWidthMatchesItem(false);
 		fTypeHierarchyViewPart= viewPart;
 	}
 
@@ -49,6 +50,15 @@ public class TypeHierarchyTransferDropAdapter extends SelectionTransferDropAdapt
 	public boolean isEnabled(DropTargetEvent event) {
 		return true;
 	}
+	
+	protected int computeLocation(DropTargetEvent event) {
+		if (event.item != null) {
+			System.out.print("dsd"); //$NON-NLS-1$
+		}
+		
+		return super.computeLocation(event);
+	}
+	
 
 	public void drop(Object target, DropTargetEvent event) {
 		if (target != null || event.detail != TypeHierarchyTransferDropAdapter.OPERATION){

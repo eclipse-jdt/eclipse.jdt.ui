@@ -64,6 +64,10 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	 */
 	private static final int LOCATION_EPSILON= 5; 
 	
+
+	private static final int ITEM_MARGIN_LEFT= 40;
+	private static final int ITEM_MARGIN_RIGTH= 10;
+	
 	/**
 	 * Style to enable location feedback.
 	 */
@@ -72,16 +76,20 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	private StructuredViewer fViewer;
 	private int fFeedback;
 	private boolean fShowInsertionFeedback;
+	private boolean fFullWidthMatchesItem;
 	private int fRequestedOperation;
 	private int fLastOperation;
 	protected int fLocation;
 	protected Object fTarget;
+
+
 
 	public JdtViewerDropAdapter(StructuredViewer viewer, int feedback) {
 		Assert.isNotNull(viewer);
 		fViewer= viewer;
 		fFeedback= feedback;
 		fLastOperation= -1;
+		fFullWidthMatchesItem= true;
 	}
 
 	/**
@@ -92,6 +100,16 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	 */
 	public void showInsertionFeedback(boolean showInsertionFeedback) {
 		fShowInsertionFeedback= showInsertionFeedback;
+	}
+	
+	/**
+	 * Controls whether the drop adapter matches an tree or table item on the full width of the viewer. 
+	 * 
+	 * @param enable <code>true</code> if the drop adapter is supposed
+	 *	to test the horizontal distance
+	 */
+	protected void setFullWidthMatchesItem(boolean enable) {
+		fFullWidthMatchesItem= enable;
 	}
 	
 	/**
@@ -186,7 +204,18 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	 * this corresponds to the items data model element.
 	 */
 	protected Object computeTarget(DropTargetEvent event) {
-		return event.item == null ? null : event.item.getData();
+		if (event.item == null) {
+			return null;
+		}
+		if (!fFullWidthMatchesItem) {
+			Point coordinates= fViewer.getControl().toControl(new Point(event.x, event.y));
+			Rectangle bounds= getBounds((Item) event.item);
+			if (coordinates.x < bounds.x - ITEM_MARGIN_LEFT || coordinates.x >= bounds.x + bounds.width + ITEM_MARGIN_RIGTH) {
+				event.item= null; // too far away
+				return null;
+			}
+		}
+		return event.item.getData();
 	}
 	
 	/**
@@ -195,7 +224,7 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	 * some threshold value. The return value is one of the LOCATION_* constants 
 	 * defined in this class.
 	 */
-	final protected int computeLocation(DropTargetEvent event) {
+	protected int computeLocation(DropTargetEvent event) {
 		if (!(event.item instanceof Item))
 			return LOCATION_NONE;
 		
@@ -211,7 +240,7 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 		if ((bounds.y + bounds.height - coordinates.y) < LOCATION_EPSILON) {
 			return LOCATION_AFTER;
 		}
-		return LOCATION_ON;
+		return LOCATION_NONE;
 	}
 
 	/**
