@@ -19,7 +19,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.link.LinkedEnvironment;
 import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.Template;
