@@ -56,7 +56,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-import org.eclipse.help.IHelp;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -643,11 +642,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @see JavaEditor#createJavaSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-		// http://dev.eclipse.org/bugs/show_bug.cgi?id=19445
 		return new SourceViewer(parent, ruler, styles) {
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
-				IHelp help= WorkbenchHelp.getHelpSupport();
-				if (help != null && help.isContextHelpDisplayed())
+				if (WorkbenchHelp.isContextHelpDisplayed())
 					return false;
 				return super.requestWidgetToken(requester);
 			}

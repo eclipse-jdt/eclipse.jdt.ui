@@ -80,7 +80,6 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.tasklist.TaskList;
 
-import org.eclipse.help.IHelp;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -337,9 +336,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		 * @see IWidgetTokenOwner#requestWidgetToken(IWidgetTokenKeeper)
 		 */
 		public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
-			// http://dev.eclipse.org/bugs/show_bug.cgi?id=19445
-			IHelp help= WorkbenchHelp.getHelpSupport();
-			if (help != null && help.isContextHelpDisplayed())
+			if (WorkbenchHelp.isContextHelpDisplayed())
 				return false;
 			return super.requestWidgetToken(requester);
 		}
