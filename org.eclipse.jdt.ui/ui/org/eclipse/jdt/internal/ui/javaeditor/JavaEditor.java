@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.CollationElementIterator;
 import java.text.Collator;
 import java.text.RuleBasedCollator;
@@ -135,7 +137,6 @@ import org.eclipse.ui.texteditor.TextNavigationAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.eclipse.ui.views.tasklist.TaskList;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -2536,12 +2537,18 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			}
 			
 			if (marker != null) {
-				IWorkbenchPage page= getSite().getPage();
-				IViewPart view= view= page.findView("org.eclipse.ui.views.TaskList"); //$NON-NLS-1$
-				if (view instanceof TaskList) {
-					StructuredSelection ss= new StructuredSelection(marker);
-					((TaskList) view).setSelection(ss, true);
+				try {
+					boolean isProblem= marker.isSubtypeOf(IMarker.PROBLEM);
+					IWorkbenchPage page= getSite().getPage();
+					IViewPart view= view= page.findView(isProblem ? IPageLayout.ID_PROBLEM_VIEW: IPageLayout.ID_TASK_LIST); //$NON-NLS-1$  //$NON-NLS-2$
+					Method method= view.getClass().getMethod("setSelection", new Class[] { IStructuredSelection.class, boolean.class}); //$NON-NLS-1$
+					method.invoke(view, new Object[] {new StructuredSelection(marker), Boolean.TRUE });
+				} catch (CoreException x) {
+				} catch (NoSuchMethodException x) {
+				} catch (IllegalAccessException x) {
+				} catch (InvocationTargetException x) {
 				}
+				// ignore, don't update any of the lists, just set statusline
 			}
 			
 			selectAndReveal(annotationPosition.getOffset(), annotationPosition.getLength());
