@@ -231,7 +231,9 @@ public class InlineMethodRefactoring extends Refactoring {
 							break;
 						if (result.getSeverity() < fTargetProvider.getStatusSeverity()) {
 							added= true;
-							result.merge(inliner.perform(new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline")))); //$NON-NLS-1$
+							TextEditGroup group= new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline"));
+							change.addTextEditGroup(group);
+							result.merge(inliner.perform(group)); //$NON-NLS-1$
 						} else {
 							fDeleteSource= false;
 						}
@@ -250,9 +252,11 @@ public class InlineMethodRefactoring extends Refactoring {
 					ImportRewrite rewrite= inliner.getImportEdit();
 					if (!rewrite.isEmpty()) {
 						TextEdit edit= rewrite.createEdit(inliner.getBuffer().getDocument());
-						root.addChild(edit);
-						change.addTextEditGroup(
-							new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.import"), new TextEdit[] {edit})); //$NON-NLS-1$
+						if (edit instanceof MultiTextEdit ? ((MultiTextEdit)edit).getChildrenSize() > 0 : true) {
+							root.addChild(edit);
+							change.addTextEditGroup(
+								new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.import"), new TextEdit[] {edit})); //$NON-NLS-1$
+						}
 					}
 				}
 			} finally {
