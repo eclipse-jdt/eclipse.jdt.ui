@@ -31,8 +31,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.internal.dialogs.ContainerCheckedTreeViewer;
 
 import org.eclipse.jdt.core.IType;
@@ -47,10 +47,10 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -254,11 +254,11 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
 		ITypeBinding binding= null;
 		if (type.isAnonymous()) {
-			final ClassInstanceCreation creation= ASTNodeSearchUtil.getClassInstanceCreationNode(type, unit);
+			final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), ClassInstanceCreation.class);
 			if (creation != null)
 				binding= creation.resolveTypeBinding();
 		} else {
-			final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unit);
+			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
 			if (declaration != null)
 				binding= declaration.resolveBinding();
 		}

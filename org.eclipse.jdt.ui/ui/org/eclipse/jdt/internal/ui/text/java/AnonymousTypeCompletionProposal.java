@@ -49,7 +49,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -105,7 +106,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			CompilationUnit unit= parser.parse(workingCopy, true);
 			IType dummyType= workingCopy.getType(dummyName);
 			ITypeBinding binding= null;
-			final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(dummyType, unit);
+			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, dummyType.getNameRange()), AbstractTypeDeclaration.class);
 			if (declaration != null) {
 				binding= declaration.resolveBinding();
 				if (binding != null) {
