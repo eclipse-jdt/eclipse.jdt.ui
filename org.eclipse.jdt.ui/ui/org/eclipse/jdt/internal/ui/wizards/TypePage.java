@@ -343,12 +343,14 @@ public abstract class TypePage extends ContainerPage {
 	protected void createModifierControls(Composite composite, int nColumns) {
 		LayoutUtil.setHorizontalSpan(fAccMdfButtons.getLabelControl(composite), 1);
 		LayoutUtil.setHorizontalSpan(fAccMdfButtons.getSelectionButtonsGroup(composite), nColumns - 2);
-		fAccMdfButtons.setButtonsMinWidth(70);
+		int minWidthHint= convertWidthInCharsToPixels(15);
+		
+		fAccMdfButtons.setButtonsMinWidth(minWidthHint);
 		DialogField.createEmptySpace(composite);
 		
 		DialogField.createEmptySpace(composite);
 		LayoutUtil.setHorizontalSpan(fOtherMdfButtons.getSelectionButtonsGroup(composite), nColumns - 2);
-		fOtherMdfButtons.setButtonsMinWidth(70);
+		fOtherMdfButtons.setButtonsMinWidth(minWidthHint);
 		DialogField.createEmptySpace(composite);
 	}
 
