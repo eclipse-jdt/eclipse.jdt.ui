@@ -19,8 +19,11 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.debug.core.model.IBreakpoint;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.jface.resource.ImageRegistry;
 
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
@@ -44,8 +47,8 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
 public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnotation {
 	
-	private static Image fgImage;
-	private static boolean fgImageInitialized= false;
+	private static Image fgQuickFixImage;
+	private static ImageRegistry fgGrayMarkersImageRegistry;
 	
 	private IDebugModelPresentation fPresentation;
 	private IJavaAnnotation fOverlay;
@@ -110,14 +113,16 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 			
 			super.initialize();
 			
-			if (indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(marker)) {
-				if (!fgImageInitialized) {
-					fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
-					fgImageInitialized= true;
-				}
-				setImage(fgImage);
-			}
 		}
+	}
+	
+	private Image getQuickFixImage() {
+		if (indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(getMarker())) {
+			if (fgQuickFixImage != null)
+				fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+			return fgQuickFixImage;
+		}
+		return null;
 	}
 
 	private boolean indicateQuixFixableProblems() {
@@ -201,12 +206,43 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 * @see MarkerAnnotation#getImage(Display)
 	 */
 	public Image getImage(Display display) {
+		// return image of overlay annoation
 		if (fOverlay != null) {
 			Image image= fOverlay.getImage(display);
 			if (image != null)
 				return image;
 		}
-		return super.getImage(display);
+
+		if (isRelevant()) {
+			Image image= getQuickFixImage();
+			if (image != null)
+				return image;
+			else
+				// the original marker image
+				return super.getImage(display);
+		} else {
+			// the original marker image
+			Image originalImage= super.getImage(display);
+			if (originalImage != null) {
+				ImageRegistry imageRegistry= getGrayMarkerImageRegistry(display);
+				if (imageRegistry != null) {
+					String key= Integer.toString(originalImage.handle);
+					Image grayImage= imageRegistry.get(key);
+					if (grayImage == null) {
+						grayImage= new Image(display, originalImage, SWT.IMAGE_GRAY);
+						imageRegistry.put(key, grayImage);
+					}
+					return grayImage;
+				}
+			}
+			return originalImage;
+		}
+	}
+	
+	private ImageRegistry getGrayMarkerImageRegistry(Display display) {
+		if (fgGrayMarkersImageRegistry == null)
+			fgGrayMarkersImageRegistry= new ImageRegistry(display);
+		return fgGrayMarkersImageRegistry;
 	}
 	
 	/*
