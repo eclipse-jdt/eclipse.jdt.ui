@@ -13,12 +13,31 @@ package org.eclipse.jdt.ui.text;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Shell;
-
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
+import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
+import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
+import org.eclipse.jdt.internal.ui.text.JavaReconciler;
+import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
+import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
+import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.IAutoIndentStrategy;
@@ -44,34 +63,9 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
-import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
-import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
-import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
-import org.eclipse.jdt.internal.ui.text.JavaReconciler;
-import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
-import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
-import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
-import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
 
 
 /**
@@ -460,20 +454,14 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getContentFormatter(ISourceViewer)
 	 */
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
-		ContentFormatter formatter= new ContentFormatter();
-		formatter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
-// *** Formatting of comments is currently disabled. ***
-//		if (getPreferenceStore().getBoolean("work_in_progress_enable_comment_formatting")) {  //$NON-NLS-1$
-//			formatter.enablePartitionAwareFormatting(true);
-//			formatter.setFormattingStrategy(new JavaFormattingStrategy(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
-//			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_DOC);
-//			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-//			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
-//		} else {
-			formatter.enablePartitionAwareFormatting(false);
-			formatter.setFormattingStrategy(new JavaFormattingStrategy(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
-//		}
+		final ContentFormatter formatter= new ContentFormatter();
+		formatter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
+		formatter.setFormattingStrategy(new JavaFormattingStrategy(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
+		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_DOC);
+		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+
 		return formatter;
 	}
 	

@@ -12,9 +12,7 @@
 package org.eclipse.jdt.internal.ui.text.comment;
 
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TypedPosition;
 
 /**
  * Factory for comment related objects.
@@ -24,23 +22,21 @@ import org.eclipse.jface.text.ITypedRegion;
 public class CommentObjectFactory {
 
 	/**
-	 * Creates a comment line for a specific comment region type.
+	 * Creates a comment line for a specific comment region.
 	 * 
 	 * @param region Comment region to create the line for
-	 * @param range Range of the line in the underlying text store measured in comment region coordinates 
 	 * @return A new comment line for the comment region, or <code>null</code> iff there is no line available for this comment type
 	 */
-	public static CommentLine getLine(CommentRegion region, IRegion range) {
+	public static CommentLine createLine(final CommentRegion region) {
 
 		final String type= region.getType();
-		final CommentRange comment= getRange(region, range.getOffset(), range.getLength());
 
 		if (type.equals(IJavaPartitions.JAVA_DOC))
-			return new JavaDocLine(region, comment);
+			return new JavaDocLine(region);
 		else if (type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
-			return new MultiCommentLine(region, comment);
+			return new MultiCommentLine(region);
 		else if (type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT))
-			return new SingleCommentLine(region, comment);
+			return new SingleCommentLine(region);
 
 		return null;
 	}
@@ -53,7 +49,7 @@ public class CommentObjectFactory {
 	 * @param length Length of the range
 	 * @return A new comment range for the comment region, or <code>null</code> iff there is no range available for this comment type
 	 */
-	public static CommentRange getRange(CommentRegion region, int offset, int length) {
+	public static CommentRange createRange(final CommentRegion region, final int offset, final int length) {
 
 		final String type= region.getType();
 
@@ -66,23 +62,25 @@ public class CommentObjectFactory {
 	/**
 	 * Creates a comment region for a specific document partition type.
 	 * 
-	 * @param document Document to create the region for
+	 * @param strategy The comment formatting strategy used to format this comment region
 	 * @param range Range of the comment region in the document
 	 * @param delimiter Line delimiter to use in the comment region
 	 * @return A new comment region for the comment region range in the document
 	 */
-	public static CommentRegion getRegion(IDocument document, ITypedRegion range, String delimiter) {
+	public static CommentRegion createRegion(final CommentFormattingStrategy strategy, final TypedPosition range, final String delimiter) {
 
 		final String type= range.getType();
 
 		if (type.equals(IJavaPartitions.JAVA_DOC))
-			return new JavaDocRegion(document, range, delimiter);
+			return new JavaDocRegion(strategy, range, delimiter);
 
-		return new CommentRegion(document, range, delimiter);
+		return new CommentRegion(strategy, range, delimiter);
 	}
 
-	/*
-	 * Not for instantiation.
+	/**
+	 * This class is not intended for instantiation.
+	 * <p>
+	 * Use the factory methods to create comment object instances.
 	 */
 	private CommentObjectFactory() {
 		// Not for instantiation

@@ -11,36 +11,161 @@
 
 package org.eclipse.jdt.internal.ui.text.comment;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * General comment line in a comment region.
  * 
  * @since 3.0
  */
-public abstract class CommentLine {
-
-	/** Html tag postfix */
-	public static final char HTML_TAG_POSTFIX= '>';
-
-	/** Html tag prefix */
-	public static final char HTML_TAG_PREFIX= '<';
-
-	/** The sequence of comment ranges in this line */
-	protected final ArrayList fRanges= new ArrayList();
+public abstract class CommentLine implements IBorderAttributes {
 
 	/** The region this comment line belongs to */
-	protected final CommentRegion fRegion;
+	private final CommentRegion fParent;
+
+	/** The sequence of comment ranges in this comment line */
+	private final LinkedList fRanges= new LinkedList();
 
 	/**
 	 * Creates a new comment line.
 	 * 
 	 * @param region Comment region to create the line for
-	 * @param range Range of the line in the underlying text store measured in comment region coordinates 
 	 */
-	protected CommentLine(CommentRegion region, CommentRange range) {
-		fRegion= region;
+	protected CommentLine(final CommentRegion region) {
+		fParent= region;
+	}
+
+	/**
+	 * Gets the context information from the previous comment line and sets it for the current one.
+	 * 
+	 * @param previous The previous comment line in the associated comment region
+	 */
+	protected abstract void adapt(final CommentLine previous);
+
+	/**
+	 * Appends the comment range to this comment line.
+	 * 
+	 * @param range Comment range to append
+	 */
+	protected void append(final CommentRange range) {
 		fRanges.add(range);
+	}
+
+	/**
+	 * Applies the formatted lower border to the underlying document.
+	 * 
+	 * @param range Last comment range in the comment region
+	 * @param indentation Indenation of the formatted lower border
+	 * @param length The maximal length of text in this comment region measured in average character widths
+	 */
+	protected void applyEnd(final CommentRange range, final String indentation, final int length) {
+
+		final int offset= range.getOffset() + range.getLength();
+		final CommentRegion parent= getParent();
+
+		final StringBuffer buffer= new StringBuffer(length);
+		final String end= getEndingPrefix();
+		final String delimiter= parent.getDelimiter();
+
+		if (parent.getSize() == 1)
+			buffer.append(end);
+		else {
+
+			final String filler= getContentPrefix().trim();
+
+			buffer.append(delimiter);
+			buffer.append(indentation);
+
+			if (parent.hasBorder(BORDER_LOWER)) {
+
+				buffer.append(' ');
+				for (int character= 0; character < length; character++)
+					buffer.append(filler);
+
+				buffer.append(end.trim());
+
+			} else
+				buffer.append(end);
+		}
+		parent.applyText(buffer.toString(), offset, parent.getLength() - offset);
+	}
+
+	/**
+	 * Applies the formatted comment line to the underlying document.
+	 * 
+	 * @param predecessor The comment line predecessor of this line
+	 * @param last The most recently applied comment range of the previous comment line in the comment region
+	 * @param indentation Indentation of the formatted comment line
+	 * @param line The index of the comment line in the comment region
+	 * @return The first comment range in this comment line
+	 */
+	protected CommentRange applyLine(final CommentLine predecessor, final CommentRange last, final String indentation, final int line) {
+
+		int offset= 0;
+		int length= 0;
+
+		CommentRange next= last;
+		CommentRange previous= null;
+
+		final CommentRegion parent= getParent();
+
+		final int stop= fRanges.size() - 1;
+		final int end= parent.getSize() - 1;
+
+		for (int index= stop; index >= 0; index--) {
+
+			previous= next;
+			next= (CommentRange)fRanges.get(index);
+
+			if (parent.canApply(previous, next)) {
+
+				offset= next.getOffset() + next.getLength();
+				length= previous.getOffset() - offset;
+
+				if (index == stop && line != end)
+					parent.applyText(parent.getDelimiter(predecessor, this, previous, next, indentation), offset, length);
+				else
+					parent.applyText(parent.getDelimiter(previous, next), offset, length);
+			}
+		}
+		return next;
+	}
+
+	/**
+	 * Applies the formatted upper border to the underlying document.
+	 * 
+	 * @param range First comment range in the comment region
+	 * @param indentation Indentation of the formatted upper border
+	 * @param length The maximal length of text in this comment region measured in average character widths
+	 */
+	protected void applyStart(final CommentRange range, final String indentation, final int length) {
+
+		final CommentRegion parent= getParent();
+
+		final StringBuffer buffer= new StringBuffer(length);
+		final String start= getStartingPrefix();
+		final String content= getContentPrefix();
+
+		if (parent.getSize() == 1)
+			buffer.append(start);
+		else {
+
+			final String trimmed= start.trim();
+			final String filler= content.trim();
+
+			buffer.append(trimmed);
+
+			if (parent.hasBorder(BORDER_UPPER)) {
+
+				for (int character= 0; character < length - trimmed.length() + start.length(); character++)
+					buffer.append(filler);
+			}
+
+			buffer.append(parent.getDelimiter());
+			buffer.append(indentation);
+			buffer.append(content);
+		}
+		parent.applyText(buffer.toString(), 0, range.getOffset());
 	}
 
 	/**
@@ -48,31 +173,58 @@ public abstract class CommentLine {
 	 * 
 	 * @return Line prefix of content lines
 	 */
-	protected abstract String getContentLinePrefix();
+	protected abstract String getContentPrefix();
 
 	/**
 	 * Returns the line prefix of end lines.
 	 * 
 	 * @return Line prefix of end lines
 	 */
-	protected abstract String getEndLinePrefix();
+	protected abstract String getEndingPrefix();
 
 	/**
-	 * Returns the line prefix for the line with the indicated index.
+	 * Returns the first comment range in this comment line.
 	 * 
-	 * @param index Index of the line to get the prefix for
+	 * @return The first comment range
 	 */
-	protected String getLinePrefix(int index) {
+	protected final CommentRange getFirst() {
+		return (CommentRange)fRanges.getFirst();
+	}
 
-		String prefix= null;
-		if (index == 0)
-			prefix= getStartLinePrefix();
-		else if (index == fRegion.getLineCount() - 1)
-			prefix= getEndLinePrefix();
-		else
-			prefix= getContentLinePrefix();
+	/**
+	 * Returns the last comment range in this comment line.
+	 * 
+	 * @return The last comment range
+	 */
+	protected final CommentRange getLast() {
+		return (CommentRange)fRanges.getLast();
+	}
 
-		return prefix;
+	/**
+	 * Returns the parent comment region of this comment line.
+	 * 
+	 * @return The parent comment region
+	 */
+	protected final CommentRegion getParent() {
+		return fParent;
+	}
+
+	/**
+	 * Returns the indentation reference string for this line.
+	 * 
+	 * @return The indentation reference string for this line
+	 */
+	protected String getReference() {
+		return ""; //$NON-NLS-1$
+	}
+
+	/**
+	 * Returns the number of comment ranges in this comment line.
+	 * 
+	 * @return The number of ranges in this line
+	 */
+	protected final int getSize() {
+		return fRanges.size();
 	}
 
 	/**
@@ -80,87 +232,45 @@ public abstract class CommentLine {
 	 * 
 	 * @return Line prefix of start lines
 	 */
-	protected abstract String getStartLinePrefix();
+	protected abstract String getStartingPrefix();
 
 	/**
 	 * Scans this line in the comment region.
 	 * 
-	 * @param index Index of this line in the comment region
-	 * @return <code>true</code> iff this line could successfully be scanned, <code>false</code> otherwise
+	 * @param line Index of this line in the comment region
 	 */
-	public boolean scanLine(int index) {
-
-		final String prefix= getLinePrefix(index).trim();
-		final CommentRange range= (CommentRange)fRanges.get(0);
-		final String content= fRegion.getContent(range);
-
-		// Search for the prefix
-		int offset= content.indexOf(prefix);
-		if (offset >= 0) {
-
-			// Update content range
-			offset += prefix.length();
-			range.changeOffset(offset);
-			range.changeLength(-offset);
-
-			return true;
-		}
-		return false;
-	}
+	protected abstract void scanLine(final int line);
 
 	/** 
 	 * Tokenizes this line into token ranges.
 	 */
-	public void tokenizeLine() {
-
-		final CommentRange range= (CommentRange)fRanges.get(0);
-		final String content= fRegion.getContent(range);
-
-		// Remove old line range
-		fRanges.remove(0);
+	protected void tokenizeLine() {
 
 		int offset= 0;
 		int index= offset;
 
-		while (offset < content.length()) {
+		final CommentRegion parent= getParent();
+		final CommentRange range= (CommentRange)fRanges.get(0);
+		final int begin= range.getOffset();
 
-			// Skip white spaces
-			while (offset < content.length() && Character.isWhitespace(content.charAt(offset)))
+		final String content= parent.getText(begin, range.getLength());
+		final int length= content.length();
+
+		while (offset < length) {
+
+			while (offset < length && Character.isWhitespace(content.charAt(offset)))
 				offset++;
 
-			// Skip tag characters
 			index= offset;
-			if (offset < content.length() && content.charAt(offset) == HTML_TAG_PREFIX)
+
+			while (index < length && !Character.isWhitespace(content.charAt(index)))
 				index++;
 
-			// Record line token
-			while (index < content.length() && !Character.isWhitespace(content.charAt(index)) && content.charAt(index) != HTML_TAG_POSTFIX && content.charAt(index) != HTML_TAG_PREFIX)
-				index++;
+			if (index - offset > 0) {
+				parent.append(CommentObjectFactory.createRange(parent, begin + offset, index - offset));
 
-			// Skip tag characters
-			if (index < content.length() && content.charAt(index) == HTML_TAG_POSTFIX)
-				index++;
-
-			// Insert token range
-			if (index - offset > 0)
-				fRanges.add(CommentObjectFactory.getRange(fRegion, offset + range.getOffset(), index - offset));
-
-			offset= index;
+				offset= index;
+			}
 		}
-	}
-
-	/*
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString() {
-
-		// TODO remove
-
-		final StringBuffer buffer= new StringBuffer(32 * fRanges.size());
-
-		for (int token= 0; token < fRanges.size(); token++)
-			buffer.append(fRanges.get(token).toString());
-
-		return buffer.toString();
 	}
 }

@@ -12,15 +12,25 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import java.util.Map;
+
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.formatter.FormattingContextProperties;
+import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+
 
 
 
@@ -48,6 +58,32 @@ public class JavaSourceViewer extends SourceViewer {
 
 	public JavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles) {
 		super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewer#createFormattingContext()
+	 * @since 3.0
+	 */
+	public IFormattingContext createFormattingContext() {
+
+		final IFormattingContext context= super.createFormattingContext();
+		if (context != null) {
+
+			final Map map= JavaCore.getOptions();
+
+			final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+			final String[] preferences= PreferenceConstants.getFormatterKeys();
+
+			boolean preference= false;
+			for (int i= 0; i < preferences.length; i++) {
+
+				preference= store.getBoolean(preferences[i]);
+				map.put(preferences[i], preference ? IPreferenceStore.TRUE : IPreferenceStore.FALSE);
+			}
+
+			context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, map);
+		}
+		return context;
 	}
 
 	/*

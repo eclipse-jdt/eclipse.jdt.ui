@@ -160,6 +160,13 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String FORMAT= "org.eclipse.jdt.ui.edit.text.java.format"; //$NON-NLS-1$
 	
 	/**
+	 * Action definition id of the java quick format action.
+	 * Value: <code>"org.eclipse.jdt.ui.edit.text.java.quick.format"</code>
+	 * @since 3.0
+	 */
+	public static final String QUICK_FORMAT= "org.eclipse.jdt.ui.edit.text.java.quick.format"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the source -> add import action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.add.import"</code>).
 	 */

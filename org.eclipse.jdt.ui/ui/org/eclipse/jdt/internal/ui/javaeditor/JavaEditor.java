@@ -1538,6 +1538,89 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 	}
 
+	/**
+	 * Quick format action to format the enclosing java element.
+	 * 
+	 * @since 3.0
+	 */
+	protected class QuickFormatAction extends Action {
+
+		/*
+		 * @see org.eclipse.jface.action.IAction#run()
+		 */
+		public void run() {
+
+			final JavaSourceViewer viewer= (JavaSourceViewer)getSourceViewer();
+			final StyledText text= viewer.getTextWidget();
+
+			if (text != null && !text.isDisposed() && viewer.isEditable()) {
+
+				final IDocument document= viewer.getDocument();
+				final int caret= widgetOffset2ModelOffset(viewer, text.getCaretOffset());
+
+				final String type;
+				try {
+
+					type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, caret);
+					if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT) || type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
+
+						final ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, caret);
+						final int offset= partition.getOffset();
+
+						viewer.setSelectedRange(offset, partition.getLength());
+						viewer.doOperation(ISourceViewer.FORMAT);
+						viewer.setSelectedRange(offset, 0);
+
+					} else if (type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+
+						try {
+
+							final IJavaElement element= getElementAt(caret, true);
+							if (element != null && element.exists()) {
+
+								ISourceRange range= null;
+								final int kind= element.getElementType();
+
+								if (kind == IJavaElement.TYPE || kind == IJavaElement.METHOD || kind == IJavaElement.INITIALIZER) {
+
+									final ISourceReference reference= (ISourceReference)element;
+									range= reference.getSourceRange();
+								}
+
+								if (range != null) {
+
+									int offset= range.getOffset();
+									int length= range.getLength();
+
+									final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset);
+									if (region.getType() != IDocument.DEFAULT_CONTENT_TYPE) {
+
+										final int delta= region.getOffset() + region.getLength() - offset + 2;
+										offset += delta;
+										length -= delta;
+									}
+									
+									final IRegion line= document.getLineInformationOfOffset(offset);
+									final int delta= offset - line.getOffset();
+									offset -= delta;
+									length += delta;
+						
+									viewer.setSelectedRange(offset, length);
+									viewer.doOperation(ISourceViewer.FORMAT);
+									viewer.setSelectedRange(offset, 0);
+								}
+							}
+						} catch (JavaModelException exception) {
+							// Should not happen
+						}
+					}
+				} catch (BadLocationException exception) {
+					// Should not happen
+				}
+			}
+		}
+	}
+
 	/** Preference key for the link color */
 	protected final static String LINK_COLOR= PreferenceConstants.EDITOR_LINK_COLOR;
 	/** Preference key for matching brackets */
@@ -2075,6 +2158,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		action= GoToNextPreviousMemberAction.newGoToPreviousMemberAction(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);				
 		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
+		
+		action= new QuickFormatAction();
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.QUICK_FORMAT);
+		setAction(IJavaEditorActionDefinitionIds.QUICK_FORMAT, action);
 	}
 	
 	public void updatedTitleImage(Image image) {

@@ -13,22 +13,35 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.formatter.FormattingContextProperties;
+import org.eclipse.jface.text.formatter.IContentFormatter;
+import org.eclipse.jface.text.formatter.IContentFormatterExtension2;
+import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -40,11 +53,10 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
-
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 /*
  * The page for setting code formatter options
@@ -62,6 +74,13 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_TAB_CHAR= JavaCore.FORMATTER_TAB_CHAR;
 	private static final String PREF_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
 	private static final String PREF_SPACE_CASTEXPRESSION= JavaCore.FORMATTER_SPACE_CASTEXPRESSION;
+	private static final String PREF_COMMENT_FORMATSOURCE= PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE;
+	private static final String PREF_COMMENT_INDENTPARAMDESC= PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMDESC;
+	private static final String PREF_COMMENT_FORMATHEADER= PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER;
+	private static final String PREF_COMMENT_INDENTROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS;
+	private static final String PREF_COMMENT_FORMAT= PreferenceConstants.FORMATTER_COMMENT_FORMAT;
+	private static final String PREF_COMMENT_NEWLINEPARAM= PreferenceConstants.FORMATTER_COMMENT_NEWLINEPARAM;
+	private static final String PREF_COMMENT_SEPARATEROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS;
 
 	// values
 	private static final String INSERT=  JavaCore.INSERT;
@@ -75,13 +94,15 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private static final String CLEAR_ALL= JavaCore.CLEAR_ALL;
 	private static final String PRESERVE_ONE= JavaCore.PRESERVE_ONE;
-			
-	private String fPreviewText;
+
 	private IDocument fPreviewDocument;
 	
 	private Text fTabSizeTextBox;
+	private String fPreviewText;
 	private SourceViewer fSourceViewer;
-	
+	private SourceViewerConfiguration fViewerConfiguration;
+	private JavaTextTools fTextTools;
+
 	private PixelConverter fPixelConverter;
 	
 	private IStatus fLineLengthStatus;
@@ -89,21 +110,20 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	
 	public CodeFormatterConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
 		super(context, project);
-			
-		fPreviewDocument= new Document();
-		fPreviewText= loadPreviewFile("CodeFormatterPreviewCode.txt");	//$NON-NLS-1$	
+
+		fTextTools= JavaPlugin.getDefault().getJavaTextTools();
+		fViewerConfiguration= new JavaSourceViewerConfiguration(fTextTools, null, IJavaPartitions.JAVA_PARTITIONING);
+		fPreviewText= loadPreviewFile("CodeFormatterPreviewCode.txt"); //$NON-NLS-1$
+		fPreviewDocument= new Document(fPreviewText);
+		fTextTools.setupJavaDocumentPartitioner(fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);
 
 		fLineLengthStatus= new StatusInfo();
 		fTabSizeStatus= new StatusInfo();
 	}
 	
 	protected String[] getAllKeys() {
-		return new String[] {
-			PREF_NEWLINE_OPENING_BRACES, PREF_NEWLINE_CONTROL_STATEMENT, PREF_NEWLINE_CLEAR_ALL,
-			PREF_NEWLINE_ELSE_IF, PREF_NEWLINE_EMPTY_BLOCK, PREF_LINE_SPLIT,
-			PREF_STYLE_COMPACT_ASSIGNEMENT, PREF_TAB_CHAR, PREF_TAB_SIZE, PREF_SPACE_CASTEXPRESSION
-		};	
-	}	
+		return new String[] { PREF_NEWLINE_OPENING_BRACES, PREF_NEWLINE_CONTROL_STATEMENT, PREF_NEWLINE_CLEAR_ALL, PREF_NEWLINE_ELSE_IF, PREF_NEWLINE_EMPTY_BLOCK, PREF_LINE_SPLIT, PREF_STYLE_COMPACT_ASSIGNEMENT, PREF_TAB_CHAR, PREF_TAB_SIZE, PREF_SPACE_CASTEXPRESSION };
+	}
 
 	protected Control createContents(Composite parent) {
 		fPixelConverter= new PixelConverter(parent);
@@ -175,6 +195,41 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		fTabSizeTextBox= addTextField(styleComposite, label, PREF_TAB_SIZE, 0, textWidth);		
 		fTabSizeTextBox.setTextLimit(3);
 
+		layout= new GridLayout();
+		layout.numColumns= 1;
+
+		Composite commentComposite= new Composite(folder, SWT.NULL);
+		commentComposite.setLayout(layout);
+
+		final String[] trueFalse= new String[] { IPreferenceStore.TRUE, IPreferenceStore.FALSE };
+
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_format.label"); //$NON-NLS-1$
+		Button master= addCheckBox(commentComposite, label, PREF_COMMENT_FORMAT, trueFalse, 0);
+
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_formatheader.label"); //$NON-NLS-1$
+		Button slave= addCheckBox(commentComposite, label, PREF_COMMENT_FORMATHEADER, trueFalse, 20);
+		createSelectionDependency(master, slave);
+
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_formatsource.label"); //$NON-NLS-1$
+		slave= addCheckBox(commentComposite, label, PREF_COMMENT_FORMATSOURCE, trueFalse, 20);
+		createSelectionDependency(master, slave);
+
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_separateroottags.label"); //$NON-NLS-1$
+		slave= addCheckBox(commentComposite, label, PREF_COMMENT_SEPARATEROOTTAGS, trueFalse, 20);
+		createSelectionDependency(master, slave);
+
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_newlineparam.label"); //$NON-NLS-1$
+		slave= addCheckBox(commentComposite, label, PREF_COMMENT_NEWLINEPARAM, trueFalse, 20);
+		createSelectionDependency(master, slave);
+
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_indentroottags.label"); //$NON-NLS-1$
+		Button indentRootTags= addCheckBox(commentComposite, label, PREF_COMMENT_INDENTROOTTAGS, trueFalse, 20);
+		createSelectionDependency(master, indentRootTags);
+
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_indentparamdesc.label"); //$NON-NLS-1$
+		slave= addCheckBox(commentComposite, label, PREF_COMMENT_INDENTPARAMDESC, trueFalse, 20);
+		createEnableDependency(master, indentRootTags, slave);
+
 		TabItem item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("CodeFormatterPreferencePage.tab.newline.tabtitle")); //$NON-NLS-1$
 		item.setControl(newlineComposite);
@@ -185,28 +240,59 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("CodeFormatterPreferencePage.tab.style.tabtitle")); //$NON-NLS-1$
-		item.setControl(styleComposite);		
-		
+		item.setControl(styleComposite);
+
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(PreferencesMessages.getString("CodeFormatterPreferencePage.tab.comment.tabtitle")); //$NON-NLS-1$
+		item.setControl(commentComposite);
+
 		fSourceViewer= createPreview(parent);
 			
 		updatePreview();
 					
 		return composite;
 	}
-	
+
+	private static void createEnableDependency(final Button chief, final Button master, final Control slave) {
+		SelectionListener listener= new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				slave.setEnabled(master.getSelection() && chief.getSelection());
+			}
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		};
+		chief.addSelectionListener(listener);
+		master.addSelectionListener(listener);
+		slave.setEnabled(master.getSelection() && chief.getSelection());
+	}
+
+	private static void createSelectionDependency(final Button master, final Control slave) {
+		master.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				slave.setEnabled(master.getSelection());
+			}
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+		slave.setEnabled(master.getSelection());
+	}
+
 	private SourceViewer createPreview(Composite parent) {
-		SourceViewer previewViewer= new SourceViewer(parent, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		previewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
+		
+		SourceViewer previewViewer= new SourceViewer(parent, null, SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		previewViewer.configure(fViewerConfiguration);
 		previewViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 		previewViewer.getTextWidget().setTabs(getPositiveIntValue((String) fWorkingValues.get(PREF_TAB_SIZE), 0));
-		previewViewer.setEditable(false);
 		previewViewer.setDocument(fPreviewDocument);
+		
 		Control control= previewViewer.getControl();
 		GridData gdata= new GridData(GridData.FILL_BOTH);
 		gdata.widthHint= fPixelConverter.convertWidthInCharsToPixels(30);
 		gdata.heightHint= fPixelConverter.convertHeightInCharsToPixels(12);
 		control.setLayoutData(gdata);
+
 		return previewViewer;
 	}
 
@@ -216,11 +302,11 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	protected void validateSettings(String changedKey, String newValue) {
 		if (changedKey == null || PREF_LINE_SPLIT.equals(changedKey)) {
 			String lineNumber= (String) fWorkingValues.get(PREF_LINE_SPLIT);
-			fLineLengthStatus= validatePositiveNumber(lineNumber);
+			fLineLengthStatus= validatePositiveNumber(lineNumber, 4);
 		}
 		if (changedKey == null || PREF_TAB_SIZE.equals(changedKey)) {
 			String tabSize= (String) fWorkingValues.get(PREF_TAB_SIZE);
-			fTabSizeStatus= validatePositiveNumber(tabSize);
+			fTabSizeStatus= validatePositiveNumber(tabSize, 0);
 			int oldTabSize= fSourceViewer.getTextWidget().getTabs();
 			if (fTabSizeStatus.matches(IStatus.ERROR)) {
 				fWorkingValues.put(PREF_TAB_SIZE, String.valueOf(oldTabSize)); // set back
@@ -228,8 +314,12 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 				fSourceViewer.getTextWidget().setTabs(getPositiveIntValue(tabSize, 0));
 			}
 		}
-		updatePreview();
-		fContext.statusChanged(StatusUtil.getMoreSevere(fLineLengthStatus, fTabSizeStatus));
+		
+		final IStatus status= StatusUtil.getMoreSevere(fLineLengthStatus, fTabSizeStatus); 
+		fContext.statusChanged(status);
+		
+		if (!status.matches(IStatus.ERROR))
+			updatePreview();
 	}	
 	
 		
@@ -257,18 +347,47 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private void updatePreview() {
-		String str= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, fPreviewText, 0, null, String.valueOf('\n'), fWorkingValues);
-		fPreviewDocument.set(str);
-	}	
-		
-	private IStatus validatePositiveNumber(String number) {
+
+		fSourceViewer.setRedraw(false);
+
+		final Point selection= fSourceViewer.getSelectedRange();
+
+		try {
+
+			fPreviewDocument.set(fPreviewText);
+
+			final IContentFormatter formatter= fViewerConfiguration.getContentFormatter(fSourceViewer);
+			if (formatter instanceof IContentFormatterExtension2) {
+				final IContentFormatterExtension2 extension= (IContentFormatterExtension2)formatter;
+
+				final IFormattingContext context= fSourceViewer.createFormattingContext();
+				try {
+					context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, fWorkingValues);
+					context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.valueOf(true));
+					extension.format(fPreviewDocument, context);
+				} finally {
+					context.dispose();
+				}
+
+			} else {
+				formatter.format(fPreviewDocument, new Region(0, fPreviewDocument.getLength()));
+			}
+			
+		} finally {
+
+			fSourceViewer.setSelectedRange(selection.x, 0);
+			fSourceViewer.setRedraw(true);
+		}
+	}
+
+	private IStatus validatePositiveNumber(String number, int threshold) {
 		StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
 			status.setError(PreferencesMessages.getString("CodeFormatterPreferencePage.empty_input")); //$NON-NLS-1$
 		} else {
 			try {
 				int value= Integer.parseInt(number);
-				if (value < 0) {
+				if (value < threshold) {
 					status.setError(PreferencesMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", number)); //$NON-NLS-1$
 				}
 			} catch (NumberFormatException e) {
@@ -295,8 +414,66 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null; // no build required
 	}
-		
 
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getDefaultOptions()
+	 */
+	protected Map getDefaultOptions() {
+
+		final Map map= super.getDefaultOptions();
+
+		final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		final String[] preferences= PreferenceConstants.getFormatterKeys();
+
+		boolean preference= false;
+		for (int i= 0; i < preferences.length; i++) {
+
+			preference= store.getDefaultBoolean(preferences[i]);
+			map.put(preferences[i], preference ? IPreferenceStore.TRUE : IPreferenceStore.FALSE);
+		}
+		return map;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getOptions(boolean)
+	 */
+	protected Map getOptions(boolean inheritJavaCoreOptions) {
+
+		final Map map= super.getOptions(inheritJavaCoreOptions);
+
+		final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		final String[] preferences= PreferenceConstants.getFormatterKeys();
+
+		boolean preference= false;
+		for (int i= 0; i < preferences.length; i++) {
+
+			preference= store.getBoolean(preferences[i]);
+			map.put(preferences[i], preference ? IPreferenceStore.TRUE : IPreferenceStore.FALSE);
+		}
+		return map;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performOk(boolean)
+	 */
+	public boolean performOk(boolean enabled) {
+
+		if (super.performOk(enabled)) {
+
+			final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+			final String[] preferences= PreferenceConstants.getFormatterKeys();
+
+			String preference= null;
+			for (int i= 0; i < preferences.length; i++) {
+
+				preference= (String)fWorkingValues.get(preferences[i]);
+				if (preference != null)
+					store.setValue(preferences[i], preference.equals(IPreferenceStore.TRUE));
+			}
+			return true;
+		}
+		return false;
+	}
 }
 
 

@@ -1863,7 +1863,14 @@
 		command="org.eclipse.jdt.ui.edit.text.java.format"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-      
+
+    <command
+        name="%ActionDefinition.quickformat.name"
+        description="%ActionDefinition.quickformat.description"
+        category="org.eclipse.jdt.ui.category.source"
+        id="org.eclipse.jdt.ui.edit.text.java.quick.format">
+    </command>
+
 	<command
  		category="org.eclipse.jdt.ui.category.source"
 		id="org.eclipse.jdt.ui.edit.text.java.sort.members"

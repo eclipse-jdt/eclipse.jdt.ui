@@ -11,25 +11,14 @@
 
 package org.eclipse.jdt.internal.ui.text.comment;
 
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
 
 /**
  * Range in a comment region in comment region coordinates.
  * 
- * <p>
- * Comment ranges are considered reference objects.
- * Its offset and length may change over time.
- * </p>
- * 
  * @since 3.0
  */
-public class CommentRange implements IRegion {
-
-	/** Length of the comment range */
-	private int fLength= 0;
-
-	/** Offset of the comment range in comment region coordinates */
-	private int fOffset= 0;
+public class CommentRange extends Position {
 
 	/**
 	 * Creates a new comment range.
@@ -37,58 +26,35 @@ public class CommentRange implements IRegion {
 	 * @param offset Offset of the range
 	 * @param length Length of the range
 	 */
-	public CommentRange(int offset, int length) {
-		fOffset= offset;
-		fLength= length;
+	public CommentRange(final int offset, final int length) {
+		super(offset, length);
 	}
 
 	/**
-	 * Changes the length of this range.
+	 * Moves this comment range.
 	 * 
-	 * @param delta The increment/decrement to change the length of the range
+	 * @param delta The delta to move the range
 	 */
-	public final void changeLength(int delta) {
-		fLength += delta;
+	public final void move(final int delta) {
+		offset += delta;
 	}
 
 	/**
-	 * Changes the offset of this range.
+	 * Trims this comment range at the beginning.
 	 * 
-	 * @param delta The increment/decrement to change the offset of the range
+	 * @param delta Amount to trim the range
 	 */
-	public final void changeOffset(int delta) {
-		fOffset += delta;
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.IRegion#getLength()
-	 */
-	public final int getLength() {
-		return fLength;
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.IRegion#getOffset()
-	 */
-	public final int getOffset() {
-		return fOffset;
+	public final void trimBegin(final int delta) {
+		offset += delta;
+		length -= delta;
 	}
 
 	/**
-	 * Sets the length of this range.
+	 * Trims this comment range at the end.
 	 * 
-	 * @param length The length to set for this range
+	 * @param delta Amount to trim the range
 	 */
-	public final void setLength(int length) {
-		fLength= length;
-	}
-
-	/**
-	 * Sets the offset of this range.
-	 * 
-	 * @param offset The offset to set for this range
-	 */
-	public final void setOffset(int offset) {
-		fOffset= offset;
+	public final void trimEnd(final int delta) {
+		length += delta;
 	}
 }

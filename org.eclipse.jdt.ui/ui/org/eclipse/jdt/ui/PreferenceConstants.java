@@ -87,6 +87,20 @@ public class PreferenceConstants {
 	 */	
 	public static final String APPEARANCE_COMPRESS_PACKAGE_NAMES= "org.eclipse.jdt.ui.compresspackagenames";//$NON-NLS-1$
 
+	public static String FORMATTER_COMMENT_FORMATSOURCE= "format_source";
+
+	public static String FORMATTER_COMMENT_INDENTPARAMDESC= "indent_param_desc";
+
+	public static String FORMATTER_COMMENT_FORMATHEADER= "format_header";
+	
+	public static String FORMATTER_COMMENT_INDENTROOTTAGS= "indent_root_tags";
+
+	public static String FORMATTER_COMMENT_FORMAT= "comment_format";
+
+	public static String FORMATTER_COMMENT_NEWLINEPARAM= "new_line_param";
+
+	public static String FORMATTER_COMMENT_SEPARATEROOTTAGS= "separate_root_tags";
+	
 	/**
 	 * A named preference that controls if empty inner packages are folded in
 	 * the hierarchical mode of the package explorer.
@@ -2108,6 +2122,21 @@ public class PreferenceConstants {
 	 */
 	public static IClasspathEntry[] getDefaultJRELibrary() {
 		return NewJavaProjectPreferencePage.getDefaultJRELibrary();
+	}
+
+	/**
+	 * @return
+	 */
+	public static String[] getFormatterKeys() {
+		return new String[] {
+			FORMATTER_COMMENT_FORMATSOURCE,
+			FORMATTER_COMMENT_INDENTPARAMDESC,
+			FORMATTER_COMMENT_FORMATHEADER,
+			FORMATTER_COMMENT_INDENTROOTTAGS,
+			FORMATTER_COMMENT_FORMAT,
+			FORMATTER_COMMENT_NEWLINEPARAM,
+			FORMATTER_COMMENT_SEPARATEROOTTAGS
+		};
 	}		
 }
 
