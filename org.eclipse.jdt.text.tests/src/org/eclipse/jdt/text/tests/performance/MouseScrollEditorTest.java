@@ -114,7 +114,7 @@ public abstract class MouseScrollEditorTest extends TestCase {
 				while (fTopPixel < fMaxTopPixel) {
 					fPoster.driveFromBackground();
 					fOldTopPixel= fTopPixel;
-					if (!fCondition.busyWaitFor(1000, false)) {
+					if (!fCondition.busyWaitFor(1000)) {
 						System.out.println("Timeout in " + MouseScrollEditorTest.this.getClass().getName() + "#" + getName() + "()");
 						break;
 					}
