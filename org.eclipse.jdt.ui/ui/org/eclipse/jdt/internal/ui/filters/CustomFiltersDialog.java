@@ -290,7 +290,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		Object[] result= getResult();
 		Set enabledIds= new HashSet(result.length);
 		for (int i= 0; i < result.length; i++)
-			enabledIds.add((((FilterDescriptor))result[i]).getId());
+			enabledIds.add(((FilterDescriptor)result[i]).getId());
 		return (String[]) enabledIds.toArray(new String[enabledIds.size()]);
 	}
 
