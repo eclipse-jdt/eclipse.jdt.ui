@@ -438,6 +438,14 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 		rect.y= Math.max(0, rect.y - dy);
 		rect.width= Math.min(rect.width + dw, display.width);
 		rect.height= Math.min(rect.height + dh, display.height);
+		int xe= rect.x + rect.width;
+		if (xe > display.width) {
+			rect.x-= xe - display.width; 
+		}
+		int ye= rect.y + rect.height;
+		if (ye > display.height) {
+			rect.y-= ye - display.height; 
+		}
 		shell.setBounds(rect);
 	}
 	
