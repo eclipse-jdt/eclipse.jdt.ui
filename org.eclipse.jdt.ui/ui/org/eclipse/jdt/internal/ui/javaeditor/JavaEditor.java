@@ -2315,6 +2315,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		
 		stores.add(JavaPlugin.getDefault().getPreferenceStore());
 		stores.add(new PreferencesAdapter(JavaCore.getPlugin().getPluginPreferences()));
+		stores.add(EditorsUI.getPreferenceStore());
 		
 		if (stores.size() == 1)
 			return (IPreferenceStore) stores.get(0);

@@ -75,7 +75,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchViewerSorter;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
-import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -126,6 +125,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		 * @param displayName the display name
 		 * @param colorKey the color preference key
 		 * @param boldKey the bold preference key
+		 * @param italicKey the italic preference key
 		 * @param itemColor the item color
 		 */
 		public HighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, Color itemColor) {
@@ -238,7 +238,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private static final String DELIMITER= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.delimiter"); //$NON-NLS-1$
 
 	/** The keys of the overlay store. */
-	public final OverlayPreferenceStore.OverlayKey[] fKeys;	
 	private final String[][] fSyntaxColorListModel= new String[][] {
 		{ PreferencesMessages.getString("JavaEditorPreferencePage.multiLineComment"), PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR }, //$NON-NLS-1$
 		{ PreferencesMessages.getString("JavaEditorPreferencePage.singleLineComment"), PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR }, //$NON-NLS-1$
@@ -279,7 +278,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private JavaEditorHoverConfigurationBlock fJavaEditorHoverConfigurationBlock;
 	private MarkOccurrencesConfigurationBlock fOccurrencesConfigurationBlock;
 	private FoldingConfigurationBlock fFoldingConfigurationBlock;
-	private AnnotationsConfigurationBlock fAnnotationsConfigurationBlock;
 	
 	/**
 	 * Quick diff preferences. 
@@ -402,12 +400,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++)
 			fSemanticHighlightingColorList.add(new HighlightingColorListItem(semanticHighlightings[i].getDisplayName(), SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]), itemColor));
 		
-		MarkerAnnotationPreferences markerAnnotationPreferences= new MarkerAnnotationPreferences();
-		fKeys= createOverlayStoreKeys(markerAnnotationPreferences);
-		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), fKeys);
+		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), createOverlayStoreKeys());
 	}
 	
-	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys(MarkerAnnotationPreferences preferences) {
+	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 		
 		ArrayList overlayKeys= new ArrayList();
 
@@ -505,10 +501,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_TAB));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_OPENING_BRACE));
 		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_CHARACTER_MODE));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER));
-
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED));
 		for (int i= 0, n= fSemanticHighlightingColorList.size(); i < n; i++) {
 			HighlightingColorListItem item= (HighlightingColorListItem) fSemanticHighlightingColorList.get(i);
@@ -1296,8 +1288,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(this, fOverlayStore);
 		fOccurrencesConfigurationBlock= new MarkOccurrencesConfigurationBlock(this, fOverlayStore);
 		fFoldingConfigurationBlock= new FoldingConfigurationBlock(fOverlayStore);
-		fAnnotationsConfigurationBlock= new AnnotationsConfigurationBlock(fOverlayStore);
-		fQuickDiffBlock= new QuickdiffConfigurationBlock(fOverlayStore, "JavaEditorPreferencePage"); //$NON-NLS-1$
+		fQuickDiffBlock= new QuickdiffConfigurationBlock(fOverlayStore); //$NON-NLS-1$
 		
 		fOverlayStore.load();
 		fOverlayStore.start();
@@ -1319,10 +1310,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item.setControl(createContentAssistPage(folder));
 
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotationsTab.title")); //$NON-NLS-1$
-		item.setControl(fAnnotationsConfigurationBlock.createControl(folder));
-
-		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.typing.tabTitle")); //$NON-NLS-1$
 		item.setControl(createTypingPage(folder));
 
@@ -1339,7 +1326,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item.setControl(createNavigationPage(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.title")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("QuickdiffConfigurationBlock.title")); //$NON-NLS-1$
 		item.setControl(fQuickDiffBlock.createControl(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
@@ -1388,7 +1375,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fQuickDiffBlock.initialize();
 		fOccurrencesConfigurationBlock.initialize();
 		fFoldingConfigurationBlock.initialize();
-		fAnnotationsConfigurationBlock.initialize();
 	}
 	
 	private void initializeFields() {
@@ -1487,7 +1473,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fOccurrencesConfigurationBlock.performOk();
 		fQuickDiffBlock.performOk();
 		fFoldingConfigurationBlock.performOk();
-		fAnnotationsConfigurationBlock.performOk();
 		fOverlayStore.setValue(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, computeStateMask(fBrowserLikeLinksKeyModifierText.getText()));
 		fOverlayStore.propagate();
 		JavaPlugin.getDefault().savePluginPreferences();
@@ -1509,7 +1494,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		fJavaEditorHoverConfigurationBlock.performDefaults();
 		fOccurrencesConfigurationBlock.performDefaults();
-		fAnnotationsConfigurationBlock.performDefaults();
 		fQuickDiffBlock.performDefaults();
 		fFoldingConfigurationBlock.performDefaults();
 

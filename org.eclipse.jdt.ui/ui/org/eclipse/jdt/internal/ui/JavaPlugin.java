@@ -54,6 +54,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -717,7 +719,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
 		super.initializeDefaultPreferences(store);
-		MarkerAnnotationPreferences.initializeDefaultValues(store);		
+		MarkerAnnotationPreferences.ignoreValuesIncludedOnPreferencePage(store, true);
 		PreferenceConstants.initializeDefaultValues(store);
 	}
 	
@@ -759,8 +761,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.0
 	 */
 	public IPreferenceStore getCombinedPreferenceStore() {
-		if (fCombinedPreferenceStore == null)
-			fCombinedPreferenceStore= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(JavaCore.getPlugin().getPluginPreferences()) });
+		if (fCombinedPreferenceStore == null) {
+			IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore(); 
+			fCombinedPreferenceStore= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(JavaCore.getPlugin().getPluginPreferences()), generalTextStore });
+		}
 		return fCombinedPreferenceStore;
 	}
 	
