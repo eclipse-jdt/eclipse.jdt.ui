@@ -495,7 +495,11 @@ public class ScopeAnalyzer {
 
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && fPosition < node.getStartPosition()) {
-				addResult(node.getTypeDeclaration().resolveBinding());
+				if (node.getAST().apiLevel() == AST.JLS2) {
+					addResult(node.getTypeDeclaration().resolveBinding());
+				} else {
+					addResult(node.getDeclaration().getName().resolveBinding());
+				}
 			}
 			return false;
 		}
