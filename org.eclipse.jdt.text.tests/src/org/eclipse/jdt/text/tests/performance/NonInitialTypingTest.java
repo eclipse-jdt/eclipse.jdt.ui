@@ -11,7 +11,9 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -32,6 +34,8 @@ import org.eclipse.ui.texteditor.ITextEditor;
  */
 public class NonInitialTypingTest extends TestCase {
 	
+	private static final Class THIS= NonInitialTypingTest.class;
+	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
 
 	private ITextEditor fEditor;
@@ -44,6 +48,10 @@ public class NonInitialTypingTest extends TestCase {
 
 	private KeyboardProbe fKeyboardProbe;
 
+	public static Test suite() {
+		return new PerformanceTestSetup(new TestSuite(THIS));
+	}
+	
 	protected void setUp() throws PartInitException, BadLocationException {
 		EditorTestHelper.runEventQueue();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
