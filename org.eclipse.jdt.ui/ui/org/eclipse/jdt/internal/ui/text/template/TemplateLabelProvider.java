@@ -10,7 +10,6 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 
 import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class TemplateLabelProvider implements ITableLabelProvider {
 
@@ -18,16 +17,7 @@ public class TemplateLabelProvider implements ITableLabelProvider {
 	 * @see ITableLabelProvider#getColumnImage(Object, int)
 	 */
 	public Image getColumnImage(Object element, int columnIndex) {
-		if (columnIndex != 0)
-			return null;
-		
-		Template template= (Template) element;
-		
-		if (template.getContextTypeName().equals("javadoc") && //$NON-NLS-1$
-			template.getName().startsWith("<")) //$NON-NLS-1$ 
-			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG);
-		else
-			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE);
+		return null;
 	}
 
 	/*

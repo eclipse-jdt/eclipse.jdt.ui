@@ -10,7 +10,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -21,14 +20,15 @@ import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 
 public class TemplateEngine {
 
+	/** The context type. */
 	private ContextType fContextType;
-	private ITableLabelProvider fLabelProvider= new TemplateLabelProvider();
-	
+	/** The result proposals. */
 	private ArrayList fProposals= new ArrayList();
 
 	/**
@@ -85,7 +85,7 @@ public class TemplateEngine {
 		Template[] templates= Templates.getInstance().getTemplates();
 		for (int i= 0; i != templates.length; i++)
 			if (context.canEvaluate(templates[i]))
-				fProposals.add(new TemplateProposal(templates[i], context, region, viewer, fLabelProvider.getColumnImage(templates[i], 0)));
+				fProposals.add(new TemplateProposal(templates[i], context, region, viewer, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
 	}
 
 }
