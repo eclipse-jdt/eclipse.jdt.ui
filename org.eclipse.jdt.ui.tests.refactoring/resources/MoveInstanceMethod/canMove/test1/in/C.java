@@ -4,15 +4,15 @@ import p1.A;
 import p2.B;
 
 class C {
-	{
-		this.getA().m1A(getB());
+    C() {
+		getA().mA1(getB());
 	}
-	
+
 	A getA() {
 		return null;
 	}
-	
+
 	B getB() {
-		return null;	
+		return null;
 	}
 }

@@ -10,7 +10,7 @@ public class A {
 		fB.mB1();
 		mA2();
 		fB.mB2();
-		System.out.println(this);		
+		System.out.println(this);
 	}
 	
 	public void mA2() {}

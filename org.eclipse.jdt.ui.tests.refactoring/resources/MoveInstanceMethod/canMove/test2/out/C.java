@@ -4,8 +4,8 @@ import p1.A;
 import p2.B;
 
 class C {
-	{
+	C() {
 		A a= new A();
-		new B().m1A(a);
+		new B().mA1(a);
 	}	
 }

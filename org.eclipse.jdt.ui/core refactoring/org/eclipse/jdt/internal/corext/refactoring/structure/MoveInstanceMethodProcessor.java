@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
@@ -88,6 +90,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -129,6 +132,68 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
  * Refactoring processor to move instance methods.
  */
 public final class MoveInstanceMethodProcessor extends MoveProcessor {
+
+	/**
+	 * AST visitor to find references to parameters occurring in anonymous classes of a method body.
+	 */
+	public final class AnonymousClassReferenceFinder extends AstNodeFinder {
+
+		/** The anonymous class nesting counter */
+		protected int fAnonymousClass= 0;
+
+		/** The declaring type of the method declaration */
+		protected final ITypeBinding fDeclaringType;
+
+		/**
+		 * Creates a new anonymous class reference finder.
+		 * 
+		 * @param declaration the method declaration to search for references
+		 */
+		public AnonymousClassReferenceFinder(final MethodDeclaration declaration) {
+			fDeclaringType= declaration.resolveBinding().getDeclaringClass();
+		}
+
+		public final void endVisit(final AnonymousClassDeclaration node) {
+			Assert.isNotNull(node);
+			if (fAnonymousClass > 0)
+				fAnonymousClass--;
+			super.endVisit(node);
+		}
+
+		public final boolean visit(final AnonymousClassDeclaration node) {
+			Assert.isNotNull(node);
+			fAnonymousClass++;
+			return super.visit(node);
+		}
+
+		public final boolean visit(final MethodInvocation node) {
+			Assert.isNotNull(node);
+			if (fAnonymousClass > 0) {
+				final IMethodBinding binding= node.resolveMethodBinding();
+				if (binding != null) {
+					if (node.getExpression() == null && !Modifier.isStatic(binding.getModifiers()))
+						fResult.add(node.getName());
+				}
+			}
+			return true;
+		}
+
+		public boolean visit(final SimpleName node) {
+			Assert.isNotNull(node);
+			if (fAnonymousClass > 0) {
+				if (!(node.getParent() instanceof FieldAccess)) {
+					final IBinding binding= node.resolveBinding();
+					if (binding instanceof IVariableBinding) {
+						final IVariableBinding variable= (IVariableBinding) binding;
+						final ITypeBinding declaring= variable.getDeclaringClass();
+						if (declaring != null && Bindings.equals(declaring, fDeclaringType))
+							fResult.add(node);
+					}
+				}
+			}
+			return false;
+		}
+	}
 
 	/**
 	 * Partial implementation of an ast node finder.
@@ -325,11 +390,20 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 */
 	public final class MethodBodyRewriter extends ASTVisitor {
 
+		/** The anonymous class nesting counter */
+		protected int fAnonymousClass= 0;
+
 		/** The method declaration to rewrite */
 		protected final MethodDeclaration fDeclaration;
 
+		/** The set of handled method invocations */
+		protected final Set fMethodDeclarations= new HashSet();
+
 		/** The source ast rewrite to use */
 		protected final ASTRewrite fRewrite;
+
+		/** The refactoring status */
+		protected final RefactoringStatus fStatus= new RefactoringStatus();
 
 		/** The target compilation unit rewrite to use */
 		protected final CompilationUnitRewrite fTargetRewrite;
@@ -350,10 +424,25 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			fDeclaration= sourceDeclaration;
 		}
 
+		public final void endVisit(final AnonymousClassDeclaration node) {
+			Assert.isNotNull(node);
+			if (fAnonymousClass > 0)
+				fAnonymousClass--;
+			super.endVisit(node);
+		}
+
+		public final boolean visit(final AnonymousClassDeclaration node) {
+			Assert.isNotNull(node);
+			fAnonymousClass++;
+			return super.visit(node);
+		}
+
 		public final boolean visit(final ClassInstanceCreation node) {
 			Assert.isNotNull(node);
 			if (node.getParent() instanceof ClassInstanceCreation) {
-				visit(node.getAnonymousClassDeclaration());
+				final AnonymousClassDeclaration declaration= node.getAnonymousClassDeclaration();
+				if (declaration != null)
+					visit(declaration);
 				return false;
 			}
 			return super.visit(node);
@@ -366,7 +455,12 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final AST ast= fRewrite.getAST();
 			if (expression instanceof ThisExpression) {
 				if (Bindings.equals(fTarget, variable)) {
-					fRewrite.replace(node, ast.newThisExpression(), null);
+					if (fAnonymousClass > 0) {
+						final ThisExpression target= ast.newThisExpression();
+						target.setQualifier(ast.newSimpleName(fTargetType.getElementName()));
+						fRewrite.replace(node, target, null);
+					} else
+						fRewrite.replace(node, ast.newThisExpression(), null);
 					return false;
 				}
 			}
@@ -467,7 +561,12 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				}
 			}
 			if (Bindings.equals(binding, fTarget))
-				rewrite.replace(node, ast.newThisExpression(), null);
+				if (fAnonymousClass > 0) {
+					final ThisExpression target= ast.newThisExpression();
+					target.setQualifier(ast.newSimpleName(fTargetType.getElementName()));
+					fRewrite.replace(node, target, null);
+				} else
+					rewrite.replace(node, ast.newThisExpression(), null);
 			else if (binding instanceof IVariableBinding) {
 				final IVariableBinding variable= (IVariableBinding) binding;
 				final IMethodBinding method= fDeclaration.resolveBinding();
@@ -1061,7 +1160,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Searches for references to the delegate method.
+	 * Searches for references to the delegate method. Returns an empty result group if no references to the delegator can be found, or if the delegator method has move than one declaration.
 	 * 
 	 * @param monitor the progress monitor to use
 	 * @param status the refactoring status to use
@@ -1072,9 +1171,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		try {
-			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.beginTask("", 2); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
-			return RefactoringSearchEngine.search(RefactoringSearchEngine.createOrPattern(new IJavaElement[] { fMethod}, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(fMethod), new CollectingSearchRequestor(), new SubProgressMonitor(monitor, 1), status);
+			final SearchResultGroup[] groups= RefactoringSearchEngine.search(RefactoringSearchEngine.createOrPattern(new IJavaElement[] { fMethod}, IJavaSearchConstants.DECLARATIONS), SearchEngine.createWorkspaceScope(), new CollectingSearchRequestor(), new SubProgressMonitor(monitor, 1), status);
+			if (groups.length < 2)
+				return RefactoringSearchEngine.search(RefactoringSearchEngine.createOrPattern(new IJavaElement[] { fMethod}, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(fMethod), new CollectingSearchRequestor(), new SubProgressMonitor(monitor, 1), status);
+			else
+				return new SearchResultGroup[0];
 		} finally {
 			monitor.done();
 		}
@@ -1237,7 +1340,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final boolean result= createMethodCopyChange(declaration, targetRewrite, monitor);
 		boolean removable= false;
 		if (fInline) {
-			removable= createInlineDelegatorMethodChanges(declaration, targetRewrite, result, status, monitor);
+			removable= createMethodInlineDelegatorChanges(declaration, targetRewrite, result, status, monitor);
 			if (fRemove && removable)
 				createOriginalMethodRemovalChange(declaration);
 		}
@@ -1257,87 +1360,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	protected ExpressionStatement createExpressionStatement(final MethodInvocation invocation) {
 		Assert.isNotNull(invocation);
 		return invocation.getAST().newExpressionStatement(invocation);
-	}
-
-	/**
-	 * Creates the necessary changes to inline the method invocations to the original method.
-	 * 
-	 * @param sourceDeclaration the source method declaration
-	 * @param targetRewrite the target compilation unit rewrite
-	 * @param targetNode <code>true</code> if a target node must be inserted as first argument, <code>false</code> otherwise
-	 * @param status the refactoring status
-	 * @param monitor the progress monitor to use
-	 * @return <code>true</code> if all method invocations to the original method declaration could be inlined, <code>false</code> otherwise
-	 */
-	protected boolean createInlineDelegatorMethodChanges(final MethodDeclaration sourceDeclaration, final CompilationUnitRewrite targetRewrite, final boolean targetNode, final RefactoringStatus status, final IProgressMonitor monitor) {
-		Assert.isNotNull(sourceDeclaration);
-		Assert.isNotNull(status);
-		Assert.isNotNull(monitor);
-		try {
-			monitor.beginTask("", 2); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
-			try {
-				boolean result= true;
-				boolean binary= false;
-				final SearchResultGroup[] groups= computeDelegateMethodReferences(new SubProgressMonitor(monitor, 1), status);
-				monitor.worked(1);
-				SearchMatch match= null;
-				SearchMatch[] matches= null;
-				SearchResultGroup group= null;
-				IType[] types= null;
-				ICompilationUnit currentUnit= null;
-				CompilationUnitRewrite currentRewrite= null;
-				for (int index= 0; index < groups.length; index++) {
-					group= groups[index];
-					currentUnit= group.getCompilationUnit();
-					types= currentUnit.getAllTypes();
-					for (int offset= 0; offset < types.length; offset++) {
-						if (types[offset].isBinary()) {
-							binary= true;
-							break;
-						}
-					}
-					if (!binary) {
-						matches= group.getSearchResults();
-						if (fSourceRewrite.getCu().equals(currentUnit))
-							currentRewrite= fSourceRewrite;
-						else if (targetRewrite.getCu().equals(currentUnit))
-							currentRewrite= targetRewrite;
-						else
-							currentRewrite= new CompilationUnitRewrite(currentUnit);
-						for (int offset= 0; offset < matches.length; offset++) {
-							match= matches[offset];
-							if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
-								final SearchMatch context= match;
-								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", currentUnit.getCorrespondingResource().getName()), JavaStatusContext.create(currentUnit, new ISourceRange() { //$NON-NLS-1$
-
-											public final int getLength() {
-												return context.getLength();
-											}
-
-											public final int getOffset() {
-												return context.getOffset();
-											}
-										})));
-								result= false;
-							} else
-								createMethodInlineChange(currentRewrite, sourceDeclaration, match, targetNode, status);
-						}
-						if (!fSourceRewrite.getCu().equals(currentUnit) && !targetRewrite.getCu().equals(currentUnit))
-							fChangeManager.manage(currentUnit, currentRewrite.createChange());
-					} else {
-						status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary", currentUnit.getCorrespondingResource().getName()), JavaStatusContext.create(currentUnit))); //$NON-NLS-1$
-						result= false;
-					}
-				}
-				return result;
-			} catch (CoreException exception) {
-				status.merge(RefactoringStatus.create(exception.getStatus()));
-				return false;
-			}
-		} finally {
-			monitor.done();
-		}
 	}
 
 	/**
@@ -1604,6 +1626,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 */
 	protected void createMethodInlineChange(final CompilationUnitRewrite unitRewrite, final MethodDeclaration sourceDeclaration, final SearchMatch match, final boolean targetNode, final RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(unitRewrite);
+		Assert.isNotNull(sourceDeclaration);
 		Assert.isNotNull(match);
 		Assert.isNotNull(status);
 		final ASTRewrite rewrite= unitRewrite.getASTRewrite();
@@ -1646,6 +1669,98 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
+	 * Creates the necessary changes to inline the method invocations to the original method.
+	 * 
+	 * @param sourceDeclaration the source method declaration
+	 * @param targetRewrite the target compilation unit rewrite
+	 * @param targetNode <code>true</code> if a target node must be inserted as first argument, <code>false</code> otherwise
+	 * @param status the refactoring status
+	 * @param monitor the progress monitor to use
+	 * @return <code>true</code> if all method invocations to the original method declaration could be inlined, <code>false</code> otherwise
+	 */
+	protected boolean createMethodInlineDelegatorChanges(final MethodDeclaration sourceDeclaration, final CompilationUnitRewrite targetRewrite, final boolean targetNode, final RefactoringStatus status, final IProgressMonitor monitor) {
+		Assert.isNotNull(sourceDeclaration);
+		Assert.isNotNull(status);
+		Assert.isNotNull(monitor);
+		try {
+			monitor.beginTask("", 3); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
+			try {
+				final IType declaring= fMethod.getDeclaringType();
+				final List ancestors= Arrays.asList(declaring.newTypeHierarchy(new SubProgressMonitor(monitor, 1)).getAllSupertypes(declaring));
+				boolean result= true;
+				boolean binary= false;
+				SearchResultGroup[] groups= computeDelegateMethodReferences(new SubProgressMonitor(monitor, 1), status);
+				monitor.worked(1);
+				SearchMatch match= null;
+				SearchMatch[] matches= null;
+				IType[] types= null;
+				ICompilationUnit currentUnit= null;
+				CompilationUnitRewrite currentRewrite= null;
+				SearchResultGroup group= null;
+				for (int index= 0; index < groups.length; index++) {
+					group= groups[index];
+					currentUnit= group.getCompilationUnit();
+					types= currentUnit.getAllTypes();
+					for (int offset= 0; offset < types.length; offset++) {
+						if (types[offset].isBinary()) {
+							binary= true;
+							break;
+						}
+					}
+					if (!binary) {
+						matches= group.getSearchResults();
+						if (fSourceRewrite.getCu().equals(currentUnit))
+							currentRewrite= fSourceRewrite;
+						else if (targetRewrite.getCu().equals(currentUnit))
+							currentRewrite= targetRewrite;
+						else
+							currentRewrite= new CompilationUnitRewrite(currentUnit);
+						IType type= null;
+						Object element= null;
+						for (int offset= 0; offset < matches.length; offset++) {
+							match= matches[offset];
+							element= match.getElement();
+							if (element instanceof IType)
+								type= (IType) element;
+							else if (element instanceof IMember)
+								type= ((IMember) element).getDeclaringType();
+							else
+								type= null;
+							if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
+								final SearchMatch context= match;
+								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", currentUnit.getCorrespondingResource().getName()), JavaStatusContext.create(currentUnit, new ISourceRange() { //$NON-NLS-1$
+
+											public final int getLength() {
+												return context.getLength();
+											}
+
+											public final int getOffset() {
+												return context.getOffset();
+											}
+										})));
+								result= false;
+							} else if (type != null && !ancestors.contains(type))
+								createMethodInlineChange(currentRewrite, sourceDeclaration, match, targetNode, status);
+						}
+						if (!fSourceRewrite.getCu().equals(currentUnit) && !targetRewrite.getCu().equals(currentUnit))
+							fChangeManager.manage(currentUnit, currentRewrite.createChange());
+					} else {
+						status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary", currentUnit.getCorrespondingResource().getName()), JavaStatusContext.create(currentUnit))); //$NON-NLS-1$
+						result= false;
+					}
+				}
+				return result;
+			} catch (CoreException exception) {
+				status.merge(RefactoringStatus.create(exception.getStatus()));
+				return false;
+			}
+		} finally {
+			monitor.done();
+		}
+	}
+
+	/**
 	 * Creates the method parameters for the target method declaration.
 	 * 
 	 * @param targetRewrite the compilation unit target rewrite
@@ -1660,6 +1775,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(sourceRewriter);
 		Assert.isNotNull(parameters);
 		final AST ast= targetRewrite.getRoot().getAST();
+		final AstNodeFinder finder= new AnonymousClassReferenceFinder(sourceDeclaration);
+		sourceDeclaration.accept(finder);
 		final boolean result= createArgumentNodeList(sourceDeclaration, parameters, new IArgumentFactory() {
 
 			public final ASTNode getArgumentNode(final IVariableBinding binding) {
@@ -1679,7 +1796,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						final String type= targetRewrite.getImportRewrite().addImport(declaring);
 						declaration.setType(ASTNodeFactory.newType(ast, type));
 						declaration.setName(ast.newSimpleName(fTargetName));
-						declaration.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.FINAL_KEYWORD));
+						if (finder.getResult().size() > 0)
+							declaration.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.FINAL_KEYWORD));
 					}
 				}
 				return declaration;

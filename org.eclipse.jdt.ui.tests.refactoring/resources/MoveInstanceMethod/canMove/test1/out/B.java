@@ -6,7 +6,10 @@ public class B {
 	public void mB1() {}
 	
 	public void mB2() {}
-	
+
+	/**
+	 * @param a
+	 */
 	public void mA1(A a) {
 		mB1();
 		a.mA2();

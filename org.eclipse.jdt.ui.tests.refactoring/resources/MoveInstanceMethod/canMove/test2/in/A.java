@@ -8,7 +8,7 @@ public class A {
 		b.mB1();
 		mA2();
 		b.mB2();
-		System.out.println(this);		
+		System.out.println(this);
 	}
 	
 	public void mA2() {}

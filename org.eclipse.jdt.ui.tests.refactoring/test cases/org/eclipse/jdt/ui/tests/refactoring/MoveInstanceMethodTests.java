@@ -131,8 +131,8 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 
 		chooseNewTarget(ref, newTargetType, newTargetName);
 		MoveInstanceMethodProcessor processor= ref.getMoveMethodProcessor();
-		processor.setRemoveDelegator(removeDelegator);
 		processor.setInlineDelegator(inlineDelegator);
+		processor.setRemoveDelegator(removeDelegator);
 		if(newMethodName != null)
 			processor.setMethodName(newMethodName);
 
@@ -209,14 +209,14 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	
 	// Move mA1 to parameter b, inline delegator
 	public void test1() throws Exception {
-		printTestDisabledMessage("not implemented yet");
-//		helper1(new String[] {"p1.A", "p2.B", "p3.C"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", true, false);
+//		printTestDisabledMessage("not implemented yet");
+		helper1(new String[] {"p1.A", "p2.B", "p3.C"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", true, false);
 	}
 
 //	// Move mA1 to parameter b, inline delegator, remove delegator
 	public void test2() throws Exception {
-		printTestDisabledMessage("not implemented yet");
-//		helper1(new String[] {"p1.A", "p2.B", "p3.C"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", true, true);
+//		printTestDisabledMessage("not implemented yet");
+		helper1(new String[] {"p1.A", "p2.B", "p3.C"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", true, true);
 	}
 	
 	// Move mA1 to field fB, do not inline delegator
@@ -335,6 +335,10 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] {"p1.A", "p1.B", "p1.StarDecorator"}, "p1.A", 9, 17, 9, 22, PARAMETER, "b", false, false);
 	}
 
+	// extended junit case
+	public void test25() throws Exception {
+		helper1(new String[] {"p1.TR", "p1.TC", "p1.P"}, "p1.TR", 4, 20, 4, 23, PARAMETER, "test", false, false);
+	}
 
 	// Cannot move interface method declaration
 	public void testFail0() throws Exception {
