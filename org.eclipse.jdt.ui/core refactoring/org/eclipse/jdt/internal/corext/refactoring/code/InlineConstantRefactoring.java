@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -69,6 +70,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.IRefactoringSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -604,6 +606,11 @@ public class InlineConstantRefactoring extends Refactoring {
 			engine.setFiltering(true, true);
 			engine.setScope(RefactoringScopeFactory.create(field));
 			engine.setStatus(status);
+			engine.setRequestor(new IRefactoringSearchRequestor() {
+				public boolean acceptSearchMatch(SearchMatch match) {
+					return ! match.isInsideDocComment();
+				}
+			});
 			engine.searchPattern(new SubProgressMonitor(pm, 1));
 			return (SearchResultGroup[]) engine.getResults();
 		}
@@ -620,8 +627,6 @@ public class InlineConstantRefactoring extends Refactoring {
 
 		/** The references in this compilation unit, represented as AST Nodes in the parsed representation of the compilation unit */
 		private final Expression[] fReferences;
-
-		private boolean fSomeReferencesCannotBeInlined;
 
 		private final ICompilationUnit fUnit;
 
@@ -691,16 +696,18 @@ public class InlineConstantRefactoring extends Refactoring {
 				addImportForType(types[i]);
 		}
 
-		public boolean checkReferences(RefactoringStatus result) throws CoreException {
+		public void checkReferences(RefactoringStatus result) throws CoreException {
 			Assert.isNotNull(result);
-
 			getEdits(result);
-			return fSomeReferencesCannotBeInlined;
 		}
 
 		private TextEdit createSubstituteStringForExpressionEdit(String string, Expression expression) throws CoreException {
 			ASTRewrite rewrite= ASTRewrite.create(expression.getRoot().getAST());
-
+			rewrite.setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
+				public SourceRange computeSourceRange(ASTNode node) {
+					return new TargetSourceRangeComputer.SourceRange(node.getStartPosition(), node.getLength());
+				}
+			});
 			rewrite.replace(expression, rewrite.createStringPlaceholder(string, expression.getNodeType()), null);
 
 			try {
@@ -1004,10 +1011,11 @@ public class InlineConstantRefactoring extends Refactoring {
 		IBinding binding= name.resolveBinding();
 		if (!(binding instanceof IVariableBinding))
 			return null;
-		if (!((IVariableBinding) binding).isField())
+		IVariableBinding variableBinding= (IVariableBinding) binding;
+		if (!variableBinding.isField() || variableBinding.isEnumConstant())
 			return null;
 		int modifiers= binding.getModifiers();
-		if (!(Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)))
+		if (! (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)))
 			return null;
 
 		return name;

@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactorin
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InlineConstantTests extends RefactoringTest {
+	private static final boolean BUG_84659_CORE_ANNOT_REF= true;
 
 	private static final Class clazz = InlineConstantTests.class;
 	private static final String REFACTORING_PATH = "InlineConstant/";
@@ -46,6 +47,10 @@ public class InlineConstantTests extends RefactoringTest {
 	
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new RefactoringTestSetup(test);
 	}
 
 	private String getSimpleName(String qualifiedName) {
@@ -215,6 +220,34 @@ public class InlineConstantTests extends RefactoringTest {
 		helper1("schweiz.zuerich.zuerich.Froehlichkeit", 14, 16, 14, 32, true, false);
 	}
 		
+	public void test16() throws Exception {
+		helper1("p.IntegerMath", 8, 23, 8, 23, true, true);
+	}
+		
+	public void test17() throws Exception {
+		helper1("p.EnumRef", 4, 59, 4, 59, true, true);
+	}
+		
+	public void test18() throws Exception {
+		if (BUG_84659_CORE_ANNOT_REF) {
+			printTestDisabledMessage("BUG_84659_CORE_ANNOT_REF");
+			return;
+		}
+		helper1("p.Annot", 5, 18, 5, 18, true, true);
+	}
+		
+	public void test19() throws Exception {
+		if (BUG_84659_CORE_ANNOT_REF) {
+			printTestDisabledMessage("BUG_84659_CORE_ANNOT_REF");
+			return;
+		}
+		helper1("p.Test", 7, 36, 7, 36, true, false);
+	}
+		
+	public void test20() throws Exception {
+		helper1("p.Test", 10, 21, 10, 21, true, true);
+	}
+		
 	// -- testing failing preconditions
 	
 	public void testFail0() throws Exception {
@@ -223,5 +256,9 @@ public class InlineConstantTests extends RefactoringTest {
 	
 	public void testFail1() throws Exception {
 		failHelper1("fun.Fun", 8, 35, 8, 35, false, false, RefactoringStatusCodes.DECLARED_IN_CLASSFILE);	
+	}
+	
+	public void testFail2() throws Exception {
+		failHelper1("p.EnumRef", 7, 22, 7, 22, true, true, RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED);	
 	}
 }
