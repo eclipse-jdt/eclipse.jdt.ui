@@ -63,6 +63,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistantExtension;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.link.ExclusivePositionUpdater;
@@ -189,6 +190,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					super.doOperation(operation);
 					fIgnoreTextConverters= false;
 					return;
+				case CONTENTASSIST_COMPLETE_PREFIX:
+					if (fContentAssistant instanceof IContentAssistantExtension) {
+						msg= ((IContentAssistantExtension) fContentAssistant).completePrefix();
+						setStatusLineErrorMessage(msg);
+						return;
+					} else
+						break;
 			}
 			
 			super.doOperation(operation);
@@ -199,6 +207,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 */
 		public boolean canDoOperation(int operation) {
 			if (operation == CORRECTIONASSIST_PROPOSALS)
+				return isEditable();
+			else if (operation == CONTENTASSIST_COMPLETE_PREFIX)
 				return isEditable();
 			
 			return super.canDoOperation(operation);
@@ -846,6 +856,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 * 
 		 * @param newElement Enclosing element
 		 * @return Offset in the document
+		 * @throws JavaModelException
+		 * @throws BadLocationException
 		 */
 		public int getRememberedOffset(IJavaElement newElement) {
 			try {
@@ -1092,6 +1104,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);		
 		setAction("ContentAssistContextInformation", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.PARAMETER_HINTS_ACTION);
+
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistCompletePrefix.", this, CONTENTASSIST_COMPLETE_PREFIX);	//$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_COMPLETE_PREFIX);		
+		setAction("ContentAssistCompletePrefix", action); //$NON-NLS-1$
+		markAsStateDependentAction("ContentAssistCompletePrefix", true); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.PARAMETER_HINTS_ACTION);
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$
@@ -1395,7 +1413,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		configureToggleCommentAction();
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#installOverrideIndicator(boolean)
 	 * @since 3.0
 	 */
