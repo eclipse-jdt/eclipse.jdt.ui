@@ -7,7 +7,7 @@
  * @author ${user}
  *
  * To change this generated comment go to 
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code Template
+ * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */</codetemplate>
  <codetemplate name="methodcomment" description="Comment for non-overriding methods" context="methodcomment_context" enabled="true">/**
  * ${tags}
@@ -19,7 +19,7 @@
  * Created on ${date}
  *
  * To change this generated comment go to 
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code Template
+ * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 ${package_declaration}
 
