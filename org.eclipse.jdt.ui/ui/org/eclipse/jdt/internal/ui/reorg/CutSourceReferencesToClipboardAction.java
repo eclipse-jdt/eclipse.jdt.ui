@@ -4,7 +4,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 
-public class CutSourceReferencesToClipboardAction extends SourceReferenceAction {
+class CutSourceReferencesToClipboardAction extends SourceReferenceAction {
 
 	public CutSourceReferencesToClipboardAction(ISelectionProvider provider) {
 		super("Cu&t", provider);
