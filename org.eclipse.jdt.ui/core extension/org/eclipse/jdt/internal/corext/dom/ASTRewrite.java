@@ -20,6 +20,8 @@ import java.util.Set;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -122,9 +124,16 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @param rootEdit
 	 */
 	public final void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit) {
-		convertOldToNewEvents();
-		TextEdit res= super.rewriteAST(textBuffer.getDocument());
+		TextEdit res= rewriteAST(textBuffer.getDocument());
 		rootEdit.addChildren(res.removeChildren());
+	}
+	
+	/**
+	 * New API.
+	 */
+	public TextEdit rewriteAST(IDocument document) {
+		convertOldToNewEvents();
+		return super.rewriteAST(document);
 	}
 	
 	/**
@@ -260,10 +269,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @return
 	 */
 	public final ASTNode createMove(ASTNode node) {
-		int changeKind= fEventStore.getChangeKind(node);
-		if (changeKind != RewriteEvent.REMOVED && changeKind != RewriteEvent.REPLACED) {
-			markAsRemoved(node);
-		}
+
 		return createMovePlaceholder(node);
 	}
 	

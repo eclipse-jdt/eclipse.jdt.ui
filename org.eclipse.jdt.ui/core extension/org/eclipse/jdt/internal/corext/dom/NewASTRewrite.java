@@ -306,6 +306,11 @@ public class NewASTRewrite {
 		validateIsInsideAST(node);
 		fEventStore.setAsMoveSource(node);
 		
+		int changeKind= fEventStore.getChangeKind(node);
+		if (changeKind != RewriteEvent.REMOVED && changeKind != RewriteEvent.REPLACED) {
+			markAsRemoved(node);
+		}
+		
 		return fNodeStore.createMovePlaceholder(node);
 	}	
 		
