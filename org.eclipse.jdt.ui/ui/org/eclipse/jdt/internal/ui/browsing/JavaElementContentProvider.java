@@ -277,11 +277,13 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 		if (element instanceof IType && fBrowsingPart.isValidInput(element))
 			postRefresh(null);
 
+		if ((flags & IJavaElementDelta.F_MODIFIERS) != 0 && fBrowsingPart.isValidElement(element))
+			postRefresh(element);
+
 			
 		if (isClassPathChange(delta))
 			 // throw the towel and do a full refresh
 			postRefresh(null);
-
 		
 		IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
 		if (affectedChildren.length > 1) {
