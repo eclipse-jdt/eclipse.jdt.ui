@@ -106,7 +106,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	
 
 		fUpperComposite= new Composite(fComposite, SWT.NONE);
-		fUpperComposite.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		fUpperComposite.setLayoutData(createGridData(GridData.FILL_VERTICAL | GridData.FILL_HORIZONTAL, 1, 0));
 		
 		GridLayout layout= createGridLayout(4);
 		layout.marginHeight= 0;
@@ -138,7 +138,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	private void createBasicOptionsGroup(Composite composite) {
 				fTitleButton= createButton(composite, SWT.CHECK, JavadocExportMessages.getString("JavadocSpecificsWizardPage.titlebutton.label"), createGridData(1)); //$NON-NLS-1$		fTitleText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 3, 0));		String text= fStore.getTitle();		if(!text.equals("")) { //$NON-NLS-1$			fTitleText.setText(text);			fTitleButton.setSelection(true);		} else fTitleText.setEnabled(false);				fBasicOptionsGroup= new Group(composite, SWT.SHADOW_ETCHED_IN);
 		fBasicOptionsGroup.setLayout(createGridLayout(1));
-		fBasicOptionsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 2, 0));
+		fBasicOptionsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 2, 0));
 		fBasicOptionsGroup.setText(JavadocExportMessages.getString("JavadocSpecificsWizardPage.basicgroup.label")); //$NON-NLS-1$
 
 		fUse= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.getString("JavadocSpecificsWizardPage.usebutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.USE, true); //$NON-NLS-1$
@@ -160,7 +160,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	private void createTagOptionsGroup(Composite composite) {
 		fTagsGroup= new Group(composite, SWT.SHADOW_ETCHED_IN);
 		fTagsGroup.setLayout(createGridLayout(1));
-		fTagsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_HORIZONTAL, 2, 0));
+		fTagsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 2, 0));
 		fTagsGroup.setText(JavadocExportMessages.getString("JavadocSpecificsWizardPage.tagsgroup.label")); //$NON-NLS-1$
 
 		fAuthorCheck= new FlaggedButton(fTagsGroup, JavadocExportMessages.getString("JavadocSpecificsWizardPage.authorbutton.label"), new GridData(GridData.FILL_HORIZONTAL), fStore.AUTHOR, true); //$NON-NLS-1$
