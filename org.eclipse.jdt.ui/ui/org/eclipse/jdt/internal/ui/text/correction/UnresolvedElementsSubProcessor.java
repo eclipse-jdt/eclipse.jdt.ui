@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -363,23 +364,23 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		String methodName= nameNode.getIdentifier();
+		int nArguments= arguments.size();
 			
 		// corrections
-		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, nameNode, SimilarElementsRequestor.METHODS);
+		IBinding[] bindings= (new ScopeAnalyzer()).getDeclarationsInScope(astRoot, nameNode.getStartPosition(), ScopeAnalyzer.METHODS);
 		
 		ArrayList parameterMismatchs= new ArrayList();
-		
-		for (int i= 0; i < elements.length; i++) {
-			String curr= elements[i].getName();
+		for (int i= 0; i < bindings.length; i++) {
+			IMethodBinding binding= (IMethodBinding) bindings[i];
+			String curr= binding.getName();
 			if (curr.equals(methodName) && needsNewName) {
-				parameterMismatchs.add(elements[i]);
-				continue;
+				parameterMismatchs.add(binding);
+			} else if (binding.getParameterTypes().length == nArguments && NameMatcher.isSimilarName(methodName, curr)) {
+				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
+				proposals.add(new ReplaceCorrectionProposal(label, context.getCompilationUnit(), context.getOffset(), context.getLength(), curr, 2));
 			}
-			
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
-			proposals.add(new ReplaceCorrectionProposal(label, context.getCompilationUnit(), context.getOffset(), context.getLength(), curr, 2));
 		}
-		
+			
 		addParameterMissmatchProposals(context, parameterMismatchs, arguments, proposals);
 		
 		// new method
@@ -429,9 +430,9 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		for (int i= 0; i < similarElements.size(); i++) {
-			SimilarElement elem = (SimilarElement) similarElements.get(i);
+			IMethodBinding elem = (IMethodBinding) similarElements.get(i);
 
-			String[] paramTypes= elem.getParameterTypes();
+			ITypeBinding[] paramTypes= elem.getParameterTypes();
 			if (paramTypes == null) {
 				continue;
 			}
@@ -448,7 +449,7 @@ public class UnresolvedElementsSubProcessor {
 				for (int k= 0; k < nDiffs; k++) {
 					int idx= indexOfDiff[k];
 					Expression nodeToCast= (Expression) arguments.get(idx);
-					String castType= paramTypes[idx];
+					String castType= paramTypes[idx].getQualifiedName();
 					if (nodeToCast.getNodeType() != ASTNode.CAST_EXPRESSION) {
 						ASTRewriteCorrectionProposal proposal= LocalCorrectionsSubProcessor.getCastProposal(context, castType, nodeToCast);
 						if (proposal != null) {

@@ -277,7 +277,6 @@ public class ASTResolving {
 		}
 		return getTypeOrder(definedTypeCode) > getTypeOrder(toAssignCode);		
 	}
-	
 
 	/**
 	 * Tests if a two types are assign compatible
@@ -326,6 +325,57 @@ public class ASTResolving {
 				return true;
 			}
 			return (Bindings.findTypeInHierarchy(typeToAssign, definedType) != null);
+		}
+	}	
+
+	/**
+	 * Tests if a two types are assign compatible
+	 * @param typeToAssign The binding of the type to assign
+	 * @param definedType The type of the object that is assigned
+	 * @return boolean Returns true if definedType = typeToAssign is true
+	 */
+	public static boolean canAssign(ITypeBinding typeToAssign, ITypeBinding definedType) {
+		// definedType = typeToAssign;
+		
+		if (definedType.isArray()) {
+			if (!typeToAssign.isArray()) {
+				return false; // can not assign a non-array type to an array
+			}
+			int definedDim= definedType.getDimensions();
+			int toAssignDim= typeToAssign.getDimensions();
+			if (definedDim == toAssignDim) {
+				definedType= definedType.getElementType();
+				typeToAssign= typeToAssign.getElementType();
+				if (typeToAssign.isPrimitive() && typeToAssign != definedType) {
+					return false; // can't assign arrays of different primitive types to each other
+				}
+				// fall through
+			} else if (definedDim < toAssignDim) {
+				return isArrayCompatible(definedType.getElementType().getQualifiedName());
+			} else {
+				return false;
+			}
+		}
+		
+		if (typeToAssign.isPrimitive()) {
+			if (!definedType.isPrimitive()) {
+				return false;
+			}
+			Code toAssignCode= PrimitiveType.toCode(typeToAssign.getName());
+			Code definedTypeCode= PrimitiveType.toCode(definedType.getName());
+			return canAssignPrimitive(toAssignCode, definedTypeCode);
+		} else {
+			if (definedType.isPrimitive()) {
+				return false;
+			}
+			String definedTypeName= definedType.getQualifiedName();
+			if (typeToAssign.isArray()) {
+				return isArrayCompatible(definedTypeName);
+			}
+			if ("java.lang.Object".equals(definedTypeName)) { //$NON-NLS-1$
+				return true;
+			}
+			return Bindings.isSuperType(definedType, typeToAssign);
 		}
 	}
 	
