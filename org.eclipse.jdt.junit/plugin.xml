@@ -67,16 +67,7 @@
          </newWizardShortcut>
       </perspectiveExtension>
       <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <actionSet
-               id="org.eclipse.jdt.junit.JUnitActionSet">
-         </actionSet>
-      </perspectiveExtension>
-      <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         <actionSet
-               id="org.eclipse.jdt.junit.JUnitActionSet">
-         </actionSet>
          <newWizardShortcut
                id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
          </newWizardShortcut>
