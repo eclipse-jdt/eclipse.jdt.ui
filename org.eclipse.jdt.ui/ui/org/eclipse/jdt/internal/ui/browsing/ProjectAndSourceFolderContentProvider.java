@@ -35,6 +35,7 @@ class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider 
 			return NO_CHILDREN;
 		
 		try {
+			startReadInDisplayThread();
 			if (element instanceof IStructuredSelection) {
 				Assert.isLegal(false);
 				Object[] result= new Object[0];
@@ -63,10 +64,14 @@ class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider 
 				return getPackageFragmentRoots((IJavaProject)element);
 			if (element instanceof IPackageFragmentRoot) 
 				return NO_CHILDREN;
+
+			return super.getChildren(element);
+
 		} catch (JavaModelException e) {
 			return NO_CHILDREN;
+		} finally {
+			finishedReadInDisplayThread();
 		}
-		return super.getChildren(element);
 	}
 
 	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
@@ -85,7 +90,7 @@ class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider 
 		return list.toArray();
 	}
 
-	/* (non-Javadoc)
+	/*
 	 *
 	 * @see ITreeContentProvider
 	 */

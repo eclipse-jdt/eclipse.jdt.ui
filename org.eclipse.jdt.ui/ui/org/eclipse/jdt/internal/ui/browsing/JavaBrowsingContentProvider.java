@@ -59,6 +59,8 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	private StructuredViewer fViewer;
 	private Object fInput;
 	private JavaBrowsingPart fBrowsingPart;
+	private int fReadsInDisplayTread;
+
 	
 	public JavaBrowsingContentProvider(boolean provideMembers, JavaBrowsingPart browsingPart) {
 		super(provideMembers, reconcileJavaViews());
@@ -70,11 +72,21 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	private static boolean reconcileJavaViews() {
 		return PreferenceConstants.UPDATE_WHILE_EDITING.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
 	}
+	
+	public boolean hasChildren(Object element) {
+		startReadInDisplayThread();
+		try{
+			return super.hasChildren(element);
+		} finally {
+			finishedReadInDisplayThread();
+		}
+	}
 
 	public Object[] getChildren(Object element) {
 		if (!exists(element))
 			return NO_CHILDREN;
-			
+
+		startReadInDisplayThread();			
 		try {
 			if (element instanceof Collection) {
 				Collection elements= (Collection)element;
@@ -100,7 +112,9 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			return super.getChildren(element);
 		} catch (JavaModelException e) {
 			return NO_CHILDREN;
-		}		
+		} finally {
+			finishedReadInDisplayThread();
+		}
 	}
 
 	private Object[] getPackageContents(IPackageFragment fragment) throws JavaModelException {
@@ -403,11 +417,12 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		
 	private void postRefresh(final Object root) {
 		postRunnable(new Runnable() {
+
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed())
 					fViewer.refresh(root, false);
-			}
+				}
 		});
 	}
 
@@ -490,14 +505,32 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			}
 		});
 	}
+	
+	protected void startReadInDisplayThread() {
+		if (isDisplayThread())
+			fReadsInDisplayTread++;
+	}
+
+	protected void finishedReadInDisplayThread() {
+		if (isDisplayThread())
+			fReadsInDisplayTread--;
+	}
+	
+	private boolean isDisplayThread() {
+		Control ctrl= fViewer.getControl();
+		if (ctrl == null)
+			return false;
+		
+		Display currentDisplay= Display.getCurrent();
+		return currentDisplay != null && currentDisplay.equals(ctrl.getDisplay());
+	}
 
 	private void postRunnable(final Runnable r) {
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
 			fBrowsingPart.setProcessSelectionEvents(false);
 			try {
-				Display currentDisplay= Display.getCurrent();
-				if (currentDisplay != null && currentDisplay.equals(ctrl.getDisplay()))
+				if (isDisplayThread() && fReadsInDisplayTread == 0)
 					ctrl.getDisplay().syncExec(r);
 				else				
 					ctrl.getDisplay().asyncExec(r);
