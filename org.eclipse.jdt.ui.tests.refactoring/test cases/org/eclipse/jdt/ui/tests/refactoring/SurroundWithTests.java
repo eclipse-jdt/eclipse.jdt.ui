@@ -165,7 +165,6 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testDeclarationInitializer() throws Exception {
-		System.out.println("==> testDeclarationInitializer disabled due to temporary AST rewriter problem");	
-		// tryCatchTest();
+		 tryCatchTest();
 	}
 }
