@@ -129,6 +129,7 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -1448,7 +1449,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					if (index < bindings.length && invocation.arguments().size() > index) {
 						final Expression argument= (Expression) invocation.arguments().get(index);
 						if (argument instanceof NullLiteral) {
-							status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.no_null_argument", Bindings.asString(sourceDeclaration.resolveBinding())), JavaStatusContext.create(unitRewrite.getCu(), invocation))); //$NON-NLS-1$
+							status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.no_null_argument", BindingLabels.getFullyQualified(sourceDeclaration.resolveBinding())), JavaStatusContext.create(unitRewrite.getCu(), invocation))); //$NON-NLS-1$
 							result= false;
 						} else {
 							if (argument instanceof ThisExpression)
@@ -1516,7 +1517,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 							if (binding != null && samePackage ? Flags.isPrivate(flags) : ((Flags.isProtected(flags) || Flags.isPrivate(flags)) && !Flags.isPublic(flags))) {
 								fTargetVisibilityAdjusted= true;
 								ModifierRewrite.create(rewrite, declaration).setVisibility(visibility, group);
-								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.change_visibility_method_warning", new String[] { Bindings.asString(binding), modifier}), JavaStatusContext.create(getter))); //$NON-NLS-1$
+								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.change_visibility_method_warning", new String[] { BindingLabels.getFullyQualified(binding), modifier}), JavaStatusContext.create(getter))); //$NON-NLS-1$
 							}
 							final MethodInvocation invocation= ast.newMethodInvocation();
 							invocation.setExpression(expression);
@@ -1542,7 +1543,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					rewrite.getListRewrite(declaration, FieldDeclaration.FRAGMENTS_PROPERTY).remove(fragment, group);
 				}
 				fTargetVisibilityAdjusted= true;
-				status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.change_visibility_field_warning", new String[] { Bindings.asString(fTarget), modifier}), JavaStatusContext.create(fSourceRewrite.getCu(), declaration))); //$NON-NLS-1$
+				status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.change_visibility_field_warning", new String[] { BindingLabels.getFullyQualified(fTarget), modifier}), JavaStatusContext.create(fSourceRewrite.getCu(), declaration))); //$NON-NLS-1$
 			}
 		}
 		final FieldAccess access= ast.newFieldAccess();
@@ -1795,7 +1796,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						found= true;
 				}
 				if (found) {
-					status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.overridden", Bindings.asString(sourceDeclaration.resolveBinding())), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+					status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.overridden", BindingLabels.getFullyQualified(sourceDeclaration.resolveBinding())), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
 					result= false;
 				} else {
 					monitor.worked(1);

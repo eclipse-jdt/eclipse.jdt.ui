@@ -80,6 +80,8 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
+
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -469,7 +471,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			if (node instanceof TypeDeclaration) {
 				final TypeDeclaration declaration= (TypeDeclaration) node;
 				ModifierRewrite.create(fSourceRewrite.getASTRewrite(), declaration).setModifiers(0, Modifier.PRIVATE, group);
-				final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_type_warning", new String[] { Bindings.asString(binding)}), JavaStatusContext.create(fSourceRewrite.getCu(), node)); //$NON-NLS-1$
+				final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_type_warning", new String[] { BindingLabels.getFullyQualified(binding)}), JavaStatusContext.create(fSourceRewrite.getCu(), node)); //$NON-NLS-1$
 				if (!containsStatusEntry(status, entry))
 					status.addEntry(entry);
 			}
@@ -705,7 +707,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 					rewrite.getListRewrite(declaration.getParent(), TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAfter(newDeclaration, declaration, null);
 					rewrite.getListRewrite(declaration, FieldDeclaration.FRAGMENTS_PROPERTY).remove(fragment, targetRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.change_visibility"))); //$NON-NLS-1$
 				}
-				final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_field_warning", new String[] {Bindings.asString(variable)}), JavaStatusContext.create(fSourceRewrite.getCu(), node)); //$NON-NLS-1$
+				final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_field_warning", new String[] {BindingLabels.getFullyQualified(variable)}), JavaStatusContext.create(fSourceRewrite.getCu(), node)); //$NON-NLS-1$
 				if (!containsStatusEntry(status, entry))
 					status.addEntry(entry);
 			}
@@ -760,7 +762,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				ModifierRewrite.create(fSourceRewrite.getASTRewrite(), declaration).setModifiers(0, Modifier.PRIVATE, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.change_visibility"))); //$NON-NLS-1$
 				final IMethodBinding binding= declaration.resolveBinding();
 				if (binding != null) {
-					final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_method_warning", new String[] { Bindings.asString(binding)}), JavaStatusContext.create(fSourceRewrite.getCu(), declaration)); //$NON-NLS-1$
+					final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_method_warning", new String[] { BindingLabels.getFullyQualified(binding)}), JavaStatusContext.create(fSourceRewrite.getCu(), declaration)); //$NON-NLS-1$
 					if (!containsStatusEntry(status, entry))
 						status.addEntry(entry);
 				}
@@ -1440,7 +1442,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				if (node instanceof TypeDeclaration) {
 					final TypeDeclaration declaration= (TypeDeclaration) node;
 					ModifierRewrite.create(fSourceRewrite.getASTRewrite(), declaration).setModifiers(0, Modifier.PRIVATE, fGroup);
-					final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_type_warning", new String[] { Bindings.asString(binding)}), JavaStatusContext.create(fSourceRewrite.getCu(), node)); //$NON-NLS-1$
+					final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_type_warning", new String[] { BindingLabels.getFullyQualified(binding)}), JavaStatusContext.create(fSourceRewrite.getCu(), node)); //$NON-NLS-1$
 					if (!containsStatusEntry(fStatus, entry))
 						fStatus.addEntry(entry);
 				}

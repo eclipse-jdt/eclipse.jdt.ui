@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
 public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrectionProposal {
 
@@ -263,7 +264,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 			buf.append("</b><ul>"); //$NON-NLS-1$
 			for (int i= 0; i < fMethodsToOverride.length; i++) {
 				buf.append("<li>"); //$NON-NLS-1$
-				buf.append(Bindings.asString(fMethodsToOverride[i]));
+				buf.append(BindingLabels.getFullyQualified(fMethodsToOverride[i]));
 				buf.append("</li>"); //$NON-NLS-1$
 			}
 			buf.append("</ul>"); //$NON-NLS-1$

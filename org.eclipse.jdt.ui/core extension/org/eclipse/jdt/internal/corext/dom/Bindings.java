@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.core.dom.*;
 
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -94,8 +95,13 @@ public class Bindings {
 			return binding.hashCode();
 		return key.hashCode();
 	}
-		
-	public static String asString(IBinding binding){
+	
+	/*
+	 * Note: this method is for debugging and testing purposes only.
+	 * There are tests whose precomputed test results rely on the returned String's format.
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.BindingLabels
+	 */
+	public static String asString(IBinding binding) {
 		if (binding instanceof IMethodBinding)
 			return asString((IMethodBinding)binding);
 		else if (binding instanceof ITypeBinding)

@@ -50,12 +50,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -416,7 +417,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
             method.accept(nameCollector);
             List names= nameCollector.getNames();
             if (names.contains(fFieldName)){
-				String[] keys= {fFieldName, Bindings.asString(method.resolveBinding())};
+				String[] keys= {fFieldName, BindingLabels.getFullyQualified(method.resolveBinding())};
             	String msg= RefactoringCoreMessages.getFormattedString("PromoteTempToFieldRefactoring.Name_conflict", keys); //$NON-NLS-1$
             	return RefactoringStatus.createFatalErrorStatus(msg);
             }	

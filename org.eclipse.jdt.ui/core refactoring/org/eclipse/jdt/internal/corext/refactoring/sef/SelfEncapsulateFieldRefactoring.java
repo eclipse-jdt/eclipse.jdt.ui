@@ -67,13 +67,14 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
+
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -266,7 +267,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			if (selector.equals(name))
 				status.addFatalError(RefactoringCoreMessages.getFormattedString(
 					"SelfEncapsulateField.method_exists", //$NON-NLS-1$
-					new String[] {Bindings.asString(method), type.getElementName()}));
+					new String[] {BindingLabels.getFullyQualified(method), type.getElementName()}));
 		}
 	}	
 	
