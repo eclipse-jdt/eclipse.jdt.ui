@@ -233,7 +233,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @return A placeholder node that stands for all of the statements 
 	 */
 	public final Block getCollapseTargetPlaceholder(Statement[] children) {
-		Block res= createCollapsePlaceholder();
+		Block res= fNodeStore.createCollapsePlaceholder();
 		List statements= res.statements();
 		for (int i= 0; i < children.length; i++) {
 			statements.add(children[i]);
@@ -293,7 +293,7 @@ public final class ASTRewrite extends NewASTRewrite {
 		int startPos= firstNode.getStartPosition();
 		int endPos= lastNode.getStartPosition() + lastNode.getLength();
 				
-		Block compoundNode= createCollapsePlaceholder();
+		Block compoundNode= fNodeStore.createCollapsePlaceholder();
 		List children= compoundNode.statements();
 		compoundNode.setSourceRange(startPos, endPos - startPos);
 		

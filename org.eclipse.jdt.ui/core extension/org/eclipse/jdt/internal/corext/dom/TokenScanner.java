@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -21,7 +22,6 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
@@ -67,15 +67,7 @@ public class TokenScanner {
 		fDocument= document;
 		fEndPosition= fScanner.getSource().length - 1;
 	}		
-	
-	/**
-	 * Creates a TokenScanner
-	 * @param textBuffer The textbuffer to create the scanner on
-	 */
-	public TokenScanner(TextBuffer textBuffer) {
-		this(textBuffer.getDocument());
-	}		
-	
+		
 	/**
 	 * Returns the wrapped scanner
 	 * @return IScanner
@@ -126,10 +118,10 @@ public class TokenScanner {
 			try {
 				curr= fScanner.getNextToken();
 				if (curr == ITerminalSymbols.TokenNameEOF) {
-					throw new CoreException(JavaUIStatus.createError(END_OF_FILE, "End Of File", null)); //$NON-NLS-1$
+					throw new CoreException(createError(END_OF_FILE, "End Of File", null)); //$NON-NLS-1$
 				}
 			} catch (InvalidInputException e) {
-				throw new CoreException(JavaUIStatus.createError(LEXICAL_ERROR, e.getMessage(), e)); //$NON-NLS-1$
+				throw new CoreException(createError(LEXICAL_ERROR, e.getMessage(), e)); //$NON-NLS-1$
 			}
 		} while (ignoreComments && isComment(curr));
 		return curr;
@@ -148,7 +140,7 @@ public class TokenScanner {
 			try {
 				curr= fScanner.getNextToken();
 			} catch (InvalidInputException e) {
-				throw new CoreException(JavaUIStatus.createError(LEXICAL_ERROR, e.getMessage(), e)); //$NON-NLS-1$
+				throw new CoreException(createError(LEXICAL_ERROR, e.getMessage(), e)); //$NON-NLS-1$
 			}
 		} while (ignoreComments && isComment(curr));
 		return curr;
@@ -385,7 +377,7 @@ public class TokenScanner {
 				return fDocument.getLineOfOffset(offset);
 			} catch (BadLocationException e) {
 				String message= "Illegal offset: " + offset; //$NON-NLS-1$
-				throw new CoreException(JavaUIStatus.createError(DOCUMENT_ERROR, message, e)); //$NON-NLS-1$
+				throw new CoreException(createError(DOCUMENT_ERROR, message, e)); //$NON-NLS-1$
 			}
 		}
 		return getScanner().getLineNumber(offset);
@@ -398,13 +390,12 @@ public class TokenScanner {
 				return region.getOffset() + region.getLength();
 			} catch (BadLocationException e) {
 				String message= "Illegal line: " + line; //$NON-NLS-1$
-				throw new CoreException(JavaUIStatus.createError(DOCUMENT_ERROR, message, e)); //$NON-NLS-1$
+				throw new CoreException(createError(DOCUMENT_ERROR, message, e)); //$NON-NLS-1$
 			}
 		}
 		return getScanner().getLineEnd(line);
 	}			
-	
-		
+
 	public static boolean isComment(int token) {
 		return token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC 
 			|| token == ITerminalSymbols.TokenNameCOMMENT_LINE;
@@ -427,6 +418,11 @@ public class TokenScanner {
 			default:
 				return false;
 		}
+	}
+	
+	private IStatus createError(int code, String message, Throwable e) {
+		return JavaUIStatus.createError(DOCUMENT_ERROR, message, e);
+		//		return new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, code, message, throwable);
 	}
 
 }

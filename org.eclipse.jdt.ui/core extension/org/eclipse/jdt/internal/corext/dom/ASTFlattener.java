@@ -18,6 +18,12 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public class ASTFlattener extends GenericVisitor {
 
+	public static String asString(ASTNode node) {
+		ASTFlattener flattener= new ASTFlattener();
+		node.accept(flattener);
+		return flattener.getResult();
+	}
+	
 	protected StringBuffer fResult;
 
 	public ASTFlattener() {

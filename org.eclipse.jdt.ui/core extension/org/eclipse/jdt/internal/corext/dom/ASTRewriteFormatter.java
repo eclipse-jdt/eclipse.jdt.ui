@@ -31,26 +31,24 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		public Object data;
 	}
 		
-	private static class ExtendedFlattener extends ASTFlattener {
+	private class ExtendedFlattener extends ASTFlattener {
 
 		private ArrayList fPositions;
-		private NewASTRewrite fRewriter;
 
 		
-		public ExtendedFlattener(NewASTRewrite rewrite) {
+		public ExtendedFlattener() {
 			fPositions= new ArrayList();
-			fRewriter= rewrite;
 		}
 	
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 		 */
 		public void preVisit(ASTNode node) {
-			Object trackData= fRewriter.getTrackedNodeData(node);
+			Object trackData= fPlaceholders.getTrackedNodeData(node);
 			if (trackData != null) {
 				addMarker(trackData, fResult.length(), 0);
 			}
-			Object placeholderData= fRewriter.getPlaceholderData(node);
+			Object placeholderData= fPlaceholders.getPlaceholderData(node);
 			if (placeholderData != null) {
 				addMarker(placeholderData, fResult.length(), 0);
 			}
@@ -60,11 +58,11 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 		 */
 		public void postVisit(ASTNode node) {
-			Object placeholderData= fRewriter.getPlaceholderData(node);
+			Object placeholderData= fPlaceholders.getPlaceholderData(node);
 			if (placeholderData != null) {
 				fixupLength(placeholderData, fResult.length());
 			}
-			Object trackData= fRewriter.getTrackedNodeData(node);
+			Object trackData= fPlaceholders.getTrackedNodeData(node);
 			if (trackData != null) {
 				fixupLength(trackData, fResult.length());
 			}
@@ -74,7 +72,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		 * @see org.eclipse.jdt.internal.corext.dom.ASTFlattener#visit(org.eclipse.jdt.core.dom.Block)
 		 */
 		public boolean visit(Block node) {
-			if (fRewriter.isCollapsed(node)) {
+			if (fPlaceholders.isCollapsed(node)) {
 				return true;
 			}
 			return super.visit(node);
@@ -104,15 +102,16 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		}
 	}
 	
-	private NewASTRewrite fRewrite;
-	private String fLineDelimiter;
+	protected String fLineDelimiter;
 	
-	public ASTRewriteFormatter(NewASTRewrite rewrite, String lineDelimiter) {
-		fRewrite= rewrite;
+	protected NodeInfoStore fPlaceholders;
+	
+	public ASTRewriteFormatter(NodeInfoStore placeholders, String lineDelimiter) {
+		fPlaceholders= placeholders;
 
 		fLineDelimiter= lineDelimiter;
 	}
-
+	
 	/**
 	 * Returns the string accumulated in the visit formatted using the default formatter.
 	 * Updates the existing node's positions.
@@ -124,7 +123,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	 */	
 	public String getFormattedResult(ASTNode node, int initialIndentationLevel, Collection resultingMarkers) {
 		
-		ExtendedFlattener flattener= new ExtendedFlattener(fRewrite);
+		ExtendedFlattener flattener= new ExtendedFlattener();
 		node.accept(flattener);
 
 		NodeMarker[] markers= flattener.getMarkers();
@@ -197,7 +196,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		}
 		
 		public String[] getPrefixAndSuffix(int indent, String lineDelim, ASTNode node) {
-			String nodeString= ASTNodes.asString(node);
+			String nodeString= ASTFlattener.asString(node);
 			String str= fPrefix + nodeString;
 			Position pos= new Position(fStart, fPrefix.length() + 1 - fStart);
 
@@ -221,7 +220,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		}
 		
 		public String[] getPrefixAndSuffix(int indent, String lineDelim, ASTNode node) {
-			String nodeString= ASTNodes.asString(node);
+			String nodeString= ASTFlattener.asString(node);
 			int nodeStart= fPrefix.length();
 			int nodeEnd= nodeStart + nodeString.length() - 1;
 			

@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -21,10 +18,6 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Statement;
 
 /**
  * Work in progress.
@@ -32,40 +25,33 @@ import org.eclipse.jdt.core.dom.Statement;
 public class NewASTRewrite {
 	
 	/** Constant used to create place holder nodes */
-	public static final int UNKNOWN= -1;
-	public static final int BLOCK= 2;
-	public static final int EXPRESSION= 3;
-	public static final int STATEMENT= 4;
-	public static final int SINGLEVAR_DECLARATION= 5;
-	public static final int TYPE= 6;
-	public static final int NAME= 7;
-	public static final int JAVADOC= 8;
-	public static final int VAR_DECLARATION_FRAGMENT= 9;
-	public static final int TYPE_DECLARATION= 10;
-	public static final int FIELD_DECLARATION= 11;
-	public static final int METHOD_DECLARATION= 12;
-	public static final int INITIALIZER= 13;
-	public static final int PACKAGE_DECLARATION= 14;
-	public static final int IMPORT_DECLARATION= 15;
+	public static final int UNKNOWN= NodeInfoStore.UNKNOWN;
+	public static final int BLOCK= NodeInfoStore.BLOCK;
+	public static final int EXPRESSION= NodeInfoStore.EXPRESSION;
+	public static final int STATEMENT= NodeInfoStore.STATEMENT;
+	public static final int SINGLEVAR_DECLARATION= NodeInfoStore.SINGLEVAR_DECLARATION;
+	public static final int TYPE= NodeInfoStore.TYPE;
+	public static final int NAME= NodeInfoStore.NAME;
+	public static final int JAVADOC= NodeInfoStore.JAVADOC;
+	public static final int VAR_DECLARATION_FRAGMENT= NodeInfoStore.VAR_DECLARATION_FRAGMENT;
+	public static final int TYPE_DECLARATION= NodeInfoStore.TYPE_DECLARATION;
+	public static final int FIELD_DECLARATION= NodeInfoStore.FIELD_DECLARATION;
+	public static final int METHOD_DECLARATION= NodeInfoStore.METHOD_DECLARATION;
+	public static final int INITIALIZER= NodeInfoStore.INITIALIZER;
+	public static final int PACKAGE_DECLARATION= NodeInfoStore.PACKAGE_DECLARATION;
+	public static final int IMPORT_DECLARATION= NodeInfoStore.IMPORT_DECLARATION;
 		
 
 	/** root node for the rewrite: Only nodes under this root are accepted */
 	private ASTNode fRootNode;
-		
-	private HashMap fPlaceholderNodes;
-	private HashSet fCollapsedNodes;
-	
-	private HashMap fTrackedNodes;
-	
 
 	protected final RewriteEventStore fEventStore;
+	protected final NodeInfoStore fNodeStore;
 	
 	public NewASTRewrite(ASTNode node) {
 		fRootNode= node;
 		fEventStore= new RewriteEventStore();
-		
-		fPlaceholderNodes= null;
-		fTrackedNodes= null;
+		fNodeStore= new NodeInfoStore(node.getAST());
 	}
 	
 	/**
@@ -85,6 +71,10 @@ public class NewASTRewrite {
 		return fRootNode;
 	}
 	
+	protected RewriteEventStore getRewriteEventStore() {
+		return fEventStore;
+	}
+	
 	/**
 	 * Performs the rewrite: The rewrite events are translated to the corresponding in text changes.
 	 * @param document Document which describes the code of the AST that is passed in in the
@@ -95,11 +85,11 @@ public class NewASTRewrite {
 		TextEdit result= new MultiTextEdit();
 		
 		ASTNode rootNode= getRootNode();
-		if (rootNode != null) {
-			ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(document, result, this, fEventStore);
+		if (rootNode != null) {		
+			ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(document, result, fEventStore, fNodeStore);
 		
 			// update extra comment ranges
-			ASTNodes.annotateExtraRanges(rootNode, visitor.getScanner());
+			CommentMapper.annotateExtraRanges(rootNode, visitor.getScanner());
 
 			rootNode.accept(visitor);
 		}
@@ -123,18 +113,7 @@ public class NewASTRewrite {
 			fEventStore.setEventEditGroup(nodeEvent, editGroup);
 		}
 	}
-	
 
-	/**
-	 * 
-	 * @param parent
-	 * @param childProperty
-	 * @return
-	 */
-	public ListRewriter getListRewrite(ASTNode parent, int childProperty) {
-		validateIsInsideAST(parent);
-		return new ListRewriter(this, parent, childProperty);
-	}
 		
 	/**
 	 * Marks a node or attribute as removed.  
@@ -153,28 +132,6 @@ public class NewASTRewrite {
 			fEventStore.setEventEditGroup(nodeEvent, editGroup);
 		}
 	}
-
-	/**
-	 * Marks a node in a list as removed.  
-	 * @param parent The parent node of the list.
-	 * @param childProperty The child property of the list. 
-	 * @param nodeToRemove The node to remove.
-	 * @param editGroup Collect the generated text edit's or <code>null</code> if
-	 * no edits should be collected.
-	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
-	 * not inside the rewriters parent, the property is not a list property or the given node is not in the specified list.
-	 */
-	public final void markAsRemoved(ASTNode parent, int childProperty, ASTNode nodeToRemove, TextEditGroup editGroup) {
-		validateIsInsideAST(parent);
-		ListRewriteEvent listEvent= fEventStore.getListEvent(parent, childProperty, true);
-		RewriteEvent res= listEvent.removeEntry(nodeToRemove);
-		if (res == null) {
-			throw new IllegalArgumentException("Node to remove is not member of list"); //$NON-NLS-1$
-		}
-		if (editGroup != null) {
-			fEventStore.setEventEditGroup(res, editGroup);
-		}
-	}
 	
 	/**
 	 * Marks an existing node as removed.
@@ -184,7 +141,7 @@ public class NewASTRewrite {
 	public final void markAsRemoved(ASTNode node, TextEditGroup editGroup) {
 		int property= ASTNodeConstants.getPropertyOfNode(node);
 		if (ASTNodeConstants.isListProperty(property)) {
-			markAsRemoved(node.getParent(), property, node, editGroup);
+			getListRewrite(node.getParent(), property).remove(node, editGroup);
 		} else {
 			markAsRemoved(node.getParent(), property, editGroup);
 		}
@@ -218,28 +175,6 @@ public class NewASTRewrite {
 		}
 	}
 
-	/**
-	 * Marks a node in a list as replaced. The replacing node must be new or a placeholder.
-	 * @param parent The parent node of the list.
-	 * @param childProperty The child property of the list. 
-	 * @param nodeToReplace The node to replaced.
-	 * @param replacingNode The node that replaces the original node.
-	 * @param editGroup Collect the generated text edit's or <code>null</code> if
-	 * no edits should be collected.
-	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
-	 * not inside the rewriters parent, the property is not a list property or the given node is not in the specified list.
-	 */
-	public final void markAsReplaced(ASTNode parent, int childProperty, ASTNode nodeToReplace, ASTNode replacingNode, TextEditGroup editGroup) {
-		validateIsInsideAST(parent);
-		ListRewriteEvent listEvent= fEventStore.getListEvent(parent, childProperty, true);
-		RewriteEvent res= listEvent.replaceEntry(nodeToReplace, replacingNode);
-		if (res == null) {
-			throw new IllegalArgumentException("Node to replace is not member of list"); //$NON-NLS-1$
-		}
-		if (editGroup != null) {
-			fEventStore.setEventEditGroup(res, editGroup);
-		}
-	}
 	
 	/**
 	 * Marks an existing node as replaced by a new node. The replacing node must be new or
@@ -251,7 +186,7 @@ public class NewASTRewrite {
 	public final void markAsReplaced(ASTNode node, ASTNode replacingNode, TextEditGroup editGroup) {
 		int property= ASTNodeConstants.getPropertyOfNode(node);
 		if (ASTNodeConstants.isListProperty(property)) {
-			markAsReplaced(node.getParent(), property, node, replacingNode, editGroup);
+			getListRewrite(node.getParent(), property).replace(node, replacingNode, editGroup);
 		} else {
 			markAsReplaced(node.getParent(), property, replacingNode, editGroup);
 		}
@@ -268,16 +203,27 @@ public class NewASTRewrite {
 	}
 	
 	/**
+	 * Gets a rewriter to modify the given list.
+	 * @param parent The parent node.
+	 * @param childProperty The child property
+	 * @return
+	 */
+	public ListRewriter getListRewrite(ASTNode parent, int childProperty) {
+		validateIsInsideAST(parent);
+		return new ListRewriter(this, parent, childProperty);
+	}
+	
+	/**
 	 * Marks a node as tracked. The edits added to the group editGroup can be used to get the
 	 * position of the node after the rewrite operation.
 	 * @param node The node to track
 	 * @param editGroup Collects the range markers describing the node position.
 	 */
 	public final void markAsTracked(ASTNode node, TextEditGroup editGroup) {
-		if (getTrackedNodeData(node) != null) {
+		if (fNodeStore.getTrackedNodeData(node) != null) {
 			throw new IllegalArgumentException("Node is already marked as tracked"); //$NON-NLS-1$
 		}
-		setTrackedNodeData(node, editGroup);
+		fNodeStore.setTrackedNodeData(node, editGroup);
 	}	
 	
 	
@@ -286,8 +232,7 @@ public class NewASTRewrite {
 	 */
 	protected final void clearRewrite() {
 		fEventStore.clear();
-
-		fPlaceholderNodes= null;
+		fNodeStore.clear();
 	}
 		
 	protected final void validateIsInsideAST(ASTNode node) {
@@ -297,8 +242,18 @@ public class NewASTRewrite {
 	
 		if (node.getAST() != getAST()) {
 			throw new IllegalArgumentException("Node is not inside the AST"); //$NON-NLS-1$
-			
 		}
+	}
+	
+	/**
+	 * Returns the node type that should be used to create a place holder for the given node
+	 * <code>existingNode</code>.
+	 * 
+	 * @param existingNode an existing node for which a place holder is to be created
+	 * @return the node type of a potential place holder
+	 */
+	public static int getPlaceholderType(ASTNode existingNode) {
+		return NodeInfoStore.getPlaceholderType(existingNode);
 	}
 			
 	/**
@@ -314,9 +269,7 @@ public class NewASTRewrite {
 	 * @return Returns the place holder node
 	 */
 	public final ASTNode createStringPlaceholder(String code, int nodeType) {
-		StringPlaceholderData data= new StringPlaceholderData();
-		data.code= code;
-		return createPlaceholder(data, nodeType);
+		return fNodeStore.createStringPlaceholder(code, nodeType);
 	}
 
 	/**
@@ -327,16 +280,9 @@ public class NewASTRewrite {
 	 */
 	public final ASTNode createCopyPlaceholder(ASTNode node) {
 		validateIsInsideAST(node);
-		
 		fEventStore.increaseCopyCount(node);
-		
-		int placeHolderType= getPlaceholderType(node);
-		if (placeHolderType == UNKNOWN) {
-			throw new IllegalArgumentException("Copy placeholders are not supported for nodes of type " + node.getClass().getName()); //$NON-NLS-1$
-		}
-		CopyPlaceholderData data= new CopyPlaceholderData();
-		data.node= node;
-		return createPlaceholder(data, placeHolderType);
+
+		return fNodeStore.createCopyPlaceholder(node);
 	}
 	
 	/**
@@ -347,198 +293,13 @@ public class NewASTRewrite {
 	 */
 	public final ASTNode createMovePlaceholder(ASTNode node) {
 		validateIsInsideAST(node);
-
-		int placeHolderType= getPlaceholderType(node);
-		if (placeHolderType == UNKNOWN) {
-			throw new IllegalArgumentException("Move placeholders are not supported for nodes of type " + node.getClass().getName()); //$NON-NLS-1$
-		}
-		
 		fEventStore.setAsMoveSource(node);
 		
-		MovePlaceholderData data= new MovePlaceholderData();
-		data.node= node;
-		return createPlaceholder(data, placeHolderType);
+		return fNodeStore.createMovePlaceholder(node);
 	}	
-	
-	// collapsed nodes: in source: use one node that represents many; to be used as
-	// copy/move source or to replace at once.
-	// in the target: one block node that is not flattened.
-	
-	protected final Block createCollapsePlaceholder() {
-		Block placeHolder= getAST().newBlock();
-		if (fCollapsedNodes == null) {
-			fCollapsedNodes= new HashSet();
-		}
-		fCollapsedNodes.add(placeHolder);
-		return placeHolder;
-	}
-	
+		
 	public final boolean isCollapsed(ASTNode node) {
-		if (fCollapsedNodes != null) {
-			return fCollapsedNodes.contains(node);
-		}
-		return false;	
-	}
-	
-	protected RewriteEventStore getRewriteEventStore() {
-		return fEventStore;
-	}
-	
-	public final TextEditGroup getTrackedNodeData(ASTNode node) {
-		if (fTrackedNodes != null) {
-			return (TextEditGroup) fTrackedNodes.get(node);
-		}
-		return null;	
-	}
-	
-	protected void setTrackedNodeData(ASTNode node, TextEditGroup editGroup) {
-		if (fTrackedNodes == null) {
-			fTrackedNodes= new HashMap();
-		}
-		fTrackedNodes.put(node, editGroup);
-	}	
-		
-	private final ASTNode createPlaceholder(PlaceholderData data, int nodeType) {
-		AST ast= getAST();
-		ASTNode placeHolder;
-		switch (nodeType) {
-			case NAME:
-				placeHolder= ast.newSimpleName("z"); //$NON-NLS-1$
-				break;
-			case EXPRESSION:
-				MethodInvocation expression = ast.newMethodInvocation(); 
-				expression.setName(ast.newSimpleName("z")); //$NON-NLS-1$
-				placeHolder = expression;
-				break;			
-			case TYPE:
-				placeHolder= ast.newSimpleType(ast.newSimpleName("X")); //$NON-NLS-1$
-				break;				
-			case STATEMENT:
-				placeHolder= ast.newReturnStatement();
-				break;
-			case BLOCK:
-				placeHolder= ast.newBlock();
-				break;
-			case METHOD_DECLARATION:
-				placeHolder= ast.newMethodDeclaration();
-				break;
-			case FIELD_DECLARATION:
-				placeHolder= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-				break;
-			case INITIALIZER:
-				placeHolder= ast.newInitializer();
-				break;								
-			case SINGLEVAR_DECLARATION:
-				placeHolder= ast.newSingleVariableDeclaration();
-				break;
-			case VAR_DECLARATION_FRAGMENT:
-				placeHolder= ast.newVariableDeclarationFragment();
-				break;
-			case JAVADOC:
-				placeHolder= ast.newJavadoc();
-				break;				
-			case TYPE_DECLARATION:
-				placeHolder= ast.newTypeDeclaration();
-				break;
-			case PACKAGE_DECLARATION:
-				placeHolder= ast.newPackageDeclaration();
-				break;
-			case IMPORT_DECLARATION:
-				placeHolder= ast.newImportDeclaration();
-				break;
-			default:
-				return null;
-		}
-		setPlaceholderData(placeHolder, data);
-		return placeHolder;
-	}	
-	
-	/**
-	 * Returns the node type that should be used to create a place holder for the given node
-	 * <code>existingNode</code>.
-	 * 
-	 * @param existingNode an existing node for which a place holder is to be created
-	 * @return the node type of a potential place holder
-	 */
-	public static int getPlaceholderType(ASTNode existingNode) {
-		switch (existingNode.getNodeType()) {
-			case ASTNode.SIMPLE_NAME:
-			case ASTNode.QUALIFIED_NAME:
-				return NAME;
-			case ASTNode.SIMPLE_TYPE:
-			case ASTNode.PRIMITIVE_TYPE:
-			case ASTNode.ARRAY_TYPE:
-				return TYPE;				
-			case ASTNode.BLOCK:
-				return BLOCK;
-			case ASTNode.TYPE_DECLARATION:
-				return TYPE_DECLARATION;
-			case ASTNode.METHOD_DECLARATION:
-				return METHOD_DECLARATION;
-			case ASTNode.FIELD_DECLARATION:
-				return FIELD_DECLARATION;
-			case ASTNode.INITIALIZER:
-				return INITIALIZER;
-			case ASTNode.SINGLE_VARIABLE_DECLARATION:
-				return SINGLEVAR_DECLARATION;			
-			case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
-				return VAR_DECLARATION_FRAGMENT;
-			case ASTNode.JAVADOC:
-				return JAVADOC;
-			case ASTNode.PACKAGE_DECLARATION:
-				return PACKAGE_DECLARATION;
-			case ASTNode.IMPORT_DECLARATION:
-				return IMPORT_DECLARATION;
-			default:
-				if (existingNode instanceof Expression) {
-					return EXPRESSION;
-				} else if (existingNode instanceof Statement) {
-					// is not Block: special case statement for block
-					return STATEMENT;
-				}
-		}
-		return UNKNOWN;
-	}
-	
-	protected final Object getPlaceholderData(ASTNode node) {
-		if (fPlaceholderNodes != null) {
-			return fPlaceholderNodes.get(node);
-		}
-		return null;	
-	}
-	
-	private void setPlaceholderData(ASTNode node, PlaceholderData data) {
-		if (fPlaceholderNodes == null) {
-			fPlaceholderNodes= new HashMap();
-		}
-		fPlaceholderNodes.put(node, data);		
-	}
-	
-
-	
-	
-	private static class PlaceholderData {
-	}
-		
-	protected static final class MovePlaceholderData extends PlaceholderData {
-		public ASTNode node;
-		public String toString() {
-			return "[placeholder move: " + node +"]"; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	}
-	
-	protected static final class CopyPlaceholderData extends PlaceholderData {
-		public ASTNode node;
-		public String toString() {
-			return "[placeholder copy: " + node +"]";  //$NON-NLS-1$//$NON-NLS-2$
-		}
-	}	
-	
-	protected static final class StringPlaceholderData extends PlaceholderData {
-		public String code;
-		public String toString() {
-			return "[placeholder string: " + code +"]"; //$NON-NLS-1$ //$NON-NLS-2$
-		}
+		return fNodeStore.isCollapsed(node);
 	}
 	
 	public String toString() {
