@@ -110,11 +110,11 @@ public class NLSSourceModifier {
 	 * @param change
 	 */
 	private void replaceAccessor(NLSSubstitution substitution, TextChange change) {
-		AccessorClassInfo accessorClassInfo= substitution.getAccessorClassInfo();
-		if (accessorClassInfo != null) {
-			Region region= accessorClassInfo.getRegion();
-			int len= accessorClassInfo.getName().length();
-			String[] args= {accessorClassInfo.getName(), substitution.getUpdatedAccessor()};
+		AccessorClassReference accessorClassRef= substitution.getAccessorClassReference();
+		if (accessorClassRef != null) {
+			Region region= accessorClassRef.getRegion();
+			int len= accessorClassRef.getName().length();
+			String[] args= {accessorClassRef.getName(), substitution.getUpdatedAccessor()};
 			TextChangeCompatibility.addTextEdit(change, NLSMessages.getFormattedString("NLSSourceModifier.replace_accessor", args), //$NON-NLS-1$
 					new ReplaceEdit(region.getOffset(), len, substitution.getUpdatedAccessor())); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -136,10 +136,10 @@ public class NLSSourceModifier {
 	}
 
 	private void deleteAccessor(NLSSubstitution substitution, TextChange change) {
-		AccessorClassInfo accessorClassInfo= substitution.getAccessorClassInfo();
-		if (accessorClassInfo != null) {
-			Region region= accessorClassInfo.getRegion();
-			TextChangeCompatibility.addTextEdit(change, NLSMessages.getFormattedString("NLSSourceModifier.remove_accessor", accessorClassInfo.getName()), new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"')); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		AccessorClassReference accessorClassRef= substitution.getAccessorClassReference();
+		if (accessorClassRef != null) {
+			Region region= accessorClassRef.getRegion();
+			TextChangeCompatibility.addTextEdit(change, NLSMessages.getFormattedString("NLSSourceModifier.remove_accessor", accessorClassRef.getName()), new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"')); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 

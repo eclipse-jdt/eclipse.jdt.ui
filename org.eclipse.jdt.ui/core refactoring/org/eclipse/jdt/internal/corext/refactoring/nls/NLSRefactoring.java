@@ -197,7 +197,7 @@ public class NLSRefactoring extends Refactoring {
 			final DynamicValidationStateChange result= new DynamicValidationStateChange("NLS Refactoring"); //$NON-NLS-1$
 
 			if (willCreateAccessorClass()) {
-				result.add(AccessorClass.create(fCu, fAccessorClassName, getAccessorCUPath(), fAccessorClassPackage, getPropertyFilePath(), new SubProgressMonitor(pm, 1)));
+				result.add(AccessorClassCreator.create(fCu, fAccessorClassName, getAccessorCUPath(), fAccessorClassPackage, getPropertyFilePath(), new SubProgressMonitor(pm, 1)));
 			}
 			pm.worked(1);
 

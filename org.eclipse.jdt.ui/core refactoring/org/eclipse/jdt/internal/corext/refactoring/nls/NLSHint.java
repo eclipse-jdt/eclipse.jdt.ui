@@ -54,7 +54,7 @@ public class NLSHint {
 		IJavaProject project= cu.getJavaProject();
 		NLSLine[] lines= createRawLines(cu);
 		
-		AccessorClassInfo firstAccessInfo= findFirstClassInfo(lines, astRoot);
+		AccessorClassReference firstAccessInfo= findFirstAccessorReference(lines, astRoot);
 		
 		Properties props= firstAccessInfo != null ? NLSHintHelper.getProperties(project, firstAccessInfo.getBinding()) : new Properties();
 		
@@ -93,14 +93,14 @@ public class NLSHint {
 			for (int j= 0; j < elements.length; j++) {
 				NLSElement nlsElement= elements[j];
 				if (nlsElement.hasTag()) {
-					AccessorClassInfo accessorClassInfo= NLSHintHelper.getAccessorClassInfo(astRoot, nlsElement);
-					if (accessorClassInfo == null) {
+					AccessorClassReference accessorClassReference= NLSHintHelper.getAccessorClassReference(astRoot, nlsElement);
+					if (accessorClassReference == null) {
 						// no accessorclass => not translated				        
 						result.add(new NLSSubstitution(NLSSubstitution.IGNORED, stripQuotes(nlsElement.getValue()), nlsElement));
 					} else {
 						String key= stripQuotes(nlsElement.getValue());
 						String value= props.getProperty(key);
-						result.add(new NLSSubstitution(NLSSubstitution.EXTERNALIZED, key, value, nlsElement, accessorClassInfo));
+						result.add(new NLSSubstitution(NLSSubstitution.EXTERNALIZED, key, value, nlsElement, accessorClassReference));
 					}
 				} else {
 					result.add(new NLSSubstitution(NLSSubstitution.INTERNALIZED, stripQuotes(nlsElement.getValue()), nlsElement));
@@ -110,15 +110,15 @@ public class NLSHint {
 		return (NLSSubstitution[]) result.toArray(new NLSSubstitution[result.size()]);
 	}
 	
-	private static AccessorClassInfo findFirstClassInfo(NLSLine[] lines, CompilationUnit astRoot) {
+	private static AccessorClassReference findFirstAccessorReference(NLSLine[] lines, CompilationUnit astRoot) {
 		for (int i= 0; i < lines.length; i++) {
 			NLSElement[] elements= lines[i].getElements();
 			for (int j= 0; j < elements.length; j++) {
 				NLSElement nlsElement= elements[j];
 				if (nlsElement.hasTag()) {
-					AccessorClassInfo accessorClassInfo= NLSHintHelper.getAccessorClassInfo(astRoot, nlsElement);
-					if (accessorClassInfo != null) {
-						return accessorClassInfo;
+					AccessorClassReference accessorClassReference= NLSHintHelper.getAccessorClassReference(astRoot, nlsElement);
+					if (accessorClassReference != null) {
+						return accessorClassReference;
 					}
 				}
 			}

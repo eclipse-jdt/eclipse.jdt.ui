@@ -43,7 +43,7 @@ public class NLSHintHelper {
 	/**
 	 * Returns the accessor binding info or <code>null</code> if this element is not a nls'ed entry
 	 */
-	public static AccessorClassInfo getAccessorClassInfo(CompilationUnit astRoot, NLSElement nlsElement) {
+	public static AccessorClassReference getAccessorClassReference(CompilationUnit astRoot, NLSElement nlsElement) {
 		if (!nlsElement.hasTag()) {
 			throw new IllegalArgumentException("NLSElement must be \"nlsed\" before."); //$NON-NLS-1$
 		}
@@ -61,7 +61,7 @@ public class NLSHintHelper {
 		MethodInvocation methodInvocation= (MethodInvocation) parent;
 		List args= methodInvocation.arguments();
 		if (args.indexOf(nlsStringLiteral) != 0) {
-			return null; // must be first arguemnt in lookup method
+			return null; // must be first argument in lookup method
 		}
 			
 		IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
@@ -71,7 +71,7 @@ public class NLSHintHelper {
 
 		ITypeBinding accessorBinding= methodBinding.getDeclaringClass();
 		if (isAccessorCandidate(accessorBinding)) {
-			return new AccessorClassInfo(accessorBinding, new Region(parent.getStartPosition(), parent.getLength()));
+			return new AccessorClassReference(accessorBinding, new Region(parent.getStartPosition(), parent.getLength()));
 		}
 		return null;
 	}

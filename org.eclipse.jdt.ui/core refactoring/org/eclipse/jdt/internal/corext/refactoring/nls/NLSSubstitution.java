@@ -31,7 +31,7 @@ public class NLSSubstitution {
 	private String fInitialValue;
 	
 	private NLSElement fNLSElement;
-	private AccessorClassInfo fAccessorClassInfo;
+	private AccessorClassReference fAccessorClassReference;
 	
 	private String fNewAccessorClassName;
 
@@ -50,14 +50,14 @@ public class NLSSubstitution {
 	/**
 	 * value == null indicates a corrupt substitution. 
 	 */
-	public NLSSubstitution(int state, String key, String value, NLSElement element, AccessorClassInfo accessorClassInfo) {
+	public NLSSubstitution(int state, String key, String value, NLSElement element, AccessorClassReference accessorClassReference) {
 		this(state,value,element);
 		if (state != EXTERNALIZED) {
 			throw new IllegalArgumentException("Set to INTERNALIZE/IGNORED State with different Constructor"); //$NON-NLS-1$
 		}
 		fKey= key;
 		fInitialKey= key;
-		fAccessorClassInfo= accessorClassInfo;
+		fAccessorClassReference= accessorClassReference;
 		fNewAccessorClassName= null;
 	}
 
@@ -150,7 +150,7 @@ public class NLSSubstitution {
 	}
 	
 	public boolean isAccessorRename() {
-		return (fAccessorClassInfo != null) && (fNewAccessorClassName != null) && !fNewAccessorClassName.equals(fAccessorClassInfo.getName());
+		return (fAccessorClassReference != null) && (fNewAccessorClassName != null) && !fNewAccessorClassName.equals(fAccessorClassReference.getName());
 	}
 	
 	
@@ -205,8 +205,8 @@ public class NLSSubstitution {
 		return fInitialValue;
 	}
 
-	public AccessorClassInfo getAccessorClassInfo() {
-		return fAccessorClassInfo;
+	public AccessorClassReference getAccessorClassReference() {
+		return fAccessorClassReference;
 	}
 
 	/**
