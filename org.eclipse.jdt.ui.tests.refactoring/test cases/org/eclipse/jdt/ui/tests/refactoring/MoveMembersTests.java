@@ -99,6 +99,8 @@ public class MoveMembersTests extends RefactoringTest {
 			ref.setDestinationTypeFullyQualifiedName(destinationTypeName);
 		
 			RefactoringStatus result= performRefactoring(ref);
+			if (fIsVerbose)
+				DebugUtils.dump("status:" + result);
 			assertNotNull("precondition was supposed to fail", result);
 			assertEquals("precondition was supposed to fail", errorLevel, result.getSeverity());
 		
@@ -216,7 +218,17 @@ public class MoveMembersTests extends RefactoringTest {
 		printTestDisabledMessage("nasty corner case");	
 //		fieldMethodHelper_passingTest(new String[]{"i"}, new String[0], new String[0][0]);
 	}
-
+	
+	public void test23() throws Exception{
+		fieldMethodHelper_passingTest(new String[]{"FRED"}, new String[0], new String[0][0]);
+	}
+	
+	public void test24() throws Exception{
+		fieldMethodHelper_passingTest(new String[]{"FRED"}, new String[0], new String[0][0]);
+	}
+	
+	
+	
 	//---
 	public void testFail0() throws Exception{
 		fieldMethodHelper_failingTest(new String[0], 
@@ -332,6 +344,42 @@ public class MoveMembersTests extends RefactoringTest {
 		fieldMethodHelper_failingTest(new String[0], 
 									  new String[]{"m"}, new String[][]{new String[0]}, 
 									  RefactoringStatus.FATAL, "p.DontExist");
+	}
+
+	public void testFail19() throws Exception{
+		fieldMethodHelper_failingTest(new String[0], 
+									  new String[]{"m"}, new String[][]{new String[0]}, 
+									  RefactoringStatus.FATAL, "p.B");
+	}
+	
+	public void testFail20() throws Exception{
+		fieldMethodHelper_failingTest(new String[0], 
+									  new String[]{"m"}, new String[][]{new String[0]}, 
+									  RefactoringStatus.FATAL, "p.B");
+	}
+	
+	public void testFail21() throws Exception{
+		fieldMethodHelper_failingTest(new String[0], 
+									  new String[]{"m"}, new String[][]{new String[0]}, 
+									  RefactoringStatus.FATAL, "p.B");
+	}
+
+	public void testFail22() throws Exception{
+		fieldMethodHelper_failingTest(new String[]{"i"}, 
+									  new String[0], new String[0][0], 
+									  RefactoringStatus.FATAL, "p.B");
+	}
+
+	public void testFail23() throws Exception{
+		fieldMethodHelper_failingTest(new String[]{"i"}, 
+									  new String[0], new String[0][0], 
+									  RefactoringStatus.FATAL, "p.B");
+	}
+
+	public void testFail24() throws Exception{
+		fieldMethodHelper_failingTest(new String[0], 
+									  new String[]{"m"}, new String[][]{new String[0]}, 
+									  RefactoringStatus.FATAL, "p.B");
 	}
 
 }
