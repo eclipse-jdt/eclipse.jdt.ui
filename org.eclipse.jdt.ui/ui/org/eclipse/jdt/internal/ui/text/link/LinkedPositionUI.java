@@ -456,7 +456,6 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 			if (event.character != 0) {
 				if (!controlUndoBehavior(offset, length)) {
 					leave(UNINSTALL | COMMIT);
-					event.doit= false;
 					break;					
 				}
 			}
