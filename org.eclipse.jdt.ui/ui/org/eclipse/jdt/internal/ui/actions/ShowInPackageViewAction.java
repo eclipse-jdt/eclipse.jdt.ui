@@ -104,8 +104,6 @@ public class ShowInPackageViewAction extends JavaElementAction {
 			showInPackagesView(element);
 			return;
 		}	
-		//XXX revisit need a standard way to give the user this feedback
-		JavaPlugin.getActiveWorkbenchShell().getDisplay().beep();	
 	}
 
 	protected void showInPackagesView(Object element) {
