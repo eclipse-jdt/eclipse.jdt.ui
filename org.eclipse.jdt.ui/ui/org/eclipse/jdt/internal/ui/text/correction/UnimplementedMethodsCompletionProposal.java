@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -28,6 +27,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -75,7 +75,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		fMethodsToOverride= methods;
 		
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		boolean annotations= project.getOption(JavaCore.COMPILER_COMPLIANCE, true).equals(JavaCore.VERSION_1_5) && project.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true).equals(JavaCore.VERSION_1_5);
+		boolean annotations= JavaModelUtil.is50OrHigher(project);
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(getCompilationUnit().getJavaProject());
 		if (!settings.createComments || binding.isAnonymous()) {

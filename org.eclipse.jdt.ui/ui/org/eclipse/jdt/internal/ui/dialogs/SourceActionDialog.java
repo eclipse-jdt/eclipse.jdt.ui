@@ -49,9 +49,10 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Modifier;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -113,7 +114,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		int insertionDefault= isConstructor ? 0 : 1;
 		boolean generateCommentsDefault= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()).createComments;
 		IJavaProject project= fType.getJavaProject();
-		boolean annotations= project.getOption(JavaCore.COMPILER_COMPLIANCE, true).equals(JavaCore.VERSION_1_5) && project.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true).equals(JavaCore.VERSION_1_5);
+		boolean annotations= JavaModelUtil.is50OrHigher(project);
 		
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		String sectionId= isConstructor ? SETTINGS_SECTION_CONSTRUCTORS : SETTINGS_SECTION_METHODS;
@@ -406,7 +407,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		Button annotationButton= new Button(annotationComposite, SWT.CHECK);
 		annotationButton.setText(fAnnotationString); //$NON-NLS-1$
 		IJavaProject project= fType.getJavaProject();
-		boolean annotations= project.getOption(JavaCore.COMPILER_COMPLIANCE, true).equals(JavaCore.VERSION_1_5) && project.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true).equals(JavaCore.VERSION_1_5);
+		boolean annotations= JavaModelUtil.is50OrHigher(project);
 		if (!annotations)
 			annotationButton.setEnabled(false);
 		annotationButton.addSelectionListener(new SelectionListener() {

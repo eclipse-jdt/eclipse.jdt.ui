@@ -894,4 +894,8 @@ public final class JavaModelUtil {
 		map.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
 	}
 	
+	public static boolean is50OrHigher(IJavaProject project) {
+		return JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+	}
+	
 }

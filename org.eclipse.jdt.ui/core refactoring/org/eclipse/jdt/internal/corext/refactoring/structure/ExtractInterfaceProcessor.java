@@ -707,7 +707,7 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 		Assert.isNotNull(replacements);
 		if (fMembers.length > 0) {
 			final IJavaProject project= fType.getJavaProject();
-			final boolean annotations= project.getOption(JavaCore.COMPILER_COMPLIANCE, true).equals(JavaCore.VERSION_1_5) && project.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true).equals(JavaCore.VERSION_1_5);
+			final boolean annotations= JavaModelUtil.is50OrHigher(project);
 			final boolean javadoc= project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true).equals(JavaCore.ENABLED);
 			IMember member= null;
 			for (int index= 0; index < fMembers.length; index++) {

@@ -37,11 +37,11 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -180,7 +180,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 
 		protected void updateUIElementEnablement() {
 			final IJavaProject project= getExtractInterfaceRefactoring().getExtractInterfaceProcessor().getType().getJavaProject();
-			boolean annotations= project.getOption(JavaCore.COMPILER_COMPLIANCE, true).equals(JavaCore.VERSION_1_5) && project.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true).equals(JavaCore.VERSION_1_5);
+			boolean annotations= JavaModelUtil.is50OrHigher(project);
 			boolean anyMethodsChecked= containsMethods(getCheckedMembers());
 			fDeclarePublicCheckbox.setEnabled(anyMethodsChecked);
 			fDeclareAbstractCheckbox.setEnabled(anyMethodsChecked);

@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -113,7 +112,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 						MethodDeclaration stub= null;
 						for (int index= 0; index < bindings.length; index++) {
 							if (key.equals(bindings[index].getKey())) {
-								stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, structure, unit.getAST(), bindings[index], binding.getName(), settings, fAnnotations && fJavaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true).equals(JavaCore.VERSION_1_5) && fJavaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true).equals(JavaCore.VERSION_1_5));
+								stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, structure, unit.getAST(), bindings[index], binding.getName(), settings, fAnnotations && JavaModelUtil.is50OrHigher(fJavaProject));
 								if (stub != null)
 									rewriter.insertFirst(stub, null);
 								break;
