@@ -4,6 +4,6 @@ public class A_test060 {
 	public void foo() {
 		do 
 			foo();
-		while(/*]*/1 < 10/*[*/);
+		while(/*]*/1/*[*/ < 10);
 	}
 }

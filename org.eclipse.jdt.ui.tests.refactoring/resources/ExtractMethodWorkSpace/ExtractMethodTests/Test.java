@@ -1,64 +1,19 @@
 import java.util.ArrayList;import java.util.Iterator;import java.util.List;public class Test {
 
 	public void foo() {
-		for (int i= 0; i < 10; i++)
+		int i= 10;
+		if (i < 10) {
+			foo();
+		}
+		boolean b;
+		if ((b= true))
 			foo();
 			
-		for (int i= 0; i < 10; i++)	
-			foo();	
-			
-			
-		for (int i= 10; i < 10; i++)
-			foo();
-			
-		for (int z= 10; z < 10; z++)
-			foo();
-		
-		foo();
-		
-		int i= 0;
-		while (i < 10)
-			foo();
-			
-		while (i < 10)
-			foo();
-			
-		foo();
-		
-		do 
-			foo();
-		while (i < 10);	
-		
-		do 
-			foo();
-		while (i < 10);		
+		// b= !b;	
+	}
 	
+	public void g() {
 		foo();
-		
-		switch (1) {
-			case 0:
-				foo();
-				break;
-			case 1:
-				foo();
-				break;
-			default:
-				foo();		
-		}
-		
-		switch (1) {
-			case 0:
-				foo();
-				break;
-			case 1:
-				foo();
-				break;
-			default:
-				foo();		
-		}
-
 		foo();
-		
-			
 	}
 }
