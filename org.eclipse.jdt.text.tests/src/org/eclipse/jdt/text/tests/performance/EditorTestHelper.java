@@ -12,6 +12,9 @@ package org.eclipse.jdt.text.tests.performance;
 
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -19,6 +22,7 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -80,11 +84,76 @@ public class EditorTestHelper {
 		while (shell.getDisplay().readAndDispatch());
 	}
 	
-	private static IWorkbenchPage getActivePage() {
+	public static IWorkbenchPage getActivePage() {
 		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (window != null)
 			return window.getActivePage();
 		else
 			return null;
+	}
+	
+	public static boolean calmDown(int maxTime, int intervalTime) {
+		long endTime= maxTime > 0 ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
+		runEventQueue();
+		boolean calm= isCalm();
+		while (!calm && System.currentTimeMillis() < endTime) {
+			sleep(intervalTime);
+			runEventQueue();
+			calm= isCalm();
+		}
+//		System.out.println("--------------------------------------------------");
+		return calm;
+	}
+
+	public static void sleep(int intervalTime) {
+		try {
+			Thread.sleep(intervalTime);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static boolean isCalm() {
+		IJobManager jobManager= Platform.getJobManager();
+		Job[] jobs= jobManager.find(null);
+		for (int i= 0; i < jobs.length; i++) {
+			Job job= jobs[i];
+			int state= job.getState();
+//			System.out.println(job.getName() + ": " + getStateName(state));
+			if (state == Job.RUNNING || state == Job.WAITING) {
+//				System.out.println();
+				return false;
+			}
+		}
+//		System.out.println();
+		return true;
+	}
+
+//	private static String getStateName(int state) {
+//		switch (state) {
+//			case Job.RUNNING: return "RUNNING";
+//			case Job.WAITING: return "WAITING";
+//			case Job.SLEEPING: return "SLEEPING";
+//			case Job.NONE: return "NONE";
+//			default: return "unknown " + state;
+//		}
+//	}
+
+	public static boolean showView(String viewId) throws PartInitException {
+		IWorkbenchPage activePage= getActivePage();
+		IViewReference view= activePage.findViewReference(viewId);
+		boolean notShown= view == null;
+		if (notShown)
+			activePage.showView(viewId);
+		return notShown;
+	}
+
+	public static boolean hideView(String viewId) {
+		IWorkbenchPage activePage= getActivePage();
+		IViewReference view= activePage.findViewReference(viewId);
+		boolean shown= view != null;
+		if (shown)
+			activePage.hideView(view);
+		return shown;
 	}
 }

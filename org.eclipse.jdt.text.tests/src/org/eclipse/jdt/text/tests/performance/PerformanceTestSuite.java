@@ -31,6 +31,7 @@ public class PerformanceTestSuite extends TestSuite {
 		addTestSuite(ToggleCommentTest.class);
 		addTestSuite(UndoJavaEditorTest.class);
 		addTestSuite(UndoTextEditorTest.class);
+		addTestSuite(OpenQuickOutlineTest.class);
 		addTestSuite(ScrollJavaEditorTest.class);
 		addTestSuite(ScrollTextEditorTest.class);
 		addTestSuite(JavaIndenterTest.class);
