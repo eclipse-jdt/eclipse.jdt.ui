@@ -352,7 +352,7 @@ public class IndentAction extends TextEditorAction {
 	 * preference for the tab display 
 	 * 
 	 * @param indent the string to be measured.
-	 * @return
+	 * @return the size in characters of a string
 	 */
 	private int whiteSpaceLength(String indent) {
 		if (indent == null)
