@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
@@ -127,7 +128,9 @@ public class UnresolvedElementsSubProcessor {
 			ICompilationUnit addedCU= pack.getCompilationUnit(addedCUName);
 			if (!addedCU.exists()) {
 				boolean isClass= (kind & SimilarElementsRequestor.CLASSES) != 0;
-				CreateCompilationUnitChange change= new CreateCompilationUnitChange(addedCU, isClass, settings.createFileComments, settings.createComments);
+				String[] superTypes= (problemPos.getId() != IProblem.ExceptionTypeNotFound) ? null : new String[] { "java.lang.Exception" };
+				
+				CreateCompilationUnitChange change= new CreateCompilationUnitChange(addedCU, isClass, superTypes, settings);
 				String name= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createtype.description", typeName); //$NON-NLS-1$
 				ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, change, 0);
 				proposal.setElementToOpen(addedCU);

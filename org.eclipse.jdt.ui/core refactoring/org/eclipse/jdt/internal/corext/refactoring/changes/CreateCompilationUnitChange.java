@@ -11,6 +11,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -27,20 +30,27 @@ public class CreateCompilationUnitChange extends Change {
 
 	private String fName;
 	private ICompilationUnit fCompilationUnit;
-	
-	private boolean fAddFileComment;
-	private boolean fAddTypeComment;
 	private boolean fIsClass;
+	private String[] fSuperTypes;
 	
-	private IChange fUndoChange;
+	private CodeGenerationSettings fCodeGenerationSettings;
 	
 	private IType fCreatedType;
+	private IChange fUndoChange;
 	
-	public CreateCompilationUnitChange(ICompilationUnit cu, boolean isClass, boolean addFileComment, boolean addTypeComment) {
+	/**
+	 * Creates a compilation with a primary type.
+	 * @param cu A handle of the compilation unit to create.
+	 * @param isClass If set a class will be created. If not, an interface.
+	 * @param superTypes The super types of the created type, or <code>null</code> to not add super types.
+	 * If the type is a class, then the first entry is the super class, the rest the extended interfaces.
+	 * @param settings Code generation settings to be used.
+	 */
+	public CreateCompilationUnitChange(ICompilationUnit cu, boolean isClass, String[] superTypes, CodeGenerationSettings settings) {
 		fCompilationUnit= cu;
-		fAddFileComment= addFileComment;
-		fAddTypeComment= addTypeComment;
+		fCodeGenerationSettings= settings;
 		fIsClass= isClass;
+		fSuperTypes= superTypes;
 		
 		fCreatedType= null;
 	}
@@ -62,17 +72,20 @@ public class CreateCompilationUnitChange extends Change {
 				
 				fUndoChange= new DeleteSourceManipulationChange(fCompilationUnit);
 				
-				if (fAddFileComment) {
+				if (fCodeGenerationSettings.createFileComments) {
 					IBuffer buf= fCompilationUnit.getBuffer();
 					buf.replace(0, 0, getTemplate("filecomment")); //$NON-NLS-1$
 					buf.save(null, false);
 				}
 
 				StringBuffer buf= new StringBuffer();
-				if (fAddTypeComment) {
+				if (fCodeGenerationSettings.createComments) {
 					buf.append(getTemplate("typecomment")); //$NON-NLS-1$
 				}
-				createTypeStub(fCompilationUnit, fIsClass, buf);
+				ImportsStructure imports= new ImportsStructure(fCompilationUnit, fCodeGenerationSettings.importOrder,  fCodeGenerationSettings.importThreshold, false);
+				createTypeStub(fCompilationUnit, fIsClass, fSuperTypes, imports, buf);
+				imports.create(true, null);
+								
 				String formattedContent= StubUtility.codeFormat(buf.toString(), 0, lineDelimiter);
 				
 				fCreatedType= fCompilationUnit.createType(formattedContent, null, false, new SubProgressMonitor(pm, 1));
@@ -85,7 +98,7 @@ public class CreateCompilationUnitChange extends Change {
 		}
 	}
 
-	protected void createTypeStub(ICompilationUnit cu, boolean isClass, StringBuffer buf) {
+	protected void createTypeStub(ICompilationUnit cu, boolean isClass, String[] superTypes, IImportsStructure imports, StringBuffer buf) {
 		buf.append("public "); //$NON-NLS-1$
 		if (isClass) {
 			buf.append(" class "); //$NON-NLS-1$
@@ -93,6 +106,35 @@ public class CreateCompilationUnitChange extends Change {
 			buf.append(" interface "); //$NON-NLS-1$
 		}
 		buf.append(Signature.getQualifier(cu.getElementName()));
+		
+		if (superTypes != null && superTypes.length > 0) {
+			int k= 0;
+			if (isClass) {
+				String superClass= superTypes[0];
+				if (!superClass.equals("java.lang.Object")) {
+					buf.append(" extends "); //$NON-NLS-1$
+					buf.append(Signature.getSimpleName(superClass));
+				}
+				if (superTypes.length > 1) {
+					buf.append(" implements "); //$NON-NLS-1$
+				}				
+				k++;
+			} else {
+				buf.append(" extends "); //$NON-NLS-1$
+			}
+			boolean commaNeeded= false;
+			while (k < superTypes.length) {
+				if (commaNeeded) {
+					buf.append(", "); //$NON-NLS-1$
+				}
+				buf.append(Signature.getSimpleName(superTypes[k++]));
+				commaNeeded= true;
+			}
+			for (int i= 0; i < superTypes.length; i++) {
+				imports.addImport(superTypes[i]);
+			}
+			
+		}
 		buf.append(" {\n\n}\n"); //$NON-NLS-1$
 	}
 	
