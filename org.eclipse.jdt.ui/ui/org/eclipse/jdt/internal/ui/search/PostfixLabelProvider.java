@@ -15,36 +15,21 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.ui.search.ISearchUIParticipant;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.swt.graphics.Image;
 
-public class PostfixLabelProvider extends LabelProvider {
-	private AppearanceAwareLabelProvider fLabelProvider;
+public class PostfixLabelProvider extends SearchLabelProvider {
 	private ITreeContentProvider fContentProvider;
-	private JavaSearchResultPage fPage;
 	
 	public PostfixLabelProvider(JavaSearchResultPage page) {
-		fPage= page;
-		fLabelProvider= new AppearanceAwareLabelProvider();
-		fLabelProvider.addListener(new ILabelProviderListener() {
-			public void labelProviderChanged(LabelProviderChangedEvent event) {
-				LabelProviderChangedEvent evt= new LabelProviderChangedEvent(PostfixLabelProvider.this, event.getElements());
-				fireLabelProviderChanged(evt);
-			}
-		});
+		super(page, new DecoratingJavaLabelProvider(new AppearanceAwareLabelProvider(), true));
 		fContentProvider= new LevelTreeContentProvider.FastJavaElementProvider();
 	}
 
-	public void dispose() {
-		fLabelProvider.dispose();
-	}
-
 	public Image getImage(Object element) {
-		Image image= fLabelProvider.getImage(element);
+		Image image= getLabelProvider().getImage(element);
 		if (image != null)
 			return image;
 		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
@@ -72,18 +57,18 @@ public class PostfixLabelProvider extends LabelProvider {
 		if (matchCount == 0)
 			return text+postfix;
 		if (matchCount == 1)
-			return text+ " (1 match)"+postfix; //$NON-NLS-1$ //$NON-NLS-2$
-		return text + " (" + matchCount + " matches)"+postfix; //$NON-NLS-1$ //$NON-NLS-2$
+			return text;
+		return text + " (" + matchCount + " matches)"+postfix;
 	}
 
 	private String internalGetText(Object element) {
-		String text= fLabelProvider.getText(element);
+		String text= getLabelProvider().getText(element);
 		if (text != null && !"".equals(text)) //$NON-NLS-1$
 			return text;
 		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
 		if (participant != null)
 			return participant.getText(element);
-		return null;
+		return ""; //$NON-NLS-1$
 	}
 
 	private boolean isSameInformation(Object realParent, Object lastElement) {
@@ -100,7 +85,4 @@ public class PostfixLabelProvider extends LabelProvider {
 		return false;
 	}
 
-	public boolean isLabelProperty(Object element, String property) {
-		return fLabelProvider.isLabelProperty(element, property);
-	}
 }

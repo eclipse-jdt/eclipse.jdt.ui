@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.ui.search.ISearchUIParticipant;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -32,6 +34,7 @@ import org.eclipse.search.ui.ISearchResultViewPart;
 import org.eclipse.search.ui.SearchUI;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PartInitException;
@@ -56,10 +59,10 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	private int fCurrentGrouping;
 	
 	public JavaSearchResultPage() {
-		fSortByNameAction= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByName"), this, JavaSearchResultLabelProvider.SHOW_ELEMENT_CONTAINER); //$NON-NLS-1$
-		fSortByPathAction= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByPath"), this, JavaSearchResultLabelProvider.SHOW_PATH); //$NON-NLS-1$
-		fSortByParentName= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByParentName"), this, JavaSearchResultLabelProvider.SHOW_CONTAINER_ELEMENT); //$NON-NLS-1$
-		fCurrentSortOrder=  JavaSearchResultLabelProvider.SHOW_ELEMENT_CONTAINER;
+		fSortByNameAction= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByName"), this, SortingLabelProvider.SHOW_ELEMENT_CONTAINER); //$NON-NLS-1$
+		fSortByPathAction= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByPath"), this, SortingLabelProvider.SHOW_PATH); //$NON-NLS-1$
+		fSortByParentName= new SortAction(SearchMessages.getString("JavaSearchResultPage.sortByParentName"), this, SortingLabelProvider.SHOW_CONTAINER_ELEMENT); //$NON-NLS-1$
+		fCurrentSortOrder=  SortingLabelProvider.SHOW_ELEMENT_CONTAINER;
 
 		initGroupingActions();
 	}
@@ -192,7 +195,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 
 	protected void configureTableViewer(TableViewer viewer) {
-		viewer.setLabelProvider(new DelegatingLabelProvider(this, new JavaSearchResultLabelProvider()));
+		viewer.setLabelProvider(new SortingLabelProvider(this));
 		fContentProvider=new JavaSearchTableContentProvider(viewer);
 		viewer.setContentProvider(fContentProvider);
 		setSortOrder(fCurrentSortOrder);
@@ -205,14 +208,21 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		viewer.setContentProvider(fContentProvider);
 	}
 	
+	protected TreeViewer createTreeViewer(Composite parent) {
+		return new ProblemTreeViewer(parent);
+	}
+	
+	protected TableViewer createTableViewer(Composite parent) {
+		return new ProblemTableViewer(parent);
+	}
+	
 	void setSortOrder(int order) {
 		fCurrentSortOrder= order;
 		StructuredViewer viewer= getViewer();
-		DelegatingLabelProvider lpWrapper= (DelegatingLabelProvider) viewer.getLabelProvider();
-		((JavaSearchResultLabelProvider)lpWrapper.getLabelProvider()).setOrder(order);
-		if (order == JavaSearchResultLabelProvider.SHOW_ELEMENT_CONTAINER) {
+		((SortingLabelProvider)viewer.getLabelProvider()).setOrder(order);
+		if (order == SortingLabelProvider.SHOW_ELEMENT_CONTAINER) {
 			viewer.setSorter(new NameSorter());
-		} else if (order == JavaSearchResultLabelProvider.SHOW_PATH) {
+		} else if (order == SortingLabelProvider.SHOW_PATH) {
 			viewer.setSorter(new PathSorter());
 		} else
 			viewer.setSorter(new ParentSorter());
