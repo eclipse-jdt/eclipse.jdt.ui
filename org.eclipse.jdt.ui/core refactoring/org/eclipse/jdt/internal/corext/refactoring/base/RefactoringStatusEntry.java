@@ -4,7 +4,10 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
+import org.eclipse.jdt.core.compiler.IProblem;
+
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 
 /**
  * An immutable tuple (message, severity) representing an entry in the list in 
@@ -118,6 +121,12 @@ public class RefactoringStatusEntry{
 	 */	
 	public static RefactoringStatusEntry createFatal(String msg, Context context) {
 		return new RefactoringStatusEntry(msg, RefactoringStatus.FATAL, context);
+	}
+	
+	public static RefactoringStatusEntry create(IProblem problem, String newWcSource) {
+		Context context= new StringContext(newWcSource, new SourceRange(problem));
+		int severity= problem.isError() ? RefactoringStatus.ERROR: RefactoringStatus.WARNING;
+		return new RefactoringStatusEntry(problem.getMessage(), severity, context);
 	}
 	
 	/**
