@@ -8,7 +8,7 @@
 
 	<runtime>
 		<library name="jsp.jar"/>
-		<!--packages prefixes="org.eclipse.jsp,org.eclipse.corte.indexsearch"/-->
+		<!--packages prefixes="org.eclipse.jsp,org.eclipse.core.indexsearch"/-->
 	</runtime>
       
 	<requires>

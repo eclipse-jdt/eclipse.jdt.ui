@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <title>Javafamily Release Notes</title>
+</head>
+<body>
+<h1 style="text-align: left;">Release Notes</h1>
+Daniel Megert, Andr&eacute; Weinand<br>
+June 15, 2003<br>
+<br>
+The javafamily plugin is a collection of prototypes that illustrate how
+the existing (mostly Java) infrastructure can be extended to support
+Java-like languages like JSP. Since this is a first cut, the project
+still contains a number of workarounds and duplications. However, it is
+our ultimate goal to eliminate all of these in order to make
+supportinmg Java-like languages smooth and simple.<br>
+<br>
+This initial release contains:<br>
+<ul>
+  <li>a JSP editor with reconciling,<br>
+  </li>
+  <li>a JSP aware Java search,<br>
+  </li>
+  <li>a JSP aware Rename Type refactoring that uses the new Refactoring
+Participants.<br>
+  </li>
+</ul>
+In addition this document contains a collection of findings we made
+while developing the various pieces.<br>
+<h2>Known issues and limitations:</h2>
+<ul>
+  <li>Before using the Rename Type refactoring you'll have to enable
+this experimental feature by going to "Window &gt; Preferences &gt;
+Java &gt; Work in Progress" and checking the "Enabling Refactoring
+Participants..." option.<br>
+  </li>
+  <li>Currently the JSP index isn't persisted. As a consequence you'll
+have to trigger a re-index by saving *.jsp files whenever starting
+Eclipse. Without this, a JSP/Java search or a Rename Type refactoring
+will not find Java types in non-Java resources.</li>
+</ul>
+<h2>Reconciling Pipes</h2>
+Findings while developing the JSP Editor:<br>
+<ul>
+  <li>JSR-045 specifies a line-oriented mapping between several input
+files
+(translated-source) and one output file (translated-source or
+final-source). The output file can either be the final-source or
+multiple output files (translated-source) can serve as input for a
+next mapping (e.g. MyCustomFormat -&gt; JSP -&gt; Java). Each step
+(language-translator) produces a SMAP file (.smap). The mapping cannot
+be used to exactly map positions inside a line.</li>
+  <li>The compiler aborts compilation if it hits some severe errors.
+Because a JSP line sequence is not necessarily the same as in the
+intermediate Java file it might happen that the compiler stops very
+early on an error that corresponds to a JSP line which is at the very
+end of the file.<br>
+  </li>
+  <li>An annotation position reported on the Java file can correspond to<br>
+  </li>
+  <ul>
+    <li>an annotation in the JSP file with adapted offset and length</li>
+    <li>several annotation in the JSP file either distributed in the
+same Java partition or over several partitions</li>
+    <li>no annotation at all, e.g. if the error is caused by the
+translator or by a wrong Java build path</li>
+  </ul>
+  <li>A JSP file can <span style="font-style: italic;">include</span>
+other JSP files. If an SMAP based approach is used and one of the
+included
+JSP files is opened in the editor then we need to find the correct SMAP
+file.</li>
+  <li>For
+most of the tags in the JSP file it is not possible to
+provide a generic parsing and mapping. This has to be defined for each
+tag. The generated Java code and the mapping are tightly coupled and
+should be kept in a single class that we call tag handler. A tag
+handler might handle more than one tag. </li>
+  <li>Special tags are needed to handle non-tagged sections like HTML
+in a JSP file.<br>
+  </li>
+  <li>The default implementation of the tag handler must be extensible
+in order to allow tag lib providers to extend the handler.</li>
+  <li>Even if we decide to use an existing translator we will have to
+provide tag handlers that can map positions in a translated line back
+to the position in the corresponding source line.</li>
+  <li>Unless we don't build a fully generic editor which can handle
+several file types (e.g. XML, Java and JSP) there's no need to have
+global tag handler factory which manages different languages.</li>
+  <li>Currently only the source line is passed to the tag handler. If
+JSP
+allows that tag (lib) attributes span multiple lines then we must
+change the interface and pass sourceLineStart and sourceLineEnd.<br>
+  </li>
+</ul>
+<h2>Towards Language Neutral Search<br>
+</h2>
+We tried to reuse the Java indexing/searching infrastructure from
+jdt.core for
+non-Java JSP files. This was easily possible for the indexing side,
+because that part makes almost no assumptions about was is being
+indexed. On the other hand, searching was more challenging because the
+search infrastructure makes hardwired assumptions about the type of
+files referenced from the index. So if a file doesn't have the .java
+extensions it is assumed to be a .class file without further checking
+of its extension. As a consequence it was not possible to get *.jsp
+files from a search because the search engine would treat them as class
+files and would run in a NPE.<br>
+<br>
+To solve this issue we created a new package
+"org.eclipse.core.indexsearch" as a starting point for an indexed
+search component. The package provides a minimal but sufficient API for
+indexing/searching non-Java files and uses the existing mechanisms from
+jdt.core as far as possible.<br>
+<br>
+As a first use case for this indexed search we combined the Type Rename
+refactoring participants
+with a JSP search engine based on "org.eclipse.core.indexsearch" and a
+simple JSP parser (org.eclipse.jsp.AbstractJspParser). With this you
+can rename Java types and
+automatically rename all occurrences of the Java type in JSP tags as
+well.<br>
+<br>
+In a second use case&nbsp; we created a new Java/JSP Search page that
+combines the existing Java search with the JSP search. As a result you
+can search for a Java type and can find occurrences not only in Java
+source but in JSP tags as well. The current implementation copies some
+of the classes from "org.eclipse.jdt.internal.ui.search" in order to be
+able to show non-Java files in the Java search result viewer. However,
+the ultimate goal would be to provide a new extension point for Java
+search that would allow for plugging in arbitrary "search
+participants".<br>
+Please note: it is not possible to automatically have
+every Java search return JSP search results as well, because some
+places in Eclipse assume that the search results only contain Java
+source, and they would fail miserably when confronted with non-Java
+files, e.g. JSP files.<br>
+<br>
+<span style="font-weight: bold;">Design considerations for an indexed
+search component:</span><br>
+<ul>
+  <li>language independence</li>
+  <li>a single index and a single indexer thread for all languages</li>
+  <li>minimal API surface area</li>
+  <li>flexible queries</li>
+  <li>background indexing and searching</li>
+  <li>not tied to IResources</li>
+</ul>
+<h3>The API</h3>
+<h4>Search Engine: class <code>SearchEngine</code></h4>
+<ul>
+  <li>API entry point</li>
+  <li>combines indexing API with searching API</li>
+  <li>manages concurrency issues between indexing access and searching</li>
+  <li>indexing based on the JobManager (current impl. delegates to
+jdt.core
+IndexManager)</li>
+  <li>index requests are added as AddFileToIndex subclasses (like today)</li>
+  <li>lifecycle issues: loading/saving index</li>
+  <li>no notion of "Scope"; scope can be introduced as an
+implementation
+detail of the IIndexQuery</li>
+</ul>
+&nbsp; <code>/**<br>
+&nbsp; * Perform the given query against the index
+and return results via the resultCollector.<br>
+&nbsp; */<br>
+&nbsp;public void <span style="font-weight: bold;">search</span>(IIndexQuery
+search,
+ISearchResultCollector resultCollector,<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+IProgressMonitor progressMonitor, int waitingPolicy);<br>
+</code><br>
+<h4>Search query: interface <code>IIndexQuery</code></h4>
+An IIndexQuery is used to perform a query against the searching
+framework.<br>
+<pre>/**<br>&nbsp;* Compute the list of paths which are keying index files and add them to the given list.<br>&nbsp;*/<br>void <span
+ style="font-weight: bold;">computePathsKeyingIndexFiles</span>(ArrayList requiredIndexKeys);<br></pre>
+<pre>/**<br>&nbsp;* Perform the query on the given index and adds the paths of all found documents to the given collector.<br> */<br>void <span
+ style="font-weight: bold;">findIndexMatches</span>(IIndex index, PathCollector collector, IProgressMonitor progressMonitor) throws IOException;<br><br>/**<br>&nbsp;* Locate all matches of this query in the given file candidate and return them via the resultcollector. <br>&nbsp;*/<br>void <span
+ style="font-weight: bold;">locateMatches</span>(IFile candidate, ISearchResultCollector resultCollector);</pre>
+<h4>Search results: interface <code>ISearchResultCollector</code></h4>
+<ul>
+  <li>search results reported via ISearchResultCollector</li>
+</ul>
+<code>/**<br>
+&nbsp;* Accepts the given search result.<br>
+&nbsp;*<br>
+&nbsp;* @param resource the resource in which the
+match has been found<br>
+&nbsp;* @param start the start position of the
+match, -1 if it is unknown<br>
+&nbsp;* @param length the length of the match<br>
+&nbsp;* @exception CoreException if this collector
+had a problem accepting the search result<br>
+&nbsp;*/<br>
+public void <span style="font-weight: bold;">accept</span>(IResource
+resource, int start,
+int length) throws CoreException;<br>
+</code>
+<h3>Open Issues</h3>
+<ul>
+  <li>the PathCollector API has Java-specific methods which are not used</li>
+  <li>Transparent search in WorkingCopies/Buffers: whenever a file
+resource in opened in an Editor, search should transparently search in
+the buffer and not in the underlying resource. Two options to make
+buffers available to SearchEngine:</li>
+  <ul>
+    <li>&nbsp; as argument to search(...) method</li>
+    <li>&nbsp; whenver buffer is created or deleted it is registered
+with the SearchEngine</li>
+  </ul>
+  <li>No common abstraction for the "content" being indexed:<br>
+In the API from above "content" is represented as an IFile in
+locateMatches(...) and an IResource in
+ISearchResultCollector.accept(...). However, to transparently deal with
+"buffers" there seems to be a need for a more abstract interface for
+content access.</li>
+</ul>
+<br>
+<br>
+</body>
+</html>
