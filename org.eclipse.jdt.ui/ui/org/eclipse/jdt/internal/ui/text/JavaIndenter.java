@@ -147,7 +147,7 @@ public class JavaIndenter {
 	 */
 	public StringBuffer computeIndentation(int offset, boolean assumeOpeningBrace) {
 		
-		StringBuffer indent= getReferenceIndentation(offset, assumeOpeningBrace);
+		StringBuffer reference= getReferenceIndentation(offset, assumeOpeningBrace);
 		
 		// handle special alignment
 		if (fAlign != JavaHeuristicScanner.NOT_FOUND) {
@@ -161,13 +161,11 @@ public class JavaIndenter {
 			}
 		}
 		
-		if (indent == null)
+		if (reference == null)
 			return null;
 		
 		// add additional indent
-		int visualLength= prefIndentationSize() * fIndent;
-		int referenceIndentationLength= computeVisualLength(indent);
-		return createIndentOfLength(referenceIndentationLength + visualLength);
+		return createReusingIndent(reference, fIndent);
 	}
 
 	/**
@@ -185,8 +183,10 @@ public class JavaIndenter {
 			char ch= indent.charAt(i);
 			switch (ch) {
 				case '\t':
-					int reminder= length % tabSize;
-					length += tabSize - reminder;
+					if (tabSize > 0) {
+						int reminder= length % tabSize;
+						length += tabSize - reminder;
+					}
 					break;
 				case ' ':
 					length++;
@@ -194,6 +194,38 @@ public class JavaIndenter {
 			}
 		}
 		return length;
+	}
+	
+	/**
+	 * Strips any characters off the end of <code>reference</code> that exceed
+	 * <code>indentLength</code>.
+	 * 
+	 * @param reference the string to measure
+	 * @param indentLength the maximum visual indentation length
+	 * @return the stripped <code>reference</code>
+	 */
+	private StringBuffer stripExceedingChars(StringBuffer reference, int indentLength) {
+		final int tabSize= prefTabSize();
+		int measured= 0;
+		int chars= reference.length();
+		int i= 0;
+		for (; measured < indentLength && i < chars; i++) {
+			char ch= reference.charAt(i);
+			switch (ch) {
+				case '\t':
+					if (tabSize > 0) {
+						int reminder= measured % tabSize;
+						measured += tabSize - reminder;
+					}
+					break;
+				case ' ':
+					measured++;
+					break;
+			}
+		}
+		int deleteFrom= measured > indentLength ? i - 1 : i;
+		
+		return reference.delete(deleteFrom, chars);
 	}
 
 	/**
@@ -239,7 +271,8 @@ public class JavaIndenter {
 	 *         by <code>start</code> and <code>indent</code>
 	 */
 	private StringBuffer createIndent(int start, final int indent, final boolean convertSpaceRunsToTabs) {
-		final int tabLen= prefTabLength();		
+		final boolean convertTabs= prefUseTabs() && convertSpaceRunsToTabs;
+		final int tabLen= prefTabSize();		
 		final StringBuffer ret= new StringBuffer();
 		try {
 			int spaces= 0;
@@ -249,24 +282,21 @@ public class JavaIndenter {
 				if (ch == '\t') {
 					ret.append('\t');
 					spaces= 0;
-				} else if (!convertSpaceRunsToTabs || tabLen == -1) {
-					ret.append(' ');
-				} else {
+				} else if (convertTabs) {
 					spaces++;
 					if (spaces == tabLen) {
 						ret.append('\t');
 						spaces= 0;
 					}
+				} else {
+					ret.append(' ');
 				}
 				
 				start++;
 			}
 			// remainder
-			if (spaces == tabLen)
-				ret.append('\t');
-			else
-				while (spaces-- > 0)
-					ret.append(' ');
+			while (spaces-- > 0)
+				ret.append(' ');
 			
 		} catch (BadLocationException e) {
 		}
@@ -278,33 +308,47 @@ public class JavaIndenter {
 	 * Creates a string with a visual length of the given
 	 * <code>indentationSize</code>.
 	 * 
-	 * @param visualLength the requested visual length of the indentation
-	 * @return the indentation specified by <code>indentationSize</code>
+	 * @param buffer the original indent to reuse if possible
+	 * @param additional the additional indentation units to add or subtract to
+	 *        reference
+	 * @return the modified <code>buffer</code> reflecting the indentation
+	 *         adapted to <code>additional</code>
 	 */
-	private StringBuffer createIndentOfLength(int visualLength) {
-		StringBuffer buf= new StringBuffer();
+	private StringBuffer createReusingIndent(StringBuffer buffer, int additional) {
+		int refLength= computeVisualLength(buffer);
+		int addLength= prefIndentationSize() * additional; // may be < 0
+		int totalLength= Math.max(0, refLength + addLength);
+		
+		
+		// copy the reference indentation for the indent up to the last tab
+		// stop within the maxCopy area
+		int minLength= Math.min(totalLength, refLength);
+		int tabSize= prefTabSize();
+		int maxCopyLength= tabSize > 0 ? minLength - minLength % tabSize : minLength; // maximum indent to copy
+		stripExceedingChars(buffer, maxCopyLength);
+		
+		
+		// add additional indent
+		int missing= totalLength - maxCopyLength;
 		final int tabs, spaces;
 		if (JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
 			tabs= 0;
-			spaces= visualLength;
+			spaces= missing;
 		} else if (JavaCore.TAB.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
-			int tabSize= prefTabSize();
-			if (tabSize > 0) {
-				tabs= visualLength / tabSize;
-				spaces= visualLength % tabSize;	
-			} else {
-				tabs= 0;
-				spaces= 0;	
-			}
+			tabs= tabSize > 0 ? missing / tabSize : 0;
+			spaces= tabSize > 0 ? missing % tabSize : missing;
+		} else if (DefaultCodeFormatterConstants.MIXED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))){
+			tabs= tabSize > 0 ? missing / tabSize : 0;
+			spaces= tabSize > 0 ? missing % tabSize : missing;
 		} else {
-			tabs= visualLength / prefIndentationSize();
-			spaces= 0;
+			Assert.isTrue(false);
+			return null;
 		}
 		for(int i= 0; i < tabs; i++)
-			buf.append('\t');
+			buffer.append('\t');
 		for(int i= 0; i < spaces; i++)
-			buf.append(' ');
-		return buf;
+			buffer.append(' ');
+		return buffer;
 	}
 	
 	/**
@@ -1288,25 +1332,19 @@ public class JavaIndenter {
 		}
 	}
 
-	private int prefTabLength() {
-		int tabLen;
+	private boolean prefUseTabs() {
+		boolean useTabs;
 		if (!isStandalone())
-			if (JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
-				// if the formatter uses chars to mark indentation, then don't substitute any chars
-				tabLen= -1; // results in no tabs being substituted for space runs
-			else
-				// if we use tabs, get the formatter length setting for tab width
-				tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
+			useTabs= !JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
 		else
-			tabLen= 4; // sensible default for testing
+			useTabs= true; // sensible default for testing
 
-		return tabLen;
+		return useTabs;
 	}
 	
 	private int prefTabSize() {
 		int tabLen;
 		if (!isStandalone())
-//			tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, 4);
 			tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
 		else
 			tabLen= 4; // sensible default for testing
@@ -1317,8 +1355,10 @@ public class JavaIndenter {
 	private int prefIndentationSize() {
 		int indentationSize;
 		if (!isStandalone())
-//			indentationSize= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, 4);
-			indentationSize= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
+			if (DefaultCodeFormatterConstants.MIXED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
+				indentationSize= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, 4);
+			else
+				indentationSize= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
 		else
 			indentationSize= 4; // sensible default for testing
 
