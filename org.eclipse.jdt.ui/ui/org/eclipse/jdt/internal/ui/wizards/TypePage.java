@@ -1165,11 +1165,12 @@ public abstract class TypePage extends ContainerPage {
 		
 		String lineDelimiter= null;	
 		if (!isInnerClass) {
-			ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$
+			lineDelimiter= System.getProperty("line.separator", "\n");
+			
+			String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ";" + lineDelimiter;
+			ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", packStatement, false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$
 
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, false);
-			
-			lineDelimiter= StubUtility.getLineDelimiterUsed(parentCU);
 			
 			String content= createTypeBody(imports, lineDelimiter, parentCU);
 			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 3));
