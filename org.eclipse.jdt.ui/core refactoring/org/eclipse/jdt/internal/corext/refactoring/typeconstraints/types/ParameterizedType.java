@@ -37,7 +37,7 @@ public final class ParameterizedType extends HierarchyType {
 		}
 	}
 	
-	public int getElementType() {
+	public int getKind() {
 		return PARAMETERIZED_TYPE;
 	}
 
@@ -47,6 +47,10 @@ public final class ParameterizedType extends HierarchyType {
 	
 	public TType getErasure() {
 		return fTypeDeclaration;
+	}
+	
+	public TType[] getTypeArguments() {
+		return (TType[]) fTypeArguments.clone();
 	}
 	
 	public boolean doEquals(TType type) {
@@ -71,7 +75,7 @@ public final class ParameterizedType extends HierarchyType {
 	}
 	
 	protected boolean doCanAssignTo(TType target) {
-		int targetType= target.getElementType();
+		int targetType= target.getKind();
 		switch (targetType) {
 			case NULL_TYPE: return false;  
 			case VOID_TYPE: return false;
@@ -95,7 +99,7 @@ public final class ParameterizedType extends HierarchyType {
 	}
 	
 	protected boolean isTypeEquivalentTo(TType other) {
-		int otherElementType= other.getElementType();
+		int otherElementType= other.getKind();
 		if (otherElementType == RAW_TYPE || otherElementType == GENERIC_TYPE)
 			return getErasure().isTypeEquivalentTo(other.getErasure());
 		return super.isTypeEquivalentTo(other);
@@ -126,7 +130,7 @@ public final class ParameterizedType extends HierarchyType {
 			return this;
 		ParameterizedType result= null;
 		TType type= getSuperclass();
-		if (type != null && type.getElementType() == PARAMETERIZED_TYPE) {
+		if (type != null && type.getKind() == PARAMETERIZED_TYPE) {
 			result= ((ParameterizedType)type).findSameDeclaration(targetDeclaration);
 			if (result != null)
 				return result;
@@ -134,7 +138,7 @@ public final class ParameterizedType extends HierarchyType {
 		TType[] interfaces= getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
 			type= interfaces[i];
-			if (type != null && type.getElementType() == PARAMETERIZED_TYPE) {
+			if (type != null && type.getKind() == PARAMETERIZED_TYPE) {
 				result= ((ParameterizedType)type).findSameDeclaration(targetDeclaration);
 				if (result != null)
 					return result;

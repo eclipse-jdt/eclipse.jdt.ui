@@ -20,12 +20,12 @@ public final class SuperWildcardType extends WildcardType {
 		return getEnvironment().getJavaLangObject();
 	}
 	
-	public int getElementType() {
+	public int getKind() {
 		return SUPER_WILDCARD_TYPE;
 	}
 	
 	protected boolean doCanAssignTo(TType lhs) {
-		switch(lhs.getElementType()) {
+		switch(lhs.getKind()) {
 			case STANDARD_TYPE:
 				return ((StandardType)lhs).isJavaLangObject();
 			case UNBOUND_WILDCARD_TYPE:
@@ -43,7 +43,7 @@ public final class SuperWildcardType extends WildcardType {
 	}
 	
 	protected boolean checkTypeArgument(TType rhs) {
-		switch(rhs.getElementType()) {
+		switch(rhs.getKind()) {
 			case ARRAY_TYPE:
 			case STANDARD_TYPE:
 			case PARAMETERIZED_TYPE:

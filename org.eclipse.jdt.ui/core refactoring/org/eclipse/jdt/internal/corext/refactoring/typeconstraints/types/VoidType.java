@@ -19,10 +19,14 @@ public class VoidType extends TType {
 		super(environment, Signature.createTypeSignature("void", true)); //$NON-NLS-1$
 	}
 
-	public int getElementType() {
+	public int getKind() {
 		return VOID_TYPE;
 	}
 
+	public TType[] getSubTypes() {
+		throw new UnsupportedOperationException();
+	}
+	
 	protected boolean doEquals(TType type) {
 		return true;
 	}

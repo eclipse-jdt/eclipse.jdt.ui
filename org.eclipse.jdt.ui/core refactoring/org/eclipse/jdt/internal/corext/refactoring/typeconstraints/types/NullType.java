@@ -17,10 +17,14 @@ public class NullType extends TType {
 		super(environment, "N"); //$NON-NLS-1$
 	}
 
-	public int getElementType() {
+	public int getKind() {
 		return NULL_TYPE;
 	}
 
+	public TType[] getSubTypes() {
+		throw new UnsupportedOperationException();
+	}
+	
 	protected boolean doEquals(TType type) {
 		return true;
 	}
@@ -34,7 +38,7 @@ public class NullType extends TType {
 	}
 	
 	protected boolean doCanAssignTo(TType target) {
-		int elementType= target.getElementType();
+		int elementType= target.getKind();
 		return elementType != PRIMITIVE_TYPE && elementType != VOID_TYPE;
 	}
 }

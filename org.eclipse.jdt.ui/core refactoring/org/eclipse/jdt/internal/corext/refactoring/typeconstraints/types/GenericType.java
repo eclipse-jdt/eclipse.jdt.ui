@@ -34,8 +34,12 @@ public final class GenericType extends HierarchyType {
 		}
 	}
 	
-	public int getElementType() {
+	public int getKind() {
 		return GENERIC_TYPE;
+	}
+	
+	public TType[] getTypeParameters() {
+		return (TType[]) fTypeParameters.clone();
 	}
 	
 	public boolean doEquals(TType type) {
@@ -51,7 +55,7 @@ public final class GenericType extends HierarchyType {
 	}
 	
 	protected boolean isTypeEquivalentTo(TType other) {
-		int otherElementType= other.getElementType();
+		int otherElementType= other.getKind();
 		if (otherElementType == RAW_TYPE || otherElementType == PARAMETERIZED_TYPE)
 			return getErasure().isTypeEquivalentTo(other.getErasure());
 		return super.isTypeEquivalentTo(other);

@@ -53,7 +53,7 @@ public class PrimitiveType extends TType {
 		return fId;
 	}
 	
-	public int getElementType() {
+	public int getKind() {
 		return PRIMITIVE_TYPE;
 	}
 	
@@ -62,8 +62,8 @@ public class PrimitiveType extends TType {
 	}
 
 	protected boolean doCanAssignTo(TType target) {
-		if (target.getElementType() != PRIMITIVE_TYPE) {
-			if (target.getElementType() == STANDARD_TYPE) {
+		if (target.getKind() != PRIMITIVE_TYPE) {
+			if (target.getKind() == STANDARD_TYPE) {
 				IJavaProject javaProject= ((StandardType)target).getJavaElementType().getJavaProject();
 				return getEnvironment().createBoxed(this, javaProject).canAssignTo(target);
 			}

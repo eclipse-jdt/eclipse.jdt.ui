@@ -92,8 +92,11 @@ public class PrettySignatures {
 	}
 
 	private static String getTypeVariable(ITypeBinding binding) {
-		StringBuffer result= new StringBuffer(binding.getName());
 		ITypeBinding[] bounds= binding.getTypeBounds();
+		if (bounds.length == 1 && bounds[0].getQualifiedName().equals("java.lang.Object"))
+			return binding.getName();
+		
+		StringBuffer result= new StringBuffer(binding.getName());
 		if (bounds.length > 0) {
 			result.append(" extends "); //$NON-NLS-1$
 			result.append(PrettySignatures.getPlain(bounds[0]));

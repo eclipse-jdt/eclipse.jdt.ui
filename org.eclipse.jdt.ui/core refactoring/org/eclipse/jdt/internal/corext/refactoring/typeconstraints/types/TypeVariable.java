@@ -37,8 +37,12 @@ public final class TypeVariable extends TType {
 		}
 	}
 	
-	public int getElementType() {
+	public int getKind() {
 		return TYPE_VARIABLE;
+	}
+	
+	public TType[] getSubTypes() {
+		throw new UnsupportedOperationException();
 	}
 	
 	public TType getErasure() {
@@ -47,6 +51,10 @@ public final class TypeVariable extends TType {
 	
 	/* package */ TType getLeftMostBound() {
 		return fBounds[0];
+	}
+	
+	public TType[] getBounds() {
+		return (TType[]) fBounds.clone();
 	}
 	
 	public boolean doEquals(TType type) {
@@ -58,7 +66,7 @@ public final class TypeVariable extends TType {
 	}
 	
 	protected boolean doCanAssignTo(TType lhs) {
-		switch (lhs.getElementType()) {
+		switch (lhs.getKind()) {
 			case NULL_TYPE: 
 			case VOID_TYPE: return false;
 			case PRIMITIVE_TYPE:
@@ -101,7 +109,7 @@ public final class TypeVariable extends TType {
 	private boolean doExtends(TypeVariable other) {
 		for (int i= 0; i < fBounds.length; i++) {
 			TType bound= fBounds[i];
-			if (other.equals(bound) || (bound.getElementType() == TYPE_VARIABLE && ((TypeVariable)bound).doExtends(other)))
+			if (other.equals(bound) || (bound.getKind() == TYPE_VARIABLE && ((TypeVariable)bound).doExtends(other)))
 				return true;
 		}
 		return false;
@@ -112,6 +120,9 @@ public final class TypeVariable extends TType {
 	}
 	
 	public String getPrettySignature() {
+		if (fBounds.length == 1 && fBounds[0].isJavaLangObject())
+			return fJavaTypeParameter.getElementName(); // don't print the trivial bound
+		
 		StringBuffer result= new StringBuffer(fJavaTypeParameter.getElementName());
 		if (fBounds.length > 0) {
 			result.append(" extends "); //$NON-NLS-1$

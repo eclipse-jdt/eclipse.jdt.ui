@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -120,7 +123,7 @@ public abstract class TType {
 	 * 
 	 * @return the binding key
 	 */
-	protected String getBindingKey() {
+	public String getBindingKey() {
 		return fBindingKey;
 	}
 	
@@ -136,11 +139,11 @@ public abstract class TType {
 	}
 	
 	/**
-	 * Returns the element type
+	 * Returns the element kind
 	 * 
-	 * @return the element type.
+	 * @return the element kind.
 	 */
-	public abstract int getElementType();
+	public abstract int getKind();
 	
 	/**
 	 * Returns whether this type represents <code>java.lang.Object</code> or
@@ -179,7 +182,7 @@ public abstract class TType {
 	 * @return whether this type is the null type or not
 	 */
 	public final boolean isNullType() {
-		return getElementType() == NULL_TYPE;
+		return getKind() == NULL_TYPE;
 	}
 	
 	/**
@@ -189,7 +192,7 @@ public abstract class TType {
 	 * @return whether this type is the void type or not
 	 */
 	public final boolean isVoidType() {
-		return getElementType() == VOID_TYPE;
+		return getKind() == VOID_TYPE;
 	}
 	
 	/**
@@ -199,7 +202,7 @@ public abstract class TType {
 	 * @return whether this type is a primitive type or not
 	 */
 	public final boolean isPrimitiveType() {
-		return getElementType() == PRIMITIVE_TYPE;
+		return getKind() == PRIMITIVE_TYPE;
 	}
 	
 	/**
@@ -209,7 +212,7 @@ public abstract class TType {
 	 * @return whether this type is an array type or not
 	 */
 	public final boolean isArrayType() {
-		return getElementType() == ARRAY_TYPE;
+		return getKind() == ARRAY_TYPE;
 	}
 	
 	/**
@@ -219,7 +222,7 @@ public abstract class TType {
 	 * @return whether this type is a hierarchy type or not
 	 */
 	public final boolean isHierarchyType() {
-		int elementType= getElementType();
+		int elementType= getKind();
 		return elementType == RAW_TYPE || elementType == PARAMETERIZED_TYPE
 			|| elementType == GENERIC_TYPE || elementType == STANDARD_TYPE; 
 	}
@@ -231,7 +234,7 @@ public abstract class TType {
 	 * @return whether this type is a standard type or not
 	 */
 	public final boolean isStandardType() {
-		return getElementType() == STANDARD_TYPE;
+		return getKind() == STANDARD_TYPE;
 	}
 	
 	/**
@@ -241,7 +244,7 @@ public abstract class TType {
 	 * @return whether this type is a raw type or not
 	 */
 	public final boolean isRawType() {
-		return getElementType() == RAW_TYPE;
+		return getKind() == RAW_TYPE;
 	}
 	
 	/**
@@ -251,7 +254,7 @@ public abstract class TType {
 	 * @return whether this type is a parameterized type or not
 	 */
 	public final boolean isParameterizedType() {
-		return getElementType() == PARAMETERIZED_TYPE;
+		return getKind() == PARAMETERIZED_TYPE;
 	}
 	
 	/**
@@ -261,7 +264,7 @@ public abstract class TType {
 	 * @return whether this type is a generic type or not
 	 */
 	public final boolean isGenericType() {
-		return getElementType() == GENERIC_TYPE;
+		return getKind() == GENERIC_TYPE;
 	}
 	
 	/**
@@ -271,7 +274,7 @@ public abstract class TType {
 	 * @return whether this type is a type variable or not
 	 */
 	public final boolean isTypeVariable() {
-		return getElementType() == TYPE_VARIABLE;
+		return getKind() == TYPE_VARIABLE;
 	}
 	
 	/**
@@ -281,7 +284,7 @@ public abstract class TType {
 	 * @return whether this type is a wildcard type or not
 	 */
 	public final boolean isWildcardType() {
-		int elementType= getElementType();
+		int elementType= getKind();
 		return elementType == EXTENDS_WILDCARD_TYPE || elementType == UNBOUND_WILDCARD_TYPE
 			|| elementType == SUPER_WILDCARD_TYPE; 
 	}
@@ -293,7 +296,7 @@ public abstract class TType {
 	 * @return whether this type is a unbound wildcard type or not
 	 */
 	public final boolean isUnboundWildcardType() {
-		return getElementType() == UNBOUND_WILDCARD_TYPE;
+		return getKind() == UNBOUND_WILDCARD_TYPE;
 	}
 	
 	/**
@@ -303,7 +306,7 @@ public abstract class TType {
 	 * @return whether this type is an extends wildcard type or not
 	 */
 	public final boolean isExtendsWildcardType() {
-		return getElementType() == EXTENDS_WILDCARD_TYPE;
+		return getKind() == EXTENDS_WILDCARD_TYPE;
 	}
 	
 	/**
@@ -313,7 +316,7 @@ public abstract class TType {
 	 * @return whether this type is a super wildcard type or not
 	 */
 	public final boolean isSuperWildcardType() {
-		return getElementType() == SUPER_WILDCARD_TYPE;
+		return getKind() == SUPER_WILDCARD_TYPE;
 	}
 	
 	/**
@@ -442,7 +445,7 @@ public abstract class TType {
 		TypeEnvironment otherEnvironment= otherType.fEnvironment;
 		if (fEnvironment.isIdentityTest() && otherEnvironment.isIdentityTest() && fEnvironment == otherEnvironment)
 			return false;
-		if (getElementType() != otherType.getElementType())
+		if (getKind() != otherType.getKind())
 			return false;
 		return doEquals(otherType);
 	}
@@ -471,6 +474,17 @@ public abstract class TType {
 	 */
 	public TType getTypeDeclaration() {
 		return this;
+	}
+	
+	public TType[] getSubTypes() {
+		Map subTypes= fEnvironment.getSubTypes();
+		if (subTypes == null)
+			throw new IllegalStateException("This TypeEnvironment does not remember subtypes"); //$NON-NLS-1$
+		List subtypes= (List) subTypes.get(this);
+		if (subtypes == null)
+			return EMPTY_TYPE_ARRAY;
+		else
+			return (TType[]) subtypes.toArray(new TType[subtypes.size()]);
 	}
 	
 	/**

@@ -16,7 +16,7 @@ public final class ExtendsWildcardType extends WildcardType {
 		super(environment);
 	}
 
-	public int getElementType() {
+	public int getKind() {
 		return EXTENDS_WILDCARD_TYPE;
 	}
 	
@@ -25,7 +25,7 @@ public final class ExtendsWildcardType extends WildcardType {
 	}
 	
 	protected boolean doCanAssignTo(TType lhs) {
-		switch (lhs.getElementType()) {
+		switch (lhs.getKind()) {
 			case ARRAY_TYPE: 
 			case STANDARD_TYPE:  
 			case PARAMETERIZED_TYPE:
@@ -47,7 +47,7 @@ public final class ExtendsWildcardType extends WildcardType {
 	}
 	
 	protected boolean checkTypeArgument(TType rhs) {
-		switch(rhs.getElementType()) {
+		switch(rhs.getKind()) {
 			case ARRAY_TYPE:
 			case STANDARD_TYPE:
 			case PARAMETERIZED_TYPE:

@@ -68,7 +68,7 @@ public class TypeEnvironment {
 		"java.lang.Double",  //$NON-NLS-1$
 		"java.lang.Byte"};  //$NON-NLS-1$
 	
-	private static TType OBJECT_TYPE= null;
+	private TType OBJECT_TYPE= null;
 	
 	private Map[] fArrayTypes= new Map[] { new HashMap() };
 	private Map fStandardTypes= new HashMap();
@@ -81,12 +81,18 @@ public class TypeEnvironment {
 	private UnboundWildcardType fUnboundWildcardType= null;
 	
 	private static final int MAX_ENTRIES= 1024;
-	private Map fSubTypeCache= new LinkedHashMap(50, 0.75f, true) {
+	private Map/*<TypeTuple, Boolean>*/ fSubTypeCache= new LinkedHashMap(50, 0.75f, true) {
 		private static final long serialVersionUID= 1L;
 		protected boolean removeEldestEntry(Map.Entry eldest) {
 			return size() > MAX_ENTRIES;
 		}
 	};
+	
+	/**
+	 * Map from TType to its known subtypes, or <code>null</code> iff subtype
+	 * information was not requested in the constructor.
+	 */
+	private Map/*<TType, List<TType>>*/ fSubTypes;
 	
 	public static ITypeBinding[] createTypeBindings(TType[] types, IJavaProject project) {
 		final Map mapping= new HashMap();
@@ -121,13 +127,20 @@ public class TypeEnvironment {
 	private boolean fIdentityTest;
 	
 	public TypeEnvironment() {
+		this(false);
+	}
+	
+	public TypeEnvironment(boolean rememberSubtypes) {
+		if (rememberSubtypes) {
+			fSubTypes= new HashMap();
+		}
 	}
 	
 	public boolean isIdentityTest() {
 		return fIdentityTest;
 	}
 	
-	public Map getSubTypeCache() {
+	Map/*<TypeTuple, Boolean>*/ getSubTypeCache() {
 		return fSubTypeCache;
 	}
 	
@@ -166,7 +179,15 @@ public class TypeEnvironment {
 		return result;
 	}
 	
-	/* package */ TType getJavaLangObject() {
+	/**
+	 * Returns the TType for java.lang.Object.
+	 * <p>
+	 * Warning: currently returns <code>null</code> unless this type environment
+	 * has already created its first hierarchy type.
+	 * 
+	 * @return the TType for java.lang.Object
+	 */
+	public TType getJavaLangObject() {
 		return OBJECT_TYPE;
 	}
 	
@@ -196,6 +217,32 @@ public class TypeEnvironment {
 		return null;
 	}
 	
+	Map/*<TType, List<TType>>*/ getSubTypes() {
+		return fSubTypes;
+	}
+	
+	private void cacheSubType(TType supertype, TType result) {
+		if (fSubTypes == null)
+			return;
+		if (supertype == null)
+			supertype= OBJECT_TYPE;
+		
+		ArrayList subtypes= (ArrayList) fSubTypes.get(supertype);
+		if (subtypes == null) {
+			subtypes= new ArrayList(5);
+			fSubTypes.put(supertype, subtypes);
+		} else {
+			Assert.isTrue(! subtypes.contains(result));
+		}
+		subtypes.add(result);
+	}
+
+	private void cacheSubTypes(TType[] interfaces, TType result) {
+		for (int i= 0; i < interfaces.length; i++) {
+			cacheSubType(interfaces[i], result);
+		}
+	}
+
 	private TType createPrimitiveType(ITypeBinding binding) {
 		String name= binding.getName();
 		String[] names= PrimitiveType.NAMES;
@@ -248,6 +295,8 @@ public class TypeEnvironment {
 		result= new GenericType(this);
 		fGenericTypes.put(javaElement, result);
 		result.initialize(binding, (IType)javaElement);
+		cacheSubType(result.getSuperclass(), result);
+		cacheSubTypes(result.getInterfaces(), result);
 		return result;
 	}
 	
@@ -265,6 +314,8 @@ public class TypeEnvironment {
 			return result;
 		result= key;
 		fParameterizedTypes.put(key, result);
+		cacheSubType(result.getSuperclass(), result);
+		cacheSubTypes(result.getInterfaces(), result);
 		return result;
 	}
 	
@@ -276,6 +327,8 @@ public class TypeEnvironment {
 		result= new RawType(this);
 		fRawTypes.put(javaElement, result);
 		result.initialize(binding, (IType)javaElement);
+		cacheSubType(result.getSuperclass(), result);
+		cacheSubTypes(result.getInterfaces(), result);
 		return result;
 	}
 	

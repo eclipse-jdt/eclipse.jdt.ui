@@ -30,7 +30,7 @@ public final class RawType extends HierarchyType {
 		fTypeDeclaration= (GenericType)environment.create(binding.getTypeDeclaration());
 	}
 	
-	public int getElementType() {
+	public int getKind() {
 		return RAW_TYPE;
 	}
 	
@@ -55,7 +55,7 @@ public final class RawType extends HierarchyType {
 	}
 	
 	protected boolean doCanAssignTo(TType target) {
-		int targetType= target.getElementType();
+		int targetType= target.getKind();
 		switch (targetType) {
 			case NULL_TYPE: return false;
 			case VOID_TYPE: return false;
@@ -79,7 +79,7 @@ public final class RawType extends HierarchyType {
 	}
 
 	protected boolean isTypeEquivalentTo(TType other) {
-		int otherElementType= other.getElementType();
+		int otherElementType= other.getKind();
 		if (otherElementType == PARAMETERIZED_TYPE || otherElementType == GENERIC_TYPE)
 			return getErasure().isTypeEquivalentTo(other.getErasure());
 		return super.isTypeEquivalentTo(other);

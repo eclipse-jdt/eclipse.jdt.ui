@@ -21,7 +21,7 @@ public final class StandardType extends HierarchyType {
 		super(environment);
 	}
 	
-	public int getElementType() {
+	public int getKind() {
 		return STANDARD_TYPE;
 	}
 	
@@ -46,7 +46,7 @@ public final class StandardType extends HierarchyType {
 	}
 	
 	protected boolean doCanAssignTo(TType lhs) {
-		switch (lhs.getElementType()) {
+		switch (lhs.getKind()) {
 			case NULL_TYPE: return false;
 			case VOID_TYPE: return false;
 			case PRIMITIVE_TYPE: return canAssignToPrimitive((PrimitiveType)lhs);

@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.internal.corext.Assert;
 
 public final class ArrayType extends TType {
-	private TType fItemType;
+	private TType fElementType;
 	private int fDimensions;
 	
 	private TType fErasure;
@@ -24,20 +24,50 @@ public final class ArrayType extends TType {
 		super(environment);
 	}
 
-	protected void initialize(ITypeBinding binding, TType itemType) {
+	protected void initialize(ITypeBinding binding, TType elementType) {
 		Assert.isTrue(binding.isArray());
 		super.initialize(binding);
-		fItemType= itemType;
+		fElementType= elementType;
 		fDimensions= binding.getDimensions();
-		if (fItemType.isParameterizedType() || fItemType.isRawType()) {
+		if (fElementType.isParameterizedType() || fElementType.isRawType()) {
 			fErasure= getEnvironment().create(binding.getErasure());
 		} else {
 			fErasure= this;
 		}
 	}
 
-	public int getElementType() {
+	public TType getElementType() {
+		return fElementType;
+	}
+	
+	/**
+	 * Returns the component type of this array.
+	 * If getDimensions() is 1, the component type is the element type.
+	 * If getDimensions() is > 1, the component type is an array type
+	 * with element type getElementType() and dimensions getDimentsions() - 1.
+	 * 
+	 * @return the component type
+	 */
+	public TType getComponentType() {
+		throw new UnsupportedOperationException(); //TODO waiting for bug 83502
+	}
+	
+	public int getDimensions() {
+		return fDimensions;
+	}
+	
+	public int getKind() {
 		return ARRAY_TYPE;
+	}
+	
+	public TType[] getSubTypes() {
+		throw new UnsupportedOperationException(); //TODO waiting for bug 83502
+//		TType[] subTypes= fElementType.getSubTypes();
+//		TType[] result= new TType[subTypes.length];
+//		for (int i= 0; i < subTypes.length; i++) {
+//			result[i]= TTypes.createArrayType(subTypes[i], fDimensions);
+//		}
+//		return result;
 	}
 	
 	public TType getErasure() {
@@ -46,15 +76,15 @@ public final class ArrayType extends TType {
 	
 	public boolean doEquals(TType other) {
 		ArrayType arrayType= (ArrayType)other;
-		return fItemType.equals(arrayType.fItemType) && fDimensions == arrayType.fDimensions;
+		return fElementType.equals(arrayType.fElementType) && fDimensions == arrayType.fDimensions;
 	}
 	
 	public int hashCode() {
-		return fItemType.hashCode() << ARRAY_TYPE_SHIFT;
+		return fElementType.hashCode() << ARRAY_TYPE_SHIFT;
 	}
 	
 	protected boolean doCanAssignTo(TType lhs) {
-		switch (lhs.getElementType()) {
+		switch (lhs.getKind()) {
 			case NULL_TYPE: return false;
 			case VOID_TYPE: return false;
 			case PRIMITIVE_TYPE: return false;
@@ -79,13 +109,13 @@ public final class ArrayType extends TType {
 	private boolean canAssignToArrayType(ArrayType lhs) {
 		if (fDimensions == lhs.fDimensions) {
 			// primitive type don't have any conversion for arrays.
-			if (fItemType.getElementType() == PRIMITIVE_TYPE || lhs.fItemType.getElementType() == PRIMITIVE_TYPE)
-				return fItemType.isTypeEquivalentTo(lhs.fItemType);
-			return fItemType.canAssignTo(lhs.fItemType);
+			if (fElementType.getKind() == PRIMITIVE_TYPE || lhs.fElementType.getKind() == PRIMITIVE_TYPE)
+				return fElementType.isTypeEquivalentTo(lhs.fElementType);
+			return fElementType.canAssignTo(lhs.fElementType);
 		}
 		if (fDimensions < lhs.fDimensions)
 			return false;
-		return isArrayLhsCompatible(lhs.fItemType);
+		return isArrayLhsCompatible(lhs.fElementType);
 	}
 
 	private boolean isArrayLhsCompatible(TType lhsElementType) {
@@ -93,7 +123,7 @@ public final class ArrayType extends TType {
 	}
 	
 	protected String getPlainPrettySignature() {
-		StringBuffer result= new StringBuffer(fItemType.getPlainPrettySignature());
+		StringBuffer result= new StringBuffer(fElementType.getPlainPrettySignature());
 		for (int i= 0; i < fDimensions; i++) {
 			result.append("[]"); //$NON-NLS-1$
 		}
@@ -101,10 +131,11 @@ public final class ArrayType extends TType {
 	}
 	
 	public String getName() {
-		StringBuffer result= new StringBuffer(fItemType.getName());
+		StringBuffer result= new StringBuffer(fElementType.getName());
 		for (int i= 0; i < fDimensions; i++) {
 			result.append("[]"); //$NON-NLS-1$
 		}
 		return result.toString();
 	}
+
 }

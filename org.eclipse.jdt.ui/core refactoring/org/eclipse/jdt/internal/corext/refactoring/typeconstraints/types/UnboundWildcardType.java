@@ -16,7 +16,7 @@ public final class UnboundWildcardType extends WildcardType {
 		super(environment);
 	}
 
-	public int getElementType() {
+	public int getKind() {
 		return UNBOUND_WILDCARD_TYPE;
 	}
 	
@@ -25,7 +25,7 @@ public final class UnboundWildcardType extends WildcardType {
 	}
 	
 	protected boolean doCanAssignTo(TType lhs) {
-		switch(lhs.getElementType()) {
+		switch(lhs.getKind()) {
 			case STANDARD_TYPE:
 				return ((StandardType)lhs).isJavaLangObject();
 			case UNBOUND_WILDCARD_TYPE:
@@ -39,7 +39,7 @@ public final class UnboundWildcardType extends WildcardType {
 	}
 	
 	protected boolean checkTypeArgument(TType rhs) {
-		switch(rhs.getElementType()) {
+		switch(rhs.getKind()) {
 			case ARRAY_TYPE:
 			case STANDARD_TYPE:
 			case PARAMETERIZED_TYPE:

@@ -34,6 +34,10 @@ public abstract class WildcardType extends TType {
 		return fBound;
 	}
 	
+	public TType[] getSubTypes() {
+		throw new UnsupportedOperationException();
+	}
+	
 	public boolean doEquals(TType type) {
 		WildcardType other= (WildcardType)type;
 		if (fBound == null)
