@@ -235,7 +235,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			result= Checks.checkMethodName(fMethodName);
 			pm.worked(1);
 			
-			fAnalyzer.checkInput(result, fMethodName, fCUnit.getJavaProject());
+			fAnalyzer.checkInput(result, fMethodName, fCUnit.getJavaProject(), fAST);
 			pm.worked(1);
 		
 			pm.done();

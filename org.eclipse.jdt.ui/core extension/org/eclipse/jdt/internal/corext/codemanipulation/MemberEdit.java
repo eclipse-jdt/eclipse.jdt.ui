@@ -13,10 +13,10 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -98,7 +98,7 @@ public class MemberEdit extends SimpleTextEdit {
 		String lineDelimiter= buffer.getLineDelimiter();
 
 		String s;
-		Scanner scanner= null;
+		IScanner scanner= null;
 		ISourceRange range= getSourceRange();
 		int start= range.getOffset();
 		int end= start + range.getLength();
@@ -117,7 +117,7 @@ public class MemberEdit extends SimpleTextEdit {
 			switch (fMember.getElementType()) {
 			case IJavaElement.TYPE:
 				// find first opening '{' at beginning of type
-				scanner= new Scanner(true, true);	// whitespace, comments
+				scanner= ToolFactory.createScanner(true, true, false, false);
 				scanner.setSource(buffer.getContent(start, range.getLength()).toCharArray());
 				int emptyLines= 0;
 				boolean sawClosingBracket= false;
@@ -127,7 +127,7 @@ public class MemberEdit extends SimpleTextEdit {
 						if (token == ITerminalSymbols.TokenNameLBRACE)
 							break;
 					}
-					offset= start+scanner.currentPosition;
+					offset= start+scanner.getCurrentTokenEndPosition();
 					// count the number of empty lines
 					while ((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 						switch (token) {
@@ -167,14 +167,14 @@ public class MemberEdit extends SimpleTextEdit {
 			switch (fMember.getElementType()) {
 			case IJavaElement.TYPE:
 				// find last closing '}' at end of type
-				scanner= new Scanner(true, true);	// whitespace, comments
+				scanner= ToolFactory.createScanner(true, true, false, false);
 				scanner.setSource(buffer.getContent(start, range.getLength()).toCharArray());
 				try {
 					int pos= -1;
 					int token;
 					while ((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 						if (token == ITerminalSymbols.TokenNameRBRACE)
-							pos= scanner.startPosition;	// remember the starting position of all '}'
+							pos= scanner.getCurrentTokenStartPosition();	// remember the starting position of all '}'
 					}
 					if (pos >= 0)
 						offset= start+pos;	// the last '}'
@@ -226,9 +226,9 @@ public class MemberEdit extends SimpleTextEdit {
 		super.connect(editor);
 	}
 	
-	private static String extract(TextBuffer buffer, int offset, Scanner scanner) {
-		int start= scanner.startPosition;
-		int length= scanner.currentPosition - start + 1;
+	private static String extract(TextBuffer buffer, int offset, IScanner scanner) {
+		int start= scanner.getCurrentTokenStartPosition();
+		int length= scanner.getCurrentTokenEndPosition() - start + 1;
 		return buffer.getContent(offset+start, length);
 	}
 	

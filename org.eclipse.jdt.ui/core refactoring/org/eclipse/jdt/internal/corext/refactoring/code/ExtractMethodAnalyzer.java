@@ -207,9 +207,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	
 	//---- Input checking -----------------------------------------------------------------------------------
 		
-	public void checkInput(RefactoringStatus status, String methodName, IJavaProject scope) {
+	public void checkInput(RefactoringStatus status, String methodName, IJavaProject scope, AST ast) {
 		ITypeBinding[] arguments= getArgumentTypes();
-		ITypeBinding type= fEnclosingMethodBinding.getDeclaringClass();
+		ITypeBinding type= fEnclosingMethodBinding != null ? fEnclosingMethodBinding.getDeclaringClass() : ast.resolveWellKnownType("void"); //$NON-NLS-1$
 		status.merge(Checks.checkMethodInType(type, methodName, arguments, scope));
 		status.merge(Checks.checkMethodInHierarchy(type.getSuperclass(), methodName, arguments, scope));
 	}

@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -192,10 +193,19 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 	 * Method declared in IWizardPage.
 	 */
 	public void createControl(Composite parent) {
-		// Additional composite is needed to limit the size of the table to
-		// 60 characters.
-		//Composite content= new Composite(parent, SWT.NONE);
-		SashForm content= new SashForm(parent, SWT.VERTICAL);
+		initializeDialogUnits(parent);
+		SashForm content= new SashForm(parent, SWT.VERTICAL) {
+			public Point computeSize (int wHint, int hHint, boolean changed) {
+				Point result= super.computeSize(wHint, hHint, changed);
+				int maxWidth= convertWidthInCharsToPixels(60);
+				int maxHeight= convertHeightInCharsToPixels(30);
+				if (result.x > maxWidth)
+					result.x= maxWidth;
+				if (result.y > maxHeight)
+					result.y= maxHeight;
+				return result;
+			}
+		};
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1; layout.marginWidth= 0; layout.marginHeight= 0;
 		content.setLayout(layout);
@@ -224,7 +234,6 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 		Table tableControl= fTableViewer.getTable();
 		initializeDialogUnits(tableControl);
 		GridData gd= new GridData(GridData.FILL_BOTH);
-		gd.widthHint= convertWidthInCharsToPixels(60);
 		tableControl.setLayoutData(gd);
 		// Add a column so that we can pack it in setVisible.
 		TableColumn tc= new TableColumn(tableControl, SWT.NONE);

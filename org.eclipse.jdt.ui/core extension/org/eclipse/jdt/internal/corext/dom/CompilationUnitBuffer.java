@@ -6,37 +6,28 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
-
 public class CompilationUnitBuffer {
-	private Scanner fScanner;
+	private IScanner fScanner;
 	private int fEndPosition;
 	
 	public CompilationUnitBuffer(ICompilationUnit unit) throws JavaModelException {
-		fScanner= new Scanner(true, false);	// comments and white spaces.
+		fScanner= ToolFactory.createScanner(true, false, false, false);
 		char[] source= unit.getBuffer().getCharacters();
 		fEndPosition= source.length - 1;
 		fScanner.setSource(source);
 	}
 	
 	public char[] getCharacters() {
-		return fScanner.source;
+		return fScanner.getSource();
 	}
 	
 	public char getCharAt(int index) {
-		return fScanner.source[index];
-	}
-	
-	/**
-	 * Returns the length of the last processed token.
-	 * 
-	 * @return the length of the last processed token
-	 */
-	public int getLastTokenLength() {
-		return fScanner.currentPosition - fScanner.startPosition;
+		return fScanner.getSource()[index];
 	}
 	
 	public int indexOf(int token, int start) {
@@ -51,7 +42,7 @@ public class CompilationUnitBuffer {
 			int next;
 			while((next= fScanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 				if (next == token) {
-					return fScanner.startPosition;
+					return fScanner.getCurrentTokenStartPosition();
 				}
 			} 
 			return -1;
@@ -64,7 +55,7 @@ public class CompilationUnitBuffer {
 		int result= indexOf(token, start);
 		if (result == -1)
 			return result;
-		return fScanner.currentPosition;
+		return fScanner.getCurrentTokenEndPosition();
 	}
 	
 	/**
@@ -83,7 +74,7 @@ public class CompilationUnitBuffer {
 			while ((token= fScanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 				if (!considerComments && isComment(token))
 					continue;
-				return fScanner.startPosition;
+				return fScanner.getCurrentTokenStartPosition();
 			}
 			return -1;
 		} catch (InvalidInputException e) {

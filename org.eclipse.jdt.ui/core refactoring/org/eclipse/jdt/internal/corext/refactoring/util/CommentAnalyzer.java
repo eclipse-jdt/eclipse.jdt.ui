@@ -4,10 +4,10 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
 
 import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -28,7 +28,7 @@ public class CommentAnalyzer {
 	}
 	
 	private void check(RefactoringStatus result, Selection selection, CompilationUnitBuffer source, int start, int end) {
-		Scanner scanner= new Scanner(true, false);
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		scanner.setSource(source.getCharacters());
 		scanner.resetTo(start, end);
 		
@@ -56,11 +56,11 @@ public class CommentAnalyzer {
 		}
 	}
 	
-	private boolean checkStart(Scanner scanner, int position) {
-		return scanner.startPosition < position && position < scanner.currentPosition;
+	private boolean checkStart(IScanner scanner, int position) {
+		return scanner.getCurrentTokenStartPosition() < position && position < scanner.getCurrentTokenEndPosition();
 	}
 
-	private boolean checkEnd(Scanner scanner, int position) {
-		return scanner.startPosition <= position && position < scanner.currentPosition - 1;
+	private boolean checkEnd(IScanner scanner, int position) {
+		return scanner.getCurrentTokenStartPosition() <= position && position < scanner.getCurrentTokenEndPosition() - 1;
 	}
 }
