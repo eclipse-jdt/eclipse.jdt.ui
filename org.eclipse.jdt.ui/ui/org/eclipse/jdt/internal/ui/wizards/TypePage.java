@@ -239,8 +239,8 @@ public abstract class TypePage extends ContainerPage {
 	 * @param nColumns Number of columns to span
 	 */
 	protected void createSeparator(Composite composite, int nColumns) {
-		(new Separator()).doFillIntoGrid(composite, nColumns, 12);		
-		(new Separator(SWT.SEPARATOR | SWT.HORIZONTAL)).doFillIntoGrid(composite, nColumns, 8);		
+		// (new Separator()).doFillIntoGrid(composite, nColumns, 12);		
+		// (new Separator(SWT.SEPARATOR | SWT.HORIZONTAL)).doFillIntoGrid(composite, nColumns, 8);		
 	}
 
 	/**

@@ -272,6 +272,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		fMainPanel.setLayout(layout);
 		createOptimizedCategoryLayout(fMainPanel);
 		createPreview(fMainPanel);
@@ -389,15 +390,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 
 	private Button createCheckOption(String name, String description, ConfigurableOption option, Composite parent, SelectionListener con) {
-		Composite pan= new Composite(parent, SWT.NONE);
-		GridLayout gl= new GridLayout();
-		gl.numColumns= 1;
-		pan.setLayout(gl);
-		GridData lgd= new GridData();
-		lgd.horizontalAlignment= GridData.FILL;
-		lgd.grabExcessHorizontalSpace= true;
-		pan.setLayoutData(lgd);
-		Button check= new Button(pan, SWT.CHECK);
+		Button check= new Button(parent, SWT.CHECK);
 		check.setToolTipText(description);
 		check.addSelectionListener(con);
 		check.setData(WIDGET_DATA_KEY, option);
@@ -409,7 +402,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private Text createTextOption(String name, String description, ConfigurableOption option, Composite parent, ModifyListener con) {
 		Composite pan= new Composite(parent, SWT.NONE);
 		GridLayout gl= new GridLayout();
-		gl.numColumns= 1;
+		gl.numColumns= 2; gl.marginWidth= 0; gl.marginHeight= 0;
 		pan.setLayout(gl);
 		GridData lgd= new GridData();
 		lgd.horizontalAlignment= GridData.FILL;
