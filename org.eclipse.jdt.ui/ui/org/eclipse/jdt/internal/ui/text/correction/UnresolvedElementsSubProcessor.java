@@ -47,6 +47,10 @@ public class UnresolvedElementsSubProcessor {
 		// type that defines the variable, null if local
 		ITypeBinding binding= null;
 		ITypeBinding declaringTypeBinding= ASTResolving.getBindingOfParentType(selectedNode);
+		if (declaringTypeBinding == null) {
+			return;
+		}
+		
 
 		// possible kind of the node
 		int similarNodeKind= SimilarElementsRequestor.VARIABLES;
@@ -122,7 +126,7 @@ public class UnresolvedElementsSubProcessor {
 
 		// new variables
 		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
-		ITypeBinding senderBinding= binding != null ? binding : ASTResolving.getBindingOfParentType(node);
+		ITypeBinding senderBinding= binding != null ? binding : declaringTypeBinding;
 
 		if (senderBinding.isFromSource() && targetCU != null && JavaModelUtil.isEditable(targetCU)) {
 			String label;
