@@ -18,13 +18,13 @@ import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.Serializer;
 import org.apache.xml.serialize.SerializerFactory;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jface.util.Assert;
-
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
