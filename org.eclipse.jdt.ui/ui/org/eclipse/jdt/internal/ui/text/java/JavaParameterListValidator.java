@@ -153,7 +153,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 			IDocument document= fViewer.getDocument();
 			IRegion line= document.getLineInformationOfOffset(fPosition);
 			
-			if (position > line.getOffset() + line.getLength())
+			if (position < line.getOffset() || position >= document.getLength())
 				return false;
 				
 			return (getCharCount(document, fPosition, position, '(', ')', false) >= 0);
