@@ -251,7 +251,6 @@ public class AllTypesCache {
 	 * modified. The elements in the array are sorted by simple type name.
 	 */
 	public static TypeInfo[] getAllTypes(IProgressMonitor monitor) throws JavaModelException {
-		
 		forceDeltaComplete();
 		
 		synchronized(fgLock) {
@@ -280,7 +279,7 @@ public class AllTypesCache {
 						try {
 							while (fgTypeCache == null) {
 								fgLock.wait(CANCEL_POLL_INTERVAL);	// poll for cancel
-								if (monitor.isCanceled())
+								if (monitor != null && monitor.isCanceled())
 									throw new OperationCanceledException();
 							}
 						} catch (InterruptedException e) {
