@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -68,6 +67,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
@@ -1347,7 +1347,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				
 				String typeContent= constructTypeStub(new ImportsManager(imports), lineDelimiter);
 				
-				String cuContent= constructCUContent(pack, typeContent, lineDelimiter);
+				String cuContent= constructCUContent(parentCU, typeContent, lineDelimiter);
 				
 				createdWorkingCopy.getBuffer().setContents(cuContent);
 				
@@ -1372,11 +1372,17 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				}
 				
 				lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
-				String content= constructTypeStub(new ImportsManager(imports), lineDelimiter);
+				StringBuffer content= new StringBuffer();
+				String comment= getTypeComment(parentCU);
+				if (comment != null) {
+					content.append(comment);
+					content.append(lineDelimiter);
+				}
+				content.append(constructTypeStub(new ImportsManager(imports), lineDelimiter));
 				IJavaElement[] elems= enclosingType.getChildren();
 				IJavaElement sibling= elems.length > 0 ? elems[0] : null;
 				
-				createdType= enclosingType.createType(content, sibling, false, new SubProgressMonitor(monitor, 1));
+				createdType= enclosingType.createType(content.toString(), sibling, false, new SubProgressMonitor(monitor, 1));
 			
 				indent= StubUtility.getIndentUsed(enclosingType) + 1;
 			}
@@ -1420,13 +1426,17 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 	}	
 
-	private String constructCUContent(IPackageFragment pack, String typeContent, String lineDelimiter) throws CoreException {
+	private String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
+		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';';
 		
-		HashMap templateContext= new HashMap();
-		templateContext.put(CodeTemplateContextType.PACKAGE_STATEMENT, packStatement);
-		templateContext.put(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
-		String content= CodeTemplateContext.evaluateTemplate(CodeTemplateContextType.NEWTYPE_NAME, pack.getJavaProject(), templateContext, lineDelimiter, 0);
+		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.NEWTYPE);
+		IJavaProject project= cu.getJavaProject();
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
+		context.setCompilationUnitVariables(cu);
+		context.setVariable(CodeTemplateContextType.PACKAGE_STATEMENT, packStatement);
+		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
+		String content= context.evaluate(template).getString();
 		if (content.length() == 0) {
 			return getDefaultCUContent(packStatement, typeContent, lineDelimiter);
 		}
@@ -1552,14 +1562,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * 
 	 * @return the file comment or <code>null</code> if a file comment 
 	 * is not desired
+	 * @deprecated
 	 */		
 	protected String getFileComment(ICompilationUnit parentCU) {
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN__FILE_COMMENTS)) {
-			String template= getTemplate("filecomment", parentCU, 0); //$NON-NLS-1$
-			if (template != null && isValidComment(template)) {
-				return template;
-			}			
-		}
 		return null;
 	}
 	
@@ -1587,9 +1592,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */		
 	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN__JAVADOC_STUBS)) {
-			String template= getTemplate("typecomment", parentCU, 0); //$NON-NLS-1$
-			if (template != null && isValidComment(template)) {
-				return template;
+			try {
+				return StubUtility.getTypeComment(parentCU, getTypeName());
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
 			}
 		}
 		return null;
@@ -1601,8 +1607,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	protected String getTemplate(String name, ICompilationUnit parentCU) {
 		return getTemplate(name, parentCU, 0);
+	}
+	
+	private String getCodeTemplate(String name, ICompilationUnit parentCU) {
+		return getTemplate(name, parentCU, 0);
 	
 	}
+		
 	
 	/**
 	 * Returns the string resulting from evaluation the given template in

@@ -114,13 +114,6 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 		String bodyStatement= "";
 		if (binding == null) {
 			decl.setModifiers(Modifier.PUBLIC);
-			if (commentSettings != null) {
-				StringBuffer buf= new StringBuffer();
-				StubUtility.genJavaDocStub("Constructor", new String[0], null, new String[0], buf);
-				Javadoc javadoc= ast.newJavadoc();
-				javadoc.setComment(buf.toString());
-				decl.setJavadoc(javadoc);
-			}
 		} else {
 			decl.setModifiers(binding.getModifiers());
 		
@@ -150,27 +143,20 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 				arguments.add(ast.newSimpleName(paramNames[i]));
 			}
 			bodyStatement= ASTNodes.asFormattedString(invocation, 0, String.valueOf('\n'));
-		
-			if (commentSettings != null) {
-				StringBuffer buf= new StringBuffer();
-				String[] excTypeRefs= new String[excTypes.length];
-				for (int i= 0; i < excTypeRefs.length; i++) {
-					excTypeRefs[i]= Signature.createTypeSignature(excTypes[i].getName(), false);
-				}
-				StubUtility.genJavaDocStub("Constructor", paramNames, null, excTypeRefs, buf);
-				String comment= buf.toString();
-				Javadoc javadoc= ast.newJavadoc();
-				javadoc.setComment(comment);
-				decl.setJavadoc(javadoc);
-			}
 		}
 		String placeHolder= StubUtility.getBodyStubTemplate(false, getCompilationUnit().getJavaProject(), name, name, bodyStatement); 	
 		if (placeHolder != null) {
 			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
 			body.statements().add(todoNode);
-		}			
-		
-		
+		}
+		if (commentSettings != null) {
+			String string= StubUtility.getMethodComment(getCompilationUnit(), name, decl);
+			if (string != null) {
+				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTRewrite.JAVADOC);
+				//TODO: getOverriding
+				decl.setJavadoc(javadoc);
+			}
+		}
 		return decl;
 	}
 

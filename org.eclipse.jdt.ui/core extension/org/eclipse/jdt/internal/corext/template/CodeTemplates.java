@@ -22,8 +22,22 @@ public class CodeTemplates extends TemplateSet {
 	private static final String DEFAULT_FILE= "default-codetemplates.xml"; //$NON-NLS-1$
 	private static final String TEMPLATE_FILE= "codetemplates.xml"; //$NON-NLS-1$
 
+	public static final String CATCHBLOCK= "catchblock"; //$NON-NLS-1$
+	public static final String METHODSTUB= "methodbody"; //$NON-NLS-1$	
+	public static final String NEWTYPE= "newtype"; //$NON-NLS-1$	
+	public static final String CONSTRUCTORSTUB= "constructorbody"; //$NON-NLS-1$
+	public static final String TYPECOMMENT= "typecomment";
+	public static final String METHODCOMMENT= "methodcomment";
+	public static final String CONSTRUCTORCOMMENT= "constructorcomment";
+	public static final String OVERRIDECOMMENT= "overridecomment";	
+
+
 	/** Singleton. */
 	private static CodeTemplates fgTemplates;
+
+	public static Template getCodeTemplate(String name) {
+		return getInstance().getFirstTemplate(name);
+	}
 
 	/**
 	 * Returns an instance of templates.

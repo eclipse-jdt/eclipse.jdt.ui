@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -137,22 +138,13 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		}
 		
 		if (commentSettings != null) {
-			StringBuffer buf= new StringBuffer();
-			String fullTypeName= Bindings.getFullyQualifiedName(binding.getDeclaringClass());
-			String[] fullParamNames= new String[params.length];
-			for (int i= 0; i < fullParamNames.length; i++) {
-				fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
+			String string= StubUtility.getMethodComment(getCompilationUnit(), typeName, decl);
+			if (string != null) {
+				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTRewrite.JAVADOC);
+				// TODO: getOverriding
+	
+				decl.setJavadoc(javadoc);
 			}
-			StubUtility.genJavaDocSeeTag(fullTypeName, binding.getName(), fullParamNames, commentSettings.createNonJavadocComments, binding.isDeprecated(), buf);
-			String comment= buf.toString();
-			Javadoc javadoc;
-			if (commentSettings.createNonJavadocComments) {
-				javadoc= (Javadoc) rewrite.createPlaceholder(comment, ASTRewrite.JAVADOC);
-			} else {
-				javadoc= ast.newJavadoc();
-				javadoc.setComment(comment);
-			}
-			decl.setJavadoc(javadoc);
 		}
 		return decl;
 	}

@@ -28,5 +28,24 @@ ${body_statement}</codetemplate>
 context="constructorbody_context" enabled="true">${body_statement}
 // ${todo} Auto-generated constructor stub</codetemplate>
 
+<codetemplate name="constructorcomment" description="Comment for created constructors" 
+context="constructorcomment_context" enabled="true">/**
+ * Contructor
+ */</codetemplate>
+
+<codetemplate name="typecomment" description="Comment for created types" 
+context="typecomment_context" enabled="true">/**
+ * Type
+ */</codetemplate>
+
+<codetemplate name="methodcomment" description="Comment for non-overriding methods" 
+context="methodcomment_context" enabled="true">/**
+ * Method
+ */</codetemplate>
+ 
+ <codetemplate name="overridecomment" description="Comment for overriding methods" 
+context="overridecomment_context" enabled="true">/**
+ * Overrides
+ */</codetemplate>
 
 </templates>

@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICodeFormatter;
@@ -23,7 +20,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -40,6 +36,7 @@ public class TryCatchBlock extends AbstractCodeBlock {
 	public TryCatchBlock(ITypeBinding[] exceptions, IJavaProject project, AbstractCodeBlock tryBody) {
 		fTryBody= tryBody;
 		fExceptions= exceptions;
+		fJavaProject= project;
 	}
 	
 	public boolean isEmpty() {
@@ -86,16 +83,11 @@ public class TryCatchBlock extends AbstractCodeBlock {
 	}
 
 	private String getCatchBody(ITypeBinding exception, String lineSeparator) throws CoreException {
-		CodeTemplates templates= CodeTemplates.getInstance();
-		Template template= templates.getTemplates(CodeTemplateContextType.CATCHBLOCK_NAME)[0];
-		Map vars= new HashMap();
-		vars.put(CodeTemplateContextType.EXCEPTION_TYPE, exception.getName());
-		vars.put(CodeTemplateContextType.EXCEPTION_VAR, "e"); //$NON-NLS-1$
-		CodeTemplateContext context= new CodeTemplateContext(
-			new CodeTemplateContextType(CodeTemplateContextType.CATCHBLOCK_CONTEXTTYPE), 
-			fJavaProject, vars, lineSeparator, 0);
-		TemplateBuffer buffer= context.evaluate(template);
-		return buffer.getString();
+		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.CATCHBLOCK);
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), fJavaProject, lineSeparator, 0);
+		context.setVariable(CodeTemplateContextType.EXCEPTION_TYPE, exception.getName());
+		context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, "e"); //$NON-NLS-1$
+		return context.evaluate(template).getString();
 	}
 
 	/*

@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
   */
 public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 		
-	private final ICompilationUnit fCompilationUnit; 
+	protected final ICompilationUnit fCompilationUnit; 
 	/** The type name. */
 	private final String fTypeName;
 	/** The package name. */

@@ -11,8 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,6 +21,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.Serializer;
 import org.apache.xml.serialize.SerializerFactory;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
@@ -36,44 +35,26 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.JavaUIException;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
  * <code>TemplateSet</code> manages a collection of templates and makes them
  * persistent.
  */
 public class TemplateSet {
-	
-	private static class TemplateComparator implements Comparator {
-		public int compare(Object arg0, Object arg1) {
-			if (arg0 == arg1)
-				return 0;
-			
-			if (arg0 == null)
-				return -1;
-				
-			Template template0= (Template) arg0;
-			Template template1= (Template) arg1;
-			
-			return template0.getName().compareTo(template1.getName());
-		}
-	}
 
 	private static final String NAME_ATTRIBUTE= "name"; //$NON-NLS-1$
 	private static final String DESCRIPTION_ATTRIBUTE= "description"; //$NON-NLS-1$
 	private static final String CONTEXT_ATTRIBUTE= "context"; //$NON-NLS-1$
 	private static final String ENABLED_ATTRIBUTE= "enabled"; //$NON-NLS-1$
 
-	protected List fTemplates= new ArrayList();
-	private Comparator fTemplateComparator= new TemplateComparator();
-	private Template[] fSortedTemplates= new Template[0];
+	private List fTemplates= new ArrayList();
 	private String fTemplateTag;
 	
 	public TemplateSet(String templateTag) {
 		fTemplateTag= templateTag;
 	}
-	
 	
 	/**
 	 * Convenience method for reading templates from a file.
@@ -151,9 +132,6 @@ public class TemplateSet {
 				}
 				add(template);
 			}
-	
-			sort();
-
 		} catch (ParserConfigurationException e) {
 			throwReadException(e);
 		} catch (IOException e) {
@@ -267,7 +245,6 @@ public class TemplateSet {
 			return; // ignore duplicate
 		
 		fTemplates.add(template);
-		sort();
 	}
 
 	private boolean exists(Template template) {
@@ -286,7 +263,6 @@ public class TemplateSet {
 	 */	
 	public void remove(Template template) {
 		fTemplates.remove(template);
-		sort();
 	}
 
 	/**
@@ -294,7 +270,6 @@ public class TemplateSet {
 	 */		
 	public void clear() {
 		fTemplates.clear();
-		sort();
 	}
 	
 	/**
@@ -316,12 +291,20 @@ public class TemplateSet {
 			}
 		}
 		return (Template[]) res.toArray(new Template[res.size()]);
-	}	
-	
-	private void sort() {
-		fSortedTemplates= (Template[]) fTemplates.toArray(new Template[fTemplates.size()]);
-		Arrays.sort(fSortedTemplates, fTemplateComparator);
 	}
+	
+	/**
+	 * Returns the first templates with the given name.
+	 */
+	public Template getFirstTemplate(String name) {
+		for (Iterator iterator= fTemplates.iterator(); iterator.hasNext();) {
+			Template curr= (Template) iterator.next();
+			if (curr.getName().equals(name)) {
+				return curr;
+			}
+		}
+		return null;
+	}	
 	
 }
 

@@ -26,7 +26,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 /*
@@ -110,7 +109,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		layout.marginWidth= 0;
 		result.setLayout(layout);
 	
-		int horizontalIndent= convertWidthInCharsToPixels(4);
+//		int horizontalIndent= convertWidthInCharsToPixels(4);
 
 		Group javaDocGroup= new Group(result, SWT.NONE);
 		layout= new GridLayout();
@@ -119,10 +118,11 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		javaDocGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		javaDocGroup.setText(PreferencesMessages.getString("CodeGenerationPreferencePage.comments.label")); //$NON-NLS-1$
 		fCreateJavaDocComments.doFillIntoGrid(javaDocGroup, 2);
+/*
 		fCreateNonJavadocComments.doFillIntoGrid(javaDocGroup, 2);
 		LayoutUtil.setHorizontalIndent(fCreateNonJavadocComments.getSelectionButton(null), horizontalIndent);
 		fCreateFileComments.doFillIntoGrid(javaDocGroup, 2);
-	
+*/	
 /*		Group getterSetterGroup= new Group(result, SWT.NONE);
 		layout= new GridLayout();
 		layout.numColumns= 2;

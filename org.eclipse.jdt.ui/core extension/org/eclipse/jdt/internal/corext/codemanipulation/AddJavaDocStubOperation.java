@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -24,13 +23,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.Templates;
-import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 /**
  * Add javadoc stubs to members. All members must belong to the same compilation unit.
@@ -50,46 +47,27 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		fSettings= settings;
 	}
 
-	private String createTypeComment(IType type, String lineDelimiter) throws CoreException {
-		Template[] templates= Templates.getInstance().getTemplates();
-		StringBuffer buf= new StringBuffer();
-		String comment= null;
-		for (int i= 0; i < templates.length; i++) {
-			if ("typecomment".equals(templates[i].getName())) { //$NON-NLS-1$
-				comment= JavaContext.evaluateTemplate(templates[i], type.getCompilationUnit(), type.getSourceRange().getOffset());
-				break;
-			}
-		}
-		if (comment == null || comment.length() == 0) {
-			buf.append("/**\n"); //$NON-NLS-1$
-			buf.append(" * "); //$NON-NLS-1$
-			buf.append(CodeGenerationMessages.getString("AddJavaDocStubOperation.configure.message")); //$NON-NLS-1$
-			buf.append('\n');
-			buf.append(" */\n"); //$NON-NLS-1$
-		} else {
-			buf.append(comment);
-			buf.append(lineDelimiter);
-		}
-		return buf.toString();
+	private String createTypeComment(IType type) throws CoreException {
+		return StubUtility.getTypeComment(type.getCompilationUnit(), type.getElementName());
 	}		
 	
-	private String createMethodComment(IMethod meth) throws JavaModelException {
+	private String createMethodComment(IMethod meth) throws CoreException {
+		ICompilationUnit cu= meth.getCompilationUnit();
+		
 		IType declaringType= meth.getDeclaringType();
-		if (fLastTypeHierarchy == null || !fLastTypeHierarchy.getType().equals(declaringType)) {
-			fLastTypeHierarchy= declaringType.newSupertypeHierarchy(null);
+		String typeName= declaringType.getElementName();
+		if (meth.isConstructor()) {
+			return StubUtility.getMethodComment(cu, typeName, meth.getElementName(), meth.getParameterNames(), meth.getExceptionTypes(), meth.getReturnType());
 		}
-		StringBuffer buf= new StringBuffer();
-		IMethod inheritedMethod= JavaModelUtil.findMethodDeclarationInHierarchy(fLastTypeHierarchy, declaringType, meth.getElementName(), meth.getParameterTypes(), meth.isConstructor());
+		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
+
+		IMethod inheritedMethod= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, meth.getElementName(), meth.getParameterTypes(), meth.isConstructor());
 		if (inheritedMethod != null) {
-			boolean nonJavaDocComments= fSettings.createNonJavadocComments;
-			boolean isDeprecated= Flags.isDeprecated(inheritedMethod.getFlags());
-			StubUtility.genJavaDocSeeTag(inheritedMethod.getDeclaringType(), inheritedMethod.getElementName(), inheritedMethod.getParameterTypes(), nonJavaDocComments, isDeprecated, buf);
+			IType definingType= inheritedMethod.getDeclaringType();
+			return StubUtility.getOverridingMethodComment(cu, typeName, definingType, meth.getElementName(), meth.getParameterTypes(), meth.getParameterNames(), meth.getExceptionTypes());
 		} else {
-			String desc= "Method " + meth.getElementName(); //$NON-NLS-1$
-			StubUtility.genJavaDocStub(desc, meth.getParameterNames(), meth.getReturnType(), meth.getExceptionTypes(), buf);
-		}
-		buf.append('\n');
-		return buf.toString();
+			return StubUtility.getMethodComment(cu, typeName, meth.getElementName(), meth.getParameterNames(), meth.getExceptionTypes(), meth.getReturnType());
+		}			
 	}
 	
 	private String createFieldComment(IField field) throws JavaModelException {
@@ -145,7 +123,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 				String comment= null;
 				switch (curr.getElementType()) {
 					case IJavaElement.TYPE:
-						comment= createTypeComment((IType) curr, lineDelim);
+						comment= createTypeComment((IType) curr);
 						break;
 					case IJavaElement.FIELD:
 						comment= createFieldComment((IField) curr);	
@@ -154,18 +132,21 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 						comment= createMethodComment((IMethod) curr);
 						break;
 				}
-				if (comment != null) {
-					int indent= StubUtility.getIndentUsed(curr);
-					String formattedComment= StubUtility.codeFormat(comment, indent, lineDelim);
-					int codeStart= 0;
-					while (Strings.isIndentChar(formattedComment.charAt(codeStart))) {
-						codeStart++;
-					}
-					String insertString= formattedComment.substring(codeStart) + formattedComment.substring(0, codeStart);
-					TextRange range= new TextRange(curr.getSourceRange().getOffset(), 0);
-					buffer.replace(range, insertString);
+				if (comment == null) {
+					comment= "/**\n *\n **/";
 				}
+				int indent= StubUtility.getIndentUsed(curr);
+				String formattedComment= StubUtility.codeFormat(comment + lineDelim, indent, lineDelim);
+				int codeStart= 0;
+				while (Strings.isIndentChar(formattedComment.charAt(codeStart))) {
+					codeStart++;
+				}
+				String insertString= formattedComment.substring(codeStart) + formattedComment.substring(0, codeStart);
+				TextRange range= new TextRange(curr.getSourceRange().getOffset(), 0);
+				buffer.replace(range, insertString);
+
 				monitor.worked(1);
+
 			}				
 
 		} finally {

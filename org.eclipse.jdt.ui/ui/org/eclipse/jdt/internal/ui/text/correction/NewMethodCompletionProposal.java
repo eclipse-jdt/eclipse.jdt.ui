@@ -145,18 +145,12 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		if (settings.createComments && !fSenderBinding.isAnonymous()) {
-			StringBuffer buf= new StringBuffer();
-			String[] namesArray= (String[]) names.toArray(new String[names.size()]);
-			String name= decl.getName().getIdentifier();
-			if (isConstructor()) {
-				StubUtility.genJavaDocStub("Constructor " + name, namesArray, null, null, buf);
-			} else {
-				String returnTypeSig= Signature.createTypeSignature(ASTNodes.asString(decl.getReturnType()), true);
-				StubUtility.genJavaDocStub("Method " + name, namesArray, returnTypeSig, null, buf);
-			}	
-			Javadoc javadoc= ast.newJavadoc();
-			javadoc.setComment(buf.toString());
-			decl.setJavadoc(javadoc);
+			String string= StubUtility.getMethodComment(getCompilationUnit(), fSenderBinding.getName(), decl);
+			if (string != null) {
+				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTRewrite.JAVADOC);
+				// TODO: getOverriding
+				decl.setJavadoc(javadoc);
+			}
 		}
 		return decl;
 	}

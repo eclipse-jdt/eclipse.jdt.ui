@@ -44,9 +44,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationMessages;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.Templates;
-import org.eclipse.jdt.internal.corext.template.java.JavaContext;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -160,16 +158,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	private String createTypeTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IType type)
 		throws CoreException, BadLocationException
 	{
-		Template[] templates= Templates.getInstance().getTemplates();
-
-		String comment= null;
-		for (int i= 0; i < templates.length; i++) {
-			if ("typecomment".equals(templates[i].getName())) { //$NON-NLS-1$
-				comment= JavaContext.evaluateTemplate(templates[i], type.getCompilationUnit(), type.getSourceRange().getOffset());
-				break;
-			}
-		}
-
+		String comment= StubUtility.getTypeComment(type.getCompilationUnit(), type.getElementName());
 		// trim comment start and end if any
 		if (comment != null) {
 			comment= comment.trim();

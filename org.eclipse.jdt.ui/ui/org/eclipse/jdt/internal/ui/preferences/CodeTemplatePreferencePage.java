@@ -332,7 +332,7 @@ public class CodeTemplatePreferencePage extends PreferencePage implements IWorkb
                     // bigger first and then make the columns wider
                     // to match the client area width
                     table.setSize(width, area.height);
-                    column1.setWidth(width / 4);
+                    column1.setWidth(width / 3);
                     column3.setWidth(width - (column1.getWidth()));
                  }
             }

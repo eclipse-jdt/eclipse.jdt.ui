@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -106,6 +107,9 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 			
 			StubUtility.GenStubSettings genStubSetting= new StubUtility.GenStubSettings(fSettings);
 			
+			ICompilationUnit cu= fType.getCompilationUnit();
+			String typeName= fType.getElementName();
+			
 			ITypeHierarchy typeHierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			
 			for (int i= 0; i < fMethods.length; i++) {
@@ -126,7 +130,8 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 						genStubSetting.callSuper= false;
 						genStubSetting.methodOverwrites= false;
 						genStubSetting.noBody= fType.isInterface();
-						content= StubUtility.genStub(fType.getElementName(), curr, genStubSetting, imports);
+						
+						content= StubUtility.genStub(cu, typeName, curr, fType, genStubSetting, imports);
 					} else {
 						int flags= overwrittenMethod.getFlags();
 						if (Flags.isFinal(flags) || Flags.isPrivate(flags)) {
@@ -139,7 +144,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 						genStubSetting.methodOverwrites= true;
 					
 						IMethod declaration= JavaModelUtil.findMethodDeclarationInHierarchy(typeHierarchy, fType, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-						content= StubUtility.genStub(fType.getElementName(), overwrittenMethod, declaration.getDeclaringType(), genStubSetting, imports);	
+						content= StubUtility.genStub(cu, typeName, overwrittenMethod, declaration.getDeclaringType(), genStubSetting, imports);	
 					}
 					IJavaElement sibling= null;
 					IMethod existing= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), existingMethods);
