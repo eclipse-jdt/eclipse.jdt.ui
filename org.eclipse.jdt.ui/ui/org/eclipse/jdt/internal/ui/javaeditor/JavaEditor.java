@@ -2712,7 +2712,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		int distance= 0;
 		
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		Iterator e= new JavaAnnotationIterator(model, false);
+		Iterator e= new JavaAnnotationIterator(model, true);
 		while (e.hasNext()) {
 			
 			IJavaAnnotation a= (IJavaAnnotation) e.next();
