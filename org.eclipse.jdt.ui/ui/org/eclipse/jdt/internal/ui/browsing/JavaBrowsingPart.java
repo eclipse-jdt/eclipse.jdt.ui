@@ -161,7 +161,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * initiated by user interaction with this part.
 	 */
 	private boolean fProcessSelectionEvents= true;
-	
+
 	private IPartListener fPartListener= new IPartListener() {
 		public void partActivated(IWorkbenchPart part) {
 			setSelectionFromEditor(part);
@@ -796,7 +796,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 				if (JavaBrowsingPreferencePage.openEditorOnSingleClick())
 					new ShowInEditorAction().run(event.getSelection(), getSite().getPage());
-				else
+				else if (JavaBrowsingPart.this.equals(getSite().getPage().getActivePart()))
 					linkToEditor((IStructuredSelection)event.getSelection());
 			}
 		});
@@ -1022,7 +1022,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			if (input instanceof ICompilationUnit)
 				return EditorUtility.getWorkingCopy((ICompilationUnit)input);
 			else
-				return EditorUtility.getWorkingCopy(input, true);
+				return EditorUtility.getWorkingCopy(input, false);
 		} catch (JavaModelException ex) {
 		}
 		return null;
@@ -1110,12 +1110,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit unit= manager.getWorkingCopy(input);
 		if (unit != null)
-			synchronized (unit) {
-				try {
-					unit.reconcile();
-					return unit.getElementAt(offset);
-				} catch (JavaModelException x) {
-				}
+			try {
+				unit.reconcile();
+				return unit.getElementAt(offset);
+			} catch (JavaModelException ex) {
 			}
 		return null;
 	}
@@ -1193,5 +1191,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 					fViewer.refresh();			
 			}
 		};
+	}
+
+	void setProcessSelectionEvents(boolean state) {
+		fProcessSelectionEvents= state;
 	}
 }

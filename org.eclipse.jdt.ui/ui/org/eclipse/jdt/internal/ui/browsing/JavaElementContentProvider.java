@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.viewers.AbstractTreeViewer;
@@ -249,14 +251,28 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 				} else if (element instanceof ICompilationUnit && !((ICompilationUnit)element).isWorkingCopy()) {
 					if (!getProvideWorkingCopy())
 						postRefresh(null);
+				} else if (element instanceof ICompilationUnit && ((ICompilationUnit)element).isWorkingCopy()) {
+					if (getProvideWorkingCopy())
+						postRefresh(null);
 				} else if (parent instanceof ICompilationUnit && getProvideWorkingCopy() && !((ICompilationUnit)parent).isWorkingCopy()) {
-					//	do nothing
-				} else
+					if (element instanceof IWorkingCopy) {
+						// working copy removed from system - refresh
+						postRefresh(null);
+					}
+				} else if (element instanceof IWorkingCopy && parent != null && parent.equals(fInput))
+				// closed editor - removing working copy
+					postRefresh(null);
+				else
 					postRemove(element);
 			}
 				
-			if (fBrowsingPart.isAncestorOf(element, fInput))
-				postAdjustInputAndSetSelection(null);
+			if (fBrowsingPart.isAncestorOf(element, fInput)) {
+				if (element instanceof IWorkingCopy) {
+					postAdjustInputAndSetSelection(((IWorkingCopy)element).getOriginal((IJavaElement)fInput));
+				} else
+					postAdjustInputAndSetSelection(null);
+			} 
+			
 			
 			return;
 		}
@@ -274,12 +290,18 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 				} else if (parent instanceof ICompilationUnit && getProvideWorkingCopy() && !((ICompilationUnit)parent).isWorkingCopy()) {
 					//	do nothing
 				} else if (element instanceof IWorkingCopy) {
-					//	do nothing
+					// new working copy comes to live
+					postRefresh(null);
 				} else
 					postAdd(parent, element);
 			} else	if (fInput == null) {
 				IJavaElement newInput= fBrowsingPart.findInputForJavaElement(element);
 				if (newInput != null)
+					postAdjustInputAndSetSelection(element);
+			} else if (element instanceof IType && fBrowsingPart.isValidInput(element)) {
+				IJavaElement cu1= element.getAncestor(IJavaElement.COMPILATION_UNIT);
+				IJavaElement cu2= ((IJavaElement)fInput).getAncestor(IJavaElement.COMPILATION_UNIT);
+				if  (cu1 != null && cu2 != null && cu1.equals(cu2))
 					postAdjustInputAndSetSelection(element);
 			}
 			return;
@@ -290,9 +312,6 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 				postRefresh(element);
 			}
 		}
-
-		if (element instanceof IType && fBrowsingPart.isValidInput(element))
-			postRefresh(null);
 
 		if (isClassPathChange(delta))
 			 // throw the towel and do a full refresh
@@ -420,7 +439,12 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 	private void postRunnable(final Runnable r) {
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
-			ctrl.getDisplay().asyncExec(r); 
+			fBrowsingPart.setProcessSelectionEvents(false);
+			try {
+				ctrl.getDisplay().syncExec(r); 
+			} finally {
+				fBrowsingPart.setProcessSelectionEvents(true);
+			}
 		}
 	}
 }
