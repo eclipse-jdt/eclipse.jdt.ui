@@ -164,7 +164,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		return tempResult.toArray();
 	}
 
-	private Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
+	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		if (!project.getProject().isOpen())
 			return NO_CHILDREN;
 			

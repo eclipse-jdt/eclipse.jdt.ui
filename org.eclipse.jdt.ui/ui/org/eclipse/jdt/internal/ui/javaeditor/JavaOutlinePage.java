@@ -55,6 +55,8 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.dialogs.IShowInSource;
+import org.eclipse.ui.dialogs.ShowInContext;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.internal.model.WorkbenchAdapter;
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -92,7 +94,6 @@ import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -120,7 +121,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  * It is specified to show the content of ICompilationUnits and IClassFiles.
  * Pulishes its context menu under <code>JavaPlugin.getDefault().getPluginId() + ".outline"</code>.
  */
-class JavaOutlinePage extends Page implements IContentOutlinePage {
+class JavaOutlinePage extends Page implements IContentOutlinePage, IAdaptable {
 
 			static Object[] NO_CHILDREN= new Object[0];
    
@@ -903,7 +904,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		// we must create the groups after we have set the selection provider to the site
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new OpenViewActionGroup(this), 
-				new ShowActionGroup(this), 
 				fCCPActionGroup= new CCPActionGroup(this),
 				new RefactorActionGroup(this), 
 				new GenerateActionGroup(this),
@@ -1022,6 +1022,16 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	}
 
 	/**
+	 * Answer the property defined by key.
+	 */
+	public Object getAdapter(Class key) {
+		if (key == IShowInSource.class) {
+			return getShowInSource();
+		}
+		return null;
+	}
+
+	/**
 	 * Convenience method to add the action installed under the given actionID to the
 	 * specified group of the menu.
 	 */
@@ -1089,6 +1099,20 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			action.run();
 	}
 	
+	/**
+	 * Returns the <code>IShowInSource</code> for this view.
+	 */
+	protected IShowInSource getShowInSource() {
+		return new IShowInSource() {
+			public ShowInContext getShowInContext() {
+				return new ShowInContext(
+					null,
+					getSite().getSelectionProvider().getSelection());
+			}
+		};
+	}
+
+	
 	private void initDragAndDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
 		Transfer[] transfers= new Transfer[] {
@@ -1109,4 +1133,5 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		DragSource source= new DragSource(control, ops);
 		// Note, that the transfer agents are set by the delegating drag adapter itself.
 		source.addDragListener(new DelegatingDragAdapter(dragListeners));
-	}}
+	}
+}

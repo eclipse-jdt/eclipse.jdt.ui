@@ -63,7 +63,7 @@ class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider 
 		return super.getChildren(element);
 	}
 
-	private Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
+	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		if (!project.getProject().isOpen())
 			return NO_CHILDREN;
 			
