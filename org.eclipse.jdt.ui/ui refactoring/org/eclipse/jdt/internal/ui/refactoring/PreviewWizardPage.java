@@ -5,7 +5,8 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.SashForm;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.compare.CompareConfiguration;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jface.viewers.CheckStateChangedEvent;import org.eclipse.jface.viewers.CheckboxTreeViewer;import org.eclipse.jface.viewers.ICheckStateListener;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ITreeViewerListener;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeExpansionEvent;import org.eclipse.jface.viewers.Viewer;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.core.refactoring.base.Change;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.compare.JavaMergeViewer;
+import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.SashForm;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.compare.CompareConfiguration;import org.eclipse.compare.internal.CompareViewerSwitchingPane;
+import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jface.viewers.CheckStateChangedEvent;import org.eclipse.jface.viewers.CheckboxTreeViewer;import org.eclipse.jface.viewers.ICheckStateListener;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ITreeViewerListener;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeExpansionEvent;import org.eclipse.jface.viewers.Viewer;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.core.refactoring.base.Change;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.compare.JavaMergeViewer;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 /**
  * Presents the changes made by the refactoring.
@@ -94,16 +95,12 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 	}
 	
 	
-	private IChange fChange;
-	private IChange fTreeViewerInput;
-		
-	private SashForm fSashForm;
-	private JavaMergeViewer fMergeViewer;
+	private IChange fChange;		
+	private CompareViewerSwitchingPane fSwitchingPane;
 	private CheckboxTreeViewer fTreeViewer;
+	private boolean fExpandFirstNode;
 	
 	public static final String PAGE_NAME= "PreviewPage"; //$NON-NLS-1$
-	
-	private boolean fExpandFirstNode;
 
 	/**
 	 * Creates a new proposed changes wizard page.
@@ -123,18 +120,20 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 			return;
 		
 		fChange= change;	
+		IChange treeViewerInput;
+		
 		if (fChange == null) {
-			fTreeViewerInput= null;
+			treeViewerInput= null;
 		} else if (fChange instanceof ICompositeChange && !(fChange instanceof AbstractTextBufferChange)) {
-			fTreeViewerInput= fChange;
+			treeViewerInput= fChange;
 		} else {
-			fTreeViewerInput= new DummyRootNode(fChange);
+			treeViewerInput= new DummyRootNode(fChange);
 		}
 		if (fTreeViewer != null)
-			fTreeViewer.setInput(fTreeViewerInput);
+			fTreeViewer.setInput(treeViewerInput);
 			
-		if (fTreeViewerInput != null)
-			checkAllActiveNodes(fTreeViewerInput);
+		if (treeViewerInput != null)
+			checkAllActiveNodes(treeViewerInput);
 	}
 	
 	/**
@@ -187,16 +186,13 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 	 * Method defined in IWizardPage
 	 */
 	public void createControl(Composite parent) {
-		fSashForm= new SashForm(parent, SWT.VERTICAL);
+		SashForm sashForm= new SashForm(parent, SWT.VERTICAL);
 		
-		createTreeViewer(fSashForm);
+		createTreeViewer(sashForm);
+		createCompareViewer(sashForm);
+		sashForm.setWeights(new int[]{33, 67});
 		
-		//Control compare= 
-		createCompareViewer(fSashForm);
-		//compare.setLayoutData(new GridData(GridData.FILL_BOTH));
-		fSashForm.setWeights(new int[]{33, 67});
-		
-		setControl(fSashForm);
+		setControl(sashForm);
 		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.REFACTORING_PREVIEW_WIZARD_PAGE));
 	}
 	
@@ -204,11 +200,12 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 	 * Method defined in IWizardPage
 	 */
 	public void setVisible(boolean visible){
-		if (visible && fTreeViewerInput != null) {
+		IChange treeViewerInput= (IChange)fTreeViewer.getInput();
+		if (visible && treeViewerInput != null) {
 			IStructuredSelection selection= (IStructuredSelection)fTreeViewer.getSelection();
 			if (selection.isEmpty()) {
 				ITreeContentProvider provider= (ITreeContentProvider)fTreeViewer.getContentProvider();
-				Object[] elements= provider.getElements(fTreeViewerInput);
+				Object[] elements= provider.getElements(treeViewerInput);
 				if (elements != null && elements.length > 0) {
 					Object element= elements[0];
 					if (fExpandFirstNode) {
@@ -225,7 +222,6 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 		}
 		super.setVisible(visible);
 	}
-	
 	
 	private List getActiveNodes(IChange root){
 		if (!root.isActive()) //assumes that no subelements can be active here
@@ -251,23 +247,24 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 		fTreeViewer.setCheckedElements(getActiveNodes(element).toArray());
 	}
 	
-	private Control createCompareViewer(Composite parent){
-		fMergeViewer= new JavaMergeViewer(parent, SWT.BORDER, new CompareConfiguration());
-		fMergeViewer.setContentProvider(new MergeTextViewerContentProvider());
-		fMergeViewer.setInput(new Object());
-			
-		Control control= fMergeViewer.getControl();		
-		return control;
+	private void createCompareViewer(final Composite parent){
+		fSwitchingPane= new CompareViewerSwitchingPane(parent, SWT.BORDER, true){
+			protected Viewer getViewer(Viewer oldViewer, Object input){
+				JavaMergeViewer mergeViewer= new JavaMergeViewer(oldViewer.getControl().getParent(), SWT.NONE, new CompareConfiguration());
+				mergeViewer.setContentProvider(new MergeTextViewerContentProvider());
+				mergeViewer.setInput(new Object());
+				return mergeViewer;
+			}
+		};
 	}
 	
-	private Control createTreeViewer(Composite parent){
+	private void createTreeViewer(Composite parent){
 		fTreeViewer= new CheckboxTreeViewer(parent);
 		fTreeViewer.setContentProvider(createTreeContentProvider());
 		fTreeViewer.setLabelProvider(createTreeLabelProvider());
 		fTreeViewer.addSelectionChangedListener(createSelectionChangedListener());
 		fTreeViewer.addCheckStateListener(createCheckStateListener());
 		fTreeViewer.addTreeListener(createTreeViewerListener());
-		return fTreeViewer.getControl();
 	}
 	
 	private ITreeViewerListener createTreeViewerListener(){
@@ -297,10 +294,8 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 				change.setActive(event.getChecked());
 				fTreeViewer.setSubtreeChecked(change, event.getChecked());
 				IStructuredSelection selection= (IStructuredSelection)fTreeViewer.getSelection();
-				if (selection.size() == 1) {
-					Object input= selection.getFirstElement();
-					fMergeViewer.setInput(input);
-				} 
+				if (selection.size() == 1) 
+					setViewerInput(selection.getFirstElement());
 			}
 		};
 	}
@@ -310,14 +305,18 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 			public void selectionChanged(SelectionChangedEvent event){
 				IStructuredSelection sel= (IStructuredSelection) event.getSelection();
 				if (sel.size() == 1) {
-					Object currentInput= fMergeViewer.getInput();
+					Object currentInput= fSwitchingPane.getInput();
 					Object newInput= sel.getFirstElement();
 					if (currentInput != newInput)
-						fMergeViewer.setInput(newInput);
+						setViewerInput(newInput);
 				} else {
-					fMergeViewer.setInput(new Object());	
+					setViewerInput(new Object());
 				}
 			}
 		};
 	}	
+	
+	private void setViewerInput(Object input){
+		fSwitchingPane.setInput(input);
+	}
 }
