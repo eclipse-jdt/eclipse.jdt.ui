@@ -59,6 +59,7 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.contentassist.IContentAssistRequestor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistantExtension;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -291,6 +292,9 @@ public class ContentAssistant2 implements IContentAssistant, IContentAssistantEx
 		}
 		
 		public void verifyKey(VerifyEvent e) {
+			// Only act on typed characters and ignore modifier-only events
+			if (e.character == 0 && (e.keyCode & SWT.KEYCODE_BIT) == 0)
+				return;
 			
 			int showStyle;
 			int pos= fViewer.getSelectedRange().x;
@@ -1049,6 +1053,13 @@ public class ContentAssistant2 implements IContentAssistant, IContentAssistantEx
 	public void setInformationControlCreator(IInformationControlCreator creator) {
 		fInformationControlCreator= creator;
 	}
+
+	/*
+	 * @see IContentAssistantExtension#install(IContentAssistRequestor)
+	 */
+	public void install(IContentAssistRequestor contentAssistRequestor) {
+		throw new UnsupportedOperationException();
+	}
 		
 	/*
 	 * @see IContentAssist#install
@@ -1167,7 +1178,6 @@ public class ContentAssistant2 implements IContentAssistant, IContentAssistantEx
 					IWidgetTokenOwnerExtension extension= (IWidgetTokenOwnerExtension) fViewer;
 					return extension.requestWidgetToken(this, WIDGET_PRIORITY);
 				}
-				return false;
 		}	
 		return true;
 	}
