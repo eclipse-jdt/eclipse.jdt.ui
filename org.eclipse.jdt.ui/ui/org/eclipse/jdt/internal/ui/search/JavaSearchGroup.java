@@ -32,10 +32,10 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 	public JavaSearchGroup(boolean inline) {
 		fInline= inline;
 		fGroups= new JavaSearchSubGroup[] {
-			new DeclarationsSearchGroup(),
 			new ReferencesSearchGroup(),
 			new ReadReferencesSearchGroup(),
 			new WriteReferencesSearchGroup(),
+			new DeclarationsSearchGroup(),
 			new ImplementorsSearchGroup()
 		};
 	}
