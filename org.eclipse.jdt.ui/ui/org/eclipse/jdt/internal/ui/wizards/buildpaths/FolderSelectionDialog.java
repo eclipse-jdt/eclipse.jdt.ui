@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
+import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
@@ -44,6 +45,7 @@ public class FolderSelectionDialog extends ElementTreeSelectionDialog implements
 
 	public FolderSelectionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider) {
 		super(parent, labelProvider, contentProvider);
+		setSorter(new ResourceSorter(ResourceSorter.NAME));
 	}
 
 	/* (non-Javadoc)
