@@ -36,13 +36,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         }
                 
         public void run(IProgressMonitor pm) throws InvocationTargetException {
-            try {
-                fCalls= fMethodWrapper.getCalls(pm);
-            } catch (Exception e) {
-                // This is bad style, but the IRunnableContext instance "eats" the exception
-                // so it's better to catch and log Exception here.
-                JavaPlugin.log(e);
-            }
+        	fCalls= fMethodWrapper.getCalls(pm);
         }
         
         MethodWrapper[] getCalls() {
