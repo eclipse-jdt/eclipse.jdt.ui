@@ -5,6 +5,6 @@ class A {
 	public void m1() {}
 	void test(){
 		A a0= new A();
-		((A)a0).m();
+		((A)a0).m1();
 	}
 }
