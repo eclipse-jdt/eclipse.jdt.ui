@@ -152,7 +152,7 @@ public class JavaUIHelp {
 				}
 			}
 			fHelpResources= (IHelpResource[]) helpResources.toArray(new IHelpResource[helpResources.size()]);
-			if (fText == null && fText.length() == 0) {
+			if (fText == null || fText.length() == 0) {
 				if (context != null) {
 					fText= context.getText();
 				}
