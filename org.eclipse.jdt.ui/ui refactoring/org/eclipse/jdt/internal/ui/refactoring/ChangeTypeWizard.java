@@ -237,8 +237,17 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			GridData gd= new GridData(GridData.FILL_BOTH);
 			gd.grabExcessHorizontalSpace= true;
 			gd.grabExcessVerticalSpace= true;
-			GC gc= new GC(parent); gc.setFont(gc.getFont()); 
-			gd.heightHint= Dialog.convertHeightInCharsToPixels(gc.getFontMetrics(), 6); // 6 characters tall
+			GC gc= null;
+			try {
+				gc= new GC(parent); 
+				gc.setFont(gc.getFont()); 
+				gd.heightHint= Dialog.convertHeightInCharsToPixels(gc.getFontMetrics(), 6); // 6 characters tall
+			} finally {
+				if (gc != null) {
+					gc.dispose();
+					gc= null;
+				}
+			}
 			fTreeViewer.getTree().setLayoutData(gd);
 			
 			fTreeViewer.setContentProvider(new ChangeTypeContentProvider(((ChangeTypeRefactoring)getRefactoring())));
