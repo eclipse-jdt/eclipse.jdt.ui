@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 
@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;
+import org.eclipse.jdt.internal.ui.search.SearchUtil;
 
 /**
  * Implements basic UI support for Java elements.
@@ -38,7 +39,6 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	private static Class[] PROPERTIES= new Class[] {
 		IPropertySource.class,
 		IResource.class,
-		ISearchPageScoreComputer.class,
 		IWorkbenchAdapter.class,
 		IResourceLocator.class,
 		IPersistableElement.class,
@@ -47,17 +47,18 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		ITaskListResourceAdapter.class
 	};
 	
-	private ISearchPageScoreComputer fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
+	private Object fSearchPageScoreComputer;
 	private static IResourceLocator fgResourceLocator= new ResourceLocator();
 	private static JavaWorkbenchAdapter fgJavaWorkbenchAdapter= new JavaWorkbenchAdapter();
 	private static ITaskListResourceAdapter fgTaskListAdapter= new JavaTaskListAdapter();
 	
 	public Class[] getAdapterList() {
+		updateLazyLoadedAdapters();
 		return PROPERTIES;
 	}
 	
 	public Object getAdapter(Object element, Class key) {
-		
+		updateLazyLoadedAdapters();
 		IJavaElement java= (IJavaElement) element;
 		
 		if (IPropertySource.class.equals(key)) {
@@ -66,7 +67,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 			return getResource(java);
 		} if (IProject.class.equals(key)) {
 			return getProject(java);
-		} if (ISearchPageScoreComputer.class.equals(key)) {
+		} if (fSearchPageScoreComputer != null && ISearchPageScoreComputer.class.equals(key)) {
 			return fSearchPageScoreComputer;
 		} if (IWorkbenchAdapter.class.equals(key)) {
 			return fgJavaWorkbenchAdapter;
@@ -125,5 +126,25 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		if (resource.getType() == IResource.FILE)
 			return new FilePropertySource((IFile) resource);
 		return new ResourcePropertySource((IResource) resource);
+	}
+
+	private void updateLazyLoadedAdapters() {
+		if (fSearchPageScoreComputer == null && SearchUtil.isSearchPlugInActivated())
+			createSearchPageScoreComputer();
+	}
+
+	private void createSearchPageScoreComputer() {
+		fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
+		PROPERTIES= new Class[] {
+			IPropertySource.class,
+			IResource.class,
+			ISearchPageScoreComputer.class,
+			IWorkbenchAdapter.class,
+			IResourceLocator.class,
+			IPersistableElement.class,
+			IProject.class,
+			IContributorResourceAdapter.class,
+			ITaskListResourceAdapter.class
+		};
 	}
 }
