@@ -8,7 +8,9 @@ import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -22,25 +24,26 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 
-public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
+public class JavaSearchResultLabelProvider extends LabelProvider {
 	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
 	public static final int SHOW_CONTAINER_ELEMENT= 2;
 	public static final int SHOW_PATH= 3;
 	public static final String POTENTIAL_MATCH= SearchMessages.getString("JavaSearchResultLabelProvider.potentialMatch"); //$NON-NLS-1$
+
+	private AppearanceAwareLabelProvider fLabelProvider;
+	private ILabelDecorator fDecorator;
 	
 	// Cache
 	private IMarker fLastMarker;
 	private IJavaElement fLastJavaElement;
 
-
 	public JavaSearchResultLabelProvider() {
-		super(
+		fDecorator= PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
+		fLabelProvider= 
 			new AppearanceAwareLabelProvider(
 				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
-				null)
-			, null);
-		setLabelDecorator(PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
+				null);
 	}	
 
 	public String getText(Object o) {
@@ -57,19 +60,36 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 			else
 				return ""; //$NON-NLS-1$
 		}
+
 		if (javaElement instanceof IImportDeclaration)
 			javaElement= ((IImportDeclaration)javaElement).getParent().getParent();
+
+		String text= "";
 		if (isPotentialMatch) 
-			return super.getText(javaElement) + POTENTIAL_MATCH;
+			text= fLabelProvider.getText(javaElement) + POTENTIAL_MATCH;
 		else
-			return super.getText(javaElement);
+			text= fLabelProvider.getText(javaElement);
+
+		if (fDecorator != null) {
+			String decoratedText= fDecorator.decorateText(text, javaElement);
+			if (decoratedText != null)
+				return decoratedText;
+		}
+		return text;
 	}
 
 	public Image getImage(Object o) {
 		IJavaElement javaElement= getJavaElement(o);
 		if (javaElement == null)
 			return null;
-		return super.getImage(javaElement);
+
+		Image image= fLabelProvider.getImage(javaElement);
+		if (fDecorator != null) {
+			Image decoratedImage= fDecorator.decorateImage(image, javaElement);
+			if (decoratedImage != null)
+				return decoratedImage;
+		}
+		return image;
 	}
 
 	public void setOrder(int orderFlag) {
@@ -86,7 +106,7 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
 			flags |= JavaElementLabels.PREPEND_ROOT_PATH;
 		}
-		((AppearanceAwareLabelProvider)getLabelProvider()).setTextFlags(flags);
+		fLabelProvider.setTextFlags(flags);
 	}
 
 	private IJavaElement getJavaElement(Object o) {
@@ -112,5 +132,24 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 			fLastMarker= marker;
 		}
 		return fLastJavaElement;
+	}
+
+	public void addListener(ILabelProviderListener listener) {
+		super.addListener(listener);
+		fLabelProvider.addListener(listener);
+	}
+
+	public void dispose() {
+		super.dispose();
+		fLabelProvider.dispose();
+	}
+
+	public boolean isLabelProperty(Object element, String property) {
+		return fLabelProvider.isLabelProperty(element, property);
+	}
+
+	public void removeListener(ILabelProviderListener listener) {
+		super.removeListener(listener);
+		fLabelProvider.removeListener(listener);
 	}
 }
