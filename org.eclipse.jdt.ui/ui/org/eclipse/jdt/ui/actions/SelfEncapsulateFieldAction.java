@@ -113,8 +113,15 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 			return;
 		}
 		IField field= (IField)elements[0];
-		if (field.isBinary())
+		try {
+			if (field.isBinary() || JdtFlags.isEnum(field)) {
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.unavailable")); //$NON-NLS-1$
+				return;
+			}
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
 			return;
+		}
 		run(field);
 	}
 	
