@@ -20,11 +20,6 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 		super(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.tooltip")); //$NON-NLS-1$
 	}
-
-	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		IType type= getType(element);
-		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(type), getScopeDescription(type), getCollector());
-	};
 	
 	protected IJavaSearchScope getScope(IType type) throws JavaModelException {
 		if (type != null)
