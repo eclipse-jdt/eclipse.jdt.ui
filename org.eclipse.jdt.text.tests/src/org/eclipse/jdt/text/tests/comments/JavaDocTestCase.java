@@ -319,7 +319,7 @@ public class JavaDocTestCase extends CommentTestCase {
 	
 	public void testNoFormat1() {
 		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMAT, "false");
-		String content= PREFIX + DELIMITER + POSTFIX;
+		String content= PREFIX + DELIMITER + INFIX + "test" + DELIMITER + INFIX + "test" + DELIMITER + POSTFIX;
 		assertEquals(content, testFormat(content));
 	}
 }
