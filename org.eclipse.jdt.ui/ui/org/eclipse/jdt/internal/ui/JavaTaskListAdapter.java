@@ -9,8 +9,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 public class JavaTaskListAdapter implements ITaskListResourceAdapter {
 	/*
 	 * @see ITaskListResourceAdapter#getAffectedResource(IAdaptable)
@@ -22,8 +20,7 @@ public class JavaTaskListAdapter implements ITaskListResourceAdapter {
 			if (resource != null)
 				return resource; 
 
-			ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(
-												java, IJavaElement.COMPILATION_UNIT);
+			ICompilationUnit cu= (ICompilationUnit) java.getAncestor(IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				if (cu.isWorkingCopy())
 					return cu.getOriginalElement().getUnderlyingResource();

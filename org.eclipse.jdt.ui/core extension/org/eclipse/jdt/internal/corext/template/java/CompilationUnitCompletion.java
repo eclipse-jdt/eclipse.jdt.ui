@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * A completion requestor to collect informations on local variables.
@@ -198,8 +197,8 @@ class CompilationUnitCompletion extends CompletionRequestorAdapter {
 			return false;
 
 		IJavaProject project= fUnit.getJavaProject();
-		IType type0= JavaModelUtil.findType(project, typeName0);
-		IType type1= JavaModelUtil.findType(project, typeName1);
+		IType type0= project.findType(typeName0);
+		IType type1= project.findType(typeName1);
 
 		ITypeHierarchy hierarchy= type0.newSupertypeHierarchy(null);
 		IType[] superTypes= hierarchy.getAllSupertypes(type0);
