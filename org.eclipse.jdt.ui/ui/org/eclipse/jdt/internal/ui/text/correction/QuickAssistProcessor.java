@@ -573,6 +573,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.anonymous");	 //$NON-NLS-1$
 			outer= ASTResolving.findParentStatement(outer);
+			if (outer == null) {
+				return false; // private Object o= new Object() { ... };
+			}
 		} else if (outer instanceof Block) {
 			//	-> a block in a block
 			body= block;
