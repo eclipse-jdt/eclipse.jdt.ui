@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.RefreshAction;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -56,6 +57,8 @@ public class OpenEditorTestSetup extends TestCase {
 		
 		setUpTestCases();
 
+		new RefreshAction(workbench.getActiveWorkbenchWindow().getShell()).refreshAll();
+		
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		if (autobuild)
 			ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(true);
