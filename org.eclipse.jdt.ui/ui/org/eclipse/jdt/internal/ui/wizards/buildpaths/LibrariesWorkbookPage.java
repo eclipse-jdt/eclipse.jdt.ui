@@ -659,12 +659,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 
 	private CPListElement[] openContainerDialog(String title, ClasspathContainerWizard wizard) {
+		wizard.setWindowTitle(title);
 		WizardDialog dialog= new WizardDialog(getShell(), wizard);
 		PixelConverter converter= new PixelConverter(getShell());
 		
 		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(40), converter.convertHeightInCharsToPixels(20));
 		dialog.create();
-		dialog.getShell().setText(title);
 		if (dialog.open() == WizardDialog.OK) {
 			IClasspathEntry created= wizard.getNewEntry();
 			if (created != null) {			

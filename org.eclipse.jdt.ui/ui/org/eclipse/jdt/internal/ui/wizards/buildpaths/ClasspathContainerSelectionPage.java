@@ -6,6 +6,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -74,6 +76,12 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 				validatePage();
 			}
 		});
+		fListViewer.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				doDoubleClick();
+			}
+		});		
+		
 		int selectionIndex= fDialogSettings.getInt(DIALOGSTORE_CONTAINER_IDX);
 		if (selectionIndex >= fContainers.length) {
 			selectionIndex= 0;
@@ -98,7 +106,12 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		}
 		return null;
 	}
-
+	
+	protected void doDoubleClick() {
+		if (canFlipToNextPage()) {
+			getContainer().showPage(getNextPage());
+		}
+	}	
 
 	/* (non-Javadoc)
 	 * @see IWizardPage#canFlipToNextPage()
