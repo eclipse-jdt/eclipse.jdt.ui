@@ -354,7 +354,6 @@ public class NLSRefactoring extends Refactoring {
 		try{
 			return bundle.getString(key);
 		} catch (MissingResourceException e){
-			//XXX very inefficient
 			return null;	
 		}
 	}
@@ -598,7 +597,7 @@ public class NLSRefactoring extends Refactoring {
 		}	
 	}
 	
-	//XXX extremely inefficient way to do it
+	//XXX performance improvement oportunities here
 	private NLSLine findLine(NLSElement element){
 		for(int i= 0; i < fLines.length; i++){
 			NLSElement[] lineElements= fLines[i].getElements();
@@ -833,7 +832,6 @@ public class NLSRefactoring extends Refactoring {
 	private StringBuffer createClass() throws CoreException{
 		String ld= fgLineDelimiter; //want shorter name
 		StringBuffer b= new StringBuffer();
-		//XXX should the class be public?
 		b.append("public class ").append(fAccessorClassName).append(" {").append(ld) //$NON-NLS-2$ //$NON-NLS-1$
 		 .append(ld)
 		 .append("private static final String ") //$NON-NLS-1$
