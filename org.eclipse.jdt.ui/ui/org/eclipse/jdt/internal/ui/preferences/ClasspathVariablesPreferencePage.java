@@ -18,8 +18,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 				updateStatus(status);
 			}
 		};
-		fVariableBlock= new VariableBlock(listener, false, null);
-	}
+		fVariableBlock= new VariableBlock(listener, false, null);		setDescription("A classpath variable allows to express indirect references on a classpath to other projects or libraries.");	}
 
 	/**
 	 * @see PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
@@ -120,6 +119,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 			srcRootPath= srcAttachPath[1];
 		}
 		JavaCore.setClasspathVariable(JRESRCROOT_VARIABLE, srcRootPath);		
-	}		*/
+	}	
+	*/
 
 }
