@@ -23,9 +23,11 @@ import org.eclipse.jdt.internal.ui.util.RowLayouter;
 public class ExtractTempInputPage extends TextInputWizardPage {
 
 	private Label fLabel;
+	private final boolean fInitialValid;
 	
 	public ExtractTempInputPage(String initialValue) {
 		super(true, initialValue);
+		fInitialValid= ! ("".equals(initialValue));
 		setMessage(RefactoringMessages.getString("ExtractTempInputPage.enter_name")); //$NON-NLS-1$
 	}
 
@@ -98,7 +100,8 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 	
 	private void updatePreviewLabel(){
 		try {
-			fLabel.setText(RefactoringMessages.getString("ExtractTempInputPage.signature_preview") + getExtractTempRefactoring().getTempSignaturePreview()); //$NON-NLS-1$
+			if (fLabel != null)
+				fLabel.setText(RefactoringMessages.getString("ExtractTempInputPage.signature_preview") + getExtractTempRefactoring().getTempSignaturePreview()); //$NON-NLS-1$
 		} catch(JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("ExtractTempInputPage.extract_local"), RefactoringMessages.getString("ExtractTempInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -123,6 +126,13 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 		checkBox.setSelection(value);
 		layouter.perform(checkBox);
 		return checkBox;		
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isInitialInputValid()
+	 */
+	protected boolean isInitialInputValid() {
+		return fInitialValid;
 	}
 
 }
