@@ -187,7 +187,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		} catch (InterruptedException e) {
 			return false;
 		} catch (InvocationTargetException ex) {
-			if (ExceptionHandler.handle(ex, getShell(), "JAR Package Wizard Error", "Creation of JAR failed"))
+			if (ExceptionHandler.handle(ex, getShell(), "JAR Export Error", "Creation of JAR failed"))
 				return false;
 		}
 		IStatus status= op.getStatus();

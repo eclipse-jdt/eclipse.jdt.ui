@@ -454,8 +454,11 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		dialog.getShell().setText("Save As");
 		dialog.setMessage("Select location and name for the descripton");
 		dialog.setOriginalFile(createFileHandle(fJarPackage.getDescriptionLocation()));
-		if (dialog.open() == dialog.OK)
-			fDescriptionFileText.setText(dialog.getResult().toString());
+		if (dialog.open() == dialog.OK) {
+			IPath path= dialog.getResult();
+			path= path.removeFileExtension().addFileExtension("jardesc");
+			fDescriptionFileText.setText(path.toString());
+		}
 	}
 	/**
 	 *	Open an appropriate destination browser so that the user can specify a source
@@ -593,14 +596,16 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	 * Overrides method from WizardDataTransferPage
 	 */
 	protected boolean validateOptionsGroup() {
-		if (fSaveDescriptionCheckbox.getSelection() && fDescriptionFileText.getText().length() == 0) {
-			setErrorMessage("Invalid description file.");
-			return false;
-		}
-		String fileExtension= fJarPackage.getDescriptionLocation().getFileExtension();
-		if (fileExtension == null || !fileExtension.equals(JarPackage.DESCRIPTION_EXTENSION)) {
-			setErrorMessage("Description file extension must be '.jardesc'");
-			return false;
+		if (fJarPackage.isDescriptionSaved()){
+			if (fDescriptionFileText.getText().length() == 0) {
+				setErrorMessage("Invalid description file.");
+				return false;
+			}
+			String fileExtension= fJarPackage.getDescriptionLocation().getFileExtension();
+			if (fileExtension == null || !fileExtension.equals(JarPackage.DESCRIPTION_EXTENSION)) {
+				setErrorMessage("Description file extension must be '.jardesc'");
+				return false;
+			}
 		}
 		return true;
 	}
@@ -611,6 +616,10 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		if (!fExportClassFilesCheckbox.getSelection()
 				&& !fExportJavaFilesCheckbox.getSelection()) {
 			setErrorMessage("No export type checked.");
+			return false;
+		}
+		if (getSelectedResources().size() == 0) {
+			setErrorMessage("No resources selected for export");
 			return false;
 		}
 		return true;

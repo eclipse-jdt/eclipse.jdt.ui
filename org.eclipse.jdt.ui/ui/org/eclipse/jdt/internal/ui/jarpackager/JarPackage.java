@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-
+import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -27,9 +26,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -96,9 +93,8 @@ transient 	private IPackageFragment[] fPackagesToUnseal;
 transient 	private IType fMainClass;
 	
 	private String fDownloadExtensionsPath;	
-
-	public JarPackage() {
-		setInitializeFromDialog(true);
+	/*	 * Error handling	 */	 private boolean fExportErrors;	 private boolean fExportWarnings;	 private boolean fLogErrors;	 private boolean fLogWarnings;
+	public JarPackage() {		setInitializeFromDialog(true);
 		setExportClassFiles(true);
 		setCompress(true);
 		setSaveDescription(false);
@@ -109,8 +105,8 @@ transient 	private IType fMainClass;
 		setReuseManifest(false);
 		setSaveManifest(false);
 		setManifestLocation(new Path(""));
-		setDownloadExtensionsPath("");
-	}
+		setDownloadExtensionsPath("");		setExportErrors(true);		setExportWarnings(true);		
+		setLogErrors(true);		setLogWarnings(true);			}
 
 	/**
 	 * Reads the JAR package spec from file.
@@ -451,7 +447,7 @@ transient 	private IType fMainClass;
 	protected JarPackageWriter getWriter(OutputStream outputStream) {
 		return new JarPackageWriter(outputStream);
 	}
-
+	/**	 * Gets the logErrors	 * @return Returns a boolean	 */	public boolean logErrors() {		return fLogErrors;	}	/**	 * Sets the logErrors	 * @param logErrors The logErrors to set	 */	public void setLogErrors(boolean logErrors) {		fLogErrors= logErrors;	}	/**	 * Gets the logWarnings	 * @return Returns a boolean	 */	public boolean logWarnings() {		return fLogWarnings;	}	/**	 * Sets the logWarnings	 * @param logWarnings The logWarnings to set	 */	public void setLogWarnings(boolean logWarnings) {		fLogWarnings= logWarnings;	}	/**	 * Answers if files with errors are exported	 * @return Returns a boolean	 */	public boolean exportErrors() {		return fExportErrors;	}	/**	 * Sets the exportErrors	 * @param exportErrors The exportErrors to set	 */	public void setExportErrors(boolean exportErrors) {		fExportErrors= exportErrors;	}	/**	 * Answers if files with warnings are exported	 * @return Returns a boolean	 */	public boolean exportWarnings() {		return fExportWarnings;	}	/**	 * Sets the exportWarnings	 * @param exportWarnings The exportWarnings to set	 */	public void setExportWarnings(boolean exportWarnings) {		fExportWarnings= exportWarnings;	}
 	// ----------- Utility methods -----------
 
 	/**
@@ -463,8 +459,6 @@ transient 	private IType fMainClass;
 			&& getSelectedResources() != null && getSelectedResources().size() > 0
 			&& getJarLocation() != null
 			&& doesManifestExist()
-			&& getDescriptionLocation().getFileExtension() != null
-			&& getDescriptionLocation().getFileExtension().equals(DESCRIPTION_EXTENSION)
 			&& isMainClassValid(new BusyIndicatorRunnableContext());
 	}
 	/**
@@ -492,7 +486,7 @@ transient 	private IType fMainClass;
 		return mainMethods.contains(getMainClass());
 	}
 	/**
-	 * Returns the minimal set of packages which contain all the selected resources.
+	 * Returns the minimal set of packages which contain all the selected Java resources.
 	 * @return	the Set of IPackageFragments which contain all the selected resources
 	 */
 	public Set getPackagesForSelectedResources() {
@@ -509,16 +503,14 @@ transient 	private IType fMainClass;
 				IJavaProject jProject= JavaCore.create(resource.getProject());
 				try {
 					IPackageFragment pack= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
-					if (pack != null)
-						packages.add(pack);
+					if (pack != null && pack.getChildren().length > 0)						packages.add(pack);
 				} catch (JavaModelException ex) {
 					// don't add the package
 				}
 			}
 		}
 		return packages;
-	}
-	/**
+	}	/**	 * Tells whether the given resource (or its children) have compile errors.	 * The method acts on the current build state and does not recompile.	 * 	 * @param resource the resource to check for errors	 * @return <code>true</code> if the resource (and its children) are error free	 * @throws import org.eclipse.core.runtime.CoreException if there's a marker problem	 */	public boolean hasCompileErrors(IResource resource) throws CoreException {		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);		for (int i= 0; i < problemMarkers.length; i++) {			if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR)				return true;		}		return false;	}	/**	 * Tells whether the given resource (or its children) have compile errors.	 * The method acts on the current build state and does not recompile.	 * 	 * @param resource the resource to check for errors	 * @return <code>true</code> if the resource (and its children) are error free	 * @throws import org.eclipse.core.runtime.CoreException if there's a marker problem	 */	public boolean hasCompileWarnings(IResource resource) throws CoreException {		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);		for (int i= 0; i < problemMarkers.length; i++) {			if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_WARNING)				return true;		}		return false;	}	/**
 	 * Checks if the JAR file can be overwritten.
 	 * If the JAR package setting does not allow to overwrite the JAR
 	 * then a dialog will ask the user again.
