@@ -113,7 +113,7 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 	 * @see Refactoring#checkInput
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 8);
+		pm.beginTask("", 9);
 		pm.subTask("checking preconditions");
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkNewName());
@@ -122,10 +122,8 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 		pm.worked(1);
 		result.merge(checkNestedHierarchy(getField().getDeclaringType()));
 		pm.worked(1);
-		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(pm)));
-		pm.worked(3);
-		result.merge(analyzeAffectedCompilationUnits());
-		pm.worked(2);
+		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 3))));
+		result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 3)));
 		pm.done();
 		return result;
 	}
@@ -165,19 +163,21 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 	 * (non java-doc)
 	 * Analyzes all compilation units in which type is referenced
 	 */
-	private RefactoringStatus analyzeAffectedCompilationUnits() throws JavaModelException{
+	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		Iterator iter= getOccurrences(null).iterator();
+		pm.beginTask("", fOccurrences.size());
+		Iterator iter= fOccurrences.iterator();
 		RenameFieldASTAnalyzer analyzer= new RenameFieldASTAnalyzer(fNewName, getField());
 		while (iter.hasNext()){
-			analyzeCompilationUnit(analyzer, (List)iter.next(), result);
+			analyzeCompilationUnit(pm, analyzer, (List)iter.next(), result);
 		}
 		return result;
 	}
 	
-	private void analyzeCompilationUnit(RenameFieldASTAnalyzer analyzer, List searchResults, RefactoringStatus result)  throws JavaModelException {
+	private void analyzeCompilationUnit(IProgressMonitor pm, RenameFieldASTAnalyzer analyzer, List searchResults, RefactoringStatus result)  throws JavaModelException {
 		SearchResult searchResult= (SearchResult)searchResults.get(0);
 		CompilationUnit cu= (CompilationUnit) (JavaCore.create(searchResult.getResource()));
+		pm.subTask("analyzing \"" + cu.getElementName() + "\"");
 		if ((! cu.exists()) || (cu.isReadOnly()) || (!cu.isStructureKnown()))
 			return;
 		result.merge(analyzer.analyze(searchResults, cu));
@@ -190,7 +190,7 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("creating rename package change", 7);
 		CompositeChange builder= new CompositeChange();
-		getOccurrences(new SubProgressMonitor(pm, 6, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+		getOccurrences(new SubProgressMonitor(pm, 6));
 		addOccurrences(pm, builder);
 		pm.worked(1);
 		pm.done();
@@ -236,7 +236,7 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 			if (pm == null)
 				pm= new NullProgressMonitor();
 			pm.subTask("searching for references");	
-			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 6, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), getScope(), createSearchPattern());
+			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 6), getScope(), createSearchPattern());
 		}	
 		return fOccurrences;
 	}
