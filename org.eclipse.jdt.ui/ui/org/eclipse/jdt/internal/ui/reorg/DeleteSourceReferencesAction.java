@@ -159,7 +159,8 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 		return true;
 	}	
 	
-	private boolean confirmDelete() {
+	//made protected for ui-less testing
+	protected boolean confirmDelete() {
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
 		String label= ReorgMessages.getString("deleteAction.confirm.message"); //$NON-NLS-1$
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
