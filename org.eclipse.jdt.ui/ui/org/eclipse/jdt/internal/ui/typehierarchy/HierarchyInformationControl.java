@@ -131,6 +131,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		super.setBackgroundColor(background);
 		fLabel.setBackground(background);
 	}
+	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl#setInput(java.lang.Object)

@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
@@ -83,6 +83,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 import org.eclipse.jdt.internal.ui.refactoring.VisibilityControlUtil;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -262,49 +263,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				setterFields= getSetterOnlyFields(result);
 				getterSetterFields= getGetterSetterFields(result);			
 			}
-			IField[][] allFields= new IField[][] {preselected, getterFields, setterFields, getterSetterFields};
-			
-			IJavaElement elementPosition= calculateElementPosition(dialog.getInsertionIndex(), allFields);
+			IJavaElement elementPosition= dialog.getElementPosition();
 			
 			generate(getterFields, setterFields, getterSetterFields, elementPosition);
 		}
-	}
-	
-	private IMethod asFirstMethod(IField[][] allFields) {
-		try {
-			for (int i=0; i < allFields.length; i++) {
-				if (allFields[i].length  > 0) {
-					IMethod methods[]= allFields[i][0].getDeclaringType().getMethods();
-					return methods[0];				
-				}
-			}
-		} catch (JavaModelException e) {
-		}
-		return null;
-	}
-	
-	private IMethod atMethodPosition(IField[][] allFields, int index) {
-		try {
-			for (int i=0; i < allFields.length; i++) {
-				if (allFields[i].length  > 0) {
-					IMethod methods[]= allFields[i][0].getDeclaringType().getMethods();
-					if (index < methods.length)
-						return methods[index];		// reserve position for "as first method" option			
-				}
-			}
-		} catch (JavaModelException e) {
-		}
-		return null;
-	}
-	
-	/*
-	 * Determine where in the file to enter the newly created methods.
-	 */
-	private IJavaElement calculateElementPosition(int comboBoxIndex, IField[][] allFields) {		
-		if (comboBoxIndex == 0)				// as first method
-			return asFirstMethod(allFields);
-		else								// method position
-			return atMethodPosition(allFields, comboBoxIndex);			
 	}
 	
 	private static class AddGetterSetterSelectionStatusValidator implements ISelectionStatusValidator {
@@ -553,9 +515,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 		try {
 			AddGetterSetterOperation op= createAddGetterSetterOperation(getterFields, setterFields, getterSetterFields, elementPosition);
-
 			setOperationStatusFields(op);
-			new ProgressMonitorDialog(getShell()).run(false, true, new WorkbenchRunnableAdapter(op));
+			
+			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
+			if (context == null) {
+				context= new BusyIndicatorRunnableContext();
+			}
+			context.run(false, true, new WorkbenchRunnableAdapter(op));
 		
 			IMethod[] createdMethods= op.getCreatedAccessors();
 			if (createdMethods.length > 0) {

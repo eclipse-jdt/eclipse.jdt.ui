@@ -57,6 +57,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	private ITreeContentProvider fContentProvider;
 	private boolean fGenerateComment;
 	private IType fType;
+	private int fWidth = 60;
+	private int fHeight = 18;
 
 	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
 		super(parent, labelProvider, contentProvider);
@@ -69,32 +71,16 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		GenStubSettings genStubSettings= new GenStubSettings(settings);
 		fGenerateComment= genStubSettings.createComments;		
 	}
-	
-	private IType getType() {
-		return fType;
-	}
-	
+		
 	protected ITreeContentProvider getContentProvider() {
 		return fContentProvider;
-	}
-
-	protected CompilationUnitEditor getEditor() {
-		return fEditor;
 	}
 
 	public int getInsertionIndex() {
 		return fInsertionIndex;
 	}
 
-	protected void setContentProvider(ITreeContentProvider provider) {
-		fContentProvider = provider;
-	}
-
-	protected void setEditor(CompilationUnitEditor editor) {
-		fEditor = editor;
-	}
-
-	protected void setInsertionIndex(int index) {
+	private void setInsertionIndex(int index) {
 		fInsertionIndex = index;
 	}
 	
@@ -102,9 +88,19 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return fGenerateComment;
 	}
 	
-	public void setGenerateComment(boolean comment) {
+	private void setGenerateComment(boolean comment) {
 		fGenerateComment= comment;
-	}	
+	}
+	
+	/**
+	 * Sets the size of the tree in unit of characters.
+	 * @param width  the width of the tree.
+	 * @param height the height of the tree.
+	 */
+	public void setSize(int width, int height) {
+		fWidth = width;
+		fHeight = height;
+	}		
 	
 	protected Composite createSelectionButtons(Composite composite) {
 		Composite buttonComposite= super.createSelectionButtons(composite);
@@ -180,7 +176,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			
 		CheckboxTreeViewer treeViewer= createTreeViewer(inner);
 		gd= new GridData(GridData.FILL_BOTH);
-		gd.heightHint = convertHeightInCharsToPixels(20);
+		gd.widthHint = convertWidthInCharsToPixels(fWidth);
+		gd.heightHint = convertHeightInCharsToPixels(fHeight);
 		treeViewer.getControl().setLayoutData(gd);			
 					
 		Composite buttonComposite= createSelectionButtons(inner);
@@ -234,21 +231,16 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	}
 	
 	protected Composite createEntryPtCombo(Composite composite) {
-		if (getEditor() != null) {
-			Composite selectionComposite = new Composite(composite, SWT.NONE);
-			GridLayout layout = new GridLayout();
-			layout.marginHeight= 0;
-			layout.marginWidth= 0;
-			selectionComposite.setLayout(layout);
-			selectionComposite.setFont(composite.getFont());	
-						
-			addOrderEntryChoices(selectionComposite);	
-											
-			return selectionComposite;
-
-		}
-		else
-			return composite;
+		Composite selectionComposite = new Composite(composite, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		selectionComposite.setLayout(layout);
+		selectionComposite.setFont(composite.getFont());	
+					
+		addOrderEntryChoices(selectionComposite);	
+										
+		return selectionComposite;
 	}
 	
 	private Composite addOrderEntryChoices(Composite buttonComposite) {
@@ -277,8 +269,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		try {
 			int position= 0;
 			int presetOffset= 0;
-			if (getEditor() != null) {
-				presetOffset= ((TextSelection)getEditor().getSelectionProvider().getSelection()).getOffset();
+			if (fEditor != null) {
+				presetOffset= ((TextSelection) fEditor.getSelectionProvider().getSelection()).getOffset();
 			}
 			else {
 				List preselected= getInitialElementSelections();	
@@ -295,7 +287,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 				}
 			}
 			
-			IMethod[] methods= getType().getMethods();
+			IMethod[] methods= fType.getMethods();
 
 			combo.add(ActionMessages.getString("SourceActionDialog.first_method")); //$NON-NLS-1$
 				
@@ -325,35 +317,33 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 * Determine where in the file to enter the newly created methods.
 	 */
 	public IJavaElement getElementPosition() {
-		IType type= getType();
 		int comboBoxIndex= getInsertionIndex();		
 		
-		if (comboBoxIndex == 0)				// as first method
-			return asFirstMethod(type);
-		else								// method position
-			return atMethodPosition(type, comboBoxIndex);			
+		try {
+			if (comboBoxIndex == 0)				// as first method
+				return asFirstMethod(fType);
+			else								// method position
+				return atMethodPosition(fType, comboBoxIndex);
+		} catch (JavaModelException e) {
+			return null;
+		}			
 	}
 	
-	private IMethod asFirstMethod(IType type) {
+	private IMethod asFirstMethod(IType type) throws JavaModelException {
 		if (type != null) {
-			try {
-				IMethod methods[]= type.getMethods();
-				return methods[0];		// reserve position for "as first method" option			
-				
-			} catch (JavaModelException e) {
+			IMethod[] methods= type.getMethods();
+			if (methods.length > 0) {
+				return methods[0];		
 			}
 		}
 		return null;
 	}
 	
-	private IMethod atMethodPosition(IType type, int index) {
+	private IMethod atMethodPosition(IType type, int index) throws JavaModelException {
 		if (type != null) {
-			try {
-				IMethod methods[]= type.getMethods();
-				if (index < methods.length)
-					return methods[index];		// reserve position for "as first method" option			
-				
-			} catch (JavaModelException e) {
+			IMethod[] methods= type.getMethods();
+			if (index < methods.length) {
+				return methods[index];
 			}
 		}
 		return null;

@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
@@ -74,6 +73,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -401,9 +401,12 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return null;
 				
 		AddDelegateMethodsOperation op = new AddDelegateMethodsOperation(list, settings, type, elementPosition);
-		IRunnableContext runnableContext = new ProgressMonitorDialog(getShell());
+		IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
+		if (context == null) {
+			context= new BusyIndicatorRunnableContext();
+		}
 		try {
-			runnableContext.run(false, true, new WorkbenchRunnableAdapter(op));
+			context.run(false, true, new WorkbenchRunnableAdapter(op));
 		} catch (InterruptedException e) {
 			// cancel pressed
 			return null;

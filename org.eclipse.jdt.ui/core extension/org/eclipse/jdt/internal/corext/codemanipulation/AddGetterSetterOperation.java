@@ -225,7 +225,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			}
 		}		
 
-		String argname= NamingConventions.suggestArgumentNames(project, "", accessorName, 0, EMPTY)[0]; //$NON-NLS-1$
+		String argname= StubUtility.guessArgumentName(project, accessorName, EMPTY);
 	
 		boolean isStatic= Flags.isStatic(field.getFlags());
 		boolean isFinal= Flags.isFinal(field.getFlags());
