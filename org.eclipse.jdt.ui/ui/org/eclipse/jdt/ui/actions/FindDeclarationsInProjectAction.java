@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -24,9 +25,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
+import org.eclipse.jdt.internal.ui.search.SearchUtil;
 
 /**
  * Finds declarations of the selected element in the enclosing project 
@@ -51,6 +54,7 @@ public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 	public FindDeclarationsInProjectAction(IWorkbenchSite site) {
 		super(site, SearchMessages.getString("Search.FindDeclarationsInProjectAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInProjectAction.tooltip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_PROJECT_ACTION);
 	}
 
 	/**
@@ -59,6 +63,7 @@ public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 	public FindDeclarationsInProjectAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindDeclarationsInProjectAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInProjectAction.tooltip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_PROJECT_ACTION);
 	}
 
 	IJavaSearchScope getScope(IType element) throws JavaModelException {
@@ -66,7 +71,7 @@ public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 	}
 
 	String getScopeDescription(IType type) {
-		return SearchMessages.getString("ProjectScope"); //$NON-NLS-1$
+		return SearchUtil.getProjectScopeDescription(type);
 	}
 
 

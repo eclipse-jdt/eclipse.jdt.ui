@@ -13,14 +13,17 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
+import org.eclipse.jdt.internal.ui.search.SearchUtil;
 
 /**
  * Finds implementors of the selected element in the enclosing project.
@@ -57,6 +60,7 @@ public class FindImplementorsInProjectAction extends FindImplementorsAction {
 	private void init() {
 		setText(SearchMessages.getString("Search.FindImplementorsInProjectAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindImplementorsInProjectAction.tooltip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_PROJECT_ACTION);
 	}
 	
 	IJavaSearchScope getScope(IType element) throws JavaModelException {
@@ -64,6 +68,6 @@ public class FindImplementorsInProjectAction extends FindImplementorsAction {
 	}
 
 	String getScopeDescription(IType type) {
-		return SearchMessages.getString("ProjectScope"); //$NON-NLS-1$
+		return SearchUtil.getProjectScopeDescription(type);
 	}
 }
