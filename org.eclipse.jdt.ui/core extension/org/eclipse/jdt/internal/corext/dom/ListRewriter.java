@@ -16,8 +16,6 @@ import java.util.List;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
