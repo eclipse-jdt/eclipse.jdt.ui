@@ -13,18 +13,15 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class PackageFragmentRootNamingPolicy implements INamingPolicy {
-	private static final String PREFIX= "reorg_policy.package_fragment.";
-	private static final String ERROR_DUPLICATE= "duplicate";
-	private static final String ERROR_EXCEPTION= "exception";
 	
 	public String isValidNewName(Object original, Object parent, String name) {
 		IJavaProject project= (IJavaProject)parent;
 		IPath p= project.getProject().getFullPath().append(name);
 		try {
 			if (project.findPackageFragmentRoot(p) != null)
-				return JavaPlugin.getResourceString(PREFIX+ERROR_DUPLICATE);
+				return ReorgMessages.getString("packageFragementRootNamingPolicy.duplicate"); //$NON-NLS-1$
 		} catch (JavaModelException e) {
-			return JavaPlugin.getResourceString(PREFIX+ERROR_EXCEPTION);
+			return ReorgMessages.getString("packageFragementRootNamingPolicy.exception"); //$NON-NLS-1$
 		}
 		return null;
 	}

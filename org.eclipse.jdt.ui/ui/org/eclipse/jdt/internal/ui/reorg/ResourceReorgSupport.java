@@ -27,10 +27,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ResourceReorgSupport  implements ICopySupport, IMoveSupport, INamingPolicy {
-	private static final String PREFIX= "reorg_policy.file.";
-	private static final String ERROR_DUPLICATE= "duplicate";
-	private static final String ERROR_EXCEPTION= "exception";
-	private static final String ERROR_INVALID_NAME= "invalid_name";
 
 	public boolean isCopyable(Object element) {
 		if (element instanceof IFolder)
@@ -62,14 +58,14 @@ public class ResourceReorgSupport  implements ICopySupport, IMoveSupport, INamin
 	public String isValidNewName(Object original, Object destination, String name) {
 		IContainer c= getDestination(destination);
 		if (c == null)
-			return JavaPlugin.getResourceString(PREFIX+ERROR_EXCEPTION);
+			return ReorgMessages.getString("resourceReorgSupport.exception"); //$NON-NLS-1$
 						
 		if (c.findMember(name) != null)
-			return JavaPlugin.getResourceString(PREFIX+ERROR_DUPLICATE);
+			return ReorgMessages.getString("resourceReorgSupport.duplicate"); //$NON-NLS-1$
 			
 		IPath p= c.getFullPath();
 		if (!p.isValidSegment(name))
-			return JavaPlugin.getResourceString(PREFIX+ERROR_INVALID_NAME);
+			return ReorgMessages.getString("resourceReorgSupport.invalidName"); //$NON-NLS-1$
 		return null;
 	}
 	

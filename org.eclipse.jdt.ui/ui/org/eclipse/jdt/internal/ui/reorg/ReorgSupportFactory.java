@@ -62,7 +62,7 @@ public class ReorgSupportFactory {
 		String name= getName(element);
 		Object parent= getJavaParent(element);
 		if (name == null)
-			return new Path("");
+			return new Path(""); //$NON-NLS-1$
 
 		if (parent == null) {
 			return new Path(name);

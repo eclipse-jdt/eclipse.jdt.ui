@@ -34,12 +34,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.ISavePolicy;
 
 public class CUSavePolicy implements ISavePolicy {
 	
-	private static final String PREFIX= "SmartSave.";
-	private static final String RENAME_CU= "rename_cu.";
-	private static final String MOVE_CU= "move_cu.";
-	private static final String CREATE_PKG= "create_pkg.";
-	private static final String PICK_PKG= "pick_pkg.";
-	private static final String EXCEPTION= "exception.";
 
 	private String fOldTypeName;
 
@@ -59,7 +53,7 @@ public class CUSavePolicy implements ISavePolicy {
 		return null;
 	}
 	protected String makeMainTypeName(String cuName) {
-		if (cuName.endsWith(".java"))
+		if (cuName.endsWith(".java")) //$NON-NLS-1$
 			return cuName.substring(0, cuName.length()-5);
 		return cuName;
 	}
@@ -77,16 +71,16 @@ public class CUSavePolicy implements ISavePolicy {
 			renameConstructors(publicType, oldName, typeName);
 			if (!typeName.equals(makeMainTypeName(cu.getElementName()))) {
 				if (shouldRenameCU(shell, typeName)) {
-					return typeName+".java";
+					return typeName+".java"; //$NON-NLS-1$
 				}
 			}
 		}
 		return null;
 	}
 	private boolean shouldRenameCU(final Shell shell, String typeName) {
-		final String cuName= typeName+".java";
-		String message= JavaPlugin.getResourceString(PREFIX+RENAME_CU+"message");
-		String title= JavaPlugin.getResourceString(PREFIX+RENAME_CU+"title");
+		final String cuName= typeName+".java"; //$NON-NLS-1$
+		String message= ReorgMessages.getString("cuSavePolicy.confirmRenameCU"); //$NON-NLS-1$
+		String title= ReorgMessages.getString("cuSavePolicy.save.title"); //$NON-NLS-1$
 		return confirm(shell, title, message, new Object[] { cuName });
 	}
 	
@@ -215,9 +209,9 @@ public void preSave(ICompilationUnit element) {
 		int flags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_CONTAINER
 					| JavaElementLabelProvider.SHOW_ROOT;
 		ILabelProvider renderer= new JavaElementLabelProvider(flags);
-		String title= JavaPlugin.getResourceString(PREFIX+PICK_PKG+"title");
+		String title= ReorgMessages.getString("cuSavePolicy.save.title"); //$NON-NLS-1$
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, title, null, renderer, true, false);
-		dialog.setMessage(JavaPlugin.getResourceString(PREFIX+PICK_PKG+"message"));
+		dialog.setMessage(ReorgMessages.getString("cuSavePolicy.pickPkg.message")); //$NON-NLS-1$
 		 
 		dialog.open(packages);
 		Object[] selection= dialog.getSelectedElements();
@@ -232,14 +226,14 @@ public void preSave(ICompilationUnit element) {
 	 * @param typeName java.lang.String
 	 */
 	private boolean shouldMoveCU(final Shell shell, ICompilationUnit cu, final String newPackage) {
-		String message= JavaPlugin.getResourceString(PREFIX+MOVE_CU+"message");
-		String title= JavaPlugin.getResourceString(PREFIX+MOVE_CU+"title");
+		String message= ReorgMessages.getString("cuSavePolicy.confirmMoveCU"); //$NON-NLS-1$
+		String title= ReorgMessages.getString("cuSavePolicy.save.title"); //$NON-NLS-1$
 		return confirm(shell, title, message, new Object[] { newPackage });
 	}
 
 	private IPackageFragment tryCreatePackage(final Shell shell, IPackageFragmentRoot pkgRoot, String packageName) throws JavaModelException {
-		String title= JavaPlugin.getResourceString(PREFIX+CREATE_PKG+"title");
-		String message= JavaPlugin.getResourceString(PREFIX+CREATE_PKG+"message");
+		String title= ReorgMessages.getString("cuSavePolicy.save.title"); //$NON-NLS-1$
+		String message= ReorgMessages.getString("cuSavePolicy.confirmCreatePkg"); //$NON-NLS-1$
 		if (confirm(shell, title, message, new Object[] { packageName }))
 			return pkgRoot.createPackageFragment(packageName, true, null);
 		return null;
@@ -289,14 +283,14 @@ public void preSave(ICompilationUnit element) {
 	private String getPackageDeclaration(ICompilationUnit cu) throws JavaModelException {
 		IPackageDeclaration[] pkgs= cu.getPackageDeclarations();
 		if (pkgs.length == 0)
-			return "";
+			return ""; //$NON-NLS-1$
 		else 
 			return pkgs[0].getElementName();		
 	}
 
 	private void showErrorDialog(Shell shell, JavaModelException e) {
-		String title= JavaPlugin.getResourceString(PREFIX+EXCEPTION+"title");
-		String message= JavaPlugin.getResourceString(PREFIX+EXCEPTION+"message");
+		String title= ReorgMessages.getString("cuSavePolicy.save.title"); //$NON-NLS-1$
+		String message= ReorgMessages.getString("cuSavePolicy.error.exception"); //$NON-NLS-1$
 		ErrorDialog.openError(shell, title, message, e.getStatus());
 	}
 	

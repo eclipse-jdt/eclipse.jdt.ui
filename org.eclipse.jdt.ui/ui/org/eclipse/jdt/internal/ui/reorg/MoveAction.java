@@ -31,22 +31,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class MoveAction extends CopyAction {
 
-	private final static String PREFIX= "action.move.";
-	private final static String NAME= PREFIX + "name";
-	private final static String LABEL= PREFIX + "label";
-	private final static String DESCRIPTION= PREFIX + "description";
-	private final static String ERROR_EXCEPTION_PREFIX= PREFIX+"error.exception.";
-	private final static String ERROR_STATUS= ERROR_EXCEPTION_PREFIX+"status";
-
-	private final static String ACTION_NAME= PREFIX + "name";
-
 	public MoveAction(ISelectionProvider viewer, String name) {
 		super(viewer, name);
 	}
 
 	public MoveAction(ISelectionProvider viewer) {
-		this(viewer, JavaPlugin.getResourceString(LABEL));
-		setDescription(JavaPlugin.getResourceString(DESCRIPTION));
+		this(viewer, ReorgMessages.getString("moveAction.label")); //$NON-NLS-1$
+		setDescription(ReorgMessages.getString("moveAction.description")); //$NON-NLS-1$
 	}
 
 	protected boolean canExecute(IStructuredSelection sel) {
@@ -72,8 +63,8 @@ public class MoveAction extends CopyAction {
 		while (iter.hasNext()) {
 			Object element= iter.next();
 			if (shouldConfirmReadOnly(element)) {
-				if (confirmReadOnly("Check Move", 
-					"The selected elements contain read-only resources. Do you still wish to move them?"))
+				if (confirmReadOnly(ReorgMessages.getString("moveAction.checkMove"),  //$NON-NLS-1$
+					ReorgMessages.getString("moveAction.error.readOnly"))) //$NON-NLS-1$
 					break;
 				else
 					return;
@@ -87,7 +78,7 @@ public class MoveAction extends CopyAction {
 			return;*/
 		if (names == null)
 			return;
-		final MultiStatus status= new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, JavaPlugin.getResourceString(ERROR_STATUS), null);
+		final MultiStatus status= new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, ReorgMessages.getString("moveAction.error.exceptions"), null); //$NON-NLS-1$
 		final List createdElements= new ArrayList();
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor pm) {
@@ -119,15 +110,10 @@ public class MoveAction extends CopyAction {
 		}
 		if (!status.isOK()) {
 			Throwable t= new JavaUIException(status);
-			ResourceBundle bundle= JavaPlugin.getResourceBundle();
-			ExceptionHandler.handle(t, activeShell, bundle, ERROR_EXCEPTION_PREFIX);
+			ExceptionHandler.handle(t, activeShell, ReorgMessages.getString("moveAction.error.title"), ReorgMessages.getString("moveAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
 			select(activeShell, createdElements);
 		}
-	}
-
-	protected String getPrefix() {
-		return PREFIX;
 	}
 
 }

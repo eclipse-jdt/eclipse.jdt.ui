@@ -46,18 +46,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 public class CopyAction extends ReorgAction {
-	private final static String PREFIX= "action.copy.";
-	protected final static String ACTION_NAME= "name";
-	private final static String LABEL= PREFIX+"label";
-	protected final static String DESCRIPTION= PREFIX+"description";
-	protected final static String DESTINATION_DIALOG= "destination_dialog.";
-	protected final static String TASK_NAME= "task.label";
-	protected final static String ERROR_EXCEPTION="error.exception.message";
-	protected final static String ERROR_DUPLICATE="error.duplicate.message";
 
 	public CopyAction(ISelectionProvider viewer) {
-		this(viewer, JavaPlugin.getResourceString(LABEL));
-		setDescription(JavaPlugin.getResourceString(DESCRIPTION));
+		this(viewer, ReorgMessages.getString("copyAction.label")); //$NON-NLS-1$
+		setDescription(ReorgMessages.getString("copyAction.description")); //$NON-NLS-1$
 	}
 
 	public CopyAction(ISelectionProvider viewer, String name) {
@@ -135,7 +127,7 @@ public class CopyAction extends ReorgAction {
 		if (names == null)
 			return;
 		String id= JavaPlugin.getDefault().getDescriptor().getUniqueIdentifier();
-		final MultiStatus status= new MultiStatus(id, IStatus.OK, "status", null);
+		final MultiStatus status= new MultiStatus(id, IStatus.OK, ReorgMessages.getString("copyAction.status"), null); //$NON-NLS-1$
 		final List createdElements= new ArrayList();
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor pm) {
@@ -165,8 +157,7 @@ public class CopyAction extends ReorgAction {
 		}
 		if (!status.isOK()) {
 			Throwable t= new JavaUIException(status);
-			ResourceBundle bundle= JavaPlugin.getResourceBundle();
-			ExceptionHandler.handle(t, activeShell, bundle, ERROR_EXCEPTION);
+			ExceptionHandler.handle(t, activeShell, ReorgMessages.getString("copyAction.exception.title"), ReorgMessages.getString("copyAction.exception.label")); //$NON-NLS-2$ //$NON-NLS-1$
 		} else {
 			select(activeShell, createdElements);
 		}
@@ -181,25 +172,21 @@ public class CopyAction extends ReorgAction {
 		
 	
 	protected String getErrorDuplicate() {
-		return JavaPlugin.getResourceString(getPrefix()+ERROR_DUPLICATE);
+		return ReorgMessages.getString("copyAction.error.duplicate"); //$NON-NLS-1$
 	}	
 	
 	protected String getTaskName() {
-		return JavaPlugin.getResourceString(getPrefix()+TASK_NAME);
+		return ReorgMessages.getString("copyAction.task"); //$NON-NLS-1$
 	}
 	
 	protected String getActionName() {
-		return JavaPlugin.getResourceString(getPrefix()+ACTION_NAME);
+		return ReorgMessages.getString("copyAction.name"); //$NON-NLS-1$
 	}
 	
 	protected String getDestinationDialogMessage() {
-		return JavaPlugin.getResourceString(getPrefix()+DESTINATION_DIALOG+"message");
+		return ReorgMessages.getString("copyAction.destination.label"); //$NON-NLS-1$
 	}
 	
-	protected String getPrefix() {
-		return PREFIX;
-	}
-
 	protected String getElementName(Object o) {
 		if (o instanceof IJavaElement)
 			return ((IJavaElement)o).getElementName();

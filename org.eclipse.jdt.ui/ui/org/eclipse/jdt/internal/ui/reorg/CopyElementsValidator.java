@@ -25,7 +25,7 @@ public class CopyElementsValidator implements ISelectionValidator {
 		if (isValid(selected)) {
 			info.setOK();
 		} else {
-			info.setError("");
+			info.setError(""); //$NON-NLS-1$
 			//XXX: Could give more detailed error message
 		}
 	}

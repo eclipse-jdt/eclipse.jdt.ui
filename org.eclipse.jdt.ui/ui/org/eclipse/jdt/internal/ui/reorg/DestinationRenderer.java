@@ -22,7 +22,7 @@ public class DestinationRenderer extends JavaElementLabelProvider {
 			if (element instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot)element;
 				if (root.getUnderlyingResource() instanceof IProject)
-					return "packages";
+					return ReorgMessages.getString("DestinationRenderer.packages"); //$NON-NLS-1$
 			}
 		} catch (JavaModelException e) {
 		}

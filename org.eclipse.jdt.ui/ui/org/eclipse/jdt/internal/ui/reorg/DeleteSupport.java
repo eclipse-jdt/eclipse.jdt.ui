@@ -104,7 +104,7 @@ public class DeleteSupport implements IDeleteSupport {
 	}
 	
 	private void deleteFromClasspath(IPackageFragmentRoot root, IProgressMonitor pm) throws JavaModelException {
-		pm.subTask(getElementName(root)+" (Removing from classpath)");
+		pm.subTask(getElementName(root)+ReorgMessages.getString("DeleteSupport.removeFromClasspath.task")); //$NON-NLS-1$
 		IPath path= root.getPath();
 		IJavaProject project= root.getJavaProject();
 		IClasspathEntry[] cp= project.getRawClasspath();

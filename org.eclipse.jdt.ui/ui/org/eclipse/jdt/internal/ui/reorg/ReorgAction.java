@@ -11,11 +11,6 @@ import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;
   * Base class for actions related to reorganizing resources
   */
 public abstract class ReorgAction extends SelectionProviderAction {
-	private static final String PREFIX= "action.reorg.";
-	private static final String CONFIRM_DISCARD_MSG= PREFIX+"discard_changes.message";
-	private static final String SAVE_TARGETS_MSG= PREFIX+"save_targets.message";
-	private static final String SAVE_TARGETS_PROGRESS= PREFIX +"save_targets.progress";
-	private static final String SAVE_EDITORS_EXCEPTION= PREFIX+"save_editors.error.message";
 	
 	public ReorgAction(ISelectionProvider p, String name) {
 		super(p, name);
@@ -80,7 +75,7 @@ public abstract class ReorgAction extends SelectionProviderAction {
 		ProgressMonitorDialog pmd= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
 		IRunnableWithProgress r= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) {
-				pm.beginTask(JavaPlugin.getResourceString(SAVE_TARGETS_PROGRESS), nrFiles*10);
+				pm.beginTask(ReorgMessages.getString("ReorgAction.task.saving"), nrFiles*10); //$NON-NLS-1$
 				for (int i= 0; i < nrFiles; i++) {
 					int index= elements.indexOf(elementsToSave[i]);
 					
@@ -93,8 +88,8 @@ public abstract class ReorgAction extends SelectionProviderAction {
 		try {
 			pmd.run(false, false, r);
 		} catch (InvocationTargetException e) {
-			if (!ExceptionHandler.handle(e.getTargetException(), getActionName(), JavaPlugin.getResourceString(SAVE_EDITORS_EXCEPTION))) {
-				MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), "Error", e.getMessage());
+			if (!ExceptionHandler.handle(e.getTargetException(), getActionName(), ReorgMessages.getString("ReorgAction.exception.saving"))) { //$NON-NLS-1$
+				MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("ReorgAction.error.title"), e.getMessage()); //$NON-NLS-1$
 			}
 			return false;
 		} catch (InterruptedException e) {
@@ -136,11 +131,11 @@ public abstract class ReorgAction extends SelectionProviderAction {
 	}
 	
 	protected String getConfirmDiscardChangesMessage() {
-		return JavaPlugin.getResourceString(CONFIRM_DISCARD_MSG);
+		return ReorgMessages.getString("ReorgAction.confirmDiscard"); //$NON-NLS-1$
 	}
 	
 	protected String getSaveTargetsMessage() {
-		return JavaPlugin.getResourceString(SAVE_TARGETS_MSG);
+		return ReorgMessages.getString("ReorgAction.checkSaveTargets"); //$NON-NLS-1$
 	}
 	
 	// readonly confirmation

@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IInputValidator;
 
+import java.text.MessageFormat;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -26,11 +27,6 @@ import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
 
 
 public class NameClashDialog extends StatusDialog {
-	private final static String PREFIX= "NameClashDialog.";
-	private final static String MESSAGE= PREFIX+"message";
-	private final static String REPLACE_LABEL= PREFIX+"replace.description";
-	private final static String RENAME_LABEL= PREFIX+"rename.description";
-	private final static String TITLE= PREFIX+"title";
 	
 	private SelectionButtonDialogField fReplaceRadioButton;
 	private SelectionButtonDialogField fRenameRadioButton;
@@ -43,8 +39,8 @@ public class NameClashDialog extends StatusDialog {
 	
 	public NameClashDialog(Shell parent, IInputValidator validator, String initialInput, boolean allowReplace) {
 		super(parent);
-		setTitle(JavaPlugin.getResourceString(TITLE));
-		fMessage= JavaPlugin.getFormattedString(MESSAGE, initialInput);
+		setTitle(ReorgMessages.getString("nameClashDialog.title")); //$NON-NLS-1$
+		fMessage= MessageFormat.format(ReorgMessages.getString("nameClashDialog.message"), new String[] { initialInput }); //$NON-NLS-1$
 		
 		fValidator= validator;
 		fDialogStatus= new StatusInfo();
@@ -57,11 +53,11 @@ public class NameClashDialog extends StatusDialog {
 		
 		fReplaceRadioButton= new SelectionButtonDialogField(SWT.RADIO);
 		fReplaceRadioButton.setDialogFieldListener(listener);
-		fReplaceRadioButton.setLabelText(JavaPlugin.getResourceString(REPLACE_LABEL));
+		fReplaceRadioButton.setLabelText(ReorgMessages.getString("nameClashDialog.replace")); //$NON-NLS-1$
 		
 		fRenameRadioButton= new SelectionButtonDialogField(SWT.RADIO);
 		fRenameRadioButton.setDialogFieldListener(listener);
-		fRenameRadioButton.setLabelText(JavaPlugin.getResourceString(RENAME_LABEL));
+		fRenameRadioButton.setLabelText(ReorgMessages.getString("nameClashDialog.rename")); //$NON-NLS-1$
 		
 		fNameDialogField= new StringDialogField();
 		fNameDialogField.setDialogFieldListener(listener);

@@ -25,10 +25,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CUOrFileReorgSupport implements ICopySupport, IMoveSupport, INamingPolicy {
-	private static final String PREFIX= "reorg_policy.cu.";
-	private static final String ERROR_DUPLICATE= "duplicate";
-	private static final String ERROR_WRONG_EXTENSION= "wrong_extension";
-	private static final String ERROR_INVALID_NAME= "invalid_name";
 
 	public Object copyTo(Object element, Object dest, String newName, IProgressMonitor pm) throws CoreException, JavaModelException {
 		IPackageFragment destination= getDestination(dest);
@@ -74,14 +70,14 @@ public class CUOrFileReorgSupport implements ICopySupport, IMoveSupport, INaming
 		// the order is important here since getCompilationUnit() throws an exception
 		// if the name is invalid.
 		if (original instanceof ICompilationUnit) {
-			if (!name.endsWith(".java"))
-				return JavaPlugin.getResourceString(PREFIX+ERROR_WRONG_EXTENSION);
+			if (!name.endsWith(".java")) //$NON-NLS-1$
+				return ReorgMessages.getString("cuFileReorgSupport.error.invalidEnding"); //$NON-NLS-1$
 			if (!JavaConventions.validateCompilationUnitName(name).isOK())
-				return JavaPlugin.getResourceString(PREFIX+ERROR_INVALID_NAME);
+				return ReorgMessages.getString("cuFileReorgSupport.error.invalidName"); //$NON-NLS-1$
 		}
 		try {
 			if (pkg.getCompilationUnit(name).exists() || ReorgSupport.getResource(pkg, name) != null)
-				return JavaPlugin.getResourceString(PREFIX+ERROR_DUPLICATE);
+				return ReorgMessages.getString("cuFileReorgSupport.error.duplicate"); //$NON-NLS-1$
 		} catch (JavaModelException e) {
 		}
 		return null;
@@ -92,7 +88,7 @@ public class CUOrFileReorgSupport implements ICopySupport, IMoveSupport, INaming
 		if (pkg == null)
 			return null;
 			
-		if (name.endsWith(".java"))
+		if (name.endsWith(".java")) //$NON-NLS-1$
 			return pkg.getCompilationUnit(name);
 		try {
 			return ReorgSupport.getResource(pkg, name);

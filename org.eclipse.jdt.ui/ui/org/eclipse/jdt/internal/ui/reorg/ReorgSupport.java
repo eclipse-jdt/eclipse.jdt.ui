@@ -9,7 +9,7 @@ import java.util.Iterator;import java.util.List;import org.eclipse.core.resou
 
 public class ReorgSupport {
 
-	private static final String DEFAULT_PACKAGE= "";
+	private static final String DEFAULT_PACKAGE= ""; //$NON-NLS-1$
 	
 	/**
 	 * Returns the actual destination for the given <code>dest</code> if the

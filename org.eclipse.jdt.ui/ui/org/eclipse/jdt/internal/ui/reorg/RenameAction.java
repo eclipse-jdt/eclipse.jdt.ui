@@ -42,13 +42,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
   */
 public class RenameAction extends ReorgAction {
 	
-	private final static String PREFIX= "action.rename.";
-	private final static String ACTION_NAME= PREFIX+"name";
-	private final static String LABEL= PREFIX+"label";
-	private final static String DESCRIPTION= PREFIX+"description";
-	private final static String INPUT_PREFIX= PREFIX+"new_name.";
-	private final static String ERROR_PREFIX= PREFIX+"error.";
-	
 	private IRefactoringRenameSupport fRefactoringSupport;
 	
 	/**
@@ -57,8 +50,8 @@ public class RenameAction extends ReorgAction {
 	 *@param viewer org.eclipse.jface.viewer.ContentViewer
 	 */
 	public RenameAction(ISelectionProvider viewer) {
-		super(viewer, JavaPlugin.getResourceString(LABEL));
-		setDescription(JavaPlugin.getResourceString(DESCRIPTION));
+		super(viewer, ReorgMessages.getString("renameAction.label")); //$NON-NLS-1$
+		setDescription(ReorgMessages.getString("renameAction.description")); //$NON-NLS-1$
 	}
 
 	public void update() {
@@ -73,8 +66,8 @@ public class RenameAction extends ReorgAction {
 	public void doActionPerformed() {
 		Object element= getStructuredSelection().getFirstElement();
 		if (isReadOnlyResource(element)) {
-			if (!confirmReadOnly("Check Rename", 
-					"The selected element is marked as read-only. Do you still wish to rename it?"))
+			if (!confirmReadOnly(ReorgMessages.getString("renameAction.checkRename.title"),  //$NON-NLS-1$
+					ReorgMessages.getString("renameAction.checkRename.message"))) //$NON-NLS-1$
 					return;
 		}
 		if (fRefactoringSupport != null) {
@@ -101,8 +94,8 @@ public class RenameAction extends ReorgAction {
 		if (!confirmIfUnsaved(element))
 			return;
 			
-		String title= JavaPlugin.getResourceString(INPUT_PREFIX+"title");
-		String message= JavaPlugin.getResourceString(INPUT_PREFIX+"message");
+		String title= ReorgMessages.getString("renameAction.rename.title"); //$NON-NLS-1$
+		String message= ReorgMessages.getString("renameAction.newName"); //$NON-NLS-1$
 		final INamingPolicy policy= ReorgSupportFactory.createNamingPolicy(element);
 		IInputValidator validator= new IInputValidator() {
 			int k= 0;
@@ -118,11 +111,11 @@ public class RenameAction extends ReorgAction {
 			return;
 			
 		String id= JavaPlugin.getDefault().getDescriptor().getUniqueIdentifier();
-		String statusString= JavaPlugin.getResourceString(ERROR_PREFIX+"status");
+		String statusString= ReorgMessages.getString("renameAction.status.exceptions"); //$NON-NLS-1$
 		final MultiStatus status= new MultiStatus(id, IStatus.OK, statusString, null);
 		final String newName= dialog.getValue();
 		final List renamedElements= new ArrayList();
-		if (newName != null && !newName.equals("")) {
+		if (newName != null && !newName.equals("")) { //$NON-NLS-1$
 			WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 				public void execute(IProgressMonitor pm) {
 					IRenameSupport support= ReorgSupportFactory.createRenameSupport(element);
@@ -144,8 +137,7 @@ public class RenameAction extends ReorgAction {
 			}
 			if (!status.isOK()) {
 				Throwable t= new JavaUIException(status);
-				ResourceBundle bundle= JavaPlugin.getResourceBundle();
-				ExceptionHandler.handle(t, activeShell, bundle, ERROR_PREFIX);
+				ExceptionHandler.handle(t, activeShell, ReorgMessages.getString("renameAction.error.title"), ReorgMessages.getString("renameAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
 				select(activeShell, renamedElements);
 			}
@@ -190,12 +182,12 @@ public class RenameAction extends ReorgAction {
 	}
 	
 	protected String getActionName() {
-		return JavaPlugin.getResourceString(ACTION_NAME);
+		return ReorgMessages.getString("renameAction.name"); //$NON-NLS-1$
 	}
 	
 	protected String getConfirmDiscardChangesMessage() {
 		// FIXME NLS");
-		return "The selected element has unsaved changes that will be discarded if you proceed";
+		return ReorgMessages.getString("renameAction.confirmDiscard"); //$NON-NLS-1$
 	}
 	
 	protected boolean isReadOnlyResource(Object element) {
