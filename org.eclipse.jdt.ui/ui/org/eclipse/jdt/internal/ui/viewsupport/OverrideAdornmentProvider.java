@@ -7,16 +7,14 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyLifeCycle;
 
 public class OverrideAdornmentProvider implements IAdornmentProvider {
-	
-	private TypeHierarchyLifeCycle fTypeHierarchy;
-	
+		
 	public OverrideAdornmentProvider() {
-		fTypeHierarchy= null;
 	}
 	
 	/*
@@ -35,7 +33,7 @@ public class OverrideAdornmentProvider implements IAdornmentProvider {
 				int flags= method.getFlags();
 				IType type= method.getDeclaringType();
 				if (type.isClass() && !method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
-					ITypeHierarchy hierarchy= getTypeHierarchy(type);
+					ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
 					if (hierarchy != null) {
 						IMethod impl= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, method.getElementName(), method.getParameterTypes(), false);
 						if (impl != null) {
@@ -54,22 +52,11 @@ public class OverrideAdornmentProvider implements IAdornmentProvider {
 		}
 		return adornmentFlags;
 	}
-	
-	private ITypeHierarchy getTypeHierarchy(IType type) throws JavaModelException {
-		if (fTypeHierarchy ==  null) {
-			fTypeHierarchy= new TypeHierarchyLifeCycle(true);
-		}
-		fTypeHierarchy.ensureRefreshedTypeHierarchy(type);
-		return fTypeHierarchy.getHierarchy();
-	}
-		
+			
 	/*
 	 * @see IAdornmentProvider#dispose()
 	 */
 	public void dispose() {
-		if (fTypeHierarchy != null) {
-			fTypeHierarchy.freeHierarchy();
-		}
 	}
 
 }
