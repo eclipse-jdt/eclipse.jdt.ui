@@ -129,8 +129,18 @@ public class ASTResolving {
 			break;		
 		case ASTNode.ARRAY_INITIALIZER:
 			ASTNode initializerParent= parent.getParent();
+			int dim= 1;
+			while (initializerParent instanceof ArrayInitializer) {
+				initializerParent= initializerParent.getParent();
+				dim++;
+			}
 			if (initializerParent instanceof ArrayCreation) {
-				return ((ArrayCreation) initializerParent).getType().getElementType().resolveBinding();
+				Type creationType= ((ArrayCreation) initializerParent).getType();
+				while ((creationType instanceof ArrayType) && dim > 0) {
+					creationType= ((ArrayType) creationType).getComponentType();
+					dim--;
+				}
+				return creationType.resolveBinding();
 			}
 			break;
 		case ASTNode.CONDITIONAL_EXPRESSION:
