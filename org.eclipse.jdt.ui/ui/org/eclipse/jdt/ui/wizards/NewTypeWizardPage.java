@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -87,6 +88,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * Applets, Servlets, Classes, Interfaces...
  * See <code>NewClassWizardPage</code> or <code>NewInterfaceWizardPage</code> for an
  * example usage of NewTypeWizardPage.
+ * @since 2.0
  */
 public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
@@ -1175,7 +1177,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, false);
 			
-			String content= createTypeBody(imports, lineDelimiter, parentCU);
+			String content= constructTypeStub(imports, lineDelimiter, parentCU);
 			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 3));
 		} else {
 			IType enclosingType= getEnclosingType();
@@ -1191,7 +1193,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, true);
 			
 			lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
-			String content= createTypeBody(imports, lineDelimiter, parentCU);
+			String content= constructTypeStub(imports, lineDelimiter, parentCU);
 			IJavaElement[] elems= enclosingType.getChildren();
 			IJavaElement sibling= elems.length > 0 ? elems[0] : null;
 			
@@ -1203,15 +1205,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		// add imports for superclass/interfaces, so types can be resolved correctly
 		imports.create(!isInnerClass, new SubProgressMonitor(monitor, 1));
 		
-		String[] methods= evalMethods(createdType, imports, new SubProgressMonitor(monitor, 1));
-		if (methods.length > 0) {
-			for (int i= 0; i < methods.length; i++) {
-				createdType.createMethod(methods[i], null, false, null);
-			}
-			// add imports
-			imports.create(!isInnerClass, null);
-		} 
-		monitor.worked(1);
+		createTypeMembers(createdType, imports, new SubProgressMonitor(monitor, 1));
+
+		// add imports
+		imports.create(!isInnerClass, new SubProgressMonitor(monitor, 1));
 		
 		ICompilationUnit cu= createdType.getCompilationUnit();	
 		ISourceRange range;
@@ -1286,7 +1283,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/*
 	 * Called from createType to construct the source for this type
 	 */		
-	private String createTypeBody(IImportsStructure imports, String lineDelimiter, ICompilationUnit parentCU) {	
+	private String constructTypeStub(IImportsStructure imports, String lineDelimiter, ICompilationUnit parentCU) {	
 		StringBuffer buf= new StringBuffer();
 		String typeComment= getTypeComment(parentCU);
 		if (typeComment != null) {
@@ -1312,12 +1309,18 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Called from createType to allow adding methods for the newly created type
-	 * Returns array of sources of the methods that have to be added
-	 * @param parent The type where the methods will be added to 
+	 * Called from createType to allow adding methods, fielse, inner types ect for the newly created type.
+	 * Implementors can use the create methods on the new type.
+	 * Formatting will be applied to the content by the createType
+	 * @param newType The new type to add members to
+	 * @param imports To add the needed imports to. 
+	 * @param monitor Progress monitor
 	 */		
-	protected String[] evalMethods(IType parent, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
-		return new String[0];
+	protected void createTypeMembers(IType newType, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+		// default implementation does nothing
+		// example would be
+		// String mainMathod= "public static void main(String[]) {}"
+		// createdType.createMethod(main, null, false, null);
 	}
 	
 	/**
@@ -1361,10 +1364,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 	
 	/**
-	 * Creates the bodies of all unimplemented methods or/and all constructors.
+	 * Creates the bodies of all unimplemented methods or/and all constructors and adds them to the type
 	 * Can be used by implementors of NewTypeWizardPage to add method stub checkboxes.
 	 */
-	protected String[] constructInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		List newMethods= new ArrayList();
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(monitor);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
@@ -1375,7 +1378,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				String[] constructors= StubUtility.evalConstructors(type, superclass, settings, imports);
 				if (constructors != null) {
 					for (int i= 0; i < constructors.length; i++) {
-						newMethods.add(constructors[i]);					
+						newMethods.add(constructors[i]);
 					}
 				}
 			
@@ -1389,7 +1392,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				}
 			}
 		}
-		return (String[]) newMethods.toArray(new String[newMethods.size()]);		
+		IMethod[] createdMethods= new IMethod[newMethods.size()];
+		for (int i= 0; i < newMethods.size(); i++) {
+			createdMethods[i]= type.createMethod((String) newMethods.get(i), null, false, null);
+		}
+		return createdMethods;
 	}
 	
 	// ---- creation ----------------

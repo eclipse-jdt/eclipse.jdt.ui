@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 /**
  * Wizard page for creating a new class. This class is not intended to be subclassed.
  * To implement a different kind of type wizard, extend <code>NewTypeWizardPage</code>.
+ * @since 2.0
  */
 public class NewClassWizardPage extends NewTypeWizardPage {
 	
@@ -197,25 +198,19 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	// ---- creation ----------------
 	
 	/*
-	 * @see NewTypeWizardPage#evalMethods
+	 * @see NewTypeWizardPage#createTypeMembers
 	 */
-	protected String[] evalMethods(IType type, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+	protected void createTypeMembers(IType type, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		List newMethods= new ArrayList();
 		
 		boolean doMain= isCreateMain();
 		boolean doConstr= isCreateConstructors();
 		boolean doInherited= isCreateInherited();
-		String[] meth= constructInheritedMethods(type, doConstr, doInherited, imports, new SubProgressMonitor(monitor, 1));
-		for (int i= 0; i < meth.length; i++) {
-			newMethods.add(meth[i]);
-		}
-		if (monitor != null) {
-			monitor.done();
-		}
-		
+		createInheritedMethods(type, doConstr, doInherited, imports, new SubProgressMonitor(monitor, 1));
+
 		if (doMain) {
 			String main= "public static void main(String[] args) {}"; //$NON-NLS-1$
-			newMethods.add(main);
+			type.createMethod(main, null, false, null);
 		}
 		
 		IDialogSettings section= getDialogSettings().getSection(PAGE_NAME);
@@ -224,9 +219,11 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		}
 		section.put(SETTINGS_CREATEMAIN, doMain);
 		section.put(SETTINGS_CREATECONSTR, doConstr);
-		section.put(SETTINGS_CREATEUNIMPLEMENTED, doInherited);	
+		section.put(SETTINGS_CREATEUNIMPLEMENTED, doInherited);
 		
-		return (String[]) newMethods.toArray(new String[newMethods.size()]);
+		if (monitor != null) {
+			monitor.done();
+		}	
 	}
 	
 }

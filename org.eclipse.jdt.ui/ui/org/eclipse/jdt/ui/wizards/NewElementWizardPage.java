@@ -11,6 +11,9 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 
+/**
+ * @since 2.0
+ */
 public abstract class NewElementWizardPage extends WizardPage {
 
 	private IStatus fCurrStatus;

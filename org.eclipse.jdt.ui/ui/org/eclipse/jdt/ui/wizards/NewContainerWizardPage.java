@@ -28,8 +28,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.*;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -37,7 +39,6 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -49,6 +50,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 /**
  * Base class for Java wizards. Provides source folder selection UI, validation and creation.
+ * @since 2.0
  */
 public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	

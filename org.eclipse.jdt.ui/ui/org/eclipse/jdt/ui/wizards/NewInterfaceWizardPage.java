@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 /**
  * Wizard page for a new interface. This class is not intended to be subclassed.
  * To implement a different kind of new type wizard, extend <code>NewTypeWizardPage</code>.
+ * @since 2.0
  */
 public class NewInterfaceWizardPage extends NewTypeWizardPage {
 	

@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 /**
  * Wizard page for a new class. This class is not intended to be subclassed.
  * To implement a different new package wizard, extend <code>ContainerPage</code>.
+ * @since 2.0
  */
 public class NewPackageWizardPage extends NewContainerWizardPage {
 	
