@@ -166,7 +166,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	 * non java-doc
 	 * @see Refactoring#checkActivation
 	 */		
-	public final RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= Checks.checkIfCuBroken(fMethod);
 		if (Flags.isNative(fMethod.getFlags()))
 			result.addError(RefactoringCoreMessages.getString("RenameMethodRefactoring.no_native")); //$NON-NLS-1$
@@ -289,7 +289,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			if (! method.exists()){
 				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.not_in_model", msgData)); //$NON-NLS-1$ 
 				continue;
-			}	
+			}
 			if (method.isBinary())
 				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_binary", msgData)); //$NON-NLS-1$
 			if (method.isReadOnly())

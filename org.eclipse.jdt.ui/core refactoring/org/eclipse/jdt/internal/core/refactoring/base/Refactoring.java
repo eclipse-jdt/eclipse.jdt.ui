@@ -112,7 +112,7 @@ public abstract class Refactoring implements IRefactoring {
 			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.not_in_model", javaElement.getElementName())); //$NON-NLS-1$
 		if (javaElement.isReadOnly())
 			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.read_only", javaElement.getElementName()));	 //$NON-NLS-1$
-		if (! javaElement.isStructureKnown())
+		if (javaElement.exists() && !javaElement.isStructureKnown())
 			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.unknown_structure", javaElement.getElementName()));	 //$NON-NLS-1$
 		if (javaElement instanceof IMember && ((IMember)javaElement).isBinary())
 			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.binary", javaElement.getElementName())); //$NON-NLS-1$
