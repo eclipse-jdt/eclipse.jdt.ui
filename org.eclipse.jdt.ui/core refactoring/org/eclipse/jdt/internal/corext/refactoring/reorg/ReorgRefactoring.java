@@ -153,6 +153,10 @@ public abstract class ReorgRefactoring extends Refactoring {
 	abstract boolean isValidDestinationForCusAndFiles(Object dest) throws JavaModelException;
 
 	public final boolean isValidDestination(Object dest) throws JavaModelException{
+
+		if (dest instanceof IProject && ! ((IProject)dest).isAccessible())
+			return false;
+		
 		if (hasLinkedResources()){
 			if (dest instanceof IPackageFragmentRoot){
 				if (! isProjectPackageFragmentRoot((IPackageFragmentRoot)dest))
