@@ -134,10 +134,15 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	protected void run(IStructuredSelection selection) {
 		try {
 			IField[] selectedFields= getSelectedFields(selection);
-			if (canEnableOn(selectedFields))
+			if (canEnableOn(selectedFields)){
 				run(selectedFields, selectedFields);
-			else
-				run((IType)selection.getFirstElement());
+				return;
+			}	
+			Object firstElement= selection.getFirstElement();
+			if (firstElement instanceof IType)
+				run((IType)firstElement);
+			else if (firstElement instanceof ICompilationUnit)	
+				run(JavaElementUtil.getMainType((ICompilationUnit)firstElement));
 		} catch (CoreException e) {
 			JavaPlugin.log(e.getStatus());
 			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
@@ -148,18 +153,28 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private boolean canEnable(IStructuredSelection selection) throws JavaModelException{
 		if (canEnableOn(getSelectedFields(selection)))
 			return true;
-		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)){
-			IType type= (IType)selection.getFirstElement();
-			if (type.getFields().length == 0)
-				return false;
-			if (type.getCompilationUnit() == null)
-				return false;
-			if (JavaModelUtil.isEditable(type.getCompilationUnit()))
-				return true;
-		}
+			
+		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType))
+			return canEnableOn((IType)selection.getFirstElement());
+
+		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
+			return canEnableOn(JavaElementUtil.getMainType((ICompilationUnit)selection.getFirstElement()));
+
 		return false;	
 	}
 
+	private static boolean canEnableOn(IType type) throws JavaModelException {
+		if (type == null)
+			return false;
+		if (type.getFields().length == 0)
+			return false;
+		if (type.getCompilationUnit() == null)
+			return false;
+		if (JavaModelUtil.isEditable(type.getCompilationUnit()))
+			return true;
+		return false;	
+	}
+	
 	private static boolean canEnableOn(IField[] fields) throws JavaModelException {
 		return fields != null && fields.length > 0 && JavaModelUtil.isEditable(fields[0].getCompilationUnit());
 	}
