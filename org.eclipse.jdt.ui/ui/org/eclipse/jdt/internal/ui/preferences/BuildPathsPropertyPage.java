@@ -148,11 +148,11 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		if (fBuildPathsBlock != null) {
 			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
 			
-			Shell shell= getControl().getShell();
+			final Shell shell= getControl().getShell();
 			IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor)	throws InvocationTargetException, InterruptedException {
 					try {
-						fBuildPathsBlock.configureJavaProject(monitor);
+						fBuildPathsBlock.configureJavaProject(shell, monitor);
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
 					} 
@@ -160,7 +160,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			};
 			IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
 			try {
-				new ProgressMonitorDialog(shell).run(false, true, op);
+				new ProgressMonitorDialog(shell).run(true, true, op);
 			} catch (InvocationTargetException e) {
 				String title= PreferencesMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
 				String message= PreferencesMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$

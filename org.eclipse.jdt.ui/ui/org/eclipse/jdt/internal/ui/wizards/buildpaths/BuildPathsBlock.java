@@ -37,6 +37,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -582,18 +583,17 @@ public class BuildPathsBlock {
 	}
 	
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
+		configureJavaProject(JavaPlugin.getActiveWorkbenchShell(), monitor);
+	}
+	
+	public void configureJavaProject(Shell shell, IProgressMonitor monitor) throws CoreException, InterruptedException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
 		monitor.setTaskName(NewWizardMessages.getString("BuildPathsBlock.operationdesc_java")); //$NON-NLS-1$
 		monitor.beginTask("", 10); //$NON-NLS-1$
-
+	
 		try {
-			Shell shell= null;
-			if (fSWTWidget != null && !fSWTWidget.getShell().isDisposed()) {
-				shell= fSWTWidget.getShell();
-			}
-			
 			internalConfigureJavaProject(fClassPathList.getElements(), getOutputLocation(), shell, monitor);
 		} finally {
 			monitor.done();
@@ -606,11 +606,8 @@ public class BuildPathsBlock {
 	 */
 	private void internalConfigureJavaProject(List classPathEntries, IPath outputLocation, Shell shell, IProgressMonitor monitor) throws CoreException, InterruptedException {
 		// 10 monitor steps to go
-		
-		IRemoveOldBinariesQuery reorgQuery= null;
-		if (shell != null) {
-			reorgQuery= getRemoveOldBinariesQuery(shell);
-		}
+
+		IRemoveOldBinariesQuery reorgQuery= getRemoveOldBinariesQuery(shell);
 
 		// remove old .class files
 		if (reorgQuery != null) {
@@ -714,7 +711,8 @@ public class BuildPathsBlock {
 		return new IRemoveOldBinariesQuery() {
 			public boolean doQuery(final IPath oldOutputLocation) throws InterruptedException {
 				final int[] res= new int[] { 1 };
-				shell.getDisplay().syncExec(new Runnable() {
+				Display display= (shell != null && !shell.isDisposed()) ? shell.getDisplay() : Display.getDefault();
+				display.syncExec(new Runnable() {
 					public void run() {
 						String title= NewWizardMessages.getString("BuildPathsBlock.RemoveBinariesDialog.title"); //$NON-NLS-1$
 						String message= NewWizardMessages.getFormattedString("BuildPathsBlock.RemoveBinariesDialog.description", oldOutputLocation.toString()); //$NON-NLS-1$
