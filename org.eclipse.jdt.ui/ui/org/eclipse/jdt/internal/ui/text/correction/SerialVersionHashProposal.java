@@ -65,6 +65,9 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 	/** The launch configuration type */
 	public static final String LAUNCH_CONFIG_TYPE= "org.eclipse.jdt.ui.serial.support"; //$NON-NLS-1$
 
+	/** The serial support class */
+	public static final String SERIAL_SUPPORT_CLASS= "org.eclipse.jdt.internal.ui.text.correction.SerialVersionComputer"; //$NON-NLS-1$
+
 	/** The serial support jar */
 	public static final String SERIAL_SUPPORT_JAR= "serialsupport.jar"; //$NON-NLS-1$
 
@@ -149,7 +152,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 			monitor.worked(1);
 			copy.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
 			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
-			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, SerialVersionComputer.class.getName());
+			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, SERIAL_SUPPORT_CLASS);
 			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, getQualifiedName());
 			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getElementName());
 			final String[] entries= JavaRuntime.computeDefaultRuntimeClassPath(project);
