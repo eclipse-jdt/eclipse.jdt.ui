@@ -203,7 +203,7 @@ public class TestSearchEngine {
 		
 		IType[] interfaces= type.newSupertypeHierarchy(null).getAllSuperInterfaces(type);
 		for (int i= 0; i < interfaces.length; i++)
-			if(interfaces[i].getFullyQualifiedName().equals("junit.framework.Test"))
+			if(interfaces[i].getFullyQualifiedName().equals(JUnitPlugin.TEST_INTERFACE_NAME))
 				return true;
 		return false;
 	}
@@ -211,7 +211,6 @@ public class TestSearchEngine {
 	public static boolean isTestImplementor(IType type) throws JavaModelException {
 		ITypeHierarchy typeHier= type.newSupertypeHierarchy(null);
 		IType[] superInterfaces= typeHier.getAllInterfaces();
-		boolean isTestClass= false;
 		for (int i= 0; i < superInterfaces.length; i++) {
 			if (superInterfaces[i].getFullyQualifiedName().equals(JUnitPlugin.TEST_INTERFACE_NAME))
 				return true;
