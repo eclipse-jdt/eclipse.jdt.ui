@@ -329,7 +329,7 @@
             id="org.eclipse.jdt.ui.wizards.NewClassCreationWizard">
          <class class="org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard">
             <parameter name="javatype" value="true"/>
-         </class> <!-- see bug 48164 for wrong pde compiler warnings --> 
+         </class>
          <description>
             %NewJavaClass.description
          </description>
@@ -341,7 +341,7 @@
             id="org.eclipse.jdt.ui.wizards.NewInterfaceCreationWizard">
          <class class="org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard">
             <parameter name="javatype" value="true"/>
-         </class> <!-- see bug 48164 for wrong pde compiler warnings --> 
+         </class>
          <description>
             %NewJavaInterface.description
          </description>
@@ -560,6 +560,9 @@
       <type
          name="org.eclipse.jdt.ui.occurrences">
       </type>
+      <type
+         name="org.eclipse.jdt.ui.overrideIndicator">
+      </type>
    </extension>
    <extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">
@@ -583,6 +586,7 @@
             textPreferenceValue="false"
             highlightPreferenceKey="occurrenceHighlighting"
             highlightPreferenceValue="true"
+            contributesToHeader="false"
             overviewRulerPreferenceKey="occurrenceIndicationInOverviewRuler"
             overviewRulerPreferenceValue="true"
             verticalRulerPreferenceKey="occurrenceIndicationInVerticalRuler"
@@ -595,6 +599,30 @@
             isGoToNextNavigationTargetKey="isOccurrenceGoToNextNavigationTarget"
 	        isGoToNextNavigationTarget="false"
             isGoToPreviousNavigationTargetKey="isOccurrenceGoToPreviousNavigationTarget"
+	        isGoToPreviousNavigationTarget="false">
+	  </specification>
+	  <specification
+            annotationType="org.eclipse.jdt.ui.overrideIndicator"
+            label="%OverrideIndicator.label"
+            icon="icons/full/ovr16/over_co.gif"
+			annotationImageProvider ="org.eclipse.jdt.internal.ui.javaeditor.OverrideIndicatorImageProvider"
+            textPreferenceKey="overrideIndicator"
+            textPreferenceValue="false"
+            highlightPreferenceKey="overrideIndicatorHighlighting"
+            highlightPreferenceValue="false"
+            contributesToHeader="false"
+            overviewRulerPreferenceKey="overrideIndicatorInOverviewRuler"
+            overviewRulerPreferenceValue="false"
+            verticalRulerPreferenceKey="overrideIndicatorInVerticalRuler"
+            verticalRulerPreferenceValue="true"
+            colorPreferenceKey="overrideIndicatorColor"
+            colorPreferenceValue="180,207,205"
+            presentationLayer="3"
+            showInNextPrevDropdownToolbarActionKey="showoverrideIndicatorInNextPrevDropdownToolbarAction"
+            showInNextPrevDropdownToolbarAction="false"
+            isGoToNextNavigationTargetKey="isOverrideIndicatorGoToNextNavigationTarget"
+	        isGoToNextNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="isOverrideIndicatorGoToPreviousNavigationTarget"
 	        isGoToPreviousNavigationTarget="false">
 	  </specification>
 
@@ -2173,6 +2201,16 @@
                actionID="RulerDoubleClick"
                id="org.eclipse.ui.texteditor.BookmarkRulerAction">
          </action>
+         <action
+               label="%Dummy.label"
+               class="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerAction"
+               actionID="RulerClick"
+               id="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerAction">
+         </action>
+      </editorContribution>
+      <editorContribution
+            targetID="org.eclipse.jdt.ui.ClassFileEditor"
+            id="org.eclipse.ui.texteditor.ruler.actions">
          <action
                label="%Dummy.label"
                class="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerAction"

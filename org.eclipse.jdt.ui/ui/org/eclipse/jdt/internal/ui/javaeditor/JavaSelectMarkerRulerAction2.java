@@ -46,17 +46,22 @@ public class JavaSelectMarkerRulerAction2 extends SelectMarkerRulerAction2 {
 	 * @see org.eclipse.ui.texteditor.IAnnotationListener#annotationDefaultSelected(org.eclipse.ui.texteditor.AnnotationEvent)
 	 */
 	public void annotationDefaultSelected(AnnotationEvent event) {
-		Annotation a= event.getAnnotation();
+		Annotation annotation= event.getAnnotation();
 		IAnnotationModel model= getAnnotationModel();
-		Position position= model.getPosition(a);
 		
-		if (isBreakpoint(a))
+		if (isOverrideIndicator(annotation)) {
+			((OverrideIndicatorManager.OverrideIndicator)annotation).open();
+			return;
+		}
+		
+		if (isBreakpoint(annotation))
 			triggerAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK);
 		
+		Position position= model.getPosition(annotation);
 		if (position == null)
 			return;
 		
-		if (isQuickFixTarget(a)) {
+		if (isQuickFixTarget(annotation)) {
 			ITextOperationTarget operation= (ITextOperationTarget) getTextEditor().getAdapter(ITextOperationTarget.class);
 			final int opCode= CompilationUnitEditor.CORRECTIONASSIST_PROPOSALS;
 			if (operation != null && operation.canDoOperation(opCode)) {
@@ -71,11 +76,21 @@ public class JavaSelectMarkerRulerAction2 extends SelectMarkerRulerAction2 {
 	}
 
 	/**
-	 * @param ma
+	 * Tells whether the given annotation is an override annotation.
+	 *
+	 * @param annotation the annotation
+	 * @return <code>true</code> iff the annotation is an override annotation
+	 */
+	private boolean isOverrideIndicator(Annotation annotation) {
+		return annotation instanceof OverrideIndicatorManager.OverrideIndicator;
+	}
+
+	/**
+	 * @param annotation
 	 * @return
 	 */
-	private boolean isBreakpoint(Annotation a) {
-		return a.getType().equals("org.eclipse.debug.core.breakpoint") || a.getType().equals(JavaExpandHover.NO_BREAKPOINT_ANNOTATION); //$NON-NLS-1$
+	private boolean isBreakpoint(Annotation annotation) {
+		return annotation.getType().equals("org.eclipse.debug.core.breakpoint") || annotation.getType().equals(JavaExpandHover.NO_BREAKPOINT_ANNOTATION); //$NON-NLS-1$
 	}
 
 	private boolean isQuickFixTarget(Annotation a) {

@@ -90,8 +90,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
-import org.eclipse.jface.text.ISelectionValidator;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ISelectionValidator;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextPresentationListener;
@@ -2097,7 +2097,13 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	private ActivationListener fActivationListener= new ActivationListener();
 	private ISelectionListenerWithAST fPostSelectionListenerWithAST;
 	private OccurrencesFinderJob fOccurrencesFinderJob;
-		
+	/**
+	 * The override and implements indicator manager for this editor.
+	 * @since 3.0
+	 */
+	protected OverrideIndicatorManager fOverrideAndImplementsIndicator;
+	
+	
 	/**
 	 * Returns the most narrow java element including the given offset.
 	 * 
@@ -2608,7 +2614,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (!(sourceViewer instanceof ISourceViewerExtension2)) {
 			setNewPreferenceStore(createNewPreferenceStore(input));
-			super.doSetInput(input);
+			internalDoSetInput(input);
 			return;
 		}
 
@@ -2626,11 +2632,18 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		if (isBrowserLikeLinks())
 			enableBrowserLikeLinks();
 		
+		internalDoSetInput(input);
+	}
+	
+	private void internalDoSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
 		
 		if (fEncodingSupport != null)
 			fEncodingSupport.reset();
 		setOutlinePageInput(fOutlinePage, input);
+		
+		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
+		installOverrideIndicator(model);
 	}
 
 	/**
@@ -2658,6 +2671,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		// cancel possible running computation
 		fMarkOccurrenceAnnotations= false;
 		uninstallOccurrencesFinder();
+		
+		uninstallOverrideIndicator();
 		
 		if (fActivationListener != null) {
 			Shell shell= getEditorSite().getShell();
@@ -3277,6 +3292,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	protected void updateOccurrenceAnnotations(ITextSelection selection, CompilationUnit astRoot) {
 
+		if (fOccurrencesFinderJob != null)
+			fOccurrencesFinderJob.cancel();
+
 		if (!fMarkOccurrenceAnnotations)
 			return;
 		
@@ -3287,8 +3305,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		if (document == null)
 			return;
 				
-		if (fOccurrencesFinderJob != null)
-			fOccurrencesFinderJob.cancel();
 		
 		ExceptionOccurrencesFinder exceptionFinder= new ExceptionOccurrencesFinder();
 		String message= exceptionFinder.initialize(astRoot, selection.getOffset(), selection.getLength());
@@ -3375,6 +3391,18 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			}
 			fOccurrenceAnnotations= null;
 		}
+	}
+
+	protected void uninstallOverrideIndicator() {
+		if (fOverrideAndImplementsIndicator != null) {
+			fOverrideAndImplementsIndicator.removeAnnotations();
+			fOverrideAndImplementsIndicator= null;
+		}
+	}
+
+	protected void installOverrideIndicator(IAnnotationModel model) {
+		uninstallOverrideIndicator();
+		fOverrideAndImplementsIndicator= new OverrideIndicatorManager(model, getInputJavaElement(), JavaPlugin.getDefault().getASTProvider().getAST(getInputJavaElement(), true, null));		
 	}
 
 	/**

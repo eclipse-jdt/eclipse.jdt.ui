@@ -10,28 +10,27 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import org.eclipse.core.resources.IFile;
-
 import java.util.Iterator;
 import java.util.ResourceBundle;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
 
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.editors.text.EditorsUI;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
+import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorExtension;
 import org.eclipse.ui.texteditor.SelectMarkerRulerAction;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -41,16 +40,23 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistLightBulbUpdater.AssistAnnotation;
 
 /**
- * A special select marker ruler action which activates quick fix if clicked on a quick fixable problem.
+ * Java select marker ruler action.
  */
 public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 
 	private ITextEditor fTextEditor;
 	private Position fPosition;
+	private Annotation fAnnotation;
+	private AnnotationPreferenceLookup fAnnotationPreferenceLookup;
+	private IPreferenceStore fStore;
 
 	public JavaSelectMarkerRulerAction(ResourceBundle bundle, String prefix, ITextEditor editor, IVerticalRulerInfo ruler) {
 		super(bundle, prefix, editor, ruler);
 		fTextEditor= editor;
+		
+		fAnnotationPreferenceLookup= EditorsUI.getAnnotationPreferenceLookup();
+		fStore= JavaPlugin.getDefault().getPreferenceStore();
+
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.JAVA_SELECT_MARKER_RULER_ACTION);
 	}
 	
@@ -59,6 +65,11 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 			return;
 
 		if (fPosition != null) {
+			if (fAnnotation instanceof OverrideIndicatorManager.OverrideIndicator) {
+				((OverrideIndicatorManager.OverrideIndicator)fAnnotation).open();
+				return;
+			}
+			
 			ITextOperationTarget operation= (ITextOperationTarget) fTextEditor.getAdapter(ITextOperationTarget.class);
 			final int opCode= CompilationUnitEditor.CORRECTIONASSIST_PROPOSALS;
 			if (operation != null && operation.canDoOperation(opCode)) {
@@ -72,67 +83,64 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 	}
 	
 	public void update() {
-		// Begin Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20114
-		if (!(fTextEditor instanceof ITextEditorExtension) || ((ITextEditorExtension) fTextEditor).isEditorInputReadOnly()) {
-			fPosition= null;
-			super.update();
-			return;
-		}
-		// End Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20114
-		fPosition= getJavaAnnotationPosition();
+		findJavaAnnotation();
 		if (fPosition != null)
 			setEnabled(true);
 		else
 			super.update();
 	}
 	
-	private Position getJavaAnnotationPosition() {
+	private void findJavaAnnotation() {
+		fPosition= null;
+		fAnnotation= null;
+		
 		AbstractMarkerAnnotationModel model= getAnnotationModel();
+		IAnnotationAccessExtension annotationAccess= getAnnotationAccessExtension();
+		
 		IDocument document= getDocument();
 		if (model == null)
-			return null;
-		ICompilationUnit cu= getCompilationUnit();
-		if (cu == null) {
-			return null;
-		}
-		
+			return ;
+
 		boolean hasAssistLightbulb= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB);
-		Annotation assistAnnotation= null;
 			
 		Iterator iter= model.getAnnotationIterator();
+		int layer= Integer.MIN_VALUE;
+		
 		while (iter.hasNext()) {
 			Annotation annotation= (Annotation) iter.next();
-			if (annotation instanceof IJavaAnnotation) {
-				IJavaAnnotation javaAnnotation= (IJavaAnnotation)annotation;
-				if (!javaAnnotation.isMarkedDeleted()) {
-					Position position= model.getPosition(annotation);
-					if (includesRulerLine(position, document) && JavaCorrectionProcessor.hasCorrections(javaAnnotation))
-						return position;
+			if (annotation.isMarkedDeleted())
+				continue;
+				
+			if (annotationAccess != null && annotationAccess.getLayer(annotation) < layer)
+				continue;
+
+			Position position= model.getPosition(annotation);
+			if (!includesRulerLine(position, document))
+				continue;
+			
+			boolean isReadOnly= fTextEditor instanceof ITextEditorExtension && ((ITextEditorExtension)fTextEditor).isEditorInputReadOnly();
+			if (!isReadOnly
+					&& (
+						((hasAssistLightbulb && annotation instanceof AssistAnnotation)
+						|| (annotation instanceof IJavaAnnotation && JavaCorrectionProcessor.hasCorrections((IJavaAnnotation)annotation))))) {
+				fPosition= position;
+				fAnnotation= annotation;
+				continue;
+			} else {
+				AnnotationPreference preference= fAnnotationPreferenceLookup.getAnnotationPreference(annotation);
+				if (preference == null)
+					continue;
+				
+				String key= preference.getVerticalRulerPreferenceKey();
+				if (key == null)
+					continue;
+				
+				if (fStore.getBoolean(key)) {
+					fPosition= position;
+					fAnnotation= annotation;
 				}
-			} else if (hasAssistLightbulb && annotation instanceof AssistAnnotation) {
-				// there is only one AssistAnnotation at a time
-				assistAnnotation= annotation; 
 			}
 		}
-		if (assistAnnotation != null) {
-			Position position= model.getPosition(assistAnnotation);
-			// no need to check 'JavaCorrectionProcessor.hasAssists': annotation only created when
-			// there are assists
-			if (includesRulerLine(position, document))
-				return position;
-		}
-		return null;
-	}
-	
-	private ICompilationUnit getCompilationUnit() {
-		IEditorInput input= fTextEditor.getEditorInput();
-		if (input instanceof IFileEditorInput) {
-			IFile file= ((IFileEditorInput) input).getFile();
-			IJavaElement element= JavaCore.create(file);
-			if (element instanceof ICompilationUnit)
-				return (ICompilationUnit) element;
-		}
-		return null;
 	}
 }
 

@@ -73,6 +73,7 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedUIControl;
 import org.eclipse.jface.text.link.LinkedUIControl.ExitFlags;
 import org.eclipse.jface.text.link.LinkedUIControl.IExitPolicy;
+import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -1409,6 +1410,25 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		configureTabConverter();
 		
 		configureToggleCommentAction();
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#installOverrideIndicator(org.eclipse.jface.text.source.IAnnotationModel)
+	 * @since 3.0
+	 */
+	protected void installOverrideIndicator(IAnnotationModel model) {
+		super.installOverrideIndicator(model);
+		addReconcileListener(fOverrideAndImplementsIndicator);
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#uninstallOverrideIndicator()
+	 * @since 3.0
+	 */
+	protected void uninstallOverrideIndicator() {
+		if (fOverrideAndImplementsIndicator != null)
+			removeReconcileListener(fOverrideAndImplementsIndicator);
+		super.uninstallOverrideIndicator();
 	}
 
 	/**
