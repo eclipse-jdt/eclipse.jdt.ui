@@ -19,7 +19,6 @@ import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.testplugin.util.DialogCheck;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -30,10 +29,6 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 public class DialogsTest2 extends TestCase {
 	
 	private static final String PROJECT_NAME = "DummyProject";
-
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), DialogsTest2.class, args);
-	}
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite(DialogsTest2.class.getName());

@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
@@ -46,12 +45,6 @@ public class AllTypesCacheTest extends TestCase {
 	public AllTypesCacheTest(String name) {
 		super(name);
 	}
-
-
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
-	}
-
 
 	public static Test suite() {
 		return new TestSuite(THIS);

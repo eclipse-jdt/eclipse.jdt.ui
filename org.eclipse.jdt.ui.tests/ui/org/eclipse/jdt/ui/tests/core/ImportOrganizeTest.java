@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
@@ -36,10 +35,6 @@ public class ImportOrganizeTest extends TestCase {
 
 	public ImportOrganizeTest(String name) {
 		super(name);
-	}
-
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
 	}
 
 	public static Test suite() {

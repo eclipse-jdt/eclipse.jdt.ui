@@ -26,12 +26,11 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.Signature;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -47,11 +46,6 @@ public class JavaModelUtilTest extends TestCase {
 	public JavaModelUtilTest(String name) {
 		super(name);
 	}
-
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
-	}
-
 
 	public static Test suite() {
 		return new TestSuite(THIS);
@@ -127,6 +121,8 @@ public class JavaModelUtilTest extends TestCase {
 		type= JavaModelUtil.findType(fJProject1, "pack1.ReqProjType.Inner.InnerInner");
 		assertElementName("InnerInner", type, IJavaElement.TYPE);	
 	}
+	
+	
 	
 	public void testFindType2() throws Exception {
 		IType type= JavaModelUtil.findType(fJProject1, "junit.extensions", "ExceptionTestCase");

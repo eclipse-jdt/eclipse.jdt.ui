@@ -16,10 +16,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 
 public class TypeHierarchyTest extends TestCase {
 	
@@ -31,10 +27,6 @@ public class TypeHierarchyTest extends TestCase {
 	public TypeHierarchyTest(String name) {
 		super(name);
 	}
-
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
-	}		
 			
 	public static Test suite() {
 		return new TestSuite(THIS);

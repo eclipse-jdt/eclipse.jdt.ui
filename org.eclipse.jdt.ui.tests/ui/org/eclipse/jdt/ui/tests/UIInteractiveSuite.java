@@ -7,7 +7,6 @@ package org.eclipse.jdt.ui.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.ui.tests.dialogs.DialogsTest;
 import org.eclipse.jdt.ui.tests.dialogs.PreferencesTest;
 import org.eclipse.jdt.ui.tests.dialogs.WizardsTest;

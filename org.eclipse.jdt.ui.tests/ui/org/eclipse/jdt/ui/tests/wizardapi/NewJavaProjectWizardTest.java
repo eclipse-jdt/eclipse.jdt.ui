@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
 
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
@@ -30,11 +29,6 @@ import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 public class NewJavaProjectWizardTest extends TestCase {
 	
 	
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), NewJavaProjectWizardTest.class, args);
-	}
-
-
 	public static Test suite() {
 		return new TestSuite(NewJavaProjectWizardTest.class);
 	}		

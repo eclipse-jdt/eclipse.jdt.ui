@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.testplugin.test;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -19,7 +18,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 
 public class JavaTestCase extends TestCase {
@@ -29,10 +27,6 @@ public class JavaTestCase extends TestCase {
 	public JavaTestCase(String name) {
 		super(name);
 	}
-
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), JavaTestCase.class, args);
-	}		
 			
 	public static Test suite() {
 		TestSuite suite= new TestSuite();

@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -37,10 +36,6 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	public AddUnimplementedMethodsTest(String name) {
 		super(name);
 	}
-
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
-	}		
 		
 	public static Test suite() {
 		TestSuite suite= new TestSuite(THIS.getName());

@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.testplugin.util.DialogCheck;
 
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
@@ -42,10 +41,6 @@ public class WizardsTest extends TestCase {
 	
 	private static final String PROJECT_NAME = "DummyProject";
 
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), WizardsTest.class, args);
-	}
-	
 	public static Test suite() {
 		TestSuite suite= new TestSuite(WizardsTest.class.getName());
 		suite.addTest(new WizardsTest("testClassWizard"));

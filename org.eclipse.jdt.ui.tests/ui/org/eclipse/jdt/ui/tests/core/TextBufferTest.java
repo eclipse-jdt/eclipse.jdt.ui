@@ -9,7 +9,7 @@ package org.eclipse.jdt.ui.tests.core;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite; 
+import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.IStatus;
 
@@ -25,8 +25,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
 
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
 public class TextBufferTest extends TestCase {
 
 	private static final Class THIS= TextBufferTest.class;
@@ -36,10 +34,6 @@ public class TextBufferTest extends TestCase {
 	
 	public TextBufferTest(String name) {
 		super(name);
-	}
-	
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
 	}
 
 	public static Test suite() {

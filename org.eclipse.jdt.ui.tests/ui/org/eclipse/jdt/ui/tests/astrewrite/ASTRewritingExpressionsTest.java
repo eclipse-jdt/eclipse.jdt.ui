@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
@@ -28,11 +27,6 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 	public ASTRewritingExpressionsTest(String name) {
 		super(name);
 	}
-
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
-	}
-
 
 	public static Test suite() {
 		if (false) {

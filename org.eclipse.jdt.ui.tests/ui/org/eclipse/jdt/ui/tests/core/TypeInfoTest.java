@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
@@ -43,16 +42,9 @@ public class TypeInfoTest extends TestCase {
 		super(name);
 	}
 
-
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
-	}
-
-
 	public static Test suite() {
 		return new TestSuite(THIS);
 	}
-
 
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");

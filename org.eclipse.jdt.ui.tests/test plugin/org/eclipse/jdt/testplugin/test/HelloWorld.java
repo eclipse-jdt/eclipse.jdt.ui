@@ -16,16 +16,12 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 
 public class HelloWorld extends TestCase {
 	
 	private IJavaProject fJProject;
 	
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), HelloWorld.class, args);
-	}
 	
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
