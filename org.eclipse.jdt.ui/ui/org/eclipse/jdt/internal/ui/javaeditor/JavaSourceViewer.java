@@ -13,8 +13,11 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.custom.BidiSegmentEvent;
+import org.eclipse.swt.custom.BidiSegmentListener;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
@@ -28,7 +31,12 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextPresentationListener;
+import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.information.IInformationPresenter;
@@ -44,6 +52,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
@@ -374,6 +383,14 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 
 		fBackspaceManager= new SmartBackspaceManager();
 		fBackspaceManager.install(this);
+		
+		StyledText text= getTextWidget();
+		text.addBidiSegmentListener(new  BidiSegmentListener() {
+			public void lineGetSegments(BidiSegmentEvent event) {
+				if (redraws())
+					event.segments= getBidiLineSegments(event.lineOffset, event.lineText);
+			}
+		});
 	}
 	
 	/**
@@ -437,5 +454,82 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 */
 	Object getReconciler() {
 		return fReconciler;
+	}
+	
+	/**
+	 * Returns a segmentation of the given line appropriate for BIDI rendering. The default
+	 * implementation returns only the string literals of a java code line as segments.
+	 * 
+	 * @param widgetLineOffset the offset of the line
+	 * @param line the content of the line
+	 * @return the line's BIDI segmentation
+	 */
+	protected int[] getBidiLineSegments(int widgetLineOffset, String line) {
+		if (line != null && line.length() > 0) {
+			int lineOffset= widgetOffset2ModelOffset(widgetLineOffset);
+			try {
+				return getBidiLineSegments(getDocument(), lineOffset);
+			} catch (BadLocationException x) {
+				return null; // don't segment line in this case
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns a segmentation of the line of the given document appropriate for
+	 * BIDI rendering. The default implementation returns only the string literals of a java code
+	 * line as segments.
+	 * 
+	 * @param document the document
+	 * @param lineOffset the offset of the line
+	 * @return the line's BIDI segmentation
+	 * @throws BadLocationException in case lineOffset is not valid in document
+	 */
+	protected int[] getBidiLineSegments(IDocument document, int lineOffset) throws BadLocationException {
+		
+		if (document == null)
+			return null;
+		
+		IRegion line= document.getLineInformationOfOffset(lineOffset);
+		ITypedRegion[] linePartitioning= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, lineOffset, line.getLength(), false);
+		
+		List segmentation= new ArrayList();
+		for (int i= 0; i < linePartitioning.length; i++) {
+			if (IJavaPartitions.JAVA_STRING.equals(linePartitioning[i].getType()))
+				segmentation.add(linePartitioning[i]);
+		}
+		
+		
+		if (segmentation.size() == 0) 
+			return null;
+			
+		int size= segmentation.size();
+		int[] segments= new int[size * 2 + 1];
+		
+		int j= 0;
+		for (int i= 0; i < size; i++) {
+			ITypedRegion segment= (ITypedRegion) segmentation.get(i);
+			
+			if (i == 0)
+				segments[j++]= 0;
+				
+			int offset= segment.getOffset() - lineOffset;
+			if (offset > segments[j - 1])
+				segments[j++]= offset;
+				
+			if (offset + segment.getLength() >= line.getLength())
+				break;
+				
+			segments[j++]= offset + segment.getLength();
+		}
+		
+		if (j < segments.length) {
+			int[] result= new int[j];
+			System.arraycopy(segments, 0, result, 0, j);
+			segments= result;
+		}
+		
+		return segments;
 	}
 }

@@ -33,8 +33,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BidiSegmentEvent;
-import org.eclipse.swt.custom.BidiSegmentListener;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ShellAdapter;
@@ -85,7 +83,6 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.ITextViewerExtension5;
-import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
@@ -1733,13 +1730,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		
 		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore());
 		
-		StyledText text= viewer.getTextWidget();
-		text.addBidiSegmentListener(new  BidiSegmentListener() {
-			public void lineGetSegments(BidiSegmentEvent event) {
-				event.segments= getBidiLineSegments(event.lineOffset, event.lineText);
-			}
-		});
-		
 		// ensure source viewer decoration support has been created and configured
 		getSourceViewerDecorationSupport(viewer);				
 		
@@ -2559,95 +2549,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	private boolean isJavaEditorHoverProperty(String property) {
 		return	PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS.equals(property);
 	}
-	
-	/**
-	 * Returns a segmentation of the line of the given viewer's input document appropriate for
-	 * BIDI rendering. The default implementation returns only the string literals of a java code
-	 * line as segments.
-	 * 
-	 * @param viewer the text viewer
-	 * @param lineOffset the offset of the line
-	 * @return the line's BIDI segmentation
-	 * @throws BadLocationException in case lineOffset is not valid in document
-	 */
-	public static int[] getBidiLineSegments(ITextViewer viewer, int lineOffset) throws BadLocationException {
-			
-		IDocument document= viewer.getDocument();
-		if (document == null)
-			return null;
-			
-		IRegion line= document.getLineInformationOfOffset(lineOffset);
-		ITypedRegion[] linePartitioning= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, lineOffset, line.getLength(), false);
 		
-		List segmentation= new ArrayList();
-		for (int i= 0; i < linePartitioning.length; i++) {
-			if (IJavaPartitions.JAVA_STRING.equals(linePartitioning[i].getType()))
-				segmentation.add(linePartitioning[i]);
-		}
-		
-		
-		if (segmentation.size() == 0) 
-			return null;
-			
-		int size= segmentation.size();
-		int[] segments= new int[size * 2 + 1];
-		
-		int j= 0;
-		for (int i= 0; i < size; i++) {
-			ITypedRegion segment= (ITypedRegion) segmentation.get(i);
-			
-			if (i == 0)
-				segments[j++]= 0;
-				
-			int offset= segment.getOffset() - lineOffset;
-			if (offset > segments[j - 1])
-				segments[j++]= offset;
-				
-			if (offset + segment.getLength() >= line.getLength())
-				break;
-				
-			segments[j++]= offset + segment.getLength();
-		}
-		
-		if (j < segments.length) {
-			int[] result= new int[j];
-			System.arraycopy(segments, 0, result, 0, j);
-			segments= result;
-		}
-		
-		return segments;
-	}
-		
-	/**
-	 * Returns a segmentation of the given line appropriate for BIDI rendering. The default
-	 * implementation returns only the string literals of a java code line as segments.
-	 * 
-	 * @param widgetLineOffset the offset of the line
-	 * @param line the content of the line
-	 * @return the line's BIDI segmentation
-	 */
-	protected int[] getBidiLineSegments(int widgetLineOffset, String line) {
-		if (line != null && line.length() > 0) {
-			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer != null) {
-				int lineOffset;
-				if (sourceViewer instanceof ITextViewerExtension5) {
-					ITextViewerExtension5 extension= (ITextViewerExtension5) sourceViewer;
-					lineOffset= extension.widgetOffset2ModelOffset(widgetLineOffset);
-				} else {
-					IRegion visible= sourceViewer.getVisibleRegion();
-					lineOffset= visible.getOffset() + widgetLineOffset;
-				}
-				try {
-					return getBidiLineSegments(sourceViewer, lineOffset);
-				} catch (BadLocationException x) {
-					// don't segment line in this case
-				}
-			}
-		}
-		return null;
-	}
-
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#updatePropertyDependentActions()
 	 */
