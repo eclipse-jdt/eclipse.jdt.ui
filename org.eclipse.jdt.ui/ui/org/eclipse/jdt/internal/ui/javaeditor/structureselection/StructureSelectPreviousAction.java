@@ -16,7 +16,13 @@ public class StructureSelectPreviousAction extends StructureSelectionAction{
 		setToolTipText(JavaEditorMessages.getString("StructureSelectPrevious.tooltip"));
 		setDescription(JavaEditorMessages.getString("StructureSelectPrevious.description"));
 	}
-			
+	
+	/*
+	 * This constructor is for testing purpose only.
+	 */
+	public StructureSelectPreviousAction() {
+	}
+		
 	/* non java doc
 	 * @see StructureSelectionAction#internalGetNewSelectionRange(ISourceRange, ICompilationUnit, StructureSelectionAnalyzer)
 	 */	

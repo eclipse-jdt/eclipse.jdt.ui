@@ -16,7 +16,13 @@ public class StructureSelectNextAction extends StructureSelectionAction{
 		setToolTipText(JavaEditorMessages.getString("StructureSelectNext.tooltip"));
 		setDescription(JavaEditorMessages.getString("StructureSelectNext.description"));
 	}
-			
+	
+	/*
+	 * This constructor is for testing purpose only.
+	 */
+	public StructureSelectNextAction() {
+	}
+		
 	/* non java doc
 	 * @see StructureSelectionAction#internalGetNewSelectionRange(ISourceRange, ICompilationUnit, StructureSelectionAnalyzer)
 	 */
