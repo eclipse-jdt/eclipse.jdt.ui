@@ -366,9 +366,21 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				}
 			}
 			
+			Position p= manager.getFirstPosition();
+			int pEndOffset= p.offset + p.length;
+			
+			// if the bracket position gets deleted or replaced, take the linked UI down.
+			// 1: the event has to happen so that it occurs on or before the position end
+			if (pEndOffset >= offset) {
+				int endOffset= offset + length;
+				// 2: either it is a replace event (selection length > 0, selection extends over closing peer, character != 0)
+				// or it is a delete event right at the end of the position, with no selection
+				if (pEndOffset < endOffset && event.character != 0 || length == 0 && pEndOffset == endOffset && event.keyCode == 127)
+					return new ExitFlags(LinkedPositionUI.COMMIT, true);
+			}
+			
 			switch (event.character) {	
 			case '\b': {
-				Position p= manager.getFirstPosition();	
 				if (p.offset == offset && p.length == length)
 					return new ExitFlags(0, false);
 				else
