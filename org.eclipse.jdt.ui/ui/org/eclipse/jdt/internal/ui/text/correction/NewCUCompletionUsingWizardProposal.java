@@ -18,7 +18,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 
-import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
@@ -41,16 +41,16 @@ import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 
 public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal {
 	
-	private String fNewTypeName;
-	private boolean fIsClass;
-	private IPackageFragment fPackage;
+	private final String fNewTypeName;
+	private final boolean fIsClass;
+	private final ICompilationUnit fCompilationUnit;
 
-    public NewCUCompletionUsingWizardProposal(String name, String newTypeName, IPackageFragment pack, boolean isClass, int severity) {
+    public NewCUCompletionUsingWizardProposal(String name, String newTypeName, ICompilationUnit compilationUnit, boolean isClass, int severity) {
         super(name, null, severity, null);
         
         fNewTypeName= newTypeName;
         fIsClass= isClass;
-        fPackage= pack;
+        fCompilationUnit= compilationUnit;
     	
         if (isClass) {
             setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS));
@@ -66,7 +66,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		} else {
 			wizard= new NewInterfaceCreationWizard();
 		}
-		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fPackage));
+		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fCompilationUnit));
 		
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		WizardDialog dialog= new WizardDialog(shell, wizard);

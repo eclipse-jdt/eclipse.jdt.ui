@@ -209,14 +209,14 @@ public class UnresolvedElementsSubProcessor {
 					proposals.add(new NewCUCompletionProposal(label, addedCU, true, superTypes, 0));
                     
                     String wizardLabel= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclassusingwizard.description", typeName); //$NON-NLS-1$
-                    proposals.add(new NewCUCompletionUsingWizardProposal(wizardLabel, typeName, pack, true, 0));
+                    proposals.add(new NewCUCompletionUsingWizardProposal(wizardLabel, typeName, cu, true, 0));
 				}
 				if ((kind & SimilarElementsRequestor.INTERFACES) != 0) {
 					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterface.description", typeName); //$NON-NLS-1$
 					proposals.add(new NewCUCompletionProposal(label, addedCU, false, null, 0));
                     
                     String wizardLabel= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterfaceusingwizard.description", typeName); //$NON-NLS-1$
-                    proposals.add(new NewCUCompletionUsingWizardProposal(wizardLabel, typeName, pack, true, 0));
+                    proposals.add(new NewCUCompletionUsingWizardProposal(wizardLabel, typeName, cu, false, 0));
 				}				
 			}
 		}
