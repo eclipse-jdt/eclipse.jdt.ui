@@ -1194,11 +1194,20 @@ public abstract class TypePage extends ContainerPage {
 			// add imports
 			imports.create(!isInnerClass, null);
 		} 
-		monitor.worked(1);	
+		monitor.worked(1);
 		
+		ICompilationUnit cu= createdType.getCompilationUnit();	
+		ISourceRange range;
+		if (isInnerClass) {
+			synchronized(cu) {
+				cu.reconcile();
+			}
+			range= createdType.getSourceRange();
+		} else {
+			range= cu.getSourceRange();
+		}
 		
-		ISourceRange range= isInnerClass ? createdType.getSourceRange() : createdType.getCompilationUnit().getSourceRange();
-		IBuffer buf= createdType.getCompilationUnit().getBuffer();
+		IBuffer buf= cu.getBuffer();
 		String originalContent= buf.getText(range.getOffset(), range.getLength());
 		String formattedContent= StubUtility.codeFormat(originalContent, indent, lineDelimiter);
 		buf.replace(range.getOffset(), range.getLength(), formattedContent);
