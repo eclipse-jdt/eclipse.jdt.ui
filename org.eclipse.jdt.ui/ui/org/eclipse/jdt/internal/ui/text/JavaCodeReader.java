@@ -51,11 +51,11 @@ public class JavaCodeReader extends SingleCharReader {
 		fEnd= Math.min(fDocument.getLength(), fOffset + length);		
 	}
 	
-	public void configureBackwardReader(IDocument document, int offset, boolean skipComments, boolean skiptStrings) throws IOException {
+	public void configureBackwardReader(IDocument document, int offset, boolean skipComments, boolean skipStrings) throws IOException {
 		fDocument= document;
 		fOffset= offset;
 		fSkipComments= skipComments;
-		fSkipStrings= skiptStrings;
+		fSkipStrings= skipStrings;
 		
 		fForward= false;
 		try {
@@ -198,11 +198,11 @@ public class JavaCodeReader extends SingleCharReader {
 			switch (current) {
 				case '/':
 					
-					if (fSkipComments && 0 <= fOffset) {
-						char next= fDocument.getChar(fOffset);
+					if (fSkipComments && fOffset > 1) {
+						char next= fDocument.getChar(fOffset - 1);
 						if (next == '*') {
 							// a comment ends, advance to the comment start
-							--fOffset;
+							fOffset -= 2;
 							gotoCommentStart();
 							continue;
 						}

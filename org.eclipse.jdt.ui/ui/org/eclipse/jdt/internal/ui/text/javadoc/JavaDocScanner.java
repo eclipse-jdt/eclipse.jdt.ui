@@ -140,7 +140,7 @@ public final class JavaDocScanner extends AbstractJavaScanner {
 		
 		// Add rule for links.
 		token= getToken(IJavaColorConstants.JAVADOC_LINK);
-		list.add(new SingleLineRule("{", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
+		list.add(new SingleLineRule("{@link", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 		
 		
 		// Add generic whitespace rule.

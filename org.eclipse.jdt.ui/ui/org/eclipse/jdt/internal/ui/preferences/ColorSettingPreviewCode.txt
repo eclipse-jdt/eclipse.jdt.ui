@@ -1,8 +1,9 @@
 /**
- * This is about <code>className</code>.
+ * This is about <code>ClassName</code>.
+ * {@link com.yourCompany.aPackage.SuperClass}
  * @author author
  */
-public class className {
+public class ClassName extends SuperClass {
 	/* This comment may span multiple lines. */
 	private int integer= 0;
 	// This comment may span only this line
