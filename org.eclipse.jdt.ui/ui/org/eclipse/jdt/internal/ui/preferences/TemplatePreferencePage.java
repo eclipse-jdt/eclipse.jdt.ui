@@ -412,7 +412,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 	private void add() {		
 		
 		Template template= new Template();
-		template.setContext(CONTEXTS[0]);
+		template.setContextTypeId(CONTEXTS[0]);
 		
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, false, true, CONTEXTS);
 		if (dialog.open() == Window.OK) {
@@ -449,7 +449,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 			} else {
 				template.setName(newTemplate.getName());
 				template.setDescription(newTemplate.getDescription());
-				template.setContext(newTemplate.getContextTypeId());
+				template.setContextTypeId(newTemplate.getContextTypeId());
 				template.setPattern(newTemplate.getPattern());
 				fTableViewer.refresh(template);
 			}

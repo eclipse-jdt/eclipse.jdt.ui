@@ -262,7 +262,7 @@ public class EditTemplateDialog extends StatusDialog {
 			updateButtons();			
 		} else if (w == fContextCombo) {
 			String name= fContextCombo.getText();
-			fTemplate.setContext(name);
+			fTemplate.setContextTypeId(name);
 			fTemplateProcessor.setContextType(JavaPlugin.getTemplateContextRegistry().getContextType(name));
 		} else if (w == fDescriptionText) {
 			String desc= fDescriptionText.getText();
