@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+   <meta name="GENERATOR" content="Mozilla/4.76 [en] (Windows NT 5.0; U) [Netscape]">
    <title>Java Tooling Release Notes</title>
 </head>
 <body>
@@ -16,15 +16,40 @@ What's new in this drop</h2>
 
 <ul>
 <li>
-JUnit support
-<ul>
-  <li>a creation wizard for test cases, it can optionally generate test stubs
-    for methods of an existing class.</li>
-  <li>a creation wizard for a test suite</li>
-  <li>an object contribution action that helps to update AllTests.</li>
-</ul>
-</li>
+JUnit support</li>
 
+<ul>
+<li>
+a creation wizard for test cases, it can optionally generate test stubs
+for methods of an existing class.</li>
+
+<li>
+a creation wizard for a test suite</li>
+
+<li>
+an object contribution action that helps to update AllTests.</li>
+</ul>
+
+<li>
+Builder preference page</li>
+
+<ul>
+<li>
+Specify resources that should not be copied to the output folder by the
+Java builder.</li>
+</ul>
+
+<li>
+Javadoc location property page for projects</li>
+
+<ul>
+<li>
+Define the location of Javadoc for element in the project's source folder.</li>
+
+<li>
+Used by the Javadoc export wizard as default destination and by the Open
+external Javadoc action.</li>
+</ul>
 </ul>
 
 <h2>
@@ -32,7 +57,6 @@ Problem Reports</h2>
 <a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F03%2F12&chfieldto=2002%2F03%2F19&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click
 here</a> to see PRs which have been marked as RESOLVED or CLOSED between
 2002/03/12 and 2002/03/19.
-
 <h1>
 Eclipse Platform Build Notes&nbsp;<br>
 Java Development Tooling UI</h1>
@@ -462,7 +486,7 @@ Java Development Tooling UI</font></h1>
 <font face="Times New Roman">Eclipse Build Input January 15th 2002</font>
 <h2>
 <font face="Times New Roman">What's new in this drop</font></h2>
-<b><font face="Times New Roman">Extract Local Variable refactoring</font></b><font face="Times New Roman">
+<font face="Times New Roman"><b>Extract Local Variable refactoring</b>
 : (aka 'Introduce Explaining Variable' or 'Introduce Local Variable'.)
 To use it - select an expression used in one your methods and choose 'Extract
 Local Variable' from the global 'Refactor' menu. It will replace the expression
