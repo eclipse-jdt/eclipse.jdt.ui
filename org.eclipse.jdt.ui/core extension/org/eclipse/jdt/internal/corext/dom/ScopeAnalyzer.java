@@ -388,6 +388,9 @@ public class ScopeAnalyzer {
 					body.accept(this);
 				}
 				visitBackwards(node.parameters());
+				if (node.getAST().apiLevel() >= AST.JLS3) {
+					visitBackwards(node.typeParameters());
+				}
 			}
 			return false;
 		}
@@ -442,12 +445,15 @@ public class ScopeAnalyzer {
 				visitBackwards(node.initializers());
 			}
 			return false;
-		}
-	
+		}	
 	
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && node.getStartPosition() + node.getLength() < fPosition) {
-				addResult(node.getTypeDeclaration().resolveBinding());		
+				if (node.getAST().apiLevel() == AST.JLS2) {
+					addResult(node.getTypeDeclaration().resolveBinding());
+				} else {
+					addResult(node.getDeclaration().getName().resolveBinding());
+				}
 				return false;
 			}
 			return isInside(node);
