@@ -15,10 +15,8 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.Block;
-import org.eclipse.jdt.internal.compiler.ast.DoStatement;
 import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
@@ -58,7 +56,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private boolean fReplaceAllOccurrences;
 	private boolean fDeclareFinal;
 	private String fTempName;
-	private Map fAlreadyUsedNameMap;
+	private Map fAlreadyUsedNameMap; //String -> ISourceRange
 	private AST fAST;
 	
 	public ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings, int tabSize, boolean compactAssignments) {
@@ -80,7 +78,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	public String getName() {
-		return "Extract Temp";
+		return "Extract Local Variable";
 	}
 
 	public boolean declareFinal() {
@@ -187,7 +185,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		NewSelectionAnalyzer selAnalyzer= new NewSelectionAnalyzer(new ExtendedBuffer(fCu.getBuffer()), selection);
 		fAST.accept(selAnalyzer);
 		AstNode[] parents= selAnalyzer.getParents();
-		for (int i= parents.length - 1 ; i >= 0 ; i--) {
+		for (int i= parents.length - 1; i >= 0; i--) {
 			if (parents[i] instanceof Expression)
 				return true;
 			if (parents[i] instanceof LocalDeclaration)
@@ -229,7 +227,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		ImportEdit importEdit= new ImportEdit(fCu, fSettings);
 		importEdit.addImport(Bindings.makeFullyQualifiedName(type.qualifiedPackageName(), type.qualifiedSourceName()));
 		if (!importEdit.isEmpty())
-			change.addTextEdit("add import", importEdit);
+			change.addTextEdit("Update imports", importEdit);
 	}
 	
 	private void addTempDeclaration(TextChange change) throws CoreException {
@@ -383,7 +381,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private Statement findInnermostStatement(AstNode[] parents) {
 		if (parents.length < 2)
 			return null;
-		for (int i= parents.length - 2 ; i >= 0 ; i--) {
+		for (int i= parents.length - 2; i >= 0; i--) {
 			if (isBlock(parents[i]))
 				return (Statement)parents[i + 1];
 		}	
@@ -405,7 +403,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		AstNode[] parents= selAnalyzer.getParents();
 		if (parents == null)
 			return null;
-		for (int i= parents.length -1 ; i >= 0 ; i--) {
+		for (int i= parents.length - 1; i >= 0 ; i--) {
 			AstNode astNode= parents[i];
 			if (astNode instanceof AbstractMethodDeclaration)
 				return (AbstractMethodDeclaration)astNode;
