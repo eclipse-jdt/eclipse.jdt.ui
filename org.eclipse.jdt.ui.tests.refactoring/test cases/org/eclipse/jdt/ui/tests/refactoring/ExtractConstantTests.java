@@ -61,13 +61,6 @@ public class ExtractConstantTests extends RefactoringTest {
 		return fileName + getSimpleTestFileName(canExtract, input);
 	}
 	
-	private String getFailingTestFileName(){
-		return getTestFileName(false, false);
-	}
-	private String getPassingTestFileName(boolean input){
-		return getTestFileName(true, input);
-	}
-
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canExtract, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canExtract, input), getFileContents(getTestFileName(canExtract, input)));
 	}
@@ -90,7 +83,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, boolean qualifyReferencesWithConstantName, String constantName, String guessedConstantName) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ExtractConstantRefactoring ref= new ExtractConstantRefactoring(cu, selection.getOffset(), selection.getLength(), 
+		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 																									JavaPreferencesSettings.getCodeGenerationSettings());
 		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful", preconditionResult.isOK());
@@ -134,7 +127,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName, int errorCode, boolean checkCode) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ExtractConstantRefactoring ref= new ExtractConstantRefactoring(cu, selection.getOffset(), selection.getLength(), 
+		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 																									JavaPreferencesSettings.getCodeGenerationSettings());
 		ref.setReplaceAllOccurrences(replaceAll);
 		ref.setConstantName(constantName);

@@ -36,21 +36,13 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
@@ -61,17 +53,23 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage;
-import org.eclipse.jdt.internal.ui.reorg.ReorgQueries;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtCopyAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 import org.eclipse.jdt.internal.ui.reorg.MockWorkbenchSite;
 import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 import org.eclipse.jdt.internal.ui.reorg.ReorgMessages;
+import org.eclipse.jdt.internal.ui.reorg.ReorgQueries;
 import org.eclipse.jdt.internal.ui.reorg.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
 
@@ -212,13 +210,13 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		
 		if (fMoveRefactoring == null){
 			IPackageFragmentRootManipulationQuery query= JdtMoveAction.createUpdateClasspathQuery(getViewer().getControl().getShell());
-			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings(), query);
+			fMoveRefactoring= MoveRefactoring.create(fElements, JavaPreferencesSettings.getCodeGenerationSettings(), query);
 		}	
 		
 		if (!canMoveElements())
 			return DND.DROP_NONE;	
 		
-		if (fMoveRefactoring.isValidDestination(target))
+		if (fMoveRefactoring != null && fMoveRefactoring.isValidDestination(target))
 			return DND.DROP_MOVE;
 		else
 			return DND.DROP_NONE;	
@@ -227,21 +225,12 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private boolean canMoveElements() {
 		if (fCanMoveElements == 0) {
 			fCanMoveElements= 2;
-			if (! canActivate(fMoveRefactoring))
+			if (fMoveRefactoring == null)
 				fCanMoveElements= 1;
 		}
 		return fCanMoveElements == 2;
 	}
 	
-	private boolean canActivate(ReorgRefactoring ref){
-		try{
-			return ref.checkActivation(new NullProgressMonitor()).isOK();
-		} catch(JavaModelException e){
-			ExceptionHandler.handle(e, PackagesMessages.getString("SelectionTransferDropAdapter.error.title"), PackagesMessages.getString("SelectionTransferDropAdapter.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
-			return false;
-		}
-	}
-
 	private void handleDropLink(Object target, DropTargetEvent event) {
 		if (fAddMethodStubAction.init((IType)target, getSelection())) 
 			fAddMethodStubAction.run();
@@ -281,13 +270,13 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		
 		if (fCopyRefactoring == null){
 			IPackageFragmentRootManipulationQuery query= JdtCopyAction.createUpdateClasspathQuery(getViewer().getControl().getShell());
-			fCopyRefactoring= new CopyRefactoring(fElements, new ReorgQueries(), query);
+			fCopyRefactoring= CopyRefactoring.create(fElements, new ReorgQueries(), query);
 		}
 		
 		if (!canCopyElements())
 			return DND.DROP_NONE;	
 
-		if (fCopyRefactoring.isValidDestination(target))
+		if (fCopyRefactoring != null && fCopyRefactoring.isValidDestination(target))
 			return DND.DROP_COPY;
 		else
 			return DND.DROP_NONE;					
@@ -346,7 +335,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private boolean canCopyElements() {
 		if (fCanCopyElements == 0) {
 			fCanCopyElements= 2;
-			if (!canActivate(fCopyRefactoring))
+			if (fCopyRefactoring == null)
 				fCanCopyElements= 1;
 		}
 		return fCanCopyElements == 2;

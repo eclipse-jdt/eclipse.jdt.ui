@@ -19,6 +19,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.CopyProjectAction;
 
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
@@ -31,8 +33,8 @@ public class JdtCopyAction extends ReorgDestinationAction {
 		super(site);
 	}
 
-	ReorgRefactoring createRefactoring(List elements){
-		return new CopyRefactoring(elements, new ReorgQueries(), createUpdateClasspathQuery(getShell()));
+	ReorgRefactoring createRefactoring(List elements) throws JavaModelException{
+		return CopyRefactoring.create(elements, new ReorgQueries(), createUpdateClasspathQuery(getShell()));
 	}
 	
 	String getActionName() {

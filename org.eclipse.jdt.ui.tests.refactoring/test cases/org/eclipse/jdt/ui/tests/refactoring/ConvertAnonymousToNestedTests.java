@@ -61,13 +61,6 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		return fileName + getSimpleTestFileName(canConvert, input);
 	}
 	
-	private String getFailingTestFileName(){
-		return getTestFileName(false, false);
-	}
-	private String getPassingTestFileName(boolean input){
-		return getTestFileName(true, input);
-	}
-
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canConvert, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canConvert, input), getFileContents(getTestFileName(canConvert, input)));
 	}
@@ -90,7 +83,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
+		ConvertAnonymousToNestedRefactoring ref= ConvertAnonymousToNestedRefactoring.create(cu, selection.getOffset(), selection.getLength());
 
 		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());	
 		if (preconditionResult.isOK())
@@ -121,7 +114,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility, int expectedSeverity) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
+		ConvertAnonymousToNestedRefactoring ref= ConvertAnonymousToNestedRefactoring.create(cu, selection.getOffset(), selection.getLength());
 
 		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());	
 		if (preconditionResult.isOK())

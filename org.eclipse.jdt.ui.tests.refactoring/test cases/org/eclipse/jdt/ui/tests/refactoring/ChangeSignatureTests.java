@@ -63,11 +63,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		fileName += (canReorder ? "canModify/": "cannotModify/");
 		return fileName + getSimpleTestFileName(canReorder, input);
 	}
-	
-	private String getPassingTestFileName(boolean input){
-		return getTestFileName(true, input);
-	}	
-	
+		
 	//---helpers 
 	
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canRename, boolean input) throws Exception {
@@ -100,7 +96,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -129,7 +125,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method " + methodName +" does not exist", method.exists());
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (returnTypeName != null)
 			ref.setNewReturnTypeName(returnTypeName);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
@@ -164,7 +160,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		modifyInfos(ref.getParameterInfos(), newOrder, oldNames, newNames);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -259,7 +255,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private void helperFail(String[] newOrder, String[] signature, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(classA.getMethod("m", signature), JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(classA.getMethod("m", signature), JavaPreferencesSettings.getCodeGenerationSettings());
 		modifyInfos(ref.getParameterInfos(), newOrder, null, null);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
@@ -268,7 +264,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private void helperAddFail(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(classA.getMethod("m", signature), JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(classA.getMethod("m", signature), JavaPreferencesSettings.getCodeGenerationSettings());
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
@@ -289,7 +285,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		markAsDeleted(ref.getParameterInfos(), deleted);	
 		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, null, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)

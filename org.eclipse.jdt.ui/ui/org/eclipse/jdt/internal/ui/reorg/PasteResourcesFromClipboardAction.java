@@ -184,7 +184,7 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 	private static boolean canActivateCopyRefactoring(Shell shell, IResource[] resourceData, IResource selectedResource) {
 		try{
 			CopyRefactoring ref= createCopyRefactoring(shell, resourceData);
-			if (! ref.checkActivation(new NullProgressMonitor()).isOK())
+			if (ref == null)
 				return false;
 
 			return ref.isValidDestination(ClipboardActionUtil.tryConvertingToJava(selectedResource));
@@ -212,8 +212,8 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		return ((TypedSource[])fClipboard.getContents(TypedSourceTransfer.getInstance()));
 	}
 
-	private static CopyRefactoring createCopyRefactoring(Shell shell, IResource[] resourceData) {
+	private static CopyRefactoring createCopyRefactoring(Shell shell, IResource[] resourceData) throws JavaModelException {
 		IPackageFragmentRootManipulationQuery query= JdtCopyAction.createUpdateClasspathQuery(shell);
-		return new CopyRefactoring(ClipboardActionUtil.getConvertedResources(resourceData), new ReorgQueries(), query);
+		return CopyRefactoring.create(ClipboardActionUtil.getConvertedResources(resourceData), new ReorgQueries(), query);
 	}
 }

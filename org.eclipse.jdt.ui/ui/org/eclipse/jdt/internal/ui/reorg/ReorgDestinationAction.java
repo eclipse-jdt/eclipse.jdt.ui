@@ -91,16 +91,20 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		setEnabled(canOperateOn(selection));
 	}
 
-	protected boolean canOperateOn(IStructuredSelection selection) {
-		if (selection.isEmpty())
-			return false;
-		if (ClipboardActionUtil.hasOnlyProjects(selection)) {
-			if (selection.size() != 1)
+	private final boolean canOperateOn(IStructuredSelection selection) {
+		try {
+			if (selection.isEmpty())
 				return false;
-			IProject project= (IProject)((IAdaptable)selection.getFirstElement()).getAdapter(IProject.class);
-			return project.isAccessible();
-		} else {
-			return ClipboardActionUtil.canActivate(createRefactoring(selection.toList()));
+			if (ClipboardActionUtil.hasOnlyProjects(selection)) {
+				if (selection.size() != 1)
+					return false;
+				IProject project= (IProject)((IAdaptable)selection.getFirstElement()).getAdapter(IProject.class);
+				return project.isAccessible();
+			} else {
+				return createRefactoring(selection.toList()) != null;
+			}
+		} catch (JavaModelException e) {
+			return false;
 		}
 	}
 
@@ -133,6 +137,8 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 			if (!ensureSaved(elements, getActionName()))
 				return;
 			ReorgRefactoring refactoring= createRefactoring(elements);
+			if (refactoring == null)
+				return;
 			
 			setUnsavedFileList(refactoring, elements);
 			Object destination= selectDestination(refactoring);
@@ -181,7 +187,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	
 	abstract String getActionName();
 	abstract String getDestinationDialogMessage();
-	abstract ReorgRefactoring createRefactoring(List elements);
+	abstract ReorgRefactoring createRefactoring(List elements) throws JavaModelException;
 
 	//returns null iff canceled
 	private static Set getExcluded(ReorgRefactoring refactoring) throws JavaModelException{
