@@ -18,6 +18,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -139,13 +140,19 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 	 *         onlyOneIndexUsed && additionalTempsNotReferenced) are satisfied
 	 */
 	public boolean satisfiesPreconditions() {
-		return arrayCanBeInferred() 
+		return is5_0_Source() 
+			&& arrayCanBeInferred() 
 			&& typeBindingsAreNotNull()
 			&& bodySatifiesPreconditions()		
 			&& initializersSatisfyPreconditions() 
 			&& updatersSatifyPreconditions();
 	}
 
+	private boolean is5_0_Source() {
+		IJavaProject project= getCompilationUnit().getJavaProject();
+		String version= project.getOption("org.eclipse.jdt.core.compiler.compliance", true); //$NON-NLS-1$
+		return JavaCore.VERSION_1_5.equals(version);
+	}
 
 	private boolean typeBindingsAreNotNull() {
 		fIndexBinding= getIndexBinding();
