@@ -175,13 +175,16 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		 */
 		private void handleBreakpointEvent(BreakpointEvent event) {
 			fInvocationCount++;
-			try {
-				ObjectReference thisObject= event.thread().frame(0).thisObject();
-				Method method= event.location().method();
-				fResults.update(method.declaringType().name() + "#" + method.name() + method.signature(), thisObject.referenceType().name() + " (id=" + thisObject.uniqueID() + ")");  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
-			} catch (Exception x) {
-				x.printStackTrace();
-			}
+			if (fVerbose)
+				try {
+					ObjectReference thisObject= event.thread().frame(0).thisObject();
+					Method method= event.location().method();
+					String classKey= method.declaringType().name() + "#" + method.name() + method.signature(); //$NON-NLS-1$
+					String instanceKey= fCollectInstanceResults ? (thisObject.referenceType().name() + " (id=" + thisObject.uniqueID() + ")") : "all instances"; //$NON-NLS-1$ //$NON-NLS-2$
+					fResults.update(classKey, instanceKey);
+				} catch (Exception x) {
+					x.printStackTrace();
+				}
 		}
 	}
 	
@@ -284,6 +287,12 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 	/** All breakpoint requests */
 	private BreakpointRequest[] fBreakpointRequests;
+
+	/** <code>true</code> iff additional information should be collected and printed */
+	private boolean fVerbose;
+
+	/** <code>true</code> iff additional information should be collected per instance */
+	private boolean fCollectInstanceResults= true;
 	
 	/**
 	 * Initialize the performance meter to count the number of invocation of
@@ -298,6 +307,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		fMethods= methods;
 		fConstructors= constructors;
 		fStartTime= System.currentTimeMillis();
+		fVerbose= !DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null;
 	}
 	
 	/**
@@ -320,6 +330,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public InvocationCountPerformanceMeter(String scenarioId, Constructor[] constructors) {
 		this(scenarioId, NO_METHODS, constructors);
+		fCollectInstanceResults= false;
 	}
 	
 	/*
@@ -365,7 +376,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public void commit() {
 		super.commit();
-		if (!DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null) {
+		if (fVerbose) {
 			System.out.println("Detailed results:"); //$NON-NLS-1$
 			fResults.print();
 		}
