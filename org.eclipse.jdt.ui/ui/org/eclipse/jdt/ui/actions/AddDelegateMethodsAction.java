@@ -95,7 +95,10 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- *
+ * 
+ * Contributors:
+ *   Sebastian Davids: m.moebius@gmx.de - bug: 28793 
+
  * @since 2.1
  */
 public class AddDelegateMethodsAction extends SelectionDispatchAction {
