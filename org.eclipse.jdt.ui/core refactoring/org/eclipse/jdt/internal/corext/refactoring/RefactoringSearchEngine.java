@@ -58,7 +58,7 @@ public class RefactoringSearchEngine {
 		};
 		new SearchEngine().search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
 		// XXX: This is a layer breaker - should not access jdt.ui
-		IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopies();
+		IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
 		List result= new ArrayList(matches.size());
 		for (Iterator iter= matches.iterator(); iter.hasNext(); ) {
 			IResource resource= (IResource)iter.next();

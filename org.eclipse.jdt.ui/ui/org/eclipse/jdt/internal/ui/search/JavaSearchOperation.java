@@ -78,7 +78,7 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 		fCollector.setProgressMonitor(monitor);
 		
 		// Also search working copies
-		SearchEngine engine= new SearchEngine(JavaUI.getSharedWorkingCopies());
+		SearchEngine engine= new SearchEngine(JavaUI.getSharedWorkingCopiesOnClasspath());
 		
 		if (fElementPattern != null)
 			engine.search(fWorkspace, fElementPattern, fLimitTo, fScope, fCollector);

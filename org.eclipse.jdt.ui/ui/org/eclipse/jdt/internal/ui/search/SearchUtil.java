@@ -88,7 +88,7 @@ public class SearchUtil extends JavaModelUtil {
 			}
 
 			// Find working copy element
-			IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopies();
+			IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
 			int i= 0;
 			while (i < workingCopies.length) {
 				if (workingCopies[i].getOriginalElement().equals(cu)) {

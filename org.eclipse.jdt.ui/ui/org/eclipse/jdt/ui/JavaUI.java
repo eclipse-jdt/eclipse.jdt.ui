@@ -574,15 +574,45 @@ public final class JavaUI {
 	}
 	
 	/**
-	 * Answers the shared working copies currently registered for the Java plug-in. 
+	 * Answers the shared working copies currently registered for the Java plug-in.
+	 * Note that the returned array can include working copies that are
+	 * not on the class path of a Java project.
 	 * 
-	 * @return the list of shared working copies this plug-in
+	 * @return the list of shared working copies
 	 * 
 	 * @see org.eclipse.jdt.core.JavaCore#getSharedWorkingCopies(org.eclipse.jdt.core.IBufferFactory)
 	 * @since 2.0
 	 */
 	public static IWorkingCopy[] getSharedWorkingCopies() {
 		return JavaCore.getSharedWorkingCopies(getBufferFactory());
+	}
+	
+	/**
+	 * Answers the shared working copies that are on the class path of a Java
+	 * project currently registered for the Java plug-in.
+	 * 
+	 * 
+	 * @return the list of shared working copies
+	 * 
+	 * @see #getSharedWorkingCopies()
+	 * @since 2.1
+	 */
+	public static IWorkingCopy[] getSharedWorkingCopiesOnClasspath() {
+		IWorkingCopy[] wcs= getSharedWorkingCopies();
+		List result= new ArrayList(wcs.length);
+		for (int i = 0; i < wcs.length; i++) {
+			IWorkingCopy wc= wcs[i];
+			if (wc instanceof IJavaElement) {
+				IJavaElement je= (IJavaElement)wc;
+				try {
+					if (je.getJavaProject().isOnClasspath(je)) {
+						result.add(wc);
+					}
+				} catch (JavaModelException e) {
+				}
+			}
+		}
+		return (IWorkingCopy[])result.toArray(new IWorkingCopy[result.size()]);
 	}
 	
 	/**

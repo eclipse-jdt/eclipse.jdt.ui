@@ -272,7 +272,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			if (!source.isWorkingCopy()) {
 				// try to find a working copy if exists.
 				// XXX: This is a layer breaker - should not access jdt.ui
-				IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopies();
+				IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
 				for (int i= 0; i < workingCopies.length; i++) {
 					IWorkingCopy wcopy= workingCopies[i];
 					if (source.equals(wcopy.getOriginalElement())) {
