@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -30,14 +31,11 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.dialogs.SaveAsDialog;
@@ -73,6 +71,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	private JarPackage fJarPackage;
 	private IStructuredSelection fInitialSelection;
 	private CheckboxTreeAndListGroup fInputGroup;
+	private boolean fFirstTime= true;
 
 	// widgets
 	private Text	fSourceNameField;	
@@ -120,7 +119,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	/*
 	 * Method declared on IDialogPage.
 	 */
-	public void createControl(Composite parent) {
+	public void createControl(final Composite parent) {
 		
 		initializeDialogUnits(parent);
 		
@@ -145,9 +144,12 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 
 		restoreResourceSpecificationWidgetValues(); // superclass API defines this hook
 		restoreWidgetValues();
-
 		if (fInitialSelection != null)
-			setupBasedOnInitialSelections();
+			BusyIndicator.showWhile(parent.getDisplay(), new Runnable() {
+				public void run() {
+					setupBasedOnInitialSelections();
+				}
+			});
 
 		setControl(composite);
 		update();

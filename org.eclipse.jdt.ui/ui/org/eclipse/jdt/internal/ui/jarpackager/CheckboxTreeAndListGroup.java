@@ -223,6 +223,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 */
 	protected void createListViewer(Composite parent, int width, int height) {
 		fListViewer= new CheckboxTableViewer(parent, SWT.BORDER);
+		fListViewer.setUseHashlookup(true);
 		GridData data= new GridData(GridData.FILL_BOTH);
 		data.widthHint= width;
 		data.heightHint= height;
@@ -242,6 +243,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		tree.setLayoutData(data);
 
 		fTreeViewer= new CheckboxTreeViewer(tree);
+		fTreeViewer.setUseHashlookup(true);
 		fTreeViewer.setContentProvider(fTreeContentProvider);
 		fTreeViewer.setLabelProvider(fTreeLabelProvider);
 		fTreeViewer.addTreeListener(this);
@@ -502,16 +504,21 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *
 	 *	@param selection ISelection
 	 */
-	public void selectionChanged(SelectionChangedEvent event) {
-		IStructuredSelection selection= (IStructuredSelection) event.getSelection();
-		Object selectedElement= selection.getFirstElement();
-		if (selectedElement == null) {
-			fCurrentTreeSelection= null;
-			fListViewer.setInput(fCurrentTreeSelection);
-			return;
-		}
-		populateListViewer(selectedElement);
+	public void selectionChanged(final SelectionChangedEvent event) {
+		BusyIndicator.showWhile(getTable().getShell().getDisplay(), new Runnable() {
+			public void run() {
+				IStructuredSelection selection= (IStructuredSelection) event.getSelection();
+				Object selectedElement= selection.getFirstElement();
+				if (selectedElement == null) {
+					fCurrentTreeSelection= null;
+					fListViewer.setInput(fCurrentTreeSelection);
+					return;
+				}
+				populateListViewer(selectedElement);
+			}
+		});
 	}
+
 	/**
 	 * Selects or deselect all of the elements in the tree depending on the value of the selection
 	 * boolean. Be sure to update the displayed files as well.
@@ -526,6 +533,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 			}
 		});
 	}
+
 	/**
 	 *	Sets the list viewer's providers to those passed
 	 *
