@@ -33,7 +33,7 @@ class RenameJavaElementAction extends SelectionDispatchAction {
 	}
 	
 	public void run(IStructuredSelection selection) {
-		if (!canOperateOn(selection))
+		if (! canOperateOn(selection))
 			return;
 		run(selection.getFirstElement());	
 	}
@@ -69,7 +69,8 @@ class RenameJavaElementAction extends SelectionDispatchAction {
 	protected void selectionChanged(IStructuredSelection selection) {
 		if (! canOperateOn(selection))
 			setEnabled(false);
-		setEnabled(canRename(selection.getFirstElement()));	
+		else	
+			setEnabled(canRename(selection.getFirstElement()));	
 	}
 
 	private static boolean canOperateOn(IStructuredSelection selection) {
