@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivale
  */
 public final class SuperTypeConstraintsSolver {
 
-	/** The type estimate data (type: <code>TType</code> */
+	/** The type estimate data (type: <code>TType</code>) */
 	public final static String DATA_TYPE_ESTIMATE= "te"; //$NON-NLS-1$
 
 	/** The type constraint model to solve */
@@ -75,6 +75,21 @@ public final class SuperTypeConstraintsSolver {
 		if (variable instanceof ImmutableTypeVariable2 || !type.equals(fModel.getSubType()))
 			return SuperTypeSet.createTypeSet(type);
 		return SuperTypeSet.createTypeSet(type, fModel.getSuperType());
+	}
+
+	/**
+	 * Computes the necessary equality constraints for non-covariant return types.
+	 * 
+	 * @param constraints the type constraints (element type: <code>ITypeConstraint2</code>)
+	 */
+	private void computeNonCovariantConstraints(final Collection constraints) {
+		Assert.isNotNull(constraints);
+		ITypeConstraint2 constraint= null;
+		for (final Iterator iterator= constraints.iterator(); iterator.hasNext();) {
+			constraint= (ITypeConstraint2) iterator.next();
+			if (constraint instanceof CovariantTypeConstraint)
+				fModel.createEqualityConstraint(constraint.getLeft(), constraint.getRight());
+		}
 	}
 
 	/**
@@ -198,13 +213,15 @@ public final class SuperTypeConstraintsSolver {
 		ITypeConstraint2 constraint= null;
 		for (final Iterator iterator= constraints.iterator(); iterator.hasNext();) {
 			constraint= (ITypeConstraint2) iterator.next();
-			final ConstraintVariable2 leftVariable= constraint.getLeft();
-			final ITypeSet leftEstimate= leftVariable.getTypeEstimate();
-			final TypeEquivalenceSet set= leftVariable.getTypeEquivalenceSet();
-			final ITypeSet newEstimate= leftEstimate.restrictedTo(constraint.getRight().getTypeEstimate());
-			if (leftEstimate != newEstimate) {
-				set.setTypeEstimate(newEstimate);
-				fProcessable.addAll(Arrays.asList(set.getContributingVariables()));
+			if (fModel.isUsingCovariance() || !(constraint instanceof CovariantTypeConstraint)) {
+				final ConstraintVariable2 leftVariable= constraint.getLeft();
+				final ITypeSet leftEstimate= leftVariable.getTypeEstimate();
+				final TypeEquivalenceSet set= leftVariable.getTypeEquivalenceSet();
+				final ITypeSet newEstimate= leftEstimate.restrictedTo(constraint.getRight().getTypeEstimate());
+				if (leftEstimate != newEstimate) {
+					set.setTypeEstimate(newEstimate);
+					fProcessable.addAll(Arrays.asList(set.getContributingVariables()));
+				}
 			}
 		}
 	}
@@ -215,6 +232,8 @@ public final class SuperTypeConstraintsSolver {
 	public final void solveConstraints() {
 		fProcessable= new LinkedList();
 		final Collection variables= fModel.getConstraintVariables();
+		if (!fModel.isUsingCovariance())
+			computeNonCovariantConstraints(variables);
 		computeTypeEstimates(variables);
 		fProcessable.addAll(variables);
 		ConstraintVariable2 variable= null;
