@@ -232,7 +232,8 @@ public class UnresolvedElementsSubProcessor {
 					if (NameMatcher.isSimilarName(currName, identifier)) {
 						relevance += 3; // variable with a similar name than the unresolved variable
 					}
-					if (guessedType != null && TypeRules.canAssign(guessedType, curr.getType())) {
+					ITypeBinding varType= curr.getType();
+					if (guessedType != null && varType != null && TypeRules.canAssign(guessedType, varType)) {
 						relevance += 2; // unresolved variable can be assign to this variable 						
 					}
 					if (relevance > 0) {
