@@ -1163,9 +1163,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					clearInput();
 					return;
 				}
+				fMethodsViewer.refresh();
 				updateHierarchyViewer();
 			} else {
 				// elements in hierarchy modified
+				fMethodsViewer.refresh();
 				if (getCurrentViewer().isMethodFiltering()) {
 					if (changedTypes.length == 1) {
 						getCurrentViewer().refresh(changedTypes[0]);
@@ -1176,7 +1178,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					getCurrentViewer().update(changedTypes, new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE } );
 				}
 			}
-			fMethodsViewer.refresh();
 		}
 	}	
 	
