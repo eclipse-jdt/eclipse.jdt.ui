@@ -1245,9 +1245,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	/*
-	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
+	 * @see JavaEditor#createJavaSourceViewer(Composite, IVerticalRuler, int)
 	 */
-	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 		return new AdaptedSourceViewer(parent, ruler, styles);
 	}
 		

@@ -172,8 +172,8 @@ public abstract class JavaEditor extends AbstractTextEditor {
 	/**
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
-	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-		ISourceViewer viewer= super.createSourceViewer(parent, ruler, styles);
+	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+		ISourceViewer viewer= createJavaSourceViewer(parent, ruler, styles);
 		StyledText text= viewer.getTextWidget();
 		text.addBidiSegmentListener(new  BidiSegmentListener() {
 			public void lineGetSegments(BidiSegmentEvent event) {
@@ -181,6 +181,13 @@ public abstract class JavaEditor extends AbstractTextEditor {
 			}
 		});
 		return viewer;
+	}
+	
+	/**
+	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
+	 */
+	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+			return super.createSourceViewer(parent, ruler, styles);
 	}
 	
 	/**
