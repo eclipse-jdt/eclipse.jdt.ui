@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILauncher;
@@ -33,8 +34,8 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
@@ -136,17 +137,15 @@ public class JavaApplicationLauncherDelegate implements ILauncherDelegate {
 				return false;
 			}
 			
-			final VMRunnerConfiguration config= new VMRunnerConfiguration(JavaModelUtil.getFullyQualifiedName(mainType), classPath);
-
+			String vmArgs= null;
+			String programArgs= null;
 			if (args != null) {
-				String[] vmArgs= args.getVMArgumentsArray();
-				String[] programArgs= args.getProgramArgumentsArray();
-				config.setVMArguments(vmArgs);
-				config.setProgramArguments(programArgs);				
-			} else {
-				config.setVMArguments(new String[0]);
-				config.setProgramArguments(new String[0]);
+				vmArgs= args.getVMArguments();
+				programArgs= args.getProgramArguments();
 			}
+			final VMRunnerConfiguration config= new VMRunnerConfiguration(JavaModelUtil.getFullyQualifiedName(mainType), classPath);
+			config.setVMArguments(JavaLaunchUtils.parseArguments(vmArgs));
+			config.setProgramArguments(JavaLaunchUtils.parseArguments(programArgs));
 			
 			final VMRunnerResult[] result= new VMRunnerResult[1];
 			
@@ -256,5 +255,4 @@ public class JavaApplicationLauncherDelegate implements ILauncherDelegate {
 			return null;
 		}
 	}
-	
 }

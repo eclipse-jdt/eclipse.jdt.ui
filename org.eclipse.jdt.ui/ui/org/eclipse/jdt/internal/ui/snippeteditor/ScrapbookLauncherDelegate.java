@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncherDelegate;
-import org.eclipse.jdt.internal.ui.launcher.JavaLaunchUtils;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.ProjectSourceLocator;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
