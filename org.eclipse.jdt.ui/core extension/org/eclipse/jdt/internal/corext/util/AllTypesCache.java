@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.swt.widgets.Display;
 
 /**
@@ -144,7 +143,8 @@ public class AllTypesCache {
 	 * The lock for synchronizing all activity in the AllTypesCache.
 	 */
 	private static Object fgLock= new Object();
-		private static TypeCacher fgTypeCacherThread;
+		private volatile static boolean fgInitialized= false;
+		private volatile static TypeCacher fgTypeCacherThread;
 		private static TypeInfo[] fgTypeCache;
 		private static int fgSizeHint= INITIAL_SIZE;
 		private static boolean fgTerminated;	
@@ -206,6 +206,8 @@ public class AllTypesCache {
 		
 		synchronized(fgLock) {
 			
+			fgInitialized= true;
+			
 			if (fgTypeCache == null) {
 				// cache is empty
 				
@@ -219,18 +221,16 @@ public class AllTypesCache {
 					}
 					if (fgTypeCache != null)
 						fgSizeHint= fgTypeCache.length;
+
 				} else {
 					// wait for the thread to finished
-					if (fgTypeCacherThread != null) {
-						try {
-							while (fgTypeCache == null)
-								fgLock.wait();
-						} catch (InterruptedException e) {
-							JavaPlugin.log(e);
-						}
+					try {
+						while (fgTypeCache == null)
+							fgLock.wait();
+					} catch (InterruptedException e) {
+						JavaPlugin.log(e);
 					}
 				}
-				Assert.isNotNull(fgTypeCache);
 			}
 			
 			if (monitor != null)
@@ -264,7 +264,7 @@ public class AllTypesCache {
 			boolean needsFlushing= processDelta(event.getDelta());
 			if (needsFlushing) {
 				synchronized(fgLock) {
-					//if (DEBUG) System.err.println("*** cache flushed"); //$NON-NLS-1$
+					fgInitialized= true;
 					fgTypeCache= null;
 					fgNumberOfCacheFlushes++;
 					
@@ -447,20 +447,25 @@ public class AllTypesCache {
 	}
 	
 	private static void startBackgroundMode() {
+		
+		fgAsyncMode= true;
+
+		if (fgInitialized)
+			return;
+		
 		synchronized(fgLock) {
 			if (fgTypeCacherThread != null) {
 				// there is already a thread
 				if (fgTerminated) {
-					fgTypeCacherThread.abort();																		
+					if (fgTypeCacherThread != null)
+						fgTypeCacherThread.abort();																		
 				} else {
 					// there is already a thread running
-					fgAsyncMode= true;
 				}							
 			} else {
 				if (fgTerminated) {
 					// already terminated: do nothing
 				} else {
-					fgAsyncMode= true;
 					if (fgTypeCache != null) {
 						// the cache is already uptodate
 					} else {
@@ -469,7 +474,7 @@ public class AllTypesCache {
 					}							
 				}
 			}
-		}		
+		}
 	}
 	
 	/**
