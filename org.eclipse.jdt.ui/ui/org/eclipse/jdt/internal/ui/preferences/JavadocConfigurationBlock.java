@@ -64,6 +64,7 @@ public class JavadocConfigurationBlock {
 		GridLayout topLayout= new GridLayout();
 		topLayout.numColumns= 3;
 		topLayout.marginWidth= 0;
+		topLayout.marginHeight= 0;
 		topComp.setLayout(topLayout);
 
 		if (fElem == null) {
