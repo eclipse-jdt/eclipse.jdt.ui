@@ -11,6 +11,8 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 
+import org.eclipse.ui.IMemento;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
@@ -22,9 +24,9 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
@@ -64,13 +66,6 @@ public class MembersView extends JavaBrowsingPart {
 		ProblemTreeViewer viewer= new ProblemTreeViewer(parent, SWT.MULTI);
 		fMemberFilterActionGroup= new MemberFilterActionGroup(viewer, JavaPlugin.ID_MEMBERS_VIEW);
 		return viewer;
-	}
-
-	/**
-	 * Adds filters the viewer of this part.
-	 */
-	protected void addFilters() {
-		super.addFilters();
 	}
 
 	protected void fillToolBar(IToolBarManager tbm) {
@@ -206,4 +201,17 @@ public class MembersView extends JavaBrowsingPart {
 		}
 		return null; 	
 	}
+	
+	/*
+	 * Implements method from IViewPart.
+	 */
+	public void saveState(IMemento memento) {
+		super.saveState(memento);
+		fMemberFilterActionGroup.saveState(memento);
+	}	
+
+	protected void restoreState(IMemento memento) {
+		super.restoreState(memento);
+		fMemberFilterActionGroup.restoreState(memento);
+	}	
 }

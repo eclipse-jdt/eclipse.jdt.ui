@@ -21,6 +21,8 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -28,11 +30,10 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.actions.ExportResourcesAction;
-import org.eclipse.ui.actions.ImportResourcesAction;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
 import org.eclipse.ui.actions.RefreshAction;
@@ -45,11 +46,12 @@ import org.eclipse.ui.views.framelist.UpAction;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
@@ -63,7 +65,9 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 public class PackageExplorerActionGroup extends CompositeActionGroup {
 
@@ -79,6 +83,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 	private NavigateActionGroup fNavigateActionGroup;
 	private BuildActionGroup fBuildActionGroup;
 	private CCPActionGroup fCCPActionGroup;
+	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
 	
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 
@@ -97,7 +102,8 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 			new ImportActionGroup(fPart),
 			new GenerateActionGroup(fPart), 
 			fBuildActionGroup= new BuildActionGroup(fPart),
-			new JavaSearchActionGroup(fPart, fPart.getViewer())});
+			new JavaSearchActionGroup(fPart, fPart.getViewer()),
+			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(part.getViewer(), JavaUI.ID_PACKAGES, shell, createTitleUpdater())});
 		
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
 		FrameList frameList= new FrameList(frameSource);
@@ -118,13 +124,15 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 	}
 
 	//---- Persistent state -----------------------------------------------------------------------
-	
+
 	/* package */ void restoreState(IMemento memento) {
 		fMemberFilterActionGroup.restoreState(memento);
+		fWorkingSetFilterActionGroup.restoreState(memento);
 	}
 	
 	/* package */ void saveState(IMemento memento) {
 		fMemberFilterActionGroup.saveState(memento);
+		fWorkingSetFilterActionGroup.saveState(memento);
 	}
 
 	//---- Action Bars ----------------------------------------------------------------------------
@@ -280,6 +288,23 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 			if (delete.isEnabled())
 				delete.run();
 		}
+	}
+	
+	private IPropertyChangeListener createTitleUpdater() {
+		return new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				String property= event.getProperty();
+				if (IWorkbenchPage.CHANGE_WORKING_SET_REPLACE.equals(property)
+				|| IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
+					Object workingSet= (IWorkingSet)event.getNewValue();
+					String workingSetName= null;
+					if (workingSet instanceof IWorkingSet)
+						workingSetName= ((IWorkingSet)workingSet).getName();
+					fPart.setWorkingSetName(workingSetName);
+					fPart.updateTitle();
+				}
+			}
+		};
 	}
 }
 

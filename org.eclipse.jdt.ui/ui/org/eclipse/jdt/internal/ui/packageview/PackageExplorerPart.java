@@ -116,6 +116,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilter;
 
 
+
 /**
  * The ViewPart for the ProjectExplorer. It listens to part activation events.
  * When selection linking with the editor is enabled the view selection tracks
@@ -142,8 +143,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
 
-	private WorkingSetFilter fWorkingSetFilter;	
-	
 	private PackageExplorerActionGroup fActionSet;
 	private ProblemTreeViewer fViewer; 
 	private StandardJavaUILabelProvider fJavaElementLabelProvider;
@@ -151,6 +150,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	
 	private IMemento fMemento;	
 	private ISelectionChangedListener fSelectionListener;
+	
+	private String fWorkingSetName;
 	
 	
 	private IPartListener fPartListener= new IPartListener() {
@@ -266,12 +267,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.setUseHashlookup(true);
 		fViewer.addFilter(fPatternFilter);
 		fViewer.addFilter(fLibraryFilter);
-		
-		addWorkingSetChangeSupport();
-		IWorkingSet workingSet= getSite().getPage().getWorkingSet();
-		if (workingSet != null)
-			fWorkingSetFilter.setWorkingSet(workingSet);		
-		
+
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(this);
@@ -288,7 +284,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			restoreFilters();
 		else
 			initFilterFromPreferences();
-			
+		
+		
 		makeActions(); // call before registering for selection changes
 		
 		// Set input after filter and sorter has been set. This avoids resorting
@@ -296,8 +293,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.setInput(findInputElement());
 		initDragAndDrop();
 		initKeyListener();
-		updateTitle();
-		
 			
 		fSelectionListener= new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -324,6 +319,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		JavaUIHelp.setHelp(fViewer, IJavaHelpContextIds.PACKAGES_VIEW);
 		
 		fillActionBars();
+
+		updateTitle();
 	}
 
 	private void fillActionBars() {
@@ -368,14 +365,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				result= path.makeRelative().toString();
 			}
 		}
-		IWorkingSet ws= fWorkingSetFilter.getWorkingSet();
-		if (ws == null)
-			return result;
 		
-		String wsstr= PackagesMessages.getFormattedString("PackageExplorer.toolTip", new String[] { ws.getName() }); //$NON-NLS-1$
+		if (fWorkingSetName == null)
+			return result;
+
+		String wsstr= PackagesMessages.getFormattedString("PackageExplorer.toolTip", new String[] { fWorkingSetName }); //$NON-NLS-1$
 		if (result.length() == 0)
 			return wsstr;
-		return PackagesMessages.getFormattedString("PackageExplorer.toolTip2", new String[] { result, ws.getName() }); //$NON-NLS-1$
+		return PackagesMessages.getFormattedString("PackageExplorer.toolTip2", new String[] { result, fWorkingSetName }); //$NON-NLS-1$
 	}
 	
 	public String getTitleToolTip() {
@@ -883,8 +880,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		String show= fMemento.getString(TAG_SHOWLIBRARIES);
 		if (show != null)
 			getLibraryFilter().setShowLibraries(show.equals("true")); //$NON-NLS-1$
-		else 
-			initLibraryFilterFromPreferences();		
+		else
+			initLibraryFilterFromPreferences();
 	}
 	
 	void initFilterFromPreferences() {
@@ -903,6 +900,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (fViewer == null)
 			return false;
 		return fViewer.isExpandable(element);
+	}
+
+	void setWorkingSetName(String workingSetName) {
+		fWorkingSetName= workingSetName;
 	}
 	
 	/**
@@ -951,65 +952,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			((JavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(showCUChildren);
 			
 			refreshViewer= true;
-		}			
+		}
+		String property= event.getProperty();
+		if (IWorkbenchPage.CHANGE_WORKING_SET_REPLACE.equals(property))
+			updateTitle();
+		else if (IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
+			updateTitle();
 
 		if (refreshViewer)
 			fViewer.refresh();
-	}
-
-	private IPropertyChangeListener addWorkingSetChangeSupport() {
-		final IPropertyChangeListener propertyChangeListener= createWorkingSetChangeListener();
-		final IWorkbenchPage page= getSite().getPage();
-
-		fWorkingSetFilter= new WorkingSetFilter();
-		fViewer.addFilter(fWorkingSetFilter);
-
-		// Register listener on working set
-		if (page.getWorkingSet() != null)		
-			page.getWorkingSet().addPropertyChangeListener(propertyChangeListener);				
-		
-		// Register listener on page
-		page.addPropertyChangeListener(propertyChangeListener);
-		
-		// Register dispose listener which removes the listeners
-		fViewer.getControl().addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				if (page!= null)
-					page.removePropertyChangeListener(propertyChangeListener);
-				if (fWorkingSetFilter.getWorkingSet() != null)
-					fWorkingSetFilter.getWorkingSet().removePropertyChangeListener(propertyChangeListener);
-					
-			}
-		});
-		
-		return propertyChangeListener;		
-	}
-
-	private IPropertyChangeListener createWorkingSetChangeListener() {
-		return new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				String property= event.getProperty();
-				if (IWorkbenchPage.CHANGE_WORKING_SET_REPLACE.equals(property)) {
-					IWorkingSet newWorkingSet= (IWorkingSet) event.getNewValue();
-
-					if (fWorkingSetFilter.getWorkingSet() != null)
-						fWorkingSetFilter.getWorkingSet().removePropertyChangeListener(this);
-
-					fWorkingSetFilter.setWorkingSet(newWorkingSet);	
-
-					if (newWorkingSet != null)
-						newWorkingSet.addPropertyChangeListener(this);	
-						
-					fViewer.getControl().setRedraw(false);
-					fViewer.refresh();
-					updateTitle();
-					fViewer.getControl().setRedraw(true);
-				}
-				else if (IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
-					updateTitle();
-				else if (IWorkingSet.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property))
-					fViewer.refresh();			
-			}
-		};
 	}
 }
