@@ -372,6 +372,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 			ContentAssistant assistant= new ContentAssistant();
 			assistant.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 			
+			assistant.setRestoreCompletionProposalSize(getSettings("completion_proposal_size")); //$NON-NLS-1$
+			
 			IContentAssistProcessor processor= new JavaCompletionProcessor(getEditor());
 			assistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
 				// Register the same processor for strings and single line comments to get code completion at the start of those partitions.
