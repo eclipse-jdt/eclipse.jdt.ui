@@ -20,22 +20,30 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -169,6 +177,11 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     		if (anon != null)
     			return anon;
     	}	
+    	if (node.getParent() instanceof ClassInstanceCreation){
+    		AnonymousClassDeclaration anon= (AnonymousClassDeclaration)((ClassInstanceCreation)node.getParent()).getAnonymousClassDeclaration();
+    		if (anon != null)
+    			return anon;
+    	}	
 		return (AnonymousClassDeclaration)ASTNodes.getParent(node, AnonymousClassDeclaration.class);
     }
     
@@ -282,7 +295,96 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	newType.setName(getAST().newSimpleName(fClassName));
     	setSuperType(newType);
         copyBodyDeclarationsToNestedClass(rewrite, newType);
+        if (isNewConstructorNeeded())
+	        createNewConstructor(rewrite, newType);
         return newType;
+    }
+    
+    private boolean isNewConstructorNeeded() {
+    	//XXX very rough approximation
+    	return ! getClassInstanceCreation().arguments().isEmpty();
+    }
+    
+    private void createNewConstructor(ASTRewrite rewrite, TypeDeclaration newType) throws JavaModelException {
+    	MethodDeclaration newConstructor= getAST().newMethodDeclaration();
+    	newConstructor.setConstructor(true);
+    	newConstructor.setExtraDimensions(0);
+    	newConstructor.setJavadoc(null);
+    	newConstructor.setModifiers(fVisibility);
+    	newConstructor.setName(getAST().newSimpleName(fClassName));
+    	addParametersToNewConstructor(newConstructor, rewrite);
+    	
+        Block constructorBody= getAST().newBlock();
+        SuperConstructorInvocation superConstructorInvocation= getAST().newSuperConstructorInvocation();
+        for (Iterator iter= newConstructor.parameters().iterator(); iter.hasNext();) {
+            SingleVariableDeclaration param= (SingleVariableDeclaration) iter.next();
+            superConstructorInvocation.arguments().add(getAST().newSimpleName(param.getName().getIdentifier()));
+        }
+        
+        constructorBody.statements().add(superConstructorInvocation);
+    	newConstructor.setBody(constructorBody);
+    	
+		addExceptionsToNewConstructor(newConstructor, rewrite);
+    	rewrite.markAsInserted(newConstructor);
+    	newType.bodyDeclarations().add(0, newConstructor);
+    }
+    
+    private IMethodBinding getSuperConstructorBinding(){
+    	//workaround 
+    	IMethodBinding anonConstr= getClassInstanceCreation().resolveConstructorBinding();
+    	ITypeBinding superClass= anonConstr.getDeclaringClass().getSuperclass();
+    	IMethodBinding[] superMethods= superClass.getDeclaredMethods();
+    	for (int i= 0; i < superMethods.length; i++) {
+            IMethodBinding superMethod= superMethods[i];
+            if (superMethod.isConstructor() && parameterTypesMatch(superMethod, anonConstr))	
+            	return superMethod;
+        }
+        Assert.isTrue(false);//there's no way - it must be there
+        return null;
+    }
+    
+    private static boolean parameterTypesMatch(IMethodBinding m1, IMethodBinding m2) {
+    	ITypeBinding[] m1Params= m1.getParameterTypes();
+    	ITypeBinding[] m2Params= m2.getParameterTypes();
+    	if (m1Params.length != m2Params.length)
+	        return false;
+	    for (int i= 0; i < m2Params.length; i++) {
+	    	if (! m1Params[i].equals(m2Params[i]))
+	    		return false;
+        }    
+        return true;
+    }
+    
+    private void addExceptionsToNewConstructor(MethodDeclaration newConstructor, ASTRewrite rewrite) {
+    	IMethodBinding constructorBinding= getSuperConstructorBinding();
+    	if (constructorBinding == null)
+    		return;
+    	ITypeBinding[] exceptions= constructorBinding.getExceptionTypes();
+    	for (int i= 0; i < exceptions.length; i++) {
+            Name exceptionTypeName= getAST().newName(Bindings.getNameComponents(exceptions[i]));
+            newConstructor.thrownExceptions().add(exceptionTypeName);
+        }	
+    }
+    
+    private void addParametersToNewConstructor(MethodDeclaration newConstructor, ASTRewrite rewrite) throws JavaModelException {
+    	IMethodBinding constructorBinding= getSuperConstructorBinding();
+    	if (constructorBinding == null)
+    		return;
+    	ITypeBinding[] paramTypes= constructorBinding.getParameterTypes();
+    	IMethod method= Binding2JavaModel.find(constructorBinding, fCu.getJavaProject());
+    	if (method == null)
+    		return;
+    	String[] parameterNames= method.getParameterNames();
+    	for (int i= 0; i < parameterNames.length; i++) {
+            SingleVariableDeclaration param= getAST().newSingleVariableDeclaration();
+            param.setExtraDimensions(0);
+            param.setInitializer(null);
+            param.setModifiers(Modifier.NONE);
+            param.setName(getAST().newSimpleName(parameterNames[i]));
+            param.setType(Bindings.createType(paramTypes[i], getAST(), false));
+            rewrite.markAsInserted(param);
+            newConstructor.parameters().add(param);
+        }
     }
 
     private void copyBodyDeclarationsToNestedClass(ASTRewrite rewrite, TypeDeclaration newType) {
