@@ -269,10 +269,12 @@ public class SmartBackspaceManager {
 	 * uninstalled manager.
 	 */
 	public void uninstall() {
-		fRunDetector.removeTypingRunListener(fRunListener);
-		fRunDetector.uninstall();
-		fRunDetector= null;
-		ensureListenerRemoved();
-		fViewer= null;
+		if (fViewer != null) {
+			fRunDetector.removeTypingRunListener(fRunListener);
+			fRunDetector.uninstall();
+			fRunDetector= null;
+			ensureListenerRemoved();
+			fViewer= null;
+		}
 	}
 }

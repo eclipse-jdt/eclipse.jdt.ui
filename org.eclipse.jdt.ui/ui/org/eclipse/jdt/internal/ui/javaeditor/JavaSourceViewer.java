@@ -358,6 +358,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		super.createControl(parent, styles);
 
 		fBackspaceManager= new SmartBackspaceManager();
+		fBackspaceManager.install(this);
 	}
 	
 	/**
