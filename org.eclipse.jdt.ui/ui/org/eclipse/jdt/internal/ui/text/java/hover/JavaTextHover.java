@@ -5,23 +5,31 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
  * All Rights Reserved.
  */
 
-import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.text.IRegion;
+import org.eclipse.debug.ui.IDebugUIConstants;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.information.IInformationProvider;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
-import org.eclipse.jface.util.IPropertyChangeListener;import org.eclipse.jface.util.PropertyChangeEvent;import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
+import org.eclipse.jdt.internal.ui.IPreferencesConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
 /**
  * Caution: this implementation is a layer breaker and contains some "shortcuts"
  */
-public class JavaTextHover implements ITextHover {
+public class JavaTextHover implements IInformationProvider {
 		
 	class EditorWatcher implements IPartListener {
 		

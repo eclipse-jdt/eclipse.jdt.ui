@@ -33,6 +33,7 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -130,6 +131,8 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 		MenuManager search= new JavaSearchGroup().getMenuManagerForGroup(isTextSelectionEmpty());
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, search);
+		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowJavaDoc");
+		
 		addAction(menu, "Inspect"); //$NON-NLS-1$
 		addAction(menu, "Display"); //$NON-NLS-1$
 		addAction(menu, "RunToLine"); //$NON-NLS-1$
@@ -307,10 +310,12 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
 		setOutlinePageInput(fOutlinePage, input);
-	}	
+	}
 	
 	protected void createActions() {
 		super.createActions();
+		
+		setAction("ShowJavaDoc", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION));
 		
 		setAction("Display", new EditorDisplayAction(this)); //$NON-NLS-1$
 		setAction("RunToLine", new RunToLineAction(this)); //$NON-NLS-1$

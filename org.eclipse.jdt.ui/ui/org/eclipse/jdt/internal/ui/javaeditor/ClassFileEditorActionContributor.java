@@ -16,6 +16,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -26,6 +27,7 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 	protected OpenOnSelectionAction fOpenOnSelection;
 	protected OpenOnSelectionAction fOpenHierarchyOnSelection;
 	protected TogglePresentationAction fTogglePresentationAction;
+	protected RetargetTextEditorAction fShowJavaDoc;
 	
 	/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
 	protected ToggleTextHoverAction fToggleTextHover;
@@ -37,6 +39,7 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		fOpenOnSelection= new OpenOnSelectionAction();
 		fOpenHierarchyOnSelection= new OpenHierarchyOnSelectionAction();
 		fTogglePresentationAction= new TogglePresentationAction();
+		fShowJavaDoc= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.");
 		
 		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
 		fToggleTextHover= new ToggleTextHoverAction();
@@ -56,6 +59,7 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenHierarchyOnSelection);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fShowJavaDoc);
 		}
 	}
 	
@@ -85,6 +89,8 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		fOpenHierarchyOnSelection.setContentEditor(textEditor);
 		
 		fTogglePresentationAction.setEditor(textEditor);
+		
+		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc"));
 
 		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
 		fToggleTextHover.setEditor(textEditor);

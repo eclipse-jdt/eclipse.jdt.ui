@@ -24,6 +24,9 @@ import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.ContentFormatter;
 import org.eclipse.jface.text.formatter.IContentFormatter;
 import org.eclipse.jface.text.formatter.IFormattingStrategy;
+import org.eclipse.jface.text.information.IInformationPresenter;
+import org.eclipse.jface.text.information.IInformationProvider;
+import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.internal.html.HoverBrowserControl;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
@@ -268,5 +271,16 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 					return new HoverBrowserControl(parent);
 			}
 		};
+	}
+	
+	/*
+	 * @see SourceViewerConfiguration#getInformationPresenter(ISourceViewer)
+	 */
+	public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
+		InformationPresenter presenter= new InformationPresenter(getHoverControlCreator(sourceViewer));
+		IInformationProvider provider= new JavaTextHover(getEditor());
+		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
+		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_DOC);
+		return presenter;
 	}
 }

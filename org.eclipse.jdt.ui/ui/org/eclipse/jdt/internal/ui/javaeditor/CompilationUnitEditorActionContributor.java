@@ -27,6 +27,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	protected OpenOnSelectionAction fOpenOnTypeSelection;
 	protected RetargetTextEditorAction fAddImportOnSelection;
 	protected RetargetTextEditorAction fOrganizeImports;
+	protected RetargetTextEditorAction fShowJavaDoc;
 	protected TogglePresentationAction fTogglePresentation;
 	protected ToggleTextHoverAction fToggleTextHover;
 	protected GotoErrorAction fPreviousError;
@@ -42,6 +43,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fOpenOnTypeSelection= new OpenHierarchyOnSelectionAction();
 		fAddImportOnSelection= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "AddImportOnSelectionAction."); //$NON-NLS-1$
 		fOrganizeImports= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "OrganizeImportsAction."); //$NON-NLS-1$
+		fShowJavaDoc= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.");
 		fTogglePresentation= new TogglePresentationAction();
 		fToggleTextHover= new ToggleTextHoverAction();
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
@@ -63,6 +65,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnTypeSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fNextError);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fPreviousError);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fShowJavaDoc);			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fAddImportOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fOrganizeImports);
 		}
@@ -95,6 +98,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		
 		fAddImportOnSelection.setAction(getAction(textEditor,"AddImportOnSelection")); //$NON-NLS-1$
 		fOrganizeImports.setAction(getAction(textEditor, "OrganizeImports")); //$NON-NLS-1$
+		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc"));
 		
 		fTogglePresentation.setEditor(textEditor);
 		fToggleTextHover.setEditor(textEditor);
