@@ -461,24 +461,27 @@ public class Bindings {
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
 	 * exists. If the method is defined in more than one super type only the first match is 
 	 * returned. First the super class is examined and than the implemented interfaces.
-	 * @param type The type to search the method in
+	 * @param typeObject the type binding for <code>java.lang.Object</code>.
+	 * @param type the type to search the method in
 	 * @param methodName The name of the method to find
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
 	 * @return the method binding representing the method
 	 */
-	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, String parameters[]) {
+	public static IMethodBinding findMethodInHierarchy(ITypeBinding typeObject, ITypeBinding type, String methodName, String parameters[]) {
 		IMethodBinding method= findMethodInType(type, methodName, parameters);
 		if (method != null)
 			return method;
 		ITypeBinding superClass= type.getSuperclass();
+		if (superClass == null && type.isInterface())
+			superClass= typeObject;
 		if (superClass != null) {
-			method= findMethodInHierarchy(superClass, methodName, parameters);
+			method= findMethodInHierarchy(typeObject, superClass, methodName, parameters);
 			if (method != null)
 				return method;			
 		}
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
-			method= findMethodInHierarchy(interfaces[i], methodName, parameters);
+			method= findMethodInHierarchy(typeObject, interfaces[i], methodName, parameters);
 			if (method != null)
 				return method;
 		}

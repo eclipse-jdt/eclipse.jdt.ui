@@ -283,7 +283,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		List toImplement= new ArrayList();
 		IMethodBinding[] overridable= null;
 		if (binding != null)
-			overridable= StubUtility2.getOverridableMethods(binding, false);
+			overridable= StubUtility2.getOverridableMethods(fUnit.getAST(), binding, false);
 		else
 			overridable= new IMethodBinding[] {};
 		for (int i= 0; i < overridable.length; i++) {

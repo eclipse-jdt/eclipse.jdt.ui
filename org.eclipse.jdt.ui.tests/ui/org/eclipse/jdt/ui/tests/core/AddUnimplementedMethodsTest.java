@@ -187,7 +187,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		assertNotNull("Could not find type declararation node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
-		IMethodBinding[] bindings= StubUtility2.getOverridableMethods(binding, false);
+		IMethodBinding[] bindings= StubUtility2.getOverridableMethods(unit.getAST(), binding, false);
 		String[] keys= new String[bindings.length];
 		for (int index= 0; index < bindings.length; index++)
 			keys[index]= bindings[index].getKey();
