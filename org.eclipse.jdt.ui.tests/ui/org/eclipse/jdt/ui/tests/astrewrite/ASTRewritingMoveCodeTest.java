@@ -28,6 +28,12 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.MoveIndentedSourceEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
@@ -50,7 +56,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMoveCodeTest("testMultipleCopiesOfSameNodeAndMove"));
+			suite.addTest(new ASTRewritingMoveCodeTest("testAddIndents"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -1594,5 +1600,111 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		clearRewrite(rewrite);
 	}	
 	
+
+	public void testRemoveIndents() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (i == 0) {\n");
+		buf.append("            foo();\n");
+		buf.append("            i++; // comment\n");
+		buf.append("            i++;\n");
+		buf.append("        }\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		TextBuffer buffer= TextBuffer.create(buf.toString());
+		TextBufferEditor editor= new TextBufferEditor(buffer);
+		
+		int start= buf.indexOf("while");
+		int end= buf.indexOf("return;") + "return;".length();
+		
+		TextRange range= TextRange.createFromStartAndExclusiveEnd(start, end);
+		
+		MultiTextEdit innerRoot= new MultiTextEdit();
+		TextEdit[] edits= MoveIndentedSourceEdit.getChangeIndentEdits(buffer, range, 2, 4, "    ");
+		for (int i= 0; i < edits.length; i++) {
+			innerRoot.add(edits[i]);
+		}
+		
+		editor.add(innerRoot);
+		
+		assertTrue("Can perform edits", editor.canPerformEdits().isOK());
+		editor.performEdits(null);
+		
+		String preview= buffer.getContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (i == 0) {\n");
+		buf.append("        foo();\n");
+		buf.append("        i++; // comment\n");
+		buf.append("        i++;\n");
+		buf.append("    }\n");
+		buf.append("    return;\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
+		String expected= buf.toString();		
+
+		assertEqualString(preview, expected);
+	}
+	
+	public void testAddIndents() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (i == 0) {\n");
+		buf.append("            foo();\n");
+		buf.append("            i++; // comment\n");
+		buf.append("            i++;\n");
+		buf.append("        }\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		TextBuffer buffer= TextBuffer.create(buf.toString());
+		TextBufferEditor editor= new TextBufferEditor(buffer);
+		
+		int start= buf.indexOf("while");
+		int end= buf.indexOf("return;") + "return;".length();
+		
+		TextRange range= TextRange.createFromStartAndExclusiveEnd(start, end);
+		
+		MultiTextEdit innerRoot= new MultiTextEdit();
+		TextEdit[] edits= MoveIndentedSourceEdit.getChangeIndentEdits(buffer, range, 2, 4, "            ");
+		for (int i= 0; i < edits.length; i++) {
+			innerRoot.add(edits[i]);
+		}
+		
+		editor.add(innerRoot);
+		
+		assertTrue("Can perform edits", editor.canPerformEdits().isOK());
+		editor.performEdits(null);
+		
+		String preview= buffer.getContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (i == 0) {\n");
+		buf.append("                foo();\n");
+		buf.append("                i++; // comment\n");
+		buf.append("                i++;\n");
+		buf.append("            }\n");
+		buf.append("            return;\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
+		String expected= buf.toString();		
+
+		assertEqualString(preview, expected);
+	}
+	
+			
 	
 }
