@@ -18,11 +18,10 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IFile;
 
+
 import org.eclipse.ui.PartInitException;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 
@@ -158,24 +157,16 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	protected void measureOpenInEditor(String file, boolean enableFolding, boolean showOutline, PerformanceMeter performanceMeter) throws PartInitException {
 		boolean shown= EditorTestHelper.isViewShown(OUTLINE_VIEW);
 		try {
-			enableFolding(enableFolding);
+			EditorTestHelper.enableFolding(enableFolding);
 			showOutline(showOutline);
 			measureOpenInEditor(file, performanceMeter);
 		} finally {
-			resetFolding();
+			EditorTestHelper.resetFolding();
 			showOutline(shown);
 		}
 	}
 
 	private boolean showOutline(boolean show) throws PartInitException {
 		return EditorTestHelper.showView(OUTLINE_VIEW, show);
-	}
-
-	private void resetFolding() {
-		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_FOLDING_ENABLED);
-	}
-
-	private void enableFolding(boolean enable) {
-		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, enable);
 	}
 }

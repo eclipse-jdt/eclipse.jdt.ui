@@ -26,6 +26,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.text.tests.Accessor;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.IWidgetTokenOwner;
@@ -54,8 +56,11 @@ import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 
 
@@ -338,5 +343,17 @@ public class EditorTestHelper {
 		};
 		sourceViewer.requestWidgetToken(tokenKeeper, Integer.MAX_VALUE);
 		sourceViewer.releaseWidgetToken(tokenKeeper);
+	}
+
+	public static void resetFolding() {
+		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_FOLDING_ENABLED);
+	}
+
+	public static boolean enableFolding(boolean value) {
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		boolean oldValue= preferenceStore.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
+		if (value != oldValue)
+			preferenceStore.setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, value);
+		return oldValue;
 	}
 }
