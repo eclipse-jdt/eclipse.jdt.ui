@@ -77,7 +77,7 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 			
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource res= delta.getResource();
-			if (res instanceof IProject) {
+			if (res instanceof IProject && delta.getKind() == IResourceDelta.CHANGED) {
 				try {
 					IJavaProject jProject= getJavaProject((IProject)res);
 					if (jProject != null) {
