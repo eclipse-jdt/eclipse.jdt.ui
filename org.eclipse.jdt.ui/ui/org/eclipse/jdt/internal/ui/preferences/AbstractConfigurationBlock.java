@@ -47,7 +47,6 @@ import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 import org.eclipse.ui.internal.dialogs.WorkbenchPreferenceDialog;
-import org.eclipse.ui.internal.editors.text.CHyperLink;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;

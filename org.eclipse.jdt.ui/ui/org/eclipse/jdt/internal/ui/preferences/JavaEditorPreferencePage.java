@@ -16,17 +16,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -45,12 +42,12 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.ui.internal.dialogs.WorkbenchPreferenceDialog;
-import org.eclipse.ui.internal.editors.text.CHyperLink;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.preferences.CHyperLinkText.ILinkListener;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
@@ -302,19 +299,21 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 	}
 	
 	private void createHeader(Composite contents) {
-		String before= PreferencesMessages.getString("JavaEditorPreferencePage.link.before"); //$NON-NLS-1$
-		String linktext= PreferencesMessages.getString("JavaEditorPreferencePage.link.linktext"); //$NON-NLS-1$
-		String linktooltip= PreferencesMessages.getString("JavaEditorPreferencePage.link.linktooltip"); //$NON-NLS-1$
-		String after= PreferencesMessages.getString("JavaEditorPreferencePage.link.after"); //$NON-NLS-1$
-		Control description= createLinkText(contents, new Object[] {
-				before, 
-				new String[] {linktext, "org.eclipse.ui.preferencePages.GeneralTextEditor", linktooltip }, //$NON-NLS-1$
-				after});
+		String text= PreferencesMessages.getFormattedString("JavaEditorPreferencePage.link", "org.eclipse.ui.preferencePages.GeneralTextEditor"); //$NON-NLS-1$ //$NON-NLS-2$
+		// TODO move to platform hyperlink widget when it becomes available
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=79419
+		CHyperLinkText link= new CHyperLinkText(contents, SWT.NONE);
+		link.setText(text);
+		link.addLinkListener(new ILinkListener() {
+			public void linkSelected(String url) {
+				WorkbenchPreferenceDialog.createDialogOn(url);
+			}
+		});
+		
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it
-		description.setLayoutData(gridData);
+		link.setLayoutData(gridData);
 		
-//		createHBar(contents);
 		addFiller(contents);
 	}
 
@@ -327,58 +326,6 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
 		filler.setLayoutData(gd);
 	}
-
-	private Control createLinkText(Composite contents, Object[] tokens) {
-		Composite description= new Composite(contents, SWT.NONE);
-		RowLayout rowLayout= new RowLayout(SWT.HORIZONTAL);
-		rowLayout.justify= false;
-		rowLayout.fill= true;
-		rowLayout.marginBottom= 0;
-		rowLayout.marginHeight= 0;
-		rowLayout.marginLeft= 0;
-		rowLayout.marginRight= 0;
-		rowLayout.marginTop= 0;
-		rowLayout.marginWidth= 0;
-		rowLayout.spacing= 0;
-		description.setLayout(rowLayout);
-		
-		for (int i= 0; i < tokens.length; i++) {
-			String text;
-			if (tokens[i] instanceof String[]) {
-				String[] strings= (String[]) tokens[i];
-				text= strings[0];
-				final String target= strings[1];
-				CHyperLink link= new CHyperLink(description, SWT.NONE);
-				link.setText(text);
-				link.addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent e) {
-						WorkbenchPreferenceDialog.createDialogOn(target);
-					}
-				});
-				if (strings.length > 2)
-					link.setToolTipText(strings[2]);
-				continue;
-			}
-			
-			text= (String) tokens[i];
-			StringTokenizer tokenizer= new StringTokenizer(text, " ", true); //$NON-NLS-1$
-			boolean addSpace= false;
-			while (tokenizer.hasMoreTokens()) {
-				String token= tokenizer.nextToken();
-				if (token.trim().length() == 0 && tokenizer.hasMoreTokens()) {
-					addSpace= true;
-					continue;
-				}
-					
-				Label label= new Label(description, SWT.NONE);
-				label.setText((addSpace ? " " : "") + token); //$NON-NLS-1$ //$NON-NLS-2$
-				addSpace= false;
-			}
-		}
-		
-		return description;
-	}
-
 
 	private void initialize() {
 		initializeFields();
