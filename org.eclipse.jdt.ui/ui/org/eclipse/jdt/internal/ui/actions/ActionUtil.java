@@ -30,6 +30,9 @@ public class ActionUtil {
 	}
 
 	private static boolean checkJavaElement(IJavaElement element) {	
+        //fix for bug http://dev.eclipse.org/bugs/show_bug.cgi?id=20051
+        if (element.getElementType() == IJavaElement.JAVA_PROJECT)
+            return true;
 		IJavaProject project= element.getJavaProject();
 		try {
 			if (!project.isOnClasspath(element))
