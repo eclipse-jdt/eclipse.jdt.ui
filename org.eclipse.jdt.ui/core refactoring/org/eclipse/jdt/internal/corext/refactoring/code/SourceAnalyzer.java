@@ -142,8 +142,9 @@ class SourceAnalyzer  {
 		}
 		public boolean visit(ClassInstanceCreation node) {
 			Expression receiver= node.getExpression();
-			if (receiver == null && node.resolveTypeBinding().isLocal()) {
-				fImplicitReceivers.add(node);
+			if (receiver == null) {
+				if (node.resolveTypeBinding().isLocal())
+					fImplicitReceivers.add(node);
 			} else if (receiver.getNodeType() == ASTNode.THIS_EXPRESSION) {
 				fImplicitReceivers.add(receiver);
 			}
