@@ -57,11 +57,10 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -318,65 +317,12 @@ public class BuildPathsBlock {
 
 	private ArrayList getExistingEntries(IClasspathEntry[] classpathEntries) {
 		ArrayList newClassPath= new ArrayList();
-		boolean projectExists= fCurrJProject.exists();
 		for (int i= 0; i < classpathEntries.length; i++) {
 			IClasspathEntry curr= classpathEntries[i];
-			
-			IPath path= curr.getPath();
-			
-			// get the resource
-			IResource res= null;
-			boolean isMissing= false;
-			
-			switch (curr.getEntryKind()) {
-				case IClasspathEntry.CPE_CONTAINER:
-					res= null;
-					try {
-						isMissing= (JavaCore.getClasspathContainer(path, fCurrJProject) == null);
-					} catch (JavaModelException e) {
-						isMissing= true;
-					}
-					break;
-				case IClasspathEntry.CPE_VARIABLE:
-					IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
-					res= null;
-					isMissing=  fWorkspaceRoot.findMember(resolvedPath) == null && !resolvedPath.toFile().isFile(); 
-					break;
-				case IClasspathEntry.CPE_LIBRARY:
-					res= fWorkspaceRoot.findMember(path);
-					if (res == null) {
-						if (!ArchiveFileFilter.isArchivePath(path)) {
-							if (fWorkspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER).isOK()) {
-								res= fWorkspaceRoot.getFolder(path);
-							}
-						}
-						isMissing= !path.toFile().isFile(); // look for external JARs
-					}
-					break;
-				case IClasspathEntry.CPE_SOURCE:
-					res= fWorkspaceRoot.findMember(path);
-					if (res == null) {
-						if (fWorkspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER).isOK()) {
-							res= fWorkspaceRoot.getFolder(path);
-						}
-						isMissing= true;
-					}
-					break;
-				case IClasspathEntry.CPE_PROJECT:					
-					res= fWorkspaceRoot.findMember(path);
-					isMissing= (res == null);
-					break;
-			}
-			boolean isExported= curr.isExported();
-										
-			CPListElement elem= new CPListElement(fCurrJProject, curr.getEntryKind(), path, res, curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath(), isExported);
-			if (projectExists) {
-				elem.setIsMissing(isMissing);
-			}
-			newClassPath.add(elem);
+			newClassPath.add(CPListElement.createFromExisting(curr, fCurrJProject));
 		}
 		return newClassPath;
-	}	
+	}
 	
 	// -------- public api --------
 	
@@ -702,7 +648,7 @@ public class BuildPathsBlock {
 					path= JavaCore.getResolvedVariablePath(path);
 				}
 				if (path != null) {
-					JavaDocLocations.setLibraryJavadocLocation(path, javadocLocation);
+					JavaUI.setLibraryJavadocLocation(path, javadocLocation);
 				}
 			}
 		}	

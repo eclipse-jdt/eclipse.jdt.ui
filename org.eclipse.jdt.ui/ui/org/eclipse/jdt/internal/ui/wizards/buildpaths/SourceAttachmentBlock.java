@@ -5,10 +5,8 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -71,12 +69,10 @@ public class SourceAttachmentBlock {
 	private StringButtonDialogField fFileNameField;
 	private SelectionButtonDialogField fInternalButtonField;
 	
-	private StringButtonDialogField fPrefixField;
 	
 	private boolean fIsVariableEntry;
 	
 	private IStatus fNameStatus;
-	private IStatus fPrefixStatus;
 		
 	private IPath fJARPath;
 	
@@ -96,7 +92,6 @@ public class SourceAttachmentBlock {
 	
 	private Control fSWTWidget;
 	private CLabel fFullPathResolvedLabel;
-	private CLabel fPrefixResolvedLabel;
 	
 	private IClasspathEntry fOldEntry;
 	
@@ -110,7 +105,6 @@ public class SourceAttachmentBlock {
 		fIsVariableEntry= (oldEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE);
 		
 		fNameStatus= new StatusInfo();
-		fPrefixStatus= new StatusInfo();
 		
 		fJARPath= (oldEntry != null) ? oldEntry.getPath() : Path.EMPTY;
 		
@@ -123,13 +117,7 @@ public class SourceAttachmentBlock {
 			fFileNameField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.varlabel")); //$NON-NLS-1$
 			fFileNameField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.filename.external.varbutton")); //$NON-NLS-1$
 			((VariablePathDialogField)fFileNameField).setVariableButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.filename.variable.button")); //$NON-NLS-1$
-		
-			fPrefixField= new VariablePathDialogField(adapter);
-			fPrefixField.setDialogFieldListener(adapter);
-			fPrefixField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.prefix.varlabel")); //$NON-NLS-1$
-			fPrefixField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.prefix.varbutton"));			 //$NON-NLS-1$
-			((VariablePathDialogField)fPrefixField).setVariableButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.prefix.variable.button")); //$NON-NLS-1$
-			
+					
 		} else {
 			fFileNameField= new StringButtonDialogField(adapter);
 			fFileNameField.setDialogFieldListener(adapter);
@@ -140,11 +128,6 @@ public class SourceAttachmentBlock {
 			fInternalButtonField.setDialogFieldListener(adapter);
 			fInternalButtonField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.internal.button")); //$NON-NLS-1$
 			
-			fPrefixField= new StringButtonDialogField(adapter);
-			fPrefixField.setDialogFieldListener(adapter);
-			fPrefixField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.prefix.label")); //$NON-NLS-1$
-			fPrefixField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.prefix.button")); //$NON-NLS-1$
-
 		}	
 	
 		// set the old settings
@@ -158,12 +141,6 @@ public class SourceAttachmentBlock {
 		} else {
 			fFileNameField.setText(""); //$NON-NLS-1$
 		}	
-				
-		if (fOldEntry != null && fOldEntry.getSourceAttachmentRootPath() != null) {
-			fPrefixField.setText(fOldEntry.getSourceAttachmentRootPath().toString());
-		} else {
-			fPrefixField.setText(""); //$NON-NLS-1$
-		}
 	}
 	
 	/**
@@ -180,11 +157,7 @@ public class SourceAttachmentBlock {
 	 * Gets the source attachment root chosen by the user
 	 */
 	public IPath getSourceAttachmentRootPath() {
-		if (getSourceAttachmentPath() == null) {
-			return null;
-		} else {
-			return new Path(fPrefixField.getText());
-		}
+		return null;
 	}
 	
 		
@@ -242,29 +215,6 @@ public class SourceAttachmentBlock {
 			DialogField.createEmptySpace(composite, 2);			
 		}
 		
-		// prefix description
-		DialogField.createEmptySpace(composite, 1);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.widthHint= widthHint;
-		gd.horizontalSpan= 2;
-		Label desc= new Label(composite, SWT.LEFT + SWT.WRAP);
-		desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.prefix.description")); //$NON-NLS-1$
-		desc.setLayoutData(gd);
-		DialogField.createEmptySpace(composite, 1);		
-		
-		// root path field	
-		fPrefixField.doFillIntoGrid(composite, 4);
-		LayoutUtil.setWidthHint(fPrefixField.getTextControl(null), widthHint);
-		
-		if (fIsVariableEntry) {
-			// label that shows the resolved path for variable jars
-			DialogField.createEmptySpace(composite, 1);	
-			fPrefixResolvedLabel= new CLabel(composite, SWT.LEFT);
-			fPrefixResolvedLabel.setText(getResolvedLabelString(fPrefixField.getText(), false));
-			fPrefixResolvedLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-			DialogField.createEmptySpace(composite, 2);
-		}
-		
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
 				
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK);
@@ -291,12 +241,7 @@ public class SourceAttachmentBlock {
 			if (jarFilePath != null) {
 				fFileNameField.setText(jarFilePath.toString());
 			}
-		} else if (field == fPrefixField) {
-			IPath prefixPath= choosePrefix();
-			if (prefixPath != null) {
-				fPrefixField.setText(prefixPath.toString());
-			}
-		}		
+		}	
 	}
 	
 	// ---------- IDialogFieldListener --------
@@ -310,25 +255,19 @@ public class SourceAttachmentBlock {
 				fFileNameField.setText(jarFilePath.toString());
 			}
 			return;
-		} else if (field == fPrefixField) {
-			fPrefixStatus= updatePrefixStatus();
-		} 
+		}
 		doStatusLineUpdate();
 	}	
 		
 	private void doStatusLineUpdate() {
-		fPrefixField.enableButton(canBrowsePrefix());
 		fFileNameField.enableButton(canBrowseFileName());
 		
 		// set the resolved path for variable jars
 		if (fFullPathResolvedLabel != null) {
 			fFullPathResolvedLabel.setText(getResolvedLabelString(fFileNameField.getText(), true));
 		}
-		if (fPrefixResolvedLabel != null) {
-			fPrefixResolvedLabel.setText(getResolvedLabelString(fPrefixField.getText(), false));
-		}
 		
-		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fNameStatus, fPrefixStatus });
+		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fNameStatus });
 		fContext.statusChanged(status);
 	}
 	
@@ -342,19 +281,6 @@ public class SourceAttachmentBlock {
 		}
 		return false;
 	}
-	
-	private boolean canBrowsePrefix() {
-		// can browse when the archive name is poiting to a existing file
-		// and (if variable) the prefix variable name is existing
-		if (fResolvedFile != null) {
-			if (fIsVariableEntry) {
-				// prefix has valid format, is resolvable and not empty
-				return fPrefixStatus.isOK() && fPrefixField.getText().length() > 0;
-			}
-			return true;
-		}
-		return false;
-	}	
 	
 	private String getResolvedLabelString(String path, boolean osPath) {
 		IPath resolvedPath= getResolvedPath(new Path(path));
@@ -380,40 +306,6 @@ public class SourceAttachmentBlock {
 		}
 		return null;
 	}	
-	
-		
-	private IStatus updatePrefixStatus() {
-		StatusInfo status= new StatusInfo();
-		
-		String prefix= fPrefixField.getText();
-		if (prefix.length() == 0) {
-			// no source attachment path
-			return status;
-		} else {
-			if (!Path.EMPTY.isValidPath(prefix)) {
-				status.setError(NewWizardMessages.getString("SourceAttachmentBlock.prefix.error.notvalid")); //$NON-NLS-1$
-				return status;
-			}
-			IPath path= new Path(prefix);
-			if (fIsVariableEntry) {
-				IPath resolvedPath= getResolvedPath(path);
-				if (resolvedPath == null) {
-					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.prefix.error.varnotexists")); //$NON-NLS-1$
-					return status;
-				}
-				if (resolvedPath.getDevice() != null) {
-					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.prefix.error.deviceinvar")); //$NON-NLS-1$
-					return status;
-				}
-			} else {
-				if (path.getDevice() != null) {
-					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.prefix.error.deviceinpath")); //$NON-NLS-1$
-					return status;
-				}
-			}				
-		}
-		return status;
-	}
 	
 	private IStatus updateFileNameStatus() {
 		StatusInfo status= new StatusInfo();
@@ -556,51 +448,6 @@ public class SourceAttachmentBlock {
 		return null;
 	}
 	
-	/*
-	 * Opens a dialog to choose path in a zip file.
-	 */		
-	private IPath choosePrefix() {
-		if (fResolvedFile != null) {
-			IPath currPath= new Path(fPrefixField.getText());
-			String initSelection= null;
-			if (fIsVariableEntry) {
-				IPath resolvedPath= getResolvedPath(currPath);
-				if (resolvedPath != null) {
-					initSelection= resolvedPath.toString();
-				}
-			} else {
-				initSelection= currPath.toString();
-			}
-			try {
-				ZipFile zipFile= new ZipFile(fResolvedFile);			
-				ZipContentProvider contentProvider= new ZipContentProvider();
-				contentProvider.setInitialInput(zipFile);
-				ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), new ZipLabelProvider(), contentProvider); 
-				dialog.setAllowMultiple(false);
-				dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.title")); //$NON-NLS-1$
-				dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.message")); //$NON-NLS-1$
-				dialog.setInput(zipFile);
-				dialog.setInitialSelection(contentProvider.getSelectedNode(initSelection));
-				if (dialog.open() == ElementTreeSelectionDialog.OK) {
-					Object obj= dialog.getFirstResult();
-					IPath path= new Path(obj.toString());
-					if (fIsVariableEntry) {
-						path= modifyPath(path, currPath.segment(0));
-					}
-					return path;
-				}
-			} catch (IOException e) {
-				String title= NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.error.title"); //$NON-NLS-1$
-				String message= NewWizardMessages.getFormattedString("SourceAttachmentBlock.prefixdialog.error.message", fResolvedFile.getPath()); //$NON-NLS-1$
-				MessageDialog.openError(getShell(), title, message);
-				JavaPlugin.log(e);
-			}				
-		
-		}
-		return null;
-	}
-	
-		
 	private Shell getShell() {
 		if (fSWTWidget != null) {
 			return fSWTWidget.getShell();

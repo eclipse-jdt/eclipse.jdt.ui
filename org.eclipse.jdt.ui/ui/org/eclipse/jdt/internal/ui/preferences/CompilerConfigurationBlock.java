@@ -54,7 +54,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
@@ -268,12 +267,12 @@ public class CompilerConfigurationBlock {
 		};
 		
 		IListAdapter adapter=  new IListAdapter() {
-			public void customButtonPressed(DialogField field, int index) {
+			public void customButtonPressed(ListDialogField field, int index) {
 				doTodoButtonPressed(index);
 			}
 
-			public void selectionChanged(DialogField field) {
-				fTodoTasksList.enableButton(3, fTodoTasksList.getSelectedElements().size() == 1);
+			public void selectionChanged(ListDialogField field) {
+				field.enableButton(3, field.getSelectedElements().size() == 1);
 			}
 		};
 		String[] buttons= new String[] {

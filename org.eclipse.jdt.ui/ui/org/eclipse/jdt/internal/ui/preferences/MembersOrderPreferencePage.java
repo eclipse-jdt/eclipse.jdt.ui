@@ -46,7 +46,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
@@ -254,15 +253,15 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		}
 
 		/**
-		* @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(DialogField, int)
+		* @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(ListDialogField, int)
 		*/
-		public void customButtonPressed(DialogField field, int index) {
+		public void customButtonPressed(ListDialogField field, int index) {
 		}
 
 		/**
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(DialogField)
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(ListDialogField)
 		 */
-		public void selectionChanged(DialogField field) {
+		public void selectionChanged(ListDialogField field) {
 		}
 
 	}

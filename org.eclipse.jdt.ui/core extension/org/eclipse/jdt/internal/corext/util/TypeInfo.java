@@ -33,12 +33,16 @@ public class TypeInfo {
 	private final String fPath;
 
 	public TypeInfo(char[] pkg, char[] name, char[][] enclosingTypes, String path, boolean isInterface) {
+		this(new String(pkg), new String(name), enclosingTypes, path, isInterface);
+	}
+	
+	public TypeInfo(String pkg, String name, char[][] enclosingTypes, String path, boolean isInterface) {
 		fPath= path;
-		fPackage= new String(pkg);
-		fName= new String(name);
+		fPackage= pkg;
+		fName= name;
 		fIsInterface= isInterface;
 		fEnclosingNames= enclosingTypes;
-	}
+	}	
 	
 	public String getTypeName() {
 		return fName;
@@ -67,11 +71,13 @@ public class TypeInfo {
 	 */
 	public String getEnclosingName() {
 		StringBuffer buf= new StringBuffer();
-		for (int i= 0; i < fEnclosingNames.length; i++) {
-			if (i != 0) {
-				buf.append('.');
-			}			
-			buf.append(fEnclosingNames[i]);
+		if (fEnclosingNames != null) {
+			for (int i= 0; i < fEnclosingNames.length; i++) {
+				if (i != 0) {
+					buf.append('.');
+				}			
+				buf.append(fEnclosingNames[i]);
+			}
 		}
 		return buf.toString();
 	}	
@@ -81,13 +87,16 @@ public class TypeInfo {
 	 * not package name. Identifiers are separated by dots.
 	 */
 	public String getTypeQualifiedName() {
-		StringBuffer buf= new StringBuffer();
-		for (int i= 0; i < fEnclosingNames.length; i++) {
-			buf.append(fEnclosingNames[i]);
-			buf.append('.');
+		if (fEnclosingNames != null && fEnclosingNames.length > 0) {
+			StringBuffer buf= new StringBuffer();
+			for (int i= 0; i < fEnclosingNames.length; i++) {
+				buf.append(fEnclosingNames[i]);
+				buf.append('.');
+			}
+			buf.append(fName);
+			return buf.toString();
 		}
-		buf.append(fName);
-		return buf.toString();
+		return fName;
 	}
 	
 	/**
@@ -100,9 +109,11 @@ public class TypeInfo {
 			buf.append(fPackage);
 			buf.append('.');
 		}
-		for (int i= 0; i < fEnclosingNames.length; i++) {
-			buf.append(fEnclosingNames[i]);
-			buf.append('.');
+		if (fEnclosingNames != null) {
+			for (int i= 0; i < fEnclosingNames.length; i++) {
+				buf.append(fEnclosingNames[i]);
+				buf.append('.');
+			}
 		}
 		buf.append(fName);
 		return buf.toString();
@@ -114,17 +125,20 @@ public class TypeInfo {
 	 * All identifiers are separated by dots.
 	 */
 	public String getTypeContainerName() {
-		StringBuffer buf= new StringBuffer();
-		if (fPackage.length() > 0) {
-			buf.append(fPackage);
-		}
-		for (int i= 0; i < fEnclosingNames.length; i++) {
-			if (buf.length() > 0) {
-				buf.append('.');
+		if (fEnclosingNames != null && fEnclosingNames.length > 0) {
+			StringBuffer buf= new StringBuffer();
+			if (fPackage.length() > 0) {
+				buf.append(fPackage);
 			}
-			buf.append(fEnclosingNames[i]);
+			for (int i= 0; i < fEnclosingNames.length; i++) {
+				if (buf.length() > 0) {
+					buf.append('.');
+				}
+				buf.append(fEnclosingNames[i]);
+			}
+			return buf.toString();
 		}
-		return buf.toString();		
+		return fPackage;
 	}	
 	
 	/**

@@ -12,11 +12,11 @@ public interface IListAdapter {
 	/**
 	 * A button from the button bar has been pressed.
 	 */
-	void customButtonPressed(DialogField field, int index);
+	void customButtonPressed(ListDialogField field, int index);
 	
 	/**
 	 * The selection of the list has changed.
 	 */	
-	void selectionChanged(DialogField field);
+	void selectionChanged(ListDialogField field);
 
 }

@@ -57,17 +57,18 @@ import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private ListDialogField fClassPathList;
 	private IJavaProject fCurrJProject;
 	
-	private ListDialogField fLibrariesList;
+	private TreeListDialogField fLibrariesList;
 	private IWorkspaceRoot fWorkspaceRoot;
 	
 	private IDialogSettings fDialogSettings;
@@ -79,9 +80,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private final int IDX_ADDVAR= 2;
 	private final int IDX_ADDADV= 3;
 	private final int IDX_EDIT= 5;
-	private final int IDX_ATTACH= 6;
+//	private final int IDX_ATTACH= 6;
 	
-	private final int IDX_REMOVE= 8;
+	private final int IDX_REMOVE= 7;
 	
 		
 	public LibrariesWorkbookPage(IWorkspaceRoot root, ListDialogField classPathList) {
@@ -98,20 +99,20 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			/* IDX_ADDADV */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.advanced.button"), //$NON-NLS-1$
 			/* */ null,  
 			/* IDX_EDIT */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.edit.button"), //$NON-NLS-1$
-			/* IDX_ATTACH */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.setsource.button"), //$NON-NLS-1$
+//			/* IDX_ATTACH */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.setsource.button"), //$NON-NLS-1$
 			/* */ null,  
 			/* IDX_REMOVE */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.remove.button") //$NON-NLS-1$
 		};		
 				
 		LibrariesAdapter adapter= new LibrariesAdapter();
 				
-		fLibrariesList= new ListDialogField(adapter, buttonLabels, new CPListLabelProvider());
+		fLibrariesList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fLibrariesList.setDialogFieldListener(adapter);
 		fLibrariesList.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.libraries.label")); //$NON-NLS-1$
 		fLibrariesList.setRemoveButtonIndex(IDX_REMOVE); //$NON-NLS-1$
 	
 		fLibrariesList.enableButton(IDX_EDIT, false);
-		fLibrariesList.enableButton(IDX_ATTACH, false);
+//		fLibrariesList.enableButton(IDX_ATTACH, false);
 		
 		fLibrariesList.setViewerSorter(new CPListElementSorter());
 
@@ -153,7 +154,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fLibrariesList.setButtonsMinWidth(buttonBarWidth);
 		
-		fLibrariesList.getTableViewer().setSorter(new CPListElementSorter());
+		fLibrariesList.getTreeViewer().setSorter(new CPListElementSorter());
 		
 		fSWTControl= composite;
 				
@@ -168,22 +169,44 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 	
 	
-	private class LibrariesAdapter implements IDialogFieldListener, IListAdapter {
+	private class LibrariesAdapter implements IDialogFieldListener, ITreeListAdapter {
+		
+		private final Object[] EMPTY_ARR= new Object[0];
 		
 		// -------- IListAdapter --------
-		public void customButtonPressed(DialogField field, int index) {
+		public void customButtonPressed(TreeListDialogField field, int index) {
 			libaryPageCustomButtonPressed(field, index);
 		}
 		
-		public void selectionChanged(DialogField field) {
+		public void selectionChanged(TreeListDialogField field) {
 			libaryPageSelectionChanged(field);
 		}
+		
+		public Object[] getChildren(TreeListDialogField field, Object element) {
+			if (element instanceof CPListElement) {
+				return ((CPListElement) element).getChildren();
+			}
+			return EMPTY_ARR;
+		}
+
+		public Object getParent(TreeListDialogField field, Object element) {
+			if (element instanceof CPListElementAttribute) {
+				return ((CPListElementAttribute) element).getParent();
+			}
+			return null;
+		}
+
+		public boolean hasChildren(TreeListDialogField field, Object element) {
+			return (element instanceof CPListElement);
+		}		
 			
 		// ---------- IDialogFieldListener --------
 	
 		public void dialogFieldChanged(DialogField field) {
 			libaryPageDialogFieldChanged(field);
 		}
+
+
 	}
 	
 	private void libaryPageCustomButtonPressed(DialogField field, int index) {
@@ -204,16 +227,16 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				libentries= advDialog.getResult();
 			}
 			break;
-		case IDX_ATTACH: /* set source attachment */
-			List selElements= fLibrariesList.getSelectedElements();
-			CPListElement selElement= (CPListElement) selElements.get(0);				
-			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), fWorkspaceRoot, selElement.getClasspathEntry());
-			if (dialog.open() == SourceAttachmentDialog.OK) {
-				selElement.setSourceAttachment(dialog.getSourceAttachmentPath(), dialog.getSourceAttachmentRootPath());
-				fLibrariesList.refresh();
-				fClassPathList.refresh();
-			}
-			break;
+//		case IDX_ATTACH: /* set source attachment */
+//			List selElements= fLibrariesList.getSelectedElements();
+//			CPListElement selElement= (CPListElement) selElements.get(0);				
+//			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), fWorkspaceRoot, selElement.getClasspathEntry());
+//			if (dialog.open() == SourceAttachmentDialog.OK) {
+//				selElement.setSourceAttachment(dialog.getSourceAttachmentPath(), dialog.getSourceAttachmentRootPath());
+//				fLibrariesList.refresh();
+//				fClassPathList.refresh();
+//			}
+//			break;
 		case IDX_EDIT: /* edit */
 			editEntry();
 			return;
@@ -244,7 +267,27 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (selElements.size() != 1) {
 			return;
 		}
-		CPListElement elem= (CPListElement) selElements.get(0);
+		Object elem= selElements.get(0);
+		if (fLibrariesList.getIndexOfElement(elem) != -1) {
+			editElementEntry((CPListElement) elem);
+		} else if (elem instanceof CPListElementAttribute) {
+			editAttributeEntry((CPListElementAttribute) elem);
+		}
+	}
+	
+	private void editAttributeEntry(CPListElementAttribute elem) {
+		if (elem.getKey().equals(CPListElement.SOURCEATTACHMENT)) {
+			CPListElement selElement= (CPListElement) elem.getParent();
+			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), fWorkspaceRoot, selElement.getClasspathEntry());
+			if (dialog.open() == SourceAttachmentDialog.OK) {
+				selElement.setSourceAttachment(dialog.getSourceAttachmentPath(), dialog.getSourceAttachmentRootPath());
+				fLibrariesList.refresh();
+				fClassPathList.refresh();
+			}
+		}
+	}
+		
+	private void editElementEntry(CPListElement elem) {
 		CPListElement[] res= null;
 		
 		switch (elem.getEntryKind()) {
@@ -280,9 +323,25 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private void libaryPageSelectionChanged(DialogField field) {
 		List selElements= fLibrariesList.getSelectedElements();
-		fLibrariesList.enableButton(IDX_ATTACH, canDoSourceAttachment(selElements));
-		fLibrariesList.enableButton(IDX_EDIT, selElements.size() == 1);
+//		fLibrariesList.enableButton(IDX_ATTACH, canDoSourceAttachment(selElements));
+		fLibrariesList.enableButton(IDX_EDIT, canEdit(selElements));
 	}
+	
+	private boolean canEdit(List selElements) {
+		if (selElements.size() != 1) {
+			return false;
+		}
+		Object elem= selElements.get(0);
+		if (fLibrariesList.getIndexOfElement(elem) != -1) {
+			return true;
+		}
+		if (elem instanceof CPListElementAttribute) {
+			CPListElementAttribute attrib= (CPListElementAttribute) elem;
+			return attrib.getKey().equals(CPListElement.SOURCEATTACHMENT);
+		}
+		return false;
+	}
+	
 	
 	private void libaryPageDialogFieldChanged(DialogField field) {
 		if (fCurrJProject != null) {

@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.net.URL;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -58,64 +60,71 @@ class CPListLabelProvider extends LabelProvider {
 	
 	public String getText(Object element) {
 		if (element instanceof CPListElement) {
-			CPListElement cpentry= (CPListElement)element;
-			IPath path= cpentry.getPath();
-			switch (cpentry.getEntryKind()) {
-				case IClasspathEntry.CPE_LIBRARY: {
-					IResource resource= cpentry.getResource();
-					if (resource instanceof IFolder) {
-						StringBuffer buf= new StringBuffer(path.makeRelative().toString());
-						buf.append(' ');
-						buf.append(fClassLabel);
-						if (!resource.exists()) {
-							buf.append(' ');
-							if (cpentry.isMissing()) {
-								buf.append(fCreateLabel);
-							} else {
-								buf.append(fNewLabel);
-							}
-						}
-						return buf.toString();
-					} else if (resource instanceof IFile) {
-						if (ArchiveFileFilter.isArchivePath(path)) {
-							String[] args= new String[] { path.lastSegment(), path.removeLastSegments(1).makeRelative().toString() };
-							return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", args); //$NON-NLS-1$
-						}
-					} else {
-						if (ArchiveFileFilter.isArchivePath(path)) {
-							String[] args= new String[] { path.lastSegment(), path.removeLastSegments(1).toOSString() };
-							return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", args); //$NON-NLS-1$
-						}
-					}
-					// should not come here
-					return path.makeRelative().toString();									
-				}
-				case IClasspathEntry.CPE_VARIABLE: {
-					String name= path.makeRelative().toString();
-					StringBuffer buf= new StringBuffer(name);
-					IPath entryPath= JavaCore.getClasspathVariable(path.segment(0));
-					if (entryPath != null) {
-						buf.append(" - "); //$NON-NLS-1$
-						buf.append(entryPath.append(path.removeFirstSegments(1)).toOSString());
-					}
-					return buf.toString();
-				}
-				case IClasspathEntry.CPE_PROJECT:
-					return path.lastSegment();
-				case IClasspathEntry.CPE_CONTAINER:
-					try {
-						IClasspathContainer container= JavaCore.getClasspathContainer(cpentry.getPath(), cpentry.getJavaProject());
-						if (container != null) {
-							return container.getDescription();
-						}
-					} catch (JavaModelException e) {
-						
-					}
-					return path.toString();		
-				case IClasspathEntry.CPE_SOURCE: {
+			return getCPListElementText((CPListElement) element);
+		} else if (element instanceof CPListElementAttribute) {
+			return getCPListElementAttributeText((CPListElementAttribute) element);
+		}
+		return super.getText(element);
+	}
+	
+	public String getCPListElementAttributeText(CPListElementAttribute attrib) {
+		String notAvailable= "(Not Configured)";
+		StringBuffer buf= new StringBuffer();
+		String key= attrib.getKey();
+		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
+			buf.append("Source attachment: ");
+			IPath path= (IPath) attrib.getValue();
+			if (path != null && !path.isEmpty()) {
+				buf.append(getPathString(path, path.getDevice() != null));
+			} else {
+				buf.append(notAvailable);
+			}
+		} else if (key.equals(CPListElement.SOURCEATTACHMENTROOT)) {
+			buf.append("Source attachment root: ");
+			IPath path= (IPath) attrib.getValue();
+			if (path != null && !path.isEmpty()) {
+				buf.append(path.toString());
+			} else {
+				buf.append(notAvailable);
+			}
+		} else if (key.equals(CPListElement.JAVADOC)) {
+			buf.append("Javadoc location: ");
+			URL path= (URL) attrib.getValue();
+			if (path != null) {
+				buf.append(path.toExternalForm());
+			} else {
+				buf.append(notAvailable);
+			}
+		} else if (key.equals(CPListElement.OUTPUT)) {
+			buf.append("Output location: ");
+			IPath path= (IPath) attrib.getValue();
+			if (path != null) {
+				buf.append(path.makeRelative().toString());
+			} else {
+				buf.append("(Project Default)");
+			}
+		} else if (key.equals(CPListElement.EXCLUSION)) {
+			buf.append("Exclusion filter: ");
+			String filter= (String) attrib.getValue();
+			if (filter != null) {
+				buf.append(filter);
+			} else {
+				buf.append(notAvailable);
+			}
+		}
+		return buf.toString();
+	}
+	
+	public String getCPListElementText(CPListElement cpentry) {
+		IPath path= cpentry.getPath();
+		switch (cpentry.getEntryKind()) {
+			case IClasspathEntry.CPE_LIBRARY: {
+				IResource resource= cpentry.getResource();
+				if (resource instanceof IFolder) {
 					StringBuffer buf= new StringBuffer(path.makeRelative().toString());
-					IResource resource= cpentry.getResource();
-					if (resource != null && !resource.exists()) {
+					buf.append(' ');
+					buf.append(fClassLabel);
+					if (!resource.exists()) {
 						buf.append(' ');
 						if (cpentry.isMissing()) {
 							buf.append(fCreateLabel);
@@ -124,28 +133,76 @@ class CPListLabelProvider extends LabelProvider {
 						}
 					}
 					return buf.toString();
+				} else if (ArchiveFileFilter.isArchivePath(path)) {
+					return getPathString(path, resource == null);
 				}
-				default:
-					// pass
+				// should not come here
+				return path.makeRelative().toString();
 			}
+			case IClasspathEntry.CPE_VARIABLE: {
+				String name= path.makeRelative().toString();
+				StringBuffer buf= new StringBuffer(name);
+				IPath entryPath= JavaCore.getClasspathVariable(path.segment(0));
+				if (entryPath != null) {
+					buf.append(" - "); //$NON-NLS-1$
+					buf.append(entryPath.append(path.removeFirstSegments(1)).toOSString());
+				}
+				return buf.toString();
+			}
+			case IClasspathEntry.CPE_PROJECT:
+				return path.lastSegment();
+			case IClasspathEntry.CPE_CONTAINER:
+				try {
+					IClasspathContainer container= JavaCore.getClasspathContainer(cpentry.getPath(), cpentry.getJavaProject());
+					if (container != null) {
+						return container.getDescription();
+					}
+				} catch (JavaModelException e) {
+	
+				}
+				return path.toString();
+			case IClasspathEntry.CPE_SOURCE: {
+				StringBuffer buf= new StringBuffer(path.makeRelative().toString());
+				IResource resource= cpentry.getResource();
+				if (resource != null && !resource.exists()) {
+					buf.append(' ');
+					if (cpentry.isMissing()) {
+						buf.append(fCreateLabel);
+					} else {
+						buf.append(fNewLabel);
+					}
+				}
+				return buf.toString();
+			}
+			default:
+				// pass
 		}
-		return super.getText(element);
+		return "unknown element";
 	}
 	
-	private ImageDescriptor getBaseImage(CPListElement cpentry) {
+	private String getPathString(IPath path, boolean isExternal) {
+		IPath appendedPath= path.removeLastSegments(1);
+		String appended= isExternal ? appendedPath.toOSString() : appendedPath.makeRelative().toString();
+		return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", new String[] { path.lastSegment(), appended }); //$NON-NLS-1$
+	}
+	
+	
+	
+	private ImageDescriptor getCPListElementBaseImage(CPListElement cpentry) {
 		switch (cpentry.getEntryKind()) {
 			case IClasspathEntry.CPE_SOURCE:
 				return fFolderImage;
 			case IClasspathEntry.CPE_LIBRARY:
 				IResource res= cpentry.getResource();
+				IPath path= cpentry.getSourceAttachmentPath();
 				if (res == null) {
-					if (cpentry.getSourceAttachmentPath() == null) {
+					if (path == null || path.isEmpty()) {
 						return fExtJarIcon;
 					} else {
 						return fExtJarWSrcIcon;
 					}
 				} else if (res instanceof IFile) {
-					if (cpentry.getSourceAttachmentPath() == null) {
+					if (path == null || path.isEmpty()) {
 						return fJarIcon;
 					} else {
 						return fJarWSrcIcon;
@@ -167,13 +224,25 @@ class CPListLabelProvider extends LabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof CPListElement) {
 			CPListElement cpentry= (CPListElement) element;
-			ImageDescriptor imageDescriptor= getBaseImage(cpentry);
+			ImageDescriptor imageDescriptor= getCPListElementBaseImage(cpentry);
 			if (imageDescriptor != null) {
 				if (cpentry.isMissing()) {
 					imageDescriptor= new JavaElementImageDescriptor(imageDescriptor, JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE);
 				}
 				return fRegistry.get(imageDescriptor);
 			}
+		} else if (element instanceof CPListElementAttribute) {
+			String key= ((CPListElementAttribute) element).getKey();
+			if (key.equals(CPListElement.SOURCEATTACHMENT)) {
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_CUNIT);
+			} else if (key.equals(CPListElement.JAVADOC)) {
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_HTMLTAG);
+			} else if (key.equals(CPListElement.OUTPUT)) {
+				return fRegistry.get(fFolderImage);
+			} else if (key.equals(CPListElement.EXCLUSION)) {
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_ERROR);
+			}
+			return  fRegistry.get(fVariableImage);
 		}
 		return null;
 	}

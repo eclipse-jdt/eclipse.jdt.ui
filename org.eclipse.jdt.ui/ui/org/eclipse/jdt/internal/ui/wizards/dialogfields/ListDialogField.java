@@ -548,6 +548,13 @@ public class ListDialogField extends DialogField {
 	 */		
 	public Object getElement(int index) {
 		return fElements.get(index);
+	}
+	
+	/**
+	* Gets the index of an element in the list or -1 if element is not in list.
+	*/
+	public int getIndexOfElement(Object elem) {
+		return fElements.indexOf(elem);
 	}	
 
 	/**

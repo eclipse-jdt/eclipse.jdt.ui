@@ -168,19 +168,19 @@ public class VariableBlock {
 		
 		// -------- IListAdapter --------
 			
-		public void customButtonPressed(DialogField field, int index) {
+		public void customButtonPressed(ListDialogField field, int index) {
 			switch (index) {
 			case 0: /* add */
 				editEntries(null);
 				break;
 			case 1: /* edit */
-				List selected= fVariablesList.getSelectedElements();			
+				List selected= field.getSelectedElements();			
 				editEntries((CPVariableElement)selected.get(0));
 				break;
 			}
 		}
 		
-		public void selectionChanged(DialogField field) {
+		public void selectionChanged(ListDialogField field) {
 			doSelectionChanged(field);
 		}				
 			

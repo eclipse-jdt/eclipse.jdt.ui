@@ -5,8 +5,9 @@
 package org.eclipse.jdt.internal.corext.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Comparator;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,9 +28,19 @@ import org.eclipse.jdt.core.search.SearchEngine;
  * the methods of this class returns a list of the lightweight objects <code>TypeInfo</code>.
  */
 public class AllTypesCache {
-
-	private static ArrayList fgTypeCache= null;
+	
+	private static TypeInfo[] fgTypeCache= null;
+	private static int fgSizeHint= 2000;
+	
 	private static int fgNumberOfCacheFlushes= 0;
+
+	private static class TypeNameComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+			return ((TypeInfo)o1).getTypeName().compareTo(((TypeInfo)o2).getTypeName());
+		}
+	}
+	
+	private static Comparator fgTypeNameComparator= new TypeNameComparator();
 
 	/**
 	 * Returns all types in the given scope.
@@ -37,36 +48,47 @@ public class AllTypesCache {
 	 * or IJavaSearchConstants.TYPE
 	 * @param typesFound The resulting <code>TypeInfo</code> elements are added to this collection
 	 */		
-	public static synchronized void getTypes(IJavaSearchScope scope, int kind, IProgressMonitor monitor, Collection typesFound) throws JavaModelException {
+	public static void getTypes(IJavaSearchScope scope, int kind, IProgressMonitor monitor, Collection typesFound) throws JavaModelException {
+		
+		TypeInfo[] allTypes= getAllTypes(monitor);
 		
 		boolean isWorkspaceScope= scope.equals(SearchEngine.createWorkspaceScope());
-				
-		if (fgTypeCache == null) {
-			ArrayList searchResult= new ArrayList(400);
-			doSearchTypes(SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE, monitor, searchResult);
-			if (monitor != null && monitor.isCanceled()) {
-				return;
-			}
-			monitor= null; // prevents duplicated invocation of monitor.done
-			fgTypeCache= searchResult;
-			JavaCore.addElementChangedListener(new TypeCacheDeltaListener());
-		}
-		
 		boolean isBoth= (kind == IJavaSearchConstants.TYPE);
 		boolean isInterface= (kind == IJavaSearchConstants.INTERFACE);
 		
-		for (Iterator iter= fgTypeCache.iterator(); iter.hasNext();) {
-			TypeInfo info= (TypeInfo) iter.next();
+		for (int i= 0; i < allTypes.length; i++) {
+			TypeInfo info= (TypeInfo) fgTypeCache[i];
 			if (isWorkspaceScope || info.isEnclosed(scope)) {
 				if (isBoth || (isInterface == info.isInterface())) {
 					typesFound.add(info);
 				}
 			}
 		}
+	}
+	
+
+	/**
+	 * Returns all types in the workspace. The returned array must not be
+	 * modified. The elements in the array are sorted by simple type name.
+	 */
+	public static synchronized TypeInfo[] getAllTypes(IProgressMonitor monitor) throws JavaModelException { 	
+		if (fgTypeCache == null) {
+			ArrayList searchResult= new ArrayList(fgSizeHint);
+			doSearchTypes(SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE, monitor, searchResult);
+			if (monitor != null && monitor.isCanceled()) {
+				return null;
+			}
+			monitor= null; // prevents duplicated invocation of monitor.done
+			fgTypeCache= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
+			Arrays.sort(fgTypeCache, getTypeNameComperator());
+			fgSizeHint= fgTypeCache.length;
+	
+			JavaCore.addElementChangedListener(new TypeCacheDeltaListener());
+		}
 		if (monitor != null) {
 			monitor.done();
-		}
-		
+		}		
+		return fgTypeCache;
 	}
 	
 	/**
@@ -75,6 +97,20 @@ public class AllTypesCache {
 	public static boolean isCacheUpToDate() {
 		return fgTypeCache != null;
 	}
+	
+	/**
+	 * Returns a hint for the number of all types in the workspace.
+	 */
+	public static int getNumberOfAllTypesHint() {
+		return fgSizeHint;
+	}
+	
+	/**
+	 * Returns a compartor that compares the simple type names
+	 */
+	public static Comparator getTypeNameComperator() {
+		return fgTypeNameComparator;
+	}	
 
 
 	private static void doSearchTypes(IJavaSearchScope scope, int style, IProgressMonitor monitor, Collection typesFound) throws JavaModelException {

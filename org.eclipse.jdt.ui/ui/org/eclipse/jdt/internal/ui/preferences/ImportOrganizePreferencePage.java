@@ -125,11 +125,11 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	
 	private class ImportOrganizeAdapter implements IListAdapter, IDialogFieldListener {
 
-        public void customButtonPressed(DialogField field, int index) {
+        public void customButtonPressed(ListDialogField field, int index) {
         	doButtonPressed(index);
         }
 
-        public void selectionChanged(DialogField field) {
+        public void selectionChanged(ListDialogField field) {
         	doSelectionChanged();
         }
 

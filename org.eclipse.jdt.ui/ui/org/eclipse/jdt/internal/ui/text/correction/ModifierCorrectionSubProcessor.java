@@ -154,11 +154,15 @@ public class ModifierCorrectionSubProcessor {
 		}
 	
 		ASTNode parentType= ASTResolving.findParentType(decl);
-		boolean parentIsAbstract= (parentType instanceof TypeDeclaration) && Modifier.isAbstract(((TypeDeclaration) parentType).getModifiers());
-		
+		TypeDeclaration parentTypeDecl= null;
+		boolean parentIsAbstractClass= false;
+		if (parentType instanceof TypeDeclaration) {
+			parentTypeDecl= (TypeDeclaration) parentType;
+			parentIsAbstractClass= !parentTypeDecl.isInterface() && Modifier.isAbstract(parentTypeDecl.getModifiers());
+		}
 		boolean hasNoBody= (decl.getBody() == null);
 		
-		if (context.getProblemId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstract) {
+		if (context.getProblemId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstractClass) {
 			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
 			
 			AST ast= astRoot.getAST();
@@ -198,9 +202,8 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(proposal2);
 		}
 		
-				
-		if (context.getProblemId() == IProblem.AbstractMethodInAbstractClass && (parentType instanceof TypeDeclaration)) {
-			ASTRewriteCorrectionProposal proposal= getMakeTypeStaticProposal(cu, (TypeDeclaration) parentType);
+		if (context.getProblemId() == IProblem.AbstractMethodInAbstractClass && (parentTypeDecl != null)) {
+			ASTRewriteCorrectionProposal proposal= getMakeTypeStaticProposal(cu, parentTypeDecl);
 			proposals.add(proposal);
 		}		
 		

@@ -60,9 +60,9 @@ import org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationBlock;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class JavadocStandardWizardPage extends JavadocWizardPage {
 
@@ -511,17 +511,17 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	private class ListAdapter implements IListAdapter {
 
 		/**
-		 * @see IListAdapter#customButtonPressed(DialogField, int)
+		 * @see IListAdapter#customButtonPressed(ListDialogField, int)
 		 */
-		public void customButtonPressed(DialogField field, int index) {
+		public void customButtonPressed(ListDialogField field, int index) {
 			if (index == 2)
 				doEditButtonPressed();
 		}
 
 		/**
-		 * @see IListAdapter#selectionChanged(DialogField)
+		 * @see IListAdapter#selectionChanged(ListDialogField)
 		 */
-		public void selectionChanged(DialogField field) {
+		public void selectionChanged(ListDialogField field) {
 			List selection= fListDialogField.getSelectedElements();
 			if (selection.size() != 1) {
 				fListDialogField.enableButton(2, false);

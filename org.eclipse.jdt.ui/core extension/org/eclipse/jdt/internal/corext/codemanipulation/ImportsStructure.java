@@ -7,14 +7,10 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
@@ -27,7 +23,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -38,8 +33,6 @@ import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Created on a Compilation unit, the ImportsStructure allows to add
@@ -541,18 +534,11 @@ public class ImportsStructure implements IImportsStructure {
 	}
 	
 	private TextBuffer aquireTextBuffer() throws CoreException {
-		return TextBuffer.acquire(getFile());
-	}
-
-	private IFile getFile() {
-		ICompilationUnit cu= fCompilationUnit;
-		if (cu.isWorkingCopy()) {
-			cu= (ICompilationUnit) cu.getOriginalElement();
-		}		
-		IFile file= (IFile) cu.getResource();
-		return file;
+		IFile file= (IFile) JavaModelUtil.toOriginal(fCompilationUnit).getResource();
+		return TextBuffer.acquire(file);
 	}
 	
+		
 	/**
 	 * Get the replace positons.
 	 * @param textBuffer The textBuffer
@@ -678,17 +664,31 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		starImportPackages.add(fCompilationUnit.getParent().getElementName());
 		starImportPackages.add(JAVA_LANG);
-		
-		ArrayList res= new ArrayList();
-		HashSet typesInPackages= new HashSet();
-		
+
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
-		AllTypesCache.getTypes(scope, IJavaSearchConstants.TYPE, null, res);
-		for (int i= 0; i < res.size(); i++) {
-			TypeInfo elem= (TypeInfo) res.get(i);
-			if (starImportPackages.contains(elem.getTypeContainerName())) {
-				if (!typesInPackages.add(elem.getTypeName())) {
-					onDemandConflicts.add(elem.getTypeName());
+		TypeInfo[] allTypes= AllTypesCache.getAllTypes(null); // all types in workspace, sorted by type name
+		
+		String lastName= null;
+		TypeInfo lastEntry= null;
+		for (int i= 0; i < allTypes.length; i++) {
+			TypeInfo curr= allTypes[i];
+			String name= curr.getTypeName();
+			if (!name.equals(lastName)) {
+				lastName= name;
+				lastEntry= curr;
+			} else { // same name as last
+				String containerName= curr.getTypeContainerName();
+				if (starImportPackages.contains(containerName) && !onDemandConflicts.contains(lastName)) {
+					String lastContainerName= lastEntry.getTypeContainerName();
+					if (!containerName.equals(lastContainerName) && starImportPackages.contains(lastContainerName)) {
+						if (curr.isEnclosed(scope)) {
+							if (lastEntry.isEnclosed(scope)) {
+								onDemandConflicts.add(lastName);
+							} else {
+								lastEntry= curr;
+							}
+						}
+					}
 				}
 			}
 		}

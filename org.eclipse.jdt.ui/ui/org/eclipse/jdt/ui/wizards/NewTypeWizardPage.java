@@ -518,11 +518,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		
 		// -------- IListAdapter
-		public void customButtonPressed(DialogField field, int index) {
+		public void customButtonPressed(ListDialogField field, int index) {
 			typePageCustomButtonPressed(field, index);
 		}
 		
-		public void selectionChanged(DialogField field) {}
+		public void selectionChanged(ListDialogField field) {}
 		
 		// -------- IDialogFieldListener
 		public void dialogFieldChanged(DialogField field) {

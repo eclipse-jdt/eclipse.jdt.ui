@@ -46,10 +46,10 @@ import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
@@ -61,14 +61,16 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	private IWorkspaceRoot fWorkspaceRoot;
 	
-	private SelectionButtonDialogField fProjectRadioButton;
-	private SelectionButtonDialogField fFolderRadioButton;
-	private ListDialogField fFoldersList;
-	private CPListElement fProjectCPEntry;
+//	private SelectionButtonDialogField fProjectRadioButton;
+//	private SelectionButtonDialogField fFolderRadioButton;
+	private TreeListDialogField fFoldersList;
+	
+//	private List fProjectCPEntry;
+//	private List fFolderCPEntries;
 	
 	private StringDialogField fOutputLocationField;
 	
-	private boolean fIsProjSelected;
+//	private boolean fIsProjSelected;
 	
 	private final int IDX_ADDNEW= 0;
 	private final int IDX_ADDEXIST= 1;
@@ -79,20 +81,20 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	public SourceContainerWorkbookPage(IWorkspaceRoot root, ListDialogField classPathList, StringDialogField outputLocationField) {
 		fWorkspaceRoot= root;
 		fClassPathList= classPathList;
-		fProjectCPEntry= null;
+	
 		fOutputLocationField= outputLocationField;
 		
 		fSWTControl= null;
 				
 		SourceContainerAdapter adapter= new SourceContainerAdapter();
 				
-		fProjectRadioButton= new SelectionButtonDialogField(SWT.RADIO);
-		fProjectRadioButton.setDialogFieldListener(adapter);
-		fProjectRadioButton.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.rb1.label")); //$NON-NLS-1$
-						
-		fFolderRadioButton= new SelectionButtonDialogField(SWT.RADIO);
-		fFolderRadioButton.setDialogFieldListener(adapter);
-		fFolderRadioButton.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.rb2.label")); //$NON-NLS-1$
+//		fProjectRadioButton= new SelectionButtonDialogField(SWT.RADIO);
+//		fProjectRadioButton.setDialogFieldListener(adapter);
+//		fProjectRadioButton.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.rb1.label")); //$NON-NLS-1$
+//						
+//		fFolderRadioButton= new SelectionButtonDialogField(SWT.RADIO);
+//		fFolderRadioButton.setDialogFieldListener(adapter);
+//		fFolderRadioButton.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.rb2.label")); //$NON-NLS-1$
 		
 		String[] buttonLabels;
 		int removeIndex;
@@ -106,16 +108,15 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		};
 		removeIndex= IDX_REMOVE;
 		
-		fFoldersList= new ListDialogField(adapter, buttonLabels, new CPListLabelProvider());
+		fFoldersList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fFoldersList.setDialogFieldListener(adapter);
 		fFoldersList.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.label")); //$NON-NLS-1$
 		fFoldersList.setRemoveButtonIndex(removeIndex);
 		
 		fFoldersList.setViewerSorter(new CPListElementSorter());
 		
-		fFolderRadioButton.setSelection(true);
-		fProjectRadioButton.setSelection(false);
-		fFolderRadioButton.attachDialogField(fFoldersList);	
+//		fFolderRadioButton.setSelection(true);
+//		fProjectRadioButton.setSelection(false);
 	}
 	
 	public void init(IJavaProject jproject) {
@@ -125,29 +126,33 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 	
 	private void updateFoldersList() {	
-		fIsProjSelected= false;
-		List srcelements= new ArrayList(fClassPathList.getSize());
+		fFoldersList.removeAllElements();
+//		fProjectCPEntry= new ArrayList(1);
+//		fFolderCPEntries= new ArrayList(4);		
 		
 		List cpelements= fClassPathList.getElements();
 		for (int i= 0; i < cpelements.size(); i++) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
 			if (cpe.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				if (fProjPath.equals(cpe.getPath())) {
-					srcelements.clear();
 					// remember the entry to ensure a unique CPListElement for the project-cpentry
-					fProjectCPEntry= cpe;
-					fIsProjSelected= true;
+					//fProjectCPEntry.add(cpe);
+					fFoldersList.addElement(cpe);
 					break;
 				} else {
-					srcelements.add(cpe);
+					fFoldersList.addElement(cpe);
+//					fFolderCPEntries.add(cpe);
 				}
 			}
 		}
-		fFoldersList.setElements(srcelements);
+//		boolean isFoldersSelected= fProjectCPEntry.isEmpty();
+//		if (isFoldersSelected) {
+//			fProjectCPEntry.add(newCPSourceElement(fCurrJProject.getResource()));
+//		}
 		
 		// fix for 1G47IYV: ITPJUI:WINNT - Both radio buttons get selected in Project properties
-		fFolderRadioButton.setSelection(!fIsProjSelected);
-		fProjectRadioButton.setSelection(fIsProjSelected);
+//		fFolderRadioButton.setSelection(isFoldersSelected);
+//		fProjectRadioButton.setSelection(!isFoldersSelected);
 	}			
 	
 	public Control getControl(Composite parent) {
@@ -159,12 +164,11 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		layout.numColumns= 2;		
 		composite.setLayout(layout);
 		
-		fProjectRadioButton.doFillIntoGrid(composite, 2);
-		fFolderRadioButton.doFillIntoGrid(composite, 2);
+//		fProjectRadioButton.doFillIntoGrid(composite, 2);
+//		fFolderRadioButton.doFillIntoGrid(composite, 2);
 		
 		Control control= fFoldersList.getListControl(composite);
 		GridData gd= new GridData(GridData.FILL_BOTH);
-		gd.horizontalIndent= converter.convertWidthInCharsToPixels(2);
 		gd.widthHint= converter.convertWidthInCharsToPixels(50);
 		gd.heightHint= converter.convertWidthInCharsToPixels(15);
 		gd.grabExcessHorizontalSpace= true;
@@ -190,16 +194,36 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 	
 	
-	private class SourceContainerAdapter implements IListAdapter, IDialogFieldListener {
+	private class SourceContainerAdapter implements ITreeListAdapter, IDialogFieldListener {
 	
+		private final Object[] EMPTY_ARR= new Object[0];
+		
 		// -------- IListAdapter --------
-		public void customButtonPressed(DialogField field, int index) {
+		public void customButtonPressed(TreeListDialogField field, int index) {
 			sourcePageCustomButtonPressed(field, index);
 		}
 		
-		public void selectionChanged(DialogField field) {
+		public void selectionChanged(TreeListDialogField field) {
 			sourcePageSelectionChanged(field);
 		}
+		
+		public Object[] getChildren(TreeListDialogField field, Object element) {
+			if (element instanceof CPListElement) {
+				return ((CPListElement) element).getChildren();
+			}
+			return EMPTY_ARR;
+		}
+
+		public Object getParent(TreeListDialogField field, Object element) {
+			if (element instanceof CPListElementAttribute) {
+				return ((CPListElementAttribute) element).getParent();
+			}
+			return null;
+		}
+
+		public boolean hasChildren(TreeListDialogField field, Object element) {
+			return (element instanceof CPListElement);
+		}		
 		
 		// ---------- IDialogFieldListener --------
 		public void dialogFieldChanged(DialogField field) {
@@ -266,8 +290,21 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	private void sourcePageSelectionChanged(DialogField field) {
 		List selected= fFoldersList.getSelectedElements();
-		fFoldersList.enableButton(IDX_EDIT, selected.size() == 1);
+		fFoldersList.enableButton(IDX_EDIT, canEdit(selected));
 	}
+	
+	private boolean canEdit(List selElements) {
+		if (selElements.size() != 1) {
+			return false;
+		}
+		Object elem= selElements.get(0);
+		if (fFoldersList.getIndexOfElement(elem) != -1) {
+			return true;
+		}
+		if (elem instanceof CPListElementAttribute) {
+		}
+		return false;
+	}	
 	
 	private void sourcePageDialogFieldChanged(DialogField field) {
 		if (fCurrJProject == null) {
@@ -275,20 +312,22 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return;
 		}
 		
-		if (field == fFolderRadioButton) {
-			if (fFolderRadioButton.isSelected()) {
-				fIsProjSelected= false;
-				updateClasspathList();
-				if (fFoldersList.getSize() > 0) {
-					askForChangingBuildPathDialog();
-				}
-			}
-		} else if (field == fProjectRadioButton) {
-			if (fProjectRadioButton.isSelected()) {
-				fIsProjSelected= true;
-				updateClasspathList();
-			}
-		} else if (field == fFoldersList) {
+//		if (field == fFolderRadioButton) {
+//			if (fFolderRadioButton.isSelected()) {
+//				fFoldersList.setElements(fFolderCPEntries);
+//			}
+//			updateClasspathList();
+//			if (fFoldersList.getSize() > 0) {
+//				askForChangingBuildPathDialog();
+//			}
+//		} else if (field == fProjectRadioButton) {
+//			if (fProjectRadioButton.isSelected()) {
+//				fFolderCPEntries= fFoldersList.getElements();
+//				fFoldersList.setElements(fProjectCPEntry);
+//				updateClasspathList();
+//			}
+//		} else
+		if (field == fFoldersList) {
 			updateClasspathList();
 		}
 	}	
@@ -296,18 +335,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 	private void updateClasspathList() {
 		List cpelements= fClassPathList.getElements();
-		
-		List srcelements;
-		if (fIsProjSelected) {
-			srcelements= new ArrayList(1);
-			if (fProjectCPEntry == null) {
-				// never initialized before: create a new one
-				fProjectCPEntry= newCPSourceElement(fCurrJProject.getProject());
-			}
-			srcelements.add(fProjectCPEntry);
-		} else {
-			srcelements= fFoldersList.getElements();
-		}
+		List srcelements= fFoldersList.getElements();
+
 		boolean changeDone= false;
 		CPListElement lastSourceFolder= null;
 		// backwards, as entries will be deleted
@@ -368,10 +397,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			
 			
 	private CPListElement[] openSourceContainerDialog(CPListElement existing) {	
-		Class[] acceptedClasses= new Class[] { IFolder.class };
+		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, existing == null);
 			
-		acceptedClasses= new Class[] { IFolder.class };
+		//acceptedClasses= new Class[] { IProject.class, IFolder.class };
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, getExistingContainers(existing));	
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();
@@ -385,7 +414,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		dialog.setTitle(title);
 		dialog.setMessage(message);
 		dialog.addFilter(filter);
-		dialog.setInput(fCurrJProject.getProject());
+		dialog.setInput(fCurrJProject.getProject().getParent());
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 		if (existing == null) {
 			dialog.setInitialSelection(fCurrJProject.getProject());
@@ -428,23 +457,17 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	 * @see BuildPathBasePage#getSelection
 	 */
 	public List getSelection() {
-		if (fIsProjSelected) {
-			ArrayList list= new ArrayList(1);
-			list.add(fProjectCPEntry);
-			return list;
-		} else {
-			return fFoldersList.getSelectedElements();
-		}
+		return fFoldersList.getSelectedElements();
 	}
 
 	/*
 	 * @see BuildPathBasePage#setSelection
 	 */	
 	public void setSelection(List selElements) {
-		if (!fIsProjSelected) {
+//		if (!fIsProjSelected) {
 			filterSelection(selElements, IClasspathEntry.CPE_SOURCE);
 			fFoldersList.selectElements(new StructuredSelection(selElements));
-		}
+//		}
 	}	
 	
 		

@@ -50,10 +50,10 @@ public class HistoryListAction extends Action {
 			};
 					
 			IListAdapter adapter= new IListAdapter() {
-				public void customButtonPressed(DialogField field, int index) {
+				public void customButtonPressed(ListDialogField field, int index) {
 					doCustomButtonPressed();
 				}
-				public void selectionChanged(DialogField field) {
+				public void selectionChanged(ListDialogField field) {
 					doSelectionChanged();
 				}
 			};

@@ -5,6 +5,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
  * All Rights Reserved.
  */
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,18 +18,16 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
@@ -134,7 +133,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		 * @see ASTVisitor#visit(ImportDeclaration)
 		 */
 		public boolean visit(ImportDeclaration node) {
-			String id= ASTNodes.asString(node.getName());
+			String id= ASTResolving.getFullName(node.getName());
 			if (node.isOnDemand()) {
 				fOldDemandImports.add(id);
 			} else {
@@ -268,10 +267,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private ArrayList fTypeRefsFound; // cached array list for reuse
 		private ArrayList fNamesFound; // cached array list for reuse
 		
-		private ArrayList fAllTypes;
 		private boolean fIgnoreLowerCaseNames;
 		
 		private IJavaSearchScope fSearchScope;
+		private IPackageFragment fCurrPackage;
 		
 		
 		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, ImportsStructure impStructure, boolean ignoreLowerCaseNames) throws JavaModelException {
@@ -279,24 +278,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fOldDemandImports= oldDemandImports;
 			fImpStructure= impStructure;
 			fIgnoreLowerCaseNames= ignoreLowerCaseNames;
+
+			ICompilationUnit cu= fImpStructure.getCompilationUnit();
+			fSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { cu.getJavaProject() });
+			fCurrPackage= (IPackageFragment) cu.getParent();
 					
 			fTypeRefsFound= new ArrayList();  	// cached array list for reuse
 			fNamesFound= new ArrayList();  	// cached array list for reuse		
-			
-			fAllTypes= null;
 		}
-		
-		private ArrayList getAllTypes() throws JavaModelException {
-			if (fAllTypes == null) {
-				fAllTypes= new ArrayList(500);
-				
-				IJavaProject project= fImpStructure.getCompilationUnit().getJavaProject();
-				fSearchScope= SearchEngine.createJavaSearchScope(new IJavaProject[] { project });		
-				AllTypesCache.getTypes(fSearchScope, IJavaSearchConstants.TYPE, null, fAllTypes);
-			}
-			return fAllTypes;
-		}
-		
 		
 		private boolean isContained(ITypeBinding curr, ITypeBinding[] list) {
 			for (int i = 0; i < list.length; i++) {
@@ -425,31 +414,48 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			return null;
 		}
+		
+		private void processEntry(TypeInfo curr, ArrayList typeRefsFound, ArrayList namesFound) {
+			if (curr.isEnclosed(fSearchScope)) {
+				String fullyQualifiedName= curr.getFullyQualifiedName();
+				if (!namesFound.contains(fullyQualifiedName)) {
+					try {
+						IType type= curr.resolveType(fSearchScope);
+						if (type != null && JavaModelUtil.isVisible(type, fCurrPackage)) {
+							typeRefsFound.add(curr);
+						}
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
+					}
+					namesFound.add(fullyQualifiedName);
+				}
+			}
+		}
 
 		private void findTypeRefs(String simpleTypeName, ArrayList typeRefsFound, ArrayList namesFound) throws JavaModelException {
 			if (fIgnoreLowerCaseNames && simpleTypeName.length() > 0 && Character.isLowerCase(simpleTypeName.charAt(0))) {
 				return;
 			}
-			ArrayList allTypes= getAllTypes();
-			IPackageFragment currPackage= (IPackageFragment) fImpStructure.getCompilationUnit().getParent();
+			TypeInfo[] allTypes= AllTypesCache.getAllTypes(null); // all types in workspace, sorted by type name
+			TypeInfo key= new TypeInfo("", simpleTypeName, null, null, true);
+			int index= Arrays.binarySearch(allTypes, key, AllTypesCache.getTypeNameComperator());
 			
-			for (int i= allTypes.size() - 1; i >= 0; i--) {
-				TypeInfo curr= (TypeInfo) allTypes.get(i);
+			for (int i= index - 1; i>= 0; i--) {
+				TypeInfo curr= allTypes[i];
 				if (simpleTypeName.equals(curr.getTypeName())) {
-					String fullyQualifiedName= curr.getFullyQualifiedName();
-					if (!namesFound.contains(fullyQualifiedName)) {
-						try {
-							IType type= curr.resolveType(fSearchScope);
-							if (type != null && JavaModelUtil.isVisible(type, currPackage)) {
-								typeRefsFound.add(curr);
-							}
-						} catch (JavaModelException e) {
-							JavaPlugin.log(e);
-						}
-						namesFound.add(fullyQualifiedName);
-					}
+					processEntry(curr, typeRefsFound, namesFound);
+				} else {
+					break;
 				}
 			}
+			for (int i= index; i < allTypes.length; i++) {
+				TypeInfo curr= allTypes[i];
+				if (simpleTypeName.equals(curr.getTypeName())) {
+					processEntry(curr,  typeRefsFound, namesFound);
+				} else {
+					break;
+				}
+			}					
 		}
 	}	
 
