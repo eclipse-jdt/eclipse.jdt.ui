@@ -154,11 +154,11 @@ public class DeleteWizard extends RefactoringWizard {
 				if (!isLinkedResource(element))
 					return RefactoringMessages.getString("DeleteWizard.4"); //$NON-NLS-1$
 
-				if (!isLinkedPackageOrPackageFragmentRoot(element))
-					return RefactoringMessages.getString("DeleteWizard.5"); //$NON-NLS-1$
-
-				//XXX workaround for jcore bugs - linked packages or source folders cannot be deleted properly		
-				return RefactoringMessages.getString("DeleteWizard.6"); //$NON-NLS-1$
+				if (isLinkedPackageOrPackageFragmentRoot(element))
+					//XXX workaround for jcore bugs 31998 and 31456 - linked packages or source folders cannot be deleted properly
+					return RefactoringMessages.getString("DeleteWizard.6"); //$NON-NLS-1$
+					
+				return RefactoringMessages.getString("DeleteWizard.5"); //$NON-NLS-1$
 			} else {
 				if (isLinked(getSelectedResources()[0])) //checked before that this will work
 					return RefactoringMessages.getString("DeleteWizard.7"); //$NON-NLS-1$
