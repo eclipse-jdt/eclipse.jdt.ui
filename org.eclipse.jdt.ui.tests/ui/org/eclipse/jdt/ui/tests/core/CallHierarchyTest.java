@@ -18,6 +18,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IMethod;
@@ -68,10 +69,10 @@ public class CallHierarchyTest extends TestCase {
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(method);
 
-        MethodWrapper[] uncachedCalls= wrapper.getCalls();
+        MethodWrapper[] uncachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, uncachedCalls);
 
-        MethodWrapper[] cachedCalls= wrapper.getCalls();
+        MethodWrapper[] cachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, cachedCalls);
 
         MethodWrapper wrapper2= null;
@@ -84,7 +85,7 @@ public class CallHierarchyTest extends TestCase {
 
         Collection expectedSecondLevelMethods= new ArrayList();
         expectedSecondLevelMethods.add(helper.getMethod4());
-        helper.assertCalls(expectedSecondLevelMethods, wrapper2.getCalls());
+        helper.assertCalls(expectedSecondLevelMethods, wrapper2.getCalls(new NullProgressMonitor()));
     }
 
     public void testCallersNoResults() throws Exception {
@@ -96,10 +97,10 @@ public class CallHierarchyTest extends TestCase {
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(method);
 
-        MethodWrapper[] uncachedCalls= wrapper.getCalls();
+        MethodWrapper[] uncachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, uncachedCalls);
 
-        MethodWrapper[] cachedCalls= wrapper.getCalls();
+        MethodWrapper[] cachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, cachedCalls);
     }
 
@@ -114,10 +115,10 @@ public class CallHierarchyTest extends TestCase {
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(method);
 
-        MethodWrapper[] uncachedCalls= wrapper.getCalls();
+        MethodWrapper[] uncachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, uncachedCalls);
 
-        MethodWrapper[] cachedCalls= wrapper.getCalls();
+        MethodWrapper[] cachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, cachedCalls);
 
         MethodWrapper wrapper2= null;
@@ -132,7 +133,7 @@ public class CallHierarchyTest extends TestCase {
         expectedMethodsTo3.add(helper.getMethod1());
         expectedMethodsTo3.add(helper.getMethod2());
 
-        helper.assertCalls(expectedMethodsTo3, wrapper2.getCalls());
+        helper.assertCalls(expectedMethodsTo3, wrapper2.getCalls(new NullProgressMonitor()));
     }
 
     public void testCalleesNoResults() throws Exception {
@@ -144,10 +145,10 @@ public class CallHierarchyTest extends TestCase {
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(method);
 
-        MethodWrapper[] uncachedCalls= wrapper.getCalls();
+        MethodWrapper[] uncachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, uncachedCalls);
 
-        MethodWrapper[] cachedCalls= wrapper.getCalls();
+        MethodWrapper[] cachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, cachedCalls);
     }
 
@@ -164,18 +165,18 @@ public class CallHierarchyTest extends TestCase {
         expectedMethodsTo2.add(method1);
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(method1);
-        MethodWrapper[] callsTo1= wrapper.getCalls();
+        MethodWrapper[] callsTo1= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callsTo1, false);
 
         MethodWrapper wrapper2= callsTo1[0];
         assertFalse("Should be marked as recursive", wrapper2.isRecursive());
 
-        MethodWrapper[] callsTo2= wrapper2.getCalls();
+        MethodWrapper[] callsTo2= wrapper2.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethodsTo2, callsTo2);
 
         assertRecursive(callsTo2, true);
 
-        callsTo1= callsTo2[0].getCalls();
+        callsTo1= callsTo2[0].getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethodsTo1, callsTo1);
 
         assertRecursive(callsTo1, true);
@@ -194,18 +195,18 @@ public class CallHierarchyTest extends TestCase {
         expectedMethodsFrom2.add(method1);
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(method1);
-        MethodWrapper[] callsFrom1= wrapper.getCalls();
+        MethodWrapper[] callsFrom1= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethodsFrom1, callsFrom1);
 
         MethodWrapper wrapper2= callsFrom1[0];
         assertRecursive(callsFrom1, false);
 
-        MethodWrapper[] callsFrom2= wrapper2.getCalls();
+        MethodWrapper[] callsFrom2= wrapper2.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethodsFrom2, callsFrom2);
 
         assertRecursive(callsFrom2, true);
         
-        callsFrom1= callsFrom2[0].getCalls();
+        callsFrom1= callsFrom2[0].getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethodsFrom1, callsFrom1);
 
         assertRecursive(callsFrom1, true);
@@ -226,13 +227,13 @@ public class CallHierarchyTest extends TestCase {
         expectedCallers.add(innerMethod1);
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(someMethod);
-        MethodWrapper[] callers= wrapper.getCalls();
+        MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
         
         Collection expectedCallersSecondLevel= new ArrayList();
         expectedCallersSecondLevel.add(innerMethod2);
-        helper.assertCalls(expectedCallersSecondLevel, callers[0].getCalls());
+        helper.assertCalls(expectedCallersSecondLevel, callers[0].getCalls(new NullProgressMonitor()));
     }
 
     /**
@@ -250,13 +251,13 @@ public class CallHierarchyTest extends TestCase {
         expectedCallers.add(innerMethod2);
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(someMethod);
-        MethodWrapper[] callers= wrapper.getCalls();
+        MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
         
         Collection expectedCallersSecondLevel= new ArrayList();
         expectedCallersSecondLevel.add(innerMethod1);
-        helper.assertCalls(expectedCallersSecondLevel, callers[0].getCalls());
+        helper.assertCalls(expectedCallersSecondLevel, callers[0].getCalls(new NullProgressMonitor()));
     }
 
     /**
@@ -274,13 +275,13 @@ public class CallHierarchyTest extends TestCase {
         expectedCallers.add(innerMethod1);
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(innerMethod2);
-        MethodWrapper[] callers= wrapper.getCalls();
+        MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
         
         Collection expectedCallersSecondLevel= new ArrayList();
         expectedCallersSecondLevel.add(someMethod);
-        helper.assertCalls(expectedCallersSecondLevel, callers[0].getCalls());
+        helper.assertCalls(expectedCallersSecondLevel, callers[0].getCalls(new NullProgressMonitor()));
     }
 
     /**
@@ -297,7 +298,7 @@ public class CallHierarchyTest extends TestCase {
         expectedCallers.add(anonField);
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(someMethod);
-        MethodWrapper[] callers= wrapper.getCalls();
+        MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
     }
@@ -316,7 +317,7 @@ public class CallHierarchyTest extends TestCase {
         expectedCallers.add(initializer);
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(someMethod);
-        MethodWrapper[] callers= wrapper.getCalls();
+        MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
     }
@@ -330,7 +331,7 @@ public class CallHierarchyTest extends TestCase {
         expectedCallers.add(helper.getType2());
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(constructorA);
-        MethodWrapper[] callers= wrapper.getCalls();
+        MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
     }
@@ -344,7 +345,7 @@ public class CallHierarchyTest extends TestCase {
         expectedCallers.add(helper.getType1());
 
         MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(constructorB);
-        MethodWrapper[] callers= wrapper.getCalls();
+        MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
     }

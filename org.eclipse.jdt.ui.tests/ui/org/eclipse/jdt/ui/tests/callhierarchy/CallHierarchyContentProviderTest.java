@@ -55,7 +55,8 @@ public class CallHierarchyContentProviderTest extends TestCase {
         helper= new CallHierarchyTestHelper();
         helper.setUp();
 
-        fProvider= new CallHierarchyContentProvider();
+        fProvider= new CallHierarchyContentProvider(null);
+        // TODO: The content provider doesn't use the viewPart argument. It should be removed.
 
         CallHierarchyUI.getDefault().setMaxCallDepth(DEFAULT_MAX_DEPTH);
     }
