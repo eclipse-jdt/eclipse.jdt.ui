@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -310,13 +311,32 @@ public class CallInliner {
 			fTargetNode= fInvocation;
 		}
 		
-		MethodDeclaration decl= (MethodDeclaration)ASTNodes.getParent(fInvocation, ASTNode.METHOD_DECLARATION);
-		int numberOfLocals= LocalVariableIndex.perform(decl);
+		BodyDeclaration decl= (BodyDeclaration)ASTNodes.getParent(fInvocation, BodyDeclaration.class);
+		int numberOfLocals= 0;
+		switch (decl.getNodeType()) {
+			case ASTNode.METHOD_DECLARATION:
+				numberOfLocals= LocalVariableIndex.perform((MethodDeclaration)decl);
+				break;
+			case ASTNode.INITIALIZER:
+				numberOfLocals= LocalVariableIndex.perform((Initializer)decl);
+				break;
+			default:
+				Assert.isTrue(false, "Should not happen");			
+		}
 		fFlowContext= new FlowContext(0, numberOfLocals + 1);
 		fFlowContext.setConsiderAccessMode(true);
 		fFlowContext.setComputeMode(FlowContext.ARGUMENTS);
 		Selection selection= Selection.createFromStartLength(fInvocation.getStartPosition(), fInvocation.getLength());
-		fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform(decl);
+		switch (decl.getNodeType()) {
+			case ASTNode.METHOD_DECLARATION:
+				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform((MethodDeclaration)decl);
+				break;
+			case ASTNode.INITIALIZER:
+				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform((Initializer)decl);
+				break;
+			default:
+				Assert.isTrue(false, "Should not happen");			
+		}
 	}
 
 	private boolean canInline(Expression expression) {

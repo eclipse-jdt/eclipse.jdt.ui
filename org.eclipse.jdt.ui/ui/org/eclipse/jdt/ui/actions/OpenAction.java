@@ -153,7 +153,7 @@ public class OpenAction extends SelectionDispatchAction {
 			Object element= elements[i];
 			try {
 				element= getElementToOpen(element);
-				boolean activateOnOpen= fEditor != null ? true :  OpenStrategy.activateOnOpen();
+				boolean activateOnOpen= fEditor != null ? true : OpenStrategy.activateOnOpen();
 				OpenActionUtil.open(element, activateOnOpen);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),

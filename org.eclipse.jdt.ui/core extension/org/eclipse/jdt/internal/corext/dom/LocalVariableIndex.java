@@ -1,11 +1,19 @@
-/*
- * (c) Copyright IBM Corp. 2002.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -15,8 +23,16 @@ public class LocalVariableIndex extends ASTVisitor {
 	private int fTopIndex;
 	
 	public static int perform(MethodDeclaration method) {
+		return doPerform(method);
+	}
+
+	public static int perform(Initializer initializer) {
+		return doPerform(initializer);
+	}
+
+	private static int doPerform(BodyDeclaration node) {
 		LocalVariableIndex counter= new LocalVariableIndex();
-		method.accept(counter);
+		node.accept(counter);
 		return counter.fTopIndex;
 	}
 

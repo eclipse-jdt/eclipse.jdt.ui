@@ -1,15 +1,23 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
@@ -98,8 +106,16 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	}
 
 	public FlowInfo perform(MethodDeclaration method) {
-		method.accept(this);
-		return getFlowInfo(method);
+		return doPerform(method);
+	}
+
+	public FlowInfo perform(Initializer initializer) {
+		return doPerform(initializer);
+	}
+
+	protected FlowInfo doPerform(BodyDeclaration node) {
+		node.accept(this);
+		return getFlowInfo(node);
 	}
 	
 	protected boolean traverseNode(ASTNode node) {

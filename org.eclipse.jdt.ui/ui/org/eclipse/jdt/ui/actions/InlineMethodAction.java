@@ -77,7 +77,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 			IRewriteTarget target= (IRewriteTarget) fEditor.getAdapter(IRewriteTarget.class);
 			try {
 				target.beginCompoundChange();
-				new RefactoringStarter().activate(refactoring, createWizard(refactoring), DIALOG_TITLE, false);
+				new RefactoringStarter().activate(refactoring, createWizard(refactoring), DIALOG_TITLE, true);
 			} finally {
 				if (target != null)
 					target.endCompoundChange();
