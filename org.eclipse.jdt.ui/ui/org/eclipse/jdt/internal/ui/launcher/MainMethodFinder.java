@@ -7,7 +7,6 @@ package org.eclipse.jdt.internal.ui.launcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
@@ -20,7 +19,6 @@ import org.eclipse.debug.core.model.IProcess;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -29,14 +27,13 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-
 import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 public class MainMethodFinder {
 	
