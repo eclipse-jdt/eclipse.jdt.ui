@@ -157,17 +157,27 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			String argname= getArgumentName(accessorName);
 			
 			boolean isStatic= Flags.isStatic(field.getFlags());
+			boolean isFinal= Flags.isFinal(field.getFlags());
+			
 			String typeName= Signature.toString(field.getTypeSignature());
 			
-			IType parentType= field.getDeclaringType();
-			
-			String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
-			int indent= StubUtility.getIndentUsed(field);
+			IType parentType= field.getDeclaringType();	
 			
 			// test if the getter already exists
 			String getterName= "get" + accessorName; //$NON-NLS-1$
-			IMethod existing= JavaModelUtil.findMethod(getterName, new String[0], false, parentType);
-			if (!(existing != null &&  querySkipExistingMethods(existing))) {			
+			IMethod existingGetter= JavaModelUtil.findMethod(getterName, new String[0], false, parentType);
+			
+			String setterName= "set" + accessorName; //$NON-NLS-1$
+			String[] args= new String[] { field.getTypeSignature() };		
+			IMethod existingSetter= JavaModelUtil.findMethod(setterName, args, false, parentType);			
+			
+			boolean doCreateGetter= (existingGetter == null) || !querySkipExistingMethods(existingGetter);
+			boolean doCreateSetter= (!isFinal || !querySkipFinalSetters(field)) && (existingSetter == null || querySkipExistingMethods(existingSetter));
+						
+			String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
+			int indent= StubUtility.getIndentUsed(field);
+			
+			if (doCreateGetter) {			
 				// create the getter stub
 				StringBuffer buf= new StringBuffer();
 				buf.append("/**\n"); //$NON-NLS-1$
@@ -183,9 +193,9 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				buf.append("() {\nreturn "); buf.append(fieldName); buf.append(";\n}\n"); //$NON-NLS-2$ //$NON-NLS-1$
 				
 				IJavaElement sibling= null;
-				if (existing != null) {
-					sibling= StubUtility.findSibling(existing);
-					existing.delete(false, null);
+				if (existingGetter != null) {
+					sibling= StubUtility.findSibling(existingGetter);
+					existingGetter.delete(false, null);
 				}				
 				
 				String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;
@@ -194,13 +204,8 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			
 			monitor.worked(1);
 									
-			String setterName= "set" + accessorName; //$NON-NLS-1$
-			String[] args= new String[] { field.getTypeSignature() };		
-			
-			// test if the setter already exists or field is final
-			boolean isFinal= Flags.isFinal(field.getFlags());
-			existing= JavaModelUtil.findMethod(setterName, args, false, parentType);
-			if (!(isFinal && querySkipFinalSetters(field)) && !(existing != null && querySkipExistingMethods(existing))) {
+
+			if (doCreateSetter) {
 				// create the setter stub
 				StringBuffer buf= new StringBuffer();
 				buf.append("/**\n"); //$NON-NLS-1$
@@ -225,9 +230,9 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				buf.append(fieldName); buf.append("= "); buf.append(argname); buf.append(";\n}\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				IJavaElement sibling= null;
-				if (existing != null) {
-					sibling= StubUtility.findSibling(existing);
-					existing.delete(false, null);
+				if (existingSetter != null) {
+					sibling= StubUtility.findSibling(existingSetter);
+					existingSetter.delete(false, null);
 				}
 				
 				String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;

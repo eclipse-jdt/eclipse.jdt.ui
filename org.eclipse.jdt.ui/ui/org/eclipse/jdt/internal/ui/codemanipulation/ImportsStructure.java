@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -251,12 +252,16 @@ public class ImportsStructure implements IImportsStructure {
 	}
 			
 		
-	private int getPackageStatementEndPos() throws JavaModelException {
+	private int getPackageStatementEndPos(IDocument doc) throws JavaModelException {
 		IPackageDeclaration[] packDecls= fCompilationUnit.getPackageDeclarations();
 		if (packDecls != null && packDecls.length > 0) {
-			ISourceRange range= packDecls[0].getSourceRange();
-			return range.getOffset() + range.getLength();  // semicolon is included
-
+			try {
+				int line= doc.getLineOfOffset(packDecls[0].getSourceRange().getOffset());
+				IRegion range= doc.getLineInformation(line + 1);
+				return range.getOffset();
+			} catch (BadLocationException e) {
+				// can happen
+			}
 		}
 		return 0;
 	}
@@ -280,7 +285,7 @@ public class ImportsStructure implements IImportsStructure {
 			}
 			lastPos= buf.length();
 		} else {
-			importsStart= getPackageStatementEndPos();
+			importsStart= getPackageStatementEndPos(doc);
 			importsLen= 0;
 			lastPos= 0;			
 		}
@@ -329,10 +334,14 @@ public class ImportsStructure implements IImportsStructure {
 			if (!container.exists() && created.size() > 0) {
 				buf.append(lineDelim);	// nl after import (<nl+>)
 				if (importsStart > 0) { // package statement
-					buf.insert(0, lineDelim);
-					buf.insert(0, lineDelim);  //<pack><nl*><nl*><import><nl+><nl-pack><cl>
-				} else {
-					buf.append(lineDelim);
+					buf.insert(0, lineDelim);  //<pack><nl><nl*><import><nl+><nl-pack><cl>
+				}
+				// check if a space between import and first type is needed
+				IType[] types= fCompilationUnit.getTypes();
+				if (types.length > 0) {
+					if (types[0].getSourceRange().getOffset() == importsStart) {
+						buf.append(lineDelim);
+					}
 				}
 			}
 			String newContent= buf.toString();
