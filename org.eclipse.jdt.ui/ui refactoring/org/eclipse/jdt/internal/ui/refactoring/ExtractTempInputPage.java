@@ -28,7 +28,7 @@ class ExtractTempInputPage extends TextInputWizardPage {
 	
 	public ExtractTempInputPage(String initialValue) {
 		super(DESCRIPTION, true, initialValue);
-		fInitialValid= ! ("".equals(initialValue));
+		fInitialValid= ! ("".equals(initialValue)); //$NON-NLS-1$
 	}
 
 	public void createControl(Composite parent) {

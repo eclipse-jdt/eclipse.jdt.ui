@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class ExtractConstantInputPage extends TextInputWizardPage {
 
@@ -34,7 +35,7 @@ class ExtractConstantInputPage extends TextInputWizardPage {
 		super(description, true, initialValue);
 	    fOriginalMessage= description;
 	    fOriginalMessageType= messageType;
-		fInitialValid= ! ("".equals(initialValue));
+		fInitialValid= ! ("".equals(initialValue)); //$NON-NLS-1$
 	}
 
 	public void createControl(Composite parent) {
@@ -165,7 +166,7 @@ class ExtractConstantInputPage extends TextInputWizardPage {
 				return result;
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			return RefactoringStatus.createFatalErrorStatus("Internal Error: please see log.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("ExtractConstantInputPage.Internal_Error")); //$NON-NLS-1$
 		}
 	}
 

@@ -31,12 +31,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class ExtractInterfaceInputPage extends TextInputWizardPage {
 
 	private Button fReplaceAllCheckbox;
 	private CheckboxTableViewer fTableViewer;
-	private static final String DESCRIPTION = "Select the name for the new interface and select the members that will be declared in the interface.";
+	private static final String DESCRIPTION = RefactoringMessages.getString("ExtractInterfaceInputPage.description"); //$NON-NLS-1$
 
 	public ExtractInterfaceInputPage() {
 		super(DESCRIPTION, true);
@@ -51,7 +52,7 @@ class ExtractInterfaceInputPage extends TextInputWizardPage {
 		result.setLayout(layout);
 		
 		Label label= new Label(result, SWT.NONE);
-		label.setText("&Interface name:");
+		label.setText(RefactoringMessages.getString("ExtractInterfaceInputPage.Interface_name")); //$NON-NLS-1$
 		
 		Text text= createTextInputField(result);
 		text.selectAll();
@@ -65,7 +66,7 @@ class ExtractInterfaceInputPage extends TextInputWizardPage {
 		separator.setLayoutData(gd);
 
 		Label tableLabel= new Label(result, SWT.NONE);
-		tableLabel.setText("&Members to declare in the interface:");
+		tableLabel.setText(RefactoringMessages.getString("ExtractInterfaceInputPage.Members")); //$NON-NLS-1$
 		tableLabel.setEnabled(anyMembersToExtract());
 		gd= new GridData();
 		gd.horizontalSpan= 2;
@@ -92,7 +93,7 @@ class ExtractInterfaceInputPage extends TextInputWizardPage {
 		try {
 			fTableViewer.setInput(getExtractInterfaceRefactoring().getExtractableMembers());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, "Extract Interface", "Internal Error. See log for details");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("ExtractInterfaceInputPage.Extract_Interface"), RefactoringMessages.getString("ExtractInterfaceInputPage.Internal_Error")); //$NON-NLS-1$ //$NON-NLS-2$
 			fTableViewer.setInput(new IMember[0]);
 		}
 		fTableViewer.getControl().setEnabled(anyMembersToExtract());
@@ -120,7 +121,7 @@ class ExtractInterfaceInputPage extends TextInputWizardPage {
 		buttonComposite.setLayoutData(gd);
 		
 		Button selectAll= new Button(buttonComposite, SWT.PUSH);
-		selectAll.setText("&Select All");
+		selectAll.setText(RefactoringMessages.getString("ExtractInterfaceInputPage.Select_All")); //$NON-NLS-1$
 		selectAll.setEnabled(anyMembersToExtract());
 		selectAll.setLayoutData(new GridData());
 		SWTUtil.setButtonDimensionHint(selectAll);
@@ -131,7 +132,7 @@ class ExtractInterfaceInputPage extends TextInputWizardPage {
 		});
 		
 		Button deSelectAll= new Button(buttonComposite, SWT.PUSH);
-		deSelectAll.setText("&Deselect All");
+		deSelectAll.setText(RefactoringMessages.getString("ExtractInterfaceInputPage.Deselect_All")); //$NON-NLS-1$
 		deSelectAll.setEnabled(anyMembersToExtract());
 		deSelectAll.setLayoutData(new GridData());
 		SWTUtil.setButtonDimensionHint(deSelectAll);
@@ -151,7 +152,7 @@ class ExtractInterfaceInputPage extends TextInputWizardPage {
 	}
 
 	private void addReplaceAllCheckbox(Composite result) {
-		String key= "&Change references to the class ''{0}'' into references to the interface (where possible)"; 
+		String key= RefactoringMessages.getString("ExtractInterfaceInputPage.change_references");  //$NON-NLS-1$
 		String title= MessageFormat.format(key, new String[]{getExtractInterfaceRefactoring().getInputType().getElementName()});
 		boolean defaultValue= getExtractInterfaceRefactoring().isReplaceOccurrences();
 		fReplaceAllCheckbox= createCheckbox(result,  title, defaultValue);

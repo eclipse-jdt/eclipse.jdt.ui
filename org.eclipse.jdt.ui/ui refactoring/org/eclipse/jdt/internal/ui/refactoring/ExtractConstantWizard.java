@@ -40,7 +40,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			return getExtractConstantRefactoring().guessConstantName();
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			return "";//default value. no ui here, just log
+			return "";//default value. no ui here, just log //$NON-NLS-1$
 		}
 	}
 

@@ -19,6 +19,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class ChangeSignatureInputPage extends UserInputWizardPage {
 
@@ -65,7 +66,7 @@ class ChangeSignatureInputPage extends UserInputWizardPage {
             
             setControl(composite);
         } catch (JavaModelException e) {
-        	ExceptionHandler.handle(e, "Change Signature", "Internal Error. See log for details.");
+        	ExceptionHandler.handle(e, RefactoringMessages.getString("ChangeSignatureInputPage.Change_Signature"), RefactoringMessages.getString("ChangeSignatureInputPage.Internal_Error")); //$NON-NLS-1$ //$NON-NLS-2$
         }
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.MODIFY_PARAMETERS_WIZARD_PAGE);
 	}
@@ -78,7 +79,7 @@ class ChangeSignatureInputPage extends UserInputWizardPage {
 			composite.setLayout(layout);
 			
 			Label label= new Label(composite, SWT.NONE);
-			label.setText("Re&turn type:");
+			label.setText(RefactoringMessages.getString("ChangeSignatureInputPage.return_type")); //$NON-NLS-1$
 			label.setLayoutData((new GridData()));
 			
 			final Text text= new Text(composite, SWT.BORDER);
@@ -94,7 +95,7 @@ class ChangeSignatureInputPage extends UserInputWizardPage {
 	}
 	
 	private void createParameterTableComposite(Composite composite) {
-		String labelText= RefactoringMessages.getString("ChangeSignatureInputPage.parameters");
+		String labelText= RefactoringMessages.getString("ChangeSignatureInputPage.parameters"); //$NON-NLS-1$
 		ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new IParameterListChangeListener() {
 			public void parameterChanged(ParameterInfo parameter) {
 				update(true);
@@ -137,7 +138,7 @@ class ChangeSignatureInputPage extends UserInputWizardPage {
 				setPageComplete(true);
 			}	
 		} catch (JavaModelException e){
-			setErrorMessage("Internal Error. Please see log for details.");			setPageComplete(false);
+			setErrorMessage(RefactoringMessages.getString("ChangeSignatureInputPage.Internal_Error")); //$NON-NLS-1$			setPageComplete(false);
 			JavaPlugin.log(e);
 		};
 	}

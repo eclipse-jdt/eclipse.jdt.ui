@@ -26,10 +26,11 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
 
-	private static final String DESCRIPTION = "Select the name and modifiers for the new nested class";
+	private static final String DESCRIPTION = RefactoringMessages.getString("ConvertAnonymousToNestedInputPage.description"); //$NON-NLS-1$
 	public static final String PAGE_NAME= "ConvertAnonymousToNestedInputPage";//$NON-NLS-1$
     
 	public ConvertAnonymousToNestedInputPage() {
@@ -56,7 +57,7 @@ class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
 
     private Text addFieldNameField(Composite result) {
         Label nameLabel= new Label(result, SWT.NONE);
-        nameLabel.setText("&Class name:");
+        nameLabel.setText(RefactoringMessages.getString("ConvertAnonymousToNestedInputPage.class_name")); //$NON-NLS-1$
         nameLabel.setLayoutData(new GridData());
         
 		final Text classNameField= new Text(result, SWT.BORDER | SWT.SINGLE);
@@ -93,7 +94,7 @@ class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
         final Button declareFinalCheckbox= new Button(result, SWT.CHECK);
         declareFinalCheckbox.setEnabled(getConvertRefactoring().canEnableSettingFinal());
         declareFinalCheckbox.setSelection(getConvertRefactoring().getDeclareFinal());
-        declareFinalCheckbox.setText("Decla&re class as 'final'");
+        declareFinalCheckbox.setText(RefactoringMessages.getString("ConvertAnonymousToNestedInputPage.declare_final")); //$NON-NLS-1$
         gd= new GridData(GridData.FILL_HORIZONTAL);
         gd.horizontalSpan= 2;
         declareFinalCheckbox.setLayoutData(gd);
