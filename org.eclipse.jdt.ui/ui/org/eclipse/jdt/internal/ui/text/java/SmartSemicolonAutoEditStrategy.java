@@ -18,6 +18,7 @@ import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ui.IEditorPart;
@@ -113,7 +114,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		// TODO: adjust to use AST / Java project tree?
 		// for now: compute the best position to insert the new character
 		// but never position before the current position!
-		int position= computeCharacterPosition(line, pos, fCharacter);
+		int position= computeCharacterPosition(document, line, pos, fCharacter);
 		if (position < pos)
 			return;
 		
@@ -162,12 +163,13 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * move to the end of the line, except if we are looking for semicolon and we are in a
 	 * <code>for</code> statement, then just stay in place.</p>
 	 * 
+	 * @param document the document
 	 * @param line the line where the change is being made
 	 * @param offset the position of the caret when a semicolon was typed
 	 * @param character the character to look for
 	 * @return the position where the semicolon should be inserted / replaced
 	 */
-	protected int computeCharacterPosition(ITextSelection line, int startOffset, char character) {
+	protected int computeCharacterPosition(IDocument document, ITextSelection line, int startOffset, char character) {
 		
 		String text= line.getText();
 		if (text == null)
@@ -179,12 +181,25 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		if (position == -1) {
 			
 			if (character != SEMICHAR || !isForStatement(text, startOffset)) {
-				int i;
-				for (i= text.length(); i >= 1; i--) {
-					if (!Character.isWhitespace(text.charAt(i-1)))
-						break;
+				
+				resultOffset= line.getOffset() + text.length();
+				
+				try {
+					
+					ITypedRegion partition= document.getPartition(resultOffset);
+					while (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())) {
+							resultOffset= partition.getOffset() -1;
+							if (resultOffset <= startOffset)
+								return startOffset;
+							partition= document.getPartition(resultOffset);
+					}
+					
+					while (resultOffset -1 > startOffset && Character.isWhitespace(document.getChar(resultOffset -1)))
+						-- resultOffset;
+					
+				} catch (BadLocationException e) {
+					return startOffset;
 				}
-				resultOffset= line.getOffset() + i;
 			}
 			
 		} else {
