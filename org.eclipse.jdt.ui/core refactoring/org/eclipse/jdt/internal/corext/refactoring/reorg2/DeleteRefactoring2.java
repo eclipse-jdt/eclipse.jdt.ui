@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -165,23 +166,52 @@ public class DeleteRefactoring2 extends Refactoring{
 	
 	//ask for confirmation of deletion of all package fragment roots that are on classpaths of other projects
 	private void removeUnconfirmedReferencedArchives() throws JavaModelException {
-		String queryTitle= "Confirm Referenced Package Fragment Root Delete";
+		String queryTitle= "Confirm Referenced Archive Delete";
 		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_REFERENCED_ARCHIVES);
+		removeUnconfirmedReferencedPackageFragmentRoots(query);
+		removeUnconfirmedReferencedArchiveFiles(query);
+	}
+
+	private void removeUnconfirmedReferencedArchiveFiles(IConfirmQuery query) throws JavaModelException, OperationCanceledException {
+		List filesToSkip= new ArrayList(0);
+		for (int i= 0; i < fResources.length; i++) {
+			IResource resource= fResources[i];
+			if (! (resource instanceof IFile))
+				continue;
+		
+			IJavaProject project= JavaCore.create(resource.getProject());
+			if (project == null || ! project.exists())
+				continue;
+			IPackageFragmentRoot root= project.findPackageFragmentRoot(resource.getFullPath());
+			List referencingProjects= new ArrayList(1);
+			referencingProjects.add(root.getJavaProject());
+			referencingProjects.addAll(Arrays.asList(JavaElementUtil.getReferencingProjects(root)));
+			if (skipDeletingReferencedRoot(query, root, referencingProjects))
+				filesToSkip.add(resource);
+		}
+		removeFromSetToDelete((IFile[]) filesToSkip.toArray(new IFile[filesToSkip.size()]));
+	}
+
+	private void removeUnconfirmedReferencedPackageFragmentRoots(IConfirmQuery query) throws JavaModelException, OperationCanceledException {
 		List rootsToSkip= new ArrayList(0);
 		for (int i= 0; i < fJavaElements.length; i++) {
 			IJavaElement element= fJavaElements[i];
 			if (! (element instanceof IPackageFragmentRoot))
 				continue;
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-			IJavaProject[] referencing= JavaElementUtil.getReferencingProjects(root);
-			if (root.isArchive() && referencing.length > 0){
-				String pattern= "Package fragment root ''{0}'' is referenced by the following project(s). Do you still want to delete it?";
-				String question= MessageFormat.format(pattern, new String[]{root.getElementName()});
-				if (! query.confirm(question, referencing))
-					rootsToSkip.add(root);
-			}
+			List referencingProjects= Arrays.asList(JavaElementUtil.getReferencingProjects(root));
+			if (skipDeletingReferencedRoot(query, root, referencingProjects))
+				rootsToSkip.add(root);
 		}
 		removeFromSetToDelete((IJavaElement[]) rootsToSkip.toArray(new IJavaElement[rootsToSkip.size()]));
+	}
+
+	private static boolean skipDeletingReferencedRoot(IConfirmQuery query, IPackageFragmentRoot root, List referencingProjects) throws OperationCanceledException {
+		if (referencingProjects.isEmpty() || root == null || ! root.exists() ||! root.isArchive())
+			return false;
+		String pattern= "Archive file ''{0}'' is referenced by the following project(s). Do you still want to delete it?";
+		String question= MessageFormat.format(pattern, new String[]{root.getElementName()});
+		return ! query.confirm(question, referencingProjects.toArray());
 	}
 
 	private void removeUnconfirmedFoldersThatContainSourceFolders() throws CoreException {
