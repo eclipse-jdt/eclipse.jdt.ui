@@ -45,6 +45,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		"@author", 		//$NON-NLS-1$
 		"@deprecated",	//$NON-NLS-1$
 		"@exception",		//$NON-NLS-1$
+		"@inheritDoc",		//$NON-NLS-1$
 		"@param",			//$NON-NLS-1$
 		"@return", 			//$NON-NLS-1$
 		"@see",				//$NON-NLS-1$
