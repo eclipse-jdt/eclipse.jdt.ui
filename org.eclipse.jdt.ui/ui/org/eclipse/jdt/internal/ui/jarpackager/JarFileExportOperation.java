@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.operation.ModalContext;
 import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -65,61 +65,24 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 * @param	message		the message
 	 * @param	exception	the throwable that caused the warning, or <code>null</code>
 	 */
-	protected void addWarning(String message, Throwable error) {
-		fErrors.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, message, error));
-	}	/**	 * Adds a new error to the list with the passed information.	 * Normally an error terminates the export operation.	 * @param	message		the message	 * @param	exception	the throwable that caused the error, or <code>null</code>	 */	protected void addError(String message, Throwable error) {		fErrors.add(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, error));	}	/**
-	 * Answers the total number of file resources that exist at or below
-	 * the given resources.
-	 *
-	 * @param	resource		the resource for which to count the children
-	 * @return	int				the number of resources in the hierarchy
-	 * @throws	CoreException	if the members of this resource can't be accessed
-	 */
-	protected int countWithChildren(IResource resource) throws CoreException {
-		if (resource.getType() == IResource.FILE)
-			return 1;
-
-		int count= 0;
-		if (resource.isAccessible()) {
-			IResource[] children= ((IContainer) resource).members();
-			for (int i= 0; i < children.length; i++)
-				count += countWithChildren(children[i]);
-		}
-
-		return count;
-	}
-	/**
+	protected void addWarning(String message, Throwable error) {		if (fJarPackage.logWarnings())
+			fErrors.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, message, error));
+	}	/**	 * Adds a new error to the list with the passed information.	 * Normally an error terminates the export operation.	 * @param	message		the message	 * @param	exception	the throwable that caused the error, or <code>null</code>	 */	protected void addError(String message, Throwable error) {		if (fJarPackage.logErrors())			fErrors.add(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, error));	}	/**
 	 * Answers the number of file resources specified by the JAR package.
 	 *
 	 * @return int
 	 */
-	protected int countSelectedResources() throws CoreException {
-		int result= 0;
-		Iterator resources= fJarPackage.getSelectedResources().iterator();
-		while (resources.hasNext())
-			result += countWithChildren((IResource) resources.next());
-		return result;
+	protected int countSelectedElements() {		return fJarPackage.getSelectedElements().size();
 	}
 	/**
 	 * Exports the passed resource to the JAR file
 	 *
-	 * @param resource org.eclipse.core.resources.IResource
+	 * @param element the resource or JavaElement to export
 	 */
-	protected void exportResource(IResource resource, IProgressMonitor progressMonitor) throws InterruptedException {
-		if (!resource.isAccessible())
-			return;
-
-		if (resource.getType() == IResource.FILE) {
-			int leadSegmentsToRemove= 1;
-			boolean isJavaProject;
-			IJavaProject jProject= null;
-			IPackageFragmentRoot pkgRoot= null;
-			try {
-				isJavaProject= resource.getProject().hasNature(JavaCore.NATURE_ID);
-			} catch (CoreException ex) {
-				isJavaProject= false;
-			}
-			if (isJavaProject) {
+	protected void exportElement(Object element, IProgressMonitor progressMonitor) throws InterruptedException {		int leadSegmentsToRemove= 1;		IPackageFragmentRoot pkgRoot= null;		boolean isJavaElement= false;		IResource resource= null;		IJavaProject jProject= null;		if (element instanceof IJavaElement) {			isJavaElement= true;			IJavaElement je= (IJavaElement)element;			try {				resource= je.getUnderlyingResource();			} catch (JavaModelException ex) {				addWarning("Underlying resource not found for compilation unit: " + je.getElementName(), ex);				return;			}			jProject= je.getJavaProject();			pkgRoot= JavaModelUtility.getPackageFragmentRoot(je);			if (pkgRoot != null)				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();		}		else			resource= (IResource)element;		if (!resource.isAccessible()) {			addWarning("Resource not found or not  accessible: " + resource.getFullPath(), null);			return;		}
+		if (resource.getType() == IResource.FILE) {			if (!resource.isLocal(IResource.DEPTH_ZERO))
+				try {					resource.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);				} catch (CoreException ex) {
+					addWarning("Resource could not be retrieved locally: " + resource.getFullPath(), ex);					return;				}			/*			try {				isJavaProject= resource.getProject().hasNature(JavaCore.NATURE_ID);			} catch (CoreException ex) {				addWarning("Project nature could not be determined for: " + resource.getFullPath(), ex);				return;			}			if (isJavaProject) {
 				jProject= JavaCore.create(resource.getProject());
 				try {
 					IPackageFragment pkgFragment= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
@@ -129,19 +92,17 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 							leadSegmentsToRemove= pkgRoot.getPath().segmentCount();
 					}
 				} catch (JavaModelException ex) {
-					// this should never happen due to inital tests
-					// use leadSegmentsToRemove 1 in that case
-				}
-			}
+					addWarning("Java package could not be found for: " + resource.getFullPath(), ex);					return;				}
+			}			*/
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
 			progressMonitor.subTask(destinationPath.toString());
 			
-			try {				// Binary Export				if (fJarPackage.areClassFilesExported() && isJavaProject && pkgRoot != null) {
+			try {				// Binary Export				if (fJarPackage.areClassFilesExported() && isJavaElement && pkgRoot != null) {
 					// find corresponding file(s) on classpath and export
-					Iterator iter= filesOnClasspath((IFile)resource, destinationPath, jProject);
+					Iterator iter= filesOnClasspath((IFile)resource, destinationPath, jProject, progressMonitor);
 					IPath baseDestinationPath= destinationPath.removeLastSegments(1);
 					while (iter.hasNext()) {
-						IFile file= (IFile)iter.next();						fJarWriter.write(file, baseDestinationPath.append(file.getName()));					}				}				// Java Files and resources				if (fJarPackage.areJavaFilesExported() && (!isJavaProject || isJavaFile(resource) || pkgRoot == null || !fJarPackage.areClassFilesExported()))					fJarWriter.write((IFile) resource, destinationPath);								} catch (IOException ex) {
+						IFile file= (IFile)iter.next();						if (!resource.isLocal(IResource.DEPTH_ZERO))													file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);						fJarWriter.write(file, baseDestinationPath.append(file.getName()));					}				}				// Java Files and resources				if (fJarPackage.areJavaFilesExported() && (!isJavaElement || isJavaFile(resource) || pkgRoot == null || !fJarPackage.areClassFilesExported()))					fJarWriter.write((IFile) resource, destinationPath);								} catch (IOException ex) {
 				String message= ex.getMessage() + " ";
 				if (message == null)
 					message= "IO Error exporting " + resource.getFullPath();
@@ -166,18 +127,16 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			}
 
 			for (int i= 0; i < children.length; i++)
-				exportResource(children[i], progressMonitor);
+				exportElement(children[i], progressMonitor);
 		}
 	}
 	/**
 	 * Exports the resources as specified by the JAR package.
 	 */
-	protected void exportSelectedResources(IProgressMonitor progressMonitor) throws InterruptedException {
-		Iterator resources= fJarPackage.getSelectedResources().iterator();
-		while (resources.hasNext()) {
-			IResource currentResource= (IResource) resources.next();
-			exportResource(currentResource, progressMonitor);
-		}
+	protected void exportSelectedElements(IProgressMonitor progressMonitor) throws InterruptedException {
+		Iterator iter= fJarPackage.getSelectedElements().iterator();
+		while (iter.hasNext())
+			exportElement(iter.next(), progressMonitor);
 	}
 	/**
 	 * Returns an iterator on a list with files that correspond to the
@@ -188,7 +147,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 * @param	javaProject		the javaProject that contains the file
 	 * @return	the iterator over the corresponding classpath files for the given file
 	 */
-	protected Iterator filesOnClasspath(IFile file, IPath pathInJar, IJavaProject javaProject) throws CoreException, IOException {
+	protected Iterator filesOnClasspath(IFile file, IPath pathInJar, IJavaProject javaProject, IProgressMonitor progressMonitor) throws CoreException, IOException {
 		IPath outputPath= javaProject.getOutputLocation();		IContainer outputContainer;				if (javaProject.getProject().getFullPath().equals(outputPath))			outputContainer= javaProject.getProject();		else {			outputContainer= createFolderHandle(outputPath);
 			if (outputContainer == null || !outputContainer.isAccessible())
 				throw new IOException("Output container not accessible");		}
@@ -207,8 +166,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			// resource  - search file with same name
 			List binaryFiles= new ArrayList(5);
 			IFile cpFile= outputContainer.getFile(pathInJar);
-			if (cpFile.isAccessible())
-				binaryFiles.add(cpFile);
+			if (cpFile.isAccessible()) {				if (!cpFile.isLocal(IResource.DEPTH_ZERO))					cpFile.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);				binaryFiles.add(cpFile);			}
 			else 
 				throw new IOException("Resource on classpath not found or not  accessible " + cpFile.getFullPath().toString());
 			return binaryFiles.iterator();
@@ -328,25 +286,17 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			return true;
 
 		return isDescendent(resources, parent);
-	}	protected boolean canBeExported(boolean hasErrors, boolean hasWarnings) throws CoreException {		return (!hasErrors && !hasWarnings)			|| (hasErrors && fJarPackage.exportErrors())			|| (hasWarnings && fJarPackage.exportWarnings());	}	protected void reportPossibleCompileProblems(IFile file, boolean hasErrors, boolean hasWarnings, boolean canBeExported) {		String prefix;		if (canBeExported)			prefix= "Exported with compile ";		else			prefix= "Not exported due to compile ";		if (hasErrors && fJarPackage.logErrors())			addWarning(prefix + "errors: " + file.getFullPath(), null);		if (hasWarnings && fJarPackage.logWarnings())			addWarning(prefix + "warnings: " + file.getFullPath(), null);	}		/**
+	}	protected boolean canBeExported(boolean hasErrors, boolean hasWarnings) throws CoreException {		return (!hasErrors && !hasWarnings)			|| (hasErrors && fJarPackage.exportErrors())			|| (hasWarnings && fJarPackage.exportWarnings());	}	protected void reportPossibleCompileProblems(IFile file, boolean hasErrors, boolean hasWarnings, boolean canBeExported) {		String prefix;		if (canBeExported)			prefix= "Exported with compile ";		else			prefix= "Not exported due to compile ";		if (hasErrors)			addWarning(prefix + "errors: " + file.getFullPath(), null);		if (hasWarnings)			addWarning(prefix + "warnings: " + file.getFullPath(), null);	}		/**
 	 * Exports the resources as specified by the JAR package.
 	 * 
 	 * @param	progressMonitor	the progress monitor that displays the progress
 	 * @see		#getStatus()
 	 */
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
-
-		int totalWork;
-		try {
-			totalWork= countSelectedResources();
-		} catch (CoreException ex) {
-			addError("Unable to traveres all resources: " +  ex.getMessage(), ex);
-			throw new InvocationTargetException(ex, "Unable to traveres all resources: " + ex.getMessage());
-		}			
-
+		int totalWork= countSelectedElements();
 		progressMonitor.beginTask("Exporting:", totalWork);
 		try {			if (!preconditionsOK())				throw new InvocationTargetException(null, "JAR creation failed. Details follow");			fJarWriter= new JarWriter(fJarPackage, fParentShell);
-			exportSelectedResources(progressMonitor);		} catch (IOException ex) {
+			exportSelectedElements(progressMonitor);		} catch (IOException ex) {
 			addError("Unable to create JAR file: " +  ex.getMessage(), ex);
 			throw new InvocationTargetException(ex, "Unable to create JAR file: " + ex.getMessage());
 		} catch (CoreException ex) {
@@ -363,4 +313,4 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			progressMonitor.done();
 		}
 	}
-		protected boolean preconditionsOK() {		if (!fJarPackage.areClassFilesExported() && !fJarPackage.areJavaFilesExported()) {			addError("No export type chosen", null);			return false;		}		if (fJarPackage.getSelectedResources() == null || fJarPackage.getSelectedResources().size() == 0) {			addError("No resources selected", null);			return false;		}		if (fJarPackage.getJarLocation() == null) {			addError("Invalid JAR location", null);			return false;		}		if (!fJarPackage.doesManifestExist()) {			addError("Manifest does not exist", null);			return false;		}		if (!fJarPackage.isMainClassValid(new BusyIndicatorRunnableContext())) {			addError("Main class is not valid", null);			return false;		}		IEditorPart[] dirtyEditors= JavaPlugin.getDirtyEditors();		if (dirtyEditors.length > 0) {			List unsavedFiles= new ArrayList(dirtyEditors.length);			List selection= fJarPackage.getSelectedResources();			for (int i= 0; i < dirtyEditors.length; i++) {				if (dirtyEditors[i].getEditorInput() instanceof IFileEditorInput) {					IFile dirtyFile= ((IFileEditorInput)dirtyEditors[i].getEditorInput()).getFile();					if (selection.contains(dirtyFile)) {						unsavedFiles.add(dirtyFile);						addError("File is unsaved: " + dirtyFile.getFullPath(), null);					}				}			}			if (!unsavedFiles.isEmpty())				return false;		}		return true;	}}
+		protected boolean preconditionsOK() {		if (!fJarPackage.areClassFilesExported() && !fJarPackage.areJavaFilesExported()) {			addError("No export type chosen", null);			return false;		}		if (fJarPackage.getSelectedElements() == null || fJarPackage.getSelectedElements().size() == 0) {			addError("No resources selected", null);			return false;		}		if (fJarPackage.getJarLocation() == null) {			addError("Invalid JAR location", null);			return false;		}		if (!fJarPackage.doesManifestExist()) {			addError("Manifest does not exist", null);			return false;		}		if (!fJarPackage.isMainClassValid(new BusyIndicatorRunnableContext())) {			addError("Main class is not valid", null);			return false;		}		IEditorPart[] dirtyEditors= JavaPlugin.getDirtyEditors();		if (dirtyEditors.length > 0) {			List unsavedFiles= new ArrayList(dirtyEditors.length);			List selection= fJarPackage.getSelectedElements();			for (int i= 0; i < dirtyEditors.length; i++) {				if (dirtyEditors[i].getEditorInput() instanceof IFileEditorInput) {					IFile dirtyFile= ((IFileEditorInput)dirtyEditors[i].getEditorInput()).getFile();					if (selection.contains(dirtyFile)) {						unsavedFiles.add(dirtyFile);						addError("File is unsaved: " + dirtyFile.getFullPath(), null);					}				}			}			if (!unsavedFiles.isEmpty())				return false;		}		return true;	}}

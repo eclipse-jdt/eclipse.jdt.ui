@@ -69,7 +69,7 @@ import org.eclipse.jdt.internal.ui.dialogs.SelectionStatusDialog;import org.ecl
 import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 /**
- *	Page 2 of the JAR Package wizard
+ *	Page 3 of the JAR Package wizard
  */
 public class JarManifestWizardPage extends WizardPage implements Listener, IJarPackageWizardPage {
 	
@@ -145,7 +145,10 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	 * Method declared on IDialogPage.
 	 */
 	public void createControl(Composite parent) {
-		Composite composite = new Composite(parent, SWT.NULL);
+		
+		initializeDialogUnits(parent);
+		
+		Composite composite= new Composite(parent, SWT.NULL);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(
 			new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
@@ -158,15 +161,18 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		fSealingHeaderLabel= createLabel(composite, "Which packages must be sealed?", false);
 		createSealingGroup(composite);
 
-		createSpacer(composite);
+//		createSpacer(composite);
 
+//		fMainClassHeaderLabel= createLabel(composite, "Which class is the application's entry point?", false);
+
+		new Label(composite, SWT.NONE); // vertical spacer
+
+//		fMainClassHeaderLabel= createLabel(composite, "Other options:", false);
 		fMainClassHeaderLabel= createLabel(composite, "Which class is the application's entry point?", false);
 		createMainClassGroup(composite);
 
-		createSpacer(composite);
-
-		fDownloadHeaderLabel= createLabel(composite, "What are your download extensions?", false);
-		createDownloadExtensionGroup(composite);
+//		fDownloadHeaderLabel= createLabel(composite, "What are your download extensions?", false);
+//		createDownloadExtensionGroup(composite);
 
 		restoreWidgetValues();
 
@@ -496,9 +502,9 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		fMainClassText.setEnabled(generate);
 		fMainClassBrowseButton.setEnabled(generate);
 
-		fDownloadHeaderLabel.setEnabled(generate);
-		fDownloadExtensionLabel.setEnabled(generate);
-		fDownloadExtensionText.setEnabled(generate);
+//		fDownloadHeaderLabel.setEnabled(generate);
+//		fDownloadExtensionLabel.setEnabled(generate);
+//		fDownloadExtensionText.setEnabled(generate);
 		
 		updateSealingInfo();
 	}
@@ -526,7 +532,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		}
 	}
 	/*
-	 * Overrides method from IJarPackageWizardPage
+	 * Implements method from IJarPackageWizardPage
 	 */
 	public boolean computePageCompletion() {
 		if (fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved() && fJarPackage.getManifestLocation().toString().length() == 0) {
@@ -589,13 +595,13 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 //			settings.put(STORE_UNSEALED_PACKAGES, fJarPackage.getPackageNamesToUnseal());
 			
 			// Main-Class
-			if (fJarPackage.getMainClass() == null)
-				settings.put(STORE_MAIN_CLASS_NAME, "");
-			else
-				settings.put(STORE_MAIN_CLASS_NAME, fJarPackage.getMainClass().getHandleIdentifier());
+//			if (fJarPackage.getMainClass() == null)
+//				settings.put(STORE_MAIN_CLASS_NAME, "");
+//			else
+//				settings.put(STORE_MAIN_CLASS_NAME, fJarPackage.getMainClass().getHandleIdentifier());
 			
 			// Download extension path
-			settings.put(STORE_DOWNLOAD_EXTENSIONS, fJarPackage.getDownloadExtensionsPath());
+//			settings.put(STORE_DOWNLOAD_EXTENSIONS, fJarPackage.getDownloadExtensionsPath());
 			}
 
 		// Allow subclasses to save values
@@ -611,7 +617,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	 *	last time this wizard was used to completion.
 	 */
 	protected void restoreWidgetValues() {
-		if (fJarPackage.isInitializedFromDialog())
+		if (!fJarPackage.isUsedToInitialize())
 			initializeJarPackage();
 
 		// Manifest creation
@@ -634,7 +640,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		fMainClassText.setText(fJarPackage.getMainClassName());
 		
 		// Download extension path
-		fDownloadExtensionText.setText(fJarPackage.getDownloadExtensionsPath());
+//		fDownloadExtensionText.setText(fJarPackage.getDownloadExtensionsPath());
 	}
 	/**
 	 *	Initializes the JAR package from last used wizard page values.
@@ -657,10 +663,10 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 //			fJarPackage.setPackageNamesToUnseal(settings.getArray(STORE_UNSEALED_PACKAGES));
 
 			// Main-Class
-			fJarPackage.setMainClass((IType)JavaCore.create(settings.get(STORE_MAIN_CLASS_NAME)));
+//			fJarPackage.setMainClass((IType)JavaCore.create(settings.get(STORE_MAIN_CLASS_NAME)));
 			
 			// Download extension path
-			fJarPackage.setDownloadExtensionsPath(settings.get(STORE_DOWNLOAD_EXTENSIONS));
+//			fJarPackage.setDownloadExtensionsPath(settings.get(STORE_DOWNLOAD_EXTENSIONS));
 		}
 	}
 	/**
@@ -688,10 +694,10 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		// Packages are updated when dialog is closed
 		
 		// Main-Class
-		// Is update when dialog is closed
+		// Is updated when dialog is closed
 		
 		// Download extension path
-		fJarPackage.setDownloadExtensionsPath(fDownloadExtensionText.getText());
+		// fJarPackage.setDownloadExtensionsPath(fDownloadExtensionText.getText());
 	}
 	/**
 	 * Determine if the page is complete and update the page appropriately. 

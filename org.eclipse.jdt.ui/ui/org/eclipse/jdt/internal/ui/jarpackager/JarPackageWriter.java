@@ -59,7 +59,7 @@ public class JarPackageWriter extends Object {
 		BufferedWriter writer= new BufferedWriter(streamWriter);
 		writer.write("--- JAR package def: ---");
 		writer.newLine();
-		writer.write("dialog init:" + jarPackage.isInitializedFromDialog());		
+		writer.write("use to init:" + jarPackage.isUsedToInitialize());		
 		writer.newLine();
 		writer.write("export bin: " + jarPackage.areClassFilesExported());
 		writer.newLine();

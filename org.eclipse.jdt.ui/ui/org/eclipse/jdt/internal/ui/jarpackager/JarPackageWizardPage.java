@@ -5,55 +5,17 @@ package org.eclipse.jdt.internal.ui.jarpackager;
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 2000
  */
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import java.io.File;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.IWizardPage;
-
-import org.eclipse.ui.dialogs.SaveAsDialog;
+import java.io.File;import java.util.HashSet;import java.util.Iterator;import java.util.Set;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.dialogs.WizardExportResourcesPage;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  *	Page 1 of the JAR Package wizard
  */
-class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPackageWizardPage {
+public class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPackageWizardPage {
 
 	private JarPackage fJarPackage;
-	private IStructuredSelection fSelection;
-	private Set fSelectedContainers;
+	private IStructuredSelection fInitialSelection;
+	private CheckboxTreeAndListGroup fInputGroup;
 
 	// widgets
 	private Text	fSourceNameField;	
@@ -84,6 +46,10 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	private final static String STORE_OVERWRITE= PAGE_NAME + ".OVERWRITE";
 	private final static String STORE_SAVE_DESCRIPTION= PAGE_NAME + ".SAVE_DESCRIPTION";
 	private final static String STORE_DESCRIPTION_LOCATION= PAGE_NAME + ".DESCRIPTION_LOCATION";
+
+	// other constants
+	private final static int SIZING_SELECTION_WIDGET_WIDTH= 400;
+	private final static int SIZING_SELECTION_WIDGET_HEIGHT= 150;
 	
 	/**
 	 *	Create an instance of this class
@@ -93,36 +59,29 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		setTitle("JAR Package Specification");
 		setDescription("Define what resources to package into which JAR");
 		fJarPackage= jarPackage;
-		fSelection= selection;
-		fSelectedContainers= new HashSet();
+		fInitialSelection= selection;
 	}
 	/*
 	 * Method declared on IDialogPage.
 	 */
 	public void createControl(Composite parent) {
+		
+		initializeDialogUnits(parent);
+		
 		Composite composite = new Composite(parent, SWT.NULL);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(
 			new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 		createPlainLabel(composite, "What do you want to export?");
-		createResourcesGroup(composite);
-		
-		// Only way to add listener and reuse source selection dialog
-		if (composite.getChildren().length == 2) {
-			Control sourceSelectionControl= composite.getChildren()[1];
-			if (sourceSelectionControl instanceof Composite) {
-				Control[] sourceSelectionSubControls= ((Composite)sourceSelectionControl).getChildren();
-				if (sourceSelectionSubControls.length > 1) {
-					sourceSelectionSubControls[0].addListener(SWT.MouseDown, this);
-					sourceSelectionSubControls[1].addListener(SWT.MouseDown, this);
-				}
-			}
-		}
-		createButtonsGroup(composite);
-		createResourceOptionsGroup(composite);
+		createInputGroup(composite);
+
+//		createButtonsGroup(composite);
+		createExportTypeGroup(composite);
 
 //		createSpacer(composite);
+		new Label(composite, SWT.NONE); // vertical spacer
+
 
 		createPlainLabel(composite, "Where do you want to export resources to?");
 		createDestinationGroup(composite);
@@ -134,7 +93,8 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 
 		restoreResourceSpecificationWidgetValues(); // superclass API defines this hook
 		restoreWidgetValues();
-		if (fSelection != null)
+
+		if (fInitialSelection != null)
 			setupBasedOnInitialSelections();
 
 		setControl(composite);
@@ -163,12 +123,12 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		fOverwriteCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fOverwriteCheckbox.setText("Overwrite existing files without warning");
 		fOverwriteCheckbox.addListener(SWT.Selection, this);
-
+/*
 		fSaveDescriptionCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fSaveDescriptionCheckbox.setText("Save the description of this JAR in the workspace");
 		fSaveDescriptionCheckbox.addListener(SWT.Selection, this);
-
 		createDescriptionFileGroup(parent);
+	*/
 	}
 	/**
 	 *	Answer the contents of the destination specification widget. If this
@@ -202,6 +162,17 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		return "." + JarPackage.EXTENSION;
 	}
 	/**
+	 * Returns this page's collection of currently-specified resources to be 
+	 * exported. This is the primary resource selection facility accessor for 
+	 * subclasses.
+	 *
+	 * @return an iterator over the collection of resources currently selected 
+	 * for export (element type: <code>IResource</code>)
+	 */
+	protected Iterator getSelectedResourcesIterator() {
+		return fInputGroup.getAllCheckedListItems();
+	}
+	/**
 	 * Persists resource specification control setting that are to be restored
 	 * in the next instance of this page. Subclasses wishing to persist
 	 * settings for their controls should extend the hook method 
@@ -223,8 +194,10 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			// options
 			settings.put(STORE_COMPRESS, fJarPackage.isCompressed());
 			settings.put(STORE_OVERWRITE, fJarPackage.allowOverwrite());
+/*
 			settings.put(STORE_SAVE_DESCRIPTION, fJarPackage.isDescriptionSaved());
 			settings.put(STORE_DESCRIPTION_LOCATION, fJarPackage.getDescriptionLocation().toString());
+			*/
 		}
 		// Allow subclasses to save values
 		internalSaveWidgetValues();
@@ -239,7 +212,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	 *	last time this wizard was used to completion.
 	 */
 	protected void restoreWidgetValues() {
-		if (fJarPackage.isInitializedFromDialog())
+		if (!fJarPackage.isUsedToInitialize())
 			initializeJarPackage();
 
 		fExportClassFilesCheckbox.setSelection(fJarPackage.areClassFilesExported());
@@ -264,8 +237,11 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		// options
 		fCompressCheckbox.setSelection(fJarPackage.isCompressed());
 		fOverwriteCheckbox.setSelection(fJarPackage.allowOverwrite());
+
+		/*
 		fSaveDescriptionCheckbox.setSelection(fJarPackage.isDescriptionSaved());
 		fDescriptionFileText.setText(fJarPackage.getDescriptionLocation().toString());
+		*/
 	}
 	/**
 	 *	Initializes the JAR package from last used wizard page values.
@@ -274,7 +250,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
 			// source
-			fJarPackage.setSelectedResources(getSelectedResources());
+			fJarPackage.setSelectedElements(getSelectedResources());
 			fJarPackage.setExportClassFiles(settings.getBoolean(STORE_EXPORT_CLASS_FILES));
 			fJarPackage.setExportJavaFiles(settings.getBoolean(STORE_EXPORT_JAVA_FILES));
 						
@@ -287,8 +263,11 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			// options
 			fJarPackage.setCompress(settings.getBoolean(STORE_COMPRESS));
 			fJarPackage.setOverwrite(settings.getBoolean(STORE_OVERWRITE));
+
+			/*
 			fJarPackage.setSaveDescription(settings.getBoolean(STORE_SAVE_DESCRIPTION));
 			fJarPackage.setDescriptionLocation(getPathFromString(settings.get(STORE_DESCRIPTION_LOCATION)));
+			*/
 		}
 	}
 	/**
@@ -299,7 +278,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			return;
 		
 		// source
-		fJarPackage.setSelectedResources(getSelectedResources());
+		fJarPackage.setSelectedElements(getSelectedResources());
 		fJarPackage.setExportClassFiles(fExportClassFilesCheckbox.getSelection());
 		fJarPackage.setExportJavaFiles(fExportJavaFilesCheckbox.getSelection());
 
@@ -309,67 +288,15 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		// options
 		fJarPackage.setCompress(fCompressCheckbox.getSelection());
 		fJarPackage.setOverwrite(fOverwriteCheckbox.getSelection());
+		/*
 		fJarPackage.setSaveDescription(fSaveDescriptionCheckbox.getSelection());
 		fJarPackage.setDescriptionLocation(new Path(fDescriptionFileText.getText()));
+		*/
 	}
 
 	protected IPath getPathFromString(String text) {
 		return new Path(text).makeAbsolute();
 	}
-	/**
-	 * Returns a boolean indicating whether the directory portion of the
-	 * passed pathname is valid and available for use.
-	 *
-	 * @return boolean
-
-	protected boolean ensureTargetDirectoryIsValid(String fullPathname) {
-		int separatorIndex= fullPathname.lastIndexOf(File.separator);
-
-		if (separatorIndex == -1) // ie.- default dir, which is fine
-			return true;
-
-		return ensureTargetIsValid(new File(fullPathname.substring(0, separatorIndex)));
-	}
-		 */
-	/**
-	 *	If the target for export does not exist then attempt to create it.
-	 *	Answer a boolean indicating whether the target exists (ie.- if it
-	 *	either pre-existed or this method was able to create it)
-	 *
-	 *	@return boolean
-	 *
-	protected boolean ensureTargetIsValid(File targetDirectory) {
-		if (targetDirectory.exists() && !targetDirectory.isDirectory()) {
-			displayErrorDialog("Target directory already exists as a file.");
-			fDestinationNamesCombo.setFocus();
-			return false;
-		}
-
-		return ensureDirectoryExists(targetDirectory);
-	}
-	 */
-	
-	/**
-	 * Attempts to ensure that the specified directory exists on the local file system.
-	 * Answers a boolean indicating success.
-	 *
-	 * @return boolean
-	 * @param directory java.io.File
-	protected boolean ensureDirectoryExists(File directory) {
-		if (!directory.exists()) {
-			if (!queryYesNoQuestion("Target directory does not exist.  Would you like to create it?"))
-				return false;
-
-			if (!directory.mkdirs()) {
-				displayErrorDialog("Target directory could not be created.");
-				fDestinationNamesCombo.setFocus();
-				return false;
-			}
-		}
-
-		return true;
-	}
-	*/
 	/**
 	 * Returns a boolean indicating whether the passed File handle is
 	 * is valid and available for use.
@@ -391,30 +318,19 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		}
 		return true;
 	}
-	/**
-	 * Ensures that the target output file and its containing directory are
-	 * both valid and able to be used.  Answer a boolean indicating these.
-	 *
-	 * @return boolean
-	protected boolean ensureTargetIsValid() {
-		String targetPath= getDestinationValue();
-		if (!ensureTargetDirectoryIsValid(targetPath))
-			return false;
-		if (!ensureTargetFileIsValid(new File(targetPath)))
-			return false;
-		return true;
-	}
-	*/
 	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
-	protected boolean allowNewContainerName() {
-		return true;
-	}
+//	protected boolean allowNewContainerName() {
+	//	return true;
+//	}
 	/*
 	 * Overrides method from WizardExportPage
 	 */
 	protected void createDestinationGroup(Composite parent) {
+		
+		initializeDialogUnits(parent);
+		
 		// destination specification group
 		Composite destinationSelectionGroup= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -501,16 +417,38 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		return null;
 	}
 	/**
-	 * Creates the export resource options specification controls.
+	 * Creates the checkbox tree and list for selecting resources.
 	 *
 	 * @param parent the parent control
 	 */
-	protected void createResourceOptionsGroup(Composite parent) {
+	protected void createInputGroup(Composite parent) {
+		int labelFlags= JavaElementLabelProvider.SHOW_BASICS
+						| JavaElementLabelProvider.SHOW_OVERLAY_ICONS
+						| JavaElementLabelProvider.SHOW_SMALL_ICONS;
+		fInputGroup= new CheckboxTreeAndListGroup(
+					parent,
+					JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()),
+					new JavaElementContentProvider(false, false, false),
+					new JavaElementLabelProvider(labelFlags),
+					new JavaElementContentProvider(true, true, false),
+					new JavaElementLabelProvider(labelFlags),
+					SWT.NONE,
+					SIZING_SELECTION_WIDGET_WIDTH,
+					SIZING_SELECTION_WIDGET_HEIGHT);
+		fInputGroup.addTreeFilter(new EmptyInnerPackageFilter());					
+		fInputGroup.getTree().addListener(SWT.MouseUp, this);
+		fInputGroup.getTable().addListener(SWT.MouseUp, this);
+	}
+	/**
+	 * Creates the export type controls.
+	 *
+	 * @param parent the parent control
+	 */
+	protected void createExportTypeGroup(Composite parent) {		
 		Composite optionsGroup= new Composite(parent, SWT.NONE);
 		GridLayout optionsLayout= new GridLayout();
 		optionsLayout.marginHeight= 0;
 		optionsGroup.setLayout(optionsLayout);
-
 		fExportClassFilesCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fExportClassFilesCheckbox.setText("Export generated class files and resources");
 		fExportClassFilesCheckbox.addListener(SWT.Selection, this);
@@ -518,20 +456,18 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		fExportJavaFilesCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fExportJavaFilesCheckbox.setText("Export java source files and resources");
 		fExportJavaFilesCheckbox.addListener(SWT.Selection, this);
-
-//		fExportResourcesCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-//		fExportResourcesCheckbox.setText("Export resources");
-//		fExportResourcesCheckbox.addListener(SWT.Selection, this);
 	}
 	/**
 	 * Updates the enablements of this page's controls. Subclasses may extend.
 	 */
 	protected void updateWidgetEnablements() {
+		/*
 		boolean saveDescription= fSaveDescriptionCheckbox.getSelection();
 		fDescriptionFileGroup.setEnabled(saveDescription);
 		fDescriptionFileBrowseButton.setEnabled(saveDescription);
 		fDescriptionFileText.setEnabled(saveDescription);
 		fDescriptionFileLabel.setEnabled(saveDescription);
+		*/
 	}
 	/*
 	 * Overrides method from IJarPackageWizardPage
@@ -596,6 +532,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	 * Overrides method from WizardDataTransferPage
 	 */
 	protected boolean validateOptionsGroup() {
+		/*
 		if (fJarPackage.isDescriptionSaved()){
 			if (fDescriptionFileText.getText().length() == 0) {
 				setErrorMessage("Invalid description file.");
@@ -607,6 +544,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 				return false;
 			}
 		}
+		*/
 		return true;
 	}
 	/*
@@ -625,7 +563,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		return true;
 	}
 	/*
-	 * Overwrites method from WizardExportPage
+	 * Overwrides method from WizardExportPage
 	 */
 	protected IPath getResourcePath() {
 		return getPathFromText(fSourceNameField);
@@ -650,6 +588,19 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
  	 */
 	protected void giveFocusToDestination() {
 		fDestinationNamesCombo.setFocus();
+	}
+	/* 
+	 * Overrides method from WizardExportResourcePage
+	 */
+	protected void setupBasedOnInitialSelections() {
+		Iterator enum = fInitialSelection.iterator();
+		while (enum.hasNext()) {
+			Object selectedElement= enum.next();
+			if (selectedElement instanceof ICompilationUnit || selectedElement instanceof IFile)
+				fInputGroup.initialCheckListItem(selectedElement);
+			else
+				fInputGroup.initialCheckTreeItem(selectedElement);
+		}
 	}
 	/* 
 	 * Method declared on IWizardPage.

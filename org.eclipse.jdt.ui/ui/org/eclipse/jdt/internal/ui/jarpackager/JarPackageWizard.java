@@ -6,15 +6,22 @@ package org.eclipse.jdt.internal.ui.jarpackager;
  * (c) Copyright IBM Corp 2000
  */
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.jar.Manifest;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -24,6 +31,8 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.ui.IExportWizard;
@@ -31,8 +40,15 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 /**
  * Standard workbench wizard for exporting resources from the workspace
@@ -58,8 +74,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class JarPackageWizard extends Wizard implements IExportWizard {
 	private IWorkbench fWorkbench;
 	private IStructuredSelection fSelection;
-	private JarPackageWizardPage fMainPage;
-	private JarManifestWizardPage fManifestPage;	
 	private JarPackage fJarPackage;
 	private boolean fHasNewDialogSettings;
 	
@@ -82,10 +96,9 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 */
 	public void addPages() {
 		super.addPages();
-		fMainPage= new JarPackageWizardPage(fJarPackage, fSelection);
-		fManifestPage = new JarManifestWizardPage(fJarPackage);
-		addPage(fMainPage);
-		addPage(fManifestPage);
+		addPage(new JarPackageWizardPage(fJarPackage, fSelection));
+		addPage(new JarOptionsPage(fJarPackage));
+		addPage(new JarManifestWizardPage(fJarPackage));
 	}
 	/**
 	 * Returns the image descriptor with the given relative path.
@@ -117,8 +130,8 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		fWorkbench= workbench;
-		fSelection= selection;
-		
+		// ignore the selection argument since the main export wizard changed it
+		fSelection= getValidSelection();
 		if (isDescriptionSelected(fSelection))
 			fJarPackage= JarPackage.readJarPackage(getDescriptionFile(fSelection));
 		else {
@@ -239,7 +252,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		// Adjust JAR package attributes
 		if (fJarPackage.isManifestReused())
 			fJarPackage.setGenerateManifest(false);
-		fJarPackage.setInitializeFromDialog(false);
+		fJarPackage.setIsUsedToInitialize(false);
 		
 		ByteArrayOutputStream objectStreamOutput= new ByteArrayOutputStream();
 		JarPackageWriter objectStream= fJarPackage.getWriter(objectStreamOutput);;
@@ -260,5 +273,72 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 			if (objectStream != null)
 				objectStream.close();
 		}
+	}
+
+	/**
+	 * Gets the current workspace page selection and converts it to a valid
+	 * selection for this wizard:
+	 * - resources and projects are OK
+	 * - CUs are OK
+	 * - Java projects are OK
+	 * - Source package fragments and source packages fragement roots are ok
+	 * - Java elements below a CU are converted to their CU
+	 * - all other input elements are ignored
+	 * 
+	 * @return a valid structured selection based on the current selection
+	 */
+	protected IStructuredSelection getValidSelection() {
+		ISelection currentSelection= JavaPlugin.getActiveWorkbenchWindow().getSelectionService().getSelection();
+		if (currentSelection instanceof IStructuredSelection) {
+			IStructuredSelection structuredSelection= (IStructuredSelection)currentSelection;
+			List selectedElements= new ArrayList(structuredSelection.size());
+			Iterator iter= structuredSelection.iterator();
+			while (iter.hasNext()) {
+				Object selectedElement=  iter.next();
+				if (selectedElement instanceof IProject) {
+					try {
+						selectedElements.addAll(Arrays.asList(((IProject)selectedElement).members()));
+					} catch (CoreException ex) {
+						// // ignore selected element
+					}
+				}
+				else if (selectedElement instanceof IResource)
+					selectedElements.add(selectedElement);
+				else if (selectedElement instanceof IJavaElement) {
+					IJavaElement je= (IJavaElement)selectedElement;
+					if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
+						selectedElements.add(je);
+					else if (je.getElementType() == IJavaElement.JAVA_PROJECT)
+						selectedElements.add(je);
+					else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+						try {
+							if (((IPackageFragment)je).getKind() == IPackageFragmentRoot.K_SOURCE)
+								selectedElements.add(je);
+						} catch (JavaModelException ex) {
+							// ignore selected element
+						}
+					}
+					else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+						try {
+							if (((IPackageFragmentRoot)je).getKind() == IPackageFragmentRoot.K_SOURCE)
+								selectedElements.add(je);
+						} catch (JavaModelException ex) {
+							// ignore selected element
+						}
+					}
+					else {
+						IJavaElement jcu= JavaModelUtility.getParent(je, IJavaElement.COMPILATION_UNIT);
+						if (jcu != null) {
+							ICompilationUnit cu= (ICompilationUnit)jcu;
+							if (!cu.isWorkingCopy() || (cu= (ICompilationUnit)cu.getOriginalElement()) != null)
+								selectedElements.add(cu);
+						}
+					}
+				}
+			}
+			return new StructuredSelection(selectedElements);
+		}
+		else
+			return StructuredSelection.EMPTY;
 	}
 }

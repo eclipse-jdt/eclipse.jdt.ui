@@ -17,6 +17,7 @@ import java.util.jar.Manifest;
 import java.util.zip.CRC32;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -88,9 +89,10 @@ public class JarWriter {
 	public void write(IFile resource, IPath destinationPath) throws IOException, CoreException {
 		ByteArrayOutputStream output= null;
 		InputStream contentStream= null;
-
 		try {
 			output= new ByteArrayOutputStream();
+			if (!resource.isLocal(IResource.DEPTH_ZERO))
+				throw new IOException("File not accessible: " + resource.getFullPath().toString());
 			contentStream= resource.getContents(false);
 			int chunkSize= contentStream.available();
 			byte[] readBuffer= new byte[chunkSize];

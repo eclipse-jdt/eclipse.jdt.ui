@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.util.HashSet;
+import java.util.ArrayList;import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -26,14 +26,14 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
-import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 
 /**
  * Model for a JAR package. Describes a JAR package including all
@@ -46,7 +46,7 @@ public class JarPackage implements java.io.Serializable {
 	public static final String DESCRIPTION_EXTENSION= "jardesc";
 
 	private String	fManifestVersion;
-	private boolean fInitializeFromDialog;
+	private boolean fIsUsedToInitialize;
 
 	/*
 	 * What to export - internal locations
@@ -54,7 +54,7 @@ public class JarPackage implements java.io.Serializable {
 	 */	
 	private boolean fExportClassFiles;				// export generated class files and resources
 	private boolean	fExportJavaFiles;				// export java files and resources
-transient 	private List	fSelectedResources;		// internal locations
+transient 	private List	fSelectedElements;		// internal locations
 
 transient 	private IPath	fJarLocation;			// external location
 
@@ -94,7 +94,7 @@ transient 	private IType fMainClass;
 	
 	private String fDownloadExtensionsPath;	
 	/*	 * Error handling	 */	 private boolean fExportErrors;	 private boolean fExportWarnings;	 private boolean fLogErrors;	 private boolean fLogWarnings;
-	public JarPackage() {		setInitializeFromDialog(true);
+	public JarPackage() {		setIsUsedToInitialize(false);
 		setExportClassFiles(true);
 		setCompress(true);
 		setSaveDescription(false);
@@ -107,7 +107,6 @@ transient 	private IType fMainClass;
 		setManifestLocation(new Path(""));
 		setDownloadExtensionsPath("");		setExportErrors(true);		setExportWarnings(true);		
 		setLogErrors(true);		setLogWarnings(true);			}
-
 	/**
 	 * Reads the JAR package spec from file.
 	 */
@@ -139,35 +138,30 @@ transient 	private IType fMainClass;
 	}
 
 	// ----------- Accessors -----------
-	
+		/**	 * Tells whether the JAR is compressed or not.	 * 	 * @return	<code>true</code> if the JAR is compressed	 */
 	public boolean isCompressed() {
 		return fCompress;
 	}
-
-	public void setCompress(boolean state) {
+	/**	 * Sets whether the JAR is compressed or not.	 * 	 * @param state	a boolean indicating the new state	 */	public void setCompress(boolean state) {
 		fCompress= state;
 	}
-
-	public boolean allowOverwrite() {
+	/**	 * Tells whether files can be overwritten without warning.	 * 	 * @return	<code>true</code> if files can be overwritten without warning	 */	public boolean allowOverwrite() {
 		return fOverwrite;
 	}
-
-	public void setOverwrite(boolean state) {
+	/**	 * Sets whether files can be overwritten without warning.	 * 	 * @param state	a boolean indicating the new state	 */	public void setOverwrite(boolean state) {
 		fOverwrite= state;
 	}
-
-	public boolean areClassFilesExported() {
+	/**	 * Tells whether class files and resources are exported.	 * 	 * @return	<code>true</code> if class files and resources are exported	 */	public boolean areClassFilesExported() {
 		return fExportClassFiles;
 	}
-
-	public void setExportClassFiles(boolean state) {
+	/**	 * Sets option to export class files and resources.	 * 	 * @param state	a boolean indicating the new state	 */	public void setExportClassFiles(boolean state) {
 		fExportClassFiles= state;
 	}
 
 	public boolean areJavaFilesExported() {
 		return fExportJavaFiles;
 	}
-
+	/**	 * Sets the option to export Java source and resources	 * 	 * @param state the new state	 */
 	public void setExportJavaFiles(boolean state) {
 		fExportJavaFiles= state;
 	}
@@ -185,19 +179,17 @@ transient 	private IType fMainClass;
 	public void setJarLocation(IPath jarLocation) {
 		fJarLocation= jarLocation;
 	}
-
-	public boolean isInitializedFromDialog() {
-		return fInitializeFromDialog;
+	/**	 * Tells whether clients should read their init values from this instance.	 * 	 * @return	<code>true</code> if clients should read their init values from this instance	 */	public boolean isUsedToInitialize() {
+		return fIsUsedToInitialize;
 	}
 	/**
-	 * Sets the initializeFromDialog
-	 * @param initializeFromDialog The initializeFromDialog to set
+	 * Sets if this JAR package is used to initialize the client
+	 * @param isUsedToInitialize <code>ture</code> if this JAR package is used to initialize the client
 	 */
-	public void setInitializeFromDialog(boolean initializeFromDialog) {
-		fInitializeFromDialog= initializeFromDialog;
+	public void setIsUsedToInitialize(boolean isUsedToInitialize) {
+		fIsUsedToInitialize= isUsedToInitialize;
 	}
-
-	public boolean isDescriptionSaved() {
+	/**	 * Tells whether this JAR package should be saved or not.	 * 	 * @return	<code>true</code> if this JAR package will be saved	 */	public boolean isDescriptionSaved() {
 		return fSaveDescription;
 	}
 	/**
@@ -207,8 +199,7 @@ transient 	private IType fMainClass;
 	public void setSaveDescription(boolean saveDescription) {
 		fSaveDescription= saveDescription;
 	}
-
-	public boolean isManifestSaved() {
+	/**	 * Tells whether the manifest should be saved or not.	 * 	 * @return	<code>true</code> if the manifest will be saved	 */	public boolean isManifestSaved() {
 		return fSaveManifest;
 	}
 	/**
@@ -220,8 +211,7 @@ transient 	private IType fMainClass;
 		if (!fSaveManifest)
 			setReuseManifest(false);
 	}
-
-	public boolean isManifestReused() {
+	/**	 * Tells whether the manifest should be reused or not.	 * The manifest will be reused when this JAR package is regenerated.	 * 	 * @return	<code>true</code> if the manifest is reused	 */	public boolean isManifestReused() {
 		return fReuseManifest;
 	}
 	/**
@@ -384,20 +374,19 @@ transient 	private IType fMainClass;
 		fDownloadExtensionsPath= downloadExtensionsPath;
 	}
 	/**
-	 * Gets the selectedResources
-	 * @return Returns a List
+	 * Gets the selected elements
+	 * @return a List with the selected elements
 	 */
-	public List getSelectedResources() {
-		return fSelectedResources;
+	public List getSelectedElements() {
+		return fSelectedElements;
 	}
 	/**
-	 * Sets the selectedResources
-	 * @param selectedResources The selectedResources to set
+	 * Sets the selected elements
+	 * @param selectedElements the list with the selected elements
 	 */
-	public void setSelectedResources(List selectedResources) {
-		fSelectedResources= selectedResources;
-	}
-	/**
+	public void setSelectedElements(List selectedElements) {
+		fSelectedElements= selectedElements;
+	}	/**	 * Computes and returns the selected resources.	 * The underlying resource is used for Java elements.	 * 	 * @return a List with the selected resources	 */	public List getSelectedResources() {		if (fSelectedElements == null)			return null;		List selectedResources= new ArrayList(fSelectedElements.size());		Iterator iter= fSelectedElements.iterator();		while (iter.hasNext()) {			Object element= iter.next();			if (element instanceof IJavaElement) {				try {					selectedResources.add(((IJavaElement)element).getUnderlyingResource());				} catch (JavaModelException ex) {					// ignore the resource for now				}			}			else				selectedResources.add(element);		}		return selectedResources;	}	/**
 	 * Gets the manifestVersion
 	 * @return Returns a String
 	 */
@@ -447,7 +436,7 @@ transient 	private IType fMainClass;
 	protected JarPackageWriter getWriter(OutputStream outputStream) {
 		return new JarPackageWriter(outputStream);
 	}
-	/**	 * Gets the logErrors	 * @return Returns a boolean	 */	public boolean logErrors() {		return fLogErrors;	}	/**	 * Sets the logErrors	 * @param logErrors The logErrors to set	 */	public void setLogErrors(boolean logErrors) {		fLogErrors= logErrors;	}	/**	 * Gets the logWarnings	 * @return Returns a boolean	 */	public boolean logWarnings() {		return fLogWarnings;	}	/**	 * Sets the logWarnings	 * @param logWarnings The logWarnings to set	 */	public void setLogWarnings(boolean logWarnings) {		fLogWarnings= logWarnings;	}	/**	 * Answers if files with errors are exported	 * @return Returns a boolean	 */	public boolean exportErrors() {		return fExportErrors;	}	/**	 * Sets the exportErrors	 * @param exportErrors The exportErrors to set	 */	public void setExportErrors(boolean exportErrors) {		fExportErrors= exportErrors;	}	/**	 * Answers if files with warnings are exported	 * @return Returns a boolean	 */	public boolean exportWarnings() {		return fExportWarnings;	}	/**	 * Sets the exportWarnings	 * @param exportWarnings The exportWarnings to set	 */	public void setExportWarnings(boolean exportWarnings) {		fExportWarnings= exportWarnings;	}
+	/**	 * Gets the logErrors	 * @return Returns a boolean	 */	public boolean logErrors() {		return fLogErrors;	}	/**	 * Sets the logErrors	 * @param logErrors The logErrors to set	 */	public void setLogErrors(boolean logErrors) {		fLogErrors= logErrors;	}	/**	 * Gets the logWarnings	 * @return Returns a boolean	 */	public boolean logWarnings() {		return fLogWarnings;	}	/**	 * Sets the logWarnings	 * @param logWarnings The logWarnings to set	 */	public void setLogWarnings(boolean logWarnings) {		fLogWarnings= logWarnings;	}	/**	 * Answers if files with errors are exported	 * @return Returns a boolean	 */	public boolean exportErrors() {		return fExportErrors;	}	/**	 * Sets the exportErrors	 * @param exportErrors The exportErrors to set	 */	public void setExportErrors(boolean exportErrors) {		fExportErrors= exportErrors;	}	/**	 * Answers if files with warnings are exported	 * @return Returns a boolean	 */	public boolean exportWarnings() {		return fExportWarnings;	}	/**	 * Sets the exportWarnings	 * @param exportWarnings The exportWarnings to set	 */	public void setExportWarnings(boolean exportWarnings) {		fExportWarnings= exportWarnings;	}
 	// ----------- Utility methods -----------
 
 	/**
@@ -456,7 +445,7 @@ transient 	private IType fMainClass;
 	 */
 	public boolean isValid() {
 		return (areClassFilesExported() || areJavaFilesExported())
-			&& getSelectedResources() != null && getSelectedResources().size() > 0
+			&& getSelectedElements() != null && getSelectedElements().size() > 0
 			&& getJarLocation() != null
 			&& doesManifestExist()
 			&& isMainClassValid(new BusyIndicatorRunnableContext());
@@ -469,7 +458,7 @@ transient 	private IType fMainClass;
 		if (isManifestGenerated())
 			return true;
 		IFile file= getManifestFile();
-		return file != null && file.exists();
+		return file != null && file.isAccessible();
 	}
 	/**
 	 * Tells whether the specified main class is valid.
@@ -491,25 +480,7 @@ transient 	private IType fMainClass;
 	 */
 	public Set getPackagesForSelectedResources() {
 		Set packages= new HashSet();
-		for (Iterator iter= getSelectedResources().iterator(); iter.hasNext();) {
-			IResource resource= (IResource)iter.next();
-			boolean isJavaProject;
-			try {
-				isJavaProject= resource.getProject().hasNature(JavaCore.NATURE_ID);
-			} catch (CoreException ex) {
-				isJavaProject= false;
-			}
-			if (isJavaProject) {
-				IJavaProject jProject= JavaCore.create(resource.getProject());
-				try {
-					IPackageFragment pack= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
-					if (pack != null && pack.getChildren().length > 0)						packages.add(pack);
-				} catch (JavaModelException ex) {
-					// don't add the package
-				}
-			}
-		}
-		return packages;
+		for (Iterator iter= getSelectedElements().iterator(); iter.hasNext();) {			Object element= iter.next();			if (element instanceof ICompilationUnit) {				IJavaElement pack= JavaModelUtility.getParent((IJavaElement)element, org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT);				if (pack != null)					packages.add(pack);			}		}		return packages;
 	}	/**	 * Tells whether the given resource (or its children) have compile errors.	 * The method acts on the current build state and does not recompile.	 * 	 * @param resource the resource to check for errors	 * @return <code>true</code> if the resource (and its children) are error free	 * @throws import org.eclipse.core.runtime.CoreException if there's a marker problem	 */	public boolean hasCompileErrors(IResource resource) throws CoreException {		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);		for (int i= 0; i < problemMarkers.length; i++) {			if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR)				return true;		}		return false;	}	/**	 * Tells whether the given resource (or its children) have compile errors.	 * The method acts on the current build state and does not recompile.	 * 	 * @param resource the resource to check for errors	 * @return <code>true</code> if the resource (and its children) are error free	 * @throws import org.eclipse.core.runtime.CoreException if there's a marker problem	 */	public boolean hasCompileWarnings(IResource resource) throws CoreException {		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);		for (int i= 0; i < problemMarkers.length; i++) {			if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_WARNING)				return true;		}		return false;	}	/**
 	 * Checks if the JAR file can be overwritten.
 	 * If the JAR package setting does not allow to overwrite the JAR
