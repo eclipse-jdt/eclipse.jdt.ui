@@ -16,7 +16,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -32,8 +35,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -297,7 +298,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	/**
 	 * Highlighting color list
 	 */
-	private final java.util.List fHighlightingColorList= new ArrayList();
+	private final List fHighlightingColorList= new ArrayList();
 	/**
 	 * Highlighting color list viewer
 	 */
