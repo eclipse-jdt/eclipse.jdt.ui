@@ -119,7 +119,7 @@ public class Checks {
 	public static RefactoringStatus checkMethodName(String name) {
 		RefactoringStatus status= checkName(name, JavaConventions.validateMethodName(name));
 		if (status.isOK() && startsWithUpperCase(name))
-			return RefactoringStatus.createWarningStatus("By convention, all names of methods start with uppercase letters");
+			return RefactoringStatus.createWarningStatus("By convention, all names of methods start with lowercase letters");
 		else	
 			return status;
 	}
