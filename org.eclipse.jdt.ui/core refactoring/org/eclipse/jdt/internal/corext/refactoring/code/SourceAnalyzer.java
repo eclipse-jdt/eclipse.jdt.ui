@@ -133,21 +133,20 @@ class SourceAnalyzer  {
 			return true;
 		}
 		public boolean visit(MethodInvocation node) {
-			Expression receiver= node.getExpression();
-			if (receiver == null) {
-				fImplicitReceivers.add(node);
-			} else if (receiver.getNodeType() == ASTNode.THIS_EXPRESSION) {
-				fImplicitReceivers.add(receiver);
+			if (fTypeCounter == 0) {
+				Expression receiver= node.getExpression();
+				if (receiver == null)
+					fImplicitReceivers.add(node);
 			}
 			return true;
 		}
 		public boolean visit(ClassInstanceCreation node) {
-			Expression receiver= node.getExpression();
-			if (receiver == null) {
-				if (node.resolveTypeBinding().isLocal())
-					fImplicitReceivers.add(node);
-			} else if (receiver.getNodeType() == ASTNode.THIS_EXPRESSION) {
-				fImplicitReceivers.add(receiver);
+			if (fTypeCounter == 0) {
+				Expression receiver= node.getExpression();
+				if (receiver == null) {
+					if (node.resolveTypeBinding().isLocal())
+						fImplicitReceivers.add(node);
+				}
 			}
 			return true;
 		}
@@ -172,6 +171,13 @@ class SourceAnalyzer  {
 				name.addReference(node);
 			return true;
 		}
+		public boolean visit(ThisExpression node) {
+			if (fTypeCounter == 0) {
+				fImplicitReceivers.add(node);
+			}
+			return true;
+		}
+
 		private void addNameData(SimpleName name) {
 			fNames.put(name.resolveBinding(), new NameData(name.getIdentifier()));
 		}

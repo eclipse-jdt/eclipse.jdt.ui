@@ -344,4 +344,8 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testReceiverWithStatic() throws Exception {
 		performReceiverTest();
 	}
+	
+	public void testThisExpression() throws Exception {
+		performReceiverTest();
+	}
 }
