@@ -11,9 +11,11 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -49,7 +51,9 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -64,6 +68,8 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -93,13 +99,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private final List fParameterInfos;
 	private final CodeGenerationSettings fCodeGenerationSettings;
 	private final ImportEditManager fImportEditManager;
-	private final ASTNodeMappingManager fAstManager;
-	private final ASTRewriteManager fRewriteManager;
 
 	private TextChangeManager fChangeManager;
 	private IMethod fMethod;
 	private IMethod[] fRippleMethods;
-	private ASTNode[] fOccurrenceNodes;
+	private SearchResultGroup[] fOccurrences;
 	private Set fDescriptionGroups;
 	private String fReturnTypeName;
 	private int fVisibility;
@@ -113,8 +117,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		Assert.isNotNull(method);
 		fMethod= method;
 		fParameterInfos= createParameterInfoList(method);
-		fAstManager= new ASTNodeMappingManager();
-		fRewriteManager= new ASTRewriteManager(fAstManager);
 		fDescriptionGroups= new HashSet(0);
 		fCodeGenerationSettings= codeGenerationSettings;
 		fImportEditManager= new ImportEditManager(fCodeGenerationSettings);
@@ -455,7 +457,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				return result;
 
 			fRippleMethods= RippleMethodFinder.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1), null);
-			fOccurrenceNodes= findOccurrenceNodes(new SubProgressMonitor(pm, 1));
+			fOccurrences= findOccurrences(new SubProgressMonitor(pm, 1));
 			
 			result.merge(checkVisibilityChanges());
 					
@@ -471,8 +473,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 
 			result.merge(checkIfDeletedParametersUsed());
-			if (mustAnalyzeAst()) 
-				result.merge(analyzeAst()); 
+			if (mustAnalyzeAstOfDeclaringCu()) 
+				result.merge(checkCompilationofDeclaringCu()); 
 			if (result.hasFatalError())
 				return result;
 
@@ -488,9 +490,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private void clearManagers() {
-		fAstManager.clear();
 		fImportEditManager.clear();
-		fRewriteManager.clear();
 	}
 
 	private RefactoringStatus collectAndCheckImports(IProgressMonitor pm) throws JavaModelException {
@@ -577,28 +577,35 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkIfDeletedParametersUsed() {
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < fOccurrenceNodes.length; i++) {
-			ASTNode methodOccurrence= fOccurrenceNodes[i];
-			if (isReferenceNode(methodOccurrence))
+		for (int i= 0; i < fOccurrences.length; i++) {
+			SearchResultGroup group= fOccurrences[i];
+			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(group.getCompilationUnit());
+			if (cu == null)
 				continue;
-			ICompilationUnit cu= fAstManager.getCompilationUnit(methodOccurrence);
-			MethodDeclaration decl= getMethodDeclaration(methodOccurrence);
-			if (decl == null) //this can be null because of bug 27236
-				continue;
-			String typeName= getFullTypeName(decl);
-			for (Iterator iter= getDeletedInfos().iterator(); iter.hasNext();) {
-				ParameterInfo info= (ParameterInfo) iter.next();
-				SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) decl.parameters().get(info.getOldIndex());
-				ASTNode[] paramRefs= TempOccurrenceFinder.findTempOccurrenceNodes(paramDecl, true, false);
-				if (paramRefs.length > 0){
-					Context context= JavaSourceContext.create(cu, paramRefs[0]);
-					Object[] keys= new String[]{paramDecl.getName().getIdentifier(),
-												decl.getName().getIdentifier(),
-												typeName};
-					String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_used", keys); //$NON-NLS-1$
-					result.addWarning(msg, context);
-				}
-			}	
+			CompilationUnit cuNode= AST.parseCompilationUnit(cu, true);
+			ASTNode[] methodOccurrences= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), cuNode);
+			for (int j= 0; j < methodOccurrences.length; j++) {
+				ASTNode methodOccurrence= methodOccurrences[j];
+				if (isReferenceNode(methodOccurrence))
+					continue;
+				MethodDeclaration decl= getMethodDeclaration(methodOccurrence);
+				if (decl == null) //this can be null because of jdt core bug 27236
+					continue;
+				String typeName= getFullTypeName(decl);
+				for (Iterator iter= getDeletedInfos().iterator(); iter.hasNext();) {
+					ParameterInfo info= (ParameterInfo) iter.next();
+					SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) decl.parameters().get(info.getOldIndex());
+					ASTNode[] paramRefs= TempOccurrenceFinder.findTempOccurrenceNodes(paramDecl, true, false);
+					if (paramRefs.length > 0){
+						Context context= JavaSourceContext.create(cu, paramRefs[0]);
+						Object[] keys= new String[]{paramDecl.getName().getIdentifier(),
+													decl.getName().getIdentifier(),
+													typeName};
+						String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_used", keys); //$NON-NLS-1$
+						result.addWarning(msg, context);
+					}
+				}	
+			}
 		}
 		return result;
 	}
@@ -608,7 +615,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		AnonymousClassDeclaration anonymous= (AnonymousClassDeclaration)ASTNodes.getParent(decl, AnonymousClassDeclaration.class);
 		if (anonymous != null && ASTNodes.isParent(typeDecl, anonymous)){
 			ClassInstanceCreation cic= (ClassInstanceCreation)ASTNodes.getParent(decl, ClassInstanceCreation.class);
-			return RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.anonymous_subclass", new String[]{ASTNodes.getNameIdentifier(cic.getName())}); //$NON-NLS-1$
+			return RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.anonymous_subclass", new String[]{ASTNodes.asString(cic.getName())}); //$NON-NLS-1$
 		} else 
 			return typeDecl.getName().getIdentifier();
 	}
@@ -665,7 +672,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return WorkingCopyUtil.getWorkingCopyIfExists(fMethod.getCompilationUnit());
 	}
 	
-	private boolean mustAnalyzeAst() throws JavaModelException{
+	private boolean mustAnalyzeAstOfDeclaringCu() throws JavaModelException{
 		if (JdtFlags.isAbstract(getMethod()))
 			return false;
 		else if (JdtFlags.isNative(getMethod()))
@@ -676,23 +683,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return true;
 	}
 	
-	private RefactoringStatus analyzeAst() throws JavaModelException{		
-		try {
-			RefactoringStatus result= new RefactoringStatus();
-						
-			result.merge(checkCompilation());
-			if (result.hasError())
-				return result;
-			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch(CoreException e) {
-			throw new JavaModelException(e);
-		}	
-	}
-	private RefactoringStatus checkCompilation() throws CoreException {
+	private RefactoringStatus checkCompilationofDeclaringCu() throws CoreException {
 		ICompilationUnit cu= getCu();
-		CompilationUnit compliationUnitNode= fAstManager.getAST(cu);
+		CompilationUnit compliationUnitNode= AST.parseCompilationUnit(cu, false);
 		TextChange change= fChangeManager.get(cu);
 		String newCuSource= change.getPreviewContent();
 		CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), cu.getElementName(), cu.getJavaProject());
@@ -745,19 +738,15 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	private List getNotDeletedInfos(){
-		List result= new ArrayList(fParameterInfos.size());
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
-			if (! info.isDeleted())
-				result.add(info);
-		}
-		return result;
+		List all= new ArrayList(fParameterInfos);
+		all.removeAll(getDeletedInfos());
+		return all;
 	}
 
 	private boolean areNamesSameAsInitial() {
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
-			if (! info.getOldName().equals(info.getNewName()))
+			if (info.isRenamed())
 				return false;
 		}
 		return true;
@@ -859,43 +848,82 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		} finally{
 			pm.done();
 			clearManagers();
-			fOccurrenceNodes= new ASTNode[0];
 		}	
 	}
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.preview"), 2); //$NON-NLS-1$
-
-		if (! areNamesSameAsInitial())
-			addRenamings();
-		modifyMethodOccurrences(new SubProgressMonitor(pm, 1));
-		if (isNoArgConstructor())
-			modifyImplicitCallsToNoArgConstructor(new SubProgressMonitor(pm, 1));
-		
 		TextChangeManager manager= new TextChangeManager();
-		fillWithRewriteEdits(manager);
+		boolean renameParameters= ! areNamesSameAsInitial();
+		boolean isNoArgConstructor= isNoArgConstructor();
+		Map subtypeMapping= null;
+		if (isNoArgConstructor){
+			//create only when needed
+			subtypeMapping= createSubclassMapping(new SubProgressMonitor(pm, 1));
+		}else{
+			pm.worked(1);
+		}
+		for (int i= 0; i < fOccurrences.length; i++) {
+			SearchResultGroup group= fOccurrences[i];
+			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(group.getCompilationUnit());
+			if (cu == null)
+				continue;
+			CompilationUnit cuNode= AST.parseCompilationUnit(cu, true);
+			ASTRewrite rewrite= new ASTRewrite(cuNode);
+			if (renameParameters && cu.equals(getCu())){
+				addParameterRenamings(cuNode, rewrite);
+			}
+			ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), cuNode);
+			for (int j= 0; j < nodes.length; j++) {
+				updateMethodOccurrenceNode(cu, rewrite, nodes[j]);
+			}
+			if (isNoArgConstructor && subtypeMapping.containsKey(cu)){
+				Set subtypes= (Set)subtypeMapping.get(cu);
+				for (Iterator iter= subtypes.iterator(); iter.hasNext();) {
+					IType subtype= (IType) iter.next();
+					TypeDeclaration subtypeNode= ASTNodeSearchUtil.getTypeDeclarationNode(subtype, cuNode);
+					if (subtypeNode != null)
+						modifyImplicitCallsToNoArgConstructor(subtypeNode, rewrite);
+				}
+			}
+			addTextEditFromRewrite(manager, cu, rewrite);
+		}
+		
 		pm.done();
 		return manager;
+	}
+
+	private void updateMethodOccurrenceNode(ICompilationUnit cu, ASTRewrite rewrite, ASTNode node) throws JavaModelException {
+		if (isReferenceNode(node))
+			updateReferenceNode(node, rewrite);
+		else	
+			updateDeclarationNode(node, rewrite, cu);
 	}	
 	
-	private void modifyImplicitCallsToNoArgConstructor(IProgressMonitor pm) throws JavaModelException {
-		TypeDeclaration[] subclassNodes= getSubclassNodes(fMethod.getDeclaringType(), pm);
-		for (int i= 0; i < subclassNodes.length; i++) {
-			modifyImplicitCallsToNoArgConstructor(subclassNodes[i]);
+	//ICompilationUnit -> Set of IType
+	private Map createSubclassMapping(IProgressMonitor pm) throws JavaModelException{
+		IType[] subtypes= getSubclasses(pm);
+		Map result= new HashMap();
+		for (int i= 0; i < subtypes.length; i++) {
+			IType subtype= subtypes[i];
+			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(subtype.getCompilationUnit());
+			if (! result.containsKey(cu))
+				result.put(cu, new HashSet());
+			((Set)result.get(cu)).add(subtype);
 		}
+		return result;
 	}
 	
-	private void modifyImplicitCallsToNoArgConstructor(TypeDeclaration subclass) {
+	private void modifyImplicitCallsToNoArgConstructor(TypeDeclaration subclass, ASTRewrite rewrite) {
 		MethodDeclaration[] constructors= getAllConstructors(subclass);
 		if (constructors.length == 0){
-			addNewConstructorToSubclass(subclass);
+			addNewConstructorToSubclass(subclass, rewrite);
 		} else {
-			ASTRewrite rewrite= getRewrite(subclass);
 			for (int i= 0; i < constructors.length; i++) {
-				if (containsImplicitCallToSuperConstructor(constructors[i])){
-					SuperConstructorInvocation superCall= addExplicitSuperConstructorCall(constructors[i], rewrite);
-					rewrite.markAsInserted(superCall);
-				}	
+				if (! containsImplicitCallToSuperConstructor(constructors[i]))
+					continue;
+				SuperConstructorInvocation superCall= addExplicitSuperConstructorCall(constructors[i], rewrite);
+				rewrite.markAsInserted(superCall);
 			}
 		}
 	}
@@ -915,7 +943,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 	
-	private boolean containsImplicitCallToSuperConstructor(MethodDeclaration constructor) {
+	private static boolean containsImplicitCallToSuperConstructor(MethodDeclaration constructor) {
 		Assert.isTrue(constructor.isConstructor());
 		Block body= constructor.getBody();
 		if (body == null)
@@ -929,7 +957,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return true;
 	}
 	
-	private void addNewConstructorToSubclass(TypeDeclaration subclass) {
+	private void addNewConstructorToSubclass(TypeDeclaration subclass, ASTRewrite rewrite) {
 		AST ast= subclass.getAST();
 		MethodDeclaration newConstructor= ast.newMethodDeclaration();
 		newConstructor.setName(ast.newSimpleName(subclass.getName().getIdentifier()));
@@ -940,9 +968,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		newConstructor.setModifiers(getAccessModifier(subclass));
 		newConstructor.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
 		
-		addExplicitSuperConstructorCall(newConstructor, getRewrite(subclass));
+		addExplicitSuperConstructorCall(newConstructor, rewrite);
 		subclass.bodyDeclarations().add(0, newConstructor); // ok to add as first ???
-		getRewrite(subclass).markAsInserted(newConstructor);
+		rewrite.markAsInserted(newConstructor);
 	}
 	
 	private static int getAccessModifier(TypeDeclaration subclass) {
@@ -967,110 +995,70 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
 	}
 	
-	private TypeDeclaration[] getSubclassNodes(IType iType, IProgressMonitor pm) throws JavaModelException {
-		IType[] subclasses= getSubclasses(iType, pm);
-		List result= new ArrayList(subclasses.length);
-		for(int i= 0; i < subclasses.length; i++){
-			TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(subclasses[i], fAstManager);
-			if (td != null)
-				result.add(td);
-		}
-		return (TypeDeclaration[]) result.toArray(new TypeDeclaration[result.size()]);
-	}
-	
-	private IType[] getSubclasses(IType iType, IProgressMonitor pm) throws JavaModelException {
-		return iType.newTypeHierarchy(pm).getSubclasses(iType);
+	private IType[] getSubclasses(IProgressMonitor pm) throws JavaModelException {
+		return fMethod.getDeclaringType().newTypeHierarchy(pm).getSubclasses(fMethod.getDeclaringType());
 	}
 	
 	private boolean isNoArgConstructor() throws JavaModelException {
 		return fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0;
 	}
+	
+	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
+		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
+		TextEdit resultingEdits= new MultiTextEdit();
+		rewrite.rewriteNode(textBuffer, resultingEdits, fDescriptionGroups);
 
-	private void fillWithRewriteEdits(TextChangeManager manager) throws JavaModelException, CoreException {
-		CompilationUnit[] cuNodes= fRewriteManager.getAllCompilationUnitNodes();
-		for (int i= 0; i < cuNodes.length; i++) {
-			CompilationUnit cuNode= cuNodes[i];
-			ASTRewrite rewrite= fRewriteManager.getRewrite(cuNode);
-			TextBuffer textBuffer= TextBuffer.create(fAstManager.getCompilationUnit(cuNode).getBuffer().getContents());
-			TextEdit resultingEdits= new MultiTextEdit();
-			rewrite.rewriteNode(textBuffer, resultingEdits, fDescriptionGroups);
-
-			ICompilationUnit cu= fAstManager.getCompilationUnit(cuNode);
-			TextChange textChange= manager.get(fAstManager.getCompilationUnit(cuNode));
-			if (fImportEditManager.hasImportEditFor(cu))
-				resultingEdits.add(fImportEditManager.getImportEdit(cu));
-			textChange.addTextEdit(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
-			rewrite.removeModifications();
-
-		}
-	}
-
-	private void modifyMethodOccurrences(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", fOccurrenceNodes.length); //$NON-NLS-1$
-		try{
-			for (int i= 0; i < fOccurrenceNodes.length; i++) {
-				ASTNode methodOccurrence= fOccurrenceNodes[i];
-				if (isReferenceNode(methodOccurrence))
-					updateReferenceNode(methodOccurrence);
-				else	
-					updateDeclarationNode(methodOccurrence);
-				pm.worked(1);	
-			}
-		} finally{
-			pm.done();
-		}
+		TextChange textChange= manager.get(cu);
+		if (fImportEditManager.hasImportEditFor(cu))
+			resultingEdits.add(fImportEditManager.getImportEdit(cu));
+		textChange.addTextEdit(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
+		rewrite.removeModifications();
 	}
 	
-	private void updateDeclarationNode(ASTNode methodOccurrence) throws JavaModelException {
+	private void updateDeclarationNode(ASTNode methodOccurrence, ASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclaration(methodOccurrence);
 		if (methodDeclaration == null) //can be null - see bug 27236
 			return;
 		if (! methodDeclaration.isConstructor())
-			changeReturnType(methodDeclaration);
-		changeParameterTypes(methodDeclaration);
+			changeReturnType(methodDeclaration, rewrite);
+		changeParameterTypes(methodDeclaration, rewrite);
 				
-		if (needsVisibilityUpdate(methodDeclaration))
-			changeVisibility(methodDeclaration);
-		reshuffleElements(methodOccurrence, methodDeclaration.parameters());
+		if (needsVisibilityUpdate(methodDeclaration, cu))
+			changeVisibility(methodDeclaration, rewrite);
+		reshuffleElements(methodOccurrence, methodDeclaration.parameters(), rewrite);
 	}
 	
-	private void changeParameterTypes(MethodDeclaration methodDeclaration) {
+	private void changeParameterTypes(MethodDeclaration methodDeclaration, ASTRewrite rewrite) {
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
 			if (! info.isAdded() && ! info.isDeleted() && info.isTypeNameChanged()){
 				SingleVariableDeclaration oldParam= (SingleVariableDeclaration)methodDeclaration.parameters().get(info.getOldIndex());
-				replaceTypeNode(oldParam.getType(), info.getNewTypeName());
+				replaceTypeNode(oldParam.getType(), info.getNewTypeName(), rewrite);
 			}
 		}
 	}
 
-	private void replaceTypeNode(Type typeNode, String newTypeName){
-		Type newParamType= (Type)getRewrite(typeNode).createPlaceholder(newTypeName, ASTRewrite.TYPE);
-		getRewrite(typeNode).markAsReplaced(typeNode, newParamType);
+	private void replaceTypeNode(Type typeNode, String newTypeName, ASTRewrite rewrite){
+		Type newParamType= (Type)rewrite.createPlaceholder(newTypeName, ASTRewrite.TYPE);
+		rewrite.markAsReplaced(typeNode, newParamType);
 	}
 
-	private ASTRewrite getRewrite(ASTNode node){
-		return fRewriteManager.getRewrite(ASTNodeMappingManager.getCompilationUnitNode(node));
+	private void changeReturnType(MethodDeclaration methodDeclaration, ASTRewrite rewrite) {
+		replaceTypeNode(methodDeclaration.getReturnType(), fReturnTypeName, rewrite);
 	}
 
-	private void changeReturnType(MethodDeclaration methodDeclaration) {
-		replaceTypeNode(methodDeclaration.getReturnType(), fReturnTypeName);
-	}
-
-	private void changeVisibility(MethodDeclaration methodDeclaration) throws JavaModelException {
+	private void changeVisibility(MethodDeclaration methodDeclaration, ASTRewrite rewrite) throws JavaModelException {
 		MethodDeclaration modifierMethodDeclaration= methodDeclaration.getAST().newMethodDeclaration();
 		modifierMethodDeclaration.setModifiers(getNewModifiers(methodDeclaration));
 		modifierMethodDeclaration.setExtraDimensions(methodDeclaration.getExtraDimensions());
-		ASTRewrite rewrite= getRewrite(methodDeclaration);
 		rewrite.markAsModified(methodDeclaration, modifierMethodDeclaration);
 	}
 
-	private void updateReferenceNode(ASTNode methodOccurrence) {		
-		reshuffleElements(methodOccurrence, getArguments(methodOccurrence));
+	private void updateReferenceNode(ASTNode methodOccurrence, ASTRewrite rewrite) {
+		reshuffleElements(methodOccurrence, getArguments(methodOccurrence), rewrite);
 	}
 	
-	private void reshuffleElements(ASTNode methodOccurrence, List elementList) {
-		ASTRewrite rewrite= getRewrite(methodOccurrence);
+	private void reshuffleElements(ASTNode methodOccurrence, List elementList, ASTRewrite rewrite) {
 		AST ast= methodOccurrence.getAST();
 		boolean isReference= isReferenceNode(methodOccurrence);
 		ASTNode[] nodes= getSubNodesOfMethodOccurrenceNode(methodOccurrence);
@@ -1136,12 +1124,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return JdtFlags.clearAccessModifiers(md.getModifiers()) | fVisibility;
 	}
 	
-	private IMethod getMethod(MethodDeclaration methodDeclaration) throws JavaModelException{
-		return (IMethod)fAstManager.getCompilationUnit(methodDeclaration).getElementAt(methodDeclaration.getName().getStartPosition());
+	private static IMethod getMethod(MethodDeclaration methodDeclaration, ICompilationUnit cu) throws JavaModelException{
+		return (IMethod)cu.getElementAt(methodDeclaration.getName().getStartPosition());
 	}
 	
-	private boolean needsVisibilityUpdate(MethodDeclaration methodDeclaration) throws JavaModelException {
-		return needsVisibilityUpdate(getMethod(methodDeclaration));
+	private boolean needsVisibilityUpdate(MethodDeclaration methodDeclaration, ICompilationUnit cu) throws JavaModelException {
+		return needsVisibilityUpdate(getMethod(methodDeclaration, cu));
 	}
 	
 	private boolean needsVisibilityUpdate(IMethod method) throws JavaModelException {
@@ -1175,15 +1163,17 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return RefactoringScopeFactory.create(fMethod);
 	}
 	
-	private ASTNode[] findOccurrenceNodes(IProgressMonitor pm) throws JavaModelException{
-		if (fMethod.isConstructor())
-			return ConstructorReferenceFinder.getConstructorOccurrenceNodes(fMethod, fAstManager, pm);
-		else	
-			return ASTNodeSearchUtil.findOccurrenceNodes(fRippleMethods, fAstManager, pm, createRefactoringScope());
+	private SearchResultGroup[] findOccurrences(IProgressMonitor pm) throws JavaModelException{
+		if (fMethod.isConstructor()){
+			return ConstructorReferenceFinder.getConstructorOccurrences(fMethod, pm);
+		}else{	
+			ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(fRippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);
+			return RefactoringSearchEngine.search(pm, createRefactoringScope(), pattern);
+		}
 	}
 	
-	private void addRenamings() throws JavaModelException {
-		MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fAstManager);
+	private void addParameterRenamings(CompilationUnit cuNode, ASTRewrite rewrite) throws JavaModelException {
+		MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, cuNode);
 		ParameterInfo[] infos= getRenamedParameterNames();
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fMethod.getCompilationUnit());
 		if (cu == null)
@@ -1197,7 +1187,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				ASTNode occurence= paramOccurrences[j];
 				if (occurence instanceof SimpleName){
 					SimpleName newName= occurence.getAST().newSimpleName(info.getNewName());
-					fRewriteManager.getRewrite(cu).markAsReplaced(occurence, newName, createGroupDescriptionString(info.getOldName()));
+					rewrite.markAsReplaced(occurence, newName, createGroupDescriptionString(info.getOldName()));
 				}
 			}
 		}
