@@ -1,10 +1,12 @@
 package p;
 
 class A {
-	void a(A a){}
+	protected int j;
+	void a(){}
 
 	protected void m() { 
-		a(this);
+		this.j++;
+		this.j= 0;
 	}
 
 }

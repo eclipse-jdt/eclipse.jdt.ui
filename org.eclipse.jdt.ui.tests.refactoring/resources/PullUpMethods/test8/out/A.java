@@ -2,14 +2,15 @@ package p;
 
 class A {
 	int x;
-	void m() { 
+	protected void m() { 
 		new B(){
 			void f(){
 				super.x++;
 			}
 		};
 	}
+
 }
 
 class B extends A {
-}
+	}

@@ -1,10 +1,13 @@
 package p;
 
 class A {
-	void a(A a){}
-
+	int x;
 	protected void m() { 
-		a(this);
+		class T extends A{
+			void t(){
+				super.x++;
+			}
+		};
 	}
 
 }
