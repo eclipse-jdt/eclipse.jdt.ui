@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -112,6 +113,10 @@ public class RefactoringAnalyzeUtil {
 		return ((MethodDeclaration)ASTNodes.getParent(decl, MethodDeclaration.class));
 	}
 
+	public static Block getBlock(TextEdit edit, TextChange change, CompilationUnit cuNode){
+		ASTNode decl= RefactoringAnalyzeUtil.getNameNode(RefactoringAnalyzeUtil.getTextRange(edit, change), cuNode);
+		return ((Block)ASTNodes.getParent(decl, Block.class));
+	}
 	
 	public static IProblem[] getIntroducedCompileProblems(String wcSource, CompilationUnit newCUNode, CompilationUnit oldCuNode) {
 		Set subResult= new HashSet();				
