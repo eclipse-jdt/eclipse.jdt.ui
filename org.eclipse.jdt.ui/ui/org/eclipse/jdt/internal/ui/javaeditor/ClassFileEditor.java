@@ -143,13 +143,6 @@ public class ClassFileEditor extends JavaEditor {
 	}
 	
 	/**
-	 * @see AbstractTextEditor#isEditable()
-	 */
-	public boolean isEditable() {
-		return false;
-	}
-
-	/**
 	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
 	 */
 	protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input) {
@@ -157,5 +150,19 @@ public class ClassFileEditor extends JavaEditor {
 			ClassFileEditorInput cfi= (ClassFileEditorInput) input;
 			page.setInput(cfi.getClassFile());
 		}
+	}
+	
+	/**
+	 * @see AbstractTextEditor#isDirty()
+	 */
+	public boolean isDirty() {
+		return false;
+	}
+	
+	/**
+	 * @see AbstractTextEditor#isSaveOnCloseNeeded()
+	 */
+	public boolean isSaveOnCloseNeeded() {
+		return false;
 	}
 }
