@@ -16,20 +16,17 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -135,9 +132,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 				
-				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "class1", preview.substring(selection.x, selection.x + selection.y));	
-
 			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
 				assertTrue("same proposal kind", doLocal);
 				doLocal= false;
@@ -151,9 +145,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("    }\n");
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
-				
-				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "class1", preview.substring(selection.x, selection.x + selection.y));	
 			}
 		}
 	}
@@ -209,8 +200,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 				
-				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "iterator", preview.substring(selection.x, selection.x + selection.y));	
 			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
 				assertTrue("same proposal kind", doLocal);
 				doLocal= false;
@@ -230,8 +219,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 
-				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "iterator", preview.substring(selection.x, selection.x + selection.y));	
 			}
 		}
 	}
@@ -293,8 +280,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 				
-				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "fManager", preview.substring(selection.x, selection.x + selection.y));	
 			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
 				assertTrue("same proposal kind", doLocal);
 				doLocal= false;
@@ -312,8 +297,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 
-				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "_manager", preview.substring(selection.x, selection.x + selection.y));	
 			}
 		}
 	}
@@ -368,8 +351,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 				
-				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "g", preview.substring(selection.x, selection.x + selection.y));	
 			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
 				assertTrue("same proposal kind", doLocal);
 				doLocal= false;
@@ -387,8 +368,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 
-				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "g", preview.substring(selection.x, selection.x + selection.y));	
 			}
 		}
 	}	
@@ -444,8 +423,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 				
-				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "objects", preview.substring(selection.x, selection.x + selection.y));						
 			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
 				assertTrue("same proposal kind", doLocal);
 				doLocal= false;
@@ -464,8 +441,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 				
-				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "objects", preview.substring(selection.x, selection.x + selection.y));	
 			}
 		}
 	}

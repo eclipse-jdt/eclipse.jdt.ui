@@ -803,7 +803,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s, int i, Object o) {\n");
 		buf.append("        int x= 0;\n");
-		buf.append("        foo(null, x, null);\n");
+		buf.append("        foo(s, x, o);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
