@@ -32,16 +32,8 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ASTNodeDeleteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -117,14 +109,14 @@ public class TypedSource {
 		};
 	}
 	public static TypedSource[] createTypedSources(IJavaElement[] javaElements) throws CoreException {
+		//Map<ICompilationUnit, List<IJavaElement>>
 		Map grouped= ReorgUtils.groupByCompilationUnit(Arrays.asList(javaElements));
 		List result= new ArrayList(javaElements.length);
 		for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
 			ICompilationUnit cu= (ICompilationUnit) iter.next();
-			List elems= (List) grouped.get(cu);
 			CompilationUnit cuNode= AST.parseCompilationUnit(cu, false);
-			for (Iterator iterator= elems.iterator(); iterator.hasNext();) {
-				TypedSource[] ts= create((IJavaElement) iterator.next(), cu, cuNode);
+			for (Iterator iterator= ((List) grouped.get(cu)).iterator(); iterator.hasNext();) {
+				TypedSource[] ts= createTypedSources((IJavaElement) iterator.next(), cu, cuNode);
 				if (ts != null)
 					result.addAll(Arrays.asList(ts));				
 			}
@@ -132,58 +124,51 @@ public class TypedSource {
 		return (TypedSource[]) result.toArray(new TypedSource[result.size()]);		
 	}
 
-	private static TypedSource[] create(IJavaElement elem, ICompilationUnit cu, CompilationUnit cuNode) throws CoreException {
+	private static TypedSource[] createTypedSources(IJavaElement elem, ICompilationUnit cu, CompilationUnit cuNode) throws CoreException {
 		if (! ReorgUtils.isInsideCompilationUnit(elem))
 			return null;
 		//import containers are different because you cannot paste them directly (there's no AST node for them)
-		if (elem.getElementType() != IJavaElement.IMPORT_CONTAINER)
-			return new TypedSource[] {create(getSource(elem, cu, cuNode), elem.getElementType())};
+		if (elem.getElementType() == IJavaElement.IMPORT_CONTAINER) 
+			return createTypedSourcesForImportContainer(cu, cuNode, (IImportContainer)elem);
+		//fields need to be handled differently because of the multi-declaration case
+		else if (elem.getElementType() == IJavaElement.FIELD) 
+			return new TypedSource[] {create(getFieldSource((IField)elem, cu, cuNode), elem.getElementType())};
+		return new TypedSource[] {create(getSourceOfDeclararationNode(elem, cu, cuNode), elem.getElementType())};
+	}
 
-		IImportContainer container= (IImportContainer)elem;
+	private static TypedSource[] createTypedSourcesForImportContainer(ICompilationUnit cu, CompilationUnit cuNode, IImportContainer container) throws JavaModelException, CoreException {
 		IJavaElement[] imports= container.getChildren();
 		List result= new ArrayList(imports.length);
 		for (int i= 0; i < imports.length; i++) {
-			result.addAll(Arrays.asList(create(imports[i], cu, cuNode)));
+			result.addAll(Arrays.asList(createTypedSources(imports[i], cu, cuNode)));
 		}
 		return (TypedSource[]) result.toArray(new TypedSource[result.size()]);
-	}
-
-	private static String getSource(IJavaElement elem, ICompilationUnit cu, CompilationUnit cuNode) throws CoreException {
-		//fields need to be handled differently because of the multi-declaration case
-		if (elem.getElementType() == IJavaElement.FIELD)
-			return getFieldSource((IField) elem, cu, cuNode);
-		return getSourceOfDeleteEdit(elem, cu, cuNode);		
 	}
 
 	private static String getFieldSource(IField field, ICompilationUnit cu, CompilationUnit cuNode) throws CoreException {
 		VariableDeclarationFragment declarationFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, cuNode);
 		FieldDeclaration declaration= ASTNodeSearchUtil.getFieldDeclarationNode(field, cuNode);
 		if (declaration.fragments().size() == 1)
-			return getSourceOfDeleteEdit(field, cu, cuNode);
+			return getSourceOfDeclararationNode(field, cu, cuNode);
 		StringBuffer buff= new StringBuffer();
 		IBuffer buffer= cu.getBuffer();
-		//get(0) is ok - checked before
 		int firstFragmentOffset= ((ASTNode)declaration.fragments().get(0)).getStartPosition();
 		buff.append(buffer.getText(declaration.getStartPosition(), firstFragmentOffset - declaration.getStartPosition()));
 		buff.append(buffer.getText(declarationFragment.getStartPosition(), declarationFragment.getLength()));
 		buff.append(";");
-		buff.append(StubUtility.getLineDelimiterUsed(field));
 		return buff.toString();
 	}
 
-	private static String getSourceOfDeleteEdit(IJavaElement elem, ICompilationUnit cu, CompilationUnit cuNode) throws JavaModelException, CoreException {
-		ASTRewrite rewrite= new ASTRewrite(cuNode);
-		try {
-			ASTNodeDeleteUtil.markAsDeleted(new IJavaElement[] {elem}, cuNode, rewrite);
-			TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
-			TextEdit resultingEdits= new MultiTextEdit();
-			rewrite.rewriteNode(textBuffer, resultingEdits);
-			TextChange change= new CompilationUnitChange("", cu);
-			change.addTextEdit("", resultingEdits);
-			String content= textBuffer.getContent(resultingEdits.getTextRange().getOffset(), resultingEdits.getTextRange().getLength());
-			return Strings.trimIndentation(content, CodeFormatterUtil.getTabWidth(), false);
-		} finally{
-			rewrite.removeModifications();
-		}
+	private static String getSourceOfDeclararationNode(IJavaElement elem, ICompilationUnit cu, CompilationUnit cuNode) throws JavaModelException, CoreException {
+		Assert.isTrue(elem.getElementType() != IJavaElement.IMPORT_CONTAINER);
+		ASTNode[] nodes= ASTNodeSearchUtil.getDeclarationNode(elem, cuNode);
+		if (nodes != null && nodes.length == 1) {
+			return trimIndent(cu.getBuffer().getText(nodes[0].getStartPosition(), nodes[0].getLength()));
+		} else 
+			return "";
+	}
+
+	private static String trimIndent(String source) {
+		return Strings.trimIndentation(source, CodeFormatterUtil.getTabWidth(), false);
 	}
 }
