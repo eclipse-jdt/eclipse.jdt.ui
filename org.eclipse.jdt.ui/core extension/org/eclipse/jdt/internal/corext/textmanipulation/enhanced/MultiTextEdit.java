@@ -18,6 +18,8 @@ public final class MultiTextEdit extends TextEdit {
 	 * @see TextEdit#getTextRange
 	 */	
 	public TextRange getTextRange() {
+		if (!isConnected())
+			return TextRange.UNDEFINED;
 		return getChildrenTextRange();
 	}
 

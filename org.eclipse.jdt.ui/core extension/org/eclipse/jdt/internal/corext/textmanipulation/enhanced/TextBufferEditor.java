@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -29,6 +30,7 @@ public class TextBufferEditor {
 	private TextBuffer fBuffer;
 	private MultiTextEdit fRoot;
 	private UndoMemento fUndoMemento;
+	private IStatus fCheckStatus;
 	
 	/**
 	 * Creates a new <code>TextBufferEditor</code> for the given 
@@ -39,6 +41,7 @@ public class TextBufferEditor {
 	public TextBufferEditor(TextBuffer buffer) {
 		Assert.isNotNull(buffer);
 		fBuffer= buffer;
+		fCheckStatus= null;
 	}
 	
 	/**
@@ -65,7 +68,9 @@ public class TextBufferEditor {
 		if (fRoot == null)
 			fRoot= new MultiTextEdit();
 		edit.executeConnect(fBuffer);
+		fRoot.setState(TextEdit.UNCONNECTED);
 		fRoot.add(edit);
+		fCheckStatus= null;
 	}
 		
 	/**
@@ -81,6 +86,7 @@ public class TextBufferEditor {
 	public void add(UndoMemento undo) throws CoreException {
 		Assert.isTrue(fRoot == null);
 		fUndoMemento= undo;
+		fCheckStatus= null;
 	}
 	
 	/**
@@ -90,11 +96,17 @@ public class TextBufferEditor {
 	 * 	</code>otherwise. One major reason why text edits cannot be executed
 	 * 	is a wrong offset or length value of a <code>TextEdit</code>.
 	 */
-	public boolean canPerformEdits() {
-		if (fRoot != null)
-			return fRoot.checkEdit(fBuffer.getLength());
-		else
-			return true;
+	public IStatus canPerformEdits() {
+		if (fCheckStatus != null)
+			return fCheckStatus;
+		if (fRoot != null) {
+			fRoot.sortChildren();
+			fRoot.setState(TextEdit.CONNECTED);
+			fCheckStatus= fRoot.checkEdit(fBuffer.getLength());
+		} else {
+			fCheckStatus= fUndoMemento.checkEdits(fBuffer.getLength());
+		}
+		return fCheckStatus;
 	}
 	
 	/**
@@ -103,6 +115,7 @@ public class TextBufferEditor {
 	public void clear() {
 		fRoot= null;
 		fUndoMemento= null;
+		fCheckStatus= null;
 	}
 	
 	/**
@@ -115,6 +128,9 @@ public class TextBufferEditor {
 	 * @exception CoreException if the edits cannot be executed
 	 */
 	public UndoMemento performEdits(IProgressMonitor pm) throws CoreException {
+		IStatus s= canPerformEdits();
+		if (!s.isOK())
+			throw new CoreException(s);
 		if (pm == null)
 			pm= new NullProgressMonitor();
 	
@@ -167,6 +183,6 @@ public class TextBufferEditor {
 			if (updater != null)
 				fBuffer.unregisterUpdater(updater);
 		}
-	}	
+	}
 }
 

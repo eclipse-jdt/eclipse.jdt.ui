@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.jface.text.DocumentEvent;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 public final class CopySourceEdit extends AbstractTransferEdit {
 
@@ -73,8 +74,13 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 		fTarget.checkRange(event);
 	}
 	
-	/* package */ boolean checkEdit(int bufferLength) {
-		return fTarget != null && fTarget.getSourceEdit() == this && super.checkEdit(bufferLength);
+	/* package */ IStatus checkEdit(int bufferLength) {
+		IStatus s= super.checkEdit(bufferLength);
+		if (!s.isOK())
+			return s;
+		if (fTarget == null || fTarget.getSourceEdit() != this)
+			return createErrorStatus("Incorrect CopySourceEdit");
+		return createOKStatus();
 	}
 	
 	/* package */ CopyTargetEdit getTargetEdit() {

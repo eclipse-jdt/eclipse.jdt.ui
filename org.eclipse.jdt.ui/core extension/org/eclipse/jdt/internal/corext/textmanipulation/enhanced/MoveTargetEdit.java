@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.jface.text.DocumentEvent;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -105,8 +106,13 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		}
 	}
 	
-	/* package */ boolean checkEdit(int bufferLength) {
-		return fSource != null && fSource.getTargetEdit() == this && getTextRange().getLength() == 0 && super.checkEdit(bufferLength);
+	/* package */ IStatus checkEdit(int bufferLength) {
+		IStatus s= super.checkEdit(bufferLength);
+		if (!s.isOK())
+			return s;
+		if (fSource == null || fSource.getTargetEdit() != this || getTextRange().getLength() != 0)
+			createErrorStatus("Incorrect MoveTargetEdit");
+		return createOKStatus();
 	}
 	
 	/* package */ MoveSourceEdit getSourceEdit() {

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.textmanipulation.enhanced;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 public final class CopyTargetEdit extends AbstractTransferEdit {
 
@@ -53,8 +54,13 @@ public final class CopyTargetEdit extends AbstractTransferEdit {
 		}
 	}
 	
-	/* package */ boolean checkEdit(int bufferLength) {
-		return fSource != null && fSource.getTargetEdit() == this && getTextRange().getLength() == 0 && super.checkEdit(bufferLength);
+	/* package */ IStatus checkEdit(int bufferLength) {
+		IStatus s= super.checkEdit(bufferLength);
+		if (!s.isOK())
+			return s;
+		if (fSource == null || fSource.getTargetEdit() != this || getTextRange().getLength() != 0)
+			return createErrorStatus("Incorrect CopyTargetEdit");
+		return createOKStatus();
 	}
 	
 	/* package */ CopySourceEdit getSourceEdit() {

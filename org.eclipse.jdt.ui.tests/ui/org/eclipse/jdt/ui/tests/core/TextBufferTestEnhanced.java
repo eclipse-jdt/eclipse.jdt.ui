@@ -11,6 +11,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite; 
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.CopySourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.CopyTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.MoveSourceEdit;
@@ -65,42 +67,42 @@ public class TextBufferTestEnhanced extends TestCase {
 		// [ [ ] ]
 		fEditor.add(SimpleTextEdit.createReplace(0, 2, "01"));
 		fEditor.add(SimpleTextEdit.createReplace(1, 2, "12"));
-		assertTrue(!fEditor.canPerformEdits());
+		assertFalse(fEditor.canPerformEdits());
 	}	
 	
 	public void testOverlap2() throws Exception {
 		// [[ ] ]
 		fEditor.add(SimpleTextEdit.createReplace(0, 2, "01"));
 		fEditor.add(SimpleTextEdit.createReplace(0, 1, "0"));
-		assertTrue(!fEditor.canPerformEdits());
+		assertFalse(fEditor.canPerformEdits());
 	}	
 	
 	public void testOverlap3() throws Exception {
 		// [ [ ]]
 		fEditor.add(SimpleTextEdit.createReplace(0, 2, "01"));
 		fEditor.add(SimpleTextEdit.createReplace(1, 1, "1"));
-		assertTrue(!fEditor.canPerformEdits());
+		assertFalse(fEditor.canPerformEdits());
 	}	
 	
 	public void testOverlap4() throws Exception {
 		// [ [ ] ]
 		fEditor.add(SimpleTextEdit.createReplace(0, 3, "012"));
 		fEditor.add(SimpleTextEdit.createReplace(1, 1, "1"));
-		assertTrue(!fEditor.canPerformEdits());
+		assertFalse(fEditor.canPerformEdits());
 	}
 	
 	public void testOverlap5() throws Exception {
 		// [ []  ]
 		fEditor.add(SimpleTextEdit.createReplace(0, 3, "012"));
 		fEditor.add(SimpleTextEdit.createInsert(1, "xx"));
-		assertTrue(!fEditor.canPerformEdits());
+		assertFalse(fEditor.canPerformEdits());
 	}
 	
 	public void testOverlap6() throws Exception {
 		// [  [] ]
 		fEditor.add(SimpleTextEdit.createReplace(0, 3, "012"));
 		fEditor.add(SimpleTextEdit.createInsert(2, "xx"));
-		assertTrue(!fEditor.canPerformEdits());
+		assertFalse(fEditor.canPerformEdits());
 	}
 	
 	public void testOverlap7() throws Exception {
@@ -108,7 +110,7 @@ public class TextBufferTestEnhanced extends TestCase {
 		MoveTargetEdit target= new MoveTargetEdit(3, source);
 		fEditor.add(source);
 		fEditor.add(target);
-		assertTrue(!fEditor.canPerformEdits());
+		assertFalse(fEditor.canPerformEdits());
 	}
 	
 	public void testOverlap8() throws Exception {
@@ -116,7 +118,7 @@ public class TextBufferTestEnhanced extends TestCase {
 		MoveTargetEdit target= new MoveTargetEdit(6, source);
 		fEditor.add(source);
 		fEditor.add(target);
-		assertTrue(!fEditor.canPerformEdits());
+		assertFalse(fEditor.canPerformEdits());
 	}
 	
 	public void testOverlap9() throws Exception {
@@ -128,7 +130,7 @@ public class TextBufferTestEnhanced extends TestCase {
 		fEditor.add(t1);
 		fEditor.add(s2);
 		fEditor.add(t2);
-		assertTrue(!fEditor.canPerformEdits());
+		assertFalse(fEditor.canPerformEdits());
 	}
 		
 	public void testInsert1() throws Exception {
@@ -583,6 +585,22 @@ public class TextBufferTestEnhanced extends TestCase {
 	
 	private void assertBufferContent() {
 		assertEquals("Buffer content restored", "0123456789", fBuffer.getContent());
+	}
+	
+	private void assertTrue(IStatus status) {
+		assertTrue(status.isOK());
+	}	
+	
+	private void assertTrue(String message, IStatus status) {
+		assertTrue(message, status.isOK());
+	}	
+	
+	private void assertFalse(IStatus status) {
+		assertTrue(!status.isOK());
+	}	
+	
+	private void assertFalse(String message, IStatus status) {
+		assertTrue(message, !status.isOK());
 	}	
 }
 

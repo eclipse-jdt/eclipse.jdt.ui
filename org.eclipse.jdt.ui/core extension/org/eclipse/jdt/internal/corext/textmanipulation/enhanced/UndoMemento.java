@@ -9,6 +9,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * This class encapsulates the reverse change of a number of <code>TextEdit</code>s
@@ -40,6 +44,10 @@ public final class UndoMemento {
 			((TextEdit)fEdits.get(i)).performed();
 			pm.worked(1);
 		}
+	}
+	
+	/* package */ IStatus checkEdits(int bufferLength) {
+		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "Undo memento is valid", null);
 	}
 }
 

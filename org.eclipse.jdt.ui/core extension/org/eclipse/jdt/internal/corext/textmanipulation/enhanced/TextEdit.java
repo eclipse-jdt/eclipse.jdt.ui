@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.textmanipulation.enhanced;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -18,7 +20,11 @@ import org.eclipse.jface.text.DocumentEvent;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 
@@ -35,17 +41,40 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
  * @see TextBufferEditor
  */
 public abstract class TextEdit {
+
+	private static class Sorter implements Comparator {
+		public int compare(Object arg1, Object arg2) {
+			TextRange r1= ((TextEdit)arg1).getTextRange();
+			TextRange r2= ((TextEdit)arg2).getTextRange();
+			int o1= r1.getOffset();
+			int o2= r2.getOffset();
+			if (o1 < o2)
+				return -1;
+			if (o1 > o2)
+				return 1;
+			
+			int l1= r1.getLength();
+			int l2= r2.getLength();
+			
+			if (l1 < l2)
+				return -1;
+			if (l1 > l2)
+				return 1;
+				
+			return 0;
+		}
+	}
 	
 	private TextEdit fParent;
 	private List fChildren;
 	private int fState;
 	
-	protected static final int CREATED= 0;
+	protected static final int UNCONNECTED= 0;
 	protected static final int ADDED= 1;
 	protected static final int CONNECTED= 2;
 
 	protected TextEdit() {
-		fState= CREATED;
+		fState= UNCONNECTED;
 	}
 
 	public TextEdit getParent() {
@@ -53,25 +82,12 @@ public abstract class TextEdit {
 	}
 	
 	public void add(TextEdit edit) {
-		Assert.isTrue(isCreated());
+		Assert.isTrue(isUnconnected());
 		edit.setParent(this);
 		if (fChildren == null) {
 			fChildren= new ArrayList(2);
-			fChildren.add(edit);
-		} else {
-			int size= fChildren.size();
-			TextRange editRange= edit.getTextRange();
-			for (int i= 0; i < size; i++) {
-				TextEdit element= (TextEdit)fChildren.get(i);
-				TextRange elementRange= element.getTextRange();
-				if (	elementRange.getOffset() > editRange.getOffset() || 
-						(elementRange.getOffset() == editRange.getOffset() && editRange.getLength() < elementRange.getLength())) {
-					fChildren.add(i, edit);
-					return;
-				}
-			}
-			fChildren.add(edit);
 		}
+		fChildren.add(edit);
 	}
 
 	/**
@@ -188,8 +204,8 @@ public abstract class TextEdit {
 		fState= state;
 	}
 	
-	/* package */ boolean isCreated() {
-		return fState == CREATED;
+	/* package */ boolean isUnconnected() {
+		return fState == UNCONNECTED;
 	}
 	
 	/* package */ boolean isAdded() {
@@ -211,14 +227,14 @@ public abstract class TextEdit {
 		Assert.isTrue(range.getOffset() <= eventOffset && eventEnd <= range.getInclusiveEnd());
 	}
 	
-	/* package */ boolean checkEdit(int bufferLength) {
+	/* package */ IStatus checkEdit(int bufferLength) {
 		TextRange range= getTextRange();
 		if (range.getExclusiveEnd() > bufferLength)
-			return false;
+			return createErrorStatus("Offset greater than buffer length");
 		boolean isInsertionPoint= range.isInsertionPoint();
 		TextRange cRange= getChildrenTextRange();
 		if (!cRange.isUndefined() && (cRange.getOffset() < range.getOffset() || cRange.getExclusiveEnd() > range.getExclusiveEnd())) {
-			return false;
+			return createErrorStatus("Range of child edit lies outside of parent edit");
 		}
 		TextRange last= null;
 		if (fChildren != null) {
@@ -227,19 +243,29 @@ public abstract class TextEdit {
 				TextRange eRange= element.getTextRange();
 				
 				if (!(isInsertionPoint && eRange.isInsertionPoint()) && last != null && last.getInclusiveEnd() >= eRange.getOffset()) {
-					return false;
+					return createErrorStatus("Overlapping text edits");
 				}
-				if (!element.checkEdit(bufferLength))
-					return false;
+				IStatus s= element.checkEdit(bufferLength);
+				if (!s.isOK())
+					return s;
 				last= eRange;
 			}
 		}
-		return true;
+		return createOKStatus();
+	}
+	
+	protected IStatus createErrorStatus(String message) {
+		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, message, null);
+	}
+	
+	protected IStatus createOKStatus() {
+		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "Text edit is valid", null);
 	}
 	
 	//---- Edit processing --------------------------------------------------------------------------------
 	
 	/* package */ void executeConnect(TextBuffer buffer) throws CoreException {
+		Assert.isTrue(isUnconnected());
 		fState= ADDED;
 		List children= getChildren();
 		if (children != null) {
@@ -249,6 +275,7 @@ public abstract class TextEdit {
 		}
 		connect(buffer);
 		fState= CONNECTED;
+		sortChildren();
 	}
 	
 	/* package */ void execute(TextBuffer buffer, Updater updater, IProgressMonitor pm) throws CoreException {
@@ -300,6 +327,11 @@ public abstract class TextEdit {
 			edit.childExecuted(delta);
 			edit= edit.getParent();
 		}
+	}
+	
+	/* package */ void sortChildren() {
+		if (fChildren != null)
+			Collections.sort(fChildren, new Sorter());
 	}	
 }
 
