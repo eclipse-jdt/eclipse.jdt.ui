@@ -26,6 +26,5 @@ public class PerformanceTestSuite5 extends TestSuite {
 	
 	public PerformanceTestSuite5() {
 		addTest(OpenTextEditorStartupTest.suiteForMeasurement());
-		addTest(EventDrivenTestSuite.suite());
 	}
 }
