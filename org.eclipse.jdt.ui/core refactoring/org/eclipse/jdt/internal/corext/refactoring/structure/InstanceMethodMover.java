@@ -292,7 +292,7 @@ class InstanceMethodMover {
 			return 0;
 		}	
 		
-		RefactoringStatus checkMoveOfMethodToMe(Method method, String newMethodName, String originalReceiverParameterName, boolean inlineDelegator, boolean removeDelegator) throws JavaModelException {
+		final RefactoringStatus checkMoveOfMethodToMe(Method method, String newMethodName, String originalReceiverParameterName, boolean inlineDelegator, boolean removeDelegator, Object validationContext) throws JavaModelException {
 			Assert.isNotNull(method);
 			Assert.isNotNull(newMethodName);
 			Assert.isNotNull(originalReceiverParameterName);
@@ -305,7 +305,7 @@ class InstanceMethodMover {
 			checkParameterNames(result, method, originalReceiverParameterName);
 			if (result.hasFatalError())
 				return result;
-			result.merge(Checks.validateModifiesFiles(getFilesToBeModified(method)));
+			result.merge(Checks.validateModifiesFiles(getFilesToBeModified(method), validationContext));
 			return result;
 		}
 		
@@ -1901,11 +1901,13 @@ class InstanceMethodMover {
 		return fMethodToMove.checkCanBeMoved();
 	}
 
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public final RefactoringStatus checkInput(IProgressMonitor pm, Object validationContext) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			Assert.isNotNull(fNewReceiver, "New receiver must be chosen before checkInput(..) is called."); //$NON-NLS-1$
-			return fNewReceiver.checkMoveOfMethodToMe(fMethodToMove, fNewMethodName, fOriginalReceiverParameterName, fInlineDelegator, fRemoveDelegator);
+			return fNewReceiver.checkMoveOfMethodToMe(fMethodToMove, fNewMethodName, 
+				fOriginalReceiverParameterName, fInlineDelegator, 
+				fRemoveDelegator, validationContext);
 		}finally{
 			pm.done();
 		}

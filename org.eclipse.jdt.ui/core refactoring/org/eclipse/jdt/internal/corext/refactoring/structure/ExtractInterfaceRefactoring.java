@@ -262,7 +262,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus validateModifiesFiles(){
-		return Checks.validateModifiesFiles(getAllFilesToModify());
+		return Checks.validateModifiesFiles(getAllFilesToModify(), getValidationContext());
 	}
 
 	/*

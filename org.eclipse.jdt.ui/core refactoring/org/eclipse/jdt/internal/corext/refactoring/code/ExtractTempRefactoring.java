@@ -255,7 +255,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		try{
 			pm.beginTask("", 6); //$NON-NLS-1$
 			
-			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
+			RefactoringStatus result= Checks.validateModifiesFiles(
+				ResourceUtil.getFiles(new ICompilationUnit[]{fCu}), getValidationContext());
 			if (result.hasFatalError())
 				return result;
 				

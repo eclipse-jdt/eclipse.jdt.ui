@@ -178,7 +178,7 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		return fMover.checkInput(pm);
+		return fMover.checkInput(pm, getValidationContext());
 	}
 	
 	/*

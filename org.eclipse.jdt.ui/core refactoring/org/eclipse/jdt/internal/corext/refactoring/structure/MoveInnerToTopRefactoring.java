@@ -920,7 +920,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 	
 	private RefactoringStatus validateModifiesFiles(){
-		return Checks.validateModifiesFiles(getAllFilesToModify());
+		return Checks.validateModifiesFiles(getAllFilesToModify(), getValidationContext());
 	}
 
 	private void updateConstructorReference(ASTNode refNode, OldASTRewrite rewrite, ICompilationUnit cu) throws CoreException {

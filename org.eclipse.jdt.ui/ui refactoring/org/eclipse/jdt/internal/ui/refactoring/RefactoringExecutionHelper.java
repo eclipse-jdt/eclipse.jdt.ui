@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -93,10 +94,15 @@ public class RefactoringExecutionHelper {
 	
 	public void perform() throws InterruptedException, InvocationTargetException {
 		Assert.isTrue(Display.getCurrent() != null);
-		IJobManager manager=  Platform.getJobManager();
+		final IJobManager manager=  Platform.getJobManager();
 		try {
 			try {
-				manager.suspend(ResourcesPlugin.getWorkspace().getRoot(), null);
+				Runnable r= new Runnable() {
+					public void run() {
+						manager.suspend(ResourcesPlugin.getWorkspace().getRoot(), null);
+					}
+				};
+				BusyIndicator.showWhile(fParent.getDisplay(), r);
 			} catch (OperationCanceledException e) {
 				throw new InterruptedException(e.getMessage());
 			}
@@ -105,6 +111,7 @@ public class RefactoringExecutionHelper {
 			if (fNeedsSavedEditors && !saveHelper.saveEditors(fParent))
 				throw new InterruptedException();
 			Operation op= new Operation();
+			fRefactoring.setValidationContext(fParent);
 			try{
 				fExecContext.run(false, false, new WorkbenchRunnableAdapter(op));
 				RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
@@ -135,6 +142,7 @@ public class RefactoringExecutionHelper {
 			}
 		} finally {
 			manager.resume(ResourcesPlugin.getWorkspace().getRoot());
+			fRefactoring.setValidationContext(null);
 		}
 	}	
 }

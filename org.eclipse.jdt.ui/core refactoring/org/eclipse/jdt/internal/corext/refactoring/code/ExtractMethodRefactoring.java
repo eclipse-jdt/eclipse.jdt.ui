@@ -213,7 +213,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (fSelectionStart < 0 || fSelectionLength == 0)
 			return mergeTextSelectionStatus(result);
 		
-		result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit})));
+		result.merge(Checks.validateModifiesFiles(
+			ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit}),
+			getValidationContext()));
 		if (result.hasFatalError())
 			return result;
 		

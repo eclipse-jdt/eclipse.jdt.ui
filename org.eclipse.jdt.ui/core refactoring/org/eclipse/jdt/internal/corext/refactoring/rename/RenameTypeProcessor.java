@@ -343,11 +343,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				pm.worked(10);
 	
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			if (checker != null) {
-				checker.addFiles(getAllFilesToModify());
-			} else {
-				result.merge(validateModifiesFiles());
-			}
+			checker.addFiles(getAllFilesToModify());
 			return result;
 		} finally {
 			pm.done();
@@ -589,10 +585,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		if (willRenameCU())
 			result.add(ResourceUtil.getFile(fType.getCompilationUnit()));
 		return (IFile[]) result.toArray(new IFile[result.size()]);
-	}
-	
-	private RefactoringStatus validateModifiesFiles() throws CoreException {
-		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
 	/*

@@ -359,13 +359,8 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements, getProcessorName());
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
 			IFile[] classPathFiles= getClassPathFiles();
-			if (checker != null) {
-				checker.addFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits()));
-				checker.addFiles(classPathFiles);
-			} else {
-				result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits())));
-				result.merge(Checks.validateModifiesFiles(classPathFiles));
-			}
+			checker.addFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits()));
+			checker.addFiles(classPathFiles);
 			return result;
 		} catch (OperationCanceledException e) {
 			fWasCanceled= true;

@@ -603,18 +603,18 @@ public class Checks {
 	
 	//-------- validateEdit checks ----
 	
-	public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify) {
+	public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify, Object context) {
 		RefactoringStatus result= new RefactoringStatus();
 		IStatus status= Resources.checkInSync(filesToModify);
 		if (!status.isOK())
 			result.merge(RefactoringStatus.create(status));
-		status= Resources.makeCommittable(filesToModify, null);
+		status= Resources.makeCommittable(filesToModify, context);
 		if (!status.isOK())
 			result.merge(RefactoringStatus.create(status));
 		return result;
 	}
 	
-	public static RefactoringStatus validateEdit(ICompilationUnit unit) {
+	public static RefactoringStatus validateEdit(ICompilationUnit unit, Object context) {
 		IResource resource= JavaModelUtil.toOriginal(unit).getResource();
 		RefactoringStatus result= new RefactoringStatus();
 		if (resource == null)
@@ -622,7 +622,7 @@ public class Checks {
 		IStatus status= Resources.checkInSync(resource);
 		if (!status.isOK())
 			result.merge(RefactoringStatus.create(status));
-		status= Resources.makeCommittable(resource, null);
+		status= Resources.makeCommittable(resource, context);
 		if (!status.isOK())
 			result.merge(RefactoringStatus.create(status));
 		return result;

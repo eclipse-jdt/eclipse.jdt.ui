@@ -277,11 +277,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				pm.worked(1);
 			
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			if (checker != null) {
-				checker.addFiles(getAllFilesToModify());
-			} else {
-				result.merge(validateModifiesFiles());
-			}
+			checker.addFiles(getAllFilesToModify());
 			return result;
 		} finally{
 			pm.done();
@@ -405,10 +401,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	private IFile[] getAllFilesToModify() {
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
-	}
-	
-	private RefactoringStatus validateModifiesFiles() {
-		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
 	private RefactoringStatus analyzeCompilationUnits() throws CoreException {

@@ -306,11 +306,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				pm.worked(1);
 			
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			if (checker != null) {
-				checker.addFiles(getAllFilesToModify());
-			} else {
-				result.merge(validateModifiesFiles());
-			}
+			checker.addFiles(getAllFilesToModify());
 			return result;
 		} finally{
 			pm.done();
@@ -580,10 +576,6 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		if (fQualifiedNameSearchResult != null)
 			combined.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
 		return (IFile[]) combined.toArray(new IFile[combined.size()]);
-	}
-	
-	private RefactoringStatus validateModifiesFiles() throws CoreException {
-		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
 	// ----------- Changes ---------------

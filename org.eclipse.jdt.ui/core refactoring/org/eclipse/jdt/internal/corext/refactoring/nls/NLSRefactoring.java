@@ -255,7 +255,7 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus validateModifiesFiles() {
-		return Checks.validateModifiesFiles(getAllFilesToModify());
+		return Checks.validateModifiesFiles(getAllFilesToModify(), getValidationContext());
 	}
 
 	//should stop checking if fatal error

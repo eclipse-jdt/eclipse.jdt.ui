@@ -212,9 +212,6 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				result.addFatalError(RefactoringCoreMessages.getString("SelfEncapsulateField.type_not_resolveable")); //$NON-NLS-1$
 			return result;
 		}
-		result.merge(Checks.validateModifiesFiles(new IFile[]{ResourceUtil.getFile(fField.getCompilationUnit())}));
-		if (result.hasFatalError())
-			return result;
 		computeUsedNames();
 		fRewriter= new OldASTRewrite(fRoot);
 		return result;
@@ -601,7 +598,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus validateModifiesFiles(){
-		return Checks.validateModifiesFiles(getAllFilesToModify());
+		return Checks.validateModifiesFiles(getAllFilesToModify(), getValidationContext());
 	}			
 
 	private IFile[] getAllFilesToModify(){

@@ -327,6 +327,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	//---- Input checking ------------------------------------
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+		initializeForFinalConditionChecking();
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("MoveMembersRefactoring.Checking_preconditions"), 10); //$NON-NLS-1$
 			
@@ -362,13 +363,18 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			List modifiedCus= new ArrayList();
 			createChange(modifiedCus, result, new SubProgressMonitor(pm, 7));
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			if (checker != null) {
-				checker.addFiles(getAllFilesToModify(modifiedCus));
-			}
+			checker.addFiles(getAllFilesToModify(modifiedCus));
+			
 			return result;
 		} finally {
 			pm.done();
 		}	
+	}
+	
+	private void initializeForFinalConditionChecking() {
+		// clears some internal state since final condition checking
+		// can be executed more than once.
+		fTarget= null;
 	}
 	
 	private IFile[] getAllFilesToModify(List modifiedCus) {
@@ -784,7 +790,6 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 				ast, fMemberBindings, targetBinding, fSourceBinding);
 			ast.getRoot().accept(analyzer);
 			status.merge(analyzer.getStatus());
-			status.merge(Checks.validateEdit(unit));
 			if (status.hasFatalError()) {
 				fChange= null;
 				return;
@@ -797,10 +802,10 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		}
 		status.merge(moveMembers(fMemberDeclarations, memberSources));
 		fChange.add(fSource.createChange());
-		status.merge(Checks.validateEdit(fSource.getCu()));
+		modifiedCus.add(fSource.getCu());
 		if (! fSource.getCu().equals(fTarget.getCu())) {
 			fChange.add(fTarget.createChange());
-			status.merge(Checks.validateEdit(fTarget.getCu()));
+			modifiedCus.add(fTarget.getCu());
 		}
 		pm.worked(1);
 	}

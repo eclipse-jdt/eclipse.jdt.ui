@@ -513,7 +513,7 @@ public class PasteAction extends SelectionDispatchAction{
 				new RefactoringExecutionHelper(fPasteRefactoring, RefactoringCore.getConditionCheckingFailedSeverity(), false, parent, context).perform();
 			}
 		}
-		private static class PasteTypedSourcesRefactoring extends Refactoring{
+		private static class PasteTypedSourcesRefactoring extends Refactoring {
 			
 			private final TypedSource[] fSources;
 			private IJavaElement fDestination;
@@ -572,7 +572,8 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 
 			public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-				RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{getDestinationCu()}));
+				RefactoringStatus result= Checks.validateModifiesFiles(
+					ResourceUtil.getFiles(new ICompilationUnit[]{getDestinationCu()}), getValidationContext());
 				return result;
 			}
 

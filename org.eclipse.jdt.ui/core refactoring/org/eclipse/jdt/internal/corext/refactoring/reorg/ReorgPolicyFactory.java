@@ -224,7 +224,7 @@ class ReorgPolicyFactory {
 		//invariant: only 1 of these can ever be not null
 		private IResource fResourceDestination;
 		private IJavaElement fJavaElementDestination;
-			
+		
 		public final RefactoringStatus setDestination(IResource destination) throws JavaModelException {
 			Assert.isNotNull(destination);
 			resetDestinations();
@@ -269,12 +269,8 @@ class ReorgPolicyFactory {
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException{
 			Assert.isNotNull(reorgQueries);
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			if (checker != null) {
-				checker.addFiles(getAllModifiedFiles());
-				return new RefactoringStatus();
-			} else {
-				return Checks.validateModifiesFiles(getAllModifiedFiles());
-			}
+			checker.addFiles(getAllModifiedFiles());
+			return new RefactoringStatus();
 		}
 		public boolean hasAllInputSet() {
 			return fJavaElementDestination != null || fResourceDestination != null;
@@ -1684,7 +1680,8 @@ class ReorgPolicyFactory {
 				//<workaround>
 				if (fChangeManager == null){
 					fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), new RefactoringStatus()); //TODO: non-CU matches silently dropped
-					RefactoringStatus status= Checks.validateModifiesFiles(getAllModifiedFiles());
+					RefactoringStatus status= Checks.validateModifiesFiles(
+						getAllModifiedFiles(), null);
 					if (status.hasFatalError())
 						fChangeManager= new TextChangeManager();
 				}	

@@ -470,7 +470,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.checking_preconditions"), 1); //$NON-NLS-1$	
 			
-		RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(fAffectedUnits));
+		RefactoringStatus result= Checks.validateModifiesFiles(
+			ResourceUtil.getFiles(fAffectedUnits), getValidationContext());
 		
 		pm.done();
 		return result;

@@ -768,7 +768,7 @@ public class PushDownRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus validateModifiesFiles(){
-		return Checks.validateModifiesFiles(getAllFilesToModify());
+		return Checks.validateModifiesFiles(getAllFilesToModify(), getValidationContext());
 	}
 
 	//--  change creation -------

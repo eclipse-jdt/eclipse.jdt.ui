@@ -250,7 +250,9 @@ public class RenameTempRefactoring extends Refactoring implements INameUpdating,
 		try {
 			pm.beginTask("", 1);	 //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();			
-			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu})));
+			result.merge(Checks.validateModifiesFiles(
+				ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
+				getValidationContext()));
 			if (result.hasFatalError())
 				return result;
 			

@@ -317,11 +317,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				return result;
 			
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			if (checker != null) {
-				checker.addFiles(getAllFilesToModify());
-			} else {
-				result.merge(validateModifiesFiles());
-			}
+			checker.addFiles(getAllFilesToModify());
 			return result;
 		} finally{
 			pm.done();
@@ -428,10 +424,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	
 	private IFile[] getAllFilesToModify() {
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
-	}
-	
-	private RefactoringStatus validateModifiesFiles() {
-		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
 	private SearchPattern createSearchPattern(){

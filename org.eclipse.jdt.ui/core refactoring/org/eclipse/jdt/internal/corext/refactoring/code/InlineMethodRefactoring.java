@@ -202,7 +202,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		fTargetProvider.initialize();
 		pm.setTaskName(RefactoringCoreMessages.getString("InlineMethodRefactoring.searching")); //$NON-NLS-1$
 		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(new SubProgressMonitor(pm, 1));
-		result.merge(Checks.validateModifiesFiles(getFilesToBeModified(units)));
+		result.merge(Checks.validateModifiesFiles(getFilesToBeModified(units), getValidationContext()));
 		if (result.hasFatalError())
 			return result;
 		checkOverridden(result, new SubProgressMonitor(pm, 1));

@@ -394,7 +394,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		cus.addAll(Arrays.asList(fAffectedCUs));
 		result.merge(
 			Checks.validateModifiesFiles(ResourceUtil.getFiles(
-				(ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]))));
+				(ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()])),
+				getValidationContext()));
 		if (result.hasFatalError())
 			return result;
 

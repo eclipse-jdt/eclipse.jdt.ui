@@ -548,16 +548,8 @@ public class InlineConstantRefactoring extends Refactoring {
 			Assert.isNotNull(pm);
 			
 			InlineTargetCompilationUnit[] results= prepareTargetsUnchecked(refactoring, pm, status);
-			validateResults(results, status);
 			return results;
 		}
-		
-		private static void validateResults(InlineTargetCompilationUnit[] results, RefactoringStatus status) {
-			ICompilationUnit[] cus= new ICompilationUnit[results.length];
-			for(int i= 0; i < results.length; i++)
-				cus[i]= results[i].fUnit;
-			status.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(cus)));
-		}		
 		
 		private static InlineTargetCompilationUnit[] prepareTargetsUnchecked(InlineConstantRefactoring refactoring, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {		
 			if(refactoring.getReplaceAllReferences())
@@ -849,11 +841,6 @@ public class InlineConstantRefactoring extends Refactoring {
 		try {
 			pm.beginTask("", 4); //$NON-NLS-1$
 	
-			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[] { fCu }));
-			if (result.hasFatalError())
-				return result;
-			pm.worked(1);
-	
 			if (!fCu.isStructureKnown())
 				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.syntax_errors"), null, Corext.getPluginId(), RefactoringStatusCodes.SYNTAX_ERRORS, null); //$NON-NLS-1$
 			pm.worked(1);
@@ -1044,13 +1031,21 @@ public class InlineConstantRefactoring extends Refactoring {
 	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
+		
 		fTargetCompilationUnits= InlineTargetCompilationUnit.prepareTargets(this, pm, result);
-		if(result.hasFatalError())
-			return result;
 		
 		for(int i= 0; i < fTargetCompilationUnits.length; i++)
 			fTargetCompilationUnits[i].checkReferences(result);
 		
+		if(result.hasFatalError())
+			return result;
+		
+		ICompilationUnit[] cus= new ICompilationUnit[fTargetCompilationUnits.length + 1];
+		for(int i= 0; i < fTargetCompilationUnits.length; i++) {
+			cus[i]= fTargetCompilationUnits[i].fUnit;
+		}
+		cus[cus.length - 1]= fCu;
+		result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(cus), getValidationContext()));
 		
 		return result;
 	}

@@ -474,7 +474,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			fFormalArgNames= findCtorArgNames();
  
 			ICompilationUnit[]	affectedFiles= collectAffectedUnits(fAllCallsTo);
-			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(affectedFiles)));
+			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(affectedFiles), getValidationContext()));
 
 			if (fCallSitesInBinaryUnits)
 				result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getString("IntroduceFactory.callSitesInBinaryClass"))); //$NON-NLS-1$

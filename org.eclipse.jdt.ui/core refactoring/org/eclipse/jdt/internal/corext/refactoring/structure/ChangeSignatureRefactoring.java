@@ -926,7 +926,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus validateModifiesFiles(){
-		return Checks.validateModifiesFiles(getAllFilesToModify());
+		return Checks.validateModifiesFiles(getAllFilesToModify(), getValidationContext());
 	}
 
 	//--  changes ----

@@ -133,7 +133,9 @@ public class InlineTempRefactoring extends Refactoring {
 		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			
-			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
+			RefactoringStatus result= Checks.validateModifiesFiles(
+				ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
+				getValidationContext());
 			if (result.hasFatalError())
 				return result;
 				
