@@ -87,6 +87,8 @@ public class RenameTypeParticipant extends RenameParticipant {
 		};
 		JspUIPlugin.getDefault().search(new JspTypeQuery(fType), collector, pm);
 		
+		if (changes.size() == 0)
+			return null;
 		CompositeChange result= new CompositeChange("JSP updates");
 		for (Iterator iter= changes.values().iterator(); iter.hasNext();) {
 			result.add((IChange)iter.next());
