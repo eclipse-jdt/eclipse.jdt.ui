@@ -46,8 +46,12 @@ class ReorgExceptionHandler implements IReorgExceptionHandler{
 			JavaModelException jme= (JavaModelException)e;
 			if (jme.getException() instanceof CoreException)
 				fStatus.merge(((CoreException) jme.getException()).getStatus());
-		} else if (e instanceof CoreException)
+		} else if (e instanceof CoreException) {
 			fStatus.merge(((CoreException) e).getStatus());
+		} else if (e instanceof OperationCanceledException)	{
+			throw (OperationCanceledException)e;
+		}
+			
 	}
 
 	public boolean forceDeletingResourceOutOfSynch(String name, CoreException e) {
