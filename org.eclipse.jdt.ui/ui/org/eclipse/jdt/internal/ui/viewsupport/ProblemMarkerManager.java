@@ -112,7 +112,7 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 			JavaPlugin.log(e.getStatus());
 		}
 
-		if (changedElements.size() > 0) {
+		if (!changedElements.isEmpty()) {
 			IResource[] changes= (IResource[]) changedElements.toArray(new IResource[changedElements.size()]);
 			fireChanges(changes);
 		}

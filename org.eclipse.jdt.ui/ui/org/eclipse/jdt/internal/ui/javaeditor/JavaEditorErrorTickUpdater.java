@@ -43,7 +43,7 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 				
 		if (model != null) {
 			if (fLabelProvider == null) {
-				fLabelProvider= new JavaUILabelProvider(0, JavaElementImageProvider.SMALL_ICONS, JavaUILabelProvider.getAdornmentProviders(true, null));
+				fLabelProvider= new JavaUILabelProvider(0, JavaElementImageProvider.SMALL_ICONS, JavaUILabelProvider.getDecorators(true, null));
 			}
 			fAnnotationModel=model;
 			fAnnotationModel.addAnnotationModelListener(this);

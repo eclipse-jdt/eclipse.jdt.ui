@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
 public class TypesView extends JavaBrowsingPart {
 
@@ -26,10 +26,10 @@ public class TypesView extends JavaBrowsingPart {
 	 * @see	ILabelProvider
 	 */
 	protected ILabelProvider createLabelProvider() {
-		return new StandardJavaUILabelProvider(
-						StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
-						StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
-						StandardJavaUILabelProvider.getAdornmentProviders(true, null)
+		return new AppearanceAwareLabelProvider(
+						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
+						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
+						AppearanceAwareLabelProvider.getDecorators(true, null)
 						);
 	}
 

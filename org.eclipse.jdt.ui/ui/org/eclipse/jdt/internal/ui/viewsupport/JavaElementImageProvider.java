@@ -4,16 +4,16 @@
  */
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -28,18 +28,19 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 /**
  * Default strategy of the Java plugin for the construction of Java element icons.
  */
 public class JavaElementImageProvider {
 	
+
 	/**
 	 * Flags for the JavaImageLabelProvider:
 	 * Generate images with overlays.
@@ -50,32 +51,13 @@ public class JavaElementImageProvider {
 	 * Generate small sized images.
 	 */
 	public final static int SMALL_ICONS= 0x2;
-
+	
 	/**
 	 * Use the 'light' style for rendering types.
 	 */	
-	public final static int LIGHT_TYPE_ICONS= 0x4;
-	
-	/**
-	 * Show error overrlay. 
-	 */	
-	public final static int OVERLAY_ERROR= 0x8;
+	public final static int LIGHT_TYPE_ICONS= 0x4;	
 
-	/**
-	 * Show warning overrlay
-	 */	
-	public final static int OVERLAY_WARNING= 0x10;
-	
-	/**
-	 * Show override overrlay. 
-	 */	
-	public final static int OVERLAY_OVERRIDE= 0x20;
 
-	/**
-	 * Show implements overrlay. 
-	 */	
-	public final static int OVERLAY_IMPLEMENTS= 0x40;
-	
 	private static final Point SMALL_SIZE= new Point(16, 16);
 	private static final Point BIG_SIZE= new Point(22, 16);
 
@@ -117,14 +99,14 @@ public class JavaElementImageProvider {
 	private boolean showOverlayIcons(int flags) {
 		return (flags & OVERLAY_ICONS) != 0;
 	}
-	
-	private boolean useLightIcons(int flags) {
-		return (flags & LIGHT_TYPE_ICONS) != 0;
-	}
-	
+		
 	private boolean useSmallSize(int flags) {
 		return (flags & SMALL_ICONS) != 0;
 	}
+	
+	private boolean useLightIcons(int flags) {
+		return (flags & LIGHT_TYPE_ICONS) != 0;
+	}	
 	
 	/**
 	 * Returns an image descriptor for a java element. The descriptor includes overlays, if specified.
@@ -148,9 +130,9 @@ public class JavaElementImageProvider {
 		if (descriptor == null) {
 			return null;
 		}
-		int adornmentFlags= computeBasicAdornmentFlags(adaptable, flags);
+
 		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
-		return new JavaElementImageDescriptor(descriptor, adornmentFlags, size);
+		return new JavaElementImageDescriptor(descriptor, 0, size);
 	}
 	
 	// ---- Computation of base image key -------------------------------------------------
@@ -196,8 +178,8 @@ public class JavaElementImageProvider {
 							return JavaPluginImages.DESC_OBJS_CLASSALT;
 						else 
 							return JavaPluginImages.DESC_OBJS_INTERFACEALT;
-					}
-					
+					}					
+										
 					int flags= type.getFlags();
 					boolean hasVisibility= Flags.isPublic(flags) || Flags.isPrivate(flags) || Flags.isProtected(flags);
 					
@@ -285,7 +267,7 @@ public class JavaElementImageProvider {
 	
 	private int computeJavaAdornmentFlags(IJavaElement element, int renderFlags) {
 		
-		int flags= computeBasicAdornmentFlags(element, renderFlags);
+		int flags= 0;
 		
 		if (showOverlayIcons(renderFlags) && element instanceof ISourceReference) { 
 			ISourceReference sourceReference= (ISourceReference)element;
@@ -311,24 +293,7 @@ public class JavaElementImageProvider {
 		}
 		return flags;
 	}
-	
-	private int computeBasicAdornmentFlags(Object element, int renderFlags) {
-		int flags= 0;
-		if ((renderFlags & OVERLAY_ERROR) !=0) {
-			flags |= JavaElementImageDescriptor.ERROR;
-		}
-		if ((renderFlags & OVERLAY_WARNING) !=0) {
-			flags |= JavaElementImageDescriptor.WARNING;
-		}		
-		if ((renderFlags & OVERLAY_OVERRIDE) !=0) {
-			flags |= JavaElementImageDescriptor.OVERRIDES;
-		}
-		if ((renderFlags & OVERLAY_IMPLEMENTS) !=0) {
-			flags |= JavaElementImageDescriptor.IMPLEMENTS;
-		}
-		return flags;			
-	}	
-	
+		
 	private boolean confirmAbstract(IMember member) {
 		 // Although all methods of a Java interface are abstract, the abstract 
 		 // icon should not be shown.

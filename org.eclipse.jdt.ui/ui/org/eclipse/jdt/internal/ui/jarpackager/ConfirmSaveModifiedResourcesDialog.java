@@ -18,9 +18,9 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TableViewer;
 
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
 /**
  * This dialog displays a list of <code>IFile</code> and asks
@@ -54,10 +54,10 @@ public class ConfirmSaveModifiedResourcesDialog extends MessageDialog {
 	protected Control createCustomArea(Composite parent) {
 		fList= new TableViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		fList.setContentProvider(new ListContentProvider());
-		fList.setLabelProvider(new StandardJavaUILabelProvider(
-			StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
-			StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-			StandardJavaUILabelProvider.getAdornmentProviders(true, null)));
+		fList.setLabelProvider(new AppearanceAwareLabelProvider(
+			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
+			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
+			AppearanceAwareLabelProvider.getDecorators(true, null)));
 		fList.setInput(Arrays.asList(fUnsavedFiles));
 		Control control= fList.getControl();
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);

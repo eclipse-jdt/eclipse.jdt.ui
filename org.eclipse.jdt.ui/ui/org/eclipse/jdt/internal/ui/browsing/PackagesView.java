@@ -6,9 +6,6 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
-import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IWorkbenchActionConstants;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -20,10 +17,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.packageview.JavaElementPatternFilter;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
-import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
 public class PackagesView extends JavaBrowsingPart {
 
@@ -43,10 +40,10 @@ public class PackagesView extends JavaBrowsingPart {
 	}
 
 	protected ILabelProvider createLabelProvider() {
-		return new StandardJavaUILabelProvider(
-						StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
-						StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-						StandardJavaUILabelProvider.getAdornmentProviders(true, null)
+		return new AppearanceAwareLabelProvider(
+						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
+						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
+						AppearanceAwareLabelProvider.getDecorators(true, null)
 						);
 	}
 

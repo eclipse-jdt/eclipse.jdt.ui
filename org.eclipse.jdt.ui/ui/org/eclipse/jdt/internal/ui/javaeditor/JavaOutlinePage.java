@@ -34,6 +34,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -44,7 +45,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
@@ -65,7 +65,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -81,11 +80,9 @@ import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
@@ -93,10 +90,9 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
-import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.OverrideAdornmentProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
@@ -677,10 +673,10 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		Tree tree= new Tree(parent, SWT.MULTI);
 
-		StandardJavaUILabelProvider lprovider= new StandardJavaUILabelProvider(
-			StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE,
-			StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
-			StandardJavaUILabelProvider.getAdornmentProviders(true, new OverrideAdornmentProvider())
+		ILabelProvider lprovider= new AppearanceAwareLabelProvider(
+			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE,
+			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
+			AppearanceAwareLabelProvider.getDecorators(true, new OverrideIndicatorLabelDecorator())
 		);
 
 		fOutlineViewer= new JavaOutlineViewer(tree);		
@@ -845,7 +841,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		}
 		fActionGroups.setContext(new ActionContext(selection));
 		fActionGroups.fillContextMenu(menu);
-		fActionGroups.setContext(null);
 	}
 	
 	/*

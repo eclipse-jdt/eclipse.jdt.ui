@@ -134,8 +134,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private IMemento fMemento;
 	
-	private IProblemChangedListener fHierarchyProblemListener;
-	
 	private TypeHierarchyLifeCycle fHierarchyLifeCycle;
 	private ITypeHierarchyLifeCycleListener fTypeHierarchyLifeCycleListener;
 		
@@ -192,8 +190,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		};
 		fHierarchyLifeCycle.addChangedListener(fTypeHierarchyLifeCycleListener);
-		
-		fHierarchyProblemListener= null;
 		
 		fIsEnableMemberFilter= false;
 		
@@ -437,12 +433,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fPaneLabelProvider.dispose();
 		getSite().getPage().removePartListener(fPartListener);
 
-		if (fHierarchyProblemListener != null) {
-			JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fHierarchyProblemListener);
-		}
-		if (fMethodsViewer != null) {
-			JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fMethodsViewer);
-		}
 		if (fActionGroups != null)
 			fActionGroups.dispose();
 		super.dispose();
@@ -533,7 +523,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		Control control= fMethodsViewer.getTable();
 		control.addKeyListener(createKeyListener());
 		
-		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fMethodsViewer);
 		return control;
 	}
 	
@@ -1068,14 +1057,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				}
 			}		
 			updateTitle();
-			
-			if (fHierarchyProblemListener != null) {
-				JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fHierarchyProblemListener);
-			}
-			fHierarchyProblemListener= getCurrentViewer();
-			JavaPlugin.getDefault().getProblemMarkerManager().addListener(fHierarchyProblemListener);
-			
-			
+					
 			fDialogSettings.put(DIALOGSTORE_HIERARCHYVIEW, viewerIndex);
 			getCurrentViewer().getTree().setFocus();
 		}

@@ -28,8 +28,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -37,7 +35,6 @@ import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
-import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
  
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	
@@ -48,13 +45,9 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, TypeHierarchyLifeCycle lifeCycle,  IWorkbenchPart part) {
 		super(new Tree(parent, SWT.SINGLE));
 
-		ILabelProvider baseLProvider= new StandardJavaUILabelProvider(
-			StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
-			StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
-			StandardJavaUILabelProvider.getAdornmentProviders(true, new HierarchyAdornmentProvider(lifeCycle))
-		);
-		
-		setLabelProvider(new DecoratingLabelProvider(baseLProvider, PlatformUI.getWorkbench().getDecoratorManager()));
+		ILabelProvider labelProvider= new HierarchyLabelProvider(lifeCycle);
+	
+		setLabelProvider(new DecoratingLabelProvider(labelProvider, PlatformUI.getWorkbench().getDecoratorManager()));
 			
 		setContentProvider(contentProvider);
 		setSorter(new ViewerSorter() {

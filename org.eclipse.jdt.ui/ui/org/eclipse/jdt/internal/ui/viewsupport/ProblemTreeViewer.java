@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
  * A <code>ProblemItemMapper</code> is contained that maps all items in
  * the tree to underlying resource
  */
-public class ProblemTreeViewer extends TreeViewer implements IProblemChangedListener {
+public class ProblemTreeViewer extends TreeViewer {
 
 	private ResourceToItemMapper fResourceToItemMapper;
 
@@ -71,15 +71,6 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 	
 	
 	/*
-	 * @see IProblemChangedListener#problemsChanged
-	 */
-	public void problemsChanged(IResource[] changed) {
-		for (int i= 0; i < changed.length; i++) {
-			fResourceToItemMapper.resourceChanged(changed[i]);
-		}
-	}
-	
-	/*
 	 * @see StructuredViewer#mapElement(Object, Widget)
 	 */
 	protected void mapElement(Object element, Widget item) {
@@ -104,7 +95,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 	 */
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
 		Object[] changed= event.getElements();
-		if (changed != null) {
+		if (changed != null && !fResourceToItemMapper.isEmpty()) {
 			ArrayList others= new ArrayList();
 			for (int i= 0; i < changed.length; i++) {
 				Object curr= changed[i];

@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
 
 public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
@@ -35,9 +35,9 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 
 	public JavaSearchResultLabelProvider() {
 		super(
-			new StandardJavaUILabelProvider(
-				StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
-				StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
+			new AppearanceAwareLabelProvider(
+				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
+				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
 				null)
 			, null);
 		setLabelDecorator(PlatformUI.getWorkbench().getDecoratorManager());
@@ -76,7 +76,7 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 	}
 
 	public void setOrder(int orderFlag) {
-		int flags= StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS;
+		int flags= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS;
 		if (orderFlag == SHOW_ELEMENT_CONTAINER)
 			flags |= JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
 							| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED;
@@ -89,7 +89,7 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
 			flags |= JavaElementLabels.PREPEND_ROOT_PATH;
 		}
-		((StandardJavaUILabelProvider)getLabelProvider()).setTextFlags(flags);
+		((AppearanceAwareLabelProvider)getLabelProvider()).setTextFlags(flags);
 	}
 
 	private IJavaElement getJavaElement(Object o) {

@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
 /**
  * The Java working set page allows the user to create
@@ -139,11 +139,11 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		fTreeContentProvider= new JavaWorkingSetPageContentProvider();
 		fTree.setContentProvider(fTreeContentProvider);
 		
-		StandardJavaUILabelProvider fJavaElementLabelProvider= 
-			new StandardJavaUILabelProvider(
-				StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
-				StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-				StandardJavaUILabelProvider.getAdornmentProviders(true, null)
+		AppearanceAwareLabelProvider fJavaElementLabelProvider= 
+			new AppearanceAwareLabelProvider(
+				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
+				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
+				AppearanceAwareLabelProvider.getDecorators(true, null)
 			);
 		
 		fTree.setLabelProvider(new DecoratingLabelProvider(

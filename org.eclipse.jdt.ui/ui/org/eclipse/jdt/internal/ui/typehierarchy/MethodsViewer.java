@@ -32,7 +32,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.ui.actions.OpenAction;
@@ -45,10 +44,10 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
-import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
 /**
  * Method viewer shows a list of methods of a input type. 
@@ -60,7 +59,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	private static final String TAG_SHOWINHERITED= "showinherited";		 //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "mv_vertical_scroll";		 //$NON-NLS-1$
 	
-	private static final int LABEL_BASEFLAGS= StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS;
+	private static final int LABEL_BASEFLAGS= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS;
 	
 	private JavaUILabelProvider fLabelProvider;
 		
@@ -74,12 +73,8 @@ public class MethodsViewer extends ProblemTableViewer {
 	public MethodsViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
 		
-		fLabelProvider= new StandardJavaUILabelProvider(
-			StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
-			StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
-			StandardJavaUILabelProvider.getAdornmentProviders(true, new HierarchyAdornmentProvider(lifeCycle))
-		);
-		
+		fLabelProvider= new HierarchyLabelProvider(lifeCycle);
+			
 		setLabelProvider(new DecoratingLabelProvider(fLabelProvider, PlatformUI.getWorkbench().getDecoratorManager()));
 		setContentProvider(new MethodsContentProvider(lifeCycle));
 				

@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
 /**
@@ -141,6 +142,13 @@ import org.eclipse.jdt.core.IJavaElement;
 	}
 	
 	/**
+	 * Clears the map.
+	 */
+	public boolean isEmpty() {
+		return fResourceToItem.isEmpty();
+	}	
+	
+	/**
 	 * Method that decides which elements can have error markers
 	 * Returns null if an element can not have error markers.
 	 */	
@@ -148,7 +156,7 @@ import org.eclipse.jdt.core.IJavaElement;
 		if (element instanceof IJavaElement) {
 			IJavaElement elem= (IJavaElement) element;
 			if (!elem.isReadOnly()) { // only modifieable elements can get error ticks
-				return elem.getResource();
+				return elem.getResource(); // no mapping for elements in working copies
 			}
 			return null;
 		} else if (element instanceof IResource) {

@@ -19,8 +19,6 @@ import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Image;
@@ -30,14 +28,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -63,7 +59,6 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewSite;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
@@ -73,9 +68,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.NewWizardMenu;
-import org.eclipse.ui.actions.OpenWithMenu;
-import org.eclipse.ui.actions.RefreshAction;
-import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
@@ -92,46 +84,37 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.ImportActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
-import org.eclipse.jdt.ui.actions.ShowInNavigatorViewAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
-import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
-import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
-import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilter;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 
@@ -216,7 +199,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		fViewer.setSorter(new JavaElementSorter());
 		fViewer.setUseHashlookup(true);
-		JavaPlugin.getDefault().getProblemMarkerManager().addListener((IProblemChangedListener)fViewer);
 		fTitleProvider= createTitleProvider();
 		
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
@@ -329,7 +311,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	
 	public void dispose() {
 		if (fViewer != null) {
-			JavaPlugin.getDefault().getProblemMarkerManager().removeListener((IProblemChangedListener)fViewer);
 			getViewSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(this);
 			getViewSite().getPage().removePartListener(fPartListener);
 			fViewer= null;
@@ -609,7 +590,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	String getToolTipText(Object element) {
 		String result;
 		if (!(element instanceof IResource)) {
-			result= JavaElementLabels.getTextLabel(element, StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS);		
+			result= JavaElementLabels.getTextLabel(element, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);		
 		} else {
 			IPath path= ((IResource) element).getFullPath();
 			if (path.isRoot()) {
@@ -652,10 +633,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	protected ILabelProvider createLabelProvider() {
-		return new StandardJavaUILabelProvider(
-						StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
-						StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-						StandardJavaUILabelProvider.getAdornmentProviders(true, null)
+		return new AppearanceAwareLabelProvider(
+						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
+						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
+						AppearanceAwareLabelProvider.getDecorators(true, null)
 						);
 	}
 

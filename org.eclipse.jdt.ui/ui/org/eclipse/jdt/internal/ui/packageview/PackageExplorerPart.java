@@ -46,6 +46,7 @@ import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -91,23 +92,21 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
-import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
@@ -140,7 +139,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 	private PackageExplorerActionGroup fActionSet;
 	private ProblemTreeViewer fViewer; 
-	private StandardJavaUILabelProvider fJavaElementLabelProvider;
 	private Menu fContextMenu;		
 	
 	private IMemento fMemento;	
@@ -221,8 +219,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	} 
 		
 	 public void dispose() {
-	 	if (fViewer != null)
-			JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fViewer);
 		if (fContextMenu != null && !fContextMenu.isDisposed())
 			fContextMenu.dispose();
 		getSite().getPage().removePartListener(fPartListener);
@@ -244,18 +240,17 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		boolean reconcile= JavaBasePreferencePage.reconcileJavaViews();
 		fViewer.setContentProvider(new JavaElementContentProvider(showCUChildren, reconcile));
 		
-		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fViewer);		
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		
-		fJavaElementLabelProvider= 
-			new StandardJavaUILabelProvider(
-				StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
-				StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-				StandardJavaUILabelProvider.getAdornmentProviders(true, null)
+		ILabelProvider labelProvider= 
+			new AppearanceAwareLabelProvider(
+				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
+				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
+				AppearanceAwareLabelProvider.getDecorators(true, null)
 			);
 		
 		fViewer.setLabelProvider(new DecoratingLabelProvider(
-			fJavaElementLabelProvider, PlatformUI.getWorkbench().getDecoratorManager())
+			labelProvider, PlatformUI.getWorkbench().getDecoratorManager())
 		);
 		fViewer.setSorter(new JavaElementSorter());
 		fViewer.addFilter(new EmptyInnerPackageFilter());
@@ -351,7 +346,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	String getToolTipText(Object element) {
 		String result;
 		if (!(element instanceof IResource)) {
-			result= JavaElementLabels.getTextLabel(element, StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS);		
+			result= JavaElementLabels.getTextLabel(element, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);		
 		} else {
 			IPath path= ((IResource) element).getFullPath();
 			if (path.isRoot()) {
@@ -916,7 +911,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			setTitle(viewName);
 			setTitleToolTip(""); //$NON-NLS-1$
 		} else {
-			String inputText= JavaElementLabels.getTextLabel(input, StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS);
+			String inputText= JavaElementLabels.getTextLabel(input, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);
 			String title= PackagesMessages.getFormattedString("PackageExplorer.argTitle", new String[] { viewName, inputText }); //$NON-NLS-1$
 			setTitle(title);
 			setTitleToolTip(getToolTipText(input));
