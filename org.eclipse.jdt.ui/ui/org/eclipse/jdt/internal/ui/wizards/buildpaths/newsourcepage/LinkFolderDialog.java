@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -47,12 +46,14 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
-import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.eclipse.ui.internal.ide.dialogs.PathVariableSelectionDialog;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -62,7 +63,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
-public class LinkFolderDialog extends SelectionStatusDialog {
+public class LinkFolderDialog extends StatusDialog {
     private final class FolderNameField extends Observable implements IDialogFieldListener {
         private StringDialogField fNameDialogField;
         
@@ -163,7 +164,7 @@ public class LinkFolderDialog extends SelectionStatusDialog {
             if (directoryName.length() > 0) {
                 final File path = new File(directoryName);
                 if (path.exists())
-                    dialog.setFilterPath(new Path(directoryName).toOSString());
+                    dialog.setFilterPath(directoryName);
             }
             final String selectedDirectory = dialog.open();
             if (selectedDirectory != null) {
@@ -211,47 +212,47 @@ public class LinkFolderDialog extends SelectionStatusDialog {
 
         public void update(Observable o, Object arg) {
             String name= fFolderNameField.getText();
-            updateStatus(IStatus.OK, ""); //$NON-NLS-1$
-            if (!validateFolderName(name))
-                return;
-            
-            validateLinkedResource(fDependenciesGroup.getLinkTarget());
+            IStatus nameStatus= validateFolderName(name);
+            if (nameStatus.matches(IStatus.ERROR)) {
+            	updateStatus(nameStatus);
+            } else {
+	            IStatus dependencyStatus= validateLinkLocation(name);
+	            updateStatus(StatusUtil.getMoreSevere(nameStatus, dependencyStatus));
+            }
         }
         
         /**
-         * Validates this page's controls.
-         *
-         * @return IStatus indicating the validation result. IStatus.OK if the 
-         *  specified link target is valid given the linkHandle.
-         */
-        private IStatus validateLinkLocation(IResource linkHandle) {
-            IWorkspace workspace = JavaPlugin.getWorkspace();
-            IPath path = new Path(fDependenciesGroup.getLinkTarget());
+		 * Validates this page's controls.
+		 *
+		 * @return IStatus indicating the validation result. IStatus.OK if the 
+		 *  specified link target is valid given the linkHandle.
+		 */
+		private IStatus validateLinkLocation(String name) {
+			IWorkspace workspace= JavaPlugin.getWorkspace();
+			IPath path= Path.fromOSString(fDependenciesGroup.getLinkTarget());
 
-            IStatus locationStatus = workspace.validateLinkLocation(linkHandle, path);
-            if (locationStatus.getMessage().equals(NewWizardMessages.getFormattedString("NewFolderDialog.links.parentNotProject", linkHandle.getName())) && //$NON-NLS-1$
-                    container.getType() == IResource.PROJECT)
-                locationStatus= Status.OK_STATUS;
-            else if (locationStatus.getSeverity() == IStatus.ERROR)
-                return locationStatus;
+			IStatus locationStatus= workspace.validateLinkLocation(fContainer.getFolder(new Path(name)), path);
+			if (locationStatus.matches(IStatus.ERROR))
+				return locationStatus;
 
-            // use the resolved link target name
-            String resolvedLinkTarget = resolveVariable();
-            path = new Path(resolvedLinkTarget);
-            File linkTargetFile = new Path(resolvedLinkTarget).toFile();
-            if (linkTargetFile.exists()) {
-                IStatus fileTypeStatus = validateFileType(linkTargetFile);
-                if (fileTypeStatus.isOK() == false)
-                    return fileTypeStatus;
-            } else if (locationStatus.getSeverity() == IStatus.OK) {
-                // locationStatus takes precedence over missing location warning.
-                return createStatus(
-                        IStatus.WARNING,
-                        NewWizardMessages
-                                .getString("NewFolderDialog.linkTargetNonExistent")); //$NON-NLS-1$ 
-            }
-            return locationStatus;
-        }
+			// use the resolved link target name
+			String resolvedLinkTarget= resolveVariable();
+			path= new Path(resolvedLinkTarget);
+			File linkTargetFile= new Path(resolvedLinkTarget).toFile();
+			if (linkTargetFile.exists()) {
+				IStatus fileTypeStatus= validateFileType(linkTargetFile);
+				if (!fileTypeStatus.isOK())
+					return fileTypeStatus;
+			} else
+				if (locationStatus.isOK()) {
+					// locationStatus takes precedence over missing location warning.
+					return new StatusInfo(IStatus.WARNING, NewWizardMessages.getString("NewFolderDialog.linkTargetNonExistent")); //$NON-NLS-1$ 
+				}
+			if (locationStatus.isOK()) {
+				return new StatusInfo();
+			}
+			return new StatusInfo(locationStatus.getSeverity(), locationStatus.getMessage());
+		}
         
         /**
          * Validates the type of the given file against the link type specified
@@ -262,20 +263,10 @@ public class LinkFolderDialog extends SelectionStatusDialog {
          *  given file is valid.
          */
         private IStatus validateFileType(File linkTargetFile) {
-            if (linkTargetFile.isDirectory() == false)
-                return createStatus(IStatus.ERROR, NewWizardMessages
-                        .getString("NewFolderDialog.linkTargetNotFolder")); //$NON-NLS-1$
-            return createStatus(IStatus.OK, ""); //$NON-NLS-1$
+            if (!linkTargetFile.isDirectory())
+                return new StatusInfo(IStatus.ERROR, NewWizardMessages.getString("NewFolderDialog.linkTargetNotFolder")); //$NON-NLS-1$
+            return new StatusInfo();
         }
-        
-        /**
-         * Returns a new status object with the given severity and message.
-         * 
-         * @return a new status object with the given severity and message.
-         */
-        private IStatus createStatus(int severity, String message) {
-            return new Status(severity, JavaPlugin.getPluginId(), severity, message, null);
-        } 
         
         /**
          * Tries to resolve the value entered in the link target field as 
@@ -283,67 +274,40 @@ public class LinkFolderDialog extends SelectionStatusDialog {
          * Displays the resolved value if the entered value is a variable.
          */
         private String resolveVariable() {
-            IPathVariableManager pathVariableManager = ResourcesPlugin
-                    .getWorkspace().getPathVariableManager();
-            IPath path = new Path(fDependenciesGroup.getLinkTarget());
-            IPath resolvedPath = pathVariableManager.resolvePath(path);
+            IPathVariableManager pathVariableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
+            IPath path= Path.fromOSString(fDependenciesGroup.getLinkTarget());
+            IPath resolvedPath= pathVariableManager.resolvePath(path);
             return resolvedPath.toOSString();
         }
-        
-        /**
-         * Checks whether the link location is valid.
-         * Disable the OK button if the location is not valid valid and display
-         * a message that indicates the problem, otherwise enable the OK button.
-         */
-        private void validateLinkedResource(String text) {
-            IFolder linkHandle = createFolderHandle(text);
-            IStatus status = validateLinkLocation(linkHandle);
-
-            if (status.getSeverity() != IStatus.ERROR)
-                getOkButton().setEnabled(true);
-            else
-                getOkButton().setEnabled(false);
-
-            if (status.isOK() == false)
-                updateStatus(status);
-        }
-        
+                
         /**
          * Checks if the folder name is valid.
          *
          * @return <code>true</code> if validation was
          * correct, <code>false</code> otherwise
          */
-        private boolean validateFolderName(String name) {
-            IWorkspace workspace = container.getWorkspace();
-            IStatus nameStatus = workspace.validateName(name, IResource.FOLDER);
-
+        private IStatus validateFolderName(String name) {
             if (name.length() == 0) { //$NON-NLS-1$
-                updateStatus(IStatus.ERROR, NewWizardMessages
-                        .getString("NewFolderDialog.folderNameEmpty")); //$NON-NLS-1$
-                return false;
+            	return new StatusInfo(IStatus.ERROR, NewWizardMessages.getString("NewFolderDialog.folderNameEmpty")); //$NON-NLS-1$
             }
             
-            if (nameStatus.isOK() == false) {
-                updateStatus(nameStatus);
-                return false;
+            IStatus nameStatus = fContainer.getWorkspace().validateName(name, IResource.FOLDER);
+            if (!nameStatus.matches(IStatus.ERROR)) {
+                return nameStatus;
             }
             
             IPath path = new Path(name);
-            if (container.getFolder(path).exists()
-                    || container.getFile(path).exists()) {
-                updateStatus(IStatus.ERROR, NewWizardMessages.getFormattedString(
-                        "NewFolderDialog.folderNameEmpty.alreadyExists", new Object[] { name })); //$NON-NLS-1$
-                return false;
+            if (fContainer.findMember(path) != null) {
+            	return new StatusInfo(IStatus.ERROR, NewWizardMessages.getFormattedString("NewFolderDialog.folderNameEmpty.alreadyExists", name)); //$NON-NLS-1$
             }
-            updateStatus(IStatus.OK, ""); //$NON-NLS-1$
-            return true;
+            return nameStatus;
         }
     }
     
     private FolderNameField fFolderNameField;
-    protected LinkFields fDependenciesGroup;
-    private IContainer container;
+    private LinkFields fDependenciesGroup;
+    private IContainer fContainer;
+	private IFolder fCreatedFolder;
 
     /**
      * Creates a NewFolderDialog
@@ -355,20 +319,10 @@ public class LinkFolderDialog extends SelectionStatusDialog {
      */
     public LinkFolderDialog(Shell parentShell, IContainer container) {
         super(parentShell);
-        this.container = container;
+        fContainer = container;
         setTitle(NewWizardMessages.getString("LinkFolderDialog.title")); //$NON-NLS-1$
         setShellStyle(getShellStyle() | SWT.RESIZE);
         setStatusLineAboveButtons(true);      
-    }
-
-    /**
-     * Creates the folder using the name and link target entered
-     * by the user.
-     * Sets the dialog result to the created folder.  
-     */
-    protected void computeResult() {
-        //Do nothing here as we 
-        //need to know the result
     }
 
     /* (non-Javadoc)
@@ -401,7 +355,7 @@ public class LinkFolderDialog extends SelectionStatusDialog {
         composite.setLayoutData(gridData);
         
         Label label= new Label(composite, SWT.NONE);
-        label.setText(NewWizardMessages.getFormattedString("LinkFolderDialog.createIn", container.getFullPath().makeRelative().toString())); //$NON-NLS-1$
+        label.setText(NewWizardMessages.getFormattedString("LinkFolderDialog.createIn", fContainer.getFullPath().makeRelative().toString())); //$NON-NLS-1$
         DialogField.createEmptySpace(composite, numOfColumns);
         
         fDependenciesGroup= new LinkFields(composite);
@@ -423,8 +377,8 @@ public class LinkFolderDialog extends SelectionStatusDialog {
      * @return the new folder resource handle
      */
     private IFolder createFolderHandle(String folderName) {
-        IWorkspaceRoot workspaceRoot = container.getWorkspace().getRoot();
-        IPath folderPath = container.getFullPath().append(folderName);
+        IWorkspaceRoot workspaceRoot = fContainer.getWorkspace().getRoot();
+        IPath folderPath = fContainer.getFullPath().append(folderName);
         IFolder folderHandle = workspaceRoot.getFolder(folderPath);
 
         return folderHandle;
@@ -450,7 +404,7 @@ public class LinkFolderDialog extends SelectionStatusDialog {
                         throw new OperationCanceledException();
                     
                         // create link to folder
-                    folderHandle.createLink(new Path(fDependenciesGroup.getLinkTarget()), IResource.ALLOW_MISSING_LOCAL, monitor);
+                    folderHandle.createLink(Path.fromOSString(fDependenciesGroup.getLinkTarget()), IResource.ALLOW_MISSING_LOCAL, monitor);
                     
                     if (monitor.isCanceled())
                         throw new OperationCanceledException();
@@ -501,31 +455,14 @@ public class LinkFolderDialog extends SelectionStatusDialog {
     protected void updateStatus(IStatus status) {
         super.updateStatus(status);
     }
-
-    /**
-     * Update the dialog's status line to reflect the given status. It is safe to call
-     * this method before the dialog has been opened.
-     * @param severity
-     * @param message
-     */
-    private void updateStatus(int severity, String message) {
-        updateStatus(new Status(severity, JavaPlugin.getPluginId(), severity, message, null));
-    }
-    
+   
     /* (non-Javadoc)
      * @see org.eclipse.ui.dialogs.SelectionStatusDialog#okPressed()
      */
     protected void okPressed() {
         String linkTarget = fDependenciesGroup.getLinkTarget();
-        linkTarget= linkTarget.equals("") ? null : linkTarget;  //$NON-NLS-1$
-        IFolder folder = createNewFolder(fFolderNameField.getText(), linkTarget);
-        if (folder == null)
-            return;
-        
-        // TODO unnecessary
-        Boolean isSourceFolderType= new Boolean(true);
-        setSelectionResult(new Object[] {folder, isSourceFolderType});
-        
+        linkTarget= linkTarget.length() == 0 ? null : linkTarget;
+        fCreatedFolder = createNewFolder(fFolderNameField.getText(), linkTarget);
         super.okPressed();
     }
     
@@ -536,23 +473,7 @@ public class LinkFolderDialog extends SelectionStatusDialog {
      * @return created folder or <code>null</code>
      */
     public IFolder getCreatedFolder() {
-        Object[] result= getResult();
-        if (result != null && result.length == 2)
-            return (IFolder) result[0];
-        return null;
+        return fCreatedFolder;
     }
     
-    /**
-     * Returns wheter the new folder is meant
-     * to be a source folder or not.
-     * 
-     * @return <code>true</code> if it is a
-     * source folder, <code>false</code> otherwise.
-     */
-    public boolean isSourceFolder() {
-        Object[] result= getResult();
-        if (result != null && result.length == 2)
-            return ((Boolean)result[1]).booleanValue();
-        return false;
-    }
 }
