@@ -218,8 +218,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	private class ListRewriter {
-		private String fContantSeparator;
-		private int fStartPos;
+		protected String fContantSeparator;
+		protected int fStartPos;
 		
 		protected List fList;
 		
@@ -401,9 +401,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		public final int DEFAULT_SPACING= 1;
 		
 		private int fInitialIndent;
+		private int fSeparatorLines;
 		
-		public ParagraphListRewriter(int initialIndent) {
+		public ParagraphListRewriter(int initialIndent, int separator) {
 			fInitialIndent= initialIndent;
+			fSeparatorLines= separator;
 		}
 		
 		protected int getInitialIndent() {
@@ -411,7 +413,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}		
 				
 		protected String getSeparatorString(ASTNode node) {
-			int newLines= getNewLines(node);
+			int newLines= fSeparatorLines == -1 ? getNewLines(node) : fSeparatorLines;
 			
 			String lineDelim= fTextBuffer.getLineDelimiter();
 			
@@ -473,7 +475,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	}
 	
-	private int rewriteParagraphList(List list, int insertPos, int insertIndent) {
+	private int rewriteParagraphList(List list, int insertPos, int insertIndent, int separator) {
 		boolean hasChanges= false;
 		boolean hasExisting= false;
 		
@@ -486,7 +488,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			return visitList(list, insertPos);
 		}
 		
-		ParagraphListRewriter listRewriter= new ParagraphListRewriter(insertIndent);
+		ParagraphListRewriter listRewriter= new ParagraphListRewriter(insertIndent, separator);
 		StringBuffer lead= new StringBuffer();
 		if (!hasExisting) {
 			lead.append(fTextBuffer.getLineDelimiter());
@@ -851,10 +853,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				
 		List imports= node.imports();
 		int startPos= last != null ? last.getStartPosition() + last.getLength() : 0;
-		startPos= rewriteParagraphList(imports, startPos, 0);
+		startPos= rewriteParagraphList(imports, startPos, 0, 0);
 
 		List types= node.types();
-		rewriteParagraphList(types, startPos, 0);
+		rewriteParagraphList(types, startPos, 0, -1);
 		return false;
 	}
 
@@ -934,7 +936,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		try {
 			int startIndent= getIndent(typeDecl.getStartPosition()) + 1;
 			int startPos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameLBRACE, pos);		
-			rewriteParagraphList(members, startPos, startIndent);
+			rewriteParagraphList(members, startPos, startIndent, -1);
 		} catch (InvalidInputException e) {
 			// ignore
 		}
@@ -1065,7 +1067,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		List declarations= node.bodyDeclarations();
 		int startPos= node.getStartPosition() + 1;
 		int startIndent= getIndent(node.getStartPosition()) + 1;
-		rewriteParagraphList(declarations, startPos, startIndent);
+		rewriteParagraphList(declarations, startPos, startIndent, -1);
 		return false;
 	}
 

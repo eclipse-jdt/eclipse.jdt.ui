@@ -15,13 +15,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -320,70 +315,7 @@ public class ASTResolving {
 		}
 		return false;
 	}	
-	
-	
-	public static IScanner createScanner(ICompilationUnit cu, int pos) throws InvalidInputException, JavaModelException {
-		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-		IBuffer buf= cu.getBuffer();
-		scanner.setSource(buf.getCharacters());
-		scanner.resetTo(pos, buf.getLength());
-		return scanner;
-	}
-	
-	public static void overreadToken(IScanner scanner, int[] prevTokens) throws InvalidInputException {
-		boolean found;
-		do {
-			found= false;
-			int curr= scanner.getNextToken();
-			if (curr == ITerminalSymbols.TokenNameEOF) {
-				throw new InvalidInputException("End of File"); //$NON-NLS-1$
-			}
-			for (int i= 0; i < prevTokens.length; i++) {
-				if (prevTokens[i] == curr) {
-					found= true;
-					break;
-				}
-			}
-		} while (found);
-	}
-		
-	public static void readToToken(IScanner scanner, int tok) throws InvalidInputException {
-		int curr= 0;
-		do {
-			curr= scanner.getNextToken();
-			if (curr == ITerminalSymbols.TokenNameEOF) {
-				throw new InvalidInputException("End of File"); //$NON-NLS-1$
-			}
-		} while (curr != tok); 
-	}	
-	
-	public static int getPositionAfter(IScanner scanner, int token) throws InvalidInputException {
-		readToToken(scanner, token);
-		return scanner.getCurrentTokenEndPosition() + 1;
-	}
-	
-	public static int getPositionBefore(IScanner scanner, int token) throws InvalidInputException {
-		readToToken(scanner, token);
-		return scanner.getCurrentTokenStartPosition();
-	}
-	
-	public static int getPositionAfter(IScanner scanner, int defaultPos, int[] tokens) throws InvalidInputException {
-		int pos= defaultPos;
-		loop: while(true) {
-			int curr= scanner.getNextToken();
-			if (curr == ITerminalSymbols.TokenNameEOF) {
-				return pos;
-			}
-			for (int i= 0; i < tokens.length; i++) {
-				if (tokens[i] == curr) {
-					pos= scanner.getCurrentTokenEndPosition() + 1;
-					continue loop;
-				}
-			}
-			return pos;
-		}
-	}
-	
+				
 	public static Type getTypeFromTypeBinding(AST ast, ITypeBinding binding) {
 		if (binding.isArray()) {
 			int dim= binding.getDimensions();
@@ -424,28 +356,6 @@ public class ASTResolving {
 		}
 		return ast.newNullLiteral();
 	}	
-	
-	private static class NodeFoundException extends RuntimeException {
-		public ASTNode node;
-	}
-	
-	
-	public static ASTNode findClonedNode(ASTNode cloneRoot, final ASTNode node) {
-		try {
-			cloneRoot.accept(new ASTVisitor() {
-				public void preVisit(ASTNode curr) {
-					if (curr.getNodeType() == node.getNodeType() && curr.getStartPosition() == node.getStartPosition() && curr.getLength() == node.getLength()) {
-						NodeFoundException exc= new NodeFoundException();
-						exc.node= curr;
-						throw exc;
-					}
-				}
-			});
-		} catch (NodeFoundException e) {
-			return e.node;
-		}
-		return null;
-	}
 	
 	private static TypeDeclaration findTypeDeclaration(List decls, String name) {
 		for (Iterator iter= decls.iterator(); iter.hasNext();) {

@@ -173,12 +173,12 @@ public class TokenScanner {
 			if (curr == ITerminalSymbols.TokenNameEOF) {
 				throw new InvalidInputException("End of File"); //$NON-NLS-1$
 			}
-
+			
 			int startLine= buffer.getLineOfOffset(getCurrentStartOffset());
 			if (lastCommentEndLine == -1 || startLine - lastCommentEndLine > 1) {
 				res= getCurrentStartOffset();
 			}
-			lastCommentEndLine= buffer.getLineOfOffset(getCurrentEndOffset());
+			lastCommentEndLine= buffer.getLineOfOffset(getCurrentEndOffset() - 1);
 		} while (isComment(curr));
 		return res;
 	}	

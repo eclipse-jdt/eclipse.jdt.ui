@@ -26,15 +26,16 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 
 import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
@@ -43,7 +44,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ReorgCorrectionsSubProcessor {
 	
@@ -101,15 +101,22 @@ public class ReorgCorrectionsSubProcessor {
 	
 	public static void removeImportStatementProposals(ICorrectionContext context, List proposals) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
-		IJavaElement elem= cu.getElementAt(context.getOffset());
-		if (elem instanceof IImportDeclaration) {
-			String label= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.unusedimport.description"); //$NON-NLS-1$
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
-			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 1, image);
-			ImportEdit importEdit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
-			importEdit.removeImport(elem.getElementName());
-			proposal.getRootTextEdit().add(importEdit);
-			proposals.add(proposal);
+
+		ASTNode selectedNode= context.getCoveringNode();
+		if (selectedNode != null) {
+			ASTNode node= ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
+			if (node instanceof ImportDeclaration) {
+				ASTRewrite rewrite= new ASTRewrite(node.getParent());
+
+				rewrite.markAsRemoved(node);
+			
+				String label= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.unusedimport.description"); //$NON-NLS-1$
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
+
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+				proposal.ensureNoModifications();
+				proposals.add(proposal);
+			}
 		}
 		
 		String name= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.organizeimports.description"); //$NON-NLS-1$
