@@ -38,14 +38,14 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
 public class MoveRefactoring extends ReorgRefactoring {
 	
 	private boolean fUpdateReferences;
-	private CodeGenerationSettings fSettings;
+	private final CodeGenerationSettings fSettings;
 	
 	public MoveRefactoring(List elements, CodeGenerationSettings settings){
 		super(elements);
 		Assert.isNotNull(settings);
 		fSettings= settings;
 	}
-	
+		
 	/* non java-doc
 	 * @see IRefactoring#getName()
 	 */
