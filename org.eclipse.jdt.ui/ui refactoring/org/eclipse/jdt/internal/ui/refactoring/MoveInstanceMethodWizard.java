@@ -140,7 +140,7 @@ public class MoveInstanceMethodWizard extends RefactoringWizard {
 		}
 		private static final String PAGE_NAME= "MOVE_INSTANCE_METHOD_INPUT_PAGE";  //$NON-NLS-1$
 		private static final int ROW_COUNT= 7;
-		private static final int LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
+		private static final long LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
 				| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_NAMES;
 	
 		public MoveInstanceMethodInputPage() {

@@ -23,7 +23,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements IPropertyChangeListener {
 
-	public final static int DEFAULT_TEXTFLAGS= JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES |  
+	public final static long DEFAULT_TEXTFLAGS= JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES |  
 		JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED;
 	public final static int DEFAULT_IMAGEFLAGS= JavaElementImageProvider.OVERLAY_ICONS;
 	
@@ -33,7 +33,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	/**
 	 * Constructor for AppearanceAwareLabelProvider.
 	 */
-	public AppearanceAwareLabelProvider(int textFlags, int imageFlags) {
+	public AppearanceAwareLabelProvider(long textFlags, int imageFlags) {
 		super(textFlags, imageFlags);
 		initMasks();
 		PreferenceConstants.getPreferenceStore().addPropertyChangeListener(this);
@@ -91,7 +91,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	/*
 	 * @see JavaUILabelProvider#evaluateTextFlags()
 	 */
-	protected int evaluateTextFlags(Object element) {
+	protected long evaluateTextFlags(Object element) {
 		return getTextFlags() & fTextFlagMask;
 	}
 

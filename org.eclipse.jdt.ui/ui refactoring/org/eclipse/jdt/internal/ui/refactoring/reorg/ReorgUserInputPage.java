@@ -45,7 +45,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 
 abstract class ReorgUserInputPage extends UserInputWizardPage{
-	private static final int LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
+	private static final long LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
 			| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 	private TreeViewer fViewer;
 	public ReorgUserInputPage(String pageName) {

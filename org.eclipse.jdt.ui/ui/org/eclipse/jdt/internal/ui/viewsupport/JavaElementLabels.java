@@ -46,215 +46,227 @@ public class JavaElementLabels {
 	 * Method names contain parameter types.
 	 * e.g. <code>foo(int)</code>
 	 */
-	public final static int M_PARAMETER_TYPES= 1 << 0;
+	public final static long M_PARAMETER_TYPES= 1 << 0;
 	
 	/**
 	 * Method names contain parameter names.
 	 * e.g. <code>foo(index)</code>
 	 */
-	public final static int M_PARAMETER_NAMES= 1 << 1;	
+	public final static long M_PARAMETER_NAMES= 1 << 1;	
+	
+	/**
+	 * Method names contain type parameters prepended.
+	 * e.g. <code><A> foo(A index)</code>
+	 */
+	public final static long M_PRE_TYPE_PARAMETERS= 1 << 31;
+	
+	/**
+	 * Method names contain type parameters prepended.
+	 * e.g. <code>foo(A index) <A></code>
+	 */
+	public final static long M_APP_TYPE_PARAMETERS= 1 << 32;	
 	
 	/**
 	 * Method names contain thrown exceptions.
 	 * e.g. <code>foo throws IOException</code>
 	 */
-	public final static int M_EXCEPTIONS= 1 << 2;
+	public final static long M_EXCEPTIONS= 1 << 2;
 	
 	/**
 	 * Method names contain return type (appended)
 	 * e.g. <code>foo : int</code>
 	 */
-	public final static int M_APP_RETURNTYPE= 1 << 3;
+	public final static long M_APP_RETURNTYPE= 1 << 3;
 	
 	/**
 	 * Method names contain return type (appended)
 	 * e.g. <code>int foo</code>
 	 */
-	public final static int M_PRE_RETURNTYPE= 1 << 4;	
+	public final static long M_PRE_RETURNTYPE= 1 << 4;	
 
 	/**
 	 * Method names are fully qualified.
 	 * e.g. <code>java.util.Vector.size</code>
 	 */
-	public final static int M_FULLY_QUALIFIED= 1 << 5;
+	public final static long M_FULLY_QUALIFIED= 1 << 5;
 	
 	/**
 	 * Method names are post qualified.
 	 * e.g. <code>size - java.util.Vector</code>
 	 */
-	public final static int M_POST_QUALIFIED= 1 << 6;
+	public final static long M_POST_QUALIFIED= 1 << 6;
 	
 	/**
 	 * Initializer names are fully qualified.
 	 * e.g. <code>java.util.Vector.{ ... }</code>
 	 */
-	public final static int I_FULLY_QUALIFIED= 1 << 7;
+	public final static long I_FULLY_QUALIFIED= 1 << 7;
 	
 	/**
 	 * Type names are post qualified.
 	 * e.g. <code>{ ... } - java.util.Map</code>
 	 */
-	public final static int I_POST_QUALIFIED= 1 << 8;		
+	public final static long I_POST_QUALIFIED= 1 << 8;		
 	
 	/**
 	 * Field names contain the declared type (appended)
 	 * e.g. <code>fHello : int</code>
 	 */
-	public final static int F_APP_TYPE_SIGNATURE= 1 << 9;
+	public final static long F_APP_TYPE_SIGNATURE= 1 << 9;
 	
 	/**
 	 * Field names contain the declared type (prepended)
 	 * e.g. <code>int fHello</code>
 	 */
-	public final static int F_PRE_TYPE_SIGNATURE= 1 << 10;	
+	public final static long F_PRE_TYPE_SIGNATURE= 1 << 10;	
 
 	/**
 	 * Fields names are fully qualified.
 	 * e.g. <code>java.lang.System.out</code>
 	 */
-	public final static int F_FULLY_QUALIFIED= 1 << 11;
+	public final static long F_FULLY_QUALIFIED= 1 << 11;
 	
 	/**
 	 * Fields names are post qualified.
 	 * e.g. <code>out - java.lang.System</code>
 	 */
-	public final static int F_POST_QUALIFIED= 1 << 12;	
+	public final static long F_POST_QUALIFIED= 1 << 12;	
 	
 	/**
 	 * Type names are fully qualified.
 	 * e.g. <code>java.util.Map.MapEntry</code>
 	 */
-	public final static int T_FULLY_QUALIFIED= 1 << 13;
+	public final static long T_FULLY_QUALIFIED= 1 << 13;
 	
 	/**
 	 * Type names are type container qualified.
 	 * e.g. <code>Map.MapEntry</code>
 	 */
-	public final static int T_CONTAINER_QUALIFIED= 1 << 14;
+	public final static long T_CONTAINER_QUALIFIED= 1 << 14;
 	
 	/**
 	 * Type names are post qualified.
 	 * e.g. <code>MapEntry - java.util.Map</code>
 	 */
-	public final static int T_POST_QUALIFIED= 1 << 15;
+	public final static long T_POST_QUALIFIED= 1 << 15;
 	
 	/**
 	 * Declarations (import container / declarartion, package declarartion) are qualified.
 	 * e.g. <code>java.util.Vector.class/import container</code>
 	 */	
-	public final static int D_QUALIFIED= 1 << 16;
+	public final static long D_QUALIFIED= 1 << 16;
 	
 	/**
 	 * Declarations (import container / declarartion, package declarartion) are post qualified.
 	 * e.g. <code>import container - java.util.Vector.class</code>
 	 */	
-	public final static int D_POST_QUALIFIED= 1 << 17;	
+	public final static long D_POST_QUALIFIED= 1 << 17;	
 
 	/**
 	 * Class file names are fully qualified.
 	 * e.g. <code>java.util.Vector.class</code>
 	 */	
-	public final static int CF_QUALIFIED= 1 << 18;
+	public final static long CF_QUALIFIED= 1 << 18;
 	
 	/**
 	 * Class file names are post qualified.
 	 * e.g. <code>Vector.class - java.util</code>
 	 */	
-	public final static int CF_POST_QUALIFIED= 1 << 19;
+	public final static long CF_POST_QUALIFIED= 1 << 19;
 	
 	/**
 	 * Compilation unit names are fully qualified.
 	 * e.g. <code>java.util.Vector.java</code>
 	 */	
-	public final static int CU_QUALIFIED= 1 << 20;
+	public final static long CU_QUALIFIED= 1 << 20;
 	
 	/**
 	 * Compilation unit names are post  qualified.
 	 * e.g. <code>Vector.java - java.util</code>
 	 */	
-	public final static int CU_POST_QUALIFIED= 1 << 21;
+	public final static long CU_POST_QUALIFIED= 1 << 21;
 
 	/**
 	 * Package names are qualified.
 	 * e.g. <code>MyProject/src/java.util</code>
 	 */	
-	public final static int P_QUALIFIED= 1 << 22;
+	public final static long P_QUALIFIED= 1 << 22;
 	
 	/**
 	 * Package names are post qualified.
 	 * e.g. <code>java.util - MyProject/src</code>
 	 */	
-	public final static int P_POST_QUALIFIED= 1 << 23;
+	public final static long P_POST_QUALIFIED= 1 << 23;
 
 	/**
 	 * Package Fragment Roots contain variable name if from a variable.
 	 * e.g. <code>JRE_LIB - c:\java\lib\rt.jar</code>
 	 */
-	public final static int ROOT_VARIABLE= 1 << 24;
+	public final static long ROOT_VARIABLE= 1 << 24;
 	
 	/**
 	 * Package Fragment Roots contain the project name if not an archive (prepended).
 	 * e.g. <code>MyProject/src</code>
 	 */
-	public final static int ROOT_QUALIFIED= 1 << 25;
+	public final static long ROOT_QUALIFIED= 1 << 25;
 	
 	/**
 	 * Package Fragment Roots contain the project name if not an archive (appended).
 	 * e.g. <code>src - MyProject</code>
 	 */
-	public final static int ROOT_POST_QUALIFIED= 1 << 26;	
+	public final static long ROOT_POST_QUALIFIED= 1 << 26;	
 	
 	/**
 	 * Add root path to all elements except Package Fragment Roots and Java projects.
 	 * e.g. <code>java.lang.Vector - c:\java\lib\rt.jar</code>
 	 * Option only applies to getElementLabel
 	 */
-	public final static int APPEND_ROOT_PATH= 1 << 27;
+	public final static long APPEND_ROOT_PATH= 1 << 27;
 
 	/**
 	 * Add root path to all elements except Package Fragment Roots and Java projects.
 	 * e.g. <code>java.lang.Vector - c:\java\lib\rt.jar</code>
 	 * Option only applies to getElementLabel
 	 */
-	public final static int PREPEND_ROOT_PATH= 1 << 28;
+	public final static long PREPEND_ROOT_PATH= 1 << 28;
 
 	/**
 	 * Package names are compressed.
 	 * e.g. <code>o*.e*.search</code>
 	 */	
-	public final static int P_COMPRESSED= 1 << 29;
+	public final static long P_COMPRESSED= 1 << 29;
 	
 	/**
 	 * Post qualify referenced package fragement roots. For example
 	 * <code>jdt.jar - org.eclipse.jdt.ui</code> if the jar is referenced
 	 * from another project.
 	 */
-	public final static int REFERENCED_ROOT_POST_QUALIFIED= 1 << 30; 
+	public final static long REFERENCED_ROOT_POST_QUALIFIED= 1 << 30; 
 	
 	/**
 	 * Qualify all elements
 	 */
-	public final static int ALL_FULLY_QUALIFIED= F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED | P_QUALIFIED | ROOT_QUALIFIED;
+	public final static long ALL_FULLY_QUALIFIED= F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED | P_QUALIFIED | ROOT_QUALIFIED;
 
 	/**
 	 * Post qualify all elements
 	 */
-	public final static int ALL_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED | P_POST_QUALIFIED | ROOT_POST_QUALIFIED;
+	public final static long ALL_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED | P_POST_QUALIFIED | ROOT_POST_QUALIFIED;
 
 	/**
 	 *  Default options (M_PARAMETER_TYPES enabled)
 	 */
-	public final static int ALL_DEFAULT= M_PARAMETER_TYPES;
+	public final static long ALL_DEFAULT= M_PARAMETER_TYPES | M_APP_TYPE_PARAMETERS;
 
 	/**
 	 *  Default qualify options (All except Root and Package)
 	 */
-	public final static int DEFAULT_QUALIFIED= F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED;
+	public final static long DEFAULT_QUALIFIED= F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED;
 
 	/**
 	 *  Default post qualify options (All except Root and Package)
 	 */
-	public final static int DEFAULT_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED;
+	public final static long DEFAULT_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED;
 
 	/**
 	 * User-readable string for separating post qualified names (e.g. " - ").
@@ -285,11 +297,11 @@ public class JavaElementLabels {
 	private JavaElementLabels() {
 	}
 
-	private static boolean getFlag(int flags, int flag) {
+	private static boolean getFlag(long flags, long flag) {
 		return (flags & flag) != 0;
 	}
 	
-	public static String getTextLabel(Object obj, int flags) {
+	public static String getTextLabel(Object obj, long flags) {
 		if (obj instanceof IJavaElement) {
 			return getElementLabel((IJavaElement) obj, flags);
 		} else if (obj instanceof IAdaptable) {
@@ -304,7 +316,7 @@ public class JavaElementLabels {
 	/**
 	 * Returns the label for a Java element. Flags as defined above.
 	 */
-	public static String getElementLabel(IJavaElement element, int flags) {
+	public static String getElementLabel(IJavaElement element, long flags) {
 		StringBuffer buf= new StringBuffer(60);
 		getElementLabel(element, flags, buf);
 		return buf.toString();
@@ -313,7 +325,7 @@ public class JavaElementLabels {
 	/**
 	 * Returns the label for a Java element. Flags as defined above.
 	 */
-	public static void getElementLabel(IJavaElement element, int flags, StringBuffer buf) {
+	public static void getElementLabel(IJavaElement element, long flags, StringBuffer buf) {
 		int type= element.getElementType();
 		IPackageFragmentRoot root= null;
 		
@@ -374,8 +386,24 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a method to a StringBuffer. Considers the M_* flags.
 	 */		
-	public static void getMethodLabel(IMethod method, int flags, StringBuffer buf) {
+	public static void getMethodLabel(IMethod method, long flags, StringBuffer buf) {
 		try {
+			// return type
+			if (getFlag(flags, M_PRE_TYPE_PARAMETERS) && method.exists()) {
+				String[] typeParameters= method.getTypeParameterSignatures();
+				if (typeParameters.length > 0) {
+					buf.append('<');
+					for (int i = 0; i < typeParameters.length; i++) {
+						if (i > 0) {
+							buf.append(COMMA_STRING);
+						}
+						buf.append(Signature.getTypeVariable(typeParameters[i]));
+					}
+					buf.append('>');
+					buf.append(' ');
+				}						
+			}
+			
 			// return type
 			if (getFlag(flags, M_PRE_RETURNTYPE) && method.exists() && !method.isConstructor()) {
 				buf.append(Signature.getSimpleName(Signature.toString(method.getReturnType())));
@@ -413,16 +441,6 @@ public class JavaElementLabels {
 						buf.append(names[i]);
 					}
 				}
-				String[] typeParameters = getFlag(flags, M_PARAMETER_TYPES) ? method.getTypeParameterSignatures() : null;
-				int nTypeParams = typeParameters == null ? 0 : typeParameters.length;
-				if (nTypeParams > 0) {
-					buf.append('<');
-					for (int i = 0; i < nTypeParams; i++) {
-						if (i > 0) buf.append(',');
-						buf.append(Signature.getTypeVariable(typeParameters[i]));
-					}
-					buf.append('>');
-				}
 			} else {
 				if (method.getParameterTypes().length > 0) {
 					buf.append(".."); //$NON-NLS-1$
@@ -441,6 +459,21 @@ public class JavaElementLabels {
 						buf.append(Signature.getSimpleName(Signature.toString(types[i])));
 					}
 				}
+			}
+			
+			if (getFlag(flags, M_APP_TYPE_PARAMETERS) && method.exists()) {
+				String[] typeParameters= method.getTypeParameterSignatures();
+				if (typeParameters.length > 0) {
+					buf.append(' ');
+					buf.append('<');
+					for (int i = 0; i < typeParameters.length; i++) {
+						if (i > 0) {
+							buf.append(COMMA_STRING);
+						}
+						buf.append(Signature.getTypeVariable(typeParameters[i]));
+					}
+					buf.append('>');
+				}						
 			}
 			
 			if (getFlag(flags, M_APP_RETURNTYPE) && method.exists() && !method.isConstructor()) {
@@ -462,7 +495,7 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a field to a StringBuffer. Considers the F_* flags.
 	 */	
-	public static void getFieldLabel(IField field, int flags, StringBuffer buf) {
+	public static void getFieldLabel(IField field, long flags, StringBuffer buf) {
 		try {
 			if (getFlag(flags, F_PRE_TYPE_SIGNATURE) && field.exists()) {
 				buf.append(Signature.toString(field.getTypeSignature()));
@@ -497,7 +530,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.0
 	 */	
-	public static void getLocalVariableLabel(ILocalVariable localVariable, int flags, StringBuffer buf) {
+	public static void getLocalVariableLabel(ILocalVariable localVariable, long flags, StringBuffer buf) {
 		buf.append(Signature.toString(localVariable.getTypeSignature()));
 		buf.append(' ');
 		buf.append(localVariable.getElementName());
@@ -510,7 +543,7 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a initializer to a StringBuffer. Considers the I_* flags.
 	 */	
-	public static void getInitializerLabel(IInitializer initializer, int flags, StringBuffer buf) {
+	public static void getInitializerLabel(IInitializer initializer, long flags, StringBuffer buf) {
 		// qualification
 		if (getFlag(flags, I_FULLY_QUALIFIED)) {
 			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
@@ -528,7 +561,7 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a type to a StringBuffer. Considers the T_* flags.
 	 */		
-	public static void getTypeLabel(IType type, int flags, StringBuffer buf) {
+	public static void getTypeLabel(IType type, long flags, StringBuffer buf) {
 		if (getFlag(flags, T_FULLY_QUALIFIED)) {
 			IPackageFragment pack= type.getPackageFragment();
 			if (!pack.isDefaultPackage()) {
@@ -595,7 +628,7 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a declaration to a StringBuffer. Considers the D_* flags.
 	 */	
-	public static void getDeclararionLabel(IJavaElement declaration, int flags, StringBuffer buf) {
+	public static void getDeclararionLabel(IJavaElement declaration, long flags, StringBuffer buf) {
 		if (getFlag(flags, D_QUALIFIED)) {
 			IJavaElement openable= (IJavaElement) declaration.getOpenable();
 			if (openable != null) {
@@ -621,7 +654,7 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a class file to a StringBuffer. Considers the CF_* flags.
 	 */	
-	public static void getClassFileLabel(IClassFile classFile, int flags, StringBuffer buf) {
+	public static void getClassFileLabel(IClassFile classFile, long flags, StringBuffer buf) {
 		if (getFlag(flags, CF_QUALIFIED)) {
 			IPackageFragment pack= (IPackageFragment) classFile.getParent();
 			if (!pack.isDefaultPackage()) {
@@ -640,7 +673,7 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a compilation unit to a StringBuffer. Considers the CU_* flags.
 	 */
-	public static void getCompilationUnitLabel(ICompilationUnit cu, int flags, StringBuffer buf) {
+	public static void getCompilationUnitLabel(ICompilationUnit cu, long flags, StringBuffer buf) {
 		if (getFlag(flags, CU_QUALIFIED)) {
 			IPackageFragment pack= (IPackageFragment) cu.getParent();
 			if (!pack.isDefaultPackage()) {
@@ -659,7 +692,7 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a package fragment to a StringBuffer. Considers the P_* flags.
 	 */	
-	public static void getPackageFragmentLabel(IPackageFragment pack, int flags, StringBuffer buf) {
+	public static void getPackageFragmentLabel(IPackageFragment pack, long flags, StringBuffer buf) {
 		if (getFlag(flags, P_QUALIFIED)) {
 			getPackageFragmentRootLabel((IPackageFragmentRoot) pack.getParent(), ROOT_QUALIFIED, buf);
 			buf.append('/');
@@ -695,14 +728,14 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a package fragment root to a StringBuffer. Considers the ROOT_* flags.
 	 */	
-	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
 		if (root.isArchive())
 			getArchiveLabel(root, flags, buf);
 		else
 			getFolderLabel(root, flags, buf);
 	}
 	
-	private static void getArchiveLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+	private static void getArchiveLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
 		// Handle variables different	
 		if (getFlag(flags, ROOT_VARIABLE) && getVariableLabel(root, flags, buf))
 			return;
@@ -713,7 +746,7 @@ public class JavaElementLabels {
 			getInternalArchiveLabel(root, flags, buf);
 	}
 	
-	private static boolean getVariableLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+	private static boolean getVariableLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
 		try {
 			IClasspathEntry rawEntry= root.getRawClasspathEntry();
 			if (rawEntry != null) {
@@ -733,7 +766,7 @@ public class JavaElementLabels {
 		return false;
 	}
 
-	private static void getExternalArchiveLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+	private static void getExternalArchiveLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
 		IPath path= root.getPath();
 		if (getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED)) {
 			int segements= path.segmentCount();
@@ -751,7 +784,7 @@ public class JavaElementLabels {
 		}
 	}
 
-	private static void getInternalArchiveLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+	private static void getInternalArchiveLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
 		IResource resource= root.getResource();
 		boolean rootQualified= getFlag(flags, ROOT_QUALIFIED);
 		boolean referencedQualified= getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED) && JavaModelUtil.isReferenced(root) && resource != null;
@@ -769,7 +802,7 @@ public class JavaElementLabels {
 		}
 	}
 
-	private static void getFolderLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+	private static void getFolderLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
 		IResource resource= root.getResource();
 		boolean rootQualified= getFlag(flags, ROOT_QUALIFIED);
 		boolean referencedQualified= getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED) && JavaModelUtil.isReferenced(root) && resource != null;
