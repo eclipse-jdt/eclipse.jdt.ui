@@ -303,6 +303,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 
 	protected Control createContents(Composite parent) {
 		PixelConverter converter= new PixelConverter(parent);
+		setShell(parent.getShell());
 		
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;

@@ -156,7 +156,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		
 	protected Control createContents(Composite parent) {
 		fPixelConverter= new PixelConverter(parent);
-		fShell= parent.getShell();
+		setShell(parent.getShell());
 		
 		Composite markersComposite= createMarkersTabContent(parent);
 		

@@ -84,8 +84,9 @@ public abstract class OptionsConfigurationBlock {
 	private ModifyListener fTextModifyListener;
 
 	protected IStatusChangeListener fContext;
-	protected Shell fShell;
 	protected IJavaProject fProject; // project or null
+	
+	private Shell fShell;
 
 	public OptionsConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
 		fContext= context;
@@ -136,6 +137,10 @@ public abstract class OptionsConfigurationBlock {
 	protected Shell getShell() {
 		return fShell;
 	}
+	
+	protected void setShell(Shell shell) {
+		fShell= shell;
+	}	
 	
 	protected abstract Control createContents(Composite parent);
 	

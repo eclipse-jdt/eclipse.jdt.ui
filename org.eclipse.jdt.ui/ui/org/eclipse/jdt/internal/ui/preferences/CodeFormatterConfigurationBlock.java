@@ -101,6 +101,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 
 	protected Control createContents(Composite parent) {
 		fPixelConverter= new PixelConverter(parent);
+		setShell(parent.getShell());
 		
 		int textWidth= fPixelConverter.convertWidthInCharsToPixels(6);
 		

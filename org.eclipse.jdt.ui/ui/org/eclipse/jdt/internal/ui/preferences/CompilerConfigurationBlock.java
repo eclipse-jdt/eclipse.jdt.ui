@@ -150,7 +150,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	protected Control createContents(Composite parent) {
 		fPixelConverter= new PixelConverter(parent);
-		fShell= parent.getShell();
+		setShell(parent.getShell());
 		
 		TabFolder folder= new TabFolder(parent, SWT.NONE);
 		folder.setLayout(new TabFolderLayout());	
