@@ -15,9 +15,6 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-
 import org.eclipse.swt.dnd.Clipboard;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -29,20 +26,24 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 
 public class CutAction extends SelectionDispatchAction{
 
@@ -61,31 +62,26 @@ public class CutAction extends SelectionDispatchAction{
 		update(getSelection());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CUT_ACTION);
 	}
-	
-	public void selectionChanged(IStructuredSelection selection) {
-		try {
-			/*
-			 * cannot cut top-level types. this deletes the cu and then you cannot paste because the cu is gone. 
-			 */
-			if (! containsOnlyElementsInsideCompilationUnits(selection) || containsTopLevelTypes(selection)){
-				setEnabled(false);
-				return;
-			}	
-			fCopyToClipboardAction.selectionChanged(selection);
-			setEnabled(fCopyToClipboardAction.isEnabled() && isDeleteEnabled(selection));
-		} catch (CoreException e) {
-			//no ui here - this happens on selection changes
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);
-			setEnabled(false);
-		}
-	}
 
-	private boolean isDeleteEnabled(IStructuredSelection selection) throws CoreException {
-		Object[] elements= selection.toArray();
-		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
-		return processor.isApplicable();
+	public void selectionChanged(IStructuredSelection selection) {
+		if (!selection.isEmpty()) {
+			try {
+				// cannot cut top-level types. this deletes the cu and then you cannot paste because the cu is gone.
+				if (!containsOnlyElementsInsideCompilationUnits(selection) || containsTopLevelTypes(selection)) {
+					setEnabled(false);
+					return;
+				}
+				fCopyToClipboardAction.selectionChanged(selection);
+				setEnabled(fCopyToClipboardAction.isEnabled() && RefactoringAvailabilityTester.isDeleteAvailable(selection));
+			} catch (CoreException e) {
+				// no ui here - this happens on selection changes
+				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+				if (JavaModelUtil.filterNotPresentException(e))
+					JavaPlugin.log(e);
+				setEnabled(false);
+			}
+		} else
+			setEnabled(false);
 	}
 
 	private static boolean containsOnlyElementsInsideCompilationUnits(IStructuredSelection selection) {
@@ -99,14 +95,11 @@ public class CutAction extends SelectionDispatchAction{
 
 	private static boolean containsTopLevelTypes(IStructuredSelection selection) {
 		for (Iterator iter = selection.iterator(); iter.hasNext();) {
-			if (isTopLevelType(iter.next()))
+			Object each= iter.next();
+			if ((each instanceof IType) && ((IType)each).getDeclaringType() == null)
 				return true;
 		}
 		return false;
-	}
-
-	private static boolean isTopLevelType(Object each) {
-		return (each instanceof IType) && ((IType)each).getDeclaringType() == null;
 	}
 
 	public void run(IStructuredSelection selection) {

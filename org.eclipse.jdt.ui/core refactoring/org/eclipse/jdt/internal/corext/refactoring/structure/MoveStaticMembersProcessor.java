@@ -78,7 +78,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -96,7 +96,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class MoveStaticMembersProcessor extends MoveProcessor {
+public final class MoveStaticMembersProcessor extends MoveProcessor {
 	
 	private static final String TRACKED_POSITION_PROPERTY= "MoveStaticMembersProcessor.trackedPosition"; //$NON-NLS-1$
 	private IMember[] fMembersToMove;
@@ -151,84 +151,16 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	}
 	
 	public static MoveStaticMembersProcessor create(IMember[] elements, CodeGenerationSettings preferenceSettings) throws JavaModelException{
-		if (! isAvailable(elements))
+		if (! RefactoringAvailabilityTester.isMoveStaticMembersAvailable(elements))
 			return null;
 		return new MoveStaticMembersProcessor(elements, preferenceSettings);
 	}
-	
-	public static boolean isAvailable(IMember[] elements) throws JavaModelException{
-		if (elements == null)
-			return false;
-
-		if (elements.length == 0)
-			return false;
-		
-		if (! areAllMoveable(elements))
-			return false;		
-
-		if (! haveCommonDeclaringType(elements))
-			return false;
-		
-		return true;
-	}
-	
-	private static boolean areAllMoveable(IMember[] elements) throws JavaModelException{
-		for (int i = 0; i < elements.length; i++) {
-			if (! isMoveable(elements[i]))
-				return false;
-		}
-		return true;
-	}
-	
-	private static boolean isMoveable(IMember member) throws JavaModelException{
-		// Initializers have no bindings -> would need special handling in MoveStaticMemberAnalyzer, etc.
-		if (member.getElementType() != IJavaElement.METHOD && 
-			member.getElementType() != IJavaElement.FIELD &&
-			member.getElementType() != IJavaElement.TYPE)
-				return false;
-		if (JdtFlags.isEnum(member))
-			return false;
-		
-		if (member.getDeclaringType() == null)
-			return false;
-		
-		if (! Checks.isAvailable(member))
-			return false;
-			
-		if (member.getElementType() == IJavaElement.METHOD && member.getDeclaringType().isInterface())
-			return false;
-				
-		if (member.getElementType() == IJavaElement.METHOD && ! JdtFlags.isStatic(member))
-			return false;
-
-		if (member.getElementType() == IJavaElement.METHOD && ((IMethod)member).isConstructor())
-			return false;
-			
-		if (member.getElementType() == IJavaElement.TYPE && ! JdtFlags.isStatic(member))
-			return false;
-			
-		if (! member.getDeclaringType().isInterface() && ! JdtFlags.isStatic(member))
-			return false;
-			
-		return true;
-	}
-	
-	private static boolean haveCommonDeclaringType(IMember[] members){
-		IType declaringType= members[0].getDeclaringType(); //index safe - checked in areAllMoveable()
-		for (int i= 0; i < members.length; i++) {
-			if (! declaringType.equals(members[i].getDeclaringType()))
-				return false;			
-		}	
-		return true;
-	}
-	
-	//---- Move Processor -------------------------------------------------
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isApplicable() throws CoreException {
-		return isAvailable(fMembersToMove);
+		return RefactoringAvailabilityTester.isMoveStaticMembersAvailable(fMembersToMove);
 	}
 
 	/**
@@ -348,7 +280,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	//---- Input checking ------------------------------------
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
-		initializeForFinalConditionChecking();
+		fTarget= null;
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("MoveMembersRefactoring.Checking_preconditions"), 10); //$NON-NLS-1$
 			
@@ -390,12 +322,6 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		} finally {
 			pm.done();
 		}	
-	}
-	
-	private void initializeForFinalConditionChecking() {
-		// clears some internal state since final condition checking
-		// can be executed more than once.
-		fTarget= null;
 	}
 	
 	private IFile[] getAllFilesToModify(List modifiedCus) {

@@ -20,6 +20,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.DeleteResourceAction;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -53,14 +54,12 @@ public class DeleteAction extends SelectionDispatchAction {
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		if (canDelegateToWorkbenchAction(selection)) {
+		if (ReorgUtils.containsOnlyProjects(selection.toList())) {
 			setEnabled(createWorkbenchAction(selection).isEnabled());
 			return;
 		}
 		try {
-			Object[] elements= selection.toArray();
-			JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
-			setEnabled(processor.isApplicable());
+			setEnabled(RefactoringAvailabilityTester.isDeleteAvailable(selection.toArray()));
 		} catch (CoreException e) {
 			//no ui here - this happens on selection changes
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
@@ -68,10 +67,6 @@ public class DeleteAction extends SelectionDispatchAction {
 				JavaPlugin.log(e);
 			setEnabled(false);
 		}
-	}
-
-	private boolean canDelegateToWorkbenchAction(IStructuredSelection selection) {
-		return ReorgUtils.containsOnlyProjects(selection.toList());
 	}
 
 	private IAction createWorkbenchAction(IStructuredSelection selection) {
@@ -84,22 +79,17 @@ public class DeleteAction extends SelectionDispatchAction {
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void run(IStructuredSelection selection) {
-		if (canDelegateToWorkbenchAction(selection)) {
+		if (ReorgUtils.containsOnlyProjects(selection.toList())) {
 			createWorkbenchAction(selection).run();
 			return;
 		}
 		try {
 			Object[] elements= selection.toArray();
-			DeleteRefactoring ref= createRefactoring(elements);
+			DeleteRefactoring ref= new DeleteRefactoring(new JavaDeleteProcessor(elements));
 			UserInterfaceStarter starter= DeleteUserInterfaceManager.getDefault().getStarter(ref);
 			starter.activate(ref, getShell(), false);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-	}
-
-	private DeleteRefactoring createRefactoring(Object[] elements) throws CoreException {
-		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
-		return new DeleteRefactoring(processor);
 	}
 }

@@ -163,7 +163,7 @@ public class MoveAction extends SelectionDispatchAction{
 		if (element == null || !(element instanceof IMember))
 			return false;
 		IMember[] array= new IMember[]{(IMember)element};
-		if (! MoveStaticMembersProcessor.isAvailable(array))	
+		if (! RefactoringAvailabilityTester.isMoveStaticMembersAvailable(array))	
 			return false;
 		IJavaProject project= null;
 		if (array.length > 0)
@@ -196,7 +196,7 @@ public class MoveAction extends SelectionDispatchAction{
 
 	private boolean tryMoveStaticMembers(IStructuredSelection selection) throws JavaModelException{
 		IMember[] array= getSelectedMembers(selection);
-		if (! MoveStaticMembersProcessor.isAvailable(array))	
+		if (! RefactoringAvailabilityTester.isMoveStaticMembersAvailable(array))	
 			return false;
 		IJavaProject project= null;
 		if (array.length > 0)

@@ -128,7 +128,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-class ReorgPolicyFactory {
+public class ReorgPolicyFactory {
 	private ReorgPolicyFactory() {
 		//private
 	}

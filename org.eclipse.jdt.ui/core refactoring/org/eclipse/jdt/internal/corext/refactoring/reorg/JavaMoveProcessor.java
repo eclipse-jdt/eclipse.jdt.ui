@@ -22,11 +22,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -36,7 +32,6 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -46,7 +41,7 @@ import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
-public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUpdating, IReorgDestinationValidator {
+public final class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUpdating, IReorgDestinationValidator {
 	//TODO: offer IMovePolicy getMovePolicy(); IReorgPolicy getReorgPolicy();
 	// and remove delegate methods (also for CopyRefactoring)?
 	
@@ -57,24 +52,9 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
 	
-	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		if (javaElements != null) {
-			for (int i= 0; i < javaElements.length; i++) {
-				IJavaElement element= javaElements[i];
-				if ((element instanceof IType) && ((IType)element).isLocal())
-					return false;
-				if ((element instanceof IPackageDeclaration))
-					return false;
-				if (element instanceof IField && JdtFlags.isEnum((IMember) element))
-					return false;
-			}
-		}
-		return isAvailable(ReorgPolicyFactory.createMovePolicy(resources, javaElements));
-	}
-
 	public static JavaMoveProcessor create(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
 		IMovePolicy movePolicy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
-		if (! isAvailable(movePolicy))
+		if (! movePolicy.canEnable())
 			return null;
 		return new JavaMoveProcessor(movePolicy);
 	}
@@ -83,12 +63,6 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 		fMovePolicy= movePolicy;
 	}
 	
-	private static boolean isAvailable(IMovePolicy movePolicy) throws JavaModelException{
-		return movePolicy.canEnable();
-	}
-	
-	//---- MoveProcessor ------------------------------------------------------
-
 	protected Object getDestination() {
 		IJavaElement je= fMovePolicy.getJavaElementDestination();
 		if (je != null)
@@ -108,7 +82,7 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 	}
 
 	public boolean isApplicable() throws CoreException {
-		return isAvailable(fMovePolicy);
+		return fMovePolicy.canEnable();
 	}
 	
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {

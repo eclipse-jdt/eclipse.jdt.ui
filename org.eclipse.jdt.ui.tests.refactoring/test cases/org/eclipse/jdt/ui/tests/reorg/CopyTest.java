@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
@@ -79,12 +80,12 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		assertTrue("copy should be disabled", ! JavaCopyProcessor.isAvailable(resources, javaElements));
+		assertTrue("copy should be disabled", ! RefactoringAvailabilityTester.isCopyAvailable(resources, javaElements));
 		assertTrue(JavaCopyProcessor.create(resources, javaElements) == null);
 	}
 
 	private JavaCopyProcessor verifyEnabled(IResource[] resources, IJavaElement[] javaElements, INewNameQueries newNameQueries, IReorgQueries reorgQueries) throws JavaModelException {
-		assertTrue("copy should be enabled", JavaCopyProcessor.isAvailable(resources, javaElements));
+		assertTrue("copy should be enabled", RefactoringAvailabilityTester.isCopyAvailable(resources, javaElements));
 		JavaCopyProcessor processor= JavaCopyProcessor.create(resources, javaElements);
 		assertNotNull(processor);
 		if (newNameQueries != null)

@@ -31,10 +31,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.refactoring.RenameSupport;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -59,11 +59,13 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	}
 
 	//---- Structured selection ------------------------------------------------
-	
+
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
-			return;
+			if (selection.size() == 1) {
+				setEnabled(canEnable(selection));
+				return;
+			}
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))

@@ -54,10 +54,6 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	private ICopyPolicy fCopyPolicy;
 	private ReorgExecutionLog fExecutionLog;
 	
-	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		return ReorgPolicyFactory.createCopyPolicy(resources, javaElements).canEnable();
-	}
-	
 	public static JavaCopyProcessor create(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
 		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
 		if (! copyPolicy.canEnable())

@@ -17,8 +17,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.actions.CopyProjectAction;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.CopyProjectAction;
 
 import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -26,6 +26,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -51,29 +52,28 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	}
 
 	public void selectionChanged(IStructuredSelection selection) {
-		if (canDelegateToWorkbenchAction(selection)) {
-			setEnabled(createWorkbenchAction(selection).isEnabled());
-			return;
-		}
-		try {
-			List elements= selection.toList();
-			IResource[] resources= ReorgUtils.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-			if (elements.size() != resources.length + javaElements.length)
+		if (!selection.isEmpty()) {
+			if (ReorgUtils.containsOnlyProjects(selection.toList())) {
+				setEnabled(createWorkbenchAction(selection).isEnabled());
+				return;
+			}
+			try {
+				List elements= selection.toList();
+				IResource[] resources= ReorgUtils.getResources(elements);
+				IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
+				if (elements.size() != resources.length + javaElements.length)
+					setEnabled(false);
+				else
+					setEnabled(RefactoringAvailabilityTester.isCopyAvailable(resources, javaElements));
+			} catch (JavaModelException e) {
+				// no ui here - this happens on selection changes
+				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+				if (JavaModelUtil.filterNotPresentException(e))
+					JavaPlugin.log(e);
 				setEnabled(false);
-			else
-				setEnabled(canEnable(resources, javaElements));
-		} catch (JavaModelException e) {
-			//no ui here - this happens on selection changes
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);
+			}
+		} else
 			setEnabled(false);
-		}
-	}
-	
-	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return JavaCopyProcessor.isAvailable(resources, javaElements);
 	}
 
 	private CopyProjectAction createWorkbenchAction(IStructuredSelection selection) {
@@ -82,12 +82,8 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		return action;
 	}
 	
-	private boolean canDelegateToWorkbenchAction(IStructuredSelection selection) {
-		return ReorgUtils.containsOnlyProjects(selection.toList());
-	}
-
 	public void run(IStructuredSelection selection) {
-		if (canDelegateToWorkbenchAction(selection)){
+		if (ReorgUtils.containsOnlyProjects(selection.toList())){
 			createWorkbenchAction(selection).run();
 			return;
 		}
@@ -95,7 +91,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 			List elements= selection.toList();
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-			if (canEnable(resources, javaElements)) 
+			if (RefactoringAvailabilityTester.isCopyAvailable(resources, javaElements)) 
 				startRefactoring(resources, javaElements);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -105,7 +101,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
 		JavaCopyProcessor processor= JavaCopyProcessor.create(resources, javaElements);
 		CopyRefactoring refactoring= new CopyRefactoring(processor);
-		RefactoringWizard wizard= createWizard(refactoring);
+		RefactoringWizard wizard= new ReorgCopyWizard(refactoring);
 		/*
 		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
 		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
@@ -113,9 +109,5 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		processor.setNewNameQueries(new NewNameQueries(wizard));
 		processor.setReorgQueries(new ReorgQueries(wizard));
 		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
-	}
-
-	private RefactoringWizard createWizard(CopyRefactoring refactoring) {
-		return new ReorgCopyWizard(refactoring);
 	}
 }

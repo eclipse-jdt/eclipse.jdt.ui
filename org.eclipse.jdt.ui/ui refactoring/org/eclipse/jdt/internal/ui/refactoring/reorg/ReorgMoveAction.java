@@ -19,8 +19,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.actions.MoveProjectAction;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.MoveProjectAction;
 
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -28,6 +28,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -51,25 +52,28 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 	}
 
 	public void selectionChanged(IStructuredSelection selection) {
-		if (canDelegateToWorkbenchAction(selection)) {
-			setEnabled(createWorkbenchAction(selection).isEnabled());
-			return;
-		}
-		try {
-			List elements= selection.toList();
-			IResource[] resources= ReorgUtils.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-			if (elements.size() != resources.length + javaElements.length)
+		if (!selection.isEmpty()) {
+			if (ReorgUtils.containsOnlyProjects(selection.toList())) {
+				setEnabled(createWorkbenchAction(selection).isEnabled());
+				return;
+			}
+			try {
+				List elements= selection.toList();
+				IResource[] resources= ReorgUtils.getResources(elements);
+				IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
+				if (elements.size() != resources.length + javaElements.length)
+					setEnabled(false);
+				else
+					setEnabled(RefactoringAvailabilityTester.isMoveAvailable(resources, javaElements));
+			} catch (JavaModelException e) {
+				// no ui here - this happens on selection changes
+				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+				if (JavaModelUtil.filterNotPresentException(e))
+					JavaPlugin.log(e);
 				setEnabled(false);
-			else
-				setEnabled(canEnable(resources, javaElements));
-		} catch (JavaModelException e) {
-			//no ui here - this happens on selection changes
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);
+			}
+		} else
 			setEnabled(false);
-		}
 	}
 
 	public void selectionChanged(ITextSelection selection) {
@@ -81,21 +85,10 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isMoveAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
-	}
-
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		IJavaElement element= selection.resolveEnclosingElement();
-		if (element == null)
-			return false;
-		return JavaMoveProcessor.isAvailable(new IResource[0], new IJavaElement[] { element});
-	}
-
-	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return JavaMoveProcessor.isAvailable(resources, javaElements);
 	}
 
 	private MoveProjectAction createWorkbenchAction(IStructuredSelection selection) {
@@ -104,12 +97,8 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		return action;
 	}
 
-	private boolean canDelegateToWorkbenchAction(IStructuredSelection selection) {
-		return ReorgUtils.containsOnlyProjects(selection.toList());
-	}
-
 	public void run(IStructuredSelection selection) {
-		if (canDelegateToWorkbenchAction(selection)) {
+		if (ReorgUtils.containsOnlyProjects(selection.toList())) {
 			createWorkbenchAction(selection).run();
 			return;
 		}
@@ -117,7 +106,7 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 			List elements= selection.toList();
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-			if (canEnable(resources, javaElements))
+			if (RefactoringAvailabilityTester.isMoveAvailable(resources, javaElements))
 				startRefactoring(resources, javaElements);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), //$NON-NLS-1$
@@ -126,9 +115,9 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 	}
 
 	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		JavaMoveProcessor processor= createMoveProcessor(resources, javaElements);
+		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements);
 		MoveRefactoring refactoring= new MoveRefactoring(processor);
-		RefactoringWizard wizard= createWizard(refactoring);
+		RefactoringWizard wizard= new ReorgMoveWizard(refactoring);
 		/*
 		 * We want to get the shell from the refactoring dialog but it's not
 		 * known at this point, so we pass the wizard and then, once the dialog
@@ -139,13 +128,5 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		new RefactoringStarter().activate(refactoring, wizard, getShell(), 
 			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), //$NON-NLS-1$ 
 			true);
-	}
-
-	private RefactoringWizard createWizard(MoveRefactoring refactoring) {
-		return new ReorgMoveWizard(refactoring);
-	}
-
-	private JavaMoveProcessor createMoveProcessor(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return JavaMoveProcessor.create(resources, javaElements);
 	}
 }
