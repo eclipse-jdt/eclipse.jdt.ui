@@ -452,7 +452,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private boolean hasIndirectProblems(VariableDeclaration varDeclaration, Collection nodesToRemove, IProgressMonitor pm) throws JavaModelException{
-		ASTNode[] references= getVariableReferences(varDeclaration, pm);
+		ASTNode[] references= getVariableReferenceNodes(varDeclaration, pm);
 		for (int i= 0; i < references.length; i++) {
 			if (! isReferenceUpdatable(references[i], nodesToRemove)){
 				addToBadVarSet(varDeclaration);
@@ -462,22 +462,26 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return false;
 	}
 	
-	private ASTNode[] getVariableReferences(VariableDeclaration varDeclaration, IProgressMonitor pm) throws JavaModelException{
+	private ASTNode[] getVariableReferenceNodes(VariableDeclaration varDeclaration, IProgressMonitor pm) throws JavaModelException{
 		IVariableBinding vb= varDeclaration.resolveBinding();
 		if (vb == null)
 			return new ASTNode[0];
 		if (vb.isField())
-			return getFieldReferences(varDeclaration, pm);
+			return getFieldReferenceNodes(varDeclaration, pm);
 		return TempOccurrenceFinder.findTempOccurrenceNodes(varDeclaration, true, false);
 	}
 
-	private ASTNode[] getFieldReferences(VariableDeclaration varDeclaration, IProgressMonitor pm) throws JavaModelException{
+	private ASTNode[] getFieldReferenceNodes(VariableDeclaration varDeclaration, IProgressMonitor pm) throws JavaModelException{
 		Assert.isTrue(varDeclaration.resolveBinding().isField());
 		IField field= Binding2JavaModel.lookupIField(varDeclaration.resolveBinding(), getCompilationUnit(varDeclaration).getJavaProject());
 		if (field == null)
 			return new ASTNode[0];
-		ISearchPattern pattern= SearchEngine.createSearchPattern(field, IJavaSearchConstants.REFERENCES);
-		IJavaSearchScope scope= RefactoringScopeFactory.create(field);
+		return getReferenceNodes(field, pm);	
+	}
+	
+	private ASTNode[] getReferenceNodes(IMember member, IProgressMonitor pm) throws JavaModelException{
+		ISearchPattern pattern= SearchEngine.createSearchPattern(member, IJavaSearchConstants.REFERENCES);
+		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
 		SearchResultGroup[] referenceGroups= RefactoringSearchEngine.search(pm, scope, pattern);
 		List result= new ArrayList();
 		for (int i= 0; i < referenceGroups.length; i++) {
@@ -570,22 +574,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 						return true;	
 				}
 			}	
-			
-			if (parentNode instanceof FieldDeclaration){
-				FieldDeclaration fd= (FieldDeclaration)parentNode;
-				if (fd.getType() == node){
-					VariableDeclarationFragment[] fragments= (VariableDeclarationFragment[]) fd.fragments().toArray(new VariableDeclarationFragment[fd.fragments().size()]);
-					for (int i= 0; i < fragments.length; i++) {
-						IVariableBinding vb= fragments[i].resolveBinding();
-						IField field= Binding2JavaModel.lookupIField(vb, getCompilationUnit(fd).getJavaProject());
-						if (field != null && anyReferenceHasDirectProblems(field, new SubProgressMonitor(pm, 1))){
-							addAllToBadVarSet(fragments);
-							return true;						
-						}
-					}
-				}
-			}
-			
+						
 			if (parentNode instanceof SingleVariableDeclaration && parentNode.getParent() instanceof CatchClause)
 				return true;
 				
@@ -593,14 +582,24 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				if(node == ((TypeDeclaration)parentNode).getSuperclass())
 				 	return true;
 			}
+
+			if (parentNode instanceof FieldDeclaration){
+				FieldDeclaration fd= (FieldDeclaration)parentNode;
+				if (fd.getType() == node && ! canReplaceTypeInFieldDeclaration(fd, new SubProgressMonitor(pm, 1))){
+					addAllToBadVarSet(getVariableDeclarationFragments(fd));
+					return true;						
+				}
+			}
 			if (parentNode instanceof VariableDeclarationStatement){
 				VariableDeclarationStatement vds= (VariableDeclarationStatement)parentNode;
-				if (vds.getType() == node && ! canReplaceTypeInVariableDeclarationStatement(vds))
+				if (vds.getType() == node && ! canReplaceTypeInVariableDeclarationStatement(vds, new SubProgressMonitor(pm, 1))){
+					addAllToBadVarSet(getVariableDeclarationFragments(vds));
 					return true; 
+				}	
 			}	
 	
 			if (parentNode instanceof SingleVariableDeclaration){
-				if (! areAllTempReferencesOK((SingleVariableDeclaration)parentNode)){
+				if (anyVariableReferenceHasDirectProblems((SingleVariableDeclaration)parentNode, new SubProgressMonitor(pm, 1))){
 					addToBadVarSet((SingleVariableDeclaration)parentNode);
 					return true;
 				}	
@@ -613,24 +612,6 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		} finally {
 			pm.done();
 		}	
-	}
-
-	private boolean anyReferenceHasDirectProblems(IMember member, IProgressMonitor pm) throws JavaModelException{
-		ISearchPattern pattern= SearchEngine.createSearchPattern(member, IJavaSearchConstants.REFERENCES);
-		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
-		SearchResultGroup[] groups= RefactoringSearchEngine.search(pm, scope, pattern);
-		for (int i= 0; i < groups.length; i++) {
-			ICompilationUnit referencedCU= groups[i].getCompilationUnit();
-			if (referencedCU == null)
-				continue;
-			SearchResult[] searchResults= groups[i].getSearchResults();
-			ASTNode[] referenceNodes= getAstNodes(searchResults, getAST(referencedCU));
-			for (int j= 0; j < referenceNodes.length; j++) {
-				if (isNotUpdatableReference(referenceNodes[j]))
-					return true;
-			}
-		}
-		return false;
 	}
 	
 	private static ASTNode[] getAstNodes(SearchResult[] searchResults, CompilationUnit cuNode) {
@@ -964,16 +945,33 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return (VariableDeclarationFragment[]) fd.fragments().toArray(new VariableDeclarationFragment[fd.fragments().size()]);
 	}
 	
-	//--- 'can replace*' related methods 
-	private boolean canReplaceTypeInVariableDeclarationStatement(VariableDeclarationStatement vds) throws JavaModelException{
+	private boolean canReplaceTypeInFieldDeclaration(FieldDeclaration fd, IProgressMonitor pm) throws JavaModelException {
+		VariableDeclarationFragment[] fragments= getVariableDeclarationFragments(fd);
+		pm.beginTask("", fragments.length);
+		try{
+			for (int i= 0; i < fragments.length; i++) {
+				IField field= Binding2JavaModel.lookupIField(fragments[i].resolveBinding(), getCompilationUnit(fd).getJavaProject());
+				if (field != null && anyReferenceHasDirectProblems(field, new SubProgressMonitor(pm, 1)))
+					return false;						
+			}
+			return true;
+		} finally {
+			pm.done();
+		}	
+	}
+	
+	private boolean canReplaceTypeInVariableDeclarationStatement(VariableDeclarationStatement vds, IProgressMonitor pm) throws JavaModelException{
 		VariableDeclarationFragment[] fragments= getVariableDeclarationFragments(vds);
-		for (int i= 0; i < fragments.length; i++) {
-			if (! areAllTempReferencesOK(fragments[i])){
-				addToBadVarSet(fragments[i]);
-				return false;
-			}	
-		}
-		return true;
+		pm.beginTask("", fragments.length);
+		try{
+			for (int i= 0; i < fragments.length; i++) {
+				if (anyVariableReferenceHasDirectProblems(fragments[i], new SubProgressMonitor(pm, 1)))
+					return false;
+			}
+			return true;
+		} finally {
+			pm.done();
+		}	
 	}
 
 	private void addToBadVarSet(VariableDeclaration variableDeclaration) {
@@ -986,15 +984,22 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}
 	}
 
-	private boolean areAllTempReferencesOK(VariableDeclaration tempDeclaration) throws JavaModelException{
-		ASTNode[] tempReferences= TempOccurrenceFinder.findTempOccurrenceNodes(tempDeclaration, true, false);			
-		for (int i= 0; i < tempReferences.length; i++) {
-			if (isNotUpdatableReference(tempReferences[i]))
-				return false;
-		}	
-		return true;
+	private boolean anyVariableReferenceHasDirectProblems(VariableDeclaration varDeclaration, IProgressMonitor pm) throws JavaModelException{
+		return anyReferenceNodeHasDirectProblems(getVariableReferenceNodes(varDeclaration, pm));
 	}
 	
+	private boolean anyReferenceHasDirectProblems(IMember member, IProgressMonitor pm) throws JavaModelException{
+		return anyReferenceNodeHasDirectProblems(getReferenceNodes(member, pm));
+	}
+	
+	private boolean anyReferenceNodeHasDirectProblems(ASTNode[] referenceNodes) throws JavaModelException{
+		for (int i= 0; i < referenceNodes.length; i++) {
+			if (isNotUpdatableReference(referenceNodes[i]))
+				return true;
+		}
+		return false;
+	}
+
 	//XXX needs better name
 	private boolean isNotUpdatableReference(ASTNode parentNode) throws JavaModelException{
 		ASTNode unparenthesizedParent= getUnparenthesizedParent(parentNode);
