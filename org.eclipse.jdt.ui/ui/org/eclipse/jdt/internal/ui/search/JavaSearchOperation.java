@@ -4,11 +4,12 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -16,7 +17,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class JavaSearchOperation extends WorkspaceModifyOperation {
@@ -68,20 +69,24 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)fElementPattern);
 			else
 				desc= fElementPattern.getElementName();
+			if ("".equals(desc) && fElementPattern.getElementType() == IJavaElement.PACKAGE_FRAGMENT) //$NON-NLS-1$
+				desc= SearchMessages.getString("JavaSearchOperation.default_package"); //$NON-NLS-1$
 		}
 		else
 			desc= fStringPattern;
+
+		String[] args= new String[] {desc, "{0}"}; //$NON-NLS-1$
 		switch (fLimitTo) {
 			case IJavaSearchConstants.IMPLEMENTORS:
-				return desc + SearchMessages.getString("JavaSearchOperation.implementorsPostfix"); //$NON-NLS-1$
+				return SearchMessages.getFormattedString("JavaSearchOperation.implementorsPostfix", args); //$NON-NLS-1$
 			case IJavaSearchConstants.DECLARATIONS:
-				return desc + SearchMessages.getString("JavaSearchOperation.declarationsPostfix"); //$NON-NLS-1$
+				return SearchMessages.getFormattedString("JavaSearchOperation.declarationsPostfix", args); //$NON-NLS-1$
 			case IJavaSearchConstants.REFERENCES:
-				return desc + SearchMessages.getString("JavaSearchOperation.referencesPostfix"); //$NON-NLS-1$
+				return SearchMessages.getFormattedString("JavaSearchOperation.referencesPostfix", args); //$NON-NLS-1$
 			case IJavaSearchConstants.ALL_OCCURRENCES:
-				return desc + SearchMessages.getString("JavaSearchOperation.occurrencesPostfix"); //$NON-NLS-1$
+				return SearchMessages.getFormattedString("JavaSearchOperation.occurrencesPostfix", args); //$NON-NLS-1$
 			default:
-				return ""; //$NON-NLS-1$
+				return SearchMessages.getFormattedString("JavaSearchOperation.occurrencesPostfix", args); //$NON-NLS-1$;
 		}
 	}
 	
