@@ -40,7 +40,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -657,10 +656,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 
 		fOutlineViewer= new JavaOutlineViewer(tree);		
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
-
-		IWorkbenchPartSite site= getSite().getPage().getActivePart().getSite();
 		fOutlineViewer.setLabelProvider(new DecoratingLabelProvider(
-			lprovider, site.getDecoratorManager()));
+			lprovider, fEditor.getSite().getDecoratorManager()));
 		
 		Object[] listeners= fSelectionChangedListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
