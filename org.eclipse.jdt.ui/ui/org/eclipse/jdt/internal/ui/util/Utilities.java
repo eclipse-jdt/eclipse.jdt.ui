@@ -62,7 +62,7 @@ public class Utilities {
 			return ((Control)widget).getShell();
 		if (widget instanceof Caret)
 			return ((Caret)widget).getParent().getShell();
-		JdtHackFinder.fixme("No present under Motif");
+		// XXX: Not present under Motif
 		/*
 		if (widget instanceof DragSource)
 			return ((DragSource)widget).getControl().getShell();

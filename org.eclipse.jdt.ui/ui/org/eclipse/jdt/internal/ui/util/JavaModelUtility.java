@@ -224,7 +224,7 @@ public class JavaModelUtility {
 			pattern= pattern.substring(0, pattern.length() - 2);
 			IJavaProject project= declaration.getJavaProject();
 			
-			JdtHackFinder.fixme("1GBRLSV: ITPJCORE:WIN2000 - Question: how to I find an inner type");
+			// XXX: 1GBRLSV: ITPJCORE:WIN2000 - Question: how to I find an inner type
 			// First try if the import statement is of form p1.p2.T1.* which would lead
 			// to a type not to a package.
 			IJavaElement result= findType(project, pattern);
@@ -247,7 +247,7 @@ public class JavaModelUtility {
 		
 		try {
 			// Check the project itself.
-			JdtHackFinder.fixme("1GAOLWQ: ITPJCORE:WIN2000 - IJavaProject.findPackageFragment strange semantic");
+			// XXX: 1GAOLWQ: ITPJCORE:WIN2000 - IJavaProject.findPackageFragment strange semantic
 			IPackageFragment[] packages= project.getPackageFragments();
 			for (int i= 0; i < packages.length; i++) {
 				if (pattern.equals(packages[i].getElementName()))

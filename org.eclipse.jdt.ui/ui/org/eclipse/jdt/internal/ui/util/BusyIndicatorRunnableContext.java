@@ -88,7 +88,7 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 	 */
 	public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
 		BusyRunnable busyRunnable= new BusyRunnable(fork, runnable);
-		JdtHackFinder.fixme("1GAXJIG: SWT:WIN2000 - Why does the new BusyIndiocator need a display passed in");
+		// XXX: 1GAXJIG: SWT:WIN2000 - Why does the new BusyIndiocator need a display passed in
 		Display display= Display.getCurrent();
 		if (display != null) {
 			BusyIndicator.showWhile(display, busyRunnable);
