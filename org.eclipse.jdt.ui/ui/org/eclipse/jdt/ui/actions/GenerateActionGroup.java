@@ -80,6 +80,7 @@ public class GenerateActionGroup extends ActionGroup {
 	
 	private OrganizeImportsAction fOrganizeImports;
 	private SortMembersAction fSortMembers;
+	private FormatAllAction fFormatAll;
 
 	private ConvertLineDelimitersAction fConvertToWindows;
 	private ConvertLineDelimitersAction fConvertToUNIX;
@@ -243,6 +244,10 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fSortMembers= new SortMembersAction(site);
 		fSortMembers.setActionDefinitionId(IJavaEditorActionDefinitionIds.SORT_MEMBERS);
+
+		fFormatAll= new FormatAllAction(site);
+		fFormatAll.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);
+
 		
 		fOverrideMethods.update(selection);
 		fAddGetterSetter.update(selection);
@@ -257,6 +262,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddTaskAction.update(selection);
 		fOrganizeImports.update(selection);
 		fSortMembers.update(selection);
+		fFormatAll.update(selection);
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection ss= (IStructuredSelection)selection;
 			fAddBookmark.selectionChanged(ss);
@@ -276,6 +282,7 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fExternalizeStrings);
 		registerSelectionListener(provider, fFindStringsToExternalize);
 		registerSelectionListener(provider, fOrganizeImports);
+		registerSelectionListener(provider, fFormatAll);
 		registerSelectionListener(provider, fSortMembers);
 		registerSelectionListener(provider, fAddTaskAction);
 		
@@ -372,6 +379,7 @@ public class GenerateActionGroup extends ActionGroup {
 
 	private int fillViewSubMenu(IMenuManager source) {
 		int added= 0;
+		added+= addAction(source, fFormatAll);
 		added+= addAction(source, fSortMembers);
 		source.add(new Separator());
 		added+= addAction(source, fOrganizeImports);
@@ -430,6 +438,7 @@ public class GenerateActionGroup extends ActionGroup {
 			// editor provides its own implementation of these actions.
 			actionBar.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), fAddBookmark);
 			actionBar.setGlobalActionHandler(IDEActionFactory.ADD_TASK.getId(), fAddTaskAction);
+			actionBar.setGlobalActionHandler(JdtActionConstants.FORMAT, fFormatAll);
 		}
 	}
 	

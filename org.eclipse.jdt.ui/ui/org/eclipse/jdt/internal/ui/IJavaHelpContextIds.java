@@ -67,7 +67,13 @@ public interface IJavaHelpContextIds {
 	public static final String GOTO_MARKER_ACTION= 											PREFIX + "goto_marker_action"; //$NON-NLS-1$
 	public static final String GOTO_PACKAGE_ACTION= 											PREFIX + "goto_package_action"; //$NON-NLS-1$
 	public static final String GOTO_TYPE_ACTION= 											PREFIX + "goto_type_action"; //$NON-NLS-1$
-	public static final String GOTO_MATCHING_BRACKET_ACTION=							PREFIX + "goto_matching_bracket_action"; 	 //$NON-NLS-1$
+	public static final String GOTO_MATCHING_BRACKET_ACTION=							PREFIX + "goto_matching_bracket_action"; 	 //$NON-NLS-1$Object[] FORMAT_ALL= null;
+
+	/**
+	 * @since 3.0
+	 */
+	public static final String FORMAT_ALL=														PREFIX + "format_all_action"; 	 //$NON-NLS-1$
+
 	public static final String GOTO_NEXT_MEMBER_ACTION=							PREFIX + "goto_next_member_action"; 	 //$NON-NLS-1$
 	public static final String GOTO_PREVIOUS_MEMBER_ACTION=							PREFIX + "goto_previous_member_action"; 	 //$NON-NLS-1$
 	public static final String HISTORY_ACTION= 													PREFIX + "history_action"; //$NON-NLS-1$
