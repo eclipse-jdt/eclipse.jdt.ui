@@ -42,6 +42,10 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 	
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
+	}
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -681,6 +685,11 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		String[] names= new String[]{};
 		String[][] signatures= new String[][]{};
 		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
+	}
+
+	public void test100() throws Exception{
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=47785
+		validatePassingTest("A", "I", true, false);
 	}
 	
 	public void testPaperExample0() throws Exception{

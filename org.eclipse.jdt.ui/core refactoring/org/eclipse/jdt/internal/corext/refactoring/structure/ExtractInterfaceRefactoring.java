@@ -577,7 +577,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private static int getMethodDeclarationLength(IMethod iMethod, MethodDeclaration methodDeclaration) throws JavaModelException{
 		int preDeclarationSourceLength= methodDeclaration.getReturnType().getStartPosition() - iMethod.getSourceRange().getOffset();
 		if (methodDeclaration.getBody() == null)
-			return methodDeclaration.getLength() - preDeclarationSourceLength;
+			return iMethod.getSourceRange().getLength() - preDeclarationSourceLength;
 		else
 			return iMethod.getSourceRange().getLength() - methodDeclaration.getBody().getLength() - preDeclarationSourceLength;
 	}
