@@ -167,7 +167,7 @@ public class AllTypesCache {
 				Collection searchResult= null;
 				try {
 					searchResult= doSearchTypes();
-				} catch (RuntimeException e) {
+				} catch (IllegalMonitorStateException e) {
 					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=73254
 					JavaPlugin.log(e);
 				}
