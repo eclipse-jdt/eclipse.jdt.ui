@@ -34,10 +34,7 @@ public class RippleMethodFinder {
 	//assert(method is defined in the most abstract type that declares it )
 	public static IMethod[] getRelatedMethods(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws JavaModelException {
 		try{
-			if (JdtFlags.isPrivate(method))
-				return new IMethod[]{method};
-		
-			if (JdtFlags.isStatic(method))
+			if (! MethodChecks.isVirtual(method) && ! method.getDeclaringType().isInterface())
 				return new IMethod[]{method};
 		
 			if (method.getDeclaringType().isInterface())
@@ -48,6 +45,7 @@ public class RippleMethodFinder {
 			pm.done();
 		}	
 	}
+	
 		
 	/*
 	 * We use the following algorithm to find methods to rename:
