@@ -187,12 +187,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		int returnVal= result[0];
 		return returnVal < 0 ? IRequestQuery.CANCEL : returnCodes[returnVal];
 	}	
-				
-	
-	
+
 	private void showError(String message) {
-		String title= ActionMessages.getString("AddGetterSetterAction.error.title"); //$NON-NLS-1$
-		MessageDialog.openError(getShell(), title, message);
+		MessageDialog.openError(getShell(), getDialogTitle(), message);
 	}
 	
 	/*
@@ -238,5 +235,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			return res;
 		}
 		return null;
+	}	
+	
+	private String getDialogTitle() {
+		return ActionMessages.getString("AddGetterSetterAction.error.title"); //$NON-NLS-1$
 	}	
 }

@@ -92,7 +92,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			type= (IType)EditorUtility.getWorkingCopy(type);
 			
 			if (type == null) {
-				MessageDialog.openError(shell, ActionMessages.getString("OverrideMethodsAction.error.title"), ActionMessages.getString("OverrideMethodsAction.error.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
+				MessageDialog.openError(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.type_removed_in_editor")); //$NON-NLS-1$
 				return;
 			}
 			
@@ -104,19 +104,19 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 				context.run(false, true, new WorkbenchRunnableAdapter(op));
 				IMethod[] res= op.getCreatedMethods();
 				if (res == null || res.length == 0) {
-					MessageDialog.openInformation(shell, ActionMessages.getString("OverrideMethodsAction.error.title"), ActionMessages.getString("OverrideMethodsAction.error.nothing_found")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.nothing_found")); //$NON-NLS-1$
 				} else if (editor != null) {
 					EditorUtility.revealInEditor(editor, res[0]);
 				}
 			} catch (InvocationTargetException e) {
 				JavaPlugin.log(e);
-				MessageDialog.openError(shell, ActionMessages.getString("OverrideMethodsAction.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
+				MessageDialog.openError(shell, getDialogTitle(), e.getTargetException().getMessage()); 
 			} catch (InterruptedException e) {
 				// Do nothing. Operation has been canceled by user.
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			ErrorDialog.openError(shell, ActionMessages.getString("OverrideMethodsAction.error.title"), null, e.getStatus()); //$NON-NLS-1$
+			ErrorDialog.openError(shell, getDialogTitle(), null, e.getStatus()); 
 		}			
 	}
 		
@@ -130,4 +130,8 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		}
 		return null;
 	}
+	
+	private String getDialogTitle() {
+		return ActionMessages.getString("OverrideMethodsAction.error.title"); //$NON-NLS-1$
+	}	
 }

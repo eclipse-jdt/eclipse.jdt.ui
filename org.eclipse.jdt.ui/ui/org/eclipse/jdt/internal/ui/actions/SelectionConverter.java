@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
@@ -103,6 +104,15 @@ public class SelectionConverter {
 		return result;
 	}
 	
+	public static IJavaElement[] codeResolveOrInputHandled(JavaEditor editor, Shell shell, String title) {
+		try {
+			return codeResolveOrInput(editor);
+		} catch(JavaModelException e) {
+			ExceptionHandler.handle(e, shell, title, ActionMessages.getString("SelectionConverter.converstion_failed")); //$NON-NLS-1$
+		}
+		return null;
+	}
+	
 	/**
 	 * Converts the text selection provided by the given editor a Java element by
 	 * asking the user if code reolve returned more than one result. If the selection 
@@ -118,6 +128,15 @@ public class SelectionConverter {
 			candidate= OpenActionUtil.selectJavaElement(Arrays.asList(elements), shell, title, message);
 		}
 		return candidate;
+	}
+	
+	public static IJavaElement codeResolveOrInputHandled(JavaEditor editor, Shell shell, String title, String message) {
+		try {
+			return codeResolveOrInput(editor, shell, title, message);
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, shell, title, ActionMessages.getString("SelectionConverter.converstion_failed")); //$NON-NLS-1$
+		}
+		return null;
 	}
 		
 	public static IJavaElement[] codeResolve(JavaEditor editor) throws JavaModelException {

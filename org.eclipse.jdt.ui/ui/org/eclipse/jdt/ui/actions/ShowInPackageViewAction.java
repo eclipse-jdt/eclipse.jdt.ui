@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -93,8 +92,10 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) throws JavaModelException {
-		run(SelectionConverter.codeResolveOrInput(fEditor, getShell(), ActionUtil.getText(this), ActionMessages.getString("ShowInPackageViewAction.select_name"))); //$NON-NLS-1$
+	protected void run(ITextSelection selection) {
+		IJavaElement element= SelectionConverter.codeResolveOrInputHandled(fEditor, getShell(), getDialogTitle(), ActionMessages.getString("ShowInPackageViewAction.select_name")); //$NON-NLS-1$
+		if (element != null)
+			run(element);
 	}
 	
 	/* (non-Javadoc)
@@ -120,9 +121,12 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			String title= ActionMessages.getString("ShowInPackageViewAction.error.title"); //$NON-NLS-1$
 			String message= ActionMessages.getString("ShowInPackageViewAction.error.message"); //$NON-NLS-1$
-			ErrorDialog.openError(getShell(), title, message, e.getStatus());
+			ErrorDialog.openError(getShell(), getDialogTitle(), message, e.getStatus());
 		}
-	}	
+	}
+	
+	private static String getDialogTitle() {
+		return ActionMessages.getString("ShowInPackageViewAction.dialog.title"); //$NON-NLS-1$
+	}		
 }

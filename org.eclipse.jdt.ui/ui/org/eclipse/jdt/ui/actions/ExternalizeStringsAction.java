@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Externalizes the strings of a compilation unit.
@@ -76,7 +77,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) throws JavaModelException {
+	protected void run(ITextSelection selection) {
 		IJavaElement element= SelectionConverter.getInput(fEditor);
 		if (!(element instanceof ICompilationUnit))
 			return;
@@ -86,12 +87,16 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(IStructuredSelection selection) throws JavaModelException {
+	protected void run(IStructuredSelection selection) {
 		run(getCompilationUnit(selection));
 	}	
 	
-	private void run(ICompilationUnit unit) throws JavaModelException {
-		openExternalizeStringsWizard(unit);
+	private void run(ICompilationUnit unit) {
+		try {
+			openExternalizeStringsWizard(unit);
+		} catch(JavaModelException e) {
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("ExternalizeStringsAction.dialog.message")); //$NON-NLS-1$
+		}
 	}
 
 	private ICompilationUnit getCompilationUnit(IStructuredSelection selection) {
@@ -114,6 +119,10 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		
 		Refactoring refactoring= createNewRefactoringInstance(unit);
 		ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
-		new RefactoringStarter().activate(refactoring, wizard, ActionMessages.getString("ExternalizeStringsAction.dialog.title"), true); //$NON-NLS-1$
+		new RefactoringStarter().activate(refactoring, wizard, getDialogTitle(), true); 
+	}	
+	
+	private static String getDialogTitle() {
+		return ActionMessages.getString("ExternalizeStringsAction.dialog.title"); //$NON-NLS-1$
 	}		
 }

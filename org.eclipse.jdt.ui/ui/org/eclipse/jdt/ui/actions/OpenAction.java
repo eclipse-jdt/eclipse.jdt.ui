@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
@@ -36,6 +37,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * This action opens a java editor on the element represented by either
@@ -113,8 +115,12 @@ public class OpenAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) throws JavaModelException {
-		run(SelectionConverter.codeResolveOrInput(fEditor));
+	protected void run(ITextSelection selection) {
+		try {
+			run(SelectionConverter.codeResolveOrInput(fEditor));
+		} catch (JavaModelException e) {
+			showError(e);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -138,7 +144,7 @@ public class OpenAction extends SelectionDispatchAction {
 					JavaStatusConstants.INTERNAL_ERROR, ActionMessages.getString("OpenAction.error.message"), e)); //$NON-NLS-1$
 				
 				ErrorDialog.openError(getShell(), 
-					ActionMessages.getString("OpenAction.error.title"), //$NON-NLS-1$
+					getDialogTitle(),
 					ActionMessages.getString("OpenAction.error.messageProblems"),  //$NON-NLS-1$
 					e.getStatus());
 			
@@ -162,5 +168,13 @@ public class OpenAction extends SelectionDispatchAction {
 				}
 			}		
 		}
+	}
+	
+	private String getDialogTitle() {
+		return ActionMessages.getString("OpenAction.error.title"); //$NON-NLS-1$
+	}
+	
+	private void showError(CoreException e) {
+		ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("OpenAction.error.message")); //$NON-NLS-1$
 	}
 }

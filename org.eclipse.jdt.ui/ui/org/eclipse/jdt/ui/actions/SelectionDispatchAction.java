@@ -26,9 +26,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+/**
+ * @since 2.0
+ */
 public abstract class SelectionDispatchAction extends Action implements ISelectionChangedListener, IUpdate {
 	
 	private UnifiedSite fSite;
@@ -45,7 +47,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 		Assert.isNotNull(site);
 		fSite= site;
 	}
-	
+
 	protected void selectionChanged(IStructuredSelection selection) {
 		selectionChanged((ISelection)selection);
 	}
@@ -58,15 +60,15 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 		setEnabled(false);
 	}
 	
-	protected void run(IStructuredSelection selection) throws CoreException {
+	protected void run(IStructuredSelection selection) {
 		run((ISelection)selection);
 	}
 	
-	protected void run(ITextSelection selection) throws CoreException {
+	protected void run(ITextSelection selection) {
 		run((ISelection)selection);
 	}
 	
-	protected void run(ISelection selection) throws CoreException {
+	protected void run(ISelection selection) {
 	}
 
 	protected UnifiedSite getSite() {
@@ -126,16 +128,12 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	}
 
 	private void dispatchRun(ISelection selection) {
-		try {
-			if (selection instanceof IStructuredSelection) {
-				run((IStructuredSelection)selection);
-			} else if (selection instanceof ITextSelection) {
-				run((ITextSelection)selection);
-			} else {
-				run(selection);
-			}
-		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), ActionUtil.getText(this), ActionMessages.getString("SelectionDispatchAction.unexpected_exception")); //$NON-NLS-1$
+		if (selection instanceof IStructuredSelection) {
+			run((IStructuredSelection)selection);
+		} else if (selection instanceof ITextSelection) {
+			run((ITextSelection)selection);
+		} else {
+			run(selection);
 		}
 	}
 }

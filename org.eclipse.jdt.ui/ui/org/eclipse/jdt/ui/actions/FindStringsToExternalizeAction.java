@@ -89,8 +89,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		setText(ActionMessages.getString("FindStringsToExternalizeAction.label")); //$NON-NLS-1$
 		fElements= new NonNLSElement[0];
 	}
-	
-	
+		
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -160,7 +159,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			return (NonNLSElement[]) l.toArray(new NonNLSElement[l.size()]);
 		} catch(JavaModelException e) {
 			ExceptionHandler.handle(e, 
-				ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$
+				getDialogTitle(),
 				ActionMessages.getString("FindStringsToExternalizeAction.error.message")); //$NON-NLS-1$
 			return new NonNLSElement[0];	
 		} finally{
@@ -171,7 +170,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	private void showResults() {
 		if (noStrings())
 			MessageDialog.openInformation(getShell(), 
-				ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$
+				getDialogTitle(),
 				ActionMessages.getString("FindStringsToExternalizeAction.noStrings")); //$NON-NLS-1$
 		else	
 			new NonNLSListDialog(getShell(), fElements, countStrings()).open();
@@ -264,7 +263,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			return result;
 		}catch(JavaModelException e) {
 			ExceptionHandler.handle(e, 
-				ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$
+				getDialogTitle(),
 				ActionMessages.getString("FindStringsToExternalizeAction.error.message")); //$NON-NLS-1$
 			return 0;
 		}catch(InvalidInputException iie) {
@@ -436,4 +435,8 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			return ((NonNLSElement)element).count != 0;
 		}
 	}
+	
+	private String getDialogTitle() {
+		return ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"); //$NON-NLS-1$
+	}	
 }

@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
 /**
@@ -88,8 +89,10 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) throws JavaModelException {
-		IJavaElement[] elements= SelectionConverter.codeResolveOrInput(fEditor);
+	protected void run(ITextSelection selection) {
+		IJavaElement[] elements= SelectionConverter.codeResolveOrInputHandled(fEditor, getShell(), getDialogTitle());
+		if (elements == null)
+			return;
 		List candidates= new ArrayList(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			candidates.addAll(Arrays.asList(OpenTypeHierarchyUtil.getCandidates(elements[i])));
@@ -113,5 +116,9 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			return;
 		}
 		OpenTypeHierarchyUtil.open(elements, getSite().getWorkbenchWindow());
-	}	
+	}
+	
+	private static String getDialogTitle() {
+		return ActionMessages.getString("OpenTypeHierarchyAction.dialog.title"); //$NON-NLS-1$
+	}		
 }

@@ -117,7 +117,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) throws JavaModelException {
+	protected void run(ITextSelection selection) {
 		run(getMethod(selection));
 	}
 	
@@ -151,9 +151,8 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			String title= ActionMessages.getString("OpenSuperImplementationAction.error.title"); //$NON-NLS-1$
 			String message= ActionMessages.getString("OpenSuperImplementationAction.error.message"); //$NON-NLS-1$
-			ErrorDialog.openError(getShell(), title, message, e.getStatus());
+			ErrorDialog.openError(getShell(), getDialogTitle(), message, e.getStatus());
 		}
 	}
 	
@@ -164,8 +163,8 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		return checkMethod(element);
 	}
 	
-	private IMethod getMethod(ITextSelection selection) throws JavaModelException {
-		return checkMethod(SelectionConverter.elementAtOffset(fEditor));
+	private IMethod getMethod(ITextSelection selection) {
+		return checkMethod(elementAtOffset());
 	}
 	
 	private IMethod checkMethod(Object element) {
@@ -183,5 +182,17 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 			JavaPlugin.log(e);
 		}
 		return null;
-	}	
+	}
+	
+	private Object elementAtOffset() {
+		try {
+			return SelectionConverter.elementAtOffset(fEditor);
+		} catch(JavaModelException e) {
+		}
+		return null;
+	}
+	
+	private static String getDialogTitle() {
+		return ActionMessages.getString("OpenSuperImplementationAction.error.title"); //$NON-NLS-1$
+	}		
 }

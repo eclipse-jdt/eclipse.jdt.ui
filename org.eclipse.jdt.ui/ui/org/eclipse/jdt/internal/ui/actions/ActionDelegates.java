@@ -20,7 +20,7 @@ public class ActionDelegates {
 	
 	public static class OpenAction extends RetargetActionDelegator {
 		protected RetargetAction createRetargetAction() {
-			return new LabelRetargetAction(getId(), ActionMessages.getString("OpenAction.label"));
+			return new LabelRetargetAction(getId(), ActionMessages.getString("OpenAction.label")); //$NON-NLS-1$
 		}
 		protected String getId() {
 			return RetargetActionIDs.OPEN;

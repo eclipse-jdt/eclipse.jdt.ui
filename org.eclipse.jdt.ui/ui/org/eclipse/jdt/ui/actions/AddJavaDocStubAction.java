@@ -124,8 +124,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	}
 	
 	private void showError(String message) {
-		String title= ActionMessages.getString("AddJavaDocStubsAction.error.dialogTitle"); //$NON-NLS-1$
-		MessageDialog.openError(getShell(), title, message);
+		MessageDialog.openError(getShell(), getDialogTitle(), message);
 	}
 	
 	private IMember[] getSelectedMembers(IStructuredSelection selection) {
@@ -156,4 +155,8 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		}
 		return null;
 	}
+	
+	private String getDialogTitle() {
+		return ActionMessages.getString("AddJavaDocStubsAction.error.dialogTitle"); //$NON-NLS-1$
+	}	
 }

@@ -34,9 +34,9 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
@@ -91,21 +91,19 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * </p>
 	 */
 	public static void openInBrowser(final URL url, final Shell shell) {
-//		IHelpResource helpResource= new IHelpResource() {
-//			public String getHref() {
-//				return url.toExternalForm();
-//			}
-//
-//			public String getLabel() {
-//				return url.toExternalForm();
-//			}
-//		};
 		IHelp help= WorkbenchHelp.getHelpSupport();
 		if (help != null) {
 			WorkbenchHelp.getHelpSupport().displayHelpResource(url.toExternalForm());
 		} else {
 			showMessage(shell, ActionMessages.getString("OpenExternalJavadocAction.help_not_available"), false); //$NON-NLS-1$
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */
+	protected String getDialogTitle() {
+		return getTitle();
 	}
 	
 	/* (non-Javadoc)
@@ -131,8 +129,12 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) throws JavaModelException {
-		run(SelectionConverter.codeResolveOrInput(fEditor, getShell(), ActionUtil.getText(this), ActionMessages.getString("OpenExternalJavadocAction.select_element"))); //$NON-NLS-1$
+	protected void run(ITextSelection selection) {
+		try {
+			run(SelectionConverter.codeResolveOrInput(fEditor, getShell(), getDialogTitle(), ActionMessages.getString("OpenExternalJavadocAction.select_element")));  //$NON-NLS-1$
+		} catch(JavaModelException e) {
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("OpenExternalJavadocAction.code_resolve_failed")); //$NON-NLS-1$
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -187,12 +189,16 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
 				if (isError) {
-					MessageDialog.openError(shell, ActionMessages.getString("OpenExternalJavadocAction.dialog.title"), message); //$NON-NLS-1$
+					MessageDialog.openError(shell, getTitle(), message); //$NON-NLS-1$
 				} else {
-					MessageDialog.openInformation(shell, ActionMessages.getString("OpenExternalJavadocAction.dialog.title"), message); //$NON-NLS-1$
+					MessageDialog.openInformation(shell, getTitle(), message); //$NON-NLS-1$
 				}
 			}
 		});
+	}
+	
+	private static String getTitle() {
+		return ActionMessages.getString("OpenExternalJavadocAction.dialog.title"); //$NON-NLS-1$
 	}
 }
 		

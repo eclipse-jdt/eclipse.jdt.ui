@@ -22,6 +22,7 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.views.navigator.ResourceNavigator;
 
@@ -33,10 +34,10 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * <p>
@@ -89,6 +90,41 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction.
+	 */
+	protected void run(ITextSelection selection) {
+		IJavaElement element= SelectionConverter.codeResolveOrInputHandled(fEditor, 
+			getShell(), getDialogTitle(), ActionMessages.getString("ShowInNavigatorView.dialog.message")); //$NON-NLS-1$
+		if (element != null)
+			run(element);
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction.
+	 */
+	protected void run(IStructuredSelection selection) {
+		run(getElement(selection));
+	}
+	
+	private void run(IJavaElement element) {
+		try {
+			IResource resource= getResource(element);
+			if (resource == null)
+				return;
+			IWorkbenchPage page= getSite().getWorkbenchWindow().getActivePage();	
+			IViewPart view= page.showView(IPageLayout.ID_RES_NAV);
+			if (view instanceof ISetSelectionTarget) {
+				ISelection selection= new StructuredSelection(resource);
+				((ISetSelectionTarget)view).selectReveal(selection);
+			}
+		} catch(PartInitException e) {
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("ShowInNavigatorView.error.activation_failed")); //$NON-NLS-1$
+		} catch(JavaModelException e) {
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("ShowInNavigatorView.error.conversion_failed")); //$NON-NLS-1$
+		}
+	}
+	
 	private IJavaElement getElement(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return null;
@@ -105,30 +141,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		return element.getCorrespondingResource();
 	}
 	
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
-	protected void run(ITextSelection selection) throws CoreException {
-		run(getResource(SelectionConverter.codeResolveOrInput(fEditor, 
-			getShell(), ActionUtil.getText(this), ActionMessages.getString("ShowInNavigatorView.dialog.message")))); //$NON-NLS-1$
-	}
-	
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
-	protected void run(IStructuredSelection selection) throws CoreException {
-		run(getResource(getElement(selection)));
-	}
-	
-	private void run(IResource resource) throws CoreException {
-		if (resource == null)
-			return;
-		
-		IWorkbenchPage page= getSite().getWorkbenchWindow().getActivePage();	
-		IViewPart view= page.showView(IPageLayout.ID_RES_NAV);
-		if (view instanceof ISetSelectionTarget) {
-			ISelection selection= new StructuredSelection(resource);
-			((ISetSelectionTarget)view).selectReveal(selection);
-		}
-	}
+	private static String getDialogTitle() {
+		return ActionMessages.getString("ShowInNavigatorView.dialog.title"); //$NON-NLS-1$
+	}	
 }
