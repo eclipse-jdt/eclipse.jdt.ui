@@ -44,10 +44,6 @@ public class NLSHintHelper {
 	 * Returns the accessor binding info or <code>null</code> if this element is not a nls'ed entry
 	 */
 	public static AccessorClassReference getAccessorClassReference(CompilationUnit astRoot, NLSElement nlsElement) {
-		if (!nlsElement.hasTag()) {
-			throw new IllegalArgumentException("NLSElement must be \"nlsed\" before."); //$NON-NLS-1$
-		}
-		
 		Region region= nlsElement.getPosition();
 		ASTNode nlsStringLiteral= NodeFinder.perform(astRoot, region.getOffset(), region.getLength());
 		if (nlsStringLiteral == null) {

@@ -123,6 +123,20 @@ public class NLSHint {
 				}
 			}
 		}
+		
+		// try to find a access with missing //non-nls tag (bug 75155)
+		for (int i= 0; i < lines.length; i++) {
+			NLSElement[] elements= lines[i].getElements();
+			for (int j= 0; j < elements.length; j++) {
+				NLSElement nlsElement= elements[j];
+				if (!nlsElement.hasTag()) {
+					AccessorClassReference accessorClassReference= NLSHintHelper.getAccessorClassReference(astRoot, nlsElement);
+					if (accessorClassReference != null) {
+						return accessorClassReference;
+					}
+				}
+			}
+		}
 		return null;
 	}
 
