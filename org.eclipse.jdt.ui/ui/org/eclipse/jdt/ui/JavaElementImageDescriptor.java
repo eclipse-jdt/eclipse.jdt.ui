@@ -51,8 +51,11 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	/** Flag to render the error adornment */
 	public final static int ERROR=			0x040;
 	
-	/** Flag to render the error adornment */
-	public final static int OVERRIDDEN= 		0x080;	
+	/** Flag to render the 'override' adornment */
+	public final static int OVERRIDES= 		0x080;
+	
+	/** Flag to render the 'implements' adornment */
+	public final static int IMPLEMENTS= 		0x100;		
 
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
@@ -190,11 +193,16 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
 		}
-		if ((fFlags & OVERRIDDEN) != 0) {
-			data= JavaPluginImages.DESC_OVR_OVERRIDDEN.getImageData();
+		if ((fFlags & OVERRIDES) != 0) {
+			data= JavaPluginImages.DESC_OVR_OVERRIDES.getImageData();
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
-		}		
+		}
+		if ((fFlags & IMPLEMENTS) != 0) {
+			data= JavaPluginImages.DESC_OVR_IMPLEMENTS.getImageData();
+			x-= data.width;
+			drawImage(data, x, size.y - data.height);
+		}			
 	}		
 	
 	private void drawBottomLeft() {

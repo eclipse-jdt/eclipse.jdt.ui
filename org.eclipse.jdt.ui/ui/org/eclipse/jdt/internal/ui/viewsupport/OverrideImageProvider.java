@@ -38,9 +38,14 @@ public class OverrideImageProvider extends ErrorTickImageProvider {
 				IType type= method.getDeclaringType();
 				if (type.isClass() && !method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
 					ITypeHierarchy hierarchy= getTypeHierarchy(type);
-					IMethod overridden= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, method.getElementName(), method.getParameterTypes(), false);
-					if (overridden != null) {
-						adornmentFlags |= JavaElementImageDescriptor.OVERRIDDEN;
+					IMethod impl= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, method.getElementName(), method.getParameterTypes(), false);
+					if (impl != null) {
+						IMethod overridden= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, method.getElementName(), method.getParameterTypes(), false);
+						if (overridden != null) {
+							adornmentFlags |= JavaElementImageDescriptor.OVERRIDES;
+						} else {
+							adornmentFlags |= JavaElementImageDescriptor.IMPLEMENTS;
+						}
 					}
 				}
 			} catch (JavaModelException e) {
