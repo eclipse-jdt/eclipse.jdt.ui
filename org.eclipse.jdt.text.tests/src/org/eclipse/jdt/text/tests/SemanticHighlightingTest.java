@@ -307,6 +307,8 @@ public class SemanticHighlightingTest extends TestCase {
 		enableSemanticHighlighting(semanticHighlighting);
 		EditorTestHelper.forceReconcile(fSourceViewer);
 		assertTrue(EditorTestHelper.joinReconciler(fSourceViewer, 0, 10000, 100));
+		EditorTestHelper.sleep(100);
+		EditorTestHelper.runEventQueue();
 	}
 
 	private void enableSemanticHighlighting(String preferenceKey) {
