@@ -20,53 +20,18 @@ import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.ui.actions.OpenAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementComparer;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+
+import org.eclipse.jdt.ui.actions.OpenAction;
  
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
-	
-	private class TypeHierarchyElementComparer extends JavaElementComparer {
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IElementComparer#equals(java.lang.Object, java.lang.Object)
-		 */
-		public boolean equals(Object o1, Object o2) {
-			if (o1 == o2)	// this handles also the case that both are null
-				return true;
-			if (o1 == null)  
-				return false; // o2 != null if we reach this point
-			if (o1 instanceof IMember && o2 instanceof IMember) {
-				IMember m1= (IMember) o1;
-				IMember m2= (IMember) o2;
-				if (m1.getElementType() != m2.getElementType()) {
-					return false;					
-				}
-				if (m1.getElementType() == IJavaElement.TYPE) {
-					return m1.equals(m2);
-				}
-				return super.equals(m1.getCompilationUnit(), m2.getCompilationUnit());
-			}
-			return o1.equals(o2);
-		}
-		
-		public int hashCode(Object o1) {
-			if (o1 instanceof IType) {
-				return o1.hashCode();
-			}
-			return super.hashCode(o1);
-		}	
-	}
-	
 	
 	private OpenAction fOpen;
 	private HierarchyLabelProvider fLabelProvider;
@@ -80,7 +45,6 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 			
 		setContentProvider(contentProvider);
 		setSorter(new HierarchyViewerSorter(lifeCycle));
-		setComparer(new TypeHierarchyElementComparer());
 		
 		fOpen= new OpenAction(part.getSite());
 		addOpenListener(new IOpenListener() {

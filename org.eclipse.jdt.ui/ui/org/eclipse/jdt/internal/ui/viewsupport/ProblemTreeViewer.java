@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Tree;
@@ -16,18 +18,21 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
-import org.eclipse.core.resources.IResource;
-
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.core.IWorkingCopy;
 
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
+
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 /**
  * Extends a  TreeViewer to allow more performance when showing error ticks.
@@ -43,7 +48,7 @@ public class ProblemTreeViewer extends TreeViewer {
 	 */
 	public ProblemTreeViewer(Composite parent) {
 		super(parent);
-		init();
+		initMapper();
 	}
 
 	/*
@@ -51,7 +56,7 @@ public class ProblemTreeViewer extends TreeViewer {
 	 */
 	public ProblemTreeViewer(Composite parent, int style) {
 		super(parent, style);
-		init();
+		initMapper();
 	}
 
 	/*
@@ -59,12 +64,11 @@ public class ProblemTreeViewer extends TreeViewer {
 	 */
 	public ProblemTreeViewer(Tree tree) {
 		super(tree);
-		init();
+		initMapper();
 	}
 	
-	private void init() {
+	private void initMapper() {
 		fResourceToItemsMapper= new ResourceToItemsMapper(this);
-		setComparer(new JavaElementComparer());
 	}
 	
 	
@@ -131,6 +135,28 @@ public class ProblemTreeViewer extends TreeViewer {
 	 */
 	protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
 		ISelection validNewSelection= getValidSelection(newSelection);
+		if (isShowingWorkingCopies()) {
+			// Convert to and from working copies
+			if (invalidSelection instanceof IStructuredSelection) {
+				IStructuredSelection structSel= (IStructuredSelection)invalidSelection;
+				List elementsToSelect= new ArrayList(structSel.size());
+				Iterator iter= structSel.iterator();
+				while (iter.hasNext()) {
+					Object element= iter.next();
+					if (element instanceof IJavaElement) {
+						IJavaElement je= convertToValidElement((IJavaElement)element);
+						if (je != null)
+							elementsToSelect.add(je);
+					}
+				}
+				if (!elementsToSelect.isEmpty()) {
+					List alreadySelected= SelectionUtil.toList(validNewSelection);
+					if (alreadySelected != null && !alreadySelected.isEmpty())
+						elementsToSelect.addAll(SelectionUtil.toList(validNewSelection));
+					validNewSelection= new StructuredSelection(elementsToSelect);
+				}
+			}
+		}
 		if (validNewSelection != newSelection)
 			setSelection(validNewSelection);
 		super.handleInvalidSelection(invalidSelection, validNewSelection);
@@ -165,6 +191,34 @@ public class ProblemTreeViewer extends TreeViewer {
 			return new StructuredSelection(validElementsToSelect);
 		else
 			return selection;
+	}
+
+	/**
+	 * Converts a working copy (element) to a cu (element)
+	 * or vice-versa.
+	 * 
+	 * @return the converted Java element or <code>null</code> if the conversion fails
+	 */
+	private IJavaElement convertToValidElement(IJavaElement je) {
+		ICompilationUnit cu= (ICompilationUnit)je.getAncestor(IJavaElement.COMPILATION_UNIT);
+		IJavaElement convertedJE= null;
+		if (cu == null)
+			return null;
+
+		if (cu.isWorkingCopy())
+			convertedJE= cu.getOriginal(je);
+		else {
+			IWorkingCopy wc= (IWorkingCopy)cu.findSharedWorkingCopy(JavaUI.getBufferFactory());
+			if (wc != null) {
+				IJavaElement[] matches= wc.findElements(je);
+				if (matches != null && matches.length > 0)
+					convertedJE= matches[0];
+			}
+		}
+		if (convertedJE != null && convertedJE.exists())
+			return convertedJE;
+		else
+			return null;
 	}
 
 	/**

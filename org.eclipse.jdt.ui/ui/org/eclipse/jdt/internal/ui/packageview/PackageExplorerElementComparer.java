@@ -8,14 +8,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.ui.viewsupport;
+package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.jface.viewers.IElementComparer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
-public class JavaElementComparer implements IElementComparer {
+/* package */ class PackageExplorerElementComparer implements IElementComparer {
 
 	public boolean equals(Object o1, Object o2) {
 		if (o1 == o2)	// this handles also the case that both are null
@@ -36,12 +36,8 @@ public class JavaElementComparer implements IElementComparer {
 			return false;
 		// From here on either c1 or c2 is a working copy.
 		if (c1.isWorkingCopy()) {
-			if (!c1.exists())		// a stale working copy isn't equal to anything.
-				return false;
 			j1= c1.getOriginal(j1);
 		} else if (c2.isWorkingCopy()) {
-			if (!c2.exists())		// a stale working copy isn't equal to anything.
-				return false;
 			j2= c2.getOriginal(j2); 
 		}
 		if (j1 == null || j2 == null)
@@ -57,8 +53,6 @@ public class JavaElementComparer implements IElementComparer {
 		if (c1 == null || !c1.isWorkingCopy())
 			return o1.hashCode();
 		// From here on c1 is a working copy.
-		if (!c1.exists())		// no hash code on stale working copies
-			return o1.hashCode();
 		j1= c1.getOriginal(j1);
 		if (j1 == null)
 			return o1.hashCode();

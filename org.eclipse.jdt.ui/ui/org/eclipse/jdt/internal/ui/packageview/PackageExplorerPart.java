@@ -263,6 +263,7 @@ public class PackageExplorerPart extends ViewPart
 		
 		fViewer= createViewer(parent);
 		fViewer.setUseHashlookup(true);
+		fViewer.setComparer(new PackageExplorerElementComparer());
 		
 		setProviders();
 		

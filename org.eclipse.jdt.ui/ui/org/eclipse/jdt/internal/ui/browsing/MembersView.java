@@ -127,9 +127,6 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 					return cf != null && cf.equals(importContainerCf);
 				}
 			}
-		} else if (element instanceof ICompilationUnit) {
-			IType type= getTypeForCU((ICompilationUnit)element);
-			return type != null && type.equals(getViewer().getInput());
 		}		
 		return false;
 	}

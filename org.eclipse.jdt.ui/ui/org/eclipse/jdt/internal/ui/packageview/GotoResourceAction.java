@@ -75,7 +75,7 @@ public class GotoResourceAction extends Action {
 			ResourcesPlugin.getWorkspace().getRoot(), viewer);
 	 	dialog.open();
 	 	Object[] result = dialog.getResult();
-	 	if (result == null || result.length == 0 || result[0] instanceof IResource == false)
+	 	if (result == null || result.length == 0 || !(result[0] instanceof IResource))
 	 		return;
 	 	StructuredSelection selection= null;
 		IJavaElement element = JavaCore.create((IResource)result[0]);
