@@ -14,6 +14,9 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+
 public class NLSScanner {
 
 	//no instances	
@@ -32,6 +35,29 @@ public class NLSScanner {
 	 */	
 	public static NLSLine[] scan(String s) throws JavaModelException, InvalidInputException {
 		return scan(s.toCharArray()); 
+	}
+	
+	/**
+	 * Returns the <code>NLSLine</code> that corresponds to the source line that the selected string literal is located on.	 * @param cu compilation unit	 * @param position position in the cu	 * @return NLSLine The line associated with the line that the selected string literal is located on
+	 * or <code>null</code> if no string is selected.	 * @throws JavaModelException 	 */
+	public static NLSLine scanCurrentPosition(ICompilationUnit cu, int position) throws JavaModelException{
+		try {
+			Assert.isTrue(position >= 0 && position <= cu.getSourceRange().getLength());
+			NLSLine[] allLines= scan(cu);
+			for (int i= 0; i < allLines.length; i++) {
+				NLSLine line= allLines[i];
+				NLSElement[] elements= line.getElements();
+				for (int j= 0; j < elements.length; j++) {
+					NLSElement element= elements[j];
+					TextRegion elementPosition= element.getPosition();
+					if (elementPosition.getOffset() <= position && position <= elementPosition.getOffset() + elementPosition.getLength())
+						return line;
+				}
+			}
+			return null;
+		} catch (InvalidInputException e) {
+			return null;
+		}
 	}
 	
 	private static NLSLine[] scan(char[] content) throws JavaModelException, InvalidInputException {
