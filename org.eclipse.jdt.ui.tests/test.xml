@@ -25,44 +25,14 @@
     <property name="jdt-folder" 
               value="${eclipse-home}/jdt_folder"/>
     <delete dir="${jdt-folder}" quiet="true"/>
-   	<condition property="os.isWindows">
-    	<os family="windows"/>
-  	</condition>
-  	
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="data-dir" value="${jdt-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" 
                 value="org.eclipse.jdt.ui.tests.AutomatedSuite"/>
     </ant>
-    
   </target>
-  
-    <!-- leak test target -->
-  <target name="leaksuite" depends="checkOS" if="os.isWindows">
-    <property name="jdt-folder" 
-              value="${eclipse-home}/jdt_folder"/>
-    <delete dir="${jdt-folder}" quiet="true"/>
-  	
-    <copy file="./leaks/ProfileNatives.dll" todir="${java.home}/bin" />	
-    
-		<ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
-      <property name="vmargs" value="-XrunProfileNatives"/>
-      <property name="classname" 
-                value="org.eclipse.jdt.ui.tests.LeakTestSuite"/>
-    </ant>
-    
-  </target>
-  
-  
-  <target name= "checkOS">
-   	<condition property="os.isWindows">
-    	<os family="windows"/>
-  	</condition>
-  </target>
-  
+
   <!-- This target holds code to cleanup the testing environment after -->
   <!-- after all of the tests have been run. You can use this target to -->
   <!-- delete temporary files that have been created. -->
@@ -71,7 +41,7 @@
 
   <!-- This target runs the test suite. Any actions that need to happen -->
   <!-- after all the tests have been run should go here. -->
-  <target name="run" depends="init,suite,leaksuite,cleanup">
+  <target name="run" depends="init,suite,cleanup">
     <ant target="collect" antfile="${library-file}" dir="${eclipse-home}">
       <property name="includes" value="org*.xml"/>
       <property name="output-file" value="${plugin-name}.xml"/>
