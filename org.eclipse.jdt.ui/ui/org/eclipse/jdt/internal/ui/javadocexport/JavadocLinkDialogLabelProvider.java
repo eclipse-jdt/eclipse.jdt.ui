@@ -12,14 +12,22 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.net.URL;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 
 
@@ -45,7 +53,25 @@ public class JavadocLinkDialogLabelProvider extends JavaUILabelProvider {
 			}
 		}
 		return text;
-
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getImage(java.lang.Object)
+	 */
+	public Image getImage(Object element) {
+		Image image= super.getImage(element);
+		if (element instanceof IJavaElement) {
+			try {
+				if (JavaUI.getJavadocBaseLocation((IJavaElement) element) == null) {
+					ImageDescriptor baseImage= new ImageImageDescriptor(image);
+					Rectangle bounds= image.getBounds();
+					return JavaPlugin.getImageDescriptorRegistry().get(new JavaElementImageDescriptor(baseImage, JavaElementImageDescriptor.WARNING, new Point(bounds.width, bounds.height)));
+				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
+		return image;
 	}
 
 }
