@@ -70,7 +70,11 @@ public class OpenTypeHierarchyUtil {
 	}
 	
 	public static TypeHierarchyViewPart open(ISelection selection, IWorkbenchWindow window) {
-		return open(getCandidates(getElement(selection)), window);
+		IJavaElement[] candidates= getCandidates(getElement(selection));
+		if (candidates != null) {
+			return open(candidates, window);
+		}
+		return null;
 	}
 	
 	public static TypeHierarchyViewPart open(IJavaElement[] candidates, IWorkbenchWindow window) {

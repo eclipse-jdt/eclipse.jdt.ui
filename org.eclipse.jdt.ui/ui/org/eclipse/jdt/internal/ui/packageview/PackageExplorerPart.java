@@ -294,7 +294,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.setInput(findInputElement());
 		initDragAndDrop();
 		initFrameList();
-		initRefreshKey();
+		initKeyListener();
 		updateTitle();
 		
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
@@ -911,18 +911,30 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	/**
 	 * Create the KeyListener for doing the refresh on the viewer.
 	 */
-	private void initRefreshKey() {
+	private void initKeyListener() {
 		fViewer.getControl().addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent event) {
-				if (event.keyCode == SWT.F5) {
-					fRefreshAction.selectionChanged(
-						(IStructuredSelection) fViewer.getSelection());
-					if (fRefreshAction.isEnabled())
-						fRefreshAction.run();
-				}
+				doKeyPressed(event.keyCode);
 			}
 		});
 	}
+
+	private void doKeyPressed(int key) {
+		if (key == SWT.F5) {
+			fRefreshAction.selectionChanged(
+				(IStructuredSelection) fViewer.getSelection());
+			if (fRefreshAction.isEnabled())
+				fRefreshAction.run();
+		} else if (key == SWT.F4) {
+			OpenTypeHierarchyUtil.open(getSelection(), getSite().getWorkbenchWindow());
+		} else if (key == SWT.F3) {
+			fOpenCUAction.update();
+			if (fOpenCUAction.isEnabled())
+				fOpenCUAction.run();
+		}
+	}
+
+
 	
 	void initFrameList() {
 		fFrameSource= new PackagesFrameSource(this);
