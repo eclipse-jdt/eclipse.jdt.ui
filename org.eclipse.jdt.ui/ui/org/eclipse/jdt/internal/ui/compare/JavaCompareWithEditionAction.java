@@ -12,9 +12,6 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.ResourceBundle;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 
@@ -24,7 +21,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.compare.*;
@@ -42,25 +38,21 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 		super(false);
 	}	
 	
-	public void run(IAction action) {
+	public void run(ISelection selection) {
 		
 		String errorTitle= CompareMessages.getString("CompareWithHistory.title"); //$NON-NLS-1$
 		String errorMessage= CompareMessages.getString("CompareWithHistory.internalErrorMessage"); //$NON-NLS-1$
-		
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
-		// shell can be null; as a result error dialogs won't be parented
-		
-		ISelection selection= getSelection();
+				
 		IMember input= getEditionElement(selection);
 		if (input == null) {
 			String invalidSelectionMessage= CompareMessages.getString("CompareWithHistory.invalidSelectionMessage"); //$NON-NLS-1$
-			MessageDialog.openInformation(shell, errorTitle, invalidSelectionMessage);
+			MessageDialog.openInformation(getShell(), errorTitle, invalidSelectionMessage);
 			return;
 		}
 		
 		IFile file= getFile(input);
 		if (file == null) {
-			MessageDialog.openError(shell, errorTitle, errorMessage);
+			MessageDialog.openError(getShell(), errorTitle, errorMessage);
 			return;
 		}
 		
@@ -68,7 +60,7 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 		if (inEditor)
 			input= (IMember) getWorkingCopy(input);
 
-		// get a TextBuffer where to insert the text
+		// get a TextBuffer
 		TextBuffer buffer= null;
 		try {
 			buffer= TextBuffer.acquire(file);
@@ -78,14 +70,14 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 			ITypedElement[] editions= buildEditions(target, file);
 
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
-			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
+			EditionSelectionDialog d= new EditionSelectionDialog(getShell(), bundle);
 			d.setHelpContextId(IJavaHelpContextIds.COMPARE_ELEMENT_WITH_HISTORY_DIALOG);
 			d.setCompareMode(true);
 			d.setEditionTitleImage(JavaCompareUtilities.getImage(input));
 			d.selectEdition(target, editions, input);
 						
 		} catch(CoreException ex) {
-			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
+			ExceptionHandler.handle(ex, getShell(), errorTitle, errorMessage);
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);

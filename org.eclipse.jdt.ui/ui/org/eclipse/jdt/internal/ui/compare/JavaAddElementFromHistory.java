@@ -15,12 +15,10 @@ import java.util.ResourceBundle;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.*;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.core.resources.IFile;
@@ -52,30 +50,26 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.AddFromHistoryAction"; //$NON-NLS-1$
 	
-	private JavaEditor fEditor;
-
 	public JavaAddElementFromHistory() {
 		super(true);
 	}
 	
-	public void run(IAction action) {
+	public void run(ISelection selection) {
 		
 		String errorTitle= CompareMessages.getString("AddFromHistory.title"); //$NON-NLS-1$
 		String errorMessage= CompareMessages.getString("AddFromHistory.internalErrorMessage"); //$NON-NLS-1$
-		
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
-		// shell can be null; as a result error dialogs won't be parented
+		Shell shell= getShell();
 		
 		ICompilationUnit cu= null;
 		IParent parent= null;
 		IMember input= null;
 		
 		// analyse selection
-		ISelection selection= getSelection();
 		if (selection.isEmpty()) {
 			// no selection: we try to use the editor's input
-			if (fEditor != null) {
-				IEditorInput editorInput= fEditor.getEditorInput();
+			JavaEditor editor= getEditor();
+			if (editor != null) {
+				IEditorInput editorInput= editor.getEditorInput();
 				IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 				if (manager != null) {
 					cu= manager.getWorkingCopy(editorInput);
@@ -130,6 +124,9 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		try {
 			buffer= TextBuffer.acquire(file);
 		
+			if (! buffer.makeCommittable(shell).isOK())
+				return;
+
 			// configure EditionSelectionDialog and let user select an edition
 			ITypedElement target= new JavaTextBufferNode(buffer, inEditor);
 
@@ -189,6 +186,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			
 		} catch(CoreException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
+			
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);
@@ -301,9 +299,10 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	protected boolean isEnabled(ISelection selection) {
 		
 		if (selection.isEmpty()) {
-			if (fEditor != null) {
+			JavaEditor editor= getEditor();
+			if (editor != null) {
 				// we check whether editor shows CompilationUnit
-				IEditorInput editorInput= fEditor.getEditorInput();
+				IEditorInput editorInput= editor.getEditorInput();
 				IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 				return manager.getWorkingCopy(editorInput) != null;
 			}

@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.ui.compare;
 public class JavaReplaceWithPreviousEditionAction extends JavaReplaceWithEditionAction {
 					
 	public JavaReplaceWithPreviousEditionAction() {
-		super(true);
+		fPrevious= true;
 	}	
 }
 

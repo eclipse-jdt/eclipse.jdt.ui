@@ -17,11 +17,17 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.*;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.*;
 
 import org.eclipse.ui.IActionDelegate;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
@@ -38,14 +44,16 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.compare.*;
 
 /**
  * Base class for the "Replace with local history"
  * and "Add from local history" actions.
  */
-public abstract class JavaHistoryAction implements IActionDelegate { 
+public abstract class JavaHistoryAction extends Action implements IActionDelegate { 
 	
 	/**
 	 * Implements the IStreamContentAccessor and ITypedElement protocols
@@ -82,6 +90,8 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 
 	private boolean fModifiesFile;
 	private ISelection fSelection;
+	
+	
 
 	JavaHistoryAction(boolean modifiesFile) {
 		fModifiesFile= modifiesFile;
@@ -91,7 +101,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		return fSelection;
 	}
 		
-	protected IFile getFile(Object input) {
+	final IFile getFile(Object input) {
 		// extract CU from input
 		ICompilationUnit cu= null;
 		if (input instanceof ICompilationUnit)
@@ -112,7 +122,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		return null;
 	}
 	
-	protected ITypedElement[] buildEditions(ITypedElement target, IFile file) {
+	final ITypedElement[] buildEditions(ITypedElement target, IFile file) {
 
 		// setup array of editions
 		IFileState[] states= null;		
@@ -135,10 +145,16 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		return editions;
 	}
 	
+	final Shell getShell() {
+		if (fEditor != null)
+			return fEditor.getEditorSite().getShell();
+		return JavaPlugin.getActiveWorkbenchShell();
+	}
+	
 	/**
 	 * Tries to find the given element in a workingcopy.
 	 */
-	protected IJavaElement getWorkingCopy(IJavaElement input) {
+	final IJavaElement getWorkingCopy(IJavaElement input) {
 		try {
 			return EditorUtility.getWorkingCopy(input, true);
 		} catch (JavaModelException ex) {
@@ -150,7 +166,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 	/**
 	 * Returns true if the given file is open in an editor.
 	 */
-	boolean beingEdited(IFile file) {
+	final boolean beingEdited(IFile file) {
 		IDocumentProvider dp= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 		FileEditorInput input= new FileEditorInput(file);	
 		return dp.getDocument(input) != null;
@@ -159,7 +175,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 	/**
 	 * Returns an IMember or null.
 	 */
-	IMember getEditionElement(ISelection selection) {
+	final IMember getEditionElement(ISelection selection) {
 		
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection ss= (IStructuredSelection) selection;
@@ -175,13 +191,19 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		return null;
 	}
 	
-	protected boolean isEnabled(IFile file) {
-		if (file == null)
+	final boolean isEnabled(IFile file) {
+		if (file == null || ! file.exists())
 			return false;
-		return !(fModifiesFile && file.isReadOnly());
+		if (fModifiesFile) {
+			// without validate/edit we would do this:
+			//    return !file.isReadOnly();
+			// with validate/edit we have to return true
+			return true;
+		}
+		return true;
 	}
 	
-	protected boolean isEnabled(ISelection selection) {
+	boolean isEnabled(ISelection selection) {
 		IMember m= getEditionElement(selection);
 		if (m == null)
 			return false;
@@ -191,21 +213,6 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		if (file != null && beingEdited(file))
 			return getWorkingCopy(m) != null;
 		return true;
-	}
-	
-	/**
-	 * Notifies this action delegate that the selection in the workbench has changed.
-	 * <p>
-	 * Implementers can use this opportunity to change the availability of the
-	 * action or to modify other presentation properties.
-	 * </p>
-	 *
-	 * @param action the action proxy that handles presentation portion of the action
-	 * @param selection the current selection in the workbench
-	 */
-	public void selectionChanged(IAction action, ISelection selection) {
-		fSelection= selection;
-		action.setEnabled(isEnabled(selection));
 	}
 	
 	void applyChanges(ASTRewrite rewriter, final TextBuffer buffer, Shell shell, boolean inEditor) throws CoreException, InvocationTargetException, InterruptedException {
@@ -249,5 +256,91 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 			}
 		}
 		return null;
+	}
+	
+	final JavaEditor getEditor(IFile file) {
+		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
+		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
+		for (int i= 0; i < windows.length; i++) {
+			IWorkbenchPage[] pages= windows[i].getPages();
+			for (int x= 0; x < pages.length; x++) {
+				IEditorPart[] editors= pages[x].getDirtyEditors();
+				for (int z= 0; z < editors.length; z++) {
+					IEditorPart ep= editors[z];
+					if (ep instanceof JavaEditor)
+						return (JavaEditor) ep;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Executes this action with the given selection.
+	 */
+	public abstract void run(ISelection selection);
+
+	//---- Action
+	
+	private JavaEditor fEditor;
+	private String fTitle;
+	private String fMessage;
+
+	void init(JavaEditor editor, String text, String title, String message) {
+		Assert.isNotNull(editor);
+		Assert.isNotNull(title);
+		Assert.isNotNull(message);
+		fEditor= editor;
+		fTitle= title;
+		fMessage= message;
+		setText(text);
+		setEnabled(checkEnabled());
+	}
+	
+	final JavaEditor getEditor() {
+		return fEditor;
+	}
+
+	final public void run() {
+		
+		// this run is called from Editor
+		IJavaElement element= null;
+		try {
+			element= SelectionConverter.getElementAtOffset(fEditor);
+		} catch (JavaModelException e) {
+			// ignored
+		}
+		fSelection= element != null
+						? new StructuredSelection(element)
+						: StructuredSelection.EMPTY;
+		boolean isEnabled= isEnabled(fSelection);
+		setEnabled(isEnabled);
+		
+		if (!isEnabled) {
+			MessageDialog.openInformation(getShell(), fTitle, fMessage);
+			return;
+		}
+		run(fSelection);
+	}
+
+	private boolean checkEnabled() {
+		ICompilationUnit unit= SelectionConverter.getInputAsCompilationUnit(fEditor);
+		IFile file= getFile(unit);
+		return isEnabled(file);
+	}	
+
+	final public void update() {
+		setEnabled(checkEnabled());
+	}
+	
+ 	//---- IActionDelegate
+	
+	final public void selectionChanged(IAction uiProxy, ISelection selection) {
+		fSelection= selection;
+		uiProxy.setEnabled(isEnabled(selection));
+	}
+	
+	final public void run(IAction action) {
+		run(fSelection);
 	}
 }
