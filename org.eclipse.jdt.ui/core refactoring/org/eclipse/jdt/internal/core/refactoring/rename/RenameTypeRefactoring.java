@@ -134,8 +134,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(fType));
-		if (!Checks.isTopLevel(fType)) //waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types
-			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.only_toplevel")); //$NON-NLS-1$
+		//if (!Checks.isTopLevel(fType)) //waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types
+		//	result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.only_toplevel")); //$NON-NLS-1$
 		if (isSpecialCase(fType))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.special_case"));	 //$NON-NLS-1$
 		return result;
@@ -595,17 +595,10 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
 		return new SimpleReplaceTextChange(RefactoringCoreMessages.getString("RenameTypeRefactoring.update_reference"), searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName) { //$NON-NLS-1$
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
-				String packageName= fType.getPackageFragment().getElementName();
-				String oldTypeName= fType.getElementName();
-				String oldText= buffer.getContent(getOffset(), getLength());
-				if (!oldTypeName.equals(packageName) 
-				  && oldText.startsWith(packageName) 
-				  && (! fType.getPackageFragment().isDefaultPackage())
-				  && (! getText().startsWith(packageName))){
-					setLength(oldText.indexOf(oldTypeName) + oldTypeName.length());
-					oldText= oldText.substring(0, getLength());
-					setText(packageName + oldText.substring(packageName.length(), oldText.indexOf(oldTypeName)) + getText());
-				}	
+				//the match is guaranteed to end with the type name - so we only take the suffix
+				Assert.isTrue(buffer.getContent(getOffset(), getLength()).endsWith(fType.getElementName()));
+				setOffset(getOffset() + getLength() - fType.getElementName().length());
+				setLength(fType.getElementName().length());
 				return null;
 			}
 		};
