@@ -37,6 +37,9 @@ Extensions may optionally contribute a preference block which will appear on the
                <documentation>
                   
                </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
@@ -61,6 +64,9 @@ Extensions may optionally contribute a preference block which will appear on the
                <documentation>
                   The name of this provider. If none is given, the id is used instead.
                </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
             </annotation>
          </attribute>
          <attribute name="class" type="string" use="required">

@@ -34,6 +34,9 @@
                <documentation>
                   an optional name of the extension instance
                </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
@@ -58,6 +61,9 @@
                <documentation>
                   a unique name that allows to identify this filter in the UI. This attribute should be a translated string. Though this attribute is not required for pattern filters (i.e. those using the &lt;samp&gt;pattern&lt;/samp&gt; attribute) we suggest to provide a name anyway, otherwise the pattern string itself would be used to represent the filter in the UI.
                </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
             </annotation>
          </attribute>
          <attribute name="description" type="string">
