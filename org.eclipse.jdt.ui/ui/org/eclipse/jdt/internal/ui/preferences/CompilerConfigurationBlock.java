@@ -904,10 +904,16 @@ public class CompilerConfigurationBlock {
 			String val= null;
 			if (enabled) {
 				val= (String) fWorkingValues.get(key);
-				hasChanges= hasChanges | !val.equals(oldVal);
+				if (!val.equals(oldVal)) {
+					hasChanges= true;
+					actualOptions.put(key, val);
+				}
 			} else {
-				hasChanges= hasChanges | (oldVal != null);
-			}			
+				if (oldVal != null) {
+					actualOptions.remove(key);
+					hasChanges= true;
+				}
+			}
 			actualOptions.put(key, val);
 		}
 		
