@@ -1039,15 +1039,18 @@ public class JavadocOptionsManager {
 		}
 		//if no projects selected add a default
 		if (fProjects.isEmpty()) {
-			Object[] roots= fRoot.getProjects();
+			try {
+				IJavaProject[] jprojects= JavaCore.create(fRoot).getJavaProjects();
 
-			for (int i= 0; i < roots.length; i++) {
-				IProject p= (IProject) roots[i];
-				IJavaProject iJavaProject= JavaCore.create(p);
-				if (getValidProject(iJavaProject)) {
-					fProjects.add(iJavaProject);
-					break;
-				}
+				for (int i= 0; i < jprojects.length; i++) {
+					IJavaProject iJavaProject= jprojects[i];
+					if (getValidProject(iJavaProject)) {
+						fProjects.add(iJavaProject);
+						break;
+					}
+				}				
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
 			}
 		}
 	}
