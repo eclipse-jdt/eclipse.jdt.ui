@@ -45,22 +45,28 @@ public class SourceReferenceSourceRangeComputer {
 	public static ISourceRange computeSourceRange(ISourceReference element, ICompilationUnit cu) throws JavaModelException{
 		try{
 		 	SourceReferenceSourceRangeComputer inst= new SourceReferenceSourceRangeComputer(element, cu);
-		 	return new SourceRange(inst.computeOffset(), inst.computeLength());
+		 	int offset= inst.computeOffset();
+		 	int end= inst.computeEnd();
+		 	int length= end - offset;
+		 	return new SourceRange(offset, length);
 		}	catch(CoreException e){
 			//fall back to the default
 			return element.getSourceRange();
 		}	
 	}
 	
-	private int computeLength() throws JavaModelException{
-		int length= fSourceReference.getSourceRange().getLength();
+	private int computeEnd() throws CoreException{
+		int end= fSourceReference.getSourceRange().getOffset() + fSourceReference.getSourceRange().getLength();
 		try{	
 			Scanner scanner= new Scanner(true, true);
 			scanner.recordLineSeparator = true;
-			scanner.setSourceBuffer(fCu.getSource().toCharArray());
-			int start= fSourceReference.getSourceRange().getOffset() + length;
-			scanner.currentPosition= start;
-			int token = scanner.getNextToken();
+			String source= fCu.getSource();
+			scanner.setSourceBuffer(source.toCharArray());
+			scanner.currentPosition= end;
+			TextBuffer buff= TextBuffer.create(source);
+			int startLine= buff.getLineOfOffset(scanner.currentPosition);
+			
+			int token= scanner.getNextToken();
 			while (token != TerminalSymbols.TokenNameEOF) {
 				switch (token) {
 					case Scanner.TokenNameWHITESPACE:
@@ -69,19 +75,63 @@ public class SourceReferenceSourceRangeComputer {
 						break;	
 					case Scanner.TokenNameCOMMENT_LINE :
 						break;
-					default:
-						return scanner.currentPosition - fSourceReference.getSourceRange().getOffset() - scanner.getCurrentTokenSource().length;
+					default:{
+						int currentLine= buff.getLineOfOffset(scanner.currentPosition);
+						if (startLine == currentLine)
+							return scanner.currentPosition - scanner.getCurrentTokenSource().length;
+						TextRegion nextLine= buff.getLineInformation(startLine + 1);
+						if (nextLine != null)
+							return nextLine.getOffset();
+						else
+							return end; //fallback	
+					}	
 				}
-				token = scanner.getNextToken();
+				token= scanner.getNextToken();
 			}
-			return length;
+			return end;
 		} catch (InvalidInputException e){
-			return length;
+			return end;//fallback
 		}
 	}
 	
 	private int computeOffset() throws CoreException{
-		return fSourceReference.getSourceRange().getOffset();
+		int offset= fSourceReference.getSourceRange().getOffset();
+		try{
+			TextBuffer buff= TextBuffer.create(fCu.getSource());
+			String lineSource= buff.getLineContentOfOffset(offset);
+			int lineOffset= buff.getLineInformationOfOffset(offset).getOffset();
+			int offsetDiff= offset- lineOffset;
+			
+			Scanner scanner= new Scanner(true, true);
+			scanner.recordLineSeparator = true;
+			scanner.setSourceBuffer(lineSource.toCharArray());
+			scanner.currentPosition= 0;
+
+			int token= scanner.getNextToken();
+			while (token != TerminalSymbols.TokenNameEOF) {
+				switch (token) {
+					case Scanner.TokenNameWHITESPACE:
+						break;
+					case TerminalSymbols.TokenNameSEMICOLON:
+						break;	
+					case Scanner.TokenNameCOMMENT_LINE :
+						break;
+					case Scanner.TokenNameCOMMENT_JAVADOC :
+						break;		
+					case Scanner.TokenNameCOMMENT_BLOCK :
+						break;			
+					default:
+						if (offsetDiff == scanner.currentPosition - scanner.getCurrentTokenSource().length)
+							return lineOffset;
+						else
+							return offset;	
+				}
+				token= scanner.getNextToken();
+			}
+			return offset;	//should never get here really
+		} catch (InvalidInputException e){
+			return offset;//fallback
+		}
 	}
 }
 
