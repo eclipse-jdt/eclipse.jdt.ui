@@ -60,7 +60,9 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 		private Button fRenameSetter;
 		private String fGetterRenamingErrorMessage;
 		private String fSetterRenamingErrorMessage;
-	
+		private static final String RENAME_GETTER= "renameGetter"; //$NON-NLS-1$
+		private static final String RENAME_SETTER= "renameSetter"; //$NON-NLS-1$
+		
 		public RenameFieldInputWizardPage(String message, String contextHelpId, String initialValue) {
 			super(message, contextHelpId, true, initialValue);
 		}
@@ -82,8 +84,11 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			getGetterSetterRenamingEnablement();
 				
 			fRenameGetter= new Button(composite, SWT.CHECK);
-			fRenameGetter.setEnabled(fGetterRenamingErrorMessage == null);
-			fRenameGetter.setSelection(getRenameFieldProcessor().getRenameGetter());
+			boolean getterEnablement= fGetterRenamingErrorMessage == null;
+			fRenameGetter.setEnabled(getterEnablement);
+			boolean getterSelection= getterEnablement && getBooleanSetting(RENAME_GETTER, getRenameFieldProcessor().getRenameGetter());
+			fRenameGetter.setSelection(getterSelection);
+			getRenameFieldProcessor().setRenameGetter(getterSelection);
 			fRenameGetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fRenameGetter.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
@@ -92,8 +97,11 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			});
 		
 			fRenameSetter= new Button(composite, SWT.CHECK);
-			fRenameSetter.setEnabled(fSetterRenamingErrorMessage == null);
-			fRenameSetter.setSelection(getRenameFieldProcessor().getRenameSetter());
+			boolean setterEnablement= fSetterRenamingErrorMessage == null;
+			fRenameSetter.setEnabled(setterEnablement);
+			boolean setterSelection= setterEnablement && getBooleanSetting(RENAME_SETTER, getRenameFieldProcessor().getRenameSetter());
+			fRenameSetter.setSelection(setterSelection);
+			getRenameFieldProcessor().setRenameSetter(setterSelection);
 			fRenameSetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fRenameSetter.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
@@ -104,6 +112,17 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			updateGetterSetterLabels();
 			Dialog.applyDialogFont(composite);
 		}
+		
+		public void dispose() {
+			if (saveSettings()) {
+				if (fRenameGetter.isEnabled())
+					saveBooleanSetting(RENAME_GETTER, fRenameGetter);
+				if (fRenameSetter.isEnabled())
+					saveBooleanSetting(RENAME_SETTER, fRenameSetter);
+			}
+			super.dispose();
+		}
+		
 		private void getGetterSetterRenamingEnablement() {
 			BusyIndicator.showWhile(getShell().getDisplay(), new Runnable(){
 				public void run() {

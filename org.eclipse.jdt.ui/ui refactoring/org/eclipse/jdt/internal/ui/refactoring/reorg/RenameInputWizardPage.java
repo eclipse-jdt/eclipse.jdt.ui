@@ -37,7 +37,17 @@ import org.eclipse.jdt.internal.ui.util.RowLayouter;
 abstract class RenameInputWizardPage extends TextInputWizardPage {
 
 	private String fHelpContextID;
+	private Button fUpdateReferences;
+	private Button fUpdateJavaDoc;
+	private Button fUpdateComments;
+	private Button fUpdateStrings;
+	private Button fUpdateQualifiedNames;
 	private QualifiedNameComponent fQualifiedNameComponent;
+	private static final String UPDATE_REFERENCES= "updateReferences"; //$NON-NLS-1$
+	private static final String UPDATE_JAVADOC= "updateJavaDoc"; //$NON-NLS-1$
+	private static final String UPDATE_COMMENTS= "updateComments"; //$NON-NLS-1$
+	private static final String UPDATE_STRINGS= "updateStrings"; //$NON-NLS-1$
+	private static final String UPDATE_QUALIFIED_NAMES= "updateQualifiedNames"; //$NON-NLS-1$
 	
 	/**
 	 * Creates a new text input page.
@@ -88,17 +98,40 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		WorkbenchHelp.setHelp(getControl(), fHelpContextID);
 	}
 	
+	protected boolean saveSettings() {
+		if (getContainer() instanceof Dialog)
+			return ((Dialog)getContainer()).getReturnCode() == IDialogConstants.OK_ID;
+		return true;
+	}
+	
 	public void dispose() {
-		if (fQualifiedNameComponent != null) {
-			boolean save= true;
-			if (getContainer() instanceof Dialog)
-				save= ((Dialog)getContainer()).getReturnCode() == IDialogConstants.OK_ID;
-			if (save)
+		if (saveSettings()) {
+			saveBooleanSetting(UPDATE_REFERENCES, fUpdateReferences);
+			saveBooleanSetting(UPDATE_JAVADOC, fUpdateJavaDoc);
+			saveBooleanSetting(UPDATE_COMMENTS, fUpdateComments);
+			saveBooleanSetting(UPDATE_STRINGS, fUpdateStrings);
+			saveBooleanSetting(UPDATE_QUALIFIED_NAMES, fUpdateQualifiedNames);
+			if (fQualifiedNameComponent != null)
 				fQualifiedNameComponent.savePatterns(getRefactoringSettings());
 		}
 		super.dispose();
 	}
 	
+	private void addOptionalUpdateReferencesCheckbox(Composite result, RowLayouter layouter) {
+		final IReferenceUpdating ref= (IReferenceUpdating)getRefactoring().getAdapter(IReferenceUpdating.class);
+		if (ref == null || !ref.canEnableUpdateReferences())	
+			return;
+		String title= RefactoringMessages.getString("RenameInputWizardPage.update_references"); //$NON-NLS-1$
+		boolean defaultValue= getBooleanSetting(UPDATE_REFERENCES, ref.getUpdateReferences());
+		fUpdateReferences= createCheckbox(result, title, defaultValue, layouter);
+		ref.setUpdateReferences(fUpdateReferences.getSelection());
+		fUpdateReferences.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				ref.setUpdateReferences(fUpdateReferences.getSelection());
+			}
+		});		
+	}
+		
 	private void addOptionalUpdateCommentsAndStringCheckboxes(Composite result, RowLayouter layouter) {
 		ITextUpdating refactoring= (ITextUpdating)getRefactoring().getAdapter(ITextUpdating.class);
 		
@@ -110,77 +143,65 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		addUpdateStringsCheckbox(result, layouter, refactoring);
 	}
 
-	private void addOptionalUpdateReferencesCheckbox(Composite result, RowLayouter layouter) {
-		final IReferenceUpdating ref= (IReferenceUpdating)getRefactoring().getAdapter(IReferenceUpdating.class);
-		if (ref == null || !ref.canEnableUpdateReferences())	
-			return;
-		String title= RefactoringMessages.getString("RenameInputWizardPage.update_references"); //$NON-NLS-1$
-		boolean defaultValue= ref.getUpdateReferences();
-		final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
-		ref.setUpdateReferences(checkBox.getSelection());
-		checkBox.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent e) {
-				ref.setUpdateReferences(checkBox.getSelection());
-			}
-		});		
-	}
-		
-	private void addUpdateStringsCheckbox(Composite result, RowLayouter layouter, final ITextUpdating refactoring) {
-		String title= RefactoringMessages.getString("RenameInputWizardPage.ppdate_string_references"); //$NON-NLS-1$
-		boolean defaultValue= refactoring.getUpdateStrings();
-		final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
-		refactoring.setUpdateStrings(checkBox.getSelection());
-		checkBox.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent e) {
-				refactoring.setUpdateStrings(checkBox.getSelection());
-				updateForcePreview();
-			}
-		});		
-	}
-
-	private void  addUpdateCommentsCheckbox(Composite result, RowLayouter layouter, final ITextUpdating refactoring) {
-		String title= RefactoringMessages.getString("RenameInputWizardPage.update_comment_references"); //$NON-NLS-1$
-		boolean defaultValue= refactoring.getUpdateComments();
-		final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
-		refactoring.setUpdateComments(checkBox.getSelection());
-		checkBox.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent e) {
-				refactoring.setUpdateComments(checkBox.getSelection());
-				updateForcePreview();
-			}
-		});		
-	}
-
 	private void  addUpdateJavaDocCheckbox(Composite result, RowLayouter layouter, final ITextUpdating refactoring) {
 		String title= RefactoringMessages.getString("RenameInputWizardPage.update_javadoc_references"); //$NON-NLS-1$
-		boolean defaultValue= refactoring.getUpdateJavaDoc();
-		final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
-		refactoring.setUpdateJavaDoc(checkBox.getSelection());
-		checkBox.addSelectionListener(new SelectionAdapter(){
+		boolean defaultValue= getBooleanSetting(UPDATE_JAVADOC, refactoring.getUpdateJavaDoc());
+		fUpdateJavaDoc= createCheckbox(result, title, defaultValue, layouter);
+		refactoring.setUpdateJavaDoc(fUpdateJavaDoc.getSelection());
+		fUpdateJavaDoc.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
-				refactoring.setUpdateJavaDoc(checkBox.getSelection());
+				refactoring.setUpdateJavaDoc(fUpdateJavaDoc.getSelection());
 				updateForcePreview();
 			}
 		});		
 	}
-		
+	
+	private void  addUpdateCommentsCheckbox(Composite result, RowLayouter layouter, final ITextUpdating refactoring) {
+		String title= RefactoringMessages.getString("RenameInputWizardPage.update_comment_references"); //$NON-NLS-1$
+		boolean defaultValue= getBooleanSetting(UPDATE_COMMENTS, refactoring.getUpdateComments());
+		fUpdateComments= createCheckbox(result, title, defaultValue, layouter);
+		refactoring.setUpdateComments(fUpdateComments.getSelection());
+		fUpdateComments.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				refactoring.setUpdateComments(fUpdateComments.getSelection());
+				updateForcePreview();
+			}
+		});		
+	}
+
+	private void addUpdateStringsCheckbox(Composite result, RowLayouter layouter, final ITextUpdating refactoring) {
+		String title= RefactoringMessages.getString("RenameInputWizardPage.ppdate_string_references"); //$NON-NLS-1$
+		boolean defaultValue= getBooleanSetting(UPDATE_STRINGS, refactoring.getUpdateStrings());
+		fUpdateStrings= createCheckbox(result, title, defaultValue, layouter);
+		refactoring.setUpdateStrings(fUpdateStrings.getSelection());
+		fUpdateStrings.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				refactoring.setUpdateStrings(fUpdateStrings.getSelection());
+				updateForcePreview();
+			}
+		});		
+	}
+
 	private void addOptionalUpdateQualifiedNameComponent(Composite parent, RowLayouter layouter, int marginWidth) {
 		final IQualifiedNameUpdating ref= (IQualifiedNameUpdating)getRefactoring().getAdapter(IQualifiedNameUpdating.class);
 		if (ref == null || !ref.canEnableQualifiedNameUpdating())
 			return;
-		Button checkbox= new Button(parent, SWT.CHECK);
-		int indent= marginWidth + checkbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-		checkbox.setText(RefactoringMessages.getString("RenameInputWizardPage.update_qualified_names")); //$NON-NLS-1$
-		layouter.perform(checkbox);
+		fUpdateQualifiedNames= new Button(parent, SWT.CHECK);
+		int indent= marginWidth + fUpdateQualifiedNames.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		fUpdateQualifiedNames.setText(RefactoringMessages.getString("RenameInputWizardPage.update_qualified_names")); //$NON-NLS-1$
+		layouter.perform(fUpdateQualifiedNames);
 		
 		fQualifiedNameComponent= new QualifiedNameComponent(parent, SWT.NONE, ref, getRefactoringSettings());
 		layouter.perform(fQualifiedNameComponent);
 		GridData gd= (GridData)fQualifiedNameComponent.getLayoutData();
 		gd.horizontalAlignment= GridData.FILL;
 		gd.horizontalIndent= indent;
-		fQualifiedNameComponent.setEnabled(false);
+		
+		boolean defaultSelection= getBooleanSetting(UPDATE_QUALIFIED_NAMES, ref.getUpdateQualifiedNames());
+		fUpdateQualifiedNames.setSelection(defaultSelection);
+		fQualifiedNameComponent.setEnabled(defaultSelection);
 
-		checkbox.addSelectionListener(new SelectionAdapter() {
+		fUpdateQualifiedNames.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				boolean enabled= ((Button)e.widget).getSelection();
 				fQualifiedNameComponent.setEnabled(enabled);
@@ -192,6 +213,19 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	
 	protected String getLabelText() {
 		return RefactoringMessages.getString("RenameInputWizardPage.enter_name"); //$NON-NLS-1$
+	}
+
+	protected boolean getBooleanSetting(String key, boolean defaultValue) {
+		String update= getRefactoringSettings().get(key);
+		if (update != null)
+			return Boolean.valueOf(update).booleanValue();
+		else
+			return defaultValue;
+	}
+	
+	protected void saveBooleanSetting(String key, Button checkBox) {
+		if (checkBox != null)
+			getRefactoringSettings().put(key, checkBox.getSelection());
 	}
 
 	private static Button createCheckbox(Composite parent, String title, boolean value, RowLayouter layouter) {
