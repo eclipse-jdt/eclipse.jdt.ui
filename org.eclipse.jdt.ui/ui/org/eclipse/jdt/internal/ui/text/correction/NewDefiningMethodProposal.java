@@ -107,7 +107,11 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 		if (getSenderBinding().isInterface()) {
 			return 0;
 		} else {
-			return fMethod.getModifiers() & (Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE | Modifier.ABSTRACT | Modifier.STRICTFP);
+			int modifiers= fMethod.getModifiers();
+			if (Modifier.isPrivate(modifiers)) {
+				modifiers |= Modifier.PROTECTED;
+			}
+			return modifiers & (Modifier.PUBLIC | Modifier.PROTECTED | Modifier.ABSTRACT | Modifier.STRICTFP);
 		}
 	}
 
