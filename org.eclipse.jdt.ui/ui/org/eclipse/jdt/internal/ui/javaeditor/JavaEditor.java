@@ -134,6 +134,7 @@ import org.eclipse.ui.views.tasklist.TaskList;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -176,49 +177,39 @@ import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
  * Java specific text editor.
  */
 public abstract class JavaEditor extends StatusTextEditor implements IViewPartInputProvider {
-		
+
 	/**
-	 * "Smart" runnable for updating the outline page's selection.
+	 * Updates the Java outline page selection and this editor's range indicator.
+	 * 
+	 * @since 3.0
 	 */
-	class OutlinePageSelectionUpdater implements Runnable {
-		
-		/** Has the runnable already been posted? */
-		private boolean fPosted= false;
-		
-		public OutlinePageSelectionUpdater() {
-		}
-		
+	class EditorSelectionChangedListener implements ISelectionChangedListener {
 		/*
-		 * @see Runnable#run()
+		 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 		 */
-		public void run() {
-			synchronizeOutlinePageSelection();
-			fPosted= false;
+		public void selectionChanged(SelectionChangedEvent event) {
+			selectionChanged();
 		}
-		
-		/**
-		 * Posts this runnable into the event queue.
-		 */
-		public void post() {
-			if (fPosted)
+
+		private void selectionChanged() {
+			if (isEditingScriptRunning())
 				return;
-				
-			Shell shell= getSite().getShell();
-			if (shell != null & !shell.isDisposed()) {
-				fPosted= true;
-				shell.getDisplay().asyncExec(this);
-			}
+			
+			ISourceReference element= computeHighlightRangeSourceReference();
+			synchronizeOutlinePage(element);
+			setSelection(element, false);
 		}
+
 	};
+		
 	
-	
-	class SelectionChangedListener  implements ISelectionChangedListener {
+	class OutlineSelectionChangedListener  implements ISelectionChangedListener {
 		public void selectionChanged(SelectionChangedEvent event) {
 			doSelectionChanged(event);
 		}
 	};
 	
-		/*
+	/*
 	 * Link mode.  
 	 */
 	class MouseClickListener implements KeyListener, MouseListener, MouseMoveListener,
@@ -944,7 +935,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					/*
 					 * @see org.eclipse.jface.text.information.IInformationProvider#getSubject(org.eclipse.jface.text.ITextViewer, int)
 					 */
-					public IRegion getSubject(ITextViewer textViewer, int offset) {					
+					public IRegion getSubject(ITextViewer textViewer, int invocationOffset) {					
 						return hoverRegion;
 					}
 					/*
@@ -1111,12 +1102,16 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected JavaOutlinePage fOutlinePage;
 	/** Outliner context menu Id */
 	protected String fOutlinerContextMenuId;
+	/**
+	 * The editor selection changed listener.
+	 * 
+	 * @since 3.0
+	 */
+	private EditorSelectionChangedListener fOutlinePageUpdater;
 	/** The selection changed listener */
-	protected ISelectionChangedListener fSelectionChangedListener= new SelectionChangedListener();
+	protected ISelectionChangedListener fOutlineSelectionChangedListener= new OutlineSelectionChangedListener();
 	/** The editor's bracket matcher */
 	protected JavaPairMatcher fBracketMatcher= new JavaPairMatcher(BRACKETS);
-	/** The outline page selection updater */
-	private OutlinePageSelectionUpdater fUpdater;
 	/** Indicates whether this editor should react on outline page selection changes */
 	private int fIgnoreOutlinePageSelection;
 	/** The line number ruler column */
@@ -1129,8 +1124,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	private InformationPresenter fInformationPresenter;
 	/** The annotation access */
 	protected IAnnotationAccess fAnnotationAccess= new AnnotationAccess();
-	/** The overview ruler */
-	protected OverviewRuler isOverviewRulerVisible;
 	/** The source viewer decoration support */
 	protected SourceViewerDecorationSupport fSourceViewerDecorationSupport;
 	/** The overview ruler */
@@ -1145,9 +1138,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 		
 	/**
-	 * Returns the most narrow java element including the given offset
+	 * Returns the most narrow java element including the given offset.
 	 * 
 	 * @param offset the offset inside of the requested element
+	 * @return the most narrow java element
 	 */
 	abstract protected IJavaElement getElementAt(int offset);
 	
@@ -1172,9 +1166,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
-		
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE))
-			fUpdater= new OutlinePageSelectionUpdater();
 	}
 	
 	/*
@@ -1256,9 +1247,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		JavaOutlinePage page= new JavaOutlinePage(fOutlinerContextMenuId, this);
 		
-		page.addSelectionChangedListener(fSelectionChangedListener);
+		page.addSelectionChangedListener(fOutlineSelectionChangedListener);
 		setOutlinePageInput(page, getEditorInput());
-		
+	
 		return page;
 	}
 	
@@ -1267,9 +1258,23 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	public void outlinePageClosed() {
 		if (fOutlinePage != null) {
-			fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
+			fOutlinePage.removeSelectionChangedListener(fOutlineSelectionChangedListener);
 			fOutlinePage= null;
 			resetHighlightRange();
+		}
+	}
+
+	/**
+	 * Synchronizes the outliner selection with the given element
+	 * position in the editor.
+	 * 
+	 * @param element the java element to select
+	 */
+	protected void synchronizeOutlinePage(ISourceReference element) {
+		if (fOutlinePage != null && element != null) {
+			fOutlinePage.removeSelectionChangedListener(fOutlineSelectionChangedListener);
+			fOutlinePage.select(element);
+			fOutlinePage.addSelectionChangedListener(fOutlineSelectionChangedListener);
 		}
 	}
 	
@@ -1282,29 +1287,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		if (isEditingScriptRunning())
 			return;
 
-		ISourceViewer sourceViewer= getSourceViewer();
-		if (sourceViewer == null || fOutlinePage == null)
-			return;
-			
-		StyledText styledText= sourceViewer.getTextWidget();
-		if (styledText == null)
-			return;
-		
-		int caret= 0;
-		if (sourceViewer instanceof ITextViewerExtension3) {
-			ITextViewerExtension3 extension= (ITextViewerExtension3) sourceViewer;
-			caret= extension.widgetOffset2ModelOffset(styledText.getCaretOffset());
-		} else {
-		int offset= sourceViewer.getVisibleRegion().getOffset();
-			caret= offset + styledText.getCaretOffset();
-		}
-
-		IJavaElement element= getElementAt(caret);
-		if (element instanceof ISourceReference) {
-			fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
-			fOutlinePage.select((ISourceReference) element);
-			fOutlinePage.addSelectionChangedListener(fSelectionChangedListener);
-		}
+		synchronizeOutlinePage(computeHighlightRangeSourceReference());
 	}
 	
 	
@@ -1416,6 +1399,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				if (offset > -1 && length > 0) {
 					sourceViewer.revealRange(offset, length);
 					sourceViewer.setSelectedRange(offset, length);
+					markInNavigationHistory();
 				}
 				
 			} catch (JavaModelException x) {
@@ -1424,12 +1408,11 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				if (textWidget != null)
 					textWidget.setRedraw(true);
 			}
-			
+						
 		} else if (moveCursor) {
 			resetHighlightRange();
+			markInNavigationHistory();
 		}
-		
-		markInNavigationHistory();
 	}
 		
 	public void setSelection(IJavaElement element) {
@@ -1450,9 +1433,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			setSelection(reference, true);
 			// set outliner selection
 			if (fOutlinePage != null) {
-				fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
+				fOutlinePage.removeSelectionChangedListener(fOutlineSelectionChangedListener);
 				fOutlinePage.select(reference);
-				fOutlinePage.addSelectionChangedListener(fSelectionChangedListener);
+				fOutlinePage.addSelectionChangedListener(fOutlineSelectionChangedListener);
 			}
 		}
 	}
@@ -1506,9 +1489,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				if (offset < range.getOffset() + range.getLength() && range.getOffset() < offset + length) {
 					setHighlightRange(range.getOffset(), range.getLength(), true);
 					if (fOutlinePage != null) {
-						fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
+						fOutlinePage.removeSelectionChangedListener(fOutlineSelectionChangedListener);
 						fOutlinePage.select((ISourceReference) element);
-						fOutlinePage.addSelectionChangedListener(fSelectionChangedListener);
+						fOutlinePage.addSelectionChangedListener(fOutlineSelectionChangedListener);
 					}
 					return;
 				}
@@ -1608,6 +1591,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			fSelectionHistory.dispose();
 			fSelectionHistory= null;
 		}
+		
+		if (fOutlinePageUpdater != null)
+			getSelectionProvider().removeSelectionChangedListener(fOutlinePageUpdater);
 				
 		super.dispose();
 	}
@@ -1749,6 +1735,18 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					disableBrowserLikeLinks();
 				return;
 			}
+			if (PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE.equals(event.getProperty())) {
+				if ((event.getNewValue() instanceof Boolean) && ((Boolean)event.getNewValue()).booleanValue()) {
+					fOutlinePageUpdater= new EditorSelectionChangedListener();
+					getSelectionProvider().addSelectionChangedListener(fOutlinePageUpdater);
+					fOutlinePageUpdater.selectionChanged();
+				} else {
+					getSelectionProvider().removeSelectionChangedListener(fOutlinePageUpdater);
+					fOutlinePageUpdater= null;
+				}
+				return;
+			}
+			
 			
 		} finally {
 			super.handlePreferenceStoreChanged(event);
@@ -1924,15 +1922,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		return null;
 	}
 	
-	/*
-	 * @see AbstractTextEditor#handleCursorPositionChanged()
-	 */
-	protected void handleCursorPositionChanged() {
-		super.handleCursorPositionChanged();
-		if (!isEditingScriptRunning() && fUpdater != null)
-			fUpdater.post();
-	}
- 
 	/**
 	 * Initializes the given line number ruler column from the preference store.
 	 * @param rulerColumn the ruler column to be initialized
@@ -2060,16 +2049,21 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		preferences.addPropertyChangeListener(fPropertyChangeListener);			
 		
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
-			public IInformationControl createInformationControl(Shell parent) {
+			public IInformationControl createInformationControl(Shell shell) {
 				boolean cutDown= false;
 				int style= cutDown ? SWT.NONE : (SWT.V_SCROLL | SWT.H_SCROLL);
-				return new DefaultInformationControl(parent, SWT.RESIZE, style, new HTMLTextPresenter(cutDown));
+				return new DefaultInformationControl(shell, SWT.RESIZE, style, new HTMLTextPresenter(cutDown));
 			}
 		};
 
 		fInformationPresenter= new InformationPresenter(informationControlCreator);
 		fInformationPresenter.setSizeConstraints(60, 10, true, true);		
 		fInformationPresenter.install(getSourceViewer());
+		
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE)) {
+			fOutlinePageUpdater= new EditorSelectionChangedListener();
+			getSelectionProvider().addSelectionChangedListener(fOutlinePageUpdater);
+		}
 	}
 	
 	protected void showOverviewRuler() {
@@ -2322,5 +2316,66 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 		
 		return nextError;
+	}
+	
+	/**
+	 * Computes and returns the source reference that includes the caret and
+	 * serves as provider for the outline page selection and the editor range
+	 * indication.
+	 * 
+	 * @return the computed source reference
+	 * @since 3.0
+	 */
+	protected ISourceReference computeHighlightRangeSourceReference() {
+		ISourceViewer sourceViewer= getSourceViewer();
+		if (sourceViewer == null)
+			return null;
+			
+		StyledText styledText= sourceViewer.getTextWidget();
+		if (styledText == null)
+			return null;
+		
+		int caret= 0;
+		if (sourceViewer instanceof ITextViewerExtension3) {
+			ITextViewerExtension3 extension= (ITextViewerExtension3)sourceViewer;
+			caret= extension.widgetOffset2ModelOffset(styledText.getCaretOffset());
+		} else {
+			int offset= sourceViewer.getVisibleRegion().getOffset();
+			caret= offset + styledText.getCaretOffset();
+		}
+
+		IJavaElement element= getElementAt(caret, false);
+		
+		if ( !(element instanceof ISourceReference))
+			return null;
+		
+		if (element.getElementType() == IJavaElement.IMPORT_DECLARATION) {
+			
+			IImportDeclaration declaration= (IImportDeclaration) element;
+			IImportContainer container= (IImportContainer) declaration.getParent();
+			ISourceRange srcRange= null;
+			
+			try {
+				srcRange= container.getSourceRange();
+			} catch (JavaModelException e) {
+			}
+			
+			if (srcRange != null && srcRange.getOffset() == caret)
+				return container;
+		}
+		
+		return (ISourceReference) element;
+	}
+
+	/**
+	 * Returns the most narrow java element including the given offset.
+	 * 
+	 * @param offset the offset inside of the requested element
+	 * @param reconcile <code>true</code> if editor input should be reconciled in advance
+	 * @return the most narrow java element
+	 * @since 3.0
+	 */
+	protected IJavaElement getElementAt(int offset, boolean reconcile) {
+		return getElementAt(offset);
 	}
 }
