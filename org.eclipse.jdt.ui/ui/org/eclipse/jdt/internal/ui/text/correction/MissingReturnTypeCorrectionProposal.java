@@ -59,7 +59,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 			if (expression != null) {
 				rewrite.set(fExistingReturn, ReturnStatement.EXPRESSION_PROPERTY, expression, null);
 				
-				markAsLinked(rewrite, expression, true, RETURN_EXPRESSION_KEY);
+				addLinkedPosition(rewrite.track(expression), true, RETURN_EXPRESSION_KEY);
 			}
 			return rewrite;
 		} else {
@@ -101,7 +101,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 
 			rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY).insertLast(returnStatement, null);
 			
-			markAsLinked(rewrite, returnStatement.getExpression(), true, RETURN_EXPRESSION_KEY);
+			addLinkedPosition(rewrite.track(returnStatement.getExpression()), true, RETURN_EXPRESSION_KEY);
 			return rewrite;
 		}
 	}
@@ -132,12 +132,12 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 					if (result == null) {
 						result= ast.newSimpleName(curr.getName());
 					}
-					addLinkedModeProposal(RETURN_EXPRESSION_KEY, curr.getName());
+					addLinkedPositionProposal(RETURN_EXPRESSION_KEY, curr.getName(), null);
 				}
 			}
 		}
 		Expression defaultExpression= ASTNodeFactory.newDefaultExpression(ast, fMethodDecl.getReturnType(), fMethodDecl.getExtraDimensions());
-		addLinkedModeProposal(RETURN_EXPRESSION_KEY, ASTNodes.asString(defaultExpression));
+		addLinkedPositionProposal(RETURN_EXPRESSION_KEY, ASTNodes.asString(defaultExpression), null);
 		if (result == null) {
 			return defaultExpression;
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,11 +28,26 @@ import org.eclipse.jdt.internal.corext.dom.RewriteException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
-  */
+ * A proposal for quick fixes and quick assists that works on a AST rewriter.
+ * Either a rewriter is directly passed in the constructor or method {@link #getRewrite()} is overridden
+ * to provide the AST rewriter that is evaluated to the document when the proposal is
+ * applied.
+ * @since 3.0
+ */
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	private ASTRewrite fRewrite;
 
+	/**
+	 * Constructs a AST rewrite correction proposal.
+	 * @param name The display name of the proposal.
+	 * @param cu The compilation unit that is modified.
+	 * @param rewrite The AST rewrite that is invoked when the proposal is applied
+	 *  <code>null</code> can be passed if {@link #getRewrite()} is overridden.
+	 * @param relevance The relevance of this proposal.
+	 * @param image The image that is displayed for this proposal or <code>null</code> if no
+	 * image is desired.
+	 */
 	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, relevance, image);
 		fRewrite= rewrite;
@@ -56,7 +71,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	}
 	
 	/**
-	 * Returns the rewriter that has been passed in the constructor. Implemententors can override this
+	 * Returns the rewriter that has been passed in the constructor. Implementors can override this
 	 * method to create the rewriter lazy. 
 	 * @return Returns the rewriter to be used.
 	 * @throws CoreException A core exception is thrown when the could not be created.

@@ -214,7 +214,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				String[] excludedNames= (String[]) usedNames.toArray(new String[usedNames.size()]);
 				if (suggestedName != null) {
 					favourite= StubUtility.suggestArgumentName(getCompilationUnit().getJavaProject(), suggestedName, excludedNames);
-					addLinkedModeProposal(nameKey, favourite);
+					addLinkedPositionProposal(nameKey, favourite, null);
 				}
 				Type type= var.getType();
 				int dim= 0;
@@ -224,7 +224,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				}
 				String[] suggestedNames=  NamingConventions.suggestArgumentNames(getCompilationUnit().getJavaProject(), "", ASTNodes.asString(type), dim, excludedNames); //$NON-NLS-1$
 				for (int k= 0; k < suggestedNames.length; k++) {
-					addLinkedModeProposal(nameKey, suggestedNames[k]);
+					addLinkedPositionProposal(nameKey, suggestedNames[k], null);
 				}
 				if (favourite == null) {
 					favourite= suggestedNames[0];
@@ -236,11 +236,11 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				// collect type suggestions
 				ITypeBinding[] bindings= ASTResolving.getRelaxingTypes(ast, desc.type);
 				for (int k= 0; k < bindings.length; k++) {
-					addLinkedModeProposal(typeKey, bindings[k]);
+					addLinkedPositionProposal(typeKey, bindings[k]);
 				}
 			
-				markAsLinked(rewrite, var.getType(), false, typeKey); //$NON-NLS-1$
-				markAsLinked(rewrite, var.getName(), false, nameKey); //$NON-NLS-1$			
+				addLinkedPosition(rewrite.track(var.getType()), false, typeKey);
+				addLinkedPosition(rewrite.track(var.getName()), false, nameKey);
 			}
 		}
 	}

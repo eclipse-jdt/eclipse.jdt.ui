@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,6 @@ import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -62,7 +61,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
- * A quick fix / quick assist proposal with linked positions and linked position proposals.
+ * A proposal for quick fixes and quick assists that works on a AST rewriter and enters the
+ * linked mode when the proposal is set up.
+ * Either a rewriter is directly passed in the constructor or method {@link #getRewrite()} is overridden
+ * to provide the AST rewriter that is evaluated to the document when the proposal is
+ * applied.
+ * @since 3.0
  */
 public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 
@@ -76,39 +80,31 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	private List fPositionOrder;
 
 	/**
-	 * Constructor.
-	 * @param name The display name of the proposal
-	 * @param cu The compilation unit that is modified
-	 * @param rewrite The AST rewrite that is used. <code>null</code> can be passed if {@link #getRewrite()} is overridden.
+	 * Constructs a linked correction proposal.
+	 * @param name The display name of the proposal.
+	 * @param cu The compilation unit that is modified.
+	 * @param rewrite The AST rewrite that is invoked when the proposal is applied
+	 *  <code>null</code> can be passed if {@link #getRewrite()} is overridden.
 	 * @param relevance The relevance of this proposal.
-	 * @param image The image shown for this proposal.
+	 * @param image The image that is displayed for this proposal or <code>null</code> if no
+	 * image is desired.
 	 */
 	public LinkedCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, rewrite, relevance, image);
 		fSelectionDescription= null;
 		fLinkGroups= null;
 	}
-		
 	
-	public void markAsSelection(ASTRewrite rewrite, ASTNode node) {
-		fSelectionDescription= rewrite.track(node);
-	}
-	
-	public void addLinkedModeProposal(String name, String proposal) {
-		addLinkedModeProposal(name, new LinkedModeProposal(proposal));
-	}
-	
-	public void addLinkedModeProposal(String name, ITypeBinding proposal) {
-		addLinkedModeProposal(name, new LinkedModeProposal(getCompilationUnit(), proposal));
-	}	
-	
-	public void addLinkedModeProposal(String name, IJavaCompletionProposal proposal) {
-		getLinkedModeGroup(name).proposals.add(proposal);
-	}
-	
-	public void markAsLinked(ASTRewrite rewrite, ASTNode node, boolean isFirst, String name) {
-		ITrackedNodePosition position= rewrite.track(node);
-		getLinkedModeGroup(name).positions.add(position);
+	/**
+	 * Adds a linked position to be shown when the proposal is applied. All position with the
+	 * same group id are linked.
+	 * @param position The position to add.
+	 * @param isFirst If set, the proposal is jumped to first.
+	 * @param groupID The id of the group the proposal belongs to. All proposals in the same group
+	 * are linked.
+	 */
+	public void addLinkedPosition(ITrackedNodePosition position, boolean isFirst, String groupID) {
+		getLinkedModeGroup(groupID).positions.add(position);
 		if (fPositionOrder == null) {
 			fPositionOrder= new ArrayList();
 		}
@@ -118,6 +114,45 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			fPositionOrder.add(position);
 		}
 	}
+	
+	/**
+	 * Sets the end position of the linked mode to the end of the passed range.
+	 * @param position The position that describes the end position of the linked mode.
+	 */
+	public void setEndPosition(ITrackedNodePosition position) {
+		fSelectionDescription= position;
+	}
+	
+	/**
+	 * Adds a linked position proposal to the group with the given id.
+	 * @param groupID The id of the group that should present the proposal
+	 * @param proposal The string to propose.
+	 * @param image The image to show for the position proposal or <code>null</code> if
+	 * no image is desired.
+	 */
+	public void addLinkedPositionProposal(String groupID, String proposal, Image image) {
+		addLinkedPositionProposal(groupID, new LinkedModeProposal(proposal));
+	}
+	
+	/**
+	 * Adds a linked position proposal to the group with the given id.
+	 * @param groupID The id of the group that should present the proposal
+	 * @param proposal The binding to use as type name proposal.
+	 */
+	public void addLinkedPositionProposal(String groupID, ITypeBinding proposal) {
+		addLinkedPositionProposal(groupID, new LinkedModeProposal(getCompilationUnit(), proposal));
+	}	
+	
+	/**
+	 * Adds a linked position proposal to the group with the given id.
+	 * @param groupID The id of the group that should present the proposal
+	 * @param proposal The proposal to present.
+	 */
+	public void addLinkedPositionProposal(String groupID, IJavaCompletionProposal proposal) {
+		getLinkedModeGroup(groupID).proposals.add(proposal);
+	}
+	
+
 	
 	private LinkedModeGroup getLinkedModeGroup(String name) {
 		if (fLinkGroups == null) {
@@ -134,10 +169,9 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
 	 */
-	protected void performChange(IDocument document, IEditorPart part) throws CoreException {
+	protected void performChange(IEditorPart part, IDocument document) throws CoreException {
 		try {
-			super.performChange(document, part);
-
+			super.performChange(part, document);
 			if (part == null) {
 				return;
 			}

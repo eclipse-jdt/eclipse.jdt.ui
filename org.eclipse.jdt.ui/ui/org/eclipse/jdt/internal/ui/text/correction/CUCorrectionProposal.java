@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,8 @@ import org.eclipse.ui.IWorkbenchPage;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.Resources;
@@ -49,14 +51,29 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 /**
- * A proposal for quick fixes and quack assist that work on a single compilation unit.
+ * A proposal for quick fixes and quick assist that work on a single compilation unit.
+ * Either a compilation unit change is directly passed in the constructor or method {@link #addEdits(IDocument, TextEdit)} is overridden
+ * to provide the text changes that are applied to the document when the proposal is
+ * evaluated.
+ * <p>
+ * The proposal takes care of the preview of the changes as proposal information.
+ * </p>
+ * @since 3.0
  */
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	private ICompilationUnit fCompilationUnit;
 	private ImportRewrite fImportRewrite;
 	private boolean fIsInitialized;
-		
+	
+	/**
+	 * Constructs a compilation unit correction proposal.
+	 * @param name The name that is displayed in the proposal selection dialog.
+	 * @param cu The compilation unit on that the change works. 
+	 * @param relevance The relevance of this proposal.
+	 * @param image The image that is displayed for this proposal or <code>null</code> if no
+	 * image is desired.
+	 */
 	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) {
 		super(name, createCompilationUnitChange(name, cu), relevance, image);
 		fCompilationUnit= cu;
@@ -64,6 +81,14 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		fIsInitialized= false;
 	}
 	
+	/**
+	 * Constructs a compilation unit correction proposal.
+	 * @param name The name that is displayed in the proposal selection dialog.
+	 * @param change The change that is executed when the proposal is applied.  
+	 * @param relevance The relevance of this proposal.
+	 * @param image The image that is displayed for this proposal or <code>null</code> if no
+	 * image is desired.
+	 */
 	public CUCorrectionProposal(String name, CompilationUnitChange change, int relevance, Image image) {
 		super(name, change, relevance, image);
 		fCompilationUnit= change.getCompilationUnit();
@@ -76,7 +101,14 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		change.setSaveMode(TextFileChange.LEAVE_DIRTY);
 		return change;
 	}
-		
+	
+	/**
+	 * Initializes the compilation unit change that is invoked when the proposal is
+	 * applied. This method is only called once, either when the a preview of
+	 * the change is requested or when the change is invoked. 
+	 * The default implementation calls {@link #addEdits(IDocument, TextEdit)}.
+	 * @throws CoreException Thrown when the initialization fails.
+	 */
 	protected void initializeCompilationUnitChange() throws CoreException {
 		if (fIsInitialized) {
 			return;
@@ -89,7 +121,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			IPath path= getCompilationUnit().getPath();
 			manager.connect(path, null);
 			try {
-	
 				IDocument document= manager.getTextFileBuffer(path).getDocument();
 				addEdits(document, rootEdit);
 				if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
@@ -102,7 +133,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	}
 	
 	/**
-	 * Called when the <code>CompilationUnitChange</code> is created. Subclasses can override to
+	 * Called when the <code>CompilationUnitChange</code> is initialized. Subclasses can override to
 	 * add text edits to root edit of the change.
 	 * @param document Content of the underlying compilation unit. To be accessed read only.
 	 * @param editRoot The root edit to add all edits to
@@ -114,9 +145,11 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}
 	}
 
-	
 	// import management
-	
+
+	/**
+	 * Returns the import rewriter used for this compilation unit.
+	 */
 	public ImportRewrite getImportRewrite() throws CoreException {
 		if (fImportRewrite == null) {
 			fImportRewrite= new ImportRewrite(getCompilationUnit());
@@ -124,6 +157,9 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		return fImportRewrite;
 	}
 	
+	/**
+	 * Sets the import rewriter used for this compilation unit.
+	 */
 	public void setImportRewrite(ImportRewrite rewrite) {
 		fImportRewrite= rewrite;
 	}
@@ -199,7 +235,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			int to= Math.min(end, endOffset);
 			String content= text.get(from, to - from);
 			if (surroundLinesOnly && (from == start) && Strings.containsOnlyWhitespaces(content)) {
-				continue; // ignore empty lines exept when range started in the middle of a line
+				continue; // ignore empty lines except when range started in the middle of a line
 			}
 			buf.append(content);
 			if (to == end && to != endOffset) { // new line when at the end of the line, and not end of range
@@ -211,9 +247,9 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
 	 */
-	protected void performChange(IDocument document, IEditorPart activeEditor) throws CoreException {
+	protected void performChange(IEditorPart activeEditor, IDocument document) throws CoreException {
 		initializeCompilationUnitChange();
-		super.performChange(document, activeEditor);
+		super.performChange(activeEditor, document);
 	}
 	
 	/* (non-Javadoc)
@@ -229,6 +265,9 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			IEditorPart part= EditorUtility.isOpenInEditor(unit);
 			if (part == null) {
 				part= EditorUtility.openInEditor(unit, true);
+				if (part != null) {
+					document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+				}
 			}
 			IWorkbenchPage page= JavaPlugin.getActivePage();
 			if (page != null && part != null) {
@@ -237,7 +276,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			if (part != null) {
 				part.setFocus();
 			}
-			performChange(document, part);
+			performChange(part, document);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, CorrectionMessages.getString("CUCorrectionProposal.error.title"), CorrectionMessages.getString("CUCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
 		}
@@ -256,7 +295,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	}
 
 	/**
-	 * Gets the compilationUnitChange.
+	 * Gets the compilation unit change that is invoked when the change is applied.
 	 * @return Returns a CompilationUnitChange
 	 */
 	public CompilationUnitChange getCompilationUnitChange() {

@@ -168,7 +168,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			rewrite.remove(assignment, null);
 		}		
 		
-		proposal.markAsSelection(rewrite, fragment.getName());
+		proposal.setEndPosition(rewrite.track(fragment.getName()));
 		resultingCollections.add(proposal);
 		return true;
 		
@@ -719,7 +719,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
-		proposal.markAsSelection(rewrite, child);
+		proposal.setEndPosition(rewrite.track(child));
 		resultingCollections.add(proposal);
 		return true;
 	}

@@ -80,9 +80,9 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			ListRewrite listRewriter= rewrite.getListRewrite(decl, MethodDeclaration.PARAMETERS_PROPERTY);
 			listRewriter.insertLast(newDecl, null);
 			
-			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
-			markAsLinked(rewrite, node, true, KEY_NAME);
-			markAsLinked(rewrite, newDecl.getName(), false, KEY_NAME);
+			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
+			addLinkedPosition(rewrite.track(node), true, KEY_NAME);
+			addLinkedPosition(rewrite.track(newDecl.getName()), false, KEY_NAME);
 			
 			return rewrite;
 		}
@@ -146,10 +146,10 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
 			rewrite.replace(dominantStatement, newDecl, null);
 			
-			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
-			markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME);
+			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
+			addLinkedPosition(rewrite.track(newDeclFrag.getName()), true, KEY_NAME);
 			
-			markAsSelection(rewrite, newDecl); // end position
+			setEndPosition(rewrite.track(newDecl));
 
 			return rewrite;
 		} else if ((dominant != dominantStatement) && isForStatementInit(dominantStatement, node)) {
@@ -166,10 +166,10 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			
 			rewrite.replace(assignment, expression, null);
 			
-			markAsLinked(rewrite, expression.getType(), false, KEY_TYPE); 
-			markAsLinked(rewrite, frag.getName(), true, KEY_NAME); 
+			addLinkedPosition(rewrite.track(expression.getType()), false, KEY_TYPE); 
+			addLinkedPosition(rewrite.track(frag.getName()), true, KEY_NAME); 
 			
-			markAsSelection(rewrite, expression); // end position
+			setEndPosition(rewrite.track(expression));
 			
 			return rewrite;
 		}
@@ -182,9 +182,9 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		newDecl.setType(evaluateVariableType(ast));
 //		newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
 
-		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
-		markAsLinked(rewrite, node, true, KEY_NAME); 
-		markAsLinked(rewrite, newDeclFrag.getName(), false, KEY_NAME);
+		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
+		addLinkedPosition(rewrite.track(node), true, KEY_NAME); 
+		addLinkedPosition(rewrite.track(newDeclFrag.getName()), false, KEY_NAME);
 		
 		Statement statement= dominantStatement;
 		List list= ASTNodes.getContainingList(statement);
@@ -297,14 +297,14 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
 			listRewriter.insertAt(newDecl, insertIndex, null);
 			
-			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
+			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 			if (!isInDifferentCU) {
-				markAsLinked(rewrite, node, true, KEY_NAME);
+				addLinkedPosition(rewrite.track(node), true, KEY_NAME);
 			}
-			markAsLinked(rewrite, fragment.getName(), false, KEY_NAME);
+			addLinkedPosition(rewrite.track(fragment.getName()), false, KEY_NAME);
 			
 			if (fragment.getInitializer() != null) {
-				markAsLinked(rewrite, fragment.getInitializer(), false, KEY_INITIALIZER);
+				addLinkedPosition(rewrite.track(fragment.getInitializer()), false, KEY_INITIALIZER);
 			}
 
 			return rewrite;
@@ -330,7 +330,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			if (isVariableAssigned()) {
 				ITypeBinding[] typeProposals= ASTResolving.getRelaxingTypes(ast, binding);
 				for (int i= 0; i < typeProposals.length; i++) {
-					addLinkedModeProposal(KEY_TYPE, typeProposals[i]);
+					addLinkedPositionProposal(KEY_TYPE, typeProposals[i]);
 				}
 			}
 			String typeName= getImportRewrite().addImport(binding);

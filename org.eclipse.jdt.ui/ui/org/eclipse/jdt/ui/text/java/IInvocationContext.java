@@ -11,6 +11,8 @@
 package org.eclipse.jdt.ui.text.java;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 /**
@@ -44,5 +46,17 @@ public interface IInvocationContext {
 	 * @return Returns the root of the AST corresponding to the current compilation unit.
 	 */
 	CompilationUnit getASTRoot();
+	
+	/**
+	 * Convenience method to evaluate the AST node covering the current selection.
+	 * @return Returns the node that covers the location of the problem
+	 */
+	ASTNode getCoveringNode();
+
+	/**
+	 * Convenience method to evaluate the AST node that is covered by the current selection.
+	 * @return Returns the node that is covered by the location of the problem
+	 */	
+	ASTNode getCoveredNode();
 
 }

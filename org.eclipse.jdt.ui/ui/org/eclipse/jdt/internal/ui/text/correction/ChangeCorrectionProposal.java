@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,12 +27,19 @@ import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+/**
+ * Implementation of a Java completion proposal to be used for quick fix and quick assist
+ * proposals that invoke a {@link Change}. The proposal offers a proposal information but no context
+ * information.
+ * @since 3.0
+ */
 public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	
 	private Change fChange;
@@ -40,7 +47,16 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	private int fRelevance;
 	private Image fImage;
 	
+	/**
+	 * Constructs a change correction proposal.
+	 * @param name The name that is displayed in the proposal selection dialog.
+	 * @param change The change that is executed when the proposal is applied.  
+	 * @param relevance The relevance of this proposal.
+	 * @param image The image that is displayed for this proposal or <code>null</code> if no
+	 * image is desired.
+	 */
 	public ChangeCorrectionProposal(String name, Change change, int relevance, Image image) {
+		Assert.isNotNull(name);
 		fName= name;
 		fChange= change;
 		fRelevance= relevance;
@@ -52,19 +68,28 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 */
 	public void apply(IDocument document) {
 		try {
-			performChange(document, JavaPlugin.getActivePage().getActiveEditor());
+			performChange(JavaPlugin.getActivePage().getActiveEditor(), document);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, CorrectionMessages.getString("ChangeCorrectionProposal.error.title"), CorrectionMessages.getString("ChangeCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
 	
-	protected void performChange(IDocument document, IEditorPart activeEditor) throws CoreException {
+	/**
+	 * Performs the change associated with this proposal.
+	 * @param activeEditor The editor currently active or <code>null</code> if no
+	 * editor is active.
+	 * @param document The document of the editor currently active or <code>null</code> if
+	 * no editor is visible.
+	 * @throws CoreException Thrown when the invocation of the change failed.
+	 */
+	protected void performChange(IEditorPart activeEditor, IDocument document) throws CoreException {
 		Change change= null;
 		try {
 			change= getChange();
 			if (change != null) {
-				// close any open linked mode before applying our changes
-				LinkedEnvironment.closeEnvironment(document);
+				if (document != null) {
+					LinkedEnvironment.closeEnvironment(document);
+				}
 				
 				change.initializeValidationData(new NullProgressMonitor());
 				RefactoringStatus valid= change.isValid(new NullProgressMonitor());
@@ -128,19 +153,18 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	}
 
 	/**
-	 * Sets the proposal's image.
-	 * 
-	 * @param image the desired image. Can be <code>null</code>
+	 * Sets the proposal's image or <code>null</code> if no image is desired.
+	 * @param image the desired image. 
 	 */
 	public void setImage(Image image) {
 		fImage= image;
 	}
 
 	/**
-	 * Gets the change element.
+	 * Returns the change that will be executed when the proposal is applied.
 	 * @return Returns a Change
 	 */
-	public final Change getChange() {
+	public Change getChange() {
 		return fChange;
 	}
 	
@@ -148,15 +172,16 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 * Sets the display name.
 	 * @param name The name to set
 	 */
-	public final void setDisplayName(String name) {
+	public void setDisplayName(String name) {
+		Assert.isNotNull(name);
 		fName= name;
 	}
 
-	/**
-	 * Gets the relevance.
-	 * @return Returns an int
+	/*
+	 *(non-Javadoc)
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
 	 */
-	public final int getRelevance() {
+	public int getRelevance() {
 		return fRelevance;
 	}
 
@@ -164,7 +189,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 * Sets the relevance.
 	 * @param relevance The relevance to set
 	 */
-	public final void setRelevance(int relevance) {
+	public void setRelevance(int relevance) {
 		fRelevance= relevance;
 	}
 

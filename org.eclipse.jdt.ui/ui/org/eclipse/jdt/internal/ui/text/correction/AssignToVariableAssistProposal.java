@@ -101,9 +101,9 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		
 		rewrite.replace(expression, newDecl, null); 
 		
-		markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME); //$NON-NLS-1$
-		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE); //$NON-NLS-1$
-		markAsSelection(rewrite, newDecl);
+		addLinkedPosition(rewrite.track(newDeclFrag.getName()), true, KEY_NAME);
+		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
+		setEndPosition(rewrite.track(newDecl));
 
 		return rewrite;
 	}
@@ -190,10 +190,10 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			selectionNode= fNodeToAssign;
 		} 
 		
-		markAsLinked(rewrite, newDeclFrag.getName(), false, KEY_NAME);
-		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
-		markAsLinked(rewrite, accessName, true, KEY_NAME);
-		markAsSelection(rewrite, selectionNode);
+		addLinkedPosition(rewrite.track(newDeclFrag.getName()), false, KEY_NAME);
+		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
+		addLinkedPosition(rewrite.track(accessName), true, KEY_NAME);
+		setEndPosition(rewrite.track(selectionNode));
 		
 		return rewrite;		
 	}
@@ -201,7 +201,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	private Type evaluateType(AST ast) throws CoreException {
 		ITypeBinding[] proposals= ASTResolving.getRelaxingTypes(ast, fTypeBinding);
 		for (int i= 0; i < proposals.length; i++) {
-			addLinkedModeProposal(KEY_TYPE, proposals[i]);
+			addLinkedPositionProposal(KEY_TYPE, proposals[i]);
 		}
 		String typeName= getImportRewrite().addImport(fTypeBinding);
 		return ASTNodeFactory.newType(ast, typeName);
@@ -220,7 +220,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			return "class1"; // fix for pr, remoev after 20030127 //$NON-NLS-1$
 		}
 		for (int i= 0; i < names.length; i++) {
-			addLinkedModeProposal(KEY_NAME, names[i]);
+			addLinkedPositionProposal(KEY_NAME, names[i], null);
 		}
 		return names[0]; 
 	}
@@ -245,7 +245,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 					result= curr;
 				}
 				if (taken.add(curr)) {
-					addLinkedModeProposal(KEY_NAME, curr);
+					addLinkedPositionProposal(KEY_NAME, curr, null);
 				}
 			}			
 		}
@@ -258,7 +258,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		for (int i= 0; i < names.length; i++) {
 			String curr= names[i];
 			if (taken.add(curr)) {
-				addLinkedModeProposal(KEY_NAME, curr);
+				addLinkedPositionProposal(KEY_NAME, curr, null);
 			}
 		}
 		if (result == null) {

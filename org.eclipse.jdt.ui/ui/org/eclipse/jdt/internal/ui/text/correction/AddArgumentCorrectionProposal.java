@@ -61,7 +61,7 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 			ListRewrite listRewriter= rewrite.getListRewrite(fCallerNode, property);
 			listRewriter.insertAt(newArg, idx, null);
 			
-			markAsLinked(rewrite, newArg, i == 0, key); 
+			addLinkedPosition(rewrite.track(newArg), i == 0, key); 
 		}
 		return rewrite;
 	}
@@ -94,14 +94,14 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 				if (best == null) {
 					best= ast.newSimpleName(curr.getName());
 				}
-				addLinkedModeProposal(key, curr.getName());
+				addLinkedPositionProposal(key, curr.getName(), null);
 			}
 		}
 		Expression defaultExpression= ASTNodeFactory.newDefaultExpression(ast, requiredType);
 		if (best == null) {
 			best= defaultExpression;
 		}
-		addLinkedModeProposal(key, ASTNodes.asString(defaultExpression));
+		addLinkedPositionProposal(key, ASTNodes.asString(defaultExpression), null);
 		return best;
 	}
 	

@@ -159,7 +159,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					return true;
 				}				
 			} catch (Exception e) {
-				// ignore
+				JavaPlugin.log(e);
 			}
 		}
 		return false;

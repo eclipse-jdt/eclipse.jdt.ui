@@ -103,8 +103,8 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		for (int i= 0; i < parameters.size(); i++) {
 			SingleVariableDeclaration curr= (SingleVariableDeclaration) parameters.get(i);
 			String name= curr.getName().getIdentifier();
-			markAsLinked(rewrite, curr.getType(), false, "arg_type_" + name); //$NON-NLS-1$
-			markAsLinked(rewrite, curr.getName(), false, "arg_name_" + name); //$NON-NLS-1$
+			addLinkedPosition(rewrite.track(curr.getType()), false, "arg_type_" + name); //$NON-NLS-1$
+			addLinkedPosition(rewrite.track(curr.getName()), false, "arg_name_" + name); //$NON-NLS-1$
 		}
 	}	
 	
@@ -155,7 +155,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			for (int i= 0; i < paramNames.length; i++) {
 				Name argument= ast.newSimpleName(paramNames[i]);
 				arguments.add(argument);
-				markAsLinked(rewrite, argument, false, "arg_name_" + paramNames[i]); //$NON-NLS-1$
+				addLinkedPosition(rewrite.track(argument), false, "arg_name_" + paramNames[i]); //$NON-NLS-1$
 			}
 		}
 		
@@ -192,9 +192,9 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		invocation.setExpression(enclosing);
 		
 		String key= "arg_name_" + firstName; //$NON-NLS-1$
-		markAsLinked(rewrite, enclosing, false, key);
+		addLinkedPosition(rewrite.track(enclosing), false, key);
 		for (int i= 0; i < enclosingArgNames.length; i++) {
-			addLinkedModeProposal(key, enclosingArgNames[i]); // alternative names
+			addLinkedPositionProposal(key, enclosingArgNames[i], null); // alternative names
 		}
 		return invocation;
 	}

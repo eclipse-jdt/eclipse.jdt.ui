@@ -71,7 +71,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	private boolean fShowDialog;
 
 	public NewCUCompletionUsingWizardProposal(ICompilationUnit cu, Name node, boolean isClass, IJavaElement typeContainer, int severity) {
-		super(null, null, severity, null);
+		super("", null, severity, null); //$NON-NLS-1$
 
 		fCompilationUnit= cu;
 		fNode= node;

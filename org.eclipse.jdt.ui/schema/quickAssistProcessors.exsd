@@ -9,6 +9,9 @@
          This extension point allows to add a Quick Assist processor to offer new Quick Assists in the Java editor.
       </documentation>
    </annotation>
+   
+   <include schemaLocation="schema://org.eclipse.core.expressions/schema/expressionLanguage.mxsd"/>
+   
 
    <element name="extension">
       <complexType>
@@ -41,6 +44,9 @@
 
    <element name="quickAssistProcessor">
       <complexType>
+         <all>
+            <element ref="enablement"/>
+         </all>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
@@ -60,9 +66,12 @@
                <documentation>
                   the name of the class that implements this Quick Assist processor. The
 class must be public and implement
-&lt;samp&gt;org.eclipse.jdt.ui.text.java.IAssistProcessor&lt;/samp&gt;
+&lt;samp&gt;org.eclipse.jdt.ui.text.java.IQuickAssistProcessor&lt;/samp&gt;
 with a public 0-argument constructor.
                </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.text.java.IQuickAssistProcessor"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>

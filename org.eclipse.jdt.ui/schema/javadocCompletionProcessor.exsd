@@ -64,7 +64,7 @@ class must be public and implement
 with a public 0-argument constructor.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.eclipse.jface.wizard.WizardPage:org.eclipse.jdt.ui.wizards.IClasspathContainerPage"/>
+                  <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor"/>
                </appInfo>
             </annotation>
          </attribute>

@@ -122,10 +122,10 @@ public class LocalCorrectionsSubProcessor {
 				proposal.setImportRewrite(imports);
 				
 				String returnKey= "return"; //$NON-NLS-1$
-				proposal.markAsLinked(rewrite, newReturnType, true, returnKey);
+				proposal.addLinkedPosition(rewrite.track(newReturnType), true, returnKey);
 				ITypeBinding[] typeSuggestions= ASTResolving.getRelaxingTypes(astRoot.getAST(), currBinding);
 				for (int i= 0; i < typeSuggestions.length; i++) {
-					proposal.addLinkedModeProposal(returnKey, typeSuggestions[i]);
+					proposal.addLinkedPositionProposal(returnKey, typeSuggestions[i]);
 				}
 				proposals.add(proposal);
 			}
@@ -313,8 +313,8 @@ public class LocalCorrectionsSubProcessor {
 				
 				String typeKey= "type" + i; //$NON-NLS-1$
 				String nameKey= "name" + i; //$NON-NLS-1$
-				proposal.markAsLinked(rewrite, var.getType(), false, typeKey); //$NON-NLS-1$
-				proposal.markAsLinked(rewrite, var.getName(), false, nameKey); //$NON-NLS-1$
+				proposal.addLinkedPosition(rewrite.track(var.getType()), false, typeKey);
+				proposal.addLinkedPosition(rewrite.track(var.getName()), false, nameKey);
 				addExceptionTypeLinkProposals(proposal, excBinding, typeKey);
 			}
 			proposals.add(proposal);				
@@ -338,7 +338,7 @@ public class LocalCorrectionsSubProcessor {
 				Name name= ASTNodeFactory.newName(ast, imp);
 				listRewrite.insertLast(name, null);
 				String typeKey= "type" + i; //$NON-NLS-1$
-				proposal.markAsLinked(rewrite, name, false, typeKey); //$NON-NLS-1$
+				proposal.addLinkedPosition(rewrite.track(name), false, typeKey);
 				addExceptionTypeLinkProposals(proposal, uncaughtExceptions[i], typeKey);
 			}
 			for (int i= 0; i < exceptions.size(); i++) {
@@ -354,7 +354,7 @@ public class LocalCorrectionsSubProcessor {
 	private static void addExceptionTypeLinkProposals(LinkedCorrectionProposal proposal, ITypeBinding exc, String key) {
 		// all superclasses except Object
 		while (exc != null && !"java.lang.Object".equals(exc.getQualifiedName())) { //$NON-NLS-1$
-			proposal.addLinkedModeProposal(key, exc);
+			proposal.addLinkedPositionProposal(key, exc);
 			exc= exc.getSuperclass();
 		}
 	}
@@ -589,7 +589,7 @@ public class LocalCorrectionsSubProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
-			proposal.markAsLinked(rewrite, expression, false, "initializer"); //$NON-NLS-1$
+			proposal.addLinkedPosition(rewrite.track(expression), false, "initializer"); //$NON-NLS-1$
 			proposals.add(proposal);			
 		}
 	}

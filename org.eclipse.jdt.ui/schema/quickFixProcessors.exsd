@@ -9,6 +9,8 @@
          This extension point allows to add a Quick Fix processor to offer new Quick Fixes on Java problems.
       </documentation>
    </annotation>
+   
+   <include schemaLocation="schema://org.eclipse.core.expressions/schema/expressionLanguage.mxsd"/>
 
    <element name="extension">
       <complexType>
@@ -41,6 +43,9 @@
 
    <element name="quickFixProcessor">
       <complexType>
+         <all>
+            <element ref="enablement"/>
+         </all>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
@@ -60,9 +65,12 @@
                <documentation>
                   the name of the class that implements this Quick Fix processor. The
 class must be public and implement
-&lt;samp&gt;org.eclipse.jdt.ui.text.java.ICorrectionProcessor&lt;/samp&gt;
+&lt;samp&gt;org.eclipse.jdt.ui.text.java.IQuickFixProcessor&lt;/samp&gt;
 with a public 0-argument constructor.
                </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.text.java.IQuickFixProcessor"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>

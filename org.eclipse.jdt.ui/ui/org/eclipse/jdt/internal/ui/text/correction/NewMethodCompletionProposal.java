@@ -92,12 +92,12 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			if (!isInDifferentCU) {
 				Name invocationName= getInvocationName();
 				if (invocationName != null) {
-					markAsLinked(rewrite, invocationName, true, KEY_NAME);
+					addLinkedPosition(rewrite.track(invocationName), true, KEY_NAME);
 				}				
 			}
-			markAsLinked(rewrite, newStub.getName(), false, KEY_NAME);
+			addLinkedPosition(rewrite.track(newStub.getName()), false, KEY_NAME);
 			if (!newStub.isConstructor()) {
-				markAsLinked(rewrite, newStub.getReturnType(), false, KEY_TYPE);
+				addLinkedPosition(rewrite.track(newStub.getReturnType()), false, KEY_TYPE);
 			}			
 			
 			return rewrite;
@@ -143,8 +143,8 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 
 			params.add(param);
 			
-			markAsLinked(rewrite, param.getType(), false, argTypeKey);
-			markAsLinked(rewrite, param.getName(), false, argNameKey);
+			addLinkedPosition(rewrite.track(param.getType()), false, argTypeKey);
+			addLinkedPosition(rewrite.track(param.getName()), false, argNameKey);
 		}
 		
 		Block body= null;
@@ -287,7 +287,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 		if (binding != null) {
 			ITypeBinding[] typeProposals= ASTResolving.getRelaxingTypes(ast, binding);
 			for (int i= 0; i < typeProposals.length; i++) {
-				addLinkedModeProposal(key, typeProposals[i]);
+				addLinkedPositionProposal(key, typeProposals[i]);
 			}		
 			String typeName= getImportRewrite().addImport(binding);
 			return ASTNodeFactory.newType(ast, typeName);
@@ -318,7 +318,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			favourite= names[0];
 		}
 		for (int i= 0; i < names.length; i++) {
-			addLinkedModeProposal(key, names[i]);
+			addLinkedPositionProposal(key, names[i], null);
 		}
 		
 		takenNames.add(favourite);

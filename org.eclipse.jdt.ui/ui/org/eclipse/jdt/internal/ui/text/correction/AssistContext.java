@@ -11,10 +11,13 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -75,6 +78,24 @@ public class AssistContext implements IInvocationContext {
 	 */
 	public void setASTRoot(CompilationUnit root) {
 		fASTRoot= root;
+	}
+	
+	/*(non-Javadoc)
+	 * @see org.eclipse.jdt.ui.text.java.IInvocationContext#getCoveringNode()
+	 */
+	public ASTNode getCoveringNode() {
+		NodeFinder finder= new NodeFinder(fOffset, fLength);
+		getASTRoot().accept(finder);
+		return finder.getCoveringNode();
+	}
+
+	/*(non-Javadoc)
+	 * @see org.eclipse.jdt.ui.text.java.IInvocationContext#getCoveredNode()
+	 */
+	public ASTNode getCoveredNode() {
+		NodeFinder finder= new NodeFinder(fOffset, fLength);
+		getASTRoot().accept(finder);
+		return finder.getCoveredNode();
 	}
 
 }
