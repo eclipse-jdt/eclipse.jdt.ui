@@ -151,6 +151,6 @@ public class TypeRenameParticipant extends RenameParticipant {
 				changes.add(new LaunchConfigChange(fType, configs[i], getArguments().getNewName()));
 			}
 		}
-		return new CompositeChange(JUnitMessages.getString("TypeRenameParticipant.name"), (Change[]) changes.toArray(new Change[changes.size()]));
+		return new CompositeChange(JUnitMessages.getString("TypeRenameParticipant.name"), (Change[]) changes.toArray(new Change[changes.size()])); //$NON-NLS-1$
 	}
 }
