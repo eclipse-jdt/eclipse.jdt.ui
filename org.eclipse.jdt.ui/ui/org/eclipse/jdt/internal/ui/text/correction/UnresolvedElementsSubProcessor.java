@@ -150,14 +150,14 @@ public class UnresolvedElementsSubProcessor {
 					if (qualifier != node) {
 						binding= qualifier.resolveTypeBinding();
 					} else {
-						typeKind= SimilarElementsRequestor.REF_TYPES;
+						typeKind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
 					}
 					ASTNode outerParent= parent.getParent();
 					while (outerParent instanceof QualifiedName) {
 						outerParent= outerParent.getParent();
 					}
 					if (outerParent instanceof SimpleType) {
-						typeKind= SimilarElementsRequestor.REF_TYPES;
+						typeKind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
 						suggestVariableProposals= false;
 					}
 				} else if (locationInParent == SwitchCase.EXPRESSION_PROPERTY) {
@@ -175,11 +175,11 @@ public class UnresolvedElementsSubProcessor {
 					binding= qualifierBinding;
 				} else {
 					node= qualifierName.getQualifier();
-					typeKind= SimilarElementsRequestor.REF_TYPES;
+					typeKind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
 					suggestVariableProposals= node.isSimpleName();
 				}
 				if (selectedNode.getParent() instanceof SimpleType) {
-					typeKind= SimilarElementsRequestor.REF_TYPES;
+					typeKind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
 					suggestVariableProposals= false;
 				}
 				break;		
@@ -203,13 +203,16 @@ public class UnresolvedElementsSubProcessor {
 		if (node == null) {
 			return;
 		}
-		
 
 		// add type proposals
 		if (typeKind != 0) {
-			int relevance= Character.isUpperCase(ASTNodes.getSimpleNameIdentifier(node).charAt(0)) ? 3 : 0;
+			if (!JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
+				typeKind= typeKind & ~(SimilarElementsRequestor.ANNOTATIONS | SimilarElementsRequestor.ENUMS | SimilarElementsRequestor.VARIABLES);
+			}
+			
+			int relevance= Character.isUpperCase(ASTNodes.getSimpleNameIdentifier(node).charAt(0)) ? 5 : -2;
 			addSimilarTypeProposals(typeKind, cu, node, relevance + 1, proposals);
-			addNewTypeProposals(cu, node, SimilarElementsRequestor.REF_TYPES, relevance, proposals);
+			addNewTypeProposals(cu, node, typeKind, relevance, proposals);
 		}
 		
 		if (!suggestVariableProposals) {

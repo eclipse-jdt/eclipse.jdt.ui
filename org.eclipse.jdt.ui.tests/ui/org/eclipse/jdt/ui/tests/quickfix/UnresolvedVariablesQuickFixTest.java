@@ -886,7 +886,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOfProposals(proposals, 10);
+		assertNumberOfProposals(proposals, 8);
 		assertCorrectLabels(proposals);
 
 		int i= 0;
@@ -970,27 +970,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("        char ch= File.pathSeparatorChar;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[i++]= buf.toString();
-		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.File;\n");
-		buf.append("public class F <Fixe> {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        char ch= Fixe.pathSeparatorChar;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[i++]= buf.toString();
-		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.File;\n");
-		buf.append("public class F {\n");
-		buf.append("    <Fixe> void foo() {\n");
-		buf.append("        char ch= Fixe.pathSeparatorChar;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[i++]= buf.toString();
+		expected[i++]= buf.toString();	
 		
 		String[] previews= new String[proposals.size()];
 		for (i= 0; i < previews.length; i++) {
