@@ -12,6 +12,7 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -26,17 +27,19 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -52,7 +55,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Java specific text editor.
  */
-public class ClassFileEditor extends JavaEditor {
+public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProvider.InputChangeListener {
 	
 		/**
 		 * A form to attach source to a class file.
@@ -154,7 +157,6 @@ public class ClassFileEditor extends JavaEditor {
 								button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.changeAttachedSource")); //$NON-NLS-1$
 							}
 		
-							button.setEnabled(false); // XXX depending on 15423
 							button.addSelectionListener(new SelectionListener() {
 								public void widgetSelected(SelectionEvent event) {				
 									try {
@@ -396,9 +398,17 @@ public class ClassFileEditor extends JavaEditor {
 		if (!(input instanceof IClassFileEditorInput))
 			throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE_TYPE, JavaEditorMessages.getString("ClassFileEditor.error.invalid_input_message"))); //$NON-NLS-1$
 
+		IDocumentProvider documentProvider= getDocumentProvider();
+		if (documentProvider instanceof ClassFileDocumentProvider)
+			((ClassFileDocumentProvider) documentProvider).removeInputChangeListener(this);
+
 		super.doSetInput(input);
-		
-		verifyInput(getEditorInput());			
+
+		documentProvider= getDocumentProvider();
+		if (documentProvider instanceof ClassFileDocumentProvider)
+			((ClassFileDocumentProvider) documentProvider).addInputChangeListener(this);
+
+		verifyInput(getEditorInput());
 	}
 
 	/*
@@ -475,4 +485,23 @@ public class ClassFileEditor extends JavaEditor {
 			}
 		}		
 	}	
+
+	/*
+	 * @see ClassFileDocumentProvider.InputChangeListener#inputChanged(IClassFileEditorInput)
+	 */
+	public void inputChanged(final IClassFileEditorInput input) {
+		if (input != null && input.equals(getEditorInput())) {	
+			ISourceViewer viewer= getSourceViewer();
+			if (viewer != null) {
+				StyledText textWidget= viewer.getTextWidget();
+				if (textWidget != null && !textWidget.isDisposed()) {
+					textWidget.getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							setInput(input);
+						}
+					});
+				}
+			}						
+		}
+	}
 }

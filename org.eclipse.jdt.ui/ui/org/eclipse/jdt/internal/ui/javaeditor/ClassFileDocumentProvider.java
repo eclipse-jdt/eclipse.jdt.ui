@@ -5,11 +5,14 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -25,7 +28,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -37,6 +39,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * A document provider for class files. Class files can be either inside 
  */
 public class ClassFileDocumentProvider extends FileDocumentProvider {
+
+	/**
+	 * An input change listener to request the editor to reread the input.
+	 */
+	public interface InputChangeListener {
+		void inputChanged(IClassFileEditorInput input);	
+	}
 		
 	/**
 	 * Synchronizes the document with external resource changes.
@@ -87,25 +96,32 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		 */
 		protected boolean check(IPackageFragmentRoot input, IJavaElementDelta delta) {
 			IJavaElement element= delta.getElement(); 
-			
+
 			if ((delta.getKind() & IJavaElementDelta.REMOVED) != 0 || (delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0) { 
 				if (element.equals(input.getJavaProject())) {
 					handleDeleted(fInput);
 					return true;
 				}
 			}
-			
+
 			if (((delta.getFlags() & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) && input.equals(element)) {
 				handleDeleted(fInput);
 				return true;
 			}
-			
+
 			IJavaElementDelta[] subdeltas= delta.getAffectedChildren();
 			for (int i= 0; i < subdeltas.length; i++) {
 				if (check(input, subdeltas[i]))
 					return true;
 			}
-			
+
+			if ((delta.getFlags() & IJavaElementDelta.F_SOURCEDETACHED) != 0 ||
+				(delta.getFlags() & IJavaElementDelta.F_SOURCEATTACHED) != 0)
+			{
+				fireInputChanged(fInput);
+				return false;
+			}
+		
 			return false;
 		}
 	};
@@ -136,6 +152,8 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		}
 	};
 	
+	/** Input change listeners. */
+	private List fInputListeners= new ArrayList();
 	
 	/**
 	 * Creates a new document provider.
@@ -257,4 +275,24 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	protected void handleDeleted(IClassFileEditorInput input) {
 		fireElementDeleted(input);
 	}
+	
+	private void fireInputChanged(IClassFileEditorInput input) {
+		for (Iterator i = fInputListeners.iterator(); i.hasNext();)
+			((InputChangeListener) i.next()).inputChanged(input);			
+	}
+
+	/**
+	 * Adds an input change listener.
+	 */
+	public void addInputChangeListener(InputChangeListener listener) {
+		fInputListeners.add(listener);
+	}
+
+	/**
+	 * Removes an input change listener.
+	 */
+	public void removeInputChangeListener(InputChangeListener listener) {
+		fInputListeners.remove(listener);
+	}
+	
 }
