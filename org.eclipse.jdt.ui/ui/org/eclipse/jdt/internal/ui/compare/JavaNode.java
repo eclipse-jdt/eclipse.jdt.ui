@@ -179,9 +179,13 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	}
 	
 	public ITypedElement replace(ITypedElement child, ITypedElement other) {
+		/* commented out for #34745
 		ITypedElement e= super.replace(child, other);
 		nodeChanged(this);
 		return e;
+		*/
+		nodeChanged(this);
+		return child;
 	}
 
 	void nodeChanged(JavaNode node) {
