@@ -214,7 +214,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * there isn't any package explorer part <code>null</code> is returned.
 	 */
 	public static PackageExplorerPart getFromActivePerspective() {
-		IViewPart view= JavaPlugin.getActivePage().findView(VIEW_ID);
+		IWorkbenchPage activePage= JavaPlugin.getActivePage();
+		if (activePage == null)
+			return null;
+		IViewPart view= activePage.findView(VIEW_ID);
 		if (view instanceof PackageExplorerPart)
 			return (PackageExplorerPart)view;
 		return null;	
