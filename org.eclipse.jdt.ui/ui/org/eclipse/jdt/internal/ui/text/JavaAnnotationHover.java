@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -75,7 +76,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		List including= new ArrayList();
 		
 		Iterator e= model.getAnnotationIterator();
-		HashMap positions= new HashMap();
+		HashMap messagesAtPosition= new HashMap();
 		while (e.hasNext()) {
 			Object o= e.next();
 			if (o instanceof IProblemAnnotation) {
@@ -84,17 +85,10 @@ public class JavaAnnotationHover implements IAnnotationHover {
 					Position position= model.getPosition((Annotation)a);
 					if (position == null)
 						continue;
-					String message= a.getMessage();
-					if (positions.containsKey(position)) {
-						if (message.equals(positions.get(position)))
-							continue;
-						else {
-							// More than one different error message at position
-							// XXX: Need collision resolution here
-							//      For now the will show up as duplicates
-						}
-					}
-					positions.put(position, message);
+
+					if (isDuplicateProblemAnnotation(messagesAtPosition, position, a.getMessage()))
+						continue;
+	
 					switch (compareRulerLine(position, document, line)) {
 						case 1:
 							exact.add(a);
@@ -110,6 +104,28 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		return select(exact, including);
 	}
 
+	private boolean isDuplicateProblemAnnotation(Map messagesAtPosition, Position position, String message) {
+		if (messagesAtPosition.containsKey(position)) {
+			Object value= messagesAtPosition.get(position);
+			if (message.equals(value))
+				return true;
+
+			if (value instanceof List) {
+				List messages= (List)value;
+				if  (messages.contains(message))
+					return true;
+				else
+					messages.add(message);
+			} else {
+				ArrayList messages= new ArrayList();
+				messages.add(value);
+				messages.add(message);
+				messagesAtPosition.put(position, messages);
+			}
+		} else
+			messagesAtPosition.put(position, message);
+		return false;
+	}
 		
 	/*
 	 * @see IVerticalRulerHover#getHoverInfo(ISourceViewer, int)
