@@ -160,6 +160,11 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	}
 	
 	private int getNameEnd(IDocument doc, int pos) throws BadLocationException {
+		if (pos > 0) {
+			if (Character.isWhitespace(doc.getChar(pos - 1))) {
+				return pos;
+			}
+		}
 		int len= doc.getLength();
 		while (pos < len) {
 			char ch= doc.getChar(pos);
