@@ -15,7 +15,9 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -233,9 +235,17 @@ public class RemoteTestRunnerClient {
 				if (fDebug)
 					System.out.println("Creating server socket "+fPort); //$NON-NLS-1$
 				fServerSocket= new ServerSocket(fPort);
-				fSocket= fServerSocket.accept();				
-				fBufferedReader= new BufferedReader(new InputStreamReader(fSocket.getInputStream()));
-				fWriter= new PrintWriter(fSocket.getOutputStream(), true);
+				fSocket= fServerSocket.accept();	
+				try {
+				    fBufferedReader= new BufferedReader(new InputStreamReader(fSocket.getInputStream(), "UTF-8")); //$NON-NLS-1$
+				} catch (UnsupportedEncodingException e) {
+				    fBufferedReader= new BufferedReader(new InputStreamReader(fSocket.getInputStream()));				    
+				}
+				try {
+				    fWriter= new PrintWriter(new OutputStreamWriter(fSocket.getOutputStream(), "UTF-8"), true); //$NON-NLS-1$
+	            } catch (UnsupportedEncodingException e1) {
+	                fWriter= new PrintWriter(new OutputStreamWriter(fSocket.getOutputStream()), true);
+	            }
 				String message;
 				while(fBufferedReader != null && (message= readMessage(fBufferedReader)) != null)
 					receiveMessage(message);

@@ -12,12 +12,15 @@
 package org.eclipse.jdt.internal.junit.runner;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -647,8 +650,16 @@ public class RemoteTestRunner implements TestListener {
 		for (int i= 1; i < 20; i++) {
 			try{
 				fClientSocket= new Socket(fHost, fPort);
-				fWriter= new PrintWriter(fClientSocket.getOutputStream(), false/*true*/);
-				fReader= new BufferedReader(new InputStreamReader(fClientSocket.getInputStream()));
+				try {
+				    fWriter= new PrintWriter(new BufferedWriter(new OutputStreamWriter(fClientSocket.getOutputStream(), "UTF-8")), false/*true*/); //$NON-NLS-1$
+	            } catch (UnsupportedEncodingException e1) {
+	                fWriter= new PrintWriter(new BufferedWriter(new OutputStreamWriter(fClientSocket.getOutputStream())), false/*true*/);
+	            }
+				try {
+				    fReader= new BufferedReader(new InputStreamReader(fClientSocket.getInputStream(), "UTF-8")); //$NON-NLS-1$
+                } catch (UnsupportedEncodingException e1) {
+                    fReader= new BufferedReader(new InputStreamReader(fClientSocket.getInputStream()));
+                }
 				fReaderThread= new ReaderThread();
 				fReaderThread.start();
 				return true;
