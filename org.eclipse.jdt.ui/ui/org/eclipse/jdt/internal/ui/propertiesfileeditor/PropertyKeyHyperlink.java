@@ -132,10 +132,12 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		
 		private List fResult;
 		private IProgressMonitor fProgressMonitor;
+		private boolean fIsKeyDoubleQuoted;
 		
-		public ResultCollector(List result, IProgressMonitor progressMonitor) {
+		public ResultCollector(List result, IProgressMonitor progressMonitor, boolean isKeyDoubleQuoted) {
 			fResult= result;
 			fProgressMonitor= progressMonitor;
+			fIsKeyDoubleQuoted= isKeyDoubleQuoted;
 		}
 		
 		public void aboutToStart() throws CoreException {
@@ -144,6 +146,10 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		public void accept(IResourceProxy proxy, int start, int length) throws CoreException {
 			// Can cast to IFile because search only reports matches on IFile
+			if (fIsKeyDoubleQuoted) {
+				start= start + 1;
+				length= length - 2;
+			}
 			fResult.add(new KeyReference((IFile)proxy.requestResource(), start, length));
 		}
 
@@ -309,27 +315,54 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	}
 	
 	/**
+	 * Returns whether we search the key in double-quotes or not.
+	 * <p>
+	 * XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
+	 * </p>
+	 * 
+	 * @return <code>true</code> if we search for double-quoted key 
+	 */
+	private boolean useDoubleQuotedKey() {
+		if (fStorage == null)
+			return false;
+		
+		String name= fStorage.getName();
+		
+		return name != null && !"about.properties".equals(name) && !"feature.properties".equals(name) && !"plugin.properties".equals(name);  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+	
+	/**
 	 * Searches references to the given key in the given scope.
 	 * 
 	 * @param scope the scope
 	 * @param key the properties key
 	 * @return the references or <code>null</code> if the search has been canceled by the user
 	 */
-	private KeyReference[] search(final IResource scope, final String key) {
+	private KeyReference[] search(final IResource scope, String key) {
 		if (key == null)
 			return new KeyReference[0];
 
 		final List result= new ArrayList(5);
+		final String searchString;
+		
+		// XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
+		if (useDoubleQuotedKey()) {
+			StringBuffer buf= new StringBuffer("\""); //$NON-NLS-1$
+			buf.append(fPropertiesKey);
+			buf.append('"');
+			searchString= buf.toString();
+		} else
+			searchString= fPropertiesKey;
 
 		try {
 			fEditor.getEditorSite().getWorkbenchWindow().getWorkbench().getProgressService().busyCursorWhile(
 				new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						ResultCollector collector= new ResultCollector(result, monitor);
+						ResultCollector collector= new ResultCollector(result, monitor, useDoubleQuotedKey());
 						TextSearchEngine engine= new TextSearchEngine();
 						engine.search(ResourcesPlugin.getWorkspace(), 
 								createScope(scope), false,
-								collector, new MatchLocator(key, true, false));
+								collector, new MatchLocator(searchString, true, false));
 					}
 				}
 			);
