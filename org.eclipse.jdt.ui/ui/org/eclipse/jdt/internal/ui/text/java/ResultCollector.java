@@ -9,26 +9,27 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.eclipse.core.resources.IMarker;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
-import org.eclipse.core.resources.IMarker;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.compiler.IProblem;
+
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
-
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
@@ -53,7 +54,7 @@ public class ResultCollector implements ICompletionRequestor {
 						fModifiers= new ArrayList(), fPackages= new ArrayList(),
 						fTypes= new ArrayList(), fVariables= new ArrayList();
 
-	private IMarker fLastProblem;
+	private IProblem fLastProblem;
 	
 	private IJavaProject fJavaProject;
 	private ICompilationUnit fCompilationUnit; // set when imports can be added
@@ -85,11 +86,11 @@ public class ResultCollector implements ICompletionRequestor {
 	}
 	
 	/*
-	 * @see ICompletionRequestor#acceptError
-	 */	
-	public void acceptError(IMarker problemMarker) {
-		fLastProblem= problemMarker;
-	}
+	 * @see ICompletionRequestor#acceptError(IProblem)
+	 */
+	public void acceptError(IProblem error) {
+		fLastProblem= error;
+	}	
 	
 	/*
 	 * @see ICompletionRequestor#acceptField
@@ -278,7 +279,7 @@ public class ResultCollector implements ICompletionRequestor {
 	
 	public String getErrorMessage() {
 		if (fLastProblem != null)
-			return fLastProblem.getAttribute(IMarker.MESSAGE, JavaTextMessages.getString("ResultCollector.compile_error.message")); //$NON-NLS-1$
+			return fLastProblem.getMessage();
 		return ""; //$NON-NLS-1$
 	}
 
@@ -446,7 +447,5 @@ public class ResultCollector implements ICompletionRequestor {
 	public void setPreventEating(boolean preventEating) {
 		fPreventEating= preventEating;
 	}
-
-
 
 }

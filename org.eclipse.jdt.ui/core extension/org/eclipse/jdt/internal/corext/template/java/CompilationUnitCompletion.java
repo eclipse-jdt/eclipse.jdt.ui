@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -100,9 +101,9 @@ class CompilationUnitCompletion implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptError(IMarker)
+	 * @see ICompletionRequestor#acceptError(IProblem)
 	 */
-	public void acceptError(IMarker marker) {
+	public void acceptError(IProblem error) {
 		fError= true;
 	}
 

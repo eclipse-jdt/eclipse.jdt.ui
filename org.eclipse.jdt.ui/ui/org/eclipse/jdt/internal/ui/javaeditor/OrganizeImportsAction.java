@@ -21,10 +21,10 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
-import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
