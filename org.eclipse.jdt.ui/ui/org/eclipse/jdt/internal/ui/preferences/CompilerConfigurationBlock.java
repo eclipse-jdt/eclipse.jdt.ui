@@ -93,6 +93,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 	private static final String PREF_PB_INVALID_JAVADOC= JavaCore.COMPILER_PB_INVALID_JAVADOC;
 	private static final String PREF_PB_INVALID_JAVADOC_TAGS= JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS;
+	private static final String PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF= JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS__NOT_VISIBLE_REF;
+	private static final String PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF = JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS__DEPRECATED_REF;
 	private static final String PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY= JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS_VISIBILITY;
 
 	private static final String PREF_PB_MISSING_JAVADOC_TAGS= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS;
@@ -128,8 +130,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 	private static final String PREF_PB_MISSING_SERIAL_VERSION= JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION;
 	
-	private static final String PREF_15_PB_UNSAVE_TYPE_OPERATION= "org.eclipse.jdt.core.compiler.problem.unsafeTypeOperation"; //$NON-NLS-1$
-	private static final String PREF_15_PB_FINAL_PARAM_BOUND= "org.eclipse.jdt.core.compiler.problem.finalParameterBound"; //$NON-NLS-1$
+	private static final String PREF_15_PB_UNSAVE_TYPE_OPERATION= JavaCore.COMPILER_PB_UNSAFE_TYPE_OPERATION;
+	private static final String PREF_15_PB_FINAL_PARAM_BOUND= JavaCore.COMPILER_PB_FINAL_PARAMETER_BOUND;
+	private static final String PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST= JavaCore.COMPILER_PB_VARARGS_ARGUMENT_NEED_CAST;
 	
 	
 	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
@@ -222,6 +225,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING, PREF_PB_MISSING_SERIAL_VERSION, 
 				PREF_JAVADOC_SUPPORT,
 				PREF_PB_INVALID_JAVADOC, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY,
+				PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF, PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF,
 				PREF_PB_MISSING_JAVADOC_TAGS, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING,
 				PREF_PB_MISSING_JAVADOC_COMMENTS, PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING,
 				
@@ -229,7 +233,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
 				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS,
 				
-				PREF_15_PB_UNSAVE_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_PB_FORBIDDEN_REFERENCE
+				PREF_15_PB_UNSAVE_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_PB_FORBIDDEN_REFERENCE, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST
 			};
 		return keys;
 	}
@@ -547,11 +551,15 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_invalid_javadoc_tags.label"); //$NON-NLS-1$
 		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS, enabledDisabled, indent);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_invalid_javadoc_tags_not_visible_ref.label"); //$NON-NLS-1$
+		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF, enabledDisabled, indent);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_invalid_javadoc_tags_deprecated.label"); //$NON-NLS-1$
+		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF, enabledDisabled, indent);
 
-		Label separator= new Label(composite, SWT.HORIZONTAL);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= nColumns;
-		separator.setLayoutData(gd);
 		
 		label = PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_javadoc.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
@@ -562,10 +570,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_javadoc_tags_overriding.label"); //$NON-NLS-1$
 		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING, enabledDisabled, indent);
 
-		separator= new Label(composite, SWT.HORIZONTAL);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= nColumns;
-		separator.setLayoutData(gd);
 		
 		label = PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_comments.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
@@ -792,6 +798,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_final_param_bound.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_15_PB_FINAL_PARAM_BOUND, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_inexact_vararg.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		return composite;
 	}
@@ -875,6 +884,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		boolean enableInvalidTagsErrors= !checkValue(PREF_PB_INVALID_JAVADOC, IGNORE);
 		getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS).setEnabled(enableInvalidTagsErrors);
+		getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF).setEnabled(enableInvalidTagsErrors);
+		getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF).setEnabled(enableInvalidTagsErrors);
 		setComboEnabled(PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, enableInvalidTagsErrors);
 		
 		boolean enableMissingTagsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_TAGS, IGNORE);
