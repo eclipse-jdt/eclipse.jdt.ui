@@ -358,6 +358,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		ITypeBinding type= getSelectedExpression().getAssociatedExpression().resolveTypeBinding();
 		if (type.isPrimitive())
 			return null;
+		if (type.isArray() && type.getElementType().isPrimitive())	
+			return null;
 			
 		ImportEdit importEdit= new ImportEdit(fCu, fSettings);
 		importEdit.addImport(Bindings.getFullyQualifiedImportName(type));
