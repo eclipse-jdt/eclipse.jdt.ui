@@ -5,7 +5,24 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
  * All Rights Reserved.
  */
 
-import java.util.List;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.IVariable;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IRegion;import org.eclipse.jface.text.ITextHover;import org.eclipse.jface.text.ITextViewer;import org.eclipse.ui.IEditorPart;import org.eclipse.jdt.debug.core.IJavaDebugTarget;import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.debug.core.model.IValue;
+import org.eclipse.debug.core.model.IVariable;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextViewer;
+
+import org.eclipse.ui.IEditorPart;
+
+import org.eclipse.jdt.debug.core.IJavaDebugTarget;
+import org.eclipse.jdt.debug.core.IJavaValue;
+
+import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
 public class JavaDebugHover implements ITextHover {
@@ -56,7 +73,7 @@ public class JavaDebugHover implements ITextHover {
 								if (!first)
 									buffer.append('\n');
 								first= false;
-								buffer.append(variable.getValue().getValueString());
+								appendVariable(buffer, variable);
 							}
 						} catch (DebugException x) {
 						}
@@ -71,5 +88,39 @@ public class JavaDebugHover implements ITextHover {
 		}
 
 		return null;
+	}
+
+	private static String getTypeName(IVariable variable) throws DebugException {
+		IValue value= variable.getValue();
+
+		if (value instanceof IJavaValue)
+			return ((IJavaValue) value).getJavaType().getName();			
+
+		return value.getReferenceTypeName();
+	}
+
+	private static void appendVariable(StringBuffer buffer, IVariable variable) throws DebugException {
+
+		buffer.append(variable.getName());
+		buffer.append(" ="); //$NON-NLS-1$
+		
+		String type= getTypeName(variable);
+		String value= variable.getValue().getValueString().trim();
+		
+		if (type.equals("java.lang.String")) { //$NON-NLS-1$
+			buffer.append(" \""); //$NON-NLS-1$
+			buffer.append(value);
+			buffer.append('"');
+
+		} else if (type.equals("boolean")) { //$NON-NLS-1$
+			buffer.append(' ');
+			buffer.append(value);
+
+		} else {
+			buffer.append(" ("); //$NON-NLS-1$
+			buffer.append(type);
+			buffer.append(") "); //$NON-NLS-1$
+			buffer.append(value);			
+		}		
 	}
 }
