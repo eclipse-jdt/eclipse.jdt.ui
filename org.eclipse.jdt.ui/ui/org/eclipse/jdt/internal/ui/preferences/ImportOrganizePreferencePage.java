@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
@@ -57,6 +58,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	// Preference store keys
 	private static final String PREF_IMPORTORDER= JavaUI.ID_PLUGIN + ".importorder"; //$NON-NLS-1$
 	private static final String PREF_ONDEMANDTHRESHOLD= JavaUI.ID_PLUGIN + ".ondemandthreshold"; //$NON-NLS-1$
+	private static final String PREF_IGNORELOWERCASE= JavaUI.ID_PLUGIN + ".ignorelowercasenames"; //$NON-NLS-1$
 	private static final String PREF_LASTLOADPATH= JavaUI.ID_PLUGIN + ".importorder.loadpath"; //$NON-NLS-1$
 	private static final String PREF_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".importorder.savepath"; //$NON-NLS-1$
 
@@ -98,6 +100,12 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		return threshold;
 	}
 	
+	public static boolean doIgnoreLowerCaseNames() {
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		return prefs.getBoolean(PREF_IGNORELOWERCASE);
+	}
+	
+	
 	/**
 	 * Initializes the default values of this page in the preference bundle.
 	 * Will be called on startup of the JavaPlugin
@@ -132,7 +140,8 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	}
 
 	private ListDialogField fOrderListField;
-	private StringDialogField fThresholdField;	
+	private StringDialogField fThresholdField;
+	private SelectionButtonDialogField fIgnoreLowerCaseTypesField;
 	
 	public ImportOrganizePreferencePage() {
 		super();
@@ -166,6 +175,9 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		fThresholdField= new StringDialogField();
 		fThresholdField.setDialogFieldListener(adapter);
 		fThresholdField.setLabelText(JavaUIMessages.getString("ImportOrganizePreferencePage.threshold.label")); //$NON-NLS-1$
+	
+		fIgnoreLowerCaseTypesField= new SelectionButtonDialogField(SWT.CHECK);
+		fIgnoreLowerCaseTypesField.setLabelText(JavaUIMessages.getString("ImportOrganizePreferencePage.ignoreLowerCase.label"));
 	}
 	
 	/**
@@ -178,7 +190,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	}
 	
 	protected Control createContents(Composite parent) {
-		initialize(getImportOrderPreference(), getImportNumberThreshold());
+		initialize(getImportOrderPreference(), getImportNumberThreshold(), doIgnoreLowerCaseNames());
 	
 		Composite composite= new Composite(parent, SWT.NONE);
 		
@@ -194,15 +206,19 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		
 		fThresholdField.doFillIntoGrid(composite, 2);
 		((MGridData) fThresholdField.getTextControl(null).getLayoutData()).grabExcessHorizontalSpace= false;
+		
+		fIgnoreLowerCaseTypesField.doFillIntoGrid(composite, 2);
+		
 		return composite;
 	}
 	
-	private void initialize(String[] importOrder, int threshold) {
+	private void initialize(String[] importOrder, int threshold, boolean ignoreLowerCase) {
 		fOrderListField.removeAllElements();
 		for (int i= 0; i < importOrder.length; i++) {
 			fOrderListField.addElement(importOrder[i]);
 		}
 		fThresholdField.setText(String.valueOf(threshold));
+		fIgnoreLowerCaseTypesField.setSelection(ignoreLowerCase);
 	}
 	
 	private void doThresholdChanged() {
@@ -373,7 +389,8 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		if (threshold == 0) {
 			threshold= Integer.MAX_VALUE;
 		}
-		initialize(order, threshold);
+		boolean ignoreLowerCase= prefs.getDefaultBoolean(PREF_IGNORELOWERCASE);
+		initialize(order, threshold, ignoreLowerCase);		
     }
 
     /**
@@ -381,8 +398,9 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
      */
     public boolean performOk() {
   		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-  		prefs.putValue(PREF_IMPORTORDER, packOrderList(fOrderListField.getElements()));
-  		prefs.putValue(PREF_ONDEMANDTHRESHOLD, fThresholdField.getText());
+  		prefs.setValue(PREF_IMPORTORDER, packOrderList(fOrderListField.getElements()));
+  		prefs.setValue(PREF_ONDEMANDTHRESHOLD, fThresholdField.getText());
+  		prefs.setValue(PREF_IGNORELOWERCASE, fIgnoreLowerCaseTypesField.isSelected());
         return true;
     }
 

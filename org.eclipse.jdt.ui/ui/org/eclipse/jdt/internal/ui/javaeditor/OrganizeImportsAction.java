@@ -71,8 +71,9 @@ public class OrganizeImportsAction extends Action {
 		ICompilationUnit cu= manager.getWorkingCopy(fEditor.getEditorInput());
 		if (cu != null) {
 			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();	
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, false, createChooseImportQuery());
+			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();
+			boolean ignoreLowerCaseNames= ImportOrganizePreferencePage.doIgnoreLowerCaseNames();
+			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, false, createChooseImportQuery());
 			try {
 				BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 				context.run(false, true, new WorkbenchRunnableAdapter(op));

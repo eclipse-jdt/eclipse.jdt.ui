@@ -120,6 +120,7 @@ public class TypeInfoTest extends TestCase {
 		assertTrue("Should find 9 elements, is " + result.size(), result.size() == 9);
 		for (int i= 0; i < result.size(); i++) {
 			TypeInfo ref= (TypeInfo) result.get(i);
+			//System.out.println(ref.getTypeName());
 			IType resolvedType= ref.resolveType(scope);
 			if (resolvedType == null) {
 				assertTrue("Could not be resolved: " + ref.toString(), false);

@@ -116,7 +116,7 @@ public class ImportOrganizeTest extends TestCase {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("BaseTestRunner", new String[] { "junit.framework.TestListener" }, new int[] { 2 });
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, true, query);
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -145,7 +145,7 @@ public class ImportOrganizeTest extends TestCase {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("LoadingTestCollector", new String[] { }, new int[] { });
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, true, query);
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -164,7 +164,7 @@ public class ImportOrganizeTest extends TestCase {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("TestCaseClassLoader", new String[] { }, new int[] { });
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 3, true, query);
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 3, false, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -183,7 +183,7 @@ public class ImportOrganizeTest extends TestCase {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("TestRunner", new String[] {}, new int[] {});
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, true, query);
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {

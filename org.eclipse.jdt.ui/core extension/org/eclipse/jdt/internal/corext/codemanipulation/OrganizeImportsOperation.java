@@ -61,11 +61,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private ArrayList fNamesFound; // cached array list for reuse
 		
 		private ArrayList fAllTypes;
+		private boolean fIgnoreLowerCaseNames;
 		
-		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, ImportsStructure impStructure, IProgressMonitor monitor) {
+		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, ImportsStructure impStructure, boolean ignoreLowerCaseNames, IProgressMonitor monitor) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 			fImpStructure= impStructure;
+			fIgnoreLowerCaseNames= ignoreLowerCaseNames;
 					
 			fTypeRefsFound= new ArrayList();  	// cached array list for reuse
 			fNamesFound= new ArrayList();  	// cached array list for reuse		
@@ -137,6 +139,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 
 		private void findTypeRefs(String simpleTypeName, ArrayList typeRefsFound, ArrayList namesFound) {
+			if (fIgnoreLowerCaseNames && simpleTypeName.length() > 0 && Character.isLowerCase(simpleTypeName.charAt(0))) {
+				return;
+			}
+			
 			for (int i= fAllTypes.size() - 1; i >= 0; i--) {
 				TypeInfo curr= (TypeInfo) fAllTypes.get(i);
 				if (simpleTypeName.equals(curr.getTypeName())) {
@@ -267,19 +273,21 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	
 	private String[] fOrderPreference;
 	private int fImportThreshold;
+	private boolean fIgnoreLowerCaseNames;
 	
 	private IChooseImportQuery fChooseImportQuery;
 	
 	// return variable: set to null if no error
 	private IProblem fParsingError;	
 		
-	public OrganizeImportsOperation(ICompilationUnit cu, String[] importOrder, int importThreshold, boolean save, IChooseImportQuery chooseImportQuery) {
+	public OrganizeImportsOperation(ICompilationUnit cu, String[] importOrder, int importThreshold, boolean ignoreLowerCaseNames, boolean save, IChooseImportQuery chooseImportQuery) {
 		super();
 		fCompilationUnit= cu;
 		fDoSave= save;
 		
 		fImportThreshold= importThreshold;
 		fOrderPreference= importOrder;
+		fIgnoreLowerCaseNames= ignoreLowerCaseNames;
 		fChooseImportQuery= chooseImportQuery;
 		
 		fParsingError= null;
@@ -328,7 +336,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, fOrderPreference, fImportThreshold, false);
 			
-			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, impStructure, new SubProgressMonitor(monitor, 1));
+			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, impStructure, fIgnoreLowerCaseNames, new SubProgressMonitor(monitor, 1));
 			ArrayList openChoices= new ArrayList();
 			ArrayList sourceRanges= new ArrayList();
 			Iterator iter= references.keySet().iterator();

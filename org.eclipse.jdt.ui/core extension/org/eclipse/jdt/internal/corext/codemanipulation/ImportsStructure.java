@@ -44,6 +44,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * Creates an ImportsStructure for a compilation unit with existing
 	 * imports. New imports are added next to the existing import that
 	 * is matching best.
+	 * @deprecated Use ImportsStructure(cu, new String[0], Integer.MAX_VALUE, true) instead
 	 */
 	public ImportsStructure(ICompilationUnit cu) throws JavaModelException {
 		this(cu, new String[0], Integer.MAX_VALUE, true);
@@ -55,6 +56,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * @param preferenceOrder Defines the preferred order of imports.
 	 * @param importThreshold Defines the number of imports in a package needed to introduce a
 	 * import on demand instead (e.g. java.util.*)
+	 * @deprecated Use ImportsStructure(cu, preferenceOrder, importThreshold, false) instead
 	 */
 	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold) throws JavaModelException {
 		this(cu, preferenceOrder, importThreshold, false);
