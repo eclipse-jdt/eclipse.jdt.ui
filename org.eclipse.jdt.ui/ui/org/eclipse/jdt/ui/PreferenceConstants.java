@@ -1514,7 +1514,7 @@ public class PreferenceConstants {
 		// CodeGenerationPreferencePage
 		store.setDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX, false);
 		store.setDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX, false);
-		store.setDefault(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX, "f, fg, _, m_"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX, "fg, f, _$, _, m_"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX, "_"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEGEN__JAVADOC_STUBS, true);
 		store.setDefault(PreferenceConstants.CODEGEN__NON_JAVADOC_COMMENTS, false);
