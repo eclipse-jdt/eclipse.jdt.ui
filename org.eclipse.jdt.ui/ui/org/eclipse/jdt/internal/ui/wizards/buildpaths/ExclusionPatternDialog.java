@@ -13,9 +13,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -50,6 +52,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 		fExclusionPatternDialog.setLabelText(label);
 		fExclusionPatternDialog.setButtonLabel(NewWizardMessages.getString("ExclusionPatternDialog.pattern.button"));
 		fExclusionPatternDialog.setDialogFieldListener(adapter);
+		fExclusionPatternDialog.enableButton(false);
 		
 		fCurrProject= entryToEdit.getJavaProject().getProject();
 		
@@ -73,6 +76,13 @@ public class ExclusionPatternDialog extends StatusDialog {
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		inner.setLayout(layout);
+		
+		Label description= new Label(inner, SWT.WRAP);
+		description.setText(NewWizardMessages.getString("ExclusionPatternDialog.description"));
+		GridData gd= new GridData();
+		gd.horizontalSpan= 2;
+		gd.widthHint= convertWidthInCharsToPixels(80);
+		description.setLayoutData(gd);
 		
 		fExclusionPatternDialog.doFillIntoGrid(inner, 3);
 		

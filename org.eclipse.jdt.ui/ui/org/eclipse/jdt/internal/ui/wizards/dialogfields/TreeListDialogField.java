@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.util.Assert;
@@ -69,6 +70,7 @@ public class TreeListDialogField extends DialogField {
 	private ITreeListAdapter fTreeAdapter;
 
 	private Object fParentElement;
+	private int fTreeExpandLevel;
 
 
 	public TreeListDialogField(ITreeListAdapter adapter, String[] buttonLabels, ILabelProvider lprovider) {
@@ -97,6 +99,8 @@ public class TreeListDialogField extends DialogField {
 		fRemoveButtonIndex= -1;
 		fUpButtonIndex= -1;
 		fDownButtonIndex= -1;
+		
+		fTreeExpandLevel= 0;
 	}
 
 	/**
@@ -138,6 +142,17 @@ public class TreeListDialogField extends DialogField {
 	public void setViewerSorter(ViewerSorter viewerSorter) {
 		fViewerSorter= viewerSorter;
 	}
+	
+	/**
+	* Sets the viewerSorter.
+	* @param viewerSorter The viewerSorter to set
+	*/
+	public void setTreeExpansionLevel(int level) {
+		fTreeExpandLevel= level;
+		if (fTree != null) {
+			fTree.expandToLevel(level);
+		}
+	}	
 
 	// ------ adapter communication
 
@@ -238,12 +253,13 @@ public class TreeListDialogField extends DialogField {
 					handleKeyPressed(e);
 				}
 			});
-
+			fTree.setAutoExpandLevel(99);
 			fTree.setContentProvider(fListViewerAdapter);
 			fTree.setLabelProvider(fLabelProvider);
 			fTree.addSelectionChangedListener(fListViewerAdapter);
 
 			fTree.setInput(fParentElement);
+			fTree.expandToLevel(fTreeExpandLevel);
 
 			if (fViewerSorter != null) {
 				fTree.setSorter(fViewerSorter);
@@ -472,8 +488,9 @@ public class TreeListDialogField extends DialogField {
 	*/
 	public void setElements(List elements) {
 		fElements= new ArrayList(elements);
+		refresh();
 		if (fTree != null) {
-			fTree.refresh();
+			fTree.expandToLevel(fTreeExpandLevel);
 		}
 		dialogFieldChanged();
 	}
@@ -515,7 +532,12 @@ public class TreeListDialogField extends DialogField {
 				if (selected.remove(oldElement)) {
 					selected.add(newElement);
 				}
-				fTree.refresh();
+				boolean isExpanded= fTree.getExpandedState(oldElement);
+				fTree.remove(oldElement);
+				fTree.add(fParentElement, newElement);
+				if (isExpanded) {
+					fTree.expandToLevel(newElement, fTreeExpandLevel);
+				}
 				selectElements(new StructuredSelection(selected));
 			}
 			dialogFieldChanged();
@@ -534,6 +556,7 @@ public class TreeListDialogField extends DialogField {
 		fElements.add(element);
 		if (fTree != null) {
 			fTree.add(fParentElement, element);
+			fTree.expandToLevel(element, fTreeExpandLevel);
 		}
 		dialogFieldChanged();
 	}
@@ -557,6 +580,9 @@ public class TreeListDialogField extends DialogField {
 			fElements.addAll(elementsToAdd);
 			if (fTree != null) {
 				fTree.add(fParentElement, elementsToAdd.toArray());
+				for (int i= 0; i < elementsToAdd.size(); i++) {
+					fTree.expandToLevel(elementsToAdd.get(i), fTreeExpandLevel);
+				}
 			}
 			dialogFieldChanged();
 		}
@@ -572,6 +598,9 @@ public class TreeListDialogField extends DialogField {
 		fElements.add(index, element);
 		if (fTree != null) {
 			fTree.add(fParentElement, element);
+			if (fTreeExpandLevel != -1) {
+				fTree.expandToLevel(element, fTreeExpandLevel);
+			}
 		}
 
 		dialogFieldChanged();
@@ -583,9 +612,7 @@ public class TreeListDialogField extends DialogField {
 	public void removeAllElements() {
 		if (fElements.size() > 0) {
 			fElements.clear();
-			if (fTree != null) {
-				fTree.refresh();
-			}
+			refresh();
 			dialogFieldChanged();
 		}
 	}

@@ -76,7 +76,11 @@ class CPListLabelProvider extends LabelProvider {
 			buf.append("Source attachment: ");
 			IPath path= (IPath) attrib.getValue();
 			if (path != null && !path.isEmpty()) {
-				buf.append(getPathString(path, path.getDevice() != null));
+				if (attrib.getParent().getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+					buf.append(getVariableString(path));
+				} else {
+					buf.append(getPathString(path, path.getDevice() != null));
+				}
 			} else {
 				buf.append(notAvailable);
 			}
@@ -146,14 +150,7 @@ class CPListLabelProvider extends LabelProvider {
 				return path.makeRelative().toString();
 			}
 			case IClasspathEntry.CPE_VARIABLE: {
-				String name= path.makeRelative().toString();
-				StringBuffer buf= new StringBuffer(name);
-				IPath entryPath= JavaCore.getClasspathVariable(path.segment(0));
-				if (entryPath != null) {
-					buf.append(" - "); //$NON-NLS-1$
-					buf.append(entryPath.append(path.removeFirstSegments(1)).toOSString());
-				}
-				return buf.toString();
+				return getVariableString(path);
 			}
 			case IClasspathEntry.CPE_PROJECT:
 				return path.lastSegment();
@@ -192,6 +189,16 @@ class CPListLabelProvider extends LabelProvider {
 		return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", new String[] { path.lastSegment(), appended }); //$NON-NLS-1$
 	}
 	
+	private String getVariableString(IPath path) {
+		String name= path.makeRelative().toString();
+		StringBuffer buf= new StringBuffer(name);
+		IPath entryPath= JavaCore.getClasspathVariable(path.segment(0));
+		if (entryPath != null) {
+			buf.append(" - "); //$NON-NLS-1$
+			buf.append(entryPath.append(path.removeFirstSegments(1)).toOSString());
+		}
+		return buf.toString();
+	}
 	
 	
 	private ImageDescriptor getCPListElementBaseImage(CPListElement cpentry) {
