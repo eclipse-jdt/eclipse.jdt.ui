@@ -2,18 +2,18 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.ui.tests;
+package org.eclipse.jdt.ui.tests.core;
 
 import java.util.ArrayList;
-
+
 import junit.framework.Test;
 import junit.framework.TestCase;
-
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -22,33 +22,27 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
-
+
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.JavaTestProject;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
+
 import org.eclipse.jdt.internal.ui.util.TypeRef;
 import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;
 import org.eclipse.jdt.testplugin.*;
-
 
 public class TypeRefTest extends TestCase {
-
-	private static final IPath SOURCES= new Path("t:\\jabiru\\smoke\\junit32src");
+	private static final IPath SOURCES= new Path("t:\\jabiru\\smoke\\junit32src");
 	private static final IPath JARFILE= new Path("d:\\temp\\VectorFooLibrary.jar");
-
-	private JavaTestProject fTestProject;
-
-	public TypeRefTest(String name) {
+	private JavaTestProject fTestProject;
+	public TypeRefTest(String name) {
 		super(name);
 	}
-
-	public static void main(String[] args) {
+	public static void main(String[] args) {
 		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeRefTest.class, args);
 	}
-
-	public static Test suite() {
+	public static Test suite() {
 		return new TypeRefTest("doTest1");
 	}
 
@@ -119,7 +113,7 @@ public class TypeRefTest extends TestCase {
 	public void doTest2() throws Exception {
 		IWorkspaceRoot workspaceRoot= JavaTestPlugin.getWorkspace().getRoot();
 
-
+
 		// our project
 		JavaTestProject proj1= new JavaTestProject(workspaceRoot, "TestProject1", "bin");
 		// external jar

@@ -2,20 +2,19 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.ui.tests;
-
-import java.io.BufferedReader;
+package org.eclipse.jdt.ui.tests.core;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
-
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
+
 import org.eclipse.core.runtime.Path;
-
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -24,20 +23,16 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-
+
 import org.eclipse.jdt.testplugin.JavaTestProject;
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
+
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocTextReader;
 import org.eclipse.jdt.internal.ui.text.javadoc.StandardDocletPageBuffer;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
-import org.eclipse.jdt.testplugin.*;
-
 
-
 public class JavaDocTestCase extends TestCase {
 	
 	private JavaTestProject fTestProject;
@@ -163,7 +158,7 @@ public class JavaDocTestCase extends TestCase {
 			System.out.println(txtreader.getString());
 		}		
 
-
+
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < methods.length; i++) {
 			IMethod curr= methods[i];

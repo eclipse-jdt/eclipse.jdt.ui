@@ -4,13 +4,16 @@
  */
 package org.eclipse.jdt.testplugin;
 
-import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.ui.internal.Workbench;
-
 import java.lang.reflect.Method;
+
 import junit.framework.Test;
 import junit.textui.TestRunner;
+
+import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.ui.internal.Workbench;
 
 public class TestWorkbench extends Workbench {
 
@@ -28,6 +31,9 @@ public class TestWorkbench extends Workbench {
 				break;
 			}
 		}
+		IPath location= JavaTestPlugin.getDefault().getWorkspace().getRoot().getLocation();
+		System.out.print("Workspace-location: " + location.toString());
+				
 		
 		try {
 			String[] args= getCommandLineArgs();
@@ -48,8 +54,14 @@ public class TestWorkbench extends Workbench {
 	
 	public Test getTest(String className) throws Exception {
 		Class testClass= getClass().getClassLoader().loadClass(className);
-		Method suiteMethod= testClass.getMethod(TestRunner.SUITE_METHODNAME, new Class[0]);
-		return (Test) suiteMethod.invoke(null, new Class[0]); // static method
+		try {
+			Method suiteMethod= testClass.getMethod(TestRunner.SUITE_METHODNAME, new Class[0]);
+			return (Test) suiteMethod.invoke(null, new Class[0]); // static method
+		} catch (NoSuchMethodException e) {
+			Object obj= testClass.newInstance();
+			return (Test) obj;
+		}
+
 	}
 	
 	
