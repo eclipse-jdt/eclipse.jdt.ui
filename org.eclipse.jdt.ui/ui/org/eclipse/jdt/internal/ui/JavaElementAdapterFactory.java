@@ -57,6 +57,10 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		IContainmentAdapter.class
 	};
 	
+	/*
+	 * Do not use real type since this would cause
+	 * the Search plug-in to be loaded.
+	 */
 	private Object fSearchPageScoreComputer;
 	private static IResourceLocator fgResourceLocator= new ResourceLocator();
 	private static JavaWorkbenchAdapter fgJavaWorkbenchAdapter= new JavaWorkbenchAdapter();
