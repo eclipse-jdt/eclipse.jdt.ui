@@ -75,8 +75,10 @@ class CompareDialog extends ResizableDialog {
 	 /* (non Javadoc)
  	 * Creates SWT control tree.
  	 */
-	protected synchronized Control createDialogArea(Composite parent) {
+	protected synchronized Control createDialogArea(Composite parent2) {
 		
+		Composite parent= (Composite) super.createDialogArea(parent2);
+
 		getShell().setText(JavaCompareUtilities.getString(fBundle, "title")); //$NON-NLS-1$
 		
 		fContentPane= new ViewerSwitchingPane(parent, SWT.BORDER | SWT.FLAT);
@@ -86,7 +88,7 @@ class CompareDialog extends ResizableDialog {
 		if (fInput != null)
 			fContentPane.setInput(fInput);
 			
-		return fContentPane;
+		return parent;
 	}
 	
 	/* (non-Javadoc)
