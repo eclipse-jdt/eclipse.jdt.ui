@@ -254,6 +254,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		String msg= ReorgMessages.getString("ReorgAction.checkSaveTargets"); //$NON-NLS-1$
 		ListSelectionDialog dialog= new ListSelectionDialog(parent, unsavedElements, new ListContentProvider(), 
 			new JavaElementLabelProvider(labelFlags), msg);
+		dialog.setTitle(ReorgMessages.getString("ReorgAction.checkSaveTargets.title")); //$NON-NLS-1$
 		dialog.setInitialSelections(unsavedElements.toArray());
 		return dialog;
 	}
