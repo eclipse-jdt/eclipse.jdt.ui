@@ -66,6 +66,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.UnhandledException:
 			case IProblem.LocalVariableIsNeverUsed:
 			case IProblem.VoidMethodReturnsValue:
+			case IProblem.NonExternalizedStringLiteral:
 				return true;
 			default:
 				return false;
@@ -137,8 +138,6 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	private void collectCorrections(ProblemPosition problemPos, ArrayList proposals) {
 		try {
 			int id= problemPos.getId();
-			
-			
 			switch (id) {
 				case IProblem.UnterminatedString:
 					String quoteLabel= CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"); //$NON-NLS-1$
@@ -195,14 +194,14 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.VoidMethodReturnsValue:
 					LocalCorrectionsSubProcessor.addVoidMethodReturnsProposals(problemPos, proposals);
 					break;
-				//case IProblem.MissingReturnType:
+				//case IProblem.MissingReturnType: bug 14313
 				//	LocalCorrectionsSubProcessor.addMissingReturnTypeProposals(problemPos, proposals);
 				//	break;
 				case IProblem.NonExternalizedStringLiteral:
 					LocalCorrectionsSubProcessor.addNLSProposals(problemPos, proposals);
 					break;				
 				default:
-					 proposals.add(new NoCorrectionProposal(problemPos));
+					 //proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
