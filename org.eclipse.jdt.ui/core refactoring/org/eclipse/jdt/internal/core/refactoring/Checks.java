@@ -183,7 +183,7 @@ public class Checks {
 			if (!resource.isAccessible())
 				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_not_accessible", resource.getFullPath())); //$NON-NLS-1$
 			if (resource.isReadOnly())
-				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_read_only", resource.getFullPath())); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_read_only", resource.getFullPath()), resource, null); //$NON-NLS-1$
 		}
 		return result;
 	}	
@@ -221,10 +221,12 @@ public class Checks {
 			return null;
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < methods.length; i++) {
-			if (Flags.isNative(methods[i].getFlags()))
-				result.addError(RefactoringCoreMessages.getFormattedString("Checks.method_native",  //$NON-NLS-1$
+			if (Flags.isNative(methods[i].getFlags())){
+				String msg= RefactoringCoreMessages.getFormattedString("Checks.method_native",  //$NON-NLS-1$
 								new String[]{methods[i].getDeclaringType().getFullyQualifiedName(), methods[i].getElementName()})
-								+ " UnsatisfiedLinkError."); //$NON-NLS-1$
+								+ " UnsatisfiedLinkError."; //$NON-NLS-1$
+				result.addError(msg, Refactoring.getResource(methods[i]), methods[i].getNameRange()); 
+			}				
 		}
 		return result;
 	}
@@ -241,7 +243,8 @@ public class Checks {
 		}
 		IMethod match= findMethod(name, paramTypes.length, false, type.getMethods());
 		if (match != null) {
-			result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.exists", PrettySignature.getUnqualifiedMethodSignature(match))); //$NON-NLS-1$
+			result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.exists", PrettySignature.getUnqualifiedMethodSignature(match)),//$NON-NLS-1$
+										Refactoring.getResource(match), match.getNameRange()); 
 		}
 		return result;
 	}

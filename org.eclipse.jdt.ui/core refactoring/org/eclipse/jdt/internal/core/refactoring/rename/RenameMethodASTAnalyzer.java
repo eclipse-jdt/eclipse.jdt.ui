@@ -60,7 +60,8 @@ class RenameMethodASTAnalyzer extends RefactoringASTAnalyzer {
 			return true;
 		if (nameDefinedInScope(scope))
 			addError(RefactoringCoreMessages.getFormattedString("RenameMethodASTAnalyzer.name_visible", //$NON-NLS-1$
-																new Object[]{cuFullPath(), new Integer(getLineNumber(messageSend)), fNewName}));
+																new Object[]{cuFullPath(), new Integer(getLineNumber(messageSend)), fNewName}),
+							messageSend.sourceStart(), messageSend.sourceEnd());
 		return true;
 	}
 

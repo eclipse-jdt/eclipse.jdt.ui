@@ -247,9 +247,11 @@ public class RenameFieldRefactoring extends Refactoring implements ITextUpdating
 		RefactoringStatus result= new RefactoringStatus();	
 		for (int i= 0; i < nestedTypes.length; i++){
 			IField otherField= nestedTypes[i].getField(getNewName());
-			if (otherField.exists())
-				result.addWarning(RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding", //$NON-NLS-1$
-																			new String[]{fField.getElementName(), getNewName(), nestedTypes[i].getFullyQualifiedName()}));
+			if (otherField.exists()){
+				String msg= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding", //$NON-NLS-1$
+																			new String[]{fField.getElementName(), getNewName(), nestedTypes[i].getFullyQualifiedName()});
+				result.addWarning(msg, Refactoring.getResource(otherField), otherField.getNameRange());
+			}									
 			result.merge(checkNestedHierarchy(nestedTypes[i]));	
 		}	
 		return result;
@@ -262,9 +264,11 @@ public class RenameFieldRefactoring extends Refactoring implements ITextUpdating
 		RefactoringStatus result= new RefactoringStatus();
 		while (current != null){
 			IField otherField= current.getField(getNewName());
-			if (otherField.exists())
-				result.addWarning(RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding2", //$NON-NLS-1$
-				 															new String[]{getNewName(), current.getFullyQualifiedName(), fField.getElementName()}));
+			if (otherField.exists()){
+				String msg= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding2", //$NON-NLS-1$
+				 															new String[]{getNewName(), current.getFullyQualifiedName(), fField.getElementName()});
+				result.addWarning(msg, Refactoring.getResource(otherField), otherField.getNameRange());
+			}									
 			current= current.getDeclaringType();
 		}
 		return result;

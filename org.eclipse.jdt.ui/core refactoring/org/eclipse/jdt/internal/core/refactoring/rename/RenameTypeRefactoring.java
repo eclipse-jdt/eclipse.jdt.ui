@@ -4,15 +4,13 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.rename;
 
-import java.util.Iterator;
-import java.util.Map;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -25,6 +23,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
+import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -38,11 +38,11 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.core.refactoring.SourceRange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
@@ -233,35 +233,36 @@ public class RenameTypeRefactoring extends Refactoring implements ITextUpdatingR
 			result.merge(Checks.checkIfCuBroken(fType));
 			if (result.hasFatalError())
 				return result;
-			
 			pm.worked(2);
+		
 			result.merge(checkTypesInCompilationUnit());
 			pm.worked(1);
+		
 			result.merge(checkForMethodsWithConstructorNames());
 			pm.worked(1);
+		
 			result.merge(checkImportedTypes());	
 			pm.worked(1);
+		
 			if (mustRenameCU())
 				result.merge(Checks.checkCompilationUnitNewName(fType.getCompilationUnit(), fNewName));
 			pm.worked(1);	
-			if (isEnclosedInType(fType, fNewName))	
-				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed",  //$NON-NLS-1$
-																			new String[]{fType.getFullyQualifiedName(), fNewName}));
+			
+			result.merge(checkEnclosingTypes());
 			pm.worked(1);	
-			if (enclosesType(fType, fNewName))
-				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.encloses",  //$NON-NLS-1$
-																			new String[]{fType.getFullyQualifiedName(), fNewName}));
+			
+			result.merge(checkEnclosedTypes());
 			pm.worked(1);	
-			if (typeNameExistsInPackage(fType.getPackageFragment(), fNewName))
-				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.exists", //$NON-NLS-1$
-																			new String[]{fNewName, fType.getPackageFragment().getElementName()}));
+			
+			result.merge(checkTypesInPackage());
 			pm.worked(1);	
-			if (compilationUnitImportsType(fType.getCompilationUnit(), fNewName))	
-				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.imported", //$NON-NLS-1$
-																			new Object[]{fNewName, getResource(fType).getFullPath()}));
+			
+			result.merge(checkTypesImportedInCu());
 			pm.worked(1);	
+		
 			result.merge(Checks.checkForNativeMethods(fType));
 			pm.worked(1);	
+		
 			result.merge(Checks.checkForMainMethod(fType));
 			pm.worked(1);	
 			
@@ -291,8 +292,51 @@ public class RenameTypeRefactoring extends Refactoring implements ITextUpdatingR
 			pm.done();
 		}	
 	}
+
+	private RefactoringStatus checkTypesImportedInCu() throws JavaModelException{
+		IImportDeclaration imp= getImportedType(fType.getCompilationUnit(), fNewName);
+		
+		if (imp == null)
+			return null;	
+			
+		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.imported", //$NON-NLS-1$
+											new Object[]{fNewName, getResource(fType).getFullPath()});
+		IJavaElement grandParent= imp.getParent().getParent();
+		if (grandParent instanceof ICompilationUnit)
+			return RefactoringStatus.createErrorStatus(msg, Refactoring.getResource((ICompilationUnit)grandParent), imp.getSourceRange());
+
+		return null;	
+	}
 	
-	private static boolean typeNameExistsInPackage(IPackageFragment pack, String name) throws JavaModelException{
+	private RefactoringStatus checkTypesInPackage() throws JavaModelException{
+		IType type= findTypeInPackage(fType.getPackageFragment(), fNewName);
+		if (type == null)
+			return null;
+		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.exists", //$NON-NLS-1$
+																	new String[]{fNewName, fType.getPackageFragment().getElementName()});
+		return RefactoringStatus.createErrorStatus(msg, Refactoring.getResource(type), type.getNameRange());
+	}
+	
+	private RefactoringStatus checkEnclosedTypes() throws JavaModelException{
+		IType enclosedType= findEnclosedType(fType, fNewName);
+		if (enclosedType == null)
+			return null;
+		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.encloses",  //$NON-NLS-1$
+																		new String[]{fType.getFullyQualifiedName(), fNewName});
+		return RefactoringStatus.createErrorStatus(msg, Refactoring.getResource(enclosedType), enclosedType.getNameRange());
+	}
+	
+	private RefactoringStatus checkEnclosingTypes() throws JavaModelException{
+		IType enclosingType= findEnclosingType(fType, fNewName);
+		if (enclosingType == null)
+			return null;
+			
+		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed",//$NON-NLS-1$
+								new String[]{fType.getFullyQualifiedName(), fNewName});
+		return RefactoringStatus.createErrorStatus(msg, Refactoring.getResource(enclosingType)	,enclosingType.getNameRange());
+	}
+	
+	private static IType findTypeInPackage(IPackageFragment pack, String name) throws JavaModelException{
 		Assert.isTrue(pack.exists(), RefactoringCoreMessages.getString("TypeRefactoring.assert.must_exist_1")); //$NON-NLS-1$
 		Assert.isTrue(!pack.isReadOnly(), RefactoringCoreMessages.getString("TypeRefactoring.assert.read-only")); //$NON-NLS-1$
 		
@@ -302,40 +346,39 @@ public class RenameTypeRefactoring extends Refactoring implements ITextUpdatingR
 		ICompilationUnit[] cus= pack.getCompilationUnits();
 		for (int i= 0; i < cus.length; i++){
 			if (cus[i].getType(name).exists())
-				return true;
+				return cus[i].getType(name);
 		}
-		return false;
+		return null;
 	}
 	
-	
-	private static boolean enclosesType(IType type, String newName) throws JavaModelException{
+	private static IType findEnclosedType(IType type, String newName) throws JavaModelException{
 		IType[] enclosedTypes= type.getTypes();
 		for (int i= 0; i < enclosedTypes.length; i++){
-			if (newName.equals(enclosedTypes[i].getElementName()) || enclosesType(enclosedTypes[i], newName))
-				return true;
+			if (newName.equals(enclosedTypes[i].getElementName()) || findEnclosedType(enclosedTypes[i], newName) != null)
+				return enclosedTypes[i];
 		}
-		return false;
+		return null;
+	}
+		
+	private static IType findEnclosingType(IType type, String newName) {
+		IType enclosing= type.getDeclaringType();
+		while (enclosing != null){
+			if (newName.equals(enclosing.getElementName()))
+				return enclosing;
+			else 
+				enclosing= enclosing.getDeclaringType();	
+		}
+		return null;
 	}
 	
-	private static boolean compilationUnitImportsType(ICompilationUnit cu, String typeName) throws JavaModelException{
+	private static IImportDeclaration getImportedType(ICompilationUnit cu, String typeName) throws JavaModelException{
 		IImportDeclaration[] imports= cu.getImports();
 		String dotTypeName= "." + typeName; //$NON-NLS-1$
 		for (int i= 0; i < imports.length; i++){
 			if (imports[i].getElementName().endsWith(dotTypeName))
-				return true;
+				return imports[i];
 		}
-		return false;
-	}
-	
-	private static boolean isEnclosedInType(IType type, String newName) {
-		IType enclosing= type.getDeclaringType();
-		while (enclosing != null){
-			if (newName.equals(enclosing.getElementName()))
-				return true;
-			else 
-				enclosing= enclosing.getDeclaringType();	
-		}
-		return false;
+		return null;
 	}
 	
 	private static boolean isSpecialCase(IType type) throws JavaModelException{
@@ -375,18 +418,15 @@ public class RenameTypeRefactoring extends Refactoring implements ITextUpdatingR
 		return result;
 	}
 	
-	private RefactoringStatus checkTypesInCompilationUnit(){
+	private RefactoringStatus checkTypesInCompilationUnit() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		if (Checks.isTopLevel(fType)){
-			ICompilationUnit cu= fType.getCompilationUnit();
-			//ICompilationUnit.getType expects simple name
-			if ((fNewName.indexOf(".") == -1) && cu.getType(fNewName).exists()) //$NON-NLS-1$
-				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.type_exists_in_cu", //$NON-NLS-1$
-																		new String[]{fNewName, cu.getElementName()}));
-		} else {
-			if (fType.getDeclaringType().getType(fNewName).exists())
-				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.member_type_exists", //$NON-NLS-1$
-																		new String[]{fNewName, fType.getDeclaringType().getFullyQualifiedName()}));
+		if (! Checks.isTopLevel(fType)){ //the other case checked in checkTypesInPackage
+			IType siblingType= fType.getDeclaringType().getType(fNewName);
+			if (siblingType.exists()){
+				String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.member_type_exists", //$NON-NLS-1$
+																		new String[]{fNewName, fType.getDeclaringType().getFullyQualifiedName()});
+				result.addError(msg, Refactoring.getResource(siblingType), siblingType.getNameRange());
+			}
 		}
 		return result;
 	}
@@ -396,39 +436,52 @@ public class RenameTypeRefactoring extends Refactoring implements ITextUpdatingR
 	 * and if it declares a native method
 	 */ 	
 	private static RefactoringStatus analyseEnclosedLocalTypes(final IType type, final String newName) throws JavaModelException{
-		CompilationUnit cu= (CompilationUnit) (JavaCore.create(getResource(type)));
+		final IResource resource= Refactoring.getResource(type);
+		CompilationUnit cu= (CompilationUnit) (JavaCore.create(resource));
 		final RefactoringStatus result= new RefactoringStatus();
 		cu.accept(new AbstractSyntaxTreeVisitorAdapter(){
 			public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
-				if ( new String(typeDeclaration.name).equals(newName)
-					&& isInType(type.getElementName(), scope))
-						result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_name", //$NON-NLS-1$
-																				new String[]{type.getElementName(), newName}));
+				if ( new String(typeDeclaration.name).equals(newName) 	&& isInType(type.getElementName(), scope)){
+						String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_name", //$NON-NLS-1$
+																				new String[]{type.getElementName(), newName});
+						result.addError(msg, resource, createSourceRange(typeDeclaration));
+					}															
 				if (typeDeclaration.methods != null){
 					for (int i=0; i < typeDeclaration.methods.length; i++){
-						if (typeDeclaration.methods[i].isNative())
-							result.addWarning(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_native", type.getElementName()));  //$NON-NLS-1$
+						AbstractMethodDeclaration method= typeDeclaration.methods[i];
+						if (method.isNative()){
+							String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_native", type.getElementName());//$NON-NLS-1$
+							result.addWarning(msg, resource, createSourceRange(method));  
+						}	
 					}	
 				}	
 				return true;
 			}
 			
 			public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
-				if (new String(typeDeclaration.name).equals(newName)
-				    && isInType(type.getElementName(), scope))
-						result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_name", //$NON-NLS-1$
-																				new String[]{type.getElementName(), newName}));
+				if (new String(typeDeclaration.name).equals(newName)   && isInType(type.getElementName(), scope)){
+					String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_name", //$NON-NLS-1$
+																					new String[]{type.getElementName(), newName});
+					result.addError(msg, resource, createSourceRange(typeDeclaration));
+				}																
 						
 				if (typeDeclaration.methods != null){
 					for (int i=0; i < typeDeclaration.methods.length; i++){
-						if (typeDeclaration.methods[i].isNative())
-							result.addWarning(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_native", type.getElementName())); //$NON-NLS-1$
+						AbstractMethodDeclaration method= typeDeclaration.methods[i];
+						if (method.isNative()){
+							String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_native", type.getElementName());//$NON-NLS-1$
+							result.addWarning(msg, resource, createSourceRange(method)); 
+						}	
 					}	
 				}	
 				return true;
 			}
 		});
 		return result;
+	}
+	
+	private static SourceRange createSourceRange(AstNode node){
+		return new SourceRange(node.sourceStart(), node.sourceEnd() - node.sourceStart() + 1);
 	}
 	
 	private static boolean isInType(String typeName, Scope scope){
@@ -463,17 +516,17 @@ public class RenameTypeRefactoring extends Refactoring implements ITextUpdatingR
 		for (int i= 0; i < types.length; i++) {
 			//could this be a problem (same package imports)?
 			if (Flags.isPublic(types[i].getFlags()) && types[i].getElementName().equals(fNewName)){
-				result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict1", //$NON-NLS-1$
-																			new Object[]{types[i].getFullyQualifiedName(), getFullPath(getCompilationUnit(imp))}));
+				String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict1", //$NON-NLS-1$
+																			new Object[]{types[i].getFullyQualifiedName(), getFullPath(getCompilationUnit(imp))});
+				IResource res= imp.exists() ? imp.getUnderlyingResource() : null ;
+				result.addError(msg, res, imp.getSourceRange());
 			}
 		}
 	}
 	
 	private void analyzeImportDeclaration(IImportDeclaration imp, RefactoringStatus result) throws JavaModelException{
-		if (!imp.isOnDemand()){
-			analyzeSingleTypeImport(imp, result);
-			return;
-		}
+		if (!imp.isOnDemand())
+			return; //analyzed earlier
 		
 		IJavaElement imported= JavaModelUtility.convertFromImportDeclaration(imp);
 		if (imported == null)
@@ -488,22 +541,6 @@ public class RenameTypeRefactoring extends Refactoring implements ITextUpdatingR
 			//cast safe: see JavaModelUtility.convertFromImportDeclaration
 			analyzeImportedTypes(((IType)imported).getTypes(), result, imp);
 		}
-	}
-	
-	private void analyzeSingleTypeImport(IImportDeclaration imp, RefactoringStatus result) throws JavaModelException{
-		String name= getSimpleName(imp);
-		IType importedType= (IType)JavaModelUtility.convertFromImportDeclaration(imp);
-		if (! fNewName.equals(name.substring(name.lastIndexOf(".") + 1))) //$NON-NLS-1$
-			return;
-		
-		Object[] message;
-		if (importedType == null)
-			message= new Object[]{name, getFullPath(getCompilationUnit(imp))};
-		else
-			message= new Object[]{importedType.getFullyQualifiedName(), getFullPath(getCompilationUnit(imp))};
-				
-		result.addError(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict1", //$NON-NLS-1$
-																	message));
 	}
 	
 	/*

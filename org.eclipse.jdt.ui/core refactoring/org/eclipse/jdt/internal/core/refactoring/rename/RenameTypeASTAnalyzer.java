@@ -19,6 +19,7 @@ import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.ClassLiteralAccess;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.ImportReference;
 import org.eclipse.jdt.internal.compiler.ast.InstanceOfExpression;
 import org.eclipse.jdt.internal.compiler.ast.LocalTypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MemberTypeDeclaration;
@@ -101,14 +102,20 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 	}
 
 	public boolean doVisit(CompilationUnitDeclaration compilationUnitDeclaration, CompilationUnitScope scope) {
-		if (typeImported(compilationUnitDeclaration, fNewNameArray))
+		ImportReference imp= typeImported(compilationUnitDeclaration, fNewNameArray);
+		if (imp != null)
 			addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.import_conflict",  //$NON-NLS-1$
-																new Object[]{fNewName, cuFullPath()}));
+																new Object[]{fNewName, cuFullPath()}),
+							imp.sourceStart(), imp.sourceEnd());
+	
 		if (!typeImported(compilationUnitDeclaration))
-			return true;	
-		if (typeDeclared(compilationUnitDeclaration, fNewNameArray))
+			return true;
+		
+		TypeDeclaration type= typeDeclared(compilationUnitDeclaration, fNewNameArray);
+		if (type != null)
 			addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.conflict_with_declared_type",  //$NON-NLS-1$
-																new String[]{cuFullPath(), fType.getFullyQualifiedName(), fNewName}));
+																new String[]{cuFullPath(), fType.getFullyQualifiedName(), fNewName}),
+							type.sourceStart(), type.sourceEnd());
 		return true;
 	}
 
@@ -123,37 +130,38 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 																	new Object[]{fType.getFullyQualifiedName(), 
 																				new String(methodDeclaration.selector),
 																				cuFullPath(),
-																				new Integer(getLineNumber(methodDeclaration))}));
+																				new Integer(getLineNumber(methodDeclaration))}),
+									methodDeclaration.sourceStart(), methodDeclaration.sourceEnd());
 		return true;
 	}
-
+
 	public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
 		analyzeTypeDeclaration(typeDeclaration);
 		return true;
-	}
-
+	}
 	public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
 		analyzeTypeDeclaration(typeDeclaration);
 		return true;
 	}
-
+
 	public boolean visit(TypeDeclaration typeDeclaration, CompilationUnitScope scope) {
 		analyzeTypeDeclaration(typeDeclaration);
 		return true;
 	}
-
+
 	public boolean visit(LocalTypeDeclaration localTypeDeclaration, MethodScope scope) {
 		analyzeTypeDeclaration(localTypeDeclaration);
 		return true;
 	}
-
+
 	public boolean visit(SingleTypeReference singleTypeReference, BlockScope scope) {
 		if (referenceConflictsWithImport(singleTypeReference.token, scope))
 			addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.refers_and_imports",  //$NON-NLS-1$
 																new Object[]{cuFullPath(), 
 																			fNewName,
 																			new Integer(getLineNumber(singleTypeReference)),
-																			fType.getFullyQualifiedName()}));
+																			fType.getFullyQualifiedName()}),
+								singleTypeReference.sourceStart(), singleTypeReference.sourceEnd());
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
 			addError(singleTypeReference);
 		return true;
@@ -165,7 +173,8 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 																new Object[]{cuFullPath(), 
 																			fNewName,
 																			new Integer(getLineNumber(singleTypeReference)),
-																			fType.getFullyQualifiedName()}));
+																			fType.getFullyQualifiedName()}),
+							singleTypeReference.sourceStart(), singleTypeReference.sourceEnd());
 			
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
 			addError(singleTypeReference);
@@ -178,7 +187,8 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 																new Object[]{cuFullPath(), 
 																			fNewName,
 																			new Integer(getLineNumber(arrayTypeReference)),
-																			fType.getFullyQualifiedName()}));
+																			fType.getFullyQualifiedName()}),
+							arrayTypeReference.sourceStart(), arrayTypeReference.sourceEnd());
 			
 		if (sourceRangeOnList(arrayTypeReference.sourceStart, arrayTypeReference.sourceStart + arrayTypeReference.token.length) && localTypeExists(scope, fNewNameArray)) {
 			addError(arrayTypeReference);
@@ -192,16 +202,16 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 																new Object[]{cuFullPath(), 
 																			fNewName,
 																			new Integer(getLineNumber(arrayTypeReference)),
-																			fType.getFullyQualifiedName()}));
+																			fType.getFullyQualifiedName()}),
+							arrayTypeReference.sourceStart(), arrayTypeReference.sourceEnd());
 			
 		return true;
 	}
 	//-----------------------------------------------------------
 	private void addError(AstNode node){
 		addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.name_visible",  //$NON-NLS-1$
-															new Object[]{fNewName, 
-																		cuFullPath(),
-																		new Integer(getLineNumber(node))}));
+															new Object[]{fNewName, 									cuFullPath(),
+																		new Integer(getLineNumber(node))}), node.sourceStart(), node.sourceEnd());
 	}
 	
 	private boolean isNewNameHiddenByAnotherType(AstNode node, Scope scope) {
@@ -238,32 +248,32 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 			current= current.parent;
 		if (current == null)
 			return false; //XXX: Revisit
-		return typeImported(((CompilationUnitScope)current).referenceContext, type);
+		return typeImported(((CompilationUnitScope)current).referenceContext, type) != null;
 	}
 	
-	private static boolean typeImported(CompilationUnitDeclaration compilationUnitDeclaration, char[] simpleTypeName) {
+	private static ImportReference typeImported(CompilationUnitDeclaration compilationUnitDeclaration, char[] simpleTypeName) {
 		if (compilationUnitDeclaration.imports == null)
-			return false;
+			return null;
 		for (int i= 0; i < compilationUnitDeclaration.imports.length; i++){
 			if (! compilationUnitDeclaration.imports[i].onDemand){
 				char[][] tokens= compilationUnitDeclaration.imports[i].tokens;
 				if (CharOperation.equals(tokens[tokens.length -1], simpleTypeName))
-					return true;
+					return compilationUnitDeclaration.imports[i];
 			}	
 		}
-		return false;
+		return null;
 	}
 	
-	private static boolean typeImported(CompilationUnitDeclaration compilationUnitDeclaration, IType type) {
+	private static ImportReference typeImported(CompilationUnitDeclaration compilationUnitDeclaration, IType type) {
 		if (compilationUnitDeclaration.imports == null)
-			return false;
+			return null;
 		String fullName= type.getFullyQualifiedName();	
 		for (int i= 0; i < compilationUnitDeclaration.imports.length; i++){
 			if (! compilationUnitDeclaration.imports[i].onDemand
 				&& compilationUnitDeclaration.imports[i].toString().equals(fullName))
-				return true;
+				return compilationUnitDeclaration.imports[i];
 		}
-		return false;
+		return null;
 	}
 	
 	private boolean typeImported(CompilationUnitDeclaration compilationUnitDeclaration) {
@@ -294,14 +304,16 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 				&& CharOperation.equals(typeDeclaration.name, fNewNameArray)
 				&& (typeDeclaration.superclass instanceof SingleTypeReference)) {
 				addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.subclass",  //$NON-NLS-1$
-																new String[]{fType.getElementName(), fNewName}));
+																new String[]{fType.getElementName(), fNewName}),
+								typeDeclaration.sourceStart(), typeDeclaration.sourceEnd());
 			}
 			if (fType.isInterface()
 				&& typeDeclaration.superInterfaces != null
 				&& singleTypeReferenceInRange(typeDeclaration.superInterfaces)
 				&& nameInConflictWithSuperInterfaces(typeDeclaration, fNewNameArray)) {
 				addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.superinterface_conflict", //$NON-NLS-1$
-																	new String[]{fNewName, new String(typeDeclaration.name)}));
+																	new String[]{fNewName, new String(typeDeclaration.name)}),
+								typeDeclaration.sourceStart(), typeDeclaration.sourceEnd());
 			}
 		} catch (JavaModelException e) {
 			//ignore it
@@ -332,15 +344,15 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 		return false;
 	}
 		
-	private static boolean typeDeclared(CompilationUnitDeclaration compilationUnitDeclaration, char[] typeName){
+	private static TypeDeclaration typeDeclared(CompilationUnitDeclaration compilationUnitDeclaration, char[] typeName){
 		TypeDeclaration[] types= compilationUnitDeclaration.types;
 		if (types == null)
-			return false;
+			return null;
 		for (int i= 0; i < types.length; i++){
 			if (CharOperation.equals(types[i].name, typeName))
-				return true;
+				return types[i];
 		}
-		return false;
+		return null;
 	}
 	
 	private boolean typeUsedAsParameter(MethodDeclaration methodDeclaration){
@@ -352,5 +364,4 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 		}
 		return false;
 	}
-
 }

@@ -47,7 +47,8 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 			
 	private void addShadowingError(AstNode node, char[] name){
 		addError(RefactoringCoreMessages.getFormattedString("RenameParameterASTAnalyzer.error",  //$NON-NLS-1$
-															new Object[]{new Integer(getLineNumber(node)), new String(name)}));
+															new Object[]{new Integer(getLineNumber(node)), new String(name)}),
+															node.sourceStart(), node.sourceEnd());
 	}
 	
 	private boolean withinMethod(AstNode node){
@@ -136,7 +137,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	public void acceptProblem(IProblem problem) {
 		if (problem.isError())
 			addFatalError("Compilation error in line " + problem.getSourceLineNumber() 
-					+ " " + problem.getMessage());
+					+ " " + problem.getMessage(), problem.getSourceStart(), problem.getSourceEnd());
 	}
 	
 	public boolean visit(SingleNameReference singleNameReference, BlockScope blockScope){
@@ -171,7 +172,8 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 			&& isInConflict(localDeclaration, blockScope))
 				addError(RefactoringCoreMessages.getFormattedString("RenameParameterASTAnalyzer.error2", //$NON-NLS-1$
 																	new Object[]{new Integer(getLineNumber(localDeclaration)),
-																				 new String(localDeclaration.name)}));
+																				 new String(localDeclaration.name)}),
+								localDeclaration.sourceStart(), localDeclaration.sourceEnd());
 		return true;
 	}
 	
