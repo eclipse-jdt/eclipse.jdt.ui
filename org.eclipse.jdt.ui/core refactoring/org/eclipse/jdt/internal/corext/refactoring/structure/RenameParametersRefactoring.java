@@ -101,6 +101,11 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 	 * @see Refactoring#getActivation
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+		IMethod orig= (IMethod)WorkingCopyUtil.getOriginal(fMethod);
+		if (orig == null || ! orig.exists())
+			return RefactoringStatus.createFatalErrorStatus("The selected method has been deleted from '" + fMethod.getCompilationUnit().getElementName()+ "'.");
+		fMethod= orig;
+		
 		return Checks.checkIfCuBroken(fMethod);
 	}
 
