@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -1088,5 +1089,40 @@ public class StubUtility {
 			newNames[i]= suggestArgumentName(project, paramNames[i], null);			
 		}
 		return newNames;
+	}
+	
+	public static boolean hasFieldName(IJavaProject project, String name) {
+		return hasPrefixOrSuffix(project, JavaCore.CODEASSIST_FIELD_PREFIXES, JavaCore.CODEASSIST_FIELD_SUFFIXES, name) 
+			|| hasPrefixOrSuffix(project, JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, name);
+	}
+	
+	public static boolean hasParameterName(IJavaProject project, String name) {
+		return hasPrefixOrSuffix(project, JavaCore.CODEASSIST_ARGUMENT_PREFIXES, JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, name);
+	}
+	
+	public static boolean hasLocalVariableName(IJavaProject project, String name) {
+		return hasPrefixOrSuffix(project, JavaCore.CODEASSIST_LOCAL_PREFIXES, JavaCore.CODEASSIST_LOCAL_SUFFIXES, name);
+	}
+	
+	private static boolean hasPrefixOrSuffix(IJavaProject project, String prefixKey, String suffixKey, String name) {
+		final String listSeparartor= ","; //$NON-NLS-1$
+		String prefixes= project.getOption(prefixKey, true);
+		StringTokenizer tok= new StringTokenizer(prefixes, listSeparartor);
+		while (tok.hasMoreTokens()) {
+			String curr= tok.nextToken();
+			if (name.startsWith(curr)) {
+				return true;
+			}
+		}
+		
+		String suffixes= project.getOption(suffixKey, true);
+		tok= new StringTokenizer(suffixes, listSeparartor);
+		while (tok.hasMoreTokens()) {
+			String curr= tok.nextToken();
+			if (name.endsWith(curr)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

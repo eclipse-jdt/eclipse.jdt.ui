@@ -37,6 +37,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -146,7 +147,8 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		SimpleName simpleName= node.isSimpleName() ? (SimpleName) node : ((QualifiedName) node).getName();
-
+		String name= simpleName.getIdentifier();
+		
 		addSimilarVariableProposals(cu, astRoot, simpleName, proposals);
 
 		// new variables
@@ -154,24 +156,26 @@ public class UnresolvedElementsSubProcessor {
 		ITypeBinding senderBinding= binding != null ? binding : declaringTypeBinding;
 
 		if (senderBinding.isFromSource() && targetCU != null && JavaModelUtil.isEditable(targetCU)) {
+			int relevance= StubUtility.hasFieldName(cu.getJavaProject(), name) ? 9 : 6;
 			String label;
 			Image image;
 			if (binding == null) {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", simpleName.getIdentifier()); //$NON-NLS-1$
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", name); //$NON-NLS-1$
 				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
 			} else {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { simpleName.getIdentifier(), binding.getName() } ); //$NON-NLS-1$
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, binding.getName() } ); //$NON-NLS-1$
 				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 			}
-			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, 6, image));
+			
+			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, relevance, image));
 			if (binding == null && senderBinding.isAnonymous()) {
 				ASTNode anonymDecl= astRoot.findDeclaringNode(senderBinding);
 				if (anonymDecl != null) {
 					senderBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
 					if (!senderBinding.isAnonymous()) {
-						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { simpleName.getIdentifier(), senderBinding.getName() } ); //$NON-NLS-1$
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, senderBinding.getName() } ); //$NON-NLS-1$
 						image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
-						proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, 6, image));
+						proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, relevance, image));
 					}
 				}
 			}
@@ -180,14 +184,16 @@ public class UnresolvedElementsSubProcessor {
 			BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
 			int type= bodyDeclaration.getNodeType();
 			if (type == ASTNode.METHOD_DECLARATION) {
+				int relevance= StubUtility.hasParameterName(cu.getJavaProject(), name) ? 8 : 5;
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", simpleName.getIdentifier()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-				proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.PARAM, simpleName, null, 5, image));
+				proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.PARAM, simpleName, null, relevance, image));
 			}
 			if (type == ASTNode.METHOD_DECLARATION || type == ASTNode.INITIALIZER) {
+				int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", simpleName.getIdentifier()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-				proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.LOCAL, simpleName, null, 7, image));
+				proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.LOCAL, simpleName, null, relevance, image));
 			}
 			
 			if (node.getParent().getNodeType() == ASTNode.ASSIGNMENT) {
