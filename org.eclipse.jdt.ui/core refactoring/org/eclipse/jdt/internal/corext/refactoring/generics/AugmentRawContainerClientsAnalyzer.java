@@ -49,6 +49,7 @@ public class AugmentRawContainerClientsAnalyzer {
 	private HashSet fProcessedCus;
 	private AugmentRawContainerClientsTCModel fTypeConstraintFactory;
 	private HashMap fDeclarationsToUpdate;
+	private HashMap fCastsToRemove;
 
 	public AugmentRawContainerClientsAnalyzer(IJavaElement[] elements) {
 		fElements= elements;
@@ -91,6 +92,7 @@ public class AugmentRawContainerClientsAnalyzer {
 		AugmentRawContClConstraintsSolver solver= new AugmentRawContClConstraintsSolver(fTypeConstraintFactory);
 		solver.solveConstraints();
 		fDeclarationsToUpdate= solver.getDeclarationsToUpdate();
+		fCastsToRemove= solver.getCastsToRemove();
 		solver= null; //free caches
 	}
 
@@ -171,6 +173,10 @@ public class AugmentRawContainerClientsAnalyzer {
 	
 	public HashMap getDeclarationsToUpdate() {
 		return fDeclarationsToUpdate;
+	}
+
+	public HashMap getCastsToRemove() {
+		return fCastsToRemove;
 	}
 
 }

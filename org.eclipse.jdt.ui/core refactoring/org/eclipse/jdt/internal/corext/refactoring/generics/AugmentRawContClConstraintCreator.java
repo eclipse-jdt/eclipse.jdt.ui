@@ -137,6 +137,8 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		if (! (expressionCv instanceof CollectionElementVariable2))
 			return;
 		
+		fTCFactory.makeCastVariable(node, (CollectionElementVariable2) expressionCv);
+		
 		Type type= node.getType();
 		ConstraintVariable2 typeCv= getConstraintVariable(type);
 		

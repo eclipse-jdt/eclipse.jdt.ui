@@ -5,8 +5,8 @@ import java.util.List;
 
 class A {
 	void foo() {
-		List list= new ArrayList();
-		list.add(new Double(1.7));
-		list.add(new Integer(1));
+		List l= new ArrayList();
+		l.add("Eclipse");
+		String eclipse= (String) l.get(0);
 	}
 }

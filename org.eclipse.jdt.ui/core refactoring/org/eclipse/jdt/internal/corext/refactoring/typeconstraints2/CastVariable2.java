@@ -16,23 +16,30 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 
-/**
- * A TypeVariable is a ConstraintVariable which stands for a
- * single type reference (in source).
- */
-public class TypeVariable2 extends TypeConstraintVariable2 implements IDeclaredConstraintVariable {
+
+public class CastVariable2 extends TypeConstraintVariable2 {
 
 	private final CompilationUnitRange fRange;
+	private TypeConstraintVariable2 fExpressionVariable;
 
-	protected TypeVariable2(ITypeBinding typeBinding, CompilationUnitRange range) {
+	protected CastVariable2(ITypeBinding typeBinding, CompilationUnitRange range, TypeConstraintVariable2 expressionVariable) {
 		super(typeBinding);
 		fRange= range;
+		fExpressionVariable= expressionVariable;
 	}
 	
 	public CompilationUnitRange getRange() {
 		return fRange;
 	}
 	
+	public ICompilationUnit getCompilationUnit() {
+		return fRange.getCompilationUnit();
+	}
+	
+	public TypeConstraintVariable2 getExpressionVariable() {
+		return fExpressionVariable;
+	}
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#getHash()
 	 */
@@ -44,23 +51,7 @@ public class TypeVariable2 extends TypeConstraintVariable2 implements IDeclaredC
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#isSameAs(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2)
 	 */
 	protected boolean isSameAs(ConstraintVariable2 other) {
-		//TODO: unique per construction?  //return this == other;
-		if (this == other)
-			return true;
-		if (other.getClass() != TypeVariable2.class)
-			return false;
-		
-		TypeVariable2 otherTypeVariable= (TypeVariable2) other;
-		return getRange().equals(otherTypeVariable.getRange())
-				&& getTypeBinding() == otherTypeVariable.getTypeBinding();
+		return this == other; // unique per construction
 	}
 
-	public void setCompilationUnit(ICompilationUnit cu) {
-		throw new UnsupportedOperationException();
-	}
-
-	public ICompilationUnit getCompilationUnit() {
-		return fRange.getCompilationUnit();
-	}
-	
 }

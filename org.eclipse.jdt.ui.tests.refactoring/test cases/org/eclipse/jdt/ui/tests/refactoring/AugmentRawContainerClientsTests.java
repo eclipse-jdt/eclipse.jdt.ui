@@ -98,8 +98,15 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 	}
 	
 	public void testCuCommonSuper() throws Exception {
-		printTestDisabledMessage("Common supertype calculation not ready.");
-//		performCuOK();
+		performCuOK();
+	}
+
+	public void testCuAddGetString() throws Exception {
+		performCuOK();
+	}
+	
+	public void testCuAddIntegerGetNumber() throws Exception {
+		performCuOK();
 	}
 	
 }

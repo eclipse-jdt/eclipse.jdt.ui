@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.DeclaringTypeVariable2;
@@ -31,6 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceR
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SimpleTypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeBindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
@@ -51,6 +53,7 @@ public class AugmentRawContClConstraintsSolver {
 	private LinkedList/*<ConstraintVariable2>*/ fWorkList;
 	
 	private HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ fDeclarationsToUpdate;
+	private HashMap/*<ICompilationUnit, List<CastVariable2>>*/ fCastsToRemove;
 	
 	public AugmentRawContClConstraintsSolver(AugmentRawContainerClientsTCModel typeConstraintFactory) {
 		fTypeConstraintFactory= typeConstraintFactory;
@@ -66,6 +69,7 @@ public class AugmentRawContClConstraintsSolver {
 		fWorkList.addAll(Arrays.asList(allConstraintVariables));
 		runSolver();
 		chooseTypes(allConstraintVariables);
+		findCastsToRemove(fTypeConstraintFactory.getCastVariables());
 		//chooseTypes(equivalenceRepresentatives);
 		// TODO: clear caches?
 //		getDeclarationsToUpdate();
@@ -175,24 +179,45 @@ public class AugmentRawContClConstraintsSolver {
 				ITypeBinding typeBinding= elementCv.getRepresentative().getTypeEstimate().chooseSingleType();
 				setChosenType(elementCv, typeBinding);
 				ICompilationUnit cu= elementCv.getCompilationUnit();
-				ArrayList cvs= (ArrayList) fDeclarationsToUpdate.get(cu);
-				if (cvs != null) {
-					cvs.add(cv);
-				} else {
-					cvs= new ArrayList(1);
-					cvs.add(cv);
-					fDeclarationsToUpdate.put(cu, cvs);
-				}
+				addToMultiMap(fDeclarationsToUpdate, cu, cv);
 			} else {
 				setTypeEstimate(cv, null);
 			}
 		}
 	}
 
-	public HashMap getDeclarationsToUpdate() {
-		return fDeclarationsToUpdate;
+	private void findCastsToRemove(CastVariable2[] castVariables) {
+		fCastsToRemove= new HashMap();
+		for (int i= 0; i < castVariables.length; i++) {
+			CastVariable2 castCv= castVariables[i];
+			TypeConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
+			ITypeBinding chosenType= AugmentRawContClConstraintsSolver.getChosenType(expressionVariable);
+			if (TypeBindings.canAssign(chosenType, castCv.getTypeBinding())) {
+				ICompilationUnit cu= castCv.getCompilationUnit();
+				addToMultiMap(fCastsToRemove, cu, castCv);
+			}
+		}
 	}
 
+	private void addToMultiMap(HashMap map, ICompilationUnit cu, ConstraintVariable2 cv) {
+		ArrayList cvs= (ArrayList) map.get(cu);
+		if (cvs != null) {
+			cvs.add(cv);
+		} else {
+			cvs= new ArrayList(1);
+			cvs.add(cv);
+			map.put(cu, cvs);
+		}
+	}
+
+	public HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ getDeclarationsToUpdate() {
+		return fDeclarationsToUpdate;
+	}
+	
+	public HashMap/*<ICompilationUnit, List<CastVariable2>>*/ getCastsToRemove() {
+		return fCastsToRemove;
+	}
+	
 	public static ITypeBinding getChosenType(ConstraintVariable2 cv) {
 		if (cv instanceof CollectionElementVariable2)
 			return ((CollectionElementVariable2) cv).getRepresentative().getTypeEstimate().chooseSingleType();

@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -84,6 +85,7 @@ public class AugmentRawContainerClientsTCModel {
 	private CustomHashtable/*<ConstraintVariable2, Object>*/ fConstraintVariables;
 	private CustomHashtable/*<ITypeConstraint2, NULL>*/ fTypeConstraints;
 	private HashSet/*<EquivalenceRepresentative>*/ fEquivalenceRepresentatives;
+	private Collection/*CastVariable2*/ fCastVariables;
 	
 	private HashSet fCuScopedConstraintVariables;
 	
@@ -98,6 +100,7 @@ public class AugmentRawContainerClientsTCModel {
 		fTypeConstraints= new CustomHashtable(new TypeConstraintComparer());
 		fConstraintVariables= new CustomHashtable(new ConstraintVariableComparer());
 		fEquivalenceRepresentatives= new HashSet();
+		fCastVariables= new ArrayList();
 		
 		fCuScopedConstraintVariables= new HashSet();
 		fNewTypeConstraints= new ArrayList();
@@ -221,6 +224,10 @@ public class AugmentRawContainerClientsTCModel {
 	
 	public EquivalenceRepresentative[] getEquivalenceRepresentatives() {
 		return (EquivalenceRepresentative[]) fEquivalenceRepresentatives.toArray(new EquivalenceRepresentative[fEquivalenceRepresentatives.size()]);
+	}
+	
+	public CastVariable2[] getCastVariables() {
+		return (CastVariable2[]) fCastVariables.toArray(new CastVariable2[fCastVariables.size()]);
 	}
 	
 //	public ConstraintVariable2[] getNewConstraintVariables() {
@@ -514,6 +521,14 @@ public class AugmentRawContainerClientsTCModel {
 		}
 	}
 
+	public void makeCastVariable(CastExpression castExpression, CollectionElementVariable2 expressionCv) {
+		ITypeBinding typeBinding= castExpression.resolveTypeBinding();
+		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(castExpression);
+		CompilationUnitRange range= new CompilationUnitRange(cu, castExpression);
+		CastVariable2 castCv= new CastVariable2(typeBinding, range, expressionCv);
+		fCastVariables.add(castCv);
+	}
+	
 	private void setElementVariable(ConstraintVariable2 typeVariable, CollectionElementVariable2 elementVariable) {
 		typeVariable.setData(COLLECTION_ELEMENT, elementVariable);
 	}
@@ -522,5 +537,4 @@ public class AugmentRawContainerClientsTCModel {
 		return (CollectionElementVariable2) constraintVariable.getData(COLLECTION_ELEMENT);
 	}
 
-	
 }

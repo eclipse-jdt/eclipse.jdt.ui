@@ -31,7 +31,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -42,6 +44,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
@@ -174,6 +177,18 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
 				rewriteConstraintVariable(compilationUnit, ast, rewrite, cv);
 			}
+			
+			//TODO: create AugmentRawContainerClientsUpdate which is a mapping from CU to {declarationsToUpdate, castsToRemove, ...}
+			List casts= (List) fAnalyzer.getCastsToRemove().get(cu);
+			if (casts != null) {
+				for (Iterator castsIter= casts.iterator(); castsIter.hasNext();) {
+					CastVariable2 castCv= (CastVariable2) castsIter.next();
+					CastExpression castExpression= (CastExpression) castCv.getRange().getNode(compilationUnit);
+					Expression newExpression= (Expression) rewrite.createMoveTarget(castExpression.getExpression());
+					rewrite.replace(castExpression, newExpression, null);
+				}
+			}
+			
 			TextBuffer buffer= null;
 			try {
 				buffer= TextBuffer.acquire((IFile) cu.getResource());
@@ -220,9 +235,10 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 					ITypeBinding chosenType= AugmentRawContClConstraintsSolver.getChosenType(elementCv);
 					String typeName= chosenType.getName(); // TODO: use ImportRewrite
 					newType.typeArguments().add(rewrite.createStringPlaceholder(typeName, ASTNode.SIMPLE_TYPE));
-					rewrite.replace(originalType, newType, null); // TODO: description
-				}
+					rewrite.replace(originalType, newType, null);
+				} //TODO: other node types?
 			}
+			
 		}
 	}
 
