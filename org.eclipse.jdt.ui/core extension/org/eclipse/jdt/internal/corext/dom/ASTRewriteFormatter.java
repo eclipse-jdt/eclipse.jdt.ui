@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 
-import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.ASTNode;
+
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 /* package */ class ASTRewriteFormatter {
 
@@ -128,8 +128,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 		
 		Hashtable map= JavaCore.getOptions();
 		map.put(JavaCore.FORMATTER_LINE_SPLIT, String.valueOf(9999));
-		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(map);
-		String formatted= formatter.format(flattener.getResult(), initialIndentationLevel, positions, lineDelimiter);
+		String formatted= CodeFormatterUtil.format(node, flattener.getResult(), initialIndentationLevel, positions, lineDelimiter, map);
 		
 		for (int i= 0, k= 0; i < nExistingNodes; i++) {
 			int startPos= positions[k++];
