@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 
@@ -37,11 +36,6 @@ public final class TypeBindings {
 			return Bindings.equals(binding, otherBinding);
 	}
 	
-	public static int hashCode(ITypeBinding binding){
-		Assert.isNotNull(binding);
-		return binding.getKey().hashCode();
-	}
-
 	public static boolean isSubtypeBindingOf(ITypeBinding binding, ITypeBinding otherBinding){
 		if (isNullBinding(binding) || isNullBinding(otherBinding)) //null binding is not comparable to anybodyO
 			return false;
