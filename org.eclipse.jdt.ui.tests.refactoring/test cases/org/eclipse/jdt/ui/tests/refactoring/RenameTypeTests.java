@@ -15,10 +15,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.*;
+import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
 
 
 public class RenameTypeTests extends RefactoringTest {

@@ -10,9 +10,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.*;
+import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class MoveMembersTests extends RefactoringTest {
