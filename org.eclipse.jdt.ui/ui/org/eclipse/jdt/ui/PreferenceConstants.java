@@ -1740,15 +1740,15 @@ public class PreferenceConstants {
 
 		store.setDefault(PreferenceConstants.EDITOR_TASK_INDICATION, false);
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_TASK_INDICATION_COLOR, new RGB(0, 128, 255));
-		store.setDefault(PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER, false);
+		store.setDefault(PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER, true);
 
 		store.setDefault(PreferenceConstants.EDITOR_BOOKMARK_INDICATION, false);
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR, new RGB(34, 164, 99));
-		store.setDefault(PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER, false);
+		store.setDefault(PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER, true);
 
-		store.setDefault(PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION, false);
+		store.setDefault(PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION, true);
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR, new RGB(192, 192, 192));
-		store.setDefault(PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER, false);
+		store.setDefault(PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER, true);
 
 		store.setDefault(PreferenceConstants.EDITOR_UNKNOWN_INDICATION, false);
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR, new RGB(0, 0, 0));
