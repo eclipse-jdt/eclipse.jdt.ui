@@ -647,8 +647,6 @@ public class SemanticHighlightings {
 					return location == ClassInstanceCreation.NAME_PROPERTY;
 				case ASTNode.SUPER_METHOD_INVOCATION:
 					return location == SuperMethodInvocation.NAME_PROPERTY;
-				case ASTNode.ENUM_CONSTANT_DECLARATION:
-					return location == EnumConstantDeclaration.NAME_PROPERTY;
 					
 				// other
 				case ASTNode.ASSIGNMENT:
