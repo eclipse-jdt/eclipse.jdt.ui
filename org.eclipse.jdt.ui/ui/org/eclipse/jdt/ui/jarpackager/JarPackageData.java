@@ -547,7 +547,7 @@ public class JarPackageData {
 	 * This should only be used if the JAR itself is sealed.
 	 * </p>
 	 * 
-	 * @return an array of <code>IPackageFragment</code>
+	 * @param packagesToUnseal an array of <code>IPackageFragment</code>
 	 */
 	public void setPackagesToUnseal(IPackageFragment[] packagesToUnseal) {
 		fPackagesToUnseal= packagesToUnseal;
@@ -628,7 +628,7 @@ public class JarPackageData {
 	/**
 	 * Set the manifest's main class.
 	 * 
-	 * @param mainClass the type with the main class for the manifest file
+	 * @param manifestMainClass the type with the main class for the manifest file
 	 */
 	public void setManifestMainClass(IType manifestMainClass) {
 		fManifestMainClass= manifestMainClass;
@@ -785,7 +785,7 @@ public class JarPackageData {
 	 * Set if a build should be performed before exporting files.
 	 * This flag is only considered if auto-build is off.
 	 * 
-	 * @param a boolean telling if a build should be performed
+	 * @param buildIfNeeded a boolean telling if a build should be performed
 	 */
 	public void setBuildIfNeeded(boolean buildIfNeeded) {
 		fBuildIfNeeded= buildIfNeeded;
@@ -825,6 +825,7 @@ public class JarPackageData {
 	 *				 	or <code>null</code> if "false/no/cancel" is the answer
 	 * 					and no dialog should be shown
 	 * @return a JarWriter
+	 * @throws CoreException if the {@link JarWriter} could not be created
 	 * @see JarWriter
 	 */
 	public JarWriter createJarWriter(Shell parent) throws CoreException {
@@ -850,6 +851,7 @@ public class JarPackageData {
 	 * @param	jarPackagesData	an array with JAR package data objects
 	 * @param	parent			the parent for the dialog,
 	 * 							or <code>null</code> if no dialog should be presented
+	 * @return the {@link IJarExportRunnable}
 	 */
 	public IJarExportRunnable createJarExportRunnable(JarPackageData[] jarPackagesData, Shell parent) {
 		return new JarFileExportOperation(jarPackagesData, parent);
@@ -910,6 +912,7 @@ public class JarPackageData {
 	/**
 	 * Tells whether the specified manifest main class is valid.
 	 * 
+	 * @param context the {@link IRunnableContext}
 	 * @return <code>true</code> if a main class is specified and valid
 	 */
 	public boolean isMainClassValid(IRunnableContext context) {

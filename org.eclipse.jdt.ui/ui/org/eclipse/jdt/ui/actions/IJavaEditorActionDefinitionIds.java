@@ -261,13 +261,13 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	
 	/**
 	 * Note: this id is for internal use only.
-	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#GOTO_NEXT_ANNOTATION
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#GOTO_NEXT_ANNOTATION}
 	 */
 	public static final String SHOW_NEXT_PROBLEM= "org.eclipse.jdt.ui.edit.text.java.show.next.problem"; //$NON-NLS-1$
 	
 	/**
 	 * Note: this id is for internal use only.
-	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#GOTO_PREVIOUS_ANNOTATION
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#GOTO_PREVIOUS_ANNOTATION}
 	 */
 	public static final String SHOW_PREVIOUS_PROBLEM= "org.eclipse.jdt.ui.edit.text.java.show.previous.problem"; //$NON-NLS-1$
 
@@ -572,7 +572,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	/**
 	 * Action definition ID of the toggle presentation toolbar button action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.toggle.presentation"</code>).
-	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#TOGGLE_SHOW_SELECTED_ELEMENT_ONLY
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#TOGGLE_SHOW_SELECTED_ELEMENT_ONLY}
 	 */
 	public static final String TOGGLE_PRESENTATION= "org.eclipse.jdt.ui.edit.text.java.toggle.presentation"; //$NON-NLS-1$
 	
