@@ -23,14 +23,14 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
  * you must also rename its implementations. But because of multiple interface inheritance you have to go up and down the hierarchy 
  * to collect all the methods.
  */
-class RippleMethodFinder {
+public class RippleMethodFinder {
 	
 	//no instances
 	private RippleMethodFinder(){
 	}
 	
 	//assert(method is defined in the most abstract type that declares it )
-	static IMethod[] getRelatedMethods(IMethod method, IProgressMonitor pm) throws JavaModelException {
+	public static IMethod[] getRelatedMethods(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		try{
 			if (Flags.isPrivate(method.getFlags()))
 				return new IMethod[]{method};
@@ -173,6 +173,9 @@ class RippleMethodFinder {
 	//---
 	private static IMethod[] getVirtualMethodsInHierarchy(IMethod method, IProgressMonitor pm) throws JavaModelException{
 		List methods= new ArrayList();
+		//
+		methods.add(method);
+		//
 		IType type= method.getDeclaringType();
 		ITypeHierarchy hier= type.newTypeHierarchy(pm);
 		IType[] subtypes= hier.getAllSubtypes(type);
