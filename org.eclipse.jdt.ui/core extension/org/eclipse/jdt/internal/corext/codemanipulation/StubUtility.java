@@ -72,6 +72,8 @@ public class StubUtility {
 		String methName= method.getElementName();
 		String[] paramNames= method.getParameterNames();
 		String returnType= method.isConstructor() ? null : method.getReturnType();
+		String lineDelimiter= String.valueOf('\n'); // reformatting required
+		
 		
 		StringBuffer buf= new StringBuffer();
 		// add method comment
@@ -80,19 +82,21 @@ public class StubUtility {
 			if (settings.methodOverwrites && returnType != null) {
 				overridden= JavaModelUtil.findMethod(methName, method.getParameterTypes(), false, definingType.getMethods());
 			}
-			String comment= getMethodComment(cu, destTypeName, methName, paramNames, method.getExceptionTypes(), returnType, overridden);
+			String comment= getMethodComment(cu, destTypeName, methName, paramNames, method.getExceptionTypes(), returnType, overridden, lineDelimiter);
 			if (comment != null) {
 				buf.append(comment);
 			} else {
-				buf.append("/**\n *\n */"); //$NON-NLS-1$
+				buf.append("/**").append(lineDelimiter); //$NON-NLS-1$
+				buf.append(" *").append(lineDelimiter); //$NON-NLS-1$
+				buf.append(" */").append(lineDelimiter); //$NON-NLS-1$							
 			}
-			buf.append('\n');
+			buf.append(lineDelimiter);
 		}
 		// add method declaration
 		String bodyContent= null;
 		if (!settings.noBody) {
 			String bodyStatement= getDefaultMethodBodyStatement(methName, paramNames, returnType, settings.callSuper);
-			bodyContent= getMethodBodyContent(returnType == null, method.getJavaProject(), destTypeName, methName, bodyStatement);
+			bodyContent= getMethodBodyContent(returnType == null, method.getJavaProject(), destTypeName, methName, bodyStatement, lineDelimiter);
 			if (bodyContent == null) {
 				bodyContent= ""; //$NON-NLS-1$
 			}
@@ -238,13 +242,13 @@ public class StubUtility {
 		return buf.toString();
 	}	
 
-	public static String getMethodBodyContent(boolean isConstructor, IJavaProject project, String destTypeName, String methodName, String bodyStatement) throws CoreException {
+	public static String getMethodBodyContent(boolean isConstructor, IJavaProject project, String destTypeName, String methodName, String bodyStatement, String lineDelimiter) throws CoreException {
 		String templateName= isConstructor ? CodeTemplates.CONSTRUCTORSTUB : CodeTemplates.METHODSTUB;
 		Template template= CodeTemplates.getCodeTemplate(templateName);
 		if (template == null) {
 			return bodyStatement;
 		}
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, String.valueOf('\n'), 0);
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
 		context.setVariable(CodeTemplateContextType.BODY_STATEMENT, bodyStatement);
@@ -261,10 +265,10 @@ public class StubUtility {
 		return str;
 	}
 	
-	public static String getCatchBodyContent(ICompilationUnit cu, String exceptionType, String variableName) throws CoreException {
+	public static String getCatchBodyContent(ICompilationUnit cu, String exceptionType, String variableName, String lineDelimiter) throws CoreException {
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.CATCHBLOCK);
 		if (template != null) {
-			CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), StubUtility.getLineDelimiterUsed(cu), 0);
+			CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter, 0);
 			context.setVariable(CodeTemplateContextType.EXCEPTION_TYPE, exceptionType);
 			context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, variableName); //$NON-NLS-1$
 			TemplateBuffer buffer= context.evaluate(template);
@@ -279,14 +283,8 @@ public class StubUtility {
 	}		
 	
 	/**
-	 * Returns the content for a new compilation unit using the 'new file' code template.
-	 * @param cu The compilation to create the source for. the compilation unit must not exist
-	 * @param typeComment The comment for the type to created. Used when the code template contains a ${typecomment} variable
-	 * @param typeContent The type declaration as string
-	 * @param lineDelimiter The line delimiter used in the type declaration
-	 * @return String Returns the new content or <code>null</code> if the template is empty.
-	 * @throws CoreException
-	 */
+	 * @see org.eclipse.jdt.ui.CodeGeneration.getTypeComment
+	 */	
 	public static String getCompilationUnitContent(ICompilationUnit cu, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String packDecl= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
@@ -295,11 +293,12 @@ public class StubUtility {
 		if (template == null) {
 			return null;
 		}
+		
 		IJavaProject project= cu.getJavaProject();
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.PACKAGE_DECLARATION, packDecl);
-		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment);
+		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment != null ? typeComment : ""); //$NON-NLS-1$
 		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
 		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getQualifier(cu.getElementName()));
 		TemplateBuffer buffer= context.evaluate(template);
@@ -311,21 +310,19 @@ public class StubUtility {
 		}
 		return content;
 	}		
-	
-	public static String getTypeComment(IType type) throws CoreException {
-		String outer= (type.getDeclaringType() != null) ? JavaModelUtil.getTypeContainerName(type) : ""; //$NON-NLS-1$
-		return getTypeComment(type.getCompilationUnit(), type.getElementName(), outer);
-	}
-	
-	public static String getTypeComment(ICompilationUnit cu, String destTypeName, String outerName) throws CoreException {
+
+	/**
+	 * @see org.eclipse.jdt.ui.CodeGeneration.getTypeComment
+	 */		
+	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String lineDelim) throws CoreException {
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.TYPECOMMENT);
 		if (template == null) {
 			return null;
 		}
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), String.valueOf('\n'), 0);
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelim, 0);
 		context.setCompilationUnitVariables(cu);
-		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, outerName);
-		context.setVariable(CodeTemplateContextType.TYPENAME, destTypeName);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, Signature.getQualifier(typeQualifiedName));
+		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getSimpleName(typeQualifiedName));
 		TemplateBuffer buffer= context.evaluate(template);
 		if (buffer == null)
 			return null;
@@ -388,42 +385,19 @@ public class StubUtility {
 	}	
 
 	/**
-	 * Returns the comment for a given method using the comment code templates.
-	 * <code>null</code> is returned if the template is empty.
-	 * @param method The method for which the comment is
-	 * @param overridden The method will be overridden by the created method or
-	 * <code>null</code> for non-overriding methods
-	 * @return String Returns the constructed comment or <code>null</code> if
-	 * the comment code template is empty. The string uses \\n as line delimiter
-	 * (formatting required)
-	 * @throws CoreException
+	 * @see org.eclipse.jdt.ui.CodeGeneration.getMethodComment
 	 */
-	public static String getMethodComment(IMethod method, IMethod overridden) throws CoreException {
+	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
 		String retType= method.isConstructor() ? null : method.getReturnType();
 		
 		return getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
-			method.getElementName(), method.getParameterNames(), method.getExceptionTypes(), retType, overridden);
+			method.getElementName(), method.getParameterNames(), method.getExceptionTypes(), retType, overridden, lineDelimiter);
 	}
 
-	
 	/**
-	 * Returns the comment for a method using the comment code templates.
-	 * <code>null</code> is returned if the template is empty.
-	 * @param cu The compilation unit to which the method belongs
-	 * @param typeName Name of the type to which the method belongs.
-	 * @param methodName Name of the method.
-	 * @param paramNames Names of the parameters for the method.
-	 * @param excTypeSig Throwns exceptions (Signature notation)
-	 * @param retTypeSig Return type (Signature notation) or <code>null</code>
-	 * for  constructors.
-	 * @param overridden The method will be overridden by the created method or
-	 * <code>null</code> for non-overriding methods
-	 * @return String Returns the constructed comment or <code>null</code> if
-	 * the comment code template is empty. The string uses \\n as line delimiter
-	 * (formatting required)
-	 * @throws CoreException
+	 * @see org.eclipse.jdt.ui.CodeGeneration.getMethodComment
 	 */
-	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, IMethod overridden) throws CoreException {
+	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, IMethod overridden, String lineDelimiter) throws CoreException {
 		String templateName= CodeTemplates.METHODCOMMENT;
 		if (retTypeSig == null) {
 			templateName= CodeTemplates.CONSTRUCTORCOMMENT;
@@ -434,7 +408,7 @@ public class StubUtility {
 		if (template == null) {
 			return null;
 		}		
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), String.valueOf('\n'), 0);
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter, 0);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
@@ -466,32 +440,21 @@ public class StubUtility {
 		String returnType= retTypeSig != null ? Signature.toString(retTypeSig) : null;
 		int[] tagOffsets= position.getOffsets();
 		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
-			insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, false);
+			insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, false, lineDelimiter);
 		}
 		return textBuffer.getContent();
 	}
 
 	/**
-	 * Returns the comment for a method using the comment code templates.
-	 * <code>null</code> is returned if the template is empty.
-	 * @param cu The compilation unit to which the method belongs
-	 * @param typeName Name of the type to which the method belongs.
-	 * @param decl The AST MethodDeclaration node that will be added as new
-	 * method.
-	 * @param overridden The method that will be overridden by the created
-	 * method or <code>null</code> if no method is overridden.
-	 * @return String Returns the method comment or <code>null</code> if the
-	 * configured template is empty. The string uses \\n as line delimiter
-	 * (formatting required)
-	 * @throws CoreException
+	 * @see org.eclipse.jdt.ui.CodeGeneration.getMethodComment
 	 */
-	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden) throws CoreException {
+	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
 		if (overridden != null) {
 			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
 			String[] parameterTypesQualifiedNames= getParameterTypesQualifiedNames(overridden);			
-			return getMethodComment(cu, typeName, decl, true, overridden.isDeprecated(), declaringClassQualifiedName, parameterTypesQualifiedNames);
+			return getMethodComment(cu, typeName, decl, true, overridden.isDeprecated(), declaringClassQualifiedName, parameterTypesQualifiedNames, lineDelimiter);
 		} else {
-			return getMethodComment(cu, typeName, decl, false, false, null, null);
+			return getMethodComment(cu, typeName, decl, false, false, null, null, lineDelimiter);
 		}
 	}
 
@@ -514,7 +477,7 @@ public class StubUtility {
 	 * (formatting required)
 	 * @throws CoreException
 	 */
-	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isOverridden, boolean isDeprecated, String declaringClassQualifiedName, String[] parameterTypesQualifiedNames) throws CoreException {
+	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isOverridden, boolean isDeprecated, String declaringClassQualifiedName, String[] parameterTypesQualifiedNames, String lineDelimiter) throws CoreException {
 		String templateName= CodeTemplates.METHODCOMMENT;
 		if (decl.isConstructor()) {
 			templateName= CodeTemplates.CONSTRUCTORCOMMENT;
@@ -563,7 +526,7 @@ public class StubUtility {
 		String returnType= !decl.isConstructor() ? ASTNodes.asString(decl.getReturnType()) : null;
 		int[] tagOffsets= position.getOffsets();
 		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
-			insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, isDeprecated);
+			insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, isDeprecated, lineDelimiter);
 		}
 		return textBuffer.getContent();
 	}
@@ -579,7 +542,7 @@ public class StubUtility {
 		return null;		
 	}	
 	
-	private static void insertTag(TextBuffer textBuffer, int offset, int length, String[] paramNames, String[] exceptionNames, String returnType, boolean isDeprecated) throws CoreException {
+	private static void insertTag(TextBuffer textBuffer, int offset, int length, String[] paramNames, String[] exceptionNames, String returnType, boolean isDeprecated, String lineDelimiter) throws CoreException {
 		TextRegion region= textBuffer.getLineInformationOfOffset(offset);
 		if (region == null) {
 			return;
@@ -589,27 +552,27 @@ public class StubUtility {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < paramNames.length; i++) {
 			if (buf.length() > 0) {
-				buf.append('\n'); buf.append(lineStart);
+				buf.append(lineDelimiter); buf.append(lineStart);
 			}
 			buf.append("@param "); buf.append(paramNames[i]); //$NON-NLS-1$
 		}
 		if (returnType != null && !returnType.equals("void")) { //$NON-NLS-1$
 			if (buf.length() > 0) {
-				buf.append('\n'); buf.append(lineStart);
+				buf.append(lineDelimiter); buf.append(lineStart);
 			}			
 			buf.append("@return"); //$NON-NLS-1$
 		}
 		if (exceptionNames != null) {
 			for (int i= 0; i < exceptionNames.length; i++) {
 				if (buf.length() > 0) {
-					buf.append('\n'); buf.append(lineStart);
+					buf.append(lineDelimiter); buf.append(lineStart);
 				}
 				buf.append("@throws "); buf.append(exceptionNames[i]); //$NON-NLS-1$
 			}
 		}		
 		if (isDeprecated) {
 			if (buf.length() > 0) {
-				buf.append('\n'); buf.append(lineStart);
+				buf.append(lineDelimiter); buf.append(lineStart);
 			}
 			buf.append("@deprecated"); //$NON-NLS-1$
 		}

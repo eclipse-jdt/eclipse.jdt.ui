@@ -32,10 +32,10 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
@@ -143,13 +143,13 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 			}
 			bodyStatement= ASTNodes.asFormattedString(invocation, 0, String.valueOf('\n'));
 		}
-		String placeHolder= StubUtility.getMethodBodyContent(true, getCompilationUnit().getJavaProject(), name, name, bodyStatement); 	
+		String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), name, name, true, bodyStatement, String.valueOf('\n')); 	
 		if (placeHolder != null) {
 			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
 			body.statements().add(todoNode);
 		}
 		if (commentSettings != null) {
-			String string= StubUtility.getMethodComment(getCompilationUnit(), name, decl, null);
+			String string= CodeGeneration.getMethodComment(getCompilationUnit(), name, decl, null, String.valueOf('\n'));
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTRewrite.JAVADOC);
 				decl.setJavadoc(javadoc);

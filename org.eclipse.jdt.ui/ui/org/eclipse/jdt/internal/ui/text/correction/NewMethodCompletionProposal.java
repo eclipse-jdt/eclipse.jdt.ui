@@ -24,8 +24,9 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.ui.CodeGeneration;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -130,7 +131,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		}
 		if (!fSenderBinding.isInterface()) {
 			body= ast.newBlock();
-			String placeHolder= StubUtility.getMethodBodyContent(isConstructor(), getCompilationUnit().getJavaProject(), fSenderBinding.getName(), getMethodName(), bodyStatement); 	
+			String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), fSenderBinding.getName(), getMethodName(), isConstructor(), bodyStatement, String.valueOf('\n')); 	
 			if (placeHolder != null) {
 				ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
 				body.statements().add(todoNode);
@@ -140,7 +141,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		if (settings.createComments && !fSenderBinding.isAnonymous()) {
-			String string= StubUtility.getMethodComment(getCompilationUnit(), fSenderBinding.getName(), decl, null);
+			String string= CodeGeneration.getMethodComment(getCompilationUnit(), fSenderBinding.getName(), decl, null, String.valueOf('\n'));
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTRewrite.JAVADOC);
 				decl.setJavadoc(javadoc);

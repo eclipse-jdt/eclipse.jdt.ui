@@ -38,11 +38,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationMessages;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -175,16 +174,13 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	
 
 	private String createTypeTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IType type)
-		throws CoreException, BadLocationException
+		throws CoreException
 	{
-		String comment= StubUtility.getTypeComment(type);
+		String comment= CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), lineDelimiter);
 		if (comment != null) {
-			comment= prepareTemplateComment(comment.trim(), indentation, lineDelimiter);
+			return prepareTemplateComment(comment.trim(), indentation, lineDelimiter);
 		}
-
-		return (comment == null || comment.length() == 0)
-			? CodeGenerationMessages.getString("AddJavaDocStubOperation.configure.message") //$NON-NLS-1$
-			: comment;
+		return null;
 	}
 	
 	private String createMethodTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IMethod method)
@@ -196,7 +192,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			return null;
 			
 		IMethod inheritedMethod= getInheritedMethod(method);
-		String comment= StubUtility.getMethodComment(method, inheritedMethod);
+		String comment= CodeGeneration.getMethodComment(method, inheritedMethod, lineDelimiter);
 		if (comment != null) {
 			comment= comment.trim();
 			boolean javadocComment= comment.startsWith("/**"); //$NON-NLS-1$

@@ -105,6 +105,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
+
 public class PullUpRefactoring extends Refactoring {
 	private static class SuperReferenceFinderVisitor extends ASTVisitor{
 		
@@ -1393,7 +1394,7 @@ public class PullUpRefactoring extends Refactoring {
 			fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
 		}
 		ICompilationUnit cu= fAstManager.getCompilationUnit(rewrite.getRootNode());
-		String comment= StubUtility.getMethodComment(cu, enclosingTypeName, newMethodNode, true, false, fullTypeName, fullParamNames);
+		String comment= StubUtility.getMethodComment(cu, enclosingTypeName, newMethodNode, true, false, fullTypeName, fullParamNames, String.valueOf('\n'));
 		return (Javadoc) rewrite.createPlaceholder(comment, ASTRewrite.JAVADOC);
 	}
 

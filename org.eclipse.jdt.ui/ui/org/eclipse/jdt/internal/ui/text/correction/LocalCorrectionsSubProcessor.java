@@ -272,7 +272,7 @@ public class LocalCorrectionsSubProcessor {
 				var.setType(ast.newSimpleType(name));
 				CatchClause newClause= ast.newCatchClause();
 				newClause.setException(var);
-				String catchBody = StubUtility.getCatchBodyContent(cu, excBinding.getName(), varName);
+				String catchBody = StubUtility.getCatchBodyContent(cu, excBinding.getName(), varName, String.valueOf('\n'));
 				if (catchBody != null) {
 					ASTNode node= rewrite.createPlaceholder(catchBody, ASTRewrite.STATEMENT);
 					newClause.getBody().statements().add(node);

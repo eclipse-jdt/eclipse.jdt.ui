@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -1446,13 +1447,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @throws CoreException
 	 */
 	protected String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
-		String enclosing= isEnclosingTypeSelected() ? JavaModelUtil.getTypeQualifiedName(getEnclosingType()) : ""; //$NON-NLS-1$
-		String typeComment= StubUtility.getTypeComment(cu, getTypeName(), enclosing);
-		if (typeComment == null) {
-			typeComment= ""; //$NON-NLS-1$
+		StringBuffer typeQualifiedName= new StringBuffer();
+		if (isEnclosingTypeSelected()) {
+			typeQualifiedName.append(JavaModelUtil.getTypeQualifiedName(getEnclosingType())).append('.');
 		}
+		typeQualifiedName.append(getTypeName());
+		String typeComment= CodeGeneration.getTypeComment(cu, typeQualifiedName.toString(), lineDelimiter);
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
-		String content= StubUtility.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
+		String content= CodeGeneration.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
 		if (content != null) {
 			CompilationUnit unit= AST.parseCompilationUnit(content.toCharArray());
 			if ((pack.isDefaultPackage() || unit.getPackage() != null) && !unit.types().isEmpty()) {
@@ -1464,7 +1466,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			buf.append("package ").append(pack.getElementName()).append(';'); //$NON-NLS-1$
 		}
 		buf.append(lineDelimiter).append(lineDelimiter);
-		if (typeComment.length() > 0) {
+		if (typeComment != null) {
 			buf.append(typeComment).append(lineDelimiter);
 		}
 		buf.append(typeContent);
@@ -1608,8 +1610,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS)) {
 			try {
-				String enclosing= isEnclosingTypeSelected() ? JavaModelUtil.getTypeQualifiedName(getEnclosingType()) : ""; //$NON-NLS-1$
-				String comment= StubUtility.getTypeComment(parentCU, getTypeName(), enclosing);
+				StringBuffer typeName= new StringBuffer();
+				if (isEnclosingTypeSelected()) {
+					typeName.append(JavaModelUtil.getTypeQualifiedName(getEnclosingType())).append('.');
+				}
+				typeName.append(getTypeName());
+				String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), String.valueOf('\n'));
 				if (comment != null && isValidComment(comment)) {
 					return comment;
 				}

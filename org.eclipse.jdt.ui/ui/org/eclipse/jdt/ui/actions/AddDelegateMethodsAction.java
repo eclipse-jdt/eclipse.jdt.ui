@@ -49,6 +49,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.*;
 
+import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
@@ -517,14 +518,15 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			StringBuffer buf = new StringBuffer();
 			if (addComment) {
 				String comment =
-					StubUtility.getMethodComment(
+					CodeGeneration.getMethodComment(
 						fType.getCompilationUnit(),
 						fType.getElementName(),
 						methodName,
 						paramNames,
 						curr.getExceptionTypes(),
 						returnTypSig,
-						overridden);
+						overridden,
+						String.valueOf('\n'));
 				if (comment != null) {
 					buf.append(comment);
 				}

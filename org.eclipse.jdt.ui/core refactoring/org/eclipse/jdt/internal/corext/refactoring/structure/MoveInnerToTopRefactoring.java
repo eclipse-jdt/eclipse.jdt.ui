@@ -66,6 +66,8 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 
+import org.eclipse.jdt.ui.CodeGeneration;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeBlock;
@@ -475,16 +477,17 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private String getNewConstructorSource() throws CoreException {
-		String constructorBody= StubUtility.getMethodBodyContent(true, fType.getJavaProject(), fType.getElementName(), fType.getElementName(), createEnclosingInstanceInitialization());
+		String lineDelimiter= getLineSeperator();
+		String constructorBody= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), fType.getElementName(), fType.getElementName(), true, createEnclosingInstanceInitialization(), lineDelimiter);
 		if (constructorBody == null)
 			constructorBody= ""; //$NON-NLS-1$
 		return getNewConstructorComment() + fType.getElementName() + '(' + createDeclarationForEnclosingInstanceConstructorParameter() + "){" +  //$NON-NLS-1$
-						getLineSeperator() + constructorBody + getLineSeperator() + '}';
+			lineDelimiter + constructorBody + lineDelimiter + '}';
 	}
 
 	private String getNewConstructorComment() throws CoreException {
 		if (fCodeGenerationSettings.createComments){
-			String comment= StubUtility.getMethodComment(getInputTypeCu(), fType.getElementName(), fType.getElementName(), new String[]{getTypeOfEnclosingInstanceField()}, new String[0], null, null);
+			String comment= CodeGeneration.getMethodComment(getInputTypeCu(), fType.getElementName(), fType.getElementName(), new String[]{getTypeOfEnclosingInstanceField()}, new String[0], null, null, getLineSeperator());
 			if (comment == null)
 				return ""; //$NON-NLS-1$
 			return comment;	
@@ -632,7 +635,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	
 	private String createSourceForNewCu(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		newCu.getBuffer().setContents(StubUtility.getCompilationUnitContent(newCu, "", createTypeSource(new SubProgressMonitor(pm, 1)).toString(), getLineSeperator())); //$NON-NLS-1$
+		newCu.getBuffer().setContents(CodeGeneration.getCompilationUnitContent(newCu, null, createTypeSource(new SubProgressMonitor(pm, 1)).toString(), getLineSeperator()));
 		addImportsToNewCu(newCu, new SubProgressMonitor(pm, 1));
 		pm.done();
 		return newCu.getSource();

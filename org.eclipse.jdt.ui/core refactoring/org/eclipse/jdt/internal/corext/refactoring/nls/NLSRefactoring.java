@@ -37,11 +37,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 
+import org.eclipse.jdt.ui.CodeGeneration;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
@@ -783,8 +784,8 @@ public class NLSRefactoring extends Refactoring {
 		ICompilationUnit newCu= null;
 		try{
 			newCu= WorkingCopyUtil.getNewWorkingCopy(getPackage(), getAccessorCUName());
-			String template= StubUtility.getTypeComment(newCu, fAccessorClassName, "");//$NON-NLS-1$
-			newCu.getBuffer().setContents(StubUtility.getCompilationUnitContent(newCu, template, createClass().toString(), fgLineDelimiter)); //$NON-NLS-1$
+			String comment= CodeGeneration.getTypeComment(newCu, fAccessorClassName, fgLineDelimiter);//$NON-NLS-1$
+			newCu.getBuffer().setContents(CodeGeneration.getCompilationUnitContent(newCu, comment, createClass().toString(), fgLineDelimiter)); //$NON-NLS-1$
 			addImportsToAccessorCu(newCu, pm);
 			return newCu.getSource();
 		} finally{
@@ -838,7 +839,7 @@ public class NLSRefactoring extends Refactoring {
 	}
 	
 	private String createConstructor() throws CoreException{
-		String constructorBody= StubUtility.getMethodBodyContent(true, fCu.getJavaProject(), fAccessorClassName, fAccessorClassName, ""); //$NON-NLS-1$
+		String constructorBody= CodeGeneration.getMethodBodyContent(fCu, fAccessorClassName, fAccessorClassName, true, "", fgLineDelimiter); //$NON-NLS-1$
 		if (constructorBody == null)
 			constructorBody= ""; //$NON-NLS-1$
 		return createNewConstructorComment() + "private " + fAccessorClassName + "(){" +  //$NON-NLS-2$//$NON-NLS-1$
@@ -847,7 +848,7 @@ public class NLSRefactoring extends Refactoring {
 	
 	private String createNewConstructorComment() throws CoreException {
 		if (fCodeGenerationSettings.createComments){
-			String comment= StubUtility.getMethodComment(fCu, fAccessorClassName, fAccessorClassName, new String[0], new String[0], null, null);
+			String comment= CodeGeneration.getMethodComment(fCu, fAccessorClassName, fAccessorClassName, new String[0], new String[0], null, null, fgLineDelimiter);
 			if (comment == null)
 				return ""; //$NON-NLS-1$
 			return comment;
@@ -865,7 +866,7 @@ public class NLSRefactoring extends Refactoring {
 		.append("return '!' + key + '!';").append(fgLineDelimiter) //$NON-NLS-1$
 		.append("}").toString(); //$NON-NLS-1$
 		
-		String methodBody= StubUtility.getMethodBodyContent(false, fCu.getJavaProject(), fAccessorClassName, "getString", bodyStatement); //$NON-NLS-1$
+		String methodBody= CodeGeneration.getMethodBodyContent(fCu, fAccessorClassName, "getString", false, bodyStatement, fgLineDelimiter); //$NON-NLS-1$
 		if (methodBody == null)
 			methodBody= "";  //$NON-NLS-1$
 		return createNewGetStringMethodComment() + "public static String getString(String key) {"  //$NON-NLS-2$//$NON-NLS-1$
@@ -874,7 +875,7 @@ public class NLSRefactoring extends Refactoring {
 
 	private String createNewGetStringMethodComment() throws CoreException {
 		if (fCodeGenerationSettings.createComments){
-			String comment= StubUtility.getMethodComment(fCu, fAccessorClassName, "getString", new String[]{"key"}, new String[0], "QString;", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String comment= CodeGeneration.getMethodComment(fCu, fAccessorClassName, "getString", new String[]{"key"}, new String[0], "QString;", null, fgLineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (comment == null)
 				return "";//$NON-NLS-1$
 			return comment;	

@@ -21,31 +21,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CatchClause;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.*;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -512,12 +490,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	}
 
 	private String getNewConstructorSource(TypeDeclaration typeDeclaration) throws CoreException {
+		String lineDelimiter= getLineSeperator();
 		String bodyStatement= fFieldName + '=' + getTempInitializerCode() + ';';
-		String constructorBody= StubUtility.getMethodBodyContent(true, fCu.getJavaProject(), getEnclosingTypeName(), getEnclosingTypeName(), bodyStatement);
+		String constructorBody= CodeGeneration.getMethodBodyContent(fCu, getEnclosingTypeName(), getEnclosingTypeName(), true, bodyStatement, lineDelimiter);
 		if (constructorBody == null)
 			constructorBody= ""; //$NON-NLS-1$
 		return getNewConstructorComment() + getModifierStringForDefaultConstructor(typeDeclaration) + ' ' + getEnclosingTypeName() + '(' + "){" +  //$NON-NLS-1$
-			getLineSeperator() + constructorBody + getLineSeperator() + '}';
+		lineDelimiter + constructorBody + lineDelimiter + '}';
 	}
 	
 	private String getLineSeperator() {
@@ -530,7 +509,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 
 	private String getNewConstructorComment() throws CoreException {
 		if (fCodeGenerationSettings.createComments){
-			String comment= StubUtility.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null);
+			String comment= CodeGeneration.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null, getLineSeperator());
 			if (comment == null)
 				return ""; //$NON-NLS-1$
 			return comment;

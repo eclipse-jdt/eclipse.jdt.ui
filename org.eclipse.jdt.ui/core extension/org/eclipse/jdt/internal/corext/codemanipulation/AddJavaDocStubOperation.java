@@ -23,6 +23,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.CodeGeneration;
+
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -47,11 +49,11 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		fSettings= settings;
 	}
 
-	private String createTypeComment(IType type) throws CoreException {
-		return StubUtility.getTypeComment(type);
+	private String createTypeComment(IType type, String lineDelimiter) throws CoreException {
+		return CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), lineDelimiter);
 	}		
 	
-	private String createMethodComment(IMethod meth) throws CoreException {
+	private String createMethodComment(IMethod meth, String lineDelimiter) throws CoreException {
 		IType declaringType= meth.getDeclaringType();
 		
 		IMethod overridden= null;
@@ -59,14 +61,14 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 			ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
 			overridden= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, meth.getElementName(), meth.getParameterTypes(), false);
 		}
-		return StubUtility.getMethodComment(meth, overridden);
+		return CodeGeneration.getMethodComment(meth, overridden, lineDelimiter);
 	}
 	
-	private String createFieldComment(IField field) throws JavaModelException {
+	private String createFieldComment(IField field, String lineDelimiter) throws JavaModelException {
 		StringBuffer buf= new StringBuffer();
-		buf.append("/**\n"); //$NON-NLS-1$
-		buf.append(" *\n"); //$NON-NLS-1$
-		buf.append(" */\n"); //$NON-NLS-1$
+		buf.append("/**").append(lineDelimiter); //$NON-NLS-1$
+		buf.append(" *").append(lineDelimiter); //$NON-NLS-1$
+		buf.append(" */").append(lineDelimiter); //$NON-NLS-1$
 		return buf.toString();			
 	}		
 	
@@ -110,17 +112,21 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 				String comment= null;
 				switch (curr.getElementType()) {
 					case IJavaElement.TYPE:
-						comment= createTypeComment((IType) curr);
+						comment= createTypeComment((IType) curr, lineDelim);
 						break;
 					case IJavaElement.FIELD:
-						comment= createFieldComment((IField) curr);	
+						comment= createFieldComment((IField) curr, lineDelim);	
 						break;
 					case IJavaElement.METHOD:
-						comment= createMethodComment((IMethod) curr);
+						comment= createMethodComment((IMethod) curr, lineDelim);
 						break;
 				}
 				if (comment == null) {
-					comment= "/**\n *\n **/"; //$NON-NLS-1$
+					StringBuffer buf= new StringBuffer();
+					buf.append("/**").append(lineDelim); //$NON-NLS-1$
+					buf.append(" *").append(lineDelim); //$NON-NLS-1$
+					buf.append(" */").append(lineDelim); //$NON-NLS-1$
+					comment= buf.toString();						
 				}
 				int indent= StubUtility.getIndentUsed(curr);
 				String formattedComment= StubUtility.codeFormat(comment + lineDelim, indent, lineDelim);

@@ -46,6 +46,8 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import org.eclipse.jdt.ui.CodeGeneration;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -444,10 +446,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private String createExtractedInterfaceCUSource(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
-		String typeComment= StubUtility.getTypeComment(newCu, fNewInterfaceName, "");//$NON-NLS-1$
-		if (typeComment == null)
-			typeComment= ""; //$NON-NLS-1$
-		String compilationUnitContent = StubUtility.getCompilationUnitContent(newCu, typeComment, createInterfaceSource(), getLineSeperator());
+		String lineDelimiter= getLineSeperator();
+		String typeComment= CodeGeneration.getTypeComment(newCu, fNewInterfaceName, lineDelimiter);//$NON-NLS-1$
+		String compilationUnitContent = CodeGeneration.getCompilationUnitContent(newCu, typeComment, createInterfaceSource(), lineDelimiter);
 		if (compilationUnitContent == null)
 			compilationUnitContent= ""; //$NON-NLS-1$
 		newCu.getBuffer().setContents(compilationUnitContent);
