@@ -14,9 +14,8 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.TestCase;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.PartInitException;
 
@@ -51,14 +50,17 @@ public class ScrollJavaEditorTest extends TestCase {
 		
 		PerformanceMeter performanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
 		try {
-			ISourceViewer viewer= ((JavaEditor) EditorTestHelper.openInEditor(EditorTestHelper.findFile(FILE), true)).getViewer();
-			int maxLine= viewer.getDocument().getNumberOfLines() - 1;
+			StyledText text= ((JavaEditor) EditorTestHelper.openInEditor(EditorTestHelper.findFile(FILE), true)).getViewer().getTextWidget();
+			int numberOfLines= text.getLineCount();
+			int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
+			int m= numberOfLines / visibleLinesInViewport;
 			
 			for (int i= 0; i < N_OF_RUNS; i++) {
 				performanceMeter.start();
-				while (viewer.getBottomIndex() < maxLine)
+				for (int j= 0; j < m; j++)
 					SWTEventHelper.pressKeyCode(display, SWT.PAGE_DOWN);
 				performanceMeter.stop();
+				assertTrue(text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
 				
 				SWTEventHelper.pressKeyCodeCombination(display, CTRL_HOME);
 			}
