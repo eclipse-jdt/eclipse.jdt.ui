@@ -10,30 +10,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.ui.dialogs.ResourceListSelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
-
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.dialogs.ResourceListSelectionDialog;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 public class GotoResourceAction extends Action {
 
@@ -41,13 +33,9 @@ public class GotoResourceAction extends Action {
 
 	private static class GotoResourceDialog extends ResourceListSelectionDialog {
 		private IJavaModel fJavaModel;
-		private Viewer fViewer;
-		private ViewerFilter[] fFilters;
 		public GotoResourceDialog(Shell parentShell, IContainer container, StructuredViewer viewer) {
 			super(parentShell, container, IResource.FILE | IResource.FOLDER | IResource.PROJECT);
 			fJavaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-			fViewer= viewer;
-			fFilters= viewer.getFilters();
 			setTitle(PackagesMessages.getString("GotoResource.dialog.title")); //$NON-NLS-1$
 			WorkbenchHelp.setHelp(parentShell, IJavaHelpContextIds.GOTO_RESOURCE_DIALOG);
 		}
