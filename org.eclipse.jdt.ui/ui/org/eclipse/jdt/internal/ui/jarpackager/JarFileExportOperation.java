@@ -139,7 +139,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			if (outputContainer == null || !outputContainer.isAccessible()) {
 				String msg= JarPackagerMessages.getString("JarFileExportOperation.outputContainerNotAccessible"); //$NON-NLS-1$				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, msg, null));			}		}
 		if (isJavaFile(file)) {
-			// Java CU - search files with .class ending			boolean hasErrors= fJarPackage.hasCompileErrors(file);			boolean hasWarnings= fJarPackage.hasCompileWarnings(file);			boolean canBeExported= canBeExported(hasErrors, hasWarnings);			reportPossibleCompileProblems(file, hasErrors, hasWarnings, canBeExported);			if (!canBeExported)				return Collections.EMPTY_LIST.iterator();			IContainer classContainer= outputContainer;			if (pathInJar.segmentCount() > 1)				classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));
+			// Java CU - search files with .class ending			boolean hasErrors= fJarPackage.hasCompileErrors(file);			boolean hasWarnings= fJarPackage.hasCompileWarnings(file);			boolean canBeExported= canBeExported(hasErrors, hasWarnings);			if (!canBeExported)				return Collections.EMPTY_LIST.iterator();			reportPossibleCompileProblems(file, hasErrors, hasWarnings, canBeExported);			IContainer classContainer= outputContainer;			if (pathInJar.segmentCount() > 1)				classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));
 			if (fClassFilesMapContainer == null || !fClassFilesMapContainer.equals(classContainer)) {
 				fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer);
 				fClassFilesMapContainer= classContainer;
