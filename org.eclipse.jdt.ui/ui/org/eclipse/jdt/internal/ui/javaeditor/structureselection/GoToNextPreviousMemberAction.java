@@ -18,6 +18,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 public class GoToNextPreviousMemberAction extends Action {
 
@@ -27,11 +28,13 @@ public class GoToNextPreviousMemberAction extends Action {
 	private boolean fIsGotoNext;
 
 	public static GoToNextPreviousMemberAction newGoToNextMemberAction(CompilationUnitEditor editor) {
-		return new GoToNextPreviousMemberAction(editor, "Go To N&ext Member", true);
+		String text= JavaEditorMessages.getString("GotoNextMember.label");//$NON-NLS-1$
+		return new GoToNextPreviousMemberAction(editor, text, true);
 	}
 
 	public static GoToNextPreviousMemberAction newGoToPreviousMemberAction(CompilationUnitEditor editor) {
-		return new GoToNextPreviousMemberAction(editor, "Go To Previ&ous Member", false);
+		String text= JavaEditorMessages.getString("GotoPreviousMember.label");//$NON-NLS-1$
+		return new GoToNextPreviousMemberAction(editor, text, false);
 	}
 	
 	private GoToNextPreviousMemberAction(CompilationUnitEditor editor, String text, boolean isGotoNext) {
