@@ -8,8 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
-package org.eclipse.jdt.internal.ui.refactoring.actions;
+package org.eclipse.ltk.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -27,10 +26,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -117,7 +112,10 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, op);
 		} catch (InvocationTargetException e) {
 			RefactoringCore.getUndoManager().flush();
-			ExceptionHandler.handle(e, RefactoringMessages.getString("UndoManagerAction.internal_error.title"), RefactoringMessages.getString("UndoManagerAction.internal_error.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e,
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+				RefactoringUIMessages.getString("UndoManagerAction.internal_error.title"),  //$NON-NLS-1$
+				RefactoringUIMessages.getString("UndoManagerAction.internal_error.message")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// Opertation isn't cancelable.
 		}
@@ -125,7 +123,7 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 		if (fPreflightStatus != null && fPreflightStatus.hasError()) {
 			String name= getName();
 			MultiStatus status = createMultiStatus();
-			String message= RefactoringMessages.getFormattedString("UndoManagerAction.cannot_be_executed", name); //$NON-NLS-1$
+			String message= RefactoringUIMessages.getFormattedString("UndoManagerAction.cannot_be_executed", name); //$NON-NLS-1$
 			ErrorDialog error= new ErrorDialog(parent, name, message, status, IStatus.ERROR) {
 				public void create() {
 					super.create();
@@ -143,16 +141,16 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 	
 	private MultiStatus createMultiStatus() {
 		MultiStatus status= new MultiStatus(
-			JavaPlugin.getPluginId(), 
+			RefactoringUIPlugin.getPluginId(), 
 			IStatus.ERROR,
-			RefactoringMessages.getString("UndoManagerAction.validation_failed"), //$NON-NLS-1$
+			RefactoringUIMessages.getString("UndoManagerAction.validation_failed"), //$NON-NLS-1$
 			null);
 		RefactoringStatusEntry[] entries= fPreflightStatus.getEntries();
 		for (int i= 0; i < entries.length; i++) {
 			String pluginId= entries[i].getPluginId();
 			status.merge(new Status(
 				IStatus.ERROR,
-				pluginId != null ? pluginId : JavaPlugin.getPluginId(),
+				pluginId != null ? pluginId : RefactoringUIPlugin.getPluginId(),
 				IStatus.ERROR,
 				entries[i].getMessage(),
 				null));

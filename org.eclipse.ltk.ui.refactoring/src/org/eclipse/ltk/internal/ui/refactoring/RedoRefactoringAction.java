@@ -8,8 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
-package org.eclipse.jdt.internal.ui.refactoring.actions;
+package org.eclipse.ltk.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -20,17 +19,15 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
 import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.UndoManagerAdapter;
 
-public class UndoRefactoringAction extends UndoManagerAction {
+public class RedoRefactoringAction extends UndoManagerAction {
 
 	private int fPatternLength;
 
-	public UndoRefactoringAction() {
+	public RedoRefactoringAction() {
 	}
 
 	/* (non-Javadoc)
@@ -38,7 +35,7 @@ public class UndoRefactoringAction extends UndoManagerAction {
 	 */
 	protected String getName() {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
-		return RefactoringMessages.getString("UndoRefactoringAction.name"); //$NON-NLS-1$
+		return RefactoringUIMessages.getString("RedoRefactoringAction.name"); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
@@ -49,7 +46,7 @@ public class UndoRefactoringAction extends UndoManagerAction {
 		return new IRunnableWithProgress(){
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
-					setPreflightStatus(RefactoringCore.getUndoManager().performUndo(pm));
+					setPreflightStatus(RefactoringCore.getUndoManager().performRedo(pm));
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);			
 				}
@@ -62,34 +59,34 @@ public class UndoRefactoringAction extends UndoManagerAction {
 	 */
 	protected UndoManagerAdapter createUndoManagerListener() {
 		return new UndoManagerAdapter() {
-			public void undoStackChanged(IUndoManager manager) {
+			public void redoStackChanged(IUndoManager manager) {
 				IAction action= getAction();
 				if (action == null)
 					return;
 				boolean enabled= false;
 				String text= null;
-				if (manager.anythingToUndo()) {
+				if (manager.anythingToRedo()) {
 					enabled= true;
 					text= getActionText();
 				} else {
-					text= RefactoringMessages.getString("UndoRefactoringAction.label"); //$NON-NLS-1$
+					text= RefactoringUIMessages.getString("RedoRefactoringAction.label"); //$NON-NLS-1$
 				}
 				action.setEnabled(enabled);
 				action.setText(text);
 			}
 		};
-	}	
-	
+	}
+		
 	/* (non-Javadoc)
 	 * Method declared in IActionDelegate
 	 */
 	public void selectionChanged(IAction action, ISelection s) {
 		if (!isHooked()) {
 			hookListener(action);
-			fPatternLength= RefactoringMessages.getString("UndoRefactoringAction.extendedLabel").length(); //$NON-NLS-1$
+			fPatternLength= RefactoringUIMessages.getString("RedoRefactoringAction.extendedLabel").length(); //$NON-NLS-1$
 			IUndoManager undoManager = RefactoringCore.getUndoManager();
-			if (undoManager.anythingToUndo()) {
-				if (undoManager.peekUndoName() != null)
+			if (undoManager.anythingToRedo()) {
+				if (undoManager.peekRedoName() != null)
 					action.setText(getActionText());
 				action.setEnabled(true);
 			} else {
@@ -99,8 +96,8 @@ public class UndoRefactoringAction extends UndoManagerAction {
 	}	
 	
 	private String getActionText() {
-		return shortenText(RefactoringMessages.getFormattedString(
-			"UndoRefactoringAction.extendedLabel", //$NON-NLS-1$
-			RefactoringCore.getUndoManager().peekUndoName()), fPatternLength);
-	}	
+		return shortenText(RefactoringUIMessages.getFormattedString(
+			"RedoRefactoringAction.extendedLabel", //$NON-NLS-1$
+			RefactoringCore.getUndoManager().peekRedoName()), fPatternLength);
+	}
 }

@@ -57,6 +57,7 @@ import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating {
 	
@@ -314,7 +315,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			if (result.hasFatalError())
 				return result;
 			
-			result.merge(validateModifiesFiles());
+			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
+			if (checker != null) {
+				checker.addFiles(getAllFilesToModify());
+			} else {
+				result.merge(validateModifiesFiles());
+			}
 			return result;
 		} finally{
 			pm.done();

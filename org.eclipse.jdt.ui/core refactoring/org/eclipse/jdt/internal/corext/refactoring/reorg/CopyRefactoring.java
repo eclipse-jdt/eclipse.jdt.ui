@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -28,6 +29,9 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.IConditionChecker;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 public final class CopyRefactoring extends Refactoring{
 
@@ -95,7 +99,11 @@ public final class CopyRefactoring extends Refactoring{
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fNewNameQueries, "Missing new name queries"); //$NON-NLS-1$
 		Assert.isNotNull(fReorgQueries, "Missing reorg queries"); //$NON-NLS-1$
-		return fCopyPolicy.checkInput(pm, fReorgQueries);
+		pm.beginTask("", 2); //$NON-NLS-1$
+		CheckConditionsContext context= createCheckConditionsContext();
+		RefactoringStatus result= fCopyPolicy.checkFinalConditions(new SubProgressMonitor(pm, 1), context, fReorgQueries);
+		result.merge(context.check(new SubProgressMonitor(pm, 1)));
+		return result;
 	}
 
 	/* (non-Javadoc)
@@ -128,4 +136,12 @@ public final class CopyRefactoring extends Refactoring{
 	public String getName() {
 		return RefactoringCoreMessages.getString("CopyRefactoring.0"); //$NON-NLS-1$
 	}
+	
+	private CheckConditionsContext createCheckConditionsContext() throws CoreException {
+		CheckConditionsContext result= new CheckConditionsContext();
+		IConditionChecker checker= new ValidateEditChecker(null);
+		result.add(checker);
+		return result;
+		
+	}	
 }

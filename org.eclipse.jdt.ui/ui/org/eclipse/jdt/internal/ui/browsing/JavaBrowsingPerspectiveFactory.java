@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
+
 
 public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 	
@@ -52,6 +54,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ELEMENT_CREATION_ACTION_SET);
 		layout.addActionSet(IPageLayout.ID_NAVIGATE_ACTION_SET);
+		layout.addActionSet(RefactoringUI.REFACTORING_ACTION_SET);
 		
 		// views - java
 		layout.addShowViewShortcut(JavaUI.ID_TYPE_HIERARCHY);

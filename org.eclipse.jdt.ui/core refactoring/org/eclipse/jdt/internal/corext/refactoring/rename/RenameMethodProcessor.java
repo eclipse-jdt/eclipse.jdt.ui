@@ -55,6 +55,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 	
@@ -210,7 +211,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				// TODO: analyzeRenameChanges already calls createChangeManager(pm), but throws it away!
 				
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
-			result.merge(validateModifiesFiles());
+			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
+			if (checker != null) {
+				checker.addFiles(getAllFilesToModify());
+			} else {
+				result.merge(validateModifiesFiles());
+			}
 			return result;
 		} finally{
 			pm.done();

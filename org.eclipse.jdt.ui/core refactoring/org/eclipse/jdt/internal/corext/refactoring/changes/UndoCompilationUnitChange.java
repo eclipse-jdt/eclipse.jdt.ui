@@ -27,8 +27,8 @@ import org.eclipse.ltk.core.refactoring.Change;
 	
 	private ICompilationUnit fCUnit;
 
-	public UndoCompilationUnitChange(String name, ICompilationUnit unit, UndoEdit undo, int saveMode) throws CoreException {
-		super(name, getFile(unit), undo, saveMode);
+	public UndoCompilationUnitChange(String name, ICompilationUnit unit, UndoEdit undo, ContentStamp stampToRestore, int saveMode) throws CoreException {
+		super(name, getFile(unit), undo, stampToRestore, saveMode);
 		fCUnit= unit;
 	}
 
@@ -39,8 +39,8 @@ import org.eclipse.ltk.core.refactoring.Change;
 	/**
 	 * {@inheritDoc}
 	 */
-	protected Change createUndoChange(UndoEdit edit) throws CoreException {
-		return new UndoCompilationUnitChange(getName(), fCUnit, edit, getSaveMode());
+	protected Change createUndoChange(UndoEdit edit, ContentStamp stampToRestore) throws CoreException {
+		return new UndoCompilationUnitChange(getName(), fCUnit, edit, stampToRestore, getSaveMode());
 	}
 	
 	/**

@@ -109,7 +109,6 @@ public class ExtractTempRefactoring extends Refactoring {
 	private final int fSelectionStart;
 	private final int fSelectionLength;
 	private final ICompilationUnit fCu;
-	private final CodeGenerationSettings fSettings;
 			
 	private boolean fReplaceAllOccurrences;
 	private boolean fDeclareFinal;
@@ -126,7 +125,6 @@ public class ExtractTempRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
-		fSettings= settings;
 		
 		fReplaceAllOccurrences= true; //default
 		fDeclareFinal= false; //default

@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifica
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.CommentAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
@@ -75,6 +76,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 public class RenamePackageProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
 	
@@ -301,8 +303,13 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				computeQualifiedNameMatches(new SubProgressMonitor(pm, 1));
 			else
 				pm.worked(1);
-				
-			result.merge(validateModifiesFiles());
+			
+			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
+			if (checker != null) {
+				checker.addFiles(getAllFilesToModify());
+			} else {
+				result.merge(validateModifiesFiles());
+			}
 			return result;
 		} finally{
 			pm.done();
@@ -577,16 +584,21 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				RefactoringCoreMessages.getString("Change.javaChanges")); //$NON-NLS-1$
 	
 			result.addAll(fChangeManager.getAllChanges());
-			
-			if (fQualifiedNameSearchResult != null)	
-				result.addAll(fQualifiedNameSearchResult.getAllChanges());
-				
+							
 			result.add(new RenamePackageChange(fPackage, getNewElementName()));
 			pm.worked(1);
 			return result;
 		} finally{
 			pm.done();
 		}	
+	}
+	
+	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
+		if (fQualifiedNameSearchResult != null) {	
+			return fQualifiedNameSearchResult.getSingleChange(Changes.getModifiedFiles(participantChanges));
+		} else {
+			return null;
+		}
 	}
 	
 	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws CoreException {

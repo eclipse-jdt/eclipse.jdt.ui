@@ -303,8 +303,9 @@ public class CallInliner {
 		// if constructor is invoked from another constructor then we can inline such invocation
 		if (fInvocation.getNodeType() != ASTNode.CONSTRUCTOR_INVOCATION && methodDeclaration.isConstructor()) {
 			result.addEntry(new RefactoringStatusEntry(
-				severity,  //$NON-NLS-1$
-				RefactoringCoreMessages.getString("CallInliner.constructors"), JavaStatusContext.create(fCUnit, fInvocation)));
+				severity,  
+				RefactoringCoreMessages.getString("CallInliner.constructors"), //$NON-NLS-1$
+				JavaStatusContext.create(fCUnit, fInvocation)));
 		}
 	}
 

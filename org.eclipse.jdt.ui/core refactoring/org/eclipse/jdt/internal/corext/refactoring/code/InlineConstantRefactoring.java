@@ -537,8 +537,6 @@ public class InlineConstantRefactoring extends Refactoring {
 		private final Expression fInitializer;
 		private final ICompilationUnit fInitializerUnit;
 
-		private final CodeGenerationSettings fCodeGenSettings;
-		 
 		private List fInlineEdits;
 		private ImportRewrite fImportRewrite;		
 		private RefactoringStatus fEditProblems;
@@ -607,7 +605,6 @@ public class InlineConstantRefactoring extends Refactoring {
 			fUnit= cu;
 			fInitializer= initializer;
 			fInitializerUnit= initializerUnit;
-			fCodeGenSettings= codeGenSettings;
 		}
 
 		private InlineTargetCompilationUnit(ICompilationUnit cu, SearchResult[] references, Expression initializer, ICompilationUnit initializerUnit, CodeGenerationSettings codeGenSettings) {
@@ -621,7 +618,6 @@ public class InlineConstantRefactoring extends Refactoring {
 			fUnit= cu;
 			fInitializer= initializer;
 			fInitializerUnit= initializerUnit;
-			fCodeGenSettings= codeGenSettings;
 			
 			fReferences= new Expression[references.length];
 			

@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifica
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
@@ -101,11 +102,13 @@ import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 class ReorgPolicyFactory {
 	private ReorgPolicyFactory() {
@@ -217,7 +220,7 @@ class ReorgPolicyFactory {
 		return resources.length + javaElements.length == 0;
 	}
 
-	private static abstract class ReorgPolicy implements IReorgPolicy{
+	private static abstract class ReorgPolicy implements IReorgPolicy {
 		//invariant: only 1 of these can ever be not null
 		private IResource fResourceDestination;
 		private IJavaElement fJavaElementDestination;
@@ -250,9 +253,15 @@ class ReorgPolicyFactory {
 		public IFile[] getAllModifiedFiles() {
 			return new IFile[0];
 		}
-		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException{
+		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException{
 			Assert.isNotNull(reorgQueries);
-			return Checks.validateModifiesFiles(getAllModifiedFiles());
+			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
+			if (checker != null) {
+				checker.addFiles(getAllModifiedFiles());
+				return new RefactoringStatus();
+			} else {
+				return Checks.validateModifiesFiles(getAllModifiedFiles());
+			}
 		}
 		public boolean hasAllInputSet() {
 			return fJavaElementDestination != null || fResourceDestination != null;
@@ -466,8 +475,8 @@ class ReorgPolicyFactory {
 		protected final ICompilationUnit[] getCus(){
 			return fCus;
 		}
-		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
-			RefactoringStatus status= super.checkInput(pm, reorgQueries);
+		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException {
+			RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
 			confirmOverwritting(reorgQueries);
 			return status;
 		}
@@ -794,8 +803,8 @@ class ReorgPolicyFactory {
 		protected IPackageFragmentRoot[] getPackageFragmentRoots(){
 			return fPackageFragmentRoots;
 		}
-		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
-			 RefactoringStatus status= super.checkInput(pm, reorgQueries);
+		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException {
+			 RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
 			 confirmOverwritting(reorgQueries);
 			 return status;
 		}
@@ -878,8 +887,8 @@ class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 		
-		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
-			RefactoringStatus refactoringStatus= super.checkInput(pm, reorgQueries);
+		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException {
+			RefactoringStatus refactoringStatus= super.checkFinalConditions(pm, context, reorgQueries);
 			confirmOverwritting(reorgQueries);
 			return refactoringStatus;
 		}
@@ -1265,6 +1274,10 @@ class ReorgPolicyFactory {
 			pm.done();
 			return composite;
 		}
+		
+		public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
+			return null;
+		}
 
 		private Change createChange(IPackageFragmentRoot root, IJavaProject destination) {
 			///XXX fix the query
@@ -1298,9 +1311,9 @@ class ReorgPolicyFactory {
 			return true;
 		}
 
-		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
+		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException {
 			try{
-				RefactoringStatus status= super.checkInput(pm, reorgQueries);
+				RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
 				confirmMovingReadOnly(reorgQueries);
 				return status;
 			} catch(JavaModelException e){
@@ -1393,14 +1406,18 @@ class ReorgPolicyFactory {
 			pm.done();
 			return result;
 		}
+		
+		public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
+			return null;
+		}
 
 		private Change createChange(IPackageFragment pack, IPackageFragmentRoot destination) {
 			return new MovePackageChange(pack, destination);
 		}
 		
-		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
+		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException {
 			try{
-				RefactoringStatus status= super.checkInput(pm, reorgQueries);
+				RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
 				confirmMovingReadOnly(reorgQueries);
 				return status;
 			} catch(JavaModelException e){
@@ -1530,12 +1547,19 @@ class ReorgPolicyFactory {
 		}
 
 		public Change createChange(IProgressMonitor pm) throws JavaModelException {
-			if (! fUpdateReferences){
-				if (fUpdateQualifiedNames)
-					return createMoveAndUpdateQualifiedNameChange(pm);
+			if (! fUpdateReferences) {
 				return createSimpleMoveChange(pm);
-			} else 
+			} else {
 				return createReferenceUpdatingMoveChange(pm);
+			}
+		}
+		
+		public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
+			if (fQualifiedNameSearchResult != null) {
+				return fQualifiedNameSearchResult.getSingleChange(Changes.getModifiedFiles(participantChanges));
+			} else {
+				return null;
+			}
 		}
 
 		private Change createReferenceUpdatingMoveChange(IProgressMonitor pm) throws JavaModelException {
@@ -1555,11 +1579,6 @@ class ReorgPolicyFactory {
 							
 				composite.merge(new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), fChangeManager.getAllChanges())); //$NON-NLS-1$
 						
-				if (fUpdateQualifiedNames) {
-					computeQualifiedNameMatches(new SubProgressMonitor(pm, 1));
-					composite.addAll(fQualifiedNameSearchResult.getAllChanges());
-				}
-							
 				Change fileMove= createSimpleMoveChange(new SubProgressMonitor(pm, 1));
 				if (fileMove instanceof CompositeChange) {
 					composite.merge(((CompositeChange)fileMove));		
@@ -1587,25 +1606,6 @@ class ReorgPolicyFactory {
 			} finally {
 				pm.done();
 			}		
-		}
-
-		private Change createMoveAndUpdateQualifiedNameChange(IProgressMonitor pm) throws JavaModelException {
-			pm.beginTask("", 2); //$NON-NLS-1$
-			Change simpleCopyChange= createSimpleMoveChange(new SubProgressMonitor(pm, 1));
-			CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements")) { //$NON-NLS-1$
-				public Change perform(IProgressMonitor pm2) throws CoreException {
-					super.perform(pm2);
-					return null;
-				}
-			};
-			if (simpleCopyChange instanceof CompositeChange) {
-				result.merge(((CompositeChange)simpleCopyChange));		
-			} else {
-				result.add(simpleCopyChange); 
-			}
-			computeQualifiedNameMatches(new SubProgressMonitor(pm, 1));
-			result.addAll(fQualifiedNameSearchResult.getAllChanges());
-			return result;
 		}
 
 		private Change createSimpleMoveChange(IProgressMonitor pm) {
@@ -1688,12 +1688,15 @@ class ReorgPolicyFactory {
 				fFilePatterns, type.getJavaProject().getProject(), pm);
 		}	
 		
-		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
+		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException {
 			try{
-				pm.beginTask("", 2); //$NON-NLS-1$
+				pm.beginTask("", 3); //$NON-NLS-1$
 				confirmMovingReadOnly(reorgQueries);
 				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
-				RefactoringStatus status= super.checkInput(new SubProgressMonitor(pm, 1), reorgQueries);
+				if (fUpdateQualifiedNames) {
+					computeQualifiedNameMatches(new SubProgressMonitor(pm, 2));
+				}
+				RefactoringStatus status= super.checkFinalConditions(new SubProgressMonitor(pm, 1), context, reorgQueries);
 				return status;
 			} catch (JavaModelException e){
 				throw e;
@@ -1822,6 +1825,10 @@ class ReorgPolicyFactory {
 				throw new JavaModelException(e);
 			}
 		}
+		
+		public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
+			return null;
+		}
 
 		public boolean canEnable() throws JavaModelException {
 			return super.canEnable() && getSourceCu() != null; //can move only elements from cus
@@ -1844,6 +1851,9 @@ class ReorgPolicyFactory {
 		}
 		public Change createChange(IProgressMonitor pm) {
 			return new NullChange();
+		}
+		public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
+			return null;
 		}
 		public boolean canEnable() throws JavaModelException {
 			return false;

@@ -95,7 +95,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private final int fSelectionStart;
 	private final int fSelectionLength;
 	private final ICompilationUnit fCu;
-	private final CodeGenerationSettings fSettings;
 
 	private IExpressionFragment fSelectedExpression;
 	private boolean fReplaceAllOccurrences= true; //default value
@@ -124,7 +123,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 		fSelectionLength= selectionLength;
 		
 		fCu= cu;
-		fSettings= settings;
 	}
 	
 	public static boolean isAvailable(ASTNode[] selectedNodes, ASTNode coveringNode) {

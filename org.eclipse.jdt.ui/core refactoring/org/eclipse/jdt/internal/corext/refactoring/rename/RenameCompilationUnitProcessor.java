@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -42,6 +43,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 
 public class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
@@ -253,10 +255,16 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 				result1.merge(result2);			
 			}	
 		
-			if (fWillRenameType)
+			if (fWillRenameType) {
 				return fRenameTypeProcessor.checkFinalConditions(pm, context);
-			else
+			} else {
+				IFile file= ResourceUtil.getFile(fCu);
+				if (file != null) {
+					ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
+					checker.addFile(file);
+				}
 				return Checks.checkCompilationUnitNewName(fCu, getNewElementName());
+			}
 		} finally{
 			pm.done();
 		}		
@@ -321,5 +329,14 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		
 		return new ValidationStateChange( 
 			new RenameCompilationUnitChange(fCu, getNewElementName()));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
+		if (fWillRenameType)
+			return fRenameTypeProcessor.postCreateChange(participantChanges, pm);
+		return super.postCreateChange(participantChanges, pm);
 	}
 }

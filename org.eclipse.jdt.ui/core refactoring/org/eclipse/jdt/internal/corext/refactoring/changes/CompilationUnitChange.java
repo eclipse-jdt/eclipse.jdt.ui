@@ -28,7 +28,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 public class CompilationUnitChange extends TextFileChange {
 
 	private ICompilationUnit fCUnit;
-
+	
 	/**
 	 * Creates a new <code>CompilationUnitChange</code>.
 	 * 
@@ -82,8 +82,8 @@ public class CompilationUnitChange extends TextFileChange {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected Change createUndoChange(UndoEdit edit) throws CoreException {
-		return new UndoCompilationUnitChange(getName(), fCUnit, edit, getSaveMode());
+	protected Change createUndoChange(UndoEdit edit, ContentStamp stampToRestore) throws CoreException {
+		return new UndoCompilationUnitChange(getName(), fCUnit, edit, stampToRestore, getSaveMode());
 	}
 	
 	/**

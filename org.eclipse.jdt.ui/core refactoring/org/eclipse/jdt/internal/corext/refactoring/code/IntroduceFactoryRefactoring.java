@@ -86,12 +86,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  * @author rfuhrer
  */
 public class IntroduceFactoryRefactoring extends Refactoring {
-	/**
-	 * The <code>CodeGenerationSettings</code> governing this refactoring instance,
-	 * typically passed in through the constructor.
-	 */
-	private CodeGenerationSettings	fCodeGenSettings;
-
+	
 	/**
 	 * The handle for the compilation unit holding the selection that was
 	 * passed into this refactoring.
@@ -235,8 +230,6 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		fCUHandle= cu;
 		fCU= ASTCreator.createAST(fCUHandle, null);
-
-		fCodeGenSettings= settings;
 	}
 
 	/**

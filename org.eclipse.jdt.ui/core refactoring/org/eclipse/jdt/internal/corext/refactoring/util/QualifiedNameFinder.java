@@ -14,29 +14,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.text.edits.ReplaceEdit;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 
 import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
 import org.eclipse.search.internal.core.text.MatchLocator;
 import org.eclipse.search.internal.core.text.TextSearchEngine;
 import org.eclipse.search.internal.core.text.TextSearchScope;
 
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.ltk.core.refactoring.TextChange;
-
-import org.eclipse.text.edits.ReplaceEdit;
 
 public class QualifiedNameFinder {
 	
@@ -44,9 +46,9 @@ public class QualifiedNameFinder {
 		
 		private String fNewValue;
 		private IProgressMonitor fProgressMonitor;
-		private QualifiedNameSearchResult fResult;	
+		private QualifiedNameSearchResult fResult;
 		
-		public ResultCollector(QualifiedNameSearchResult result, String newValue,  IProgressMonitor monitor) {
+		public ResultCollector(QualifiedNameSearchResult result, String newValue, IProgressMonitor monitor) {
 			fResult= result;
 			fNewValue= newValue;
 			fProgressMonitor= monitor;
@@ -62,10 +64,13 @@ public class QualifiedNameFinder {
 			// Make sure we don't change Compilation Units
 			IFile file= (IFile)proxy.requestResource();
 			IJavaElement element= JavaCore.create(file);
-			if (element != null && element.exists())
+			if ((element != null && element.exists()))
 				return;
 			TextChange change= fResult.getChange(file);
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("QualifiedNameFinder.update_name"), new ReplaceEdit(start, length, fNewValue));
+			TextChangeCompatibility.addTextEdit(
+				change, 
+				RefactoringCoreMessages.getString("QualifiedNameFinder.update_name"),  //$NON-NLS-1$
+				new ReplaceEdit(start, length, fNewValue));
 		}
 
 		public void done() throws CoreException {
@@ -94,7 +99,9 @@ public class QualifiedNameFinder {
 			monitor= new NullProgressMonitor();
 		ResultCollector collector= new ResultCollector(result, newValue, monitor);
 		TextSearchEngine engine= new TextSearchEngine();
-		engine.search(ResourcesPlugin.getWorkspace(), createScope(filePatterns, root), collector, new MatchLocator(pattern, "")); //$NON-NLS-1$
+		engine.search(ResourcesPlugin.getWorkspace(), 
+			createScope(filePatterns, root), 
+			collector, new MatchLocator(pattern, "")); //$NON-NLS-1$
 	}
 	
 	private static TextSearchScope createScope(String filePatterns, IProject root) throws JavaModelException {

@@ -163,21 +163,18 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 		try{
 			Assert.isNotNull(fReorgQueries);
 			fWasCanceled= false;
-			return fMovePolicy.checkInput(pm, fReorgQueries);
+			return fMovePolicy.checkFinalConditions(pm, context, fReorgQueries);
 		} catch (OperationCanceledException e) {
 			fWasCanceled= true;
 			throw e;
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() == null || fMovePolicy.getResourceDestination() == null);
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null);		
 		try {
-			final ValidationStateChange result= new ValidationStateChange(getProcessorName()){
+			final ValidationStateChange result= new ValidationStateChange(RefactoringCoreMessages.getString("Change.javaChanges")) { //$NON-NLS-1$
 				public Change perform(IProgressMonitor pm) throws CoreException {
 					super.perform(pm);
 					return null;
@@ -194,6 +191,10 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 		} finally {
 			pm.done();
 		}
+	}
+	
+	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
+		return fMovePolicy.postCreateChange(participantChanges, pm);
 	}
 
 	public String getProcessorName() {
