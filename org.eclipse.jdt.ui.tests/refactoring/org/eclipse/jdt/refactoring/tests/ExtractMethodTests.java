@@ -535,6 +535,24 @@ public class ExtractMethodTests extends RefactoringTest {
 		invalidSelectionTest();
 	}
 	
+	//---- Synchronized statement
+	
+	public void test150() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test151() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test152() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test153() throws Exception {
+		invalidSelectionTest();
+	}
+	
 	//====================================================================================
 	// Testing valid selections
 	//=====================================================================================
@@ -756,6 +774,24 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	public void test311() throws Exception {
+		validSelectionTest();
+	}
+	
+	//---- Synchronized statement
+	
+	public void test350() throws Exception {
+		validSelectionTest();
+	}
+	
+	public void test351() throws Exception {
+		validSelectionTest();
+	}
+	
+	public void test352() throws Exception {
+		validSelectionTest();
+	}
+	
+	public void test353() throws Exception {
 		validSelectionTest();
 	}
 	
