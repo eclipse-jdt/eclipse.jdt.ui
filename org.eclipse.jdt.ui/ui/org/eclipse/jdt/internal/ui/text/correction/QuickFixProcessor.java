@@ -152,6 +152,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UseEnumAsAnIdentifier:
 			case IProblem.RedefinedLocal:
 			case IProblem.RedefinedArgument:
+			case IProblem.CodeCannotBeReached:
 				return true;
 			default:
 				return false;
@@ -426,6 +427,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.SuperclassMustBeAClass:
 				LocalCorrectionsSubProcessor.getInterfaceExtendsClassProposals(context, problem, proposals);
+				break;
+			case IProblem.CodeCannotBeReached:
+				LocalCorrectionsSubProcessor.getUnreachableCodeProposals(context, problem, proposals);
+				break;
 			default:
 		}
 	}
