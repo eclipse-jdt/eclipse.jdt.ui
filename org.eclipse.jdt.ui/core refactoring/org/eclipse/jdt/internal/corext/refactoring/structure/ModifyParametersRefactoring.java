@@ -86,6 +86,9 @@ public class ModifyParametersRefactoring extends Refactoring {
 	private IMethod fMethod;
 	private IMethod[] fRippleMethods;
 	private SearchResultGroup[] fOccurrences;
+	private static final String CONST_CLASS_DECL = "class A{";
+	private static final String CONST_ASSIGN = " i=";
+	private static final String CONST_CLOSE = ";}";
 
 	public ModifyParametersRefactoring(IMethod method){
 		fMethod= method;
@@ -148,27 +151,32 @@ public class ModifyParametersRefactoring extends Refactoring {
 
 	private void checkParameterDefaultValue(RefactoringStatus result, ParameterInfo info) {
 		if (! isValidExpression(info.getDefaultValue())){
-			String pattern= "{0} is not a valid expression";
+			String pattern= "''{0}'' is not a valid expression";
 			String msg= MessageFormat.format(pattern, new String[]{info.getDefaultValue()});
 			result.addFatalError(msg);
 		}	
 	}
 
 	private void checkParameterType(RefactoringStatus result, ParameterInfo info) {
-		if (! isValidType(info.getType())){
-			String pattern= "{0} is not a valid type name";
+		if (! isValidTypeName(info.getType())){
+			String pattern= "''{0}'' is not a valid type name";
 			String msg= MessageFormat.format(pattern, new String[]{info.getType()});
 			result.addFatalError(msg);
 		}	
 	}
 
-	//XXX should maybe unify the 2 checks
-	private static boolean isValidType(String string){
+	private static boolean isValidTypeName(String string){
+		if ("".equals(string.trim())) //speed up for a common case
+			return false;
+		if (! Checks.checkTypeName(string).hasFatalError())
+			return true;
 		StringBuffer cuBuff= new StringBuffer();
-		cuBuff.append("class A{");
+		cuBuff.append(CONST_CLASS_DECL);
 		int offset= cuBuff.length();
 		cuBuff.append(string)
-			  .append(" i= null;}");
+			  .append(CONST_ASSIGN)
+			  .append("null")
+			  .append(CONST_CLOSE);
 		CompilationUnit cu= AST.parseCompilationUnit(cuBuff.toString().toCharArray());
 		Selection selection= Selection.createFromStartLength(offset, string.length());
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
@@ -179,12 +187,15 @@ public class ModifyParametersRefactoring extends Refactoring {
 	}
 	
 	private static boolean isValidExpression(String string){
+		if ("".equals(string.trim())) //speed up for a common case
+			return false;
 		StringBuffer cuBuff= new StringBuffer();
-		cuBuff.append("class A{")
-			  .append("Object i=");
+		cuBuff.append(CONST_CLASS_DECL)
+			  .append("Object")
+			  .append(CONST_ASSIGN);
 		int offset= cuBuff.length();
 		cuBuff.append(string)
-			  .append(";}");
+			  .append(CONST_CLOSE);
 		CompilationUnit cu= AST.parseCompilationUnit(cuBuff.toString().toCharArray());
 		Selection selection= Selection.createFromStartLength(offset, string.length());
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
