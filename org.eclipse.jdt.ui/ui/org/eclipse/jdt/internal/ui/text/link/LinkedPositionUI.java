@@ -53,7 +53,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	private static final int DOCUMENT_CHANGED= 4;	// document has changed
 	private static final int UPDATE_CARET= 8;		// update caret
 
-	private static final String CARET_POSITION= "LinkedPositionUI.caret.position";
+	private static final String CARET_POSITION= "LinkedPositionUI.caret.position"; //$NON-NLS-1$
 	private static final IPositionUpdater fgUpdater= new DefaultPositionUpdater(CARET_POSITION);
 	
 	private final ITextViewer fViewer;
