@@ -13,14 +13,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.*;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.compare.JavaHistoryAction.JavaTextBufferNode;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 
 import org.eclipse.compare.*;
 
@@ -75,33 +73,8 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
 			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
 			d.setCompareMode(true);
-
-			ITypedElement ti= d.selectEdition(target, editions, input);
+			d.selectEdition(target, editions, input);
 						
-			if (ti instanceof IStreamContentAccessor) {
-										
-				// from the edition get the lines (text) to insert
-				String[] lines= null;
-				try {
-					lines= JavaCompareUtilities.readLines(((IStreamContentAccessor) ti).getContents());								
-				} catch (CoreException ex) {
-					JavaPlugin.log(ex);
-				}
-				if (lines == null) {
-					MessageDialog.openError(shell, errorTitle, errorMessage);
-					return;
-				}
-				
-				TextEdit edit= new MemberEdit(input, MemberEdit.REPLACE, lines,
-										CodeFormatterPreferencePage.getTabSize());
-
-				TextBufferEditor editor= new TextBufferEditor(buffer);
-				editor.add(edit);
-				editor.performEdits(new NullProgressMonitor());
-				
-				TextBuffer.commitChanges(buffer, false, new NullProgressMonitor());
-			}
-
 		} catch(CoreException ex) {
 			JavaPlugin.log(ex);
 			MessageDialog.openError(shell, errorTitle, errorMessage);

@@ -440,6 +440,14 @@
 			class="org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction">
 		</action>
 		<action
+			id="javaReplacePreviousFromHistory"
+			label="%JavaReplaceWithPreviousFromHistoryAction.label"
+			tooltip="%JavaReplaceWithPreviousFromHistoryAction.tooltip"
+			menubarPath="replaceWithMenu/replaceWithGroup"
+			enablesFor="1"
+			class="org.eclipse.jdt.internal.ui.compare.JavaReplaceWithPreviousEditionAction">
+		</action>
+		<action
 			id="javaAddElementFromHistoryAction"
 			label="%JavaAddElementFromHistoryAction.label"
 			tooltip="%JavaAddElementFromHistoryAction.tooltip"

@@ -4,12 +4,14 @@
  */
 package org.eclipse.jdt.internal.ui.compare;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ResourceBundle;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.*;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.core.resources.*;
@@ -23,6 +25,7 @@ import org.eclipse.jdt.internal.ui.compare.JavaHistoryAction.JavaTextBufferNode;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 
 import org.eclipse.compare.*;
+import org.eclipse.compare.internal.TimeoutContext;
 
 
 /**
@@ -32,8 +35,14 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.ReplaceWithEditionAction"; //$NON-NLS-1$
 	
+	private boolean fPrevious= false;
+
 	
 	public JavaReplaceWithEditionAction() {
+	}
+	
+	public JavaReplaceWithEditionAction(boolean previous) {
+		fPrevious= previous;
 	}	
 
 	// CompareMessages.getString("ReplaceFromHistory.action.label")
@@ -87,7 +96,11 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 
 			ITypedElement[] editions= buildEditions(target, file);
 
-			ITypedElement ti= d.selectEdition(target, editions, input);
+			ITypedElement ti= null;
+			if (fPrevious)
+				ti= d.selectPreviousEdition(target, editions, input);
+			else
+				ti= d.selectEdition(target, editions, input);
 						
 			if (ti instanceof IStreamContentAccessor) {
 														
@@ -105,14 +118,40 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				
 				TextEdit edit= new MemberEdit(input, MemberEdit.REPLACE, lines,
 										CodeFormatterPreferencePage.getTabSize());
-
+										
+				IProgressMonitor nullProgressMonitor= new NullProgressMonitor();
+				
 				TextBufferEditor editor= new TextBufferEditor(buffer);
 				editor.add(edit);
-				editor.performEdits(new NullProgressMonitor());
+				editor.performEdits(nullProgressMonitor);
 				
-				TextBuffer.commitChanges(buffer, false, new NullProgressMonitor());
+				final TextBuffer bb= buffer;
+				IRunnableWithProgress r= new IRunnableWithProgress() {
+					public void run(IProgressMonitor pm) throws InvocationTargetException {
+						try {
+							TextBuffer.commitChanges(bb, false, pm);
+						} catch (CoreException ex) {
+							throw new InvocationTargetException(ex);
+						}
+					}
+				};
+				
+				if (inEditor) {
+					// we don't show progress
+					r.run(nullProgressMonitor);
+				} else {
+					ProgressMonitorDialog pd= new ProgressMonitorDialog(shell);
+					pd.run(true, false, r);
+				}
+				
 			}
-
+	 	} catch(InvocationTargetException ex) {
+			JavaPlugin.log(ex);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
+			
+		} catch(InterruptedException ex) {
+			// shouldn't be called because is not cancable
+			
 		} catch(CoreException ex) {
 			JavaPlugin.log(ex);
 			MessageDialog.openError(shell, errorTitle, errorMessage);

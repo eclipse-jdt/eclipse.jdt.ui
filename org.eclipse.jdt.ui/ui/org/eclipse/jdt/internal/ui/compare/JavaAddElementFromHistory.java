@@ -5,12 +5,15 @@
 package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.ResourceBundle;
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.IEditorInput;
 
@@ -145,12 +148,38 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 				return;
 			}
 			
+			IProgressMonitor nullProgressMonitor= new NullProgressMonitor();
+
 			TextBufferEditor editor= new TextBufferEditor(buffer);
 			editor.add(edit);
-			editor.performEdits(new NullProgressMonitor());
+			editor.performEdits(nullProgressMonitor);
 			
-			TextBuffer.commitChanges(buffer, false, new NullProgressMonitor());
-						
+			final TextBuffer bb= buffer;
+			IRunnableWithProgress r= new IRunnableWithProgress() {
+				public void run(IProgressMonitor pm) throws InvocationTargetException {
+					try {
+						TextBuffer.commitChanges(bb, false, pm);
+					} catch (CoreException ex) {
+						throw new InvocationTargetException(ex);
+					}
+				}
+			};
+			
+			if (inEditor) {
+				// we don't show progress
+				r.run(nullProgressMonitor);
+			} else {
+				ProgressMonitorDialog pd= new ProgressMonitorDialog(shell);
+				pd.run(true, false, r);
+			}
+
+	 	} catch(InvocationTargetException ex) {
+			JavaPlugin.log(ex);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
+			
+		} catch(InterruptedException ex) {
+			// shouldn't be called because is not cancable
+			
 		} catch(CoreException ex) {
 			JavaPlugin.log(ex);
 			MessageDialog.openError(shell, errorTitle, errorMessage);
