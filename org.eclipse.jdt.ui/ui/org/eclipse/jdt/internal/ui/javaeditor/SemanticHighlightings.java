@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -317,9 +318,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
 		 */
 		public boolean consumes(SemanticToken token) {
-			SimpleName node= token.getNode();
-			ASTNode parent= node.getParent();
-			return parent != null && parent.getNodeType() == ASTNode.METHOD_DECLARATION && node.isDeclaration();
+			return token.getNode().getLocationInParent() == MethodDeclaration.NAME_PROPERTY;
 		}
 	}
 	
