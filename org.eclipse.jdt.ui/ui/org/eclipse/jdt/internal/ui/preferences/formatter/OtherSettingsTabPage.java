@@ -63,7 +63,7 @@ public class OtherSettingsTabPage extends ModifyDialogTabPage {
 		
 		final Group generalGroup= createGroup(numColumns, composite, "General settings");
 		createNumberPref(generalGroup, numColumns, "Maximum line &width:", DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, Integer.MAX_VALUE);
-		createNumberPref(generalGroup, numColumns, "Tab si&ze:", DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 999);
+		createNumberPref(generalGroup, numColumns, "Tab si&ze:", DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 1, 999);
 		createCheckboxPref(generalGroup, numColumns, "U&se tab character", DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, new String [] {JavaCore.SPACE, JavaCore.TAB});
 		
 
