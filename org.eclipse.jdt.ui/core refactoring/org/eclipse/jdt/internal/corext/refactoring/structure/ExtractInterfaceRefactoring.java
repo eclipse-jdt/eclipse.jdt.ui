@@ -396,7 +396,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				int parameterIndex= methodDeclaration.parameters().indexOf(parentNode);
 				IMethod[] methods= getAllRippleMethods(methodDeclaration, new SubProgressMonitor(pm, 1));
 				if (methods == null){ //XXX this can be null because of bug 22883
-					SingleVariableDeclaration svd= (SingleVariableDeclaration)methodDeclaration.parameters().get(parameterIndex);
+					SingleVariableDeclaration svd= getParameterDeclarationNode(parameterIndex, methodDeclaration);
 					nodesToRemove.add(svd.getType());
 					addToBadVarSet(svd);
 					return true;
@@ -467,7 +467,11 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private SingleVariableDeclaration getParameterDeclarationNode(int parameterIndex, IMethod method) throws JavaModelException {
-		return (SingleVariableDeclaration)getMethodDeclarationNode(method).parameters().get(parameterIndex);
+		return getParameterDeclarationNode(parameterIndex, getMethodDeclarationNode(method));
+	}
+	
+	private SingleVariableDeclaration getParameterDeclarationNode(int parameterIndex, MethodDeclaration md){
+		return (SingleVariableDeclaration)md.parameters().get(parameterIndex);
 	}
 	
 	private Collection getAllReturnTypeNodes(IMethod[] methods) throws JavaModelException {
@@ -655,7 +659,24 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	
 			if (parentNode instanceof SingleVariableDeclaration){
 				if (anyVariableReferenceHasDirectProblems((SingleVariableDeclaration)parentNode, new SubProgressMonitor(pm, 1))){
-					addToBadVarSet((SingleVariableDeclaration)parentNode);
+					if (! isMethodParameter(parentNode)){
+						addToBadVarSet((SingleVariableDeclaration)parentNode);
+						return true;
+					}	
+					
+					MethodDeclaration methodDeclaration= (MethodDeclaration)parentNode.getParent();	
+					int parameterIndex= methodDeclaration.parameters().indexOf(parentNode);
+					IMethod[] methods= getAllRippleMethods(methodDeclaration, new SubProgressMonitor(pm, 1));
+					
+					if (methods == null){ //XXX this can be null because of bug 22883
+						SingleVariableDeclaration svd= getParameterDeclarationNode(parameterIndex, methodDeclaration);
+						addToBadVarSet(svd);
+						return true;
+					}
+					for (int i= 0; i < methods.length; i++) {
+						SingleVariableDeclaration svd= getParameterDeclarationNode(parameterIndex, methods[i]);
+						addToBadVarSet(svd);
+					}
 					return true;
 				}	
 			} 
