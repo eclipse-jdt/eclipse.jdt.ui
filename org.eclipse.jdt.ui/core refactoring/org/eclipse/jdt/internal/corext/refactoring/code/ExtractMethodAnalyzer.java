@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -41,13 +43,12 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -198,6 +199,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 			ASTNode node= nodes[0];
 			if (node instanceof Type) {
 				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_type_reference"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
+			} else if (node.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY) {
+				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_switch_case"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
 			}
 		}
 	}
