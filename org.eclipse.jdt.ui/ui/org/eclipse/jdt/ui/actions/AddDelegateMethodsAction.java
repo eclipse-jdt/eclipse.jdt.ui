@@ -140,6 +140,21 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
+	
+	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
+		if (getSelectedFields(selection) != null)
+			return true;
+
+		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
+			IType type= (IType) selection.getFirstElement();
+			return type.getCompilationUnit() != null && type.isClass(); // look if class: not cheap but done by all source generation actions
+		}
+
+		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
+			return true;
+
+		return false;
+	}	
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
@@ -156,29 +171,16 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				run((IType) firstElement, new IField[0], false);
 			else if (firstElement instanceof ICompilationUnit)
 				run(JavaElementUtil.getMainType((ICompilationUnit) firstElement), new IField[0], false);
+			else
+				MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
 		}
 
 	}
 
-	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
-		if (getSelectedFields(selection) != null)
-			return true;
-
-		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
-			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null;
-		}
-
-		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
-			return true;
-
-		return false;
-	}
-
 	private static boolean canRunOn(IType type) throws JavaModelException {
-		if (type == null || type.getCompilationUnit() == null)
+		if (type == null || type.getCompilationUnit() == null || type.isInterface())
 			return false;
 
 		return canRunOn(type.getFields());
