@@ -7,8 +7,8 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Julien Ruaux: jruaux@octo.com
- * 	   Vincent Massol: vmassol@octo.com
+ *     Julien Ruaux: jruaux@octo.com 
+ * 	   Vincent Massol: vmassol@octo.com 
  ******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -27,7 +27,7 @@ import org.eclipse.jdt.junit.ITestRunListener;
 
 /**
  * The client side of the RemoteTestRunner. Handles the
- * marshalling of th different messages.
+ * marshaling of the different messages.
  */
 public class RemoteTestRunnerClient {
 	public abstract class ListenerSafeRunnable implements ISafeRunnable {
@@ -394,7 +394,10 @@ public class RemoteTestRunnerClient {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
 				public void run() {
-					listener.testReran(testId, className, testName, statusCode, trace);
+				    if (listener instanceof ITestRunListener3 ) 
+				        ((ITestRunListener3)listener).testReran(testId, className, testName, statusCode, trace, fExpectedResult, fActualResult);
+				    else
+						listener.testReran(testId, className, testName, statusCode, trace);
 				}
 			});
 		}

@@ -7,7 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Julien Ruaux: jruaux@octo.com see bug 25324 Ability to know when tests are finished [junit]
+ *     Julien Ruaux: jruaux@octo.com see bug 25324 Ability to know when tests are finished [junit] 
  *     Vincent Massol: vmassol@octo.com 25324 Ability to know when tests are finished [junit]
  *     Sebastian Davids: sdavids@gmx.de 35762 JUnit View wasting a lot of screen space [JUnit]
  ******************************************************************************/
@@ -176,10 +176,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	final Image fTestRunOKDirtyIcon= TestRunnerViewPart.createImage("cview16/junitsuccq.gif"); //$NON-NLS-1$
 	final Image fTestRunFailDirtyIcon= TestRunnerViewPart.createImage("cview16/juniterrq.gif"); //$NON-NLS-1$
 	
-	// Persistance tags.
+	// Persistence tags.
 	static final String TAG_PAGE= "page"; //$NON-NLS-1$
 	static final String TAG_RATIO= "ratio"; //$NON-NLS-1$
-	static final String TAG_TRACEFILTER= "tracefilter"; //$NON-NLS-1$
+	static final String TAG_TRACEFILTER= "tracefilter"; //$NON-NLS-1$ 
 	static final String TAG_ORIENTATION= "orientation"; //$NON-NLS-1$
 	static final String TAG_SCROLL= "scroll"; //$NON-NLS-1$
 	
@@ -333,7 +333,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			setOrientation(orientation.intValue());
 		String scrollLock= memento.getString(TAG_SCROLL);
 		if (scrollLock != null)
-			fScrollLockAction.setChecked(scrollLock.equals("true"));
+			fScrollLockAction.setChecked(scrollLock.equals("true")); //$NON-NLS-1$
 	}
 	
 	/**
@@ -348,15 +348,15 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 * Stops the currently running test and shuts down the RemoteTestRunner
 	 */
 	public void rerunTestRun() {
-		if (fLastLaunch != null && fLastLaunch.getLaunchConfiguration() != null) {
-			try {
-				DebugUITools.saveAndBuildBeforeLaunch();
-				fLastLaunch.getLaunchConfiguration().launch(fLastLaunch.getLaunchMode(), null);		
-			} catch (CoreException e) {
-				ErrorDialog.openError(getSite().getShell(), 
-					JUnitMessages.getString("TestRunnerViewPart.error.cannotrerun"), e.getMessage(), e.getStatus() //$NON-NLS-1$
-				);
+		if (lastLaunchIsKeptAlive()) {
+			// prompt for terminating the existing run
+			if (MessageDialog.openQuestion(getSite().getShell(), JUnitMessages.getString("TestRunnerViewPart.terminate.title"), JUnitMessages.getString("TestRunnerViewPart.terminate.message"))) {  //$NON-NLS-1$ //$NON-NLS-2$
+				if (fTestRunnerClient != null)
+					fTestRunnerClient.stopTest();
 			}
+		}
+		if (fLastLaunch != null && fLastLaunch.getLaunchConfiguration() != null) {
+			DebugUITools.launch(fLastLaunch.getLaunchConfiguration(), fLastLaunch.getLaunchMode());
 		}
 	}
 
@@ -573,6 +573,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		}
 	}
 
+	public void testReran(String testId, String className, String testName, int statusCode, String trace, String expectedResult, String actualResult) {
+		testReran(testId, className, testName, statusCode, trace);
+		TestRunInfo info= getTestInfo(testId);
+		info.setActual(actualResult);
+		info.setExpected(expectedResult);
+		fFailureView.updateEnablement(info);
+	}
+	
 	private void updateTest(TestRunInfo info, final int status) {
 		if (status == info.getStatus())
 			return;
@@ -956,7 +964,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		
 		int activePage= fTabFolder.getSelectionIndex();
 		memento.putInteger(TAG_PAGE, activePage);
-		memento.putString(TAG_SCROLL, fScrollLockAction.isChecked() ? "true" : "false");
+		memento.putString(TAG_SCROLL, fScrollLockAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		int weigths[]= fSashForm.getWeights();
 		int ratio= (weigths[0] * 1000) / (weigths[0] + weigths[1]);
 		memento.putInteger(TAG_RATIO, ratio);
@@ -1132,20 +1140,25 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		return fCounterPanel != null;
 	}
 
-	public void rerunTest(String testId, String className, String testName) {
+	public void rerunTest(String testId, String className, String testName, String launchMode) {
 		DebugUITools.saveAndBuildBeforeLaunch();
-		if (fTestRunnerClient != null && fTestRunnerClient.isRunning() && ILaunchManager.DEBUG_MODE.equals(fLaunchMode))
+		if (lastLaunchIsKeptAlive())
 			fTestRunnerClient.rerunTest(testId, className, testName);
 		else if (fLastLaunch != null) {
 			// run the selected test using the previous launch configuration
 			ILaunchConfiguration launchConfiguration= fLastLaunch.getLaunchConfiguration();
 			if (launchConfiguration != null) {
 				try {
-					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy("Rerun "+testName); //$NON-NLS-1$
-					tmp.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);
-//					String args= "-rerun "+testId;
-//					tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, args);
-					tmp.launch(fLastLaunch.getLaunchMode(), null);	
+					String name= className;
+					if (testName != null) 
+						name+= "."+testName; //$NON-NLS-1$
+					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy("Rerun "+name); //$NON-NLS-1$
+					if (testName != null) {
+						tmp.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);
+						//	String args= "-rerun "+testId;
+						//	tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, args);
+					}
+					tmp.launch(launchMode, null);	
 					return;	
 				} catch (CoreException e) {
 					ErrorDialog.openError(getSite().getShell(), 
@@ -1160,6 +1173,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		}
 	}
 	
+	public boolean lastLaunchIsKeptAlive() {
+		return fTestRunnerClient != null && fTestRunnerClient.isRunning() && ILaunchManager.DEBUG_MODE.equals(fLaunchMode);
+	}
+
 	private void setOrientation(int orientation) {
 		if ((fSashForm == null) || fSashForm.isDisposed())
 			return;
@@ -1179,4 +1196,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		else
 			layout.numColumns= 1;
 	}
+
+
 }

@@ -14,10 +14,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -148,7 +150,11 @@ class FailureRunView implements ITestRunView, IMenuListener {
 			String methodName= getMethodName();
 			if (className != null) {
 				manager.add(new OpenTestAction(fRunnerViewPart, className, methodName));
-				manager.add(new RerunAction(fRunnerViewPart, getSelectedTestId(), className, methodName));
+				manager.add(new Separator());
+				manager.add(new RerunAction(fRunnerViewPart, getSelectedTestId(), className, methodName, ILaunchManager.RUN_MODE));
+				if (!fRunnerViewPart.lastLaunchIsKeptAlive()) 
+					manager.add(new RerunAction(fRunnerViewPart, getSelectedTestId(), className, methodName, ILaunchManager.DEBUG_MODE));
+				manager.add(new Separator());
 				manager.add(new CopyFailureListAction(fRunnerViewPart, FailureRunView.this, fClipboard));
 			}
 		}

@@ -17,4 +17,6 @@ package org.eclipse.jdt.internal.junit.ui;
 public interface ITestRunListener3 extends ITestRunListener2 {
 
     public void testFailed(int status, String testId, String testName, String trace, String expected, String actual);
+
+	public void testReran(String testId, String className, String testName, int statusCode, String trace, String expectedResult, String actualResult);
 }

@@ -171,13 +171,17 @@ class FailureTraceView implements IMenuListener {
 	public void showFailure(TestRunInfo failure) {	
 	    fFailure= failure;
 	    String trace= ""; //$NON-NLS-1$
-	    fCompareAction.setEnabled(failure != null && failure.isComparisonFailure());
+	    updateEnablement(failure);
 	    if (failure != null) 
 	        trace= failure.getTrace();
 		if (fInputTrace == trace)
 			return;
 		fInputTrace= trace;
 		updateTable(trace);
+	}
+
+	public void updateEnablement(TestRunInfo failure) {
+		fCompareAction.setEnabled(failure != null && failure.isComparisonFailure());
 	}
 
 	private void updateTable(String trace) {
