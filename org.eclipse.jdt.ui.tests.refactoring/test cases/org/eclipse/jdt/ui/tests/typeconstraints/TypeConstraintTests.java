@@ -19,12 +19,12 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCollector;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint;
 
@@ -59,7 +59,7 @@ public class TypeConstraintTests extends RefactoringTest {
 
 	private CompilationUnit getCuNode() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP());
-		return AST.parseCompilationUnit(cu, true);
+		return ASTCreator.createAST(cu, null);
 	}
 
 	private static void assertAllSatisfied(ITypeConstraint[] constraints){
