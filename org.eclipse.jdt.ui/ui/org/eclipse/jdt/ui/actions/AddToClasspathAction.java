@@ -39,7 +39,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 
 /**
  * Action to add a JAR to the classpath of its parent project.
@@ -71,41 +70,38 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	 * Method declared in SelectionDispatchAction
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(checkEnabled(selection));
-	}
-	
-	private IFile getCandidate(IAdaptable element) throws JavaModelException {
-		IResource resource= (IResource)((IAdaptable) element).getAdapter(IResource.class);
-		if (resource instanceof IFile && ArchiveFileFilter.isArchivePath(resource.getFullPath())) {
-			IJavaProject project= JavaCore.create(resource.getProject());
-			if (project.findPackageFragmentRoot(resource.getFullPath()) == null) {
-				return (IFile) resource;
-			}
+		try {
+			setEnabled(checkEnabled(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
 		}
-		return null;
 	}
 	
-	
-	private boolean checkEnabled(IStructuredSelection selection) {
+	private static boolean checkEnabled(IStructuredSelection selection) throws JavaModelException {
 		if (selection.isEmpty())
 			return false;
-		try {
-			for (Iterator iter= selection.iterator(); iter.hasNext();) {
-				Object element= (Object) iter.next();
-				if (element instanceof IAdaptable) {
-					if (getCandidate((IAdaptable) element) == null) {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			}
-			return true;
-		} catch (JavaModelException e) {
-			return false;
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			if (! canBeAddedToBuildPath(iter.next()))
+				return false;
 		}
+		return true;
 	}
-	
+
+	private static boolean canBeAddedToBuildPath(Object element) throws JavaModelException{
+		return (element instanceof IAdaptable) && getCandidate((IAdaptable) element) != null;
+	}
+
+	private static IFile getCandidate(IAdaptable element) throws JavaModelException {
+		IResource resource= (IResource)((IAdaptable) element).getAdapter(IResource.class);
+		if (! (resource instanceof IFile))
+			return null;
+		
+		IJavaProject project= JavaCore.create(resource.getProject());
+		if (project != null && project.exists() && (null == project.findPackageFragmentRoot(resource.getFullPath())))
+			return (IFile) resource;
+		return null;
+	}
+			
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
@@ -143,7 +139,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 		}
 	}
 	
-	private IFile[] getJARFiles(IStructuredSelection selection) throws JavaModelException {
+	private static IFile[] getJARFiles(IStructuredSelection selection) throws JavaModelException {
 		ArrayList list= new ArrayList();
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object element= (Object) iter.next();
