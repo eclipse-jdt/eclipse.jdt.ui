@@ -24,8 +24,10 @@ import junit.framework.TestCase;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -38,6 +40,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
@@ -171,7 +174,7 @@ public abstract class RefactoringTest extends TestCase {
 		return null;
 	}
 	
-	protected final RefactoringStatus performRefactoringWithStatus(IRefactoring ref) throws JavaModelException {
+	protected final RefactoringStatus performRefactoringWithStatus(IRefactoring ref) throws Exception {
 		RefactoringStatus status= ref.checkPreconditions(new NullProgressMonitor());
 		if (status.hasFatalError())
 			return status;
@@ -185,10 +188,14 @@ public abstract class RefactoringTest extends TestCase {
 		return status;
 	}
 	
-	protected void performChange(IChange change) throws JavaModelException{
+	protected void performChange(final IChange change) throws Exception {
 		change.aboutToPerform(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		try {
-			change.perform(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
+			JavaCore.run(new IWorkspaceRunnable() {
+		 		public void run(IProgressMonitor pm) throws CoreException {
+		 			change.perform(new ChangeContext(new TestExceptionHandler()), pm);
+		 		}
+		 	}, new NullProgressMonitor());
 		} finally {
 			change.performed();
 		}

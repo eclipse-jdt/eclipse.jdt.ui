@@ -13,6 +13,9 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -20,6 +23,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
@@ -109,17 +113,26 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 			case COMPARE_WITH_OUTPUT:
 				assertTrue(!status.hasFatalError());
 				String original= unit.getSource();
-				IChange change= refactoring.createChange(pm);
+				final IChange change= refactoring.createChange(pm);
 				assertNotNull(change);
-				ChangeContext context= new ChangeContext(new TestExceptionHandler());
+				final ChangeContext context= new ChangeContext(new TestExceptionHandler());
 				change.aboutToPerform(context, pm);
-				change.perform(context, pm);
+				JavaCore.run(new IWorkspaceRunnable() {
+					public void run(IProgressMonitor monitor) throws CoreException {
+						change.perform(context, monitor);
+					}
+				}, pm);
 				change.performed();
-				IChange undo= change.getUndoChange();
+				final IChange undo= change.getUndoChange();
 				assertNotNull(undo);
 				compareSource(unit.getSource(), out);
-				context= new ChangeContext(new TestExceptionHandler());
+				final ChangeContext context2= new ChangeContext(new TestExceptionHandler());
 				undo.aboutToPerform(context, pm);
+				JavaCore.run(new IWorkspaceRunnable() {
+					public void run(IProgressMonitor monitor) throws CoreException {
+						undo.perform(context2, monitor);
+					}
+				}, pm);
 				undo.perform(context, pm);
 				undo.performed();
 				compareSource(unit.getSource(), original);
