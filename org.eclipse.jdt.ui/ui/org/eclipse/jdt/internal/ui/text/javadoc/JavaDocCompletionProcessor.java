@@ -38,6 +38,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 
+import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
@@ -62,6 +63,10 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	public JavaDocCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
 		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("javadoc"); //$NON-NLS-1$
+		if (contextType == null) {
+			contextType= new JavaDocContextType();
+			ContextTypeRegistry.getInstance().add(contextType);
+		}
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
 		fSubProcessorFlags= 0;
