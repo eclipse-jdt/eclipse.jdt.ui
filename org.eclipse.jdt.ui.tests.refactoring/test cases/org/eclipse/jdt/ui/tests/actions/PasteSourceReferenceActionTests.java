@@ -9,6 +9,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -106,6 +107,21 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 		
 		IType typeB= fCuB.getType("B");
 		SourceReferenceTestUtil.paste(new IType[]{typeB}, fClipboard);
+
+		check();
+	}
+
+	public void test3() throws Exception{
+		if (true){
+			printTestDisabledMessage("test for bug#19007");
+			return;
+		}	
+		Object elem0= fCuA.getImport("java.lang.*");
+				
+		SourceReferenceTestUtil.copy(new Object[]{elem0}, fClipboard);
+		
+		ISourceReference container= fCuB.getImportContainer();
+		SourceReferenceTestUtil.paste(new ISourceReference[]{container}, fClipboard);
 
 		check();
 	}
