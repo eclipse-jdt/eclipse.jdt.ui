@@ -338,12 +338,12 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 	private static boolean isPullable(IMember member) throws JavaModelException {
 		if (member.getElementType() != IJavaElement.METHOD && member.getElementType() != IJavaElement.FIELD && member.getElementType() != IJavaElement.TYPE)
 			return false;
-		if (JdtFlags.isEnum(member))
+		if (JdtFlags.isEnum(member) && member.getElementType() != IJavaElement.TYPE)
 			return false;
 		if (!Checks.isAvailable(member))
 			return false;
 		if (member instanceof IType) {
-			if (!JdtFlags.isStatic(member))
+			if (!JdtFlags.isStatic(member) && !JdtFlags.isEnum(member))
 				return false;
 		}
 		if (member instanceof IMethod ){
@@ -1313,7 +1313,7 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 		AbstractTypeDeclaration targetClass= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetClass(), targetRewrite.getRoot());
 		fMembersToMove= JavaElementUtil.sortByOffset(fMembersToMove); // preserve member order
 		monitor.beginTask("", fMembersToMove.length); //$NON-NLS-1$
-		for (int i= 0; i < fMembersToMove.length; i++) {
+		for (int i= fMembersToMove.length - 1; i >= 0; i--) {
 			IMember member= fMembersToMove[i];
 			if (member instanceof IField) {
 				IField field= (IField)member;

@@ -505,6 +505,12 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	protected RefactoringStatus checkDeclaringType(final IProgressMonitor monitor) throws JavaModelException {
 		final IType type= getDeclaringType();
 
+		if (type.isEnum())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.enum_members")); //$NON-NLS-1$
+			
+		if (type.isAnnotation())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.annotation_members")); //$NON-NLS-1$
+
 		if (type.isInterface())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.interface_members")); //$NON-NLS-1$
 
