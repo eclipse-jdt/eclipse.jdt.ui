@@ -585,8 +585,11 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 			ISourceRange sr= importContainer.getSourceRange();
 			start= sr.getOffset() + sr.getLength() - 1;
 		}	
-			
-		String newImportText= "\nimport " + pack.getElementName() + ".*;\n";
+		
+		// Begin 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
+		String lineDelimiter= org.eclipse.jdt.internal.ui.codemanipulation.StubUtility.getLineDelimiterUsed(cu);
+		String newImportText= lineDelimiter + "import " + pack.getElementName() + ".*;" + lineDelimiter;
+		// End 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
 		change.addInsert("add import declaration" + pack.getElementName(), start + 1, newImportText);
 		return true;
 	}
