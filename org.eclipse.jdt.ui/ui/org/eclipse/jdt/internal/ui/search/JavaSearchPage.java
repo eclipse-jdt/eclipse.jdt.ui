@@ -474,7 +474,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				else
 					fJavaElement= null;
 				setLimitTo(getSearchFor());
-				updateCaseSensitiveCheckbox();
+				doPatternModified();
 			}
 		};
 
@@ -558,8 +558,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		});
 		fPattern.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
+				doPatternModified();
 				updateOKStatus();
-				updateCaseSensitiveCheckbox();
+
 			}
 		});
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
@@ -607,14 +608,15 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		super.dispose();
 	}
 
-	private void updateCaseSensitiveCheckbox() {
-		if (fInitialData != null && getPattern().equals(fInitialData.getPattern()) && fJavaElement != null) {
+	private void doPatternModified() {
+		if (fInitialData != null && getPattern().equals(fInitialData.getPattern()) && fInitialData.getJavaElement() != null && fInitialData.getSearchFor() == getSearchFor()) {
 			fCaseSensitive.setEnabled(false);
 			fCaseSensitive.setSelection(true);
-		}
-		else {
+			fJavaElement= fInitialData.getJavaElement();
+		} else {
 			fCaseSensitive.setEnabled(true);
 			fCaseSensitive.setSelection(fIsCaseSensitive);
+			fJavaElement= null;
 		}
 	}
 
@@ -723,7 +725,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fInitialData= initData;
 		fJavaElement= initData.getJavaElement();
 		fCaseSensitive.setSelection(initData.isCaseSensitive());
-		fCaseSensitive.setEnabled(initData.getJavaElement() == null);
+		fCaseSensitive.setEnabled(fJavaElement == null);
 		fSearchFor[initData.getSearchFor()].setSelection(true);
 		setLimitTo(initData.getSearchFor());
 		fLimitTo[initData.getLimitTo()].setSelection(true);		
