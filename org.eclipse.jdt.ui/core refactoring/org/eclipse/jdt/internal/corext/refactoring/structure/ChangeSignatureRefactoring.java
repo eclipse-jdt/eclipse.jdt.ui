@@ -1076,7 +1076,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 		
 	private IMethod getMethod(MethodDeclaration methodDeclaration) throws JavaModelException{
-		return (IMethod)fAstManager.getCompilationUnit(methodDeclaration).getElementAt(methodDeclaration.getStartPosition());
+		return (IMethod)fAstManager.getCompilationUnit(methodDeclaration).getElementAt(methodDeclaration.getName().getStartPosition());
 	}
 	
 	private boolean needsVisibilityUpdate(MethodDeclaration methodDeclaration) throws JavaModelException {
