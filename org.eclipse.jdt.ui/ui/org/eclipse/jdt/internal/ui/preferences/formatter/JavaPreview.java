@@ -18,12 +18,14 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.MarginPainter;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IContentFormatter;
@@ -62,6 +64,9 @@ public class JavaPreview {
 					if (event.getProperty().equals(PreferenceConstants.EDITOR_TEXT_FONT)) {
 						Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 						viewer.getTextWidget().setFont(font);
+						if (fMarginPainter != null) {
+							fMarginPainter.initialize();
+						}
 					}
 				}
 			};
@@ -90,15 +95,12 @@ public class JavaPreview {
 	}
 	
 	
-//	private static final String PREVIEW_FONT =	"org.eclipse.jdt.internal.ui.preferences.code_formatter_preview_font";
-//	private static final double PREVIEW_FONT_SCALE_FACTOR = 0.8;
-	
 	private final JavaTextTools fTextTools;
 	private final JavaSourceViewerConfiguration fViewerConfiguration;
 	private final Document fPreviewDocument;
-//	private final FontRegistry fFontRegistry;
 
 	private SourceViewer fSourceViewer;
+	protected MarginPainter fMarginPainter;
 	protected Map fWorkingValues;
 	private String fPreviewText;
 	
@@ -123,6 +125,10 @@ public class JavaPreview {
 		fSourceViewer.configure(fViewerConfiguration);
 		fSourceViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 		
+		fMarginPainter= new MarginPainter(fSourceViewer);
+		fMarginPainter.setMarginRulerColor(fTextTools.getColorManager().getColor(new RGB(100, 100, 100)));
+		fSourceViewer.addPainter(fMarginPainter);
+		
 		new JavaSourcePreviewerUpdater(fSourceViewer, fTextTools);
 		fSourceViewer.setDocument(fPreviewDocument);
 		update();
@@ -137,6 +143,15 @@ public class JavaPreview {
 		final StyledText text = fSourceViewer.getTextWidget();
 		final int top0= fSourceViewer.getTopIndex();
 		final int range0= text.getLineCount() - (fSourceViewer.getBottomIndex()- fSourceViewer.getTopIndex());
+		
+		if (fMarginPainter != null) {
+			try {
+				final String value= (String)fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT);
+				int lineWidth= Integer.parseInt(value);
+				fMarginPainter.setMarginRulerColumn(lineWidth);
+			} catch (NumberFormatException e) {}
+		}
+
 		
 		if (fPreviewText == null) {
 			fPreviewDocument.set(""); //$NON-NLS-1$
