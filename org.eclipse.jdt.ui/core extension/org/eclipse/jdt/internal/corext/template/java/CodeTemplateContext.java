@@ -18,6 +18,8 @@ public class CodeTemplateContext extends TemplateContext {
 	private String fLineDelimiter;
 	private int fInitialIndentLevel;
 	private IJavaProject fProject;
+	
+	private TemplateBuffer fTemplateBuffer;
 
 	public CodeTemplateContext(String contextTypeName, IJavaProject project, String lineDelim, int initialIndentLevel) {
 		super(ContextTypeRegistry.getInstance().getContextType(contextTypeName));
@@ -40,7 +42,6 @@ public class CodeTemplateContext extends TemplateContext {
 		
 		TemplateTranslator translator= new TemplateTranslator();
 		TemplateBuffer buffer= translator.translate(template.getPattern());
-
 		getContextType().edit(buffer, this);
 		return buffer;
 	}

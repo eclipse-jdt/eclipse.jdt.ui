@@ -1429,13 +1429,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';';
-		
+
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.NEWTYPE);
 		IJavaProject project= cu.getJavaProject();
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.PACKAGE_STATEMENT, packStatement);
+		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, StubUtility.getTypeComment(cu, getTypeName()));
 		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, getTypeName());
 		String content= context.evaluate(template).getString();
 		if (content.length() == 0) {
 			return getDefaultCUContent(packStatement, typeContent, lineDelimiter);
@@ -1593,7 +1595,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN__JAVADOC_STUBS)) {
 			try {
-				return StubUtility.getTypeComment(parentCU, getTypeName());
+				String comment= StubUtility.getTypeComment(parentCU, getTypeName());
+				if (comment != null && isValidComment(comment)) {
+					return comment;
+				}
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}

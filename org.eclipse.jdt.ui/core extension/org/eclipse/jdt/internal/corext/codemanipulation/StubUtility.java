@@ -31,15 +31,22 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.Template;
+import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
+import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class StubUtility {
 	
@@ -291,14 +298,42 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
 		if (retTypeSig != null) {
 			context.setVariable(CodeTemplateContextType.RETURN_TYPE, Signature.toString(retTypeSig));
-		}		
-		String str= context.evaluate(template).getString();
+		}
+		
+		TemplateBuffer buffer= context.evaluate(template);
+		String str= buffer.getString();
 		if (Strings.containsOnlyWhitespaces(str)) {
 			return null;
 		}
-		return str;
+		TemplatePosition position= findTagPosition(buffer); // look if Javadoc tags have to be added
+		if (position == null) {
+			return str;
+		}
+			
+		TextBuffer textBuffer= TextBuffer.create(str);
+		String[] exceptionNames= new String[excTypeSig.length];
+		for (int i= 0; i < excTypeSig.length; i++) {
+			exceptionNames[i]= Signature.toString(excTypeSig[i]);
+		}
+		String returnType= retTypeSig != null ? Signature.toString(retTypeSig) : null;
+		int[] tagOffsets= position.getOffsets();
+		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
+			insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, false);
+		}
+		return textBuffer.getContent();
 	}
-	
+			
+	private static TemplatePosition findTagPosition(TemplateBuffer buffer) {
+		TemplatePosition[] positions= buffer.getVariables();
+		for (int i= 0; i < positions.length; i++) {
+			TemplatePosition curr= positions[i];
+			if (CodeTemplateContextType.TAGS.equals(curr.getName())) {
+				return curr;
+			}
+		}
+		return null;		
+	}
+
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl) throws CoreException {
 		String templateName= decl.isConstructor() ? CodeTemplates.CONSTRUCTORCOMMENT : CodeTemplates.METHODCOMMENT;
 		Template template= CodeTemplates.getCodeTemplate(templateName);
@@ -308,15 +343,74 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, decl.getName().getIdentifier());
 		if (!decl.isConstructor()) {
 			context.setVariable(CodeTemplateContextType.RETURN_TYPE, ASTNodes.asString(decl.getReturnType()));
-		}		
-		String str= context.evaluate(template).getString();
+		}
+		TemplateBuffer buffer= context.evaluate(template);
+		String str= buffer.getString();
 		if (Strings.containsOnlyWhitespaces(str)) {
 			return null;
 		}
-		return str;
+		TemplatePosition position= findTagPosition(buffer);  // look if Javadoc tags have to be added
+		if (position == null) {
+			return str;
+		}
+			
+		TextBuffer textBuffer= TextBuffer.create(str);
+		List params= decl.parameters();
+		String[] paramNames= new String[params.size()];
+		for (int i= 0; i < params.size(); i++) {
+			SingleVariableDeclaration elem= (SingleVariableDeclaration) params.get(i);
+			paramNames[i]= elem.getName().getIdentifier();
+		}
+		List exceptions= decl.thrownExceptions();
+		String[] exceptionNames= new String[exceptions.size()];
+		for (int i= 0; i < exceptions.size(); i++) {
+			exceptionNames[i]= ASTResolving.getSimpleName((Name) exceptions.get(i));
+		}
+		String returnType= !decl.isConstructor() ? ASTNodes.asString(decl.getReturnType()) : null;
+		int[] tagOffsets= position.getOffsets();
+		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
+			insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, false);
+		}
+		return textBuffer.getContent();
 	}	
 	
-	
+	private static void insertTag(TextBuffer textBuffer, int offset, int length, String[] paramNames, String[] exceptionNames, String returnType, boolean isDeprecated) throws CoreException {
+		TextRegion region= textBuffer.getLineInformationOfOffset(offset);
+		if (region == null) {
+			return;
+		}
+		String lineStart= textBuffer.getContent(region.getOffset(), offset - region.getOffset());
+		
+		StringBuffer buf= new StringBuffer();
+		for (int i= 0; i < paramNames.length; i++) {
+			if (buf.length() > 0) {
+				buf.append('\n'); buf.append(lineStart);
+			}
+			buf.append("@param "); buf.append(paramNames[i]); //$NON-NLS-1$
+		}
+		if (returnType != null && !returnType.equals("void")) {
+			if (buf.length() > 0) {
+				buf.append('\n'); buf.append(lineStart);
+			}			
+			buf.append("@return "); buf.append(returnType); //$NON-NLS-1$
+		}
+		if (exceptionNames != null) {
+			for (int i= 0; i < exceptionNames.length; i++) {
+				if (buf.length() > 0) {
+					buf.append('\n'); buf.append(lineStart);
+				}
+				buf.append("@throws "); buf.append(exceptionNames[i]); //$NON-NLS-1$
+			}
+		}		
+		if (isDeprecated) {
+			if (buf.length() > 0) {
+				buf.append('\n'); buf.append(lineStart);
+			}
+			buf.append("@deprecated");
+		}
+		textBuffer.replace(offset, length, buf.toString());
+	}
+
 	public static String getOverridingMethodComment(ICompilationUnit cu, String typeName, IType definingType, String methodName, String[] paramTypeRefs, String[] paramNames, String[] excTypeSig) throws CoreException {
 		IMethod overridden= JavaModelUtil.findMethod(methodName, paramTypeRefs, false, definingType.getMethods());
 		String retTypeSig= Signature.SIG_VOID;

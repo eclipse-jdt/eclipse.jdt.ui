@@ -2,6 +2,13 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
@@ -29,12 +36,15 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String BODY_STATEMENT= "body_statement"; //$NON-NLS-1$
 	public static final String RETURN_TYPE= "return_type"; //$NON-NLS-1$
 	
+	public static final String TAGS= "tags"; //$NON-NLS-1$
+	
 	public static final String FILENAME= "file_name"; //$NON-NLS-1$
 	public static final String PACKAGENAME= "package_name"; //$NON-NLS-1$
 	public static final String PROJECTNAME= "project_name"; //$NON-NLS-1$
 
 	public static final String PACKAGE_STATEMENT= "package_statement"; //$NON-NLS-1$
 	public static final String TYPE_DECLARATION= "type_declaration"; //$NON-NLS-1$
+	public static final String TYPE_COMMENT= "typecomment"; //$NON-NLS-1$
 	
 	public static class CodeTemplateVariable extends TemplateVariable {
 		public CodeTemplateVariable(String name, String description) {
@@ -45,6 +55,16 @@ public class CodeTemplateContextType extends ContextType {
 			return context.getVariable(getName());
 		}
 	}
+	
+	public static class TagsTemplateVariable extends TemplateVariable {
+		public TagsTemplateVariable() {
+			super(TAGS,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.tags"));
+		}
+		
+		public String evaluate(TemplateContext context) {
+			return "@";
+		}
+	}	
 		
 	protected static class Todo extends TemplateVariable {
 
@@ -60,6 +80,8 @@ public class CodeTemplateContextType extends ContextType {
 			return todoTaskTag;
 		}
 	}
+	
+	private IScanner fScanner;
 	
 	
 	public CodeTemplateContextType(String contextName) {
@@ -85,24 +107,29 @@ public class CodeTemplateContextType extends ContextType {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype")));
 			addVariable(new CodeTemplateVariable(BODY_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.bodystatement")));			
 		} else if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
+			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype")));
 			addVariable(new CodeTemplateVariable(PACKAGE_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.packstatement")));
 			addVariable(new CodeTemplateVariable(TYPE_DECLARATION,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typedeclaration")));
+			addVariable(new CodeTemplateVariable(TYPE_COMMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typecomment")));
 			addCompilationUnitVariables();
 		} else if (TYPECOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype")));
+			addVariable(new TagsTemplateVariable());
 			addCompilationUnitVariables();
 		} else if (METHODCOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype")));
 			addVariable(new CodeTemplateVariable(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod")));
 			addVariable(new CodeTemplateVariable(RETURN_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.returntype")));
+			addVariable(new TagsTemplateVariable());
 			addCompilationUnitVariables();
 		} else if (OVERRIDECOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype")));
 			addVariable(new CodeTemplateVariable(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod")));
+			addVariable(new TagsTemplateVariable());
 			addCompilationUnitVariables();
 		} else if (CONSTRUCTORCOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype")));
-			addVariable(new CodeTemplateVariable(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod")));
+			addVariable(new TagsTemplateVariable());
 			addCompilationUnitVariables();
 		}
 	}
@@ -159,5 +186,45 @@ public class CodeTemplateContextType extends ContextType {
 	}
 	
 	
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validate(java.lang.String)
+	 */
+	public String validate(String pattern) throws CoreException {
+		String message= super.validate(pattern);
+		if (message != null) {
+			return message;
+		}
+		String contextName= getName();
+		if (METHODCOMMENT_CONTEXTTYPE.equals(contextName) || CONSTRUCTORCOMMENT_CONTEXTTYPE.equals(contextName) 
+				|| TYPECOMMENT_CONTEXTTYPE.equals(contextName) || OVERRIDECOMMENT_CONTEXTTYPE.equals(contextName)) {
+			if (!isValidComment(pattern)) {
+				return JavaTemplateMessages.getString("CodeTemplateContextType.validate.invalidcomment");
+			}
+		}
+		return null;
+	}
+	
+	private IScanner getScanner() {
+		if (fScanner == null) {
+			fScanner= ToolFactory.createScanner(true, false, false, false);
+		}
+		return fScanner;
+	}
+	
+	
+	private boolean isValidComment(String template) {
+		IScanner scanner= getScanner();
+		scanner.setSource(template.toCharArray());
+		try {
+			int next= scanner.getNextToken();
+			while (next == ITerminalSymbols.TokenNameCOMMENT_LINE || next == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || next == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
+				next= scanner.getNextToken();
+			}
+			return next == ITerminalSymbols.TokenNameEOF;
+		} catch (InvalidInputException e) {
+		}
+		return false;
+	}	
 
 }
