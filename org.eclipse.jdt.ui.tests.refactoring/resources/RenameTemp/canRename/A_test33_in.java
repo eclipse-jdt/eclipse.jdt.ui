@@ -2,7 +2,7 @@
 package p;
 class A{
    A A;
-   A m(){
+   A m(A a){
    	/*[*/A A= null;/*]*/
      A:
         for (;;){
