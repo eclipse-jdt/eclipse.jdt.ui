@@ -624,7 +624,7 @@ public class PackageExplorerPart extends ViewPart
 				for (int i= 0; i < size && current != null && (segment= path.getSegment(i)) != null; i++) {
 					internalExpandToLevel(current, 1);
 					current= internalFindChild(current, segment);
-					if (i == last)
+					if (i == last && current != null)
 						toSelect.add(current);
 				}
 			}

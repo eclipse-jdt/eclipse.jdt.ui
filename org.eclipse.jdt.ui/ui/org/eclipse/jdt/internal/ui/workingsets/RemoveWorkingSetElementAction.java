@@ -51,7 +51,7 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 			if (paths.length != 1)
 				return null;
 			TreePath path= paths[0];
-			if (path.getSegmentCount() == 0)
+			if (path.getSegmentCount() != 2)
 				return null;
 			Object candidate= path.getSegment(0);
 			if (!(candidate instanceof IWorkingSet))

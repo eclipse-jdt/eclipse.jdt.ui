@@ -38,8 +38,11 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -254,6 +257,17 @@ public class ReorgUtils {
 				resources.add(element);
 		}
 		return (IJavaElement[]) resources.toArray(new IJavaElement[resources.size()]);
+	}
+	
+	public static IWorkingSet[] getWorkingSets(List elements) {
+		List result= new ArrayList(1);
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof IWorkingSet) {
+				result.add(element);
+			}
+		}
+		return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
 	}
 	
 	public static boolean isDeletedFromEditor(IJavaElement elem) {
@@ -577,5 +591,16 @@ public class ReorgUtils {
 			}
 		}
 		return result;
+	}
+	
+	public static void splitIntoJavaElementsAndResources(IResource[] resources, List javaElementResult, List resourceResult) {
+		for (int i= 0; i < resources.length; i++) {
+			IResource resource= resources[i];
+			IJavaElement jElement= JavaCore.create(resource);
+			if (jElement != null && jElement.exists())
+				javaElementResult.add(jElement);
+			else
+				resourceResult.add(resource);
+		}
 	}
 }
