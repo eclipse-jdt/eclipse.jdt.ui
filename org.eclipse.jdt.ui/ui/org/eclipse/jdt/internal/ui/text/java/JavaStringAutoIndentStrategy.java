@@ -118,11 +118,6 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				hasLineDelimiters(document, command.text))
 			{
 				javaStringIndentAfterNewLine(document, command);
-				
-			} else if (preferenceStore.getBoolean(CompilationUnitEditor.SKIP_CLOSING_QUOTES) &&
-				command.text.equals("\"")) //$NON-NLS-1$
-			{
-				javaStringSkipQuote(document, command);
 			}
 				
 		} catch (BadLocationException e) {

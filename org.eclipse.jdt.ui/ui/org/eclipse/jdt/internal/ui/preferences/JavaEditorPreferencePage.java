@@ -169,8 +169,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_STRINGS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_BRACKETS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_JAVADOCS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SKIP_CLOSING_QUOTES),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SKIP_CLOSING_BRACKETS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WRAP_STRINGS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ADD_JAVADOC_TAGS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END)
@@ -372,8 +370,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitEditor.CLOSE_STRINGS, true);
 		store.setDefault(CompilationUnitEditor.CLOSE_BRACKETS, true);
 		store.setDefault(CompilationUnitEditor.CLOSE_JAVADOCS, true);
-		store.setDefault(CompilationUnitEditor.SKIP_CLOSING_QUOTES, true);
-		store.setDefault(CompilationUnitEditor.SKIP_CLOSING_BRACKETS, true);
 		store.setDefault(CompilationUnitEditor.WRAP_STRINGS, true);
 		store.setDefault(CompilationUnitEditor.ADD_JAVADOC_TAGS, true);
 		
@@ -762,29 +758,23 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		composite.setLayout(layout);
 
-		String label= JavaUIMessages.getString("JavaEditorPreferencePage.closeStrings"); //$NON-NLS-1$
-		addCheckBox(composite, label, CompilationUnitEditor.CLOSE_STRINGS, 1);
-
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.skipClosingQuotes"); //$NON-NLS-1$
-		addCheckBox(composite, label, CompilationUnitEditor.SKIP_CLOSING_QUOTES, 1);
-
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
+		String label= JavaUIMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
 		addCheckBox(composite, label, CompilationUnitEditor.WRAP_STRINGS, 1);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
 		addCheckBox(composite, label, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END, 1);
-
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeBrackets"); //$NON-NLS-1$
-		addCheckBox(composite, label, CompilationUnitEditor.CLOSE_BRACKETS, 1);
-
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.skipClosingBrackets"); //$NON-NLS-1$
-		addCheckBox(composite, label, CompilationUnitEditor.SKIP_CLOSING_BRACKETS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
 		addCheckBox(composite, label, CompilationUnitEditor.SPACES_FOR_TABS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
 		Button button= addCheckBox(composite, label, CompilationUnitEditor.CLOSE_JAVADOCS, 1);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeStrings"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitEditor.CLOSE_STRINGS, 1);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeBrackets"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitEditor.CLOSE_BRACKETS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
 		fAddJavaDocTagsButton= addCheckBox(composite, label, CompilationUnitEditor.ADD_JAVADOC_TAGS, 1);

@@ -13,6 +13,9 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
@@ -48,6 +51,8 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITextViewerExtension;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
@@ -109,6 +114,9 @@ import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
 
 
 
@@ -455,14 +463,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String OVERVIEW_RULER= "overviewRuler"; //$NON-NLS-1$
 	/** Preference key for automatically closing strings */
 	public final static String CLOSE_STRINGS= "closeStrings"; //$NON-NLS-1$
-	/** Preference key for automatically skipping closing quote */
-	public final static String SKIP_CLOSING_QUOTES= "skipClosingQuotes"; //$NON-NLS-1$
 	/** Preference key for automatically wrapping Java strings */
 	public final static String WRAP_STRINGS= "wrapStrings"; //$NON-NLS-1$
 	/** Preference key for automatically closing brackets and parenthesis */
 	public final static String CLOSE_BRACKETS= "closeBrackets"; //$NON-NLS-1$
-	/** Preference key for automatically skipping closing brackets and parenthesis */
-	public final static String SKIP_CLOSING_BRACKETS= "skipClosingBrackets"; //$NON-NLS-1$
 	/** Preference key for automatically closing javadocs and comments */
 	public final static String CLOSE_JAVADOCS= "closeJavaDocs"; //$NON-NLS-1$
 	/** Preference key for automatically adding javadoc tags */
@@ -495,6 +499,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private ITextSelection fRememberedSelection;
 	/** The remembered java element offset */
 	private int fRememberedElementOffset;
+	/** The bracket inserter. */
+	private BracketInserter fBracketInserter= new BracketInserter();
 	
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
@@ -1103,6 +1109,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	public void dispose() {
 
+		ISourceViewer sourceViewer= getSourceViewer();
+		if (sourceViewer instanceof ITextViewerExtension)
+			((ITextViewerExtension) sourceViewer).removeVerifyKeyListener(fBracketInserter);
+
 		if (fPropertyChangeListener != null) {
 			Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
 			preferences.removePropertyChangeListener(fPropertyChangeListener);
@@ -1151,7 +1161,173 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			showOverviewRuler();
 
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		preferences.addPropertyChangeListener(fPropertyChangeListener);			
+		preferences.addPropertyChangeListener(fPropertyChangeListener);
+		
+		IPreferenceStore preferenceStore= getPreferenceStore();
+		boolean closeBrackets= preferenceStore.getBoolean(CLOSE_BRACKETS);
+		boolean closeStrings= preferenceStore.getBoolean(CLOSE_STRINGS);
+		
+		fBracketInserter.setCloseBracketsEnabled(closeBrackets);
+		fBracketInserter.setCloseStringsEnabled(closeStrings);
+		
+		ISourceViewer sourceViewer= getSourceViewer();
+		if (sourceViewer instanceof ITextViewerExtension)
+			((ITextViewerExtension) sourceViewer).prependVerifyKeyListener(fBracketInserter);
+	}
+	
+	private static char getPeerCharacter(char character) {
+		switch (character) {
+			case '(':
+				return ')';
+				
+			case ')':
+				return '(';
+				
+			case '[':
+				return ']';
+
+			case ']':
+				return '[';
+				
+			case '"':
+				return character;
+			
+			default:
+				throw new IllegalArgumentException();
+		}					
+	}
+	
+	private static class ExitPolicy implements LinkedPositionUI.ExitPolicy {
+		
+		final char fExitCharacter;
+		
+		public ExitPolicy(char exitCharacter) {
+			fExitCharacter= exitCharacter;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
+		 */
+		public ExitFlags doExit(LinkedPositionManager manager, VerifyEvent event, int offset, int length) {
+			
+			if (event.character == fExitCharacter) {
+				if (manager.anyPositionIncludes(offset, length))
+					return new ExitFlags(LinkedPositionUI.COMMIT| LinkedPositionUI.UPDATE_CARET, false);
+				else
+					return new ExitFlags(LinkedPositionUI.COMMIT, true);
+			}	
+			
+			switch (event.character) {			
+			case '\b':
+				if (manager.getFirstPosition().length == 0)
+					return new ExitFlags(0, false);
+				else
+					return null;
+				
+			case '\n':
+			case '\r':
+				return new ExitFlags(LinkedPositionUI.COMMIT, true);
+				
+			default:
+				return null;
+			}						
+		}
+
+	}
+	
+	private class BracketInserter implements VerifyKeyListener, LinkedPositionUI.ExitListener {
+		
+		private boolean fCloseBrackets= true;
+		private boolean fCloseStrings= true;
+		
+		private int fOffset;
+		private int fLength;
+
+		public void setCloseBracketsEnabled(boolean enabled) {
+			fCloseBrackets= enabled;
+		}
+
+		public void setCloseStringsEnabled(boolean enabled) {
+			fCloseStrings= enabled;
+		}
+		
+		/*
+		 * @see org.eclipse.swt.custom.VerifyKeyListener#verifyKey(org.eclipse.swt.events.VerifyEvent)
+		 */
+		public void verifyKey(VerifyEvent event) {			
+
+			if (!event.doit)
+				return;
+
+			final ISourceViewer sourceViewer= getSourceViewer();
+			IDocument document= sourceViewer.getDocument();
+
+			final Point selection= sourceViewer.getSelectedRange();
+			final int offset= selection.x;
+			final int length= selection.y;
+
+			switch (event.character) {
+			case '(':
+			case '[':
+				if (!fCloseBrackets)
+					return;
+			
+			case '"':
+				if (event.character == '"' && !fCloseStrings)
+					return;
+				
+				try {		
+					ITypedRegion partition= document.getPartition(offset);
+					if (! IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()) && partition.getOffset() != offset)
+						return;
+
+					final char character= event.character;
+					final char closingCharacter= getPeerCharacter(character);		
+					final StringBuffer buffer= new StringBuffer();
+					buffer.append(character);
+					buffer.append(closingCharacter);
+
+					document.replace(offset, length, buffer.toString());
+
+					LinkedPositionManager manager= new LinkedPositionManager(document);
+					manager.addPosition(offset + 1, 0);
+
+					fOffset= offset;
+					fLength= 2;
+			
+					LinkedPositionUI editor= new LinkedPositionUI(sourceViewer, manager);
+					editor.setCancelListener(this);
+					editor.setExitPolicy(new ExitPolicy(closingCharacter));
+					editor.setFinalCaretOffset(offset + 2);
+					editor.enter();
+
+					IRegion newSelection= editor.getSelectedRegion();
+					sourceViewer.setSelectedRange(newSelection.getOffset(), newSelection.getLength());
+	
+					event.doit= false;
+
+				} catch (BadLocationException e) {
+				}
+				break;	
+			}
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitListener#exit(boolean)
+		 */
+		public void exit(boolean accept) {
+			if (accept)
+				return;
+
+			// remove brackets
+			try {
+				final ISourceViewer sourceViewer= getSourceViewer();
+				IDocument document= sourceViewer.getDocument();
+				document.replace(fOffset, fLength, null);
+			} catch (BadLocationException e) {
+			}
+		}
+
 	}
 	
 	/*
@@ -1165,7 +1341,17 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			if (asv != null) {
 					
 				String p= event.getProperty();		
-				
+
+				if (CLOSE_BRACKETS.equals(p)) {
+					fBracketInserter.setCloseBracketsEnabled(getPreferenceStore().getBoolean(p));
+					return;	
+				}
+
+				if (CLOSE_STRINGS.equals(p)) {
+					fBracketInserter.setCloseStringsEnabled(getPreferenceStore().getBoolean(p));
+					return;
+				}
+								
 				if (SPACES_FOR_TABS.equals(p)) {
 					if (isTabConversionEnabled())
 						startTabConversion();

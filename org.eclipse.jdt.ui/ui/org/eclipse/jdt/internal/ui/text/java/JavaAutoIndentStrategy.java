@@ -5,7 +5,6 @@ package org.eclipse.jdt.internal.ui.text.java;
  * All Rights Reserved.
  */
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.DocumentCommand;
@@ -13,8 +12,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.ITypedRegion;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 
 /**
@@ -221,77 +218,10 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		
 		return false;
 	}
-	
-	private char getClosingCharacter(char openingCharacter) {
-		switch (openingCharacter) {
-		case '\"':
-		case '\'':
-			return openingCharacter;
-			
-		case '(':
-			return ')';
-			
-		case '{':
-			return '}';
-			
-		case '[':
-			return ']';
-			
-		default:
-			throw new IllegalArgumentException();
-		}
-	}
 
 	private void smartIndentAfterBlockDelimiter(IDocument document, DocumentCommand command) {
-		try {
-			final char character= command.text.charAt(0);
-
-			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-
-			switch (character) {
-			case '}':
-				smartInsertAfterBracket(document, command);
-				break;
-
-			// creating closing peer character
-			case '(':
-				if (preferenceStore.getBoolean(CompilationUnitEditor.CLOSE_BRACKETS) &&
-					(command.offset == document.getLength() ||
-					Character.isWhitespace(document.getChar(command.offset))))
-				{
-					command.doit= false;
-					document.replace(command.offset + command.length, 0, String.valueOf(getClosingCharacter(character)));
-				}
-				break;
-
-			case '[':
-				if (preferenceStore.getBoolean(CompilationUnitEditor.CLOSE_BRACKETS)) {
-					command.doit= false;
-					document.replace(command.offset + command.length, 0, String.valueOf(getClosingCharacter(character)));
-				}
-				break;
-				
-			case '\"':
-				if (preferenceStore.getBoolean(CompilationUnitEditor.CLOSE_STRINGS)) {
-					command.doit= false;
-					document.replace(command.offset + command.length, 0, String.valueOf(getClosingCharacter(character)));
-				}
-				break;
-
-			// try eating closing peer character
-			case ')':
-			case ']':
-				if (preferenceStore.getBoolean(CompilationUnitEditor.SKIP_CLOSING_BRACKETS) &&
-					document.getChar(command.offset) == character)
-				{
-					command.length++;
-				}
-				break;
-			}
-
-		} catch (BadLocationException e) {
-			System.out.println(JavaTextMessages.getString("AutoIndent.error.bad_location.message1")); //$NON-NLS-1$
-		}
+		if (command.text.charAt(0) == '}')
+			smartInsertAfterBracket(document, command);
 	}
 
 	/*
