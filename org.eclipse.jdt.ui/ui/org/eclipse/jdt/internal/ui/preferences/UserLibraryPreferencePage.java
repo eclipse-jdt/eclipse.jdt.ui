@@ -357,24 +357,29 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 		 */
 		protected void okPressed() {
-			if (isSave() && fLastFile != null) {
-				String title= PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.overwrite.title"); //$NON-NLS-1$
-				String message= PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.overwrite.message"); //$NON-NLS-1$
-				if (!MessageDialog.openQuestion(getShell(), title, message)) {
-					return;
+			if (isSave()) {
+				final File file= new File(fLocationField.getText());
+				if (file.exists()) {
+					String title= PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.overwrite.title"); //$NON-NLS-1$
+					String message= PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.overwrite.message"); //$NON-NLS-1$
+					if (!MessageDialog.openQuestion(getShell(), title, message)) {
+						return;
+					}
 				}
 				final List elements= fExportImportList.getCheckedElements();
+
 				BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 				try {
 					context.run(true, true, new IRunnableWithProgress() {
 						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 							try {
-								saveLibraries(elements, fLastFile, monitor);
+								saveLibraries(elements, file, monitor);
 							} catch (IOException e) {
 								throw new InvocationTargetException(e);
 							}
 						}
 					});
+					fSettings.put(PREF_LASTPATH, file.getPath());
 				} catch (InvocationTargetException e) {
 					String errorTitle= PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.save.errordialog.title"); //$NON-NLS-1$
 					String errorMessage= PreferencesMessages.getFormattedString("UserLibraryPreferencePage.LoadSaveDialog.save.errordialog.message", e.getMessage()); //$NON-NLS-1$
@@ -389,6 +394,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		
 		private IStatus validateSettings() {
 			String name= fLocationField.getText();
+			fLastFile= null;
 			if (isSave()) {
 				if (name.length() == 0) {
 					return new StatusInfo(IStatus.ERROR, PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.location.error.save.enterlocation")); //$NON-NLS-1$
