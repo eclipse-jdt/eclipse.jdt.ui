@@ -15,7 +15,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -217,17 +216,17 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 
 	public String getNewGetterName() throws JavaModelException {
-		return NamingConventions.suggestGetterName(fField.getJavaProject(), fNewName, fField.getFlags(), isBoolean(fField), null);
+		IMethod primaryGetterCandidate= JavaModelUtil.findMethod(GetterSetterUtil.getGetterName(fField, new String[0]), new String[0], false, fField.getDeclaringType());
+		if (! JavaModelUtil.isBoolean(fField) || (primaryGetterCandidate != null && primaryGetterCandidate.exists()))
+			return NamingConventions.suggestGetterName(fField.getJavaProject(), fNewName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
+		//bug 30906 describes why we need to look for other alternatives here	
+		return NamingConventions.suggestGetterName(fField.getJavaProject(), fNewName, fField.getFlags(), false, null);
 	}
 
 	public String getNewSetterName() throws JavaModelException {
-		return NamingConventions.suggestSetterName(fField.getJavaProject(), fNewName, fField.getFlags(), isBoolean(fField), null);
+		return NamingConventions.suggestSetterName(fField.getJavaProject(), fNewName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
 	}
 
-	private static boolean isBoolean(IField field) throws JavaModelException{
-		return Signature.SIG_BOOLEAN.equals(field.getTypeSignature());
-	}
-	
 	//----------
 	
 	/* non java-doc
