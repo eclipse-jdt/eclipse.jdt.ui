@@ -27,10 +27,12 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -113,6 +115,10 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 		int k= 0; // index over the oldParameters
 		ArrayList createdVariables= new ArrayList();
 		ArrayList usedNames= new ArrayList();
+		IVariableBinding[] declaredFields= fSenderBinding.getDeclaringClass().getDeclaredFields();
+		for (int i= 0; i < declaredFields.length; i++) { // avoid to take parameter names that are equal to field names
+			usedNames.add(declaredFields[i].getName());
+		}		
 		
 		for (int i= 0; i < fParameterChanges.length; i++) {
 			ChangeDescription curr= fParameterChanges[i];
@@ -172,18 +178,20 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 		for (int i= 0; i < createdVariables.size(); i++) {
 			SingleVariableDeclaration var= (SingleVariableDeclaration) createdVariables.get(i);
 			String suggestedName= (String) var.getProperty(NAME_SUGGESTION);
-			int dim= 0;
+
+			String name;
+			String[] excludedNames= (String[]) usedNames.toArray(new String[usedNames.size()]);
 			if (suggestedName == null) {
 				Type type= var.getType();
+				int dim= 0;
 				if (type.isArrayType()) {
 					dim= ((ArrayType) type).getDimensions();
 					type= ((ArrayType) type).getElementType();
 				}
-				suggestedName= ASTNodes.asString(type);
+				name= NamingConventions.suggestArgumentNames(getCompilationUnit().getJavaProject(), "", ASTNodes.asString(type), dim, excludedNames)[0]; //$NON-NLS-1$
+			} else {
+				name= StubUtility.guessArgumentName(getCompilationUnit().getJavaProject(), suggestedName, excludedNames);
 			}
-			String[] excludedNames= (String[]) usedNames.toArray(new String[usedNames.size()]);
-			
-			String name= NamingConventions.suggestArgumentNames(getCompilationUnit().getJavaProject(), "", suggestedName, dim, excludedNames)[0]; //$NON-NLS-1$
 			var.setName(ast.newSimpleName(name));
 			usedNames.add(name);
 		}

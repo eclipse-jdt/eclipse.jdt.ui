@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -100,13 +101,18 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		List params= decl.parameters();
 		
 		int nArguments= arguments.size();
-		ArrayList names= new ArrayList(nArguments);
+		ArrayList takenNames= new ArrayList(nArguments);
+		IVariableBinding[] declaredFields= fSenderBinding.getDeclaredFields();
+		for (int i= 0; i < declaredFields.length; i++) { // avoid to take parameter names that are equal to field names
+			takenNames.add(declaredFields[i].getName());
+		}
+		
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression elem= (Expression) arguments.get(i);
 			SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 			Type type= getParameterType(ast, elem);
 			param.setType(type);
-			param.setName(ast.newSimpleName(getParameterName(names, elem, type)));
+			param.setName(ast.newSimpleName(getParameterName(takenNames, elem, type)));
 			params.add(param);
 		}
 		
@@ -148,13 +154,13 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	}
 			
 	private String getParameterName(ArrayList takenNames, Expression argNode, Type type) {
+		IJavaProject project= getCompilationUnit().getJavaProject();
+		String[] excludedNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
 		if (argNode instanceof SimpleName) {
-			String name= ((SimpleName) argNode).getIdentifier();
-			while (takenNames.contains(name)) {
-				name += '1';
-			}
-			takenNames.add(name);
-			return name;
+			SimpleName name= (SimpleName) argNode;
+			String suggestion= StubUtility.guessArgumentName(project, name.getIdentifier(), excludedNames);
+			takenNames.add(suggestion);
+			return suggestion;
 		}
 		
 		int dim= 0;
@@ -166,8 +172,6 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		String typeName= ASTNodes.asString(type);
 		String packName= Signature.getQualifier(typeName);
 		
-		IJavaProject project= getCompilationUnit().getJavaProject();
-		String[] excludedNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
 		String[] names= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excludedNames);
 		takenNames.add(names[0]);
 		return names[0];

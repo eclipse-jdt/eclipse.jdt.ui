@@ -887,5 +887,22 @@ public class StubUtility {
 		}
 		return null;
 	}
+	
+	/*
+	 * Workaraound for bug 38111
+	 */
+	public static String guessArgumentName(IJavaProject project, String baseName, String[] excluded) {
+		String name= Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
+		String[] argname= NamingConventions.suggestArgumentNames(project, "", name, 0, excluded); //$NON-NLS-1$
+		String longest= null;
+		for (int i= 0; i < argname.length; i++) {
+			if (longest == null || argname[i].length() > longest.length()) {
+				longest= argname[i];
+			}
+		}
+		return longest;
+	}
+	
+	
 
 }
