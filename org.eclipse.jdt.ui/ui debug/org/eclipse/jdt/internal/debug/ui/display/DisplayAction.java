@@ -4,8 +4,8 @@
  */
 package org.eclipse.jdt.internal.debug.ui.display;
 
-import java.util.ResourceBundle;import org.eclipse.core.resources.IMarker;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.debug.core.DebugException;import org.eclipse.swt.widgets.Display;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.ui.texteditor.MarkerUtilities;import org.eclipse.jdt.debug.core.IJavaEvaluationResult;import org.eclipse.jdt.debug.core.IJavaValue;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import java.util.ResourceBundle;import org.eclipse.core.resources.IMarker;import org.eclipse.debug.core.DebugException;import org.eclipse.swt.widgets.Display;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.jdt.debug.core.IJavaEvaluationResult;import org.eclipse.jdt.debug.core.IJavaValue;
 
 
 /**
@@ -41,19 +41,6 @@ public class DisplayAction extends EvaluateAction {
 			reportProblems(problems);
 	}
 	
-	protected void reportProblems(IMarker[] problems) {
-		
-		String defaultMsg= getErrorResourceString("unqualified");
-		
-		StringBuffer buffer= new StringBuffer();
-		for (int i= 0; i < problems.length; i++) {
-			if (i > 0) buffer.append('\n');
-			buffer.append(problems[i].getAttribute(IMarker.MESSAGE, defaultMsg));
-		}
-		
-		reportError(buffer.toString());
-	}
-		
 	protected void insertResult(IJavaValue result) {
 		
 		StringBuffer resultString= new StringBuffer();

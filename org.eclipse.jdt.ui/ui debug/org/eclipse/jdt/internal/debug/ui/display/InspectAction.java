@@ -22,7 +22,7 @@ public class InspectAction extends EvaluateAction {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					if (res.hasProblems()) {
-						showProblems(res);
+						reportProblems(res.getProblems());
 					} else {
 						DebugUITools.inspect(res.getSnippet().trim(), value);
 					}
