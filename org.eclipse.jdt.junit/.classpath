@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
     <classpathentry kind="src" path="Eclipse JUnit"/>
-    <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
+    <classpathentry kind="src" path="/org.eclipse.core.boot"/>
+    <classpathentry kind="src" path="/org.eclipse.core.runtime"/>
+    <classpathentry kind="src" path="/org.eclipse.ui"/>
+    <classpathentry kind="src" path="/org.eclipse.core.resources"/>
     <classpathentry kind="src" path="/org.eclipse.debug.core"/>
     <classpathentry kind="src" path="/org.eclipse.debug.ui"/>
-    <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
+    <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.ui"/>
-    <classpathentry kind="src" path="/org.eclipse.ui"/>
-    <classpathentry kind="lib"
-        path="/org.eclipse.core.runtime/runtime.jar" sourcepath="/org.eclipse.core.runtime/runtimesrc.zip"/>
-    <classpathentry kind="lib"
-        path="/org.eclipse.core.resources/resources.jar" sourcepath="/org.eclipse.core.resources/resourcessrc.zip"/>
-    <classpathentry kind="lib" path="/org.eclipse.core.boot/boot.jar" sourcepath="/org.eclipse.core.boot/bootsrc.zip"/>
-    <classpathentry kind="lib" path="/org.junit/junit.jar" sourcepath="D:/junit3.7/src.jar"/>
-    <classpathentry kind="var" path="JRE_LIB"
-        rootpath="M:/JAVA/JDK/IBM JRE 1.3 src/src.jar" sourcepath="JRE_SRC"/>
-    <classpathentry kind="lib" path="/org.eclipse.swt/ws/win32/swt.jar"
-        rootpath="common" sourcepath="/org.eclipse.swt/swtsrc.zip"/>
+    <classpathentry kind="src" path="/org.eclipse.jdt.debug"/>
+    <classpathentry kind="src" path="/org.eclipse.swt"/>
+    <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
+    <classpathentry kind="src" path="/org.apache.xerces"/>
+    <classpathentry kind="src" path="/org.junit"/>
+    <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>

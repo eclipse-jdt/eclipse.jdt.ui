@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -99,8 +100,8 @@ public class TypeInfoTest extends TestCase {
 		ArrayList result= new ArrayList();
 
 
-		IResource[] resources= new IResource[] {fJProject1.getJavaProject().getProject()};
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(resources);
+		IJavaElement[] elements= new IJavaElement[] { fJProject1 };
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 		ITypeNameRequestor requestor= new TypeInfoRequestor(result);
 		SearchEngine engine= new SearchEngine();
 
