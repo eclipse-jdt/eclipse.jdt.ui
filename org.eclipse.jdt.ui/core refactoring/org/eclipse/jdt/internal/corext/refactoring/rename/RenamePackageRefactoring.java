@@ -7,7 +7,6 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -21,7 +20,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -298,11 +296,6 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		return new RefactoringStatus();
 	}
 		
-	//-------------- AST visitor-based analysis
-	
-	/*
-	 * Analyzes all compilation units in which type is referenced
-	 */
 	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
@@ -310,25 +303,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			return result;
 		
 		result.merge(Checks.checkCompileErrorsInAffectedFiles(fOccurrences));	
-		
-		pm.beginTask("", fOccurrences.length);	 //$NON-NLS-1$
-		RenamePackageASTAnalyzer analyzer= new RenamePackageASTAnalyzer(fNewName);
-		for (int i= 0; i < fOccurrences.length; i++){
-			if (pm.isCanceled())
-				throw new OperationCanceledException();
-			
-			analyzeCompilationUnit(pm, analyzer, fOccurrences[i], result);
-			pm.worked(1);
-		}
 		return result;
-	}
-	
-	private void analyzeCompilationUnit(IProgressMonitor pm, RenamePackageASTAnalyzer analyzer, SearchResultGroup searchResults, RefactoringStatus result)  throws JavaModelException {
-		CompilationUnit cu= (CompilationUnit) (JavaCore.create(searchResults.getResource()));
-		pm.subTask(RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.analyzing_formatted", cu.getElementName())); //$NON-NLS-1$
-		if ((! cu.exists()) || (cu.isReadOnly()) || (!cu.isStructureKnown()))
-			return;
-		result.merge(analyzer.analyze(searchResults.getSearchResults(), cu));
 	}
 	
 	// ----------- Changes ---------------
