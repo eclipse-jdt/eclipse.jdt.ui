@@ -38,5 +38,7 @@ public class PerformanceTestSuite extends TestSuite {
 		addTestSuite(ScrollAnnotatedJavaEditorTest.class);
 		addTest(new OpenJavaEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
 		addTest(new OpenTextEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
+		addTestSuite(MouseScrollJavaEditorTest.class);
+		addTestSuite(MouseScrollTextEditorTest.class);
 	}
 }
