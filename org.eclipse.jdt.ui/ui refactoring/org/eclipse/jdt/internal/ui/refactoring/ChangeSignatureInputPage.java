@@ -70,7 +70,7 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.MODIFY_PARAMETERS_WIZARD_PAGE);
 	}
 
-	private void createReturnTypeControl(Composite parent) {
+	private void createReturnTypeControl(Composite parent) throws JavaModelException {
 			Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 			GridLayout layout= new GridLayout();
