@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterActionGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
@@ -162,14 +163,20 @@ public class MembersView extends JavaBrowsingPart {
 			return null;
 			
 		switch (je.getElementType()) {
-			case IJavaElement.METHOD:
-			case IJavaElement.FIELD:
 			case IJavaElement.TYPE:
-				IType type= ((IMember)je).getDeclaringType();
+				IType type= ((IType)je).getDeclaringType();
 				if (type == null)
 					return je;
 				else
 					return findInputForJavaElement(type);
+			case IJavaElement.COMPILATION_UNIT:
+				return getTypeForCU((ICompilationUnit)je);
+			case IJavaElement.CLASS_FILE:
+				try {
+					return findInputForJavaElement(((IClassFile)je).getType());
+				} catch (JavaModelException ex) {
+					return null;
+				}
 			case IJavaElement.IMPORT_DECLARATION:
 				return findInputForJavaElement(je.getParent());
 			case IJavaElement.PACKAGE_DECLARATION:
@@ -188,14 +195,11 @@ public class MembersView extends JavaBrowsingPart {
 						return null;
 				}
 				else if (parent instanceof IClassFile)
-					try {
-						return ((IClassFile)parent).getType();
-					} catch (JavaModelException ex) {
-						// no input
-					}
-				return null;
+					return findInputForJavaElement(parent);
+			default:
+				if (je instanceof IMember)
+					return findInputForJavaElement(((IMember)je).getDeclaringType());
 		}
-		return super.findInputForJavaElement(je);
+		return null; 	
 	}
-		
 }

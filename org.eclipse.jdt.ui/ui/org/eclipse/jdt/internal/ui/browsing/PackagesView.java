@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.ui.jarpackager.LibraryFilter;
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.packageview.EmptyPackageFilter;
+import org.eclipse.jdt.internal.ui.packageview.JavaElementPatternFilter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
@@ -33,6 +34,9 @@ public class PackagesView extends JavaBrowsingPart {
 		getViewer().addFilter(new EmptyInnerPackageFilter());
 		getViewer().addFilter(new NonJavaElementFilter());
 		getViewer().addFilter(new LibraryFilter());
+		JavaElementPatternFilter patternFilter= new JavaElementPatternFilter();
+		patternFilter.setPatterns(new String[] {"CVS", "*.CVS"});
+		getViewer().addFilter(patternFilter);
 	}
 
 	/**
@@ -59,13 +63,6 @@ public class PackagesView extends JavaBrowsingPart {
 	/*
 	 * Gets suitable input.
 	 */
-	protected Set getInputFromSelection(ISelection selection) {
-		Set list= super.getInputFromSelection(selection);
-		if (list.size() == 1)
-			return list;
-		else
-			return Collections.EMPTY_SET;
-	}
 
 	/**
 	 * Answers if the given <code>element</code> is a valid

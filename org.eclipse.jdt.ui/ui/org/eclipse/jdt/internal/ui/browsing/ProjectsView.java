@@ -104,4 +104,14 @@ public class ProjectsView extends JavaBrowsingPart {
 				return findElementToSelect(je.getParent());
 		}
 	}
+	
+	/*
+	 * @see JavaBrowsingPart#setInput(Object)
+	 */
+	protected void setInput(Object input) {
+		// Don't allow to clear input for this view
+		if (input != null)
+			super.setInput(input);
+	}
+
 }

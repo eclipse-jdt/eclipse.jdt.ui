@@ -102,8 +102,16 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 				}
 			}
 		}
-		else
-			sourceRefs= fragment.getClassFiles();
+		else {
+			IClassFile[] classFiles= fragment.getClassFiles();
+			List topLevelClassFile= new ArrayList();
+			for (int i= 0; i < classFiles.length; i++) {
+				IType type= classFiles[i].getType();
+				if (type != null && type.getDeclaringType() == null)
+					topLevelClassFile.add(classFiles[i]);
+			}
+			sourceRefs= (ISourceReference[])topLevelClassFile.toArray(new ISourceReference[topLevelClassFile.size()]);
+		}
 
 		Object[] result= new Object[0];
 		for (int i= 0; i < sourceRefs.length; i++)
@@ -243,24 +251,8 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 			return;
 		}
 		if (kind == IJavaElementDelta.ADDED) {
-			Object parent= internalGetParent(element);
-			// we are filtering out empty subpackages, so we
-			// have to handle additions to them specially. 
-			if (parent instanceof IPackageFragment) {
-				Object grandparent= internalGetParent(parent);
-				// avoid posting a refresh to an unvisible parent
-				if (parent.equals(fInput)) {
-					postRefresh(parent);
-				} else {
-					// refresh from grandparent if parent isn't visible yet
-					if (fViewer.testFindItem(parent) == null)
-						postRefresh(grandparent);
-					else {
-						postRefresh(parent);
-					}	
-				}
-			}
-			if (fBrowsingPart.isValidElement(element))
+			if (fBrowsingPart.isValidElement(element)) {
+				Object parent= internalGetParent(element);				
 				if (element instanceof IClassFile) {
 					postAdd(parent, ((IClassFile)element).getType());
 				} else if (element instanceof ICompilationUnit && !((ICompilationUnit)element).isWorkingCopy()) {
@@ -270,12 +262,12 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 					//	do nothing
 				} else
 					postAdd(parent, element);
-			
-			if (fInput == null) {
+			} else	if (fInput == null) {
 				IJavaElement newInput= fBrowsingPart.findInputForJavaElement(element);
 				if (newInput != null)
 					postAdjustInputAndSetSelection(element);
 			}
+			return;
 		}
 
 		if (element instanceof IType && fBrowsingPart.isValidInput(element))
@@ -360,7 +352,8 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 						((ListViewer)fViewer).add(elements);
 					else if (fViewer instanceof TableViewer)
 						((TableViewer)fViewer).add(elements);
-					fBrowsingPart.adjustInputAndSetSelection((IJavaElement)elements[0]);
+					if (fViewer.testFindItem(elements[0]) != null)
+						fBrowsingPart.adjustInputAndSetSelection((IJavaElement)elements[0]);
 					ctrl.setRedraw(true);
 				}
 			}

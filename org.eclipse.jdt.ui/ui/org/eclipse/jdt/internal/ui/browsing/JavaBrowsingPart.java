@@ -5,11 +5,7 @@
 package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -76,6 +72,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -84,10 +81,13 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
+import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -133,7 +133,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private UpAction fUpAction;
 //	private GotoTypeAction fGotoTypeAction;
 //	private GotoPackageAction fGotoPackageAction;
-	private IWorkbenchPart fInputSource;
+	private IWorkbenchPart fPreviousSelectionProvider;
 	private Image fOriginalTitleImage;
 		
 	/*
@@ -475,10 +475,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	private boolean isInputResetBy(Object newInput, Object input, IWorkbenchPart part) {
 		if (newInput == null)
-			return part == fInputSource;
-
+			return part == fPreviousSelectionProvider;
+			
 		if (input instanceof IJavaElement && newInput instanceof IJavaElement)
-			return getTypeComparator().compare(newInput, input)  >= 0;
+			return getTypeComparator().compare(newInput, input)  > 0;
 		else
 			return false;
 	}
@@ -500,52 +500,41 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		if (!fProcessSelectionEvents || part == this || !(selection instanceof IStructuredSelection))
 			return;
-
+			
+		if (selection.isEmpty() && part instanceof JavaBrowsingPart && !(part instanceof ProjectsView))
+			return;
+		
 		// Set input
-		Set newInput= getInputFromSelection(selection);
-		if (!newInput.isEmpty()) {
-			setInput(newInput);
-			fInputSource= part;
+		Object newInput= getElementFromSingleSelection(selection);
+		Object currentInput= (IJavaElement)getViewer().getInput();
+		if (newInput != null && newInput.equals(currentInput)) {
+			IJavaElement elementToSelect= findElementToSelect(getElementFromSingleSelection(selection));
+			if (elementToSelect != null && getTypeComparator().compare(newInput, elementToSelect) < 0)
+				setSelection(new StructuredSelection(elementToSelect), true);
+			fPreviousSelectionProvider= part;
 			return;
 		}
 
-		// Clear input
-		Object inputElement= getFirstElement(getViewer().getInput());
-		Object newInputElement= getFirstElement(getFirstElement(selection));
-		if (isInputResetBy(newInputElement, inputElement, part)) {
-			if (!isAncestorOf(newInputElement, inputElement))
+		// Clear input if needed
+		if (part != fPreviousSelectionProvider && newInput != null && !newInput.equals(currentInput) && isInputResetBy(newInput, currentInput, part)) {
+			if (!isAncestorOf(newInput, currentInput))
 				setInput(null);
+			fPreviousSelectionProvider= part;
+			return;
+		} else if (newInput == null && part == fPreviousSelectionProvider) {
+			setInput(null);
+			fPreviousSelectionProvider= part;
 			return;
 		}
-
+		fPreviousSelectionProvider= part;
+		
 		// Set selection
-		Object firstElement= getFirstElement(selection);
-		if (firstElement instanceof IJavaElement)
-			adjustInputAndSetSelection((IJavaElement)firstElement);
+		if (newInput instanceof IJavaElement)
+			adjustInputAndSetSelection((IJavaElement)newInput);
 		else
 			setSelection(StructuredSelection.EMPTY, true);
 	}
 
-	/**
-	 * Answers if the given <code>element</code> is a valid
-	 * input for this part.
-	 * 
-	 * @param 	element	the object to test
-	 * @return	<true> if the given element is a valid input
-	 */
-	protected Set getInputFromSelection(ISelection selection) {
-		if (!(selection instanceof IStructuredSelection))
-			return Collections.EMPTY_SET;
-		Set elements= new HashSet();
-		Iterator iter= ((IStructuredSelection)selection).iterator();
-		while (iter.hasNext()) {
-			IJavaElement element= getSuitableJavaElement(iter.next());
-			if (!isValidInput(element))
-				return Collections.EMPTY_SET;
-			elements.add(element);
-		}
-		return elements;
-	}
 
 	protected void setInput(Object input) {
 		if (input == null)
@@ -635,16 +624,14 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	protected void setInitialInput() {
 		// Use the selection, if any
 		ISelection selection= getSite().getPage().getSelection();
-		if (selection != null && !selection.isEmpty())
-			setInput(getInputFromSelection(selection));
-		else {
+		Object input= getElementFromSingleSelection(selection);
+		if (!(input instanceof IJavaElement)) {
 			// Use the input of the page
-			Object input= getSite().getPage().getInput();
+			input= getSite().getPage().getInput();
 			if (!(input instanceof IJavaElement) && input instanceof IAdaptable)
 				input= ((IAdaptable)input).getAdapter(IJavaElement.class);
-			if (isValidInput(input))
-				setInput(input);
 		}
+		setInput(findInputForJavaElement((JavaElement)input));		
 	}
 
 	protected void setInitialSelection() {
@@ -652,7 +639,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		Object input;
 		ISelection selection= getSite().getPage().getSelection();
 		if (selection != null && !selection.isEmpty())
-			input= getFirstElement(selection);
+			input= getElementFromSingleSelection(selection);
 		else {
 			// Use the input of the page
 			input= getSite().getPage().getInput();
@@ -662,7 +649,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			else
 				return;
 		}
-		if (input instanceof IJavaElement && findElementToSelect((IJavaElement)input) != null)
+		if (findElementToSelect((IJavaElement)input) != null)
 			adjustInputAndSetSelection((IJavaElement)input);
 	}
 
@@ -733,7 +720,12 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		return findInputForJavaElement(je.getParent());
 	}
 	
-
+	final protected IJavaElement findElementToSelect(Object obj) {
+		if (obj instanceof IJavaElement)
+			return findElementToSelect((IJavaElement)obj);
+		return null;
+	}
+	
 	/**
 	 * Finds the element which has to be selected in this part.
 	 * 
@@ -741,25 +733,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 */
 	abstract protected IJavaElement findElementToSelect(IJavaElement je);
 	
-	Object getFirstElement(Object object) {
-		if (object instanceof StructuredSelection)
-			return ((StructuredSelection)object).getFirstElement();
 
-		if (object instanceof Collection) {
-			Collection col= (Collection)object;
-			if (col.isEmpty())
-				return null;
-			else
-				return col.iterator().next();
-		} 
-		if (object instanceof Object[]) {
-			Object[] array= (Object[])object;
-			if (array.length > 0)
-				return array[0];
-			else
-				return null;
-		}
-		return object;
+	private Object getElementFromSingleSelection(ISelection selection) {
+		if (selection instanceof StructuredSelection
+			&& ((StructuredSelection)selection).size() == 1)
+				return ((StructuredSelection)selection).getFirstElement();
+
+		return null;
 	}
 
 	/**
@@ -994,4 +974,24 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			}
 		return null;
 	}
+	
+	protected IType getTypeForCU(ICompilationUnit cu) {
+		cu= (ICompilationUnit)getSuitableJavaElement(cu);
+		
+		// Use primary type if possible
+		IType primaryType= JavaModelUtil.findPrimaryType(cu);
+		if (primaryType != null)
+			return primaryType;
+
+		// Use first top-level type
+		try {
+			IType[] types= cu.getTypes();
+			if (types.length > 0)
+				return types[0];
+			else
+				return null;
+		} catch (JavaModelException ex) {
+			return null;
+		}
+	}	
 }

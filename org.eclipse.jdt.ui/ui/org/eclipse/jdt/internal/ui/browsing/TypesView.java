@@ -62,8 +62,10 @@ public class TypesView extends JavaBrowsingPart {
 	protected boolean isValidElement(Object element) {
 		if (element instanceof ICompilationUnit)
 			return super.isValidElement(((ICompilationUnit)element).getParent());
-		else if (element instanceof IType)
-			return isValidElement(((IType)element).getCompilationUnit());
+		else if (element instanceof IType) {
+			IType type= (IType)element;
+			return type.getDeclaringType() == null && isValidElement(type.getCompilationUnit());
+		}
 		return false;
 	}
 
@@ -83,18 +85,10 @@ public class TypesView extends JavaBrowsingPart {
 					type= (IType)je;
 				return getSuitableJavaElement(type);
 			case IJavaElement.COMPILATION_UNIT:
-				try {
-					IType[] types= ((ICompilationUnit)getSuitableJavaElement(je)).getTypes();
-					if (types.length > 0)
-						return types[0];
-					else
-						return null;
-				} catch (JavaModelException ex) {
-					return null;
-				}
+				return getTypeForCU((ICompilationUnit)je);
 			case IJavaElement.CLASS_FILE:
 				try {
-					return ((IClassFile)je).getType();
+					return findElementToSelect(((IClassFile)je).getType());
 				} catch (JavaModelException ex) {
 					return null;
 				}
@@ -103,11 +97,10 @@ public class TypesView extends JavaBrowsingPart {
 			case IJavaElement.PACKAGE_DECLARATION:
 				return findElementToSelect(je.getParent());
 			default:
-				if (je instanceof IMember) {
-					je= ((IMember)je).getDeclaringType();
-					return getSuitableJavaElement(je);
-				}
-				return null; 
+				if (je instanceof IMember)
+					return findElementToSelect(((IMember)je).getDeclaringType());
+				return null;
+
 		}
 	}
 
