@@ -213,14 +213,14 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			result.merge(checkNewElementName(getNewElementName()));
 			pm.worked(1);
 			
-			boolean mustAnalyzeShadowing= true;
+			boolean mustAnalyzeShadowing;
 			IMethod[] newNameMethods= searchForDeclarationsOfClashingMethods(new SubProgressMonitor(pm, 2));
 			if (newNameMethods.length == 0) {
 				mustAnalyzeShadowing= false;
 				pm.worked(2);
 			} else {
-				IType[] declaringTypes= searchForDeclaringTypesOfReferences(newNameMethods, new SubProgressMonitor(pm, 3));
-				if (declaringTypes.length > 0) {
+				IType[] outerTypes= searchForOuterTypesOfReferences(newNameMethods, new SubProgressMonitor(pm, 3));
+				if (outerTypes.length > 0) {
 					//There exists a reference to a clashing method, where the reference is in a nested type.
 					//That nested type could be a type in a ripple method's hierarchy, which could
 					//cause the reference to bind to the new ripple method instead of to
@@ -228,7 +228,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					//-> Getting *more* references than before -> Semantics not preserved.
 					//Example: RenamePrivateMethodTests#testFail6()
 					//TODO: could pass declaringTypes to the RippleMethodFinder and check whether
-					//a hierarchy contains one of declaringTypes (or an outer type).
+					//a hierarchy contains one of outerTypes (or an outer type of an outerType, recursively).
 					mustAnalyzeShadowing= true;
 					
 				} else {
@@ -288,21 +288,24 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		}	
 	}
 	
-	private IType[] searchForDeclaringTypesOfReferences(IMethod[] newNameMethods, IProgressMonitor pm) throws CoreException {
-		final Set declaringTypesOfReferences= new HashSet();
+	private IType[] searchForOuterTypesOfReferences(IMethod[] newNameMethods, IProgressMonitor pm) throws CoreException {
+		final Set outerTypesOfReferences= new HashSet();
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(newNameMethods, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= createRefactoringScope(getMethod());
 		SearchRequestor requestor= new SearchRequestor() {
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
 				IMember member= (IMember) match.getElement();
 				IType declaring= member.getDeclaringType();
-				if (declaring != null)
-					declaringTypesOfReferences.add(declaring);
+				if (declaring == null)
+					return;
+				IType outer= declaring.getDeclaringType();
+				if (outer != null)
+					outerTypesOfReferences.add(declaring);
 			}
 		};
 		new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(),
 				scope, requestor, pm);
-		return (IType[]) declaringTypesOfReferences.toArray(new IType[declaringTypesOfReferences.size()]);
+		return (IType[]) outerTypesOfReferences.toArray(new IType[outerTypesOfReferences.size()]);
 	}
 
 	private IMethod[] searchForDeclarationsOfClashingMethods(IProgressMonitor pm) throws CoreException {

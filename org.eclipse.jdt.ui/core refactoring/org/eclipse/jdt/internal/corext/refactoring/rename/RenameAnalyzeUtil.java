@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.text.edits.TextEdit;
 
@@ -201,9 +202,10 @@ class RenameAnalyzeUtil {
 			}
 		}
 		
-		for (Iterator iter= cuToNewResults.keySet().iterator(); iter.hasNext();) {
-			ICompilationUnit cu= (ICompilationUnit) iter.next();
-			SearchMatch[] newSearchMatches= (SearchMatch[]) cuToNewResults.remove(cu);
+		for (Iterator iter= cuToNewResults.entrySet().iterator(); iter.hasNext();) {
+			Map.Entry entry= (Entry) iter.next();
+			ICompilationUnit cu= (ICompilationUnit) entry.getKey();
+			SearchMatch[] newSearchMatches= (SearchMatch[]) entry.getValue();
 			for (int i= 0; i < newSearchMatches.length; i++) {
 				SearchMatch newMatch= newSearchMatches[i];
 				addReferenceShadowedError(cu, newMatch, newElementName, result);
