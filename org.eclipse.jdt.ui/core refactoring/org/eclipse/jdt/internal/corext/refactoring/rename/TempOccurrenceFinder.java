@@ -69,21 +69,21 @@ public class TempOccurrenceFinder {
 			return (ASTNode[]) fNodes.toArray(new ASTNode[fNodes.size()]);
 		}
 		
+				
 		private boolean visitNameReference(Name nameReference){
-			if (!fIncludeReferences)
-				return true;	
-
-			if (fTempBinding != null && fTempBinding == nameReference.resolveBinding())
+			if (nameReference.getParent() instanceof VariableDeclaration){
+				if (((VariableDeclaration)nameReference.getParent()).getName() == nameReference)
+					return true;
+			}
+			
+			if (fIncludeReferences && fTempBinding != null && fTempBinding == nameReference.resolveBinding())
 				fNodes.add(nameReference);
 					
 			return true;
 		}
 
 		private boolean visitVariableDeclaration(VariableDeclaration localDeclaration) {
-			if (! fIncludeDeclaration)
-				return true;
-			
-			if (fTempDeclaration.equals(localDeclaration))
+			if (fIncludeDeclaration && fTempDeclaration.equals(localDeclaration))
 				fNodes.add(localDeclaration.getName());
 			
 			return true;
