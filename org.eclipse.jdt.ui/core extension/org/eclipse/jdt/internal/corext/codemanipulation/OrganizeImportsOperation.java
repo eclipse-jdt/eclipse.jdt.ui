@@ -284,8 +284,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		public boolean visit(TagElement node) {
 			String name= node.getTagName();
 			List list= node.fragments();
+			int idx= 0;
 			if (name != null && !list.isEmpty()) {
-				int idx= 0;
 				Object first= list.get(0);
 				if (first instanceof Name) {
 					if ("@throws".equals(name) || "@exception".equals(name)) {  //$NON-NLS-1$//$NON-NLS-2$
@@ -293,10 +293,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					} else if ("@see".equals(name) || "@link".equals(name) || "@linkplain".equals(name)) {  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 						possibleTypeRefFound((Name) first);
 					}
+					idx++;
 				}
-				for (int i= idx; i < list.size(); i++) {
-					doVisitNode((ASTNode) list.get(i));
-				}
+			}
+			for (int i= idx; i < list.size(); i++) {
+				doVisitNode((ASTNode) list.get(i));
 			}
 			return false;
 		}
