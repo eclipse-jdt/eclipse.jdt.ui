@@ -261,6 +261,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		fLabelProvider= createLabelProvider();
 		ILabelDecorator decorationMgr= PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
+		
 		fViewer.setLabelProvider(createDecoratingLabelProvider(fLabelProvider, decorationMgr));
 		
 		fViewer.setSorter(createJavaElementSorter());
@@ -308,7 +309,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 	
 	protected DecoratingLabelProvider createDecoratingLabelProvider(ILabelProvider provider, ILabelDecorator decorationMgr) {
-		return new DecoratingLabelProvider(provider, decorationMgr);
+		return new ExcludingDecoratingLabelProvider(provider, decorationMgr, "org.eclipse.jdt.ui.problem.decorator"); //$NON-NLS-1$
 	}
 	
 	protected JavaElementSorter createJavaElementSorter() {
