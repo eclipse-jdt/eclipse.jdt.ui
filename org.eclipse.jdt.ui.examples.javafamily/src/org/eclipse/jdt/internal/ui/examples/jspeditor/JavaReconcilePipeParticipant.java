@@ -21,10 +21,11 @@ import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
-import org.eclipse.jface.text.source.*;
+import org.eclipse.jface.text.source.IAnnotationExtension;
+import org.eclipse.jface.text.source.TemporaryAnnotation;
 
-import org.eclipse.text.reconcilerpipe.*;
 import org.eclipse.text.reconcilerpipe.AbstractReconcilePipeParticipant;
+import org.eclipse.text.reconcilerpipe.AnnotationAdapter;
 import org.eclipse.text.reconcilerpipe.IReconcilePipeParticipant;
 import org.eclipse.text.reconcilerpipe.IReconcileResult;
 import org.eclipse.text.reconcilerpipe.ITextModel;
@@ -99,7 +100,7 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 			else if (fProblem.isWarning())
 				type= TemporaryAnnotation.WARNING;
 				
-			return new TemporaryAnnotation(type, fProblem.getMessage(), fProblem.getID());
+			return new TemporaryAnnotation(type, fProblem.getMessage());
 		}
 		
 		private Position createPositionFromProblem() {
@@ -228,7 +229,6 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 		try {
 			fWorkingCopy= new CompilationUnitAdapter(createTemporaryWorkingCopy(jspFile));
 		} catch (JavaModelException e) {
-			// XXX Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -244,7 +244,6 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 		try {
 			fWorkingCopy= new CompilationUnitAdapter(createTemporaryWorkingCopy(jspFile));
 		} catch (JavaModelException e) {
-			// XXX Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

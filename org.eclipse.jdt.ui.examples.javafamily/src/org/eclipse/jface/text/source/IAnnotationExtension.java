@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Display;
  * Interface for marker and temporary annotations.
  * 
  * @see org.eclipse.core.resources.IMarker
- * @see java.text.Annotation
+ * @see org.eclipse.jface.text.source.Annotation
  * @since 3.0
  */
 public interface IAnnotationExtension {
@@ -44,13 +44,6 @@ public interface IAnnotationExtension {
 	 * @return the message of this annotation
 	 */
 	String getMessage();
-
-	/**
-	 * Returns the id of this annotation.
-	 * 
-	 * @return the id for this annotation or <code>-1</code> if no id is assigned
-	 */
-	int getId();
 
 	/**
 	 * Returns an image for this annotation.

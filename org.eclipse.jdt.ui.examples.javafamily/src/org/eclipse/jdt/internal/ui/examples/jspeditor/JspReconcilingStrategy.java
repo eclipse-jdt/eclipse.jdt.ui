@@ -12,14 +12,9 @@
 package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -30,8 +25,8 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
-import org.eclipse.jface.text.source.*;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
@@ -39,9 +34,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.MarkerUtilities;
 
-import org.eclipse.text.reconcilerpipe.*;
+import org.eclipse.text.reconcilerpipe.AnnotationAdapter;
 import org.eclipse.text.reconcilerpipe.IReconcilePipeParticipant;
 import org.eclipse.text.reconcilerpipe.IReconcileResult;
 import org.eclipse.text.reconcilerpipe.TextModelAdapter;
@@ -53,15 +47,7 @@ import org.eclipse.text.reconcilerpipe.TextModelAdapter;
  */
 public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
-	/**
-	 * Allows to toggle the example between using markers
-	 * or annotations.
-	 */
-	public static final boolean USE_MARKERS= false;
-
-
 	private IReconcilePipeParticipant fFirstParticipant;
-	private HashMap fOffsetToMarkerMap;
 	private ITextEditor fTextEditor;
 	private IProgressMonitor fProgressMonitor;
 	
@@ -82,18 +68,16 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.reconciler.DirtyRegion, org.eclipse.jface.text.IRegion)
 	 */
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
-		initializeProblemMarkers();
+		removeTemporaryAnnotations();
 		process(fFirstParticipant.reconcile(dirtyRegion, subRegion));
-		removeRemainingMarkers();
 	}
 	
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
 	public void reconcile(IRegion partition) {
-		initializeProblemMarkers();
+		removeTemporaryAnnotations();
 		process(fFirstParticipant.reconcile(partition));
-		removeRemainingMarkers();
 	}
 
 	/*
@@ -135,42 +119,15 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 					Position pos= result.getPosition();
 					
 					IAnnotationExtension annotation= result.createAnnotation();
-
-					if (!USE_MARKERS)  {
-						getAnnotationModel().addAnnotation((Annotation)annotation, pos);
-					} else  {
-				
-						// Check if marker already exists.
-						Integer offset= new Integer(pos.offset);
-						IMarker marker= (IMarker)fOffsetToMarkerMap.get(offset);
-						
-						if (marker != null && marker.getAttribute(IMarker.MESSAGE, "").equals(annotation.getMessage())) //$NON-NLS-1$
-							fOffsetToMarkerMap.remove(offset);
-						else {
-	
-							Map attributes= new HashMap(4);
-							attributes.put(IMarker.SEVERITY, new Integer(getMarkerSeverity(annotation)));
-							attributes.put(IMarker.CHAR_START, offset);
-							attributes.put(IMarker.CHAR_END, new Integer(pos.offset + pos.length));
-							attributes.put(IMarker.MESSAGE, annotation.getMessage());
-							try {
-								MarkerUtilities.createMarker(getFile(), attributes, "org.eclipse.jdt.core.problem"); //$NON-NLS-1$
-							} catch (CoreException e) {
-								e.printStackTrace();
-								continue;
-							}
-						}
-					}
+					getAnnotationModel().addAnnotation((Annotation)annotation, pos);
 				}
 			}
 		};
 		try {
 			runnable.run(null);
 		} catch (InvocationTargetException e) {
-			// XXX Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// XXX Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -178,65 +135,24 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	private IAnnotationModel getAnnotationModel()  {
 		return fTextEditor.getDocumentProvider().getAnnotationModel(fTextEditor.getEditorInput());
 	}
-	
-	private int getMarkerSeverity(IAnnotationExtension annotation)  {
-		if (annotation instanceof TemporaryAnnotation)  {
-			if (((TemporaryAnnotation)annotation).isWarning())
-				return IMarker.SEVERITY_WARNING;
-			else if (((TemporaryAnnotation)annotation).isError()) 
-				return IMarker.SEVERITY_ERROR;
-		}
 
-		return IMarker.SEVERITY_INFO;
-	}
-	
-	
-	private void initializeProblemMarkers() {
-		if (USE_MARKERS)  {
-			IMarker[] markers;
-			try {
-				markers= getFile().findMarkers("org.eclipse.jdt.core.problem", true, IResource.DEPTH_INFINITE); //$NON-NLS-1$
-			} catch (CoreException e) {
-				fOffsetToMarkerMap= new HashMap();
-				return;
-			}
-		
-			fOffsetToMarkerMap= new HashMap(markers.length);
-			for (int i= 0; i < markers.length; i++) {
-				int offset= markers[i].getAttribute(IMarker.CHAR_START, -1);
-				if (offset != -1 && markers[i].exists())
-					fOffsetToMarkerMap.put(new Integer(offset), markers[i]);
-			}
-		} else  {
-			
-			// for now we simply remove all temporary markers
-			
-			Iterator iter= getAnnotationModel().getAnnotationIterator();
-			while (iter.hasNext())  {
-				Object annotation= iter.next();
-				if (annotation instanceof IAnnotationExtension)  {
-					IAnnotationExtension extension= (IAnnotationExtension)annotation;
-						if (extension.isTemporary())
-							getAnnotationModel().removeAnnotation((Annotation)annotation);
-				}
+	/*
+	 * XXX: A "real" implementation must be smarter
+	 * 		i.e. don't remove and add the annotations
+	 * 		which are the same.
+	 */	
+	private void removeTemporaryAnnotations() {
+		Iterator iter= getAnnotationModel().getAnnotationIterator();
+		while (iter.hasNext())  {
+			Object annotation= iter.next();
+			if (annotation instanceof IAnnotationExtension)  {
+				IAnnotationExtension extension= (IAnnotationExtension)annotation;
+					if (extension.isTemporary())
+						getAnnotationModel().removeAnnotation((Annotation)annotation);
 			}
 		}
 	}
 
-	private void removeRemainingMarkers() {
-		
-		if (USE_MARKERS)  {
-			IMarker[] markers= (IMarker[])fOffsetToMarkerMap.values().toArray(new IMarker[fOffsetToMarkerMap.values().size()]);
-			try {
-				ResourcesPlugin.getWorkspace().deleteMarkers(markers);
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
-		} else  {
-			// nothing to do here
-		}
-	}
-	
 	private IFile getFile() {
 		IEditorInput input= fTextEditor.getEditorInput();
 		if (!(input instanceof IFileEditorInput))

@@ -28,9 +28,6 @@ import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
-// XXX: This layer breaker will go away. Only needed for the marker based example.
-import org.eclipse.jdt.internal.ui.examples.jspeditor.JspReconcilingStrategy;
-
 /**
  * Temporary annotation.
  * <p>
@@ -57,17 +54,15 @@ public class TemporaryAnnotation extends Annotation implements IAnnotationExtens
 	private Image fImage;
 	private boolean fImageInitialized= false;
 	private int fSeverity;
-	private int fId;
 	private String fMessage;
 
 	/** The marker annotation preferences */
-	protected MarkerAnnotationPreferences fMarkerAnnotationPreferences;
+	private MarkerAnnotationPreferences fMarkerAnnotationPreferences;
 	
 	
-	public TemporaryAnnotation(int severity, String message, int id) {
+	public TemporaryAnnotation(int severity, String message) {
 		Assert.isTrue(severity == NONE || severity == WARNING || severity == ERROR);
 		fSeverity= severity;
-		fId= id;
 		fMessage= message;
 		setLayer(MarkerAnnotation.PROBLEM_LAYER + 1);
 		fMarkerAnnotationPreferences= new MarkerAnnotationPreferences();
@@ -114,30 +109,6 @@ public class TemporaryAnnotation extends Annotation implements IAnnotationExtens
 		return fImage;
 	}
 	
-	/**
-	 * Returns whether this annotation is a temporary warning.
-	 * <p>
-	 * XXX: this method can go a away once we decide to remove
-	 * 		the marker based example.</p>
-	 *
-	 * @see JspReconcilingStrategy#USE_MARKERS
-	 */
-	public boolean isWarning() {
-		return  fSeverity == WARNING;
-	}
-
-	/**
-	 * Returns whether this annotation is a temporary error.
-	 * <p>
-	 * XXX: this method can go a away once we decide to remove
-	 * 		the marker based example.</p>
-	 *
-	 * @see JspReconcilingStrategy#USE_MARKERS
-	 */
-	public boolean isError()  {
-		return fSeverity == ERROR;
-	}
-
 	/*
 	 * @see IAnnotationExtension#getMessage()
 	 */
@@ -146,29 +117,14 @@ public class TemporaryAnnotation extends Annotation implements IAnnotationExtens
 	}
 
 	/*
-	 * @see IAnnotationExtension#getId()
-	 */
-	public int getId() {
-		return fId;
-	}
-
-	/*
 	 * @see IAnnotationExtension#getType()
 	 */
 	public Object getType() {
-		if (JspReconcilingStrategy.USE_MARKERS) {	
-			// XXX: This is currently a hack to bring the marker-based demo to live 
-			return new Integer(fSeverity);
-
-		} else  {
-			
-			AnnotationPreference pref= getAnnotationPreference();
-			
-			if (pref != null)
-				return pref.getAnnotationType();
-			else
-				return null;
-		}
+		AnnotationPreference pref= getAnnotationPreference();
+		if (pref != null)
+			return pref.getAnnotationType();
+		else
+			return null;
 	}
 
 	/**

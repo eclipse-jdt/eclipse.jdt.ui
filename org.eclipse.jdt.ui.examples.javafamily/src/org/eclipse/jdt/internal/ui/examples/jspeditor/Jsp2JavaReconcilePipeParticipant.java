@@ -128,7 +128,6 @@ public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParti
 				}
 				pos.offset += javaPartitionStart;
 			} catch (BadLocationException e) {
-				// XXX Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

@@ -17,7 +17,8 @@ import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 /**
  * Default annotation access.
  * <p>
- * FIXME: the "extends" relationship needs to be inverted in the final solution.
+ * FIXME:	The "extends" relationship needs to be inverted in the final solution
+ * 			and there should be no reference to "*marker*".
  * </p>
  * 
  * @since 3.0
