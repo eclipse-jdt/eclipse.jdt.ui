@@ -13,7 +13,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRef
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
+
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -81,7 +82,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 		ICompilationUnit interfaceCu= clas.getPackageFragment().getCompilationUnit(newInterfaceName + ".java");
 //		assertEquals("incorrect interface created", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
-		AbstractCUTestCase.compareSource(interfaceCu.getSource(), getFileContents(getOutputTestFileName(newInterfaceName)));
+		SourceCompareUtil.compare(interfaceCu.getSource(), getFileContents(getOutputTestFileName(newInterfaceName)));
 	}
 	
 	private void validatePassingTest(String className, String newInterfaceName, boolean extractAll, boolean replaceOccurrences) throws Exception {

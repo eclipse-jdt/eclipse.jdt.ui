@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 
 public class ChangeSignatureTests extends RefactoringTest {
 	private static final Class clazz= ChangeSignatureTests.class;
@@ -99,7 +99,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
 //		assertEquals("invalid renaming", expectedFileContents, newcu.getSource());
-		AbstractCUTestCase.compareSource(newcu.getSource(), expectedFileContents);
+		SourceCompareUtil.compare(newcu.getSource(), expectedFileContents);
 	}
 
 	private void helperDoAll(String methodName, 
@@ -132,7 +132,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
-		AbstractCUTestCase.compareSource(newcu.getSource(), expectedFileContents);
+		SourceCompareUtil.compare(newcu.getSource(), expectedFileContents);
 	}
 	
 	private void markAsDeleted(List list, int[] deleted) {
@@ -163,7 +163,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
 //		assertEquals("invalid renaming", expectedFileContents, newcu.getSource());
-		AbstractCUTestCase.compareSource(newcu.getSource(), expectedFileContents);
+		SourceCompareUtil.compare(newcu.getSource(), expectedFileContents);
 	}
 
 	private void modifyInfos(List infos, ParameterInfo[] newParamInfos, int[] newIndices, String[] oldParamNames, String[] newParamNames, String[] newParamTypeNames, int[] permutation) {
