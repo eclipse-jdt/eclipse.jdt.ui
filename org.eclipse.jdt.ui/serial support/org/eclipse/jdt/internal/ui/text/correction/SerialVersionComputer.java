@@ -38,14 +38,16 @@ public final class SerialVersionComputer {
 		if (arguments.length > 0) {
 			try {
 				final ObjectStreamClass stream= ObjectStreamClass.lookup(Class.forName(arguments[0]));
-				if (stream != null)
+				if (stream != null) {
 					System.out.println(stream.getSerialVersionUID());
-				else
+					return;
+				} else
 					System.err.println(SerialVersionMessages.getFormattedString("SerialVersionComputer.not.serializable", arguments[0])); //$NON-NLS-1$
 			} catch (ClassNotFoundException exception) {
 				System.err.println(SerialVersionMessages.getFormattedString("SerialVersionComputer.not.resolvable", arguments[0])); //$NON-NLS-1$
 			}
 		} else
 			System.err.println(SerialVersionMessages.getString("SerialVersionComputer.no.argument")); //$NON-NLS-1$
+		System.out.println(1);
 	}
 }
