@@ -23,22 +23,14 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	private Text fTextField;	
 	
 	public static final String PAGE_NAME= "TextInputPage";//$NON-NLS-1$
-	
-	private String fOriginalMessage;
-	private int fOriginalMessageType;
-	
+
 	/**
 	 * Creates a new text input page.
 	 * @param isLastUserPage <code>true</code> if this page is the wizard's last
 	 *  user input page. Otherwise <code>false</code>.
 	 */
-	public TextInputWizardPage(String message, boolean isLastUserPage) {
-		this(message, NONE, isLastUserPage);
-		
-	}
-	
-	public TextInputWizardPage(String message, int messageType, boolean isLastUserPage) {
-		this(message, messageType, isLastUserPage, ""); //$NON-NLS-1$
+	public TextInputWizardPage(String description, boolean isLastUserPage) {
+		this(description, isLastUserPage, ""); //$NON-NLS-1$
 	}
 	
 	/**
@@ -47,17 +39,11 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	 *  user input page. Otherwise <code>false</code>.
 	 * @param initialSetting the initialSetting.
 	 */
-	public TextInputWizardPage(String message, boolean isLastUserPage, String initialValue) {
-		this(message, NONE, isLastUserPage, initialValue);
-	}
-	
-	public TextInputWizardPage(String message, int messageType, boolean isLastUserPage, String initialValue) {
+	public TextInputWizardPage(String description, boolean isLastUserPage, String initialValue) {
 		super(PAGE_NAME, isLastUserPage);
 		Assert.isNotNull(initialValue);
-		setMessage(message, messageType);
+		setDescription(description);
 		fInitialValue= initialValue;
-		fOriginalMessage= message;
-		fOriginalMessageType= messageType;
 	}
 	
 	/**
@@ -107,9 +93,9 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	 * describes the result of input validation. <code>Null<code> is interpreted
 	 * as no error.
 	 */
-	protected RefactoringStatus validateTextField(String text) {
+	protected RefactoringStatus validateTextField(String text){
 		return null;
-	}	
+	}
 	
 	protected Text createTextInputField(Composite parent) {
 		return createTextInputField(parent, SWT.BORDER);
@@ -144,20 +130,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 			return;
 		}
 		
-		RefactoringStatus status= validateTextField(text);
-		getRefactoringWizard().setStatus(status);
-
-		if (status.getSeverity() == RefactoringStatus.FATAL){
-			setPageComplete(false);
-			setErrorMessage(status.getFirstMessage(status.getSeverity()));	
-		} else {
-			setPageComplete(true);
-			setErrorMessage(null);
-			if (status.getSeverity() == RefactoringStatus.OK)
-				restoreMessage();
-			else	
-				setMessage(status.getFirstMessage(status.getSeverity()), getCorrespondingIStatusSeverity(status.getSeverity()));	
-		}
+		setPageComplete(validateTextField(text));
 	}
 	private static int getCorrespondingIStatusSeverity(int severity) {
 		if (severity == RefactoringStatus.FATAL)
@@ -171,8 +144,12 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 		return IStatus.OK;			
 	}
 	
-	private void restoreMessage(){
-		setMessage(fOriginalMessage, fOriginalMessageType);
+	/**
+	 * Subclasses can override if they want to restore the message differently.
+	 * This implementation calls <code>setMessage(null)</code>, which clears the message 
+	 * thus exposing the description.	 */
+	protected void restoreMessage(){
+		setMessage(null);
 	}
 	
 	/* (non-Javadoc)
