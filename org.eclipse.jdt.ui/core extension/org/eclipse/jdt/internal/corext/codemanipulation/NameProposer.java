@@ -206,7 +206,8 @@ public class NameProposer {
 				String curr= fNamePrefixes[i];
 				if (fieldname.startsWith(curr)) {
 					int currLen= curr.length();
-					if (bestLength < currLen && fieldname.length() != currLen) {
+					boolean capitalNotForced= !Character.isLetter(curr.charAt(currLen - 1));					
+					if (bestLength < currLen && fieldname.length() != currLen && (capitalNotForced || Character.isUpperCase(fieldname.charAt(currLen)))) {
 						name= fieldname.substring(currLen);
 						bestLength= currLen;
 					}

@@ -12,6 +12,7 @@ import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
 import org.eclipse.jdt.ui.tests.core.HierarchicalASTVisitorTest;
 import org.eclipse.jdt.ui.tests.core.ImportOrganizeTest;
 import org.eclipse.jdt.ui.tests.core.JavaModelUtilTest;
+import org.eclipse.jdt.ui.tests.core.NameProposerTest;
 import org.eclipse.jdt.ui.tests.core.TextBufferTest;
 import org.eclipse.jdt.ui.tests.core.TypeHierarchyTest;
 import org.eclipse.jdt.ui.tests.core.TypeInfoTest;
@@ -50,6 +51,7 @@ public class AutomatedSuite extends TestSuite {
 		addTest(TypeHierarchyTest.suite());
 		addTest(HTML2TextReaderTester.suite());
 		addTest(JavaDoc2HTMLTextReaderTester.suite());
+		addTest(NameProposerTest.suite());
 		
 		addTest(ASTRewritingTest.suite());
 		addTest(QuickFixTest.suite());
