@@ -14,10 +14,7 @@ import java.lang.reflect.InvocationTargetException;import java.util.Iterator;
  */
 public class CompilationUnitEditor extends JavaEditor {
 	
-	
-	/** Save policy determining the compilation unit save behavior */
-	protected ISavePolicy fSavePolicy;
-	
+		
 	/** The status line clearer */
 	protected ISelectionChangedListener fStatusLineClearer;
 	
@@ -32,7 +29,6 @@ public class CompilationUnitEditor extends JavaEditor {
 		setEditorContextMenuId("#CompilationUnitEditorContext"); //$NON-NLS-1$
 		setRulerContextMenuId("#CompilationUnitRulerContext"); //$NON-NLS-1$
 		setOutlinerContextMenuId("#CompilationUnitOutlinerContext"); //$NON-NLS-1$
-		fSavePolicy= new CUSavePolicy();
 	}
 	
 	/**
@@ -175,30 +171,6 @@ public class CompilationUnitEditor extends JavaEditor {
 			} else 
 				performSaveOperation(createSaveOperation(false), progressMonitor);
 		}
-	}
-	
-	/**
-	 * @see AbstractTextEditor#createSaveOperation(boolean)
-	 */
-	protected WorkspaceModifyOperation createSaveOperation(final boolean overwrite) {
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
-		final ICompilationUnit original= (unit == null ? null : (ICompilationUnit) unit.getOriginalElement());
-		
-		return new WorkspaceModifyOperation() {
-			public void execute(final IProgressMonitor monitor) throws CoreException {
-				
-				if (fSavePolicy != null && original != null)
-					fSavePolicy.preSave(original);
-				
-				IDocumentProvider provider= getDocumentProvider();
-				IEditorInput input= getEditorInput();
-				provider.saveDocument(monitor, input, provider.getDocument(input), overwrite);
-				
-				if (fSavePolicy != null && original != null)
-					fSavePolicy.postSave(original);
-			}
-		};
 	}
 	
 	public void gotoError(boolean forward) {

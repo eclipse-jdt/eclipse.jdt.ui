@@ -70,16 +70,24 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				}
 			}
 			
+			/**
+			 * Installs the synchronizer to listen to document
+			 * as well as buffer changes.
+			 */
 			public void install() {
 				fDocument.addDocumentListener(this);
 				fBuffer.addBufferChangedListener(this);
 			}
 			
+			/**
+			 * Uninstalls the synchronizer. The synchronizer does no
+			 * longer listen to buffer or document changes.
+			 */
 			public void uninstall() {
 				fDocument.removeDocumentListener(this);
 				fBuffer.removeBufferChangedListener(this);
 			}
-			
+						
 			/**
 			 * @see IDocumentListener#documentChanged
 			 */
@@ -148,10 +156,15 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 		};
 		
+	
+	/** The save policy used by this provider */
+	private ISavePolicy fSavePolicy;
+		
 	/**
 	 * Constructor
 	 */
-	public CompilationUnitDocumentProvider() {
+	public CompilationUnitDocumentProvider(ISavePolicy savePolicy) {
+		fSavePolicy= savePolicy;
 	}
 	
 	protected ICompilationUnit createCompilationUnit(IFile file) {
@@ -217,23 +230,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		
 		super.disposeElementInfo(element, info);
 	}
-		
-	/**
-	 * @see AbstractDocumentProvider#aboutToChange(Object)
-	 */
-	public void aboutToChange(Object element) {
-		
-		ElementInfo elementInfo= getElementInfo(element);		
-		if (elementInfo instanceof CompilationUnitInfo) {
-			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
-			
-			if (info.fBufferSynchronizer != null)
-				info.fBufferSynchronizer.uninstall();
-		}
-		
-		super.aboutToChange(element);
-	}
-
+	
 	/**
 	 * @see AbstractDocumentProvider#changed(Object)
 	 */
@@ -242,7 +239,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		ElementInfo elementInfo= getElementInfo(element);		
 		if (elementInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
-			if (info.fBufferSynchronizer != null) 
+			if (info.fBufferSynchronizer != null)
 				info.fBufferSynchronizer.install();
 		}
 		
@@ -268,8 +265,17 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				if (resource != null && !overwrite)
 					checkSynchronizationState(info.fModificationStamp, resource);
 				
+				if (fSavePolicy != null)
+					fSavePolicy.preSave(info.fCopy);
+								
+				if (info.fBufferSynchronizer != null)
+					info.fBufferSynchronizer.uninstall();
+					
 				// commit working copy
 				info.fCopy.commit(overwrite, monitor);
+				
+				if (fSavePolicy != null)
+					fSavePolicy.postSave(original);
 				
 				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
 				model.updateMarkers(info.fDocument);

@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ISavePolicy;
 public class CUSavePolicy implements ISavePolicy {
 	
 
-	private String fOldTypeName;
+	private String fNewTypeName;
 
 	/**
 	 * 
@@ -52,11 +52,13 @@ public class CUSavePolicy implements ISavePolicy {
 		}
 		return null;
 	}
+	
 	protected String makeMainTypeName(String cuName) {
 		if (cuName.endsWith(".java")) //$NON-NLS-1$
 			return cuName.substring(0, cuName.length()-5);
 		return cuName;
 	}
+	
 	/**
 	 * 
 	 * @param cu com.oti.leapfrog.javamodel.LFCompilationUnit
@@ -77,6 +79,7 @@ public class CUSavePolicy implements ISavePolicy {
 		}
 		return null;
 	}
+	
 	private boolean shouldRenameCU(final Shell shell, String typeName) {
 		final String cuName= typeName+".java"; //$NON-NLS-1$
 		String message= ReorgMessages.getString("cuSavePolicy.confirmRenameCU"); //$NON-NLS-1$
@@ -101,63 +104,76 @@ public class CUSavePolicy implements ISavePolicy {
 		return confirmed[0];
 	}
 
-/**
- * 
- * @param t com.oti.leapfrog.javamodel.ILFType
- */
-protected void renameConstructors(IType t, String oldName, String newName) throws JavaModelException {
-	if (oldName == null)
-		return;
-	IMethod[] p= t.getMethods();
-	for (int i= 0; i < p.length; i++) {
-		if (oldName.equals(p[i].getElementName()))
-			p[i].rename(newName, true, null);
+	/**
+	 * 
+	 * @param t com.oti.leapfrog.javamodel.ILFType
+	 */
+	protected void renameConstructors(IType t, String oldName, String newName) throws JavaModelException {
+		if (oldName == null)
+			return;
+		IMethod[] p= t.getMethods();
+		for (int i= 0; i < p.length; i++) {
+			if (oldName.equals(p[i].getElementName()))
+				p[i].rename(newName, true, null);
+		}
 	}
-}
-/**
- * 
- * @param cu com.oti.leapfrog.javamodel.LFCompilationUnit
- * @param typeName java.lang.String
- */
-protected String checkOverwriteCU(final Shell shell, final ICompilationUnit cu, final IPackageFragment newPackage, final String newName) {
-	final INamingPolicy namingPolicy= ReorgSupportFactory.createNamingPolicy(cu);
-	class Runner implements Runnable {
-		public String fNewName= null;
+	
+	/**
+	 * 
+	 * @param cu com.oti.leapfrog.javamodel.LFCompilationUnit
+	 * @param typeName java.lang.String
+	 */
+	protected String checkOverwriteCU(final Shell shell, final ICompilationUnit cu, final IPackageFragment newPackage, final String newName) {
+		final INamingPolicy namingPolicy= ReorgSupportFactory.createNamingPolicy(cu);
+		class Runner implements Runnable {
+			public String fNewName= null;
+			
+			public void run() {
+					NameClashDialog dialog= new NameClashDialog(shell, new IInputValidator() {
+						public String isValid(String newText) {
+							return namingPolicy.isValidNewName(cu, newPackage, newText);
+						}
+					}, newName, true);
+					if (dialog.open() == dialog.CANCEL)
+						return;
+					if (!dialog.isReplace())
+						fNewName= dialog.getNewName();
+					else
+						fNewName= newName;
+				}
+		};
+		if (namingPolicy.isValidNewName(cu, newPackage, newName) != null) {
+			Runner r= new Runner();
+			shell.getDisplay().syncExec(r);
+			return r.fNewName;
+		}
+		return newName;
+	}
+	
+	/**
+	 * preSave method comment.
+	 */
+	public void preSave(ICompilationUnit workingCopy) {
 		
-		public void run() {
-				NameClashDialog dialog= new NameClashDialog(shell, new IInputValidator() {
-					public String isValid(String newText) {
-						return namingPolicy.isValidNewName(cu, newPackage, newText);
-					}
-				}, newName, true);
-				if (dialog.open() == dialog.CANCEL)
-					return;
-				if (!dialog.isReplace())
-					fNewName= dialog.getNewName();
-				else
-					fNewName= newName;
+		String oldTypeName= null;
+		try {
+			
+			ICompilationUnit original= (ICompilationUnit) workingCopy.getOriginalElement();
+			if (original != null) {
+				IType type= getMainType(original);
+				if (type != null)
+					oldTypeName= type.getElementName();
 			}
-	};
-	if (namingPolicy.isValidNewName(cu, newPackage, newName) != null) {
-		Runner r= new Runner();
-		shell.getDisplay().syncExec(r);
-		return r.fNewName;
+					
+			if (oldTypeName == null)
+				return;
+				
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
+			fNewTypeName= handleTypeNameChanged(shell, workingCopy, oldTypeName);
+		} catch (JavaModelException e) {
+		}
 	}
-	return newName;
-}
-/**
- * collectInfo method comment.
- */
-public void preSave(ICompilationUnit element) {
-	ICompilationUnit cu= (ICompilationUnit)element;
-	fOldTypeName= null;
-	try {
-		IType t= getMainType(cu);
-		if (t != null)
-			fOldTypeName= t.getElementName();
-	} catch (JavaModelException e) {
-	}
-}
+	
 	/**
 	 * 
 	 * @param cu com.oti.leapfrog.javamodel.LFCompilationUnit
@@ -220,6 +236,7 @@ public void preSave(ICompilationUnit element) {
 		}
 		return null;
 	}
+	
 	/**
 	 * 
 	 * @param cu com.oti.leapfrog.javamodel.LFCompilationUnit
@@ -238,47 +255,58 @@ public void preSave(ICompilationUnit element) {
 			return pkgRoot.createPackageFragment(packageName, true, null);
 		return null;
 	}
+	
 	/**
 	 * update method comment.
 	 */
-	public void postSave(ICompilationUnit cu) {
+	public void postSave(ICompilationUnit original) {
 	
-		IPackageFragment oldPackage= (IPackageFragment)cu.getParent();
+		IPackageFragment oldPackage= (IPackageFragment) original.getParent();
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 	
 		try {
+			
 			ICompilationUnit newCU= null;
-			String newName= handleTypeNameChanged(shell, cu, fOldTypeName);
-			IPackageFragment newPackage= handlePackageChanged(shell, cu);
+			IPackageFragment newPackage= handlePackageChanged(shell, original);
+			
 			if (newPackage != null) {
+				
 				// handle the move, perhaps renaming
-				if (newName == null) {
-					newName= cu.getElementName();
-				}
-				if ((newName= checkOverwriteCU(shell, cu, newPackage, newName)) == null)
+				if (fNewTypeName == null)
+					fNewTypeName= original.getElementName();
+					
+				fNewTypeName= checkOverwriteCU(shell, original, newPackage, fNewTypeName);
+				if (fNewTypeName == null)
 					return;
-				cu.move(newPackage, null, newName, true, null);
-				newCU= newPackage.getCompilationUnit(newName);
-			} else if (newName != null) {
-				if ((newName= checkOverwriteCU(shell, cu, oldPackage, newName)) == null)
+				
+				original.move(newPackage, null, fNewTypeName, true, null);
+				newCU= newPackage.getCompilationUnit(fNewTypeName);
+				
+			} else if (fNewTypeName != null) {
+				
+				fNewTypeName= checkOverwriteCU(shell, original, oldPackage, fNewTypeName);
+				if (fNewTypeName == null)
 					return;
-				cu.rename(newName, true, null);
-				newCU= oldPackage.getCompilationUnit(newName);
+				
+				original.rename(fNewTypeName, true, null);
+				newCU= oldPackage.getCompilationUnit(fNewTypeName);
 			}
+			
 			if (newCU != null) {
-				newName= newCU.getElementName();
+				
+				fNewTypeName= newCU.getElementName();
 				IType newType= getMainType(newCU);
+				
 				if (newType != null) {
-					if (!makeMainTypeName(newName).equals(newType.getElementName())) {
-						newType.rename(makeMainTypeName(newName), false, null);
-					}
+					if (!makeMainTypeName(fNewTypeName).equals(newType.getElementName()))
+						newType.rename(makeMainTypeName(fNewTypeName), false, null);
 				}
 			}
+			
 		} catch (JavaModelException e) {
 			showErrorDialog(shell, e);
 		}
 	}
-
 
 	private String getPackageDeclaration(ICompilationUnit cu) throws JavaModelException {
 		IPackageDeclaration[] pkgs= cu.getPackageDeclarations();
