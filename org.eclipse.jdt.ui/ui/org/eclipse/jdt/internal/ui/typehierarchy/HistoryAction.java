@@ -23,7 +23,7 @@ public class HistoryAction extends Action {
 		if (forward) {
 			JavaPluginImages.setImageDescriptors(this, "lcl16", "forward_nav.gif"); //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
-			JavaPluginImages.setImageDescriptors(this, "lcl16", "backward.gif"); //$NON-NLS-1$ //$NON-NLS-2$
+			JavaPluginImages.setImageDescriptors(this, "lcl16", "backward_nav.gif"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		fViewPart= viewPart;
