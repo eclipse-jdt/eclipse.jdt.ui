@@ -465,7 +465,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 		
 		setAction("ContentAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$
-		setAction("ContentAssistContextInformation", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION));			 //$NON-NLS-1$ //$NON-NLS-2$
+		setAction("ContentAssistContextInformation", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION, true));			 //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("AddImportOnSelection", new AddImportOnSelectionAction(this));		 //$NON-NLS-1$
 		setAction("OrganizeImports", new OrganizeImportsAction(this)); //$NON-NLS-1$
 		
@@ -486,6 +486,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
 			new OpenActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
 			
+		markAsStateDependentAction("CorrectionAssistProposal", true);
 		markAsStateDependentAction("ContentAssistProposal", true);
 		markAsStateDependentAction("Comment", true);
 		markAsStateDependentAction("Uncomment", true);
