@@ -253,7 +253,7 @@ public class CodeTemplateBlock {
 	public boolean hasProjectSpecificOptions() {
 		TemplatePersistenceData[] templateData= fTemplateStore.getTemplateData();
 		for (int i= 0; i < templateData.length; i++) {
-			if (fTemplateStore.isProjectSpecific(templateData[i])) {
+			if (fTemplateStore.isProjectSpecific(templateData[i].getId())) {
 				return true;
 			}
 		}
@@ -516,7 +516,7 @@ public class CodeTemplateBlock {
 		if (fProject != null) {
 			TemplatePersistenceData[] templateData= fTemplateStore.getTemplateData();
 			for (int i= 0; i < templateData.length; i++) {
-				fTemplateStore.setProjectSpecific(templateData[i], enabled);
+				fTemplateStore.setProjectSpecific(templateData[i].getId(), enabled);
 			}
 			node= new ProjectScope(fProject).getNode(JavaUI.ID_PLUGIN);
 		} else {

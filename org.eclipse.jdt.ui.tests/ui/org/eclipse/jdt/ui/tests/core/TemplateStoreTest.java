@@ -94,10 +94,11 @@ public class TemplateStoreTest extends CoreTests {
 			assertNotNull(fromStore);
 			assertEquals(fromArray.getTemplate().getPattern(), fromStore.getPattern());
 		}
-		String newComment= "//Hello";
+		String newComment= "//Hello1";
 		String templateId= CodeTemplateContextType.SETTERCOMMENT_ID;
 
 		TemplatePersistenceData currData= find(templateId, allTemplateDatas);
+		// don't use setPattern, use TemplatePersistenceData.setTemplate instead!
 		currData.getTemplate().setPattern(newComment);
 		
 		Template currTempl= store.findTemplateById(templateId);
@@ -135,35 +136,34 @@ public class TemplateStoreTest extends CoreTests {
 				assertEquals(fromInstance.getPattern(), fromStore.getPattern());
 			}
 						
-			String newComment= "//Hello";
+			String newComment= "//Hello2";
 			String templateId= CodeTemplateContextType.SETTERCOMMENT_ID;
 			
-			TemplatePersistenceData currData= find(templateId, allTemplateDatas);
-			
 			// make project specific
-			projectStore.setProjectSpecific(currData, true);
-			assertTrue(projectStore.isProjectSpecific(currData));
+			projectStore.setProjectSpecific(templateId, true);
+			assertTrue(projectStore.isProjectSpecific(templateId));
+
 			
 			// modify template
-			currData.getTemplate().setPattern(newComment);
-			
 			Template currTempl= projectStore.findTemplateById(templateId);
+			currTempl.setPattern(newComment);
+			
 			assertTrue(currTempl.getPattern().equals(newComment));
 
 			Template instanceElem= instanceStore.findTemplateById(templateId);
 			assertFalse(instanceElem.getPattern().equals(currTempl.getPattern()));
 			
 			// remove project specific
-			projectStore.setProjectSpecific(currData, false);
-			assertFalse(projectStore.isProjectSpecific(currData));
+			projectStore.setProjectSpecific(templateId, false);
+			assertFalse(projectStore.isProjectSpecific(templateId));
 			
 			currTempl= projectStore.findTemplateById(templateId);
 			assertFalse(currTempl.getPattern().equals(newComment));
 			assertTrue(instanceElem.getPattern().equals(currTempl.getPattern()));
 			
 			// make project specific again and restore defaults
-			projectStore.setProjectSpecific(currData, true);
-			assertTrue(projectStore.isProjectSpecific(currData));
+			projectStore.setProjectSpecific(templateId, true);
+			assertTrue(projectStore.isProjectSpecific(templateId));
 			
 			projectStore.restoreDefaults(); // restore
 			
@@ -182,18 +182,15 @@ public class TemplateStoreTest extends CoreTests {
 			ProjectTemplateStore projectStore= new ProjectTemplateStore(fJProject1.getProject());
 			projectStore.load();
 
-			TemplatePersistenceData[] allTemplateDatas= projectStore.getTemplateData();
-						
-			String newComment= "//Hello";
+			String newComment= "//Hello3";
 			String templateId= CodeTemplateContextType.SETTERCOMMENT_ID;
 			
-			TemplatePersistenceData currData= find(templateId, allTemplateDatas);
-			
 			// make project specific
-			projectStore.setProjectSpecific(currData, true);
-			
+			projectStore.setProjectSpecific(templateId, true);
+
 			// modify template
-			currData.getTemplate().setPattern(newComment);
+			Template currTempl= projectStore.findTemplateById(templateId);
+			currTempl.setPattern(newComment);
 			
 			projectStore.save();
 			
@@ -201,11 +198,11 @@ public class TemplateStoreTest extends CoreTests {
 			projectStore= new ProjectTemplateStore(fJProject1.getProject());
 			projectStore.load();
 			
-			Template currTempl= projectStore.findTemplateById(templateId);
+			currTempl= projectStore.findTemplateById(templateId);
 			assertTrue(currTempl.getPattern().equals(newComment));
 			
 			// remove project specific
-			projectStore.setProjectSpecific(currData, false);
+			projectStore.setProjectSpecific(templateId, false);
 			projectStore.save();
 			
 			projectStore= new ProjectTemplateStore(fJProject1.getProject());

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
+import org.eclipse.jface.text.templates.persistence.TemplateReaderWriter;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
@@ -39,24 +41,49 @@ public final class ProjectTemplateStore {
 
 	private final TemplateStore fInstanceStore;
 	private final TemplateStore fProjectStore;
-
-	private final Map fDatas= new HashMap();
 	
 	public ProjectTemplateStore(IProject project) {
 		fInstanceStore= JavaPlugin.getDefault().getCodeTemplateStore();
 		if (project == null) {
 			fProjectStore= null;
 		} else {
-			IPreferenceStore projectSettings= new ScopedPreferenceStore(new ProjectScope(project), JavaUI.ID_PLUGIN);
-			fProjectStore= new TemplateStore(projectSettings, KEY);
+			final IPreferenceStore projectSettings= new ScopedPreferenceStore(new ProjectScope(project), JavaUI.ID_PLUGIN);
+			fProjectStore= new TemplateStore(projectSettings, KEY) {
+				/*
+				 * Make sure we keep the id of added code templates - add removes
+				 * it in the usual add() method
+				 */
+				public void add(TemplatePersistenceData data) {
+					internalAdd(data);
+				}
+				
+				public void save() throws IOException {
+					
+					StringWriter output= new StringWriter();
+					TemplateReaderWriter writer= new TemplateReaderWriter();
+					writer.save(getTemplateData(false), output);
+					
+					projectSettings.setValue(KEY, output.toString());
+				}
+			};
 		}
 	}
 	
 	public TemplatePersistenceData[] getTemplateData() {
-		if (fProjectStore != null)
-			return (TemplatePersistenceData[]) fDatas.values().toArray(new TemplatePersistenceData[fDatas.size()]);
-		else
+		Map datas= new HashMap();
+		if (fProjectStore != null) {
+			TemplatePersistenceData[] data= fInstanceStore.getTemplateData(false);
+			for (int i= 0; i < data.length; i++) {
+				datas.put(data[i].getId(), data[i]);
+			}
+			data= fProjectStore.getTemplateData(false);
+			for (int i= 0; i < data.length; i++) {
+				datas.put(data[i].getId(), data[i]);
+			}
+			return (TemplatePersistenceData[]) datas.values().toArray(new TemplatePersistenceData[datas.values().size()]);
+		} else {
 			return fInstanceStore.getTemplateData(false);
+		}
 	}
 	
 	public Template findTemplateById(String id) {
@@ -71,44 +98,36 @@ public final class ProjectTemplateStore {
 	
 	public void load() throws IOException {
 		if (fProjectStore != null) {
-			fDatas.clear();
-			TemplatePersistenceData[] templateData= fInstanceStore.getTemplateData(false);
-			for (int i= 0; i < templateData.length; i++) {
-				final TemplatePersistenceData original= templateData[i];
-				final String id= original.getId();
-				if (id != null) {
-					TemplatePersistenceData copy= new TemplatePersistenceData(original.getTemplate(), original.isEnabled(), id);
-					fDatas.put(id, copy);
-				}
-			}
-
-			TemplatePersistenceData[] ds= fProjectStore.getTemplateData(false);
-			for (int i= 0; i < ds.length; i++) {
-				final TemplatePersistenceData original= ds[i];
-				String id= original.getId();
-				if (id != null && !original.isDeleted())
-					fDatas.put(id, original);
-			}
+			fProjectStore.load();
 		}
 	}
 	
-	public boolean isProjectSpecific(TemplatePersistenceData data) {
+	public boolean isProjectSpecific(String id) {
 		if (fProjectStore == null)
 			return false;
 		
-		return data.isDeleted() || fProjectStore.findTemplateById(data.getId()) == null;
+		return fProjectStore.findTemplateById(id) != null;
 	}
 	
 	
-	public void setProjectSpecific(TemplatePersistenceData data, boolean projectSpecific) {
+	public void setProjectSpecific(String id, boolean projectSpecific) {
 		Assert.isNotNull(fProjectStore);
 		
+		TemplatePersistenceData data= fProjectStore.getTemplateData(id);
 		if (projectSpecific) {
-			if (fProjectStore.findTemplateById(data.getId()) == null)
-				fProjectStore.add(data);
-			data.setDeleted(false);
+			if (data == null) {
+				TemplatePersistenceData orig= fInstanceStore.getTemplateData(id);
+				if (orig == null)
+					return; // does not exist
+				TemplatePersistenceData copy= new TemplatePersistenceData(new Template(orig.getTemplate()), orig.isEnabled(), orig.getId());
+				fProjectStore.add(copy);
+			} else {
+				data.setDeleted(false);
+			}
 		} else {
-			data.setDeleted(true);
+			if (data != null)
+				data.setDeleted(true);
+			// else: nothing to do
 		}
 	}
 
@@ -116,11 +135,7 @@ public final class ProjectTemplateStore {
 		if (fProjectStore == null) {
 			fInstanceStore.restoreDefaults();
 		} else {
-			try {
-				load();
-			} catch (IOException e) {
-				JavaPlugin.log(e);
-			}
+			fProjectStore.restoreDefaults();
 		}
 	}
 	public void save() throws IOException {
