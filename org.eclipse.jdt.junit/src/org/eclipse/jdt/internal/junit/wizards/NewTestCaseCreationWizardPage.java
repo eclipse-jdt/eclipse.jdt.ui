@@ -80,7 +80,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * The first page of the TestCase creation wizard. 
@@ -272,7 +271,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements 
 		}
 		restoreWidgetValues();
 		Dialog.applyDialogFont(composite);
-		WorkbenchHelp.setHelp(composite, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE);	
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE);	
 
 	}
 

@@ -30,7 +30,7 @@ import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 
@@ -53,7 +53,7 @@ public class GotoMarkerAction extends Action {
 	private IEditorPart fEditor;
 	
 	public GotoMarkerAction(){
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_MARKER_ACTION);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_MARKER_ACTION);		
 	}
 	
 	public void run() {

@@ -21,7 +21,7 @@ import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -41,7 +41,7 @@ public class CopyTraceAction extends Action {
 	public CopyTraceAction(FailureTrace view, Clipboard clipboard) {
 		super(JUnitMessages.getString("CopyTrace.action.label"));  //$NON-NLS-1$
 		Assert.isNotNull(clipboard);
-		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.COPYTRACE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYTRACE_ACTION);
 		fView= view;
 		fClipboard= clipboard;
 	}

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
@@ -34,7 +34,7 @@ public class RerunAction extends Action {
 			setText(JUnitMessages.getString("RerunAction.label.run")); //$NON-NLS-1$
 		else if (launchMode.equals(ILaunchManager.DEBUG_MODE))
 			setText(JUnitMessages.getString("RerunAction.label.debug")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.RERUN_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.RERUN_ACTION);
 		fTestRunner= runner;
 		fTestId= testId;
 		fClassName= className;

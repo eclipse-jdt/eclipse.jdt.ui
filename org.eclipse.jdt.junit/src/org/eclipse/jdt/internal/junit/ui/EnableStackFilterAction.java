@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.junit.ui;
 
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Action to enable/disable stack trace filtering.
@@ -29,7 +29,7 @@ public class EnableStackFilterAction extends Action {
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/cfilter.gif")); //$NON-NLS-1$
 		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/cfilter.gif")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/cfilter.gif")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.ENABLEFILTER_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.ENABLEFILTER_ACTION);
 
 		fView= view;
 		setChecked(JUnitPreferencePage.getFilterStack());

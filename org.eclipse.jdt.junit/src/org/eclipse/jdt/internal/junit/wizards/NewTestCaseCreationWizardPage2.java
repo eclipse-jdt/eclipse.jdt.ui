@@ -40,7 +40,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.dialogs.ContainerCheckedTreeViewer;
 
 /**
@@ -91,7 +91,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage implements IAbout
 		setControl(container);
 		restoreWidgetValues();
 		Dialog.applyDialogFont(container);
-		WorkbenchHelp.setHelp(container, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE2);	
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE2);	
 	}
 
 	protected void createButtonChoices(Composite container) {

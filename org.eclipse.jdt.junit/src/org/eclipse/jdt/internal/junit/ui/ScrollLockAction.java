@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.junit.ui;
 
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Toggles console auto-scroll
@@ -28,7 +28,7 @@ public class ScrollLockAction extends Action {
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/lock.gif")); //$NON-NLS-1$
 		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/lock.gif")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/lock.gif")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(
 			this,
 			IJUnitHelpContextIds.OUTPUT_SCROLL_LOCK_ACTION);
 		setChecked(false);

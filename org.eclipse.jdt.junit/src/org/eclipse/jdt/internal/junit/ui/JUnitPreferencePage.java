@@ -71,7 +71,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchViewerSorter;
 
 /**
@@ -307,7 +306,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	}
 
 	protected Control createContents(Composite parent) {
-		WorkbenchHelp.setHelp(parent, IJUnitHelpContextIds.JUNIT_PREFERENCE_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJUnitHelpContextIds.JUNIT_PREFERENCE_PAGE);
 
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout();

@@ -91,7 +91,7 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
@@ -312,7 +312,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_automatic.gif")); //$NON-NLS-1$				
 			}
 			fActionOrientation= orientation;
-			WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.RESULTS_VIEW_TOGGLE_ORIENTATION_ACTION);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.RESULTS_VIEW_TOGGLE_ORIENTATION_ACTION);
 		}
 		
 		public int getOrientation() {
@@ -1237,7 +1237,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		JUnitPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		fOriginalViewImage= getTitleImage();
 		fProgressImages= new ProgressImages();
-		WorkbenchHelp.setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
 		
 		getViewSite().getPage().addPartListener(fPartListener);
 

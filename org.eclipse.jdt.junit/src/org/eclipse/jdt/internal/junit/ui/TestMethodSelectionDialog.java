@@ -43,7 +43,6 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
@@ -78,7 +77,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		WorkbenchHelp.setHelp(newShell, IJUnitHelpContextIds.TEST_SELECTION_DIALOG);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJUnitHelpContextIds.TEST_SELECTION_DIALOG);
 	}
 
 	/*

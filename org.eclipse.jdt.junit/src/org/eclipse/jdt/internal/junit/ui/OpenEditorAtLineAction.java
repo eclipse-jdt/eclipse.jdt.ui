@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
@@ -59,7 +59,7 @@ public class OpenEditorAtLineAction extends OpenEditorAction {
 	 */
 	public OpenEditorAtLineAction(TestRunnerViewPart testRunner, String cuName, String className, int line) {
 		super(testRunner, className);
-		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.OPENEDITORATLINE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.OPENEDITORATLINE_ACTION);
 		fLineNumber= line;
 		fCUName= cuName;
 	}

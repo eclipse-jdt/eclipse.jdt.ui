@@ -59,7 +59,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Wizard page to select the test classes to include
@@ -138,7 +138,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		setControl(composite);
 		restoreWidgetValues();
 		Dialog.applyDialogFont(composite);	
-		WorkbenchHelp.setHelp(composite, IJUnitHelpContextIds.NEW_TESTSUITE_WIZARD_PAGE);			
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.NEW_TESTSUITE_WIZARD_PAGE);			
 	}
 
 	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {

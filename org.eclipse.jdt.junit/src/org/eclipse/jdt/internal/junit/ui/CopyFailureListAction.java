@@ -17,7 +17,7 @@ import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -34,7 +34,7 @@ public class CopyFailureListAction extends Action {
 	 */
 	public CopyFailureListAction(TestRunnerViewPart runner, FailureTab view, Clipboard clipboard) {
 		super(JUnitMessages.getString("CopyFailureList.action.label"));  //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.COPYFAILURELIST_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYFAILURELIST_ACTION);
 		fView= view;
 		fClipboard= clipboard;
 	}

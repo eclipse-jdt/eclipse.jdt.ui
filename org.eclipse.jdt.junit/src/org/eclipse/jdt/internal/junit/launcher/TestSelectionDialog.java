@@ -65,7 +65,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		//WorkbenchHelp.setHelp(newShell, new Object[] { IJavaHelpContextIds.MAINTYPE_SELECTION_DIALOG });
+		//PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, new Object[] { IJavaHelpContextIds.MAINTYPE_SELECTION_DIALOG });
 	}
 
 	/*
