@@ -584,6 +584,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		source.addDragListener(new DelegatingDragAdapter(dragListeners) {
 			public void dragStart(DragSourceEvent event) {
 				IStructuredSelection selection= (IStructuredSelection)getSelection();
+				if (selection.isEmpty()) {
+					event.doit= false;
+					return; 
+				}
 				for (Iterator iter= selection.iterator(); iter.hasNext(); ) {
 					if (iter.next() instanceof IMember) {
 						setPossibleListeners(new TransferDragSourceListener[] {new SelectionTransferDragAdapter(fViewer)});
