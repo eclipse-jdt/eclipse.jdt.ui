@@ -4,7 +4,54 @@
  */
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Iterator;import java.util.List;import java.util.StringTokenizer;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IncrementalProjectBuilder;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IConfigurationElement;import org.eclipse.core.runtime.IExecutableExtension;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.ILaunch;import org.eclipse.debug.core.ILauncher;import org.eclipse.debug.core.Launch;import org.eclipse.debug.core.model.ILauncherDelegate;import org.eclipse.debug.core.model.ISourceLocator;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.Utilities;import org.eclipse.jdt.launching.ExecutionArguments;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.ProjectSourceLocator;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.wizard.WizardDialog;import org.eclipse.ui.IFileEditorInput;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExecutableExtension;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILauncher;
+import org.eclipse.debug.core.Launch;
+import org.eclipse.debug.core.model.ILauncherDelegate;
+import org.eclipse.debug.core.model.ISourceLocator;
+import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.debug.internal.ui.LaunchWizard;
+import org.eclipse.debug.internal.ui.LaunchWizardDialog;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.Utilities;
+import org.eclipse.jdt.launching.ExecutionArguments;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMRunner;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.ProjectSourceLocator;
+import org.eclipse.jdt.launching.VMRunnerConfiguration;
+import org.eclipse.jdt.launching.VMRunnerResult;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IFileEditorInput;
+import org.omg.CORBA.UNKNOWN;
 
 /**
  * A launcher for running java main classes. Uses JDI to launch a vm in debug 
@@ -28,15 +75,14 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 	public JavaApplicationLauncher() {
 	}
 		
-	/**
-	 *	@see ILauncher#launch
-	 */
 	public boolean launch(Object runnable, String mode, ILauncher launcher) {
 		
 		if (!(runnable instanceof IType)) {
-			showNoMainDialog();
-			return false;
+			IProject project = findProject(new Object[] {runnable});
+			useLaunchWizard(mode, new ILauncher[] {launcher}, project);
+			return true;
 		}
+		
 		IType mainType= (IType)runnable;
 
 		IJavaProject javaProject= mainType.getJavaProject();
@@ -70,10 +116,13 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 		if (elements.size() > 1) {
 			return useWizard(elements, selection, mode, launcher);
 		}
+		
 		if (elements.size() == 0) {
-			showNoMainDialog();
-			return false;
+			IProject project = findProject(objects);
+			useLaunchWizard(mode, new ILauncher[] {launcher}, project);
+			return true;
 		}
+		
 		Iterator itr= elements.iterator();
 		if (itr.hasNext()) {
 			Object launchable= itr.next();
@@ -83,21 +132,43 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 	}	
 	
 	/**
+	 * Given an array of potentially launchable elements, scan through them and
+	 * look for the first one that has an IResource adapter, and use it to get
+	 * the associated project.
+	 */
+	protected IProject findProject(Object[] objects) {
+		for (int i = 0; i < objects.length; i++) {
+			Object object = objects[i];
+			if (object instanceof IAdaptable) {
+				IResource resource = (IResource) ((IAdaptable)object).getAdapter(IResource.class);
+				if (resource != null) {
+					return resource.getProject();				
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Use the wizard to do the launch.
 	 */
 	protected boolean useWizard(List elements, IStructuredSelection selection, String mode, ILauncher launcher) {
 		JavaApplicationWizard w= new JavaApplicationWizard(elements);
 		w.init(launcher, mode, selection);
 		WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), w);
-		return dialog.open() == dialog.OK;
+		dialog.open();
+		// Rather than returning whether the user clicked OK or Cancel, always 
+		// return true.  If the launch fails, 
+		return true;
 	}
 	
-	protected void showNoMainDialog() {
-		String title= LauncherMessages.getString("javaAppLauncher.error.title"); //$NON-NLS-1$
-		String msg= LauncherMessages.getString("javaAppLauncher.noMainClass"); //$NON-NLS-1$
-		MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(),title, msg);
+	protected void useLaunchWizard(String mode, ILauncher[] launchers, IProject project) {
+		LaunchWizard lw= new LaunchWizard(launchers, null, mode, project, launchers[0]);
+		Shell shell = DebugUIPlugin.getActiveWorkbenchWindow().getShell();
+		LaunchWizardDialog dialog= new LaunchWizardDialog(shell, lw);
+		dialog.open();
 	}
-
+	
 	protected void showNoLauncherDialog() {
 		String title= LauncherMessages.getString("javaAppLauncher.error.title"); //$NON-NLS-1$
 		String msg= LauncherMessages.getString("javaAppLauncher.error.noJRE"); //$NON-NLS-1$
