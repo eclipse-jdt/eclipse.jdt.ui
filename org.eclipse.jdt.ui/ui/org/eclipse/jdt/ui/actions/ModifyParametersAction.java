@@ -112,12 +112,15 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	}
 	
 	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		//see getSingleSelectedMethod(ITextSelection)
 		IJavaElement[] elements= selection.resolveElementAtOffset(); 
-		if (elements.length != 1)
+		if (elements.length > 1)
 			return false;
-		if (! (elements[0] instanceof IMethod))
-			return false;
-		return ChangeSignatureRefactoring.isAvailable((IMethod)elements[0]);
+		if (elements.length == 1 && (elements[0] instanceof IMethod))
+			return ChangeSignatureRefactoring.isAvailable((IMethod)elements[0]);
+		
+		IJavaElement elementAt= selection.resolveEnclosingElement();
+		return (elementAt instanceof IMethod) && ChangeSignatureRefactoring.isAvailable((IMethod)elementAt);
 	}
 	
 	/*
@@ -165,10 +168,15 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	}
 	
 	private IMethod getSingleSelectedMethod(ITextSelection selection) throws JavaModelException{
+		//- when caret/selection on method name (call or declaration) -> that method
+		//- otherwise: caret position's enclosing method declaration
+		//  - when caret inside argument list of method declaration -> enclosing method declaration
+		//  - when caret inside argument list of method call -> enclosing method declaration (and NOT method call)
+
 		IJavaElement[] elements= resolveElements();
-		if (elements.length != 1)
+		if (elements.length > 1)
 			return null;
-		if (elements[0] instanceof IMethod)
+		if (elements.length == 1 && elements[0] instanceof IMethod)
 			return (IMethod)elements[0];
 		IJavaElement elementAt= SelectionConverter.getInputAsCompilationUnit(fEditor).getElementAt(selection.getOffset());
 		if (elementAt instanceof IMethod)
