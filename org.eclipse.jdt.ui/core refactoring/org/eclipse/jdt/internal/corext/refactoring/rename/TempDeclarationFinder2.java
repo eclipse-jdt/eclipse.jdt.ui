@@ -67,8 +67,10 @@ public class TempDeclarationFinder2 {
 		public boolean visitNode(ASTNode node) {
 			if (!(node instanceof VariableDeclaration))
 				return super.visitNode(node);
-			if (getSelection().coveredBy(node))
+			if (getSelection().coveredBy(node)){
 				fNode= node;
+				return false;
+			}	
 			return super.visitNode(node);
 				
 		}
