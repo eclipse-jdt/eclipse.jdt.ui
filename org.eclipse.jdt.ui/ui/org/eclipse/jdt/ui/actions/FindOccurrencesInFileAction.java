@@ -13,9 +13,10 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
@@ -40,7 +41,6 @@ import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
- 
 /**
  * Action to find all occurrences of a compilation unit member (e.g.
  * fields, methods, types, and local variables) in a file. 
