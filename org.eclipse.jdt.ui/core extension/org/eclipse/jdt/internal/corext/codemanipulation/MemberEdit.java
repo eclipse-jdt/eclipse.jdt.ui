@@ -275,8 +275,7 @@ public class MemberEdit extends SimpleTextEdit {
 		if (fUseFormatter) {
 			CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
 			formatter.options.setLineSeparator(lineDelimiter);
-			formatter.setInitialIndentationLevel(initialIndentationLevel);
-			return formatter.formatSourceString(buffer.toString());
+			return formatter.format(buffer.toString(), initialIndentationLevel);
 		}
 		return buffer.toString();
 	}

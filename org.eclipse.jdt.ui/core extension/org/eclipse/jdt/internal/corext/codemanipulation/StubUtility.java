@@ -474,12 +474,9 @@ public class StubUtility {
 	}
 	
 	public static String codeFormat(String sourceString, int initialIndentationLevel, String lineDelim) {
-		// code formatter does not offer all options we need
-		
 		CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
 		formatter.options.setLineSeparator(lineDelim);
-		formatter.setInitialIndentationLevel(initialIndentationLevel);
-		return formatter.formatSourceString(sourceString) + lineDelim;
+		return formatter.format(sourceString, initialIndentationLevel) + lineDelim;
 	}
 	
 	/**
