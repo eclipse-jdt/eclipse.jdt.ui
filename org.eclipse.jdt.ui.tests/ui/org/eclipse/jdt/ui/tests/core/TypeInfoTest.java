@@ -110,11 +110,9 @@ public class TypeInfoTest extends TestCase {
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(
-			fJProject1.getJavaModel().getWorkspace(),
 			null, 
 			new char[] {'V'}, 
 			SearchPattern.R_PREFIX_MATCH, 
-			false, 
 			IJavaSearchConstants.TYPE, 
 			scope, 
 			requestor, 
@@ -167,11 +165,9 @@ public class TypeInfoTest extends TestCase {
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(
-			fJProject1.getJavaModel().getWorkspace(),
 			null, 
 			new char[] {'T'}, 
 			SearchPattern.R_PREFIX_MATCH, 
-			false, 
 			IJavaSearchConstants.TYPE, 
 			scope, 
 			requestor, 
@@ -293,11 +289,9 @@ public class TypeInfoTest extends TestCase {
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(
-			fJProject1.getJavaModel().getWorkspace(),
 			null, 
 			"Foo".toCharArray(),
-			SearchPattern.R_EXACT_MATCH, 
-			true, 
+			SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 
 			IJavaSearchConstants.TYPE, 
 			scope, 
 			requestor, 
