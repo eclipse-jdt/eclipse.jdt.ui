@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -28,17 +29,21 @@ abstract class OpenRefactoringWizardAction extends SelectionDispatchAction {
 	private Class fActivationType;
 	private Refactoring fRefactoring;
 	private CompilationUnitEditor fEditor;
+	private boolean fCanActivateOnMultiSelection;
+	private String fUnavailableMessage;
 	
-	protected OpenRefactoringWizardAction(String label, IWorkbenchSite site, Class activatedOnType) {
+	protected OpenRefactoringWizardAction(String label, String unavailableString, IWorkbenchSite site, Class activatedOnType, boolean canActivateOnMultiSelection) {
 		super(site);
+		Assert.isNotNull(unavailableString);
+		Assert.isNotNull(activatedOnType);
 		setText(label);
 		fActivationType= activatedOnType;
+		fCanActivateOnMultiSelection= canActivateOnMultiSelection;
+		fUnavailableMessage= unavailableString;
 	}
 	
-	protected OpenRefactoringWizardAction(String label, CompilationUnitEditor editor, Class activatedOnType) {
-		super(editor.getEditorSite());
-		setText(label);
-		fActivationType= activatedOnType;
+	protected OpenRefactoringWizardAction(String label, String unavailableString, CompilationUnitEditor editor, Class activatedOnType, boolean canActivateOnMultiSelection) {
+		this(label, unavailableString, editor.getEditorSite(), activatedOnType, canActivateOnMultiSelection);
 		fEditor= editor;
 	}
 	
@@ -46,17 +51,50 @@ abstract class OpenRefactoringWizardAction extends SelectionDispatchAction {
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		setEnabled(canOperateOn(selection));
+		setEnabled(canEnable(selection));
 	}
 
-	protected boolean canOperateOn(IStructuredSelection selection){
-		if (selection.isEmpty())
-			return canOperateOnEmptySelection();
+	protected void selectionChanged(ITextSelection selection) {
+		//resolving is too expensive to do on selection changes in the editor - just enable here, we'll check it later
+		setEnabled(fEditor != null);
+	}
+
+	/*
+	 * @see SelectionDispatchAction#run(IStructuredSelection)
+	 */
+	protected void run(IStructuredSelection selection) {
+		startRefactoring();
+	}
+
+	protected void run(ITextSelection selection) {
+		if (! canRun(selection)){
+			MessageDialog.openInformation(getShell(), "Operation Unavailable", fUnavailableMessage);
+			fRefactoring= null;
+			return;
+		}
+		startRefactoring();	
+	}
 		
-		if (selection.size() > 1 && !canOperateOnMultiSelection())	
+	/**
+	 * Creates a new instance of <code>Refactoring</code>.
+	 * @param obj is guaranteed to be of the accepted type (passed in the constructor)
+	 * However, if <code>fCanOperateOnMultiSelection</code> is set to <code>true</code>, 
+	 * then obj is <code>Object[]</code> and contains elements of the accepted type (passed in the constructor) 
+	 */
+	protected abstract Refactoring createNewRefactoringInstance(Object obj) throws JavaModelException;	
+	
+	protected abstract RefactoringWizard createWizard(Refactoring refactoring);	
+	
+	protected abstract boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException;
+
+	private boolean canEnable(IStructuredSelection selection){
+		if (selection.isEmpty())
 			return false;
 		
-		if (selection.size() == 1&& !canOperateOnMultiSelection())
+		if (selection.size() > 1 && ! fCanActivateOnMultiSelection)	
+			return false;
+		
+		if (selection.size() == 1 && ! fCanActivateOnMultiSelection)
 			return fActivationType.isInstance(selection.getFirstElement()) && shouldAcceptElement(selection.getFirstElement());
 				
 		for  (Iterator iter= selection.iterator(); iter.hasNext(); ) {
@@ -65,37 +103,18 @@ abstract class OpenRefactoringWizardAction extends SelectionDispatchAction {
 		}
 		return shouldAcceptElement(selection.toArray());
 	}
+		
+	private boolean canRun(ITextSelection selection){
+		IJavaElement[] elements= resolveElements();
+		if (elements.length != 1)
+			return false;
 
-	protected boolean canOperateOnMultiSelection(){
-		return false;
+		if (fCanActivateOnMultiSelection)
+			return fActivationType.isInstance(elements[0]) && shouldAcceptElement(elements);	//XXX not pretty
+		else	
+			return fActivationType.isInstance(elements[0]) && shouldAcceptElement(elements[0]);
 	}
-	
-	protected boolean canOperateOnEmptySelection(){
-		return false;
-	}
-		
-	/*
-	 * @see SelectionDispatchAction#run(IStructuredSelection)
-	 */
-	public void run(IStructuredSelection selection) {
-		Assert.isNotNull(fRefactoring);
-		try{
-			new RefactoringStarter().activate(fRefactoring, createWizard(fRefactoring), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-		}	
-	}
-		
-	/**
-	 * Creates a new instance of <code>Refactoring</code>.
-	 * @param obj is guaranteed to be of the accepted type (passed in the constructor)
-	 * However, if <code>canOperateOnMultiSelection</code> resturns <code>true</code>, 
-	 * then obj is <code>Object[]</code> and contains elements of the accepted type (passed in the constructor) 
-	 */
-	protected abstract Refactoring createNewRefactoringInstance(Object obj) throws JavaModelException;	
-	
-	protected abstract RefactoringWizard createWizard(Refactoring refactoring);	
-	
+
 	/**
 	 * @param obj is guaranteed to be of the accepted type (passed in the constructor)
 	 * However, if <code>canOperateOnMultiSelection</code> resturns <code>true</code>, 
@@ -107,45 +126,22 @@ abstract class OpenRefactoringWizardAction extends SelectionDispatchAction {
 			fRefactoring= createNewRefactoringInstance(obj);
 			return canActivateRefactoring(fRefactoring);
 		} catch (JavaModelException e){
-				JavaPlugin.log(e.getStatus());
-				return false;
+			JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
+			return false;
 		}	
 	}
-	
-	protected abstract boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException;
-
-	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
-	}
-
-	private boolean canRun(ITextSelection selection){
-		IJavaElement[] elements= resolveElements();
-		if (elements.length != 1)
-			return false;
-
-		if (! canOperateOnMultiSelection())
-			return fActivationType.isInstance(elements[0]) && shouldAcceptElement(elements[0]);
-		else
-			return fActivationType.isInstance(elements[0]) && shouldAcceptElement(elements);	//XXX not pretty
-	}
-	
+		
 	private IJavaElement[] resolveElements() {
 		return SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"));  //$NON-NLS-1$
 	}
 	
-	protected void run(ITextSelection selection) {
-		if (! canRun(selection)){
-			Display.getDefault().beep();
-			return;
-		}
-		
+	private void startRefactoring() {
 		Assert.isNotNull(fRefactoring);
-		//to be extracted
 		try{
 			new RefactoringStarter().activate(fRefactoring, createWizard(fRefactoring), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-		}	
+		}
 	}
 
 }
