@@ -28,7 +28,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 
 import org.eclipse.jface.text.Assert;
@@ -46,7 +45,7 @@ import org.eclipse.ui.texteditor.quickdiff.ReferenceProviderDescriptor;
  */
 class QuickdiffConfigurationBlock implements IPreferenceConfigurationBlock {
 	
-	private IPreferenceStore fStore;
+	private OverlayPreferenceStore fStore;
 	
 	private Map fCheckBoxes= new HashMap();
 	private SelectionListener fCheckBoxListener= new SelectionListener() {
@@ -91,12 +90,35 @@ class QuickdiffConfigurationBlock implements IPreferenceConfigurationBlock {
 
 	
 
-	public QuickdiffConfigurationBlock(IPreferenceStore store, String prefix) {
+	public QuickdiffConfigurationBlock(OverlayPreferenceStore store, String prefix) {
 		Assert.isNotNull(store);
 		fStore= store;
+		fStore.addKeys(createOverlayStoreKeys());
 		MarkerAnnotationPreferences markerAnnotationPreferences= new MarkerAnnotationPreferences();
 		fQuickDiffModel= createQuickDiffModel(markerAnnotationPreferences);
 		fQuickDiffProviderListModel= createQuickDiffReferenceListModel();
+	}
+	
+	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
+		MarkerAnnotationPreferences preferences= new MarkerAnnotationPreferences();
+		ArrayList overlayKeys= new ArrayList();
+		Iterator e= preferences.getAnnotationPreferences().iterator();
+
+		while (e.hasNext()) {
+			AnnotationPreference info= (AnnotationPreference) e.next();
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, info.getColorPreferenceKey()));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getTextPreferenceKey()));
+			if (info.getHighlightPreferenceKey() != null)
+				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getHighlightPreferenceKey()));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getOverviewRulerPreferenceKey()));
+			if (info.getVerticalRulerPreferenceKey() != null)
+				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getVerticalRulerPreferenceKey()));
+			if (info.getTextStylePreferenceKey() != null)
+				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, info.getTextStylePreferenceKey()));
+		}
+		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
+		overlayKeys.toArray(keys);
+		return keys;
 	}
 	
 	private String[][] createQuickDiffModel(MarkerAnnotationPreferences preferences) {
