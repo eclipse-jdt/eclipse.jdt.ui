@@ -27,16 +27,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PushDownWizard;
@@ -44,6 +38,9 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 
 /**
  * Action to push down methods and fields into subclasses.
@@ -59,11 +56,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class PushDownAction extends SelectionDispatchAction{
 
-	private PushDownRefactoring fRefactoring;
 	private CompilationUnitEditor fEditor;
 	
 	/**
-	 * Creates a new <code>PullUpAction</code>. The action requires that the selection 
+	 * Creates a new <code>PushDownAction</code>. The action requires that the selection 
 	 * provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
@@ -88,116 +84,108 @@ public class PushDownAction extends SelectionDispatchAction{
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		setEnabled(canEnable(selection));
-		if (! isEnabled())
-			fRefactoring= null;
+		try {
+			setEnabled(canEnable(getSelectedMembers(selection)));
+		} catch (JavaModelException e) {
+			setEnabled(false);//no ui
+		}
 	}
 
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(ITextSelection)
 	 */
 	protected void selectionChanged(ITextSelection selection) {
+		//do nothing, this happens too often
 	}
 	
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
 	protected void run(IStructuredSelection selection) {
-		if (fRefactoring == null)
-			selectionChanged(selection);
-		if (isEnabled())
-			startRefactoring();
-		fRefactoring= null;	
-		selectionChanged(selection);
+		try {
+			IMember[] members= getSelectedMembers(selection);
+			if (canEnable(members))
+				startRefactoring(members);
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(ITextSelection)
 	 */
 	protected void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
-			return;
-		if (canRun()){
-			startRefactoring();	
-		} else {
-			String unavailable= RefactoringMessages.getString("PushDownAction.To_activate"); //$NON-NLS-1$
-			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
+		try {
+			if (!ActionUtil.isProcessable(getShell(), fEditor))
+				return;
+			IMember member= getSelectedMember();
+			IMember[] array= new IMember[]{member};
+			if (member != null && canEnable(array)){
+				startRefactoring(array);	
+			} else {
+				String unavailable= RefactoringMessages.getString("PushDownAction.To_activate"); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
+			}
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		fRefactoring= null;
-		selectionChanged(selection);
 	}
 		
-	private boolean canEnable(IStructuredSelection selection){
+	private static IMember[] getSelectedMembers(IStructuredSelection selection){
 		if (selection.isEmpty())
-			return false;
+			return null;
 		
 		for  (Iterator iter= selection.iterator(); iter.hasNext(); ) {
 			if (! (iter.next() instanceof IMember))
-				return false;
+				return null;
 		}
-		return shouldAcceptElements(selection.toArray());
+		return convertToMemberArray(selection.toArray());
 	}
-		
-	private boolean canRun(){
-		try {
-			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
-			if (element == null)
-				return false;
-			return (element instanceof IMember) && shouldAcceptElements(new IJavaElement[]{element});
-		} catch (JavaModelException e) {
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
-			return false;
-		}
+	
+	private static boolean canEnable(IMember[] members) throws JavaModelException {
+		return PushDownRefactoring.isAvailable(members);
+	}
+			
+	private IMember getSelectedMember() throws JavaModelException{
+		IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+		if (element == null || ! (element instanceof IMember))
+			return null;
+		return (IMember)element;
 	}
 
-	private PushDownRefactoring createNewRefactoringInstance(Object[] obj) throws JavaModelException{
-		return PushDownRefactoring.create(convertToMemberArray(obj), JavaPreferencesSettings.getCodeGenerationSettings());
+	private static PushDownRefactoring createNewRefactoringInstance(IMember[] members) throws JavaModelException{
+		return PushDownRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
-	private IMember[] convertToMemberArray(Object[] obj) {
+	private static IMember[] convertToMemberArray(Object[] obj) {
+		if (obj == null)
+			return null;
 		Set memberSet= new HashSet();
 		memberSet.addAll(Arrays.asList(obj));
 		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
 	}
 
-	private boolean shouldAcceptElements(Object[] elements) {
-		try{
-			fRefactoring= createNewRefactoringInstance(elements);
-			return fRefactoring != null;
-		} catch (JavaModelException e){
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
-			return false;
-		}	
-	}
-		
-	private RefactoringWizard createWizard(){
+	private static RefactoringWizard createWizard(PushDownRefactoring refactoring){
 		String title= RefactoringMessages.getString("PushDownAction.wizard_title"); //$NON-NLS-1$
 		String helpId= IJavaHelpContextIds.PUSH_DOWN_ERROR_WIZARD_PAGE;
-		return new PushDownWizard(fRefactoring, title, helpId);
+		return new PushDownWizard(refactoring, title, helpId);
 	}
-		
-	private void startRefactoring() {
-		Assert.isNotNull(fRefactoring);
+
+	private void startRefactoring(IMember[] members) throws JavaModelException {
+		PushDownRefactoring refactoring= createNewRefactoringInstance(members);
+		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), fRefactoring.getDeclaringClass()))
+		if (!ActionUtil.isProcessable(getShell(), refactoring.getDeclaringClass()))
 			return;
-		
-		try{
-			Object newElementToProcess= new RefactoringStarter().activate(fRefactoring, createWizard(), getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
-			if (newElementToProcess == null)
-				return;
-			IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);
-			selectionChanged(mockSelection);
-			if (isEnabled())
-				run(mockSelection);
-			else
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("PushDownAction.Refactoring"), RefactoringMessages.getString("PushDownAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-		}
+	
+		Object newElementToProcess= new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
+		if (newElementToProcess == null)
+			return;
+		IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);
+		selectionChanged(mockSelection);
+		if (isEnabled())
+			run(mockSelection);
+		else
+			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("PushDownAction.Refactoring"), RefactoringMessages.getString("PushDownAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
 	}	
 }
