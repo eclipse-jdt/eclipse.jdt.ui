@@ -25,6 +25,9 @@ public class EditorInputAdapterFactory implements IAdapterFactory {
 		return PROPERTIES;
 	}
 	
+	/**
+	 * @see Object#clone()
+	 */
 	public Object getAdapter(Object element, Class key) {
 		if (ISearchPageScoreComputer.class.equals(key))
 			return getSearchPageScoreComputer();

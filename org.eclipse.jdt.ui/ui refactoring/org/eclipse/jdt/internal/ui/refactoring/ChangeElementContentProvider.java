@@ -173,7 +173,10 @@ public class ChangeElementContentProvider  implements ITreeContentProvider {
 		int offset= getOffset(edit);
 		if (offset == -1)
 			return cunit;
-		return cunit.getElementAt(offset);
+		IJavaElement elementAtOffset= cunit.getElementAt(offset);
+		if (elementAtOffset != null)
+			return elementAtOffset;
+		return cunit;
 	}
 
 	private static int getOffset(EditChange edit) {
