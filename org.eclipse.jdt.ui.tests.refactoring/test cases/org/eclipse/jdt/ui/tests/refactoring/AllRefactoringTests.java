@@ -25,6 +25,7 @@ public class AllRefactoringTests {
 		//-- structure
 		suite.addTest(ReorderParametersTests.suite());
 		suite.addTest(PullUpTests.suite());
+		suite.addTest(MoveMembersTests.suite());
 		 
 		//--methods
 		suite.addTest(RenameVirtualMethodInClassTests.suite());
@@ -44,7 +45,6 @@ public class AllRefactoringTests {
 		suite.addTest(RenameNonPrivateFieldTests.suite());
 		
 		//--compilation units
-		//suite.addTest(MoveCUTests.noSetupSuite());
 		suite.addTest(MultiMoveTests.suite());
 
 		//--projects
