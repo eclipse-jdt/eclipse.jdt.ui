@@ -59,7 +59,7 @@ public class AllTypesCache {
 		
 		private int fDelay;
 		private int fSizeHint;
-		private volatile boolean fReset;
+		private volatile boolean fRestart;
 		private volatile boolean fAbort;
 		private IProgressMonitor fMonitor;
 		
@@ -71,13 +71,13 @@ public class AllTypesCache {
 			setPriority(Thread.NORM_PRIORITY-1);
 		}
 		
-		void reset() {
-			fReset= true;
+		void restart() {
+			fRestart= true;
 			interrupt();
 		}
 		
 		public void abort() {
-			fReset= fAbort= true;
+			fRestart= fAbort= true;
 			interrupt();
 		}
 		
@@ -94,15 +94,15 @@ public class AllTypesCache {
 					}
 				}
 				
-				fReset= false;
+				fRestart= false;
 				Collection searchResult= doSearchTypes();
 				if (searchResult != null) {
-					if (!fAbort && !fReset) {
+					if (!fAbort && !fRestart) {
 						TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
 						Arrays.sort(result, fgTypeNameComparator);
 						setCache(result);
 					}
-					if (!fReset)
+					if (!fRestart)
 						break;
 				}
 			}
@@ -120,12 +120,12 @@ public class AllTypesCache {
 		
 			ITypeNameRequestor requestor= new ITypeNameRequestor() {
 				public void acceptInterface(char[] packageName, char[] typeName, char[][] enclosingTypeNames, String path) {
-					if (fReset)
+					if (fRestart)
 						throw new RequestorAbort();
 					typesFound.add(factory.create(packageName, typeName, enclosingTypeNames, true, path));
 				}
 				public void acceptClass(char[] packageName, char[] typeName, char[][] enclosingTypeNames, String path) {
-					if (fReset)
+					if (fRestart)
 						throw new RequestorAbort();
 					typesFound.add(factory.create(packageName, typeName, enclosingTypeNames, false, path));
 				}
@@ -146,7 +146,6 @@ public class AllTypesCache {
 	 * The lock for synchronizing all activity in the AllTypesCache.
 	 */
 	private static Object fgLock= new Object();
-		private volatile static boolean fgInitialized= false;
 		private volatile static TypeCacher fgTypeCacherThread;
 		private static TypeInfo[] fgTypeCache;
 		private static int fgSizeHint= INITIAL_SIZE;
@@ -210,8 +209,6 @@ public class AllTypesCache {
 		forceDeltaComplete();
 		
 		synchronized(fgLock) {
-			
-			fgInitialized= true;
 			
 			if (fgTypeCache == null) {
 				// cache is empty
@@ -280,15 +277,17 @@ public class AllTypesCache {
 		 * @see IElementChangedListener#elementChanged
 		 */
 		public void elementChanged(ElementChangedEvent event) {
+			if (fgTerminated)
+				return;
 			boolean needsFlushing= processDelta(event.getDelta());
 			if (needsFlushing) {
 				synchronized(fgLock) {
-					fgInitialized= true;
 					fgTypeCache= null;
 					fgNumberOfCacheFlushes++;
 					
 					if (fgTypeCacherThread != null) {
-						fgTypeCacherThread.reset();
+						// if caching thread is already running, restart it
+						fgTypeCacherThread.restart();
 					} else {
 						if (fgAsyncMode) {	// start thread only if we are in background mode
 							fgTypeCacherThread= new TypeCacher(fgSizeHint, TIMEOUT, null);
@@ -468,11 +467,6 @@ public class AllTypesCache {
 	
 	private static void startBackgroundMode() {
 		
-		fgAsyncMode= true;
-
-		if (fgInitialized)
-			return;
-		
 		forceDeltaComplete();
 		
 		synchronized(fgLock) {
@@ -488,6 +482,7 @@ public class AllTypesCache {
 				if (fgTerminated) {
 					// already terminated: do nothing
 				} else {
+					fgAsyncMode= true;
 					if (fgTypeCache != null) {
 						// the cache is already uptodate
 					} else {
