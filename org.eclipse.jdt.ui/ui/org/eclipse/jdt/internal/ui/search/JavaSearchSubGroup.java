@@ -4,19 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-
-import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Contribute Java search specific menu elements.
@@ -29,12 +25,11 @@ public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
 	
 	public void fill(IMenuManager manager, GroupContext context) {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID);
-		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(context.getSelectionProvider());
-		IStructuredSelection selection= provider.getSelection();
+		ISelection sel= context.getSelection();
 		ElementSearchAction[] actions= getActions();
 		for (int i= 0; i < actions.length; i++) {
 			ElementSearchAction action= actions[i];
-			if (action.canOperateOn(selection))
+			if (!(sel instanceof IStructuredSelection) || action.canOperateOn((IStructuredSelection)sel))
 				javaSearchMM.add(action);
 		}
 		

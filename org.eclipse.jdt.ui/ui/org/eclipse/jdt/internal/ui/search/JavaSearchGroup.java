@@ -8,14 +8,17 @@ import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.ISelectionService;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * Contribute Java search specific menu elements.
@@ -62,9 +65,13 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 		return GROUP_NAME;
 	}
 	
-	public void fill(IMenuManager manager, String groupId, ISelectionService service) {
-		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(service);
-		IStructuredSelection selection= provider.getSelection();
+	public void fill(IMenuManager manager, String groupId, JavaEditor editor) {
+		IStructuredSelection selection;
+		try {
+			selection= SelectionConverter.getStructuredSelection(editor);
+		} catch (JavaModelException ex) {
+			selection= StructuredSelection.EMPTY;
+		}
 
 		IMenuManager javaSearchMM;
 		if (fInline) {

@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -14,7 +13,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 
 import org.eclipse.search.ui.ISearchResultViewEntry;
 
@@ -29,7 +29,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -120,12 +120,19 @@ public abstract class JavaElementAction extends Action {
 			return getJavaElement(selection.getFirstElement(), silent);
 		return null;
 	}
-	public IStructuredSelection getSelection() {
-		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
-		if (window != null)
-			return StructuredSelectionProvider.createFrom(window.getSelectionService()).getSelection();
-		else
-			return StructuredSelection.EMPTY;
+	public IStructuredSelection getSelection() {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null) {
+			IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
+			if (part != null) {
+				try {
+					return SelectionConverter.getStructuredSelection(part);
+				} catch (JavaModelException ex) {
+					return StructuredSelection.EMPTY;
+				}
+			}
+		}
+		return StructuredSelection.EMPTY;
 	}
 	private IJavaElement chooseFromList(IJavaElement[] openChoices) {
 		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED;
