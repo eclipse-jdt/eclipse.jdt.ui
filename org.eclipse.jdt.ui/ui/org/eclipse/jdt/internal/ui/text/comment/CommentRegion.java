@@ -95,7 +95,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 		fStrategy= strategy;
 		fDelimiter= delimiter;
-		fClear= fStrategy.getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES) == IPreferenceStore.TRUE;
+		fClear= IPreferenceStore.TRUE.equals(fStrategy.getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES));
 
 		final ISourceViewer viewer= strategy.getViewer();
 		final StyledText text= viewer.getTextWidget();

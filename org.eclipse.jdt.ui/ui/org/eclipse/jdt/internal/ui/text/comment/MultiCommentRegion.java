@@ -55,10 +55,10 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 
 		final Map preferences= strategy.getPreferences();
 
-		fIndentRoots= preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS) == IPreferenceStore.TRUE;
-		fIndentDescriptions= preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION) == IPreferenceStore.TRUE;
-		fSeparateRoots= preferences.get(PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS) == IPreferenceStore.TRUE;
-		fParameterNewLine= preferences.get(PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER) == IPreferenceStore.TRUE;
+		fIndentRoots= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS));
+		fIndentDescriptions= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION));
+		fSeparateRoots= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS));
+		fParameterNewLine= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER));
 	}
 
 	/*

@@ -122,8 +122,8 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			position.length= partition.getLength();
 
 			final Map preferences= getPreferences();
-			final boolean format= preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMAT) == IPreferenceStore.TRUE;
-			final boolean header= preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER) == IPreferenceStore.TRUE;
+			final boolean format= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMAT));
+			final boolean header= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER));
 
 			if (format && (header || position.getOffset() != 0 || !type.equals(IJavaPartitions.JAVA_DOC))) {
 

@@ -64,8 +64,8 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 
 		final Map preferences= strategy.getPreferences();
 
-		fFormatSource= preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE) == IPreferenceStore.TRUE;
-		fFormatHtml= preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHTML) == IPreferenceStore.TRUE;
+		fFormatSource= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE));
+		fFormatHtml= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHTML));
 	}
 
 	/*
