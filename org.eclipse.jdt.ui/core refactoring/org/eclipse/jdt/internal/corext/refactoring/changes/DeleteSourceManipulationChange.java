@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -22,9 +24,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IReorgExceptionHandler;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 
@@ -39,7 +41,15 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("DeleteSourceManipulationChange.delete"); //$NON-NLS-1$
+		String pattern= "Delete ''{0}''";
+		return MessageFormat.format(pattern, new String[]{getElementName()});
+	}
+
+	private String getElementName() {
+		IJavaElement javaElement= getJavaElement(getSourceModification());
+		if (JavaElementUtil.isDefaultPackage(javaElement))
+			return "(default package)";
+		return javaElement.getElementName();
 	}
 
 	/*
@@ -54,8 +64,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	 */
 	protected void doDelete(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
 		try{
-			//cast safe
-			((ISourceManipulation)getModifiedLanguageElement()).delete(false, pm);	
+			getSourceModification().delete(false, pm);	
 		} catch (JavaModelException jme) {
 			if (! (getModifiedLanguageElement() instanceof ICompilationUnit))
 				throw jme;
@@ -79,6 +88,10 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 		
 	}
 		
+	private ISourceManipulation getSourceModification() {
+		return (ISourceManipulation)getModifiedLanguageElement();
+	}
+
 	private static IJavaElement getJavaElement(ISourceManipulation sm){
 		//all known ISourceManipulations are IJavaElements
 		return (IJavaElement)sm;
