@@ -589,15 +589,15 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(pm, scope, pattern);
 		
 		for (int i= 0; i < groupedResults.length; i++) {
-			IJavaElement element= JavaCore.create(groupedResults[i].getResource());
-			if (!(element instanceof ICompilationUnit))
+			ICompilationUnit cu= groupedResults[i].getCompilationUnit();
+			if (cu == null)
 				continue;
 			SearchResult[] results= groupedResults[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				SearchResult searchResult= results[j];
-				ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
+				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
 				TextEdit edit= new UpdateMethodReferenceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), newAccessorName, accessor.getElementName());
-				manager.get(cu).addTextEdit(editName, edit);
+				manager.get(wc).addTextEdit(editName, edit);
 			}
 		}
 	}
@@ -629,13 +629,13 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		pm.beginTask("", fReferences.length); //$NON-NLS-1$
 		String editName= RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_field_reference"); //$NON-NLS-1$
 		for (int i= 0; i < fReferences.length; i++){
-			IJavaElement element= JavaCore.create(fReferences[i].getResource());
-			if (!(element instanceof ICompilationUnit))
+			ICompilationUnit cu= fReferences[i].getCompilationUnit();
+			if (cu == null)
 				continue;
 			SearchResult[] results= fReferences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
-				manager.get(cu).addTextEdit(editName, createTextChange(results[j]));
+				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+				manager.get(wc).addTextEdit(editName, createTextChange(results[j]));
 			}
 			pm.worked(1);			
 		}

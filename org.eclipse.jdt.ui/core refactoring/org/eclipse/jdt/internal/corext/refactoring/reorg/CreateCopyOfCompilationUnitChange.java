@@ -78,9 +78,7 @@ class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		SearchResultGroup refs= getReferences(wc, pm);
 		if (refs == null)
 			return manager;
-		IResource resource= refs.getResource();
-		IJavaElement element= JavaCore.create(resource);
-		if (!(element instanceof ICompilationUnit))
+		if (refs.getCompilationUnit() == null)	
 			return manager;
 				
 		String name= RefactoringCoreMessages.getString("CopyRefactoring.update_ref"); //$NON-NLS-1$

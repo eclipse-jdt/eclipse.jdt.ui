@@ -470,14 +470,14 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
 		pm.beginTask("", fOccurrences.length);				 //$NON-NLS-1$
 		for (int i= 0; i < fOccurrences.length; i++){
-			IJavaElement element= JavaCore.create(fOccurrences[i].getResource());
-			if (!(element instanceof ICompilationUnit))
+			ICompilationUnit cu= fOccurrences[i].getCompilationUnit();
+			if (cu == null)	
 				continue;
-			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
+			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_occurrence"); //$NON-NLS-1$
-				manager.get(cu).addTextEdit(editName, createTextChange(results[j]));
+				manager.get(wc).addTextEdit(editName, createTextChange(results[j]));
 			}
 			pm.worked(1);
 		}		

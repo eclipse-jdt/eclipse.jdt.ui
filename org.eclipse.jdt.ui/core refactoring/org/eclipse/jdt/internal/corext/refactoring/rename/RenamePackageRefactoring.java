@@ -405,14 +405,14 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
 		pm.beginTask("", fOccurrences.length); //$NON-NLS-1$
 		for (int i= 0; i < fOccurrences.length; i++){
-			IJavaElement element= JavaCore.create(fOccurrences[i].getResource());
-			if (!(element instanceof ICompilationUnit))
+			ICompilationUnit cu= fOccurrences[i].getCompilationUnit();
+			if (cu == null)
 				continue;
 			String name= RefactoringCoreMessages.getString("RenamePackageRefactoring.update_reference"); //$NON-NLS-1$
-			ICompilationUnit cu= 	WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
+			ICompilationUnit wc= 	WorkingCopyUtil.getWorkingCopyIfExists(cu);
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				manager.get(cu).addTextEdit(name, createTextChange(results[j]));
+				manager.get(wc).addTextEdit(name, createTextChange(results[j]));
 			}
 			pm.worked(1);
 		}	

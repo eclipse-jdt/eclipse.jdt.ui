@@ -630,19 +630,11 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private static ICompilationUnit[] getCus(SearchResultGroup[] searchResultGroups){
 		List cus= new ArrayList(searchResultGroups.length);
 		for (int i= 0; i < searchResultGroups.length; i++) {
-			ICompilationUnit cu= getCu(searchResultGroups[i]);
+			ICompilationUnit cu= searchResultGroups[i].getCompilationUnit();
 			if (cu != null)
 				cus.add(cu);
 		}
 		return (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
-	}
-	
-	private static ICompilationUnit getCu(SearchResultGroup searchResultGroup){
-		IJavaElement je= JavaCore.create(searchResultGroup.getResource());
-		if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
-			return (ICompilationUnit)je;
-		else
-			return null;	
 	}
 	
 	private static String getFullPath(ICompilationUnit cu) throws JavaModelException{
@@ -760,12 +752,11 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
 		pm.beginTask("", fReferences.length); //$NON-NLS-1$
 		for (int i= 0; i < fReferences.length; i++){
-			IResource resource= fReferences[i].getResource();
-			IJavaElement element= JavaCore.create(resource);
-			if (!(element instanceof ICompilationUnit))
+			ICompilationUnit cu= fReferences[i].getCompilationUnit();
+			if (cu == null)
 				continue;
 					
-			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
+			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
 			String name= RefactoringCoreMessages.getString("RenameTypeRefactoring.update_reference"); //$NON-NLS-1$
 			SearchResult[] results= fReferences[i].getSearchResults();
 
