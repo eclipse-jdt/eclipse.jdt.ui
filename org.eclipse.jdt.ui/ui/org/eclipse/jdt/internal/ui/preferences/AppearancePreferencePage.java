@@ -38,44 +38,31 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private static final String STACK_BROWSING_VIEWS_VERTICALLY= PreferenceConstants.BROWSING_STACK_VERTICALLY;
 	private static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER;
 
+
 	/**
 	 * @deprecated Inline to remove reference to preference page
-	*/
-	public static boolean stackBrowsingViewsHorizontally() {
-		return !PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.BROWSING_STACK_VERTICALLY);
-	}
-	
-	/**
-	 * @deprecated Inline to remove reference to preference page
-	*/
+	 */
 	public static boolean showMethodReturnType() {
 		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE);
 	}
 
 	/**
 	 * @deprecated Inline to remove reference to preference page
-	*/
+	 */
 	public static boolean showOverrideIndicators() {
 		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR);
 	}	
 
 	/**
 	 * @deprecated Inline to remove reference to preference page
-	*/
-	public static boolean showCompilationUnitChildren() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
-	}
-
-	/**
-	 * @deprecated Inline to remove reference to preference page
-	*/
+	 * /
 	public static boolean arePackagesFoldedInHierarchicalLayout(){
 		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER);	
 	}
 
 	/**
 	 * @deprecated Inline to remove reference to preference page
-	*/
+	 */
 	public static String getPkgNamePatternForPackagesView() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES))

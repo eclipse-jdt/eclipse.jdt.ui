@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.IOpenable;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
@@ -71,8 +72,7 @@ import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
-import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 class PackageExplorerActionGroup extends CompositeActionGroup implements ISelectionChangedListener {
@@ -225,7 +225,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		toolBar.add(fForwardAction);
 		toolBar.add(fUpAction);
 		
-		if (AppearancePreferencePage.showCompilationUnitChildren()) {
+		if (showCompilationUnitChildren()) {
 			toolBar.add(new Separator());
 			fMemberFilterActionGroup.contributeToToolBar(toolBar);
 		}
@@ -304,7 +304,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		TreeViewer viewer= fPart.getViewer();
 		Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
 		if (viewer.isExpandable(element)) {
-			if (JavaBasePreferencePage.doubleClickGoesInto()) {
+			if (doubleClickGoesInto()) {
 				// don't zoom into compilation units and class files
 				if (element instanceof IOpenable && 
 					!(element instanceof ICompilationUnit) && 
@@ -361,5 +361,12 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 			}
 		};
 	}
-}
 
+	private boolean showCompilationUnitChildren() {
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
+	}
+
+	private boolean doubleClickGoesInto() {
+		return PreferenceConstants.DOUBLE_CLICK_GOES_INTO.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.DOUBLE_CLICK));
+	}
+}

@@ -37,10 +37,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 
 /**
  * Content provider which provides package fragments for hierarchical
@@ -54,7 +54,7 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 	private boolean fFoldPackages;
 	
 	public PackageFragmentProvider() {
-		fFoldPackages= AppearancePreferencePage.arePackagesFoldedInHierarchicalLayout();
+		fFoldPackages= arePackagesFoldedInHierarchicalLayout();
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
 	
@@ -500,13 +500,17 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
-		if(AppearancePreferencePage.arePackagesFoldedInHierarchicalLayout()!=fFoldPackages){
-			fFoldPackages= AppearancePreferencePage.arePackagesFoldedInHierarchicalLayout();
+		if(arePackagesFoldedInHierarchicalLayout() != fFoldPackages){
+			fFoldPackages= arePackagesFoldedInHierarchicalLayout();
 			fViewer.getControl().setRedraw(false);
 			Object[] expandedObjects= fViewer.getExpandedElements();
 			fViewer.refresh();	
 			fViewer.setExpandedElements(expandedObjects);
 			fViewer.getControl().setRedraw(true);
 		}
+	}
+
+	private boolean arePackagesFoldedInHierarchicalLayout(){
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER);
 	}
 }

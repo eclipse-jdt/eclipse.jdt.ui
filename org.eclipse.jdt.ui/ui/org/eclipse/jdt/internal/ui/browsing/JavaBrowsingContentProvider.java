@@ -41,12 +41,12 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 
 
 class JavaBrowsingContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener {
@@ -63,7 +63,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	}
 
 	private static boolean reconcileJavaViews() {
-		return JavaBasePreferencePage.reconcileJavaViews();
+		return PreferenceConstants.UPDATE_WHILE_EDITING.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
 	}
 
 	public Object[] getChildren(Object element) {

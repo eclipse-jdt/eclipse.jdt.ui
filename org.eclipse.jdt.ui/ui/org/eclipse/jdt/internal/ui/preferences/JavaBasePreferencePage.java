@@ -61,13 +61,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 
 	/**
 	 * @deprecated Inline to avoid reference to preference page
-     */
-	public static boolean linkBrowsingViewSelectionToEditor() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_BROWSING_VIEW_TO_EDITOR);
-	}
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
 	 */		
 	public static boolean linkPackageSelectionToEditor() {
 		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_PACKAGES_TO_EDITOR);
@@ -109,13 +102,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	 */	
 	public static boolean doubleClickGoesInto() {
 		return PreferenceConstants.DOUBLE_CLICK_GOES_INTO.equals(PreferenceConstants.getPreferenceStore().getString(DOUBLE_CLICK));
-	}
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */
-	public static boolean reconcileJavaViews() {
-		return PreferenceConstants.UPDATE_WHILE_EDITING.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
 	}
 
 	private ArrayList fCheckBoxes;
