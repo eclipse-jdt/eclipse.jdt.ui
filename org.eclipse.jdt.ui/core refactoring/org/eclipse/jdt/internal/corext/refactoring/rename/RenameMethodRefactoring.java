@@ -359,13 +359,13 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}
 	
 	private SearchResultGroup[] getOldOccurrences(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		ISearchPattern oldPattern= createSearchPattern(new SubProgressMonitor(pm, 1));
 		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), oldPattern);
 	}
 	
 	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
-		pm.beginTask("", 3);
+		pm.beginTask("", 3); //$NON-NLS-1$
 		try{
 			ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
 			ICompilationUnit[] newWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));

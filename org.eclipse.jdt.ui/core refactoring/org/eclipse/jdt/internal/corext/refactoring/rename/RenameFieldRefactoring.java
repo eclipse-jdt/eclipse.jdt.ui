@@ -357,7 +357,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 
 	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
 		ICompilationUnit[] newWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
 		

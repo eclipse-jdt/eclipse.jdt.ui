@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactor
 
 public class RenameCompilationUnitRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
 
-	private static final String JAVA_CU_SUFFIX= ".java";
+	private static final String JAVA_CU_SUFFIX= ".java"; //$NON-NLS-1$
 	
 	private String fNewName; //without the trailing .java
 	private RenameTypeRefactoring fRenameTypeRefactoring;
