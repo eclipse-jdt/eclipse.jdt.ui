@@ -18,6 +18,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -35,7 +36,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
  * <p> This class may be instantiated; it is not intended to be subclassed.
@@ -82,17 +82,21 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
     }
 
 	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		if (selection.isEmpty() || selection.size() != 1) 
+		IMethod method= getSingleSelectedMethod(selection);
+		if (method == null)
 			return false;
-		
-		Object first= selection.getFirstElement();
-		return (first instanceof IMethod) && shouldAcceptElement((IMethod)first);
+		return MoveInstanceMethodRefactoring.isAvailable(method, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
-	private static boolean shouldAcceptElement(IMethod method) throws JavaModelException {
-		return (! method.isBinary() && ! JdtFlags.isStatic(method));
+	private static IMethod getSingleSelectedMethod(IStructuredSelection selection) {
+		if (selection.isEmpty() || selection.size() != 1) 
+			return null;
+		
+		Object first= selection.getFirstElement();
+		if (! (first instanceof IMethod))
+			return null;
+		return (IMethod) first;
 	}
-	
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
@@ -100,11 +104,9 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 		try {
 			Assert.isTrue(canEnable(selection));
 			
-			Object first= selection.getFirstElement();
-			Assert.isTrue(first instanceof IMethod);
-			
-			IMethod method= (IMethod) first;
-			run(method.getNameRange().getOffset(), method.getNameRange().getLength(), method.getCompilationUnit());
+			IMethod method= getSingleSelectedMethod(selection);
+			Assert.isNotNull(method);	
+			run(method);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.unexpected_exception"));	 //$NON-NLS-1$
 		}
@@ -114,31 +116,43 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void run(ITextSelection selection) {
-		run(selection.getOffset(), selection.getLength(), getCompilationUnitForTextSelection());
+		try {
+			run(selection.getOffset(), selection.getLength(), getCompilationUnitForTextSelection());
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.unexpected_exception"));	 //$NON-NLS-1$
+		}
 	}
-	
-	private void run(int selectionOffset, int selectionLength, ICompilationUnit cu) {
+
+	private void run(IMethod method) throws JavaModelException {
+		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		if (refactoring == null) {
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.No_reference_or_declaration")); //$NON-NLS-1$
+			return;
+		}
+		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
+	}
+		
+	private void run(int selectionOffset, int selectionLength, ICompilationUnit cu) throws JavaModelException{
 		Assert.isNotNull(cu);
 		Assert.isTrue(selectionOffset >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
-			
-		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(
-			cu, selectionOffset, selectionLength,
-			JavaPreferencesSettings.getCodeGenerationSettings());
-		if (refactoring == null) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.No_reference_or_declaration")); //$NON-NLS-1$
-			return;
-		}
-		try {
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.unexpected_exception"));	 //$NON-NLS-1$
-		}		
+
+		IMethod method= getMethod();
+
+		if (method != null)
+			run(method);
 	}
 	
+	private IMethod getMethod() {
+		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), RefactoringMessages.getString("RenameJavaElementAction.name")); //$NON-NLS-1$
+		if (elements == null || elements.length != 1 || ! (elements[0] instanceof IMethod))
+			return null;
+		return (IMethod) elements[0];
+	}
+
 	private ICompilationUnit getCompilationUnitForTextSelection() {
 		Assert.isNotNull(fEditor);
 		return SelectionConverter.getInputAsCompilationUnit(fEditor);
