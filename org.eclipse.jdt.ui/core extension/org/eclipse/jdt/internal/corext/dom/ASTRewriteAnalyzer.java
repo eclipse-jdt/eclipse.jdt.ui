@@ -1075,14 +1075,19 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(EmptyStatement)
 	 */
 	public boolean visit(EmptyStatement node) {
-		return super.visit(node);
+		checkNoModification(node); // no modification possible
+		return false;		
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ExpressionStatement)
 	 */
 	public boolean visit(ExpressionStatement node) {
-		return super.visit(node);
+		ASTNode expression= node.getExpression();
+		if (isReplaced(expression)) {
+			replaceNode(expression, getReplacingNode(expression));
+		}	
+		return false;
 	}
 
 	/* (non-Javadoc)
