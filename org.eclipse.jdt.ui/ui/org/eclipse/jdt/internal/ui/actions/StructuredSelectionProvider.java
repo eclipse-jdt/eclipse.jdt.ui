@@ -43,7 +43,7 @@ public abstract class StructuredSelectionProvider {
 		protected IStructuredSelection asStructuredSelection(ITextSelection selection, int flags) {
 			IEditorPart editor= JavaPlugin.getActivePage().getActiveEditor();
 			if (editor == null)
-				return null;
+				return StructuredSelection.EMPTY;
 			return asStructuredSelection(selection, editor, flags);				
 		}
 		
@@ -145,7 +145,7 @@ public abstract class StructuredSelectionProvider {
 				return (IStructuredSelection)result;
 			if (result instanceof ITextSelection)
 				return asStructuredSelection((ITextSelection)result, flags);
-			return null;
+			return StructuredSelection.EMPTY;
 		}
 	}
 	
