@@ -7,24 +7,35 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.Iterator;
 
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
-
 import org.eclipse.core.runtime.CoreException;
-
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.debug.ui.display.InspectAction;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
+import org.eclipse.jdt.internal.ui.actions.AddWatchpointAction;
+import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
+import org.eclipse.jdt.internal.ui.actions.OpenSuperImplementationAction;
+import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPartService;
@@ -35,27 +46,6 @@ import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.jdt.internal.debug.ui.display.InspectAction;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
-import org.eclipse.jdt.internal.ui.actions.AddWatchpointAction;
-import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
-import org.eclipse.jdt.internal.ui.actions.OpenSuperImplementationAction;
-import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 
 
 
@@ -336,6 +326,10 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		setAction("Display", new EditorDisplayAction(this, true)); //$NON-NLS-1$
 		setAction("RunToLine", new RunToLineAction(this)); //$NON-NLS-1$
 		setAction("Inspect", new InspectAction(this, true)); //$NON-NLS-1$
+		
+		markAsSelectionDependentAction("Display", true);
+		markAsSelectionDependentAction("Inspect", true);
+		
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(getSite().getWorkbenchWindow().getSelectionService());
 		setAction("OpenSuperImplementation", new OpenSuperImplementationAction(provider)); //$NON-NLS-1$
 	}

@@ -8,18 +8,17 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ResourceBundle;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
-
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class CompilationUnitEditorActionContributor extends BasicEditorActionContributor {
 	
@@ -33,6 +32,9 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	protected GotoErrorAction fPreviousError;
 	protected GotoErrorAction fNextError;
 	
+	protected RetargetTextEditorAction fDisplay;
+	protected RetargetTextEditorAction fInspect;
+	
 	
 	public CompilationUnitEditorActionContributor() {
 		super();
@@ -41,15 +43,18 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		
 		fOpenOnSelection= new OpenOnSelectionAction();
 		fOpenOnTypeSelection= new OpenHierarchyOnSelectionAction();
-		fAddImportOnSelection= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "AddImportOnSelectionAction."); //$NON-NLS-1$
-		fOrganizeImports= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "OrganizeImportsAction."); //$NON-NLS-1$
-		fShowJavaDoc= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.");
+		fAddImportOnSelection= new RetargetTextEditorAction(bundle, "AddImportOnSelectionAction."); //$NON-NLS-1$
+		fOrganizeImports= new RetargetTextEditorAction(bundle, "OrganizeImportsAction."); //$NON-NLS-1$
+		fShowJavaDoc= new RetargetTextEditorAction(bundle, "ShowJavaDoc."); //$NON-NLS-1$
 		fTogglePresentation= new TogglePresentationAction();
 		fToggleTextHover= new ToggleTextHoverAction();
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
 		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
 		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
+		
+		fDisplay= new RetargetTextEditorAction(bundle, "DisplayAction."); //$NON-NLS-1$	
+		fInspect= new RetargetTextEditorAction(bundle, "InpsectAction."); //$NON-NLS-1$
 	}
 	
 	/**
@@ -68,6 +73,9 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fShowJavaDoc);			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fAddImportOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fOrganizeImports);
+			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));	
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspect);		
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fDisplay);
 		}
 	}
 	
@@ -98,11 +106,22 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		
 		fAddImportOnSelection.setAction(getAction(textEditor,"AddImportOnSelection")); //$NON-NLS-1$
 		fOrganizeImports.setAction(getAction(textEditor, "OrganizeImports")); //$NON-NLS-1$
-		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc"));
+		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
 		
 		fTogglePresentation.setEditor(textEditor);
 		fToggleTextHover.setEditor(textEditor);
 		fPreviousError.setEditor(textEditor);
 		fNextError.setEditor(textEditor);
+		
+		IAction updateAction= getAction(textEditor, "Display"); //$NON-NLS-1$
+		if (updateAction instanceof IUpdate) {
+			((IUpdate)updateAction).update();
+		}
+		fDisplay.setAction(updateAction); 
+		updateAction= getAction(textEditor, "Inspect"); //$NON-NLS-1$
+		if (updateAction instanceof IUpdate) {
+			((IUpdate)updateAction).update();
+		}
+		fInspect.setAction(updateAction);
 	}
 }

@@ -7,19 +7,17 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ResourceBundle;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
-
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
-
+import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
-import org.eclipse.jdt.ui.IContextMenuConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class ClassFileEditorActionContributor extends BasicTextEditorActionContributor {
@@ -29,6 +27,9 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 	protected TogglePresentationAction fTogglePresentationAction;
 	protected RetargetTextEditorAction fShowJavaDoc;
 	
+	protected RetargetTextEditorAction fDisplay;
+	protected RetargetTextEditorAction fInspect;
+	
 	/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
 	protected ToggleTextHoverAction fToggleTextHover;
 	
@@ -36,13 +37,16 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 	public ClassFileEditorActionContributor() {
 		super();
 		
+		ResourceBundle bundle= JavaEditorMessages.getResourceBundle();
 		fOpenOnSelection= new OpenOnSelectionAction();
 		fOpenHierarchyOnSelection= new OpenHierarchyOnSelectionAction();
 		fTogglePresentationAction= new TogglePresentationAction();
-		fShowJavaDoc= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.");
+		fShowJavaDoc= new RetargetTextEditorAction(bundle, "ShowJavaDoc."); //$NON-NLS-1$
 		
 		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
 		fToggleTextHover= new ToggleTextHoverAction();
+		fDisplay= new RetargetTextEditorAction(bundle, "DisplayAction."); //$NON-NLS-1$	
+		fInspect= new RetargetTextEditorAction(bundle, "InpsectAction."); //$NON-NLS-1$
 	}
 	
 	/**
@@ -60,6 +64,10 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenHierarchyOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fShowJavaDoc);
+			
+			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));	
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspect);		
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fDisplay);
 		}
 	}
 	
@@ -90,9 +98,20 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		
 		fTogglePresentationAction.setEditor(textEditor);
 		
-		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc"));
+		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
 
 		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
 		fToggleTextHover.setEditor(textEditor);
+		
+		IAction updateAction= getAction(textEditor, "Display"); //$NON-NLS-1$
+		if (updateAction instanceof IUpdate) {
+			((IUpdate)updateAction).update();
+		}
+		fDisplay.setAction(updateAction); 
+		updateAction= getAction(textEditor, "Inspect"); //$NON-NLS-1$
+		if (updateAction instanceof IUpdate) {
+			((IUpdate)updateAction).update();
+		}
+		fInspect.setAction(updateAction);
 	}
 }
