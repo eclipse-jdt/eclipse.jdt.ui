@@ -50,6 +50,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	private Composite fLowerComposite;
 	private Text fOverViewText;
 	private Text fExtraOptionsText;
+	private Text fVMOptionsText;
 
 	private StatusInfo fOverviewStatus;
 	private StatusInfo fAntStatus;
@@ -58,6 +59,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	private final int OVERVIEWSTATUS= 1;
 	private final int ANTSTATUS= 2;
+
 
 	protected JavadocSpecificsWizardPage(String pageName, JavadocOptionsManager store) {
 		super(pageName);
@@ -73,6 +75,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
+		initializeDialogUnits(parent);
 
 		fLowerComposite= new Composite(parent, SWT.NONE);
 		fLowerComposite.setLayoutData(createGridData(GridData.FILL_BOTH, 1, 0));
@@ -104,7 +107,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		SWTUtil.setButtonDimensionHint(fOverViewBrowseButton);
 
 		String str= fStore.getOverview();
-		if (str.equals("")) { //$NON-NLS-1$
+		if (str.length() == 0) {
 			//default
 			fOverViewText.setEnabled(false);
 			fOverViewBrowseButton.setEnabled(false);
@@ -113,12 +116,16 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			fOverViewText.setText(str);
 		}
 
+		createLabel(composite, SWT.NONE, JavadocExportMessages.getString("JavadocSpecificsWizardPage.vmoptionsfield.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 3, 0)); //$NON-NLS-1$
+		fVMOptionsText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, 3, 0));
+		fVMOptionsText.setText(fStore.getVMParams());
+		
+		
 		createLabel(composite, SWT.NONE, JavadocExportMessages.getString("JavadocSpecificsWizardPage.extraoptionsfield.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 3, 0)); //$NON-NLS-1$
 		fExtraOptionsText= createText(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.H_SCROLL | SWT.V_SCROLL, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 3, 0));
 		//fExtraOptionsText.setSize(convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(10));
 
-		str= fStore.getAdditionalParams();
-		fExtraOptionsText.setText(str);
+		fExtraOptionsText.setText(fStore.getAdditionalParams());
 
 		fJDK14Button= createButton(composite, SWT.CHECK, JavadocExportMessages.getString("JavadocSpecificsWizardPage.jdk14mode.label"), createGridData(3)); //$NON-NLS-1$
 		fJDK14Button.setSelection(fStore.isJDK14Mode());
@@ -244,11 +251,8 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	protected void updateStore() {
 
-		String str= fExtraOptionsText.getText();
-		if (str.length() > 0)
-			fStore.setAdditionalParams(str);
-		else
-			fStore.setAdditionalParams(""); //$NON-NLS-1$
+		fStore.setVMParams(fVMOptionsText.getText());
+		fStore.setAdditionalParams(fExtraOptionsText.getText());
 
 		if (fOverViewText.getEnabled())
 			fStore.setOverview(fOverViewText.getText());

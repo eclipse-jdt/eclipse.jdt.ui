@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javadocexport;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
@@ -182,7 +184,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			}
 		}
 
-		if (!executeJavadocGeneration(fStore.createArgumentArray()))
+		if (!executeJavadocGeneration())
 			return false;
 
 		return true;
@@ -239,9 +241,29 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		}
 	}
 
-	private boolean executeJavadocGeneration(String[] args) {
+	private boolean executeJavadocGeneration() {
 		Process process= null;
 		try {
+			ArrayList vmArgs= new ArrayList();
+			ArrayList progArgs= new ArrayList();
+			
+			fStore.getArgumentArray(vmArgs, progArgs);
+			
+			File file= File.createTempFile("javadoc-arguments", ".tmp");  //$NON-NLS-1$//$NON-NLS-2$
+			vmArgs.add('@' + file.getAbsolutePath());
+
+			FileWriter writer= new FileWriter(file);
+			try {
+				for (int i= 0; i < progArgs.size(); i++) {
+					String curr= (String) progArgs.get(i);
+					writer.write(curr);
+					writer.write(' ');
+				}
+			} finally {
+				writer.close();
+			}
+			
+			String[] args= (String[]) vmArgs.toArray(new String[vmArgs.size()]);
 			process= Runtime.getRuntime().exec(args);
 			if (process != null) {
 				// contruct a formatted command line for the process properties
@@ -251,7 +273,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					buf.append(' ');
 				}
 
-				IDebugEventSetListener listener= new JavadocDebugEventListener(getShell().getDisplay());
+				IDebugEventSetListener listener= new JavadocDebugEventListener(getShell().getDisplay(), file);
 				DebugPlugin.getDefault().addDebugEventListener(listener);
 
 				ILaunchConfigurationWorkingCopy wc= null;
@@ -486,9 +508,11 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 	private class JavadocDebugEventListener implements IDebugEventSetListener {
 		private Display fDisplay;
+		private File fFile;
 
-		public JavadocDebugEventListener(Display display) {
+		public JavadocDebugEventListener(Display display, File file) {
 			fDisplay= display;
+			fFile= file;
 		}
 		
 		public void handleDebugEvents(DebugEvent[] events) {
@@ -496,6 +520,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				if (events[i].getKind() == DebugEvent.TERMINATE) {
 					try {
 						if (!fWriteCustom) {
+							fFile.delete();
 							refresh(fDestination); //If destination of javadoc is in workspace then refresh workspace
 							spawnInBrowser(fDisplay);
 						}

@@ -70,6 +70,7 @@ public class JavadocOptionsManager {
 	private boolean fFromStandard;
 	private String fStylesheet;
 	private String fAdditionalParams;
+	private String fVMParams;
 	private String fOverview;
 	private String fTitle;
 	
@@ -125,6 +126,7 @@ public class JavadocOptionsManager {
 	public final String PACKAGENAMES= "packagenames"; //$NON-NLS-1$
 	public final String SOURCEFILES= "sourcefiles"; //$NON-NLS-1$
 	public final String EXTRAOPTIONS= "additionalparam"; //$NON-NLS-1$
+	public final String VMOPTIONS= "vmparam"; //$NON-NLS-1$
 	//public final String JAVADOCCOMMAND= "javadoccommand"; //$NON-NLS-1$
 	public final String TITLE= "doctitle"; //$NON-NLS-1$
 	public final String HREF= "href"; //$NON-NLS-1$
@@ -136,6 +138,8 @@ public class JavadocOptionsManager {
 	public final String SOURCE= "source"; //$NON-NLS-1$
 	
 	private final String SECTION_JAVADOC= "javadoc"; //$NON-NLS-1$
+
+
 	
 	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings dialogSettings, List currSelection) {
 		fXmlfile= xmlJavadocFile;
@@ -238,6 +242,10 @@ public class JavadocOptionsManager {
 		if (fStylesheet == null)
 			fStylesheet= ""; //$NON-NLS-1$
 
+		fVMParams= settings.get(VMOPTIONS);
+		if (fVMParams == null)
+			fVMParams= ""; //$NON-NLS-1$
+		
 		fAdditionalParams= settings.get(EXTRAOPTIONS);
 		if (fAdditionalParams == null)
 			fAdditionalParams= ""; //$NON-NLS-1$
@@ -289,6 +297,7 @@ public class JavadocOptionsManager {
 		fDocletpath= ""; //$NON-NLS-1$
 		fTitle= ""; //$NON-NLS-1$
 		fStylesheet= ""; //$NON-NLS-1$
+		fVMParams= ""; //$NON-NLS-1$
 		fAdditionalParams= ""; //$NON-NLS-1$
 		fOverview= ""; //$NON-NLS-1$
 
@@ -516,6 +525,10 @@ public class JavadocOptionsManager {
 	public String getAdditionalParams() {
 		return fAdditionalParams;
 	}
+	
+	public String getVMParams() {
+		return fVMParams;
+	}
 
 	public IPath[] getClasspath() {
 		return fClasspath;
@@ -585,102 +598,108 @@ public class JavadocOptionsManager {
 	}
 	
 
-	public String[] createArgumentArray() {
-		List args= new ArrayList();
+	public void getArgumentArray(List vmArgs, List toolArgs) {
+		
 		//bug 38692
-		args.add(JavadocPreferencePage.getJavaDocCommand());
+		vmArgs.add(JavadocPreferencePage.getJavaDocCommand());
 		if (fFromStandard) {
-			args.add("-d"); //$NON-NLS-1$
-			args.add(fDestination);
+			toolArgs.add("-d"); //$NON-NLS-1$
+			toolArgs.add(fDestination);
 		} else {
-			if (fAdditionalParams.length() != 0) { //$NON-NLS-1$
-				ExecutionArguments tokens= new ExecutionArguments("", fAdditionalParams); //$NON-NLS-1$
+			if (fAdditionalParams.length() + fVMParams.length() != 0) {
+				ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams); //$NON-NLS-1$
+				String[] vmArgsArray= tokens.getVMArgumentsArray();
+				for (int i= 0; i < vmArgsArray.length; i++) {
+					vmArgs.add(vmArgsArray[i]);
+				}
+				
 				String[] argsArray= tokens.getProgramArgumentsArray();
 				for (int i= 0; i < argsArray.length; i++) {
-					args.add(argsArray[i]);
+					toolArgs.add(argsArray[i]);
 				}
 			}
-			args.add("-doclet"); //$NON-NLS-1$
-			args.add(fDocletname);
-			args.add("-docletpath"); //$NON-NLS-1$
-			args.add(fDocletpath);
+			toolArgs.add("-doclet"); //$NON-NLS-1$
+			toolArgs.add(fDocletname);
+			toolArgs.add("-docletpath"); //$NON-NLS-1$
+			toolArgs.add(fDocletpath);
 		}
-		args.add("-sourcepath"); //$NON-NLS-1$
-		args.add(flatPathList(fSourcepath));
-		args.add("-classpath"); //$NON-NLS-1$
-		args.add(flatPathList(fClasspath));
-		args.add("-" + fAccess); //$NON-NLS-1$
+		toolArgs.add("-sourcepath"); //$NON-NLS-1$
+		toolArgs.add(flatPathList(fSourcepath));
+		toolArgs.add("-classpath"); //$NON-NLS-1$
+		toolArgs.add(flatPathList(fClasspath));
+		toolArgs.add("-" + fAccess); //$NON-NLS-1$
 
 		if (fFromStandard) {
 			if (fJDK14Mode) {
-				args.add("-source"); //$NON-NLS-1$
-				args.add("1.4"); //$NON-NLS-1$
+				toolArgs.add("-source"); //$NON-NLS-1$
+				toolArgs.add("1.4"); //$NON-NLS-1$
 			}			
 			
 			if (fUse)
-				args.add("-use"); //$NON-NLS-1$
+				toolArgs.add("-use"); //$NON-NLS-1$
 			if (fVersion)
-				args.add("-version"); //$NON-NLS-1$
+				toolArgs.add("-version"); //$NON-NLS-1$
 			if (fAuthor)
-				args.add("-author"); //$NON-NLS-1$
+				toolArgs.add("-author"); //$NON-NLS-1$
 			if (fNonavbar)
-				args.add("-nonavbar"); //$NON-NLS-1$
+				toolArgs.add("-nonavbar"); //$NON-NLS-1$
 			if (fNoindex)
-				args.add("-noindex"); //$NON-NLS-1$
+				toolArgs.add("-noindex"); //$NON-NLS-1$
 			if (fNotree)
-				args.add("-notree"); //$NON-NLS-1$
+				toolArgs.add("-notree"); //$NON-NLS-1$
 			if (fNodeprecated)
-				args.add("-nodeprecated"); //$NON-NLS-1$
+				toolArgs.add("-nodeprecated"); //$NON-NLS-1$
 			if (fNoDeprecatedlist)
-				args.add("-nodeprecatedlist"); //$NON-NLS-1$
+				toolArgs.add("-nodeprecatedlist"); //$NON-NLS-1$
 			if (fSplitindex)
-				args.add("-splitindex"); //$NON-NLS-1$
+				toolArgs.add("-splitindex"); //$NON-NLS-1$
 
 			if (fTitle.length() != 0) { //$NON-NLS-1$
-				args.add("-doctitle"); //$NON-NLS-1$
-				args.add(fTitle);
+				toolArgs.add("-doctitle"); //$NON-NLS-1$
+				toolArgs.add(fTitle);
 			}
 
 
 			if (fStylesheet.length() != 0) { //$NON-NLS-1$
-				args.add("-stylesheetfile"); //$NON-NLS-1$
-				args.add(fStylesheet);
+				toolArgs.add("-stylesheetfile"); //$NON-NLS-1$
+				toolArgs.add(fStylesheet);
 			}
 
-			if (fAdditionalParams.length() != 0) { //$NON-NLS-1$
-				ExecutionArguments tokens= new ExecutionArguments("", fAdditionalParams); //$NON-NLS-1$
+			if (fAdditionalParams.length() + fVMParams.length() != 0) {
+				ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams); //$NON-NLS-1$
+				String[] vmArgsArray= tokens.getVMArgumentsArray();
+				for (int i= 0; i < vmArgsArray.length; i++) {
+					vmArgs.add(vmArgsArray[i]);
+				}
+				
 				String[] argsArray= tokens.getProgramArgumentsArray();
 				for (int i= 0; i < argsArray.length; i++) {
-					args.add(argsArray[i]);
+					toolArgs.add(argsArray[i]);
 				}
 			}
 
 			for (int i= 0; i < fHRefs.length; i++) {
-				args.add("-link"); //$NON-NLS-1$
-				args.add(fHRefs[i]);
+				toolArgs.add("-link"); //$NON-NLS-1$
+				toolArgs.add(fHRefs[i]);
 			}
 
 		} //end standard options
 
 		if (fOverview.length() != 0) { //$NON-NLS-1$
-			args.add("-overview"); //$NON-NLS-1$
-			args.add(fOverview);
+			toolArgs.add("-overview"); //$NON-NLS-1$
+			toolArgs.add(fOverview);
 		}
 
 		for (int i= 0; i < fSelectedElements.length; i++) {
 			IJavaElement curr= fSelectedElements[i];
 			if (curr instanceof IPackageFragment) {
-				args.add(curr.getElementName());
+				toolArgs.add(curr.getElementName());
 			} else if (curr instanceof ICompilationUnit) {
 				IPath p= curr.getResource().getLocation();
 				if (p != null)
-					args.add(p.toOSString());
+					toolArgs.add(p.toOSString());
 			}
 		}
-
-		String[] res= (String[]) args.toArray(new String[args.size()]);
-		return res;
-
 	}
 
 	public void createXML(IJavaProject[] projects) throws CoreException {
@@ -754,6 +773,8 @@ public class JavadocOptionsManager {
 			settings.put(DESTINATION, fDestination);
 		if (fAdditionalParams.length() != 0) //$NON-NLS-1$
 			settings.put(EXTRAOPTIONS, fAdditionalParams);
+		if (fVMParams.length() != 0) //$NON-NLS-1$
+			settings.put(VMOPTIONS, fVMParams);
 		if (fOverview.length() != 0) //$NON-NLS-1$
 			settings.put(OVERVIEW, fOverview);
 		if (fStylesheet.length() != 0) //$NON-NLS-1$
@@ -792,6 +813,10 @@ public class JavadocOptionsManager {
 
 	public void setAdditionalParams(String params) {
 		fAdditionalParams= params;
+	}
+	
+	public void setVMParams(String params) {
+		fVMParams= params;
 	}
 
 	public void setGeneralAntpath(String antpath) {
@@ -949,4 +974,6 @@ public class JavadocOptionsManager {
 	public void updateRecentSettings(IJavaProject project) {
 		fRecentSettings.setProjectSettings(project, fDestination, fAntpath, fHRefs);
 	}
+
+
 }
