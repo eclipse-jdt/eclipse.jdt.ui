@@ -52,6 +52,9 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	
 	public static final String PLUGIN_ID = "org.eclipse.jdt.junit" ; //$NON-NLS-1$
 
+	public final static String TEST_SUPERCLASS_NAME= "junit.framework.TestCase"; //$NON-NLS-1$
+	public final static String TEST_INTERFACE_NAME= "junit.framework.Test"; //$NON-NLS-1$
+
 	private static URL fgIconBaseURL;
 	
 	public JUnitPlugin(IPluginDescriptor desc) {
@@ -90,6 +93,9 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		return workBench.getActiveWorkbenchWindow();
 	}	
 	
+	public IWorkbenchPage getActivePage() {
+		return getActiveWorkbenchWindow().getActivePage();
+	}
 
 	public static String getPluginId() {
 		return getDefault().getDescriptor().getUniqueIdentifier();

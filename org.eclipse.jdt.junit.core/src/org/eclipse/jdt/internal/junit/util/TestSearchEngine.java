@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -206,4 +207,16 @@ public class TestSearchEngine {
 				return true;
 		return false;
 	}
+
+	public static boolean isTestImplementor(IType type) throws JavaModelException {
+		ITypeHierarchy typeHier= type.newSupertypeHierarchy(null);
+		IType[] superInterfaces= typeHier.getAllInterfaces();
+		boolean isTestClass= false;
+		for (int i= 0; i < superInterfaces.length; i++) {
+			if (superInterfaces[i].getFullyQualifiedName().equals(JUnitPlugin.TEST_INTERFACE_NAME))
+				return true;
+		}
+		return false;
+	}
+
 }
