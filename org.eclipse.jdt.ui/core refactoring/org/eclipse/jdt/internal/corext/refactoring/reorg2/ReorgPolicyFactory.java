@@ -101,6 +101,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 class ReorgPolicyFactory {
 	private ReorgPolicyFactory(){
@@ -121,8 +122,9 @@ class ReorgPolicyFactory {
 		else
 			NO= new NoMovePolicy();
 
-		IResource[] resources= ReorgUtils2.getResourcesWithoutCorrespondingJavaElementsSelected(selectedResources, selectedJavaElements);
-		IJavaElement[] javaElements= selectedJavaElements;
+		ActualSelectionComputer selectionComputer= new ActualSelectionComputer(selectedJavaElements, selectedResources);
+		IResource[] resources= selectionComputer.getActualResourcesToReorg();
+		IJavaElement[] javaElements= selectionComputer.getActualJavaElementsToReorg();
 	
 		if (isNothingToReorg(resources, javaElements) || 
 			containsNull(resources) ||
@@ -253,6 +255,9 @@ class ReorgPolicyFactory {
 			Assert.isNotNull(reorgQueries);
 			return Checks.validateModifiesFiles(getAllModifiedFiles());
 		}
+		public boolean hasAllInputSet() {
+			return fJavaElementDestination != null || fResourceDestination != null;
+		}
 		public boolean canUpdateReferences() {
 			return false;
 		}
@@ -316,7 +321,7 @@ class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (! javaElement.exists())
-				return RefactoringStatus.createFatalErrorStatus("The selected destination does not exist");
+				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this operation");
 			Assert.isTrue(! (javaElement instanceof IJavaModel));
 	
 			if (javaElement.isReadOnly())
@@ -424,16 +429,6 @@ class ReorgPolicyFactory {
 			return ReorgUtils2.union(fFiles, fFolders);
 		}
 
-		public final boolean canEnable() throws JavaModelException{
-			if (! super.canEnable()) return false;
-			for (int i= 0; i < fCus.length; i++) {
-				IResource res= fCus[i].getResource();
-				if (res == null || ! res.exists())
-					return false;
-			}
-			return true;
-		}
-	
 		protected boolean containsLinkedResources() {
 			return 	ReorgUtils2.containsLinkedResources(fFiles) || 
 					ReorgUtils2.containsLinkedResources(fFolders) || 
@@ -670,7 +665,8 @@ class ReorgPolicyFactory {
 		
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
 			Assert.isNotNull(destination);
-			Assert.isTrue(destination.exists());
+			if (!destination.exists())
+				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");
 			if (! (destination instanceof ICompilationUnit) && ! ReorgUtils2.isInsideCompilationUnit(destination))
 				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");
 
@@ -748,7 +744,7 @@ class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (! javaElement.exists())
-				return RefactoringStatus.createFatalErrorStatus("The selected destination does not exist");
+				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this operation");
 			if (! (javaElement instanceof IJavaProject))
 				return RefactoringStatus.createFatalErrorStatus("Source folders can only be copied to Java projects");
 			if (javaElement.isReadOnly())
@@ -839,6 +835,8 @@ class ReorgPolicyFactory {
 		
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
+			if (! javaElement.exists())
+				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this operation");
 			IPackageFragmentRoot destRoot= getDestinationAsPackageFragmentRoot(javaElement);
 			if (! ReorgUtils2.isSourceFolder(destRoot))
 				return RefactoringStatus.createFatalErrorStatus("Packages can only be moved or copied to source folders or Java projects that do not have source folders");
@@ -957,10 +955,11 @@ class ReorgPolicyFactory {
 			
 		private static IChange createCopyResourceChange(IResource resource, NewNameProposer nameProposer, INewNameQueries copyQueries, IContainer destination) {
 			INewNameQuery nameQuery;
-			if (nameProposer.createNewName(resource, destination) == null)
+			String name= nameProposer.createNewName(resource, destination);
+			if (name == null)
 				nameQuery= copyQueries.createNullQuery();
 			else
-				nameQuery= copyQueries.createNewResourceNameQuery(resource);
+				nameQuery= copyQueries.createNewResourceNameQuery(resource, name);
 			return new CopyResourceChange(resource, destination, nameQuery);
 		}
 
@@ -979,7 +978,7 @@ class ReorgPolicyFactory {
 		
 			try {
 				IPath newPath= ResourceUtil.getResource(cu).getParent().getFullPath().append(newName);				
-				INewNameQuery nameQuery= copyQueries.createNewCompilationUnitNameQuery(cu);
+				INewNameQuery nameQuery= copyQueries.createNewCompilationUnitNameQuery(cu, newName);
 				return new CreateCopyOfCompilationUnitChange(newPath, cu.getSource(), cu, nameQuery);
 			} catch(CoreException e) {
 				return simpleCopy; //fallback - no ui here
@@ -1010,9 +1009,11 @@ class ReorgPolicyFactory {
 			IResource res= root.getResource();
 			IProject destinationProject= destination.getProject();
 			String newName= nameProposer.createNewName(res, destinationProject);
+			INewNameQuery nameQuery;
 			if (newName == null )
-				newName= root.getElementName();
-			INewNameQuery nameQuery= copyQueries.createStaticQuery(newName);
+				nameQuery= copyQueries.createNullQuery();
+			else
+				nameQuery= copyQueries.createNewPackageFragmentRootNameQuery(root, newName);
 			//TODO sounds wrong that this change works on IProjects
 			//TODO fix the query problem
 			return new CopyPackageFragmentRootChange(root, destinationProject, nameQuery,  null);
@@ -1045,13 +1046,13 @@ class ReorgPolicyFactory {
 				if (newName == null)
 					nameQuery= copyQueries.createNullQuery();
 				else
-					nameQuery= copyQueries.createNewPackageNameQuery(pack);
+					nameQuery= copyQueries.createNewPackageNameQuery(pack, newName);
 				return new CopyPackageChange(pack, destination, nameQuery);
 			} else {
 				if (destination.getResource() instanceof IContainer){
 					IContainer dest= (IContainer)destination.getResource();
 					IResource res= pack.getResource();
-					INewNameQuery nameQuery= copyQueries.createNewResourceNameQuery(res);
+					INewNameQuery nameQuery= copyQueries.createNewResourceNameQuery(res, newName);
 					return new CopyResourceChange(res, dest, nameQuery);
 				}else
 					return new NullChange();
@@ -1097,12 +1098,15 @@ class ReorgPolicyFactory {
 								new String[]{String.valueOf(i), cu.getElementName()});
 				if (isNewNameOk(destination, newName) && ! fAutoGeneratedNewNames.contains(newName)){
 					fAutoGeneratedNewNames.add(newName);
-					return newName;
+					return removeTrailingJava(newName);
 				}
 				i++;
 			}
 		}
-	
+		private static String removeTrailingJava(String name) {
+			Assert.isTrue(name.endsWith(".java")); //$NON-NLS-1$
+			return name.substring(0, name.length() - ".java".length()); //$NON-NLS-1$
+		}
 		public String createNewName(IResource res, IContainer destination){
 			if (isNewNameOk(destination, res.getName()))
 				return null;
@@ -1530,7 +1534,9 @@ class ReorgPolicyFactory {
 				result.addAll(Arrays.asList(ResourceUtil.getFiles(getCus())));
 			return (IFile[]) result.toArray(new IFile[result.size()]);
 		}
-		
+		public boolean hasAllInputSet() {
+			return super.hasAllInputSet() && ! canUpdateReferences() && ! canUpdateQualifiedNames();
+		}
 		public boolean canUpdateReferences(){
 			if (getCus().length == 0)
 				return false;
@@ -1653,6 +1659,53 @@ class ReorgPolicyFactory {
 		}
 		public IJavaElement[] getJavaElements() {
 			return new IJavaElement[0];
+		}
+	}
+	
+	private static class ActualSelectionComputer {
+		private final IResource[] fResources;
+		private final IJavaElement[] fJavaElements;
+
+		public ActualSelectionComputer(IJavaElement[]  javaElements, IResource[] resources) {
+			fJavaElements= javaElements;
+			fResources= resources;
+		}
+		
+		public IJavaElement[] getActualJavaElementsToReorg() throws JavaModelException {
+			Set result= new HashSet();
+			for (int i= 0; i < fJavaElements.length; i++) {
+				IJavaElement element= fJavaElements[i];
+				if (element == null)
+					continue;
+				if (ReorgUtils2.isDeletedFromEditor(element))
+					continue;
+				element= WorkingCopyUtil.getWorkingCopyIfExists(element);
+				if (element instanceof IType) {
+					IType type= (IType)element;
+					ICompilationUnit cu= type.getCompilationUnit();
+					if (cu != null && type.getDeclaringType() == null && cu.exists() && cu.getTypes().length == 1)
+						result.add(cu);
+					else
+						result.add(type);
+				} else  {
+					result.add(element);
+				}
+			}
+			return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);
+		}
+		
+		public IResource[] getActualResourcesToReorg() {
+			Set javaElementSet= new HashSet(Arrays.asList(fJavaElements));	
+			Set result= new HashSet();
+			for (int i= 0; i < fResources.length; i++) {
+				if (fResources[i] == null)
+					continue;
+				IJavaElement element= JavaCore.create(fResources[i]);
+				if (element == null || ! element.exists() || ! javaElementSet.contains(element))
+					result.add(fResources[i]);
+			}
+			return (IResource[]) result.toArray(new IResource[result.size()]);
+
 		}
 	}
 }
