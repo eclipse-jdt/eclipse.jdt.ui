@@ -22,35 +22,63 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 class ConstructorReferenceFinder {
 	private final IType fType;
+	private final IMethod[] fConstructors;
 	private final ASTNodeMappingManager fASTManager;
 	
-	private ConstructorReferenceFinder(IType type, ASTNodeMappingManager astManager){
-		fType= type;
+	private ConstructorReferenceFinder(IType type, ASTNodeMappingManager astManager) throws JavaModelException{
+		fConstructors= JavaElementUtil.getAllConstructors(type);
 		fASTManager= astManager;
+		fType= type;
+	}
+	
+	private ConstructorReferenceFinder(IMethod constructor, ASTNodeMappingManager astManager){
+		fConstructors= new IMethod[]{constructor};
+		fASTManager= astManager;
+		fType= constructor.getDeclaringType();
 	}
 	
 	public static ASTNode[] getConstructorReferenceNodes(IType type, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
-		return new ConstructorReferenceFinder(type, astManager).getConstructorReferenceNodes(pm);
+		return new ConstructorReferenceFinder(type, astManager).getConstructorReferenceNodes(pm, IJavaSearchConstants.REFERENCES);
+	}
+
+	public static ASTNode[] getConstructorOccurrenceNodes(IMethod constructor, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
+		Assert.isTrue(constructor.isConstructor());
+		return new ConstructorReferenceFinder(constructor, astManager).getConstructorReferenceNodes(pm, IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 	
-	private ASTNode[] getConstructorReferenceNodes(IProgressMonitor pm) throws JavaModelException{
-		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
-		ISearchPattern pattern= createConstructorSearchPattern(fType, IJavaSearchConstants.REFERENCES);
+	private ASTNode[] getConstructorReferenceNodes(IProgressMonitor pm, int limitTo) throws JavaModelException{
+		IJavaSearchScope scope= createSearchScope();
+		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(fConstructors, limitTo);
 		if (pattern == null){
-			if (JavaElementUtil.getAllConstructors(fType).length != 0)
+			if (fConstructors.length != 0)
 				return new ASTNode[0];
 			return getImplicitConstructorReferenceNodes(pm);	
 		}	
 		return ASTNodeSearchUtil.searchNodes(scope, pattern, fASTManager, pm);
 	}
 	
-	private static ISearchPattern createConstructorSearchPattern(IType type, int limitTo) throws JavaModelException {
-		return RefactoringSearchEngine.createSearchPattern(JavaElementUtil.getAllConstructors(type), limitTo);
+	private IJavaSearchScope createSearchScope() throws JavaModelException{
+		if (fConstructors.length ==0)
+			return RefactoringScopeFactory.create(fType);
+		return RefactoringScopeFactory.create(getMostVisibleConstructor());
 	}
-
+	
+	private IMethod getMostVisibleConstructor() throws JavaModelException {
+		Assert.isTrue(fConstructors.length > 0);
+		IMethod candidate= fConstructors[0];
+		int visibility= JdtFlags.getVisibilityCode(fConstructors[0]);
+		for (int i= 1; i < fConstructors.length; i++) {
+			IMethod constructor= fConstructors[i];
+			if (JdtFlags.isHigherVisibility(JdtFlags.getVisibilityCode(constructor), visibility))
+				candidate= constructor;
+		}
+		return candidate;
+	}
+	
 	private ASTNode[] getImplicitConstructorReferenceNodes(IProgressMonitor pm) throws JavaModelException {
 		ITypeHierarchy hierarchy= fType.newTypeHierarchy(pm);
 		IType[] subTypes= hierarchy.getAllSubtypes(fType);
