@@ -16,6 +16,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -119,18 +120,22 @@ public class SelectionListenerWithASTManager {
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}
-			// create AST		
-			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(input, true, monitor);
-		
-			if (astRoot != null && !monitor.isCanceled()) {
-				Object[] listeners= fAstListeners.getListeners();
-				for (int i= 0; i < listeners.length; i++) {
-					((ISelectionListenerWithAST) listeners[i]).selectionChanged(fPart, selection, astRoot);
-					if (monitor.isCanceled()) {
-						return Status.CANCEL_STATUS;
+			// create AST
+			try {
+				CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(input, true, monitor);
+			
+				if (astRoot != null && !monitor.isCanceled()) {
+					Object[] listeners= fAstListeners.getListeners();
+					for (int i= 0; i < listeners.length; i++) {
+						((ISelectionListenerWithAST) listeners[i]).selectionChanged(fPart, selection, astRoot);
+						if (monitor.isCanceled()) {
+							return Status.CANCEL_STATUS;
+						}
 					}
+					return Status.OK_STATUS;
 				}
-				return Status.OK_STATUS;			
+			} catch (OperationCanceledException e) {
+				// thrown when cancelling the AST creation
 			}
 			return Status.CANCEL_STATUS;
 		}
