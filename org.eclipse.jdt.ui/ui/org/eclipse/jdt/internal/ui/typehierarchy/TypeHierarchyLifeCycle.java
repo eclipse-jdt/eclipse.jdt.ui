@@ -134,11 +134,13 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	
 	private void doHierarchyRefresh(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
 		boolean hierachyCreationNeeded= (fHierarchy == null || !element.equals(fInputElement));
+		// to ensore the order of the two listeners always remove / add listeners on operations
+		// on type hierarchies
+		if (fHierarchy != null) {
+			fHierarchy.removeTypeHierarchyChangedListener(this);
+			JavaCore.removeElementChangedListener(this);
+		}
 		if (hierachyCreationNeeded) {
-			if (fHierarchy != null) {
-				fHierarchy.removeTypeHierarchyChangedListener(this);
-				JavaCore.removeElementChangedListener(this);
-			}
 			fInputElement= element;
 			if (element.getElementType() == IJavaElement.TYPE) {
 				IType type= (IType) element;
@@ -163,11 +165,11 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				IJavaProject jproject= element.getJavaProject();
 				fHierarchy= jproject.newTypeHierarchy(region, pm);				
 			}
-			fHierarchy.addTypeHierarchyChangedListener(this);
-			JavaCore.addElementChangedListener(this);
 		} else {
 			fHierarchy.refresh(pm);
 		}
+		fHierarchy.addTypeHierarchyChangedListener(this);
+		JavaCore.addElementChangedListener(this);
 	}		
 	
 	/*
