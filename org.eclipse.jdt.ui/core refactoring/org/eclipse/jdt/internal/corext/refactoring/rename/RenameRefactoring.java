@@ -140,7 +140,7 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 		RefactoringStatus result= new RefactoringStatus();
 		
 		initParticipants();
-		pm.beginTask("", 2 + fElementParticipants.length + fDerivedParticipants.length + fResourceParticipants.length); //$NON-NLS-1$
+		pm.beginTask("", 1 + fElementParticipants.length + fDerivedParticipants.length + fResourceParticipants.length); //$NON-NLS-1$
 		
 		result.merge(fProcessor.checkInput(new SubProgressMonitor(pm, 1)));
 		if (result.hasFatalError())
