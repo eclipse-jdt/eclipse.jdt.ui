@@ -88,7 +88,7 @@ public class QuickFixTest extends TestCase {
 	public static void assertCorrectContext(IInvocationContext context, ProblemLocation problem) {
 		if (problem.getProblemId() != 0) {
 			if (!JavaCorrectionProcessor.hasCorrections(context.getCompilationUnit(), problem.getProblemId())) {
-				assertTrue("Problem type not marked with lightbulb: " + problem, false);
+				assertTrue("Problem type not marked with light bulb: " + problem, false);
 			}
 		}
 	}	
@@ -189,7 +189,7 @@ public class QuickFixTest extends TestCase {
 		
 		ICompilationUnit wc= cu.getWorkingCopy(new WorkingCopyOwner() {}, requestor, null);
 		try {
-			wc.reconcile(false, true, wc.getOwner(), null);
+			wc.reconcile(0, true, wc.getOwner(), null);
 		} finally {
 			wc.discardWorkingCopy();
 		}
