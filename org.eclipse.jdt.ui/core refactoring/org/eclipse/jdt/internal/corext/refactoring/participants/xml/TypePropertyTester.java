@@ -20,6 +20,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public class TypePropertyTester extends TypeExtender {
 
 	private static final String PROPERTY_HAS_MAIN_TYPE= "hasMainType"; //$NON-NLS-1$
+	private static final String IS_ANONYMOUES= "isAnonymous";  //$NON-NLS-1$
+	private static final String IS_LOCAL= "isLocal"; //$NON-NLS-1$
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
@@ -29,6 +31,18 @@ public class TypePropertyTester extends TypeExtender {
 		if (PROPERTY_HAS_MAIN_TYPE.equals(method)) { //$NON-NLS-1$
 			try {
 				return Boolean.valueOf(JavaModelUtil.hasMainMethod(type));
+			} catch (JavaModelException e) {
+				return Boolean.FALSE;
+			}
+		} else if (IS_ANONYMOUES.equals(method)) {
+			try {
+				return Boolean.valueOf(type.isAnonymous());
+			} catch (JavaModelException e) {
+				return Boolean.FALSE;
+			}
+		} else if (IS_LOCAL.equals(method)) {
+			try {
+				return Boolean.valueOf(type.isLocal());
 			} catch (JavaModelException e) {
 				return Boolean.FALSE;
 			}

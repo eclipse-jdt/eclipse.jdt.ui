@@ -3441,7 +3441,7 @@
   <typeExtender
      id="ITypePropertyTester"
      type="org.eclipse.jdt.core.IType"
-     methods="hasMainType"
+     methods="hasMainType, isAnonymous, isLocal"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypePropertyTester"/>
      
   <typeExtender
@@ -3542,6 +3542,7 @@
      <objectState>
         <test property="instanceof" value="org.eclipse.jdt.core.IType"/>
         <test property="isAvailable"/>
+        <not><test property="isAnonymous"/></not>
 	 </objectState>     
   </renameProcessor>
   
