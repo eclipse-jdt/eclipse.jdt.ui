@@ -323,7 +323,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		store.setDefault(CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER, true);
 		store.setDefault(CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER, true);
-		store.setDefault(CompilationUnitEditor.MARKER_INDICATION_IN_OVERVIEW_RULER, true);
+		store.setDefault(CompilationUnitEditor.MARKER_INDICATION_IN_OVERVIEW_RULER, false);
 		
 		store.setDefault(JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, true);
 		store.setDefault(JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
@@ -771,25 +771,25 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		composite.setLayout(layout);
 				
-		String label= "Analyse problems while typing";
+		String label= "Analyse problems while &typing";
 		addCheckBox(composite, label, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, 0);
 
-		label= "Highlight errors in text";
+		label= "Highlight &errors in text";
 		addCheckBox(composite, label, CompilationUnitEditor.ERROR_INDICATION, 0);
 		
-		label= "Show errors in overview ruler";
+		label= "Show e&rrors in overview ruler";
 		addCheckBox(composite, label, CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER, 0);
 		
-		label= "Highlight warnings in text";
+		label= "Highlight &warnings in text";
 		addCheckBox(composite, label, CompilationUnitEditor.WARNING_INDICATION, 0);
 		
-		label= "Show warnings in overview ruler";
+		label= "Show warnin&gs in overview ruler";
 		addCheckBox(composite, label, CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER, 0);
 		
-		label= "Highlight markers in text";
+		label= "Highlight &markers in text";
 		addCheckBox(composite, label, CompilationUnitEditor.MARKER_INDICATION, 0);
 
-		label= "Show markers in overview ruler";
+		label= "Show mar&kers in overview ruler";
 		addCheckBox(composite, label, CompilationUnitEditor.MARKER_INDICATION_IN_OVERVIEW_RULER, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
