@@ -99,28 +99,19 @@ public class MembersView extends JavaBrowsingPart {
 	protected boolean isValidElement(Object element) {
 		if (element instanceof IMember)
 			return super.isValidElement(((IMember)element).getDeclaringType());
-		else if (element instanceof IImportContainer || element instanceof IImportDeclaration) {
-			IJavaElement parent= ((IJavaElement)element).getParent();
-			if (parent.getElementType() == IJavaElement.CLASS_FILE) {
-				IType type;
-				try {
-					type= ((IClassFile)parent).getType();
-				} catch (JavaModelException ex) {
-					return false;
-				}
-				return isValidElement(type);
-			}
-			else if (parent.getElementType() == IJavaElement.COMPILATION_UNIT) {
-				IType[] types;
-				try {
-					types= ((ICompilationUnit)parent).getAllTypes();
-				} catch (JavaModelException ex) {
-					return false;
-				}
-				for (int i= 0; i < types.length; i++) {
-					boolean result= isValidElement(types[i]);
-					if (result)
-						return true;
+		else if (element instanceof IImportDeclaration)
+			return isValidElement(((IJavaElement)element).getParent());
+		else if (element instanceof IImportContainer) {
+			Object input= getViewer().getInput();
+			if (input instanceof IJavaElement) {
+				ICompilationUnit cu= (ICompilationUnit)((IJavaElement)input).getAncestor(IJavaElement.COMPILATION_UNIT);
+				if (cu != null) {
+					ICompilationUnit importContainerCu= (ICompilationUnit)((IJavaElement)element).getAncestor(IJavaElement.COMPILATION_UNIT);
+					return cu.equals(importContainerCu);
+				} else {
+					IClassFile cf= (IClassFile)((IJavaElement)input).getAncestor(IJavaElement.CLASS_FILE);
+					IClassFile importContainerCf= (IClassFile)((IJavaElement)element).getAncestor(IJavaElement.CLASS_FILE);
+					return cf != null && cf.equals(importContainerCf);
 				}
 			}
 		}
@@ -137,9 +128,11 @@ public class MembersView extends JavaBrowsingPart {
 			return null;
 
 		switch (je.getElementType()) {
+			case IJavaElement.TYPE:
+				if (((IType)je).getDeclaringType() == null)
+					return null;
 			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
-			case IJavaElement.TYPE:
 			case IJavaElement.PACKAGE_DECLARATION:
 			case IJavaElement.IMPORT_CONTAINER:
 			case IJavaElement.IMPORT_DECLARATION:
