@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -42,7 +42,7 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	 * @param completionLength the completion length within the document
 	 * @param compilationUnit the compilation unit (may be <code>null</code>)
 	 */
-	protected CompilationUnitContext(ContextType type, IDocument document, int completionOffset,
+	protected CompilationUnitContext(TemplateContextType type, IDocument document, int completionOffset,
 		int completionLength, ICompilationUnit compilationUnit)
 	{
 		super(type, document, completionOffset, completionLength);

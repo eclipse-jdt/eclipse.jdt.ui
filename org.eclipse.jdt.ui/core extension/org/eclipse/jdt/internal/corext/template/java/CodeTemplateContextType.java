@@ -12,9 +12,9 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.util.ArrayList;
 
-import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
-import org.eclipse.jface.text.templates.GlobalVariables;
+import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 /**
   */
-public class CodeTemplateContextType extends ContextType {
+public class CodeTemplateContextType extends TemplateContextType {
 	
 	/* context types */
 	public static final String CATCHBLOCK_CONTEXTTYPE= "catchblock_context"; //$NON-NLS-1$
@@ -140,11 +140,11 @@ public class CodeTemplateContextType extends ContextType {
 		fIsComment= false;
 		
 		// global
-		addResolver(new GlobalVariables.Dollar());
-		addResolver(new GlobalVariables.Date());
-		addResolver(new GlobalVariables.Year());
-		addResolver(new GlobalVariables.Time());
-		addResolver(new GlobalVariables.User());
+		addResolver(new GlobalTemplateVariables.Dollar());
+		addResolver(new GlobalTemplateVariables.Date());
+		addResolver(new GlobalTemplateVariables.Year());
+		addResolver(new GlobalTemplateVariables.Time());
+		addResolver(new GlobalTemplateVariables.User());
 		addResolver(new Todo());
 		
 		if (CATCHBLOCK_CONTEXTTYPE.equals(contextName)) {

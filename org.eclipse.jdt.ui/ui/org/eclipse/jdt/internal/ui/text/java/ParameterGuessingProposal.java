@@ -31,7 +31,7 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.ProposalPosition;
 
-import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -148,8 +148,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				
 				model.forceInstall();
 				
-				LinkedModeUI ui= new LinkedModeUI(model, fViewer);
-				ui.setPositionListener(new EditorHistoryUpdater());
+				LinkedModeUI ui= new EditorLinkedModeUI(model, fViewer);
 				ui.setExitPosition(fViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setExitPolicy(new ExitPolicy(')'));
 				ui.setCyclingMode(LinkedModeUI.CYCLE_WHEN_NO_PARENT);

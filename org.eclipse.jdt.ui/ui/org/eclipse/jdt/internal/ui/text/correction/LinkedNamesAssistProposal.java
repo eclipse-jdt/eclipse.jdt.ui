@@ -29,7 +29,7 @@ import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI;
 
-import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -119,8 +119,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			model.addGroup(group);
 			model.forceInstall();
 			
-			LinkedModeUI ui= new LinkedModeUI(model, viewer);
-			ui.setPositionListener(new EditorHistoryUpdater());
+			LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
 //			ui.setInitialOffset(offset);
 			ui.setExitPosition(viewer, offset, 0, LinkedPositionGroup.NO_STOP);
 			ui.enter();

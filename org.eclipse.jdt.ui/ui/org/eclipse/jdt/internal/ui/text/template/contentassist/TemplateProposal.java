@@ -34,21 +34,20 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.ILinkedModeListener;
-import org.eclipse.jface.text.link.InclusivePositionUpdater;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.ProposalPosition;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
-import org.eclipse.jface.text.templates.GlobalVariables;
+import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
-import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -191,8 +190,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			
 			if (hasPositions) {
 				model.forceInstall();
-				LinkedModeUI ui= new LinkedModeUI(model, viewer);
-				ui.setPositionListener(new EditorHistoryUpdater());
+				LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
 				ui.setExitPosition(viewer, getCaretOffset(templateBuffer) + start, 0, Integer.MAX_VALUE);
 				ui.enter();
 				
@@ -283,7 +281,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	    TemplateVariable[] variables= buffer.getVariables();
 		for (int i= 0; i != variables.length; i++) {
 			TemplateVariable variable= variables[i];
-			if (variable.getType().equals(GlobalVariables.Cursor.NAME))
+			if (variable.getType().equals(GlobalTemplateVariables.Cursor.NAME))
 				return variable.getOffsets()[0];
 		}
 

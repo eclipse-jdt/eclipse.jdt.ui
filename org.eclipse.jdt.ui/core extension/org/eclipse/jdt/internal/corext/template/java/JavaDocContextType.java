@@ -30,14 +30,14 @@ public class JavaDocContextType extends CompilationUnitContextType {
 		super(NAME);
 		
 		// global
-		addResolver(new GlobalVariables.Cursor());
-		addResolver(new GlobalVariables.LineSelection());
-		addResolver(new GlobalVariables.WordSelection());
-		addResolver(new GlobalVariables.Dollar());
-		addResolver(new GlobalVariables.Date());
-		addResolver(new GlobalVariables.Year());
-		addResolver(new GlobalVariables.Time());
-		addResolver(new GlobalVariables.User());
+		addResolver(new GlobalTemplateVariables.Cursor());
+		addResolver(new GlobalTemplateVariables.LineSelection());
+		addResolver(new GlobalTemplateVariables.WordSelection());
+		addResolver(new GlobalTemplateVariables.Dollar());
+		addResolver(new GlobalTemplateVariables.Date());
+		addResolver(new GlobalTemplateVariables.Year());
+		addResolver(new GlobalTemplateVariables.Time());
+		addResolver(new GlobalTemplateVariables.User());
 		
 		// compilation unit
 		addResolver(new File());

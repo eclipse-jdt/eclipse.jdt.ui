@@ -29,7 +29,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITypedRegion;
-import org.eclipse.jface.text.templates.GlobalVariables;
+import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateVariable;
@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
  */
 public class JavaFormatter {
 
-	private static final String MARKER= "/*${" + GlobalVariables.Cursor.NAME + "}*/"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String MARKER= "/*${" + GlobalTemplateVariables.Cursor.NAME + "}*/"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/** The line delimiter to use if code formatter is not used. */
 	private final String fLineDelimiter;
@@ -92,7 +92,7 @@ public class JavaFormatter {
 	    for (int i= 0; i != variables.length; i++) {
 	        TemplateVariable variable= variables[i];
 	        
-	        if (variable.getType().equals(GlobalVariables.Cursor.NAME))
+	        if (variable.getType().equals(GlobalTemplateVariables.Cursor.NAME))
 	        	return variable.getOffsets()[0];
 	    }
 	    

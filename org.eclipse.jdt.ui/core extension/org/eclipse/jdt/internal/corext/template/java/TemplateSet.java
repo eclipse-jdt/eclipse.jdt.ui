@@ -46,7 +46,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateException;
@@ -215,7 +215,7 @@ public class TemplateSet {
 	}
 
 	protected String validateTemplate(Template template) {
-		ContextType type= fRegistry.getContextType(template.getContextTypeId());
+		TemplateContextType type= fRegistry.getContextType(template.getContextTypeId());
 		if (type == null) {
 			return "Unknown context type: " + template.getContextTypeId(); //$NON-NLS-1$
 		}

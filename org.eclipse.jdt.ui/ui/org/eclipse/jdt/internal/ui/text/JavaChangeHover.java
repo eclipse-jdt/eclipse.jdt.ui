@@ -54,9 +54,9 @@ public class JavaChangeHover extends LineChangeHover  {
 	}
 	
 	/*
-	 * @see org.eclipse.jface.text.source.IAnnotationHoverExtension#getInformationControlCreator()
+	 * @see org.eclipse.jface.text.source.IAnnotationHoverExtension#getHoverControlCreator()
 	 */
-	public IInformationControlCreator getInformationControlCreator() {
+	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				fInformationControl= new CustomSourceInformationControl(parent, fPartition);

@@ -144,7 +144,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
@@ -152,7 +151,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
-import org.eclipse.ui.texteditor.PreferencesAdapter;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -3926,12 +3924,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		
 		CompositeRuler ruler= new CompositeRuler();
 		AnnotationRulerColumn column= new AnnotationRulerColumn(VERTICAL_RULER_WIDTH, getAnnotationAccess());
-		column.setHover(new JavaExpandHover(ruler, ruler, new IDoubleClickListener() {
+		column.setHover(new JavaExpandHover(ruler, getAnnotationAccess(), new IDoubleClickListener() {
 
 			public void doubleClick(DoubleClickEvent event) {
 				// for now: just invoke ruler double click action
 				triggerAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK);
-}
+			}
+			
 			private void triggerAction(String actionID) {
 				IAction action= getAction(actionID);
 				if (action != null) {
@@ -3946,7 +3945,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 			}
 			
-		}, getAnnotationAccess()));
+		}));
 		ruler.addDecorator(0, column);
 		
 		if (isLineNumberRulerVisible())

@@ -26,7 +26,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -60,7 +60,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	
 	public JavaDocCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
-		ContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("javadoc"); //$NON-NLS-1$
+		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("javadoc"); //$NON-NLS-1$
 		if (contextType == null) {
 			contextType= new JavaDocContextType();
 			JavaPlugin.getDefault().getTemplateContextRegistry().addContextType(contextType);

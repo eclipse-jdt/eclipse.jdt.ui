@@ -50,7 +50,7 @@ import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 
-import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -208,9 +208,8 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 						model.addGroup(group);
 						model.forceInstall();
 						
-						LinkedModeUI ui= new LinkedModeUI(model, fTextViewer);
+						LinkedModeUI ui= new EditorLinkedModeUI(model, fTextViewer);
 						ui.setSimpleMode(true);
-						ui.setPositionListener(new EditorHistoryUpdater());
 						ui.setExitPolicy(new ExitPolicy(')'));
 						ui.setExitPosition(fTextViewer, newOffset + 1, 0, Integer.MAX_VALUE);
 						ui.setCyclingMode(LinkedModeUI.CYCLE_NEVER);

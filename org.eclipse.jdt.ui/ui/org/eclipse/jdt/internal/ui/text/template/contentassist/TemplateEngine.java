@@ -19,8 +19,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.templates.ContextType;
-import org.eclipse.jface.text.templates.GlobalVariables;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.Template;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -33,11 +33,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class TemplateEngine {
 
-	private static final String $_LINE_SELECTION= "${" + GlobalVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
-	private static final String $_WORD_SELECTION= "${" + GlobalVariables.WordSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String $_LINE_SELECTION= "${" + GlobalTemplateVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String $_WORD_SELECTION= "${" + GlobalTemplateVariables.WordSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/** The context type. */
-	private ContextType fContextType;
+	private TemplateContextType fContextType;
 	/** The result proposals. */
 	private ArrayList fProposals= new ArrayList();
 
@@ -45,7 +45,7 @@ public class TemplateEngine {
 	 * Creates the template engine for a particular context type.
 	 * See <code>TemplateContext</code> for supported context types.
 	 */
-	public TemplateEngine(ContextType contextType) {
+	public TemplateEngine(TemplateContextType contextType) {
 		Assert.isNotNull(contextType);
 		fContextType= contextType;
 	}

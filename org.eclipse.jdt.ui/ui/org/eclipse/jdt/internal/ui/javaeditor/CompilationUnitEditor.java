@@ -48,6 +48,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DocumentCommand;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension;
@@ -65,7 +66,6 @@ import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
-import org.eclipse.jface.text.link.ExclusivePositionUpdater;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
@@ -94,7 +94,7 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
-import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -441,6 +441,92 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		Position fSecondPosition;
 	}
 	
+	/**
+	 * Position updater that takes any changes at the borders of a position to not belong to the position.
+	 * 
+	 * @since 3.0
+	 */
+	private static class ExclusivePositionUpdater implements IPositionUpdater {
+
+		/** The position category. */
+		private final String fCategory;
+
+		/**
+		 * Creates a new updater for the given <code>category</code>.
+		 * 
+		 * @param category the new category.
+		 */
+		public ExclusivePositionUpdater(String category) {
+			fCategory= category;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.IPositionUpdater#update(org.eclipse.jface.text.DocumentEvent)
+		 */
+		public void update(DocumentEvent event) {
+
+			int eventOffset= event.getOffset();
+			int eventOldLength= event.getLength();
+			int eventNewLength= event.getText() == null ? 0 : event.getText().length();
+			int deltaLength= eventNewLength - eventOldLength;
+
+			try {
+				Position[] positions= event.getDocument().getPositions(fCategory);
+
+				for (int i= 0; i != positions.length; i++) {
+
+					Position position= positions[i];
+
+					if (position.isDeleted())
+						continue;
+
+					int offset= position.getOffset();
+					int length= position.getLength();
+					int end= offset + length;
+
+					if (offset >= eventOffset + eventOldLength) 
+						// position comes
+						// after change - shift
+						position.setOffset(offset + deltaLength);
+					else if (end <= eventOffset) 
+						// position comes way before change -
+						// leave alone
+						;
+					else if (offset <= eventOffset && end >= eventOffset + eventOldLength) {
+						// event completely internal to the position - adjust length
+						position.setLength(length + deltaLength);
+					} else if (offset < eventOffset) {
+						// event extends over end of position - adjust length
+						int newEnd= eventOffset;
+						position.setLength(newEnd - offset);
+					} else if (end > eventOffset + eventOldLength) {
+						// event extends from before position into it - adjust offset
+						// and length
+						// offset becomes end of event, length ajusted acordingly
+						int newOffset= eventOffset + eventNewLength;
+						position.setOffset(newOffset);
+						position.setLength(end - newOffset);
+					} else {
+						// event consumes the position - delete it
+						position.delete();
+					}
+				}
+			} catch (BadPositionCategoryException e) {
+				// ignore and return
+			}
+		}
+
+		/**
+		 * Returns the position category.
+		 * 
+		 * @return the position category
+		 */
+		public String getCategory() {
+			return fCategory;
+		}
+
+	}
+	
 	private class BracketInserter implements VerifyKeyListener, ILinkedModeListener {
 		
 		private boolean fCloseBrackets= true;
@@ -595,9 +681,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					document.addPosition(CATEGORY, level.fFirstPosition);
 					document.addPosition(CATEGORY, level.fSecondPosition);
 					
-					level.fUI= new LinkedModeUI(model, sourceViewer);
+					level.fUI= new EditorLinkedModeUI(model, sourceViewer);
 					level.fUI.setSimpleMode(true);
-					level.fUI.setPositionListener(new EditorHistoryUpdater());
 					level.fUI.setExitPolicy(new ExitPolicy(closingCharacter, getEscapeCharacter(closingCharacter), fBracketLevelStack));
 					level.fUI.setExitPosition(sourceViewer, offset + 2, 0, Integer.MAX_VALUE);
 					level.fUI.setCyclingMode(LinkedModeUI.CYCLE_NEVER);

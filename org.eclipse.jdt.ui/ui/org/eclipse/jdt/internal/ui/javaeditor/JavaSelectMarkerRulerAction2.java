@@ -17,15 +17,15 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.AnnotationEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.VerticalRulerEvent;
 
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
-import org.eclipse.ui.texteditor.SelectMarkerRulerAction2;
+import org.eclipse.ui.texteditor.SelectAnnotationRulerAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavaExpandHover;
 /**
  * A special select marker ruler action which activates quick fix if clicked on a quick fixable problem.
  */
-public class JavaSelectMarkerRulerAction2 extends SelectMarkerRulerAction2 {
+public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 
 	public JavaSelectMarkerRulerAction2(ResourceBundle bundle, String prefix, ITextEditor editor) {
 		super(bundle, prefix, editor);
@@ -43,10 +43,10 @@ public class JavaSelectMarkerRulerAction2 extends SelectMarkerRulerAction2 {
 	}
 	
 	/*
-	 * @see org.eclipse.ui.texteditor.IAnnotationListener#annotationDefaultSelected(org.eclipse.ui.texteditor.AnnotationEvent)
+	 * @see org.eclipse.ui.texteditor.IVerticalRulerListener#annotationDefaultSelected(org.eclipse.ui.texteditor.VerticalRulerEvent)
 	 */
-	public void annotationDefaultSelected(AnnotationEvent event) {
-		Annotation annotation= event.getAnnotation();
+	public void annotationDefaultSelected(VerticalRulerEvent event) {
+		Annotation annotation= event.getSelectedAnnotation();
 		IAnnotationModel model= getAnnotationModel();
 		
 		if (isOverrideIndicator(annotation)) {

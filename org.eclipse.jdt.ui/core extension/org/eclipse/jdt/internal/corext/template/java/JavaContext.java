@@ -32,7 +32,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
@@ -78,7 +78,7 @@ public class JavaContext extends CompilationUnitContext {
 	 * @param completionLength the completion length.
 	 * @param compilationUnit the compilation unit (may be <code>null</code>).
 	 */
-	public JavaContext(ContextType type, IDocument document, int completionOffset, int completionLength,
+	public JavaContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength,
 		ICompilationUnit compilationUnit)
 	{
 		super(type, document, completionOffset, completionLength, compilationUnit);
@@ -611,7 +611,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException, BadLocationException, TemplateException {
 
-		ContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
+		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
 		if (contextType == null)
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.getString("JavaContext.error.message"), null)); //$NON-NLS-1$
 

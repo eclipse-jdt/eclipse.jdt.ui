@@ -29,13 +29,12 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.IAnnotationAccessExtension;
-import org.eclipse.jface.text.source.IAnnotationListener;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.IVerticalRulerInfo;
 
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
@@ -77,12 +76,8 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	
 	private AnnotationPreferenceLookup fLookup= new AnnotationPreferenceLookup();
 	
-	public JavaExpandHover(IVerticalRulerInfo ruler, IAnnotationListener listener, IDoubleClickListener doubleClickListener, IAnnotationAccess access) {
-		super(ruler, listener, doubleClickListener, access);
-	}
-
-	public JavaExpandHover(IVerticalRulerInfo ruler, IAnnotationAccess access) {
-		super(ruler, access);
+	public JavaExpandHover(CompositeRuler ruler, IAnnotationAccess access, IDoubleClickListener doubleClickListener) {
+		super(ruler, access, doubleClickListener);
 	}
 	
 	/*
@@ -160,8 +155,8 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		AnnotationHoverInput input= new AnnotationHoverInput();
 		input.fAnnotations= (Annotation[]) exact.toArray(new Annotation[0]);
 		input.fViewer= viewer;
-		input.fRulerInfo= fVerticalRulerInfo;
-		input.fAnnotationListener= fAnnotationListener;
+		input.fRulerInfo= fCompositeRuler;
+		input.fAnnotationListener= fgListener;
 		input.fDoubleClickListener= fDblClickListener;
 		input.redoAction= new AnnotationExpansionControl.ICallback() {
 

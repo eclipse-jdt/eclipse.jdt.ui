@@ -26,7 +26,7 @@ import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI;
 
-import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -78,8 +78,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 				
 				model.forceInstall();
 				
-				LinkedModeUI ui= new LinkedModeUI(model, fViewer);
-				ui.setPositionListener(new EditorHistoryUpdater());
+				LinkedModeUI ui= new EditorLinkedModeUI(model, fViewer);
 				ui.setExitPosition(fViewer, replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setDoContextInfo(true);
 				ui.enter();

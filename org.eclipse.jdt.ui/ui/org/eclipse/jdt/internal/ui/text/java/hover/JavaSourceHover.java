@@ -115,10 +115,10 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.ITextHoverExtension#getInformationControlCreator()
+	 * @see org.eclipse.jface.text.ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.0
 	 */
-	public IInformationControlCreator getInformationControlCreator() {
+	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				return new SourceViewerInformationControl(parent, getTooltipAffordanceString());

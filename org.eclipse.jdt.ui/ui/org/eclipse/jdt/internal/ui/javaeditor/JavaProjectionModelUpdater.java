@@ -298,6 +298,8 @@ public class JavaProjectionModelUpdater implements IProjectionListener {
 				ISourceReference reference= (ISourceReference) element;
 				ISourceRange range= reference.getSourceRange();
 				String contents= reference.getSource();
+				if (contents == null)
+					return null;
 				
 				IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 				scanner.setSource(contents.toCharArray());

@@ -89,12 +89,12 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover implem
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.ITextHoverExtension#getInformationControlCreator()
+	 * @see org.eclipse.jface.text.ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.0
 	 */
-	public IInformationControlCreator getInformationControlCreator() {
+	public IInformationControlCreator getHoverControlCreator() {
 		if (ensureHoverCreated() && (fHover instanceof ITextHoverExtension))
-			return ((ITextHoverExtension)fHover).getInformationControlCreator();
+			return ((ITextHoverExtension)fHover).getHoverControlCreator();
 
 		return null;
 	}

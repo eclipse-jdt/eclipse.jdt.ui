@@ -54,15 +54,15 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateException;
 
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
-import org.eclipse.ui.texteditor.PreferencesAdapter;
+
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -71,7 +71,9 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.javaeditor.ChainedPreferenceStore;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.javaeditor.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -152,7 +154,7 @@ public class EditTemplateDialog extends StatusDialog {
 		fContextTypes= contextTypes;
 		fValidationStatus= new StatusInfo();
 		
-		ContextType type= getContextType(template.getContextTypeId());
+		TemplateContextType type= getContextType(template.getContextTypeId());
 		fTemplateProcessor.setContextType(type);
 	}
 	
@@ -261,7 +263,7 @@ public class EditTemplateDialog extends StatusDialog {
 		}	
 	}
 	
-	private ContextType getContextType(String contextTypeId) {
+	private TemplateContextType getContextType(String contextTypeId) {
 		return JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(contextTypeId);
 	}
 
@@ -269,7 +271,7 @@ public class EditTemplateDialog extends StatusDialog {
 		String text= document.get();
 		fTemplate.setPattern(text);
 		fValidationStatus.setOK();
-		ContextType contextType= getContextType(fTemplate.getContextTypeId());
+		TemplateContextType contextType= getContextType(fTemplate.getContextTypeId());
 		if (contextType != null) {
 			try {
 				contextType.validate(text);

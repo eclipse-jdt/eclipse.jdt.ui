@@ -11,8 +11,8 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.templates.ContextType;
-import org.eclipse.jface.text.templates.GlobalVariables;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.Signature;
 /**
  * Compilation unit context type.
  */
-public abstract class CompilationUnitContextType extends ContextType {
+public abstract class CompilationUnitContextType extends TemplateContextType {
 	
 	protected static class ReturnType extends TemplateVariableResolver {
 	 	public ReturnType() {
@@ -203,7 +203,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 		// check for multiple cursor variables		
 		for (int i= 0; i < variables.length; i++) {
 			TemplateVariable var= variables[i];
-			if (var.getType().equals(GlobalVariables.Cursor.NAME)) {
+			if (var.getType().equals(GlobalTemplateVariables.Cursor.NAME)) {
 				if (var.getOffsets().length > 1) {
 					throw new TemplateException(JavaTemplateMessages.getString("ContextType.error.multiple.cursor.variables")); //$NON-NLS-1$
 				}

@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
@@ -40,7 +40,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	 * @param completionLength the completion length within the document.
 	 * @param compilationUnit the compilation unit (may be <code>null</code>).
 	 */
-	public JavaDocContext(ContextType type, IDocument document, int completionOffset, int completionLength,
+	public JavaDocContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength,
 		ICompilationUnit compilationUnit)
 	{
 		super(type, document, completionOffset, completionLength, compilationUnit);

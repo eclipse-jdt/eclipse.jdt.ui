@@ -25,7 +25,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.Template;
 
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
@@ -402,7 +402,7 @@ public class ParameterGuesser {
 	 * @return
 	 */
 	private TemplateProposal createTemplateProposal(int offset, IDocument document, int replacementLength) {
-		ContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
+		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
 		CompilationUnitContext context= ((CompilationUnitContextType) contextType).createContext(document, offset, replacementLength, fCompilationUnit);
 		context.setForceEvaluation(true);
 		context.setVariable("type", fTemplateType); //$NON-NLS-1$

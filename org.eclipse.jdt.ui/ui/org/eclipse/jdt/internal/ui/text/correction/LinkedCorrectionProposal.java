@@ -41,7 +41,7 @@ import org.eclipse.jface.text.link.ProposalPosition;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -232,8 +232,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		model.forceInstall();
 		
 		if (added) { // only set up UI if there are any positions set
-			LinkedModeUI ui= new LinkedModeUI(model, viewer);
-			ui.setPositionListener(new EditorHistoryUpdater());
+			LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
 			if (fSelectionDescription != null && fSelectionDescription.getStartPosition() != -1) {
 				ui.setExitPosition(viewer, fSelectionDescription.getStartPosition() + fSelectionDescription.getLength(), 0, Integer.MAX_VALUE);				
 			} else {

@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.text;
 
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.reconciler.CompositeReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.source.IAnnotationModel;
