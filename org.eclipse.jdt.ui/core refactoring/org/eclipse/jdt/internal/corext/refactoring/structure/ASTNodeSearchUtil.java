@@ -93,7 +93,7 @@ public class ASTNodeSearchUtil {
 		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
 	}
 
-	private static ASTNode getAstNode(SearchResult searchResult, CompilationUnit cuNode) {
+	public static ASTNode getAstNode(SearchResult searchResult, CompilationUnit cuNode) {
 		ASTNode selectedNode= getAstNode(cuNode, searchResult.getStart(), searchResult.getEnd() - searchResult.getStart());
 		if (selectedNode == null)
 			return null;
@@ -105,7 +105,7 @@ public class ASTNodeSearchUtil {
 	private static ASTNode getAstNode(CompilationUnit cuNode, int start, int length){
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(start, length), true);
 		cuNode.accept(analyzer);
-		//XXX workaround for bug 23527
+		//XXX workaround for jdt core bug 23527
 		ASTNode node= analyzer.getFirstSelectedNode();
 		if (node == null && analyzer.getLastCoveringNode() instanceof SuperConstructorInvocation)
 			node= analyzer.getLastCoveringNode().getParent();
@@ -140,6 +140,10 @@ public class ASTNodeSearchUtil {
 		return node;
 	}
 
+	public static MethodDeclaration getMethodDeclarationNode(IMethod iMethod, CompilationUnit cuNode) throws JavaModelException {
+		return (MethodDeclaration)ASTNodes.getParent(getDeclarationNode(iMethod, cuNode), MethodDeclaration.class);
+	}
+
 	public static MethodDeclaration getMethodDeclarationNode(IMethod iMethod, ASTNodeMappingManager astManager) throws JavaModelException {
 		return (MethodDeclaration)ASTNodes.getParent(getDeclarationNode(iMethod, astManager), MethodDeclaration.class);
 	}
@@ -155,18 +159,26 @@ public class ASTNodeSearchUtil {
 		return (FieldDeclaration)ASTNodes.getParent(getDeclarationNode(iField, astManager), FieldDeclaration.class);
 	}
 
+	public static TypeDeclaration getTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
+		return (TypeDeclaration)ASTNodes.getParent(getDeclarationNode(iType, cuNode), TypeDeclaration.class);
+	}
+
 	public static TypeDeclaration getTypeDeclarationNode(IType iType, ASTNodeMappingManager astManager) throws JavaModelException {
 		return (TypeDeclaration)ASTNodes.getParent(getDeclarationNode(iType, astManager), TypeDeclaration.class);
 	}
 	
-	private static ASTNode getDeclarationNode(IMember iMember, ASTNodeMappingManager astManager) throws JavaModelException {
+	private static ASTNode getDeclarationNode(IMember iMember, CompilationUnit cuNode) throws JavaModelException {
 		Assert.isTrue(! (iMember instanceof IInitializer));
 		Selection selection= Selection.createFromStartLength(iMember.getNameRange().getOffset(), iMember.getNameRange().getLength());
 		SelectionAnalyzer selectionAnalyzer= new SelectionAnalyzer(selection, true);
-		astManager.getAST(iMember.getCompilationUnit()).accept(selectionAnalyzer);
+		cuNode.accept(selectionAnalyzer);
 		ASTNode node= selectionAnalyzer.getFirstSelectedNode();
 		if (node == null)
 			node= selectionAnalyzer.getLastCoveringNode();
 		return node;		
+	}
+
+	private static ASTNode getDeclarationNode(IMember iMember, ASTNodeMappingManager astManager) throws JavaModelException {
+		return getDeclarationNode(iMember, astManager.getAST(iMember.getCompilationUnit()));
 	}
 }
