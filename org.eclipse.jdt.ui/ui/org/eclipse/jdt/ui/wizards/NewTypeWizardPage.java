@@ -1368,7 +1368,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * Can be used by implementors of NewTypeWizardPage to add method stub checkboxes.
 	 */
 	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
-		List newMethods= new ArrayList();
+		ArrayList newMethods= new ArrayList();
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(monitor);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 
@@ -1394,7 +1394,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		IMethod[] createdMethods= new IMethod[newMethods.size()];
 		for (int i= 0; i < newMethods.size(); i++) {
-			String content= (String) newMethods.get(i) + "\n"; //$NON-NLS-1$
+			String content= (String) newMethods.get(i) + '\n'; // content will be formatted, ok to use \n
 			createdMethods[i]= type.createMethod(content, null, false, null);
 		}
 		return createdMethods;
