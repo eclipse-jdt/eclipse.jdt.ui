@@ -12,7 +12,16 @@
 package org.eclipse.jdt.text.tests.performance;
 
 import org.eclipse.ui.PartInitException;
-
+/**
+ * Opens 20 instances of org.eclipse.swt.graphics.TextLayout leaving
+ * each of them open and then closes all together them (close all).
+ * Then repeats above scenario.
+ * <p>
+ * This tests a mid-size file.
+ * </p>
+ *  
+ * @since 3.1
+ */
 public class OpenJavaEditorTest extends OpenEditorTest {
 
 	public static final int N_OF_COPIES= 20;
