@@ -44,6 +44,11 @@ abstract class SourceReferenceAction extends RefactoringAction {
 	 * @see Action#run
 	 */
 	public final void run() {
+		//safety net - fix for: 9528
+		update();
+		if (!isEnabled())
+			return;
+		
 		new BusyIndicator().showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
 			public void run() {
 				try {
