@@ -1,12 +1,17 @@
+/**********************************************************************
+Copyright (c) 2000, 2002 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
+
+Contributors:
+    IBM Corporation - Initial implementation
+**********************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
 
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.information.IInformationProvider;
 
@@ -17,9 +22,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
+import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
+
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
-import org.eclipse.jdt.ui.*;
-import org.eclipse.jdt.ui.text.java.hover.*;
 
 
 public class JavaInformationProvider implements IInformationProvider {

@@ -15,7 +15,6 @@ import org.eclipse.jface.text.source.IVerticalRulerInfo;
 
 import org.eclipse.ui.texteditor.AbstractRulerActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.SelectMarkerRulerAction;
 
 public class JavaSelectRulerAction extends AbstractRulerActionDelegate {
 

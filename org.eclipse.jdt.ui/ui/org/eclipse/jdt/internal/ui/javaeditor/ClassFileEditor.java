@@ -1,9 +1,17 @@
+/**********************************************************************
+Copyright (c) 2000, 2002 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
+
+Contributors:
+    IBM Corporation - Initial implementation
+**********************************************************************/
+
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -165,7 +173,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				Composite composite= createComposite(fScrolledComposite);
 				composite.setLayout(new GridLayout());
 		
-				Label titleLabel= createTitleLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.title")); //$NON-NLS-1$
+				createTitleLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.title")); //$NON-NLS-1$
 				createLabel(composite, null);
 				createLabel(composite, null);
 		
