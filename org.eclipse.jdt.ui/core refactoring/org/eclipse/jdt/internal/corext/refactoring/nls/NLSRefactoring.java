@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -202,7 +201,7 @@ public class NLSRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(fCu.getElementName() + NLSMessages.getString("NLSrefactoring.read_only"));	 //$NON-NLS-1$
 		
 		if (NLSHolder.create(fCu).getSubstitutions().length == 0)	{
-			String message= RefactoringCoreMessages.getFormattedString("NLSRefactoring.no_strings", fCu.getElementName());//$NON-NLS-1$
+			String message= NLSMessages.getFormattedString("NLSRefactoring.no_strings", fCu.getElementName());//$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 		
@@ -506,7 +505,7 @@ public class NLSRefactoring extends Refactoring {
 	//---- modified source files
 			
 	private IChange createSourceModification() throws CoreException{
-		String message= RefactoringCoreMessages.getFormattedString("NLSRefactoring.externalize_strings", //$NON-NLS-1$
+		String message= NLSMessages.getFormattedString("NLSRefactoring.externalize_strings", //$NON-NLS-1$
 							fCu.getElementName());
 		TextChange change= new CompilationUnitChange(message, fCu); 
 		for (int i= 0; i < fNlsSubs.length; i++){
@@ -618,7 +617,7 @@ public class NLSRefactoring extends Refactoring {
 			if (fNlsSubs[i].task == NLSSubstitution.TRANSLATE){
 				if (fNlsSubs[i].putToPropertyFile){
 					String entry= createEntry(fNlsSubs[i].value, fNlsSubs[i].key).toString();
-					String message= RefactoringCoreMessages.getFormattedString("NLSRefactoring.add_entry", //$NON-NLS-1$
+					String message= NLSMessages.getFormattedString("NLSRefactoring.add_entry", //$NON-NLS-1$
 										fNlsSubs[i].key);
 					tfc.addTextEdit(message, SimpleTextEdit.createInsert(old.length(), entry));
 				}	
