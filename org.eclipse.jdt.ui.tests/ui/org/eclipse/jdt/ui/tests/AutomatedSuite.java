@@ -34,13 +34,13 @@ public class AutomatedSuite extends TestSuite {
 	 * Construct the test suite.
 	 */
 	public AutomatedSuite() {
-//		addTest(TypeInfoTest.suite());
-//		addTest(AddUnimplementedMethodsTest.suite());
-//		addTest(ImportOrganizeTest.suite());
-//		addTest(JavaModelUtilTest.suite());
-//		addTest(TextBufferTest.suite());
-//		addTest(TypeHierarchyTest.suite());
-//		addTest(AllTypesCacheTest.suite());
+		addTest(TypeInfoTest.suite());
+		addTest(AddUnimplementedMethodsTest.suite());
+		addTest(ImportOrganizeTest.suite());
+		addTest(JavaModelUtilTest.suite());
+		addTest(TextBufferTest.suite());
+		addTest(TypeHierarchyTest.suite());
+		addTest(AllTypesCacheTest.suite());
 	}
 	
 	public static void main(String[] args) {
