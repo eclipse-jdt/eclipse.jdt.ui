@@ -64,6 +64,14 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class StubUtility2 {
 
+	private static void createAnnotations(ASTRewrite rewrite, MethodDeclaration decl, IMethodBinding binding, boolean annotations) {
+		if (annotations && !binding.getDeclaringClass().isInterface()) {
+			final Annotation marker= rewrite.getAST().newMarkerAnnotation();
+			marker.setTypeName(rewrite.getAST().newSimpleName("Override")); //$NON-NLS-1$
+			rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(marker, null);
+		}
+	}
+
 	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, int modifiers, boolean omitSuper, CodeGenerationSettings settings) throws CoreException {
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
@@ -414,11 +422,8 @@ public final class StubUtility2 {
 				decl.setJavadoc(javadoc);
 			}
 		}
-		if (annotations) {
-			final Annotation marker= rewrite.getAST().newMarkerAnnotation();
-			marker.setTypeName(rewrite.getAST().newSimpleName("Override")); //$NON-NLS-1$
-			rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(marker, null);
-		}
+		createAnnotations(rewrite, decl, binding, annotations);
+
 		return decl;
 	}
 
@@ -503,11 +508,8 @@ public final class StubUtility2 {
 				decl.setJavadoc(javadoc);
 			}
 		}
-		if (annotations) {
-			final Annotation marker= rewrite.getAST().newMarkerAnnotation();
-			marker.setTypeName(rewrite.getAST().newSimpleName("Override")); //$NON-NLS-1$
-			rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(marker, null);
-		}
+		createAnnotations(rewrite, decl, binding, annotations);
+
 		return decl;
 	}
 
