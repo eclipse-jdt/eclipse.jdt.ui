@@ -35,7 +35,7 @@ public abstract class Indexer extends InternalIndexer {
 	 * Indexes the given document, adding the document name and the word references 
 	 * to this document to the given <code>Index</code>.
 	 */
-	public abstract void index(Document document) throws IOException;
+	public abstract void index(Document document, IPath indexPath) throws IOException;
 	
 	/**
 	 * Trigger an indexing action at earliest convenience (in background). When the corresponding action is performed, the
