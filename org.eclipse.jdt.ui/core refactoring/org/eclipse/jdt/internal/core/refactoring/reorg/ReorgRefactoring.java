@@ -435,12 +435,6 @@ public abstract class ReorgRefactoring extends Refactoring {
 		if (root == null)
 			return false;
 			
-		// the order is important here since getPackageFragment() throws an exception
-		// if the name is invalid.
-		IStatus status= JavaConventions.validatePackageName(name);
-		if (! status.isOK())
-			return true;
-			
 		IPackageFragment pkg= root.getPackageFragment(name);
 		return (pkg.exists() && pkg.hasChildren());
 	}
