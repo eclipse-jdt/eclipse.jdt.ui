@@ -415,7 +415,7 @@ public class ChangeParametersControl extends Composite {
 
 	private Button createAddButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText("Add");
+		button.setText("&Add");
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -435,7 +435,7 @@ public class ChangeParametersControl extends Composite {
 
 	private Button createRemoveButton(Composite buttonComposite) {
 		final Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText("Remove");
+		button.setText("Re&move");
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {

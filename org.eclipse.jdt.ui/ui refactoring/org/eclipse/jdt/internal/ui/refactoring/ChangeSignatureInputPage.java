@@ -77,7 +77,7 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 			composite.setLayout(layout);
 			
 			Label label= new Label(composite, SWT.NONE);
-			label.setText("Return type:");
+			label.setText("Re&turn type:");
 			label.setLayoutData((new GridData()));
 			
 			final Text text= new Text(composite, SWT.BORDER);
