@@ -4,15 +4,21 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import java.util.Collection;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -21,6 +27,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -29,7 +36,9 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -44,6 +53,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.SeverityItemMapper;
 
 
 /**
@@ -52,6 +62,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
  * No dependency to the type hierarchy view
  */
 public class MethodsViewer extends TableViewer {
+	
+	private SeverityItemMapper fSeverityItemMapper;
 	
 	/**
 	 * Sorter that uses the unmodified labelprovider (No declaring class names)
@@ -116,6 +128,8 @@ public class MethodsViewer extends TableViewer {
 	
 	public MethodsViewer(Composite parent, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
+		
+		fSeverityItemMapper= new SeverityItemMapper();
 		
 		final Table table= getTable();
 		final TableColumn column= new TableColumn(table, SWT.NULL | SWT.MULTI | SWT.FULL_SELECTION);
@@ -294,5 +308,58 @@ public class MethodsViewer extends TableViewer {
 		tbm.add(fFilterActions[1]); // static
 		tbm.add(fFilterActions[2]); // public
 	}
+	
+	private IResource getMappingResource(IMember member) {
+		try {
+			int type= member.getElementType();
+			if (type == IJavaElement.TYPE || type == IJavaElement.METHOD || type == IJavaElement.INITIALIZER) {
+				ICompilationUnit cu= member.getCompilationUnit();
+				if (cu != null) {
+					return cu.getCorrespondingResource();
+				}
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
+		}			
+		return null;
+	}	
+	
+	/**
+	 * @see TableViewer#mapElement
+	 */
+	protected void mapElement(Object element, Widget widget) {
+		super.mapElement(element, widget);
+		IResource res= getMappingResource((IMember)element);
+		if (res != null && widget instanceof Item) {
+			fSeverityItemMapper.addToMap(res, (Item)widget);
+		}
+	}
+
+	/**
+	 * @see TableViewer#unmapElement
+	 */	
+	protected void unmapElement(Object element) {
+		super.unmapElement(element);
+		IResource res= getMappingResource((IMember)element);
+		if (res != null) {
+			fSeverityItemMapper.removeFromMap(res, element);
+		}
+	}
+
+
+	/**
+	 * @see TableViewer#unmapAllElements
+	 */	
+	protected void unmapAllElements() {
+		super.unmapAllElements();
+		fSeverityItemMapper.clearMap();
+	}
+
+	/**
+	 * Called when severities changed.
+	 */	
+	public void severitiesChanged(Collection changed) {
+		fSeverityItemMapper.severitiesChanged(changed, (ILabelProvider)getLabelProvider());
+	}	
 
 }

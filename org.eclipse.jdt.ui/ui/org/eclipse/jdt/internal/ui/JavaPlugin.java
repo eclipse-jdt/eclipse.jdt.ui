@@ -52,16 +52,16 @@ import org.eclipse.jdt.internal.compiler.ConfigurableOption;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.launcher.VMPreferencePage;
-import org.eclipse.jdt.internal.ui.packageview.ErrorTickManager;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaDebugPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickManager;
 
 /**
  * Represents the java plugin. It provides a series of convenience methods such as

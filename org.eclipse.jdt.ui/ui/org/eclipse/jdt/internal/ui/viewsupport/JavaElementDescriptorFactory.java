@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.packageview.ErrorTickManager;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  {
@@ -50,11 +49,11 @@ public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  
 
 		IJavaElement jElement= (IJavaElement)element;
 		ErrorTickManager errorManager= JavaPlugin.getErrorTickManager();
-		boolean[] errorInfo= errorManager.getErrorInfo(jElement);
-		if (errorInfo[1]) {
-			flags|=JavaOverlayDescriptor.ERROR;
-		} else if (errorInfo[0]) {
-			flags|=JavaOverlayDescriptor.WARNING;
+		int info= errorManager.getErrorInfo(jElement);
+		if ((info & ErrorTickManager.ERRORTICK_ERROR) != 0) {
+			flags |= JavaOverlayDescriptor.ERROR;
+		} else if ((info & ErrorTickManager.ERRORTICK_WARNING) != 0) {
+			flags |= JavaOverlayDescriptor.WARNING;
 		}
 					
 		if (element instanceof ISourceReference) { 
