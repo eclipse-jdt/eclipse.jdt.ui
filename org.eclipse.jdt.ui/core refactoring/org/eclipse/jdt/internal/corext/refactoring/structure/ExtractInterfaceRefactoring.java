@@ -130,6 +130,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		//for now
 		if (! Checks.isTopLevel(type))
 			return false;
+		if (type.isAnnotation())
+			return false;
 		return true;
 	}
 	
