@@ -335,6 +335,7 @@ public class JavaPluginImages {
 	public static final String IMG_CORRECTION_LOCAL= NAME_PREFIX + "localvariable_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_CORRECTION_REMOVE= NAME_PREFIX + "remove_correction.gif"; //$NON-NLS-1$
 	public static final String IMG_CORRECTION_ADD= NAME_PREFIX + "add_correction.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_CAST= NAME_PREFIX + "correction_cast.gif"; //$NON-NLS-1$
 
 	static {
 		createManaged(T_OBJ, IMG_CORRECTION_CHANGE);
@@ -344,6 +345,7 @@ public class JavaPluginImages {
 		createManaged(T_OBJ, IMG_CORRECTION_LOCAL);
 		createManaged(T_OBJ, IMG_CORRECTION_REMOVE);
 		createManaged(T_OBJ, IMG_CORRECTION_ADD);
+		createManaged(T_OBJ, IMG_CORRECTION_CAST);
 	}
 
 	/**

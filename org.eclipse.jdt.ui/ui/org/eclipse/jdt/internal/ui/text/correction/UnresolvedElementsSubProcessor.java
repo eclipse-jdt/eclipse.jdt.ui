@@ -764,7 +764,7 @@ public class UnresolvedElementsSubProcessor {
 			rewrite.replace(accessExpression, parents, null);
 
 			String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.missingcastbrackets.description"); //$NON-NLS-1$
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 8, image);
 			proposals.add(proposal);
 			return true;
