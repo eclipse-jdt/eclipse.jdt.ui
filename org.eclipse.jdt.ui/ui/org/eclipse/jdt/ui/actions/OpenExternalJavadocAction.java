@@ -14,14 +14,14 @@ import java.io.File;
 import java.net.URL;
 import java.text.MessageFormat;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -30,9 +30,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -135,7 +135,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		try {
 			String labelName= JavaElementLabels.getElementLabel(element, JavaElementLabels.M_PARAMETER_TYPES);
 			
-			URL baseURL= JavaDocLocations.getJavadocBaseLocation(element);
+			URL baseURL= JavaUI.getJavadocBaseLocation(element);
 			if (baseURL == null) {
 				IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
 				if (root != null && root.getKind() == IPackageFragmentRoot.K_BINARY) {
@@ -149,7 +149,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 				return;
 			}
 			if ("file".equals(baseURL.getProtocol())) { //$NON-NLS-1$
-				URL noRefURL= JavaDocLocations.getJavadocLocation(element, false);
+				URL noRefURL= JavaUI.getJavadocLocation(element, false);
 				if (!(new File(noRefURL.getFile())).isFile()) {
 					String message= ActionMessages.getString("OpenExternalJavadocAction.no_entry"); //$NON-NLS-1$
 					showMessage(shell, MessageFormat.format(message, new String[] { labelName, noRefURL.toExternalForm() }), false);
@@ -157,7 +157,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 				}
 			}
 		
-			URL url= JavaDocLocations.getJavadocLocation(element, true);
+			URL url= JavaUI.getJavadocLocation(element, true);
 			if (url != null) {
 				OpenBrowserUtil.open(url, shell, getTitle());
 			} 		

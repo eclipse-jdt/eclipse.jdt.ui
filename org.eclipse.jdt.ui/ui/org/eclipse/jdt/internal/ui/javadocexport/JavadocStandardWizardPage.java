@@ -50,7 +50,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
@@ -276,7 +275,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				for (Iterator iterator= referencedClasses.iterator(); iterator.hasNext();) {
 					IJavaElement element= (IJavaElement) iterator.next();
 					try {
-						url= JavaDocLocations.getJavadocBaseLocation(element);
+						url= JavaUI.getJavadocBaseLocation(element);
 					} catch (JavaModelException e) {
 						JavaPlugin.log(e);
 						continue;
@@ -413,7 +412,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		for (Iterator iterator= els.iterator(); iterator.hasNext();) {
 			try {
 				IJavaElement element= (IJavaElement) iterator.next();
-				url= JavaDocLocations.getJavadocBaseLocation(element);
+				url= JavaUI.getJavadocBaseLocation(element);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 				continue;

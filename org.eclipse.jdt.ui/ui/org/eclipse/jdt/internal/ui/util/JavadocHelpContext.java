@@ -20,9 +20,10 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.javadoc.SingleCharReader;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -93,17 +94,17 @@ public class JavadocHelpContext implements IContext {
 					fText= ""; // no doc on multiple selection //$NON-NLS-1$
 				}					
 				
-				URL url= JavaDocLocations.getJavadocLocation(element, true);
+				URL url= JavaUI.getJavadocLocation(element, true);
 				if (url == null || doesNotExist(url)) {
 					IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
 					if (root != null) {
-						url= JavaDocLocations.getJavadocBaseLocation(element);
+						url= JavaUI.getJavadocBaseLocation(element);
 						if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 							element= element.getJavaProject();
 						} else {
 							element= root;
 						}
-						url= JavaDocLocations.getJavadocLocation(element, false);
+						url= JavaUI.getJavadocLocation(element, false);
 					}
 				}
 				if (url != null) {

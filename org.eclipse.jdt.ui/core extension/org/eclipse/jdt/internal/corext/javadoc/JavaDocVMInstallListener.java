@@ -11,6 +11,8 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.LibraryLocation;
 import org.eclipse.jdt.launching.PropertyChangeEvent;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 /**
   */
 public class JavaDocVMInstallListener implements IVMInstallChangedListener {
@@ -53,7 +55,7 @@ public class JavaDocVMInstallListener implements IVMInstallChangedListener {
 				for (int i = 0; i < locations.length; i++) {
 					IPath path= locations[i].getSystemLibraryPath();
 					if (path != null) {
-						JavaDocLocations.setLibraryJavadocLocation(path, url);
+						JavaUI.setLibraryJavadocLocation(path, url);
 					}
 				}
 			}

@@ -34,6 +34,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -51,15 +52,13 @@ import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbench;
 
-import org.eclipse.debug.ui.IDebugUIConstants;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -150,7 +149,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				//get javadoc locations for all projects
 				for (int i= 0; i < projects.length; i++) {
 					IJavaProject iJavaProject= projects[i];
-					URL currURL= JavaDocLocations.getProjectJavadocLocation(iJavaProject);
+					URL currURL= JavaUI.getProjectJavadocLocation(iJavaProject);
 					if (!newURL.equals(currURL)) { // currURL can be null
 						//if not all projects have the same javadoc location ask if you want to change
 						//them to have the same javadoc location
@@ -197,12 +196,12 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 			switch (dialog.open()) {
 				case YES :
-					JavaDocLocations.setProjectJavadocLocation(iJavaProject, newURL);
+					JavaUI.setProjectJavadocLocation(iJavaProject, newURL);
 					break;
 				case YES_TO_ALL :
 					for (int i= j; i < projects.length; i++) {
 						iJavaProject= projects[i];
-						JavaDocLocations.setProjectJavadocLocation(iJavaProject, newURL);
+						JavaUI.setProjectJavadocLocation(iJavaProject, newURL);
 						j++;
 					}
 					break;

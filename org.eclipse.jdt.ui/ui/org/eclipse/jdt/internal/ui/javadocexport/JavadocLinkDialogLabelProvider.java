@@ -11,7 +11,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 
@@ -25,7 +26,7 @@ public class JavadocLinkDialogLabelProvider extends JavaUILabelProvider {
 
 			String doc = ""; //$NON-NLS-1$
 			try {
-				URL url = JavaDocLocations.getJavadocBaseLocation((IJavaElement) element);
+				URL url = JavaUI.getJavadocBaseLocation((IJavaElement) element);
 				if (url != null) {
 					doc = url.toExternalForm();
 					Object[] args= new Object[] { text, doc };

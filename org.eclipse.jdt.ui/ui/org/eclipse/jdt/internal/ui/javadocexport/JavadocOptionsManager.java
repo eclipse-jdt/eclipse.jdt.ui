@@ -50,7 +50,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.launching.ExecutionArguments;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -252,7 +253,7 @@ public class JavadocOptionsManager {
 
 	private String getDefaultDestination(IJavaProject project) {
 		if (project != null) {
-			URL url = JavaDocLocations.getProjectJavadocLocation(project);
+			URL url = JavaUI.getProjectJavadocLocation(project);
 			//uses default if source is has http protocol
 			if (url == null || !url.getProtocol().equals("file")) { //$NON-NLS-1$
 				return project.getProject().getLocation().append("doc").toOSString(); //$NON-NLS-1$
