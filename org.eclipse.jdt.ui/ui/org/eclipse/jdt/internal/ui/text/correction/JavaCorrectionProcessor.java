@@ -167,17 +167,20 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 						if (proposals.isEmpty()) {
 							//proposals.add(new NoCorrectionProposal(pp, annot.getMessage()));
 						}
-					}					
+					}
+					noProbemFound= false;				
 				} else {
 					if (annot instanceof MarkerAnnotation) {
 						IMarker marker= ((MarkerAnnotation) annot).getMarker();
 						IMarkerResolution[] res= PlatformUI.getWorkbench().getMarkerHelpRegistry().getResolutions(marker);
-						for (int i= 0; i < res.length; i++) {
-							proposals.add(new MarkerResolutionProposal(res[i], marker));
+						if (res.length > 0) {
+							noProbemFound= false;
+							for (int i= 0; i < res.length; i++) {
+								proposals.add(new MarkerResolutionProposal(res[i], marker));
+							}
 						}
 					}
 				}
-				noProbemFound= false;
 			}
 		}
 		if (noProbemFound) {
