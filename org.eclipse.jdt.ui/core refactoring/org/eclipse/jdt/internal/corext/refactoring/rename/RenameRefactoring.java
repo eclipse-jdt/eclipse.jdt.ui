@@ -164,12 +164,12 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 			
 			for (int i= 0; i < fElementParticipants.length; i++) {
 				IRenameParticipant participant= fElementParticipants[i];
-				fProcessor.propagateNewElementNameTo(participant);
+				fProcessor.propagateDataTo(participant);
 				result.merge(participant.checkInput(new SubProgressMonitor(pm, fElementParticipants.length)));
 			}
 			for (int i= 0; i < fDerivedParticipants.length; i++) {
 				IRenameParticipant participant= fDerivedParticipants[i];
-				fProcessor.propagateNewElementNameTo(participant);
+				fProcessor.propagateDataTo(participant);
 				result.merge(participant.checkInput(new SubProgressMonitor(pm, fDerivedParticipants.length)));
 			}
 			for (int i= 0; i < fResourceParticipants.length; i++) {
@@ -195,12 +195,12 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 			
 			for (int i= 0; i < fElementParticipants.length; i++) {
 				IRenameParticipant participant= fElementParticipants[i];
-				fProcessor.propagateNewElementNameTo(participant);
+				fProcessor.propagateDataTo(participant);
 				result.add(participant.createChange(new SubProgressMonitor(pm, fElementParticipants.length)));
 			}
 			for (int i= 0; i < fDerivedParticipants.length; i++) {
 				IRenameParticipant participant= fDerivedParticipants[i];
-				fProcessor.propagateNewElementNameTo(participant);
+				fProcessor.propagateDataTo(participant);
 				result.add(participant.createChange(new SubProgressMonitor(pm, fDerivedParticipants.length)));
 			}
 			for (int i= 0; i < fResourceParticipants.length; i++) {

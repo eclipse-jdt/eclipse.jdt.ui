@@ -22,8 +22,6 @@ public class MethodPropertyTester extends PropertyTester {
 	private static final String PROPERTY_DECLARING_TYPE= "declaringType"; //$NON-NLS-1$
 	
 	public int test(Object element, String propertyName, String value) throws CoreException {
-		if (!(element instanceof IMethod))
-			return UNKNOWN;
 		IMethod method= (IMethod)element;
 		if (PROPERTY_IS_VIRTUAL.equals(propertyName)) {
 			return testBoolean(value, MethodChecks.isVirtual(method));

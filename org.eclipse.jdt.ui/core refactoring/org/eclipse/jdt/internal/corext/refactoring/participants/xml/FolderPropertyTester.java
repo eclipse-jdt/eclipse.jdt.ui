@@ -10,23 +10,20 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
-public class FilePropertyTester extends PropertyTester {
+public class FolderPropertyTester extends PropertyTester {
 
-	private static final String PROPERTY_IS_CU= "isCompilationUnit"; //$NON-NLS-1$
+	private static final String PROPERTY_IS_SOURCE_FOLDER= "isSourceFolder"; //$NON-NLS-1$
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
-	 */
 	public int test(Object element, String propertyName, String value) {
-		IFile file= (IFile)element;
-		if (PROPERTY_IS_CU.equals(propertyName)) {
-			IJavaElement jElement= JavaCore.create(file);
-			return testBoolean(value, jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.COMPILATION_UNIT);
+		IFolder folder= (IFolder)element;
+		if (PROPERTY_IS_SOURCE_FOLDER.equals(propertyName)) {
+			IJavaElement jElement= JavaCore.create(folder);
+			return testBoolean(value, jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT);
 		}
 		return UNKNOWN;
 	}

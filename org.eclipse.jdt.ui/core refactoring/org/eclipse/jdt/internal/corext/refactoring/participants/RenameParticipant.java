@@ -16,6 +16,7 @@ public abstract class RenameParticipant implements IRenameParticipant {
 
 	private IRefactoringProcessor fProcessor;
 	private String fNewName;
+	private boolean fUpdateReferences;
 	
 	public void initialize(IRefactoringProcessor processor) {
 		Assert.isNotNull(processor);
@@ -32,5 +33,13 @@ public abstract class RenameParticipant implements IRenameParticipant {
 	
 	public void setNewElementName(String name) {
 		fNewName= name;
+	}
+	
+	public void setUpdateReferences(boolean updateReferences) {
+		fUpdateReferences= updateReferences;
+	}
+	
+	public boolean getUpdateReferences() {
+		return fUpdateReferences;
 	}
 }

@@ -23,6 +23,8 @@ public interface IRefactoringParticipant {
 	
 	public boolean isAvailable() throws CoreException;
 	
+	public boolean operatesOn(Object element);
+	
 	public RefactoringStatus checkActivation() throws CoreException;
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException;

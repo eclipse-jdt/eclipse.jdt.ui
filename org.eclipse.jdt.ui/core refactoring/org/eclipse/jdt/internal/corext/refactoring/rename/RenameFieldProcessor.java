@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
@@ -123,6 +124,28 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	
 	public IResourceModifications getResourceModifications() {
 		return null;
+	}
+	
+	public void propagateDataTo(IRenameParticipant participant) throws CoreException {
+		if (participant.operatesOn(fField)) {
+			participant.setNewElementName(getNewElementName());
+			participant.setUpdateReferences(getUpdateReferences());
+			return;
+		}
+		if (fRenameGetter) {
+			IMethod getter= getGetter();
+			if (participant.operatesOn(getter)) {
+				participant.setNewElementName(getNewGetterName());
+				participant.setUpdateReferences(getUpdateReferences());
+			}
+		}
+		if (fRenameSetter) {
+			IMethod setter= getSetter();
+			if (participant.operatesOn(setter)) {
+				participant.setNewElementName(getNewSetterName());
+				participant.setUpdateReferences(getUpdateReferences());
+			}
+		}
 	}
 	
 	//---- IRenameProcessor -------------------------------------

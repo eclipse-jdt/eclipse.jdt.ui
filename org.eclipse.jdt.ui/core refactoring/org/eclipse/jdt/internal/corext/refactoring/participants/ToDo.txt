@@ -32,6 +32,10 @@
   o pass to caller
   currently it is turned into true which is the incorrect thing to do. It must be
   false anyway.
+  
+- ISharedParticipant and propagating data to participant. That doesn't wortk for the
+  current implementation. SetNewName and other methods must have an additional object
+  parameter. Best is to split this into IShared and INonShared participants.
 
 ======================================= UI ===============================================
   

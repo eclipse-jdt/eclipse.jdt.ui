@@ -34,5 +34,5 @@ public interface IRenameProcessor extends IRefactoringProcessor {
 	 */
 	public Object getNewElement() throws CoreException;
 	
-	public void propagateNewElementNameTo(IRenameParticipant participant);	
+	public void propagateDataTo(IRenameParticipant participant)throws CoreException;	
 }

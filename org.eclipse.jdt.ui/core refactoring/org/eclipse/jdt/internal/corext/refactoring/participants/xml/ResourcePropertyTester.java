@@ -27,8 +27,6 @@ public class ResourcePropertyTester extends PropertyTester {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
 	 */
 	public int test(Object element, String propertyName, String value) {
-		if (!(element instanceof IResource))
-			return UNKNOWN;
 		IResource resource= (IResource)element;
 		if (PROPERTY_NAME.equals(propertyName)) { //$NON-NLS-1$
 			String fileName= resource.getName();

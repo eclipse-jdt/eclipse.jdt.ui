@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 
 public abstract class RenameProcessor implements IRenameProcessor {
 
@@ -53,10 +54,10 @@ public abstract class RenameProcessor implements IRenameProcessor {
 		return new Object[0];
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#propagateNewElementNameTo(org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant)
-	 */
-	public void propagateNewElementNameTo(IRenameParticipant participant) {
+	public void propagateDataTo(IRenameParticipant participant) throws CoreException {
 		participant.setNewElementName(fNewElementName);
+		if (this instanceof IReferenceUpdating) {
+			participant.setUpdateReferences(((IReferenceUpdating)this).getUpdateReferences());
+		}
 	}
 }

@@ -23,8 +23,6 @@ public class MemberPropertyTester extends PropertyTester {
 	private static final String PROPERTY_IS_PRIVATE= "isPrivate"; //$NON-NLS-1$
 	
 	public int test(Object element, String propertyName, String value) throws CoreException {
-		if (!(element instanceof IMember))
-			return UNKNOWN;
 		IMember member= (IMember)element;
 		if (PROPERTY_IS_STATIC.equals(propertyName)) {
 			return testBoolean(value, JdtFlags.isStatic(member));

@@ -24,8 +24,6 @@ public class TypePropertyTester extends PropertyTester {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
 	 */
 	public int test(Object element, String propertyName, String value) {
-		if (!(element instanceof IType))
-			return UNKNOWN;
 		IType type= (IType)element;
 		if (PROPERTY_HAS_MAIN_TYPE.equals(propertyName)) { //$NON-NLS-1$
 			try {
