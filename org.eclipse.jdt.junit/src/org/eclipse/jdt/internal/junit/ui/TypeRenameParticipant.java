@@ -11,6 +11,9 @@
 
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
@@ -20,6 +23,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -84,7 +88,7 @@ public class TypeRenameParticipant extends RenameParticipant {
 		 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getName()
 		 */
 		public String getName() {
-			return JUnitMessages.getString("TypeRenameParticipant.name");  //$NON-NLS-1$
+			return fConfig.getName();
 		}
 
 		/* (non-Javadoc)
@@ -139,18 +143,17 @@ public class TypeRenameParticipant extends RenameParticipant {
 		if (!getUpdateReferences()) 
 			return null;	
 		
-		IChange result= null;
 		ILaunchManager manager= DebugPlugin.getDefault().getLaunchManager();
 		ILaunchConfigurationType type= manager.getLaunchConfigurationType(JUnitLaunchConfiguration.ID_JUNIT_APPLICATION);
 		ILaunchConfiguration configs[]= manager.getLaunchConfigurations(type);
 		String typeName= fType.getFullyQualifiedName();
+		List changes= new ArrayList();
 		for (int i= 0; i < configs.length; i++) {
 			String mainType= configs[i].getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
 			if (typeName.equals(mainType)) {
-				if (result == null) // TODO handle multiple launch configs refering to the same type, i.e., create a composite
-					result= new LaunchConfigChange(fType, configs[i], getNewName());
+				changes.add(new LaunchConfigChange(fType, configs[i], getNewName()));
 			}
 		}
-		return result;
+		return new CompositeChange(JUnitMessages.getString("TypeRenameParticipant.name"), (IChange[]) changes.toArray(new IChange[changes.size()]));
 	}
 }
