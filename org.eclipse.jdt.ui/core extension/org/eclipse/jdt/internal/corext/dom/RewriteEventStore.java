@@ -24,6 +24,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 
 /**
@@ -44,7 +45,7 @@ public final class RewriteEventStore {
 		 * @param childProperty The child property to access 
 		 * @return The child node at the given property location.
 		 */
-		Object getOriginalValue(ASTNode parent, int childProperty);
+		Object getOriginalValue(ASTNode parent, StructuralPropertyDescriptor childProperty);
 	}
 	
 	/*
@@ -52,10 +53,10 @@ public final class RewriteEventStore {
 	 */
 	private static class EventHolder {
 		public ASTNode parent;
-		public int childProperty;
+		public StructuralPropertyDescriptor childProperty;
 		public RewriteEvent event;
 		
-		public EventHolder(ASTNode parent, int childProperty, RewriteEvent change) {
+		public EventHolder(ASTNode parent, StructuralPropertyDescriptor childProperty, RewriteEvent change) {
 			this.parent= parent;
 			this.childProperty= childProperty;
 			this.event= change;
@@ -64,7 +65,7 @@ public final class RewriteEventStore {
 		public String toString() {
 			StringBuffer buf= new StringBuffer();
 			buf.append(parent).append(" - "); //$NON-NLS-1$
-			buf.append(ASTNodeConstants.getPropertyName(childProperty)).append(": "); //$NON-NLS-1$
+			buf.append(childProperty.getId()).append(": "); //$NON-NLS-1$
 			buf.append(event).append('\n');
 			return buf.toString();
 		}
@@ -73,8 +74,8 @@ public final class RewriteEventStore {
 	/*
 	 * Store element to remember if a node is the source of a copy or move
 	 */
-	private static class NodeSourceData {
-		boolean isMoveSource= false; // true if this node is moved
+	public static class NodeSourceData {
+		public boolean isMoveSource= false; // true if this node is moved
 		int copyCount= 0; // number of times this node is copied
 	}
 	
@@ -180,7 +181,7 @@ public final class RewriteEventStore {
 		fInsertBoundToPrevious= null;
 	}
 	
-	public void addEvent(ASTNode parent, int childProperty, RewriteEvent event) {
+	public void addEvent(ASTNode parent, StructuralPropertyDescriptor childProperty, RewriteEvent event) {
 		validateHasChildProperty(parent, childProperty);
 		
 		if (event.isListRewrite()) {
@@ -201,7 +202,7 @@ public final class RewriteEventStore {
 		fEvents.add(holder);
 	}
 	
-	public RewriteEvent getEvent(ASTNode parent, int property) {
+	public RewriteEvent getEvent(ASTNode parent, StructuralPropertyDescriptor property) {
 		validateHasChildProperty(parent, property);
 		
 		if (fLastEvent != null && fLastEvent.parent == parent && fLastEvent.childProperty == property) {
@@ -218,7 +219,7 @@ public final class RewriteEventStore {
 		return null;
 	}
 	
-	public NodeRewriteEvent getNodeEvent(ASTNode parent, int childProperty, boolean forceCreation) {
+	public NodeRewriteEvent getNodeEvent(ASTNode parent, StructuralPropertyDescriptor childProperty, boolean forceCreation) {
 		validateIsNodeProperty(childProperty);
 		NodeRewriteEvent event= (NodeRewriteEvent) getEvent(parent, childProperty);
 		if (event == null && forceCreation) {
@@ -229,7 +230,7 @@ public final class RewriteEventStore {
 		return event;		
 	}
 	
-	public ListRewriteEvent getListEvent(ASTNode parent, int childProperty, boolean forceCreation) {
+	public ListRewriteEvent getListEvent(ASTNode parent, StructuralPropertyDescriptor childProperty, boolean forceCreation) {
 		validateIsListProperty(childProperty);
 		ListRewriteEvent event= (ListRewriteEvent) getEvent(parent, childProperty);
 		if (event == null && forceCreation) {
@@ -295,7 +296,7 @@ public final class RewriteEventStore {
 	}
 	
 	
-	public Object getOriginalValue(ASTNode parent, int property) {
+	public Object getOriginalValue(ASTNode parent, StructuralPropertyDescriptor property) {
 		RewriteEvent event= getEvent(parent, property);
 		if (event != null) {
 			return event.getOriginalValue();
@@ -303,7 +304,7 @@ public final class RewriteEventStore {
 		return accessOriginalValue(parent, property);
 	}
 	
-	public Object getNewValue(ASTNode parent, int property) {
+	public Object getNewValue(ASTNode parent, StructuralPropertyDescriptor property) {
 		RewriteEvent event= getEvent(parent, property);
 		if (event != null) {
 			return event.getNewValue();
@@ -323,12 +324,12 @@ public final class RewriteEventStore {
 	 * Gets an original child from the AST. The behav
 	 * Temporarily overridden to port. All rewriters should prevent AST modification without their control.
 	 */
-	private Object accessOriginalValue(ASTNode parent, int childProperty) {
+	private Object accessOriginalValue(ASTNode parent, StructuralPropertyDescriptor childProperty) {
 		if (fNodePropertyMapper != null) {
 			return fNodePropertyMapper.getOriginalValue(parent, childProperty);
 		}
 		
-		return ASTNodeConstants.getNodeChild(parent, childProperty);
+		return parent.getStructuralProperty(childProperty);
 	}	
 	
 	public TextEditGroup getEventEditGroup(RewriteEvent event) {
@@ -429,23 +430,23 @@ public final class RewriteEventStore {
 		fInsertBoundToPrevious.add(node);
 	}
 	
-	private void validateIsListProperty(int property) {
-		if (!ASTNodeConstants.isListProperty(property)) {
-			String message= ASTNodeConstants.getPropertyName(property) + " is not a list property"; //$NON-NLS-1$
+	private void validateIsListProperty(StructuralPropertyDescriptor property) {
+		if (!property.isChildListProperty()) {
+			String message= property.getId() + " is not a list property"; //$NON-NLS-1$
 			throw new IllegalArgumentException(message);
 		}
 	}
 	
-	private void validateHasChildProperty(ASTNode parent, int property) {
-		if (!ASTNodeConstants.hasChildProperty(parent, property)) {
-			String message= Signature.getSimpleName(parent.getClass().getName()) + " has no property " + ASTNodeConstants.getPropertyName(property); //$NON-NLS-1$
+	private void validateHasChildProperty(ASTNode parent, StructuralPropertyDescriptor property) {
+		if (!parent.structuralPropertiesForType().contains(property)) {
+			String message= Signature.getSimpleName(parent.getClass().getName()) + " has no property " + property.getId(); //$NON-NLS-1$
 			throw new IllegalArgumentException(message);
 		}
 	}
 	
-	private void validateIsNodeProperty(int property) {
-		if (ASTNodeConstants.isListProperty(property)) {
-			String message= ASTNodeConstants.getPropertyName(property) + " is not a node property"; //$NON-NLS-1$
+	private void validateIsNodeProperty(StructuralPropertyDescriptor property) {
+		if (property.isChildListProperty()) {
+			String message= property.getId() + " is not a node property"; //$NON-NLS-1$
 			throw new IllegalArgumentException(message);
 		}
 	}	

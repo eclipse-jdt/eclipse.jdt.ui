@@ -12,9 +12,9 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jface.text.Assert;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.core.dom.*;
 
 public class ASTRewriteFlattener extends GenericVisitor {
 
@@ -96,27 +96,30 @@ public class ASTRewriteFlattener extends GenericVisitor {
 		}
 	}
 	
-	protected List getChildList(ASTNode parent, int childProperty) {
+	protected List getChildList(ASTNode parent, StructuralPropertyDescriptor childProperty) {
 		return (List) getAttribute(parent, childProperty);
 	}
 	
-	protected ASTNode getChildNode(ASTNode parent, int childProperty) {
+	protected ASTNode getChildNode(ASTNode parent, StructuralPropertyDescriptor childProperty) {
 		return (ASTNode) getAttribute(parent, childProperty);
 	}
 	
-	protected int getIntAttribute(ASTNode parent, int childProperty) {
+	protected int getIntAttribute(ASTNode parent, StructuralPropertyDescriptor childProperty) {
 		return ((Integer) getAttribute(parent, childProperty)).intValue();
 	}
 	
-	protected boolean getBooleanAttribute(ASTNode parent, int childProperty) {
+	protected boolean getBooleanAttribute(ASTNode parent, StructuralPropertyDescriptor childProperty) {
 		return ((Boolean) getAttribute(parent, childProperty)).booleanValue();
 	}
 	
-	protected Object getAttribute(ASTNode parent, int childProperty) {
+	protected Object getAttribute(ASTNode parent, StructuralPropertyDescriptor childProperty) {
+		if (!parent.structuralPropertiesForType().contains(childProperty)) {
+			System.out.print("Property doesn'y match node");
+		}
 		return fStore.getNewValue(parent, childProperty);
 	}
 	
-	protected void visitList(ASTNode parent, int childProperty, String separator) {
+	protected void visitList(ASTNode parent, StructuralPropertyDescriptor childProperty, String separator) {
 		List list= getChildList(parent, childProperty);
 		for (int i= 0; i < list.size(); i++) {
 			if (separator != null && i > 0) {
@@ -126,7 +129,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 		}
 	}
 	
-	protected void visitList(ASTNode parent, int childProperty, String separator, String lead) {
+	protected void visitList(ASTNode parent, StructuralPropertyDescriptor childProperty, String separator, String lead) {
 		List list= getChildList(parent, childProperty);
 		if (!list.isEmpty()) {
 			fResult.append(lead);
@@ -145,7 +148,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(AnonymousClassDeclaration node) {
 		fResult.append('{');
-		visitList(node, ASTNodeConstants.BODY_DECLARATIONS, null);
+		visitList(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY, null);
 		fResult.append('}');
 		return false;
 	}
@@ -154,9 +157,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ArrayAccess)
 	 */
 	public boolean visit(ArrayAccess node) {
-		getChildNode(node, ASTNodeConstants.ARRAY).accept(this);
+		getChildNode(node, ArrayAccess.ARRAY_PROPERTY).accept(this);
 		fResult.append('[');
-		getChildNode(node, ASTNodeConstants.INDEX).accept(this);
+		getChildNode(node, ArrayAccess.INDEX_PROPERTY).accept(this);
 		fResult.append(']');
 		return false;
 	}
@@ -166,19 +169,19 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ArrayCreation node) {
 		fResult.append("new "); //$NON-NLS-1$
-		ArrayType arrayType= (ArrayType) getChildNode(node, ASTNodeConstants.TYPE);
+		ArrayType arrayType= (ArrayType) getChildNode(node, ArrayCreation.TYPE_PROPERTY);
 		
 		// get the element type and count dimensions
-		Type elementType= (Type) getChildNode(arrayType, ASTNodeConstants.COMPONENT_TYPE);
+		Type elementType= (Type) getChildNode(arrayType, ArrayType.COMPONENT_TYPE_PROPERTY);
 		int dimensions= 1; // always include this array type
 		while (elementType.isArrayType()) {
 			dimensions++;
-			elementType = (Type) getChildNode(elementType, ASTNodeConstants.COMPONENT_TYPE);
+			elementType = (Type) getChildNode(elementType, ArrayType.COMPONENT_TYPE_PROPERTY);
 		}
 		
 		elementType.accept(this);
 		
-		List list= getChildList(node, ASTNodeConstants.DIMENSIONS);
+		List list= getChildList(node, ArrayCreation.DIMENSIONS_PROPERTY);
 		for (int i= 0; i < list.size(); i++) {
 			fResult.append('[');
 			((ASTNode) list.get(i)).accept(this);
@@ -190,10 +193,10 @@ public class ASTRewriteFlattener extends GenericVisitor {
 		for (int i= 0; i < dimensions; i++) {
 			fResult.append("[]"); //$NON-NLS-1$
 		}
-		ASTNode initializer= getChildNode(node, ASTNodeConstants.INITIALIZER);
+		ASTNode initializer= getChildNode(node, ArrayCreation.INITIALIZER_PROPERTY);
 		if (initializer != null) {
 			fResult.append('=');
-			getChildNode(node, ASTNodeConstants.INITIALIZER).accept(this);
+			getChildNode(node, ArrayCreation.INITIALIZER_PROPERTY).accept(this);
 		}
 		return false;
 	}
@@ -203,7 +206,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ArrayInitializer node) {
 		fResult.append('{');
-		visitList(node, ASTNodeConstants.EXPRESSIONS, String.valueOf(','));
+		visitList(node, ArrayInitializer.EXPRESSIONS_PROPERTY, String.valueOf(','));
 		fResult.append('}');
 		return false;
 	}
@@ -212,7 +215,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ArrayType)
 	 */
 	public boolean visit(ArrayType node) {
-		getChildNode(node, ASTNodeConstants.COMPONENT_TYPE).accept(this);
+		getChildNode(node, ArrayType.COMPONENT_TYPE_PROPERTY).accept(this);
 		fResult.append("[]"); //$NON-NLS-1$
 		return false;
 	}
@@ -222,9 +225,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(AssertStatement node) {
 		fResult.append("assert "); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, AssertStatement.EXPRESSION_PROPERTY).accept(this);
 		
-		ASTNode message= getChildNode(node, ASTNodeConstants.MESSAGE);
+		ASTNode message= getChildNode(node, AssertStatement.MESSAGE_PROPERTY);
 		if (message != null) {
 			fResult.append(':');
 			message.accept(this);
@@ -237,9 +240,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(Assignment)
 	 */
 	public boolean visit(Assignment node) {
-		getChildNode(node, ASTNodeConstants.LEFT_HAND_SIDE).accept(this);
-		fResult.append(getAttribute(node, ASTNodeConstants.OPERATOR).toString());
-		getChildNode(node, ASTNodeConstants.RIGHT_HAND_SIDE).accept(this);
+		getChildNode(node, Assignment.LEFT_HAND_SIDE_PROPERTY).accept(this);
+		fResult.append(getAttribute(node, Assignment.OPERATOR_PROPERTY).toString());
+		getChildNode(node, Assignment.RIGHT_HAND_SIDE_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -250,7 +253,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(Block node) {
 		fResult.append('{');
-		visitList(node, ASTNodeConstants.STATEMENTS, null);
+		visitList(node, Block.STATEMENTS_PROPERTY, null);
 		fResult.append('}');
 		return false;
 	}
@@ -272,7 +275,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(BreakStatement node) {
 		fResult.append("break"); //$NON-NLS-1$
-		ASTNode label= getChildNode(node, ASTNodeConstants.LABEL);
+		ASTNode label= getChildNode(node, BreakStatement.LABEL_PROPERTY);
 		if (label != null) {
 			fResult.append(' ');
 			label.accept(this);
@@ -286,9 +289,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(CastExpression node) {
 		fResult.append('(');
-		getChildNode(node, ASTNodeConstants.TYPE).accept(this);
+		getChildNode(node, CastExpression.TYPE_PROPERTY).accept(this);
 		fResult.append(')');
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, CastExpression.EXPRESSION_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -297,9 +300,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(CatchClause node) {
 		fResult.append("catch ("); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.EXCEPTION).accept(this);
+		getChildNode(node, CatchClause.EXCEPTION_PROPERTY).accept(this);
 		fResult.append(')');
-		getChildNode(node, ASTNodeConstants.BODY).accept(this);
+		getChildNode(node, CatchClause.BODY_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -307,7 +310,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(CharacterLiteral)
 	 */
 	public boolean visit(CharacterLiteral node) {
-		fResult.append(getAttribute(node, ASTNodeConstants.ESCAPED_VALUE));
+		fResult.append(getAttribute(node, CharacterLiteral.ESCAPED_VALUE_PROPERTY));
 		return false;
 	}
 
@@ -315,17 +318,17 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ClassInstanceCreation)
 	 */
 	public boolean visit(ClassInstanceCreation node) {
-		ASTNode expression= getChildNode(node, ASTNodeConstants.EXPRESSION);
+		ASTNode expression= getChildNode(node, ClassInstanceCreation.EXPRESSION_PROPERTY);
 		if (expression != null) {
 			expression.accept(this);
 			fResult.append('.');
 		}
 		fResult.append("new "); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		getChildNode(node, ClassInstanceCreation.NAME_PROPERTY).accept(this);
 		fResult.append('(');
-		visitList(node, ASTNodeConstants.ARGUMENTS, String.valueOf(','));
+		visitList(node, ClassInstanceCreation.ARGUMENTS_PROPERTY, String.valueOf(','));
 		fResult.append(')');
-		ASTNode decl= getChildNode(node, ASTNodeConstants.ANONYMOUS_CLASS_DECLARATION);
+		ASTNode decl= getChildNode(node, ClassInstanceCreation.ANONYMOUS_CLASS_DECLARATION_PROPERTY);
 		if (decl != null) {
 			decl.accept(this);
 		}
@@ -336,12 +339,12 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(CompilationUnit)
 	 */
 	public boolean visit(CompilationUnit node) {
-		ASTNode pack= getChildNode(node, ASTNodeConstants.PACKAGE);
+		ASTNode pack= getChildNode(node, CompilationUnit.PACKAGE_PROPERTY);
 		if (pack != null) {
 			pack.accept(this);
 		}
-		visitList(node, ASTNodeConstants.IMPORTS, null);
-		visitList(node, ASTNodeConstants.TYPES, null);
+		visitList(node, CompilationUnit.IMPORTS_PROPERTY, null);
+		visitList(node, CompilationUnit.TYPES_PROPERTY, null);
 		return false;
 	}
 
@@ -349,11 +352,11 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ConditionalExpression)
 	 */
 	public boolean visit(ConditionalExpression node) {
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, ConditionalExpression.EXPRESSION_PROPERTY).accept(this);
 		fResult.append('?');
-		getChildNode(node, ASTNodeConstants.THEN_EXPRESSION).accept(this);
+		getChildNode(node, ConditionalExpression.THEN_EXPRESSION_PROPERTY).accept(this);
 		fResult.append(':');
-		getChildNode(node, ASTNodeConstants.ELSE_EXPRESSION).accept(this);
+		getChildNode(node, ConditionalExpression.ELSE_EXPRESSION_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -362,7 +365,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ConstructorInvocation node) {
 		fResult.append("this("); //$NON-NLS-1$
-		visitList(node, ASTNodeConstants.ARGUMENTS, String.valueOf(','));
+		visitList(node, ConstructorInvocation.ARGUMENTS_PROPERTY, String.valueOf(','));
 		fResult.append(");"); //$NON-NLS-1$
 		return false;
 	}
@@ -372,7 +375,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ContinueStatement node) {
 		fResult.append("continue"); //$NON-NLS-1$
-		ASTNode label= getChildNode(node, ASTNodeConstants.LABEL);
+		ASTNode label= getChildNode(node, ContinueStatement.LABEL_PROPERTY);
 		if (label != null) {
 			fResult.append(' ');
 			label.accept(this);
@@ -386,9 +389,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(DoStatement node) {
 		fResult.append("do "); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.BODY).accept(this);
+		getChildNode(node, DoStatement.BODY_PROPERTY).accept(this);
 		fResult.append(" while ("); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, DoStatement.EXPRESSION_PROPERTY).accept(this);
 		fResult.append(");"); //$NON-NLS-1$
 		return false;
 	}
@@ -405,7 +408,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ExpressionStatement)
 	 */
 	public boolean visit(ExpressionStatement node) {
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, ExpressionStatement.EXPRESSION_PROPERTY).accept(this);
 		fResult.append(';');
 		return false;
 	}
@@ -414,9 +417,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(FieldAccess)
 	 */
 	public boolean visit(FieldAccess node) {
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, FieldAccess.EXPRESSION_PROPERTY).accept(this);
 		fResult.append('.');
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		getChildNode(node, FieldAccess.NAME_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -424,14 +427,14 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(FieldDeclaration)
 	 */
 	public boolean visit(FieldDeclaration node) {
-		ASTNode javadoc= getChildNode(node, ASTNodeConstants.JAVADOC);
+		ASTNode javadoc= getChildNode(node, FieldDeclaration.JAVADOC_PROPERTY);
 		if (javadoc != null) {
 			javadoc.accept(this);
 		}
-		printModifiers(getIntAttribute(node, ASTNodeConstants.MODIFIERS), fResult);
-		getChildNode(node, ASTNodeConstants.TYPE).accept(this);
+		printModifiers(getIntAttribute(node, FieldDeclaration.MODIFIERS_PROPERTY), fResult);
+		getChildNode(node, FieldDeclaration.TYPE_PROPERTY).accept(this);
 		fResult.append(' ');
-		visitList(node, ASTNodeConstants.FRAGMENTS, String.valueOf(','));
+		visitList(node, FieldDeclaration.FRAGMENTS_PROPERTY, String.valueOf(','));
 		fResult.append(';');
 		return false;
 	}
@@ -441,16 +444,16 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ForStatement node) {
 		fResult.append("for ("); //$NON-NLS-1$
-		visitList(node, ASTNodeConstants.INITIALIZERS, null);
+		visitList(node, ForStatement.INITIALIZERS_PROPERTY, null);
 		fResult.append(';');
-		ASTNode expression= getChildNode(node, ASTNodeConstants.EXPRESSION);
+		ASTNode expression= getChildNode(node, ForStatement.EXPRESSION_PROPERTY);
 		if (expression != null) {
 			expression.accept(this);
 		}
 		fResult.append(';');
-		visitList(node, ASTNodeConstants.UPDATERS, null);
+		visitList(node, ForStatement.UPDATERS_PROPERTY, null);
 		fResult.append(')');
-		getChildNode(node, ASTNodeConstants.BODY).accept(this);
+		getChildNode(node, ForStatement.BODY_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -459,10 +462,10 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(IfStatement node) {
 		fResult.append("if ("); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, IfStatement.EXPRESSION_PROPERTY).accept(this);
 		fResult.append(')');
-		getChildNode(node, ASTNodeConstants.THEN_STATEMENT).accept(this);
-		ASTNode elseStatement= getChildNode(node, ASTNodeConstants.ELSE_STATEMENT);
+		getChildNode(node, IfStatement.THEN_STATEMENT_PROPERTY).accept(this);
+		ASTNode elseStatement= getChildNode(node, IfStatement.ELSE_STATEMENT_PROPERTY);
 		if (elseStatement != null) {
 			fResult.append(" else "); //$NON-NLS-1$
 			elseStatement.accept(this);
@@ -475,8 +478,8 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ImportDeclaration node) {
 		fResult.append("import "); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
-		if (getBooleanAttribute(node, ASTNodeConstants.IS_ON_DEMAND)) {
+		getChildNode(node, ImportDeclaration.NAME_PROPERTY).accept(this);
+		if (getBooleanAttribute(node, ImportDeclaration.ON_DEMAND_PROPERTY)) {
 			fResult.append(".*"); //$NON-NLS-1$
 		}
 		fResult.append(';');
@@ -489,15 +492,15 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(InfixExpression)
 	 */
 	public boolean visit(InfixExpression node) {
-		getChildNode(node, ASTNodeConstants.LEFT_OPERAND).accept(this);
+		getChildNode(node, InfixExpression.LEFT_OPERAND_PROPERTY).accept(this);
 		fResult.append(' ');
-		String operator= getAttribute(node, ASTNodeConstants.OPERATOR).toString();
+		String operator= getAttribute(node, InfixExpression.OPERATOR_PROPERTY).toString();
 		
 		fResult.append(operator);
 		fResult.append(' ');
-		getChildNode(node, ASTNodeConstants.RIGHT_OPERAND).accept(this);
+		getChildNode(node, InfixExpression.RIGHT_OPERAND_PROPERTY).accept(this);
 		
-		List list= getChildList(node, ASTNodeConstants.EXTENDED_OPERANDS);
+		List list= getChildList(node, InfixExpression.EXTENDED_OPERANDS_PROPERTY);
 		for (int i= 0; i < list.size(); i++) {
 			fResult.append(operator);
 			((ASTNode) list.get(i)).accept(this);
@@ -509,9 +512,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(InstanceofExpression)
 	 */
 	public boolean visit(InstanceofExpression node) {
-		getChildNode(node, ASTNodeConstants.LEFT_OPERAND).accept(this);
+		getChildNode(node, InstanceofExpression.LEFT_OPERAND_PROPERTY).accept(this);
 		fResult.append(" instanceof "); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.RIGHT_OPERAND).accept(this);
+		getChildNode(node, InstanceofExpression.RIGHT_OPERAND_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -519,12 +522,12 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(Initializer)
 	 */
 	public boolean visit(Initializer node) {
-		ASTNode javadoc= getChildNode(node, ASTNodeConstants.JAVADOC);
+		ASTNode javadoc= getChildNode(node, Initializer.JAVADOC_PROPERTY);
 		if (javadoc != null) {
 			javadoc.accept(this);
 		}
-		printModifiers(getIntAttribute(node, ASTNodeConstants.MODIFIERS), fResult);
-		getChildNode(node, ASTNodeConstants.BODY).accept(this);
+		printModifiers(getIntAttribute(node, Initializer.MODIFIERS_PROPERTY), fResult);
+		getChildNode(node, Initializer.BODY_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -533,7 +536,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(Javadoc node) {
 		fResult.append("/**"); //$NON-NLS-1$
-		List list= getChildList(node, ASTNodeConstants.TAGS);
+		List list= getChildList(node, Javadoc.TAGS_PROPERTY);
 		for (int i= 0; i < list.size(); i++) {
 			fResult.append("\n * "); //$NON-NLS-1$
 			((ASTNode) list.get(i)).accept(this);
@@ -546,9 +549,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(LabeledStatement)
 	 */
 	public boolean visit(LabeledStatement node) {
-		getChildNode(node, ASTNodeConstants.LABEL).accept(this);
+		getChildNode(node, LabeledStatement.LABEL_PROPERTY).accept(this);
 		fResult.append(": "); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.BODY).accept(this);
+		getChildNode(node, LabeledStatement.BODY_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -556,25 +559,25 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(MethodDeclaration)
 	 */
 	public boolean visit(MethodDeclaration node) {
-		ASTNode javadoc= getChildNode(node, ASTNodeConstants.JAVADOC);
+		ASTNode javadoc= getChildNode(node, MethodDeclaration.JAVADOC_PROPERTY);
 		if (javadoc != null) {
 			javadoc.accept(this);
 		}
-		printModifiers(getIntAttribute(node, ASTNodeConstants.MODIFIERS), fResult);
-		if (!getBooleanAttribute(node, ASTNodeConstants.IS_CONSTRUCTOR)) {
-			getChildNode(node, ASTNodeConstants.RETURN_TYPE).accept(this);
+		printModifiers(getIntAttribute(node, MethodDeclaration.MODIFIERS_PROPERTY), fResult);
+		if (!getBooleanAttribute(node, MethodDeclaration.CONSTRUCTOR_PROPERTY)) {
+			getChildNode(node, MethodDeclaration.RETURN_TYPE_PROPERTY).accept(this);
 			fResult.append(' ');
 		}
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		getChildNode(node, MethodDeclaration.NAME_PROPERTY).accept(this);
 		fResult.append('(');
-		visitList(node, ASTNodeConstants.PARAMETERS, String.valueOf(','));
+		visitList(node, MethodDeclaration.PARAMETERS_PROPERTY, String.valueOf(','));
 		fResult.append(')');
-		int extraDims= getIntAttribute(node, ASTNodeConstants.EXTRA_DIMENSIONS);
+		int extraDims= getIntAttribute(node, MethodDeclaration.EXTRA_DIMENSIONS_PROPERTY);
 		for (int i = 0; i < extraDims; i++) {
 			fResult.append("[]"); //$NON-NLS-1$
 		}		
-		visitList(node, ASTNodeConstants.THROWN_EXCEPTIONS, String.valueOf(','), " throws "); //$NON-NLS-1$
-		ASTNode body= getChildNode(node, ASTNodeConstants.BODY);
+		visitList(node, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY, String.valueOf(','), " throws "); //$NON-NLS-1$
+		ASTNode body= getChildNode(node, MethodDeclaration.BODY_PROPERTY);
 		if (body == null) {
 			fResult.append(';');
 		} else {
@@ -587,14 +590,14 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(MethodInvocation)
 	 */
 	public boolean visit(MethodInvocation node) {
-		ASTNode expression= getChildNode(node, ASTNodeConstants.EXPRESSION);
+		ASTNode expression= getChildNode(node, MethodInvocation.EXPRESSION_PROPERTY);
 		if (expression != null) {
 			expression.accept(this);
 			fResult.append('.');
 		}
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		getChildNode(node, MethodInvocation.NAME_PROPERTY).accept(this);
 		fResult.append('(');
-		visitList(node, ASTNodeConstants.ARGUMENTS, String.valueOf(','));
+		visitList(node, MethodInvocation.ARGUMENTS_PROPERTY, String.valueOf(','));
 		fResult.append(')');
 		return false;
 	}
@@ -611,7 +614,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(NumberLiteral)
 	 */
 	public boolean visit(NumberLiteral node) {
-		fResult.append(getAttribute(node, ASTNodeConstants.TOKEN).toString());
+		fResult.append(getAttribute(node, NumberLiteral.TOKEN_PROPERTY).toString());
 		return false;
 	}
 
@@ -620,7 +623,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(PackageDeclaration node) {
 		fResult.append("package "); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		getChildNode(node, PackageDeclaration.NAME_PROPERTY).accept(this);
 		fResult.append(';');
 		return false;
 	}
@@ -630,7 +633,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ParenthesizedExpression node) {
 		fResult.append('(');
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, ParenthesizedExpression.EXPRESSION_PROPERTY).accept(this);
 		fResult.append(')');
 		return false;
 	}
@@ -639,8 +642,8 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(PostfixExpression)
 	 */
 	public boolean visit(PostfixExpression node) {
-		getChildNode(node, ASTNodeConstants.OPERAND).accept(this);
-		fResult.append(getAttribute(node, ASTNodeConstants.OPERATOR).toString());
+		getChildNode(node, PostfixExpression.OPERAND_PROPERTY).accept(this);
+		fResult.append(getAttribute(node, PostfixExpression.OPERATOR_PROPERTY).toString());
 		return false;
 	}
 
@@ -648,8 +651,8 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(PrefixExpression)
 	 */
 	public boolean visit(PrefixExpression node) {
-		fResult.append(getAttribute(node, ASTNodeConstants.OPERATOR).toString());
-		getChildNode(node, ASTNodeConstants.OPERAND).accept(this);
+		fResult.append(getAttribute(node, PrefixExpression.OPERATOR_PROPERTY).toString());
+		getChildNode(node, PrefixExpression.OPERAND_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -657,7 +660,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(PrimitiveType)
 	 */
 	public boolean visit(PrimitiveType node) {
-		fResult.append(getAttribute(node, ASTNodeConstants.PRIMITIVE_TYPE_CODE).toString());
+		fResult.append(getAttribute(node, PrimitiveType.PRIMITIVE_TYPE_CODE_PROPERTY).toString());
 		return false;
 	}
 
@@ -665,9 +668,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(QualifiedName)
 	 */
 	public boolean visit(QualifiedName node) {
-		getChildNode(node, ASTNodeConstants.QUALIFIER).accept(this);
+		getChildNode(node, QualifiedName.QUALIFIER_PROPERTY).accept(this);
 		fResult.append('.');
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		getChildNode(node, QualifiedName.NAME_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -676,7 +679,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ReturnStatement node) {
 		fResult.append("return"); //$NON-NLS-1$
-		ASTNode expression= getChildNode(node, ASTNodeConstants.EXPRESSION);
+		ASTNode expression= getChildNode(node, ReturnStatement.EXPRESSION_PROPERTY);
 		if (expression != null) {
 			fResult.append(' ');
 			expression.accept(this);
@@ -689,7 +692,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(SimpleName)
 	 */
 	public boolean visit(SimpleName node) {
-		fResult.append(getAttribute(node, ASTNodeConstants.IDENTIFIER));
+		fResult.append(getAttribute(node, SimpleName.IDENTIFIER_PROPERTY));
 		return false;
 	}
 
@@ -704,15 +707,15 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(SingleVariableDeclaration)
 	 */
 	public boolean visit(SingleVariableDeclaration node) {
-		printModifiers(getIntAttribute(node, ASTNodeConstants.MODIFIERS), fResult);
-		getChildNode(node, ASTNodeConstants.TYPE).accept(this);
+		printModifiers(getIntAttribute(node, SingleVariableDeclaration.MODIFIERS_PROPERTY), fResult);
+		getChildNode(node, SingleVariableDeclaration.TYPE_PROPERTY).accept(this);
 		fResult.append(' ');
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
-		int extraDimensions= getIntAttribute(node, ASTNodeConstants.EXTRA_DIMENSIONS);
+		getChildNode(node, SingleVariableDeclaration.NAME_PROPERTY).accept(this);
+		int extraDimensions= getIntAttribute(node, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY);
 		for (int i = 0; i < extraDimensions; i++) {
 			fResult.append("[]"); //$NON-NLS-1$
 		}			
-		ASTNode initializer= getChildNode(node, ASTNodeConstants.INITIALIZER);
+		ASTNode initializer= getChildNode(node, SingleVariableDeclaration.INITIALIZER_PROPERTY);
 		if (initializer != null) {
 			fResult.append('=');
 			initializer.accept(this);
@@ -724,7 +727,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(StringLiteral)
 	 */
 	public boolean visit(StringLiteral node) {
-		fResult.append(getAttribute(node, ASTNodeConstants.ESCAPED_VALUE));
+		fResult.append(getAttribute(node, StringLiteral.ESCAPED_VALUE_PROPERTY));
 		return false;
 	}
 
@@ -732,13 +735,13 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(SuperConstructorInvocation)
 	 */
 	public boolean visit(SuperConstructorInvocation node) {
-		ASTNode expression= getChildNode(node, ASTNodeConstants.EXPRESSION);
+		ASTNode expression= getChildNode(node, SuperConstructorInvocation.EXPRESSION_PROPERTY);
 		if (expression != null) {
 			expression.accept(this);
 			fResult.append('.');
 		}
 		fResult.append("super("); //$NON-NLS-1$
-		visitList(node, ASTNodeConstants.ARGUMENTS, String.valueOf(','));
+		visitList(node, SuperConstructorInvocation.ARGUMENTS_PROPERTY, String.valueOf(','));
 		fResult.append(");"); //$NON-NLS-1$
 		return false;
 	}
@@ -747,13 +750,13 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(SuperFieldAccess)
 	 */
 	public boolean visit(SuperFieldAccess node) {
-		ASTNode qualifier= getChildNode(node, ASTNodeConstants.QUALIFIER);
+		ASTNode qualifier= getChildNode(node, SuperFieldAccess.QUALIFIER_PROPERTY);
 		if (qualifier != null) {
 			qualifier.accept(this);
 			fResult.append('.');
 		}
 		fResult.append("super."); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		getChildNode(node, SuperFieldAccess.NAME_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -761,15 +764,15 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(SuperMethodInvocation)
 	 */
 	public boolean visit(SuperMethodInvocation node) {
-		ASTNode qualifier= getChildNode(node, ASTNodeConstants.QUALIFIER);
+		ASTNode qualifier= getChildNode(node, SuperMethodInvocation.QUALIFIER_PROPERTY);
 		if (qualifier != null) {
 			qualifier.accept(this);
 			fResult.append('.');
 		}
 		fResult.append("super."); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		getChildNode(node, SuperMethodInvocation.NAME_PROPERTY).accept(this);
 		fResult.append('(');
-		visitList(node, ASTNodeConstants.ARGUMENTS, String.valueOf(','));
+		visitList(node, SuperMethodInvocation.ARGUMENTS_PROPERTY, String.valueOf(','));
 		fResult.append(')');
 		return false;
 	}
@@ -778,7 +781,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(SwitchCase)
 	 */
 	public boolean visit(SwitchCase node) {
-		ASTNode expression= getChildNode(node, ASTNodeConstants.EXPRESSION);
+		ASTNode expression= getChildNode(node, SwitchCase.EXPRESSION_PROPERTY);
 		if (expression == null) {
 			fResult.append("default"); //$NON-NLS-1$
 		} else {
@@ -794,10 +797,10 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(SwitchStatement node) {
 		fResult.append("switch ("); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, SwitchStatement.EXPRESSION_PROPERTY).accept(this);
 		fResult.append(')');
 		fResult.append('{');
-		visitList(node, ASTNodeConstants.STATEMENTS, null);
+		visitList(node, SwitchStatement.STATEMENTS_PROPERTY, null);
 		fResult.append('}');
 		return false;
 	}
@@ -807,9 +810,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(SynchronizedStatement node) {
 		fResult.append("synchronized ("); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, SynchronizedStatement.EXPRESSION_PROPERTY).accept(this);
 		fResult.append(')');
-		getChildNode(node, ASTNodeConstants.BODY).accept(this);
+		getChildNode(node, SynchronizedStatement.BODY_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -817,7 +820,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(ThisExpression)
 	 */
 	public boolean visit(ThisExpression node) {
-		ASTNode qualifier= getChildNode(node, ASTNodeConstants.QUALIFIER);
+		ASTNode qualifier= getChildNode(node, ThisExpression.QUALIFIER_PROPERTY);
 		if (qualifier != null) {
 			qualifier.accept(this);
 			fResult.append('.');
@@ -831,7 +834,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(ThrowStatement node) {
 		fResult.append("throw "); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, ThrowStatement.EXPRESSION_PROPERTY).accept(this);
 		fResult.append(';');
 		return false;
 	}
@@ -841,10 +844,10 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(TryStatement node) {
 		fResult.append("try "); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.BODY).accept(this);
+		getChildNode(node, TryStatement.BODY_PROPERTY).accept(this);
 		fResult.append(' ');
-		visitList(node, ASTNodeConstants.CATCH_CLAUSES, null);
-		ASTNode finallyClause= getChildNode(node, ASTNodeConstants.FINALLY);
+		visitList(node, TryStatement.CATCH_CLAUSES_PROPERTY, null);
+		ASTNode finallyClause= getChildNode(node, TryStatement.FINALLY_PROPERTY);
 		if (finallyClause != null) {
 			fResult.append(" finally "); //$NON-NLS-1$
 			finallyClause.accept(this);
@@ -856,17 +859,17 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(TypeDeclaration)
 	 */
 	public boolean visit(TypeDeclaration node) {
-		ASTNode javadoc= getChildNode(node, ASTNodeConstants.JAVADOC);
+		ASTNode javadoc= getChildNode(node, TypeDeclaration.JAVADOC_PROPERTY);
 		if (javadoc != null) {
 			javadoc.accept(this);
 		}
-		printModifiers(getIntAttribute(node, ASTNodeConstants.MODIFIERS), fResult);
+		printModifiers(getIntAttribute(node, TypeDeclaration.MODIFIERS_PROPERTY), fResult);
 		
-		boolean isInterface= getBooleanAttribute(node, ASTNodeConstants.IS_INTERFACE);
+		boolean isInterface= getBooleanAttribute(node, TypeDeclaration.INTERFACE_PROPERTY);
 		fResult.append(isInterface ? "interface " : "class "); //$NON-NLS-1$ //$NON-NLS-2$
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		getChildNode(node, TypeDeclaration.NAME_PROPERTY).accept(this);
 		fResult.append(' ');
-		ASTNode superclass= getChildNode(node, ASTNodeConstants.SUPERCLASS);
+		ASTNode superclass= getChildNode(node, TypeDeclaration.SUPERCLASS_PROPERTY);
 		if (superclass != null) {
 			fResult.append("extends "); //$NON-NLS-1$
 			superclass.accept(this);
@@ -874,9 +877,9 @@ public class ASTRewriteFlattener extends GenericVisitor {
 		}
 		
 		String lead= isInterface ? "extends " : "implements ";  //$NON-NLS-1$//$NON-NLS-2$
-		visitList(node, ASTNodeConstants.SUPER_INTERFACES, String.valueOf(','), lead);
+		visitList(node, TypeDeclaration.SUPER_INTERFACES_PROPERTY, String.valueOf(','), lead);
 		fResult.append('{');
-		visitList(node, ASTNodeConstants.BODY_DECLARATIONS, null);
+		visitList(node, TypeDeclaration.BODY_DECLARATIONS_PROPERTY, null);
 		fResult.append('}');
 		return false;
 	}
@@ -885,7 +888,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(TypeDeclarationStatement)
 	 */
 	public boolean visit(TypeDeclarationStatement node) {
-		getChildNode(node, ASTNodeConstants.TYPE_DECLARATION).accept(this);
+		getChildNode(node, TypeDeclarationStatement.TYPE_DECLARATION_PROPERTY).accept(this);
 		return false;
 	}
 
@@ -893,7 +896,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(TypeLiteral)
 	 */
 	public boolean visit(TypeLiteral node) {
-		getChildNode(node, ASTNodeConstants.TYPE).accept(this);
+		getChildNode(node, TypeLiteral.TYPE_PROPERTY).accept(this);
 		fResult.append(".class"); //$NON-NLS-1$
 		return false;
 	}
@@ -902,10 +905,10 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(VariableDeclarationExpression)
 	 */
 	public boolean visit(VariableDeclarationExpression node) {
-		printModifiers(getIntAttribute(node, ASTNodeConstants.MODIFIERS), fResult);
-		getChildNode(node, ASTNodeConstants.TYPE).accept(this);
+		printModifiers(getIntAttribute(node, VariableDeclarationExpression.MODIFIERS_PROPERTY), fResult);
+		getChildNode(node, VariableDeclarationExpression.TYPE_PROPERTY).accept(this);
 		fResult.append(' ');
-		visitList(node, ASTNodeConstants.FRAGMENTS, String.valueOf(','));
+		visitList(node, VariableDeclarationExpression.FRAGMENTS_PROPERTY, String.valueOf(','));
 		return false;
 	}
 
@@ -913,12 +916,12 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(VariableDeclarationFragment)
 	 */
 	public boolean visit(VariableDeclarationFragment node) {
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
-		int extraDimensions= getIntAttribute(node, ASTNodeConstants.EXTRA_DIMENSIONS);
+		getChildNode(node, VariableDeclarationFragment.NAME_PROPERTY).accept(this);
+		int extraDimensions= getIntAttribute(node, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY);
 		for (int i = 0; i < extraDimensions; i++) {
 			fResult.append("[]"); //$NON-NLS-1$
 		}
-		ASTNode initializer= getChildNode(node, ASTNodeConstants.INITIALIZER);
+		ASTNode initializer= getChildNode(node, VariableDeclarationFragment.INITIALIZER_PROPERTY);
 		if (initializer != null) {
 			fResult.append('=');
 			initializer.accept(this);
@@ -930,10 +933,10 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(VariableDeclarationStatement)
 	 */
 	public boolean visit(VariableDeclarationStatement node) {
-		printModifiers(getIntAttribute(node, ASTNodeConstants.MODIFIERS), fResult);
-		getChildNode(node, ASTNodeConstants.TYPE).accept(this);
+		printModifiers(getIntAttribute(node, VariableDeclarationStatement.MODIFIERS_PROPERTY), fResult);
+		getChildNode(node, VariableDeclarationStatement.TYPE_PROPERTY).accept(this);
 		fResult.append(' ');
-		visitList(node, ASTNodeConstants.FRAGMENTS, String.valueOf(','));
+		visitList(node, VariableDeclarationStatement.FRAGMENTS_PROPERTY, String.valueOf(','));
 		fResult.append(';');
 		return false;
 	}
@@ -943,11 +946,12 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 */
 	public boolean visit(WhileStatement node) {
 		fResult.append("while ("); //$NON-NLS-1$
-		getChildNode(node, ASTNodeConstants.EXPRESSION).accept(this);
+		getChildNode(node, WhileStatement.EXPRESSION_PROPERTY).accept(this);
 		fResult.append(')');
-		getChildNode(node, ASTNodeConstants.BODY).accept(this);
+		getChildNode(node, WhileStatement.BODY_PROPERTY).accept(this);
 		return false;
 	}
+	
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BlockComment)
@@ -965,26 +969,26 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MemberRef)
 	 */
 	public boolean visit(MemberRef node) {
-		ASTNode qualifier= getChildNode(node, ASTNodeConstants.QUALIFIER);
+		ASTNode qualifier= getChildNode(node, MemberRef.QUALIFIER_PROPERTY);
 		if (qualifier != null) {
 			qualifier.accept(this);
 		}
 		fResult.append('#');
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		getChildNode(node, MemberRef.NAME_PROPERTY).accept(this);
 		return false;
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRef)
 	 */
 	public boolean visit(MethodRef node) {
-		ASTNode qualifier= getChildNode(node, ASTNodeConstants.QUALIFIER);
+		ASTNode qualifier= getChildNode(node, MethodRef.QUALIFIER_PROPERTY);
 		if (qualifier != null) {
 			qualifier.accept(this);
 		}
 		fResult.append('#');
-		getChildNode(node, ASTNodeConstants.NAME).accept(this);
+		getChildNode(node, MethodRef.NAME_PROPERTY).accept(this);
 		fResult.append('(');
-		visitList(node, ASTNodeConstants.PARAMETERS, ","); //$NON-NLS-1$
+		visitList(node, MethodRef.PARAMETERS_PROPERTY, ","); //$NON-NLS-1$
 		fResult.append(')');
 		return false;
 	}
@@ -992,8 +996,8 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRefParameter)
 	 */
 	public boolean visit(MethodRefParameter node) {
-		getChildNode(node, ASTNodeConstants.TYPE).accept(this);
-		ASTNode name= getChildNode(node, ASTNodeConstants.NAME);
+		getChildNode(node, MethodRefParameter.TYPE_PROPERTY).accept(this);
+		ASTNode name= getChildNode(node, MethodRefParameter.NAME_PROPERTY);
 		if (name != null) {
 			fResult.append(' ');
 			name.accept(this);
@@ -1004,11 +1008,11 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TagElement)
 	 */
 	public boolean visit(TagElement node) {
-		Object tagName= getAttribute(node, ASTNodeConstants.TAG_NAME);
+		Object tagName= getAttribute(node, TagElement.TAG_NAME_PROPERTY);
 		if (tagName != null) {
 			fResult.append((String) tagName);
 		}
-		List list= getChildList(node, ASTNodeConstants.FRAGMENTS);
+		List list= getChildList(node, TagElement.FRAGMENTS_PROPERTY);
 		for (int i= 0; i < list.size(); i++) {
 			if (i > 0 || tagName != null) {
 				fResult.append(' ');
@@ -1028,8 +1032,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TextElement)
 	 */
 	public boolean visit(TextElement node) {
-		fResult.append(getAttribute(node, ASTNodeConstants.TEXT));
+		fResult.append(getAttribute(node, TextElement.TEXT_PROPERTY));
 		return false;
 	}
-
 }

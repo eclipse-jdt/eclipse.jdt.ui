@@ -22,13 +22,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
+
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -71,12 +71,9 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 		if (newTypeDecl != null) {
 			ASTRewrite rewrite= new ASTRewrite(astRoot);
 			
-			List members;
-			if (fSenderBinding.isAnonymous()) {
-				members= ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations();
-			} else {
-				members= ((TypeDeclaration) newTypeDecl).bodyDeclarations();
-			}
+			ChildListPropertyDescriptor property= fSenderBinding.isAnonymous() ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
+			List members= (List) newTypeDecl.getStructuralProperty(property);
+			
 			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
 			
 			int insertIndex;
@@ -87,7 +84,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			} else {
 				insertIndex= members.size();
 			}
-			ListRewriter listRewriter= rewrite.getListRewrite(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS);
+			ListRewriter listRewriter= rewrite.getListRewrite(newTypeDecl, property);
 			listRewriter.insertAt(newStub, insertIndex, null);
 
 			if (!isInDifferentCU) {

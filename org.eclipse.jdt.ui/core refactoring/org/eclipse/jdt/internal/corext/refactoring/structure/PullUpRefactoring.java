@@ -82,7 +82,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -1350,7 +1349,7 @@ public class PullUpRefactoring extends Refactoring {
 			MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cuNode);//getMethodDeclarationNode(method);
 		
 			int newModifiers= getModifiersWithUpdatedVisibility(method, methodDeclaration.getModifiers(), pm, false);
-			rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+			rewrite.markAsReplaced(methodDeclaration, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 		}
 	}
 
@@ -1510,7 +1509,7 @@ public class PullUpRefactoring extends Refactoring {
 		TypeDeclaration targetClass= ASTNodeSearchUtil.getTypeDeclarationNode(getTargetClass(), cuNode);
 	
 		int newModifiers= targetClass.getModifiers() | Modifier.ABSTRACT;
-		rewrite.markAsReplaced(targetClass, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+		rewrite.markAsReplaced(targetClass, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 	}
 
 	private boolean shouldMakeTargetClassAbstract() throws JavaModelException {

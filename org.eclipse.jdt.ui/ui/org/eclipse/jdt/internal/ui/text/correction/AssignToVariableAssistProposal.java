@@ -19,12 +19,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.NamingConventions;
+
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -117,7 +117,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		Expression expression= isParamToField ? ((SingleVariableDeclaration) fNodeToAssign).getName() : ((ExpressionStatement) fNodeToAssign).getExpression();
 		
 		boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
-		List decls= isAnonymous ?  ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations() :  ((TypeDeclaration) newTypeDecl).bodyDeclarations();
+		ChildListPropertyDescriptor property=  isAnonymous ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
+		List decls= (List) newTypeDecl.getStructuralProperty(property);
 		
 		ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
 		AST ast= newTypeDecl.getAST();
@@ -172,14 +173,14 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 		
 		int insertIndex= findFieldInsertIndex(decls, fNodeToAssign.getStartPosition());
-		rewrite.getListRewrite(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS).insertAt(newDecl, insertIndex, null);
+		rewrite.getListRewrite(newTypeDecl, property).insertAt(newDecl, insertIndex, null);
 
 		ASTNode selectionNode;
 		if (isParamToField) {
 			// assign parameter to field
 			ExpressionStatement statement= ast.newExpressionStatement(assignment);
 			int insertIdx=  findAssignmentInsertIndex(body.statements());
-			rewrite.getListRewrite(body, ASTNodeConstants.STATEMENTS).insertAt(statement, insertIdx, null);
+			rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY).insertAt(statement, insertIdx, null);
 			selectionNode= statement;
 			
 		} else {			

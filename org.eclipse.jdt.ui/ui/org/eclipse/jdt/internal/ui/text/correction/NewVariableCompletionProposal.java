@@ -20,9 +20,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -77,7 +77,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			newDecl.setType(evaluateVariableType(ast));
 			newDecl.setName(ast.newSimpleName(node.getIdentifier()));
 			
-			ListRewriter listRewriter= rewrite.getListRewrite(decl, ASTNodeConstants.PARAMETERS);
+			ListRewriter listRewriter= rewrite.getListRewrite(decl, MethodDeclaration.PARAMETERS_PROPERTY);
 			listRewriter.insertLast(newDecl, null);
 			
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
@@ -194,9 +194,13 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		if (list != null) {
 			ASTNode parent= statement.getParent();
-			int childProperty= ASTNodeConstants.getPropertyOfNode(statement);
-			rewrite.getListRewrite(parent, childProperty).insertBefore(newDecl, statement, null);
-			return rewrite;
+			StructuralPropertyDescriptor childProperty= statement.getLocationInParent();
+			if (childProperty.isChildListProperty()) {
+				rewrite.getListRewrite(parent, (ChildListPropertyDescriptor) childProperty).insertBefore(newDecl, statement, null);
+				return rewrite;
+			} else {
+				return null;
+			}
 		}
 		return rewrite;
 	}
@@ -280,11 +284,13 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			}
 		
 			boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
-			List decls= isAnonymous ?  ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations() :  ((TypeDeclaration) newTypeDecl).bodyDeclarations();
-							
+			
+			ChildListPropertyDescriptor property= isAnonymous ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
+			List decls= (List) newTypeDecl.getStructuralProperty(property);
+						
 			int insertIndex= findFieldInsertIndex(decls, node.getStartPosition());
 			
-			ListRewriter listRewriter= rewrite.getListRewrite(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS);
+			ListRewriter listRewriter= rewrite.getListRewrite(newTypeDecl, property);
 			listRewriter.insertAt(newDecl, insertIndex, null);
 			
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);

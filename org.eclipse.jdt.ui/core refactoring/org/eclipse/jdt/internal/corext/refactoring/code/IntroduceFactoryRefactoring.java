@@ -60,7 +60,6 @@ import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -678,7 +677,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		if (constructor == null || (constructor.getModifiers() & VISIBILITY_MASK) == fConstructorVisibility)
 			return false;
 		unitRewriter.markAsReplaced(
-			constructor, ASTNodeConstants.MODIFIERS,
+			constructor, MethodDeclaration.MODIFIERS_PROPERTY,
 			new Integer(ASTNodes.changeVisibility(constructor.getModifiers(), fConstructorVisibility)),
 			declGD);
 		return true;
@@ -1018,7 +1017,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 	/**
 	 * Sets the class on which the generated factory method is to be placed.
-	 * @param type an <code>IType</code> referring to an existing class
+	 * @param fullyQualifiedTypeName an <code>IType</code> referring to an existing class
 	 */
 	public RefactoringStatus setFactoryClass(String fullyQualifiedTypeName) {
 		IType factoryType;

@@ -19,9 +19,11 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
@@ -73,7 +75,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		 */
 		public boolean visit(Block node) {
 			if (fPlaceholders.isCollapsed(node)) {
-				visitList(node, ASTNodeConstants.STATEMENTS, null);
+				visitList(node, Block.STATEMENTS_PROPERTY, null);
 				return false;
 			}
 			return super.visit(node);
@@ -135,7 +137,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		}		
 		
 		Hashtable map= JavaCore.getOptions();
-		map.put(JavaCore.FORMATTER_LINE_SPLIT, String.valueOf(9999));
+		map.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, String.valueOf(9999));
 		String unformatted= flattener.getResult();
 		TextEdit edit= CodeFormatterUtil.format2(node, unformatted, initialIndentationLevel, fLineDelimiter, map);
 		if (edit == null) {

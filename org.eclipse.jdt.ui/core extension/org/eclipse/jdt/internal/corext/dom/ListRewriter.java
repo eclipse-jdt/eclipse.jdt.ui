@@ -18,6 +18,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 /**
  *
@@ -25,11 +26,11 @@ import org.eclipse.jdt.core.dom.Statement;
 public final class ListRewriter {
 	
 	private ASTNode fParent;
-	private int fChildProperty;
+	private StructuralPropertyDescriptor fChildProperty;
 	private NewASTRewrite fRewriter;
 
 
-	/* package*/ ListRewriter(NewASTRewrite rewriter, ASTNode parent, int childProperty) {
+	/* package*/ ListRewriter(NewASTRewrite rewriter, ASTNode parent, StructuralPropertyDescriptor childProperty) {
 		fRewriter= rewriter;
 		fParent= parent;
 		fChildProperty= childProperty;

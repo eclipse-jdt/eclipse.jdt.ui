@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.ui.text.java.*;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -91,7 +90,7 @@ public class ReturnTypeSubProcessor {
 			MethodDeclaration declaration= (MethodDeclaration) selectedNode;
 			
 			ASTRewrite rewrite= new ASTRewrite(declaration);
-			rewrite.markAsReplaced(declaration, ASTNodeConstants.IS_CONSTRUCTOR, Boolean.TRUE, null);
+			rewrite.markAsReplaced(declaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.TRUE, null);
 			
 			String label= CorrectionMessages.getString("ReturnTypeSubProcessor.constrnamemethod.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -133,8 +132,8 @@ public class ReturnTypeSubProcessor {
 				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
 				
 				if (methodDeclaration.isConstructor()) {
-					rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.IS_CONSTRUCTOR, Boolean.FALSE, null);
-					rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.RETURN_TYPE, newReturnType, null);
+					rewrite.markAsReplaced(methodDeclaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.FALSE, null);
+					rewrite.markAsReplaced(methodDeclaration, MethodDeclaration.RETURN_TYPE_PROPERTY, newReturnType, null);
 				} else {
 					rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
 				}
@@ -192,8 +191,8 @@ public class ReturnTypeSubProcessor {
 				typeName= "void"; //$NON-NLS-1$		
 				type= ast.newPrimitiveType(PrimitiveType.VOID);	
 			}
-			rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.RETURN_TYPE, type, null);
-			rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.IS_CONSTRUCTOR, Boolean.FALSE, null);
+			rewrite.markAsReplaced(methodDeclaration, MethodDeclaration.RETURN_TYPE_PROPERTY, type, null);
+			rewrite.markAsReplaced(methodDeclaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.FALSE, null);
 
 			String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.missingreturntype.description", typeName); //$NON-NLS-1$		
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);

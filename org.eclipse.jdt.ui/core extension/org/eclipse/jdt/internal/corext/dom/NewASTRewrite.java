@@ -20,6 +20,8 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 /**
  * Work in progress.
@@ -141,7 +143,7 @@ public class NewASTRewrite {
 	 * @param insertedNode The node or attribute to insert.
 	 * @param editGroup Description of the change.
 	 */
-	public final void markAsInsert(ASTNode parent, int childProperty, ASTNode insertedNode, TextEditGroup editGroup) {
+	public final void markAsInsert(ASTNode parent, StructuralPropertyDescriptor childProperty, ASTNode insertedNode, TextEditGroup editGroup) {
 		validateIsInsideAST(parent);
 		NodeRewriteEvent nodeEvent= fEventStore.getNodeEvent(parent, childProperty, true);
 		nodeEvent.setNewValue(insertedNode);
@@ -161,7 +163,7 @@ public class NewASTRewrite {
 	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
 	 * not inside the rewriters parent or the property is not a node property.
 	 */
-	public final void markAsRemoved(ASTNode parent, int childProperty, TextEditGroup editGroup) {
+	public final void markAsRemoved(ASTNode parent, StructuralPropertyDescriptor childProperty, TextEditGroup editGroup) {
 		validateIsInsideAST(parent);
 		NodeRewriteEvent nodeEvent= fEventStore.getNodeEvent(parent, childProperty, true);
 		nodeEvent.setNewValue(null);
@@ -176,9 +178,9 @@ public class NewASTRewrite {
 	 * @param editGroup Description of the change.
 	 */
 	public final void markAsRemoved(ASTNode node, TextEditGroup editGroup) {
-		int property= ASTNodeConstants.getPropertyOfNode(node);
-		if (ASTNodeConstants.isListProperty(property)) {
-			getListRewrite(node.getParent(), property).remove(node, editGroup);
+		StructuralPropertyDescriptor property= node.getLocationInParent();
+		if (property.isChildListProperty()) {
+			getListRewrite(node.getParent(), (ChildListPropertyDescriptor) property).remove(node, editGroup);
 		} else {
 			markAsRemoved(node.getParent(), property, editGroup);
 		}
@@ -203,7 +205,7 @@ public class NewASTRewrite {
 	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
 	 * not inside the rewriters parent or the property is not a node property.
 	 */
-	public final void markAsReplaced(ASTNode parent, int childProperty, Object replacingNode, TextEditGroup editGroup) {
+	public final void markAsReplaced(ASTNode parent, StructuralPropertyDescriptor childProperty, Object replacingNode, TextEditGroup editGroup) {
 		validateIsInsideAST(parent);
 		NodeRewriteEvent nodeEvent= fEventStore.getNodeEvent(parent, childProperty, true);
 		nodeEvent.setNewValue(replacingNode);
@@ -222,9 +224,9 @@ public class NewASTRewrite {
 	 * @param editGroup Description of the change. 
 	 */		
 	public final void markAsReplaced(ASTNode node, ASTNode replacingNode, TextEditGroup editGroup) {
-		int property= ASTNodeConstants.getPropertyOfNode(node);
-		if (ASTNodeConstants.isListProperty(property)) {
-			getListRewrite(node.getParent(), property).replace(node, replacingNode, editGroup);
+		StructuralPropertyDescriptor property= node.getLocationInParent();
+		if (property.isChildListProperty()) {
+			getListRewrite(node.getParent(), (ChildListPropertyDescriptor) property).replace(node, replacingNode, editGroup);
 		} else {
 			markAsReplaced(node.getParent(), property, replacingNode, editGroup);
 		}
@@ -246,7 +248,7 @@ public class NewASTRewrite {
 	 * @param childProperty The child property
 	 * @return
 	 */
-	public ListRewriter getListRewrite(ASTNode parent, int childProperty) {
+	public ListRewriter getListRewrite(ASTNode parent, ChildListPropertyDescriptor childProperty) {
 		validateIsInsideAST(parent);
 		validateIsListProperty(childProperty);
 		
@@ -276,9 +278,9 @@ public class NewASTRewrite {
 		}
 	}
 	
-	protected void validateIsListProperty(int property) {
-		if (!ASTNodeConstants.isListProperty(property)) {
-			String message= ASTNodeConstants.getPropertyName(property) + " is not a list property"; //$NON-NLS-1$
+	protected void validateIsListProperty(StructuralPropertyDescriptor property) {
+		if (!property.isChildListProperty()) {
+			String message= property.getId() + " is not a list property"; //$NON-NLS-1$
 			throw new IllegalArgumentException(message);
 		}
 	}
@@ -328,7 +330,7 @@ public class NewASTRewrite {
 	
 		ASTNode placeholder= fNodeStore.newPlaceholderNode(getPlaceholderType(node));
 		if (placeholder == null) {
-			throw new IllegalArgumentException("Creating a copy placeholder is not supported for type " + node.getClass().getName()); //$NON-NLS-1$
+			throw new IllegalArgumentException("Creating a copy placeholder is not supported for type" + node.getClass().getName()); //$NON-NLS-1$
 		}
 		
 		fNodeStore.markAsCopyTarget(placeholder, node);

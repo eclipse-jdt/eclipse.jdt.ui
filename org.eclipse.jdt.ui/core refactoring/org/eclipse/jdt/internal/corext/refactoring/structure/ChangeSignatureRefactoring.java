@@ -69,7 +69,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -1434,7 +1433,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 		private void removeExtraDimensions(SingleVariableDeclaration oldParam) {
 			if (oldParam.getExtraDimensions() != 0) {		
-				fRewrite.markAsReplaced(oldParam, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(0), null);
+				fRewrite.markAsReplaced(oldParam, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 			}
 		}
 	
@@ -1453,7 +1452,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		
 		private void changeVisibility() {
 			int newModifiers= JdtFlags.clearAccessModifiers(fMethDecl.getModifiers()) | fVisibility;
-			fRewrite.markAsReplaced(fMethDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+			fRewrite.markAsReplaced(fMethDecl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 		}
 	
 		private void changeExceptions() {

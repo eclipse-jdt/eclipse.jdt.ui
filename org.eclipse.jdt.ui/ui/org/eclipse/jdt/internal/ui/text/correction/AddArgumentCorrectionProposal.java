@@ -11,17 +11,20 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -49,18 +52,32 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	protected ASTRewrite getRewrite() {
 		AST ast= fCallerNode.getAST();
 		ASTRewrite rewrite= new ASTRewrite(fCallerNode);
+		ChildListPropertyDescriptor property= getProperty();
 
 		for (int i= 0; i < fInsertIndexes.length; i++) {
 			int idx= fInsertIndexes[i];
 			String key= "newarg_" + i; //$NON-NLS-1$
 			Expression newArg= evaluateArgumentExpressions(ast, fParamTypes[idx], key);
-			ListRewriter listRewriter= rewrite.getListRewrite(fCallerNode, ASTNodeConstants.ARGUMENTS);
+			ListRewriter listRewriter= rewrite.getListRewrite(fCallerNode, property);
 			listRewriter.insertAt(newArg, idx, null);
 			
 			markAsLinked(rewrite, newArg, i == 0, key); 
 		}
 		return rewrite;
 	}
+	
+	private ChildListPropertyDescriptor getProperty() {
+		List list= fCallerNode.structuralPropertiesForType();
+		for (int i= 0; i < list.size(); i++) {
+			StructuralPropertyDescriptor curr= (StructuralPropertyDescriptor) list.get(i);
+			if (curr.isChildListProperty() && "arguments".equals(curr.getId())) { //$NON-NLS-1$
+				return (ChildListPropertyDescriptor) curr;
+			}
+		}
+		return null;
+		
+	}
+	
 	
 	private Expression evaluateArgumentExpressions(AST ast, ITypeBinding requiredType, String key) {
 		CompilationUnit root= (CompilationUnit) fCallerNode.getRoot();

@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.NamingConventions;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -34,7 +35,6 @@ import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -124,7 +124,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		}
 		
 		ImportRewrite imports= getImportRewrite();
-		ListRewriter listRewrite= rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS);
+		ListRewriter listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.PARAMETERS_PROPERTY);
 		
 		List parameters= methodDecl.parameters(); // old parameters
 		int k= 0; // index over the oldParameters

@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -243,11 +242,11 @@ public class ModifierCorrectionSubProcessor {
 			
 			AST ast= astRoot.getAST();
 			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
-			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+			rewrite.markAsReplaced(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 
 			if (hasNoBody) {
 				Block newBody= ast.newBlock();
-				rewrite.markAsInsert(decl, ASTNodeConstants.BODY, newBody, null);
+				rewrite.markAsInsert(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
 				
 				Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
 				if (expr != null) {
@@ -306,10 +305,10 @@ public class ModifierCorrectionSubProcessor {
 			AST ast= astRoot.getAST();
 			
 			int newModifiers= decl.getModifiers() & ~Modifier.NATIVE;
-			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+			rewrite.markAsReplaced(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 
 			Block newBody= ast.newBlock();
-			rewrite.markAsInsert(decl, ASTNodeConstants.BODY, newBody, null);
+			rewrite.markAsInsert(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
 			
 			Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
 			if (expr != null) {
@@ -344,7 +343,7 @@ public class ModifierCorrectionSubProcessor {
 		ASTRewrite rewrite= new ASTRewrite(typeDeclaration.getParent());
 				
 		int newModifiers= typeDeclaration.getModifiers() | Modifier.ABSTRACT;
-		rewrite.markAsReplaced(typeDeclaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+		rewrite.markAsReplaced(typeDeclaration, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 
 		String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.addabstract.description", typeDeclaration.getName().getIdentifier()); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -366,10 +365,10 @@ public class ModifierCorrectionSubProcessor {
 			ASTRewrite rewrite= new ASTRewrite(decl);
 			
 			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
-			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);		
+			rewrite.markAsReplaced(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);		
 			
 			Block body= ast.newBlock();
-			rewrite.markAsInsert(decl, ASTNodeConstants.BODY, body, null);
+			rewrite.markAsInsert(decl, MethodDeclaration.BODY_PROPERTY, body, null);
 			
 			Type returnType= decl.getReturnType();
 			if (!decl.isConstructor()) {
@@ -392,7 +391,7 @@ public class ModifierCorrectionSubProcessor {
 			ASTRewrite rewrite= new ASTRewrite(decl);
 			
 			int newModifiers= decl.getModifiers() | Modifier.ABSTRACT;
-			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+			rewrite.markAsReplaced(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 			
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.setmethodabstract.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);

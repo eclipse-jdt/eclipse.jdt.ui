@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -44,7 +45,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -320,9 +320,16 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		if (nodes.length == 0) {
 			fIsLastStatementSelected= false;
 		} else {
-			Block body= (Block)ASTNodeConstants.getNodeChild(fEnclosingBodyDeclaration, ASTNodeConstants.BODY);
-			List statements= body.statements();
-			fIsLastStatementSelected= nodes[nodes.length - 1] == statements.get(statements.size() - 1);
+			Block body= null;
+			if (fEnclosingBodyDeclaration instanceof MethodDeclaration) {
+				body= ((MethodDeclaration) fEnclosingBodyDeclaration).getBody();
+			} else if (fEnclosingBodyDeclaration instanceof Initializer) {
+				body= ((Initializer) fEnclosingBodyDeclaration).getBody();
+			}
+			if (body != null) {
+				List statements= body.statements();
+				fIsLastStatementSelected= nodes[nodes.length - 1] == statements.get(statements.size() - 1);
+			}
 		}
 	}
 

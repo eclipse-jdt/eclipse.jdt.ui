@@ -60,7 +60,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -1151,7 +1150,7 @@ public class PushDownRefactoring extends Refactoring {
 
 	private void makeDeclaringClassAbstract(TypeDeclaration declaration, ASTRewrite rewrite) {
 		int newModifiers= createNewModifiersForMakingDeclaringClassAbstract(declaration);
-		rewrite.markAsReplaced(declaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+		rewrite.markAsReplaced(declaration, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 	}
 
 	private int createNewModifiersForMakingDeclaringClassAbstract(TypeDeclaration declaration) {
@@ -1189,7 +1188,7 @@ public class PushDownRefactoring extends Refactoring {
 		rewrite.markAsRemoved(declaration.getBody());
 		
 		int newModifiers= createModifiersForMethodMadeAbstract(info, declaration.getModifiers());
-		rewrite.markAsReplaced(declaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+		rewrite.markAsReplaced(declaration, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 	}
 
 	private int createModifiersForMethodMadeAbstract(MemberActionInfo info, int oldModifiers) throws JavaModelException {

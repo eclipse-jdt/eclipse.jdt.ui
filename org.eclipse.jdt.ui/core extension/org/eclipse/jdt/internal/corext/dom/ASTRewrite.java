@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -96,8 +97,8 @@ public final class ASTRewrite extends NewASTRewrite {
 		
 		// override the parent to child mapper to correct back modified modes from inserts
 		fEventStore.setNodePropertyMapper(new RewriteEventStore.INodePropertyMapper() {
-			public Object getOriginalValue(ASTNode parent, int childProperty) {
-				Object originalValue= ASTNodeConstants.getNodeChild(parent, childProperty);
+			public Object getOriginalValue(ASTNode parent, StructuralPropertyDescriptor childProperty) {
+				Object originalValue= parent.getStructuralProperty(childProperty);
 				if (parent.getStartPosition() == -1) {
 					return originalValue; // ignore unnecessary inserts
 				}
@@ -179,11 +180,11 @@ public final class ASTRewrite extends NewASTRewrite {
 	
 	private void processChange(ASTNode nodeInAST, ASTNode originalNode, ASTNode newNode, TextEditGroup desc, Set processedListEvents) {
 		ASTNode parent= nodeInAST.getParent();
-		int childProperty= ASTNodeConstants.getPropertyOfNode(nodeInAST);
-		if (ASTNodeConstants.isListProperty(childProperty)) {
+		StructuralPropertyDescriptor childProperty= nodeInAST.getLocationInParent();
+		if (childProperty.isChildListProperty()) {
 			ListRewriteEvent event= fEventStore.getListEvent(parent, childProperty, true); // create
 			if (processedListEvents.add(event)) {
-				convertListChange(event, (List) ASTNodeConstants.getNodeChild(parent, childProperty));
+				convertListChange(event, (List) parent.getStructuralProperty(childProperty));
 			}
 		} else {
 			NodeRewriteEvent event= fEventStore.getNodeEvent(parent, childProperty, true);
@@ -334,7 +335,7 @@ public final class ASTRewrite extends NewASTRewrite {
 		List children= compoundNode.statements();
 		compoundNode.setSourceRange(startPos, endPos - startPos);
 		
-		int childProperty= ASTNodeConstants.getPropertyOfNode(firstNode);
+		StructuralPropertyDescriptor childProperty= firstNode.getLocationInParent();
 		
 		ListRewriteEvent existingEvent= fEventStore.getListEvent(firstNode.getParent(), childProperty, false);
 		if (existingEvent != null) {
@@ -348,7 +349,7 @@ public final class ASTRewrite extends NewASTRewrite {
 			
 			RewriteEvent[] newCollapsedChildren= new RewriteEvent[length];
 			System.arraycopy(origChildren, index, newCollapsedChildren, 0, length);
-			fEventStore.addEvent(compoundNode, ASTNodeConstants.STATEMENTS, new ListRewriteEvent(newCollapsedChildren));
+			fEventStore.addEvent(compoundNode, Block.STATEMENTS_PROPERTY, new ListRewriteEvent(newCollapsedChildren));
 		}
 		
 		for (int i= 0; i < length; i++) {

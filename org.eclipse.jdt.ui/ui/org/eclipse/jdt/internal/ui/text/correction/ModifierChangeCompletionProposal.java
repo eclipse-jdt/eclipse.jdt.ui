@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
 public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
@@ -67,36 +66,36 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
 				int newModifiers= (methodDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 				
-				rewrite.markAsReplaced(methodDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);
+				rewrite.markAsReplaced(methodDecl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);
 			} else if (declNode instanceof VariableDeclarationFragment) {
 				ASTNode parent= declNode.getParent();
 				if (parent instanceof FieldDeclaration) {
 					FieldDeclaration fieldDecl= (FieldDeclaration) parent;
 					int newModifiers= (fieldDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 				
-					rewrite.markAsReplaced(fieldDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);	
+					rewrite.markAsReplaced(fieldDecl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);	
 				} else if (parent instanceof VariableDeclarationStatement) {
 					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
 					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 					
-					rewrite.markAsReplaced(varDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);	
+					rewrite.markAsReplaced(varDecl, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);	
 				} else if (parent instanceof VariableDeclarationExpression) {
 					VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
 					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 					
-					rewrite.markAsReplaced(varDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);
+					rewrite.markAsReplaced(varDecl, VariableDeclarationExpression.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);
 				}
 			} else if (declNode instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration variableDeclaration= (SingleVariableDeclaration) declNode;
 				int newModifiers= (variableDeclaration.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 				
-				rewrite.markAsReplaced(variableDeclaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);
+				rewrite.markAsReplaced(variableDeclaration, SingleVariableDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);
 				
 			} else if (declNode instanceof TypeDeclaration) {
 				TypeDeclaration typeDecl= (TypeDeclaration) declNode;
 				int newModifiers= (typeDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 				
-				rewrite.markAsReplaced(typeDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);
+				rewrite.markAsReplaced(typeDecl, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);
 			}
 			return rewrite;
 		}

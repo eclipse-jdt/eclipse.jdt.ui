@@ -32,7 +32,6 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -143,7 +142,7 @@ public class JavadocTagsSubProcessor {
 		
 		AST ast= javadoc.getAST();
 		ASTRewrite rewrite= new ASTRewrite(javadoc);
-		ListRewriter tagsRewriter= rewrite.getListRewrite(javadoc, ASTNodeConstants.TAGS);
+		ListRewriter tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 		
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG);
@@ -179,7 +178,7 @@ public class JavadocTagsSubProcessor {
 		proposals.add(proposal);
 		
 		rewrite= new ASTRewrite(javadoc);
-		tagsRewriter= rewrite.getListRewrite(javadoc, ASTNodeConstants.TAGS);
+		tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 		
 		String label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.allmissing.description"); //$NON-NLS-1$
 		ASTRewriteCorrectionProposal addAllMissing= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image); //$NON-NLS-1$

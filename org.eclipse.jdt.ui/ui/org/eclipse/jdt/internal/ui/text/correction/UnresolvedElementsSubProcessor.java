@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -34,7 +35,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -1071,7 +1071,7 @@ public class UnresolvedElementsSubProcessor {
 			newExpression= name;
 		}
 		
-		rewrite.markAsInsert(invocationNode, ASTNodeConstants.EXPRESSION, newExpression, null);
+		rewrite.markAsInsert(invocationNode, MethodInvocation.EXPRESSION_PROPERTY, newExpression, null);
 
 		String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetoouter.description", currType.getName()); //$NON-NLS-1$	
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);

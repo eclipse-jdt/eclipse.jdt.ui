@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -27,7 +28,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
@@ -141,7 +141,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 
 		Expression placeholder= (Expression) rewrite.createMove(assignment.getRightHandSide());
-		rewrite.markAsInsert(fragment, ASTNodeConstants.INITIALIZER, placeholder, null);
+		rewrite.markAsInsert(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, placeholder, null);
 		
 		if (assignParent instanceof ExpressionStatement) {
 			int statementParent= assignParent.getParent().getNodeType();
@@ -188,13 +188,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		// statement is ForStatement or VariableDeclarationStatement
 		
 		ASTNode statementParent= statement.getParent();
-		int property= ASTNodeConstants.getPropertyOfNode(statement);
-		
-		Object container= ASTNodeConstants.getNodeChild(statementParent, property);
-		if (!(container instanceof List)) {
+		StructuralPropertyDescriptor property= statement.getLocationInParent();
+		if (!property.isChildListProperty()) {
 			return false;
 		}
-		List list= (List) container;
+
+		List list= (List) statementParent.getStructuralProperty(property);
 		
 		if (resultingCollections == null) {
 			return true;
@@ -221,7 +220,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			
 			int modifiers= ((VariableDeclarationStatement) statement).getModifiers();
 			if (Modifier.isFinal(modifiers)) {
-				rewrite.markAsReplaced(statement, ASTNodeConstants.MODIFIERS, new Integer(modifiers & ~Modifier.FINAL), null);
+				rewrite.markAsReplaced(statement, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(modifiers & ~Modifier.FINAL), null);
 			}
 		} else {
 			rewrite.markAsReplaced(fragment.getParent(), assignment);
@@ -237,7 +236,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			newStatement= newVarDec;
 		}
 		
-		ListRewriter listRewriter= rewrite.getListRewrite(statementParent, property);
+		ListRewriter listRewriter= rewrite.getListRewrite(statementParent, (ChildListPropertyDescriptor) property);
 		listRewriter.insertAt(newStatement, insertIndex, null);
 
 		proposal.ensureNoModifications();
@@ -329,7 +328,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= tryStatement.getAST();
 		Block finallyBody= ast.newBlock();
 
-		rewrite.markAsInsert(tryStatement, ASTNodeConstants.FINALLY, finallyBody, null);
+		rewrite.markAsInsert(tryStatement, TryStatement.FINALLY_PROPERTY, finallyBody, null);
 				
 		String label= CorrectionMessages.getString("QuickAssistProcessor.addfinallyblock.description"); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
@@ -357,7 +356,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= statement.getAST();
 		Block body= ast.newBlock();
 
-		rewrite.markAsInsert(ifStatement, ASTNodeConstants.ELSE_STATEMENT, body, null);
+		rewrite.markAsInsert(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, body, null);
 				
 		String label= CorrectionMessages.getString("QuickAssistProcessor.addelseblock.description"); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
@@ -403,7 +402,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				Name name= ((SimpleType) type).getName();
 				Name newName= (Name) ASTNode.copySubtree(catchClause.getAST(), name);
 				
-				ListRewriter listRewriter= rewrite.getListRewrite(methodDeclaration, ASTNodeConstants.THROWN_EXCEPTIONS);
+				ListRewriter listRewriter= rewrite.getListRewrite(methodDeclaration, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
 				listRewriter.insertLast(newName, null);
 			}
 		
@@ -626,7 +625,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			statement= (Statement) statement.getParent();
 		}
 		
-		int childProperty= -1;
+		StructuralPropertyDescriptor childProperty= null;
 		ASTNode child= null;
 		switch (statement.getNodeType()) {
 			case ASTNode.IF_STATEMENT:
@@ -635,13 +634,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				ASTNode then= ((IfStatement) statement).getThenStatement();
 				if (selectionEnd <= then.getStartPosition() + then.getLength()) {
 					if (!(then instanceof Block)) {
-						childProperty= ASTNodeConstants.THEN_STATEMENT;
+						childProperty= IfStatement.THEN_STATEMENT_PROPERTY;
 						child= then;
 					}
 				} else if (selectionStart >=  then.getStartPosition() + then.getLength()) {
 					ASTNode elseStatement= ((IfStatement) statement).getElseStatement();
 					if (!(elseStatement instanceof Block)) {
-						childProperty= ASTNodeConstants.ELSE_STATEMENT;
+						childProperty= IfStatement.ELSE_STATEMENT_PROPERTY;
 						child= elseStatement;
 					}
 				}
@@ -649,21 +648,21 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			case ASTNode.WHILE_STATEMENT:
 				ASTNode whileBody= ((WhileStatement) statement).getBody();
 				if (!(whileBody instanceof Block)) {
-					childProperty= ASTNodeConstants.BODY;
+					childProperty= WhileStatement.BODY_PROPERTY;
 					child= whileBody;
 				}
 				break;
 			case ASTNode.FOR_STATEMENT:
 				ASTNode forBody= ((ForStatement) statement).getBody();
 				if (!(forBody instanceof Block)) {
-					childProperty= ASTNodeConstants.BODY;
+					childProperty= ForStatement.BODY_PROPERTY;
 					child= forBody;
 				}
 				break;
 			case ASTNode.DO_STATEMENT:
 				ASTNode doBody= ((DoStatement) statement).getBody();
 				if (!(doBody instanceof Block)) {
-					childProperty= ASTNodeConstants.BODY;
+					childProperty= DoStatement.BODY_PROPERTY;
 					child= doBody;
 				}
 				break;
@@ -685,9 +684,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		rewrite.markAsInsert(statement, childProperty, replacingBody, null);
 
 		String label;
-		if (childProperty == ASTNodeConstants.THEN_STATEMENT) {
+		if (childProperty == IfStatement.THEN_STATEMENT_PROPERTY) {
 			label = CorrectionMessages.getString("QuickAssistProcessor.replacethenwithblock.description");//$NON-NLS-1$
-		} else if (childProperty == ASTNodeConstants.ELSE_STATEMENT) {
+		} else if (childProperty == IfStatement.ELSE_STATEMENT_PROPERTY) {
 			label = CorrectionMessages.getString("QuickAssistProcessor.replaceelsewithblock.description");//$NON-NLS-1$
 		} else {
 			label = CorrectionMessages.getString("QuickAssistProcessor.replacebodywithblock.description");//$NON-NLS-1$

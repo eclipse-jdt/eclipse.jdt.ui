@@ -36,7 +36,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -294,7 +293,7 @@ public class LocalCorrectionsSubProcessor {
 			proposal.setImportRewrite(imports);
 			
 			AST ast= astRoot.getAST();
-			ListRewriter clausesRewrite= rewrite.getListRewrite(surroundingTry, ASTNodeConstants.CATCH_CLAUSES);
+			ListRewriter clausesRewrite= rewrite.getListRewrite(surroundingTry, TryStatement.CATCH_CLAUSES_PROPERTY);
 			for (int i= 0; i < uncaughtExceptions.length; i++) {
 				ITypeBinding excBinding= uncaughtExceptions[i];
 				String varName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME);
@@ -334,7 +333,7 @@ public class LocalCorrectionsSubProcessor {
 			AST ast= astRoot.getAST();
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
 			List exceptions= methodDecl.thrownExceptions();
-			ListRewriter listRewrite= rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS);
+			ListRewriter listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
 			for (int i= 0; i < uncaughtExceptions.length; i++) {
 				String imp= imports.addImport(uncaughtExceptions[i]);
 				Name name= ASTNodeFactory.newName(ast, imp);
@@ -592,7 +591,7 @@ public class LocalCorrectionsSubProcessor {
 			if (expression == null) {
 				return;
 			}
-			rewrite.markAsInsert(fragment, ASTNodeConstants.INITIALIZER, expression, null);
+			rewrite.markAsInsert(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, expression, null);
 
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.uninitializedvariable.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
