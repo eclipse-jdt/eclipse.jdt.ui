@@ -10,7 +10,7 @@
  *     jens.lukowski@gmx.de - contributed code to convert prefix and postfix 
  *       expressions into a combination of setter and getter calls.
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
- *       bug Encapuslate field can fail when two variables in one variable declaration (see
+ *       bug Encapsulate field can fail when two variables in one variable declaration (see
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=51540).
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.sef;
@@ -19,15 +19,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -39,12 +38,15 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -60,8 +62,12 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
@@ -70,7 +76,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -83,16 +88,13 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 /**
- * Encapsulates a field into gettter and setter calls.
+ * Encapsulates a field into getter and setter calls.
  */
 public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
@@ -101,7 +103,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	
 	private CompilationUnit fRoot;
 	private VariableDeclarationFragment fFieldDeclaration;
-	private OldASTRewrite fRewriter;
+	private ASTRewrite fRewriter;
 
 	private int fVisibility;
 	private String fGetterName;
@@ -138,7 +140,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return new SelfEncapsulateFieldRefactoring(field);
 	}
 	
-	//---- Setter and Getter methdos ----------------------------------------------------------
+	//---- Setter and Getter methods ----------------------------------------------------------
 	
 	public IField getField() {
 		return fField;
@@ -215,7 +217,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			return result;
 		}
 		computeUsedNames();
-		fRewriter= new OldASTRewrite(fRoot);
+		fRewriter= ASTRewrite.create(fRoot.getAST());
 		return result;
 	}
 
@@ -303,7 +305,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			ICompilationUnit unit= affectedCUs[i];
 			sub.subTask(unit.getElementName());
 			CompilationUnit root= null;
-			OldASTRewrite rewriter= null;
+			ASTRewrite rewriter= null;
 			List descriptions;
 			if (owner.equals(unit)) {
 				root= fRoot;
@@ -311,7 +313,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				descriptions= ownerDescriptions;
 			} else {
 				root= new RefactoringASTParser(AST.JLS3).parse(unit, true);
-				rewriter= new OldASTRewrite(root);
+				rewriter= ASTRewrite.create(root.getAST());
 				descriptions= new ArrayList();
 			}
 			checkCompileErrors(result, root, unit);
@@ -344,7 +346,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 
-	private void createEdits(ICompilationUnit unit, OldASTRewrite rewriter, List groups) throws CoreException {
+	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups) throws CoreException {
 		TextBuffer buffer= TextBuffer.acquire(getFile(unit));
 		try {
 			createEdits(unit, rewriter, groups, buffer);
@@ -353,11 +355,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 	}
 
-	private void createEdits(ICompilationUnit unit, OldASTRewrite rewriter, List groups, TextBuffer buffer) {
+	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups, TextBuffer buffer) {
 		TextChange change= fChangeManager.get(unit);
-		MultiTextEdit root= new MultiTextEdit(); 
-		rewriter.rewriteNode(buffer, root);
-		change.setEdit(root);
+		change.setEdit(rewriter.rewriteAST(buffer.getDocument(), fField.getJavaProject().getOptions(true)));
 		for (Iterator iter= groups.iterator(); iter.hasNext();) {
 			change.addTextEditGroup((TextEditGroup)iter.next());
 		}
@@ -426,14 +426,10 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 	}
 
-	private List addGetterSetterChanges(CompilationUnit root, OldASTRewrite rewriter, String lineDelimiter) throws CoreException {
+	private List addGetterSetterChanges(CompilationUnit root, ASTRewrite rewriter, String lineDelimiter) throws CoreException {
 		List result= new ArrayList(2);
 		AST ast= root.getAST();
 		FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, ASTNode.FIELD_DECLARATION);
-		if (!JdtFlags.isPrivate(fField)) {
-			result.add(makeDeclarationPrivate(rewriter, decl));
-		}
-		
 		int position= 0;
 		int numberOfMethods= 0;
 		List members= ASTNodes.getBodyDeclarations(decl.getParent());
@@ -451,42 +447,54 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			position++;
 		}
 		TextEditGroup description;
+		ListRewrite rewrite= fRewriter.getListRewrite(decl.getParent(), getBodyDeclarationsProperty(decl.getParent()));
 		if (!JdtFlags.isFinal(fField)) {
 			description= new TextEditGroup(RefactoringCoreMessages.getString("SelfEncapsulateField.add_setter")); //$NON-NLS-1$
 			result.add(description);
-			members.add(position++, createSetterMethod(ast, rewriter, description, lineDelimiter));
+			rewrite.insertAt(createSetterMethod(ast, rewriter, lineDelimiter), position++, description);
 		}
 		description= new TextEditGroup(RefactoringCoreMessages.getString("SelfEncapsulateField.add_getter")); //$NON-NLS-1$
 		result.add(description);
-		members.add(position, createGetterMethod(ast, rewriter, description, lineDelimiter));
+		rewrite.insertAt(createGetterMethod(ast, rewriter, lineDelimiter), position, description);
+		if (!JdtFlags.isPrivate(fField))
+			result.add(makeDeclarationPrivate(rewriter, decl));
 		return result;
 	}
 
-	private TextEditGroup makeDeclarationPrivate(OldASTRewrite rewriter, FieldDeclaration decl) {
+	private TextEditGroup makeDeclarationPrivate(ASTRewrite rewriter, FieldDeclaration decl) {
 		AST ast= rewriter.getAST();
-		TextEditGroup description= new TextEditGroup(RefactoringCoreMessages
-			.getString("SelfEncapsulateField.change_visibility")); //$NON-NLS-1$
-		
+		TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility")); //$NON-NLS-1$
 		if (decl.fragments().size() > 1) {
+			//TODO: doesn't work for cases like this:  int field1, field2= field1, field3= field2; // keeping refs to field
 			rewriter.remove(fFieldDeclaration, description);
-			List bodyDeclarations= ASTNodes.getBodyDeclarations(decl.getParent());
-			int index= bodyDeclarations.indexOf(decl);
-			VariableDeclarationFragment newField= (VariableDeclarationFragment)rewriter.createCopyTarget(fFieldDeclaration);
-			decl= ast.newFieldDeclaration(newField);
-			decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE));
-			bodyDeclarations.add(index + 1, decl);
-			rewriter.markAsInserted(decl, description);
+			ChildListPropertyDescriptor descriptor= getBodyDeclarationsProperty(decl.getParent());
+			VariableDeclarationFragment newField= (VariableDeclarationFragment) rewriter.createCopyTarget(fFieldDeclaration);
+			FieldDeclaration fieldDecl= ast.newFieldDeclaration(newField);
+			fieldDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE));
+			rewriter.getListRewrite(decl.getParent(), descriptor).insertAfter(fieldDecl, decl, description);
 		} else {
 			ModifierRewrite.create(rewriter, decl).setVisibility(Modifier.PRIVATE, description);
 		}
 		return description;
 	}
 
-	private MethodDeclaration createSetterMethod(AST ast, OldASTRewrite rewriter, TextEditGroup description, String lineDelimiter) throws CoreException {
+	private ChildListPropertyDescriptor getBodyDeclarationsProperty(ASTNode declaration) {
+		if (declaration instanceof AnonymousClassDeclaration)
+			return AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
+		else if (declaration instanceof AnnotationTypeDeclaration)
+			return AnnotationTypeDeclaration.BODY_DECLARATIONS_PROPERTY;
+		else if (declaration instanceof TypeDeclaration)
+			return TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
+		else if (declaration instanceof EnumDeclaration)
+			return EnumDeclaration.BODY_DECLARATIONS_PROPERTY;
+		Assert.isTrue(false);
+		return null;
+	}
+
+	private MethodDeclaration createSetterMethod(AST ast, ASTRewrite rewriter, String lineDelimiter) throws CoreException {
 		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 		Type type= field.getType();
 		MethodDeclaration result= ast.newMethodDeclaration();
-		rewriter.markAsInserted(result, description);
 		result.setName(ast.newSimpleName(fSetterName));
 		result.modifiers().addAll(ASTNodeFactory.newModifiers(ast, createModifiers()));
 		if (fSetterMustReturnValue) {
@@ -524,11 +532,10 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private MethodDeclaration createGetterMethod(AST ast, OldASTRewrite rewriter, TextEditGroup description, String lineDelimiter) throws CoreException {
+	private MethodDeclaration createGetterMethod(AST ast, ASTRewrite rewriter, String lineDelimiter) throws CoreException {
 		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 		Type type= field.getType();
 		MethodDeclaration result= ast.newMethodDeclaration();
-		rewriter.markAsInserted(result, description);
 		result.setName(ast.newSimpleName(fGetterName));
 		result.modifiers().addAll(ASTNodeFactory.newModifiers(ast, createModifiers()));
 		result.setReturnType2((Type)rewriter.createCopyTarget(type));
