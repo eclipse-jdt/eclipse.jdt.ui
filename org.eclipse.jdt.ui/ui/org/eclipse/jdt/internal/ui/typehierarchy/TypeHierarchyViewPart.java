@@ -762,7 +762,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
     	addResizeListener(container);
 
 		fPagebook= new PageBook(container, SWT.NONE);
-		fWorkingSetActionGroup= new WorkingSetFilterActionGroup(container.getShell(), fPropertyChangeListener);
+		fWorkingSetActionGroup= new WorkingSetFilterActionGroup(getSite(), fPropertyChangeListener);
 
 		// page 1 of page book (no hierarchy label)
 		

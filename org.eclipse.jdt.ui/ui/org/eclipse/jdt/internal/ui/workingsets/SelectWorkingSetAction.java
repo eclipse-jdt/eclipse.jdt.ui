@@ -16,6 +16,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
@@ -31,15 +32,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 2.0
  */
 public class SelectWorkingSetAction extends Action {
-	private Shell fShell;
+	private IWorkbenchPartSite fSite;
 	private WorkingSetFilterActionGroup fActionGroup;
 
-	public SelectWorkingSetAction(WorkingSetFilterActionGroup actionGroup, Shell shell) {
+	public SelectWorkingSetAction(WorkingSetFilterActionGroup actionGroup, IWorkbenchPartSite site) {
 		super(WorkingSetMessages.getString("SelectWorkingSetAction.text")); //$NON-NLS-1$
 		Assert.isNotNull(actionGroup);
 		setToolTipText(WorkingSetMessages.getString("SelectWorkingSetAction.toolTip")); //$NON-NLS-1$
 		
-		fShell= shell;
+		fSite= site;
 		fActionGroup= actionGroup;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SELECT_WORKING_SET_ACTION);
 	}
@@ -48,10 +49,11 @@ public class SelectWorkingSetAction extends Action {
 	 * Overrides method from Action
 	 */
 	public void run() {
-		if (fShell == null)
-			fShell= JavaPlugin.getActiveWorkbenchShell();
+		Shell shell= fSite != null 
+			? fSite.getShell() 
+			: JavaPlugin.getActiveWorkbenchShell();
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-		IWorkingSetSelectionDialog dialog= manager.createWorkingSetSelectionDialog(fShell, false);
+		IWorkingSetSelectionDialog dialog= manager.createWorkingSetSelectionDialog(shell, false);
 		IWorkingSet workingSet= fActionGroup.getWorkingSet();
 		if (workingSet != null)
 			dialog.setSelection(new IWorkingSet[]{workingSet});

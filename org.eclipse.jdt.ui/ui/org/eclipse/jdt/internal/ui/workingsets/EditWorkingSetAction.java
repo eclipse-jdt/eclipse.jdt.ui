@@ -18,6 +18,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
@@ -32,15 +33,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 2.1
  */
 public class EditWorkingSetAction extends Action {
-	private Shell fShell;
+	private IWorkbenchPartSite fSite;
 	private WorkingSetFilterActionGroup fActionGroup;
 
-	public EditWorkingSetAction(WorkingSetFilterActionGroup actionGroup, Shell shell) {
+	public EditWorkingSetAction(WorkingSetFilterActionGroup actionGroup, IWorkbenchPartSite site) {
 		super(WorkingSetMessages.getString("EditWorkingSetAction.text")); //$NON-NLS-1$
 		Assert.isNotNull(actionGroup);
 		setToolTipText(WorkingSetMessages.getString("EditWorkingSetAction.toolTip")); //$NON-NLS-1$
 		setEnabled(actionGroup.getWorkingSet() != null);
-		fShell= shell;
+		fSite= site;
 		fActionGroup= actionGroup;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EDIT_WORKING_SET_ACTION);
 	}
@@ -49,8 +50,9 @@ public class EditWorkingSetAction extends Action {
 	 * Overrides method from Action
 	 */
 	public void run() {
-		if (fShell == null)
-			fShell= JavaPlugin.getActiveWorkbenchShell();
+		Shell shell= fSite != null 
+			? fSite.getShell() 
+			: JavaPlugin.getActiveWorkbenchShell();
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 		IWorkingSet workingSet= fActionGroup.getWorkingSet();
 		if (workingSet == null) {
@@ -61,10 +63,10 @@ public class EditWorkingSetAction extends Action {
 		if (wizard == null) {
 			String title= WorkingSetMessages.getString("EditWorkingSetAction.error.nowizard.title"); //$NON-NLS-1$
 			String message= WorkingSetMessages.getString("EditWorkingSetAction.error.nowizard.message"); //$NON-NLS-1$
-			MessageDialog.openError(fShell, title, message);
+			MessageDialog.openError(shell, title, message);
 			return;
 		}
-		WizardDialog dialog= new WizardDialog(fShell, wizard);
+		WizardDialog dialog= new WizardDialog(shell, wizard);
 	 	dialog.create();		
 		if (dialog.open() == Window.OK)
 			fActionGroup.setWorkingSet(wizard.getSelection(), true);

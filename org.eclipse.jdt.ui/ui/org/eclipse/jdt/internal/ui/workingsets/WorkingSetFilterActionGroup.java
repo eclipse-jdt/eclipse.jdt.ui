@@ -16,8 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
@@ -32,6 +30,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
@@ -67,14 +66,14 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	private IMenuListener fMenuListener;
 	private List fContributions= new ArrayList();
 
-	public WorkingSetFilterActionGroup(Shell shell, IPropertyChangeListener changeListener) {
-		Assert.isNotNull(shell);
+	public WorkingSetFilterActionGroup(IWorkbenchPartSite site, IPropertyChangeListener changeListener) {
+		Assert.isNotNull(site);
 		Assert.isNotNull(changeListener);
 
 		fChangeListener= changeListener;
 		fClearWorkingSetAction= new ClearWorkingSetAction(this);
-		fSelectWorkingSetAction= new SelectWorkingSetAction(this, shell);
-		fEditWorkingSetAction= new EditWorkingSetAction(this, shell);
+		fSelectWorkingSetAction= new SelectWorkingSetAction(this, site);
+		fEditWorkingSetAction= new EditWorkingSetAction(this, site);
 
 		fWorkingSetListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {

@@ -573,7 +573,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 					doWorkingSetChanged(event);
 				}
 			};
-			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(getShell(), workingSetListener);
+			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(getSite(), workingSetListener);
 			fViewer.addFilter(fWorkingSetFilterActionGroup.getWorkingSetFilter());
 		}
 	

@@ -15,15 +15,8 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IOpenable;
-import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -47,6 +40,7 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
+
 import org.eclipse.ui.views.framelist.BackAction;
 import org.eclipse.ui.views.framelist.ForwardAction;
 import org.eclipse.ui.views.framelist.Frame;
@@ -56,11 +50,11 @@ import org.eclipse.ui.views.framelist.GoIntoAction;
 import org.eclipse.ui.views.framelist.TreeFrame;
 import org.eclipse.ui.views.framelist.UpAction;
 
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup;
-import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
-import org.eclipse.jdt.internal.ui.workingsets.WorkingSetActionGroup;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -74,6 +68,12 @@ import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.NavigateActionGroup;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup;
+import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetActionGroup;
 
 class PackageExplorerActionGroup extends CompositeActionGroup {
 
@@ -112,7 +112,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		};
 		
 		IWorkbenchPartSite site = fPart.getSite();
-		Shell shell= site.getShell();
 		setGroups(new ActionGroup[] {
 			new NewWizardsActionGroup(site),
 			fNavigateActionGroup= new NavigateActionGroup(fPart), 
@@ -124,7 +123,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart),
 			new ProjectActionGroup(fPart), 
-			fViewActionGroup= new ViewActionGroup(fPart.getRootMode(), workingSetListener, shell),
+			fViewActionGroup= new ViewActionGroup(fPart.getRootMode(), workingSetListener, site),
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, viewer),
 			new LayoutActionGroup(part),
 			new WorkingSetActionGroup(part)});

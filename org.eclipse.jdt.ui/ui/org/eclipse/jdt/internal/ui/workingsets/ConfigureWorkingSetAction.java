@@ -14,21 +14,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 
 public class ConfigureWorkingSetAction extends Action {
 
-	private final Shell fParent;
+	private final IWorkbenchPartSite fSite;
 	private WorkingSetModel fWorkingSetModel;
 
-	public ConfigureWorkingSetAction(Shell parent) {
+	public ConfigureWorkingSetAction(IWorkbenchPartSite site) {
 		super(WorkingSetMessages.getString("ConfigureWorkingSetAction.label")); //$NON-NLS-1$
-		fParent= parent;
+		fSite= site;
 	}
 	
 	public void setWorkingSetModel(WorkingSetModel model) {
@@ -41,7 +40,7 @@ public class ConfigureWorkingSetAction extends Action {
 	public void run() {
 		List workingSets= new ArrayList(Arrays.asList(fWorkingSetModel.getAllWorkingSets()));
 		WorkingSetConfigurationDialog dialog= new WorkingSetConfigurationDialog(
-			fParent, 
+			fSite.getShell(), 
 			(IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()])); //$NON-NLS-1$
 		dialog.setSelection(fWorkingSetModel.getActiveWorkingSets());
 		if (dialog.open() == IDialogConstants.OK_ID) {
