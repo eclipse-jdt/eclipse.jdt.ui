@@ -15,13 +15,13 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.dialogs.PropertyPage;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 
 /**
@@ -86,6 +86,36 @@ public class JavaElementInfoPage extends PropertyPage {
 				packageContentsType.setText("not present");
 			}
 		}
+		if (element instanceof IPackageFragmentRoot) {
+			Label rootContents= new Label(composite, SWT.NONE);
+			rootContents.setText("Classpath entry kind: ");
+			Label rootContentsType= new Label(composite, SWT.NONE);
+			try {
+				IClasspathEntry entry= JavaModelUtility.getRawClasspathEntry((IPackageFragmentRoot)element);
+				if (entry != null) {
+					switch (entry.getEntryKind()) {
+						case IClasspathEntry.CPE_SOURCE:
+							rootContentsType.setText("source"); break;
+						case IClasspathEntry.CPE_PROJECT:
+							rootContentsType.setText("project"); break;
+						case IClasspathEntry.CPE_LIBRARY:
+							rootContentsType.setText("library"); break;
+						case IClasspathEntry.CPE_VARIABLE:
+							rootContentsType.setText("variable");
+							Label varPath= new Label(composite, SWT.NONE);
+							varPath.setText("Variable path: ");
+							Label varPathVar= new Label(composite, SWT.NONE);
+							varPathVar.setText(entry.getPath().makeRelative().toString());							
+							break;
+					}
+				} else {
+					rootContentsType.setText("not present");
+				}
+			} catch (JavaModelException e) {
+				rootContentsType.setText("not present");
+			}
+		}		
+		
 		return composite;
 	}
 

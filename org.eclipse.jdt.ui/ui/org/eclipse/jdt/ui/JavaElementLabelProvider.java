@@ -98,6 +98,12 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public final static int SHOW_SMALL_ICONS= 			0x100;
 	
 	/**
+	 * Flag (bit mask) indicating that the packagefragment roots from variables should
+	 * be rendered with the variable in the name
+	 */
+	public final static int SHOW_VARIABLE= 			0x200;	
+	
+	/**
 	 * Constant (value <code>0</code>) indicating that the label should show 
 	 * the basic images only.
 	 */

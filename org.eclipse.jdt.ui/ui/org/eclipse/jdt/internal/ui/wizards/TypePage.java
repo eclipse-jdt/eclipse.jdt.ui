@@ -1012,7 +1012,7 @@ public abstract class TypePage extends ContainerPage {
 			imports= new ImportsStructure(parentCU, prefOrder, threshold);
 			
 			String content= createTypeBody(imports);
-			createdType= parentCU.createType(content, null, true, new SubProgressMonitor(monitor, 5));
+			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 5));
 		} else {
 			IType enclosingType= getEnclosingType();
 			
@@ -1027,7 +1027,7 @@ public abstract class TypePage extends ContainerPage {
 			imports= new ImportsStructure(parentCU);
 			
 			String content= createTypeBody(imports);
-			createdType= enclosingType.createType(content, null, true, new SubProgressMonitor(monitor, 1));
+			createdType= enclosingType.createType(content, null, false, new SubProgressMonitor(monitor, 1));
 		
 			indent= StubUtility.getIndentUsed(enclosingType, 4) + 1;
 		}
@@ -1038,7 +1038,7 @@ public abstract class TypePage extends ContainerPage {
 		String[] methods= evalMethods(createdType, imports, new SubProgressMonitor(monitor, 1));
 		if (methods.length > 0) {
 			for (int i= 0; i < methods.length; i++) {
-				createdType.createMethod(methods[i], null, true, null);
+				createdType.createMethod(methods[i], null, false, null);
 			}
 			// add imports
 			imports.create(!isInnerClass, null);

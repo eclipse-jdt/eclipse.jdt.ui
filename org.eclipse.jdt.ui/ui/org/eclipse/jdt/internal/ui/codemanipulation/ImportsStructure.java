@@ -191,7 +191,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * @param enclosingTypeName Name of the enclosing type (dor-separated)
 	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
 	 */			
-	public void sortIn(String packageName, String enclosingTypeName, String typeName) {
+	public void addImport(String packageName, String enclosingTypeName, String typeName) {
 		sortIn(JavaModelUtility.concatenateName(packageName, enclosingTypeName), typeName);
 	}	
 		
@@ -251,7 +251,7 @@ public class ImportsStructure implements IImportsStructure {
 		int importsStart, importsLen;
 
 		String[] lineDelims= doc.getLegalLineDelimiters();
-		String lineDelim= lineDelims.length > 0 ? lineDelims[0] : "\n";
+		String lineDelim= lineDelims.length > 0 ? lineDelims[0] : System.getProperty("line.separator", "\n");
 		
 		int lastPos;
 		StringBuffer buf= new StringBuffer();
@@ -267,12 +267,7 @@ public class ImportsStructure implements IImportsStructure {
 		} else {
 			importsStart= getPackageStatementEndPos();
 			importsLen= 0;
-			buf.append(lineDelim);
-			if (importsStart != 0) {
-				lastPos= buf.length();
-			} else {
-				lastPos= 0;
-			}
+			lastPos= 0;			
 		}
 		
 		// all (top level) types in this cu
@@ -316,6 +311,15 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		if (!created.isEmpty()) {
 			try {
+				if (!container.exists()) {
+					buf.append(lineDelim);	// nl after import (<nl+>)
+					if (importsStart > 0) { // package statement
+						buf.insert(0, lineDelim);
+						buf.insert(0, lineDelim);  //<pack><nl*><nl*><import><nl+><nl-pack><cl>
+					} else {
+						buf.append(lineDelim);
+					}
+				}			
 				doc.replace(importsStart, importsLen, buf.toString());
 			} catch (BadLocationException e) {
 				// can not happen

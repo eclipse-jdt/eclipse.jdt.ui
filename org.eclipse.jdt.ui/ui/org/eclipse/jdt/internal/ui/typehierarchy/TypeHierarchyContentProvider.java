@@ -311,7 +311,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 						int nAffected= delta.getAffectedChildren().length;
 						int nChanged= delta.getChangedChildren().length;
 						if (nAffected - nChanged > 0) {
-							fViewer.refresh(type);
+							if (fMemberFilter == null) {
+								fViewer.refresh(type);
+							} else {
+								fViewer.refresh();
+							}
 							return false;
 						} else {
 							fViewer.update(type, UNSTRUCTURED);

@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.ArrayList;import java.util.List;import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.custom.SashForm;import org.eclipse.swt.custom.ViewForm;import org.eclipse.swt.events.KeyAdapter;import org.eclipse.swt.events.KeyEvent;import org.eclipse.swt.events.KeyListener;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.ToolBar;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.action.ToolBarManager;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IInputSelectionProvider;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.Viewer;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IMemento;import org.eclipse.ui.IViewSite;import org.eclipse.ui.PartInitException;import org.eclipse.ui.actions.OpenWithMenu;import org.eclipse.ui.part.PageBook;import org.eclipse.ui.part.ViewPart;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.ITypeHierarchyViewPart;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import java.util.ArrayList;import java.util.List;import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.BusyIndicator;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.custom.SashForm;import org.eclipse.swt.custom.ViewForm;import org.eclipse.swt.events.KeyAdapter;import org.eclipse.swt.events.KeyEvent;import org.eclipse.swt.events.KeyListener;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.ToolBar;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.action.ToolBarManager;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IInputSelectionProvider;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.Viewer;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IMemento;import org.eclipse.ui.IViewSite;import org.eclipse.ui.PartInitException;import org.eclipse.ui.actions.OpenWithMenu;import org.eclipse.ui.part.PageBook;import org.eclipse.ui.part.ViewPart;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.ITypeHierarchyViewPart;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 /**
  * view showing the supertypes/subtypes of its input.
@@ -276,7 +276,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 							}
 					}
 					fCurrentViewer.getControl().getDisplay().beep();
-				}
+				} else if (event.keyCode == SWT.F5) {
+					updateTypesViewer();
+				}	
 			}
 		};
 				
@@ -498,7 +500,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 
 		// Add the submenu.
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
-
 	}
 
 	private void addOpenPerspectiveItem(IMenuManager menu, IStructuredSelection selection) {
@@ -530,21 +531,31 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	 * <code>updateTypesViewer<code> brings up the correct view and refreshes
 	 * the current tree
 	 */
-	private void updateTypesViewer() {
+	public void updateTypesViewer() {
 		if (fInput == null) {
 			fPagebook.showPage(fNoHierarchyShownLabel);
 		} else {
 			if (fCurrentViewer.containsElements()) {
-				fCurrentViewer.updateContent();
+				Runnable runnable= new Runnable() {
+					public void run() {
+						fCurrentViewer.updateContent();
+					}
+				};
+				Display display= getDisplay();
+				if (display != null) {
+					BusyIndicator.showWhile(display, runnable);
+				} else {
+					runnable.run();
+				}
 				if (!isChildVisible(fViewerbook, fCurrentViewer.getControl())) {
 					updateViewerVisibility(false);
-				}
+				}	
 			} else {							
 				fEmptyTypesViewer.setText(JavaPlugin.getFormattedString(NO_DECL_IN_VIEWER, fInput.getElementName()));				
 				updateViewerVisibility(true);
 			}
 		}
-	}	
+	}
 			
 	private void setMemberFilter(IMember[] memberFilter) {
 		for (int i= 0; i < fAllViewers.length; i++) {
@@ -634,33 +645,33 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	 * Can be called from any thread
 	 */
 	public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchy) {
-		checkedSyncExec(new Runnable() {
-			public void run() {
-				if (!fHierarchyLifeCycle.getHierarchy().exists()) {
-					clearInput();
-				} else {
-					try {
-						fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInput);
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e.getStatus());
+		Display display= getDisplay();
+		if (display != null) {
+			display.syncExec(new Runnable() {
+				public void run() {
+					if (!fHierarchyLifeCycle.getHierarchy().exists()) {
 						clearInput();
-						return;
+					} else {
+						try {
+							fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInput);
+						} catch (JavaModelException e) {
+							JavaPlugin.log(e.getStatus());
+							clearInput();
+							return;
+						}
+						updateTypesViewer();
 					}
-					updateTypesViewer();
 				}
-			}
-		});	
-	}
-	
-	private void checkedSyncExec(Runnable r) {
-		if (fPagebook != null && !fPagebook.isDisposed()) {
-			Display d= fPagebook.getDisplay();
-			if (d != null) {
-				d.syncExec(r);
-			}
+			});
 		}
 	}
 	
+	private Display getDisplay() {
+		if (fPagebook != null && !fPagebook.isDisposed()) {
+			return fPagebook.getDisplay();
+		}
+		return null;
+	}		
 	
 	private boolean isChildVisible(Composite pb, Control child) {
 		Control[] children= pb.getChildren();

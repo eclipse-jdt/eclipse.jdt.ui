@@ -14,29 +14,25 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	private static final String DIALOG_ADDTOBUILDPATH= "SourceAttachmentPropertyPage.addtobpdialog";	
 
 	private SourceAttachmentBlock fSourceAttachmentBlock;
-	private IPackageFragmentRoot fRoot;
+	private IPackageFragmentRoot fJarRoot;
 
 	public SourceAttachmentPropertyPage() {
 		fSourceAttachmentBlock= null;
-		fRoot= null;
+		fJarRoot= null;
 	}
 	
 	/**
 	 * @see PreferencePage#createContents
 	 */
 	protected Control createContents(Composite composite) {
-		fRoot= getJARPackageFragmentRoot();
-		if (fRoot != null) {
+		fJarRoot= getJARPackageFragmentRoot();
+		if (fJarRoot != null) {
 			try {
-				IJavaProject jproject= fRoot.getJavaProject();
-				IClasspathEntry[] entries= jproject.getRawClasspath();
-				
-				int index= findClasspathEntry(entries, fRoot.getPath());
-				IClasspathEntry entry;
-				if (index != -1) {
-					entry= entries[index];
-				} else {
-					entry= JavaCore.newLibraryEntry(fRoot.getPath(), null, null);
+				IJavaProject jproject= fJarRoot.getJavaProject();
+				IClasspathEntry entry= JavaModelUtility.getRawClasspathEntry(fJarRoot);
+				if (entry == null) {
+					// use a dummy entry to use for initialization
+					entry= JavaCore.newLibraryEntry(fJarRoot.getPath(), null, null);
 				}
 				fSourceAttachmentBlock= new SourceAttachmentBlock(jproject.getProject(), this, entry);
 				return fSourceAttachmentBlock.createControl(composite);				
@@ -56,13 +52,13 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	public boolean performOk() {
 		if (fSourceAttachmentBlock != null) {
 			try {
-				IJavaProject jproject= fRoot.getJavaProject();
+				IJavaProject jproject= fJarRoot.getJavaProject();
 				
 				IPath attachPath= fSourceAttachmentBlock.getSourceAttachmentPath();
 				IPath attachRoot= fSourceAttachmentBlock.getSourceAttachmentRootPath();				
 				
-				IClasspathEntry[] entries= jproject.getRawClasspath();
-				if (!modifyClasspathEntry(entries, attachPath, attachRoot)) {
+				IClasspathEntry[] entries= modifyClasspath(fJarRoot, attachPath, attachRoot);
+				if (entries == null) {
 					// root not found in classpath
 					if (fSourceAttachmentBlock.getSourceAttachmentPath() == null) {
 						return true;
@@ -71,10 +67,11 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 						return true;
 					}
 					// put new on class path
+					entries= jproject.getRawClasspath();
 					int nEntries= entries.length;
 					IClasspathEntry[] incrEntries= new IClasspathEntry[nEntries + 1];
 					System.arraycopy(entries, 0, incrEntries, 0, nEntries);
-					incrEntries[nEntries]= JavaCore.newLibraryEntry(fRoot.getPath(), attachPath, attachRoot);
+					incrEntries[nEntries]= JavaCore.newLibraryEntry(fJarRoot.getPath(), attachPath, attachRoot);
 					entries= incrEntries;
 				}
 				final IClasspathEntry[] newEntries= entries;
@@ -82,7 +79,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 				IRunnableWithProgress runnable= new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException {
 						try {
-							IJavaProject jproject= fRoot.getJavaProject();
+							IJavaProject jproject= fJarRoot.getJavaProject();
 							jproject.setRawClasspath(newEntries, monitor);
 						} catch (JavaModelException e) {
 							throw new InvocationTargetException(e);
@@ -104,32 +101,26 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		}
 		return true;
 	}
-	
-	private int findClasspathEntry(IClasspathEntry[] entries, IPath path) {
-		for (int i= 0; i < entries.length; i++) {
-			IClasspathEntry curr= entries[i];
-			if (curr.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-				curr= curr.getResolvedEntry();
+				
+	private IClasspathEntry[] modifyClasspath(IPackageFragmentRoot root, IPath attachPath, IPath attachRoot) throws JavaModelException{
+		IClasspathEntry entry= JavaModelUtility.getRawClasspathEntry(root);
+		if (entry != null) {
+			IClasspathEntry[] oldClasspath= root.getJavaProject().getRawClasspath();
+			IClasspathEntry[] newClasspath= new IClasspathEntry[oldClasspath.length];
+			for (int i= 0; i < oldClasspath.length; i++) {
+				if (oldClasspath[i] == entry) {
+					if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+						newClasspath[i]= JavaCore.newVariableEntry(entry.getPath(), attachPath, attachRoot);
+					} else {
+						newClasspath[i]= JavaCore.newLibraryEntry(entry.getPath(), attachPath, attachRoot);
+					}
+				} else {
+					newClasspath[i]= oldClasspath[i];
+				}
 			}
-			if (curr.getEntryKind() == IClasspathEntry.CPE_LIBRARY && path.equals(curr.getPath())) {
-				return i;
-			}
+			return newClasspath;
 		}
-		return -1;
-	}
-			
-	private boolean modifyClasspathEntry(IClasspathEntry[] entries, IPath attachPath, IPath attachRoot) {
-		int index= findClasspathEntry(entries, fRoot.getPath());
-		if (index != -1) {
-			IClasspathEntry old= entries[index];
-			if (old.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-				entries[index]= JavaCore.newVariableEntry(old.getPath(), attachPath, attachRoot);
-			} else {
-				entries[index]= JavaCore.newLibraryEntry(old.getPath(), attachPath, attachRoot);
-			}
-			return true;
-		}
-		return false;
+		return null;
 	}		
 	
 	private boolean putJarOnClasspath() {

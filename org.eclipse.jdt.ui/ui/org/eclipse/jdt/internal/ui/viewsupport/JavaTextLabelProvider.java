@@ -56,6 +56,10 @@ public class JavaTextLabelProvider {
 		return (fFlags & JavaElementLabelProvider.SHOW_CONTAINER) != 0;
 	}
 	
+	protected final boolean showVariable() {
+		return (fFlags & JavaElementLabelProvider.SHOW_VARIABLE) != 0;
+	}	
+	
 	protected final boolean showRoot() {
 		return (fFlags & JavaElementLabelProvider.SHOW_ROOT) != 0;
 	}	
@@ -82,6 +86,9 @@ public class JavaTextLabelProvider {
 			case IJavaElement.PACKAGE_FRAGMENT:
 				renderPackageFragment((IPackageFragment)element, buf);
 				break;
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				renderPackageFragmentRoot((IPackageFragmentRoot)element, buf);
+				break;			
 			case IJavaElement.COMPILATION_UNIT:
 			case IJavaElement.CLASS_FILE:
 				if (showContainerQualification()) {
@@ -134,6 +141,22 @@ public class JavaTextLabelProvider {
 		} 
 	}
 	
+	protected void renderPackageFragmentRoot(IPackageFragmentRoot root, StringBuffer buf) {
+		String name= root.getElementName();
+		if (showVariable() && root.isArchive()) {
+			try {
+				IClasspathEntry rawEntry= JavaModelUtility.getRawClasspathEntry(root);
+				if (rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+					buf.append(rawEntry.getPath().makeRelative());
+					buf.append(" - ");
+				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e.getStatus());
+			}
+		}
+		buf.append(root.getElementName());
+	}
+	
 	protected void renderQualified(String elementName, IPackageFragment pack, StringBuffer buf) {
 		if (showPostfixQualification()) {
 			buf.append(elementName);
@@ -147,7 +170,6 @@ public class JavaTextLabelProvider {
 			buf.append(elementName);
 		}
 	}
-	
 	
 	protected void renderInnerType(IType type, StringBuffer buf) {
 		if (showPostfixQualification()) {
@@ -214,14 +236,6 @@ public class JavaTextLabelProvider {
 	public String getTextLabel(IJavaElement element) {
 		StringBuffer buf= new StringBuffer();
 		renderName(element, buf);
-		if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-			IPackageFragmentRoot root= (IPackageFragmentRoot) element;
-			if (root.isArchive()) {
-				String label= checkVariableReference(root);
-				if (label != null)
-					return label;
-			}
-		}
 		if (showRoot()) {
 			IPackageFragmentRoot root= JavaModelUtility.getPackageFragmentRoot(element);
 			if (root != null) {
@@ -232,17 +246,5 @@ public class JavaTextLabelProvider {
 		return buf.toString();
 	}
 	
-	String checkVariableReference(IPackageFragmentRoot root) {
-		IClasspathEntry rawEntry= JavaModelUtility.getRawClasspathEntry(root);
-		if (rawEntry != null) {
-			IPath varpath= rawEntry.getPath();
-			String label= varpath.segment(0);
-			if (varpath.segmentCount() > 1)
-				label+= "/"+varpath.segment(1); 
-			label+= " - "+ root.getPath();
-			return label;
-		}
-		return null;
-	}	
 
 }

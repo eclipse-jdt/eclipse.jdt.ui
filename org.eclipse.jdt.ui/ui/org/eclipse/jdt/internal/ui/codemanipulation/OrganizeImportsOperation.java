@@ -125,7 +125,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 				List types= (List) result[i];
 				if (!types.isEmpty()) {
 					TypeRef typeRef= (TypeRef) types.get(0);
-					impStructure.sortIn(typeRef.getPackageName(), typeRef.getEnclosingName(), typeRef.getTypeName());
+					impStructure.addImport(typeRef.getPackageName(), typeRef.getEnclosingName(), typeRef.getTypeName());
 				}
 			}				
 			return true;

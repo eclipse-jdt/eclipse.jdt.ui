@@ -153,7 +153,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		JavaPlugin.getErrorTickManager().addListener(fViewer);		
 
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
-					JavaElementLabelProvider.SHOW_SMALL_ICONS;
+					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE;
 		fViewer.setLabelProvider(new JavaElementLabelProvider(labelFlags));
 		fViewer.setSorter(new PackageViewerSorter());
 		fViewer.addFilter(new EmptyInnerPackageFilter());
