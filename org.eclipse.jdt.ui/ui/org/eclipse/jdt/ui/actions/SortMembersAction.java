@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -36,6 +37,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.internal.corext.codemanipulation.SortMembersOperation;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -68,6 +70,8 @@ import org.eclipse.jdt.ui.JavaUI;
  * @since 2.1
  */
 public class SortMembersAction extends SelectionDispatchAction {
+
+	public static final boolean BUG_81329= true;
 
 	private CompilationUnitEditor fEditor;
 	private final static String ID= "org.eclipse.jdt.ui.actions.SortMembersAction"; //$NON-NLS-1$
@@ -186,6 +190,22 @@ public class SortMembersAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), cu)) {
 			return;
 		}		
+		
+		if (BUG_81329) {
+			try {
+				final IType[] types= cu.getAllTypes();
+				IType type= null;
+				for (int index= 0; index < types.length; index++) {
+					type= types[index];
+					if (type.isEnum()) {
+						MessageDialog.openInformation(shell, "Sort Members", "Sorting of enum types is currently not supported."); //$NON-NLS-1$ //$NON-NLS-2$
+						return;
+					}
+				}
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+		}
 		
 		if (containsRelevantMarkers(editor)) {
 			int returnCode= OptionalMessageDialog.open(ID, 
