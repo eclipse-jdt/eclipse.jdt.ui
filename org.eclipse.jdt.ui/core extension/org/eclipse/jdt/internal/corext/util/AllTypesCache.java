@@ -22,8 +22,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.core.search.JavaWorkspaceScope;
-
 /**
  * Manages a search cache for types in the workspace. Instead of returning objects of type <code>IType</code>
  * the methods of this class returns a list of the lightweight objects <code>TypeInfo</code>.
@@ -41,8 +39,8 @@ public class AllTypesCache {
 	 */		
 	public static synchronized void getTypes(IJavaSearchScope scope, int kind, IProgressMonitor monitor, Collection typesFound) throws JavaModelException {
 		
-		boolean isWorkspaceScope= (scope instanceof JavaWorkspaceScope); // XXX: use of internal class: bug 9179 
-		
+		boolean isWorkspaceScope= scope.equals(SearchEngine.createWorkspaceScope());
+				
 		if (fgTypeCache == null) {
 			if (!isWorkspaceScope) {
 				// don't build up the cache, perform a bare search
