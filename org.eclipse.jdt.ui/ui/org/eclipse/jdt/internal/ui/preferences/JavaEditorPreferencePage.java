@@ -38,7 +38,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -512,11 +511,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 	private Control createSyntaxPage(Composite parent) {
 		
-		Composite colorComposite= new Composite(parent, SWT.NULL);
+		Composite colorComposite= new Composite(parent, SWT.NONE);
 		colorComposite.setLayout(new GridLayout());
 
 		Group backgroundComposite= new Group(colorComposite, SWT.SHADOW_ETCHED_IN);
-		backgroundComposite.setLayout(new RowLayout());
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 3;
+		backgroundComposite.setLayout(layout);
 		backgroundComposite.setText(PreferencesMessages.getString("JavaEditorPreferencePage.backgroundColor"));//$NON-NLS-1$
 	
 		SelectionListener backgroundSelectionListener= new SelectionListener() {
@@ -535,7 +536,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBackgroundCustomRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
 		fBackgroundCustomRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.custom")); //$NON-NLS-1$
 		fBackgroundCustomRadioButton.addSelectionListener(backgroundSelectionListener);
-
+		
 		fBackgroundColorEditor= new ColorEditor(backgroundComposite);
 		fBackgroundColorButton= fBackgroundColorEditor.getButton();
 
@@ -573,7 +574,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite editorComposite= new Composite(colorComposite, SWT.NONE);
-		GridLayout layout= new GridLayout();
+		layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
