@@ -383,6 +383,29 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		standardPassingTest();
 	}
 
+	public void test64() throws Exception{
+//		printTestDisabledMessage("test for 23105");
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", new String[]{"A", "Inter"}, "I", names, signatures, true);
+	}
+
+	public void test65() throws Exception{
+		printTestDisabledMessage("test for 23105");
+//		standardPassingTest();
+	}
+
+	public void test66() throws Exception{
+		standardPassingTest();
+	}
+
+	public void test67() throws Exception{
+		printTestDisabledMessage("test for 23105");
+//		String[] names= new String[]{"m"};
+//		String[][] signatures= new String[][]{new String[0]};
+//		validatePassingTest("A", new String[]{"A", "Outer", "Inter"}, "I", names, signatures, true);
+	}
+
 	public void testFail0() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
 	}
