@@ -29,6 +29,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
@@ -338,4 +339,16 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		return MessageDialog.openQuestion(parent, title, label);
 	}
+	
+    /*
+     * @see SourceReferenceAction#canWorkOn(Object)
+     */
+    protected boolean canWorkOn(Object element) throws JavaModelException {
+    	if (! super.canWorkOn(element))
+    		return false;
+    	if (element instanceof IMember && ((IMember)element).isBinary())
+    		return false;
+    	return true;	
+    }
+
 }
