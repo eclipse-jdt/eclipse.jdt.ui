@@ -1,0 +1,20 @@
+==============================================================
+
+   Eclipse Platform Build Notes
+   Java Development Tooling UI
+
+==============================================================
+
+
+This file lists the new and noteworthy items for each build. To see which bugs
+have been addressed in one of the builds go to bugzilla enter the JDT UI
+component, select status, resolution and the time frame.
+
+
+
+---------- Eclipse Build Input Mai 6th 2003 ----------
+<add whats new here>
+
+
+---------- Eclipse Build Input April 22nd 2003 ----------
+- several bugs fixed
