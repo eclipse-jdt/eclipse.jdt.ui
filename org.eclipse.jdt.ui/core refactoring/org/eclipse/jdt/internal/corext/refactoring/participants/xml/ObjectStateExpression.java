@@ -11,29 +11,35 @@
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IPluginDescriptor;
 
 
 public class ObjectStateExpression extends CompositeExpression {
 	
-	private String fAdaptable;
+	private IConfigurationElement fElement;
 	
 	public static final String NAME= "objectState"; //$NON-NLS-1$
 	
 	private static final String ADAPTABLE= "adaptable"; //$NON-NLS-1$
 	
 	public ObjectStateExpression(IConfigurationElement element) {
-		fAdaptable= element.getAttribute(ADAPTABLE);
+		fElement= element;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
-	 */
 	public int evaluate(Object element) throws CoreException {
-//		if (fAdaptable != null) {
-//			if (("*".equals(fAdaptable) || isInstanceOf(element, fAdaptable)) && (element instanceof IAdaptable)) //$NON-NLS-1$
-//				element= ((IAdaptable)element).getAdapter(IResource.class); 
-//		}
+		String adaptable= fElement.getAttribute(ADAPTABLE);
+		if (adaptable != null && element instanceof IAdaptable) {
+			IPluginDescriptor pd= fElement.getDeclaringExtension().getDeclaringPluginDescriptor();
+			ClassLoader loader= pd.getPluginClassLoader();
+			try {
+				Class clazz= loader.loadClass(adaptable);
+				element= ((IAdaptable)element).getAdapter(clazz);
+			} catch (ClassNotFoundException e) {
+				element= null;
+			}
+		}
 		if (element == null)
 			return ITestResult.FALSE;
 		return evaluateAnd(element);

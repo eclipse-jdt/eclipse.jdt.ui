@@ -17,7 +17,7 @@ public class DeleteExtensionManager {
 	private static final String PROCESSOR_EXT_POINT= "deleteProcessors"; //$NON-NLS-1$
 	private static final String PARTICIPANT_EXT_POINT= "deleteParticipants"; //$NON-NLS-1$
 	
-	private static ExtensionManager fInstance= new ExtensionManager(PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT);
+	private static ExtensionManager fInstance= new ExtensionManager("Delete", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
 	
 	public static IDeleteProcessor getProcessor(Object element) throws CoreException {
 		return (IDeleteProcessor)fInstance.getProcessor(element);

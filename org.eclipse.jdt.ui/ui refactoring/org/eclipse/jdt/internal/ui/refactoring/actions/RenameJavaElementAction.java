@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.participants.RenameExtensionManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -86,10 +87,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
 			return false;
-		RenameSupport support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
-		if (support == null)
-			return false;
-		return support.preCheck().isOK();		
+		return RenameExtensionManager.processorExists(element);
 	} 
 
 	private static IJavaElement getJavaElement(IStructuredSelection selection) {

@@ -17,14 +17,18 @@ public class RenameExtensionManager {
 	private static final String PROCESSOR_EXT_POINT= "renameProcessors"; //$NON-NLS-1$
 	private static final String PARTICIPANT_EXT_POINT= "renameParticipants"; //$NON-NLS-1$
 	
-	private static ExtensionManager fInstance= new ExtensionManager(PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT);
+	private static ExtensionManager fgInstance= new ExtensionManager("Rename", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
+	
+	public static boolean processorExists(Object element) throws CoreException {
+		return fgInstance.processorExists(element);
+	}
 	
 	public static IRenameProcessor getProcessor(Object element) throws CoreException {
-		return (IRenameProcessor)fInstance.getProcessor(element);
+		return (IRenameProcessor)fgInstance.getProcessor(element);
 	}
 
 	public static IRenameParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
-		IRefactoringParticipant[] participants= fInstance.getParticipants(processor, elements);
+		IRefactoringParticipant[] participants= fgInstance.getParticipants(processor, elements);
 		IRenameParticipant[] result= new IRenameParticipant[participants.length];
 		System.arraycopy(participants, 0, result, 0, participants.length);
 		return result;

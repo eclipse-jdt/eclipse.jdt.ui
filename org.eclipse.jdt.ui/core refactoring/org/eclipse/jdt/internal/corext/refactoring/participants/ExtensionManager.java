@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,18 +32,72 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ExtensionManager {
 	
+	private String fName;
+	
 	private String fProcessorID;
+	private static final int MAX_ENTRIES= 20;
+	private LinkedList fLRUProcessors= new LinkedList();
 	private List fProcessors= new ArrayList(5);
 	
 	private String fParticipantID;
 	private List fParticipants= new ArrayList(20);
 	
-	public ExtensionManager(String processorId, String participantId) {
+	//---- debuging----------------------------------------
+	private static final boolean EXIST_TRACING;
+	static {
+		String value= Platform.getDebugOption("org.eclipse.jdt.ui/processor/existTracing"); //$NON-NLS-1$
+		EXIST_TRACING= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
+	}
+	
+	public ExtensionManager(String name, String processorId, String participantId) {
+		Assert.isNotNull(name);
 		Assert.isNotNull(processorId);
 		Assert.isNotNull(participantId);
+		fName= name;
 		fProcessorID= processorId;
 		fParticipantID= participantId;
 		init();
+	}
+	
+	public boolean processorExists(Object element) throws CoreException {
+		// check last recently used processors
+		long start= 0;
+		if (EXIST_TRACING)
+			start= System.currentTimeMillis();
+		for (Iterator iter= fLRUProcessors.iterator(); iter.hasNext();) {
+			ProcessorDescriptor descriptor= (ProcessorDescriptor)iter.next();
+			if (descriptor.matches(element)) {
+				if (fLRUProcessors.getFirst() != descriptor) {
+					iter.remove();
+					fLRUProcessors.addFirst(descriptor);
+				}
+				if (EXIST_TRACING)
+					printTime(start);
+				return true;
+			}
+		}
+		// now check normal list of processors
+		for (Iterator iter= fProcessors.iterator(); iter.hasNext();) {
+			ProcessorDescriptor descriptor= (ProcessorDescriptor)iter.next();
+			if (descriptor.matches(element)) {
+				if (fLRUProcessors.size() >= MAX_ENTRIES) {
+					fLRUProcessors.removeLast();
+				}
+				fLRUProcessors.addFirst(descriptor);
+				if (EXIST_TRACING)
+					printTime(start);
+				return true;
+			}
+		}
+		if (EXIST_TRACING)
+			printTime(start);
+		return false;
+	}
+	
+	private void printTime(long start) {
+		System.out.println("[" + fName +  //$NON-NLS-1$
+			" extension manager] - existing test: " +  //$NON-NLS-1$
+			(System.currentTimeMillis() - start) + " ms"); //$NON-NLS-1$
 	}
 	
 	public IRefactoringProcessor getProcessor(Object element) throws CoreException {

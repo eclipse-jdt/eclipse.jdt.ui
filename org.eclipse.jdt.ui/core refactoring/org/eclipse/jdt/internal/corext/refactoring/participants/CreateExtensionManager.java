@@ -17,7 +17,7 @@ public class CreateExtensionManager {
 	private static final String PROCESSOR_EXT_POINT= "createProcessors"; //$NON-NLS-1$
 	private static final String PARTICIPANT_EXT_POINT= "createParticipants"; //$NON-NLS-1$
 	
-	private static ExtensionManager fInstance= new ExtensionManager(PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT);
+	private static ExtensionManager fInstance= new ExtensionManager("Create", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
 	
 	/* unclear if we are going to support create processors
 	public static IMoveProcessor getProcessor(Object element) throws CoreException {

@@ -17,7 +17,7 @@ public class MoveExtensionManager {
 	private static final String PROCESSOR_EXT_POINT= "moveProcessors"; //$NON-NLS-1$
 	private static final String PARTICIPANT_EXT_POINT= "moveParticipants"; //$NON-NLS-1$
 	
-	private static ExtensionManager fInstance= new ExtensionManager(PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT);
+	private static ExtensionManager fInstance= new ExtensionManager("Move", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
 	
 	public static IMoveProcessor getProcessor(Object element) throws CoreException {
 		return (IMoveProcessor)fInstance.getProcessor(element);
