@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.core.refactoring.DebugUtils;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jface.util.Assert;
 
@@ -38,10 +38,37 @@ public abstract class TextInputWizardPage extends EditorSavingWizardPage {
 	}
 	
 	/**
+	 * @return <code>true</code> iff the input provided at initialization is valid.
+	 * Typically it is not, because the user is required to provide some information e.g. a new type name etc.
+	 */
+	protected boolean isInitialInputValid(){
+		return false;
+	}
+	
+	/**
+	 * @return <code>true</code> iff an empty string is valid.
+	 * Typically it is not, because the user is required to provide some information e.g. a new type name etc.
+	 */
+	protected boolean isEmptyInputValid(){
+		return false;
+	}
+	
+	/**
 	 * Checks the page's state and issues a corresponding error message. The page validation
 	 * is computed by calling <code>validatePage</code>.
 	 */
-	protected void checkState() {
+	protected void checkState() {		
+		if (! isEmptyInputValid() && fStringInput.getText().equals("")){
+			setPageComplete(false);
+			setErrorMessage(null);
+			return;
+		}
+		if ((! isInitialInputValid()) && fStringInput.getText().equals(fInitialSetting)){
+			setPageComplete(false);
+			setErrorMessage(null);
+			return;
+		}
+		
 		RefactoringStatus status= validatePage();
 		getRefactoringWizard().setStatus(status);
 		if (status != null && status.hasFatalError()) {
