@@ -1,16 +1,22 @@
 package org.eclipse.jdt.internal.core.refactoring.rename;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.changes.AddToClasspathChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.DeleteFromClasspathChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameJavaProjectChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -52,7 +58,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Rename Java project " + getCurrentName() + " to:" + fNewName;
+		return "Rename Java project '" + getCurrentName() + "' to:'" + fNewName + "'";
 	}
 		
 	//-- preconditions
@@ -124,9 +130,43 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try{
-			return new RenameJavaProjectChange(fProject, fNewName);
+			CompositeChange composite= new CompositeChange("Renaming a Java Project");
+			addNewProjectToClasspaths(composite);
+			composite.addChange(new RenameJavaProjectChange(fProject, fNewName));
+			removeOldProjectFromClasspaths(composite);
+			return composite;
 		} finally{
 			pm.done();
 		}	
+	}
+
+	private void addNewProjectToClasspaths(CompositeChange composite) {
+		IProject[] referencing=getReferencingProjects();
+		IPath newProjectPath= createNewProjectPath();
+		for (int i= 0; i < referencing.length; i++) {
+			IProject project= referencing[i];
+			IJavaProject jp= JavaCore.create(project);
+			if (jp != null)
+				composite.addChange(new AddToClasspathChange(jp, newProjectPath));
+		}
+	}
+	
+	private void removeOldProjectFromClasspaths(CompositeChange composite) {
+		IProject[] referencing=getReferencingProjects();
+		IPath oldProjectPath= fProject.getProject().getFullPath();
+		for (int i= 0; i < referencing.length; i++) {
+			IProject project= referencing[i];
+			IJavaProject jp= JavaCore.create(project);
+			if (jp != null)
+				composite.addChange(new DeleteFromClasspathChange(oldProjectPath, jp));
+		}
+	}
+	
+	private IProject[] getReferencingProjects() {
+		return  fProject.getProject().getReferencingProjects();
+	}
+	
+	private IPath createNewProjectPath(){
+		return fProject.getProject().getFullPath().removeLastSegments(1).append(fNewName);
 	}
 }
