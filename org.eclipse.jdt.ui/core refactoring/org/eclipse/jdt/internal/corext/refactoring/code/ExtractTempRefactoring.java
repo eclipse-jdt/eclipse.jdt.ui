@@ -290,7 +290,10 @@ public class ExtractTempRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.expr_in_method_or_initializer")); //$NON-NLS-1$
 			pm.worked(1);				
 			
-			if (selectedExpression.getAssociatedNode() instanceof Name && selectedExpression.getAssociatedNode().getParent() instanceof ClassInstanceCreation)
+			ASTNode associatedNode= selectedExpression.getAssociatedNode();
+			if (associatedNode instanceof Name
+					&& associatedNode.getParent() instanceof ClassInstanceCreation
+					&& associatedNode.getLocationInParent() == ClassInstanceCreation.NAME_PROPERTY)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.name_in_new")); //$NON-NLS-1$
 			pm.worked(1);				
 	
