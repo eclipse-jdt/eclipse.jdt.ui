@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.jface.text.IDocument;
 
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -26,8 +27,9 @@ public interface IOccurrencesFinder {
 	
 	public String getJobLabel();
 
-	public String getResultLabel(String documentName, int matches);
+	public String getPluralLabel(String documentName);
+	
+	public String getSingularLabel(String documentName);
 	
 	public void collectOccurrenceMatches(IJavaElement element, IDocument document, Collection resultingMatches);
-
 }

@@ -156,21 +156,21 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			}
 		}
 	}
-	
+		
 	public String getJobLabel() {
 		return SearchMessages.getString("ExceptionOccurrencesFinder.searchfor") ; //$NON-NLS-1$
 	}
 	
-	public String getResultLabel(String elementName, int nMatches) {
-		String nodeContents= ASTNodes.asString(fSelectedName);
-		if (nMatches == 1) {
-			String[] args= new String[] {nodeContents, elementName}; //$NON-NLS-1$
-			return SearchMessages.getFormattedString("ExceptionOccurrencesFinder.label.singular", args); //$NON-NLS-1$
-		}
-		String[] args= new String[] {nodeContents, String.valueOf(nMatches), elementName}; //$NON-NLS-1$
+	public String getPluralLabel(String elementName) {
+		String[] args= new String[] {ASTNodes.asString(fSelectedName), "{0}", elementName}; //$NON-NLS-1$
 		return SearchMessages.getFormattedString("ExceptionOccurrencesFinder.label.plural", args); //$NON-NLS-1$
 	}
-
+	
+	public String getSingularLabel(String elementName) {
+		String[] args= new String[] {ASTNodes.asString(fSelectedName), elementName}; //$NON-NLS-1$
+		return SearchMessages.getFormattedString("ExceptionOccurrencesFinder.label.singular", args); //$NON-NLS-1$
+	}
+	
 	public boolean visit(AnonymousClassDeclaration node) {
 		return false;
 	}
@@ -257,4 +257,6 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		return false;
 	}
+
+
 }

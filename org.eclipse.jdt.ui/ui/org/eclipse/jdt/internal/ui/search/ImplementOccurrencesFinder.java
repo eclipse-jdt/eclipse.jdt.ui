@@ -84,7 +84,6 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	private List fResult;
 	private Name fSelectedName;
 	private ITypeBinding fSelectedType;
-
 	
 	public ImplementOccurrencesFinder() {
 		fResult= new ArrayList();
@@ -147,17 +146,19 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		return SearchMessages.getString("ImplementOccurrencesFinder.searchfor") ; //$NON-NLS-1$
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getResultLabel(java.lang.String, int)
-	 */
-	public String getResultLabel(String elementName, int nMatches) {
-		String nodeContents= ASTNodes.asString(fSelectedName);
-		if (nMatches == 1) {
-			String[] args= new String[] {nodeContents, elementName}; //$NON-NLS-1$
-			return SearchMessages.getFormattedString("ImplementOccurrencesFinder.label.singular", args); //$NON-NLS-1$
-		}
-		String[] args= new String[] {nodeContents, String.valueOf(nMatches), elementName}; //$NON-NLS-1$
+	public String getPluralLabel(String elementName) {
+		String[] args= new String[] {ASTNodes.asString(fSelectedName), "{0}", elementName}; //$NON-NLS-1$
 		return SearchMessages.getFormattedString("ImplementOccurrencesFinder.label.plural", args); //$NON-NLS-1$
+	}
+	
+	public String getSingularLabel(String elementName) {
+		String[] args= new String[] {ASTNodes.asString(fSelectedName), elementName}; //$NON-NLS-1$
+		return SearchMessages.getFormattedString("ImplementOccurrencesFinder.label.singular", args); //$NON-NLS-1$
+	}
+	
+	public void releaseAST() {
+		fStart= null;
+		fSelectedType= null;
 	}
 	
 }

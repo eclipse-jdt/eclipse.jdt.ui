@@ -122,17 +122,15 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		return SearchMessages.getString("OccurrencesFinder.searchfor") ; //$NON-NLS-1$
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getResultLabel(java.lang.String, int)
-	 */
-	public String getResultLabel(String elementName, int nMatches) {
-		String nodeContents= ASTNodes.asString(fSelectedNode);
-		if (nMatches == 1) {
-			String[] args= new String[] {nodeContents, elementName};
-			return SearchMessages.getFormattedString("OccurrencesFinder.label.singular", args); //$NON-NLS-1$
-		}
-		String[] args= new String[] {nodeContents, String.valueOf(nMatches), elementName};
+	
+	public String getPluralLabel(String elementName) {
+		String[] args= new String[] {ASTNodes.asString(fSelectedNode), "{0}", elementName}; //$NON-NLS-1$
 		return SearchMessages.getFormattedString("OccurrencesFinder.label.plural", args); //$NON-NLS-1$
+	}
+	
+	public String getSingularLabel(String elementName) {
+		String[] args= new String[] {ASTNodes.asString(fSelectedNode), elementName}; //$NON-NLS-1$
+		return SearchMessages.getFormattedString("OccurrencesFinder.label.singular", args); //$NON-NLS-1$
 	}
 	
 	public boolean visit(QualifiedName node) {
