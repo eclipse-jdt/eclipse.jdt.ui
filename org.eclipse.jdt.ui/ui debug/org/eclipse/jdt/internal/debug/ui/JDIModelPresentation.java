@@ -52,6 +52,10 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	private static final String EXCEPTION_USR= LABEL + "exception_usr";
 	private static final String BREAKPOINT_SYS= LABEL + "breakpoint_sys";
 	private static final String BREAKPOINT_USR= LABEL + "breakpoint_usr";
+	private static final String ACCESS_SYS= LABEL + "access_sys";
+	private static final String ACCESS_USR= LABEL + "access_usr";
+	private static final String MODIFICATION_SYS= LABEL + "modification_sys";
+	private static final String MODIFICATION_USR= LABEL + "modification_usr";	
 	private static final String RUN_TO_LINE_SYS= LABEL + "run_to_line_sys";
 	private static final String RUN_TO_LINE_USR= LABEL + "run_to_line_usr";
 	private static final String SUSPENDED_SYS= LABEL + "suspended_sys";
@@ -148,6 +152,23 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 					return getFormattedString(EXCEPTION_SYS, new String[] {thread.getName(), typeName});
 				} else {
 					return getFormattedString(EXCEPTION_USR, new String[] {thread.getName(), typeName});
+				}
+			}
+			if (JDIDebugModel.isWatchpoint(breakpoint)) {
+				String fieldName= JDIDebugModel.getField(breakpoint).getElementName();
+				if (JDIDebugModel.isAccess(breakpoint)) {
+					if (thread.isSystemThread()) {
+						return getFormattedString(ACCESS_SYS, new String[] {thread.getName(), fieldName, typeName});
+					} else {
+						return getFormattedString(ACCESS_USR, new String[] {thread.getName(), fieldName, typeName});
+					}
+				} else {
+					// modification
+					if (thread.isSystemThread()) {
+						return getFormattedString(MODIFICATION_SYS, new String[] {thread.getName(), fieldName, typeName});
+					} else {
+						return getFormattedString(MODIFICATION_USR, new String[] {thread.getName(), fieldName, typeName});
+					}
 				}
 			}
 			int lineNumber= breakpoint.getAttribute(IMarker.LINE_NUMBER, -1);
