@@ -29,7 +29,7 @@ public class RevertTextEditorTest extends RevertEditorTest {
 		EditorTestHelper.runEventQueue();
 	}
 
-	public void testRevertJavaEditor() throws PartInitException, BadLocationException {
+	public void testRevertTextEditor() throws PartInitException, BadLocationException {
 		// cold run
 		measureRevert(EditorTestHelper.findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
 	}
