@@ -8,10 +8,13 @@ import java.util.ArrayList;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -20,17 +23,18 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+
 import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ISourceElementRequestor;
 import org.eclipse.jdt.internal.compiler.SourceElementParser;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 
-public class OrganizeImportsOperation extends WorkspaceModifyOperation {
+public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 
 	public static interface IChooseImportQuery {
@@ -273,8 +277,12 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 		
 		fParsingError= null;
 	}
-	
-	public void execute(IProgressMonitor monitor) throws CoreException, InterruptedException {
+
+	/**
+	 * Runs the operation.
+	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
+	 */	
+	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();
@@ -289,7 +297,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 				references= findTypeReferences(fCompilationUnit);
 			} catch (ParsingError e) {
 				fParsingError= e.getProblem();
-				throw new InterruptedException();
+				throw new OperationCanceledException();
 			}
 							
 			IImportDeclaration[] decls= fCompilationUnit.getImports();
@@ -325,7 +333,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 				TypeInfo[] chosen= fChooseImportQuery.chooseImports(openChoices);
 				if (chosen == null) {
 					// cancel pressed by the user
-					throw new InterruptedException();
+					throw new OperationCanceledException();
 				}
 				for (int i= 0; i < chosen.length; i++) {
 					TypeInfo typeInfo= chosen[i];

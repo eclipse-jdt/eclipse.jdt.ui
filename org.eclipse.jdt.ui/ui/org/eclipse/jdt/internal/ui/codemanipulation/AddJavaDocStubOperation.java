@@ -6,14 +6,14 @@ package org.eclipse.jdt.internal.ui.codemanipulation;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
  * Add javadoc stubs to members. All members must belong to the same compilation unit.
  * If the parent type is open in an editor, be sure to pass over its working copy.
  */
-public class AddJavaDocStubOperation extends WorkspaceModifyOperation {
+public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	
 	private IMember[] fMembers;
 	
@@ -82,8 +82,12 @@ public class AddJavaDocStubOperation extends WorkspaceModifyOperation {
 			}
 		});	
 	}
-	
-	public void execute(IProgressMonitor monitor) throws CoreException, InterruptedException {
+
+	/**
+	 * Runs the operation.
+	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
+	 */	
+	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,9 +28,7 @@ import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -39,13 +36,12 @@ import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableWrapper;
 import org.eclipse.jdt.internal.ui.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
@@ -126,7 +122,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { type }, false);
 					ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 					try {
-						dialog.run(false, true, op);
+						dialog.run(false, true, new WorkbenchRunnableWrapper(op));
 					} catch (InvocationTargetException e) {
 						JavaPlugin.log(e);
 						MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$

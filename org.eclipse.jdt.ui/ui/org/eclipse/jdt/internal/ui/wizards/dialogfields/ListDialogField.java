@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt
 public class ListDialogField extends DialogField {
 	
 	protected TableViewer fTable;
-	protected WrappedTableLabelProvider fWrappedLabelProvider;
+	protected ILabelProvider fLabelProvider;
 	protected ListViewerAdapter fListViewerAdapter;
 	protected List fElements;
 
@@ -54,7 +54,7 @@ public class ListDialogField extends DialogField {
 		super();
 		fListAdapter= adapter;
 
-		fWrappedLabelProvider= new WrappedTableLabelProvider(lprovider);
+		fLabelProvider= lprovider;
 		fListViewerAdapter= new ListViewerAdapter();
 		fParentElement= this;
 
@@ -111,7 +111,7 @@ public class ListDialogField extends DialogField {
 	// ------ adapter communication
 	
 	private void buttonPressed(int index) {
-		if (!extraButtonPressed(index)) {
+		if (!managedButtonPressed(index)) {
 			fListAdapter.customButtonPressed(this, index);
 		}
 	}
@@ -120,7 +120,7 @@ public class ListDialogField extends DialogField {
 	 * Checks if the button pressed is handled internally
 	 * @return Returns true if button has been handled.
 	 */
-	protected boolean extraButtonPressed(int index) {
+	protected boolean managedButtonPressed(int index) {
 		if (index == fRemoveButtonIndex) {
 			remove();
 		} else if (index == fUpButtonIndex) {
@@ -201,7 +201,7 @@ public class ListDialogField extends DialogField {
 						
 			fTable= createTableViewer(parent);
 			fTable.setContentProvider(fListViewerAdapter);
-			fTable.setLabelProvider(fWrappedLabelProvider);
+			fTable.setLabelProvider(fLabelProvider);
 			fTable.addSelectionChangedListener(fListViewerAdapter);	
 			
 			fTableControl= (Table)fTable.getControl();
@@ -363,14 +363,14 @@ public class ListDialogField extends DialogField {
 			for (int i= 0; i < fButtonControls.length; i++) {
 				Button button= fButtonControls[i];
 				if (isOkToUse(button)) {
-					boolean extraState= getExtraButtonState(sel, i);
+					boolean extraState= getManagedButtonState(sel, i);
 					button.setEnabled(isEnabled() && extraState && fButtonsEnabled[i]);
 				}				
 			}
 		}
 	}
 	
-	protected boolean getExtraButtonState(ISelection sel, int index) {
+	protected boolean getManagedButtonState(ISelection sel, int index) {
 		if (index == fRemoveButtonIndex) {
 			return !sel.isEmpty();
 		} else if (index == fUpButtonIndex) {
@@ -720,40 +720,5 @@ public class ListDialogField extends DialogField {
 		if (fListAdapter != null) {
 			fListAdapter.selectionChanged(this);
 		}
-	}
-	
-	
-	private class WrappedTableLabelProvider implements ITableLabelProvider {
-
-		private ILabelProvider fLabelProvider;
-
-		public WrappedTableLabelProvider(ILabelProvider lprovider) {
-			fLabelProvider= lprovider;
-		}
-
-		public Image getColumnImage(Object element, int columnIndex) {
-			return fLabelProvider.getImage(element);
-		}
-
-		public String getColumnText(Object element, int columnIndex) {
-			return fLabelProvider.getText(element);
-		}
-		
-		public void addListener(ILabelProviderListener listener) {
-			fLabelProvider.addListener(listener);
-		}
-		
-		public void removeListener(ILabelProviderListener listener) {
-			fLabelProvider.removeListener(listener);
-		}
-	
-		public void dispose() {
-			fLabelProvider.dispose();
-		}
-
-		public boolean isLabelProperty(Object element, String property) {
-			return fLabelProvider.isLabelProperty(element, property);
-		}	
-	}
-	
+	}	
 }

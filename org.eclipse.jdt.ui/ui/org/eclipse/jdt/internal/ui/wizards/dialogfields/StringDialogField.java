@@ -122,7 +122,7 @@ public class StringDialogField extends DialogField {
 	// ------ text access 
 	
 	/**
-	 * Gets the text.
+	 * Gets the text. Can not be <code>null</code>
 	 */	
 	public String getText() {
 		return fText;

@@ -6,19 +6,18 @@ package org.eclipse.jdt.internal.ui.codemanipulation;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
@@ -27,7 +26,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
  * Methods are added without checking if they already exist (will result in duplicated methods)
  * If the parent type is open in an editor, be sure to pass over its working copy.
  */
-public class AddMethodStubOperation extends WorkspaceModifyOperation {
+public class AddMethodStubOperation implements IWorkspaceRunnable {
 		
 	private IType fType;
 	private IMethod[] fMethods;
@@ -50,11 +49,11 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 		fReplaceQuery= replaceQuery;
 	}
 	
-	private boolean queryOverrideFinalMethods(IMethod inheritedMethod) throws InterruptedException {
+	private boolean queryOverrideFinalMethods(IMethod inheritedMethod) throws OperationCanceledException {
 		if (!fOverrideAll) {
 			switch (fOverrideQuery.doQuery(inheritedMethod)) {
 				case IRequestQuery.CANCEL:
-					throw new InterruptedException();
+					throw new OperationCanceledException();
 				case IRequestQuery.NO:
 					return false;
 				case IRequestQuery.YES_ALL:
@@ -64,11 +63,11 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 		return true;
 	}
 	
-	private boolean queryReplaceMethods(IMethod method) throws InterruptedException {
+	private boolean queryReplaceMethods(IMethod method) throws OperationCanceledException {
 		if (!fReplaceAll) {
 			switch (fReplaceQuery.doQuery(method)) {
 				case IRequestQuery.CANCEL:
-					throw new InterruptedException();
+					throw new OperationCanceledException();
 				case IRequestQuery.NO:
 					return false;
 				case IRequestQuery.YES_ALL:
@@ -77,8 +76,12 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 		}
 		return true;
 	}	
-	
-	public void execute(IProgressMonitor monitor) throws CoreException, InterruptedException {
+
+	/**
+	 * Runs the operation.
+	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
+	 */	
+	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();
@@ -145,7 +148,7 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 				} finally {
 					monitor.worked(1);
 					if (monitor.isCanceled()) {
-						throw new InterruptedException();
+						throw new OperationCanceledException();
 					}
 				}
 			}

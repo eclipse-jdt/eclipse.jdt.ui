@@ -20,7 +20,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -79,10 +78,10 @@ public class AddJavaDocStubAction extends Action {
 					workingCopyMembers[i]= workingCopyMember;
 				}
 			}
-		
+			
 			AddJavaDocStubOperation op= new AddJavaDocStubOperation(workingCopyMembers);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
-			dialog.run(false, true, op);
+			dialog.run(false, true, new WorkbenchRunnableWrapper(op));
 					
 			EditorUtility.revealInEditor(editor, members[0]);	
 		} catch (InvocationTargetException e) {

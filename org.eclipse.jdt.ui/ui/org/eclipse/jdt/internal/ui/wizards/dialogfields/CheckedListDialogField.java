@@ -170,27 +170,27 @@ public class CheckedListDialogField extends ListDialogField {
 	// ------ enable / disable management
 	
 	/*
-	 * @see ListDialogField#getExtraButtonState
+	 * @see ListDialogField#getManagedButtonState
 	 */
-	protected boolean getExtraButtonState(ISelection sel, int index) {
+	protected boolean getManagedButtonState(ISelection sel, int index) {
 		if (index == fCheckAllButtonIndex) {
 			return !fElements.isEmpty();
 		} else if (index == fUncheckAllButtonIndex) {
 			return !fElements.isEmpty();
 		}
-		return super.getExtraButtonState(sel, index);
+		return super.getManagedButtonState(sel, index);
 	}	
 
 	/*
 	 * @see ListDialogField#extraButtonPressed
 	 */	
-	protected boolean extraButtonPressed(int index) {
+	protected boolean managedButtonPressed(int index) {
 		if (index == fCheckAllButtonIndex) {
 			checkAll(true);
 		} else if (index == fUncheckAllButtonIndex) {
 			checkAll(false);
 		} else {
-			return super.extraButtonPressed(index);
+			return super.managedButtonPressed(index);
 		}
 		return true;
 	}

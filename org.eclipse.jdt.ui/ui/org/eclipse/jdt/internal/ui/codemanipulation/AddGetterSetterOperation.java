@@ -7,12 +7,12 @@ package org.eclipse.jdt.internal.ui.codemanipulation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 /**
  * For given fields, method stubs for getters and setters are created.
  */
-public class AddGetterSetterOperation extends WorkspaceModifyOperation {
+public class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	private IField[] fFields;
 	private List fCreatedAccessors;
@@ -92,9 +92,10 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 	}
 	
 	/**
-	 * @see WorkbenchModifyOperation#execute
+	 * Runs the operation.
+	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
 	 */
-	public void execute(IProgressMonitor monitor) throws CoreException, InterruptedException {
+	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
@@ -105,7 +106,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 			for (int i= 0; i < nFields; i++) {
 				generateStubs(fFields[i], new SubProgressMonitor(monitor, 1));
 				if (monitor.isCanceled()) {
-					throw new InterruptedException();
+					throw new OperationCanceledException();
 				}
 			}
 		} finally {
@@ -113,11 +114,11 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 		}
 	}
 	
-	private boolean querySkipFinalSetters(IField field) throws InterruptedException {
+	private boolean querySkipFinalSetters(IField field) throws OperationCanceledException {
 		if (!fSkipAllFinalSetters) {
 			switch (fSkipFinalSettersQuery.doQuery(field)) {
 				case IRequestQuery.CANCEL:
-					throw new InterruptedException();
+					throw new OperationCanceledException();
 				case IRequestQuery.NO:
 					return false;
 				case IRequestQuery.YES_ALL:
@@ -127,11 +128,11 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 		return true;
 	}
 	
-	private boolean querySkipExistingMethods(IMethod method) throws InterruptedException {
+	private boolean querySkipExistingMethods(IMethod method) throws OperationCanceledException {
 		if (!fSkipAllExisting) {
 			switch (fSkipExistingQuery.doQuery(method)) {
 				case IRequestQuery.CANCEL:
-					throw new InterruptedException();
+					throw new OperationCanceledException();
 				case IRequestQuery.NO:
 					return false;
 				case IRequestQuery.YES_ALL:
@@ -144,7 +145,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 	/**
 	 * Creates setter and getter for a given field.
 	 */
-	private void generateStubs(IField field, IProgressMonitor monitor) throws JavaModelException, InterruptedException {
+	private void generateStubs(IField field, IProgressMonitor monitor) throws JavaModelException, OperationCanceledException {
 		try {
 			monitor.beginTask(CodeManipulationMessages.getFormattedString("AddGetterSetterOperation.processField", field.getElementName()), 2); //$NON-NLS-1$
 	

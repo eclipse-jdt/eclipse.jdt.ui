@@ -6,12 +6,12 @@ package org.eclipse.jdt.internal.ui.codemanipulation;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
  * Evaluates all unimplemented methods and creates them.
  * If the type is open in an editor, be sure to pass over the types working working copy.
  */
-public class AddUnimplementedMethodsOperation extends WorkspaceModifyOperation {
+public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 
 	private IType fType;
 	private IMethod[] fCreatedMethods;
@@ -34,7 +34,11 @@ public class AddUnimplementedMethodsOperation extends WorkspaceModifyOperation {
 		fCreatedMethods= null;
 	}
 
-	public void execute(IProgressMonitor monitor) throws CoreException {
+	/**
+	 * Runs the operation.
+	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
+	 */
+	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();

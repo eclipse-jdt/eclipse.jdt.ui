@@ -4,17 +4,18 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
@@ -23,7 +24,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
  * imports is done (use ImportStructure for this). Duplicates are not added.
  * If the compilation unit is open in an editor, be sure to pass over its working copy.
  */
-public class AddImportsOperation extends WorkspaceModifyOperation {
+public class AddImportsOperation implements IWorkspaceRunnable {
 	
 	private ICompilationUnit fCompilationUnit;
 	private IJavaElement[] fImports;
@@ -44,7 +45,11 @@ public class AddImportsOperation extends WorkspaceModifyOperation {
 		fDoSave= save;
 	}
 
-	public void execute(IProgressMonitor monitor) throws CoreException {
+	/**
+	 * Runs the operation.
+	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
+	 */
+	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();

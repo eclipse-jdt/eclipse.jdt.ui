@@ -5,7 +5,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +27,9 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableWrapper;
 import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation;
+import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
@@ -74,7 +74,7 @@ public class OrganizeImportsAction extends Action {
 			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, false, createChooseImportQuery());
 			try {
 				ProgressMonitorDialog dialog= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
-				dialog.run(false, true, op);
+				dialog.run(false, true, new WorkbenchRunnableWrapper(op));
 			} catch (InvocationTargetException e) {
 				JavaPlugin.log(e);
 				MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaEditorMessages.getString("OrganizeImportsAction.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
