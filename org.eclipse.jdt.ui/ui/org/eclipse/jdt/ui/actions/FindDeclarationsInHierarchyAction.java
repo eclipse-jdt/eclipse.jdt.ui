@@ -18,11 +18,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
@@ -46,17 +48,24 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindDeclarationsInHierarchyAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class, ILocalVariable.class } ); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.tooltip")); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_HIERARCHY_ACTION);
+		super(site);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindDeclarationsInHierarchyAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class, ILocalVariable.class} ); //$NON-NLS-1$
+		super(editor);
+	}
+	
+	Class[] getValidTypes() {
+		return new Class[] { IField.class, IMethod.class, ILocalVariable.class, ITypeParameter.class };
+	}
+	
+	void init() {
+		setText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.tooltip")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_HIERARCHY_ACTION);
 	}
 	

@@ -18,8 +18,8 @@ import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
@@ -41,20 +41,27 @@ public class FindReadReferencesAction extends FindReferencesAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindReadReferencesAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindReadReferencesAction.label"), new Class[] {IField.class, ILocalVariable.class } ); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindReadReferencesAction.tooltip")); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
+		super(site);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindReadReferencesAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindReadReferencesAction.label"), new Class[] {IField.class, ILocalVariable.class} ); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindReadReferencesAction.tooltip")); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
+		super(editor);
+	}
+	
+	Class[] getValidTypes() {
+		return new Class[] { IField.class, ILocalVariable.class };
 	}
 
+	void init() {
+		setText(SearchMessages.getString("Search.FindReadReferencesAction.label")); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindReadReferencesAction.tooltip")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
+	}
+	
 	int getLimitTo() {
 		return IJavaSearchConstants.READ_ACCESSES;
 	}	

@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
@@ -52,9 +53,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindReferencesInWorkingSetAction(IWorkbenchSite site) {
-		super(site);
-		init();
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKING_SET_ACTION);
+		this(site, null);
 	}
 
 	/**
@@ -66,7 +65,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 	 * @param workingSets	the working sets to be used in the search
 	 */
 	public FindReferencesInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets) {
-		this(site);
+		super(site);
 		fWorkingSets= workingSets;
 	}
 
@@ -74,44 +73,21 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindReferencesInWorkingSetAction(JavaEditor editor) {
-		super(editor);
-		init();
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKING_SET_ACTION);
+		this(editor, null);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindReferencesInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
-		this(editor);
+		super(editor);
 		fWorkingSets= workingSets;
 	}
-
-	private void init() {
+	
+	void init() {
 		setText(SearchMessages.getString("Search.FindReferencesInWorkingSetAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
-	}
-
-
-	FindReferencesInWorkingSetAction(IWorkbenchSite site, String label, Class[] validTypes) {
-		super(site, label, validTypes);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKING_SET_ACTION);
-	}
-
-	FindReferencesInWorkingSetAction(JavaEditor editor, String label, Class[] validTypes) {
-		super(editor, label, validTypes);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKING_SET_ACTION);
-	}
-
-	FindReferencesInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets, Class[] validTypes) {
-		super(site, "", validTypes);  //$NON-NLS-1$
-		fWorkingSets= workingSets;
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKING_SET_ACTION);
-	}
-
-	FindReferencesInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets, Class[] validTypes) {
-		super(editor, "", validTypes);  //$NON-NLS-1$
-		fWorkingSets= workingSets;
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 

@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
@@ -45,7 +46,6 @@ public class FindImplementorsInProjectAction extends FindImplementorsAction {
 	 */
 	public FindImplementorsInProjectAction(IWorkbenchSite site) {
 		super(site);
-		init();
 	}
 
 	/**
@@ -53,12 +53,12 @@ public class FindImplementorsInProjectAction extends FindImplementorsAction {
 	 */
 	public FindImplementorsInProjectAction(JavaEditor editor) {
 		super(editor);
-		init();
 	}
 
-	private void init() {
+	void init() {
 		setText(SearchMessages.getString("Search.FindImplementorsInProjectAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindImplementorsInProjectAction.tooltip")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_PROJECT_ACTION);
 	}
 	

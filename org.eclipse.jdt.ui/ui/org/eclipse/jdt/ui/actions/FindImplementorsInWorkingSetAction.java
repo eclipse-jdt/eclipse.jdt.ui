@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
@@ -50,8 +51,6 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 	 */
 	public FindImplementorsInWorkingSetAction(IWorkbenchSite site) {
 		super(site);
-		init();
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKING_SET_ACTION);
 	}
 
 	/**
@@ -72,8 +71,6 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 	 */
 	public FindImplementorsInWorkingSetAction(JavaEditor editor) {
 		super(editor);
-		init();
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKING_SET_ACTION);
 	}
 
 	/**
@@ -84,10 +81,11 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 		fWorkingSets= workingSets;
 	}
 
-
-	private void init() {
+	void init() {
 		setText(SearchMessages.getString("Search.FindImplementorsInWorkingSetAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindImplementorsInWorkingSetAction.tooltip")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKING_SET_ACTION);
 	}
 
 	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {

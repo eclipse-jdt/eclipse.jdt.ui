@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -41,17 +42,24 @@ public class FindWriteReferencesInHierarchyAction extends FindReferencesInHierar
 	 * @param site the site providing context information for this action
 	 */
 	public FindWriteReferencesInHierarchyAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindWriteReferencesInHierarchyAction.label"), new Class[] {IField.class, ILocalVariable.class } ); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesInHierarchyAction.tooltip")); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_HIERARCHY_ACTION);
+		super(site);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindWriteReferencesInHierarchyAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindWriteReferencesInHierarchyAction.label"), new Class[] {IField.class, ILocalVariable.class } ); //$NON-NLS-1$
+		super(editor);
+	}
+	
+	Class[] getValidTypes() {
+		return new Class[] { IField.class, ILocalVariable.class };
+	}
+	
+	void init() {
+		setText(SearchMessages.getString("Search.FindWriteReferencesInHierarchyAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesInHierarchyAction.tooltip")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 

@@ -22,11 +22,13 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
@@ -54,17 +56,24 @@ public class FindReferencesInProjectAction extends FindReferencesAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindReferencesInProjectAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindReferencesInProjectAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class }); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindReferencesInProjectAction.tooltip")); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_PROJECT_ACTION);
+		super(site);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindReferencesInProjectAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindReferencesInProjectAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class }); //$NON-NLS-1$
+		super(editor);
+	}
+	
+	Class[] getValidTypes() {
+		return new Class[] { IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class, ITypeParameter.class };
+	}
+	
+	void init() {
+		setText(SearchMessages.getString("Search.FindReferencesInProjectAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReferencesInProjectAction.tooltip")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_PROJECT_ACTION);
 	}
 

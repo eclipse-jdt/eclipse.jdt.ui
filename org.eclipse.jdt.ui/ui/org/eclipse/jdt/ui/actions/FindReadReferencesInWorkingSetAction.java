@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
@@ -43,9 +44,7 @@ public class FindReadReferencesInWorkingSetAction extends FindReferencesInWorkin
 	 * @param site the site providing context information for this action
 	 */
 	public FindReadReferencesInWorkingSetAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindReadReferencesInWorkingSetAction.label"), new Class[] {IField.class, ILocalVariable.class } ); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindReadReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKING_SET_ACTION);
+		super(site);
 	}
 
 	/**
@@ -57,24 +56,31 @@ public class FindReadReferencesInWorkingSetAction extends FindReferencesInWorkin
 	 * @param workingSets	the working sets to be used in the search
 	 */
 	public FindReadReferencesInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets) {
-		super(site, workingSets, new Class[] {IField.class, ILocalVariable.class });
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKING_SET_ACTION);
+		super(site, workingSets);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindReadReferencesInWorkingSetAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindReadReferencesInWorkingSetAction.label"), new Class[] {IField.class, ILocalVariable.class } ); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindReadReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKING_SET_ACTION);
+		super(editor);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindReadReferencesInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
-		super(editor, workingSets, new Class[] {IField.class, ILocalVariable.class});
+		super(editor, workingSets);
+	}
+	
+	Class[] getValidTypes() {
+		return new Class[] { IField.class, ILocalVariable.class };
+	}
+	
+	void init() {
+		setText(SearchMessages.getString("Search.FindReadReferencesInWorkingSetAction.label")); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindReadReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 

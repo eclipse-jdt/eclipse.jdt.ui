@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
@@ -45,7 +46,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  * @since 2.0
  */
 public class FindDeclarationsAction extends FindAction {
-
+	
 	/**
 	 * Creates a new <code>FindDeclarationsAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
@@ -54,28 +55,25 @@ public class FindDeclarationsAction extends FindAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindDeclarationsAction(IWorkbenchSite site) {
-		this(site, SearchMessages.getString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class }); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindDeclarationAction.tooltip")); //$NON-NLS-1$
+		super(site);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindDeclarationsAction(JavaEditor editor) {
-		this(editor, SearchMessages.getString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class}); //$NON-NLS-1$
+		super(editor);
+	}
+	
+	void init() {
+		setText(SearchMessages.getString("Search.FindDeclarationAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindDeclarationAction.tooltip")); //$NON-NLS-1$
-	}
-
-	FindDeclarationsAction(IWorkbenchSite site, String label, Class[] validTypes) {
-		super(site, label, validTypes);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKSPACE_ACTION);
 	}
-
-	FindDeclarationsAction(JavaEditor editor, String label, Class[] validTypes) {
-		super(editor, label, validTypes);
-		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKSPACE_ACTION);
+	
+	Class[] getValidTypes() {
+		return new Class[] { IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class, ITypeParameter.class };
 	}
 	
 	int getLimitTo() {

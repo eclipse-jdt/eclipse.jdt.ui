@@ -17,7 +17,6 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
@@ -42,26 +41,35 @@ public class WorkingSetFindAction extends FindAction {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public WorkingSetFindAction(IWorkbenchSite site, FindAction action, String workingSetName) {
-		super(site, workingSetName, null);
-		Assert.isNotNull(action);
-		fAction= action;
-		setImageDescriptor(action.getImageDescriptor());
-		setToolTipText(action.getToolTipText());
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.WORKING_SET_FIND_ACTION);
+		super(site);
+		init(action, workingSetName);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public WorkingSetFindAction(JavaEditor editor, FindAction action, String workingSetName) {
-		super(editor, workingSetName, null);
+		super(editor);
+		init(action, workingSetName);
+	}
+
+	Class[] getValidTypes() {
+		return null; // ignore, we override canOperateOn
+	}
+	
+	void init() {
+		// ignore: do our own init in 'init(FindAction, String)'
+	}
+	
+	private void init(FindAction action, String workingSetName) {
 		Assert.isNotNull(action);
 		fAction= action;
+		setText(workingSetName);
 		setImageDescriptor(action.getImageDescriptor());
 		setToolTipText(action.getToolTipText());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.WORKING_SET_FIND_ACTION);
 	}
-
+	
 	public void run(IJavaElement element) {
 		fAction.run(element);
 	}

@@ -70,18 +70,31 @@ public abstract class FindAction extends SelectionDispatchAction {
 	private JavaEditor fEditor;	
 
 
-	FindAction(IWorkbenchSite site, String label, Class[] validTypes) {
+	FindAction(IWorkbenchSite site) {
 		super(site);
-		setText(label);
-		fValidTypes= validTypes;
+		fValidTypes= getValidTypes();
+		init();
 	}
 
-	FindAction(JavaEditor editor, String label, Class[] validTypes) {
-		this (editor.getEditorSite(), label, validTypes);
+	FindAction(JavaEditor editor) {
+		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
+	
+	/**
+	 * Called once by the constructors to initialize label, tooltip, image and help support of the action.
+	 * To be overridden by implementors of this action.
+	 */
+	abstract void init();
 
+	/**
+	 * Called once by the constructors to get the list of the valid input types of the action.
+	 * To be overridden by implementors of this action.
+	 * @return the valid input types of the action
+	 */
+	abstract Class[] getValidTypes();
+	
 	private boolean canOperateOn(IStructuredSelection sel) {
 		return sel != null && !sel.isEmpty() && canOperateOn(getJavaElement(sel, true));
 	}

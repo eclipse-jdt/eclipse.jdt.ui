@@ -24,6 +24,7 @@ import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
@@ -55,8 +56,6 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 	 */
 	public FindDeclarationsInWorkingSetAction(IWorkbenchSite site) {
 		super(site);
-		init();
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKING_SET_ACTION);
 	}
 
 	/**
@@ -77,8 +76,6 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 	 */
 	public FindDeclarationsInWorkingSetAction(JavaEditor editor) {
 		super(editor);
-		init();
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKING_SET_ACTION);
 	}
 
 	/**
@@ -89,10 +86,13 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 		fWorkingSet= workingSets;
 	}
 
-	private void init() {
+	void init() {
 		setText(SearchMessages.getString("Search.FindDeclarationsInWorkingSetAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInWorkingSetAction.tooltip")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKING_SET_ACTION);
 	}
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.FindDeclarationsAction#createJob(org.eclipse.jdt.core.IJavaElement, org.eclipse.jdt.internal.ui.search.JavaSearchResult)

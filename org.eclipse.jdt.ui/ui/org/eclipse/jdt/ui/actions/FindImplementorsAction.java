@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -46,23 +45,25 @@ public class FindImplementorsAction extends FindAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindImplementorsAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {ICompilationUnit.class, IType.class}); //$NON-NLS-1$
-		init();
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION);
+		super(site); //$NON-NLS-1$
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindImplementorsAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {ICompilationUnit.class, IType.class}); //$NON-NLS-1$
-		init();
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION);
+		super(editor); //$NON-NLS-1$
 	}
 
-	private void init() {
+	void init() {
+		setText(SearchMessages.getString("Search.FindImplementorsAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindImplementorsAction.tooltip")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION);
+	}
+	
+	Class[] getValidTypes() {
+		return new Class[] { ICompilationUnit.class, IType.class};
 	}
 
 	boolean canOperateOn(IJavaElement element) {

@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -54,26 +55,23 @@ public class FindReferencesAction extends FindAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindReferencesAction(IWorkbenchSite site) {
-		this(site, SearchMessages.getString("Search.FindReferencesAction.label"), new Class[] {ICompilationUnit.class, IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class }); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindReferencesAction.tooltip")); //$NON-NLS-1$
+		super(site);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindReferencesAction(JavaEditor editor) {
-		this(editor, SearchMessages.getString("Search.FindReferencesAction.label"), new Class[] {ICompilationUnit.class, IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class }); //$NON-NLS-1$
+		super(editor);
+	}
+	
+	Class[] getValidTypes() {
+		return new Class[] { ICompilationUnit.class, IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class, ITypeParameter.class };
+	}
+	
+	void init() {
+		setText(SearchMessages.getString("Search.FindReferencesAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReferencesAction.tooltip")); //$NON-NLS-1$
-	}
-
-	FindReferencesAction(IWorkbenchSite site, String label, Class[] validTypes) {
-		super(site, label, validTypes);
-		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKSPACE_ACTION);
-	}
-
-	FindReferencesAction(JavaEditor editor, String label, Class[] validTypes) {
-		super(editor, label, validTypes);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKSPACE_ACTION);
 	}

@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
@@ -42,7 +43,6 @@ public class FindReadReferencesInProjectAction extends FindReadReferencesAction 
 	 */
 	public FindReadReferencesInProjectAction(IWorkbenchSite site) {
 		super(site);
-		init();
 	}
 
 	/**
@@ -50,12 +50,12 @@ public class FindReadReferencesInProjectAction extends FindReadReferencesAction 
 	 */
 	public FindReadReferencesInProjectAction(JavaEditor editor) {
 		super(editor);
-		init();
 	}
 
-	private void init() {
+	void init() {
 		setText(SearchMessages.getString("Search.FindReadReferencesInProjectAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReadReferencesInProjectAction.tooltip")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_PROJECT_ACTION);
 	}
 	

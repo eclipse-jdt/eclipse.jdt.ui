@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
@@ -46,7 +47,6 @@ public class FindWriteReferencesInProjectAction extends FindWriteReferencesActio
 	 */
 	public FindWriteReferencesInProjectAction(IWorkbenchSite site) {
 		super(site);
-		init();
 	}
 
 	/**
@@ -54,12 +54,12 @@ public class FindWriteReferencesInProjectAction extends FindWriteReferencesActio
 	 */
 	public FindWriteReferencesInProjectAction(JavaEditor editor) {
 		super(editor);
-		init();
 	}
-
-	private void init() {
+	
+	void init() {
 		setText(SearchMessages.getString("Search.FindWriteReferencesInProjectAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesInProjectAction.tooltip")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_PROJECT_ACTION);
 	}
 	

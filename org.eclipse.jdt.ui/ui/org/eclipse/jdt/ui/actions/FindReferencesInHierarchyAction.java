@@ -19,11 +19,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
@@ -47,27 +49,24 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindReferencesInHierarchyAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {ICompilationUnit.class, IType.class, IMethod.class, IField.class, ILocalVariable.class }); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindHierarchyReferencesAction.tooltip")); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
+		super(site);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindReferencesInHierarchyAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {ICompilationUnit.class, IType.class, IMethod.class, IField.class, ILocalVariable.class }); //$NON-NLS-1$
+		super(editor);
+	}
+	
+	Class[] getValidTypes() {
+		return new Class[] { ICompilationUnit.class, IType.class, IMethod.class, IField.class, ILocalVariable.class, ITypeParameter.class };
+	}
+	
+	void init() {
+		setText(SearchMessages.getString("Search.FindHierarchyReferencesAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyReferencesAction.tooltip")); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
-	}
-
-	FindReferencesInHierarchyAction(IWorkbenchSite site, String label, Class[] validTypes) {
-		super(site, label, validTypes);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
-	}
-
-	FindReferencesInHierarchyAction(JavaEditor editor, String label, Class[] validTypes) {
-		super(editor, label, validTypes);
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 
