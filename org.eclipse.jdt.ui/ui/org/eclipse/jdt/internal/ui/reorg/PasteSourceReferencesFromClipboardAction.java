@@ -30,9 +30,10 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchAction {
@@ -173,10 +174,11 @@ public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchA
 			TypedSource[] elems= getContentsToPaste();
 			
 			IJavaElement element= (IJavaElement)selected;
-			int tabWidth= CodeFormatterPreferencePage.getTabSize();
+			int tabWidth= CodeFormatterUtil.getTabWidth();
 			for (int i= 0; i < elems.length; i++) {
-				String[] source= new String[]{elems[i].getSource()};
-				tbe.add(new MemberEdit(element, style, source, tabWidth));
+				String[] source= Strings.convertIntoLines(elems[i].getSource());
+				MemberEdit edit= new MemberEdit(element, style, source, tabWidth);
+				tbe.add(edit);
 			}
 			if (! tbe.canPerformEdits())
 				return; ///XXX
