@@ -889,7 +889,6 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	public boolean visit(TypeDeclarationStatement node) {
 		node.getTypeDeclaration().accept(this);
-		fResult.append(";");//$NON-NLS-1$
 		return false;
 	}
 
