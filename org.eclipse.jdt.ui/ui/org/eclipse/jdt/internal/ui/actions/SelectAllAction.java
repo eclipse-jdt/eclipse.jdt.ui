@@ -2,15 +2,12 @@
  * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.browsing;
+package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TableViewer;
 
-import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -18,21 +15,20 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 /**
  * This action selects all entries currently showing in view.
  */
-class SelectAllAction extends Action implements ISelectionListener {
+public class SelectAllAction extends Action {
 
 	private TableViewer fViewer;
 
 	/**
 	 * Creates the action.
 	 */
-	SelectAllAction(TableViewer viewer) {
+	public SelectAllAction(TableViewer viewer) {
 		super("selectAll"); //$NON-NLS-1$
-		setText(JavaBrowsingMessages.getString("SelectAllAction.label")); //$NON-NLS-1$
-		setToolTipText(JavaBrowsingMessages.getString("SelectAllAction.tooltip")); //$NON-NLS-1$
+		setText(ActionMessages.getString("SelectAllAction.label")); //$NON-NLS-1$
+		setToolTipText(ActionMessages.getString("SelectAllAction.tooltip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SELECT_ALL_ACTION);
 		Assert.isNotNull(viewer);
 		fViewer= viewer;
-		updateEnablement();
 	}
 
 	/**
@@ -42,17 +38,5 @@ class SelectAllAction extends Action implements ISelectionListener {
 		fViewer.getTable().selectAll();
 		// force viewer selection change
 		fViewer.setSelection(fViewer.getSelection());
-	}
-
-	/* (non-Javadoc)
-	 * Method declared on ISelectionListener.
-	 */
-	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-		updateEnablement();
-	}
-
-	private void updateEnablement() {
-		boolean enabled= fViewer.getTable().getItemCount() > 0;
-		setEnabled(enabled);
 	}
 }

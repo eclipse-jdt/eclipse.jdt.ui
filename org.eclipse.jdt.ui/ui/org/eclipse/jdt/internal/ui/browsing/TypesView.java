@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
+import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -133,12 +134,5 @@ public class TypesView extends JavaBrowsingPart {
 		
 		// Add selectAll action handlers.
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, fSelectAllAction);
-		getViewSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(fSelectAllAction);
-	}
-	
-	public void dispose() {
-		if (fSelectAllAction != null)
-			getViewSite().getWorkbenchWindow().getSelectionService().removePostSelectionListener(fSelectAllAction);
-		super.dispose();
 	}
 }
