@@ -107,7 +107,7 @@ public class NewGroup extends ContextMenuGroup {
 		try {
 			if (obj instanceof IJavaElement) {
 				IJavaElement elem= (IJavaElement)obj;
-				return JavaModelUtil.isOnBuildPath(elem.getJavaProject(), elem);
+				return elem.getJavaProject().isOnClasspath(elem);
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e.getStatus());

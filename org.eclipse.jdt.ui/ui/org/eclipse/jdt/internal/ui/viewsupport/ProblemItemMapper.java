@@ -16,8 +16,7 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 /**
  * Helper class for updating error markers.
@@ -174,7 +173,12 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 	 */	
 	private static IPath getCorrespondingPath(Object element) {
 		if (element instanceof IJavaElement) {
-			return JavaModelUtil.getUnderlyingPath((IJavaElement)element);
+			IJavaElement elem= (IJavaElement) element;
+			IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			if (root != null && !root.isArchive()) {
+				return elem.getPath();
+			}
+			return null;
 		} else if (element instanceof IResource) {
 			return ((IResource)element).getFullPath();
 		}

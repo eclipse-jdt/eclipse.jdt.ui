@@ -21,7 +21,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 
 public class JavaElementLabels {
 	
@@ -484,7 +483,7 @@ public class JavaElementLabels {
 	 */	
 	public static void getDeclararionLabel(IJavaElement declaration, int flags, StringBuffer buf) {
 		if (getFlag(flags, D_QUALIFIED)) {
-			IJavaElement openable= (IJavaElement) JavaModelUtil.getOpenable(declaration);
+			IJavaElement openable= (IJavaElement) declaration.getOpenable();
 			if (openable != null) {
 				buf.append(getElementLabel(openable, CF_QUALIFIED | CU_QUALIFIED));
 				buf.append('/');
@@ -497,7 +496,7 @@ public class JavaElementLabels {
 		}
 		// post qualification
 		if (getFlag(flags, D_POST_QUALIFIED)) {
-			IJavaElement openable= (IJavaElement) JavaModelUtil.getOpenable(declaration);
+			IJavaElement openable= (IJavaElement) declaration.getOpenable();
 			if (openable != null) {
 				buf.append(CONCAT_STRING);
 				buf.append(getElementLabel(openable, CF_QUALIFIED | CU_QUALIFIED));
@@ -585,7 +584,7 @@ public class JavaElementLabels {
 	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
 		if (root.isArchive() && getFlag(flags, ROOT_VARIABLE)) {
 			try {
-				IClasspathEntry rawEntry= JavaModelUtil.getRawClasspathEntry(root);
+				IClasspathEntry rawEntry= root.getRawClasspathEntry();
 				if (rawEntry != null) {
 					if (rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
 						buf.append(rawEntry.getPath().makeRelative());

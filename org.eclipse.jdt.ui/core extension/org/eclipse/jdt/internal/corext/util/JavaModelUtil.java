@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
@@ -144,28 +143,9 @@ public class JavaModelUtil {
 	 * @return the member found, or null if not existing
 	 */		
 	public static IMember findMemberInCompilationUnit(ICompilationUnit cu, IMember member) throws JavaModelException {
-		if (member.getElementType() == IJavaElement.TYPE) {
-			return findTypeInCompilationUnit(cu, getTypeQualifiedName((IType)member));
-		} else {
-			IType declaringType= findTypeInCompilationUnit(cu, getTypeQualifiedName(member.getDeclaringType()));
-			if (declaringType != null) {
-				IMember result= null;
-				switch (member.getElementType()) {
-				case IJavaElement.FIELD:
-					result= declaringType.getField(member.getElementName());
-					break;
-				case IJavaElement.METHOD:
-					IMethod meth= (IMethod) member;
-					result= findMethod(meth.getElementName(), meth.getParameterTypes(), meth.isConstructor(), declaringType);
-					break;
-				case IJavaElement.INITIALIZER:
-					result= declaringType.getInitializer(1);
-					break;					
-				}
-				if (result != null && result.exists()) {
-					return result;
-				}
-			}
+		IJavaElement[] elements= cu.findElements(member);
+		if (elements != null && elements.length > 0) {
+			return (IMember) elements[0];
 		}
 		return null;
 	}
@@ -174,35 +154,13 @@ public class JavaModelUtil {
 	/**
 	 * Gets the primary type of a compilation unit (type with the same name as the
 	 * compilation unit), or <code>null</code> if not existing.
+	 * @deprecated Use cu.findPrimaryType();
 	 */
 	public static IType findPrimaryType(ICompilationUnit cu) {
-		String typeName= Signature.getQualifier(cu.getElementName());
-		IType primaryType= cu.getType(typeName);
-		if (primaryType.exists()) {
-			return primaryType;
-		}
-		return null;
+		return cu.findPrimaryType();
 	}
 	
-	
-	/**
-	 * Finds a JavaElement by name.
-	 * 
-	 * @param elements the array to choose from
-	 * @param name Name of the element to find
-	 * @return the first member of the given array with the name given
-	 */
-	private static IJavaElement find(IJavaElement[] elements, String name) {
-		if (elements == null || name == null)
-			return null;
-			
-		for (int i= 0; i < elements.length; i++) {
-			if (name.equals(elements[i].getElementName()))
-				return elements[i];
-		}
-		
-		return null;
-	}
+
 	
 	/** 
 	 * Returns the element of the given compilation unit which is "equal" to the
@@ -214,25 +172,10 @@ public class JavaModelUtil {
 	 * @return an element of the given cu "equal" to the given element
 	 */		
 	public static IJavaElement findInCompilationUnit(ICompilationUnit cu, IJavaElement element) throws JavaModelException {
-		
-		if (element instanceof IMember)
-			return findMemberInCompilationUnit(cu, (IMember) element);
-		
-		int type= element.getElementType();
-		switch (type) {
-			case IJavaElement.IMPORT_CONTAINER:
-				return cu.getImportContainer();
-			
-			case IJavaElement.PACKAGE_DECLARATION:
-				return find(cu.getPackageDeclarations(), element.getElementName());
-			
-			case IJavaElement.IMPORT_DECLARATION:
-				return find(cu.getImports(), element.getElementName());
-			
-			case IJavaElement.COMPILATION_UNIT:
-				return cu;
+		IJavaElement[] elements= cu.findElements(element);
+		if (elements != null && elements.length > 0) {
+			return elements[0];
 		}
-		
 		return null;
 	}
 	
@@ -291,60 +234,23 @@ public class JavaModelUtil {
 	 * Gets the path of the underlying resource without throwing
 	 * a JavaModelException if the resource does not exist.
 	 * Returns <code>null</code> for libararies and elemens in libraries.
+	* @deprecated Use elem.getPath();
 	 */
 	public static IPath getUnderlyingPath(IJavaElement elem) {
-		switch (elem.getElementType()) {
-			case IJavaElement.JAVA_MODEL:
-				return null;
-			case IJavaElement.JAVA_PROJECT:
-				return ((IJavaProject)elem).getProject().getFullPath();
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				IPackageFragmentRoot root= (IPackageFragmentRoot)elem;
-				if (!root.isArchive()) {
-					return root.getPath();
-				}
-				return null;
-			case IJavaElement.PACKAGE_FRAGMENT:
-				String packName= elem.getElementName();
-				IPath rootPath= getUnderlyingPath(elem.getParent());
-				if (rootPath != null && packName.length() > 0) {
-					rootPath= rootPath.append(packName.replace('.', '/'));
-				}
-				return rootPath;		
-			case IJavaElement.CLASS_FILE:
-			case IJavaElement.COMPILATION_UNIT:
-				IPath packPath= getUnderlyingPath(elem.getParent());
-				if (packPath != null) {
-					packPath= packPath.append(elem.getElementName());
-				}
-				return packPath;
-			default:
-				IOpenable openable= JavaModelUtil.getOpenable(elem);
-				if (openable instanceof IJavaElement) {
-					return getUnderlyingPath((IJavaElement)openable);
-				}
-				return null;
+		IPackageFragmentRoot root= getPackageFragmentRoot(elem);
+		if (root != null && !root.isArchive()) {
+			return elem.getPath();
 		}
+		return null;
 	}	
 		
 	/**
 	 * Returns the raw class path entry corresponding to a package fragment root
 	 * or null if there isn't a corresponding entry.
+	 * @deprecated Use root.getRawClasspathEntry();
 	 */
 	public static IClasspathEntry getRawClasspathEntry(IPackageFragmentRoot root) throws JavaModelException {
-		IPath path= root.getPath();
-		IClasspathEntry[] entries= root.getJavaProject().getRawClasspath();
-		for (int i= 0; i < entries.length; i++) {
-			IClasspathEntry curr= entries[i];
-		
-			if (curr.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-				curr= JavaCore.getResolvedClasspathEntry(curr);
-			}
-			if (curr != null && curr.getContentKind() == root.getKind() && path.equals(curr.getPath())) {
-				return entries[i];
-			}
-		}
-		return null;
+		return root.getRawClasspathEntry();
 	}
 
 	/**
@@ -386,19 +292,10 @@ public class JavaModelUtil {
 		
 	/**
 	 * Returns true if the element is on the build path of the given project
+	 * @deprecated Use jproject.isOnClasspath(element);
 	 */	
 	public static boolean isOnBuildPath(IJavaProject jproject, IJavaElement element) throws JavaModelException {
-		IPath rootPath;
-		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
-			rootPath= ((IJavaProject)element).getProject().getFullPath();
-		} else {
-			IPackageFragmentRoot root= getPackageFragmentRoot(element);
-			if (root == null) {
-				return false;
-			}
-			rootPath= root.getPath();
-		}
-		return jproject.findPackageFragmentRoot(rootPath) != null;
+		return jproject.isOnClasspath(element);
 	}
 	
 	
@@ -407,29 +304,29 @@ public class JavaModelUtil {
 	 * element is already a package fragment root, the element itself is returned.
 	 */
 	public static IPackageFragmentRoot getPackageFragmentRoot(IJavaElement element) {
-		return (IPackageFragmentRoot)findElementOfKind(element, IJavaElement.PACKAGE_FRAGMENT_ROOT);
+		return (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 	}
 
 	/**
 	 * Returns the first openable parent. If the given element is openable, the element
 	 * itself is returned.
+	 * @deprecated Use element.getOpenable();
 	 */
 	public static IOpenable getOpenable(IJavaElement element) {
-		while (element != null && !(element instanceof IOpenable)) {
-			element= element.getParent();
-		}
-		return (IOpenable) element;	
+		return element.getOpenable();
 	}		
 	
 	
 	/**
 	 * Returns the parent of the supplied java element that conforms to the given 
 	 * parent type or <code>null</code>, if such a parent doesn't exit.
+	 * @deprecated Use element.getParent().getAncestor(kind);
 	 */
 	public static IJavaElement findParentOfKind(IJavaElement element, int kind) {
-		if (element == null)
-			return null;
-		return findElementOfKind(element.getParent(), kind);	
+		if (element != null && element.getParent() != null) {
+			return element.getParent().getAncestor(kind);
+		}
+		return null;
 	}
 	
 	/**
@@ -437,11 +334,10 @@ public class JavaModelUtil {
 	 * java element's parent relationship. If the given element alrady conforms to
 	 * the given kind, the element is returned.
 	 * Returns <code>null</code> if no such element exits.
+	 * @deprecated Use element.getAncestor(kind);
 	 */
 	public static IJavaElement findElementOfKind(IJavaElement element, int kind) {
-		while (element != null && element.getElementType() != kind)
-			element= element.getParent();
-		return element;				
+		return element.getAncestor(kind);
 	}
 
 	/**
