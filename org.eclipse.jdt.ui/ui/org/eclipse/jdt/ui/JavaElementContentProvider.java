@@ -81,9 +81,11 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		int flags= delta.getFlags();
 		IJavaElement element= delta.getElement();
 
-		if (!getProvideWorkingCopy() && element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
+		if (!getProvideWorkingCopy() && element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy())
 			return;
-		}
+
+		if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT && !element.getJavaProject().isOnClasspath(element))
+			return;
 			 
 		// handle open and closing of a solution or project
 		if (((flags & IJavaElementDelta.F_CLOSED) != 0) || ((flags & IJavaElementDelta.F_OPENED) != 0)) {			
