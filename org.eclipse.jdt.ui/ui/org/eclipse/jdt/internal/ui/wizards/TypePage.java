@@ -1177,11 +1177,6 @@ public abstract class TypePage extends ContainerPage {
 			
 			String content= createTypeBody(imports, lineDelimiter);
 			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 5));
-
-			String fileComment= getFileComment();
-			if (fileComment != null) {
-				parentCU.getBuffer().replace(0, 0, fileComment + lineDelimiter);
-			}
 		} else {
 			IType enclosingType= getEnclosingType();
 			
@@ -1234,6 +1229,10 @@ public abstract class TypePage extends ContainerPage {
 		String formattedContent= StubUtility.codeFormat(originalContent, indent, lineDelimiter);
 		buf.replace(range.getOffset(), range.getLength(), formattedContent);
 		if (!isInnerClass) {
+			String fileComment= getFileComment();
+			if (fileComment != null) {
+				buf.replace(0, 0, fileComment + lineDelimiter);
+			}
 			buf.save(new SubProgressMonitor(monitor, 1), false);
 		} else {
 			monitor.worked(1);

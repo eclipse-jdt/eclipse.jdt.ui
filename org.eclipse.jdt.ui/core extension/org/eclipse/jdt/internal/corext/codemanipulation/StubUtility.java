@@ -350,7 +350,7 @@ public class StubUtility {
 				// 1G4CKUS
 				if (!Flags.isStatic(curr.getFlags())) {
 					IMethod impl= findMethod(curr, allMethods);
-					if (impl == null || curr.getExceptionTypes().length < impl.getExceptionTypes().length) {
+					if (impl == null || ((curr.getExceptionTypes().length < impl.getExceptionTypes().length) && !Flags.isFinal(impl.getFlags()))) {
 						if (impl != null) {
 							allMethods.remove(impl);
 						}
