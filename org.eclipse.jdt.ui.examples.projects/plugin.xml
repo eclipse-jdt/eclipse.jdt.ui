@@ -27,7 +27,6 @@
             id="org.eclipse.jdt.ui.java">
       </category>
       <wizard
-            banner="icons/full/wizban/newjprjex_wiz.gif"
             name="%JUnitProjectExampleCreationWizard.title"
             icon="icons/full/etool16/newjprjex_wiz.gif"
             category="org.eclipse.ui.Examples/org.eclipse.jdt.ui.java"
