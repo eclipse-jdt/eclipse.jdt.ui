@@ -57,8 +57,8 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetEditWizard;
+import org.eclipse.ui.dialogs.IWorkingSetNewWizard;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.internal.dialogs.WorkingSetNewWizard;
 
 public class WorkingSetConfigurationDialog extends SelectionDialog {
 
@@ -338,12 +338,12 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	}
 
 	private void createWorkingSet() {
-		WorkingSetNewWizard wizard= new WorkingSetNewWizard();
+		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
+		IWorkingSetNewWizard wizard= manager.createWorkingSetNewWizard(new String[] {JavaWorkingSetUpdater.ID});
+		// the wizard can't be null since we have at least the Java working set.
 		WizardDialog dialog= new WizardDialog(getShell(), wizard);
-
 		dialog.create();
 		if (dialog.open() == Window.OK) {
-			IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 			IWorkingSet workingSet= wizard.getSelection();
 			Filter filter= new Filter();
 			if (filter.select(null, null, workingSet)) {
