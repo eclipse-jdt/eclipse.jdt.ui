@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 public class JavaProblemHover extends AbstractJavaEditorTextHover {
 
-	private static String ID= "org.eclipse.jdt.internal.ui.text.java.hover.JavaProblemHover"; //$NON-NLS-1$
+	private static final String ID= "org.eclipse.jdt.internal.ui.text.java.hover.JavaProblemHover"; //$NON-NLS-1$
 	
 	/*
 	 * Formats a message as HTML text.

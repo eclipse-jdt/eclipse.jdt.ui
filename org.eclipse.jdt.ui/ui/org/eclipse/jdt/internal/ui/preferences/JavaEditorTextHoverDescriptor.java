@@ -37,11 +37,11 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  */
 public class JavaEditorTextHoverDescriptor implements Comparable {
 
-	private final static String JAVA_EDITOR_TEXT_HOVER_EXTENSION_POINT= "org.eclipse.jdt.ui.javaEditorTextHovers"; //$NON-NLS-1$
-	private final static String HOVER_TAG= "hover"; //$NON-NLS-1$
-	private final static String ID_ATTRIBUTE= "id"; //$NON-NLS-1$
-	private static String CLASS_ATTRIBUTE= "class"; //$NON-NLS-1$
-	private final static String LABEL_ATTRIBUTE= "label"; //$NON-NLS-1$
+	private static final String JAVA_EDITOR_TEXT_HOVER_EXTENSION_POINT= "org.eclipse.jdt.ui.javaEditorTextHovers"; //$NON-NLS-1$
+	private static final String HOVER_TAG= "hover"; //$NON-NLS-1$
+	private static final String ID_ATTRIBUTE= "id"; //$NON-NLS-1$
+	private static final String CLASS_ATTRIBUTE= "class"; //$NON-NLS-1$
+	private static final String LABEL_ATTRIBUTE= "label"; //$NON-NLS-1$
 	
 	private IConfigurationElement fElement;
 	
