@@ -15,9 +15,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaCore;
@@ -130,11 +134,19 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 			IJavaElement je= (IJavaElement) match.getElement();
 			if (editorInput instanceof IFileEditorInput) {
 				IFile inputFile= ((IFileEditorInput)editorInput).getFile();
-				try {
-					return inputFile.equals(je.getUnderlyingResource());
-				} catch (JavaModelException e) {
-					return false;
+				IResource matchFile= null;
+				ICompilationUnit cu= (ICompilationUnit) je.getAncestor(IJavaElement.COMPILATION_UNIT);
+				if (cu != null) {
+					matchFile= cu.getResource();
+				} else {
+					IClassFile cf= (IClassFile) je.getAncestor(IJavaElement.CLASS_FILE);
+					if (cf != null)
+						matchFile= cf.getResource();
 				}
+				if (matchFile != null)
+					return inputFile.equals(matchFile);
+				else
+					return false;
 			} else if (editorInput instanceof IClassFileEditorInput) {
 				return ((IClassFileEditorInput)editorInput).getClassFile().equals(je.getAncestor(IJavaElement.CLASS_FILE));
 			}
