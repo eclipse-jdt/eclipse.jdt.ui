@@ -30,6 +30,7 @@ public class ImportEdit extends SimpleTextEdit {
 	private ICompilationUnit fCUnit;
 	private CodeGenerationSettings fSettings;
 	private List fImports;
+	private boolean fFilterImplicitImports;
 	
 	public ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings) {
 		Assert.isNotNull(cunit);
@@ -37,11 +38,19 @@ public class ImportEdit extends SimpleTextEdit {
 		fCUnit= cunit;
 		fSettings= settings;
 		fImports= new ArrayList(3);
+		fFilterImplicitImports= true;
 	}
 
 	private ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings, List imports) {
 		this(cunit, settings);
 		fImports= new ArrayList(imports);
+	}
+	
+	/**
+	 * @see ImportsStructure#setFilterImplicitImports(boolean)
+	 */
+	public void setFilterImplicitImports(boolean filterImplicitImports) {
+		fFilterImplicitImports= filterImplicitImports;
 	}
 	
 	/**
@@ -76,6 +85,7 @@ public class ImportEdit extends SimpleTextEdit {
 	public void connect(TextBufferEditor editor) throws CoreException {
 		TextBuffer buffer= editor.getTextBuffer();
 		ImportsStructure importStructure= new ImportsStructure(fCUnit, fSettings.importOrder, fSettings.importThreshold, true);
+		importStructure.setFilterImplicitImports(fFilterImplicitImports);
 		for (Iterator iter= fImports.iterator(); iter.hasNext();) {
 			importStructure.addImport((String)iter.next());
 		}
