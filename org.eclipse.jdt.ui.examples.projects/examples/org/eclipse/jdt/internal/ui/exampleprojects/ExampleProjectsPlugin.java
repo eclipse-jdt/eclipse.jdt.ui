@@ -67,7 +67,7 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 	}
 
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Internal Error", e));
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Internal Error", e)); //$NON-NLS-1$
 	}
 
 }

@@ -33,16 +33,16 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 	private Text fTextControl;
 	
 	public ExampleProjectCreationWizardPage(int pageNumber, IConfigurationElement elem) {
-		super("page" + pageNumber);
-		fCurrStatus= createStatus(IStatus.OK, "");
+		super("page" + pageNumber); //$NON-NLS-1$
+		fCurrStatus= createStatus(IStatus.OK, ""); //$NON-NLS-1$
 		
 		fConfigurationElement= elem;
 		
-		setTitle(getAttribute(elem, "pagetitle"));
-		setDescription(getAttribute(elem, "pagedescription"));
+		setTitle(getAttribute(elem, "pagetitle")); //$NON-NLS-1$
+		setDescription(getAttribute(elem, "pagedescription")); //$NON-NLS-1$
 		
-		fNameLabel= getAttribute(elem, "label");
-		fProjectName= getAttribute(elem, "name");		
+		fNameLabel= getAttribute(elem, "label"); //$NON-NLS-1$
+		fProjectName= getAttribute(elem, "name");		 //$NON-NLS-1$
 		
 	}
 	
@@ -86,7 +86,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		IStatus status= workspace.validateName(text, IResource.PROJECT);
 		if (status.isOK()) {
 			if (workspace.getRoot().getProject(text).exists()) {
-				status= createStatus(IStatus.ERROR, ExampleProjectMessages.getString("ExampleProjectCreationWizardPage.error.alreadyexists"));
+				status= createStatus(IStatus.ERROR, ExampleProjectMessages.getString("ExampleProjectCreationWizardPage.error.alreadyexists")); //$NON-NLS-1$
 			}
 		}	
 		updateStatus(status);
@@ -104,7 +104,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		// policy: wizards are not allowed to come up with an error message
 		if (visible && fCurrStatus.matches(IStatus.ERROR)) {
 			// keep the error state, but remove the message
-			fCurrStatus= createStatus(IStatus.ERROR, "");
+			fCurrStatus= createStatus(IStatus.ERROR, ""); //$NON-NLS-1$
 		} 
 		updateStatus(fCurrStatus);
 	}	

@@ -36,7 +36,7 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 	public ExampleProjectCreationWizard() {
 		super();
 		setDialogSettings(ExampleProjectsPlugin.getDefault().getDialogSettings());
-		setWindowTitle(ExampleProjectMessages.getString("ExampleProjectCreationWizard.title"));		
+		setWindowTitle(ExampleProjectMessages.getString("ExampleProjectCreationWizard.title"));		 //$NON-NLS-1$
 		setNeedsProgressMonitor(true);
 	}
 	
@@ -45,7 +45,7 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 	 */
 	protected void initializeDefaultPageImageDescriptor() {
 		if (fConfigElement != null) {
-			String banner= fConfigElement.getAttribute("banner");
+			String banner= fConfigElement.getAttribute("banner"); //$NON-NLS-1$
 			if (banner != null) {
 				ImageDescriptor desc= ExampleProjectsPlugin.getDefault().getImageDescriptor(banner);
 				setDefaultPageImageDescriptor(desc);
@@ -58,9 +58,9 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 	public void addPages() {
 		super.addPages();
 		
-		IConfigurationElement[] children = fConfigElement.getChildren("projectsetup");
+		IConfigurationElement[] children = fConfigElement.getChildren("projectsetup"); //$NON-NLS-1$
 		if (children == null || children.length == 0) {
-			ExampleProjectsPlugin.log("descriptor must contain one ore more projectsetup tags");
+			ExampleProjectsPlugin.log("descriptor must contain one ore more projectsetup tags"); //$NON-NLS-1$
 			return;
 		}
 		
@@ -97,8 +97,8 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 	}
 	
 	private void handleException(Throwable target) {
-		String title= ExampleProjectMessages.getString("ExampleProjectCreationWizard.op_error.title");
-		String message= ExampleProjectMessages.getString("ExampleProjectCreationWizard.op_error.message");
+		String title= ExampleProjectMessages.getString("ExampleProjectCreationWizard.op_error.title"); //$NON-NLS-1$
+		String message= ExampleProjectMessages.getString("ExampleProjectCreationWizard.op_error.message"); //$NON-NLS-1$
 		if (target instanceof CoreException) {
 			IStatus status= ((CoreException)target).getStatus();
 			ErrorDialog.openError(getShell(), title, message, status);
@@ -154,8 +154,8 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 			final int[] result= { IDialogConstants.CANCEL_ID };
 			getShell().getDisplay().syncExec(new Runnable() {
 				public void run() {
-					String title= ExampleProjectMessages.getString("ExampleProjectCreationWizard.overwritequery.title");
-					String msg= ExampleProjectMessages.getFormattedString("ExampleProjectCreationWizard.overwritequery.message", file);
+					String title= ExampleProjectMessages.getString("ExampleProjectCreationWizard.overwritequery.title"); //$NON-NLS-1$
+					String msg= ExampleProjectMessages.getFormattedString("ExampleProjectCreationWizard.overwritequery.message", file); //$NON-NLS-1$
 					String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.CANCEL_LABEL};
 					MessageDialog dialog= new MessageDialog(getShell(), title, null, msg, MessageDialog.QUESTION, options, 0);
 					result[0]= dialog.open();
