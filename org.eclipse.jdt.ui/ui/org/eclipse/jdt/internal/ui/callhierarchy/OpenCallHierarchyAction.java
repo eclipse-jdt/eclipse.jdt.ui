@@ -77,6 +77,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
      * Method declared on SelectionDispatchAction.
      */
 	public void selectionChanged(ITextSelection selection) {
+        // Do nothing
     }
 
     /* (non-Javadoc)

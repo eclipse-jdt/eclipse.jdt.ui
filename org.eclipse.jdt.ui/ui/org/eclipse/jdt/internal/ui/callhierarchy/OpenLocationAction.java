@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import java.util.Iterator;
 
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
@@ -23,8 +24,11 @@ import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 class OpenLocationAction extends SelectionDispatchAction {
-    public OpenLocationAction(IWorkbenchSite site) {
+    private CallHierarchyViewPart fPart;
+
+    public OpenLocationAction(CallHierarchyViewPart part, IWorkbenchSite site) {
         super(site);
+        fPart= part;
         setText(CallHierarchyMessages.getString("OpenLocationAction.label")); //$NON-NLS-1$
         setToolTipText(CallHierarchyMessages.getString("OpenLocationAction.tooltip")); //$NON-NLS-1$
     }
@@ -50,8 +54,15 @@ class OpenLocationAction extends SelectionDispatchAction {
     }
 
     /* (non-Javadoc)
- * Method declared on SelectionDispatchAction.
- */
+     * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#getSelection()
+     */
+    public ISelection getSelection() {
+        return fPart.getSelection();
+    }
+    
+    /* (non-Javadoc)
+     * Method declared on SelectionDispatchAction.
+     */
     public void run(IStructuredSelection selection) {
         if (!checkEnabled(selection)) {
             return;

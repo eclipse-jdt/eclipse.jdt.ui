@@ -53,7 +53,7 @@ class CallHierarchyViewer extends TreeViewer {
 
         JavaUIHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
 
-        fOpen= new OpenLocationAction(part.getSite());
+        fOpen= new OpenLocationAction(part, part.getSite());
         addOpenListener(new IOpenListener() {
             public void open(OpenEvent event) {
                 fOpen.run();

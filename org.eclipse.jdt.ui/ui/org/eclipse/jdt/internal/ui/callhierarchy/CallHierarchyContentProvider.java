@@ -36,7 +36,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
             fMethodWrapper= methodWrapper;
         }
                 
-        public void run(IProgressMonitor pm) throws InvocationTargetException {
+        public void run(IProgressMonitor pm) {
         	fCalls= fMethodWrapper.getCalls(pm);
         }
         
@@ -109,7 +109,9 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     /**
      * @see org.eclipse.jface.viewers.IContentProvider#dispose()
      */
-    public void dispose() {}
+    public void dispose() {
+        // Nothing to dispose
+    }
 
     /**
      * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
@@ -136,5 +138,6 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
      * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
      */
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+        // Do nothing
     }
 }

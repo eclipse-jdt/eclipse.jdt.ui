@@ -40,16 +40,7 @@ class FocusOnSelectionAction extends Action {
     public boolean canActionBeAdded() {
         Object element = SelectionUtil.getSingleElement(getSelection());
 
-        IMethod method = null;
-        
-        if (element instanceof IMethod) {
-            method= (IMethod) element;
-        } else if (element instanceof MethodWrapper) {
-            IMember member= ((MethodWrapper) element).getMember();
-            if (member.getElementType() == IJavaElement.METHOD) {
-                method= (IMethod) member;
-            }
-        }
+        IMethod method = getSelectedMethod(element);
         
         if (method != null) {
             setText(CallHierarchyMessages.getFormattedString("FocusOnSelectionAction.focusOn.text", method.getElementName())); //$NON-NLS-1$
@@ -60,17 +51,29 @@ class FocusOnSelectionAction extends Action {
         return false;
     }
 
-    /*
+    private IMethod getSelectedMethod(Object element) {
+		IMethod method = null;
+        
+        if (element instanceof IMethod) {
+            method= (IMethod) element;
+        } else if (element instanceof MethodWrapper) {
+            IMember member= ((MethodWrapper) element).getMember();
+            if (member.getElementType() == IJavaElement.METHOD) {
+                method= (IMethod) member;
+            }
+        }
+		return method;
+	}
+
+	/*
      * @see Action#run
      */
     public void run() {
         Object element = SelectionUtil.getSingleElement(getSelection());
 
-        if (element instanceof MethodWrapper) {
-            IMember member= ((MethodWrapper) element).getMember();
-            if (member.getElementType() == IJavaElement.METHOD) {
-                fPart.setMethod((IMethod) member);
-            }
+        IMethod method= getSelectedMethod(element);
+        if (method != null) {
+                fPart.setMethod(method);
         }
     }
 

@@ -11,44 +11,26 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.core.runtime.IAdaptable;
-
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.actions.OpenAction;
-
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-
-import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
-
+/**
+ * This class is used for opening the declaration of an element from the call hierarchy view.
+ */
 class OpenDeclarationAction extends OpenAction {
     public OpenDeclarationAction(IWorkbenchSite site) {
         super(site);
     }
 
     public boolean canActionBeAdded() {
-        Object element = SelectionUtil.getSingleElement(getSelection());
-
-        IMethod method = null;
+        // It is safe to cast to IMember since the selection has already been converted
+        IMember member = (IMember) SelectionUtil.getSingleElement(getSelection());
         
-        if (element instanceof IMethod) {
-            method = (IMethod) element;
-        } else if (element instanceof IAdaptable) {
-            method = (IMethod) ((IAdaptable) element).getAdapter(IMethod.class);
-        }
-        
-        if (method != null) {
+        if (member != null) {
             return true;
         }
 
@@ -56,23 +38,10 @@ class OpenDeclarationAction extends OpenAction {
     }
 
     public ISelection getSelection() {
-        ISelection selection= getSelectionProvider().getSelection();
-        
-        if (selection instanceof IStructuredSelection) {
-            IStructuredSelection structuredSelection= (IStructuredSelection) selection;
-            List javaElements= new ArrayList();
-            for (Iterator iter= structuredSelection.iterator(); iter.hasNext();) {
-                Object element= iter.next();
-                if (element instanceof MethodWrapper) {
-                    javaElements.add(((MethodWrapper)element).getMember());
-                }
-            }
-            return new StructuredSelection(javaElements);
-        }
-        return selection; 
+        return CallHierarchyUI.convertSelection(getSelectionProvider().getSelection());
     }
 
-    public Object getElementToOpen(Object object) throws JavaModelException {
+    public Object getElementToOpen(Object object) {
         if (object instanceof MethodWrapper) {
             return ((MethodWrapper) object).getMember();
         }

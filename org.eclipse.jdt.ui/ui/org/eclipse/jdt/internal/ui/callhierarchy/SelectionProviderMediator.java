@@ -27,8 +27,6 @@ import org.eclipse.jface.viewers.Viewer;
 /**
  * A selection provider for viewparts with more that one viewer.
  * Tracks the focus of the viewers to provide the correct selection.
- * 
- * NOTE: This class was copied from the org.eclipse.jdt.internal.ui.typehierarchy (without modification)
  */
 public class SelectionProviderMediator implements ISelectionProvider {
 
@@ -134,13 +132,16 @@ public class SelectionProviderMediator implements ISelectionProvider {
 	 * @see ISelectionProvider#getSelection
 	 */
 	public ISelection getSelection() {
-		if (fViewerInFocus != null) {
-			return fViewerInFocus.getSelection();
-		} else {
-			return StructuredSelection.EMPTY;
-		}
+        return CallHierarchyUI.convertSelection(getRawSelection());
 	}
-	
+
+    public ISelection getRawSelection() {
+       if (fViewerInFocus != null) {
+        return fViewerInFocus.getSelection();
+       } else {
+        return StructuredSelection.EMPTY;
+       }
+    }
 	/*
 	 * @see ISelectionProvider#setSelection
 	 */
@@ -156,5 +157,4 @@ public class SelectionProviderMediator implements ISelectionProvider {
 	public Viewer getViewerInFocus() {
 		return fViewerInFocus;
 	}
-	
 }

@@ -35,6 +35,7 @@ public class CallHierarchyLabelDecorator implements ILabelDecorator {
      * images. 
      */
     public CallHierarchyLabelDecorator() {
+        // Do nothing
     }   
 
     /* (non-Javadoc)
@@ -87,12 +88,14 @@ public class CallHierarchyLabelDecorator implements ILabelDecorator {
      * @see IBaseLabelProvider#addListener(ILabelProviderListener)
      */
     public void addListener(ILabelProviderListener listener) {
+        // Do nothing
     }
 
     /* (non-Javadoc)
      * @see IBaseLabelProvider#dispose()
      */
     public void dispose() {
+        // Nothing to dispose
     }
 
     /* (non-Javadoc)
@@ -106,5 +109,6 @@ public class CallHierarchyLabelDecorator implements ILabelDecorator {
      * @see IBaseLabelProvider#removeListener(ILabelProviderListener)
      */
     public void removeListener(ILabelProviderListener listener) {
+        // Do nothing
     }
 }

@@ -11,6 +11,10 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -22,6 +26,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.OpenStrategy;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -30,6 +37,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -40,7 +48,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
@@ -51,7 +58,9 @@ public class CallHierarchyUI {
 
     private static CallHierarchyUI fgInstance;
 
-    private CallHierarchyUI() { }
+    private CallHierarchyUI() {
+        // Do nothing
+    }
 
     public static CallHierarchyUI getDefault() {
         if (fgInstance == null) {
@@ -219,5 +228,35 @@ public class CallHierarchyUI {
         return null;        
     }
     
-    
+    /**
+     * Converts an ISelection (containing MethodWrapper instances) to an ISelection
+     * with the MethodWrapper's replaced by their corresponding IMembers. If the selection
+     * contains elements which are not MethodWrapper instances or not already IMember instances
+     * they are discarded.  
+     * @param selection The selection to convert.
+     * @return An ISelection containing IMember's in place of MethodWrapper instances.
+     */
+    static ISelection convertSelection(ISelection selection) {
+        if (selection.isEmpty()) {
+            return selection;   
+        }
+        
+        if (selection instanceof IStructuredSelection) {
+            IStructuredSelection structuredSelection= (IStructuredSelection) selection;
+            List javaElements= new ArrayList();
+            for (Iterator iter= structuredSelection.iterator(); iter.hasNext();) {
+                Object element= iter.next();
+                if (element instanceof MethodWrapper) {
+                    IMember member= ((MethodWrapper)element).getMember();
+                    if (member != null) {
+                        javaElements.add(member);
+                    }
+                } else if (element instanceof IMember) {
+                    javaElements.add(element);
+                }
+            }
+            return new StructuredSelection(javaElements);
+        }
+        return StructuredSelection.EMPTY; 
+    }
 }
