@@ -408,11 +408,8 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 
 				if (fIncludesProblemAnnotationChanges) {
 					try {
-						if (fCompilationUnit != null) {
-							synchronized (fCompilationUnit) {
-								fCompilationUnit.reconcile(true, null);
-							}
-						}
+						if (fCompilationUnit != null)
+							fCompilationUnit.reconcile(true, null);
 					} catch (JavaModelException ex) {
 						if (!ex.isDoesNotExist())
 							handleCoreException(ex, ex.getMessage());
