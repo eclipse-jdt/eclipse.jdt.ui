@@ -66,9 +66,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 	protected void setUp() throws Exception {
 		Hashtable options= JavaCore.getDefaultOptions();
-		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
-		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);
 		
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -96,7 +96,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
@@ -157,7 +157,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
@@ -220,7 +220,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
@@ -283,7 +283,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
@@ -333,7 +333,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
@@ -383,7 +383,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 4);
 		assertCorrectLabels(proposals);
@@ -463,7 +463,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
@@ -521,7 +521,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu2= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
 
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true, null, null);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
@@ -585,7 +585,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true, null, null);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
@@ -613,7 +613,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true, null, null);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
@@ -641,7 +641,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true, null, null);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
@@ -670,7 +670,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 5);
 		assertCorrectLabels(proposals);
@@ -790,7 +790,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
@@ -841,7 +841,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
@@ -893,7 +893,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
@@ -947,7 +947,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
@@ -1005,7 +1005,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
@@ -1064,7 +1064,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
@@ -1124,7 +1124,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true, null, null);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);

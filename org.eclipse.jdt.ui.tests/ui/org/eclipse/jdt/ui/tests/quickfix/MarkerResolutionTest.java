@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -75,8 +76,8 @@ public class MarkerResolutionTest extends QuickFixTest {
 
 	protected void setUp() throws Exception {
 		Hashtable options= JavaCore.getDefaultOptions();
-		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
-		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);			
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();

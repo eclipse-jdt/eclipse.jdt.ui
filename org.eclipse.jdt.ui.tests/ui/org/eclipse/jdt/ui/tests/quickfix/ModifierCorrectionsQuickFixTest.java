@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -63,8 +65,8 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 	protected void setUp() throws Exception {
 		Hashtable options= JavaCore.getDefaultOptions();
-		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
-		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.ERROR);
 		
 		JavaCore.setOptions(options);			
