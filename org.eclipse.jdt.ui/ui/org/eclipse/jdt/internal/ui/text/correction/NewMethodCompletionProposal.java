@@ -251,6 +251,12 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		if (binding != null) {
 			String typeName= addImport(binding);
 			return ASTNodeFactory.newType(ast, typeName);			
+		} else {
+			ASTNode parent= fNode.getParent();
+			if (!(parent instanceof ExpressionStatement)) {
+				return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+			}
+			
 		}
 		return null;
 	}

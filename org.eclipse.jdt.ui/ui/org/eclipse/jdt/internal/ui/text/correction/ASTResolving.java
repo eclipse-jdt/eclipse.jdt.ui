@@ -287,7 +287,14 @@ public class ASTResolving {
 	public static boolean isInStaticContext(ASTNode selectedNode) {
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
 		if (decl instanceof MethodDeclaration) {
-			return Modifier.isStatic(((MethodDeclaration)decl).getModifiers());
+			MethodDeclaration methodDecl= (MethodDeclaration) decl;
+			if (methodDecl.isConstructor()) {
+				Statement statement= findParentStatement(selectedNode);
+				if (statement instanceof ConstructorInvocation || statement instanceof SuperConstructorInvocation) {
+					return true; // argument in a this or super call 
+				}
+			}
+			return Modifier.isStatic(methodDecl.getModifiers());
 		} else if (decl instanceof Initializer) {
 			return Modifier.isStatic(((Initializer)decl).getModifiers());
 		} else if (decl instanceof FieldDeclaration) {
