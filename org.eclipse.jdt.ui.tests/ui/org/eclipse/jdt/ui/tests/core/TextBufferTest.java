@@ -43,16 +43,24 @@ public class TextBufferTest extends TestCase {
 	}
 
 	public static Test suite() {
-		TestSuite result= new TestSuite(THIS);
-		if (false) {	// For hot code replace when debugging test cases
-			result.addTestSuite(THIS);
-			result.addTestSuite(THIS);
-			result.addTestSuite(THIS);
-			result.addTestSuite(THIS);
-			result.addTestSuite(THIS);
-			result.addTestSuite(THIS);
-		}
-		return result;
+		if (false) {
+			TestSuite result= new TestSuite(THIS);
+			if (false) {	// For hot code replace when debugging test cases
+				result.addTestSuite(THIS);
+				result.addTestSuite(THIS);
+				result.addTestSuite(THIS);
+				result.addTestSuite(THIS);
+				result.addTestSuite(THIS);
+				result.addTestSuite(THIS);
+			}
+			return result;
+		} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new TextBufferTest("testSwap1"));
+			suite.addTest(new TextBufferTest("testSwap2"));
+			suite.addTest(new TextBufferTest("testSwapInSwap"));
+			return suite;
+		}	
 	}
 	
 	protected void setUp() throws Exception {
@@ -620,6 +628,121 @@ public class TextBufferTest extends TestCase {
 	
 	private void assertFalse(String message, IStatus status) {
 		assertTrue(message, !status.isOK());
+	}
+	
+	public void testSwap1() throws Exception {
+		TextBuffer buffer= TextBuffer.create("foo(1, 2), 3");
+		TextBufferEditor editor= new TextBufferEditor(buffer);		
+		
+		MultiTextEdit root= new MultiTextEdit();
+		{
+			CopySourceEdit innerRoot= new CopySourceEdit(0, 9);
+			
+			SimpleTextEdit e1= SimpleTextEdit.createReplace(0, 9, "");
+			e1.add(innerRoot);
+			CopyTargetEdit t1= new CopyTargetEdit(11, innerRoot);
+			
+			SimpleTextEdit e2= SimpleTextEdit.createReplace(11, 1, "");
+			CopySourceEdit s2= new CopySourceEdit(11, 1);
+			e2.add(s2);
+			CopyTargetEdit t2= new CopyTargetEdit(0, s2);
+
+			root.add(e1);
+			root.add(t2);
+			root.add(e2);				
+			root.add(t1);
+
+			editor.add(root);
+		}
+		
+		assertTrue("Can perform edits", editor.canPerformEdits());
+		UndoMemento undo= editor.performEdits(null);
+
+		String result= "3, foo(1, 2)";
+		assertEquals("Buffer content", result, buffer.getContent());
+	}
+	
+	public void testSwap2() throws Exception {
+		TextBuffer buffer= TextBuffer.create("foo(1, 2), 3");
+		TextBufferEditor editor= new TextBufferEditor(buffer);		
+		
+		MultiTextEdit innerRoot= new MultiTextEdit();
+		{
+			SimpleTextEdit e1= SimpleTextEdit.createReplace(4, 1, "");
+			CopySourceEdit s1= new CopySourceEdit(4, 1);
+			e1.add(s1);
+			CopyTargetEdit t1= new CopyTargetEdit(7, s1);
+			
+			SimpleTextEdit e2= SimpleTextEdit.createReplace(7, 1, "");
+			CopySourceEdit s2= new CopySourceEdit(7, 1);
+			e2.add(s2);
+			CopyTargetEdit t2= new CopyTargetEdit(4, s2);
+			
+			innerRoot.add(e1);
+			innerRoot.add(t2);
+			innerRoot.add(e2);				
+			innerRoot.add(t1);
+		}
+		
+		editor.add(innerRoot);
+		
+		assertTrue("Can perform edits", editor.canPerformEdits());
+		UndoMemento undo= editor.performEdits(null);
+
+		String result= "foo(2, 1), 3";
+		assertEquals("Buffer content", result, buffer.getContent());
 	}	
+	
+	public void testSwap2InSwap1() throws Exception {
+		// disabled
+		if (true)
+			return;
+		
+		TextBuffer buffer= TextBuffer.create("foo(1, 2), 3");
+		TextBufferEditor editor= new TextBufferEditor(buffer);		
+		
+		CopySourceEdit innerRoot= new CopySourceEdit(0, 9);
+		{
+			SimpleTextEdit e1= SimpleTextEdit.createReplace(4, 1, "");
+			CopySourceEdit s1= new CopySourceEdit(4, 1);
+			e1.add(s1);
+			CopyTargetEdit t1= new CopyTargetEdit(7, s1);
+			
+			SimpleTextEdit e2= SimpleTextEdit.createReplace(7, 1, "");
+			CopySourceEdit s2= new CopySourceEdit(7, 1);
+			e2.add(s2);
+			CopyTargetEdit t2= new CopyTargetEdit(4, s2);
+			
+			innerRoot.add(e1);
+			innerRoot.add(t2);
+			innerRoot.add(e2);				
+			innerRoot.add(t1);
+		}
+		MultiTextEdit root= new MultiTextEdit();
+		{
+			SimpleTextEdit e1= SimpleTextEdit.createReplace(0, 9, "");
+			e1.add(innerRoot);
+			CopyTargetEdit t1= new CopyTargetEdit(11, innerRoot);
+			
+			SimpleTextEdit e2= SimpleTextEdit.createReplace(11, 1, "");
+			CopySourceEdit s2= new CopySourceEdit(11, 1);
+			e2.add(s2);
+			CopyTargetEdit t2= new CopyTargetEdit(0, s2);
+
+			root.add(e1);
+			root.add(t2);
+			root.add(e2);				
+			root.add(t1);
+			
+			editor.add(root);
+		}
+
+		assertTrue("Can perform edits", editor.canPerformEdits());
+		UndoMemento undo= editor.performEdits(null);
+
+		String result= "3, foo(2, 1)";
+		assertEquals("Buffer content", result, buffer.getContent());
+	}	
+		
 }
 
