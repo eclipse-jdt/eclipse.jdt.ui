@@ -173,6 +173,22 @@ public final class RefactoringSearchEngine2 {
 	}
 
 	/**
+	 * Returns the compilation units of the previous search queries.
+	 * <p>
+	 * In order to retrieve the compilation units, grouping by resource must have been enabled before searching.
+	 * 
+	 * @return the compilation units of the previous queries
+	 */
+	public final ICompilationUnit[] getCompilationUnits() {
+		Assert.isTrue(fGrouping);
+		final SearchResultGroup[] groups= getGroupedMatches();
+		final ICompilationUnit[] units= new ICompilationUnit[groups.length];
+		for (int index= 0; index < groups.length; index++)
+			units[index]= groups[index].getCompilationUnit();
+		return units;
+	}
+
+	/**
 	 * Returns the found search matches in grouped by their containing resource.
 	 * 
 	 * @return the found search matches
