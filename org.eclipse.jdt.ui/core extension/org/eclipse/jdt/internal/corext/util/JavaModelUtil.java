@@ -575,7 +575,7 @@ public final class JavaModelUtil {
 	 */
 	private static IMethod toOriginalMethod(IMethod method) {
 		ICompilationUnit cu= method.getCompilationUnit();
-		if (JavaPlugin.USE_WORKING_COPY_OWNERS && (cu == null || isPrimary(cu))) {
+		if (cu == null || isPrimary(cu)) {
 			return method;
 		}
 		try{

@@ -225,9 +225,6 @@ public class AllTypesCacheTest extends TestCase {
 	}
 	
 	public void testWorkingCopies() throws Exception {
-		if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			return;
-		}
 		// change a type in the editor and save
 		
 		IJavaSearchScope workspaceScope= SearchEngine.createWorkspaceScope();
@@ -268,10 +265,6 @@ public class AllTypesCacheTest extends TestCase {
 	}
 	
 	public void testWorkingCopies2() throws Exception {
-		if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			return;
-		}
-		
 		// change a type in the editor and do not save
 		
 		IJavaSearchScope workspaceScope= SearchEngine.createWorkspaceScope();

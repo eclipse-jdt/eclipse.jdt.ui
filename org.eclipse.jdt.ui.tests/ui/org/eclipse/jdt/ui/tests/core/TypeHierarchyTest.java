@@ -96,10 +96,6 @@ public class TypeHierarchyTest extends TestCase {
 	
 	public void testHierarchyWithWorkingCopy1() throws Exception {
 		
-		if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			return;
-		}
-		
 		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
 		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
 		
@@ -164,10 +160,6 @@ public class TypeHierarchyTest extends TestCase {
 	}
 	
 	public void testHierarchyWithWorkingCopy2() throws Exception {
-		
-		if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			return;
-		}
 		
 		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
 		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
@@ -235,10 +227,6 @@ public class TypeHierarchyTest extends TestCase {
 	}
 	
 	public void testHierarchyWithWorkingCopy3() throws Exception {
-		
-		if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			return;
-		}
 		
 		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
 		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);

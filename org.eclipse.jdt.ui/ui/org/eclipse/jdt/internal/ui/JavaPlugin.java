@@ -98,7 +98,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringUI;
  * of the plug-in such as document providers and find-replace-dialogs.
  */
 public class JavaPlugin extends AbstractUIPlugin {
-	/** temporarily */
+	/** @deprecated Will stay true */
 	public static final boolean USE_WORKING_COPY_OWNERS= true;
 	/**
 	 * The key to store customized templates. 
