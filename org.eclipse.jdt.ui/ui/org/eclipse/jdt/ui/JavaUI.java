@@ -120,7 +120,7 @@ public final class JavaUI {
 	 * 
 	 * @since 2.0
 	 */
-	public static final String ID_SEARCH_ACTION_SET= "org.eclipse.jdt.ui.SearchActionSet";
+	public static final String ID_SEARCH_ACTION_SET= "org.eclipse.jdt.ui.SearchActionSet"; //$NON-NLS-1$
 	
 	/**
 	 * The editor part id of the editor that presents Java compilation units

@@ -90,15 +90,15 @@ public class OpenViewActionGroup extends ActionGroup {
 
 		fOpenSuperImplementation= new OpenSuperImplementationAction(part);
 		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
-		part.setAction("OpenSuperImplementation", fOpenSuperImplementation);
+		part.setAction("OpenSuperImplementation", fOpenSuperImplementation); //$NON-NLS-1$
 
 		fOpenExternalJavadoc= new OpenExternalJavadocAction(part);
 		fOpenExternalJavadoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EXTERNAL_JAVADOC);
-		part.setAction("OpenExternalJavadoc", fOpenExternalJavadoc);
+		part.setAction("OpenExternalJavadoc", fOpenExternalJavadoc); //$NON-NLS-1$
 
 		fOpenTypeHierarchy= new OpenTypeHierarchyAction(part);
 		fOpenTypeHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_TYPE_HIERARCHY);
-		part.setAction("OpenTypeHierarchy", fOpenTypeHierarchy);
+		part.setAction("OpenTypeHierarchy", fOpenTypeHierarchy); //$NON-NLS-1$
 
 		initialize(part.getEditorSite());
 	}

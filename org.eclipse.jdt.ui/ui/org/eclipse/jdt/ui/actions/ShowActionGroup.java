@@ -73,11 +73,11 @@ public class ShowActionGroup extends ActionGroup {
 	public ShowActionGroup(JavaEditor part) {
 		fShowInPackagesViewAction= new ShowInPackageViewAction(part);
 		fShowInPackagesViewAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_PACKAGE_VIEW);
-		part.setAction("ShowInPackageView", fShowInPackagesViewAction);
+		part.setAction("ShowInPackageView", fShowInPackagesViewAction); //$NON-NLS-1$
 
 		fShowInNavigatorViewAction= new ShowInNavigatorViewAction(part);
 		fShowInNavigatorViewAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_NAVIGATOR_VIEW);
-		part.setAction("ShowInNavigatorView", fShowInNavigatorViewAction);
+		part.setAction("ShowInNavigatorView", fShowInNavigatorViewAction); //$NON-NLS-1$
 		initialize(part.getSite(), true);
 	}
 

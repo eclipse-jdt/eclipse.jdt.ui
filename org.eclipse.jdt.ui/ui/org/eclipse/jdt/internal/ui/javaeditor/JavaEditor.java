@@ -574,7 +574,7 @@ public abstract class JavaEditor extends StatusTextEditor {
 		
 		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
-		setAction("ShowJavaDoc", action);				
+		setAction("ShowJavaDoc", action);				 //$NON-NLS-1$
 	
 		fEncodingSupport= new DefaultEncodingSupport();
 		fEncodingSupport.initialize(this);

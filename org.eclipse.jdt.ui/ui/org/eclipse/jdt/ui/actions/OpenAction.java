@@ -126,7 +126,7 @@ public class OpenAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		try {
 			IJavaElement element= SelectionConverter.codeResolve(fEditor, getShell(), getDialogTitle(), 
-				ActionMessages.getString("OpenAction.select_element"));				
+				ActionMessages.getString("OpenAction.select_element"));				 //$NON-NLS-1$
 			if (element == null) {
 				/* waiting for support a time out in status line to ensure that message disappears
 				IStatusLineManager statusLine= getStatusLineManager();
