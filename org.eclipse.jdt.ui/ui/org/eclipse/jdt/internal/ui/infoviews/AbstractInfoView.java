@@ -489,8 +489,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 
 		fGotoInputAction.setEnabled(true);
 
-		String title= InfoViewMessages.getFormattedString("AbstractInfoView.compoundTitle", getSite().getRegisteredName(), JavaElementLabels.getElementLabel(fCurrentViewInput, TITLE_LABEL_FLAGS)); //$NON-NLS-1$
-		setTitle(title);
+		setContentDescription(JavaElementLabels.getElementLabel(fCurrentViewInput, TITLE_LABEL_FLAGS));
 		setTitleToolTip(JavaElementLabels.getElementLabel(fCurrentViewInput, TOOLTIP_LABEL_FLAGS));
 	}
 }
