@@ -10,19 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.browsing;
 
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPerspectiveFactory;
-
 import org.eclipse.search.ui.NewSearchUI;
+
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
 import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.ui.progress.IProgressConstants;
+
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 
 public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
@@ -103,13 +105,14 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addView(JavaUI.ID_MEMBERS_VIEW, IPageLayout.BOTTOM, (float)0.50, JavaUI.ID_TYPES_VIEW);
 		
 		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+		placeHolderBottom.addPlaceholder(IProgressConstants.PROGRESS_VIEW_ID);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
 		placeHolderBottom.addPlaceholder(NewSearchUI.SEARCH_VIEW_ID);
 		placeHolderBottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
 		placeHolderBottom.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
-		placeHolderBottom.addPlaceholder(JavaPerspectiveFactory.ID_PROGRESS_VIEW);
+
 	}
 
 	private void createHorizontalLayout(IPageLayout layout) {
@@ -143,6 +146,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
 		placeHolderBottom.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
+		placeHolderBottom.addPlaceholder(IProgressConstants.PROGRESS_VIEW_ID);
 	}
 	
 	private boolean shouldShowProjectsView() {
