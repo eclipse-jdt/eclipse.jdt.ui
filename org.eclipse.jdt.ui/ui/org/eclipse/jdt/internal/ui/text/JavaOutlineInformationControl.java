@@ -19,6 +19,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
@@ -33,6 +34,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -61,7 +63,9 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.actions.LexicalSortingAction;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
+import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -82,6 +86,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	protected Color fForegroundColor;
 	
 	private boolean fShowOnlyMainType;
+	private LexicalSortingAction fLexicalSortingAction;
+	private SortByDefiningTypeAction fSortByDefiningTypeAction;
+	private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
 
 	
 	private class OutlineLabelProvider extends AppearanceAwareLabelProvider {
@@ -116,7 +123,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		
 		private boolean fIsFiltering= false;
 
-		public OutlineTreeViewer(Tree tree) {
+		private OutlineTreeViewer(Tree tree) {
 			super(tree);
 		}
 		
@@ -180,7 +187,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 * 
 		 * @param showInheritedMembers <code>true</code> iff inherited members are shown
 		 */
-		public OutlineContentProvider(boolean showInheritedMembers) {
+		private OutlineContentProvider(boolean showInheritedMembers) {
 			super(true);
 			fShowInheritedMembers= showInheritedMembers;
 		}
@@ -323,14 +330,18 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	}
 	
 	
-	private class ShowOnlyMainType extends Action {
+	private class ShowOnlyMainTypeAction extends Action {
+		
+		private TreeViewer fOutlineViewer;
 
-		public ShowOnlyMainType() {
+		private ShowOnlyMainTypeAction(TreeViewer outlineViewer) {
 			super(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.label"), IAction.AS_CHECK_BOX); //$NON-NLS-1$
 			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GO_INTO_TOP_LEVEL_TYPE_ACTION);
 			setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.tooltip")); //$NON-NLS-1$
 			setDescription(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.description")); //$NON-NLS-1$
 			JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.gif"); //$NON-NLS-1$
+			
+			fOutlineViewer= outlineViewer;
 
 			boolean showclass= getDialogSettings().getBoolean("GoIntoTopLevelTypeAction.isChecked"); //$NON-NLS-1$
 			setTopLevelTypeOnly(showclass);
@@ -346,12 +357,47 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		private void setTopLevelTypeOnly(boolean show) {
 			fShowOnlyMainType= show;
 			setChecked(show);
-			getTreeViewer().refresh(false);
+			fOutlineViewer.refresh(false);
 			if (!fShowOnlyMainType)
-				getTreeViewer().expandToLevel(2);
+				fOutlineViewer.expandToLevel(2);
 			
 			getDialogSettings().put("GoIntoTopLevelTypeAction.isChecked", show); //$NON-NLS-1$
 		}
+	}
+	
+
+	private class SortByDefiningTypeAction extends Action {
+		
+		private TreeViewer fOutlineViewer;
+		
+		/** 
+		 * Creates the action.
+		 */
+		private SortByDefiningTypeAction(TreeViewer outlineViewer) {
+			super(TypeHierarchyMessages.getString("SortByDefiningTypeAction.label")); //$NON-NLS-1$
+			setDescription(TypeHierarchyMessages.getString("SortByDefiningTypeAction.description")); //$NON-NLS-1$
+			setToolTipText(TypeHierarchyMessages.getString("SortByDefiningTypeAction.tooltip")); //$NON-NLS-1$
+			
+			fOutlineViewer= outlineViewer;
+			
+			JavaPluginImages.setLocalImageDescriptors(this, "definingtype_sort_co.gif"); //$NON-NLS-1$
+
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SORT_BY_DEFINING_TYPE_ACTION);
+	 
+			boolean state= getDialogSettings().getBoolean("SortByDefiningType.isChecked"); //$NON-NLS-1$
+			setChecked(state);
+		}
+		
+		/*
+		 * @see Action#actionPerformed
+		 */	
+		public void run() {
+			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
+				public void run() {
+//					sortByDefiningType(isChecked());
+				}
+			});		
+		}	
 	}
 	
 
@@ -365,7 +411,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	 */
 	public JavaOutlineInformationControl(Shell parent, int shellStyle, int treeStyle, String commandId) {
 		super(parent, shellStyle, treeStyle, commandId, true);
-		fForegroundColor= parent.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 	}
 
 	/**
@@ -392,9 +437,15 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 				return !(element instanceof IImportDeclaration);
 			}
 		});
-		treeViewer.addFilter(new NamePatternFilter());
 		
+		// Hard-coded filters
+		treeViewer.addFilter(new NamePatternFilter());
 		treeViewer.addFilter(new MemberFilter());
+
+		fForegroundColor= parent.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+		fLexicalSortingAction= new LexicalSortingAction(treeViewer, getId());
+//		fSortByDefiningTypeAction= new SortByDefiningTypeAction(treeViewer);
+		fShowOnlyMainTypeAction= new ShowOnlyMainTypeAction(treeViewer);
 		
 		fOutlineContentProvider= new OutlineContentProvider(false);
 		treeViewer.setContentProvider(fOutlineContentProvider);
@@ -494,6 +545,11 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	 */
 	protected void fillViewMenu(IMenuManager viewMenu) {
 		super.fillViewMenu(viewMenu);
-		viewMenu.add(new ShowOnlyMainType()); //$NON-NLS-1$
+		viewMenu.add(fShowOnlyMainTypeAction); //$NON-NLS-1$
+
+		viewMenu.add(new Separator("Sorters")); //$NON-NLS-1$
+		viewMenu.add(fLexicalSortingAction);
+		
+//		viewMenu.add(fSortByDefiningTypeAction);
 	}
 }
