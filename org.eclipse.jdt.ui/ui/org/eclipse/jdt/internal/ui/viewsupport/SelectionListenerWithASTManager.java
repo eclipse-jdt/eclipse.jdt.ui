@@ -171,9 +171,8 @@ public class SelectionListenerWithASTManager {
 		
 		public void install(IEditorPart part, ISelectionListenerWithAST listener) {
 			if (fPartListeners.isEmpty()) {
-				String id= part.getSite().getId();
-				fSelectionService.addPostSelectionListener(id, fPostSelectionListener);
-				fSelectionService.addSelectionListener(id, fSelectionListener);
+				fSelectionService.addPostSelectionListener(fPostSelectionListener);
+				fSelectionService.addSelectionListener(fSelectionListener);
 			}
 			
 			PartListenerGroup listenerGroup= (PartListenerGroup) fPartListeners.get(part);
@@ -193,9 +192,8 @@ public class SelectionListenerWithASTManager {
 			if (listenerGroup.isEmpty()) {
 				fPartListeners.remove(part);
 				if (fPartListeners.isEmpty()) {
-					String id= part.getSite().getId();
-					fSelectionService.removePostSelectionListener(id, fPostSelectionListener);
-					fSelectionService.removeSelectionListener(id, fSelectionListener);
+					fSelectionService.removePostSelectionListener(fPostSelectionListener);
+					fSelectionService.removePostSelectionListener(fSelectionListener);
 				}
 			}
 		}		
