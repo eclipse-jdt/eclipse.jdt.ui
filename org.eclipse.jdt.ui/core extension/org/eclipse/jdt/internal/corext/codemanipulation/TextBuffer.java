@@ -372,6 +372,7 @@ public class TextBuffer {
 			default:
 				break;
 			}
+			break;
 		}
 		return indent;			
 	}

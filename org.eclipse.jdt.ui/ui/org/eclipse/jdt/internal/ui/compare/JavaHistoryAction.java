@@ -58,6 +58,6 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 		}
 		return null;
 	}
-	
+			
 	abstract protected boolean isEnabled(ISelection selection);
 }

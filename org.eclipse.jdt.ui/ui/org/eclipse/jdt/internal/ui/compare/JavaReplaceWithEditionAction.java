@@ -4,28 +4,22 @@
  */
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.ResourceBundle;
 
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.*;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.*;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFileState;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.*;
 
 import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.internal.corext.codemanipulation.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.DocumentManager;
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 
 import org.eclipse.compare.*;
-import org.eclipse.compare.contentmergeviewer.IDocumentRange;
 
 
 /**
@@ -35,39 +29,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.ReplaceWithEditionAction"; //$NON-NLS-1$
 	
-	/**
-	 * Makes the IStreamContentAccessor and ITypedElement protocols
-	 * available to for Java element within a document.
-	 */
-	private class DocumentNode implements ITypedElement, IStreamContentAccessor {
-	
-		private IDocument fDocument;
-		private String fName;
-		private String fType;
-		
-		DocumentNode(IDocument document, String name, String type) {
-			fDocument= document;
-			fName= name;
-			fType= type;
-		}
-	
-		public String getType() {
-			return fType;
-		}
-	
-		public Image getImage() {
-			return null;
-		}
-		
-		public String getName() {
-			return fName;
-		}
-		
-		public InputStream getContents() {
-			return new ByteArrayInputStream(fDocument.get().getBytes());
-		}
-	}
-		
+
 	public JavaReplaceWithEditionAction(ISelectionProvider sp) {
 		super(sp);
 		
@@ -130,49 +92,48 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		if (states != null)		
 			for (int i= 0; i < states.length; i++)
 				editions[i+1]= new HistoryItem(editions[0], states[i]);
-				
-		DocumentManager docManager= null;
+						
+		// get a TextBuffer where to insert the text
+		TextBuffer buffer= null;
 		try {
-			docManager= new DocumentManager(cu);
-		} catch (JavaModelException ex) {
-			JavaPlugin.log(ex);
-			MessageDialog.openError(shell, errorTitle, errorMessage);
-			return;
-		}
-		
-		try {
-			docManager.connect();
+			buffer= TextBuffer.acquire(file);
+
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
 			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
 			
-			IDocument document= docManager.getDocument();
-			String type= file.getFileExtension();
-			ITypedElement ti= d.selectEdition(new DocumentNode(document, cu.getElementName(), type), editions, input);
+			ITypedElement ti= d.selectEdition(new JavaTextBufferNode(buffer, cu.getElementName()), editions, input);
 						
 			if (ti instanceof IStreamContentAccessor) {
 				IStreamContentAccessor sca= (IStreamContentAccessor) ti;				
-					
-				Position range= null;
-				ITypedElement target= d.getTarget();
-				if (target instanceof IDocumentRange)
-					range= ((IDocumentRange)target).getRange();
-		
-				if (range != null) {	// shouldn't happen
-					String text= JavaCompareUtilities.readString(sca.getContents());	
-					if (text != null) {
-						document.replace(range.getOffset(), range.getLength(), text);
-					}
+										
+				// from the edition get the lines (text) to insert
+				String[] lines= null;
+				try {
+					lines= JavaCompareUtilities.readLines(((IStreamContentAccessor) ti).getContents());								
+				} catch (CoreException ex) {
+					JavaPlugin.log(ex);
 				}
+				if (lines == null) {
+					MessageDialog.openError(shell, errorTitle, "couldn't get text to insert");
+					return;
+				}
+				
+				TextEdit edit= new MemberEdit(input, MemberEdit.REPLACE, lines,
+										CodeFormatterPreferencePage.getTabSize());
+
+				TextBufferEditor editor= new TextBufferEditor(buffer);
+				editor.addTextEdit(edit);
+				editor.performEdits(new NullProgressMonitor());
+				
+				TextBuffer.commitChanges(buffer, false, new NullProgressMonitor());
 			}
 
-		} catch(BadLocationException ex) {
-			JavaPlugin.log(ex);
-			MessageDialog.openError(shell, errorTitle, errorMessage);
 		} catch(CoreException ex) {
 			JavaPlugin.log(ex);
-			MessageDialog.openError(shell, errorTitle, errorMessage);
+			MessageDialog.openError(shell, errorTitle, "error with TextBuffer");
 		} finally {
-			docManager.disconnect();
+			if (buffer != null)
+				TextBuffer.release(buffer);
 		}
 	}
 	

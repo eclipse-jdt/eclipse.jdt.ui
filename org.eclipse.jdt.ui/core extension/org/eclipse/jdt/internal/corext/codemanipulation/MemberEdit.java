@@ -14,7 +14,7 @@ import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 
 
-public class AddMemberEdit2 extends SimpleTextEdit {
+public class MemberEdit extends SimpleTextEdit {
 	
 	public static final int INSERT_BEFORE= 0;	// fMember is sibling
 	public static final int INSERT_AFTER= 1;		// fMember is sibling
@@ -30,7 +30,7 @@ public class AddMemberEdit2 extends SimpleTextEdit {
 	private int fEmptyLinesBetweenMembers= 1;
 
 
-	public AddMemberEdit2(IJavaElement member, int insertionKind, String[] source, int tabWidth) {
+	public MemberEdit(IJavaElement member, int insertionKind, String[] source, int tabWidth) {
 		Assert.isNotNull(member);
 		fMember= member;
 		
@@ -48,7 +48,7 @@ public class AddMemberEdit2 extends SimpleTextEdit {
 	 * @see TextEdit#getCopy
 	 */
 	public TextEdit copy() {
-		return new AddMemberEdit2(fMember, fInsertionKind, fSource, fTabWidth);
+		return new MemberEdit(fMember, fInsertionKind, fSource, fTabWidth);
 	}
 	
 	/* non Java-doc
@@ -71,7 +71,8 @@ public class AddMemberEdit2 extends SimpleTextEdit {
 		String s;
 		Scanner scanner= null;
 		ISourceRange range= getSourceRange();
-		int end= range.getOffset() + range.getLength();
+		int start= range.getOffset();
+		int end= start + range.getLength();
 		int offset= -1;	// where to insert the lines
 		int length= 0;		// length of range to be replaced
 		
@@ -79,16 +80,16 @@ public class AddMemberEdit2 extends SimpleTextEdit {
 			
 		case REPLACE:
 			sb.append(getSource(getLineIndent(buffer), lineDelimiter));
+			offset= range.getOffset();
 			length= range.getLength();
-			offset= end;
 			break;
 			
-		case ADD_AT_BEGINNING:	// add text add end of container
+		case ADD_AT_BEGINNING:	// add text at end of container
 			switch (fMember.getElementType()) {
 			case IJavaElement.TYPE:
 				// find first opening '{' at beginning of type
 				scanner= new Scanner(true, true);	// whitespace, comments
-				scanner.setSourceBuffer(buffer.getContent().toCharArray());
+				scanner.setSourceBuffer(buffer.getContent(start, range.getLength()).toCharArray());
 				int emptyLines= 0;
 				boolean sawClosingBracket= false;
 				try {
@@ -97,7 +98,7 @@ public class AddMemberEdit2 extends SimpleTextEdit {
 						if (token == TerminalSymbols.TokenNameLBRACE)
 							break;
 					}
-					offset= scanner.currentPosition;
+					offset= start+scanner.currentPosition;
 					// count the number of empty lines
 					while ((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
 						switch (token) {
@@ -119,11 +120,9 @@ public class AddMemberEdit2 extends SimpleTextEdit {
 				}
 				sb.append(lineDelimiter);
 				sb.append(getSource(getLineIndent(buffer)+1, lineDelimiter));
-				//System.out.println("sawClosingBracket: " + sawClosingBracket);
-				//System.out.println("emptyLines: " + emptyLines);
 				if (sawClosingBracket) {
-					if (emptyLines == 0)
-						fill(sb, 1, lineDelimiter);
+//					if (emptyLines == 0)
+//						fill(sb, 1, lineDelimiter);
 				} else {
 					if (emptyLines < fEmptyLinesBetweenMembers)
 						fill(sb, fEmptyLinesBetweenMembers+1, lineDelimiter);
@@ -137,14 +136,27 @@ public class AddMemberEdit2 extends SimpleTextEdit {
 		case ADD_AT_END:	// add text add end of container
 			switch (fMember.getElementType()) {
 			case IJavaElement.TYPE:
-			
 				// find last closing '}' at end of type
-				offset= findToken(buffer, TerminalSymbols.TokenNameRBRACE, false);
-
-				//fill(sb, fEmptyLinesBetweenMembers+1, lineDelimiter);
+				scanner= new Scanner(true, true);	// whitespace, comments
+				scanner.setSourceBuffer(buffer.getContent(start, range.getLength()).toCharArray());
+				int emptyLines= 0;
+				boolean sawClosingBracket= false;
+				try {
+					int pos= -1;
+					int token;
+					while ((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+						if (token == TerminalSymbols.TokenNameRBRACE)
+							pos= scanner.startPosition;	// remember the starting position of all '}'
+					}
+					if (pos >= 0)
+						offset= start+pos;	// the last '}'
+				} catch (InvalidInputException e) {
+					throw new JavaModelException(e, IJavaModelStatusConstants.INVALID_CONTENTS);
+				}
 				sb.append(getSource(getLineIndent(buffer)+1, lineDelimiter));
 				sb.append(lineDelimiter);
 				break;
+
 			case IJavaElement.COMPILATION_UNIT:
 				fill(sb, fEmptyLinesBetweenMembers+1, lineDelimiter);
 				sb.append(getSource(0, lineDelimiter));
@@ -233,30 +245,6 @@ public class AddMemberEdit2 extends SimpleTextEdit {
 		return position;
 	}
 	
-	/**
-	 * Returns -1 if token was not found.
-	 */
-	private int findToken(TextBuffer buffer, int token, boolean first) throws JavaModelException {
-		int position= -1;
-		Scanner scanner= new Scanner(false, false);	// no whitespace, no comments
-		scanner.setSourceBuffer(buffer.getContent().toCharArray());
-		try {
-			int t;
-			while ((t= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
-				if (t == token) {
-					if (first) {
-						position= scanner.currentPosition;
-						break;
-					}
-					position= scanner.startPosition;
-				}
-			}
-		} catch (InvalidInputException e) {
-			throw new JavaModelException(e, IJavaModelStatusConstants.INVALID_CONTENTS);
-		}
-		return position;
-	}
-	
 	// private helpers
 	
 	private ISourceRange getSourceRange() throws CoreException {
@@ -266,6 +254,7 @@ public class AddMemberEdit2 extends SimpleTextEdit {
 	/**
 	 */
 	private int getLineIndent(TextBuffer buffer) throws CoreException {
+		int offset= getSourceRange().getOffset();
 		int line= buffer.getLineOfOffset(getSourceRange().getOffset());
 		return buffer.getLineIndent(line, fTabWidth);
 	}

@@ -5,8 +5,11 @@
 package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.ResourceBundle;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.*;
@@ -103,7 +106,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		if (cu.isWorkingCopy())
 			cu= (ICompilationUnit) cu.getOriginalElement();
 
-		// find underlying file
+		// find underlying file 
 		IFile file= null;
 		try {
 			file= (IFile) cu.getUnderlyingResource();
@@ -127,47 +130,48 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			return;
 		}
 		
-		// configure EditionSelectionDialog and let user select an edition
-		ITypedElement target= new ResourceNode(file);
-		ITypedElement[] editions= new ITypedElement[states.length];
-		for (int i= 0; i < states.length; i++)
-			editions[i]= new HistoryItem(target, states[i]);
-							
-		ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
-		EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
-		d.setAddMode(true);
-		ITypedElement ti= d.selectEdition(target, editions, parent);
-		if (!(ti instanceof IStreamContentAccessor))
-			return;	// user cancel
-		
-		// from the edition get the lines (text) to insert
-		String[] lines= null;
-		try {
-			lines= JavaCompareUtilities.readLines(((IStreamContentAccessor) ti).getContents());								
-		} catch (CoreException ex) {
-			JavaPlugin.log(ex);
-		}
-		if (lines == null) {
-			MessageDialog.openError(shell, errorTitle, "couldn't get text to insert");
-			return;
-		}
-		
-		// build the TextEdit that inserts the text into the buffer
-		TextEdit edit= null;
-		if (input != null)
-			edit= new AddMemberEdit2(input, AddMemberEdit2.INSERT_AFTER, lines,
-									CodeFormatterPreferencePage.getTabSize());
-		else
-			edit= createEdit(lines, parent);
-		if (edit == null) {
-			MessageDialog.openError(shell, errorTitle, "couldn't determine place to insert");
-			return;
-		}
-		
 		// get a TextBuffer where to insert the text
 		TextBuffer buffer= null;
 		try {
 			buffer= TextBuffer.acquire(file);
+		
+			// configure EditionSelectionDialog and let user select an edition
+			ITypedElement target= new JavaTextBufferNode(buffer, cu.getElementName());
+			
+			ITypedElement[] editions= new ITypedElement[states.length];
+			for (int i= 0; i < states.length; i++)
+				editions[i]= new HistoryItem(target, states[i]);
+								
+			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
+			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
+			d.setAddMode(true);
+			ITypedElement ti= d.selectEdition(target, editions, parent);
+			if (!(ti instanceof IStreamContentAccessor))
+				return;	// user cancel
+			
+			// from the edition get the lines (text) to insert
+			String[] lines= null;
+			try {
+				lines= JavaCompareUtilities.readLines(((IStreamContentAccessor) ti).getContents());								
+			} catch (CoreException ex) {
+				JavaPlugin.log(ex);
+			}
+			if (lines == null) {
+				MessageDialog.openError(shell, errorTitle, "couldn't get text to insert");
+				return;
+			}
+			
+			// build the TextEdit that inserts the text into the buffer
+			TextEdit edit= null;
+			if (input != null)
+				edit= new MemberEdit(input, MemberEdit.INSERT_AFTER, lines,
+										CodeFormatterPreferencePage.getTabSize());
+			else
+				edit= createEdit(lines, parent);
+			if (edit == null) {
+				MessageDialog.openError(shell, errorTitle, "couldn't determine place to insert");
+				return;
+			}
 			
 			TextBufferEditor editor= new TextBufferEditor(buffer);
 			editor.addTextEdit(edit);
@@ -207,18 +211,18 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 					candidate= chld;
 					continue;
 				default:
-					return new AddMemberEdit2(chld, AddMemberEdit2.INSERT_BEFORE, lines,
+					return new MemberEdit(chld, MemberEdit.INSERT_BEFORE, lines,
 											CodeFormatterPreferencePage.getTabSize());
 				}
 			}
 			if (candidate != null)
-				return new AddMemberEdit2(candidate, AddMemberEdit2.INSERT_AFTER, lines,
+				return new MemberEdit(candidate, MemberEdit.INSERT_AFTER, lines,
 											CodeFormatterPreferencePage.getTabSize());
 		}
 		
 		// no children: insert at end (but before closing bracket)
 		if (container instanceof IJavaElement)
-			return new AddMemberEdit2((IJavaElement)container, AddMemberEdit2.ADD_AT_BEGINNING, lines,
+			return new MemberEdit((IJavaElement)container, MemberEdit.ADD_AT_END, lines,
 											CodeFormatterPreferencePage.getTabSize());
 											
 		return null;

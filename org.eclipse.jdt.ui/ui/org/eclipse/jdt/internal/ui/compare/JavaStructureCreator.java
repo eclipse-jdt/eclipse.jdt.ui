@@ -4,26 +4,23 @@
  */
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.util.*;
 import java.io.InputStream;
+import java.util.*;
 
 import org.eclipse.jface.text.*;
 
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.compiler.*;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.parser.*;
 import org.eclipse.jdt.internal.core.JavaElement;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 import org.eclipse.compare.*;
 import org.eclipse.compare.structuremergeviewer.*;
-
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
-import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 
 
 public class JavaStructureCreator implements IStructureCreator {
@@ -156,7 +153,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				}
 			};
 			JavaParseTreeBuilder builder= new JavaParseTreeBuilder(root, buffer);
-			SourceElementParser parser= new SourceElementParser(builder, new ProblemFactory());
+			SourceElementParser parser= new SourceElementParser(builder, new ProblemFactory(), new CompilerOptions());
 			try {
 				parser.parseCompilationUnit(builder, false);
 			} catch (ParseError ex) {
@@ -186,7 +183,7 @@ public class JavaStructureCreator implements IStructureCreator {
 			// we hook into the root node to intercept all node changes
 			JavaNode root= new JavaNode(doc, false);
 			JavaParseTreeBuilder builder= new JavaParseTreeBuilder(root, buffer);
-			SourceElementParser parser= new SourceElementParser(builder, new ProblemFactory());
+			SourceElementParser parser= new SourceElementParser(builder, new ProblemFactory(), new CompilerOptions());
 			try {
 				parser.parseCompilationUnit(builder, false);
 			} catch (ParseError ex) {

@@ -13,6 +13,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
 
+/**
+ * @deprecated Use class MemberEdit instead.
+ */
 public class AddMemberEdit extends SimpleTextEdit {
 	
 	public static final int INSERT_BEFORE= 0;
@@ -23,6 +26,9 @@ public class AddMemberEdit extends SimpleTextEdit {
 	private String[] fSource;
 	private int fTabWidth;
 	
+	/**
+	 * @deprecated Use class MemberEdit instead.
+	 */
 	public AddMemberEdit(IMember sibling, int insertionKind, String[] source, int tabWidth) {
 		fSibling= sibling;
 		Assert.isNotNull(fSibling);
