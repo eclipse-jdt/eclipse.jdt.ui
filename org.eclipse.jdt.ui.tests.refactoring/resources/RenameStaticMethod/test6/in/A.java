@@ -4,7 +4,7 @@ class A{
 	static void m(){
 	}
 }
-class test{
+class test1{
 	void m(){
 		class X extends A{
 			void mm(){
