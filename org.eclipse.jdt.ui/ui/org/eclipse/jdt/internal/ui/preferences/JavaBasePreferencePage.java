@@ -168,7 +168,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		store.setDefault(SRCBIN_BINNAME, "bin"); //$NON-NLS-1$
 
 		store.setDefault(DOUBLE_CLICK_GOES_INTO, false);		
-		store.setDefault(RECONCILE_JAVA_VIEWS, false);
+		store.setDefault(RECONCILE_JAVA_VIEWS, true);
 	}
 	
 	/*
