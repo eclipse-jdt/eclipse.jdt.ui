@@ -12,22 +12,21 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.jdt.internal.debug.ui.launcher.JavaArgumentsTab;
-import org.eclipse.jdt.internal.debug.ui.launcher.JavaEnvironmentTab;
+import org.eclipse.jdt.internal.debug.ui.launcher.JavaClasspathTab;
+import org.eclipse.jdt.internal.debug.ui.launcher.JavaJRETab;
 
 public class JUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
 	/**
 	 * @see ILaunchConfigurationTabGroup#createTabs(ILaunchConfigurationDialog, String)
 	 */
-	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
-		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[4];
-		tabs[0]= new JUnitMainTab();
-		tabs[0].setLaunchConfigurationDialog(dialog);
-		tabs[1]= new JavaArgumentsTab(); 
-		tabs[1].setLaunchConfigurationDialog(dialog);
-		tabs[2]= new JavaEnvironmentTab();
-		tabs[2].setLaunchConfigurationDialog(dialog);
-		tabs[3]= new CommonTab();
-		tabs[3].setLaunchConfigurationDialog(dialog);
+	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {		
+		ILaunchConfigurationTab[] tabs= new ILaunchConfigurationTab[] {
+			new JUnitMainTab(),
+			new JavaArgumentsTab(),
+			new JavaClasspathTab(),
+			new JavaJRETab(),
+			new CommonTab()
+		};
 		setTabs(tabs);
 	}
 
