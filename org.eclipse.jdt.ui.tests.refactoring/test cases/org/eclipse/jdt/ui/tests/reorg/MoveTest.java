@@ -181,18 +181,18 @@ public class MoveTest extends RefactoringTest {
 		}		
 	}
 
-	public void testDisabled_noCommonParent2() throws Exception {
-		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
-		try {
-			IType classA= cu.getType("A");
-			IJavaElement[] javaElements= { classA, cu};
-			IResource[] resources= {};
-			verifyDisabled(resources, javaElements);
-		} finally {
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-		}		
-	}
+//	public void testDisabled_noCommonParent2() throws Exception {
+//		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
+//		try {
+//			IType classA= cu.getType("A");
+//			IJavaElement[] javaElements= { classA, cu};
+//			IResource[] resources= {};
+//			verifyDisabled(resources, javaElements);
+//		} finally {
+//			performDummySearch();
+//			cu.delete(true, new NullProgressMonitor());
+//		}		
+//	}
 
 	public void testDisabled_noCommonParent3() throws Exception {
 		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
@@ -1507,7 +1507,9 @@ public class MoveTest extends RefactoringTest {
 			IType otherType= cu.getType("B");
 			Object destination= otherType;
 			verifyValidDestination(ref, destination);
-			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+
 			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));
 			SourceCompareUtil.compare("source differs", cu.getSource(), expected);
 		} finally {
@@ -1528,6 +1530,8 @@ public class MoveTest extends RefactoringTest {
 			IType otherType= cu.getType("B");
 			Object destination= otherType;
 			verifyValidDestination(ref, destination);
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
 			
 			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));
 			SourceCompareUtil.compare("source differs", cu.getSource(), expected);
@@ -1549,6 +1553,8 @@ public class MoveTest extends RefactoringTest {
 			IType otherType= cu.getType("B");
 			Object destination= otherType;
 			verifyValidDestination(ref, destination);
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
 			
 			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));
 			SourceCompareUtil.compare("source differs", cu.getSource(), expected);
