@@ -100,7 +100,7 @@ public class QualifiedNameFinder {
 		ResultCollector collector= new ResultCollector(result, newValue, monitor);
 		TextSearchEngine engine= new TextSearchEngine();
 		engine.search(ResourcesPlugin.getWorkspace(), 
-			createScope(filePatterns, root), 
+			createScope(filePatterns, root), false,
 			collector, new MatchLocator(pattern, true, false)); //$NON-NLS-1$
 	}
 	
