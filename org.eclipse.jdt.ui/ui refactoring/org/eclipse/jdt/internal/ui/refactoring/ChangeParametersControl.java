@@ -166,6 +166,9 @@ public class ChangeParametersControl extends Composite {
 	private List fParameterInfos;
 	private TableCursor fTableCursor; 
 
+	/**
+	 * @param label no label is created if <code>label</code> is <code>null</code>.
+	 */
 	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, boolean canChangeParameterNames, boolean canChangeTypesOfOldParameters, boolean canAddParameters) {
 		super(parent, style);
 		Assert.isNotNull(listener);
@@ -179,11 +182,13 @@ public class ChangeParametersControl extends Composite {
 		layout.marginHeight= 0;
 		setLayout(layout);
 
-		Label tableLabel= new Label(this, SWT.NONE);
-		GridData labelGd= new GridData();
-		labelGd.horizontalSpan= 2;
-		tableLabel.setLayoutData(labelGd);
-		tableLabel.setText(label);
+		if (label != null) {
+			Label tableLabel= new Label(this, SWT.NONE);
+			GridData labelGd= new GridData();
+			labelGd.horizontalSpan= 2;
+			tableLabel.setLayoutData(labelGd);
+			tableLabel.setText(label);
+		}
 
 		createParameterList(this);
 		createButtonComposite(this);

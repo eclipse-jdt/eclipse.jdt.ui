@@ -103,10 +103,12 @@ public class ParameterInfo {
 		return fNewName;
 	}
 
+	//TODO: obsolete: use getOldBinding()
 	public Object getData() {
 		return fData;
 	}
-
+	
+	//TODO: obsolete: use constructor
 	public void setData(Object data) {
 		fData= data;
 	}

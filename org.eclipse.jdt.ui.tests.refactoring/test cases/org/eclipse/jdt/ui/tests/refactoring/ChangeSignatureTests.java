@@ -18,15 +18,21 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.Modifier;
 
+import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -46,7 +52,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		if (true) {
+			return new MySetup(new TestSuite(clazz));
+		} else {
+			System.err.println("*** Running only parts of " + clazz.getName() + "!");
+			TestSuite suite= new TestSuite();
+			suite.addTest(new ChangeSignatureTests("testException01"));
+			return new MySetup(suite);
+		}
 	}
 	
 	private String getSimpleTestFileName(boolean canReorder, boolean input){
@@ -292,6 +305,51 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertEquals("Severity:" + result.getFirstMessage(result.getSeverity()), expectedSeverity, result.getSeverity());		
 	}
 	
+	private void helperException(String[] signature, String[] removeExceptions, String[] addExceptions) throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		IType classA= getType(cu, "A");
+		IMethod method = classA.getMethod("m", signature);
+		assertTrue("method does not exist", method.exists());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+
+		// from RefactoringTest#performRefactoring():
+		RefactoringStatus status= ref.checkActivation(new NullProgressMonitor());
+		assertTrue("checkActivation was supposed to pass", status.isOK());
+
+		mangleExceptions(ref.getExceptionInfos(), removeExceptions, addExceptions, method.getCompilationUnit());
+
+		status= ref.checkInput(new NullProgressMonitor());
+		assertTrue("checkInput was supposed to pass", status.isOK());
+		IChange change= ref.createChange(new NullProgressMonitor());
+		performChange(change);
+		// XXX: this should be done by someone else
+		Refactoring.getUndoManager().addUndo(ref.getName(), change.getUndoChange());
+		
+		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		String expectedFileContents= getFileContents(getTestFileName(true, false));
+		assertEqualLines("invalid renaming", expectedFileContents, newcu.getSource());
+	}
+	
+	
+	private void mangleExceptions(List list, String[] removeExceptions, String[] addExceptions, ICompilationUnit cu) throws Exception {
+		for (Iterator iter= list.iterator(); iter.hasNext(); ) {
+			ExceptionInfo info= (ExceptionInfo) iter.next();
+			String name= JavaModelUtil.getFullyQualifiedName(info.getType());
+			for (int i= 0; i < removeExceptions.length; i++) {
+				if (name.equals(removeExceptions[i]))
+					iter.remove();
+			}
+		}
+		for (int i= 0; i < addExceptions.length; i++) {
+//			IType type= JavaModelUtil.findTypeInCompilationUnit(cu, addExceptions[i]);
+			IType type= JavaModelUtil.findType(cu.getJavaProject(), addExceptions[i]);
+			list.add(ExceptionInfo.createInfoForAddedException(type));
+		}
+	}
+
 	//------- tests 
 	
 	public void testFail0() throws Exception{
@@ -1132,6 +1190,13 @@ public class ChangeSignatureTests extends RefactoringTest {
 //		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
 //		int[] newIndices= {1};
 //		helperAdd(signature, newParamInfo, newIndices);
+	}
+	
+	public void testException01() throws Exception {
+		String[] signature= {"J"};
+		String[] remove= {};
+		String[] add= {"java.util.zip.ZipException"};
+		helperException(signature, remove, add);
 	}
 	
 }

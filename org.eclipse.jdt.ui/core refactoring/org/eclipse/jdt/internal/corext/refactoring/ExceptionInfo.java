@@ -1,0 +1,87 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.corext.refactoring;
+
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+import org.eclipse.jdt.internal.corext.Assert;
+
+public class ExceptionInfo {
+	private final IType fType;
+	private final ITypeBinding fTypeBinding;
+	private int fKind;
+
+	private static final int OLD= 0;
+	private static final int ADDED= 1;
+	private static final int DELETED= 2;
+	
+	private ExceptionInfo(IType type, int kind, ITypeBinding binding) {
+		Assert.isNotNull(type);
+		fType= type;
+		fKind= kind;
+		fTypeBinding= binding;
+	}
+
+	public static ExceptionInfo createInfoForOldException(IType type, ITypeBinding binding){
+		return new ExceptionInfo(type, OLD, binding);
+	}
+	public static ExceptionInfo createInfoForAddedException(IType type){
+		return new ExceptionInfo(type, ADDED, null);
+	}
+	
+	public void markAsDeleted(){
+		Assert.isTrue(! isAdded());//added exception infos should be simply removed from the list
+		fKind= DELETED;
+	}
+	
+	public void markAsOld(){
+		Assert.isTrue(isDeleted());
+		fKind= OLD;
+	}
+	
+	public boolean isAdded(){
+		return fKind == ADDED;
+	}
+	
+	public boolean isDeleted(){
+		return fKind == DELETED;
+	}
+	
+	public boolean isOld(){
+		return fKind == OLD;
+	}
+	
+	public IType getType() {
+		return fType;
+	}
+	
+	/**
+	 * @return ITypeBinding the typeBinding (for OLD and DELETED exceptions) or <code>null</code>
+	 */
+	public ITypeBinding getTypeBinding() {
+		return fTypeBinding;
+	}
+	
+	public String toString() {
+		StringBuffer result= new StringBuffer();
+		switch (fKind) {
+			case OLD : result.append("OLD: "); break;
+			case ADDED : result.append("ADDED: "); break;
+			case DELETED : result.append("DELETED: "); break;
+		}
+		if (fType == null)
+			result.append("null");
+		else
+			result.append(fType.toString());
+		return result.toString();
+	}
+}
