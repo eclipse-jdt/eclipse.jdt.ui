@@ -878,7 +878,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			if (!preconditionsOK())
 				throw new InvocationTargetException(null, JarPackagerMessages.getString("JarFileExportOperation.jarCreationFailedSeeDetails")); //$NON-NLS-1$
 			int totalWork= countSelectedElements();
-			if ((!isAutoBuilding() && fJarPackage.isBuildingIfNeeded() && fJarPackage.areGeneratedFilesExported()) || fFilesSaved) {
+			if (fJarPackage.areGeneratedFilesExported() 
+				&& ((!isAutoBuilding() && fJarPackage.isBuildingIfNeeded())
+					|| (isAutoBuilding() && fFilesSaved))) {
 				int subMonitorTicks= totalWork/10;
 				totalWork += subMonitorTicks;
 				progressMonitor.beginTask("", totalWork); //$NON-NLS-1$
