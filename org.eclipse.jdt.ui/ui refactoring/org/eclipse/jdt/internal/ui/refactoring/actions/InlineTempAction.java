@@ -8,7 +8,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.refactoring.InlineTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
 public class InlineTempAction extends TextSelectionBasedRefactoringAction {
@@ -36,7 +35,7 @@ public class InlineTempAction extends TextSelectionBasedRefactoringAction {
 		//XXX wrong help
 		String helpId= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
 		String pageTitle= "Inline Local Variable";
-		return new InlineTempWizard((InlineTempRefactoring)refactoring, pageTitle, helpId);
+		return new RefactoringWizard((InlineTempRefactoring)refactoring, pageTitle, helpId);
 	}
 }
 
