@@ -36,7 +36,6 @@ import org.eclipse.ui.part.PageBook;
 import org.eclipse.compare.CompareUI;
 
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.dom.InstanceofExpression;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
