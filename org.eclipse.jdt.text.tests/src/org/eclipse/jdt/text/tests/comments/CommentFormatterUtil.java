@@ -19,13 +19,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
 
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
 import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.comment.CommentObjectFactory;
 import org.eclipse.jdt.internal.ui.text.comment.CommentRegion;
 import org.eclipse.jdt.internal.ui.text.comment.ITextMeasurement;
@@ -71,10 +67,9 @@ public class CommentFormatterUtil {
 
 		final IDocument document= new Document(source);
 		final TypedPosition position= new TypedPosition(offset, length, type);
-		final boolean tabs= JavaCore.TAB.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
 
 		final CommentRegion region= CommentObjectFactory.createRegion(document, position, TextUtilities.getDefaultLineDelimiter(document), preferences, textMeasurement);
 
-		return region.format(CommentFormattingStrategy.getLineIndentation(document, region, offset, tabs));
+		return region.format();
 	}
 }

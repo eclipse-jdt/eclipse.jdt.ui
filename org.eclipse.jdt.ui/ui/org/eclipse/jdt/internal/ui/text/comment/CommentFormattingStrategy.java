@@ -20,19 +20,16 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -44,35 +41,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.0
  */
 public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
-
-	/**
-	 * Returns the indentation of the line at the specified offset.
-	 * 
-	 * @param document	the document which owns the line
-	 * @param region	the comment region which owns the line
-	 * @param offset	the offset where to determine the indentation
-	 * @param useTab		<code>true</code> iff the indentation should use tabs
-	 *                   instead of spaces, <code>false</code> otherwise
-	 * @return The indentation of the line
-	 */
-	public static String getLineIndentation(final IDocument document, final CommentRegion region, final int offset, final boolean useTab) {
-
-		String result= ""; //$NON-NLS-1$
-
-		try {
-
-			final IRegion line= document.getLineInformationOfOffset(offset);
-
-			final int begin= line.getOffset();
-			final int end= Math.min(offset, line.getOffset() + line.getLength());
-
-			result= region.stringToIndent(document.get(begin, end - begin), useTab);
-
-		} catch (BadLocationException exception) {
-			// Ignore and return empty
-		}
-		return result;
-	}
 
 	/** Documents to be formatted by this strategy */
 	private final LinkedList fDocuments= new LinkedList();
@@ -135,14 +103,13 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		if (document != null && position != null) {
 			final boolean isFormmatingComments= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMAT).equals(IPreferenceStore.TRUE);
 			final boolean isFormattingHeader= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER).equals(IPreferenceStore.TRUE);
-			final boolean useTab= getPreferences().get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR).equals(JavaCore.TAB);
 			
 			int documentsHeaderEnd= computeHeaderEnd(document);
 			
 			if (isFormmatingComments && (isFormattingHeader || position.offset >= documentsHeaderEnd)) {
 				
 				final CommentRegion region= CommentObjectFactory.createRegion(document, position, TextUtilities.getDefaultLineDelimiter(document), getPreferences(), fTextMeasurement);
-				final TextEdit edit= region.format(getLineIndentation(document, region, position.getOffset(), useTab));
+				final TextEdit edit= region.format();
 				try {
 					
 					if (edit != null)
