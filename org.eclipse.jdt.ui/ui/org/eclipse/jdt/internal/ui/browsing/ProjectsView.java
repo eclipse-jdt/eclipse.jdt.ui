@@ -136,13 +136,4 @@ public class ProjectsView extends JavaBrowsingPart {
 		super.createActions();
 		fActionGroups.addGroup(new ProjectActionGroup(this));
 	}		
-	
-	
-	/**
-	 * @see org.eclipse.ui.IWorkbenchPart#getTitle()
-	 */
-	public String getTitle() {
-		return JavaBrowsingMessages.getString("JavaBrowsing.projectView.title"); //$NON-NLS-1$
-	}
-
 }

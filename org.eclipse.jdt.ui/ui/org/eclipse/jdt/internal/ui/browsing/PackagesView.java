@@ -105,13 +105,4 @@ public class PackagesView extends JavaBrowsingPart {
 				return findElementToSelect(je.getParent());
 		}
 	}
-	
-		
-	/**
-	 * @see org.eclipse.ui.IWorkbenchPart#getTitle()
-	 */
-	public String getTitle() {
-		return JavaBrowsingMessages.getString("JavaBrowsing.packageView.title"); //$NON-NLS-1$
-	}
-
 }
