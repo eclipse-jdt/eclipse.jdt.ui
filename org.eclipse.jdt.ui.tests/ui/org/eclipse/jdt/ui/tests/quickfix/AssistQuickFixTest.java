@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.core.runtime.Preferences;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -55,7 +57,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new AssistQuickFixTest("testUnwrapForLoop"));
+			suite.addTest(new AssistQuickFixTest("testAssignToLocal4"));
 			return suite;
 		}
 	}
@@ -70,6 +72,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
+		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, false);
 		
 //		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
 	
@@ -232,6 +235,164 @@ public class AssistQuickFixTest extends QuickFixTest {
 			}
 		}
 	}
+	
+	public void testAssignToLocal3() throws Exception {
+		// test prefixes and this qualification
+		
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, true);
+		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
+		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+		corePrefs.setValue(JavaCore.CODEASSIST_LOCAL_PREFIXES, "_");
+			
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private int fCount;\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.getSecurityManager();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+				
+		int offset= buf.toString().indexOf("System");
+		CorrectionContext context= getCorrectionContext(cu, offset, 0);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 3);
+		assertCorrectLabels(proposals);
+
+		boolean doField= true, doLocal= true;
+		for (int i= 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (!(curr instanceof AssignToVariableAssistProposal)) {
+				continue;
+			}			
+			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
+			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
+				assertTrue("same proposal kind", doField);
+				doField= false;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class E {\n");
+				buf.append("\n");
+				buf.append("    private int fCount;\n");
+				buf.append("    private SecurityManager fManager;\n");
+				buf.append("\n");				
+				buf.append("    public void foo() {\n");
+				buf.append("        this.fManager = System.getSecurityManager();\n");
+				buf.append("    }\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());
+				
+				Point selection= proposal.getSelection(new Document(preview));
+				assertEquals("wrong selection", "fManager", preview.substring(selection.x, selection.x + selection.y));	
+			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
+				assertTrue("same proposal kind", doLocal);
+				doLocal= false;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class E {\n");
+				buf.append("\n");
+				buf.append("    private int fCount;\n");
+				buf.append("\n");
+				buf.append("    public void foo() {\n");
+				buf.append("        SecurityManager _manager = System.getSecurityManager();\n");
+				buf.append("    }\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());
+
+				Point selection= proposal.getSelection(new Document(preview));
+				assertEquals("wrong selection", "_manager", preview.substring(selection.x, selection.x + selection.y));	
+			}
+		}
+	}
+	
+	public void testAssignToLocal4() throws Exception {
+		// test name conflict
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private int f;\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Math.min(1.0f, 2.0f);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+				
+		int offset= buf.toString().indexOf("Math");
+		CorrectionContext context= getCorrectionContext(cu, offset, 0);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 3);
+		assertCorrectLabels(proposals);
+
+		boolean doField= true, doLocal= true;
+		for (int i= 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (!(curr instanceof AssignToVariableAssistProposal)) {
+				continue;
+			}			
+			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
+			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
+				assertTrue("same proposal kind", doField);
+				doField= false;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class E {\n");
+				buf.append("\n");
+				buf.append("    private int f;\n");
+				buf.append("    private float g;\n");
+				buf.append("\n");				
+				buf.append("    public void foo() {\n");
+				buf.append("        g = Math.min(1.0f, 2.0f);\n");
+				buf.append("    }\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());
+				
+				Point selection= proposal.getSelection(new Document(preview));
+				assertEquals("wrong selection", "g", preview.substring(selection.x, selection.x + selection.y));	
+			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
+				assertTrue("same proposal kind", doLocal);
+				doLocal= false;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class E {\n");
+				buf.append("\n");
+				buf.append("    private int f;\n");
+				buf.append("\n");
+				buf.append("    public void foo() {\n");
+				buf.append("        float g = Math.min(1.0f, 2.0f);\n");
+				buf.append("    }\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());
+
+				Point selection= proposal.getSelection(new Document(preview));
+				assertEquals("wrong selection", "g", preview.substring(selection.x, selection.x + selection.y));	
+			}
+		}
+	}	
+	
 	
 	public void testAssignToLocal2CursorAtEnd() throws Exception {
 //		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
