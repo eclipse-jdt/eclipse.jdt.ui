@@ -21,14 +21,15 @@ import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.corext.codegeneration.AddJavaDocStubOperation;
 import org.eclipse.jdt.internal.corext.codegeneration.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Create Java Doc Stubs for selected members
@@ -116,8 +117,8 @@ public class AddJavaDocStubAction extends Action {
 				ICompilationUnit cu= null;
 				for (int i= 0; i < nElements; i++) {
 					Object curr= elements.get(i);
-					if (curr instanceof IMember) {
-						IMember member= (IMember)curr;
+					if (curr instanceof IMethod) {
+						IMethod member= (IMethod)curr; // limit to methods
 						
 						if (i == 0) {
 							cu= member.getCompilationUnit();
