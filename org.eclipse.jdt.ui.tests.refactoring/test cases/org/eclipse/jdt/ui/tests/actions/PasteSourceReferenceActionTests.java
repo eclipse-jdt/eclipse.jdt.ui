@@ -84,6 +84,10 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 	}
 	
 	public void test1() throws Exception{
+		printTestDisabledMessage("should not show dialog when testing");
+		if (true)
+			return;
+			
 		ICompilationUnit newcuA= null;
 		ICompilationUnit newcuB= null;
 		try{
