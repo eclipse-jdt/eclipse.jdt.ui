@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.text.Collator;
 import java.util.Comparator;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.templates.TemplateProposal;
-
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -26,13 +24,6 @@ public class JavaCompletionProposalComparator implements Comparator {
 	public static JavaCompletionProposalComparator getInstance() {
 		return fgInstance;
 	}
-	
-	private static Collator fgCollator;
-	static {
-		fgCollator= Collator.getInstance();
-		fgCollator.setStrength(Collator.TERTIARY); // ignore case
-	}
-	
 	
 	private boolean fOrderAlphabetically;
 
@@ -62,7 +53,7 @@ public class JavaCompletionProposalComparator implements Comparator {
 				return relevanceDif;
 			}
 		}
-		return fgCollator.compare(p1.getDisplayString(), p2.getDisplayString());
+		return p1.getDisplayString().compareToIgnoreCase(p2.getDisplayString());
 	}
 
 	private int getRelevance(ICompletionProposal obj) {
