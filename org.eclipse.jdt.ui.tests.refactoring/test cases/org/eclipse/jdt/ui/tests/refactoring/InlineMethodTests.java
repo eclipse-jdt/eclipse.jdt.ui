@@ -251,6 +251,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performSimpleTestInlineMethod();
 	}
 
+	public void testSurroundingCallers() throws Exception {
+		performSimpleTestInlineMethod();
+	}
+
 	/* *********************** Argument Tests ******************************* */
 		
 	private void performArgumentTest() throws Exception {

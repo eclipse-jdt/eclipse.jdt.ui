@@ -52,7 +52,7 @@ public class TextChangeCompatibility {
 		change.addTextEditGroup(new TextEditGroup(name, edits));
 	}
 	
-	private static void insert(TextEdit parent, TextEdit edit) {
+	public static void insert(TextEdit parent, TextEdit edit) {
 		if (!parent.hasChildren()) {
 			parent.addChild(edit);
 			return;

@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -275,7 +276,12 @@ public class InlineMethodRefactoring extends Refactoring {
 				RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.delete"), new TextEdit[] { delete }); //$NON-NLS-1$
 			TextEdit root= change.getEdit();
 			if (root != null) {
-				root.addChild(delete);
+				// TODO instead of finding the right insert position the call inliner should
+				// resuse the AST & rewriter of the source provide and we should rewrite the
+				// whole AST at the end. However, since recursive calls aren't allowed there
+				// shouldn't be a text edit overlap.
+				// root.addChild(delete);
+				TextChangeCompatibility.insert(root, delete);
 			} else {
 				change.setEdit(delete);
 			}
