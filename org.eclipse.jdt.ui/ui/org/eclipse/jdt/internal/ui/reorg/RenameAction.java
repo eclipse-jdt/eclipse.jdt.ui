@@ -104,7 +104,7 @@ public class RenameAction extends ReorgAction {
 		IInputValidator validator= new IInputValidator() {
 			int k= 0;
 			public String isValid(String name) {
-				IJavaElement parent= getJavaParent(element);
+				Object parent= getJavaParent(element);
 				return policy.isValidNewName(element, parent, name);
 			}
 		};
@@ -163,12 +163,16 @@ public class RenameAction extends ReorgAction {
 		return support.canRename(element);			
 	}
 	
-	private IJavaElement getJavaParent(Object element) {
+	private Object getJavaParent(Object element) {
 		if (element instanceof IJavaElement) 
 			return ((IJavaElement)element).getParent();
 		if (element instanceof IResource) {
 			IResource file= (IResource)element;
-			return JavaCore.create(file.getParent());
+			IResource parent= file.getParent();
+			IJavaElement javaParent= JavaCore.create(parent);
+			if (javaParent != null)
+				return javaParent;
+			return parent;
 		}
 		return null;
 	}
