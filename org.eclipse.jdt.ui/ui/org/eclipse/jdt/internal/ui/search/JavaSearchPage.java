@@ -9,9 +9,14 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -35,24 +40,18 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.model.IWorkbenchAdapter;
 
-import org.eclipse.search.internal.ui.SearchManager;
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
 import org.eclipse.search.ui.ISearchResultViewEntry;
-
 import org.eclipse.search.ui.IWorkingSet;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -70,8 +69,11 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
@@ -94,14 +96,16 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		SearchMessages.getString("SearchPage.searchFor.method"), //$NON-NLS-1$
 		SearchMessages.getString("SearchPage.searchFor.package"), //$NON-NLS-1$
 		SearchMessages.getString("SearchPage.searchFor.constructor"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.searchFor.field") }; //$NON-NLS-1$
+		SearchMessages.getString("SearchPage.searchFor.field")}; //$NON-NLS-1$
 
 	private Button[] fLimitTo;
 	private String[] fLimitToText= {
 		SearchMessages.getString("SearchPage.limitTo.declarations"), //$NON-NLS-1$
 		SearchMessages.getString("SearchPage.limitTo.implementors"), //$NON-NLS-1$
 		SearchMessages.getString("SearchPage.limitTo.references"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.limitTo.allOccurrences")}; //$NON-NLS-1$
+		SearchMessages.getString("SearchPage.limitTo.allOccurrences"), //$NON-NLS-1$
+		SearchMessages.getString("SearchPage.limitTo.readReferences"), //$NON-NLS-1$		
+		SearchMessages.getString("SearchPage.limitTo.writeReferences")}; //$NON-NLS-1$
 	
 	private IJavaElement fJavaElement;
 	
@@ -178,8 +182,37 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			if (fLimitTo[i].getSelection())
 				return i;
 		}
-		Assert.isTrue(false, SearchMessages.getString("SearchPage.shouldNeverHappen")); //$NON-NLS-1$
 		return -1;
+	}
+
+	private void setLimitTo(int searchFor) {
+		fLimitTo[DECLARATIONS].setEnabled(true);
+		fLimitTo[IMPLEMENTORS].setEnabled(false);
+		fLimitTo[REFERENCES].setEnabled(true);			
+		fLimitTo[ALL_OCCURRENCES].setEnabled(true);
+		fLimitTo[READ_REFERENCES].setEnabled(false);
+		fLimitTo[WRITE_REFERENCES].setEnabled(false);
+		
+		if (!(searchFor == TYPE || searchFor == INTERFACE) && fLimitTo[IMPLEMENTORS].getSelection()) {
+			fLimitTo[IMPLEMENTORS].setSelection(false);
+			fLimitTo[REFERENCES].setSelection(true);
+		}
+
+		if (!(searchFor == FIELD) && (getLimitTo() == READ_REFERENCES || getLimitTo() == WRITE_REFERENCES)) {
+			fLimitTo[getLimitTo()].setSelection(false);
+			fLimitTo[REFERENCES].setSelection(true);
+		}
+
+		switch (searchFor) {
+			case TYPE | INTERFACE:
+				fLimitTo[IMPLEMENTORS].setEnabled(true);
+			case FIELD:
+				fLimitTo[READ_REFERENCES].setEnabled(true);
+				fLimitTo[WRITE_REFERENCES].setEnabled(true);
+				break;
+			default :
+				break;
+		}
 	}
 
 	private String[] getPreviousSearchPatterns() {
@@ -286,18 +319,16 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		SelectionAdapter javaElementInitializer= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				fJavaElement= null;
+				setLimitTo(getSearchFor());
 			}
 		};
 
-		fSearchFor[FIELD].addSelectionListener(javaElementInitializer);
+		fSearchFor[TYPE].addSelectionListener(javaElementInitializer);
 		fSearchFor[METHOD].addSelectionListener(javaElementInitializer);
+		fSearchFor[FIELD].addSelectionListener(javaElementInitializer);
+		fSearchFor[CONSTRUCTOR].addSelectionListener(javaElementInitializer);
 		fSearchFor[PACKAGE].addSelectionListener(javaElementInitializer);
-		
-		fSearchFor[TYPE].addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleSearchForSelected(((Button)e.widget).getSelection());
-			}
-		});
+
 		setControl(result);
 		
 		WorkbenchHelp.setHelp(result, new Object[] { IJavaHelpContextIds.JAVA_SEARCH_PAGE });	
@@ -343,10 +374,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		for (int i= 0; i < fLimitTo.length; i++)
 			fLimitTo[i].setSelection(false);
 		fSearchFor[values.searchFor].setSelection(true);
+		setLimitTo(values.searchFor);
 		fLimitTo[values.limitTo].setSelection(true);
-		fLimitTo[IMPLEMENTORS].setEnabled((values.searchFor == TYPE));
-		fLimitTo[DECLARATIONS].setEnabled((values.searchFor != PACKAGE));
-		fLimitTo[ALL_OCCURRENCES].setEnabled((values.searchFor != PACKAGE));				
+		
 		fInitialPattern= values.pattern;
 		fPattern.setText(fInitialPattern);
 		fJavaElement= values.javaElement;
@@ -356,22 +386,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			getContainer().setSelectedScope(values.scope);
 	}
 
-	private void handleSearchForSelected(boolean state) {
-		boolean implState= fLimitTo[IMPLEMENTORS].getSelection();
-		if (!state && implState) {
-			fLimitTo[IMPLEMENTORS].setSelection(false);
-			fLimitTo[REFERENCES].setSelection(true);
-		}
-		fLimitTo[IMPLEMENTORS].setEnabled(state);
-		fJavaElement= null;
-	}
-		
 	private Control createSearchFor(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
 		result.setText(SearchMessages.getString("SearchPage.searchFor.label")); //$NON-NLS-1$
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 3;
 		result.setLayout(layout);
+		result.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 
 		fSearchFor= new Button[fSearchForText.length];
 		for (int i= 0; i < fSearchForText.length; i++) {
@@ -412,10 +433,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			values= getDefaultInitValues();
 					
 		fSearchFor[values.searchFor].setSelection(true);
-		fLimitTo[values.limitTo].setSelection(true);
-		if (values.searchFor != TYPE)
-			fLimitTo[IMPLEMENTORS].setEnabled(false);
-
+		setLimitTo(values.searchFor);
+		fLimitTo[values.limitTo].setSelection(true);		
 		fInitialPattern= values.pattern;
 		fPattern.setText(fInitialPattern);
 		fJavaElement= values.javaElement;

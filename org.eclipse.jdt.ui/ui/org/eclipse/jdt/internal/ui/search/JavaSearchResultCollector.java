@@ -112,9 +112,9 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			attributes= new HashMap(6);
 			attributes.put(IJavaSearchUIConstants.ATT_ACCURACY, POTENTIAL_MATCH_VALUE);
 			if (groupKey == null)
-				groupKey= "?:null";
+				groupKey= "?:null"; //$NON-NLS-1$
 			else
-				groupKey= "?:" + enclosingElement.getHandleIdentifier();
+				groupKey= "?:" + enclosingElement.getHandleIdentifier(); //$NON-NLS-1$
 		} else
 			attributes= new HashMap(5);
 		JavaCore.addJavaElementMarkerAttributes(attributes, enclosingElement);

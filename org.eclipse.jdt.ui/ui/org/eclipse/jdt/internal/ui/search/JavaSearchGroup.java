@@ -33,7 +33,7 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 	}
 
 	public void fill(IMenuManager manager, GroupContext context) {
-		MenuManager javaSearchMM= new MenuManager(SearchMessages.getString(GROUP_NAME), GROUP_NAME); //$NON-NLS-1$
+		MenuManager javaSearchMM= new MenuManager(SearchMessages.getString("group.search"), GROUP_NAME); //$NON-NLS-1$
 		
 		for (int i= 0; i < fActions.length; i++) {
 			ElementSearchAction action= fActions[i];
@@ -50,7 +50,7 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 	}
 	
 	public MenuManager getMenuManagerForGroup(boolean isTextSelectionEmpty) {
-		MenuManager javaSearchMM= new MenuManager(SearchMessages.getString(GROUP_NAME), GROUP_NAME); //$NON-NLS-1$
+		MenuManager javaSearchMM= new MenuManager(SearchMessages.getString("group.search"), GROUP_NAME); //$NON-NLS-1$
 		if (!isTextSelectionEmpty) {
 			javaSearchMM.add(new GroupMarker(GROUP_NAME));
 			for (int i= 0; i < fActions.length; i++)
