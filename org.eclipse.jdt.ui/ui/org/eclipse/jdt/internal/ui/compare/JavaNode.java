@@ -4,21 +4,16 @@
  */
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
-
-import org.eclipse.jdt.internal.core.JavaElement;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * Comparable Java elements are represented as JavaNodes.
@@ -36,8 +31,6 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	public static final int INIT= 7;
 	public static final int CONSTRUCTOR= 8;
 	public static final int METHOD= 9;
-
-	private static Map fgImages= new Hashtable(13);	// maps the names below to SWT Images
 
 	private int fInitializerCount= 1;
 	private boolean fIsEditable;
@@ -134,68 +127,46 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 		
 	/**
 	 * Returns a shared image for this Java element.
-	 * Returns null if no image exists for the type code.
 	 *
 	 * see ITypedInput.getImage
 	 */
 	public Image getImage() {
-				
-		int id= getTypeCode();
-		Integer key= new Integer(id);
-		Image image= (Image) fgImages.get(key);
-		
-		if (image == null) {
-			ImageDescriptor d= null;
-			
-			switch (getTypeCode()) {
-			case CU:
-				d= JavaPluginImages.DESC_OBJS_CUNIT;
-				break;
-			case PACKAGE:
-				d= JavaPluginImages.DESC_OBJS_PACKDECL;
-				break;
-			case IMPORT:
-				d= JavaPluginImages.DESC_OBJS_IMPDECL;
-				break;
-			case IMPORT_CONTAINER:
-				d= JavaPluginImages.DESC_OBJS_IMPCONT;
-				break;
-			case CLASS:
-				d= JavaPluginImages.DESC_OBJS_CLASS;
-				break;
-			case INTERFACE:
-				d= JavaPluginImages.DESC_OBJS_INTERFACE;
-				break;
-			case INIT:
-			case METHOD:
-			case CONSTRUCTOR:
-				d= JavaCompareUtilities.getImageDescriptor("obj16/compare_method.gif"); //$NON-NLS-1$
-				break;
-			case FIELD:
-				d= JavaCompareUtilities.getImageDescriptor("obj16/compare_field.gif"); //$NON-NLS-1$
-				break;					
-			default:
-				break;
-			}
-	
-			if (d == null)
-				d= ImageDescriptor.getMissingImageDescriptor();
-			image= d.createImage();
-			fgImages.put(key, image);
+						
+		ImageDescriptor id= null;
+					
+		switch (getTypeCode()) {
+		case CU:
+			id= JavaCompareUtilities.getImageDescriptor(IMember.COMPILATION_UNIT);
+			break;
+		case PACKAGE:
+			id= JavaCompareUtilities.getImageDescriptor(IMember.PACKAGE_DECLARATION);
+			break;
+		case IMPORT:
+			id= JavaCompareUtilities.getImageDescriptor(IMember.IMPORT_DECLARATION);
+			break;
+		case IMPORT_CONTAINER:
+			id= JavaCompareUtilities.getImageDescriptor(IMember.IMPORT_CONTAINER);
+			break;
+		case CLASS:
+			id= JavaCompareUtilities.getTypeImageDescriptor(true);
+			break;
+		case INTERFACE:
+			id= JavaCompareUtilities.getTypeImageDescriptor(false);
+			break;
+		case INIT:
+			id= JavaCompareUtilities.getImageDescriptor(IMember.INITIALIZER);
+			break;
+		case CONSTRUCTOR:
+		case METHOD:
+			id= JavaCompareUtilities.getImageDescriptor(IMember.METHOD);
+			break;
+		case FIELD:
+			id= JavaCompareUtilities.getImageDescriptor(IMember.FIELD);
+			break;					
 		}
-		return image;
+		return JavaPlugin.getImageDescriptorRegistry().get(id);
 	}
 
-	public static void disposeImages() {
-		Iterator i= fgImages.values().iterator();
-		while (i.hasNext()) {
-			Image image= (Image) i.next();
-			if (!image.isDisposed())
-				image.dispose();
-		}
-		fgImages.clear();
-	}
-	
 	public void setContent(byte[] content) {
 		super.setContent(content);
 		nodeChanged(this);

@@ -97,7 +97,6 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 	
 	protected ITypedElement[] buildEditions(ITypedElement target, IFile file) {
 
-
 		// setup array of editions
 		IFileState[] states= null;		
 		// add available editions
@@ -117,15 +116,8 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 			for (int i= 0; i < states.length; i++)
 				editions[i+1]= new HistoryItem(target, states[i]);
 		return editions;
-		
-		/*
-		if (states == null || states.length <= 0) {
-			MessageDialog.openInformation(shell, errorTitle, CompareMessages.getString("AddFromHistory.noHistoryMessage")); //$NON-NLS-1$
-			return;
-		}
-		*/
 	}
-
+	
 	/**
 	 * Tries to find the given element in a workingcopy.
 	 */

@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.ui.compare.JavaHistoryAction.JavaTextBufferNode;
 
 import org.eclipse.compare.*;
 
+
 /**
  * Provides "Replace from local history" for Java elements.
  */
@@ -32,9 +33,7 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 	
 	public JavaCompareWithEditionAction() {
 	}	
-
-	// CompareMessages.getString("ReplaceFromHistory.action.label")
-
+	
 	public void run(IAction action) {
 		
 		String errorTitle= CompareMessages.getString("ReplaceFromHistory.title"); //$NON-NLS-1$
@@ -73,6 +72,7 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
 			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
 			d.setCompareMode(true);
+			d.setEditionTitleImage(JavaCompareUtilities.getImage(input));
 			d.selectEdition(target, editions, input);
 						
 		} catch(CoreException ex) {

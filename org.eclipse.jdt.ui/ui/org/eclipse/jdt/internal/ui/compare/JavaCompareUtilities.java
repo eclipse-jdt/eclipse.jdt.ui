@@ -8,18 +8,61 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.core.JavaElement;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.*;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 
 class JavaCompareUtilities {
+	
+	static ImageDescriptor getImageDescriptor(int type) {
+		switch (type) {			
+		case IMember.INITIALIZER:
+		case IMember.METHOD:
+			return getImageDescriptor("obj16/compare_method.gif"); //$NON-NLS-1$			
+		case IMember.FIELD:
+			return getImageDescriptor("obj16/compare_field.gif"); //$NON-NLS-1$
+		case IMember.PACKAGE_DECLARATION:
+			return JavaPluginImages.DESC_OBJS_PACKDECL;
+		case IMember.IMPORT_DECLARATION:
+			return JavaPluginImages.DESC_OBJS_IMPDECL;
+		case IMember.IMPORT_CONTAINER:
+			return JavaPluginImages.DESC_OBJS_IMPCONT;
+		case IMember.COMPILATION_UNIT:
+			return JavaPluginImages.DESC_OBJS_CUNIT;
+		}	
+		return ImageDescriptor.getMissingImageDescriptor();
+	}
+	
+	static ImageDescriptor getTypeImageDescriptor(boolean isClass) {
+		if (isClass)
+			return JavaPluginImages.DESC_OBJS_CLASS;
+		return JavaPluginImages.DESC_OBJS_INTERFACE;
+	}
+
+	static ImageDescriptor getImageDescriptor(IMember element) {
+		int t= element.getElementType();
+		if (t == IMember.TYPE) {
+			IType type= (IType) element;
+			try {
+				return getTypeImageDescriptor(type.isClass());
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+				return JavaPluginImages.DESC_OBJS_GHOST;
+			}
+		}
+		return getImageDescriptor(t);
+	}
 	
 	/**
 	 * Returns a name for the given Java element that uses the same conventions
@@ -134,6 +177,11 @@ class JavaCompareUtilities {
 		return null;
 	}
 	
+	static Image getImage(IMember member) {
+		ImageDescriptor id= getImageDescriptor(member);
+		return id.createImage();
+	}
+
 	static JavaTextTools getJavaTextTools() {
 		JavaPlugin plugin= JavaPlugin.getDefault();
 		if (plugin != null)
