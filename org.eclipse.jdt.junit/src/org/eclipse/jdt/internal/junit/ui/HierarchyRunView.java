@@ -47,6 +47,9 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	 */
 	private Tree fTree;
 	
+	private TreeItem fCachedParent;
+	private TreeItem[] fCachedItems;
+	
 	/**
 	 * Helper used to resurrect test hierarchy
 	 */
@@ -145,7 +148,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		TreeItem[] treeItems= fTree.getSelection();
 		if(treeItems.length != 1) 
 			return false;
-		return treeItems[0].getItems().length > 0;
+		return treeItems[0].getItemCount() > 0;
 	}	
 	
 	private String getClassName() {
@@ -202,8 +205,48 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			
 		updateItem(treeItem, testInfo);
 		
-		if (fTestRunnerPart.isAutoScroll())
+		if (fTestRunnerPart.isAutoScroll()) {
 			fTree.showItem(treeItem);
+			cacheItems(treeItem);
+			collapseIfOK(treeItem);
+		} 
+	}
+
+	private void cacheItems(TreeItem treeItem) {
+		TreeItem parent= treeItem.getParentItem();
+		if (parent == fCachedParent)
+			return;
+		fCachedItems= parent.getItems();
+		fCachedParent= parent;	
+	}
+
+	private void collapseIfOK(TreeItem treeItem) {
+		TreeItem parent= treeItem.getParentItem();
+		if (parent != null) {
+			TreeItem[] items= null;
+			if (parent == fCachedParent)
+				items= fCachedItems;
+			else 
+				items= parent.getItems();
+				
+			if (isLast(treeItem, items)) {
+				boolean ok= true;
+				for (int i= 0; i < items.length; i++) {
+					if (!(getTestRunInfo(items[i]).getStatus() == ITestRunListener.STATUS_OK)) {
+						ok= false;
+						break;
+					}
+				}
+				if (ok) {
+					parent.setExpanded(false);
+					collapseIfOK(parent);
+				}
+			}
+		}
+	}
+
+	private boolean isLast(TreeItem treeItem, TreeItem[] items) {
+		return items[items.length-1] == treeItem;
 	}
 
 	private void updateItem(TreeItem treeItem, TestRunInfo testInfo) {
@@ -222,6 +265,8 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 
 	private void propagateStatus(TreeItem item, int status) {
 		TreeItem parent= item.getParentItem();
+		TestRunInfo testRunInfo= getTestRunInfo(item);
+		
 		if (parent == null)
 			return;
 		Image parentImage= parent.getImage();
@@ -230,14 +275,20 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			if (parentImage == fSuiteErrorIcon || parentImage == fSuiteFailIcon) 
 				return;
 			parent.setImage(fSuiteFailIcon);
+			testRunInfo.setStatus(ITestRunListener.STATUS_FAILURE);
 		} else {
 			if (parentImage == fSuiteErrorIcon) 
 				return;
 			parent.setImage(fSuiteErrorIcon);
+			testRunInfo.setStatus(ITestRunListener.STATUS_ERROR);
 		}
 		propagateStatus(parent, status);
 	}
 	
+	private TestRunInfo getTestRunInfo(TreeItem item) {
+		return (TestRunInfo)item.getData();
+	}
+
 	public void activate() {
 		testSelected();
 	}
@@ -250,6 +301,8 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		fTree.removeAll();
 		fSuiteInfos.removeAllElements();
 		fTreeItemMap= new HashMap();
+		fCachedParent= null;
+		fCachedItems= null;
 	}
 	
 	private void testSelected() {
