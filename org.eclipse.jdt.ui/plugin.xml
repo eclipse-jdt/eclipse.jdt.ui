@@ -297,7 +297,7 @@
 		id="org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1" 
 		objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
 		class="org.eclipse.jdt.internal.ui.preferences.SourceAttachmentPropertyPage"
-		nameFilter="*.jar">
+		nameFilter="*.jar*">
     </page>  
   	<page name="%sourceAttachmentPageName" 
 		id="org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage2" 
@@ -321,7 +321,7 @@
 		id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage3"
 		objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
 		class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
-		nameFilter="*.jar">
+		nameFilter="*.jar*">
 	</page>
  	<page name="%javadocLocationPageName"
 		id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage4"
