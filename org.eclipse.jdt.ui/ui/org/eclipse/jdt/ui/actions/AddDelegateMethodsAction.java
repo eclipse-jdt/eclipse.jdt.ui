@@ -397,7 +397,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				}
 				
 				if (createdMethods != null && createdMethods.length > 0) {
-					type.getCompilationUnit().reconcile();
+					synchronized (type.getCompilationUnit()) {
+						type.getCompilationUnit().reconcile();
+					}
 					EditorUtility.revealInEditor(part, createdMethods[0]);
 				}
 			}

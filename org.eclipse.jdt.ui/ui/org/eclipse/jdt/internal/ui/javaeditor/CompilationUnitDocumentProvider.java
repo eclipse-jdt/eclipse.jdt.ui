@@ -849,8 +849,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (elementInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
 			
-			// update structure, assumes lock on info.fCopy
-			info.fCopy.reconcile();
+			synchronized (info.fCopy) {
+				info.fCopy.reconcile();
+			}
 			
 			ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
 			IResource resource= original.getResource();

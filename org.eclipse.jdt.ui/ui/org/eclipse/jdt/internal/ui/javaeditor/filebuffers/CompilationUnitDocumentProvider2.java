@@ -812,8 +812,9 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 		if (fileInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) fileInfo;
 			
-			// update structure, assumes lock on info.fCopy
-			info.fCopy.reconcile();
+			synchronized (info.fCopy) {
+				info.fCopy.reconcile();
+			}
 			
 			ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
 			IResource resource= original.getResource();
