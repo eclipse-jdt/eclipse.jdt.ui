@@ -286,6 +286,8 @@ public abstract class TextChange extends AbstractTextChange {
 	 * @see AbstractTextChange#addTextEdits
 	 */
 	protected void addTextEdits(TextBufferEditor editor) throws CoreException {
+		if (fEdit == null)
+			return;
 		fCopier= new TextEditCopier(fEdit);
 		TextEdit copiedEdit= fCopier.copy();
 		for (Iterator iter= fTextEditChanges.iterator(); iter.hasNext(); ) {
@@ -305,6 +307,8 @@ public abstract class TextChange extends AbstractTextChange {
 	}
 	
 	protected void addTextEdits(TextBufferEditor editor, EditChange[] changes) throws CoreException {
+		if (fEdit == null)
+			return;
 		fCopier= new TextEditCopier(fEdit);
 		TextEdit copiedEdit= fCopier.copy();
 		copiedEdit.setActive(false);
