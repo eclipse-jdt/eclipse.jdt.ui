@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -113,7 +114,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm)	throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		initAST();
 		if (fTempDeclarationNode == null)
 			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
@@ -149,12 +150,18 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	public RefactoringStatus checkInput(IProgressMonitor pm)	throws JavaModelException {
 		try{
 			pm.beginTask("", 1);	
-			RefactoringStatus result= new RefactoringStatus();
+			RefactoringStatus result= new RefactoringStatus();			
+			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu})));
+			if (result.hasFatalError())
+				return result;
+			
 			result.merge(checkNewName(fNewName));
 			if (result.hasFatalError())
 				return result;
 			result.merge(analyzeAST());
 			return result;
+		} catch (CoreException e){	
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}	
