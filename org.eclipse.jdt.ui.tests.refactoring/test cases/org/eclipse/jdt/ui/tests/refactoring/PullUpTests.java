@@ -1,6 +1,7 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Test;
@@ -65,6 +66,33 @@ public class PullUpTests extends RefactoringTest {
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
 			assertEquals("incorrect modification", expected, actual);
+		} finally{
+			performDummySearch();
+			cu.delete(false, null);
+		}	
+	}
+	
+	private void addRequiredMembersHelper(String[] fieldNames, String[] methodNames, String[][] methodSignatures, String[] expectedFieldNames, String[] expectedMethodNames, String[][] expectedMethodSignatures) throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		try{
+			IType type= getType(cu, "B");
+			IField[] fields= TestUtil.getFields(type, fieldNames);
+			IMethod[] methods= TestUtil.getMethods(type, methodNames, methodSignatures);
+
+			PullUpRefactoring ref= createRefactoring(TestUtil.merge(methods, fields));
+			List  required= Arrays.asList(ref.getRequiredPullableMembers(new NullProgressMonitor()));
+			IField[] expectedFields= TestUtil.getFields(type, expectedFieldNames);
+			IMethod[] expectedMethods= TestUtil.getMethods(type, expectedMethodNames, expectedMethodSignatures);
+			List expected= Arrays.asList(TestUtil.merge(expectedFields, expectedMethods));
+			assertEquals("incorrect size", expected.size(), required.size());
+			for (Iterator iter= expected.iterator(); iter.hasNext();) {
+				Object each= (Object) iter.next();
+				assertTrue ("required does not contain " + each, required.contains(each));
+			}
+			for (Iterator iter= required.iterator(); iter.hasNext();) {
+				Object each= (Object) iter.next();
+				assertTrue ("expected does not contain " + each, expected.contains(each));
+			}
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -466,5 +494,84 @@ public class PullUpTests extends RefactoringTest {
 //		printTestDisabledMessage("bug 23324 ");
 		fieldMethodHelper1(new String[]{"f"}, new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
+	
+	//----
+	public void testAddingRequiredMembers0() throws Exception{
+		String[] fieldNames= {};
+		String[] methodNames= {"m"};
+		String[][] methodSignatures= {new String[0]};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= methodNames;
+		String[][] expectedMethodSignatures= methodSignatures;
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers1() throws Exception{
+		String[] fieldNames= {};
+		String[] methodNames= {"m"};
+		String[][] methodSignatures= {new String[0]};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= methodNames;
+		String[][] expectedMethodSignatures= methodSignatures;
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers2() throws Exception{
+		String[] fieldNames= {};
+		String[] methodNames= {"m"};
+		String[][] methodSignatures= {new String[0]};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= methodNames;
+		String[][] expectedMethodSignatures= methodSignatures;
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers3() throws Exception{
+		String[] fieldNames= {};
+		String[] methodNames= {"m"};
+		String[][] methodSignatures= {new String[0]};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= {"m", "y"};
+		String[][] expectedMethodSignatures= {new String[0], new String[0]};
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers4() throws Exception{
+		String[] fieldNames= {};
+		String[] methodNames= {"m"};
+		String[][] methodSignatures= {new String[0]};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= {"m", "y"};
+		String[][] expectedMethodSignatures= {new String[0], new String[0]};
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers5() throws Exception{
+		String[] fieldNames= {"y"};
+		String[] methodNames= {};
+		String[][] methodSignatures= {};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= {"m"};
+		String[][] expectedMethodSignatures= {new String[0]};
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers6() throws Exception{
+		String[] fieldNames= {};
+		String[] methodNames= {"m"};
+		String[][] methodSignatures= {new String[0]};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= methodNames;
+		String[][] expectedMethodSignatures= methodSignatures;
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+	
 }
 
