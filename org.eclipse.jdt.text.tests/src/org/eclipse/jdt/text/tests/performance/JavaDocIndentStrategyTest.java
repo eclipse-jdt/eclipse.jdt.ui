@@ -44,10 +44,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implements ITextEditorTestCase {
 	
 	private static class Setup extends TextEditorTestSetup {
-
-		private static final String PROJECT= "JavaDocIndentStrategyTest";
-		
-		private static final String LINKED_FOLDER= "/testResources/javaDocIndentStrategyTest1";
 		
 		private static final String FILE= "Test.java";
 		
@@ -80,6 +76,10 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implement
 			store.setToDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS);
 		}
 	}
+
+	public static final String PROJECT= "JavaDocIndentStrategyTest";
+	
+	public static final String LINKED_FOLDER= "/testResources/javaDocIndentStrategyTest1";
 	
 	private static final Class THIS= JavaDocIndentStrategyTest.class;
 

@@ -52,10 +52,6 @@ import org.eclipse.jdt.ui.actions.FindReferencesAction;
 public abstract class TypingInvocationCountTest extends TextPerformanceTestCase implements ITextEditorTestCase {
 	
 	protected abstract static class Setup extends TextEditorTestSetup {
-
-		private static final String PROJECT= "TypingInvocationCountTest";
-		
-		private static final String LINKED_FOLDER= "/testResources/typingInvocationCountTest1";
 		
 		private static final String FILE= "Test.java";
 		
@@ -129,6 +125,10 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 			store.setToDefault(preference.getColorPreferenceKey());
 		}
 	}
+
+	public static final String PROJECT= "TypingInvocationCountTest";
+	
+	public static final String LINKED_FOLDER= "/testResources/typingInvocationCountTest1";
 	
 	private AbstractTextEditor fEditor;
 

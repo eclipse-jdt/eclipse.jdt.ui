@@ -182,19 +182,11 @@ public class ResourceTestHelper {
 	}
 
 	public static boolean disableAutoBuilding() {
-		Preferences preferences= ResourcesPlugin.getPlugin().getPluginPreferences();
-		boolean oldValue= preferences.getBoolean(ResourcesPlugin.PREF_AUTO_BUILDING);
-		if (oldValue)
-			preferences.setValue(ResourcesPlugin.PREF_AUTO_BUILDING, false);
-		return oldValue;
+		return setAutoBuilding(false);
 	}
 
 	public static boolean enableAutoBuilding() {
-		Preferences preferences= ResourcesPlugin.getPlugin().getPluginPreferences();
-		boolean oldValue= preferences.getBoolean(ResourcesPlugin.PREF_AUTO_BUILDING);
-		if (!oldValue)
-			preferences.setValue(ResourcesPlugin.PREF_AUTO_BUILDING, true);
-		return oldValue;
+		return setAutoBuilding(true);
 	}
 	
 	public static boolean setAutoBuilding(boolean value) {

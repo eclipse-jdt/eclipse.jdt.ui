@@ -15,12 +15,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.core.filebuffers.tests.ResourceHelper;
-
 import org.eclipse.text.tests.Accessor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -49,7 +43,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 
 public class SemanticHighlightingTest extends TestCase {
 	
-	public static final Class THIS= SemanticHighlightingTest.class;
+	private static final Class THIS= SemanticHighlightingTest.class;
 	
 	private static class SemanticHighlightingTestSetup extends TestSetup {
 
@@ -61,14 +55,7 @@ public class SemanticHighlightingTest extends TestCase {
 		
 		protected void setUp() throws Exception {
 			super.setUp();
-			fJavaProject= JavaProjectHelper.createJavaProject("SHTest", "bin");
-			assertNotNull("JRE is null", JavaProjectHelper.addRTJar(fJavaProject));
-			
-			IProject project= (IProject) fJavaProject.getUnderlyingResource();
-			IFolder folder= ResourceHelper.createLinkedFolder(project, new Path("src"), JdtTextTestPlugin.getDefault(), new Path("testResources/semanticHighlightingTest1"));
-			assertNotNull(folder);
-			assertTrue(folder.exists());
-			JavaProjectHelper.addSourceContainer(fJavaProject, "src");
+			EditorTestHelper.createJavaProject(PROJECT, LINKED_FOLDER);
 			
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			if (!store.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED))
@@ -100,6 +87,10 @@ public class SemanticHighlightingTest extends TestCase {
 			super.tearDown();
 		}
 	}
+	
+	public static final String LINKED_FOLDER= "testResources/semanticHighlightingTest1";
+	
+	public static final String PROJECT= "SHTest";
 	
 	private static JavaEditor fEditor;
 	
