@@ -23,7 +23,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
+import org.eclipse.jface.text.rules.FastPartitioner;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -609,7 +609,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 									  IJavaPartitions.JAVA_CHARACTER,
 									  IDocument.DEFAULT_CONTENT_TYPE
 		};
-		DefaultPartitioner partitioner= new DefaultPartitioner(new FastJavaPartitionScanner(), types);
+		FastPartitioner partitioner= new FastPartitioner(new FastJavaPartitionScanner(), types);
 		partitioner.connect(document);
 		document.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, partitioner);
 	}

@@ -15,7 +15,7 @@ import org.eclipse.core.filebuffers.IDocumentSetupParticipant;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
+import org.eclipse.jface.text.rules.FastPartitioner;
 
 /**
  * The document setup participant for a properties file document.
@@ -52,6 +52,6 @@ public class PropertiesFileDocumentSetupParticipant  implements IDocumentSetupPa
 	 * @return a newly created properties file document partitioner
 	 */
 	private static IDocumentPartitioner createDocumentPartitioner() {
-		return new DefaultPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
+		return new FastPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
 	}
 }

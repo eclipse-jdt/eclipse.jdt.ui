@@ -19,7 +19,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.TextViewer;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
+import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
@@ -67,7 +67,7 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#getDocumentPartitioner()
 	 */
 	protected IDocumentPartitioner getDocumentPartitioner() {
-		return new DefaultPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
+		return new FastPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
 	}
 
 	/*

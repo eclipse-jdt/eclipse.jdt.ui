@@ -28,7 +28,7 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
+import org.eclipse.jface.text.rules.FastPartitioner;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -272,7 +272,7 @@ class JavaCompareUtilities {
 	}
 	
 	static void setupPropertiesFileDocument(IDocument document) {
-		IDocumentPartitioner partitioner= new DefaultPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
+		IDocumentPartitioner partitioner= new FastPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
 		document.setDocumentPartitioner(partitioner);
 		partitioner.connect(document);
 	}

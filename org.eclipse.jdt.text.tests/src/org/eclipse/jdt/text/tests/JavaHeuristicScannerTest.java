@@ -19,7 +19,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
+import org.eclipse.jface.text.rules.FastPartitioner;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.text.JavaIndenter;
  */
 public class JavaHeuristicScannerTest extends TestCase {
 
-	private DefaultPartitioner fPartitioner;
+	private FastPartitioner fPartitioner;
 	private Document fDocument;
 	private JavaIndenter fScanner;
 
@@ -69,7 +69,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 			IJavaPartitions.JAVA_CHARACTER,
 			IDocument.DEFAULT_CONTENT_TYPE
 		};
-		fPartitioner= new DefaultPartitioner(new FastJavaPartitionScanner(), types);
+		fPartitioner= new FastPartitioner(new FastJavaPartitionScanner(), types);
 		fPartitioner.connect(fDocument); 
 		fDocument.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, fPartitioner);
 		
