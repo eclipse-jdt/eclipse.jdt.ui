@@ -75,7 +75,6 @@ public class PushDownTests extends RefactoringTest {
 		IMember[] selectedMembers= merge(selectedFields, selectedMethods);
 		
 		PushDownRefactoring ref= createRefactoring(selectedMembers);
-//		assertTrue("preactivation", ref.checkPreactivation().isOK());
 		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 		
 		prepareForInputCheck(ref, selectedMethods, selectedFields, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
@@ -115,7 +114,7 @@ public class PushDownTests extends RefactoringTest {
 			PushDownRefactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, cuA);
 
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-			assertTrue("precondition was supposed to pass but got " + checkInputResult.toString(), checkInputResult.isOK());	
+			assertTrue("precondition was supposed to pass but got " + checkInputResult.toString(), !checkInputResult.hasError());	
 			performChange(ref, false);
 
 			String expected= getFileContents(getOutputTestFileName("A"));
@@ -180,7 +179,6 @@ public class PushDownTests extends RefactoringTest {
 			IMember[] selectedMembers= merge(selectedFields, selectedMethods);
 		
 			PushDownRefactoring ref= createRefactoring(selectedMembers);
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertEquals("activation was expected to fail", expectedSeverity, ref.checkInitialConditions(new NullProgressMonitor()).getSeverity());
 		} finally{
 			performDummySearch();
@@ -215,7 +213,6 @@ public class PushDownTests extends RefactoringTest {
 
 			IMember[] members= merge(methods, fields);
 			PushDownRefactoring ref= createRefactoring(members);
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 
 			ref.computeAdditionalRequiredMembersToPushDown(new NullProgressMonitor());
@@ -890,7 +887,7 @@ public class PushDownTests extends RefactoringTest {
 			   RefactoringStatus.ERROR);
 	}
 
-	public void testFail4() throws Exception {
+	public void testVisibility1() throws Exception {
 		String[] selectedMethodNames= {"f"};
 		String[][] selectedMethodSignatures= {new String[0]};
 		String[] selectedFieldNames= {};
@@ -900,15 +897,14 @@ public class PushDownTests extends RefactoringTest {
 		String[] namesOfMethodsToDeclareAbstract= {};
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 		
-		failInputHelper(selectedMethodNames, selectedMethodSignatures, 
+		helper(selectedMethodNames, selectedMethodSignatures, 
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
-			   RefactoringStatus.ERROR);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
-	public void testFail5() throws Exception {
+	public void testVisibility2() throws Exception {
 		String[] selectedMethodNames= {"f"};
 		String[][] selectedMethodSignatures= {new String[0]};
 		String[] selectedFieldNames= {};
@@ -918,15 +914,14 @@ public class PushDownTests extends RefactoringTest {
 		String[] namesOfMethodsToDeclareAbstract= {};
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 		
-		failInputHelper(selectedMethodNames, selectedMethodSignatures, 
+		helper(selectedMethodNames, selectedMethodSignatures, 
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
-			   RefactoringStatus.ERROR);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
-	public void testFail6() throws Exception {
+	public void testVisibility3() throws Exception {
 		String[] selectedMethodNames= {"f"};
 		String[][] selectedMethodSignatures= {new String[0]};
 		String[] selectedFieldNames= {};
@@ -936,12 +931,11 @@ public class PushDownTests extends RefactoringTest {
 		String[] namesOfMethodsToDeclareAbstract= {};
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 		
-		failInputHelper(selectedMethodNames, selectedMethodSignatures, 
+		helper(selectedMethodNames, selectedMethodSignatures, 
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
-			   RefactoringStatus.ERROR);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void testFail7() throws Exception {
@@ -1052,7 +1046,7 @@ public class PushDownTests extends RefactoringTest {
 			   RefactoringStatus.ERROR);
 	}
 
-	public void testFail13() throws Exception {
+	public void testVisibility0() throws Exception {
 		String[] selectedMethodNames= {"foo"};
 		String[][] selectedMethodSignatures= {new String[0]};
 		String[] selectedFieldNames= {};
@@ -1062,12 +1056,11 @@ public class PushDownTests extends RefactoringTest {
 		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
 		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
 		
-		failInputHelper(selectedMethodNames, selectedMethodSignatures, 
+		helper(selectedMethodNames, selectedMethodSignatures, 
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
-			   RefactoringStatus.ERROR);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 	
 	public void testAddingRequiredMembers0() throws Exception{

@@ -1,4 +1,3 @@
-//no access to T from f
 package p;
 
 class A {

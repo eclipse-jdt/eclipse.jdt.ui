@@ -1,11 +1,11 @@
-//no access to i from f
 package p;
 
 class A {
 	public void f(){
-		i++;
+		m();
 	}
-	private int i;
+	private void m(){
+	}
 }
 class B extends A {
 }

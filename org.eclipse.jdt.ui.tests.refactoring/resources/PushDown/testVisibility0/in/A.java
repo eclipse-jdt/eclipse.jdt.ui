@@ -1,4 +1,3 @@
-//abstracting foo not possible - referencing bar
 package p;
 
 class A {
