@@ -352,11 +352,7 @@ public abstract class TypePage extends ContainerPage {
 	 * Sets the focus on the container if empty, elso on type name
 	 */		
 	protected void setFocus() {
-		if (getContainerText().length() == 0) {
-			setFocusOnContainer();
-		} else {
-			fTypeNameDialogField.setFocus();
-		}
+		fTypeNameDialogField.setFocus();
 	}
 				
 	// -------- TypeFieldsAdapter --------
