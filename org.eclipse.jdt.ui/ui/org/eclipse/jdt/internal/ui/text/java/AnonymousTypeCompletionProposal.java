@@ -34,13 +34,14 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 	
 	private ImportsStructure fImportStructure;
 
-	public AnonymousTypeCompletionProposal(ICompilationUnit cu, int start, int length, String constructorCompletion, String displayName, String declaringTypeName) {
+	public AnonymousTypeCompletionProposal(IJavaProject jproject, ICompilationUnit cu, int start, int length, String constructorCompletion, String displayName, String declaringTypeName) {
 		super(constructorCompletion, start, length, null, displayName);
-		Assert.isNotNull(cu);
 		Assert.isNotNull(declaringTypeName);
+		Assert.isNotNull(jproject);
 		
-		fCompilationUnit= cu;
-		fDeclaringType= getDeclaringType(cu.getJavaProject(), declaringTypeName);
+		fCompilationUnit= cu; // can be null -> no imports
+		
+		fDeclaringType= getDeclaringType(jproject, declaringTypeName);
 		setImage(getImageForType(fDeclaringType));
 		setCursorPosition(constructorCompletion.indexOf('(') + 1);
 	}
@@ -86,9 +87,13 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
-			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();					
-			fImportStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
+			if (fCompilationUnit == null) {
+				fImportStructure= null;
+			} else {
+				String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
+				int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();					
+				fImportStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
+			}
 			
 			String replacementString= getReplacementString();
 			

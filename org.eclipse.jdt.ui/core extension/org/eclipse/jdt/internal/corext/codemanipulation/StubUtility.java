@@ -55,8 +55,9 @@ public class StubUtility {
 	 * will be constructed so it can be added to a type.
 	 * @param destTypeName The name of the type to which the method will be added to (Used for the constructor)
 	 * @param method A method template (method belongs to different type than the parent)
-	 * @param options Options as defined abouve (GENSTUB_*)
-	 * @param imports Imports required by the sub are added to the imports structure
+	 * @param options Options as defined above (<code>GenStubSettings</code>)
+	 * @param imports Imports required by the stub are added to the imports structure. If imports structure is <code>null</code>
+	 * all type names are qualified.
 	 * @throws JavaModelException
 	 */
 	public static String genStub(String destTypeName, IMethod method, GenStubSettings settings, IImportsStructure imports) throws JavaModelException {
@@ -109,22 +110,27 @@ public class StubUtility {
 		if (method.isConstructor()) {
 			buf.append(destTypeName);
 		} else {
-			String retTypeFrm= Signature.toString(retTypeSig);
+			String retTypeFrm;
 			if (!isBuiltInType(retTypeSig)) {
-				resolveAndAdd(retTypeSig, declaringtype, imports);
+				retTypeFrm= resolveAndAdd(retTypeSig, declaringtype, imports);
+			} else {
+				retTypeFrm= Signature.toString(retTypeSig);
 			}
-			buf.append(Signature.getSimpleName(retTypeFrm));
+			buf.append(retTypeFrm);
 			buf.append(' ');
 			buf.append(method.getElementName());
 		}
 		buf.append('(');
 		for (int i= 0; i <= lastParam; i++) {
 			String paramTypeSig= paramTypes[i];
-			String paramTypeFrm= Signature.toString(paramTypeSig);
+			String paramTypeFrm;
+			
 			if (!isBuiltInType(paramTypeSig)) {
-				resolveAndAdd(paramTypeSig, declaringtype, imports);
+				paramTypeFrm= resolveAndAdd(paramTypeSig, declaringtype, imports);
+			} else {
+				paramTypeFrm= Signature.toString(paramTypeSig);
 			}
-			buf.append(Signature.getSimpleName(paramTypeFrm));
+			buf.append(paramTypeFrm);
 			buf.append(' ');
 			buf.append(paramNames[i]);
 			if (i < lastParam) {
@@ -138,9 +144,8 @@ public class StubUtility {
 			buf.append(" throws "); //$NON-NLS-1$
 			for (int i= 0; i <= lastExc; i++) {
 				String excTypeSig= excTypes[i];
-				String excTypeFrm= Signature.toString(excTypeSig);
-				resolveAndAdd(excTypeSig, declaringtype, imports);
-				buf.append(Signature.getSimpleName(excTypeFrm));
+				String excTypeFrm= resolveAndAdd(excTypeSig, declaringtype, imports);
+				buf.append(excTypeFrm);
 				if (i < lastExc) {
 					buf.append(", "); //$NON-NLS-1$
 				}
@@ -195,11 +200,16 @@ public class StubUtility {
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
 	}
 
-	private static void resolveAndAdd(String refTypeSig, IType declaringType, IImportsStructure imports) throws JavaModelException {
+	private static String resolveAndAdd(String refTypeSig, IType declaringType, IImportsStructure imports) throws JavaModelException {
 		String resolvedTypeName= JavaModelUtil.getResolvedTypeName(refTypeSig, declaringType);
 		if (resolvedTypeName != null) {
-			imports.addImport(resolvedTypeName);		
+			if (imports != null) {
+				imports.addImport(resolvedTypeName);
+				return Signature.getSimpleName(resolvedTypeName);
+			}
+			return resolvedTypeName;
 		}
+		return Signature.toString(refTypeSig);
 	}
 	
 	/**
@@ -273,7 +283,7 @@ public class StubUtility {
 	 * @param type The type to create constructors for
 	 * @param supertype The type's super type
 	 * @param settings Options for comment generation
-	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
+	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
 	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
 	 */
 	public static String[] evalConstructors(IType type, IType supertype, CodeGenerationSettings settings, IImportsStructure imports) throws JavaModelException {
@@ -302,7 +312,7 @@ public class StubUtility {
 	 * evaluation is for the type itself.
 	 * @param settings Options for comment generation
 	 * @param selectionQuery If not null will select the methods to implement.
-	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
+	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
 	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
 	 */
 	public static String[] evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, CodeGenerationSettings settings, 

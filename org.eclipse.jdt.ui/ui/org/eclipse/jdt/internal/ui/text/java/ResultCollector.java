@@ -56,7 +56,7 @@ public class ResultCollector implements ICompletionRequestor {
 	private IMarker fLastProblem;
 	
 	private IJavaProject fJavaProject;
-	private ICompilationUnit fCompilationUnit;
+	private ICompilationUnit fCompilationUnit; // set when imports can be added
 	private int fCodeAssistOffset;
 	private ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	
@@ -344,7 +344,7 @@ public class ResultCollector implements ICompletionRequestor {
 	
 		int length= end - start;
 		
-		return new AnonymousTypeCompletionProposal(fCompilationUnit, start, length, new String(completionName), nameBuffer.toString(), declTypeBuf.toString());
+		return new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, start, length, new String(completionName), nameBuffer.toString(), declTypeBuf.toString());
 	}
 
 	
