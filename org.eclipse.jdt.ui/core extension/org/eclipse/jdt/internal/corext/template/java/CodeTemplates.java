@@ -12,14 +12,16 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
-import org.eclipse.jface.text.templates.*;
-import org.eclipse.jface.text.templates.persistence.*;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.persistence.TemplateSet;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -30,6 +32,7 @@ public class CodeTemplates extends TemplateSet {
 
 	private static final String DEFAULT_FILE= "default-codetemplates.xml"; //$NON-NLS-1$
 	private static final String TEMPLATE_FILE= "codetemplates.xml"; //$NON-NLS-1$
+	private static final ResourceBundle fgResourceBundle= ResourceBundle.getBundle(JavaTemplateMessages.class.getName());
 
 	public static final String COMMENT_SUFFIX= "comment"; //$NON-NLS-1$
 
@@ -78,7 +81,7 @@ public class CodeTemplates extends TemplateSet {
 			ContextTypeRegistry.getInstance().add(new JavaDocContextType());
 		
 		try {
-			addFromStream(getDefaultsAsStream(), false, true);
+			addFromStream(getDefaultsAsStream(), false, true, fgResourceBundle);
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
 				addFromFile(templateFile, false);
@@ -109,7 +112,7 @@ public class CodeTemplates extends TemplateSet {
 	 */
 	public void restoreDefaults() throws CoreException {
 		clear();
-		addFromStream(getDefaultsAsStream(), false, true);
+		addFromStream(getDefaultsAsStream(), false, true, fgResourceBundle);
 	}
 
 	/**

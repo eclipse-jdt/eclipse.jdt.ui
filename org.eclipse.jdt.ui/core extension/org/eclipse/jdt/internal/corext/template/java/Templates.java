@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -31,6 +32,7 @@ public class Templates extends TemplateSet {
 
 	private static final String DEFAULT_FILE= "default-templates.xml"; //$NON-NLS-1$
 	private static final String TEMPLATE_FILE= "templates.xml"; //$NON-NLS-1$
+	private static final ResourceBundle fgResourceBundle= ResourceBundle.getBundle(JavaTemplateMessages.class.getName());
 
 	/** Singleton. */
 	private static Templates fgTemplates;
@@ -63,7 +65,7 @@ public class Templates extends TemplateSet {
 			if (templateFile.exists()) {
 				addFromFile(templateFile, true);
 			} else {
-				addFromStream(getDefaultsAsStream(), true, true);
+				addFromStream(getDefaultsAsStream(), true, true, fgResourceBundle);
 				saveToFile(templateFile);
 			}
 
@@ -91,7 +93,7 @@ public class Templates extends TemplateSet {
 	 */
 	public void restoreDefaults() throws CoreException {
 		clear();
-		addFromStream(getDefaultsAsStream(), true, true);
+		addFromStream(getDefaultsAsStream(), true, true, fgResourceBundle);
 	}
 
 	/**
