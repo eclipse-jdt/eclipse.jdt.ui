@@ -1,5 +1,5 @@
 package p;
-class Inner{
+class Inner {
 	private A a;
 	Inner(A a, int t){
 		this.a= a;
