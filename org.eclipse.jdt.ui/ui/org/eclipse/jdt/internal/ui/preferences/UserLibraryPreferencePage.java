@@ -11,8 +11,8 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
@@ -103,17 +103,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementSorter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPUserLibraryElement;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.*;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 public class UserLibraryPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -509,7 +498,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 		
 		protected static void saveLibraries(List libraries, File file, IProgressMonitor monitor) throws IOException {
-			FileOutputStream outputStream= new FileOutputStream(file);
+			FileWriter writer= new FileWriter(file);
 			try {
 				DocumentBuilder docBuilder= null;
 				DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
@@ -559,15 +548,15 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount","4"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				DOMSource source = new DOMSource(document);
-				StreamResult result = new StreamResult(outputStream);
-				transformer.transform(source, result);
+				StreamResult result = new StreamResult(writer);
+				transformer.transform(source, result);	
 			} catch (ParserConfigurationException e) {
 				throw new IOException(e.getMessage());
 			} catch (TransformerException e) {
 				throw new IOException(e.getMessage());			
 			} finally {
 				try {
-					outputStream.close();
+					writer.close();
 				} catch (IOException e) {
 					// ignore
 				}
