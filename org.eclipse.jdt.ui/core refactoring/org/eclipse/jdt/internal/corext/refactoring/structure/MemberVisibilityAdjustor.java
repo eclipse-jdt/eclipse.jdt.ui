@@ -335,12 +335,12 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/**
-	 * Returns the message template for the specified member.
+	 * Returns the message string for the specified member.
 	 * 
-	 * @param member the member to get the template for
-	 * @return the template for the member
+	 * @param member the member to get the string for
+	 * @return the string for the member
 	 */
-	private static String getTemplate(final IMember member) {
+	public static String getMessage(final IMember member) {
 		Assert.isTrue(member instanceof IType || member instanceof IMethod || member instanceof IField);
 		if (member instanceof IType)
 			return "MemberVisibilityAdjustor.change_visibility_type_warning"; //$NON-NLS-1$
@@ -544,7 +544,7 @@ public final class MemberVisibilityAdjustor {
 			if (member != null) {
 				final ModifierKeyword threshold= computeIncomingVisibilityThreshold(member, fReferencing, monitor);
 				if (hasLowerVisibility(member.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(member, threshold))
-					fAdjustments.put(member, new IncomingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, RefactoringCoreMessages.getFormattedString(getTemplate(member), new String[] { getLabel(member), getLabel(threshold)}), JavaStatusContext.create(member), null, RefactoringStatusEntry.NO_CODE, null)));
+					fAdjustments.put(member, new IncomingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, RefactoringCoreMessages.getFormattedString(getMessage(member), new String[] { getLabel(member), getLabel(threshold)}), JavaStatusContext.create(member), null, RefactoringStatusEntry.NO_CODE, null)));
 			}
 		}
 	}
