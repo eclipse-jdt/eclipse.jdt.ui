@@ -75,7 +75,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
 	 */
 	public char[] getCompletionProposalAutoActivationCharacters() {
-		return new char[] { '.', '(' };
+		return new char[] { '.' };
 	}
 
 	/**
