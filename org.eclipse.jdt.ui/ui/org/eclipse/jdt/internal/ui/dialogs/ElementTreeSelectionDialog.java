@@ -36,25 +36,21 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	
-	private String fEmptyListMessage;
-
 	private TreeViewer fViewer;
 	private ILabelProvider fLabelProvider;
 	private ITreeContentProvider fContentProvider;
-	private ISelectionValidator fValidator= null;
-	private boolean fAllowMultiple = true;
-	private boolean fDoubleClickSelects = true;
 	
+	private ISelectionValidator fValidator= null;
+	private ViewerSorter fSorter;
+	private boolean fAllowMultiple= true;
+	private boolean fDoubleClickSelects= true;
+	private String fEmptyListMessage= JavaUIMessages.getString("ElementTreeSelectionDialog.nothing_available"); //$NON-NLS-1$	
 	private int fInitialCharWidth= 40;
 	private int fInitialCharHeight= 18;
 	
-	private IStatus fCurrStatus;
-
-	private ViewerSorter fSorter;
+	private IStatus fCurrStatus= new StatusInfo();
 	private List fFilters;
-	
-	private Object fInput;
-		
+	private Object fInput;		
 	private boolean fIsEmpty;
 
 	/**
@@ -71,8 +67,6 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		fContentProvider= contentProvider;
 
 		setResult(new ArrayList(0));
-		fCurrStatus= new StatusInfo();
-		fEmptyListMessage= JavaUIMessages.getString("ElementTreeSelectionDialog.nothing_available"); //$NON-NLS-1$
 		setStatusLineAboveButtons(true);
 	}	
 	
@@ -92,6 +86,9 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		fAllowMultiple= allowMultiple;
 	}
 	
+	/**
+	 * Sets the double click selects flag.
+	 */
 	public void setDoubleClickSelects(boolean doubleClickSelects) {
 		fDoubleClickSelects= doubleClickSelects;
 	}
@@ -99,17 +96,16 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	/**
 	 * Sets the sorter used by the tree viewer.
 	 */
-	public void setSorter(ViewerSorter s) {
-		fSorter= s;
+	public void setSorter(ViewerSorter sorter) {
+		fSorter= sorter;
 	}		
 	
 	/**
 	 * Adds the given filter to the tree viewer.
 	 */
 	public void addFilter(ViewerFilter filter) {
-		if (fFilters == null) {
+		if (fFilters == null)
 			fFilters= new ArrayList(4);
-		}
 		fFilters.add(filter);
 	}
 	
@@ -130,23 +126,6 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	} 
 
 	/**
-	 * Opens the dialog on the given input element.
-	 */
-	public int open(Object input) {
-		return open(input, null);
-	}
-	
-	/**
-	 * Opens the dialog on the given input element and the given 
-	 * initial selection.
-	 */
-	public int open(Object input, Object selected) {
-		setInitialSelection(selected);
-		setInput(input);
-		return open();		
-	}
-
-	/**
 	 * @deprecated Use SelectionDialog.getResult() instead.
 	 */
 	public Object[] getSelectedElements() {
@@ -159,9 +138,8 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	 */
 	public Object getSelectedElement() {
 		Object[] result= getResult();
-		if (result != null && result.length > 0) {
+		if (result != null && result.length > 0)
 			return result[0];
-		}
 		return null;
 	}
 			
@@ -226,9 +204,8 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	public void create() {
 		super.create();
 		List initialSelections= getInitialSelections();
-		if (initialSelections != null) {
+		if (initialSelections != null)
 			fViewer.setSelection(new StructuredSelection(initialSelections), true);
-		}
 		updateOKStatus();
 	}		
 	
