@@ -33,9 +33,10 @@ public abstract class RevertEditorTest extends TestCase {
 				ITextEditor part= (ITextEditor) EditorTestHelper.openInEditor(files[i], true);
 				dirtyEditor(part);
 				performanceMeter.start();
-				EditorTestHelper.revertEditor(part);
+				EditorTestHelper.revertEditor(part, true);
 				performanceMeter.stop();
 				sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
+				EditorTestHelper.runEventQueue(part);
 			}
 		} finally {
 			EditorTestHelper.closeAllEditors();

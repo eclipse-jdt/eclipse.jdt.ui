@@ -42,7 +42,7 @@
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" 
-                value="org.eclipse.jdt.text.tests.performance.OpenEditorTestSetup"/>
+                value="org.eclipse.jdt.text.tests.performance.PerformanceTestSuite"/>
     </ant>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="data-dir" value="${jdt-text-performance-folder}"/>

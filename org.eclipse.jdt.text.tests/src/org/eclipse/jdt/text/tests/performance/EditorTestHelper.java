@@ -29,6 +29,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
@@ -76,16 +77,22 @@ public class EditorTestHelper {
 		return provider.getDocument(input);
 	}
 
-	public static void revertEditor(ITextEditor editor) {
+	public static void revertEditor(ITextEditor editor, boolean runEventQueue) {
 		editor.doRevertToSaved();
+		if (runEventQueue)
+			runEventQueue(editor);
 	}
 	
 	public static void closeAllEditors() {
-		getActivePage().closeAllEditors(false);
+		IWorkbenchPage page= getActivePage();
+		if (page != null)
+			page.closeAllEditors(false);
 	}
 	
 	public static void runEventQueue() {
-		runEventQueue(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (window != null)
+			runEventQueue(window.getShell());
 	}
 	
 	public static void runEventQueue(IWorkbenchPart part) {
@@ -97,7 +104,11 @@ public class EditorTestHelper {
 	}
 	
 	private static IWorkbenchPage getActivePage() {
-		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (window != null)
+			return window.getActivePage();
+		else
+			return null;
 	}
 
 	public static Display getActiveDisplay() {

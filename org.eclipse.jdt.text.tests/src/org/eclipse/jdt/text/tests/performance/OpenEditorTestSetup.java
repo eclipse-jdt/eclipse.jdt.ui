@@ -63,7 +63,8 @@ public class OpenEditorTestSetup extends TestCase {
 		if (autobuild)
 			ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(true);
 		
-		workbench.close(); // ensures the workbench state gets saved during the Automated Test Suite (not needed when run from Plug-in Test launch configuration)
+//		workbench.close(); // ensures the workbench state gets saved during the Automated Test Suite (not needed when run from Plug-in Test launch configuration)
+//      don't close here, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=71362
 	}
 	
 	private void setUpTestCases() throws Exception {

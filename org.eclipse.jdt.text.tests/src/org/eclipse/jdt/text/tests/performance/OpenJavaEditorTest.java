@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -36,7 +37,9 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	
 	private static final String PERSPECTIVE= "org.eclipse.jdt.ui.JavaPerspective";
 
-	protected void setUp() {
+	protected void setUp() throws CoreException {
+		EditorTestHelper.runEventQueue();
+		ensureTestProjectOpened();
 		EditorTestHelper.runEventQueue();
 	}
 
