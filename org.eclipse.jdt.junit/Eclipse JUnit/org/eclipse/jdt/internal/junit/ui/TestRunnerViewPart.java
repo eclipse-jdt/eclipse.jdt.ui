@@ -36,6 +36,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -542,12 +543,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		toolBar.add(new StopAction());
+
 		actionBars.updateActionBars();
 		
 		Composite counterPanel= createProgressCountPanel(parent);
 		counterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		SashForm sashForm= createSashForm(parent);
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.COPY, new CopyTraceAction(fFailureView));
 	}
 
 	private IStatusLineManager getStatusLine() {

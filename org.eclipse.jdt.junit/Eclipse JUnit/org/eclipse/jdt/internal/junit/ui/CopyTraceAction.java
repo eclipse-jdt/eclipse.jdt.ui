@@ -20,17 +20,13 @@ import org.eclipse.jface.action.Action;
  * Copies a test failure stack trace to the clipboard.
  */
 public class CopyTraceAction extends Action {
-	private String fTrace;
 	private FailureTraceView fView;
 	
 	/**
 	 * Constructor for CopyTraceAction.
 	 */
-	public CopyTraceAction(FailureTraceView view, String trace) {
+	public CopyTraceAction(FailureTraceView view) {
 		super("Copy Trace"); 
-		fTrace= trace;
-		if (fTrace == null)
-			fTrace= "";
 		fView= view;
 	}
 
@@ -38,10 +34,14 @@ public class CopyTraceAction extends Action {
 	 * @see IAction#run()
 	 */
 	public void run() {
+		String trace= fView.getTrace();
+		if (trace == null)
+			trace= "";
+		
 		TextTransfer plainTextTransfer = TextTransfer.getInstance();
 		Clipboard clipboard= new Clipboard(fView.getComposite().getDisplay());		
 		clipboard.setContents(
-			new String[]{ convertLineTerminators(fTrace) }, 
+			new String[]{ convertLineTerminators(trace) }, 
 			new Transfer[]{ plainTextTransfer });
 	}
 

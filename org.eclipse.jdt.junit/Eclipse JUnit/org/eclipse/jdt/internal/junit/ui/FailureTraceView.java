@@ -83,9 +83,13 @@ class FailureTraceView implements IMenuListener {
 			if (a != null)
 				manager.add(a);
 		}
-		manager.add(new CopyTraceAction(FailureTraceView.this, fInputTrace));
+		manager.add(new CopyTraceAction(FailureTraceView.this));
 	}
 
+	public String getTrace() {
+		return fInputTrace;
+	}
+	
 	private String getSelectedText() {
 		return fTable.getSelection()[0].getText();
 	}				
