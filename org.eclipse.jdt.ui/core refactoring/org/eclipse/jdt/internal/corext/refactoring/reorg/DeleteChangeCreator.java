@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceManipulation;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -46,12 +45,11 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFolderChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
@@ -143,7 +141,7 @@ class DeleteChangeCreator {
 		return result;
 	}
 
-	private static Change createDeleteChange(IJavaElement javaElement) throws JavaModelException {
+	private static Change createDeleteChange(IJavaElement javaElement) {
 		Assert.isTrue(! ReorgUtils.isInsideCompilationUnit(javaElement));
 		
 		switch(javaElement.getElementType()){
@@ -197,7 +195,7 @@ class DeleteChangeCreator {
 		return new DeleteSourceManipulationChange(element);
 	}
 	
-	private static Change createPackageFragmentRootDeleteChange(IPackageFragmentRoot root) throws JavaModelException {
+	private static Change createPackageFragmentRootDeleteChange(IPackageFragmentRoot root) {
 		IResource resource= root.getResource();
 		if (resource != null && resource.isLinked()){
 			//XXX using this code is a workaround for jcore bug 31998

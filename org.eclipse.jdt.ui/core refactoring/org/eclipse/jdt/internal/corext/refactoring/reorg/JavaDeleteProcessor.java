@@ -272,7 +272,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		}
 	}
 	
-	private void handleResourceDelete(List collected, IResource element, String[] natures, SharableParticipants shared) throws CoreException {
+	private void handleResourceDelete(List collected, IResource element, String[] natures, SharableParticipants shared) {
 		collected.add(element);
 	}
 
