@@ -526,6 +526,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				if (DEFAULT.equals(newValue)) {
 					updateComplianceDefaultSettings();
 				}
+				fComplianceStatus= validateCompliance();
 			} else if (PREF_COMPLIANCE.equals(changedKey)) {
 				if (checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT)) {
 					updateComplianceDefaultSettings();
