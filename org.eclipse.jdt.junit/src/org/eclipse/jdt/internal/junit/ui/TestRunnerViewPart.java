@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.junit.ITestRunListener;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -1252,6 +1253,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 					if (testName != null) 
 						name+= "."+testName; //$NON-NLS-1$
 					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy("Rerun "+name); //$NON-NLS-1$
+					// fix for bug: 64838  junit view run single test does not use correct class [JUnit] 
+					tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, className);
 					if (testName != null) {
 						tmp.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);
 						//	String args= "-rerun "+testId;
