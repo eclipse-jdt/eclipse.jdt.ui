@@ -1,22 +1,18 @@
-/**
-* class Foo 
-*/
 
-String UNIX="\n";
-String MAC="\r";
-String DOS="\r\n";
+ 
+{
 
-public static void bar()
-{
-String k=System.getProperty("line.separator");
-if (k.equals(UNIX))
-{
+if (size < currentSize) {
+try {
+size = inStream.available();
+} catch (IOException e) {
 }
-else if (k.equals(MAC))
-{
 }
-else if (k.equals(DOS))
-{
+else if (size == currentSize) {
+++size;
+}
+else {
+--size;
 }
 
 }

@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 1999, 2000
+ */
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.BufferedReader;import java.io.IOException;import java.io.InputStreamReader;import java.util.ArrayList;import java.util.Enumeration;import java.util.Locale;import java.util.Hashtable;
@@ -8,8 +13,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 
 	private String fPreviewText;
 	private Document fPreviewDocument;
-	private static final String fgpreviewFile= "CodeFormatterPreviewCode.txt";
-	
 	private Composite fMainPanel;
 	private Button[] fCheckOptions;
 	private Text[] fTextOptions;
@@ -18,27 +21,25 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private SourceViewer fPreviewViewer;
 	private boolean fEraseStatusMessage;
 	private String fErrorMessage;
-		
 	private ConfigurableOption[] fNewOptions;
-		
 	private static ConfigurableOption[] fgCurrentOptions;
-		
 	private static IPreferenceStore fgPreferenceStore;
-
+	
 	private static final int INDENTATION_LEVEL = 0;
 	private static final int TEXT_LIMIT=3;
-	
-	private final int TAB_CHECK_OPTION_ID=9;
-	private final int TAB_TEXT_OPTION_ID=10;
-	
-	
+	private static final int TAB_CHECK_OPTION_ID=9;
+	private static final int TAB_TEXT_OPTION_ID=10;
+	private static final String PREVIEW_FILE= "CodeFormatterPreviewCode.txt";
+	private static final String ERROR_MESSAGE_EMPTY="Empty Input";
+	private static final String ERROR_MESSAGE_INVALID=" is not a valid Input";
+	private static final String PREFERENCE_NAME="CodeFormatterPreferencePage";
+	private static final String WIDGET_DATA_KEY="OPTION";
 	
 	private ModifyListener   fTextListener = new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
 			{
 				if (fTextOptions == null) return; 
-				Integer newValue = new Integer(0);
 				Text source = (Text)e.widget;
 				if (checkAllTextInputs(source))
 				{
@@ -65,9 +66,9 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 						valueOK = true;
 				} catch (NumberFormatException nx) {
 					if (text.equals(""))
-						fErrorMessage = new String("Empty Input");
+						fErrorMessage = new String(ERROR_MESSAGE_EMPTY);
 					else
-						fErrorMessage = new String(text + " is not a valid Input");
+						fErrorMessage = new String(text + ERROR_MESSAGE_INVALID);
 				}	
 			}
 			setErrorMessage(fErrorMessage);
@@ -105,7 +106,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		
 		private void savePreferences() throws IOException {
 		for (int i= 0; i < fgCurrentOptions.length; i++) {
-			String preferenceID= "CodeFormatterPreferencePage" + "." + fgCurrentOptions[i].getID();
+			String preferenceID= PREFERENCE_NAME + "." + fgCurrentOptions[i].getID();
 			fgPreferenceStore.setValue(preferenceID, String.valueOf(fgCurrentOptions[i].getCurrentValueIndex()));
 		}
 		}
@@ -180,7 +181,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		fNewOptions= getDefaultOptions();
 		updateOptions(fNewOptions, fgCurrentOptions);		
 		fPreviewDocument = new Document();
-		fPreviewText= loadPreviewFile(fgpreviewFile);
+		fPreviewText= loadPreviewFile(PREVIEW_FILE);
 	}
 
 	
@@ -188,7 +189,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			fgPreferenceStore = store;
 			fgCurrentOptions= CodeFormatter.getDefaultOptions(Locale.getDefault());
 		 	for (int i= 0; i < fgCurrentOptions.length; i++) {
-				String preferenceID= "CodeFormatterPreferencePage" + "." + fgCurrentOptions[i].getID();
+				String preferenceID= PREFERENCE_NAME + "." + fgCurrentOptions[i].getID();
 				if (fgPreferenceStore.contains(preferenceID))
 				fgCurrentOptions[i].setValueIndex(fgPreferenceStore.getInt(preferenceID));
 		
@@ -354,7 +355,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		Button check= new Button(pan, SWT.CHECK);
 		check.setToolTipText(description);
 		check.addSelectionListener(con);
-		check.setData("OPTION", option);
+		check.setData(WIDGET_DATA_KEY, option);
 		check.setText(name);
 		check.setSelection(option.getCurrentValueIndex() == 0 ? true : false);
 		return check;
@@ -375,7 +376,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		Text text= new Text(pan, SWT.BORDER | SWT.SINGLE);
 		text.setTextLimit(TEXT_LIMIT);
 		text.setToolTipText(description);
-		text.setData("OPTION", option);
+		text.setData(WIDGET_DATA_KEY, option);
 		GridData gd= new GridData();
 		gd.widthHint= 20;
 		gd.horizontalAlignment= GridData.BEGINNING;
@@ -386,7 +387,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 
 	private void createPreview(Composite parent) {
-		//fPreviewViewer= new StyledText(parent, SWT.BORDER| SWT.MULTI| SWT.V_SCROLL);
 		fPreviewViewer= new SourceViewer(parent, null,  SWT.H_SCROLL | SWT.V_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		fPreviewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
@@ -409,7 +409,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 
 	private ConfigurableOption retrieveOption(Widget widget) {
-		return (ConfigurableOption) widget.getData("OPTION");
+		return (ConfigurableOption) widget.getData(WIDGET_DATA_KEY);
 	}
 	
 
@@ -417,10 +417,10 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private int parseTextInput(String input) throws NumberFormatException
 	{
 		if (input.equals(""))
-			throw new NumberFormatException("Empty Input");							
+			throw new NumberFormatException();							
 		int val= Integer.parseInt(input);
 		if (val < 0)
-			throw new NumberFormatException("Negative number");
+			throw new NumberFormatException();
 		return val;
 		 
 	}
