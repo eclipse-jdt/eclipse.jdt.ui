@@ -7,7 +7,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.io.ByteArrayInputStream;
-import java.io.FilterInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,9 +40,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IPropertyListener;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
@@ -71,6 +67,7 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
+import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 
 
 
@@ -183,16 +180,19 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		
 		/**
 		 * Annotation model dealing with java marker annotations and temporary problems.
+		 * Also acts as problem requestor for its compilation unit. Initialiy inactive. Must explicitly be
+		 * activated.
 		 */
-		protected class CompilationUnitAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor {
+		protected class CompilationUnitAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor, IProblemRequestorExtension {
 			
 			private List fCollectedProblems;
-			private List fGeneratedAnnotations;			
+			private List fGeneratedAnnotations;
+			private IProgressMonitor fProgressMonitor;
+			private boolean fIsActive= false;
 			
-			public CompilationUnitAnnotationModel(IResource resource, boolean collectProblems) {
+			
+			public CompilationUnitAnnotationModel(IResource resource) {
 				super(resource);
-				if (collectProblems)
-					startCollectingProblems();
 			}
 			
 			protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
@@ -232,6 +232,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				if (!isActive())
 					return;
 					
+				if (fProgressMonitor != null && fProgressMonitor.isCanceled())
+					return;
+					
 				boolean temporaryProblemsChanged= false;
 				
 				synchronized (fAnnotations) {
@@ -268,7 +271,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			/**
 			 * Tells this annotation model to collect temporary problems from now on.
 			 */
-			public void startCollectingProblems() {
+			private void startCollectingProblems() {
 				fCollectedProblems= new ArrayList();
 				fGeneratedAnnotations= new ArrayList();  
 			}
@@ -276,7 +279,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			/**
 			 * Tells this annotation model to no longer collect temporary problems.
 			 */
-			public void stopCollectingProblems() {
+			private void stopCollectingProblems() {
 				if (fGeneratedAnnotations != null) {
 					removeAnnotations(fGeneratedAnnotations, true, true);
 					fGeneratedAnnotations.clear();
@@ -296,7 +299,27 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemRequestor#isActive()
 			 */
 			public boolean isActive() {
-				return fCollectedProblems != null;
+				return fIsActive && (fCollectedProblems != null);
+			}
+			
+			/*
+			 * @see IProblemRequestorExtension#setProgressMonitor(IProgressMonitor)
+			 */
+			public void setProgressMonitor(IProgressMonitor monitor) {
+				fProgressMonitor= monitor;
+			}
+			
+			/*
+			 * @see IProblemRequestorExtension#setIsActive(boolean)
+			 */
+			public void setIsActive(boolean isActive) {
+				if (fIsActive != isActive) {
+					fIsActive= isActive;
+					if (fIsActive)
+						startCollectingProblems();
+					else
+						stopCollectingProblems();
+				}
 			}
 		};
 		
@@ -419,6 +442,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				IAnnotationModel m= createCompilationUnitAnnotationModel(input);
 				IProblemRequestor r= m instanceof IProblemRequestor ? (IProblemRequestor) m : null;
 				ICompilationUnit c= (ICompilationUnit) original.getSharedWorkingCopy(monitor, fBufferFactory, r);
+				
 				DocumentAdapter a= null;
 				try {
 					a= (DocumentAdapter)c.getBuffer();
@@ -426,11 +450,18 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, JavaStatusConstants.TEMPLATE_IO_EXCEPTION, "Shared working copy has wrong buffer", cce); //$NON-NLS-1$
 					throw new CoreException(status);
 				}
+				
 				_FileSynchronizer f= new _FileSynchronizer(input); 
 				f.install();
 				
 				CompilationUnitInfo info= new CompilationUnitInfo(a.getDocument(), m, f, c);
 				info.setModificationStamp(computeModificationStamp(input.getFile()));
+				
+				if (r instanceof IProblemRequestorExtension) {
+					IProblemRequestorExtension extension= (IProblemRequestorExtension) r;
+					extension.setIsActive(isHandlingTemporaryProblems());
+				}
+				
 				return info;
 				
 			} catch (JavaModelException x) {
@@ -526,7 +557,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE_TYPE));
 		
 		IFileEditorInput input= (IFileEditorInput) element;
-		return new CompilationUnitAnnotationModel(input.getFile(), isHandlingTemporaryProblems());
+		return new CompilationUnitAnnotationModel(input.getFile());
 	}
 	
 	/*
@@ -693,12 +724,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			ElementInfo element= getElementInfo(iter.next());
 			if (element instanceof CompilationUnitInfo) {
 				CompilationUnitInfo info= (CompilationUnitInfo)element;
-				if (info.fModel instanceof CompilationUnitAnnotationModel) {
-					CompilationUnitAnnotationModel m= (CompilationUnitAnnotationModel) info.fModel;
-					if (enable)
-						m.startCollectingProblems();
-					else
-						m.stopCollectingProblems();
+				if (info.fModel instanceof IProblemRequestorExtension) {
+					IProblemRequestorExtension  extension= (IProblemRequestorExtension) info.fModel;
+					extension.setIsActive(enable);
 				}
 			}
 		}

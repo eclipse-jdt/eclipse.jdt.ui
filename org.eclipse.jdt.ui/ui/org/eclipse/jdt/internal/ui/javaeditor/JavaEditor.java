@@ -9,24 +9,33 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.source.AnnotationColumn;
+import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.IVerticalRulerColumn;
+import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -58,6 +67,8 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.OpenExternalJavadocAction;
 import org.eclipse.jdt.ui.actions.OpenSuperImplementationAction;
 import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
+import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -111,29 +122,29 @@ public abstract class JavaEditor extends AbstractTextEditor {
 	
 	
 	class SelectionChangedListener  implements ISelectionChangedListener {
-		/*
-		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
-		 */
 		public void selectionChanged(SelectionChangedEvent event) {
 			doSelectionChanged(event);
 		}
 	};
 	
+	/** Preference key for showing the line number ruler */
+	public final static String LINE_NUMBER_RULER= "lineNumberRuler"; //$NON-NLS-1$
+	/** Preference key for the foreground color of the line numbers */
+	public final static String LINE_NUMBER_COLOR= "lineNumberColor"; //$NON-NLS-1$
+	
 	
 	/** The outline page */
 	protected JavaOutlinePage fOutlinePage;
-	
 	/** Outliner context menu Id */
 	protected String fOutlinerContextMenuId;
-	
 	/** The selection changed listener */
 	private ISelectionChangedListener fSelectionChangedListener= new SelectionChangedListener();
-	
 	/** The outline page selection updater */
 	private OutlinePageSelectionUpdater fUpdater;
-	
 	/** Indicates whether this editor should react on outline page selection changes */
 	private int fIgnoreOutlinePageSelection;
+	/** The line number ruler column */
+	private LineNumberRulerColumn fLineNumberRulerColumn;
 	
 	
 		
@@ -167,7 +178,7 @@ public abstract class JavaEditor extends AbstractTextEditor {
 			fUpdater= new OutlinePageSelectionUpdater();
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
@@ -182,14 +193,14 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		return viewer;
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 			return super.createSourceViewer(parent, ruler, styles);
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
 	 */
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
@@ -204,7 +215,7 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		fOutlinerContextMenuId= menuId;
 	}
 			
-	/**
+	/*
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
@@ -215,23 +226,9 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		addGroup(menu, ITextEditorActionConstants.GROUP_EDIT, IContextMenuConstants.GROUP_NEW);
 		
 		new JavaSearchGroup(false).fill(menu, ITextEditorActionConstants.GROUP_FIND, this);
-
-		/*
-		 * http://dev.eclipse.org/bugs/show_bug.cgi?id=8735
-		 * Removed duplicates of Edit menu entries to shorten context menu.
-		 * Will be reworked for overal context menu reorganization.
-		 */
-//		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowJavaDoc");
 		
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowInPackageView"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenSuperImplementation"); //$NON-NLS-1$
-		
-		/*
-		 * http://dev.eclipse.org/bugs/show_bug.cgi?id=8735
-		 * Removed duplicates of Edit menu entries to shorten context menu.
-		 * Will be reworked for overal context menu reorganization.
-		 */
-//		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenExternalJavadoc");
 	}			
 	
 	/**
@@ -295,7 +292,7 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		return null;
 	}	
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#getAdapter(Class)
 	 */
 	public Object getAdapter(Class required) {
@@ -443,7 +440,7 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		}
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#adjustHighlightRange(int, int)
 	 */
 	protected void adjustHighlightRange(int offset, int length) {
@@ -477,7 +474,7 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		return (this == service.getActivePart());
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#doSetInput
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
@@ -506,29 +503,81 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		setTitleImage(image);
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
+		
+		try {			
 
-		super.handlePreferenceStoreChanged(event);
-		
-		ISourceViewer sourceViewer= getSourceViewer();
-		if (sourceViewer == null)
-			return;
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer == null)
+				return;
+				
+			String property= event.getProperty();	
 			
-		String property= event.getProperty();	
-		
-		if (JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH.equals(property)) {
-			Object value= event.getNewValue();
-			
-			if (value instanceof Integer) {
-				sourceViewer.getTextWidget().setTabs(((Integer) value).intValue());
-					
-			} else if (value instanceof String) {
-				sourceViewer.getTextWidget().setTabs(Integer.parseInt((String) value));
+			if (JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH.equals(property)) {
+				Object value= event.getNewValue();
+				if (value instanceof Integer) {
+					sourceViewer.getTextWidget().setTabs(((Integer) value).intValue());
+				} else if (value instanceof String) {
+					sourceViewer.getTextWidget().setTabs(Integer.parseInt((String) value));
+				}
+				return;
 			}
+			
+			if (LINE_NUMBER_RULER.equals(property)) {
+				if (isLineNumberRulerVisible())
+					showLineNumberRuler();
+				else
+					hideLineNumberRuler();
+				return;
+			}
+			
+			if (fLineNumberRulerColumn != null &&
+						(LINE_NUMBER_COLOR.equals(property) || 
+						PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT.equals(property)  ||
+						PREFERENCE_COLOR_BACKGROUND.equals(property))) {
+					
+					initializeLineNumberRulerColumn(fLineNumberRulerColumn);
+			}
+				
+			
+		} finally {
+			super.handlePreferenceStoreChanged(event);
 		}
+	}
+	
+	/**
+	 * Shows the line number ruler column.
+	 */
+	private void showLineNumberRuler() {
+		IVerticalRuler v= getVerticalRuler();
+		if (v instanceof CompositeRuler) {
+			CompositeRuler c= (CompositeRuler) v;
+			c.addDecorator(1, createLineNumberRulerColumn());
+		}
+	}
+	
+	/**
+	 * Hides the line number ruler column.
+	 */
+	private void hideLineNumberRuler() {
+		IVerticalRuler v= getVerticalRuler();
+		if (v instanceof CompositeRuler) {
+			CompositeRuler c= (CompositeRuler) v;
+			c.removeDecorator(1);
+		}
+	}
+	
+	/**
+	 * Return whether the line number ruler column should be 
+	 * visible according to the preference store settings.
+	 * @return <code>true</code> if the line numbers should be visible
+	 */
+	private boolean isLineNumberRulerVisible() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(LINE_NUMBER_RULER);
 	}
 	
 	/**
@@ -613,5 +662,61 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		super.handleCursorPositionChanged();
 		if (!isEditingScriptRunning() && fUpdater != null)
 			fUpdater.post();
+	}
+	
+	/**
+	 * Initializes the given line number ruler column from the preference store.
+	 * @param rulerColumn the ruler column to be initialized
+	 */
+	protected void initializeLineNumberRulerColumn(LineNumberRulerColumn rulerColumn) {
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		IColorManager manager= textTools.getColorManager();	
+		
+		IPreferenceStore store= getPreferenceStore();
+		if (store != null) {	
+		
+			RGB rgb=  null;
+			// foreground color
+			if (store.contains(LINE_NUMBER_COLOR)) {
+				if (store.isDefault(LINE_NUMBER_COLOR))
+					rgb= PreferenceConverter.getDefaultColor(store, LINE_NUMBER_COLOR);
+				else
+					rgb= PreferenceConverter.getColor(store, LINE_NUMBER_COLOR);
+			}
+			rulerColumn.setForeground(manager.getColor(rgb));
+			
+			
+			rgb= null;
+			// background color
+			if (!store.getBoolean(PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT)) {
+				if (store.contains(PREFERENCE_COLOR_BACKGROUND)) {
+					if (store.isDefault(PREFERENCE_COLOR_BACKGROUND))
+						rgb= PreferenceConverter.getDefaultColor(store, PREFERENCE_COLOR_BACKGROUND);
+					else
+						rgb= PreferenceConverter.getColor(store, PREFERENCE_COLOR_BACKGROUND);
+				}
+			}
+			rulerColumn.setBackground(manager.getColor(rgb));
+		}
+	}
+	
+	/**
+	 * Creates a new line number ruler column that is appropriately initialized.
+	 */
+	protected IVerticalRulerColumn createLineNumberRulerColumn() {
+		fLineNumberRulerColumn= new LineNumberRulerColumn();
+		initializeLineNumberRulerColumn(fLineNumberRulerColumn);
+		return fLineNumberRulerColumn;
+	}
+	
+	/*
+	 * @see AbstractTextEditor#createVerticalRuler()
+	 */
+	protected IVerticalRuler createVerticalRuler() {
+		CompositeRuler ruler= new CompositeRuler();
+		ruler.addDecorator(0, new AnnotationColumn(VERTICAL_RULER_WIDTH));
+		if (isLineNumberRulerVisible())
+			ruler.addDecorator(1, createLineNumberRulerColumn());
+		return ruler;
 	}
 }

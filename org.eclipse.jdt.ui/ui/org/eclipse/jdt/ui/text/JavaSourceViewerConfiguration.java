@@ -11,6 +11,8 @@ import java.util.Vector;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
@@ -217,6 +219,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 
 		if (getEditor() != null && getEditor().isEditable()) {
 			MonoReconciler reconciler= new MonoReconciler(new JavaReconcilingStrategy(getEditor()), false);
+			reconciler.setProgressMonitor(new NullProgressMonitor());
 			reconciler.setDelay(500);
 			return reconciler;
 		}

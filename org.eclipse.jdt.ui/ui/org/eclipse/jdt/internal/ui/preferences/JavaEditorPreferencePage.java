@@ -135,7 +135,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitDocumentProvider.HANDLE_TEMPRARY_PROBELMS),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.OVERVIEW_RULER),
-//		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditor.LINE_NUMBER_RULER),
+		
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.LINE_NUMBER_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditor.LINE_NUMBER_RULER),
 				
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SPACES_FOR_TABS),
 		
@@ -214,6 +216,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fBoldCheckBox;
 	private SourceViewer fPreviewViewer;
 	
+	private Button fLineNumberButton;
+	private Control fLineNumberColor;
 	private Button fBracketHighlightButton;
 	private Control fBracketHighlightColor;
 	private Button fLineHighlightButton;
@@ -274,7 +278,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitDocumentProvider.HANDLE_TEMPRARY_PROBELMS, true);
 		
 		store.setDefault(CompilationUnitEditor.OVERVIEW_RULER, true);
-//		store.setDefault(JavaEditor.LINE_NUMBER_RULER, false);
+		
+		store.setDefault(JavaEditor.LINE_NUMBER_RULER, false);
+		PreferenceConverter.setDefault(store, JavaEditor.LINE_NUMBER_COLOR, new RGB(0, 0, 0));
 		
 		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
 
@@ -620,8 +626,21 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.OVERVIEW_RULER, 0);
 		
-//		label= "Show line numbers";
-//		addCheckBox(behaviorComposite, label, JavaEditor.LINE_NUMBER_RULER, 0);
+		
+		label= "Show line numbers";
+		fLineHighlightButton= addCheckBox(behaviorComposite, label, JavaEditor.LINE_NUMBER_RULER, 0);
+		
+		label= "Line number foreground color:";
+		fLineNumberColor= addColorButton(behaviorComposite, label, JavaEditor.LINE_NUMBER_COLOR, 0);
+		
+		fLineHighlightButton.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				setEnabled(fLineNumberColor, fLineHighlightButton.getSelection());
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+		
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
 		fBracketHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);

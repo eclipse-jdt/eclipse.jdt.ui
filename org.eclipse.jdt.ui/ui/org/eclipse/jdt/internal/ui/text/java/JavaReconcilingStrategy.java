@@ -8,10 +8,13 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
+import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -23,12 +26,13 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
+import org.eclipse.jdt.internal.core.WorkingCopy;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 
 
 
-public class JavaReconcilingStrategy implements IReconcilingStrategy {
+public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 	
 	
 	private ITextEditor fEditor;
@@ -36,6 +40,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy {
 	private IWorkingCopyManager fManager;
 	private IDocumentProvider fDocumentProvider;
 	private ICompilationUnit fUnit;
+	private IProgressMonitor fProgressMonitor;
 	
 	
 	public JavaReconcilingStrategy(ITextEditor editor) {
@@ -44,22 +49,31 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy {
 		fDocumentProvider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 	}
 	
-	IProblemRequestor getProblemRequestor() {
+	private IProblemRequestorExtension getProblemRequestorExtension() {
 		IAnnotationModel model= fDocumentProvider.getAnnotationModel(fEditor.getEditorInput());
-		if (model instanceof IProblemRequestor)
-			return (IProblemRequestor) model;
-		
+		if (model instanceof IProblemRequestorExtension)
+			return (IProblemRequestorExtension) model;
 		return null;
 	}
 	
-	private void reconcile() {
+	private void reconcile(boolean forceProblemDetection) {
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());		
 		if (unit != null) {
 			synchronized (unit) {
 				try {
 					
 					// reconcile
-					unit.reconcile();
+					
+					/* fix for missing cancel flag communication */
+					IProblemRequestorExtension extension= getProblemRequestorExtension();
+					if (extension != null)
+						extension.setProgressMonitor(fProgressMonitor);
+					
+					unit.reconcile(forceProblemDetection, fProgressMonitor);
+					
+					/* fix for missing cancel flag communication */
+					if (extension != null)
+						extension.setProgressMonitor(null);
 					
 					if (fEditor instanceof IReconcilingParticipant) {
 						IReconcilingParticipant p= (IReconcilingParticipant) fEditor;
@@ -77,19 +91,33 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy {
 	 * @see IReconcilingStrategy#reconcile(IRegion)
 	 */
 	public void reconcile(IRegion partition) {
-		reconcile();
+		reconcile(false);
 	}
 	
 	/*
 	 * @see IReconcilingStrategy#reconcile(DirtyRegion, IRegion)
 	 */
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
-		reconcile();
+		reconcile(false);
 	}
 	
 	/*
 	 * @see IReconcilingStrategy#setDocument(IDocument)
 	 */
 	public void setDocument(IDocument document) {
+	}
+	
+	/*
+	 * @see IReconcilingStrategyExtension#setProgressMonitor(IProgressMonitor)
+	 */
+	public void setProgressMonitor(IProgressMonitor monitor) {
+		fProgressMonitor= monitor;
+	}
+
+	/*
+	 * @see IReconcilingStrategyExtension#initialReconcile()
+	 */
+	public void initialReconcile() {
+		reconcile(true);
 	}
 }
