@@ -92,7 +92,7 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 			return;
 		}
 		
-		ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, false, modifiers);
+		ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers, false);
 		if (Flags.isDeprecated(modifiers))
 			descriptor= getDeprecatedDescriptor(descriptor);
 
@@ -148,7 +148,7 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 			return;
 		}
 		
-		ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(true, false, false, modifiers);
+		ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers | Flags.AccInterface, false);
 		if (Flags.isDeprecated(modifiers))
 			descriptor= getDeprecatedDescriptor(descriptor);
 

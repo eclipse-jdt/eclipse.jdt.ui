@@ -49,6 +49,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -421,7 +422,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 					return null;
 				}
 				boolean isInInterface= binding.isMember() && binding.getDeclaringClass().isInterface();
-				ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(binding.isInterface(), binding.isMember(), isInInterface, binding.getModifiers());
+				ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(binding.isMember(), isInInterface, binding.getModifiers() | Flags.AccInterface, false);
 				return JavaPlugin.getImageDescriptorRegistry().get(descriptor);
 			}
 			return null;

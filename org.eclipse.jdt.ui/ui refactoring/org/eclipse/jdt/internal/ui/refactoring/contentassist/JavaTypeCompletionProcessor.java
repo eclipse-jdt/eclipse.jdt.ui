@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -105,14 +106,14 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 		public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
 			if (isDummyClass(typeName))
 				return;
-			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, false, modifiers);
+			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers, false);
 			addAdjustedTypeCompletion(packageName, typeName, completionName, start, end, relevance, descriptor);
 		}
 		
 		public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
 			if (isDummyClass(typeName))
 				return;
-			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(true, false, false, modifiers);
+			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers | Flags.AccInterface, false);
 			addAdjustedTypeCompletion(packageName, typeName, completionName, start, end, relevance, descriptor);
 		}
 		
