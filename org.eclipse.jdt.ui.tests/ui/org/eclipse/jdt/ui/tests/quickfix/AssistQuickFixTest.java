@@ -1044,8 +1044,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= (9+ 8);\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        return (9+ 8);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -1064,8 +1064,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= 9+ 8;\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        return 9+ 8;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());	
@@ -1076,8 +1076,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= Math.abs(9+ 8);\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        return Math.abs(9+ 8);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -1096,8 +1096,76 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        return 9+ 8;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}
+	
+	public void testSplitDeclaration1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        int i= 9+ 8;\n");
+		buf.append("        int i = 9;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "9";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        i = 9;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}
+	
+	public void testSplitDeclaration2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < 9; i++) {\n");
+		buf.append("       }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "0";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        for (i = 0; i < 9; i++) {\n");
+		buf.append("       }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());	
