@@ -123,18 +123,18 @@ public class HistoryListAction extends Action {
 		
 		
 		private void doSelectionChanged() {
-			StatusInfo status= new StatusInfo();
-			List selected= fHistoryList.getSelectedElements();
-			if (selected.size() != 1) {
-				status.setError(""); //$NON-NLS-1$
-				fResult= null;
-			} else {
-				fResult= (IMethod) selected.get(0);
-			}
-			fHistoryList.enableButton(0, fHistoryList.getSize() > selected.size());			
-			fHistoryStatus= status;
-			updateStatus(status);	
-		}
+        	StatusInfo status= new StatusInfo();
+        	List selected= fHistoryList.getSelectedElements();
+        	if (selected.size() != 1) {
+        		status.setError(""); //$NON-NLS-1$
+        		fResult= null;
+        	} else {
+        		fResult= (IMethod) selected.get(0);
+        	}
+        	fHistoryList.enableButton(0, fHistoryList.getSize() > selected.size() && selected.size() != 0);			
+        	fHistoryStatus= status;
+        	updateStatus(status);	
+        }
 				
 		public IMethod getResult() {
 			return fResult;
