@@ -1,6 +1,6 @@
 package org.eclipse.jdt.internal.junit.launcher;
 
-/*
+/* 
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */

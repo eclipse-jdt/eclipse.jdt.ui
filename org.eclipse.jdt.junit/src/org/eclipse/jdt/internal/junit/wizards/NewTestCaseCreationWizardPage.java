@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.junit.wizards;
 
-import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.ListIterator;
@@ -44,18 +43,18 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -141,16 +140,16 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		if (element != null) {
 			IType classToTest= null;
 			// evaluate the enclosing type
-			IPackageFragment pack= (IPackageFragment) JavaModelUtil.findElementOfKind(element, IJavaElement.PACKAGE_FRAGMENT);
-			IType typeInCompUnit= (IType) JavaModelUtil.findElementOfKind(element, IJavaElement.TYPE);
+			IPackageFragment pack= (IPackageFragment) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+			IType typeInCompUnit= (IType) element.getAncestor(IJavaElement.TYPE);
 			if (typeInCompUnit != null) {
 				if (typeInCompUnit.getCompilationUnit() != null) {
 					classToTest= typeInCompUnit;
 				}
 			} else {
-				ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(element, IJavaElement.COMPILATION_UNIT);
+				ICompilationUnit cu= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (cu != null) 
-					classToTest= JavaModelUtil.findPrimaryType(cu);
+					classToTest= cu.findPrimaryType();
 				else {
 					if (element instanceof IClassFile) {
 						try {
@@ -373,10 +372,10 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	/**
 	 * @see NewTypeWizardPage#createTypeMembers
 	 */
-	protected void createTypeMembers(IType type, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		fIndexOfFirstTestMethod= 0;
 
-		createConstructor(type, imports);
+		createConstructor(type, imports); 
 
 		if (fMethodStubsButtons.isSelected(0)) 
 			createMain(type);
@@ -394,7 +393,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		}
 	}
 
-	protected void createConstructor(IType type, IImportsStructure imports) throws JavaModelException {
+	protected void createConstructor(IType type, ImportsManager imports) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
 		String constr= ""; //$NON-NLS-1$
@@ -431,7 +430,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fIndexOfFirstTestMethod++;		
 	}
 
-	protected void createSetUp(IType type, IImportsStructure imports) throws JavaModelException {
+	protected void createSetUp(IType type, ImportsManager imports) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
 		String setUp= ""; //$NON-NLS-1$
@@ -464,7 +463,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fIndexOfFirstTestMethod++;
 	}
 	
-	protected void createTearDown(IType type, IImportsStructure imports) throws JavaModelException {
+	protected void createTearDown(IType type, ImportsManager imports) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
 		String tearDown= ""; //$NON-NLS-1$
@@ -832,16 +831,16 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			String packName= pack.getElementName();
 			// search in own package
 			if (!pack.isDefaultPackage()) {
-				type= JavaModelUtil.findType(jproject, packName, classToTestName);
+				type= jproject.findType(packName, classToTestName);
 			}
 			// search in java.lang
 			if (type == null && !"java.lang".equals(packName)) { //$NON-NLS-1$
-				type= JavaModelUtil.findType(jproject, "java.lang", classToTestName); //$NON-NLS-1$
+				type= jproject.findType("java.lang", classToTestName); //$NON-NLS-1$
 			}
 		}
 		// search fully qualified
 		if (type == null) {
-			type= JavaModelUtil.findType(jproject, classToTestName);
+			type= jproject.findType(classToTestName);
 		}
 		return type;
 	}

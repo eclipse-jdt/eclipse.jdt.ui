@@ -15,8 +15,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
 import org.eclipse.swt.SWT;
 
 /**
@@ -76,7 +76,7 @@ public class JUnitStubUtility {
 	 * @param imports Imports required by the sub are added to the imports structure
 	 * @throws JavaModelException
 	 */
-	public static String genStub(String destTypeName, IMethod method, GenStubSettings settings, IImportsStructure imports) throws JavaModelException {
+	public static String genStub(String destTypeName, IMethod method, GenStubSettings settings, ImportsManager imports) throws JavaModelException {
 		IType declaringtype= method.getDeclaringType();	
 		StringBuffer buf= new StringBuffer();
 		String[] paramTypes= method.getParameterTypes();
@@ -255,7 +255,7 @@ public class JUnitStubUtility {
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
 	}
 
-	private static void resolveAndAdd(String refTypeSig, IType declaringType, IImportsStructure imports) throws JavaModelException {
+	private static void resolveAndAdd(String refTypeSig, IType declaringType, ImportsManager imports) throws JavaModelException {
 		String resolvedTypeName= JavaModelUtil.getResolvedTypeName(refTypeSig, declaringType);
 		if (resolvedTypeName != null) {
 			imports.addImport(resolvedTypeName);		

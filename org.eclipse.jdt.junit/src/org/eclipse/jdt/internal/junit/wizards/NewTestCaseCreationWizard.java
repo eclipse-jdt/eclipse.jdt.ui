@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.junit.wizards;
 
+import java.net.MalformedURLException;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -11,6 +13,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
  * A wizard for creating test cases.
@@ -22,10 +25,17 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 	public NewTestCaseCreationWizard() {
 		super();
-		//setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
-		//setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(WizardMessages.getString("Wizard.title.new")); //$NON-NLS-1$
 		initDialogSettings();
+	}
+
+	protected void initializeDefaultPageImageDescriptor() {
+		try {
+			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("wizban/newtest_wiz.gif"));
+			setDefaultPageImageDescriptor(id);
+	} catch (MalformedURLException e) {
+			// Should not happen.  Ignore.
+		}
 	}
 
 
@@ -41,8 +51,8 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		fPage.init(getSelection(),fPage2);
 		addPage(fPage2);
 	}	
-
-	/*
+	
+/*
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {

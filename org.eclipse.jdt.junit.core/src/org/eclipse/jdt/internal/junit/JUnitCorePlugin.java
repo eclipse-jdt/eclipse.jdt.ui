@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IViewPart;
@@ -60,7 +61,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	public JUnitPlugin(IPluginDescriptor desc) {
 		super(desc);
 		fgPlugin= this;
-		String pathSuffix= "icons/"; //$NON-NLS-1$
+		String pathSuffix= "icons/full/"; //$NON-NLS-1$
 		try {
 			fgIconBaseURL= new URL(getDescriptor().getInstallURL(), pathSuffix);
 		} catch (MalformedURLException e) {
@@ -121,6 +122,15 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		if (JUnitPlugin.fgIconBaseURL == null)
 			throw new MalformedURLException();
 		return new URL(JUnitPlugin.fgIconBaseURL, name);
+	}
+
+	static ImageDescriptor getImageDescriptor(String relativePath) {
+		try {
+			return ImageDescriptor.createFromURL(makeIconFileURL(relativePath));
+		} catch (MalformedURLException e) {
+			// should not happen
+			return ImageDescriptor.getMissingImageDescriptor();
+		}
 	}
 
 	/*
@@ -202,7 +212,6 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		super.startup();
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.addLaunchListener(this);	
-		ProgressImages.load();
 	}
 
 	/*
@@ -212,7 +221,6 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		super.shutdown();
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.removeLaunchListener(this);
-		ProgressImages.dispose();
 	}
 
 	public static Display getDisplay() {

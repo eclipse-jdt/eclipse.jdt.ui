@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.net.MalformedURLException;
 import java.text.NumberFormat;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -60,11 +61,10 @@ import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
 /**
  * A ViewPart that shows the results of a test run.
  */
-public class TestRunnerViewPart
-	extends ViewPart
+public class TestRunnerViewPart extends ViewPart
 	implements ITestRunListener, IPropertyChangeListener {
 
-	public static final String NAME = "org.eclipse.jdt.junit.ResultView";
+	public static final String NAME= "org.eclipse.jdt.junit.ResultView";
  	/**
  	 * Number of executed tests during a test run
  	 */
@@ -93,7 +93,8 @@ public class TestRunnerViewPart
 	private TestRunInfo fFirstFailure;
 
 	private ProgressBar fProgressBar;
-	private Image fProgressImage;
+	private ProgressImages fProgressImages;
+	private Image fViewImage;
 	private CounterPanel fCounterPanel;
 	private boolean fShowOnErrorOnly= false;
 
@@ -127,15 +128,19 @@ public class TestRunnerViewPart
 	 */
 	private RemoteTestRunnerClient fTestRunnerClient;
 
-	protected final Image fHierarchyIcon= TestRunnerViewPart.createImage("icons/hierarchy.gif", getClass());
-	protected final Image fStackViewIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass());//$NON-NLS-1$
-	protected Image fOriginalViewImage = null;
+	final Image fStackViewIcon= TestRunnerViewPart.createImage("obj16/stackframe.gif");//$NON-NLS-1$
+	final Image fTestRunOKIcon= TestRunnerViewPart.createImage("cview16/junitsuc.gif");
+	final Image fTestRunFailIcon= TestRunnerViewPart.createImage("cview16/juniterr.gif");
+	
+	Image fOriginalViewImage = null;
 
 	private class StopAction extends Action{
 		public StopAction() {
 			setText(JUnitMessages.getString("TestRunnerViewPart.stopaction.text"));//$NON-NLS-1$
 			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.stopaction.tooltip"));//$NON-NLS-1$
-			setImageDescriptor(ImageDescriptor.createFromFile(getClass(), "icons/stopIcon.gif"));//$NON-NLS-1$
+			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/stop.gif"));
+			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/stop.gif"));
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/stop.gif"));
 		}
 
 		public void run() {
@@ -147,7 +152,9 @@ public class TestRunnerViewPart
 		public RerunAction() {
 			setText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.label")); //$NON-NLS-1$
 			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.tooltip")); //$NON-NLS-1$
-			setImageDescriptor(ImageDescriptor.createFromFile(getClass(), "icons/relaunch.gif")); //$NON-NLS-1$
+			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/relaunch.gif"));
+			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/relaunch.gif"));
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunch.gif"));
 		}
 		
 		public void run(){
@@ -202,8 +209,17 @@ public class TestRunnerViewPart
 					fActiveRunView.setSelectedTest(fFirstFailure.fTestName);
 					handleTestSelected(fFirstFailure.fTestName);
 				}
+				updateViewIcon();
 			}
 		});	
+	}
+
+	private void updateViewIcon() {
+		if (fErrors+fFailures > 0) 
+			fViewImage= fTestRunFailIcon;
+		else 
+			fViewImage= fTestRunOKIcon;
+		firePropertyChange(IWorkbenchPart.PROP_TITLE);	
 	}
 
 	private String elapsedTimeAsString(long runTime) {
@@ -215,7 +231,20 @@ public class TestRunnerViewPart
 	 */
 	public void testRunStopped(final long elapsedTime) {
 		String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.stopped", elapsedTimeAsString(elapsedTime)); //$NON-NLS-1$
-		showMessage(msg);
+		postInfo(msg);
+		postAsyncRunnable(new Runnable() {				
+			public void run() {
+				if(isDisposed()) 
+					return;	
+				resetViewIcon();
+			}
+		});	
+
+	}
+
+	private void resetViewIcon() {
+		fViewImage= fOriginalViewImage;
+		firePropertyChange(IWorkbenchPart.PROP_TITLE);
 	}
 
 	/*
@@ -371,7 +400,7 @@ public class TestRunnerViewPart
 		String msg= JUnitMessages.getString("TestRunnerViewPart.message.launching"); //$NON-NLS-1$
 		showInformation(msg);
 		postInfo(msg);
-		fProgressImage= fOriginalViewImage;
+		fViewImage= fOriginalViewImage;
 		firePropertyChange(IWorkbenchPart.PROP_TITLE);
 	}
 
@@ -389,8 +418,11 @@ public class TestRunnerViewPart
 	public synchronized void dispose(){
 		fIsDisposed= true;
 		stopTest();
-		JUnitPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(
-			this);
+		fProgressImages.dispose();
+		JUnitPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
+		fTestRunOKIcon.dispose();
+		fTestRunFailIcon.dispose();
+		fStackViewIcon.dispose();
 	}
 
 	private void start(final int total) {
@@ -448,9 +480,9 @@ public class TestRunnerViewPart
 		updateProgressColor(fFailures+fErrors);
 		fProgressBar.setSelection(fProgressBar.getSelection() + 1);
 		if (fShowOnErrorOnly) {
-			Image progress= ProgressImages.getImage(fExecutedTests, fTestCount, fErrors, fFailures);
-			if (progress != fProgressImage) {
-				fProgressImage= progress;
+			Image progress= fProgressImages.getImage(fExecutedTests, fTestCount, fErrors, fFailures);
+			if (progress != fViewImage) {
+				fViewImage= progress;
 				firePropertyChange(IWorkbenchPart.PROP_TITLE);
 			}
 		}
@@ -645,6 +677,7 @@ public class TestRunnerViewPart
 
 		JUnitPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		fOriginalViewImage= getTitleImage();
+		fProgressImages= new ProgressImages();
 	}
 
 	private IStatusLineManager getStatusLine() {
@@ -709,8 +742,14 @@ public class TestRunnerViewPart
 		return fTestType.getJavaProject();
 	}
 
-	protected static Image createImage(String fName, Class clazz) {
-		return (new Image(Display.getCurrent(), clazz.getResourceAsStream(fName)));
+	protected static Image createImage(String path) {
+		try {
+			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL(path));
+			return id.createImage();
+		} catch (MalformedURLException e) {
+			// fall through
+		}  
+		return null;
 	}
 
 	private boolean isDisposed() {
@@ -727,9 +766,9 @@ public class TestRunnerViewPart
 		if (fOriginalViewImage == null)
 			fOriginalViewImage= super.getTitleImage();
 			
-		if (fProgressImage == null)
+		if (fViewImage == null)
 			return super.getTitleImage();
-		return fProgressImage;
+		return fViewImage;
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -738,7 +777,7 @@ public class TestRunnerViewPart
 
 		if (event.getProperty() == JUnitPreferencePage.SHOW_ON_ERROR_ONLY) {
 			if (!JUnitPreferencePage.getShowOnErrorOnly()) {
-				fProgressImage= fOriginalViewImage;
+				fViewImage= fOriginalViewImage;
 				firePropertyChange(IWorkbenchPart.PROP_TITLE);
 			}
 		}

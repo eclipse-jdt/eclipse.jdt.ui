@@ -24,9 +24,8 @@ public class CounterPanel extends Composite {
 	private Label fNumberOfRuns;
 	private int fTotal;
 	
-	private final Image fErrorIcon= TestRunnerViewPart.createImage("icons/error.gif", getClass()); //$NON-NLS-1$
-	private final Image fFailureIcon= TestRunnerViewPart.createImage("icons/failure.gif", getClass()); //$NON-NLS-1$
-	private final Image fRunIcon= TestRunnerViewPart.createImage("icons/run_exc.gif", getClass()); //$NON-NLS-1$
+	private final Image fErrorIcon= TestRunnerViewPart.createImage("ovr16/error_ovr.gif"); //$NON-NLS-1$
+	private final Image fFailureIcon= TestRunnerViewPart.createImage("ovr16/failed_ovr.gif"); //$NON-NLS-1$
 			
 	public CounterPanel(Composite parent) {
 		super(parent, SWT.WRAP);
@@ -50,7 +49,6 @@ public class CounterPanel extends Composite {
 	void disposeIcons() {
 		fErrorIcon.dispose();
 		fFailureIcon.dispose();
-		fRunIcon.dispose();
 	}
 
 	private Label createLabel(String name, Image image, String init) {

@@ -74,18 +74,20 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	
 	private boolean fPressed= false;
 	
-	private final Image fOkIcon= TestRunnerViewPart.createImage("icons/ok.gif", getClass()); //$NON-NLS-1$
-	private final Image fErrorIcon= TestRunnerViewPart.createImage("icons/error.gif", getClass()); //$NON-NLS-1$
-	private final Image fFailureIcon= TestRunnerViewPart.createImage("icons/failure.gif", getClass()); //$NON-NLS-1$
-	private final Image fHierarchyIcon= TestRunnerViewPart.createImage("icons/hierarchy.gif", getClass()); //$NON-NLS-1$
-	private final Image fTestIcon= TestRunnerViewPart.createImage("icons/testIcon.gif", getClass()); //$NON-NLS-1$
+	private final Image fOkIcon= TestRunnerViewPart.createImage("obj16/testok.gif"); //$NON-NLS-1$
+	private final Image fErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
+	private final Image fFailureIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
+	private final Image fHierarchyIcon= TestRunnerViewPart.createImage("obj16/testhier.gif"); //$NON-NLS-1$
+	private final Image fSuiteIcon= TestRunnerViewPart.createImage("obj16/tsuite.gif"); //$NON-NLS-1$
+	private final Image fSuiteErrorIcon= TestRunnerViewPart.createImage("obj16/tsuiteerror.gif"); //$NON-NLS-1$
+	private final Image fSuiteFailIcon= TestRunnerViewPart.createImage("obj16/tsuitefail.gif"); //$NON-NLS-1$
+	private final Image fTestIcon= TestRunnerViewPart.createImage("obj16/test.gif"); //$NON-NLS-1$
 		
 	public HierarchyRunView(CTabFolder tabFolder, TestRunnerViewPart runner) {
 		fTestRunnerPart= runner;
 		
 		CTabItem hierarchyTab= new CTabItem(tabFolder, SWT.NONE);
 		hierarchyTab.setText(getName());
-		fHierarchyIcon.setBackground(tabFolder.getBackground());
 		hierarchyTab.setImage(fHierarchyIcon);
 		
 		Composite testTreePanel= new Composite(tabFolder, SWT.NONE);
@@ -103,10 +105,6 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		fTree= new Tree(testTreePanel, SWT.V_SCROLL);
 		gridData= new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
 		fTree.setLayoutData(gridData);
-
-		fOkIcon.setBackground(testTreePanel.getBackground());
-		fErrorIcon.setBackground(testTreePanel.getBackground());
-		fFailureIcon.setBackground(testTreePanel.getBackground());
 		
 		initMenu();
 		addListeners();
@@ -114,16 +112,14 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 
 
 	void disposeIcons() {
-		if (fErrorIcon != null && !fErrorIcon.isDisposed()) 
-			fErrorIcon.dispose();
-		if (fFailureIcon != null && !fFailureIcon.isDisposed()) 
-			fFailureIcon.dispose();
-		if (fOkIcon != null && !fOkIcon.isDisposed()) 
-			fOkIcon.dispose();
-		if (fHierarchyIcon != null && !fHierarchyIcon.isDisposed()) 
-			fHierarchyIcon.dispose();
-		if (fTestIcon != null && !fTestIcon.isDisposed()) 
-			fTestIcon.dispose();
+		fErrorIcon.dispose();
+		fFailureIcon.dispose();
+		fOkIcon.dispose();
+		fHierarchyIcon.dispose();
+		fTestIcon.dispose();
+		fSuiteIcon.dispose();
+		fSuiteErrorIcon.dispose();
+		fSuiteFailIcon.dispose(); 
 	}
 	
 	private void initMenu() {
@@ -197,14 +193,36 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 
 	private void updateItem(TreeItem treeItem, TestRunInfo testInfo) {
 		treeItem.setData(testInfo);
-		if(testInfo.fStatus == ITestRunListener.STATUS_OK)
+		if(testInfo.fStatus == ITestRunListener.STATUS_OK) {
 			treeItem.setImage(fOkIcon);	
-		else if (testInfo.fStatus == ITestRunListener.STATUS_FAILURE)
+			return;
+		}
+		
+		if (testInfo.fStatus == ITestRunListener.STATUS_FAILURE) 
 			treeItem.setImage(fFailureIcon);
 		else if (testInfo.fStatus == ITestRunListener.STATUS_ERROR)
 			treeItem.setImage(fErrorIcon);
+		propagateStatus(treeItem, testInfo.fStatus);	
 	}
 
+	void propagateStatus(TreeItem item, int status) {
+		TreeItem parent= item.getParentItem();
+		if (parent == null)
+			return;
+		Image parentImage= parent.getImage();
+		
+		if (status == ITestRunListener.STATUS_FAILURE) {
+			if (parentImage == fSuiteErrorIcon || parentImage == fSuiteFailIcon) 
+				return;
+			parent.setImage(fSuiteFailIcon);
+		} else {
+			if (parentImage == fSuiteErrorIcon) 
+				return;
+			parent.setImage(fSuiteErrorIcon);
+		}
+		propagateStatus(parent, status);
+	}
+	
 	public void activate() {
 		testSelected();
 	}
@@ -327,7 +345,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		if(fSuiteInfos.size() == 0){
 			testInfo.fStatus= IS_SUITE;
 			treeItem= new TreeItem(fTree, SWT.NONE);
-			treeItem.setImage(fHierarchyIcon);
+			treeItem.setImage(fSuiteIcon);
 			fSuiteInfos.addElement(new SuiteInfo(treeItem, testCount));
 		} else if(isSuite.equals("true")) { //$NON-NLS-1$
 			testInfo.fStatus= IS_SUITE;

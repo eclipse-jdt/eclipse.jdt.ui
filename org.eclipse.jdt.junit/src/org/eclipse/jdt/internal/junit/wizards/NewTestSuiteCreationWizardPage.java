@@ -321,7 +321,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	/*
 	 * @see TypePage#evalMethods
 	 */
-	protected void createTypeMembers(IType type, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		writeImports(imports);
 		if (fMethodStubsButtons.isEnabled() && fMethodStubsButtons.isSelected(0)) 
 			createMain(type);
@@ -587,7 +587,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 
 	}
 
-	private void writeImports(IImportsStructure imports) {
+	private void writeImports(ImportsManager imports) {
 		imports.addImport("junit.framework.Test"); //$NON-NLS-1$
 		imports.addImport("junit.framework.TestSuite");		 //$NON-NLS-1$
 	}

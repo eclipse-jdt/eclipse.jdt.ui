@@ -38,15 +38,14 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	private TestRunnerViewPart fRunnerViewPart;
 	private boolean fPressed= false;
 	
-	private final Image fErrorIcon= TestRunnerViewPart.createImage("icons/error.gif", getClass()); //$NON-NLS-1$
-	private final Image fFailureIcon= TestRunnerViewPart.createImage("icons/failure.gif", getClass()); //$NON-NLS-1$
+	private final Image fErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
+	private final Image fFailureIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
 	
 	public FailureRunView(CTabFolder tabFolder, TestRunnerViewPart runner) {
 		fRunnerViewPart= runner;
 		
 		CTabItem failureTab= new CTabItem(tabFolder, SWT.NONE);
 		failureTab.setText(getName());
-		fFailureIcon.setBackground(tabFolder.getBackground());
 		failureTab.setImage(fFailureIcon);
 
 		Composite composite= new Composite(tabFolder, SWT.NONE);
@@ -69,9 +68,6 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		
 		failureTab.setControl(composite);
 		failureTab.setToolTipText(JUnitMessages.getString("FailureRunView.tab.tooltip")); //$NON-NLS-1$
-		
-		fErrorIcon.setBackground(fTable.getBackground());
-		fFailureIcon.setBackground(fTable.getBackground());
 		
 		initMenu();
 		addListeners();	

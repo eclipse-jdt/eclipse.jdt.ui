@@ -21,7 +21,10 @@ public class EnableStackFilterAction extends Action {
 		setDescription(JUnitMessages.getString("EnableStackFilterAction.action.description"));  //$NON-NLS-1$
 		setToolTipText(JUnitMessages.getString("EnableStackFilterAction.action.tooltip")); //$NON-NLS-1$
 		
-		setImageDescriptors(); 
+		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/cfilter.gif"));
+		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/cfilter.gif"));
+		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/cfilter.gif"));
+
 		fView= view;
 		setChecked(JUnitPreferencePage.getFilterStack());
 	}
@@ -32,23 +35,5 @@ public class EnableStackFilterAction extends Action {
 	public void run() {
 		JUnitPreferencePage.setFilterStack(isChecked());
 		fView.refresh();
-	}
-	
-	private void setImageDescriptors() {	
-		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("dlfilter.gif"));  //$NON-NLS-1$
-			if (id != null)
-				setDisabledImageDescriptor(id);
-				
-			id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("clfilter.gif"));  //$NON-NLS-1$
-			if (id != null)
-				setHoverImageDescriptor(id);
-	
-			id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("elfilter.gif"));  //$NON-NLS-1$
-			if (id != null)
-				setImageDescriptor(id);
-				
-		} catch (MalformedURLException e) {
-		}
 	}
 }

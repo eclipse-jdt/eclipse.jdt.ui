@@ -88,7 +88,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		IStructuredContentProvider cprovider= new NewTestSuiteCreationWizardPage.ClassesInSuitContentProvider();
 
 		/* find TestClasses already in Test Suite */
-		IType testSuiteType= JavaModelUtil.findPrimaryType(fTestSuite);
+		IType testSuiteType= fTestSuite.findPrimaryType();
 		fSuiteMethod= testSuiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
 		if (fSuiteMethod.exists()) {
 			try {

@@ -33,7 +33,7 @@
 		point="org.eclipse.ui.views">
 		<view
 			name="%View.label"
-			icon="icons/smalllogo.gif"
+			icon="icons/full/cview16/junit.gif"
 			category="org.eclipse.jdt.ui.java"
 			class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
 			id="org.eclipse.jdt.junit.ResultView"
@@ -81,7 +81,7 @@
 		<launchConfigurationTypeImage
 			id="org.eclipse.jdt.junit.launchimage"
 			configTypeID="org.eclipse.jdt.junit.launchconfig"
-			icon="icons/smalllogo.gif">
+			icon="icons/full/obj16/julaunch.gif">
 		</launchConfigurationTypeImage>	
 	</extension>
 		
@@ -114,7 +114,7 @@
 			name="%TestCaseWizard.name"
 			class="org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizard"
 			category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
-			icon="icons/ctool16/newtest_wiz.gif">
+			icon="icons/full/ctool16/new_testcase.gif">
 			<description>%TestWizard.description</description>
 	    </wizard>
 		<wizard 
@@ -122,7 +122,7 @@
 			name="%TestSuiteWizard.name"
 			class="org.eclipse.jdt.internal.junit.wizards.NewTestSuiteCreationWizard"
 			category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
-			icon="icons/ctool16/newsuite_wiz.gif">
+			icon="icons/full/ctool16/new_testsuite.gif">
 			<description>%SuiteWizard.description</description>
 	    </wizard>
 	</extension>

@@ -34,9 +34,8 @@ class FailureTraceView implements IMenuListener {
 	private TestRunnerViewPart fTestRunner;
 	private String fInputTrace;
 	
-	private final Image fStackIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass()); //$NON-NLS-1$
-	private final Image fExceptionIcon= TestRunnerViewPart.createImage("icons/exc_catch.gif", getClass()); //$NON-NLS-1$
-	private final Image fInfoIcon= TestRunnerViewPart.createImage("icons/info_obj.gif", getClass()); //$NON-NLS-1$
+	private final Image fStackIcon= TestRunnerViewPart.createImage("obj16/stackframe.gif"); //$NON-NLS-1$
+	private final Image fExceptionIcon= TestRunnerViewPart.createImage("obj16/exc_catch.gif"); //$NON-NLS-1$
 
 	public FailureTraceView(Composite parent, TestRunnerViewPart testRunner) {
 		fTable= new Table(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -49,10 +48,6 @@ class FailureTraceView implements IMenuListener {
 		});
 		
 		initMenu();
-		
-		fStackIcon.setBackground(fTable.getBackground());
-		fExceptionIcon.setBackground(fTable.getBackground());
-		fInfoIcon.setBackground(fTable.getBackground());
 		
 		parent.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
@@ -118,8 +113,6 @@ class FailureTraceView implements IMenuListener {
 			fExceptionIcon.dispose();
 		if (fStackIcon != null && !fStackIcon.isDisposed()) 
 			fStackIcon.dispose();
-		if (fInfoIcon != null && !fInfoIcon.isDisposed()) 
-			fInfoIcon.dispose();
 	}
 	
 	/**
@@ -198,7 +191,6 @@ class FailureTraceView implements IMenuListener {
 	public void setInformation(String text) {
 		clear();
 		TableItem tableItem= new TableItem(fTable, SWT.NONE);
-		tableItem.setImage(fInfoIcon);
 		tableItem.setText(text);
 	}
 	
