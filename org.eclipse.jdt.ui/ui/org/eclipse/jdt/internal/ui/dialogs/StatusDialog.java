@@ -63,7 +63,7 @@ public abstract class StatusDialog extends Dialog {
 		}
 	}
 	
-	public IStatus getStatus() {
+	protected IStatus getStatus() {
 		return fLastStatus;
 	}
 
