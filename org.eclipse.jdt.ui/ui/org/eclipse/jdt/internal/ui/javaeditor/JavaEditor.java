@@ -1884,8 +1884,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		
-		getSourceViewerDecorationSupport(getViewer()).install(getPreferenceStore());
-
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
 		preferences.addPropertyChangeListener(fPropertyChangeListener);			
 		
@@ -2149,8 +2147,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					containingAnnotationPosition= p;
 					if (length == p.length)
 						currentAnnotation= true;
-				}
 			}
+		}
 		}
 		if (containingAnnotationPosition != null && (!currentAnnotation || nextAnnotation == null)) {
 			annotationPosition.setOffset(containingAnnotationPosition.getOffset());
@@ -2161,6 +2159,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			annotationPosition.setOffset(nextAnnotationPosition.getOffset());
 			annotationPosition.setLength(nextAnnotationPosition.getLength());
 		}
+		
 		return nextAnnotation;
 	}
 	
