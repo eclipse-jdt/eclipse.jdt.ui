@@ -81,7 +81,7 @@ public class MethodChecks {
 		}
 	}
 	
-	private static IMethod overridesAnotherMethod(IMethod method, IProgressMonitor pm) throws JavaModelException {
+	public static IMethod overridesAnotherMethod(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		IMethod found= JavaModelUtil.findMethodDeclarationInHierarchy(
 						method.getDeclaringType().newSupertypeHierarchy(pm), 
 						method.getDeclaringType(), 
