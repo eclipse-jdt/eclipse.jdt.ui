@@ -320,7 +320,36 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	
 	//overridden
 	boolean canCopyResources(Object dest) throws JavaModelException{
-		return super.canCopyResources(dest) && ! destinationIsParentForResources(getDestinationForResources(dest));
+		IContainer destination= getDestinationForResources(dest);
+		return super.canCopyResources(dest) && 
+				! destinationIsOneOfResources(destination) &&
+				! destinationIsParentForResources(destination);
+	}
+	
+	private boolean destinationIsParentForResources(IContainer dest){
+		if (dest == null)
+			return false;
+		for (Iterator iter= getElements().iterator(); iter.hasNext(); ){
+			Object each= iter.next();
+			if (!(each instanceof IResource))
+				continue;
+				
+			IResource resource= (IResource)each;
+			if (dest.equals(resource.getParent()))
+				return true;
+		}
+		return false;
+	}
+	
+	private boolean destinationIsOneOfResources(IContainer dest){
+		if (dest == null)
+			return false;
+		for (Iterator iter= getElements().iterator(); iter.hasNext(); ){
+			Object each= iter.next();
+			if (dest.equals(each))
+				return true;
+		}
+		return false;		
 	}
 	
 	public boolean canUpdateReferences() throws JavaModelException{

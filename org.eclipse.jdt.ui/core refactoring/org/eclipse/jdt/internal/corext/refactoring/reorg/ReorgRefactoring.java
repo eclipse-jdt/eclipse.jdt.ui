@@ -476,22 +476,6 @@ public abstract class ReorgRefactoring extends Refactoring {
 		}
 		return false;
 	}
-		
-	boolean destinationIsParentForResources(IContainer dest){
-		if (dest == null)
-			return false;
-		for (Iterator iter= getElements().iterator(); iter.hasNext(); ){
-			Object each= iter.next();
-			if (!(each instanceof IResource))
-				continue;
-				
-			IResource resource= (IResource)each;
-			if (dest.equals(resource.getParent()))
-				return true;
-		}
-		return false;
-	}
-	
 	
 	/**
 	 * Tries to convert the given object into an <code>IResource</code>. If the 
