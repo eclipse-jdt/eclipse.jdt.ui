@@ -2218,7 +2218,7 @@ public class PreferenceConstants {
 
 		// TypeFilterPreferencePage
 		store.setDefault(PreferenceConstants.TYPEFILTER_ENABLED, ""); //$NON-NLS-1$
-		store.setDefault(PreferenceConstants.TYPEFILTER_DISABLED, "java.awt*;COM*"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.TYPEFILTER_DISABLED, ""); //$NON-NLS-1$
 		
 		// ClasspathVariablesPreferencePage
 		// CodeFormatterPreferencePage
