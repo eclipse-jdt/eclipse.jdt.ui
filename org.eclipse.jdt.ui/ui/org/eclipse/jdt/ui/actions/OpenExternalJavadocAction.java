@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -134,6 +135,9 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		if (element == null)
 			return;
 		Shell shell= getShell();
+		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
+		if (!ActionUtil.isProcessable(shell, element))
+			return;
 		try {
 			String labelName= JavaElementLabels.getElementLabel(element, JavaElementLabels.M_PARAMETER_TYPES);
 			

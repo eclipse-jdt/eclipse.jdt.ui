@@ -163,6 +163,9 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	}
 
 	private boolean reveal(PackageExplorerPart view, Object element) {
+		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
+		if (element == null)
+			return false;
 		view.selectReveal(new StructuredSelection(element));
 		if (element.equals(getSelectedElement(view)))
 			return true;
@@ -174,6 +177,9 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	}
 	
 	private IJavaElement getVisibleParent(IJavaElement element) {
+		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
+		if (element == null)
+			return null;
 		switch (element.getElementType()) {
 			case IJavaElement.IMPORT_DECLARATION:
 			case IJavaElement.PACKAGE_DECLARATION:

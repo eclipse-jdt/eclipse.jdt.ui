@@ -19,6 +19,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -118,6 +119,9 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	
 	private void startRefactoring() {
 		Assert.isNotNull(fRefactoring);
+		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
+		if (!ActionUtil.isProcessable(getShell(), fRefactoring.getMethod()))
+			return;
 		try{
 			Object newElementToProcess= new RefactoringStarter().activate(fRefactoring, createWizard(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 			if (newElementToProcess == null)

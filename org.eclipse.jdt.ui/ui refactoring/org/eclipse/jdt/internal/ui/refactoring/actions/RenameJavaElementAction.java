@@ -13,6 +13,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -40,7 +41,10 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		run(selection.getFirstElement());	
 	}
 
-	private void run(Object element){
+	private void run(Object element) {
+		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
+		if (!ActionUtil.isProcessable(getShell(), element))
+			return;
 		IRefactoringRenameSupport refactoringSupport= RefactoringSupportFactory.createRenameSupport(element);
 		if (! canRename(refactoringSupport, element))
 			return;
