@@ -96,7 +96,7 @@ public class ProblemNode extends ASTAttribute {
 	}
 
 	/**
-	 * @return Returns the length of the problem
+	 * @return Returns the offset of the problem
 	 */
 	public int getOffset() {
 		return fProblem.getSourceStart();

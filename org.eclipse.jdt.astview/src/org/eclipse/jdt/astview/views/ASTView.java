@@ -396,7 +396,7 @@ public class ASTView extends ViewPart {
 		String version= root.getAST().apiLevel() == AST.JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
 		TreeInfoCollector collector= new TreeInfoCollector(root);
 
-		String msg= "{0} ({1}).  Creation time: {2,number} ms.  Size: {3,number} AST nodes, {4,number} bytes."; //$NON-NLS-1$
+		String msg= "{0} ({1}).  Creation time: {2,number} ms.  Size: {3,number} nodes, {4,number} bytes (AST nodes only)."; //$NON-NLS-1$
 		Object[] args= { element.getElementName(), version, new Long(time),  new Integer(collector.getNumberOfNodes()), new Integer(collector.getSize())};
 		setContentDescription(MessageFormat.format(msg, args));
 
