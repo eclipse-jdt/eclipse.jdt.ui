@@ -46,7 +46,7 @@ import org.eclipse.ui.PlatformUI;
 public class ContentProviderTests4 extends TestCase{
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("Tests for content provider -  part 4"); //$NON-NLS-1$
+		TestSuite suite= new TestSuite("org.eclipse.jdt.ui.tests.ContentProviderTests4"); //$NON-NLS-1$
 		//$JUnit-BEGIN$
 	   suite.addTestSuite(ContentProviderTests4.class);
 		//$JUnit-END$

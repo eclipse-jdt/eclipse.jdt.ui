@@ -47,7 +47,7 @@ public class ContentProviderTests2 extends TestCase{
 
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("Tests for content provider -  part 2"); //$NON-NLS-1$
+		TestSuite suite= new TestSuite("org.eclipse.jdt.ui.ContentProviderTests2"); //$NON-NLS-1$
 		//$JUnit-BEGIN$
 	   suite.addTestSuite(ContentProviderTests2.class);
 		//$JUnit-END$

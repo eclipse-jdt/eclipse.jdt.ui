@@ -20,6 +20,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 
@@ -45,7 +46,7 @@ import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 public class PackagesViewContentProviderTests extends TestCase {
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("Tests for content provider - part 1"); //$NON-NLS-1$
+		TestSuite suite= new TestSuite("org.eclipse.jdt.ui.tests.PackagesViewContentProviderTests"); //$NON-NLS-1$
 		//$JUnit-BEGIN$
 		suite.addTestSuite(PackagesViewContentProviderTests.class);
 		//$JUnit-END$
@@ -107,6 +108,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 	private IPackageFragment fInternalPack10;
 	private IPackageFragment fInternalPack6;
 	private IPackageFragment fInternalPackMetaInf;
+	private boolean fEnableAutoBuildAfterTesting;
 	
 	public PackagesViewContentProviderTests(String name) {
 		super(name);
@@ -377,6 +379,11 @@ public class PackagesViewContentProviderTests extends TestCase {
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);	
 		
+		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
+		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
+		if (fEnableAutoBuildAfterTesting)
+			JavaProjectHelper.setAutoBuilding(false);
+		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");//$NON-NLS-1$//$NON-NLS-2$
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");//$NON-NLS-1$//$NON-NLS-2$
 		
@@ -500,6 +507,10 @@ public class PackagesViewContentProviderTests extends TestCase {
 		fProvider.inputChanged(null, null, null);
 		page.hideView(fMyPart);
 		fMyPart.dispose();
+		
+		if (fEnableAutoBuildAfterTesting)
+			JavaProjectHelper.setAutoBuilding(true);
+
 		
 		super.tearDown();
 	}

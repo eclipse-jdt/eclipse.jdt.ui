@@ -18,6 +18,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 
@@ -49,7 +50,7 @@ import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 public class PackagesViewDeltaTests extends TestCase {
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite("Tests for content provider - Deltas");//$NON-NLS-1$
+		TestSuite suite= new TestSuite("org.eclipse.jdt.ui.tests.PackagesViewDeltaTests");//$NON-NLS-1$
 		//$JUnit-BEGIN$
 		suite.addTestSuite(PackagesViewDeltaTests.class);
 		//$JUnit-END$
@@ -103,6 +104,7 @@ public class PackagesViewDeltaTests extends TestCase {
 	private IPackageFragment fPack102;
 	private ICompilationUnit fCU33;
 	private ICompilationUnit fCU43;
+	private boolean fEnableAutoBuildAfterTesting;
 	
 	public PackagesViewDeltaTests(String name) {
 		super(name);
@@ -222,12 +224,13 @@ public class PackagesViewDeltaTests extends TestCase {
 		//force events from display
 		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
 
-		//assert remove happened
+		//assert delta correct (no remove or refresh, only change to logicalpackage)
 		assertTrue("Refresh happened", !fMyPart.hasRefreshHappened() && !fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 
 		//test life cycle of CompoundElement
 		Object[] child= fProvider.getChildren(ParentCp5);
-		if (!(child[0] instanceof LogicalPackage)) {
+		
+		if ((child.length != 1) || (!(child[0] instanceof LogicalPackage))) {
 			assertTrue("wrong parent found for compound after remove", false); //$NON-NLS-1$
 		}
 
@@ -410,6 +413,11 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
+		
+		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
+		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
+		if (fEnableAutoBuildAfterTesting)
+			JavaProjectHelper.setAutoBuilding(false);
 
 		//------------set up project ------------------------------
 		fJProject= JavaProjectHelper.createJavaProject("TestProject2", "bin"); //$NON-NLS-1$//$NON-NLS-2$
@@ -500,6 +508,9 @@ public class PackagesViewDeltaTests extends TestCase {
 		fProvider.inputChanged(null, null, null);
 		fPage.hideView(fMyPart);
 		fMyPart.dispose();
+
+		if (fEnableAutoBuildAfterTesting)
+			JavaProjectHelper.setAutoBuilding(true);
 
 		super.tearDown();
 	}
