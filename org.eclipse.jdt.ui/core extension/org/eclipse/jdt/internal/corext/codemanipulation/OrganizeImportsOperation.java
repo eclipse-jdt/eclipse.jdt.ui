@@ -157,10 +157,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		 * @see ASTVisitor#visit(ImportDeclaration)
 		 */
 		public boolean visit(ImportDeclaration node) {
+			String id= ASTNodes.asString(node.getName());
 			if (node.isOnDemand()) {
-				fOldDemandImports.add(node.getName());
+				fOldDemandImports.add(id);
 			} else {
-				fOldSingleImports.add(node.getName());
+				fOldSingleImports.add(id);
 			}
 			return false;
 		}
