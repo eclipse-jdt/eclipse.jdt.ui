@@ -116,27 +116,6 @@ public class ClassFileEditor extends JavaEditor {
 	 */
 	public void saveState(IMemento memento) {
 	}
-		
-	/**
-	 * @see AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
-	 */
-	public void editorContextMenuAboutToShow(IMenuManager menu) {
-		
-		super.editorContextMenuAboutToShow(menu);
-		
-		if (getEditorInput() instanceof IClassFileEditorInput) {
-			
-			IClassFileEditorInput input= (IClassFileEditorInput) getEditorInput();
-			IClassFile file= input.getClassFile();
-			
-			try {
-				if (file.getSource() != null)
-					addAction(menu, ITextEditorActionConstants.GROUP_ADD, "AddBreakpoint"); //$NON-NLS-1$
-			} catch (JavaModelException x) {
-				// ignore
-			}
-		}
-	}
 	
 	/**
 	 * @see AbstractTextEditor#rulerContextMenuAboutToShow(IMenuManager)
