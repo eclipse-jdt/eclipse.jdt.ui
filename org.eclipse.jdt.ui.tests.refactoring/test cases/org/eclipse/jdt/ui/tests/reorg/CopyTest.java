@@ -1513,22 +1513,25 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void test_type_yes_type() throws Exception{
-		printTestDisabledMessage("not implemented yet");
-//		ICompilationUnit cu= null;
-//		ICompilationUnit otherCu= createCUfromTestFile(getPackageP(), "C");
-//
-//		try {
-//			cu= createCUfromTestFile(getPackageP(), "A");
-//			IType type= cu.getType("A");
-//			IType otherType= otherCu.getType("C");
-//			IJavaElement[] javaElements= { type };
-//			Object destination= otherType;
-//			verifyCopyingOfSubCuElements(new ICompilationUnit[]{otherCu, cu}, destination, javaElements);
-//		} finally {
-//			performDummySearch();
-//			cu.delete(true, new NullProgressMonitor());
-//			otherCu.delete(true, new NullProgressMonitor());
-//		}
+		if (true) {
+			printTestDisabledMessage("not implemented yet");
+			return;
+		}
+		ICompilationUnit cu= null;
+		ICompilationUnit otherCu= createCUfromTestFile(getPackageP(), "C");
+
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IType type= cu.getType("A");
+			IType otherType= otherCu.getType("C");
+			IJavaElement[] javaElements= { type };
+			Object destination= otherType;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{otherCu, cu}, destination, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			otherCu.delete(true, new NullProgressMonitor());
+		}
 	}
 
 	public void test_inner_type_yes_cu() throws Exception{
