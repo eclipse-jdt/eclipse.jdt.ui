@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 public class RefactoringScopeFactory {
 
 	private RefactoringScopeFactory() {
+		//no instances
 	}
 
 	public static IJavaSearchScope create(IMember[] members) throws JavaModelException {
@@ -63,6 +64,9 @@ public class RefactoringScopeFactory {
 		return 4;
 	}
 
+	/**
+	 * @return scope with all CUs or projects possibly referencing <code>javaElement</code>.
+	 */ 
 	public static IJavaSearchScope create(IJavaElement javaElement) throws JavaModelException {
 		if (javaElement instanceof IMember) {
 			IMember member= (IMember) javaElement;
@@ -73,7 +77,7 @@ public class RefactoringScopeFactory {
 					return SearchEngine.createJavaSearchScope(new IJavaElement[] { member });
 			}
 			// Removed code that does some optimizations regarding package visible members. The problem is that
-			// the can be a package fragment with the same name in a different source folder or project. So we
+			// there can be a package fragment with the same name in a different source folder or project. So we
 			// have to treat package visible members like public or protected members.
 		}
 		return create(javaElement.getJavaProject());
@@ -175,5 +179,50 @@ public class RefactoringScopeFactory {
 				elements.add(root);
 		}
 		return elements;
+	}
+
+	/**
+	 * @return scope with all projects possibly referenced from within <code>javaElements</code>.
+	 */ 
+	public static IJavaSearchScope createReferencedScope(IJavaElement[] javaElements) throws JavaModelException {
+		Set allProjects= getReferencedProjects(javaElements);
+		IJavaElement[] allReferencedProjects= (IJavaProject[]) allProjects.toArray(new IJavaProject[allProjects.size()]);
+		return SearchEngine.createJavaSearchScope(allReferencedProjects, false);
+	}
+	
+	/**
+	 * @param javaElements iteration base
+	 * @return Collection of IJavaProject
+	 * @throws JavaModelException
+	 */
+	private static Set getReferencedProjects(IJavaElement[] javaElements) throws JavaModelException {
+		Set allProjects= new HashSet();
+		for (int i= 0; i < javaElements.length; i++) {
+			IJavaProject project= javaElements[i].getJavaProject();
+			addReferencedProjects(project, allProjects);
+			allProjects.add(project);
+		}
+		return allProjects;
+	}
+	/**
+	 * Adds to <code>projects</code> IJavaProject objects for all projects
+	 * directly or indirectly referenced by focus.
+	 * 
+	 * @param focus
+	 * @param projects		IJavaProjects will be added to this set
+	 * @throws JavaModelException
+	 */
+	private static void addReferencedProjects(IJavaProject focus, Set projects) throws JavaModelException {
+		IClasspathEntry[] classpathEntries= focus.getResolvedClasspath(true);
+		for (int i= 0; i < classpathEntries.length; i++) {
+			IClasspathEntry entry= classpathEntries[i];
+			if (entry.getEntryKind() != IClasspathEntry.CPE_PROJECT)
+				continue;
+			IJavaProject candidate= focus.getJavaModel().getJavaProject(entry.getPath().lastSegment());
+			if (candidate == null || !candidate.exists() || projects.contains(candidate))
+				continue;
+			projects.add(candidate);
+			addReferencedProjects(candidate, projects);
+		}
 	}
 }
