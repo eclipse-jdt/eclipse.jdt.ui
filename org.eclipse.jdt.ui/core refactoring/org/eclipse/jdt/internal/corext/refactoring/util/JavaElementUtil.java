@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -70,5 +71,27 @@ public class JavaElementUtil {
 		}
 		return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);
 	}
+
+	public static boolean isMainType(IType type) throws JavaModelException{
+		if (! type.exists())	
+			return false;
+		
+		if (type.getDeclaringType() != null)
+			return false;
+		
+		return isPrimaryType(type) || isCuOnlyType(type);
+	}
+
+
+	private static boolean isPrimaryType(IType type){
+		return type.getElementName().equals(Signature.getQualifier(type.getCompilationUnit().getElementName()));
+	}
+
+
+	private static boolean isCuOnlyType(IType type) throws JavaModelException{
+		return (type.getCompilationUnit().getTypes().length == 1);
+	}
+
+	
 	
 }
