@@ -8,14 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.text.tests.performance.eval;
+package org.eclipse.test.internal.performance.eval;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.jdt.text.tests.performance.data.Assert;
-import org.eclipse.jdt.text.tests.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.Assert;
+import org.eclipse.test.internal.performance.data.Dimension;
+
 
 
 /**

@@ -8,18 +8,19 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.text.tests.performance.eval;
+package org.eclipse.test.internal.performance.eval;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.test.internal.performance.PerfMsrConstants;
+import org.eclipse.test.internal.performance.data.DataPoint;
+import org.eclipse.test.internal.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.Sample;
+import org.eclipse.test.internal.performance.data.Scalar;
+
 import junit.framework.Assert;
 
-import org.eclipse.jdt.text.tests.performance.PerfMsrConstants;
-import org.eclipse.jdt.text.tests.performance.data.DataPoint;
-import org.eclipse.jdt.text.tests.performance.data.Dimension;
-import org.eclipse.jdt.text.tests.performance.data.Sample;
-import org.eclipse.jdt.text.tests.performance.data.Scalar;
 
 
 /**

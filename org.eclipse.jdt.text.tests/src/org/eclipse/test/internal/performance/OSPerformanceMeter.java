@@ -9,10 +9,12 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.text.tests.performance;
+package org.eclipse.test.internal.performance;
 
 import java.util.StringTokenizer;
 
+import org.eclipse.test.internal.performance.data.PerformanceFileParser;
+import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.perfmsr.core.IPerformanceMonitor;
@@ -20,8 +22,6 @@ import org.eclipse.perfmsr.core.LoadValueConstants;
 import org.eclipse.perfmsr.core.PerfMsrCorePlugin;
 import org.eclipse.perfmsr.core.Upload;
 
-import org.eclipse.jdt.text.tests.performance.data.Sample;
-import org.eclipse.jdt.text.tests.performance.data.PerformanceFileParser;
 
 public class OSPerformanceMeter extends PerformanceMeter {
 

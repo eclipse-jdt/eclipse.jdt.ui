@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.text.tests.performance;
+package org.eclipse.test.internal.performance;
 
 import org.eclipse.test.performance.PerformanceMeter;
 

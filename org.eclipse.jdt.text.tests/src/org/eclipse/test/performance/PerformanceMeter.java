@@ -11,7 +11,7 @@
 
 package org.eclipse.test.performance;
 
-import org.eclipse.jdt.text.tests.performance.data.Sample;
+import org.eclipse.test.internal.performance.data.Sample;
 
 /**
  * A <code>PerformanceMeter</code> is used to measure an arbitrary operation

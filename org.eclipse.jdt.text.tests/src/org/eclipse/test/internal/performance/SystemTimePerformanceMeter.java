@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.text.tests.performance;
+package org.eclipse.test.internal.performance;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -22,12 +22,12 @@ import org.eclipse.core.runtime.IBundleGroup;
 import org.eclipse.core.runtime.IBundleGroupProvider;
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.test.internal.performance.data.Assert;
+import org.eclipse.test.internal.performance.data.DataPoint;
+import org.eclipse.test.internal.performance.data.Sample;
+import org.eclipse.test.internal.performance.data.Scalar;
 import org.eclipse.test.performance.PerformanceMeter;
 
-import org.eclipse.jdt.text.tests.performance.data.Assert;
-import org.eclipse.jdt.text.tests.performance.data.DataPoint;
-import org.eclipse.jdt.text.tests.performance.data.Sample;
-import org.eclipse.jdt.text.tests.performance.data.Scalar;
 
 public class SystemTimePerformanceMeter extends PerformanceMeter {
 

@@ -15,10 +15,11 @@ import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.test.internal.performance.OSPerformanceMeterFactory;
+import org.eclipse.test.internal.performance.PerformanceMeterFactory;
+import org.eclipse.test.internal.performance.eval.Evaluator;
+
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
-import org.eclipse.jdt.text.tests.performance.OSPerformanceMeterFactory;
-import org.eclipse.jdt.text.tests.performance.PerformanceMeterFactory;
-import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
 
 /**
  * Helper for performance measurements. Currently provides performance meter

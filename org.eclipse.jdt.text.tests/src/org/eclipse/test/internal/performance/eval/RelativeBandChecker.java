@@ -8,9 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.text.tests.performance.eval;
+package org.eclipse.test.internal.performance.eval;
 
-import org.eclipse.jdt.text.tests.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.Dimension;
 
 
 /**

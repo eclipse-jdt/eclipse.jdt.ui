@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.text.tests.performance.data;
+package org.eclipse.test.internal.performance.data;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
