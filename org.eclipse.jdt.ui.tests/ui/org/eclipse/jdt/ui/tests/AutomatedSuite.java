@@ -10,16 +10,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.ui.tests.astrewrite.ASTRewritingTest;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
-import org.eclipse.jdt.ui.tests.core.AddImportTest;
-import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
-import org.eclipse.jdt.ui.tests.core.ClassPathDetectorTest;
-import org.eclipse.jdt.ui.tests.core.HierarchicalASTVisitorTest;
-import org.eclipse.jdt.ui.tests.core.ImportOrganizeTest;
-import org.eclipse.jdt.ui.tests.core.JavaModelUtilTest;
-import org.eclipse.jdt.ui.tests.core.NameProposerTest;
-import org.eclipse.jdt.ui.tests.core.TextBufferTest;
-import org.eclipse.jdt.ui.tests.core.TypeHierarchyTest;
-import org.eclipse.jdt.ui.tests.core.TypeInfoTest;
+import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests1;
 import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests2;
 import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests3;
@@ -47,26 +38,14 @@ public class AutomatedSuite extends TestSuite {
 	 * Construct the test suite.
 	 */
 	public AutomatedSuite() {
-		addTest(TypeInfoTest.suite());
-		addTest(AddUnimplementedMethodsTest.suite());
-		addTest(ImportOrganizeTest.suite());
-		addTest(AddImportTest.suite());
-		addTest(JavaModelUtilTest.suite());
-		addTest(TextBufferTest.suite());
-		addTest(TypeHierarchyTest.suite());
-		addTest(HTML2TextReaderTester.suite());
-		addTest(JavaDoc2HTMLTextReaderTester.suite());
-		addTest(NameProposerTest.suite());
-		addTest(ClassPathDetectorTest.suite());	
-		
+		addTest(CoreTests.suite());
 		addTest(ASTRewritingTest.suite());
 		addTest(QuickFixTest.suite());
-
-		// disabled addTest(AllTypesCacheTest.suite());
+		
 		addTest(NewJavaProjectWizardTest.suite());
 		
-		addTest(HierarchicalASTVisitorTest.suite());
-
+		addTest(JavaDoc2HTMLTextReaderTester.suite());
+		addTest(HTML2TextReaderTester.suite());
 		addTest(ContentProviderTests1.suite());
 		addTest(ContentProviderTests2.suite());
 		addTest(ContentProviderTests3.suite());

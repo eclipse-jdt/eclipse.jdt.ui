@@ -48,7 +48,13 @@ public class TypeInfoTest extends TestCase {
 	}
 
 	public static Test suite() {
-		return new TestSuite(THIS);
+		if (true) {
+			return new TestSuite(THIS);
+		} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new TypeInfoTest("test1"));
+			return suite;
+		}	
 	}
 
 	protected void setUp() throws Exception {

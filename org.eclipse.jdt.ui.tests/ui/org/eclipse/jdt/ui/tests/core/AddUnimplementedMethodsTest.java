@@ -38,12 +38,13 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	}
 		
 	public static Test suite() {
-		TestSuite suite= new TestSuite(THIS.getName());
-		suite.addTest(new AddUnimplementedMethodsTest("test1"));
-		suite.addTest(new AddUnimplementedMethodsTest("test2"));
-		suite.addTest(new AddUnimplementedMethodsTest("test3"));
-		suite.addTest(new AddUnimplementedMethodsTest("test4"));
-		return suite;
+		if (true) {
+			return new TestSuite(THIS);
+		} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new AddUnimplementedMethodsTest("test1"));
+			return suite;
+		}	
 	}
 	
 	/**
