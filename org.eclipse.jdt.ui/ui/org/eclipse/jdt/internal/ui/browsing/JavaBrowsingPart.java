@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -28,6 +27,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
@@ -56,6 +56,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.RefreshAction;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.help.ViewContextComputer;
@@ -81,13 +82,16 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
+import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.packageview.AddBookmarkAction;
 import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
+import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.packageview.ShowInNavigatorAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
@@ -99,7 +103,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
-import org.eclipse.jdt.internal.ui.wizards.NewGroup;
 
 
 
@@ -118,7 +121,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private Action fOpenToAction;
 	private Action fShowTypeHierarchyAction;
 	private Action fShowNavigatorAction;
-	private Action fPropertyDialogAction;
+	private PropertyDialogAction fPropertyDialogAction;
  	private Action fDeleteAction;
  	private RefreshAction fRefreshAction;
  	private BackAction fBackAction;
@@ -268,9 +271,17 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
 		IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
-		boolean selectionHasElements= !selection.isEmpty();
-//		Object element= selection.getFirstElement();
+		Object element= selection.getFirstElement();
+		
+		fPropertyDialogAction.selectionChanged(selection);
+
+		MenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
+		menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
+		new NewWizardMenu(newMenu, getSite().getWorkbenchWindow(), false);
+
 		// updateActions(selection);
+//		if (selection.size() == 1 && fViewer.isExpandable(element)) 
+//			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
 //		addGotoMenu(menu);
 //
 //		fOpenCUAction.update();
@@ -280,11 +291,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 //		addOpenWithMenu(menu, selection);
 //		
 //		addOpenToMenu(menu, selection);
-//		addRefactoring(menu);
-//		if (selection.size() == 1) {
-//			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction());	
-//			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaAddElementFromHistory(null, fViewer));	
-//		}
+		addRefactoring(menu);
+
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);
 		
 		if (fAddBookmarkAction.canOperateOnSelection())
@@ -293,15 +301,20 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
 		fRefreshAction.selectionChanged(selection);
 
-		if (selectionHasElements) {
-			// update the action to use the right selection since the refresh
-			// action doesn't listen to selection changes.
-			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fPropertyDialogAction);
-		}	
+		menu.add(new Separator());
+		if (fPropertyDialogAction.isApplicableForSelection())
+			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fPropertyDialogAction);	
+	}
+
+	private void addRefactoring(IMenuManager menu){
+		MenuManager refactoring= new MenuManager(PackagesMessages.getString("PackageExplorer.refactoringTitle"));  //$NON-NLS-1$
+		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup() }, fViewer);
+		if (!refactoring.isEmpty())
+			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactoring);
 	}
 
 	private void createActions() {
-		ISelectionProvider provider= fViewer;
+		ISelectionProvider provider= getSelectionProvider();
 //		fOpenCUAction= new OpenResourceAction(provider);
 		fPropertyDialogAction= new PropertyDialogAction(getShell(), provider);
 		// fShowTypeHierarchyAction= new ShowTypeHierarchyAction(provider);
@@ -309,9 +322,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fAddBookmarkAction= new AddBookmarkAction(provider);
 		
 		fStandardGroups= new ContextMenuGroup[] {
-			new NewGroup(),
 			new BuildGroup(),
 			new ReorgGroup(),
+			new GenerateGroup(),
 			new JavaSearchGroup()
 		};
 		
@@ -320,16 +333,19 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 //		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
 //		fShowLibrariesAction = new ShowLibrariesAction(this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
 //		fShowBinariesAction = new ShowBinariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.binaryProjects")); //$NON-NLS-1$
-//		
+//		fFilterWorkingSetAction = new FilterWorkingSetAction(getShell(), this, "Filter Working Set..."); //$NON-NLS-1$
+//		fRemoveWorkingSetAction = new RemoveWorkingSetFilterAction(getShell(), this, "Remove Working Set Filter"); //$NON-NLS-1$
+		
 //		fBackAction= new BackAction(fFrameList);
 //		fForwardAction= new ForwardAction(fFrameList);
 //		fZoomInAction= new GoIntoAction(fFrameList);
 //		fUpAction= new UpAction(fFrameList);
-//
+
 //		fGotoTypeAction= new GotoTypeAction(this);
 //		fGotoPackageAction= new GotoPackageAction(this);
 		IActionBars actionService= getViewSite().getActionBars();
 		actionService.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
+		ReorgGroup.addGlobalReorgActions(actionService, provider);
 	}
 
 	/**
@@ -343,6 +359,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	protected final Display getDisplay() {
 		return fViewer.getControl().getDisplay();
 	}	
+
+	/**
+	 * Returns the selection provider.
+	 */
+	private ISelectionProvider getSelectionProvider() {
+		return fViewer;
+	}
 
 	/**
 	 * Answers if the given <code>element</code> is a valid
