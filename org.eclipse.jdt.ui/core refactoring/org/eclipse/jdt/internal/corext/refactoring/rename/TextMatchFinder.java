@@ -157,14 +157,11 @@ class TextMatchFinder {
 	}
 	
 	private void addTextMatches(ICompilationUnit cu) throws JavaModelException{
-		Set javaDocResults= new HashSet();
-		Set commentResults= new HashSet();
-		Set stringResults= new HashSet();
-		fScanner.scan(cu, javaDocResults, commentResults, stringResults);
+		fScanner.scan(cu);
 		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-		fJavaDocMatches.put(wc, javaDocResults);
-		fCommentMatches.put(wc, commentResults);
-		fStringMatches.put(wc, stringResults);
+		fJavaDocMatches.put(wc, fScanner.getJavaDocResults());
+		fCommentMatches.put(wc, fScanner.getCommentResults());
+		fStringMatches.put(wc, fScanner.getStringResults());
 	}	
 }
 

@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -23,6 +24,10 @@ public class RefactoringScanner {
 	
 	private String fPattern;
 	
+	private Set fJavaDocResults;
+	private Set fCommentResults;
+	private Set fStringResults;
+	
 	public RefactoringScanner(){
 		this(true, true, true);
 	}
@@ -33,23 +38,27 @@ public class RefactoringScanner {
 		fAnalyzeStrings= analyzeStrings;
 	}
 	
-	public void scan(ICompilationUnit cu, Set javaDocResults, Set commentResults, Set stringResults)	throws JavaModelException {
+	public void scan(ICompilationUnit cu)	throws JavaModelException {
 		try{
-			scan(cu.getBuffer().getCharacters(), javaDocResults, commentResults, stringResults);
+			scan(cu.getBuffer().getCharacters());		
 		} catch (InvalidInputException e){
 			//ignore
 		}	
 	}
 	
-	public void scan(String text, Set javaDocResults, Set commentResults, Set stringResults)	throws JavaModelException {
+	public void scan(String text) throws JavaModelException {
 		try{
-			scan(text.toCharArray(), javaDocResults, commentResults, stringResults);
+			scan(text.toCharArray());
 		} catch (InvalidInputException e){
 			//ignore
 		}	
 	}
-	
-	private void scan(char[] content, Set javaDocResults, Set commentResults, Set stringResults)	throws JavaModelException, InvalidInputException {
+
+	private void scan(char[] content)	throws JavaModelException, InvalidInputException {
+		fJavaDocResults= new HashSet();
+		fCommentResults= new HashSet();
+		fStringResults= new HashSet();
+		
 		Scanner scanner = new Scanner(true, true);
 		scanner.recordLineSeparator = true;
 		scanner.setSourceBuffer(content);
@@ -60,22 +69,22 @@ public class RefactoringScanner {
 				case ITerminalSymbols.TokenNameStringLiteral :
 					if (!fAnalyzeStrings)
 						break;
-					parseCurrentToken(stringResults, scanner);	
+					parseCurrentToken(fStringResults, scanner);	
 					break;
 				case Scanner.TokenNameCOMMENT_JAVADOC :
 					if (!fAnalyzeJavaDoc)
 						break;
-					parseCurrentToken(javaDocResults, scanner);	
+					parseCurrentToken(fJavaDocResults, scanner);	
 					break;
 				case Scanner.TokenNameCOMMENT_LINE :
 					if (!fAnalyzeComments)
 						break;
-					parseCurrentToken(commentResults, scanner);	
+					parseCurrentToken(fCommentResults, scanner);	
 					break;
 				case Scanner.TokenNameCOMMENT_BLOCK :
 					if (!fAnalyzeComments)
 						break;
-					parseCurrentToken(commentResults, scanner);	
+					parseCurrentToken(fCommentResults, scanner);	
 					break;
 			}
 			token = scanner.getNextToken();
@@ -140,6 +149,18 @@ public class RefactoringScanner {
 	public void setPattern(String pattern) {
 		Assert.isNotNull(pattern);
 		fPattern = pattern;
+	}
+
+	public Set getJavaDocResults() {
+		return fJavaDocResults;
+	}
+
+	public Set getCommentResults() {
+		return fCommentResults;
+	}
+
+	public Set getStringResults() {
+		return fStringResults;
 	}
 }
 
