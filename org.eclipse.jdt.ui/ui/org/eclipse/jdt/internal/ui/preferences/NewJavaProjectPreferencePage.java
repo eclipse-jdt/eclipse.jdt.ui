@@ -11,6 +11,7 @@
 // AW
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -75,6 +76,8 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	private static final String CLASSPATH_JRELIBRARY_INDEX= PreferenceConstants.NEWPROJECT_JRELIBRARY_INDEX;
 	private static final String CLASSPATH_JRELIBRARY_LIST= PreferenceConstants.NEWPROJECT_JRELIBRARY_LIST;
 
+	
+	private static String fgDefaultEncoding= System.getProperty("file.encoding"); //$NON-NLS-1$
 
 	public static IClasspathEntry[] getDefaultJRELibrary() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -102,11 +105,28 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	public static String decodeJRELibraryDescription(String encoded) {
 		int end= encoded.indexOf(' ');
 		if (end != -1) {
-			return URLDecoder.decode(encoded.substring(0, end));
+			return decode(encoded.substring(0, end));
 		}
 		return ""; //$NON-NLS-1$
 	}
 	
+	private static String decode(String str) {
+		try {
+			return URLDecoder.decode(str, fgDefaultEncoding);
+		} catch (UnsupportedEncodingException e) {
+			JavaPlugin.log(e);
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	private static String encode(String str) {
+		try {
+			return URLEncoder.encode(str, fgDefaultEncoding);
+		} catch (UnsupportedEncodingException e) {
+			JavaPlugin.log(e);
+		}
+		return ""; //$NON-NLS-1$
+	}	
 	
 	public static IClasspathEntry[] decodeJRELibraryClasspathEntries(String encoded) {
 		StringTokenizer tok= new StringTokenizer(encoded, " "); //$NON-NLS-1$
@@ -152,7 +172,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < cpentries.length; i++) {
 			IClasspathEntry entry= cpentries[i];
-			buf.append(URLEncoder.encode(desc));
+			buf.append(encode(desc));
 			buf.append(' ');
 			buf.append(entry.getEntryKind());
 			buf.append(' ');
@@ -174,7 +194,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		} else if (path.isEmpty()) {
 			return "&"; //$NON-NLS-1$
 		} else {
-			return URLEncoder.encode(path.toString());
+			return encode(path.toString());
 		}
 	}
 	
@@ -184,7 +204,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		} else if ("&".equals(str)) { //$NON-NLS-1$
 			return Path.EMPTY;
 		} else {
-			return new Path(URLDecoder.decode(str));
+			return new Path(decode(str));
 		}
 	}
 	
