@@ -65,7 +65,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	}
 
 	private void updateStatus() {
-		RefactoringStatus nameCheck= getModifyParametersRefactoring().checkNewNames();
+		RefactoringStatus nameCheck= getModifyParametersRefactoring().checkParameters();
 		if (nameCheck.hasFatalError()){
 			setErrorMessage(nameCheck.getFirstMessage(RefactoringStatus.FATAL));
 			setPageComplete(false);
