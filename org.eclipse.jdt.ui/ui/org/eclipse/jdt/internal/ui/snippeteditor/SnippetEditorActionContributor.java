@@ -64,10 +64,11 @@ public class SnippetEditorActionContributor extends BasicEditorActionContributor
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {	
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnSelectionAction);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnTypeSelectionAction);			
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fDisplayAction);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fRunAction);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fInspectAction);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnTypeSelectionAction);
+			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));			
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fDisplayAction);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fRunAction);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspectAction);
 		}
 	}
 	
@@ -99,10 +100,7 @@ public class SnippetEditorActionContributor extends BasicEditorActionContributor
 		fDisplayAction= new DisplayAction(fSnippetEditor);		
 		fRunAction= new RunAction(fSnippetEditor);
 		fInspectAction= new InspectAction(fSnippetEditor);
-			
 		fStopAction= new StopAction(fSnippetEditor);
-		fStopAction.setEnabled(false);
-		
 		fRunInAction= new RunInPackageAction(null);
 	}	
 	

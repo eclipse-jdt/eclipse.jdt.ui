@@ -4,7 +4,9 @@
  */
 package org.eclipse.jdt.internal.ui.snippeteditor;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.action.Action;import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.text.ITextSelection;
 
 /**
  * Base class for evaluation state dependent actions and
@@ -34,7 +36,6 @@ public abstract class SnippetAction extends Action implements ISnippetStateChang
 		} else {
 			setEnabled(false);
 		}
-		
 	}
 	
 	/**
@@ -45,7 +46,6 @@ public abstract class SnippetAction extends Action implements ISnippetStateChang
 		ITextSelection selection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 		String text= selection.getText();
 		if (text != null) {
-			text= text.trim();
 			setEnabled(textHasContent(text));
 			return;
 		} 
@@ -53,6 +53,7 @@ public abstract class SnippetAction extends Action implements ISnippetStateChang
 	}
 	
 	protected boolean textHasContent(String text) {
+		text= text.trim();
 		int length= text.length();
 		if (length > 0) {
 			for (int i= 0; i < length; i++) {
