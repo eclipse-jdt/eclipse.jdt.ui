@@ -22,6 +22,8 @@ import org.eclipse.swt.widgets.Item;
 
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IViewerLabelProvider;
+import org.eclipse.jface.viewers.ViewerLabel;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -71,15 +73,31 @@ public class ResourceToItemsMapper {
 			ILabelProvider lprovider= (ILabelProvider) fContentViewer.getLabelProvider();
 			
 			Object data= item.getData();
-			Image oldImage= item.getImage();
-			Image image= lprovider.getImage(data);
-			if (image != null && !image.equals(oldImage)) {
-				item.setImage(image);
-			}
-			String oldText= item.getText();
-			String text= lprovider.getText(data);
-			if (text != null && !text.equals(oldText)) {
-				item.setText(text);
+			
+			// If it is an IItemLabelProvider than short circuit: patch Tod (bug 55012)
+			if (lprovider instanceof IViewerLabelProvider) {
+				IViewerLabelProvider provider= (IViewerLabelProvider) lprovider;
+				
+				ViewerLabel updateLabel= new ViewerLabel(item.getText(), item.getImage());
+				provider.updateLabel(updateLabel, data);
+				
+				if (updateLabel.hasNewImage()) {
+					item.setImage(updateLabel.getImage());
+				}
+				if (updateLabel.hasNewText()) {
+					item.setText(updateLabel.getText());
+				}
+			} else {
+				Image oldImage= item.getImage();
+				Image image= lprovider.getImage(data);
+				if (image != null && !image.equals(oldImage)) {
+					item.setImage(image);
+				}
+				String oldText= item.getText();
+				String text= lprovider.getText(data);
+				if (text != null && !text.equals(oldText)) {
+					item.setText(text);
+				}
 			}
 		}
 	}
@@ -154,7 +172,7 @@ public class ResourceToItemsMapper {
 	}
 	
 	/**
-	 * Clears the map.
+	 * Tests if the map is empty
 	 */
 	public boolean isEmpty() {
 		return fResourceToItem.isEmpty();
@@ -171,8 +189,8 @@ public class ResourceToItemsMapper {
 				IResource res= elem.getResource();
 				if (res == null) {
 					ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
-					if (cu != null && cu.isWorkingCopy()) {
-						// elements in working copies are mapped to the underlying resource of the original cu
+					if (cu != null) {
+						// elements in compilation units are mapped to the underlying resource of the original cu
 						res= cu.getResource();
 					}
 				}
