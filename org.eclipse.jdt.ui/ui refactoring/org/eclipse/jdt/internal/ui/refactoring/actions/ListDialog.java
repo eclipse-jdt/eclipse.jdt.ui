@@ -76,13 +76,11 @@ public class ListDialog extends SelectionDialog {
 		fTableViewer= new TableViewer(parent, getTableStyle());
 		fTableViewer.setContentProvider(fContentProvider);
 		Table table= fTableViewer.getTable();
-		TableColumn c= new TableColumn(table, SWT.NULL);
 		fTableViewer.setLabelProvider(fLabelProvider);
 		fTableViewer.setInput(fInput);
-		c.pack();
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.heightHint= convertHeightInCharsToPixels(15);
-		gd.widthHint= convertWidthInCharsToPixels(80);
+		gd.widthHint= convertWidthInCharsToPixels(55);
 		table.setLayoutData(gd);
 		return parent;
 	}
