@@ -61,6 +61,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -709,7 +710,7 @@ public final class MemberVisibilityAdjustor {
 		Assert.isNotNull(template);
 		boolean adjust= true;
 		final IType declaring= member.getDeclaringType();
-		if (declaring != null && declaring.isInterface())
+		if (declaring != null && JavaModelUtil.isInterfaceOrAnnotation(declaring))
 			adjust= false;
 		if (adjust && hasLowerVisibility((List) declaration.getStructuralProperty(declaration.getModifiersProperty()), threshold) && needsVisibilityAdjustment(member, threshold))
 			fAdjustments.put(member, new OutgoingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, RefactoringCoreMessages.getFormattedString(template, new String[] { BindingLabels.getFullyQualified(binding), getLabel(threshold)}), JavaStatusContext.create(rewrite.getCu(), declaration), null, RefactoringStatusEntry.NO_CODE, null)));

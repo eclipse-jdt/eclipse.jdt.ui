@@ -832,7 +832,7 @@ public class Checks {
 
 	public static boolean isException(IType iType, IProgressMonitor pm) throws JavaModelException {
 		try{
-			if (iType.isInterface())
+			if (! iType.isClass())
 				return false;
 			IType[] superTypes= iType.newSupertypeHierarchy(pm).getAllSupertypes(iType);
 			for (int i= 0; i < superTypes.length; i++) {

@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 /**
  * Filter for the methods viewer.
  * Changing a filter property does not trigger a refiltering of the viewer
@@ -79,10 +81,10 @@ public class MemberFilter extends ViewerFilter {
 					return false;
 				}
 				int flags= member.getFlags();
-				if (hasFilter(FILTER_STATIC) && (Flags.isStatic(flags) || isFieldInInterface(member)) && memberType != IJavaElement.TYPE) {
+				if (hasFilter(FILTER_STATIC) && (Flags.isStatic(flags) || isFieldInInterfaceOrAnnotation(member)) && memberType != IJavaElement.TYPE) {
 					return false;
 				}
-				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterface(member) && !isTopLevelType(member)) {
+				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterfaceOrAnnotation(member) && !isTopLevelType(member)) {
 					return false;
 				}
 			}			
@@ -97,13 +99,13 @@ public class MemberFilter extends ViewerFilter {
 		return parent instanceof IMember && !(parent instanceof IType);
 	}
 	
-	private boolean isMemberInInterface(IMember member) throws JavaModelException {
+	private boolean isMemberInInterfaceOrAnnotation(IMember member) throws JavaModelException {
 		IType parent= member.getDeclaringType();
-		return parent != null && parent.isInterface();
+		return parent != null && JavaModelUtil.isInterfaceOrAnnotation(parent);
 	}
 	
-	private boolean isFieldInInterface(IMember member) throws JavaModelException {
-		return (member.getElementType() == IJavaElement.FIELD) && member.getDeclaringType().isInterface();
+	private boolean isFieldInInterfaceOrAnnotation(IMember member) throws JavaModelException {
+		return (member.getElementType() == IJavaElement.FIELD) && JavaModelUtil.isInterfaceOrAnnotation(member.getDeclaringType());
 	}	
 	
 	private boolean isTopLevelType(IMember member) {

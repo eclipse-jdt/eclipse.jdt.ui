@@ -126,7 +126,7 @@ public class JavaElementUtil {
 	}
 	
 	public static IMethod[] getAllConstructors(IType type) throws JavaModelException {
-		if (type.isInterface())
+		if (JavaModelUtil.isInterfaceOrAnnotation(type))
 			return new IMethod[0];
 		List result= new ArrayList();
 		IMethod[] methods= type.getMethods();
