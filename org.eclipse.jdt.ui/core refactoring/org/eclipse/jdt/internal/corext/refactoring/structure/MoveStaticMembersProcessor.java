@@ -805,7 +805,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			engine.setScope(RefactoringScopeFactory.create(fMembersToMove));
 			engine.setStatus(status);
 			engine.searchPattern(new SubProgressMonitor(pm, 1));
-			ICompilationUnit[] units= engine.getCompilationUnits();
+			ICompilationUnit[] units= engine.getAffectedCompilationUnits();
 			modifiedCus.addAll(Arrays.asList(units));
 			SubProgressMonitor sub= new SubProgressMonitor(pm, 1);
 			sub.beginTask("", units.length); //$NON-NLS-1$

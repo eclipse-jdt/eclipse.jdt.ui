@@ -562,7 +562,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		engine.setScope(RefactoringScopeFactory.create(method));
 		engine.setStatus(status);
 		engine.searchPattern(new SubProgressMonitor(pm, 1));
-		return engine.getCompilationUnits();
+		return engine.getAffectedCompilationUnits();
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {

@@ -330,7 +330,7 @@ abstract class TargetProvider {
 			engine.setFiltering(true, true);
 			engine.setScope(RefactoringScopeFactory.create(method));
 			engine.searchPattern(new SubProgressMonitor(pm, 1));
-			return engine.getCompilationUnits();
+			return engine.getAffectedCompilationUnits();
 		}
 
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
