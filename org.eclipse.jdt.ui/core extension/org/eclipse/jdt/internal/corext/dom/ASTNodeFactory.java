@@ -104,7 +104,8 @@ public class ASTNodeFactory {
 	}
 	
 	/**
-	 * @deprecated use import rewrite or ASTNode.copySubtree(..)
+	 * @deprecated since it is unclear whether e.g. generic type arguments should be qualified or not.
+	 * Use an ImportRewrite, or ASTNode.copySubtree(..) if the target is in the same CU.
 	 */
 	public static Type newType(AST ast, ITypeBinding binding, boolean fullyQualify) {
 		if (binding.isPrimitive()) {
