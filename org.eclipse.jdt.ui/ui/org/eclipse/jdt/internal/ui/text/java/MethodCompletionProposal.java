@@ -172,5 +172,8 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 		setReplacementString(Strings.trimLeadingTabsAndSpaces(replacement));
 		return true;
 	}
+	
+	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
+		return new String(); // don't let method stub proposals complete incrementally
+	}
 }
-

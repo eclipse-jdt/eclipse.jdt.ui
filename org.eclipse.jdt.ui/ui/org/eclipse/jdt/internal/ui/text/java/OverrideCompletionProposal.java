@@ -102,8 +102,12 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 		return false;
 	}
 	
-
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getPrefixCompletionText(org.eclipse.jface.text.IDocument, int)
+	 */
+	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
+		return fMethodName;
+	}
 	
-
 }
 
