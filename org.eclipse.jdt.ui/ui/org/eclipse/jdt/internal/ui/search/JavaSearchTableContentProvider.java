@@ -26,6 +26,8 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider im
 	}
 
 	public void elementsChanged(Object[] updatedElements) {
+		if (fResult == null)
+			return;
 		int addCount= 0;
 		int removeCount= 0;
 		for (int i= 0; i < updatedElements.length; i++) {
