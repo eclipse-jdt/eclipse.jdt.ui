@@ -392,6 +392,7 @@ public class WorkingSetSelectionDialog extends SelectionDialog implements
                     .getWorkingSetManager();
             IWorkingSet workingSet = wizard.getSelection();
 
+            fElements.add(workingSet);
             listViewer.add(workingSet);
             listViewer.setSelection(new StructuredSelection(workingSet), true);
             manager.addWorkingSet(workingSet);
@@ -524,6 +525,7 @@ public class WorkingSetSelectionDialog extends SelectionDialog implements
                     }
                     removedWorkingSets.add(workingSet);
                 }
+                fElements.remove(workingSet);
                 manager.removeWorkingSet(workingSet);
             }
             listViewer.remove(((IStructuredSelection) selection).toArray());
