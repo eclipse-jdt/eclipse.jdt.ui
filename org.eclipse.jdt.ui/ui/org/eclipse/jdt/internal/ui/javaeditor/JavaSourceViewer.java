@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -26,6 +27,8 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.ITextPresentationListener;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.information.IInformationPresenter;
@@ -382,5 +385,25 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		}
 
 		super.handleDispose();
+	}
+	
+	/**
+	 * Prepends the text presentation listener at the beginning of the viewer's 
+	 * list of text presentation listeners.  If the listener is already registered 
+	 * with the viewer this call moves the listener to the beginning of
+	 * the list.
+	 *
+	 * @param listener the text presentation listener
+	 * @since 3.0
+	 */
+	public void prependTextPresentationListener(ITextPresentationListener listener) {
+		
+		Assert.isNotNull(listener);
+
+		if (fTextPresentationListeners == null)
+			fTextPresentationListeners= new ArrayList();
+		
+		fTextPresentationListeners.remove(listener);
+		fTextPresentationListeners.add(0, listener);
 	}
 }

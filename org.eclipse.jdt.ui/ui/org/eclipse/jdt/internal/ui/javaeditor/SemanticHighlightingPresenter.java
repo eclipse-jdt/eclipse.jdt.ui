@@ -27,12 +27,9 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextPresentationListener;
-import org.eclipse.jface.text.ITextViewerExtension2;
-import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextPresentation;
-import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedPosition;
@@ -232,7 +229,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	private IPositionUpdater fPositionUpdater= new HighlightingPositionUpdater(getPositionCategory());
 	
 	/** The source viewer this semantic highlighting reconciler is installed on */
-	private ISourceViewer fSourceViewer;
+	private JavaSourceViewer fSourceViewer;
 	/** The background presentation reconciler */
 	private JavaPresentationReconciler fPresentationReconciler;
 
@@ -613,23 +610,20 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 
 	/**
 	 * Install this presenter on the given source viewer and background presentation
-	 * reconciler. The source viewer should implement {@link ITextViewerExtension2} and
-	 * {@link ITextViewerExtension4}.
+	 * reconciler.
 	 * 
 	 * @param sourceViewer the source viewer
 	 * @param backgroundPresentationReconciler the background presentation reconciler,
 	 * 	can be <code>null</code>, in that case {@link SemanticHighlightingPresenter#createPresentation(List, List)}
 	 * 	should not be called
 	 */
-	public void install(ISourceViewer sourceViewer, JavaPresentationReconciler backgroundPresentationReconciler) {
-		if (sourceViewer instanceof ITextViewerExtension2 && sourceViewer instanceof ITextViewerExtension4) {
-			fSourceViewer= sourceViewer;
-			fPresentationReconciler= backgroundPresentationReconciler;
-			
-			((ITextViewerExtension4)fSourceViewer).addTextPresentationListener(this);
-			fSourceViewer.addTextInputListener(this);
-			manageDocument(fSourceViewer.getDocument());
-		}
+	public void install(JavaSourceViewer sourceViewer, JavaPresentationReconciler backgroundPresentationReconciler) {
+		fSourceViewer= sourceViewer;
+		fPresentationReconciler= backgroundPresentationReconciler;
+		
+		fSourceViewer.prependTextPresentationListener(this);
+		fSourceViewer.addTextInputListener(this);
+		manageDocument(fSourceViewer.getDocument());
 	}
 
 	/**
@@ -637,7 +631,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 */
 	public void uninstall() {
 		if (fSourceViewer != null) {
-			((ITextViewerExtension4)fSourceViewer).removeTextPresentationListener(this);
+			fSourceViewer.removeTextPresentationListener(this);
 			releaseDocument(fSourceViewer.getDocument());
 			invalidateTextPresentation();
 			resetState();
@@ -653,11 +647,10 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @param highlighting The highlighting
 	 */
 	public void highlightingStyleChanged(Highlighting highlighting) {
-		ITextViewerExtension2 extension= (ITextViewerExtension2)fSourceViewer;
 		for (int i= 0, n= fPositions.size(); i < n; i++) {
 			HighlightedPosition position= (HighlightedPosition) fPositions.get(i);
 			if (position.getHighlighting() == highlighting)
-				extension.invalidateTextPresentation(position.getOffset(), position.getLength());
+				fSourceViewer.invalidateTextPresentation(position.getOffset(), position.getLength());
 		}
 	}
 
@@ -665,10 +658,9 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * Invalidate text presentation of all positions.
 	 */
 	private void invalidateTextPresentation() {
-		ITextViewerExtension2 extension= (ITextViewerExtension2)fSourceViewer;
 		for (int i= 0, n= fPositions.size(); i < n; i++) {
 			Position position= (Position) fPositions.get(i);
-			extension.invalidateTextPresentation(position.getOffset(), position.getLength());
+			fSourceViewer.invalidateTextPresentation(position.getOffset(), position.getLength());
 		}
 	}
 

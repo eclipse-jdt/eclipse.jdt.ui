@@ -68,7 +68,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -310,7 +309,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 * @since 3.0
 	 */
 	private Button fItalicCheckBox;
-	private SourceViewer fPreviewViewer;
+	private JavaSourceViewer fPreviewViewer;
 	private Color fBackgroundColor;
 	private Text fBrowserLikeLinksKeyModifierText;
 	private Button fBrowserLikeLinksCheckBox;

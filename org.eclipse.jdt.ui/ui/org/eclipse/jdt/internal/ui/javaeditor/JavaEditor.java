@@ -3769,7 +3769,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (fSemanticManager == null) {
 			fSemanticManager= new SemanticHighlightingManager();
 			JavaPresentationReconciler backgroundPresentationReconciler= (JavaPresentationReconciler) getSourceViewerConfiguration().getPresentationReconciler(getSourceViewer());
-			fSemanticManager.install(this, getSourceViewer(), JavaPlugin.getDefault().getJavaTextTools().getColorManager(), getPreferenceStore(), backgroundPresentationReconciler);
+			fSemanticManager.install(this, (JavaSourceViewer) getSourceViewer(), JavaPlugin.getDefault().getJavaTextTools().getColorManager(), getPreferenceStore(), backgroundPresentationReconciler);
 		}
 	}
 	

@@ -21,16 +21,14 @@ import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import org.eclipse.jface.text.ITextViewerExtension2;
-import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextAttribute;
-import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IColorManagerExtension;
+
 import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
 
 /**
@@ -235,7 +233,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	/** The editor */
 	private JavaEditor fEditor;
 	/** The source viewer */
-	private ISourceViewer fSourceViewer;
+	private JavaSourceViewer fSourceViewer;
 	/** The color manager */
 	private IColorManager fColorManager;
 	/** The preference store */
@@ -255,19 +253,17 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * @param preferenceStore The preference store
 	 * @param backgroundPresentationReconciler the background presentation reconciler
 	 */
-	public void install(JavaEditor editor, ISourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, JavaPresentationReconciler backgroundPresentationReconciler) {
-		if (sourceViewer instanceof ITextViewerExtension2 && sourceViewer instanceof ITextViewerExtension4) {
-			fEditor= editor;
-			fSourceViewer= sourceViewer;
-			fColorManager= colorManager;
-			fPreferenceStore= preferenceStore;
-			fPresentationReconciler= backgroundPresentationReconciler;
-			
-			fPreferenceStore.addPropertyChangeListener(this);
+	public void install(JavaEditor editor, JavaSourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, JavaPresentationReconciler backgroundPresentationReconciler) {
+		fEditor= editor;
+		fSourceViewer= sourceViewer;
+		fColorManager= colorManager;
+		fPreferenceStore= preferenceStore;
+		fPresentationReconciler= backgroundPresentationReconciler;
+		
+		fPreferenceStore.addPropertyChangeListener(this);
 
-			if (isEnabled())
-				enable();
-		}
+		if (isEnabled())
+			enable();
 	}
 	
 	/**
@@ -277,7 +273,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * @param colorManager the color manager
 	 * @param preferenceStore the preference store
 	 */
-	public void install(ISourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, HighlightedRange[] hardcodedRanges) {
+	public void install(JavaSourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, HighlightedRange[] hardcodedRanges) {
 		fHardcodedRanges= hardcodedRanges;
 		install(null, sourceViewer, colorManager, preferenceStore, null);
 	}
