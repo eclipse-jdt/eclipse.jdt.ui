@@ -36,11 +36,23 @@
 			icon="icons/smalllogo.gif"
 			category="org.eclipse.jdt.ui.java"
 			class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
-			id="org.eclipse.jdt.junit.viewpart"
+			id="org.eclipse.jdt.junit.ResultView"
 			fastViewWidthRatio="0.40">	
 		</view>
 	</extension>
-   	
+	
+    <extension 
+    	point="org.eclipse.ui.perspectiveExtensions">
+        <perspectiveExtension 
+           targetID="org.eclipse.jdt.ui.JavaPerspective"> 
+           <view id="org.eclipse.jdt.junit.ResultView" 
+                relative="org.eclipse.jdt.ui.PackageExplorer"
+                visible="false" 
+                relationship="stack"/> 
+        </perspectiveExtension> 
+    </extension> 
+
+
 	<extension
 		point="org.eclipse.ui.preferencePages">
 		<page name="%PreferencePage.label"
