@@ -227,7 +227,7 @@ public class InlineMethodRefactoring extends Refactoring {
 					if (!importer.isEmpty()) {
 						root.add(importer);
 						change.addGroupDescription(
-							new GroupDescription("Update Import statements", new TextEdit[] {importer}));
+							new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.import"), new TextEdit[] {importer})); //$NON-NLS-1$
 					}
 				}
 			} catch (CoreException e) {
