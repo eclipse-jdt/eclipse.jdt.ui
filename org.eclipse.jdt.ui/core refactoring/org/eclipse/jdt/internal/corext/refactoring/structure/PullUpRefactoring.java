@@ -439,6 +439,7 @@ public class PullUpRefactoring extends Refactoring {
 		fTargetType= targetType;
 	}
 	
+	/* @return matching elements of in targetClass and subtypes of targetClass */
 	public IMember[] getMatchingElements(IProgressMonitor pm, boolean includeMethodsToDeclareAbstract) throws JavaModelException {
 		try{	
 			Set result= new HashSet();
@@ -447,7 +448,7 @@ public class PullUpRefactoring extends Refactoring {
 			for (Iterator iter= matching.keySet().iterator(); iter.hasNext();) {
 				IMember	key= (IMember) iter.next();
 				if (key.getDeclaringType().equals(targetClass))
-					iter.remove();
+					iter.remove(); //TODO: can remove this, since line is never reached (asserted by construction of keySet)
 				else	
 					result.addAll((Set)matching.get(key));
 			}
@@ -638,7 +639,7 @@ public class PullUpRefactoring extends Refactoring {
 					addToMapping(result, field, found);
 			} else if (member instanceof IType){
 				IType type= (IType)member;
-				IField found= type.getField(type.getElementName());
+				IType found= analyzedType.getType(type.getElementName());
 				if (found.exists())
 					addToMapping(result, type, found);
 			} else
@@ -710,12 +711,10 @@ public class PullUpRefactoring extends Refactoring {
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkFinalFields(new SubProgressMonitor(pm, 1)));
 			result.merge(checkAccesses(new SubProgressMonitor(pm, 1)));
-			result.merge(checkMembersInDestinationType());
-			pm.worked(1);
+			result.merge(checkMembersInTypeAndAllSubtypes(new SubProgressMonitor(pm, 2)));
+			result.merge(checkIfSkippingOverElements(new SubProgressMonitor(pm, 1)));
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-			result.merge(checkMembersInSubclasses(new SubProgressMonitor(pm, 1)));
-			result.merge(checkIfSkippingOverElements(new SubProgressMonitor(pm, 1)));
 			if (shouldMakeTargetClassAbstract())
 				result.merge(checkCallsToTargetClassConstructors(new SubProgressMonitor(pm, 1)));
 			else	
@@ -729,14 +728,6 @@ public class PullUpRefactoring extends Refactoring {
 		} finally {
 			pm.done();
 		}	
-	}
-	private RefactoringStatus checkMembersInDestinationType() throws JavaModelException {
-		IMember[] membersToBeCreatedInTargetClass = getMembersToBeCreatedInTargetClass();
-		List newMembersInDesitnationType= new ArrayList(membersToBeCreatedInTargetClass.length);
-		newMembersInDesitnationType.addAll(Arrays.asList(membersToBeCreatedInTargetClass));
-		newMembersInDesitnationType.removeAll(Arrays.asList(fMethodsToDelete));
-		IMember[] members= (IMember[]) newMembersInDesitnationType.toArray(new IMember[newMembersInDesitnationType.size()]);
-		return MemberCheckUtil.checkMembersInDestinationType(members, getTargetClass());
 	}
 	
 	private void clearCaches() {
@@ -1075,18 +1066,42 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 	
-	private RefactoringStatus checkMembersInSubclasses(IProgressMonitor pm) throws JavaModelException {
+	private RefactoringStatus checkMembersInTypeAndAllSubtypes(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask("", 3); //$NON-NLS-1$
 		Set notDeletedMembers= getNotDeletedMembers(new SubProgressMonitor(pm, 1));
-		checkAccessModifiers(result, notDeletedMembers);
-		checkMethodReturnTypes(new SubProgressMonitor(pm, 1), result, notDeletedMembers);
+		Set notDeletedMembersInTargetType= new HashSet();
+		Set notDeletedMembersInSubtypes= new HashSet();
+		splitNotDeletedMembers(notDeletedMembers, notDeletedMembersInTargetType, notDeletedMembersInSubtypes);
+		checkMembersInDestinationType(result, notDeletedMembersInTargetType);
+		checkAccessModifiers(result, notDeletedMembersInSubtypes);
+		checkMethodReturnTypes(new SubProgressMonitor(pm, 1), result, notDeletedMembersInSubtypes);
 		checkFieldTypes(new SubProgressMonitor(pm, 1), result);
 		pm.done();
 		return result;
 	}
 
-	private void checkMethodReturnTypes(IProgressMonitor pm, RefactoringStatus result, Set notDeletedMembers) throws JavaModelException {
+	private void splitNotDeletedMembers(Set originals, Set inTargetType, Set inSubTypes) {
+		for (Iterator iter= originals.iterator(); iter.hasNext();) {
+			IMember member= (IMember) iter.next();
+			if (getTargetClass().equals(member.getDeclaringType()))
+				inTargetType.add(member);
+			else
+				inSubTypes.add(member);
+		}
+	}
+
+	private void checkMembersInDestinationType(RefactoringStatus result, Set notDeletedMembersInTargetType) throws JavaModelException {
+		IMember[] membersToBeCreatedInTargetClass= getMembersToBeCreatedInTargetClass();
+		List newMembersInDestinationType= new ArrayList(membersToBeCreatedInTargetClass.length);
+		newMembersInDestinationType.addAll(Arrays.asList(membersToBeCreatedInTargetClass));
+		newMembersInDestinationType.addAll(notDeletedMembersInTargetType);
+		newMembersInDestinationType.removeAll(Arrays.asList(fMethodsToDelete));
+		IMember[] members= (IMember[]) newMembersInDestinationType.toArray(new IMember[newMembersInDestinationType.size()]);
+		result.merge(MemberCheckUtil.checkMembersInDestinationType(members, getTargetClass()));
+	}
+	
+	private void checkMethodReturnTypes(IProgressMonitor pm, RefactoringStatus result, Set notDeletedMembersInSubtypes) throws JavaModelException {
 		Map mapping= getMatchingMemberMatching(pm, true);
 		IMember[] members= getMembersToBeCreatedInTargetClass();
 		for (int i= 0; i < members.length; i++) {
@@ -1099,7 +1114,7 @@ public class PullUpRefactoring extends Refactoring {
 				IMethod matchingMethod= (IMethod) iter.next();
 				if (method.equals(matchingMethod))
 					continue;
-				if (!notDeletedMembers.contains(matchingMethod))
+				if (!notDeletedMembersInSubtypes.contains(matchingMethod))
 					continue;
 				if (returnType.equals(getReturnTypeName(matchingMethod)))
 					continue;
@@ -1135,36 +1150,32 @@ public class PullUpRefactoring extends Refactoring {
 			}
 		}
 	}
-
+	
+	/* @return Map<IMember memberToBeCreatedInTargetClass, Set<IMember memberInTargetClassOrSubtypeOfTC> > */
 	private Map getMatchingMemberMatching(IProgressMonitor pm, boolean includeMethodsToDeclareAbstract) throws JavaModelException {
+		//TODO: This is the top method of this whole "matching members" mess.
+		// Need to clean up the whole caller hierarchy and ensure that everything
+		// is calculated correctly and only once, and that names make sense.
 		return getMatchingMembersMappingFromTypeAndAllSubtypes(getTypeHierarchyOfTargetClass(pm), getTargetClass(), includeMethodsToDeclareAbstract);
 	}
 
-	private void checkAccessModifiers(RefactoringStatus result, Set notDeletedMembers) throws JavaModelException {
+	private void checkAccessModifiers(RefactoringStatus result, Set notDeletedMembersInSubtypes) throws JavaModelException {
 		List toDeclareAbstract= Arrays.asList(fMethodsToDeclareAbstract);
-		for (Iterator iter= notDeletedMembers.iterator(); iter.hasNext();) {
+		for (Iterator iter= notDeletedMembersInSubtypes.iterator(); iter.hasNext();) {
 			IMember member= (IMember) iter.next();
-			
 			if (member.getElementType() == IJavaElement.METHOD && ! toDeclareAbstract.contains(member))
 				checkMethodAccessModifiers(result, ((IMethod) member));
 		}
 	}
 	
 	private void checkMethodAccessModifiers(RefactoringStatus result, IMethod method) throws JavaModelException {
-		RefactoringStatusContext errorContext= JavaStatusContext.create(method);
-		
-		if (JdtFlags.isStatic(method)){
-				String[] keys= {createMethodLabel(method), createTypeLabel(method.getDeclaringType())};
-				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.static_method", //$NON-NLS-1$
-					keys);
-				result.addError(message, errorContext);
-		 } 
-		 if (isVisibilityLowerThanProtected(method)){
+		if (isVisibilityLowerThanProtected(method)){
 		 	String[] keys= {createMethodLabel(method), createTypeLabel(method.getDeclaringType())};
 		 	String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.lower_visibility", //$NON-NLS-1$
 		 		keys);
+			RefactoringStatusContext errorContext= JavaStatusContext.create(method);
 			result.addError(message, errorContext);	
-		} 
+		}
 	}
 
 	private static String getReturnTypeName(IMethod method) throws JavaModelException {
@@ -1174,7 +1185,8 @@ public class PullUpRefactoring extends Refactoring {
 	private static String getTypeName(IField field) throws JavaModelException {
 		return Signature.toString(field.getTypeSignature());
 	}
-
+	
+	/* @return not deleted matching members of membersToBeCreatedInTargetClass */
 	private Set getNotDeletedMembers(IProgressMonitor pm) throws JavaModelException {
 		Set matchingSet= new HashSet();
 		pm.beginTask("", 2); //$NON-NLS-1$
@@ -1540,6 +1552,7 @@ public class PullUpRefactoring extends Refactoring {
 			   getAbstractMethodsAddedToTargetClass().length > 0;	
 	}
 	
+	/* @return the members to be pulled up (*not* the pulled-up members!) */
 	private IMember[] getMembersToBeCreatedInTargetClass(){
 		List result= new ArrayList(fMembersToPullUp.length + fMethodsToDeclareAbstract.length);
 		result.addAll(Arrays.asList(fMembersToPullUp));

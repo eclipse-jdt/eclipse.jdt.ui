@@ -32,6 +32,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 class MemberCheckUtil {
 	
 	private MemberCheckUtil(){
+		//static only
 	}
 	
 	public static RefactoringStatus checkMembersInDestinationType(IMember[] members, IType destinationType) throws JavaModelException {	
@@ -143,7 +144,8 @@ class MemberCheckUtil {
 	}
 	
 	/**
-	 * Finds a method in a list of methods.
+	 * Finds a method in a list of methods. Compares methods by signature
+	 * (only SimpleNames of types), and not by the declaring type.
 	 * @return The found method or <code>null</code>, if nothing found
 	 */
 	public static IMethod findMethod(IMethod method, IMethod[] allMethods) throws JavaModelException {

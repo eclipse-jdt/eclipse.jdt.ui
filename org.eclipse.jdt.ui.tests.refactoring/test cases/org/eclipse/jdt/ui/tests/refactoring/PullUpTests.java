@@ -1198,6 +1198,10 @@ public class PullUpTests extends RefactoringTest {
 								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, 
 								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
+	
+	public void testFail29() throws Exception {
+		helper2(new String[] {"stop"}, new String[][]{new String[0]}, true, false, 0);
+	}
 
 	//----------------------------------------------------------
 	public void testField0() throws Exception{
