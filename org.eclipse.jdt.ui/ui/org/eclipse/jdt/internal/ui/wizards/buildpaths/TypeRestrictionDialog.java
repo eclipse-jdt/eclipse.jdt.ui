@@ -48,13 +48,13 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
-public class ExclusionInclusionDialog extends StatusDialog {
+public class TypeRestrictionDialog extends StatusDialog {
 	
-	private static class ExclusionInclusionLabelProvider extends LabelProvider {
+	private static class TypeRestrictionLabelProvider extends LabelProvider {
 		
 		private Image fElementImage;
 
-		public ExclusionInclusionLabelProvider(ImageDescriptor descriptor) {
+		public TypeRestrictionLabelProvider(ImageDescriptor descriptor) {
 			ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
 			fElementImage= registry.get(descriptor);
 		}
@@ -82,13 +82,13 @@ public class ExclusionInclusionDialog extends StatusDialog {
 	private static final int IDX_REMOVE= 4;
 	
 		
-	public ExclusionInclusionDialog(Shell parent, CPListElement entryToEdit, boolean focusOnExcluded) {
+	public TypeRestrictionDialog(Shell parent, CPListElement entryToEdit, boolean focusOnExcluded) {
 		super(parent);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		fCurrElement= entryToEdit;
 
-		setTitle(NewWizardMessages.getString("ExclusionInclusionDialog.title")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.getString("TypeRestrictionDialog.title")); //$NON-NLS-1$
 
 		fCurrProject= entryToEdit.getJavaProject().getProject();
 		IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
@@ -97,29 +97,31 @@ public class ExclusionInclusionDialog extends StatusDialog {
 			fCurrSourceFolder= (IContainer) res;
 		}	
 		
-		String excLabel= NewWizardMessages.getString("ExclusionInclusionDialog.exclusion.pattern.label"); //$NON-NLS-1$
+		String excLabel= NewWizardMessages.getString("TypeRestrictionDialog.exclusion.pattern.label"); //$NON-NLS-1$
 		ImageDescriptor excDescriptor= JavaPluginImages.DESC_OBJS_EXCLUSION_FILTER_ATTRIB;
 		String[] excButtonLabels= new String[] {
-				/* IDX_ADD */ NewWizardMessages.getString("ExclusionInclusionDialog.exclusion.pattern.add"), //$NON-NLS-1$
-				/* IDX_ADD_MULTIPLE */ NewWizardMessages.getString("ExclusionInclusionDialog.exclusion.pattern.add.multiple"), //$NON-NLS-1$
-				/* IDX_EDIT */ NewWizardMessages.getString("ExclusionInclusionDialog.exclusion.pattern.edit"), //$NON-NLS-1$
+				/* IDX_ADD */ NewWizardMessages.getString("TypeRestrictionDialog.exclusion.pattern.add"), //$NON-NLS-1$
+				/* IDX_ADD_MULTIPLE */ NewWizardMessages.getString("TypeRestrictionDialog.exclusion.pattern.add.multiple"), //$NON-NLS-1$
+				/* IDX_EDIT */ NewWizardMessages.getString("TypeRestrictionDialog.exclusion.pattern.edit"), //$NON-NLS-1$
 				null,
-				/* IDX_REMOVE */ NewWizardMessages.getString("ExclusionInclusionDialog.exclusion.pattern.remove") //$NON-NLS-1$
+				/* IDX_REMOVE */ NewWizardMessages.getString("TypeRestrictionDialog.exclusion.pattern.remove") //$NON-NLS-1$
 			};
 		
 		
-		String incLabel= NewWizardMessages.getString("ExclusionInclusionDialog.inclusion.pattern.label"); //$NON-NLS-1$
+		String incLabel= NewWizardMessages.getString("TypeRestrictionDialog.inclusion.pattern.label"); //$NON-NLS-1$
 		ImageDescriptor incDescriptor= JavaPluginImages.DESC_OBJS_INCLUSION_FILTER_ATTRIB;
 		String[] incButtonLabels= new String[] {
-				/* IDX_ADD */ NewWizardMessages.getString("ExclusionInclusionDialog.inclusion.pattern.add"), //$NON-NLS-1$
-				/* IDX_ADD_MULTIPLE */ NewWizardMessages.getString("ExclusionInclusionDialog.inclusion.pattern.add.multiple"), //$NON-NLS-1$
-				/* IDX_EDIT */ NewWizardMessages.getString("ExclusionInclusionDialog.inclusion.pattern.edit"), //$NON-NLS-1$
+				/* IDX_ADD */ NewWizardMessages.getString("TypeRestrictionDialog.inclusion.pattern.add"), //$NON-NLS-1$
+				/* IDX_ADD_MULTIPLE */ NewWizardMessages.getString("TypeRestrictionDialog.inclusion.pattern.add.multiple"), //$NON-NLS-1$
+				/* IDX_EDIT */ NewWizardMessages.getString("TypeRestrictionDialog.inclusion.pattern.edit"), //$NON-NLS-1$
 				null,
-				/* IDX_REMOVE */ NewWizardMessages.getString("ExclusionInclusionDialog.inclusion.pattern.remove") //$NON-NLS-1$
+				/* IDX_REMOVE */ NewWizardMessages.getString("TypeRestrictionDialog.inclusion.pattern.remove") //$NON-NLS-1$
 			};	
 		
 		fExclusionPatternList= createListContents(entryToEdit, CPListElement.EXCLUSION, excLabel, excDescriptor, excButtonLabels);
+		fExclusionPatternList.enableButton(IDX_ADD_MULTIPLE, false);
 		fInclusionPatternList= createListContents(entryToEdit, CPListElement.INCLUSION, incLabel, incDescriptor, incButtonLabels);
+		fInclusionPatternList.enableButton(IDX_ADD_MULTIPLE, false);
 		if (focusOnExcluded) {
 			fExclusionPatternList.postSetFocusOnDialogField(parent.getDisplay());
 		} else {
@@ -129,9 +131,9 @@ public class ExclusionInclusionDialog extends StatusDialog {
 	
 	
 	private ListDialogField createListContents(CPListElement entryToEdit, String key, String label, ImageDescriptor descriptor, String[] buttonLabels) {
-		ExclusionPatternAdapter adapter= new ExclusionPatternAdapter();
+		TypeRestrictionAdapter adapter= new TypeRestrictionAdapter();
 		
-		ListDialogField patternList= new ListDialogField(adapter, buttonLabels, new ExclusionInclusionLabelProvider(descriptor));
+		ListDialogField patternList= new ListDialogField(adapter, buttonLabels, new TypeRestrictionLabelProvider(descriptor));
 		patternList.setDialogFieldListener(adapter);
 		patternList.setLabelText(label);
 		patternList.setRemoveButtonIndex(IDX_REMOVE);
@@ -164,7 +166,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 		
 		DialogField labelField= new DialogField();
 		String name= fCurrElement.getPath().makeRelative().toString();
-		labelField.setLabelText(NewWizardMessages.getFormattedString("ExclusionInclusionDialog.description", name)); //$NON-NLS-1$
+		labelField.setLabelText(NewWizardMessages.getFormattedString("TypeRestrictionDialog.description", name)); //$NON-NLS-1$
 		labelField.doFillIntoGrid(inner, 2);
 		
 		fInclusionPatternList.doFillIntoGrid(inner, 3);
@@ -210,7 +212,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 		}
 		List existing= field.getElements();
 		String entry= (String) selElements.get(0);
-		ExclusionInclusionEntryDialog dialog= new ExclusionInclusionEntryDialog(getShell(), isExclusion(field), entry, existing, fCurrElement);
+		TypeRestrictionEntryDialog dialog= new TypeRestrictionEntryDialog(getShell(), isExclusion(field), entry, existing, fCurrElement);
 		if (dialog.open() == Window.OK) {
 			field.replaceElement(entry, dialog.getExclusionPattern());
 		}
@@ -223,7 +225,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 
 	private void addEntry(ListDialogField field) {
 		List existing= field.getElements();
-		ExclusionInclusionEntryDialog dialog= new ExclusionInclusionEntryDialog(getShell(), isExclusion(field), null, existing, fCurrElement);
+		TypeRestrictionEntryDialog dialog= new TypeRestrictionEntryDialog(getShell(), isExclusion(field), null, existing, fCurrElement);
 		if (dialog.open() == Window.OK) {
 			field.addElement(dialog.getExclusionPattern());
 		}
@@ -231,9 +233,9 @@ public class ExclusionInclusionDialog extends StatusDialog {
 	
 	
 		
-	// -------- ExclusionPatternAdapter --------
+	// -------- TypeRestrictionAdapter --------
 
-	private class ExclusionPatternAdapter implements IListAdapter, IDialogFieldListener {
+	private class TypeRestrictionAdapter implements IListAdapter, IDialogFieldListener {
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField, int)
 		 */
@@ -298,14 +300,14 @@ public class ExclusionInclusionDialog extends StatusDialog {
 	private void addMultipleEntries(ListDialogField field) {
 		String title, message;
 		if (isExclusion(field)) {
-			title= NewWizardMessages.getString("ExclusionInclusionDialog.ChooseExclusionPattern.title"); //$NON-NLS-1$
-			message= NewWizardMessages.getString("ExclusionInclusionDialog.ChooseExclusionPattern.description"); //$NON-NLS-1$
+			title= NewWizardMessages.getString("TypeRestrictionDialog.ChooseExclusionPattern.title"); //$NON-NLS-1$
+			message= NewWizardMessages.getString("TypeRestrictionDialog.ChooseExclusionPattern.description"); //$NON-NLS-1$
 		} else {
-			title= NewWizardMessages.getString("ExclusionInclusionDialog.ChooseInclusionPattern.title"); //$NON-NLS-1$
-			message= NewWizardMessages.getString("ExclusionInclusionDialog.ChooseInclusionPattern.description"); //$NON-NLS-1$
+			title= NewWizardMessages.getString("TypeRestrictionDialog.ChooseInclusionPattern.title"); //$NON-NLS-1$
+			message= NewWizardMessages.getString("TypeRestrictionDialog.ChooseInclusionPattern.description"); //$NON-NLS-1$
 		}
 		
-		IPath[] res= ExclusionInclusionEntryDialog.chooseExclusionPattern(getShell(), fCurrSourceFolder, title, message, null, true);
+		IPath[] res= TypeRestrictionEntryDialog.chooseExclusionPattern(getShell(), fCurrSourceFolder, title, message, null, true);
 		if (res != null) {
 			for (int i= 0; i < res.length; i++) {
 				field.addElement(res[i].toString());

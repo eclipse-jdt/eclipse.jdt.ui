@@ -376,18 +376,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFoldersList.enableButton(IDX_ADD, noAttributes);
 	}
 	
-	private boolean hasAttributes(List selElements) {
-		if (selElements.size() == 0) {
-			return false;
-		}
-		for (int i= 0; i < selElements.size(); i++) {
-			if (selElements.get(i) instanceof CPListElementAttribute) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	private void removeEntry() {
 		List selElements= fFoldersList.getSelectedElements();
 		for (int i= selElements.size() - 1; i >= 0 ; i--) {

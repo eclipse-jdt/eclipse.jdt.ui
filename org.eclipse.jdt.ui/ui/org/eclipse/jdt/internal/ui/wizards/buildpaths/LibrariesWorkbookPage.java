@@ -376,6 +376,20 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				selElement.setAttribute(CPListElement.JAVADOC, result[0]);
 				fLibrariesList.refresh();
 			}
+		} else if (key.equals(CPListElement.EXCLUSION)) {
+			showExclusionInclusionDialog(elem.getParent(), true);		
+		} else if (key.equals(CPListElement.INCLUSION)) {
+			showExclusionInclusionDialog(elem.getParent(), false);
+		}
+	}
+
+	private void showExclusionInclusionDialog(CPListElement selElement, boolean focusOnExclusion) {
+		TypeRestrictionDialog dialog= new TypeRestrictionDialog(getShell(), selElement, focusOnExclusion);
+		if (dialog.open() == Window.OK) {
+			selElement.setAttribute(CPListElement.INCLUSION, dialog.getInclusionPattern());
+			selElement.setAttribute(CPListElement.EXCLUSION, dialog.getExclusionPattern());
+			fLibrariesList.refresh();
+			fClassPathList.dialogFieldChanged(); // validate
 		}
 	}
 		
@@ -423,18 +437,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList.enableButton(IDX_ADDJAR, noAttributes);
 		fLibrariesList.enableButton(IDX_ADDLIB, noAttributes);
 		fLibrariesList.enableButton(IDX_ADDVAR, noAttributes);
-	}
-	
-	private boolean hasAttributes(List selElements) {
-		if (selElements.size() == 0) {
-			return false;
-		}
-		for (int i= 0; i < selElements.size(); i++) {
-			if (selElements.get(i) instanceof CPListElementAttribute) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	private boolean canEdit(List selElements) {

@@ -69,4 +69,16 @@ public abstract class BuildPathBasePage {
 		}
 	}
 	
+	protected boolean hasAttributes(List selElements) {
+		if (selElements.size() == 0) {
+			return false;
+		}
+		for (int i= 0; i < selElements.size(); i++) {
+			if (selElements.get(i) instanceof CPListElementAttribute) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }

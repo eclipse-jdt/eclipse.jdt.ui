@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
-public class ExclusionInclusionEntryDialog extends StatusDialog {
+public class TypeRestrictionEntryDialog extends StatusDialog {
 	
 	private StringButtonDialogField fExclusionPatternDialog;
 	private StatusInfo fExclusionPatternStatus;
@@ -62,25 +62,25 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 	private List fExistingPatterns;
 	private boolean fIsExclusion;
 		
-	public ExclusionInclusionEntryDialog(Shell parent, boolean isExclusion, String patternToEdit, List existingPatterns, CPListElement entryToEdit) {
+	public TypeRestrictionEntryDialog(Shell parent, boolean isExclusion, String patternToEdit, List existingPatterns, CPListElement entryToEdit) {
 		super(parent);
 		fIsExclusion= isExclusion;
 		fExistingPatterns= existingPatterns;
 		String title, message;
 		if (isExclusion) {
 			if (patternToEdit == null) {
-				title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.exclude.add.title"); //$NON-NLS-1$
+				title= NewWizardMessages.getString("TypeRestrictionEntryDialog.exclude.add.title"); //$NON-NLS-1$
 			} else {
-				title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.exclude.edit.title"); //$NON-NLS-1$
+				title= NewWizardMessages.getString("TypeRestrictionEntryDialog.exclude.edit.title"); //$NON-NLS-1$
 			}
-			message= NewWizardMessages.getFormattedString("ExclusionInclusionEntryDialog.exclude.pattern.label", entryToEdit.getPath().makeRelative().toString());  //$NON-NLS-1$
+			message= NewWizardMessages.getFormattedString("TypeRestrictionEntryDialog.exclude.pattern.label", entryToEdit.getPath().makeRelative().toString());  //$NON-NLS-1$
 		} else {
 			if (patternToEdit == null) {
-				title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.include.add.title"); //$NON-NLS-1$
+				title= NewWizardMessages.getString("TypeRestrictionEntryDialog.include.add.title"); //$NON-NLS-1$
 			} else {
-				title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.include.edit.title"); //$NON-NLS-1$
+				title= NewWizardMessages.getString("TypeRestrictionEntryDialog.include.edit.title"); //$NON-NLS-1$
 			}
-			message= NewWizardMessages.getFormattedString("ExclusionInclusionEntryDialog.include.pattern.label", entryToEdit.getPath().makeRelative().toString());  //$NON-NLS-1$
+			message= NewWizardMessages.getFormattedString("TypeRestrictionEntryDialog.include.pattern.label", entryToEdit.getPath().makeRelative().toString());  //$NON-NLS-1$
 		}
 		setTitle(title);
 		if (patternToEdit != null) {
@@ -99,9 +99,9 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 		ExclusionPatternAdapter adapter= new ExclusionPatternAdapter();
 		fExclusionPatternDialog= new StringButtonDialogField(adapter);
 		fExclusionPatternDialog.setLabelText(message);
-		fExclusionPatternDialog.setButtonLabel(NewWizardMessages.getString("ExclusionInclusionEntryDialog.pattern.button")); //$NON-NLS-1$
+		fExclusionPatternDialog.setButtonLabel(NewWizardMessages.getString("TypeRestrictionEntryDialog.pattern.button")); //$NON-NLS-1$
 		fExclusionPatternDialog.setDialogFieldListener(adapter);
-		fExclusionPatternDialog.enableButton(fCurrSourceFolder != null);
+		fExclusionPatternDialog.enableButton(false /*fCurrSourceFolder != null*/);
 		
 		if (patternToEdit == null) {
 			fExclusionPatternDialog.setText(""); //$NON-NLS-1$
@@ -126,9 +126,9 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 		Label description= new Label(inner, SWT.WRAP);
 		
 		if (fIsExclusion) {
-			description.setText(NewWizardMessages.getString("ExclusionInclusionEntryDialog.exclude.description")); //$NON-NLS-1$
+			description.setText(NewWizardMessages.getString("TypeRestrictionEntryDialog.exclude.description")); //$NON-NLS-1$
 		} else {
-			description.setText(NewWizardMessages.getString("ExclusionInclusionEntryDialog.include.description")); //$NON-NLS-1$
+			description.setText(NewWizardMessages.getString("TypeRestrictionEntryDialog.include.description")); //$NON-NLS-1$
 		}
 		GridData gd= new GridData();
 		gd.horizontalSpan= 2;
@@ -179,16 +179,16 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 	protected void checkIfPatternValid() {
 		String pattern= fExclusionPatternDialog.getText().trim();
 		if (pattern.length() == 0) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionInclusionEntryDialog.error.empty")); //$NON-NLS-1$
+			fExclusionPatternStatus.setError(NewWizardMessages.getString("TypeRestrictionEntryDialog.error.empty")); //$NON-NLS-1$
 			return;
 		}
 		IPath path= new Path(pattern);
 		if (path.isAbsolute() || path.getDevice() != null) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionInclusionEntryDialog.error.notrelative")); //$NON-NLS-1$
+			fExclusionPatternStatus.setError(NewWizardMessages.getString("TypeRestrictionEntryDialog.error.notrelative")); //$NON-NLS-1$
 			return;
 		}
 		if (fExistingPatterns.contains(pattern)) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionInclusionEntryDialog.error.exists")); //$NON-NLS-1$
+			fExclusionPatternStatus.setError(NewWizardMessages.getString("TypeRestrictionEntryDialog.error.exists")); //$NON-NLS-1$
 			return;
 		}
 		
@@ -214,11 +214,11 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 	private IPath chooseExclusionPattern() {
 		String title, message;
 		if (fIsExclusion) {
-			title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.ChooseExclusionPattern.title"); //$NON-NLS-1$
-			message= NewWizardMessages.getString("ExclusionInclusionEntryDialog.ChooseExclusionPattern.description"); //$NON-NLS-1$
+			title= NewWizardMessages.getString("TypeRestrictionEntryDialog.ChooseExclusionPattern.title"); //$NON-NLS-1$
+			message= NewWizardMessages.getString("TypeRestrictionEntryDialog.ChooseExclusionPattern.description"); //$NON-NLS-1$
 		} else {
-			title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.ChooseInclusionPattern.title"); //$NON-NLS-1$
-			message= NewWizardMessages.getString("ExclusionInclusionEntryDialog.ChooseInclusionPattern.description"); //$NON-NLS-1$
+			title= NewWizardMessages.getString("TypeRestrictionEntryDialog.ChooseInclusionPattern.title"); //$NON-NLS-1$
+			message= NewWizardMessages.getString("TypeRestrictionEntryDialog.ChooseInclusionPattern.description"); //$NON-NLS-1$
 		}
 		IPath initialPath= new Path(fExclusionPatternDialog.getText());
 		

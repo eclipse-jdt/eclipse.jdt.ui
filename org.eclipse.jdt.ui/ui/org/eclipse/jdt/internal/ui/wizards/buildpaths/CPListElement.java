@@ -76,10 +76,16 @@ public class CPListElement {
 			case IClasspathEntry.CPE_VARIABLE:
 				createAttributeElement(SOURCEATTACHMENT, null);
 				createAttributeElement(JAVADOC, null);
+				createAttributeElement(INCLUSION, new Path[0]);
+				createAttributeElement(EXCLUSION, new Path[0]);
 				break;
 			case IClasspathEntry.CPE_PROJECT:
+				createAttributeElement(INCLUSION, new Path[0]);
+				createAttributeElement(EXCLUSION, new Path[0]);
 				break;
 			case IClasspathEntry.CPE_CONTAINER:
+				createAttributeElement(INCLUSION, new Path[0]);
+				createAttributeElement(EXCLUSION, new Path[0]);
 				try {
 					IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
 					if (container != null) {
@@ -106,22 +112,22 @@ public class CPListElement {
 	
 
 	private IClasspathEntry newClasspathEntry() {
+		IPath[] inclusionPattern= (IPath[]) getAttribute(INCLUSION);
+		IPath[] exclusionPattern= (IPath[]) getAttribute(EXCLUSION);
 		switch (fEntryKind) {
 			case IClasspathEntry.CPE_SOURCE:
 				IPath outputLocation= (IPath) getAttribute(OUTPUT);
-				IPath[] inclusionPattern= (IPath[]) getAttribute(INCLUSION);
-				IPath[] exclusionPattern= (IPath[]) getAttribute(EXCLUSION);
 				return JavaCore.newSourceEntry(fPath, inclusionPattern, exclusionPattern, outputLocation);
 			case IClasspathEntry.CPE_LIBRARY:
 				IPath attach= (IPath) getAttribute(SOURCEATTACHMENT);
-				return JavaCore.newLibraryEntry(fPath, attach, null, isExported());
+				return JavaCore.newLibraryEntry(fPath, attach, null, inclusionPattern, exclusionPattern, isExported());
 			case IClasspathEntry.CPE_PROJECT:
-				return JavaCore.newProjectEntry(fPath, isExported());
+				return JavaCore.newProjectEntry(fPath, inclusionPattern, exclusionPattern, isExported());
 			case IClasspathEntry.CPE_CONTAINER:
-				return JavaCore.newContainerEntry(fPath, isExported());
+				return JavaCore.newContainerEntry(fPath, inclusionPattern, exclusionPattern, isExported());
 			case IClasspathEntry.CPE_VARIABLE:
 				IPath varAttach= (IPath) getAttribute(SOURCEATTACHMENT);
-				return JavaCore.newVariableEntry(fPath, varAttach, null, isExported());
+				return JavaCore.newVariableEntry(fPath, varAttach, null, inclusionPattern, exclusionPattern, isExported());
 			default:
 				return null;
 		}
@@ -360,9 +366,19 @@ public class CPListElement {
 		return buf;
 	}
 	
-	/**
-	 * @return
-	 */
+	public static StringBuffer appendEncodedFilter(IPath[] filters, StringBuffer buf) {
+		if (filters != null) {
+			buf.append('[').append(filters.length).append(']');
+			for (int i= 0; i < filters.length; i++) {
+				appendEncodePath(filters[i], buf).append(';');
+			}
+		} else {
+			buf.append('[').append(']');
+		}
+		return buf;
+	}
+	
+
 	public StringBuffer appendEncodedSettings(StringBuffer buf) {
 		buf.append(fEntryKind).append(';');
 		appendEncodePath(fPath, buf).append(';');
@@ -371,17 +387,6 @@ public class CPListElement {
 			case IClasspathEntry.CPE_SOURCE:
 				IPath output= (IPath) getAttribute(OUTPUT);
 				appendEncodePath(output, buf).append(';');
-				IPath[] exclusion= (IPath[]) getAttribute(EXCLUSION);
-				buf.append('[').append(exclusion.length).append(']');
-				for (int i= 0; i < exclusion.length; i++) {
-					appendEncodePath(exclusion[i], buf).append(';');
-				}
-				IPath[] inclusion= (IPath[]) getAttribute(INCLUSION);
-				buf.append('[').append(inclusion.length).append(']');
-				for (int i= 0; i < inclusion.length; i++) {
-					appendEncodePath(inclusion[i], buf).append(';');
-				}
-				break;
 			case IClasspathEntry.CPE_LIBRARY:
 			case IClasspathEntry.CPE_VARIABLE:
 				IPath sourceAttach= (IPath) getAttribute(SOURCEATTACHMENT);
@@ -390,8 +395,11 @@ public class CPListElement {
 				appendEncodedURL(javadoc, buf).append(';');				
 				break;
 			default:
-			
 		}
+		IPath[] exclusion= (IPath[]) getAttribute(EXCLUSION);
+		appendEncodedFilter(exclusion, buf);
+		IPath[] inclusion= (IPath[]) getAttribute(INCLUSION);
+		appendEncodedFilter(inclusion, buf);
 		return buf;
 	}
 
@@ -414,7 +422,10 @@ public class CPListElement {
 		} else if (entryKind == IClasspathEntry.CPE_CONTAINER) {
 			Object[] children= getChildren(false);
 			for (int i= 0; i < children.length; i++) {
-				((CPListElement) children[i]).collectJavaDocLocations(paths, urls);
+				Object curr= children[i];
+				if (curr instanceof CPListElement) {
+					((CPListElement) curr).collectJavaDocLocations(paths, urls);
+				}
 			}
 		}
 	}	
