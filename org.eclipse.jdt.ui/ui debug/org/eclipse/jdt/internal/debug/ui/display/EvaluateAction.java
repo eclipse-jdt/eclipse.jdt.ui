@@ -146,8 +146,6 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 		
 		IJavaStackFrame adapter= (IJavaStackFrame) stackFrame.getAdapter(IJavaStackFrame.class);
 		if (adapter != null) {
-			
-			
 			IJavaElement javaElement= getJavaElement(stackFrame);
 			if (javaElement != null) {
 				IJavaProject project = javaElement.getJavaProject();
@@ -230,7 +228,7 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 	}
 	
 	protected void reportError(IStatus status) {
-		ErrorDialog.openError(getShell(), DisplayMessages.getString("Evaluate.error.title.eval_problems"), null, status); //$NON-NLS-1$
+		ErrorDialog.openError(getShell(), "Error evaluating", null, status);
 	}
 	
 	protected void reportError(Throwable exception) {
@@ -269,14 +267,20 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 		
 		String message= ""; //$NON-NLS-1$
 		for (int i= 0; i < problems.length; i++) {
-			String msg= problems[i].getAttribute(IMarker.MESSAGE, defaultMsg);
-			if (i == 0)
-				message= msg;
-			else
-				message= MessageFormat.format(DisplayMessages.getString("Evaluate.error.problem_append_pattern"), new Object[] { message, msg }); //$NON-NLS-1$
+			IMarker problem= problems[i];
+			if (problem.getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR) {
+				String msg= problems[i].getAttribute(IMarker.MESSAGE, defaultMsg);
+				if (i == 0) {
+					message= msg;
+				} else {
+					message= MessageFormat.format(DisplayMessages.getString("Evaluate.error.problem_append_pattern"), new Object[] { message, msg }); //$NON-NLS-1$
+				}
+			}
 		}
 		
-		reportError(message);
+		if (message.length() != 0) {
+			reportError(message);
+		}
 	}
 	
 	protected void reportWrappedException(Throwable exception) {

@@ -40,10 +40,12 @@ public class DisplayAction extends EvaluateAction {
 			}
 			display.asyncExec(new Runnable() {
 				public void run() {
-					if (result.hasProblems())
+					if (result.hasProblems()) {
 						reportProblems(result);
-					if (value != null)
+					}
+					if (value != null) {
 						insertResult(value, result.getThread());
+					}
 				}
 			});
 		}
@@ -57,8 +59,9 @@ public class DisplayAction extends EvaluateAction {
 			if ("V".equals(sig)) { //$NON-NLS-1$
 				resultString= DisplayMessages.getString("Display.no_result_value"); //$NON-NLS-1$
 			} else {
-				if (sig != null)
+				if (sig != null) {
 					resultString= MessageFormat.format(DisplayMessages.getString("Display.type_name_pattern"), new Object[] { result.getReferenceTypeName() }); //$NON-NLS-1$
+				}
 				resultString= MessageFormat.format(DisplayMessages.getString("Display.result_pattern"), new Object[] { resultString, result.evaluateToString(thread) }); //$NON-NLS-1$
 			}
 		} catch(DebugException x) {
@@ -66,7 +69,8 @@ public class DisplayAction extends EvaluateAction {
 		}
 		
 		IDataDisplay dataDisplay= getDataDisplay();
-		if (dataDisplay != null)
+		if (dataDisplay != null) {
 			dataDisplay.displayExpressionValue(resultString);
+		}
 	}
 }

@@ -41,7 +41,8 @@ public class InspectAction extends EvaluateAction {
 				public void run() {
 					if (res.hasProblems()) {
 						reportProblems(res);
-					} else {
+					} 
+					if (value != null) {
 						DebugUITools.inspect(res.getSnippet().trim(), value);
 					}
 				}
