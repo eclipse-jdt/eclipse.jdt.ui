@@ -133,9 +133,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	static final String TAG_FILTERS = "filters"; //$NON-NLS-1$
 	static final String TAG_FILTER = "filter"; //$NON-NLS-1$
 	static final String TAG_SHOWLIBRARIES = "showLibraries"; //$NON-NLS-1$
+	static final String TAG_SHOWBINARIES = "showLibraries"; //$NON-NLS-1$
 
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
+	private BinaryProjectFilter fBinaryFilter= new BinaryProjectFilter();
 
 	private ProblemTreeViewer fViewer; 
 	private PackagesFrameSource fFrameSource;
@@ -159,7 +161,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
  	private FilterSelectionAction fFilterAction;
  	private ShowLibrariesAction fShowLibrariesAction;
-
+	private ShowBinariesAction fShowBinariesAction;
 	private IMemento fMemento;
 	
 	private IPartListener fPartListener= new IPartListener() {
@@ -247,6 +249,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.setUseHashlookup(true);
 		fViewer.addFilter(fPatternFilter);
 		fViewer.addFilter(fLibraryFilter);
+		fViewer.addFilter(fBinaryFilter);
 		if(fMemento != null) 
 			restoreFilters();
 		else
@@ -312,6 +315,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		IMenuManager menu = actionBars.getMenuManager();
 		menu.add(fFilterAction);
 		menu.add(fShowLibrariesAction);  
+		menu.add(fShowBinariesAction);  
 	}
 		
 	private Object findInputElement() {
@@ -458,8 +462,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fRefreshAction= new RefreshAction(getShell());
 		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
 		fShowLibrariesAction = new ShowLibrariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
+		fShowBinariesAction = new ShowBinariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.binaryProjets")); //$NON-NLS-1$
 		
-		//&&&
 		fBackAction= new BackAction(fFrameList);
 		fForwardAction= new ForwardAction(fFrameList);
 		fZoomInAction= new GoIntoAction(fFrameList);
@@ -740,6 +744,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (!showLibraries)
 			show= "false"; //$NON-NLS-1$
 		memento.putString(TAG_SHOWLIBRARIES, show);
+		
+		//save binary filter
+		boolean showBinaries= getBinaryFilter().getShowBinaries();
+		String showBinString= "true"; //$NON-NLS-1$
+		if (!showBinaries)
+			showBinString= "false"; //$NON-NLS-1$
+		memento.putString(TAG_SHOWBINARIES, showBinString);
+	
 	}
 
 	void restoreState(IMemento memento) {
@@ -873,6 +885,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		return fLibraryFilter;
 	}
 
+	/**
+ 	 * Returns the Binary filter for this view.
+ 	 * @return the binary filter
+ 	 */
+	BinaryProjectFilter getBinaryFilter() {
+		return fBinaryFilter;
+	}
+
 	void restoreFilters() {
 		IMemento filtersMem= fMemento.getChild(TAG_FILTERS);
 		if(filtersMem != null) {	
@@ -890,15 +910,32 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (show != null)
 			getLibraryFilter().setShowLibraries(show.equals("true")); //$NON-NLS-1$
 		else 
-			initFilterFromPreferences();		
+			initLibraryFilterFromPreferences();		
+		
+		//restore binary fileter
+		String showbin= fMemento.getString(TAG_SHOWBINARIES);
+		if (showbin != null)
+			getBinaryFilter().setShowBinaries(show.equals("true")); //$NON-NLS-1$
+		else 
+			initBinaryFilterFromPreferences();		
 	}
 	
 	void initFilterFromPreferences() {
+		initBinaryFilterFromPreferences();
+		initLibraryFilterFromPreferences();
+	}
+
+	void initLibraryFilterFromPreferences() {
 		JavaPlugin plugin= JavaPlugin.getDefault();
 		boolean show= plugin.getPreferenceStore().getBoolean(TAG_SHOWLIBRARIES);
 		getLibraryFilter().setShowLibraries(show);
 	}
 
+	void initBinaryFilterFromPreferences() {
+		JavaPlugin plugin= JavaPlugin.getDefault();
+		boolean showbin= plugin.getPreferenceStore().getBoolean(TAG_SHOWBINARIES);
+		getBinaryFilter().setShowBinaries(showbin);
+	}
 	/**
 	 * Updates the title text and title tool tip.
 	 * Called whenever the input of the viewer changes.
