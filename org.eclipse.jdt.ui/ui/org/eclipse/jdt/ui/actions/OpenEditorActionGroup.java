@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -17,25 +21,19 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenWithMenu;
-import org.eclipse.ui.dialogs.PropertyDialogAction;
-import org.eclipse.ui.part.Page;
 
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
 import org.eclipse.jdt.ui.IContextMenuConstants;
+
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * Action group that adds the actions opening a new editor to the 

@@ -10,18 +10,17 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.CloseResourceAction;

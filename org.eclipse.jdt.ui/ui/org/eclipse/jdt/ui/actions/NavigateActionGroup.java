@@ -12,16 +12,11 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-
-import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds the open and show actions to a context menu and

@@ -10,25 +10,14 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import java.util.Iterator;
-
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.ExportResourcesAction;
 import org.eclipse.ui.actions.ImportResourcesAction;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 

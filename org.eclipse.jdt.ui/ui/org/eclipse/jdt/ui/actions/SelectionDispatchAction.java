@@ -21,13 +21,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.texteditor.IUpdate;
-
-import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Action that dispatches the <code>IAction#run()</code> and the 

@@ -14,32 +14,32 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.part.Page;
-import org.eclipse.ui.texteditor.ConvertLineDelimitersAction;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
+import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.ConvertLineDelimitersAction;
 
-import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 /**
  * Action group that adds the source and generate actions to a part's context

@@ -14,7 +14,6 @@ import org.eclipse.swt.dnd.Clipboard;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.viewers.IInputSelectionProvider;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
@@ -23,7 +22,6 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
-import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
