@@ -245,7 +245,7 @@ public class UnresolvedElementsSubProcessor {
 		while (true) {
 			String addedCUName= typeName + ".java"; //$NON-NLS-1$
 			if (!JavaConventions.validateCompilationUnitName(addedCUName).matches(IStatus.ERROR)) {
-				int severity= 0;
+				int relevance= 0;
 				ICompilationUnit addedCU;
 				if (node.isSimpleName()) {
 					addedCU= ((IPackageFragment) cu.getParent()).getCompilationUnit(addedCUName);
@@ -255,20 +255,20 @@ public class UnresolvedElementsSubProcessor {
 					addedCU= root.getPackageFragment(packName).getCompilationUnit(addedCUName);
 					typeName= JavaModelUtil.concatenateName(packName, typeName);
 					if (Character.isLowerCase(packName.charAt(0))) {
-						severity++;
+						relevance++;
 					}					
 				}
 				if (Character.isUpperCase(addedCUName.charAt(0))) {
-					severity++;
+					relevance++;
 				}
 				if (!addedCU.exists()) {
 					if ((kind & SimilarElementsRequestor.CLASSES) != 0) {
 						String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclassusingwizard.description", typeName); //$NON-NLS-1$
-			            proposals.add(new NewCUCompletionUsingWizardProposal(label, cu, node, true, severity));
+			            proposals.add(new NewCUCompletionUsingWizardProposal(label, cu, node, true, relevance));
 					}
 					if ((kind & SimilarElementsRequestor.INTERFACES) != 0) {
 						String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterfaceusingwizard.description", typeName); //$NON-NLS-1$
-			            proposals.add(new NewCUCompletionUsingWizardProposal(label, cu, node, false, severity));
+			            proposals.add(new NewCUCompletionUsingWizardProposal(label, cu, node, false, relevance));
 					}				
 				}
 			}
@@ -277,7 +277,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 			node= ((QualifiedName) node).getQualifier();
 			typeName= ASTResolving.getSimpleName(node);
-			if (Character.isLowerCase(typeName.charAt(kind))) {
+			if (Character.isLowerCase(typeName.charAt(0))) {
 				return;
 			}
 		}
