@@ -45,8 +45,8 @@ public class AddUnimplementedConstructorsOperation implements IWorkspaceRunnable
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();
 			}			
-			
-			monitor.beginTask(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description"), 3); //$NON-NLS-1$
+			monitor.setTaskName(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description")); //$NON-NLS-1$
+			monitor.beginTask("", 3); //$NON-NLS-1$
 			
 			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			monitor.worked(1);

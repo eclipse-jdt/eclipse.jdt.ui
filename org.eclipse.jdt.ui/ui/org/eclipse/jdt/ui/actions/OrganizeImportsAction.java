@@ -297,8 +297,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}	
+		monitor.setTaskName(ActionMessages.getString("OrganizeImportsAction.multi.op.description")); //$NON-NLS-1$
 	
-		monitor.beginTask(ActionMessages.getString("OrganizeImportsAction.multi.op.description"), cus.length); //$NON-NLS-1$
+		monitor.beginTask("", cus.length); //$NON-NLS-1$
 		try {
 			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);

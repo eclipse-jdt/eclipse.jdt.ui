@@ -576,8 +576,9 @@ public class BuildPathsBlock {
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
-		}				
-		monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc_java"), 10); //$NON-NLS-1$
+		}
+		monitor.setTaskName(NewWizardMessages.getString("BuildPathsBlock.operationdesc_java")); //$NON-NLS-1$
+		monitor.beginTask("", 10); //$NON-NLS-1$
 
 		try {
 			Shell shell= null;

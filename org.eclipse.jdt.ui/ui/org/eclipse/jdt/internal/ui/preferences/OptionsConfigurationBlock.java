@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -327,16 +328,21 @@ public abstract class OptionsConfigurationBlock {
 	protected void doFullBuild() {
 		ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 		try {
-			dialog.run(true, true, new IRunnableWithProgress() {
+			dialog.run(true, true, new IRunnableWithProgress() { 
 				public void run(IProgressMonitor monitor) throws InvocationTargetException {
+					monitor.beginTask("", 1); //$NON-NLS-1$
 					try {
 						if (fProject != null) {
-							fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+							monitor.setTaskName(PreferencesMessages.getFormattedString("OptionsConfigurationBlock.buildproject.taskname", fProject.getElementName())); //$NON-NLS-1$
+							fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
 						} else {
-							JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+							monitor.setTaskName(PreferencesMessages.getString("OptionsConfigurationBlock.buildall.taskname")); //$NON-NLS-1$
+							JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
 						}
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
+					} finally {
+						monitor.done();
 					}
 				}
 			});

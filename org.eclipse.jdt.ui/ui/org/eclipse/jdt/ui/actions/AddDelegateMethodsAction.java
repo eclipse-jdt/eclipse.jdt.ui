@@ -71,6 +71,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  * Creates delegate methods for a type's fields. Opens a dialog with a list of
@@ -403,8 +404,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		public void run(IProgressMonitor monitor) throws CoreException {
 			String message = ActionMessages.getFormattedString("AddDelegateMethodsAction.monitor.message", String.valueOf(fList.size())); //$NON-NLS-1$
-
-			monitor.beginTask(message, fList.size());
+			monitor.setTaskName(message);
+			monitor.beginTask("", fList.size()); //$NON-NLS-1$
 
 			// the preferences
 			CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings();
@@ -430,12 +431,16 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					}
 					return;
 				}
+				
 
 				ITypeHierarchy typeHierarchy = fType.newSupertypeHierarchy(null);
 				String content = null;
 				Methods2Field wrapper = (Methods2Field) fList.get(i);
 				IMethod curr = wrapper.fMethod;
 				IField field = wrapper.fField;
+				
+				monitor.subTask(JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES));
+				
 				IMethod overwrittenMethod =
 					JavaModelUtil.findMethodImplementationInHierarchy(
 						typeHierarchy,
@@ -490,6 +495,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				IMethod created = fType.createMethod(formattedContent, sibling, true, null);
 				fCreatedMethods.add(created);
 
+				
 				monitor.worked(1);
 				//System.out.println(System.currentTimeMillis()-time +" for #"+i);
 			}

@@ -71,8 +71,9 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		try {			
-			monitor.beginTask(CodeGenerationMessages.getString("AddGetterSetterOperation.description"), fGetterFields.length + fSetterFields.length); //$NON-NLS-1$
+		try {
+			monitor.setTaskName(CodeGenerationMessages.getString("AddGetterSetterOperation.description")); //$NON-NLS-1$
+			monitor.beginTask("", fGetterFields.length + fSetterFields.length); //$NON-NLS-1$
 
 			fSkipAllFinalSetters= (fSkipFinalSettersQuery == null);
 			fSkipAllExisting= (fSkipExistingQuery == null);
