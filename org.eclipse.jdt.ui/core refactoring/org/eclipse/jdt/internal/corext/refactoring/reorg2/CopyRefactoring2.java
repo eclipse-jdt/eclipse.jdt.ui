@@ -26,17 +26,23 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
@@ -45,16 +51,22 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CreateCopyOfCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 public final class CopyRefactoring2 extends Refactoring{
 
@@ -161,9 +173,33 @@ public final class CopyRefactoring2 extends Refactoring{
 					return NO;
 				return new CopyFilesFoldersAndCusPolicy(ReorgUtils2.getFiles(resources), ReorgUtils2.getFolders(resources), convertToCompilationUnitArray(javaElements));
 			}
+			
+			if (hasElementsSmallerThanCu(javaElements)){
+				if (resources.length != 0 ||
+					ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT) || 
+					hasElementsLargerThanCu(javaElements))
+					return NO;
+				return new CopySubCuElementsPolicy(javaElements);
+			}
 			return NO;
 		}
 		
+		private static boolean hasElementsSmallerThanCu(IJavaElement[] javaElements) {
+			for (int i= 0; i < javaElements.length; i++) {
+				if (ReorgUtils2.isInsideCompilationUnit(javaElements[i]))
+					return true;
+			}
+			return false;
+		}
+
+		private static boolean hasElementsLargerThanCu(IJavaElement[] javaElements) {
+			for (int i= 0; i < javaElements.length; i++) {
+				if (! ReorgUtils2.isInsideCompilationUnit(javaElements[i]))
+					return true;
+			}
+			return false;
+		}
+
 		private static ICompilationUnit[] convertToCompilationUnitArray(IJavaElement[] javaElements) {
 			List result= Arrays.asList(javaElements);
 			return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
@@ -198,7 +234,7 @@ public final class CopyRefactoring2 extends Refactoring{
 		}
 
 		private static boolean canCopy(IResource resource) {
-			return resource != null && resource.exists() && ! resource.isPhantom();
+			return resource != null && resource.exists() && ! resource.isPhantom() && resource.isAccessible();
 		}
 
 		private static boolean canCopy(IJavaElement element) {
@@ -297,7 +333,7 @@ public final class CopyRefactoring2 extends Refactoring{
 				Assert.isNotNull(destination);
 				resetDestinations();
 				fResourceDestination= destination;
-				return doSetDestination(destination);
+				return verifyDestination(destination);
 			}
 			/* (non-Javadoc)
 			 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.ICopyPolicy#setDestination(org.eclipse.jdt.core.IJavaElement)
@@ -306,10 +342,10 @@ public final class CopyRefactoring2 extends Refactoring{
 				Assert.isNotNull(destination);
 				resetDestinations();
 				fJavaElementDestination= destination;
-				return doSetDestination(destination);
+				return verifyDestination(destination);
 			}
-			protected abstract RefactoringStatus doSetDestination(IJavaElement destination) throws JavaModelException;
-			protected abstract RefactoringStatus doSetDestination(IResource destination) throws JavaModelException;
+			protected abstract RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException;
+			protected abstract RefactoringStatus verifyDestination(IResource destination) throws JavaModelException;
 			
 			private void resetDestinations() {
 				fJavaElementDestination= null;
@@ -338,11 +374,11 @@ public final class CopyRefactoring2 extends Refactoring{
 				}
 				return true;
 			}
-			protected RefactoringStatus doSetDestination(IResource resource) {
+			protected RefactoringStatus verifyDestination(IResource resource) {
 				return RefactoringStatus.createFatalErrorStatus("Package fragment roots can only be moved to Java projects");
 			}
 			
-			protected RefactoringStatus doSetDestination(IJavaElement javaElement) {
+			protected RefactoringStatus verifyDestination(IJavaElement javaElement) {
 				Assert.isNotNull(javaElement);
 				if (! javaElement.exists())
 					return RefactoringStatus.createFatalErrorStatus("The selected destination does not exist");
@@ -397,12 +433,12 @@ public final class CopyRefactoring2 extends Refactoring{
 				return true;
 			}
 
-			protected RefactoringStatus doSetDestination(IResource resource) {
+			protected RefactoringStatus verifyDestination(IResource resource) {
 				Assert.isNotNull(resource);
 				return RefactoringStatus.createFatalErrorStatus("Packages can only be moved to source folders or Java projects that do not have source folders");
 			}
 			
-			protected RefactoringStatus doSetDestination(IJavaElement javaElement) throws JavaModelException {
+			protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 				Assert.isNotNull(javaElement);
 				IPackageFragmentRoot destRoot= getDestinationAsPackageFragmentRoot(javaElement);
 				if (! ReorgUtils2.isSourceFolder(destRoot))
@@ -491,7 +527,7 @@ public final class CopyRefactoring2 extends Refactoring{
 				return true;
 			}
 
-			protected RefactoringStatus doSetDestination(IResource resource) throws JavaModelException {
+			protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 				Assert.isNotNull(resource);
 				if (! resource.exists() || resource.isPhantom())
 					return RefactoringStatus.createFatalErrorStatus("The selected destination does not exist or is a phantom resource");			
@@ -504,7 +540,7 @@ public final class CopyRefactoring2 extends Refactoring{
 				return new RefactoringStatus();
 			}
 
-			protected RefactoringStatus doSetDestination(IJavaElement javaElement) throws JavaModelException {
+			protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 				Assert.isNotNull(javaElement);
 				if (! javaElement.exists())
 					return RefactoringStatus.createFatalErrorStatus("The selected destination does not exist");
@@ -642,18 +678,142 @@ public final class CopyRefactoring2 extends Refactoring{
 				Assert.isTrue(false);//there's nothing else
 				return null;				
 			}
+			
+			public IFile[] getAllModifiedFiles() {
+				if (getDestinationAsPackageFragment() != null)
+					return ReorgUtils2.getFiles(ReorgUtils2.getResources(fCus));
+				return new IFile[0];
+			}
 		}
 		
+		private static class CopySubCuElementsPolicy extends CopyPolicy{
+			private final IJavaElement[] fJavaElements;
+			
+			CopySubCuElementsPolicy(IJavaElement[] javaElements){
+				Assert.isNotNull(javaElements);
+				fJavaElements= javaElements;
+			}
+			protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
+				Assert.isNotNull(destination);
+				Assert.isTrue(destination.exists());
+				if (! (destination instanceof ICompilationUnit) && ! ReorgUtils2.isInsideCompilationUnit(destination))
+					return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this copy operation");
+
+				ICompilationUnit destinationCu= getDestinationCu(destination);
+				Assert.isNotNull(destinationCu);
+				if (destinationCu.isReadOnly())//the resource read-onliness is handled by validateEdit
+					return RefactoringStatus.createFatalErrorStatus("The selected destination element cannot be modified");
+				
+				if (JavaElementUtil.getMainType(destinationCu) == null){
+					if (ReorgUtils2.hasElementsOfType(fJavaElements, IJavaElement.METHOD) || 
+						ReorgUtils2.hasElementsOfType(fJavaElements, IJavaElement.FIELD) || 
+						ReorgUtils2.hasElementsOfType(fJavaElements, IJavaElement.INITIALIZER))
+					return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this copy operation");
+				}
+				
+				if (destination instanceof IPackageDeclaration)
+					return RefactoringStatus.createFatalErrorStatus("Package declarations are not available as copy destinations");
+				
+				if (destination instanceof IImportContainer){
+					if (! canCopyAllToImportContainer(fJavaElements))
+						return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this copy operation");
+				}
+				
+				if (destination instanceof IImportDeclaration){
+					if (ReorgUtils2.hasElementsNotOfType(fJavaElements, IJavaElement.IMPORT_DECLARATION))
+						return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this copy operation");
+				}
+					
+				return new RefactoringStatus();
+			}
+
+			private static boolean canCopyAllToImportContainer(IJavaElement[] javaElements) {
+				for (int i= 0; i < javaElements.length; i++) {
+					if (! (javaElements[i] instanceof IImportDeclaration))
+						return false;
+				}
+				return true;
+			}
+			private static ICompilationUnit getDestinationCu(IJavaElement destination) {
+				if (destination instanceof ICompilationUnit)
+					return (ICompilationUnit) destination;
+				return (ICompilationUnit) destination.getAncestor(IJavaElement.COMPILATION_UNIT);
+			}
+			
+			protected RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
+				return RefactoringStatus.createFatalErrorStatus("A resource cannot be the destination for the selected elements.");
+			}
+
+			public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries) throws JavaModelException {
+				try {
+					ICompilationUnit sourceCu= getSourceCu();
+					CompilationUnit sourceCuNode= AST.parseCompilationUnit(sourceCu, false);
+					ICompilationUnit destinationCu= getDestinationCu();
+					CompilationUnit destinationCuNode= AST.parseCompilationUnit(destinationCu, false);
+					ASTRewrite rewrite= new ASTRewrite(destinationCuNode);
+					for (int i= 0; i < fJavaElements.length; i++) {
+						copyToDestination(fJavaElements[i], rewrite, sourceCuNode, destinationCuNode);
+					}
+					return addTextEditFromRewrite(destinationCu, rewrite);
+				} catch (JavaModelException e){
+					throw e;
+				} catch (CoreException e) {
+					throw new JavaModelException(e);
+				}
+			}
+
+			private void copyToDestination(IJavaElement element, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) {
+				// TODO implement me
+				
+			}
+			private ICompilationUnit getSourceCu() {
+				//all have a common parent, so all must be in the same cu
+				//we checked before that the array in not null and not empty
+				return (ICompilationUnit) fJavaElements[0].getAncestor(IJavaElement.COMPILATION_UNIT);
+			}
+			
+			private ICompilationUnit getDestinationCu() {
+				return getDestinationCu(getJavaElementDestination());
+			}
+						
+			private static TextChange addTextEditFromRewrite(ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
+				TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
+				TextEdit resultingEdits= new MultiTextEdit();
+				rewrite.rewriteNode(textBuffer, resultingEdits, null);
+				
+				TextChange textChange= new CompilationUnitChange(cu.getElementName(), cu);
+				if (textChange instanceof TextFileChange){
+					TextFileChange tfc= (TextFileChange)textChange;
+					tfc.setSave(! cu.isWorkingCopy());
+				}
+				//TODO fix the descriptions
+				String message= "Copy elements to " + cu.getElementName();
+				textChange.addTextEdit(message, resultingEdits);
+				rewrite.removeModifications();
+				return textChange;
+			}
+
+			public boolean canEnable() throws JavaModelException {
+				//TODO we should be able to copy from class files too
+				if (getSourceCu() == null)
+					return false;
+				return true;
+			}
+			
+			public IFile[] getAllModifiedFiles() {
+				return ReorgUtils2.getFiles(new IResource[]{ReorgUtils2.getResource(getDestinationCu())});
+			}
+		}
 		private static final class NoCopyPolicy extends CopyPolicy{
 			public boolean canEnable() throws JavaModelException {
 				return false;
 			}
 
-			protected RefactoringStatus doSetDestination(IResource resource) throws JavaModelException {
+			protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 				return RefactoringStatus.createFatalErrorStatus("Copy is not allowed");
 			}
 
-			protected RefactoringStatus doSetDestination(IJavaElement javaElement) throws JavaModelException {
+			protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 				return RefactoringStatus.createFatalErrorStatus("Copy is not allowed");
 			}
 

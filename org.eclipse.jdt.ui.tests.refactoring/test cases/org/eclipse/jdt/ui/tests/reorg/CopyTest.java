@@ -21,6 +21,10 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -272,9 +276,8 @@ public class CopyTest extends RefactoringTest {
 		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
 		try {
 			IType classA= cu.getType("A");
-			IType classInner= classA.getType("Inner");
 			IMethod	methodFoo= classA.getMethod("foo", new String[0]);
-			IJavaElement[] javaElements= { methodFoo, classInner};
+			IJavaElement[] javaElements= { methodFoo, classA};
 			IResource[] resources= {};
 			verifyDisabled(resources, javaElements);
 		} finally {
@@ -1132,6 +1135,409 @@ public class CopyTest extends RefactoringTest {
 			performDummySearch();
 			JavaProjectHelper.delete(otherJavaProject);
 		}						
+	}
+	
+	public void testDestination_method_no_cu_with_no_main_type() throws Exception{
+		ICompilationUnit cu= null;
+		ICompilationUnit otherCu= getPackageP().createCompilationUnit("C.java", "package p;class D{}class E{}", false, new NullProgressMonitor());
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= otherCu;
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			otherCu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_method_no_package() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= getPackageP();
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_method_no_file() throws Exception{
+		ICompilationUnit cu= null;
+		IFolder parentFolder= (IFolder) getPackageP().getResource();
+		String fileName= "a.txt";
+		IFile file= parentFolder.getFile(fileName);
+		file.create(getStream("123"), true, null);
+
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= file;
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			file.delete(true, false, null);
+		}
+	}
+
+	public void testDestination_method_no_folder() throws Exception{
+		ICompilationUnit cu= null;
+		IProject parentFolder= MySetup.getProject().getProject();
+		String folderName= "a.txt";
+		IFolder folder= parentFolder.getFolder(folderName);
+		folder.create(true, true, null);	
+
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= folder;
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			folder.delete(true, false, null);
+		}
+	}
+
+	public void testDestination_method_no_root() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= getRoot();
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_method_no_java_project() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= MySetup.getProject();
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_method_no_simple_project() throws Exception{
+		ICompilationUnit cu= null;
+		IProject simpleProject= ResourcesPlugin.getWorkspace().getRoot().getProject("mySImpleProject");
+		simpleProject.create(null);
+		simpleProject.open(null);
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= simpleProject;
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			simpleProject.delete(true, true, null);	
+		}
+	}
+
+	public void testDestination_method_no_import_container() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			IImportContainer importContainer= cu.getImportContainer();
+			Object destination= importContainer;
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_method_no_import_declaration() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			IImportDeclaration importDeclaration= cu.getImport("java.util.*");
+			Object destination= importDeclaration;
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_method_no_package_declaration() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= cu.getPackageDeclaration("p");
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_method_yes_itself() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= method;
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_method_yes_cu_with_main_type() throws Exception{
+		ICompilationUnit cu= null;
+		ICompilationUnit otherCu= getPackageP().createCompilationUnit("C.java", "package p;class C{}class D{}", false, new NullProgressMonitor());
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= otherCu;
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			otherCu.delete(true, new NullProgressMonitor());
+		}
+	}
+	public void testDestination_method_yes_other_method() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}void bar(){}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IMethod otherMethod= cu.getType("A").getMethod("bar", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= otherMethod;
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_method_yes_field() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}int bar;}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IField field= cu.getType("A").getField("bar");
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= field;
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_method_yes_type() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}int bar;}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= cu.getType("A");
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+	
+	public void testDestination_method_yes_initializer() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}{}}", false, new NullProgressMonitor());
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= cu.getType("A").getInitializer(1);
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_initializer_no_package() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}{}}", false, new NullProgressMonitor());
+			IInitializer initializer= cu.getType("A").getInitializer(1);
+			IJavaElement[] javaElements= { initializer };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= getPackageP();
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_initializer_yes_type() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}{}}", false, new NullProgressMonitor());
+			IInitializer initializer= cu.getType("A").getInitializer(1);
+			IJavaElement[] javaElements= { initializer };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= cu.getType("A");
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_initializer_yes_method() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}{}}", false, new NullProgressMonitor());
+			IInitializer initializer= cu.getType("A").getInitializer(1);
+			IJavaElement[] javaElements= { initializer };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= cu.getType("A").getMethod("foo", new String[0]);
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_import_container_no_package() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}{}}", false, new NullProgressMonitor());
+			IImportContainer container= cu.getImportContainer();
+			IJavaElement[] javaElements= { container };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= getPackageP();
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_import_container_yes_type_in_different_cu() throws Exception{
+		ICompilationUnit cu= null;
+		ICompilationUnit otherCu= getPackageP().createCompilationUnit("C.java", "package p;class C{}class D{}", false, new NullProgressMonitor());
+
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}{}}", false, new NullProgressMonitor());
+			IImportContainer container= cu.getImportContainer();
+			IJavaElement[] javaElements= { container };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= otherCu.getType("C");
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			otherCu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_import_container_yes_method_in_different_cu() throws Exception{
+		ICompilationUnit cu= null;
+		ICompilationUnit otherCu= getPackageP().createCompilationUnit("C.java", "package p;class C{void foo(){}}", false, new NullProgressMonitor());
+
+		try {
+			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{}", false, new NullProgressMonitor());
+			IImportContainer container= cu.getImportContainer();
+			IJavaElement[] javaElements= { container };
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= otherCu.getType("C").getMethod("foo", new String[0]);
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			otherCu.delete(true, new NullProgressMonitor());
+		}
 	}
 
 	public void testCopy_File_to_Folder() throws Exception {
