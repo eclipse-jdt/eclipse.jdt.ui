@@ -504,26 +504,36 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	public void selectReveal(ISelection selection) {
 		ISelection javaSelection= convertSelection(selection);
 	 	fViewer.setSelection(javaSelection, true);
+	 	if (javaSelection != selection && !javaSelection.equals(fViewer.getSelection()))
+	 		fViewer.setSelection(selection);
 	}
 
 	private ISelection convertSelection(ISelection s) {
-		List converted= new ArrayList();
-		if (s instanceof StructuredSelection) {
-			Object[] elements= ((StructuredSelection)s).toArray();
-			for (int i= 0; i < elements.length; i++) {
-				Object e= elements[i];
-				if (e instanceof IJavaElement)	
-					converted.add(e);
-				else if (e instanceof IResource) {
-					IJavaElement element= JavaCore.create((IResource)e);
-					if (element != null) 
-						converted.add(element);
-					else 
-						converted.add(e);
-				}
+		if (!(s instanceof IStructuredSelection))
+			return s;
+			
+		Object[] elements= ((StructuredSelection)s).toArray();
+		if (!containsResources(elements))
+			return s;
+				
+		for (int i= 0; i < elements.length; i++) {
+			Object o= elements[i];
+			if (o instanceof IResource) {
+				IJavaElement jElement= JavaCore.create((IResource)o);
+				if (jElement != null) 
+					elements[i]= jElement;
 			}
 		}
-		return new StructuredSelection(converted.toArray());
+		
+		return new StructuredSelection(elements);
+	}
+	
+	private boolean containsResources(Object[] elements) {
+		for (int i = 0; i < elements.length; i++) {
+			if (elements[i] instanceof IResource)
+				return true;
+		}
+		return false;
 	}
 	
 	public void selectAndReveal(Object element) {

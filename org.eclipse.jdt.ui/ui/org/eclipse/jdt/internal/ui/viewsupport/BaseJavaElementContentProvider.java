@@ -320,9 +320,9 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 		// try to map resources to the containing package fragment
 		if (element instanceof IResource) {
 			IResource parent= ((IResource)element).getParent();
-			Object packageFragment= JavaCore.create(parent);
-			if (packageFragment != null) 
-				return packageFragment;
+			Object jParent= JavaCore.create(parent);
+			if (jParent != null) 
+				return jParent;
 			return parent;
 		}
 

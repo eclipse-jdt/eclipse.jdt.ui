@@ -16,6 +16,8 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -150,7 +152,18 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 					view.selectReveal(new StructuredSelection(element));
 					selectedElement= getSelectedElement(view);
 					if (!element.equals(selectedElement)) {
-						MessageDialog.openInformation(getShell(), getDialogTitle(), "Couldn't reveal the selected element in Packages View. May be the element is filtered out.");
+						IResource resource= null;
+						try {
+							resource= element.getCorrespondingResource();
+						} catch (JavaModelException e) {
+						}
+						if (resource != null) {
+							view.selectReveal(new StructuredSelection(resource));
+							selectedElement= getSelectedElement(view);
+							if (resource.equals(selectedElement))
+								return;
+						}
+						MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("ShowInPackageViewAction.not_found")); //$NON-NLS-1$
 					}
 				}
 			}
