@@ -3743,21 +3743,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		foldingMenu.add(action);
 	}
 	
-	
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#collectContextMenuPreferencePages()
 	 * @since 3.1
 	 */
 	protected String[] collectContextMenuPreferencePages() {
 		String[] ids= super.collectContextMenuPreferencePages();
-		String[] more= new String[ids.length + 6];
+		String[] more= new String[ids.length + 5];
 		more[0]= "org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"; //$NON-NLS-1$
 		more[1]= "org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage"; //$NON-NLS-1$
 		more[2]= "org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage"; //$NON-NLS-1$
 		more[3]= "org.eclipse.jdt.ui.preferences.JavaEditorHoverPreferencePage"; //$NON-NLS-1$
 		more[4]= "org.eclipse.jdt.ui.preferences.JavaEditorColoringPreferencePage"; //$NON-NLS-1$
-		more[5]= "org.eclipse.jdt.ui.preferences.SpellingPreferencePage"; //$NON-NLS-1$
-		System.arraycopy(ids, 0, more, 6, ids.length);
+		System.arraycopy(ids, 0, more, 5, ids.length);
 		return more;
 	}
 }

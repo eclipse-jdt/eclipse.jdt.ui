@@ -244,4 +244,16 @@ public class PropertiesFileEditor extends TextEditor {
 		
 		return viewer;
 	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#collectContextMenuPreferencePages()
+	 * @since 3.1
+	 */
+	protected String[] collectContextMenuPreferencePages() {
+		String[] ids= super.collectContextMenuPreferencePages();
+		String[] more= new String[ids.length + 1];
+		more[0]= "org.eclipse.jdt.ui.preferences.PropertiesFileEditorPreferencePage"; //$NON-NLS-1$
+		System.arraycopy(ids, 0, more, 1, ids.length);
+		return more;
+	}
 }
