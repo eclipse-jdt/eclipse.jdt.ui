@@ -6,77 +6,34 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-
-import org.eclipse.jdt.core.IJavaProject;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.IVMType;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Table;
 
 /*
  * The page for setting java runtime
  */
 public class VMPropertyPage extends JavaProjectPropertyPage {
-	private Combo fCombo;
+	private VMSelector fVMSelector;
 	
-	protected static final String DESCRIPTION="vm_propertypage.description";
-	protected static final String NO_JAVA="vm_propertypage.no_java";
+	public VMPropertyPage() {
+		fVMSelector= new VMSelector();
+	}
 	
-	protected Control createJavaContents(Composite parent) {
+	protected Control createJavaContents(Composite ancestor) {
 		noDefaultAndApplyButton();
-		IJavaProject project= getJavaProject();
-		fCombo= new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
-		String[] vms= JavaRuntime.getJavaRuntimes();
-		
-		for (int i= 0; i < vms.length; i++) {
-			fCombo.add(vms[i]);
-		}
-		int index=0;
-		try {
-			String vm= JavaRuntime.getJavaRuntime(project);
-			if (vm == null)
-				vm= JavaPlugin.getDefault().getPreferenceStore().getString(VMPreferencePage.PREF_VM);
-			if (vm != null)
-				index= fCombo.indexOf(vm);
-		} catch (CoreException e) {
-		}
-		fCombo.select(index);
-		return fCombo;
-	};
+		Control vmSelector= fVMSelector.createContents(ancestor);
+		fVMSelector.initFromProject(getJavaProject());
+		return vmSelector;
+	}
+
 	
 	public boolean performOk() {
 		IJavaProject project= getJavaProject();
 		if (project != null) {
 			try {
-				JavaRuntime.setJavaRuntime(project, fCombo.getText());
+				JavaRuntime.setVM(project, fVMSelector.getSelectedVM());
 			} catch (CoreException e) {
 			}
 		}
 		return true;
-	}
-	
-	private IProject getProject() {
-		Object o= getElement();
-		if (o instanceof IProject)
-			return (IProject)o;
-		if (o instanceof IJavaProject) {
-			return ((IJavaProject)o).getProject();
-		}
-		return null;
-	}
-						
-	public void setElement(IAdaptable element) {
-		super.setElement(element);
-		IJavaProject project= getJavaProject();
-		if (project != null) {
-			setDescription(JavaLaunchUtils.getResourceString(DESCRIPTION));
-		}
 	}
 }

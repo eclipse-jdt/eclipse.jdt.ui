@@ -6,12 +6,17 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.Date;import java.util.List;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;
+import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.List;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jdt.ui.JavaUI;
 
 public class JDK12Launcher extends JavaLauncher {
 	private static final String PREFIX= "launcher.jdk12.";
 	
 	private final static String ERROR_NO_JDK12_SPECIFIED= "launcher.error.noJDKspecified.";	
+	
+	
+	public JDK12Launcher(IVM vmInstance) {
+		super(vmInstance);
+	}
 	
 	public VMRunnerResult run(VMRunnerConfiguration config) {
 		String location= getJDKLocation("");
@@ -50,7 +55,7 @@ public class JDK12Launcher extends JavaLauncher {
 		try {
 			Process p= Runtime.getRuntime().exec(cmdLine);
 			IProcess process= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
-			process.setAttribute(ATTR_CMDLINE, renderCommandLine(cmdLine));
+			process.setAttribute(JavaUI.ATTR_CMDLINE, renderCommandLine(cmdLine));
 			return new VMRunnerResult(null, new IProcess[] { process });
 		} catch (IOException e) {
 			showErrorDialog(ERROR_CREATE_PROCESS, new LauncherException(e));
@@ -77,12 +82,6 @@ public class JDK12Launcher extends JavaLauncher {
 			pathCount++;
 		}
 		return buf.toString();
-	}
-	protected String getJDKLocation(String dflt) {
-		String location= JavaPlugin.getDefault().getPreferenceStore().getString(JDK12PreferencePage.PREF_LOCATION);
-		if (location == null)
-			return dflt;
-		return location;
 	}
 	
 }

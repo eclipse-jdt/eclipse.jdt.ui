@@ -42,6 +42,8 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 		IWorkspaceRoot root= JavaPlugin.getWorkspace().getRoot();
 		fJavaPage= new NewJavaProjectWizardPage(root, fMainPage);
 		addPage(fJavaPage);
+		fVMPage= new VMWizardPage(fMainPage);
+		addPage(fVMPage);
 	}		
 	
 
@@ -60,6 +62,7 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 		} catch  (InterruptedException e) {
 			return false;
 		}
+		fVMPage.finish();
 		updatePerspective();
 		selectAndReveal(fJavaPage.getNewJavaProject().getProject());
 		return true;

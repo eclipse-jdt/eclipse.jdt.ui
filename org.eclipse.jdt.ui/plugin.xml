@@ -445,40 +445,26 @@
    		modes="debug" />
 </extension>	
 
-<extension point = "org.eclipse.jdt.launching.vmRunners">
-	<launcher
-	   	class="org.eclipse.jdt.internal.ui.launcher.JDK12Launcher"
-	    id="org.eclipse.jdt.ui.launcher.JDK12Launcher"
-	  	modes="run"
-	  	runtime="JDK 1.2.2"/>
-	<launcher
-	   	class="org.eclipse.jdt.internal.ui.launcher.JDK12DebugLauncher"
-	    id="org.eclipse.jdt.ui.launcher.JDK12DebugLauncher"
-	  	modes="debug"
-	  	runtime="JDK 1.2.2"/>
-	<launcher
-	   	class="org.eclipse.jdt.internal.ui.launcher.J9Launcher"
-	    id="org.eclipse.jdt.ui.launcher.J9Launcher"
-	  	modes="run"
-	  	runtime="J9"/>
-	<launcher
-	   	class="org.eclipse.jdt.internal.ui.launcher.J9DebugLauncher"
-	    id="org.eclipse.jdt.ui.launcher.J9DebugLauncher"
-	  	modes="debug"
-	  	runtime="J9"/>
+<extension point = "org.eclipse.jdt.launching.vmTypes">
+	<vmType
+	   	class="org.eclipse.jdt.internal.ui.launcher.StandardVMType"
+	    id="org.eclipse.jdt.internal.ui.launcher.StandardVMType"/>
+	<vmType
+	   	class="org.eclipse.jdt.internal.ui.launcher.J9VMType"
+	    id="org.eclipse.jdt.internal.ui.launcher.J9Type"/>
 </extension>
 
 <extension
 	point="org.eclipse.ui.propertyPages">
 	<page
 		id="org.eclipse.jdt.ui.propertyPages.VMPropertyPage" 
-		name="Java Runtime"
+		name="Java VM"
 		objectClass="org.eclipse.jdt.core.IJavaProject"
 		class="org.eclipse.jdt.internal.ui.launcher.VMPropertyPage">
     </page>
 	<page
 		id="org.eclipse.jdt.ui.propertyPages.VMPropertyPage" 
-		name="Java Runtime"
+		name="Java VM"
 		objectClass="org.eclipse.core.resources.IProject"
 		class="org.eclipse.jdt.internal.ui.launcher.VMPropertyPage">
 		<filter name="nature" value="org.eclipse.jdt.core.javanature"/>
@@ -543,20 +529,14 @@
 	<page
 		id = "org.eclipse.jdt.ui.preferences.VMPreferencePage"
 		class="org.eclipse.jdt.internal.ui.launcher.VMPreferencePage"
-		name= "Runtimes"
+		name= "VM Definitions"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
 	<page
-		id = "org.eclipse.jdt.ui.preferences.JDK12PreferencePage"
-		class="org.eclipse.jdt.internal.ui.launcher.JDK12PreferencePage"
-		name= "JDK 1.2"
-		category= "org.eclipse.jdt.ui.preferences.VMPreferencePage">
-	</page>
-	<page
-		id = "org.eclipse.jdt.ui.preferences.J9PreferencePage"
-		class="org.eclipse.jdt.internal.ui.launcher.J9PreferencePage"
-		name= "J9"
-		category= "org.eclipse.jdt.ui.preferences.VMPreferencePage">
+		id = "org.eclipse.jdt.ui.preferences.JDIPreferencePage"
+		class="org.eclipse.jdt.internal.ui.launcher.JDIPreferencePage"
+		name= "JDI Debugging"
+		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
 </extension>
 

@@ -128,6 +128,17 @@ public final class JavaUI {
 	public static final String ID_TYPE_HIERARCHY= 		"org.eclipse.jdt.ui.TypeHierarchy";
 	
 	/**
+	 * The class org.eclipse.debug.core.model.IProcess allows attaching
+	 * String properties to processes. The Java UI contributes a property
+	 * page for IProcess that will show the contents of the property
+	 * with this key.
+	 * The intent of this property is to show the command line a process
+	 * was launched with.
+	 */
+	public final static String ATTR_CMDLINE= JavaPlugin.getPluginId()+".launcher.cmdLine";
+
+	
+	/**
 	 * Returns the shared images for the Java UI.
 	 *
 	 * @return the shared images manager

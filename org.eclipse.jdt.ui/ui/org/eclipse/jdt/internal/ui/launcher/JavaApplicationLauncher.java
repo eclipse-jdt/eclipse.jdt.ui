@@ -6,60 +6,7 @@ package org.eclipse.jdt.internal.ui.launcher;
  * (c) Copyright IBM Corp 1999, 2000
  */
 
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.Vector;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.wizard.WizardDialog;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExecutableExtension;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-
-import org.eclipse.ui.IFileEditorInput;
-
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILauncher;
-import org.eclipse.debug.core.Launch;
-import org.eclipse.debug.core.model.ILauncherDelegate;
-import org.eclipse.debug.core.model.ISourceLocator;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
-import org.eclipse.jdt.internal.ui.util.Utilities;
-import org.eclipse.jdt.launching.ExecutionArguments;
-import org.eclipse.jdt.launching.IVMRunner;
-import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.jdt.launching.ProjectSourceLocator;
-import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.eclipse.jdt.launching.VMRunnerResult;
+import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Iterator;import java.util.List;import java.util.StringTokenizer;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IncrementalProjectBuilder;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IConfigurationElement;import org.eclipse.core.runtime.IExecutableExtension;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.ILaunch;import org.eclipse.debug.core.ILauncher;import org.eclipse.debug.core.Launch;import org.eclipse.debug.core.model.ILauncherDelegate;import org.eclipse.debug.core.model.ISourceLocator;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.Utilities;import org.eclipse.jdt.launching.ExecutionArguments;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.ProjectSourceLocator;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.wizard.WizardDialog;import org.eclipse.ui.IFileEditorInput;import org.omg.CORBA.UNKNOWN;
 
 /**
  * A launcher for running java main classes. Uses JDI to launch a vm in debug 
@@ -250,12 +197,12 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 	}
 	
 	protected IVMRunner getJavaLauncher(IJavaProject p, String mode) throws CoreException {
-		String vm= null;
-		if (p != null)
-			vm= JavaRuntime.getJavaRuntime(p);
-		if (vm == null)
-			vm= JavaPlugin.getDefault().getPreferenceStore().getString(VMPreferencePage.PREF_VM);
-		return JavaRuntime.getVMLauncher(mode, vm);
+		if (p != null) {
+			IVM vm= JavaRuntime.getVM(p);
+			if (vm != null)
+				return vm.getVMRunner(mode);
+		}
+		return null;
 	}
 	
 	protected IVMRunner getJavaLauncher(IStructuredSelection selection, String mode) throws CoreException {

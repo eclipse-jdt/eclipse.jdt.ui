@@ -6,13 +6,17 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.util.Date;import java.util.Vector;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;
+import java.io.File;import java.io.IOException;import java.util.Vector;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jdt.ui.JavaUI;
 
 public class J9Launcher extends JavaLauncher {
 	
 	private static final String PREFIX= "launcher.j9.";
 	
 	protected final static String ERROR_NO_J9_SPECIFIED= "launcher.error.noJ9specified.";
+
+	public J9Launcher(IVM vmInstance) {
+		super(vmInstance);
+	}
 
 	public VMRunnerResult run(VMRunnerConfiguration config) {
 		String location= getJDKLocation("");
@@ -50,7 +54,7 @@ public class J9Launcher extends JavaLauncher {
 		try {
 			Process p= Runtime.getRuntime().exec(cmdLine);
 			IProcess process= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
-			process.setAttribute(ATTR_CMDLINE, renderCommandLine(cmdLine));
+			process.setAttribute(JavaUI.ATTR_CMDLINE, renderCommandLine(cmdLine));
 			return new VMRunnerResult(null, new IProcess[] { process });
 		} catch (IOException e) {
 			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_CREATE_PROCESS, new LauncherException(e));
@@ -60,13 +64,6 @@ public class J9Launcher extends JavaLauncher {
 
 	protected boolean shouldIncludeInPath(String path) {
 		return true;
-	}
-	
-	protected String getJDKLocation(String dflt) {
-		String location= JavaPlugin.getDefault().getPreferenceStore().getString(J9PreferencePage.PREF_LOCATION);
-		if (location == null)
-			return dflt;
-		return location;
 	}
 	
 	protected String convertClassPath(String[] cp) {

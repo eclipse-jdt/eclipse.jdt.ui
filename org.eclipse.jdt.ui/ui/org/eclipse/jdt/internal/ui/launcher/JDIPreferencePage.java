@@ -11,53 +11,43 @@ import java.io.File;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.
 /*
  * The page for setting java concole preferences.
  */
-public class J9PreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
-
-	public static final String PREF_LOCATION= "org.eclipse.jdt.ui.Launcher.J9.location";
-	public static final String PREF_TIMEOUT= "org.eclipse.jdt.ui.Launcher.J9.timeout";
-	protected static final String PREFIX= "launcher.j9.preferences.";
-	protected static final String DESCRIPTION= PREFIX + "description";
-	protected static final String HOME= PREFIX+"home";
-	protected static final String TIMEOUT= PREFIX+"timeout";
-	private JDKRootFieldEditor fJDKRoot;
-
-	public J9PreferencePage() {
+public class JDIPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {	
+	
+	public static final String PREF_TIMEOUT= "org.eclipse.jdt.ui.launcher.jdi.timeout";
+	private MinMaxIntegerFieldEditor fTimeout;
+	
+	public JDIPreferencePage() {
 		super(GRID);
-
+		
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		setPreferenceStore(store);
-
-		setDescription(JavaLaunchUtils.getResourceString(DESCRIPTION));
 	}
+	
+
 
 	/**
 	 * @see FieldEditorPreferencePage#createFieldEditors
 	 */
 	protected void createFieldEditors() {
 		Composite parent= getFieldEditorParent();
-		String suffix1= "bin" + File.separator + "j9.exe";
-		String suffix2= "bin" + File.separator + "j9";
-		fJDKRoot= new JDKRootFieldEditor(PREF_LOCATION, JavaLaunchUtils.getResourceString(HOME), new String[] { suffix1, suffix2 }, parent);
-		addField(fJDKRoot);
-		MinMaxIntegerFieldEditor timeout= new MinMaxIntegerFieldEditor(PREF_TIMEOUT, JavaLaunchUtils.getResourceString(TIMEOUT), parent);
-		timeout.setMinimumValue(500);
-		addField(timeout);
+		fTimeout= new MinMaxIntegerFieldEditor(PREF_TIMEOUT, "Request Timeout:", parent);
+		fTimeout.setMinimumValue(500);
+		addField(fTimeout);
 	}
-
+	
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible)
-			fJDKRoot.setFocus();
+			fTimeout.setFocus();
 	}
 	
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(PREF_TIMEOUT, 3000);
 	}
+	
 	/**
 	 * @see IWorkbenchPreferencePage#init
 	 */
 	public void init(IWorkbench workbench) {
 	}
-
 }
-

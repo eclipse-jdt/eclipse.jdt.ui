@@ -6,7 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.List;import java.util.Map;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdi.Bootstrap;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.SocketUtil;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import com.sun.jdi.VirtualMachine;import com.sun.jdi.connect.AttachingConnector;import com.sun.jdi.connect.Connector;import com.sun.jdi.connect.IllegalConnectorArgumentsException;import com.sun.jdi.connect.Connector.IntegerArgument;
+import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.List;import java.util.Map;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdi.Bootstrap;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.SocketUtil;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jdt.ui.JavaUI;import com.sun.jdi.VirtualMachine;import com.sun.jdi.connect.AttachingConnector;import com.sun.jdi.connect.Connector;import com.sun.jdi.connect.IllegalConnectorArgumentsException;import com.sun.jdi.connect.Connector.IntegerArgument;
 
 public class J9DebugLauncher extends J9Launcher {
 	private static final String PREFIX= "launcher.j9.debug.";
@@ -14,6 +14,10 @@ public class J9DebugLauncher extends J9Launcher {
 	protected static final String ERROR_NO_PORT=PREFIX+"error.no_port.";
 	protected static final String ERROR_NO_CONNECTOR=PREFIX+"error.no_connector.";
 	protected static final String ERROR_CONNECT= PREFIX+"error.connect.";
+	
+	public J9DebugLauncher(IVM vmInstance) {
+		super(vmInstance);
+	}
 	
 	public VMRunnerResult run(VMRunnerConfiguration config) {
 		int port= SocketUtil.findUnusedLocalPort("localhost", 5000, 15000);
@@ -73,8 +77,8 @@ public class J9DebugLauncher extends J9Launcher {
 		}
 		IProcess process1= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
 		IProcess process2= DebugPlugin.getDefault().newProcess(p2, renderProcessLabel(new String[] { "j9Proxy" }));
-		process1.setAttribute(ATTR_CMDLINE, renderCommandLine(cmdLine));
-		process2.setAttribute(ATTR_CMDLINE, proxyCmd);
+		process1.setAttribute(JavaUI.ATTR_CMDLINE, renderCommandLine(cmdLine));
+		process2.setAttribute(JavaUI.ATTR_CMDLINE, proxyCmd);
 				
 		AttachingConnector connector= getConnector();
 		if (connector == null) {

@@ -6,14 +6,18 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.text.DateFormat;import java.util.Date;import java.util.List;import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.Utilities;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.swt.widgets.Display;import com.sun.jdi.VirtualMachine;
+import java.io.File;import java.text.DateFormat;import java.util.Date;import java.util.List;import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jdt.internal.ui.util.Utilities;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.swt.widgets.Display;import com.sun.jdi.VirtualMachine;
 
 public abstract class JavaLauncher implements IVMRunner {
 	protected final static String PREFIX= "launcher.";
 	protected final static String ERROR_CREATE_PROCESS= PREFIX+"error.create_process.";
 	protected final static String ERROR_LAUNCHING= PREFIX+"error.launch.";
 
-	public final static String ATTR_CMDLINE= JavaPlugin.getPluginId()+'.'+PREFIX+"cmdLine";
+	protected IVM fVMInstance;
+
+	public JavaLauncher(IVM vmInstance) {
+		fVMInstance= vmInstance;
+	}
 	
 	protected String renderDebugTarget(String classToRun, int host) {
 		return classToRun+" at localhost:"+host;
@@ -72,12 +76,19 @@ public abstract class JavaLauncher implements IVMRunner {
 	}
 	
 	
-	protected void setTimeout(VirtualMachine vm) {
+	protected void setTimeout(VirtualMachine vm) {		
 		if (vm instanceof org.eclipse.jdi.VirtualMachine) {
-			int timeout= JavaPlugin.getDefault().getPreferenceStore().getInt(JDK12PreferencePage.PREF_TIMEOUT);
+			JdtHackFinder.fixMeSoon("preference for timeout");
+			int timeout= JavaPlugin.getDefault().getPreferenceStore().getInt(JDIPreferencePage.PREF_TIMEOUT);
 			org.eclipse.jdi.VirtualMachine vm2= (org.eclipse.jdi.VirtualMachine)vm;
 			vm2.setRequestTimeout(timeout);
 		}
 	}
 
+	protected String getJDKLocation(String dflt) {
+		File location= fVMInstance.getInstallLocation();
+		if (location == null)
+			return dflt;
+		return location.getAbsolutePath();
+	}
 }

@@ -5,15 +5,7 @@ package org.eclipse.jdt.internal.ui;/*
  */
 
 
-import java.io.File;
-
-import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.jdt.internal.ui.launcher.J9PreferencePage;
-import org.eclipse.jdt.internal.ui.launcher.VMPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JDKZipFieldEditor;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.launching.JavaRuntime;
+import java.io.File;import org.eclipse.jdt.internal.ui.preferences.JDKZipFieldEditor;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
  * @see IRuntimeSettings
@@ -39,7 +31,10 @@ public class J9Settings implements IRuntimeDefaultPreferences {
 			preferences.setDefault(JDKZipFieldEditor.PROP_PREFIX, "");
 		}
 		
-		preferences.setDefault(J9PreferencePage.PREF_LOCATION, javaHome.getAbsolutePath());
+		org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixMeSoon("removed for testing");
+
+/*		preferences.setDefault(J9PreferencePage.PREF_LOCATION, javaHome.getAbsolutePath());
+		
 		
 		String[] vms= JavaRuntime.getJavaRuntimes();
 		for (int i= 0; i < vms.length; i++) {
@@ -47,6 +42,6 @@ public class J9Settings implements IRuntimeDefaultPreferences {
 				preferences.setDefault(VMPreferencePage.PREF_VM, "J9");
 				break;
 			}
-		}
+		}*/
 	}
 }

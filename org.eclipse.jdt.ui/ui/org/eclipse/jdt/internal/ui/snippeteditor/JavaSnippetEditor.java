@@ -6,67 +6,7 @@ package org.eclipse.jdt.internal.ui.snippeteditor;
  */
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-
-import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.part.EditorActionBarContributor;
-import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
-import org.eclipse.ui.texteditor.ITextEditorActionConstants;
-import org.eclipse.ui.texteditor.MarkerUtilities;
-import org.eclipse.ui.texteditor.TextOperationAction;
-
-import org.eclipse.debug.core.DebugEvent;
-import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IDebugEventListener;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.ILauncher;
-import org.eclipse.debug.core.model.IDebugElement;
-import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.debug.ui.DebugUITools;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.eval.IEvaluationContext;
-import org.eclipse.jdt.debug.core.IJavaEvaluationListener;
-import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
-import org.eclipse.jdt.debug.core.IJavaStackFrame;
-import org.eclipse.jdt.debug.core.IJavaThread;
-import org.eclipse.jdt.debug.core.IJavaValue;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.jdt.internal.debug.core.JDIDebugTarget;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.launcher.JDK12PreferencePage;
-import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
-import org.eclipse.jdt.launching.JavaRuntime;
+import java.util.ArrayList;import java.util.List;import java.util.ResourceBundle;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IProject;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IStatus;import org.eclipse.debug.core.DebugEvent;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IDebugEventListener;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.debug.core.ILauncher;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.eval.IEvaluationContext;import org.eclipse.jdt.debug.core.IJavaEvaluationListener;import org.eclipse.jdt.debug.core.IJavaEvaluationResult;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.debug.core.IJavaThread;import org.eclipse.jdt.debug.core.IJavaValue;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.java.ResultCollector;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.util.Assert;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorSite;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.AbstractTextEditor;import org.eclipse.ui.texteditor.ITextEditorActionConstants;import org.eclipse.ui.texteditor.MarkerUtilities;import org.eclipse.ui.texteditor.TextOperationAction;
 
 /**
  * An editor for Java snippets.
@@ -407,10 +347,6 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		return true;
 	}
 	
-	String getJDKHome() {
-		return JavaPlugin.getDefault().getPreferenceStore().getString(JDK12PreferencePage.PREF_LOCATION);
-	}
-		
 	void evaluationStarts() {
 		fEvaluating= true;
 		fireEvalStateChanged();
