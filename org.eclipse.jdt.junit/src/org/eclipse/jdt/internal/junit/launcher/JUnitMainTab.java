@@ -39,6 +39,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -64,7 +65,6 @@ import org.eclipse.jdt.internal.debug.ui.launcher.VMStandin;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.*;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
@@ -314,8 +314,12 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	}
 
 	/**
-	 * @see ILaunchConfigurationTab#isPageComplete()
+	 * @see ILaunchConfigurationTab#isValid(ILaunchConfiguration)
 	 */
+	public boolean isValid(ILaunchConfiguration config) {
+		return isValid();
+	}
+
 	public boolean isValid() {
 		
 		setErrorMessage(null);
