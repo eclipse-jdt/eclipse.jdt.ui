@@ -415,13 +415,10 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 			return;
 		}
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope((IResource[])resources.toArray(new IResource[resources.size()]));
-
-		IType mainClass= fJarPackage.getMainClass();
-		String name= (mainClass == null) ? "" : mainClass.getElementName(); //$NON-NLS-1$
-		SelectionDialog dialog=	JavaUI.createMainTypeDialog(getContainer().getShell(), getContainer(), searchScope, 0, false, name);
+		SelectionDialog dialog= JavaUI.createMainTypeDialog(getContainer().getShell(), getContainer(), searchScope, 0, false, ""); //$NON-NLS-1$
 		dialog.setTitle(JarPackagerMessages.getString("JarManifestWizardPage.mainTypeSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.mainTypeSelectionDialog.message")); //$NON-NLS-1$
-		dialog.setInitialSelections(new Object[] {mainClass});
+		dialog.setInitialSelections(new Object[] {fJarPackage.getMainClass()});
 
 		if (dialog.open() == dialog.OK) {
 			fJarPackage.setMainClass((IType)dialog.getResult()[0]);
