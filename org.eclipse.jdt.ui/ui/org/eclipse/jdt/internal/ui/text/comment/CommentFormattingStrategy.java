@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterPreferenceConstants;
-import org.eclipse.jdt.internal.corext.text.comment.CommentObjectFactory;
+import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterConstants;
 import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -154,11 +154,11 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 */
 	private static int getKindForPartitionType(String type) {
 		if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type))
-				return CommentObjectFactory.K_SINGLE_LINE_COMMENT;
+				return CommentFormatterConstants.K_SINGLE_LINE_COMMENT;
 		if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type))
-				return CommentObjectFactory.K_MULTI_LINE_COMMENT;
+				return CommentFormatterConstants.K_MULTI_LINE_COMMENT;
 		if (IJavaPartitions.JAVA_DOC.equals(type))
-				return CommentObjectFactory.K_JAVA_DOC;
+				return CommentFormatterConstants.K_JAVA_DOC;
 		return -1;
 	}
 	

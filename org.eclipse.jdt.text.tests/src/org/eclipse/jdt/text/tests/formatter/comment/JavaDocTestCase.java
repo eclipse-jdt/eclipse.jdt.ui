@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterPreferenceConstants;
-import org.eclipse.jdt.internal.corext.text.comment.CommentObjectFactory;
+import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterConstants;
 import org.eclipse.jdt.internal.corext.text.comment.JavaDocLine;
 import org.eclipse.jdt.internal.corext.text.comment.MultiCommentLine;
 
@@ -38,7 +38,7 @@ public class JavaDocTestCase extends CommentTestCase {
 	}
 
 	protected int getCommentKind() {
-		return CommentObjectFactory.K_JAVA_DOC;
+		return CommentFormatterConstants.K_JAVA_DOC;
 	}
 
 	public void testSingleLineComment1() {

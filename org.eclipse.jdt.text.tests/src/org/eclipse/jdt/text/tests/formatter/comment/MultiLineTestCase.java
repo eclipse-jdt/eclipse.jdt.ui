@@ -14,7 +14,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterPreferenceConstants;
-import org.eclipse.jdt.internal.corext.text.comment.CommentObjectFactory;
+import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterConstants;
 import org.eclipse.jdt.internal.corext.text.comment.MultiCommentLine;
 
 public class MultiLineTestCase extends CommentTestCase {
@@ -34,7 +34,7 @@ public class MultiLineTestCase extends CommentTestCase {
 	}
 
 	protected int getCommentKind() {
-		return CommentObjectFactory.K_MULTI_LINE_COMMENT;
+		return CommentFormatterConstants.K_MULTI_LINE_COMMENT;
 	}
 
 	public void testSingleLineComment1() {

@@ -70,10 +70,36 @@ public class CommentFormatter extends CodeFormatter {
 		final boolean isFormattingComments= Boolean.toString(true).equals(fPreferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMAT));
 		TextEdit edit= null;
 		if (isFormattingComments) {
-			final CommentRegion region= CommentObjectFactory.createRegion(kind, document, position, lineDelimiter, fPreferences, fTextMeasurement);
+			final CommentRegion region= createRegion(kind, document, position, lineDelimiter, fPreferences, fTextMeasurement);
 			if (region != null)
 				edit= region.format(indentationLevel);
 		}
 		return edit;
+	}
+
+	/**
+	 * Creates a comment region for a specific document partition type.
+	 * 
+	 * @param kind the comment snippet kind
+	 * @param document the document which contains the comment region
+	 * @param range range of the comment region in the document
+	 * @param delimiter line delimiter to use in the comment region
+	 * @param preferences the preferences to use
+	 * @param textMeasurement the text measurement. Can be <code>null</code>.
+	 * @return a new comment region for the comment region range in the
+	 *         document
+	 * @since 3.1
+	 */
+	private static CommentRegion createRegion(int kind, IDocument document, Position range, String delimiter, Map preferences, ITextMeasurement textMeasurement) {
+		switch (kind) {
+			case CommentFormatterConstants.K_SINGLE_LINE_COMMENT:
+				return new CommentRegion(document, range, delimiter, preferences, textMeasurement);
+			case CommentFormatterConstants.K_MULTI_LINE_COMMENT:
+				return new MultiCommentRegion(document, range, delimiter, preferences, textMeasurement);
+			case CommentFormatterConstants.K_JAVA_DOC:
+				return new JavaDocRegion(document, range, delimiter, preferences, textMeasurement);
+			default:
+				return null;
+		}
 	}
 }

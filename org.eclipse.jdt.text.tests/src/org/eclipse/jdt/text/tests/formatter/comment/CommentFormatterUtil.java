@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.Assert; // TODO: replace with org.eclipse.jdt.internal.core.Assert
 import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterPreferenceConstants;
-import org.eclipse.jdt.internal.corext.text.comment.CommentObjectFactory;
+import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterConstants;
 import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
 import org.eclipse.jdt.internal.corext.text.comment.ToolFactory;
 
@@ -72,7 +72,7 @@ public class CommentFormatterUtil {
 	 * @return the formatted source string
 	 */
 	public static String format(int kind, String source, int offset, int length, Map preferences, ITextMeasurement textMeasurement) {
-		Assert.isTrue(kind == CommentObjectFactory.K_JAVA_DOC || kind == CommentObjectFactory.K_MULTI_LINE_COMMENT || kind == CommentObjectFactory.K_SINGLE_LINE_COMMENT);
+		Assert.isTrue(kind == CommentFormatterConstants.K_JAVA_DOC || kind == CommentFormatterConstants.K_MULTI_LINE_COMMENT || kind == CommentFormatterConstants.K_SINGLE_LINE_COMMENT);
 
 		Assert.isNotNull(source);
 		Assert.isNotNull(preferences);

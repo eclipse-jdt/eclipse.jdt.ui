@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterPreferenceConstants;
-import org.eclipse.jdt.internal.corext.text.comment.CommentObjectFactory;
+import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterConstants;
 import org.eclipse.jdt.internal.corext.text.comment.SingleCommentLine;
 
 public class SingleLineTestCase extends CommentTestCase {
@@ -33,7 +33,7 @@ public class SingleLineTestCase extends CommentTestCase {
 	}
 
 	protected int getCommentKind() {
-		return CommentObjectFactory.K_SINGLE_LINE_COMMENT;
+		return CommentFormatterConstants.K_SINGLE_LINE_COMMENT;
 	}
 
 	public void testClearBlankLines1() {

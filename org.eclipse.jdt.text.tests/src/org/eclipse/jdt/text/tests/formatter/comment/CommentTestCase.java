@@ -18,7 +18,7 @@ import junit.framework.TestCase;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.TextUtilities;
 
-import org.eclipse.jdt.internal.corext.text.comment.CommentObjectFactory;
+import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterConstants;
 
 public abstract class CommentTestCase extends TestCase {
 
@@ -65,7 +65,7 @@ public abstract class CommentTestCase extends TestCase {
 		assertTrue(length >= 0);
 		assertTrue(offset + length <= text.length());
 
-		assertTrue(kind == CommentObjectFactory.K_JAVA_DOC || kind == CommentObjectFactory.K_MULTI_LINE_COMMENT || kind == CommentObjectFactory.K_SINGLE_LINE_COMMENT);
+		assertTrue(kind == CommentFormatterConstants.K_JAVA_DOC || kind == CommentFormatterConstants.K_MULTI_LINE_COMMENT || kind == CommentFormatterConstants.K_SINGLE_LINE_COMMENT);
 
 		return CommentFormatterUtil.format(kind, text, offset, length, CommentFormatterUtil.createOptions(getUserOptions()), null);
 	}
