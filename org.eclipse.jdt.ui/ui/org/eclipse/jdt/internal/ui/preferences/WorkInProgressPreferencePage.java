@@ -40,7 +40,6 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
-		store.setDefault(PREF_SHOW_TEMP_PROBLEMS, false);
 	}
 	
 	/*
@@ -62,13 +61,6 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 			parent
         );
 		addField(boolEditor);
-		
-		boolEditor= new BooleanFieldEditor(
-			PREF_SHOW_TEMP_PROBLEMS,
-			"Show &temporary problems solvable with Quick Fix in vertical ruler", //$NON-NLS-1$
-			parent
-        );
-		addField(boolEditor);
 	}
 	
 	/*
@@ -77,11 +69,11 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	public void init(IWorkbench workbench) {
 	}
 	
-	static public boolean synchronizeOutlineOnCursorMove() {
+	public static boolean synchronizeOutlineOnCursorMove() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE);
 	}
 	
-	static public boolean showTempProblems() {
+	public static boolean showTempProblems() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SHOW_TEMP_PROBLEMS);
 	}
 }

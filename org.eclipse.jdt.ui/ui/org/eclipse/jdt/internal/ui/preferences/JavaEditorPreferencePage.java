@@ -132,6 +132,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PROBLEM_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PROBLEM_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, WorkInProgressPreferencePage.PREF_SHOW_TEMP_PROBLEMS),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS),
 		
@@ -236,6 +237,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fPrintMarginButton;
 	private Control fPrintMarginColumn;
 	private Button fProblemIndicationButton;
+	private Button fQuickFixableProblemButton;
 	
 	public JavaEditorPreferencePage() {
 		setDescription(JavaUIMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
@@ -279,6 +281,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		PreferenceConverter.setDefault(store, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE, new RGB(185, 176 , 180));
 		
 		store.setDefault(CompilationUnitEditor.PROBLEM_INDICATION, true);
+		store.setDefault(WorkInProgressPreferencePage.PREF_SHOW_TEMP_PROBLEMS, false);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, new RGB(255, 0 , 128));
 		
 		store.setDefault(CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, true);
@@ -640,6 +643,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightProblems"); //$NON-NLS-1$
 		fProblemIndicationButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
+
+		label= "Show &temporary problems solvable with Quick Fix in vertical ruler";
+		fQuickFixableProblemButton= addCheckBox(behaviorComposite, label, WorkInProgressPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
 		fPrintMarginButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
