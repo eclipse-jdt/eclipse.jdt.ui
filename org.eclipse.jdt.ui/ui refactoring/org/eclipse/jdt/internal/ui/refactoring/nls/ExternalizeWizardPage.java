@@ -73,6 +73,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private static final int VAL_PROP= 2; 
 	private static final int SIZE= 3; //column counter
 	
+	private static final int ROW_COUNT= 5;
+	
 	public static final String DEFAULT_KEY_PREFIX= ""; //$NON-NLS-1$
 	
 	public static final String PAGE_NAME= "NLSWizardPage1"; //$NON-NLS-1$
@@ -402,7 +404,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		c.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		fTable= new Table(c, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION | SWT.HIDE_SELECTION | SWT.BORDER);
-		fTable.setLayoutData(new GridData(GridData.FILL_BOTH));
+		GridData tableGD= new GridData(GridData.FILL_BOTH);
+		tableGD.heightHint= fTable.getGridLineWidth() + fTable.getItemHeight() * ROW_COUNT;
+		fTable.setLayoutData(tableGD);
 		
 		fTable.setLinesVisible(true);
 		fTableEditor= new TableEditor(fTable);
