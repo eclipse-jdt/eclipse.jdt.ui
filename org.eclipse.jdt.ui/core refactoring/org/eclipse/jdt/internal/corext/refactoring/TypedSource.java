@@ -161,7 +161,7 @@ public class TypedSource {
 
 	private static String getSourceOfDeclararationNode(IJavaElement elem, ICompilationUnit cu, CompilationUnit cuNode) throws JavaModelException, CoreException {
 		Assert.isTrue(elem.getElementType() != IJavaElement.IMPORT_CONTAINER);
-		ASTNode[] nodes= ASTNodeSearchUtil.getDeclarationNode(elem, cuNode);
+		ASTNode[] nodes= ASTNodeSearchUtil.getDeclarationNodes(elem, cuNode);
 		if (nodes != null && nodes.length == 1) {
 			return trimIndent(cu.getBuffer().getText(nodes[0].getStartPosition(), nodes[0].getLength()));
 		} else 
