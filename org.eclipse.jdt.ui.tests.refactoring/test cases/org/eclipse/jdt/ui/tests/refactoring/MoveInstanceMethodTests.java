@@ -277,8 +277,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 
 	//move to field - do not pass 'this' because it's unneeded
 	public void test12() throws Exception {
-		printTestDisabledMessage("not implemented yet");
-		//helper1(new String[] {"p1.A", "p2.B"}, "p1.A", 8, 17, 8, 20, FIELD, "fB", false, false);
+		helper1(new String[] {"p1.A", "p2.B"}, "p1.A", 8, 17, 8, 20, FIELD, "fB", false, false);
 	}	
 
 	//junit case
@@ -322,6 +321,22 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test20() throws Exception {
 		helper1(new String[] {"p.A", "p.B", "p.StarDecorator"}, "p.A", 10, 17, 10, 22, PARAMETER, "b", false, false);
 	}	
+
+	// Arguments of method calls preserved in moved body (bug 41468)
+	public void test21() throws Exception {
+		helper1(new String[] {"p.A", "p.Second"}, "p.A", 5, 17, 5, 22, FIELD, "s", false, false);
+	}
+
+	// arguments of method calls preserved in moved body (bug 41468),
+	// use "this" instead of field (bug 38310)
+	public void test22() throws Exception {
+		helper1(new String[] {"p.A", "p.Second"}, "p.A", 5, 17, 5, 22, FIELD, "s", false, false);
+	}
+
+	// "this"-qualified field access: this.s -> this (bug 41597)
+	public void test23() throws Exception {
+		helper1(new String[] {"p.A", "p.Second"}, "p.A", 5, 17, 5, 22, FIELD, "s", false, false);
+	}
 
 
 	// Cannot move interface method declaration

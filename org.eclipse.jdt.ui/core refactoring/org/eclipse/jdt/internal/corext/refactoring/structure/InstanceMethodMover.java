@@ -658,19 +658,24 @@ class InstanceMethodMover {
 				Assert.isNotNull(expression);
 				
 				ASTNode parent= expression.getParent();
-				if(parent instanceof MethodInvocation) {
+				if (parent instanceof MethodInvocation) {
 					MethodInvocation invocation= (MethodInvocation) parent;
 					if(expression.equals(invocation.getExpression()))
 						replaceReceiverWithImplicitThis(invocation);
-					else if(invocation.arguments().contains(expression))
+					else if (invocation.arguments().contains(expression))
 						replaceExpressionWithExplicitThis(expression);
 					else		
 						Assert.isTrue(false, "expression should be an expression for which, syntactically, \"this\" could by substituted, so not the name in a method invocation."); //$NON-NLS-1$
-				} else if(parent instanceof FieldAccess) {
+				} else if (parent instanceof FieldAccess) {
 					FieldAccess fieldAccess= (FieldAccess) parent;
-					Assert.isTrue(expression.equals(fieldAccess.getExpression()), "expression should be an expression for which, syntactically, \"this\" could by substituted, so not the field name in a field access."); //$NON-NLS-1$
-					replaceReceiverWithImplicitThis(fieldAccess);
-				} else if(parent instanceof QualifiedName) {
+					if (fieldAccess.getExpression() instanceof ThisExpression) {
+						Assert.isTrue(expression.equals(fieldAccess.getName()), "expression should syntactically be substitutable by \"this\"");
+						replaceExpressionWithSelfReference(fieldAccess); //recursion
+					} else {
+						Assert.isTrue(expression.equals(fieldAccess.getExpression()), "expression should be an expression for which, syntactically, \"this\" could by substituted, so not the field name in a field access."); //$NON-NLS-1$
+						replaceReceiverWithImplicitThis(fieldAccess);
+					}
+				} else if (parent instanceof QualifiedName) {
 					QualifiedName qualifiedName= (QualifiedName) parent;
 					Assert.isTrue(isQualifiedNameUsedAsFieldAccessOnObject(qualifiedName, expression), "expression should be an expression for which, syntactically, \"this\" could by substituted."); //$NON-NLS-1$
 					replaceReceiverWithImplicitThis(qualifiedName);
@@ -679,10 +684,7 @@ class InstanceMethodMover {
 			}
 			
 			private void replaceReceiverWithImplicitThis(MethodInvocation invocation) {
-				MethodInvocation replacement= invocation.getAST().newMethodInvocation();
-				replacement.setName((SimpleName) fRewrite.createCopy(invocation.getName()));
-				
-				fRewrite.markAsReplaced(invocation, replacement);
+				fRewrite.markAsRemoved(invocation.getExpression());
 			}
 	
 			private void replaceReceiverWithImplicitThis(FieldAccess fieldAccess) {
