@@ -20,11 +20,6 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
 
 	public static final String GROUP_ID= IContextMenuConstants.GROUP_SEARCH;
-	private final ElementSearchAction[] fActions;
-
-	public JavaSearchSubGroup() {
-		fActions= getActions();
-	}
 
 	abstract protected ElementSearchAction[] getActions();
 	
@@ -32,9 +27,9 @@ public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
 	
 	public void fill(IMenuManager manager, GroupContext context) {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID);
-		
-		for (int i= 0; i < fActions.length; i++) {
-			ElementSearchAction action= fActions[i];
+		ElementSearchAction[] actions= getActions();
+		for (int i= 0; i < actions.length; i++) {
+			ElementSearchAction action= actions[i];
 			if (action.canOperateOn(context.getSelection()))
 				javaSearchMM.add(action);
 		}
@@ -45,9 +40,10 @@ public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
 
 	public MenuManager getMenuManagerForGroup(boolean isTextSelectionEmpty) {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID); //$NON-NLS-1$
+		ElementSearchAction[] actions= getActions();
 		if (!isTextSelectionEmpty) {
-			for (int i= 0; i < fActions.length; i++)
-				javaSearchMM.add(fActions[i]);
+			for (int i= 0; i < actions.length; i++)
+				javaSearchMM.add(actions[i]);
 		}
 		return javaSearchMM;
 	}

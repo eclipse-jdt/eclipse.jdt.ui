@@ -26,6 +26,7 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 		IWorkingSet workingSet= queryWorkingSet();
 		if (workingSet == null)
 			return null;
+		updateLRUWorkingSet(workingSet);
 		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
 	};
 

@@ -17,6 +17,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 
+	private IWorkingSet fWorkingSet;
+	
 	public FindReferencesInWorkingSetAction() {
 		setText(SearchMessages.getString("Search.FindReferencesInWorkingSetAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
@@ -26,10 +28,24 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 		super(label, validTypes);
 	}
 
+	FindReferencesInWorkingSetAction(IWorkingSet workingSet, Class[] validTypes) {
+		super("", validTypes);  //$NON-NLS-1$
+		fWorkingSet= workingSet;
+	}
+
+	public FindReferencesInWorkingSetAction(IWorkingSet workingSet) {
+		this();
+		fWorkingSet= workingSet;
+	}
+
 	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		IWorkingSet workingSet= queryWorkingSet();
-		if (workingSet == null)
-			return null;
+		IWorkingSet workingSet= fWorkingSet;
+		if (fWorkingSet == null) {
+			workingSet= queryWorkingSet();
+			if (workingSet == null)
+				return null;
+		}
+		updateLRUWorkingSet(workingSet);
 		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
 	};
 

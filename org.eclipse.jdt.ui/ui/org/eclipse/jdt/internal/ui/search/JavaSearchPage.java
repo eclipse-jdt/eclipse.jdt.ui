@@ -156,6 +156,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 					return false;
 				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()}); //$NON-NLS-1$
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSet());
+				ElementSearchAction.updateLRUWorkingSet(getContainer().getSelectedWorkingSet());
 		}		
 		
 		JavaSearchResultCollector collector= new JavaSearchResultCollector();
@@ -230,7 +231,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			if (fSearchFor[i].getSelection())
 				return i;
 		}
-		Assert.isTrue(false, SearchMessages.getString("SearchPage.shouldNeverHappen")); //$NON-NLS-1$
+		Assert.isTrue(false, "shouldNeverHappen"); //$NON-NLS-1$
 		return -1;
 	}
 	

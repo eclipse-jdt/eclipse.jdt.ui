@@ -16,8 +16,16 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jface.util.Assert;
 
 public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
+
+	private IWorkingSet fWorkingSet;
+
+	public FindDeclarationsInWorkingSetAction(IWorkingSet workingSet) {
+		this();
+		fWorkingSet= workingSet;
+	}
 
 	public FindDeclarationsInWorkingSetAction() {
 		setText(SearchMessages.getString("Search.FindDeclarationsInWorkingSetAction.label")); //$NON-NLS-1$
@@ -25,9 +33,13 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 	}
 
 	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		IWorkingSet workingSet= queryWorkingSet();
-		if (workingSet == null)
-			return null;
+		IWorkingSet workingSet= fWorkingSet;
+		if (fWorkingSet == null) {
+			workingSet= queryWorkingSet();
+			if (workingSet == null)
+				return null;
+		}
+		updateLRUWorkingSet(workingSet);
 		if (element.getElementType() == IJavaElement.METHOD) {
 			IMethod method= (IMethod)element;
 			int searchFor= IJavaSearchConstants.METHOD;
