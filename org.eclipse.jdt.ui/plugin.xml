@@ -1652,6 +1652,22 @@ JavaStructureDiffViewerCreator
 		class= "org.eclipse.jdt.internal.ui.filters.NonPublicTypeFilter"
 		enabled= "false">
 	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.TypesView.InterfaceFilter"
+		name= "%HideInterface.label"
+		description= "%HideInterface.description"
+		viewId= "org.eclipse.jdt.ui.TypesView"
+		class= "org.eclipse.jdt.internal.ui.filters.InterfaceFilter"
+		enabled= "false">
+	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.TypesView.ClassFilter"
+		name= "%HideClass.label"
+		description= "%HideClass.description"
+		viewId= "org.eclipse.jdt.ui.TypesView"
+		class= "org.eclipse.jdt.internal.ui.filters.ClassFilter"
+		enabled= "false">
+	</filter>
 
 
 	<!-- Packages view -->
