@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -66,7 +66,7 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 			int startLine= document.getLineOfOffset(offset);
 			int endLine= document.getLineOfOffset(offset + length);
 			IRegion region= document.getLineInformation(endLine);
-			return ((startLine  < endLine) || (offset != region.getOffset() || length != region.getLength()));
+			return ((startLine  < endLine) || (length > 0 && offset == region.getOffset() && length == region.getLength()));
 		} catch (BadLocationException e) {
 			return false;
 		}
@@ -75,7 +75,7 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#process(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[], java.util.List)
 	 */
-	public void process(IAssistContext context, IProblemLocation[] locations, List resultingCollections) throws CoreException {
+	public void process(IAssistContext context, IProblemLocation[] locations, Collection resultingCollections) throws CoreException {
 		try {
 			ICompilationUnit cu= context.getCompilationUnit();
 			IDocument document= getDocument(cu);
@@ -87,7 +87,7 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 			int endLine= document.getLineOfOffset(offset + length);
 			IRegion endLineRegion= document.getLineInformation(endLine);
 			if (startLine  == endLine) {
-				if (offset != endLineRegion.getOffset() || length != endLineRegion.getLength()) {
+				if (length == 0 || offset != endLineRegion.getOffset() || length != endLineRegion.getLength()) {
 					return;
 				}
 			} else {
@@ -111,7 +111,7 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 		return document;
 	}
 	
-	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, List result) throws BadLocationException {
+	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection result) throws BadLocationException {
 		CompilationUnitContextType contextType= (CompilationUnitContextType) ContextTypeRegistry.getInstance().getContextType(JavaContextType.NAME);
 		CompilationUnitContext context= contextType.createContext(document, offset, length, cu);
 		context.setVariable("selection", document.get(offset, length)); //$NON-NLS-1$

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -122,7 +122,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ICorrectionProcessor#process(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[], java.util.List)
 	 */
-	public void process(IAssistContext context, IProblemLocation[] locations, List resultingCollections) throws CoreException {
+	public void process(IAssistContext context, IProblemLocation[] locations, Collection resultingCollections) throws CoreException {
 		if (locations == null || locations.length == 0) {
 			return;
 		}
@@ -137,7 +137,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 		}
 	}
 	
-	private void process(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	private void process(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		int id= problem.getProblemId();
 		if (id == 0) { // no proposals for none-problem locations
 			return;

@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -47,7 +48,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal
 
 public class UnresolvedElementsSubProcessor {
 	
-	public static void getVariableProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void getVariableProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		
 		ICompilationUnit cu= context.getCompilationUnit();
 		
@@ -192,7 +193,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
-	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, SimpleName node, List proposals) {
+	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, SimpleName node, Collection proposals) {
 		IBinding[] varsInScope= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(node, ScopeAnalyzer.VARIABLES);
 		if (varsInScope.length > 0) {
 			// avoid corrections like int i= i;
@@ -228,7 +229,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	public static void getTypeProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void getTypeProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		ASTNode selectedNode= problem.getCoveringNode(context);
@@ -301,7 +302,7 @@ public class UnresolvedElementsSubProcessor {
 		addNewTypeProposals(cu, node, kind, 0, proposals);
 	}
 
-	private static void addSimilarTypeProposals(int kind, ICompilationUnit cu, Name node, int relevance, List proposals) throws JavaModelException {
+	private static void addSimilarTypeProposals(int kind, ICompilationUnit cu, Name node, int relevance, Collection proposals) throws JavaModelException {
 		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, node, kind);
 		
 		// try to resolve type in context -> highest severity
@@ -350,7 +351,7 @@ public class UnresolvedElementsSubProcessor {
 		return proposal;
 	}
 
-	private static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, List proposals) throws JavaModelException {
+	private static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection proposals) throws JavaModelException {
 		Name node= refNode;
 		do {
 			String typeName= ASTResolving.getSimpleName(node);
@@ -401,7 +402,7 @@ public class UnresolvedElementsSubProcessor {
 		} while (node != null);
 	}
 	
-	public static void getMethodProposals(IAssistContext context, IProblemLocation problem, boolean needsNewName, List proposals) throws CoreException {
+	public static void getMethodProposals(IAssistContext context, IProblemLocation problem, boolean needsNewName, Collection proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 		
@@ -494,7 +495,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
-	private static void addParameterMissmatchProposals(IAssistContext context, IProblemLocation problem, List similarElements, List arguments, List proposals) throws CoreException {
+	private static void addParameterMissmatchProposals(IAssistContext context, IProblemLocation problem, List similarElements, List arguments, Collection proposals) throws CoreException {
 		int nSimilarElements= similarElements.size();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
 		if (argTypes == null || nSimilarElements == 0)  {
@@ -518,7 +519,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
-	private static void doMoreParameters(IAssistContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
+	private static void doMoreParameters(IAssistContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= paramTypes.length - argTypes.length;
@@ -599,7 +600,7 @@ public class UnresolvedElementsSubProcessor {
 		return buf.toString();
 	}
 
-	private static void doMoreArguments(IAssistContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
+	private static void doMoreArguments(IAssistContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= argTypes.length - paramTypes.length;
@@ -717,7 +718,7 @@ public class UnresolvedElementsSubProcessor {
 	}	
 	
 
-	private static void doEqualNumberOfParameters(IAssistContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
+	private static void doEqualNumberOfParameters(IAssistContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int[] indexOfDiff= new int[paramTypes.length];
 		int nDiffs= 0;
@@ -828,7 +829,7 @@ public class UnresolvedElementsSubProcessor {
 		return res;
 	}
 
-	public static void getConstructorProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void getConstructorProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		CompilationUnit astRoot= context.getASTRoot();
@@ -899,7 +900,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
-	public static void getAmbiguosTypeReferenceProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void getAmbiguosTypeReferenceProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
 		int offset= problem.getOffset();
 		int len= problem.getLength();

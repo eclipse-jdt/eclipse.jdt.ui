@@ -15,17 +15,25 @@ import java.util.ResourceBundle;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextOperationTarget;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
+import org.eclipse.jface.viewers.ISelection;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorExtension;
 import org.eclipse.ui.texteditor.SelectMarkerRulerAction;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
 /**
@@ -33,34 +41,31 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
  */
 public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 
-	private ITextEditor fMyTextEditor;
+	private ITextEditor fTextEditor;
 	private Position fPosition;
 
 	public JavaSelectMarkerRulerAction(ResourceBundle bundle, String prefix, ITextEditor editor, IVerticalRulerInfo ruler) {
 		super(bundle, prefix, editor, ruler);
-		fMyTextEditor= editor;
+		fTextEditor= editor;
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.JAVA_SELECT_MARKER_RULER_ACTION);
 	}
 	
 	public void run() {
-		superCall: {
-			if (fPosition == null)
-				break superCall;
-			ITextOperationTarget operation= (ITextOperationTarget) fMyTextEditor.getAdapter(ITextOperationTarget.class);
+		if (fPosition != null) {
+			ITextOperationTarget operation= (ITextOperationTarget) fTextEditor.getAdapter(ITextOperationTarget.class);
 			final int opCode= CompilationUnitEditor.CORRECTIONASSIST_PROPOSALS;
-			if (operation == null || !operation.canDoOperation(opCode)) {
-				break superCall;
+			if (operation != null && operation.canDoOperation(opCode)) {
+				fTextEditor.selectAndReveal(fPosition.getOffset(), fPosition.getLength());
+				operation.doOperation(opCode);
+				return;
 			}
-			fMyTextEditor.selectAndReveal(fPosition.getOffset(), 0);
-			operation.doOperation(opCode);
-			return;
 		}
 		super.run();
 	}
 	
 	public void update() {
 		// Begin Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20114
-		if (!(fMyTextEditor instanceof ITextEditorExtension) || ((ITextEditorExtension) fMyTextEditor).isEditorInputReadOnly()) {
+		if (!(fTextEditor instanceof ITextEditorExtension) || ((ITextEditorExtension) fTextEditor).isEditorInputReadOnly()) {
 			fPosition= null;
 			super.update();
 			return;
@@ -90,7 +95,30 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 				}
 			}
 		}
+		ISelection sel= fTextEditor.getSelectionProvider().getSelection();
+		if (sel instanceof ITextSelection) {
+			ITextSelection selection= (ITextSelection) sel;
+			Position position= new Position(selection.getOffset(), selection.getLength());
+			if (!includesRulerLine(position, document)) {
+				return null;
+			}
+			ICompilationUnit cu= getCompilationUnit();
+			if (cu != null) {
+				AssistContext context= new AssistContext(cu, position.getOffset(), position.getLength());
+				if (JavaCorrectionProcessor.hasAssists(context)) {
+					return position;
+				}
+			}
+		}
 		return null;
 	}
+	
+	private ICompilationUnit getCompilationUnit() {
+		IEditorInput input= fTextEditor.getEditorInput();
+		if (input instanceof FileEditorInput) {
+			return JavaCore.createCompilationUnitFrom(((FileEditorInput) input).getFile());
+		}
+		return null;
+	}	
 }
 

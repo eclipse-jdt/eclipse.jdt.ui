@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -35,7 +35,7 @@ public class ModifierCorrectionSubProcessor {
 	public static final int TO_NON_PRIVATE= 3;
 	public static final int TO_NON_STATIC= 4;
 	
-	public static void addNonAccessibleMemberProposal(IAssistContext context, IProblemLocation problem, List proposals, int kind) throws JavaModelException {
+	public static void addNonAccessibleMemberProposal(IAssistContext context, IProblemLocation problem, Collection proposals, int kind) throws JavaModelException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context);
@@ -117,7 +117,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 	
-	public static void addNonFinalLocalProposal(IAssistContext context, IProblemLocation problem, List proposals) {
+	public static void addNonFinalLocalProposal(IAssistContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context);
@@ -159,7 +159,7 @@ public class ModifierCorrectionSubProcessor {
 		return Modifier.PUBLIC;
 	}
 
-	public static void addAbstractMethodProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addAbstractMethodProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -233,7 +233,7 @@ public class ModifierCorrectionSubProcessor {
 		
 	}
 	
-	public static void addNativeMethodProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addNativeMethodProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -309,7 +309,7 @@ public class ModifierCorrectionSubProcessor {
 		return proposal;
 	}
 
-	public static void addMethodRequiresBodyProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addMethodRequiresBodyProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		AST ast= context.getASTRoot().getAST();
 		
@@ -350,7 +350,7 @@ public class ModifierCorrectionSubProcessor {
 	}
 	
 
-	public static void addNeedToEmulateProposal(IAssistContext context, IProblemLocation problem, List proposals) {
+	public static void addNeedToEmulateProposal(IAssistContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context);

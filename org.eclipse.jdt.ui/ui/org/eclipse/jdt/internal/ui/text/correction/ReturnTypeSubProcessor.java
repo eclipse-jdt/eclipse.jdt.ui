@@ -11,8 +11,8 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -79,7 +79,7 @@ public class ReturnTypeSubProcessor {
 	}	
 	
 	
-	public static void addMethodWithConstrNameProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addMethodWithConstrNameProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 	
 		ASTNode selectedNode= problem.getCoveringNode(context);
@@ -98,7 +98,7 @@ public class ReturnTypeSubProcessor {
 	
 	}
 	
-	public static void addVoidMethodReturnsProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addVoidMethodReturnsProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		CompilationUnit astRoot= context.getASTRoot();
@@ -157,7 +157,7 @@ public class ReturnTypeSubProcessor {
 	
 
 	
-	public static void addMissingReturnTypeProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addMissingReturnTypeProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		CompilationUnit astRoot= context.getASTRoot();
@@ -217,7 +217,7 @@ public class ReturnTypeSubProcessor {
 		}
 	}
 
-	public static void addMissingReturnStatementProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addMissingReturnStatementProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		ASTNode selectedNode= problem.getCoveringNode(context);

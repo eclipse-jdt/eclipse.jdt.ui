@@ -153,6 +153,20 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			JavaPlugin.log(e);
 			return false;
 		}
+	}
+	
+	public static boolean hasAssists(IAssistContext context) {
+		IAssistProcessor[] processors= getAssistProcessors();
+		for (int i= 0; i < processors.length; i++) {
+			try {
+				if (processors[i].hasAssists(context)) {
+					return true;
+				}
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+		return false;
 	}	
 	
 	private IEditorPart fEditor;

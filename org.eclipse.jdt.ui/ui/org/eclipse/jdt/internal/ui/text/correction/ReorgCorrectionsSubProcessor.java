@@ -11,7 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class ReorgCorrectionsSubProcessor {
 	
-	public static void getWrongTypeNameProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void getWrongTypeNameProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		String[] args= problem.getProblemArguments();
 		if (args.length == 2) {
 			ICompilationUnit cu= context.getCompilationUnit();
@@ -68,7 +68,7 @@ public class ReorgCorrectionsSubProcessor {
 		}
 	}
 	
-	public static void getWrongPackageDeclNameProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void getWrongPackageDeclNameProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		String[] args= problem.getProblemArguments();
 		if (args.length == 1) {
 			ICompilationUnit cu= context.getCompilationUnit();
@@ -101,7 +101,7 @@ public class ReorgCorrectionsSubProcessor {
 		}
 	}
 	
-	public static void removeImportStatementProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void removeImportStatementProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context);

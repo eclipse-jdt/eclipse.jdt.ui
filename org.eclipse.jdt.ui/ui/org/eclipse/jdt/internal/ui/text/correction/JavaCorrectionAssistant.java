@@ -52,6 +52,8 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	private ITextViewer fViewer;
 	private IEditorPart fEditor;
 	private Position fPosition;
+		
+	private QuickAssistLightBulbUpdater fLightBulbUpdater;
 	
 	/**
 	 * Constructor for JavaCorrectionAssistant.
@@ -100,11 +102,29 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		RGB rgb= PreferenceConverter.getColor(store, key);
 		return manager.getColor(rgb);
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistant#install(org.eclipse.jface.text.ITextViewer)
+	 */
 	public void install(ITextViewer textViewer) {
 		super.install(textViewer);
-		fViewer= textViewer;
-	}			
+		
+		fLightBulbUpdater= new QuickAssistLightBulbUpdater(fEditor, textViewer);
+		fLightBulbUpdater.install();
+	}
+	
+
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.ContentAssistant#uninstall()
+	 */
+	public void uninstall() {
+		if (fLightBulbUpdater != null) {
+			fLightBulbUpdater.uninstall();
+			fLightBulbUpdater= null;
+		}
+		super.uninstall();
+	}
 
 	/**
 	 * Show completions at caret position. If current

@@ -11,6 +11,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -48,7 +49,7 @@ import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
   */
 public class LocalCorrectionsSubProcessor {
 
-	public static void addCastProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addCastProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		String[] args= problem.getProblemArguments();
 		if (args.length != 2) {
 			return;
@@ -225,7 +226,7 @@ public class LocalCorrectionsSubProcessor {
 		return proposal;
 	}
 	
-	public static void addUncaughtExceptionProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addUncaughtExceptionProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -331,7 +332,7 @@ public class LocalCorrectionsSubProcessor {
 		return false;
 	}
 	
-	public static void addUnreachableCatchProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addUnreachableCatchProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context);
@@ -363,7 +364,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}	
 	
-	public static void addNLSProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addNLSProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
 		if (! NLSRefactoring.isAvailable(cu)){
 			return;
@@ -406,7 +407,7 @@ public class LocalCorrectionsSubProcessor {
 	 * @param context
 	 * @param proposals
 	 */
-	public static void addInstanceAccessToStaticProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addInstanceAccessToStaticProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -478,7 +479,7 @@ public class LocalCorrectionsSubProcessor {
 		ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_STATIC);
 	}
 
-	public static void addUnimplementedMethodsProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addUnimplementedMethodsProposals(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (selectedNode == null) {
@@ -502,7 +503,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void addUninitializedLocalVariableProposal(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+	public static void addUninitializedLocalVariableProposal(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context);
@@ -540,7 +541,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void addConstructorFromSuperclassProposal(IAssistContext context, IProblemLocation problem, List proposals) {
+	public static void addConstructorFromSuperclassProposal(IAssistContext context, IProblemLocation problem, Collection proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (!(selectedNode instanceof Name && selectedNode.getParent() instanceof TypeDeclaration)) {
 			return;
@@ -560,7 +561,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void addUnusedMemberProposal(IAssistContext context, IProblemLocation problem,  List proposals) throws CoreException {
+	public static void addUnusedMemberProposal(IAssistContext context, IProblemLocation problem,  Collection proposals) throws CoreException {
 		ASTNode selectedNode= problem.getCoveringNode(context);
 		
 		SimpleName name= null;

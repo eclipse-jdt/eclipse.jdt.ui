@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -27,9 +27,9 @@ public interface ICorrectionProcessor {
 	/**
 	 * Collects corrections or code manipulations for the given context
 	 * @param context Defines current compilation unit, position and the problem ID.
-	 * @param resultingCollections The resulting proposals. The proposals must be of type
+	 * @param resultingCorrections The resulting proposals. The proposals must be of type
 	 * <code>IJavaCompletionProposal</code>
 	 */
-	void process(IAssistContext context, IProblemLocation[] locations, List resultingCollections) throws CoreException;
+	void process(IAssistContext context, IProblemLocation[] locations, Collection resultingCorrections) throws CoreException;
 	
 }

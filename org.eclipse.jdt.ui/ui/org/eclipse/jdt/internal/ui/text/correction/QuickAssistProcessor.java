@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -28,21 +29,30 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
   */
 public class QuickAssistProcessor implements IAssistProcessor {
 	
-	/**
-	 * Constructor for CodeManipulationProcessor.
-	 */
 	public QuickAssistProcessor() {
 		super();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#hasAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
+	 */
+	public boolean hasAssists(IAssistContext context) throws CoreException {
+		ASTNode coveringNode= getCoveringNode(context);
+		if (coveringNode != null) {
+			return getCatchClauseToThrowsProposals(context, coveringNode, null) 
+				|| getRenameLocalProposals(context, coveringNode, null)
+				|| getAssignToVariableProposals(context, coveringNode, null)
+				|| getUnWrapProposals(context, coveringNode, null);
+		}
+		return false;
 	}
 
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#process(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[], java.util.List)
 	 */
-	public void process(IAssistContext context, IProblemLocation[] locations, List resultingCollections) throws CoreException {
-		NodeFinder finder= new NodeFinder(context.getSelectionOffset(), context.getSelectionLength());
-		context.getASTRoot().accept(finder);
-		ASTNode coveringNode= finder.getCoveringNode();
+	public void process(IAssistContext context, IProblemLocation[] locations, Collection resultingCollections) throws CoreException {
+		ASTNode coveringNode= getCoveringNode(context);
 		if (coveringNode != null) {
 		
 			// quick assists that show up also if there is an error/warning
@@ -56,24 +66,34 @@ public class QuickAssistProcessor implements IAssistProcessor {
 		}
 	}
 	
-	private void getAssignToVariableProposals(IAssistContext context, ASTNode node, List resultingCollections) throws CoreException {
+	private ASTNode getCoveringNode(IAssistContext context) {
+		NodeFinder finder= new NodeFinder(context.getSelectionOffset(), context.getSelectionLength());
+		context.getASTRoot().accept(finder);
+		return finder.getCoveringNode();	
+	}
+	
+	
+	private boolean getAssignToVariableProposals(IAssistContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof ExpressionStatement)) {
-			return;
+			return false;
 		}
 		ExpressionStatement expressionStatement= (ExpressionStatement) statement;
 
 		Expression expression= expressionStatement.getExpression();
 		if (expression.getNodeType() == ASTNode.ASSIGNMENT) {
-			return; // too confusing and not helpful
+			return false; // too confusing and not helpful
 		}
-		
 		
 		ITypeBinding typeBinding= expression.resolveTypeBinding();
 		typeBinding= Bindings.normalizeTypeBinding(typeBinding);
 		if (typeBinding == null) {
-			return;
+			return false;
 		}
+		if (resultingCollections == null) {
+			return true;
+		}
+		
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		AssignToVariableAssistProposal localProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.LOCAL, expressionStatement, typeBinding, 2);
@@ -83,23 +103,27 @@ public class QuickAssistProcessor implements IAssistProcessor {
 		if (type != null) {
 			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.FIELD, expressionStatement, typeBinding, 1);
 			resultingCollections.add(fieldProposal);
-		}				
+		}
+		return true;				
 	}
 	
-	private void getCatchClauseToThrowsProposals(IAssistContext context, ASTNode node, List resultingCollections) throws CoreException {
+	private boolean getCatchClauseToThrowsProposals(IAssistContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(node, ASTNode.CATCH_CLAUSE);
 		if (catchClause == null) {
-			return;
+			return false;
 		}
 		Type type= catchClause.getException().getType();
 		if (!type.isSimpleType()) {
-			return;
+			return false;
 		}
-		
 		
 		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(catchClause);
 		if (!(bodyDeclaration instanceof MethodDeclaration)) {
-			return;
+			return false;
+		}
+		
+		if (resultingCollections == null) {
+			return true;
 		}
 		
 		MethodDeclaration methodDeclaration= (MethodDeclaration) bodyDeclaration;
@@ -132,7 +156,7 @@ public class QuickAssistProcessor implements IAssistProcessor {
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		proposal.ensureNoModifications();
 		resultingCollections.add(proposal);
-
+		return true;
 	}
 	
 	private boolean isNotYetThrown(ITypeBinding binding, List thrownExcpetions) {
@@ -149,17 +173,22 @@ public class QuickAssistProcessor implements IAssistProcessor {
 	}
 	
 	
-	private void getRenameLocalProposals(IAssistContext context, ASTNode node, List resultingCollections) throws CoreException {
+	private boolean getRenameLocalProposals(IAssistContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		if (!(node instanceof SimpleName)) {
-			return;
+			return false;
 		}
 		SimpleName name= (SimpleName) node;
 		IBinding binding= name.resolveBinding();
 		if (binding == null || binding.getKind() == IBinding.PACKAGE) {
-			return;
+			return false;
 		}
+		if (resultingCollections == null) {
+			return true;
+		}
+				
 		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(name);
 		resultingCollections.add(proposal);
+		return true;
 	}
 	
 	private ASTNode getCopyOfInner(ASTRewrite rewrite, ASTNode statement) {
@@ -180,7 +209,7 @@ public class QuickAssistProcessor implements IAssistProcessor {
 	}
 	
 	
-	private void getUnWrapProposals(IAssistContext context, ASTNode node, List resultingCollections) throws CoreException {
+	private boolean getUnWrapProposals(IAssistContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		ASTNode outer= node;
 			
 		Block block= null;
@@ -221,12 +250,12 @@ public class QuickAssistProcessor implements IAssistProcessor {
 					Block curr= ((MethodDeclaration) elem).getBody();
 					if (curr != null && !curr.statements().isEmpty()) {
 						if (body != null) {
-							return;
+							return false;
 						}
 						body= curr;
 					}
 				} else if (elem instanceof TypeDeclaration) {
-					return;
+					return false;
 				}
 			}
 			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.anonymous");	 //$NON-NLS-1$
@@ -255,17 +284,23 @@ public class QuickAssistProcessor implements IAssistProcessor {
 			}
 		}
 		if (body == null) {
-			return; 
+			return false; 
 		}
 		ASTRewrite rewrite= new ASTRewrite(outer.getParent());
 		ASTNode inner= getCopyOfInner(rewrite, body);
-		if (inner != null) {
-			rewrite.markAsReplaced(outer, inner);
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
-			proposal.ensureNoModifications();
-			resultingCollections.add(proposal);
-		}				
+		if (inner == null) {
+			return false;
+		}
+		if (resultingCollections == null) {
+			return true;
+		}
+			
+		rewrite.markAsReplaced(outer, inner);
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		proposal.ensureNoModifications();
+		resultingCollections.add(proposal);
+		return true;
 	}
 
 
