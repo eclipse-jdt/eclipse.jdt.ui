@@ -68,6 +68,18 @@ public class MoveAction extends CopyAction {
 	}
 
 	protected void processElements(Shell activeShell, final Object destination, final List elements) {
+		Iterator iter= elements.iterator();
+		while (iter.hasNext()) {
+			Object element= iter.next();
+			if (shouldConfirmReadOnly(element)) {
+				if (confirmReadOnly("Check Move", 
+					"The selected elements contain read-only resources. Do you still wish to move them?"))
+					break;
+				else
+					return;
+			}
+		}
+
 		ArrayList toBeReplaced= new ArrayList();
 		final String[] names= getRenamings(activeShell, destination, elements, toBeReplaced);
 		if (!confirmIfUnsaved(toBeReplaced))

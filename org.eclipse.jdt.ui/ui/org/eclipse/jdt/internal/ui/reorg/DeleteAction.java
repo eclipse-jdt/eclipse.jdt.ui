@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Collections;import java.util.Comparator;import java.util.Iterator;import java.util.List;import java.util.ResourceBundle;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaUIException;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Collections;import java.util.Comparator;import java.util.Iterator;import java.util.List;import java.util.ResourceBundle;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaUIException;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jface.dialogs.InputDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 /** 
  * Action for deleting elements in a delete target.
@@ -38,8 +38,13 @@ public class DeleteAction extends ReorgAction {
 		final Iterator iter= getStructuredSelection().iterator();
 		final MultiStatus status= new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, JavaPlugin.getResourceString(ERROR_STATUS), null);
 		final List elements= new ArrayList();
-		while (iter.hasNext())
-			elements.add(iter.next());
+		boolean hasReadOnlyResources= false;
+		while (iter.hasNext()) {
+			Object element= iter.next();
+			if (!hasReadOnlyResources && shouldConfirmReadOnly(element))
+				hasReadOnlyResources= true;
+			elements.add(element);
+		}
 		
 		try {
 			if (!isClasspathDelete(elements) && !MessageDialog.openConfirm(activeShell, title, label))
@@ -51,6 +56,9 @@ public class DeleteAction extends ReorgAction {
 		if (!confirmIfUnsaved(elements))
 			return;
 
+		String msg= "The selected elements contain read-only resources. Do you still wish to delete them?";
+		if (hasReadOnlyResources && !confirmReadOnly("Check Deletion", msg))
+			return;
 						
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor pm) {

@@ -31,9 +31,9 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
@@ -73,6 +73,11 @@ public class RenameAction extends ReorgAction {
 	 */
 	public void doActionPerformed() {
 		Object element= getStructuredSelection().getFirstElement();
+		if (isReadOnlyResource(element)) {
+			if (!confirmReadOnly("Check Rename", 
+					"The selected element is marked as read-only. Do you still wish to rename it?"))
+					return;
+		}
 		if (fRefactoringSupport != null) {
 			fRefactoringSupport.rename(element);
 			fRefactoringSupport= null;
@@ -193,4 +198,24 @@ public class RenameAction extends ReorgAction {
 		JdtHackFinder.fixme("NLS");
 		return "The selected element has unsaved changes that will be discarded if you proceed";
 	}
+	
+	protected boolean isReadOnlyResource(Object element) {
+		if (element instanceof IJavaElement) {
+			try {
+				if ((element instanceof IPackageFragmentRoot) && ReorgSupport.isClasspathDelete((IPackageFragmentRoot)element)) {
+					return false;
+				}
+				element= ((IJavaElement)element).getCorrespondingResource();
+			} catch (JavaModelException e) {
+				// we catch this, we're only interested in knowing
+				// whether to pop up the read-only dialog.
+			}
+		}
+		
+		if (element instanceof IResource) {
+			return ((IResource)element).isReadOnly();
+		}
+		return false;
+	}
+
 }

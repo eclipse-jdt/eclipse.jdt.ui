@@ -5,33 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.actions.SelectionProviderAction;
-import org.eclipse.ui.dialogs.ListSelectionDialog;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
+import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.List;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.actions.SelectionProviderAction;import org.eclipse.ui.dialogs.ListSelectionDialog;
 
 /**
   * Base class for actions related to reorganizing resources
@@ -168,4 +142,48 @@ public abstract class ReorgAction extends SelectionProviderAction {
 	protected String getSaveTargetsMessage() {
 		return JavaPlugin.getResourceString(SAVE_TARGETS_MSG);
 	}
+	
+	// readonly confirmation
+	protected boolean shouldConfirmReadOnly(Object element) {
+		if (element instanceof IJavaElement) {
+			try {
+				if ((element instanceof IPackageFragmentRoot) && ReorgSupport.isClasspathDelete((IPackageFragmentRoot)element)) {
+					return false;
+				}
+				element= ((IJavaElement)element).getCorrespondingResource();
+			} catch (JavaModelException e) {
+				// we catch this, we're only interested in knowing
+				// whether to pop up the read-only dialog.
+			}
+		}
+		
+		if (element instanceof IResource) {
+			return shouldConfirmReadOnly((IResource)element);
+		}
+		return false;
+	}
+	
+	protected boolean shouldConfirmReadOnly(IResource res) {
+		if (res.isReadOnly()) 
+			return true;
+		if (res instanceof IContainer) {
+			IContainer container= (IContainer)res;
+			try {
+				IResource[] children= container.members();
+				for (int i= 0; i < children.length; i++) {
+					if (shouldConfirmReadOnly(children[i]))
+						return true;
+				}
+			} catch (CoreException e) {
+				// we catch this, we're only interested in knowing
+				// whether to pop up the read-only dialog.
+			}
+		}
+		return false;
+	}
+	
+	protected boolean confirmReadOnly(String title, String msg) {
+		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, msg);
+	}
+
 }
