@@ -18,10 +18,10 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
@@ -63,12 +63,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		store.setValue(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);
 		store.setValue(PreferenceConstants.CODEGEN__JAVADOC_STUBS, false);
 		
-		CodeTemplates templates= CodeTemplates.getInstance();
-		templates.getTemplates(CodeTemplateContextType.CATCHBLOCK_NAME)[0].setPattern("");
-		templates.getTemplates(CodeTemplateContextType.CONSTRUCTORSTUB_NAME)[0].setPattern("");
-		templates.getTemplates(CodeTemplateContextType.METHODSTUB_NAME)[0].setPattern("");
+		CodeTemplates.getCodeTemplate(CodeTemplates.CATCHBLOCK).setPattern("");
+		CodeTemplates.getCodeTemplate(CodeTemplates.CONSTRUCTORSTUB).setPattern("");
+		CodeTemplates.getCodeTemplate(CodeTemplates.METHODSTUB).setPattern("");
 
-		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 
