@@ -783,7 +783,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private void addRefactoring(IMenuManager menu, IInputSelectionProvider viewer){
 		MenuManager refactoring= new MenuManager(TypeHierarchyMessages.getString("TypeHierarchyViewPart.menu.refactor")); //$NON-NLS-1$
-		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup() }, viewer);
+		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup(UnifiedSite.create(getSite())) }, viewer);
 		if (!refactoring.isEmpty())
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactoring);
 	}

@@ -836,7 +836,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	 
 	private void addRefactoring(IMenuManager menu){
 		MenuManager refactoring= new MenuManager(JavaEditorMessages.getString("JavaOutlinePage.ContextMenu.refactoring.label")); //$NON-NLS-1$
-		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup() }, fOutlineViewer);
+		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup(UnifiedSite.create(getSite())) }, fOutlineViewer);
 		if (!refactoring.isEmpty())
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactoring);
 	}

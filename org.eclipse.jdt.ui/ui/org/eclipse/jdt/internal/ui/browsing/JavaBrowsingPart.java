@@ -429,7 +429,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 	private void addRefactoring(IMenuManager menu){
 		MenuManager refactoring= new MenuManager(PackagesMessages.getString("PackageExplorer.refactoringTitle"));  //$NON-NLS-1$
-		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup() }, fViewer);
+		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup(UnifiedSite.create(getSite())) }, fViewer);
 		if (!refactoring.isEmpty())
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactoring);
 	}
