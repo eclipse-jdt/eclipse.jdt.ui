@@ -1,5 +1,4 @@
 package p1;
-import p.A;
 import p.Inner;
 public class A1 {
 	static void f(){

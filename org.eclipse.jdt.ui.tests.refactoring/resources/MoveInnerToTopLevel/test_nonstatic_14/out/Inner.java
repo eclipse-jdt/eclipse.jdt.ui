@@ -1,5 +1,9 @@
 package p;
-class Inner{
+
+import p.A.X;
+
+class Inner {
+	/** Comment */
 	private A a;
 
 	/**
@@ -7,10 +11,9 @@ class Inner{
 	 */
 	Inner(A a) {
 		this.a= a;
-		// TODO Auto-generated constructor stub
 	}
 
 	void f(){
-		A.X x= this.a.new X();
+		X x= this.a.new X();
 	}
 }

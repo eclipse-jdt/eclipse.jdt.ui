@@ -2,6 +2,7 @@ package p;
 public class Inner
 {
 	
+	/** Comment */
 	private A a;
 
 	/**
@@ -9,7 +10,6 @@ public class Inner
 	 */
 	Inner(A a) {
 		this.a= a;
-		// TODO Auto-generated constructor stub
 	}
 
 	public void bar0(){

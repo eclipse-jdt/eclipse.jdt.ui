@@ -1,5 +1,6 @@
 package p;
 class Inner{
+	/** Comment */
 	private A a;
 
 	/**
@@ -7,7 +8,6 @@ class Inner{
 	 */
 	Inner(A a) {
 		this.a= a;
-		// TODO Auto-generated constructor stub
 	}
 
 	void f(){

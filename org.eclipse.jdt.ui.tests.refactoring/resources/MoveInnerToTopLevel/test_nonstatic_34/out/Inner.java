@@ -1,6 +1,7 @@
 package p;
 public class Inner {
 
+	/** Comment */
 	private final A a;
 
 	public Inner(A a) {

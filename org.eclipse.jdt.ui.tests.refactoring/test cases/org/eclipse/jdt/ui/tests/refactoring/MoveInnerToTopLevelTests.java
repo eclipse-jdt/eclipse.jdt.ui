@@ -24,17 +24,19 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class MoveInnerToTopLevelTests extends RefactoringTest {
 
+	private static final String FIELD_COMMENT= "/** Comment */";
 	private static final Class clazz= MoveInnerToTopLevelTests.class;
 	private static final String REFACTORING_PATH= "MoveInnerToTopLevel/";
 	
@@ -47,11 +49,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
+		return new Java15Setup(new TestSuite(clazz));
 	}
 	
 	public static Test setUpTest(Test someTest) {
-	    return new RefactoringTestSetup(someTest);
+	    return new Java15Setup(someTest);
 	}
 	
 	protected String getRefactoringPath() {
@@ -60,6 +62,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	protected void setUp() throws Exception {
 		super.setUp();
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.FIELDCOMMENT).setPattern(FIELD_COMMENT);
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(
 			"${package_declaration}" + 
 			System.getProperty("line.separator", "\n") +
@@ -200,8 +203,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 	public void test9() throws Exception{
-		printTestDisabledMessage("removing unused imports");
-//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null);
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
 	public void test10() throws Exception{
@@ -240,7 +242,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	public void test19() throws Exception{
 		printTestDisabledMessage("bug 23078");
-//		validatePassingTest("A", "Inner", new String[]{"A", "A1"}, new String[]{"p", "p1"}, null);
+//		validatePassingTest("A", "Inner", new String[]{"A", "A1"}, new String[]{"p", "p1"}, null, false, false);
 	}
 
 	public void test20() throws Exception{
@@ -270,6 +272,10 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	public void test25() throws Exception{
 //		printTestDisabledMessage("bug 39716");
 		validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, false, false, true);
+	}
+
+	public void test26() throws Exception{
+		validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
 	}
 
 	public void test_nonstatic_0() throws Exception{
@@ -316,8 +322,8 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, true);
 	}
 	public void test_nonstatic_14() throws Exception{
-		printTestDisabledMessage("bug 23488");
-//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
+//		printTestDisabledMessage("bug 23488");
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
 	public void test_nonstatic_15() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
@@ -326,8 +332,8 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
 	public void test_nonstatic_17() throws Exception{ 
-		printTestDisabledMessage("bug 23488");
-//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
+//		printTestDisabledMessage("bug 23488");
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
 	public void test_nonstatic_18() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
@@ -364,12 +370,12 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
 	public void test_nonstatic_28() throws Exception{
-		printTestDisabledMessage("test for bug 23725");
-//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
+//		printTestDisabledMessage("test for bug 23725");
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
 	public void test_nonstatic_29() throws Exception{
 		printTestDisabledMessage("test for bug 23724");
-//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
+//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
 	public void test_nonstatic_30() throws Exception{
 //		printTestDisabledMessage("test for bug 23715");

@@ -1,9 +1,10 @@
 package p;
 class Inner{
+	/** Comment */
 	private A a;
 	Inner(A a){
-		f();
 		this.a= a;
+		f();
 	}
 	void f(){
 	}
