@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -42,7 +41,6 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
@@ -91,7 +89,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -116,6 +113,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactor
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -841,7 +839,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 * @param declaration the method declaration
 	 * @return the array of method parameter variable bindings
 	 */
-	protected static IVariableBinding[] getMethodParameters(final MethodDeclaration declaration) {
+	protected static IVariableBinding[] getParameterBindings(final MethodDeclaration declaration) {
 		Assert.isNotNull(declaration);
 		final List parameters= new ArrayList(declaration.parameters().size());
 		VariableDeclaration variable= null;
@@ -855,6 +853,29 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		}
 		final IVariableBinding[] result= new IVariableBinding[parameters.size()];
 		parameters.toArray(result);
+		return result;
+	}
+
+	/**
+	 * Returns the bindings of the method parameters types of the specified declaration.
+	 * 
+	 * @param declaration the method declaration
+	 * @return the array of method parameter variable bindings
+	 */
+	protected static ITypeBinding[] getParameterTypes(final MethodDeclaration declaration) {
+		Assert.isNotNull(declaration);
+		final IVariableBinding[] parameters= getParameterBindings(declaration);
+		final List types= new ArrayList(parameters.length);
+		IVariableBinding binding= null;
+		ITypeBinding type= null;
+		for (int index= 0; index < parameters.length; index++) {
+			binding= parameters[index];
+			type= binding.getType();
+			if (type != null)
+				types.add(type);
+		}
+		final ITypeBinding[] result= new ITypeBinding[types.size()];
+		types.toArray(result);
 		return result;
 	}
 
@@ -1161,7 +1182,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Searches for references to the delegate method. Returns an empty result group if no references to the delegator can be found, or if the delegator method has move than one declaration.
+	 * Searches for references to the delegate method.
 	 * 
 	 * @param monitor the progress monitor to use
 	 * @param status the refactoring status to use
@@ -1174,11 +1195,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		try {
 			monitor.beginTask("", 2); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
-			final SearchResultGroup[] groups= RefactoringSearchEngine.search(RefactoringSearchEngine.createOrPattern(new IJavaElement[] { fMethod}, IJavaSearchConstants.DECLARATIONS), SearchEngine.createWorkspaceScope(), new CollectingSearchRequestor(), new SubProgressMonitor(monitor, 1), status);
-			if (groups.length < 2)
-				return RefactoringSearchEngine.search(RefactoringSearchEngine.createOrPattern(new IJavaElement[] { fMethod}, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(fMethod), new CollectingSearchRequestor(), new SubProgressMonitor(monitor, 1), status);
-			else
-				return new SearchResultGroup[0];
+			return RefactoringSearchEngine.search(RefactoringSearchEngine.createOrPattern(new IJavaElement[] { fMethod}, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(fMethod), new CollectingSearchRequestor(), new SubProgressMonitor(monitor, 1), status);
 		} finally {
 			monitor.done();
 		}
@@ -1240,7 +1257,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final IMethodBinding method= declaration.resolveBinding();
 			if (method != null) {
 				final ITypeBinding declaring= method.getDeclaringClass();
-				IVariableBinding[] bindings= getMethodParameters(declaration);
+				IVariableBinding[] bindings= getParameterBindings(declaration);
 				ITypeBinding binding= null;
 				for (int index= 0; index < bindings.length; index++) {
 					binding= bindings[index].getType();
@@ -1643,7 +1660,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, ast.newSimpleName(fTargetName), group);
 				rewriter.insertLast(ast.newSimpleName(fTargetName), null);
 			} else {
-				final IVariableBinding[] bindings= getMethodParameters(sourceDeclaration);
+				final IVariableBinding[] bindings= getParameterBindings(sourceDeclaration);
 				if (bindings.length > 0) {
 					int index= 0;
 					for (; index < bindings.length; index++)
@@ -1686,71 +1703,79 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			monitor.beginTask("", 3); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
 			try {
-				final IType declaring= fMethod.getDeclaringType();
-				final ITypeHierarchy hierarchy= declaring.newTypeHierarchy(new SubProgressMonitor(monitor, 1));
-				final List ancestors= Arrays.asList(hierarchy.getAllSupertypes(declaring));
-				final List descendants= new ArrayList(Arrays.asList(hierarchy.getAllSubtypes(declaring)));
-				descendants.add(declaring);
 				boolean result= true;
 				boolean binary= false;
-				SearchResultGroup[] groups= computeDelegateMethodReferences(new SubProgressMonitor(monitor, 1), status);
-				monitor.worked(1);
-				SearchMatch match= null;
-				SearchMatch[] matches= null;
-				IType[] types= null;
-				ICompilationUnit currentUnit= null;
-				CompilationUnitRewrite currentRewrite= null;
-				SearchResultGroup group= null;
-				for (int index= 0; index < groups.length; index++) {
-					group= groups[index];
-					currentUnit= group.getCompilationUnit();
-					types= currentUnit.getAllTypes();
-					for (int offset= 0; offset < types.length; offset++) {
-						if (types[offset].isBinary()) {
-							binary= true;
-							break;
+				boolean found= false;
+				final ITypeHierarchy hierarchy= fMethod.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(monitor, 1));
+				IType type= null;
+				IMethod method= null;
+				IType[] types= hierarchy.getAllSubtypes(fMethod.getDeclaringType());
+				for (int index= 0; index < types.length && !found; index++) {
+					type= types[index];
+					method= JavaModelUtil.findMethod(fMethod.getElementName(), fMethod.getParameterTypes(), false, type);
+					if (method != null)
+						found= true;
+				}
+				types= hierarchy.getAllSupertypes(fMethod.getDeclaringType());
+				for (int index= 0; index < types.length && !found; index++) {
+					type= types[index];
+					method= JavaModelUtil.findMethod(fMethod.getElementName(), fMethod.getParameterTypes(), false, type);
+					if (method != null)
+						found= true;
+				}
+				if (found) {
+					status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.overridden", Bindings.asString(sourceDeclaration.resolveBinding())), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+					result= false;
+				} else {
+					SearchResultGroup[] groups= computeDelegateMethodReferences(new SubProgressMonitor(monitor, 1), status);
+					monitor.worked(1);
+					SearchMatch match= null;
+					SearchMatch[] matches= null;
+					ICompilationUnit currentUnit= null;
+					CompilationUnitRewrite currentRewrite= null;
+					SearchResultGroup group= null;
+					for (int index= 0; index < groups.length; index++) {
+						group= groups[index];
+						currentUnit= group.getCompilationUnit();
+						types= currentUnit.getAllTypes();
+						for (int offset= 0; offset < types.length; offset++) {
+							if (types[offset].isBinary()) {
+								binary= true;
+								break;
+							}
 						}
-					}
-					if (!binary) {
-						matches= group.getSearchResults();
-						if (fSourceRewrite.getCu().equals(currentUnit))
-							currentRewrite= fSourceRewrite;
-						else if (targetRewrite.getCu().equals(currentUnit))
-							currentRewrite= targetRewrite;
-						else
-							currentRewrite= new CompilationUnitRewrite(currentUnit);
-						IType type= null;
-						Object element= null;
-						for (int offset= 0; offset < matches.length; offset++) {
-							match= matches[offset];
-							element= match.getElement();
-							if (element instanceof IType)
-								type= (IType) element;
-							else if (element instanceof IMember)
-								type= ((IMember) element).getDeclaringType();
+						if (!binary) {
+							matches= group.getSearchResults();
+							if (fSourceRewrite.getCu().equals(currentUnit))
+								currentRewrite= fSourceRewrite;
+							else if (targetRewrite.getCu().equals(currentUnit))
+								currentRewrite= targetRewrite;
 							else
-								type= null;
-							if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
-								final SearchMatch context= match;
-								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", currentUnit.getCorrespondingResource().getName()), JavaStatusContext.create(currentUnit, new ISourceRange() { //$NON-NLS-1$
+								currentRewrite= new CompilationUnitRewrite(currentUnit);
+							for (int offset= 0; offset < matches.length; offset++) {
+								match= matches[offset];
+								if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
+									final SearchMatch context= match;
+									status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", currentUnit.getCorrespondingResource().getName()), JavaStatusContext.create(currentUnit, new ISourceRange() { //$NON-NLS-1$
 
-											public final int getLength() {
-												return context.getLength();
-											}
+												public final int getLength() {
+													return context.getLength();
+												}
 
-											public final int getOffset() {
-												return context.getOffset();
-											}
-										})));
-								result= false;
-							} else if (type != null && (descendants.contains(type) || !ancestors.contains(type)))
-								createMethodInlineChange(currentRewrite, sourceDeclaration, match, targetNode, status);
+												public final int getOffset() {
+													return context.getOffset();
+												}
+											})));
+									result= false;
+								} else
+									createMethodInlineChange(currentRewrite, sourceDeclaration, match, targetNode, status);
+							}
+							if (!fSourceRewrite.getCu().equals(currentUnit) && !targetRewrite.getCu().equals(currentUnit))
+								fChangeManager.manage(currentUnit, currentRewrite.createChange());
+						} else {
+							status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary", currentUnit.getCorrespondingResource().getName()), JavaStatusContext.create(currentUnit))); //$NON-NLS-1$
+							result= false;
 						}
-						if (!fSourceRewrite.getCu().equals(currentUnit) && !targetRewrite.getCu().equals(currentUnit))
-							fChangeManager.manage(currentUnit, currentRewrite.createChange());
-					} else {
-						status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary", currentUnit.getCorrespondingResource().getName()), JavaStatusContext.create(currentUnit))); //$NON-NLS-1$
-						result= false;
 					}
 				}
 				return result;
@@ -1856,7 +1881,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final ITypeBinding type= fTarget.getDeclaringClass();
 		if (type != null) {
 			boolean shadows= false;
-			final IVariableBinding[] bindings= getMethodParameters(declaration);
+			final IVariableBinding[] bindings= getParameterBindings(declaration);
 			IVariableBinding variable= null;
 			for (int index= 0; index < bindings.length; index++) {
 				variable= bindings[index];
