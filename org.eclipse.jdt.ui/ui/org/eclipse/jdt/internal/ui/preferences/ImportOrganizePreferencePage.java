@@ -300,7 +300,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		for (int i= 0 ; i < nEntries; i++) {
 			String curr= properties.getProperty(String.valueOf(i));
 			if (curr != null) {
-				if (JavaConventions.validatePackageName(curr).isOK()) {
+				if (!JavaConventions.validatePackageName(curr).matches(IStatus.ERROR)) {
 					res.add(curr);
 				} else {
 					return null;
