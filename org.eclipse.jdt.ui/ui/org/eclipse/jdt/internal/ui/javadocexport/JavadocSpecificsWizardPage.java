@@ -120,7 +120,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		}
 
 		Label jdocLocationLabel= createLabel(composite, SWT.NONE, JavadocExportMessages.getString("JavadocSpecificsWizardPage.extraoptionsfield.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 3, 0)); //$NON-NLS-1$
-		fExtraOptionsText= createText(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.H_SCROLL, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 3, 0));
+		fExtraOptionsText= createText(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.H_SCROLL | SWT.V_SCROLL, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 3, 0));
 		//fExtraOptionsText.setSize(convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(10));
 
 		str= fStore.getAdditionalParams();
