@@ -812,18 +812,6 @@ public final class JavaModelUtil {
 		}
 	}
 	
-	private static Boolean fgIsJDTCore_1_5= null;
-	
-	/**
-	 * Return true if JRE 1.5 in enabled.
-	 */
-	public static boolean isJDTCore_1_5() {
-		if (fgIsJDTCore_1_5 == null) {
-			fgIsJDTCore_1_5= new Boolean(JavaCore.getDefaultOptions().containsKey("org.eclipse.jdt.core.compiler.problem.unsafeTypeOperation")); //$NON-NLS-1$
-		}
-		return fgIsJDTCore_1_5.booleanValue();
-	}
-
 	/**
 	 * Helper method that tests if an classpath entry can be found in a
 	 * container. <code>null</code> is returned if the entry can not be found

@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -220,17 +219,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				
 				PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
 				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
-				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS
+				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS,
+				
+				PREF_15_PB_UNSAVE_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND
 			};
-		if (JavaModelUtil.isJDTCore_1_5()) {
-			String[] newKeys= new String[] {
-					PREF_15_PB_UNSAVE_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND
-			};
-			String[] merged= new String[keys.length + newKeys.length];
-			System.arraycopy(keys, 0, merged, 0, keys.length);
-			System.arraycopy(newKeys, 0, merged, keys.length, newKeys.length);
-			keys= merged;
-		}
 		return keys;
 	}
 	
@@ -290,13 +282,11 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.others.tabtitle")); //$NON-NLS-1$
 		item.setControl(othersComposite);		
 		
-		if (JavaModelUtil.isJDTCore_1_5()) {
-			Composite extraComposite= create15TabContent(folder);
-			
-			item= new TabItem(folder, SWT.NONE);
-			item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.15.tabtitle")); //$NON-NLS-1$
-			item.setControl(extraComposite);		
-		}
+		Composite extraComposite= create15TabContent(folder);
+		
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.15.tabtitle")); //$NON-NLS-1$
+		item.setControl(extraComposite);		
 		
 		validateSettings(null, null);
 	
@@ -661,21 +651,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 
-		String[] values34, values34Labels;
-		if (JavaModelUtil.isJDTCore_1_5()) {
-			values34= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5 };
-			values34Labels= new String[] {
-				PreferencesMessages.getString("CompilerConfigurationBlock.version13"),  //$NON-NLS-1$
-				PreferencesMessages.getString("CompilerConfigurationBlock.version14"), //$NON-NLS-1$
-				PreferencesMessages.getString("CompilerConfigurationBlock.version15") //$NON-NLS-1$
-			};
-		} else {
-			values34= new String[] { VERSION_1_3, VERSION_1_4 };
-			values34Labels= new String[] {
-				PreferencesMessages.getString("CompilerConfigurationBlock.version13"),  //$NON-NLS-1$
-				PreferencesMessages.getString("CompilerConfigurationBlock.version14") //$NON-NLS-1$
-			};
-		}
+		String[] values345= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5 };
+		String[] values345Labels= new String[] {
+			PreferencesMessages.getString("CompilerConfigurationBlock.version13"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version14"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version15") //$NON-NLS-1$
+		};
 
 		Composite compComposite= new Composite(folder, SWT.NULL);
 		compComposite.setLayout(layout);
@@ -691,7 +672,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		group.setLayout(layout);
 	
 		String label= PreferencesMessages.getString("CompilerConfigurationBlock.compiler_compliance.label"); //$NON-NLS-1$
-		addComboBox(group, label, PREF_COMPLIANCE, values34, values34Labels, 0);	
+		addComboBox(group, label, PREF_COMPLIANCE, values345, values345Labels, 0);	
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.default_settings.label"); //$NON-NLS-1$
 		addCheckBox(group, label, INTR_DEFAULT_COMPLIANCE, new String[] { DEFAULT_CONF, USER_CONF }, 0);	
@@ -699,31 +680,20 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
 		Control[] otherChildren= group.getChildren();	
 				
-		String[] versions, versionsLabels;
-		if (JavaModelUtil.isJDTCore_1_5()) {
-			versions= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5 };
-			versionsLabels= new String[] {
-				PreferencesMessages.getString("CompilerConfigurationBlock.version11"),  //$NON-NLS-1$
-				PreferencesMessages.getString("CompilerConfigurationBlock.version12"), //$NON-NLS-1$
-				PreferencesMessages.getString("CompilerConfigurationBlock.version13"), //$NON-NLS-1$
-				PreferencesMessages.getString("CompilerConfigurationBlock.version14"), //$NON-NLS-1$
-				PreferencesMessages.getString("CompilerConfigurationBlock.version15") //$NON-NLS-1$
-			};
-		} else {
-			versions= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4 };
-			versionsLabels= new String[] {
-				PreferencesMessages.getString("CompilerConfigurationBlock.version11"),  //$NON-NLS-1$
-				PreferencesMessages.getString("CompilerConfigurationBlock.version12"), //$NON-NLS-1$
-				PreferencesMessages.getString("CompilerConfigurationBlock.version13"), //$NON-NLS-1$
-				PreferencesMessages.getString("CompilerConfigurationBlock.version14") //$NON-NLS-1$
-			};
-		}
+		String[] versions= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5 };
+		String[] versionsLabels= new String[] {
+			PreferencesMessages.getString("CompilerConfigurationBlock.version11"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version12"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version13"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version14"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.version15") //$NON-NLS-1$
+		};
 		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.codegen_targetplatform.label"); //$NON-NLS-1$
 		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, versions, versionsLabels, indent);	
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.source_compatibility.label"); //$NON-NLS-1$
-		addComboBox(group, label, PREF_SOURCE_COMPATIBILITY, values34, values34Labels, indent);	
+		addComboBox(group, label, PREF_SOURCE_COMPATIBILITY, values345, values345Labels, indent);	
 
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
@@ -916,7 +886,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			}			
 		}
 		if (VERSION_1_4.equals(source)) {
-			if (!VERSION_1_4.equals(target)) {
+			if (VERSION_1_1.equals(target) || VERSION_1_2.equals(target) || VERSION_1_3.equals(target)) {
 				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.src14tgt14.error")); //$NON-NLS-1$
 				return status;
 			}
