@@ -131,8 +131,8 @@ public class ShowInPackageViewAction extends Action implements IUpdate, IObjectA
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			String title= JavaUIMessages.getString("ShowInPackageViewAction.error.title");
-			String message= JavaUIMessages.getString("ShowInPackageViewAction.error.message");
+			String title= JavaUIMessages.getString("ShowInPackageViewAction.error.title"); //$NON-NLS-1$
+			String message= JavaUIMessages.getString("ShowInPackageViewAction.error.message"); //$NON-NLS-1$
 			ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message, e.getStatus());
 		}
 	}

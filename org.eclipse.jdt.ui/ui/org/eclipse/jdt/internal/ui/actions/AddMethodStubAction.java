@@ -157,7 +157,7 @@ public class AddMethodStubAction extends Action {
 		int[] returnCodes= {IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
 		final Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		if (shell == null) {
-			JavaPlugin.logErrorMessage("AddMethodStubAction.showQueryDialog: No active shell found");
+			JavaPlugin.logErrorMessage("AddMethodStubAction.showQueryDialog: No active shell found"); //$NON-NLS-1$
 			return IRequestQuery.CANCEL;
 		}
 		final int[] result= { MessageDialog.CANCEL };

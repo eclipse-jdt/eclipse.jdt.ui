@@ -63,7 +63,7 @@ import org.eclipse.ui.actions.RetargetAction;
 	}
 	
 	protected RetargetAction createRetargetAction() {
-		return new RetargetAction(getId(), "label");
+		return new RetargetAction(getId(), "label"); //$NON-NLS-1$
 	}
 	
 	protected abstract String getId();

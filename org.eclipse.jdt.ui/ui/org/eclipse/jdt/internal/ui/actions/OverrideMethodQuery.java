@@ -143,13 +143,13 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 				}
 			}
 			if (count == 0 && !fEmptySelectionAllowed) {
-				return new StatusInfo(IStatus.ERROR, "");
+				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			}
 			String message;
 			if (count == 1) {
-				message= JavaUIMessages.getFormattedString("OverrideMethodQuery.selectioninfo.one", String.valueOf(count));
+				message= JavaUIMessages.getFormattedString("OverrideMethodQuery.selectioninfo.one", String.valueOf(count)); //$NON-NLS-1$
 			} else {
-				message= JavaUIMessages.getFormattedString("OverrideMethodQuery.selectioninfo.more", String.valueOf(count));
+				message= JavaUIMessages.getFormattedString("OverrideMethodQuery.selectioninfo.more", String.valueOf(count)); //$NON-NLS-1$
 			}
 			return new StatusInfo(IStatus.INFO, message);
 		}
@@ -190,8 +190,8 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 		
 		CheckedTreeSelectionDialog dialog= new CheckedTreeSelectionDialog(fShell, lprovider, cprovider);
 		dialog.setValidator(new OverrideMethodValidator());
-		dialog.setTitle(JavaUIMessages.getString("OverrideMethodQuery.dialog.title"));
-		dialog.setMessage(JavaUIMessages.getString("OverrideMethodQuery.dialog.description"));
+		dialog.setTitle(JavaUIMessages.getString("OverrideMethodQuery.dialog.title")); //$NON-NLS-1$
+		dialog.setMessage(JavaUIMessages.getString("OverrideMethodQuery.dialog.description")); //$NON-NLS-1$
 		dialog.setInitialSelections(defaultSelected);
 		dialog.setExpandedElements(expanded.toArray());
 		dialog.setContainerMode(true);

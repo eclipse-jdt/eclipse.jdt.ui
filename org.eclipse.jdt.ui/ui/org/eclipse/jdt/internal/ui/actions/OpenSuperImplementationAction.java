@@ -114,8 +114,8 @@ public class OpenSuperImplementationAction extends Action implements IUpdate, IO
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			String title= JavaUIMessages.getString("OpenSuperImplementationAction.error.title");
-			String message= JavaUIMessages.getString("OpenSuperImplementationAction.error.message");
+			String title= JavaUIMessages.getString("OpenSuperImplementationAction.error.title"); //$NON-NLS-1$
+			String message= JavaUIMessages.getString("OpenSuperImplementationAction.error.message"); //$NON-NLS-1$
 			ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message, e.getStatus());
 		}
 	}
