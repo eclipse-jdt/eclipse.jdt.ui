@@ -144,7 +144,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 * <p>
 	 * Subclasses may replace, but usually should not need to. Consider
 	 * replacing
@@ -179,7 +179,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 * <p>
 	 * Subclasses may extend, but usually should not need to.
 	 * </p>
@@ -190,7 +190,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 * 
 	 * Subclasses may extend, but must call the super implementation.
 	 */
@@ -202,7 +202,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 * 
 	 * Subclasses may extend, but must call the super implementation.
 	 */
@@ -211,7 +211,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 * 
 	 * Subclasses may extend, but must call the super implementation.
 	 */
