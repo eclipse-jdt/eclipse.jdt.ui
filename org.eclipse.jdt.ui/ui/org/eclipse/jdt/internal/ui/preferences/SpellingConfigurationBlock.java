@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -435,5 +436,18 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 			fFileStatus= validateAbsoluteFilePath((String)fWorkingValues.get(PREF_SPELLING_USER_DICTIONARY));
 
 		fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fThresholdStatus, fFileStatus }));
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateCheckBox(org.eclipse.swt.widgets.Button)
+	 * @since 3.1
+	 */
+	protected void updateCheckBox(Button curr) {
+		super.updateCheckBox(curr);
+		Event event= new Event();
+		event.type= SWT.Selection;
+		event.display= curr.getDisplay();
+		event.widget= curr;
+		curr.notifyListeners(SWT.Selection, event);
 	}
 }
