@@ -1616,7 +1616,7 @@ public class PreferenceConstants {
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR, new RGB(127, 159, 191));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_KEYWORD_BOLD, true); //$NON-NLS-1$
 
-		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD, new RGB(127, 127, 159));
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR, new RGB(127, 127, 159));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD, false); //$NON-NLS-1$
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR, new RGB(63, 63, 191));
