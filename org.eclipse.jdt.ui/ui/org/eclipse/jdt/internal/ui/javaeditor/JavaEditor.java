@@ -248,7 +248,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			ISourceReference element= computeHighlightRangeSourceReference();
 			synchronizeOutlinePage(element);
 			setSelection(element, false);
-//			updateStatusLine();
+			updateStatusLine();
 		}
 	}
 		
@@ -2601,6 +2601,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
 		Annotation annotation= getAnnotation(selection.getOffset(), selection.getLength());
 		setStatusLineErrorMessage(null);
+		setStatusLineMessage(null);
 		if (annotation != null) {
 			try {
 				fIsUpdatingAnnotationViews= true;
@@ -2609,7 +2610,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				fIsUpdatingAnnotationViews= false;
 			}
 			if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation)annotation).isProblem())
-				setStatusLineErrorMessage(((IJavaAnnotation)annotation).getMessage());
+				setStatusLineMessage(((IJavaAnnotation)annotation).getMessage());
 		}
 	}
 	
@@ -2678,13 +2679,26 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 
 	/**
-	 * Ses the given message as error message to this editor's status line.
+	 * Sets the given message as error message to this editor's status line.
+	 * 
 	 * @param msg message to be set
 	 */
 	protected void setStatusLineErrorMessage(String msg) {
 		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
 		if (statusLine != null)
 			statusLine.setMessage(true, msg, null);	
+	}
+
+	/**
+	 * Sets the given message as message to this editor's status line.
+	 * 
+	 * @param msg message to be set
+	 * @since 3.0
+	 */
+	protected void setStatusLineMessage(String msg) {
+		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
+		if (statusLine != null)
+			statusLine.setMessage(false, msg, null);	
 	}
 	
 	private static IRegion getSignedSelection(ITextViewer viewer) {
