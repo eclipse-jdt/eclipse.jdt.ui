@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -57,6 +58,9 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 			pm.subTask(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
+			if (result.hasFatalError())
+				return result;
+			
 			pm.subTask(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 			if (hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), getMethod(), getNewName()))
 				result.addError(RefactoringCoreMessages.getFormattedString("RenamePrivateMethodRefactoring.hierarchy_defines", //$NON-NLS-1$
@@ -71,7 +75,7 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	
 	private RefactoringStatus analyzeCompilationUnit(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 1); //$NON-NLS-1$
-		SearchResultGroup[] grouped= getOccurrences(pm);
+		SearchResultGroup[] grouped= getOccurrences();
 		pm.done();
 		Assert.isTrue(grouped.length <= 1 , RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.assert.references_outside_cu")); //$NON-NLS-1$
 		if (grouped.length == 0)
@@ -80,20 +84,15 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 		Assert.isTrue(searchResults.length > 0, RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.assert.nothing_found")); //$NON-NLS-1$
 		return new RenameMethodASTAnalyzer(getNewName(), getMethod()).analyze(searchResults, getMethod().getCompilationUnit());
 	}
-	
+
 	/* non java-doc
 	 * overriding RenameMethodrefactoring@addOccurrences
 	 */
-	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws CoreException{
+	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
+		pm.beginTask("", 1);
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getMethod().getCompilationUnit());
-		TextChange change= new CompilationUnitChange(cu.getElementName(), cu);
-		
-		if (getUpdateReferences())
-			addReferenceUpdates(change);
-			
-		//there can be only 1 affected resource - the cu that declares the renamed method
-		addDeclarationUpdate(change);
-		builder.add(change);
+		addReferenceUpdates(manager.get(cu));
+		addDeclarationUpdate(manager.get(cu));
 		pm.worked(1);
 	}
 	
@@ -108,13 +107,13 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	}
 	
 	private void addReferenceUpdates(TextChange change) throws JavaModelException{
-		SearchResultGroup[] grouped= getOccurrences(null);
-			if (grouped.length != 0){
-				SearchResult[] results= grouped[0].getSearchResults();
-				for (int i= 0; i < results.length; i++){
-					String editName= "Update method reference";
-					change.addTextEdit(editName , createTextChange(results[i]));
-				}
-		}	
+		SearchResultGroup[] grouped= getOccurrences();
+		if (grouped.length == 0)
+			return;
+		SearchResult[] results= grouped[0].getSearchResults();
+		for (int i= 0; i < results.length; i++){
+			String editName= "Update method reference";
+			change.addTextEdit(editName , createTextChange(results[i]));
+		}
 	}
 }

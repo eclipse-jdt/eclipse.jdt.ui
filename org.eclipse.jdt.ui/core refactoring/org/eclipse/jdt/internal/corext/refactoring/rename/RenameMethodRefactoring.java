@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -43,6 +44,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -54,6 +57,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	private SearchResultGroup[] fOccurrences;
 	private boolean fUpdateReferences;
 	private IMethod fMethod;
+	private TextChangeManager fChangeManager;
 	
 	RenameMethodRefactoring(IMethod method) {
 		Assert.isNotNull(method);
@@ -204,16 +208,23 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			result.merge(checkNewName(fNewName));
 			pm.worked(1);
 			
-			if (!fUpdateReferences)
-				return result;
-				
-			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 4))));
+			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 4));	
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
-			result.merge(checkRelatedMethods(new SubProgressMonitor(pm, 1)));
+			if (fUpdateReferences)
+				result.merge(checkRelatedMethods(new SubProgressMonitor(pm, 1)));
+			else
+				pm.worked(1);
 			
-			result.merge(analyzeCompilationUnits(new SubProgressMonitor(pm, 3)));	
+			if (fUpdateReferences)
+				result.merge(analyzeCompilationUnits(new SubProgressMonitor(pm, 3)));	
+			else
+				pm.worked(3);
 			
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
+			result.merge(validateModifiesFiles());
 			return result;
+		} catch (CoreException e){	
+			throw new JavaModelException(e);	
 		} finally{
 			pm.done();
 		}	
@@ -250,19 +261,17 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return methods;
 	}
 	
-	SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws JavaModelException{
-		if (fOccurrences != null)
-			return fOccurrences;
-
-		if (pm == null)
-			pm= new NullProgressMonitor();
+	SearchResultGroup[] getOccurrences(){
+		return fOccurrences;	
+	}
+	
+	private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 2);	 //$NON-NLS-1$
 		pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.creating_pattern")); //$NON-NLS-1$
 		ISearchPattern pattern= createSearchPattern(new SubProgressMonitor(pm, 1));
 		pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.searching")); //$NON-NLS-1$
-		fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), pattern);	
 		pm.done();
-		return fOccurrences;
+		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), pattern);	
 	}
 
 	private static boolean isSpecialCase(IMethod method) throws JavaModelException{
@@ -299,6 +308,14 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 				result.addError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_native_1", msgData));//$NON-NLS-1$
 		}
 		return result;	
+	}
+	
+	private IFile[] getAllFilesToModify() throws JavaModelException{
+		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
+	}
+	
+	private RefactoringStatus validateModifiesFiles() throws CoreException{
+		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
 	private RefactoringStatus analyzeCompilationUnits(IProgressMonitor pm) throws JavaModelException{
@@ -348,7 +365,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return false;
 	}
 	
-	boolean hierarchyDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws JavaModelException{
+	final boolean hierarchyDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws JavaModelException{
 		IType type= method.getDeclaringType();
 		ITypeHierarchy hier= type.newTypeHierarchy(pm);
 		if (null != Checks.findMethod(newName, method.getParameterTypes().length, false, type)) {
@@ -362,57 +379,53 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	//-------- changes -----
 	
 	public final IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		try {
-			pm.beginTask("", 1);
-			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.creating_change")); //$NON-NLS-1$
-			CompositeChange builder= new CompositeChange();
-			
-			/* don't really want to add declaration and references separetely in this refactoring 
-			* (declarations of methods are different than declarations of anything else)
-			 */
-			if (! fUpdateReferences)
-				addDeclarationUpdate(builder);
-			else	
-				addOccurrences(new SubProgressMonitor(pm, 1), builder);
-
-			return builder;
-		} catch (CoreException e){
-			throw new JavaModelException(e);	
+		try{
+			return new CompositeChange("Rename Method", fChangeManager.getAllChanges());
 		} finally{
 			pm.done();
 		}	
 	}
 	
-	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws CoreException{
-		pm.beginTask("", fOccurrences.length);
+	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
+		TextChangeManager manager= new TextChangeManager();
+		
+		/* don't really want to add declaration and references separetely in this refactoring 
+		* (declarations of methods are different than declarations of anything else)
+		*/
+		if (! fUpdateReferences)
+			addDeclarationUpdate(manager);
+		else
+			addOccurrences(manager, pm);	
+		return manager;
+	}
+	
+	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
+		pm.beginTask("", fOccurrences.length);				
 		for (int i= 0; i < fOccurrences.length; i++){
 			IJavaElement element= JavaCore.create(fOccurrences[i].getResource());
 			if (!(element instanceof ICompilationUnit))
 				continue;
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
-			TextChange change= new CompilationUnitChange(cu.getElementName(), cu);
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				String editName= "Update method occurrence";
-				change.addTextEdit(editName, createTextChange(results[j]));
+				manager.get(cu).addTextEdit(editName, createTextChange(results[j]));
 			}
-			builder.add(change);
 			pm.worked(1);
-		}
+		}		
 	}
 	
-	private void addDeclarationUpdate(CompositeChange builder) throws CoreException{
+	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException{
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fMethod.getCompilationUnit());
-		TextChange change= new CompilationUnitChange(cu.getElementName(), cu);
+		TextChange change= manager.get(cu);
 		addDeclarationUpdate(change);
-		builder.add(change);
 	}
 	
-	void addDeclarationUpdate(TextChange change) throws JavaModelException{
+	final void addDeclarationUpdate(TextChange change) throws JavaModelException{
 		change.addTextEdit("Update method declaration", SimpleTextEdit.createReplace(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewName)); 
 	}
 	
-	TextEdit createTextChange(SearchResult searchResult) {
+	final TextEdit createTextChange(SearchResult searchResult) {
 		return new UpdateMethodReferenceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName, fMethod.getElementName());		
 	}
 }	
