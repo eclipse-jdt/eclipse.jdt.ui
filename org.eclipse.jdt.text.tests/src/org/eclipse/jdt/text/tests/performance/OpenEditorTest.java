@@ -14,11 +14,6 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.TestCase;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.PartInitException;
 
@@ -45,22 +40,5 @@ public abstract class OpenEditorTest extends TestCase {
 			wait(time);
 		} catch (InterruptedException e) {
 		}
-	}
-	
-	/**
-	 * Make sure the project exists and is opened. This is needed to circumvent
-	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=71362
-	 * 
-	 * It does not restore the java perspective!
-	 * 
-	 * @throws CoreException
-	 */
-	protected void ensureTestProjectOpened() throws CoreException {
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IProject project= workspace.getRoot().getProject(PerformanceTestSetup.PROJECT);
-		IProjectDescription description= workspace.newProjectDescription(PerformanceTestSetup.PROJECT);
-		description.setLocation(null);
-
-		project.open(null);
 	}
 }

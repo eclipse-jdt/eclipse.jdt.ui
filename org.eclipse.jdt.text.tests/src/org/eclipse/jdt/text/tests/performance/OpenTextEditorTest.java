@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.PartInitException;
 
@@ -31,9 +30,7 @@ public class OpenTextEditorTest extends OpenEditorTest {
 	
 	public static final String ORIG_FILE= PATH + FILE_PREFIX + ".java";
 	
-	protected void setUp() throws CoreException {
-		EditorTestHelper.runEventQueue();
-		ensureTestProjectOpened();
+	protected void setUp() {
 		EditorTestHelper.runEventQueue();
 	}
 

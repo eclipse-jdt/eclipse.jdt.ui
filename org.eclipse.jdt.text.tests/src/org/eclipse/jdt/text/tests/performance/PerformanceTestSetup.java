@@ -70,9 +70,6 @@ public class PerformanceTestSetup extends TestSetup {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		if (autobuild)
 			ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(true);
-		
-//		workbench.close(); // ensures the workbench state gets saved during the Automated Test Suite (not needed when run from Plug-in Test launch configuration)
-//      don't close here, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=71362
 	}
 	
 	/*
@@ -80,6 +77,19 @@ public class PerformanceTestSetup extends TestSetup {
 	 */
 	protected void tearDown() throws Exception {
 		// do nothing, the set up workspace will be used by the open editor tests
+		
+		/* 
+		 * ensure the workbench state gets saved when running with the Automated Testing Framework
+                 * TODO: remove when https://bugs.eclipse.org/bugs/show_bug.cgi?id=71362 is fixed
+                 */
+		StackTraceElement[] elements=  new Throwable().getStackTrace();
+		for (int i= 0; i < elements.length; i++) {
+			StackTraceElement element= elements[i];
+			if (element.getClassName().equals("org.eclipse.test.EclipseTestRunner")) {
+				PlatformUI.getWorkbench().close();
+				break;
+			}
+		}
 	}
 	
 	private void setUpTestCases() throws Exception {
