@@ -219,6 +219,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 	
 	public RefactoringStatus checkEnclosingInstanceName(String name){
+		if (! fCreateInstanceField)
+			return new RefactoringStatus();
 		RefactoringStatus result= Checks.checkFieldName(name);
 		if (! Checks.startsWithLowerCase(name))
 			result.addWarning(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.names_start_lowercase"));  //$NON-NLS-1$
@@ -386,13 +388,13 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		ASTRewrite rewrite= new ASTRewrite(cuNode);
 		if (processedCu.equals(declaringCu)){
 			TypeDeclaration td= findTypeDeclaration(fType, cuNode);
-			if (! removeTypeDeclaration && ! isInputTypeStatic()){
+			if (! removeTypeDeclaration && ! isInputTypeStatic() && fCreateInstanceField) {
 				if (typeHasNoConstructors())
-					createConstructor(td, rewrite, fCreateInstanceField);
-				else if (fCreateInstanceField)
+					createConstructor(td, rewrite);
+				else
 					modifyConstructors(td, rewrite);
-				if (fCreateInstanceField)
-					addEnclosingInstanceDeclaration(td, rewrite);
+				
+				addEnclosingInstanceDeclaration(td, rewrite);
 			}
 			modifyAccessesToMembersFromEnclosingInstance(td, rewrite);
 			if (removeTypeDeclaration)
@@ -715,31 +717,21 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		rewrite.markAsInserted(param);
 	}
 
-	private void createConstructor(TypeDeclaration declaration, ASTRewrite rewrite, boolean addRefToEnclosing) throws CoreException {
-		BodyDeclaration newConst= (BodyDeclaration)rewrite.createPlaceholder(formatConstructorSource(getNewConstructorSource(addRefToEnclosing), 0), ASTRewrite.METHOD_DECLARATION);
+	private void createConstructor(TypeDeclaration declaration, ASTRewrite rewrite) throws CoreException {
+		BodyDeclaration newConst= (BodyDeclaration)rewrite.createPlaceholder(formatConstructorSource(getNewConstructorSource(), 0), ASTRewrite.METHOD_DECLARATION);
 		declaration.bodyDeclarations().add(0, newConst);
 		rewrite.markAsInserted(newConst);
 	}
 
-	private String getNewConstructorSource(boolean addRefToEnclosing) throws CoreException {
+	private String getNewConstructorSource() throws CoreException {
 		String lineDelimiter= getLineSeperator();
-		String bodyStatement= createNewConstructorBodyStatement(addRefToEnclosing);
-		if (addRefToEnclosing)
-			bodyStatement= createEnclosingInstanceInitialization();
+		String bodyStatement= createEnclosingInstanceInitialization();
 		String constructorBody= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), fType.getElementName(), fType.getElementName(), true, bodyStatement, lineDelimiter);
 		if (constructorBody == null)
 			constructorBody= ""; //$NON-NLS-1$
-		if (addRefToEnclosing)
-			return getNewConstructorComment() + fType.getElementName() + '(' + createDeclarationForEnclosingInstanceConstructorParameter() + "){" +  //$NON-NLS-1$
+		return getNewConstructorComment() + fType.getElementName() +
+				'(' + createDeclarationForEnclosingInstanceConstructorParameter() + "){" +  //$NON-NLS-1$
 				lineDelimiter + constructorBody + lineDelimiter + '}';
-		else
-			return getNewConstructorComment() + fType.getElementName() +  "(){" + lineDelimiter + constructorBody + lineDelimiter + '}';//$NON-NLS-1$
-	}
-
-	private String createNewConstructorBodyStatement(boolean addRefToEnclosing) throws JavaModelException {
-		if (addRefToEnclosing)
-			return createEnclosingInstanceInitialization();
-		else return ""; //$NON-NLS-1$
 	}
 
 	private String getNewConstructorComment() throws CoreException {
@@ -934,13 +926,15 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 	
 	private void updateConstructorReference(SuperConstructorInvocation sci, ASTRewrite rewrite, ICompilationUnit cu) throws CoreException{
-		insertExpressionAsParameter(sci, rewrite, cu);
+		if (fCreateInstanceField)
+			insertExpressionAsParameter(sci, rewrite, cu);
 		if (sci.getExpression() != null)
 			rewrite.markAsRemoved(sci.getExpression());
 	}
 
 	private void updateConstructorReference(ClassInstanceCreation cic, ASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException {
-		insertExpressionAsParameter(cic, rewrite, cu);
+		if (fCreateInstanceField)
+			insertExpressionAsParameter(cic, rewrite, cu);
 		if (cic.getExpression() != null)
 			rewrite.markAsRemoved(cic.getExpression());
 	}
