@@ -204,6 +204,9 @@ public class RefactorActionGroup extends ActionGroup {
 
 		fUseSupertypeAction= new UseSupertypeAction(fSite);
 		initAction(fUseSupertypeAction, provider, selection);
+		
+		fInlineConstantAction= new InlineConstantAction(fSite);
+		initAction(fInlineConstantAction, provider, selection);
 	}
 
 	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
