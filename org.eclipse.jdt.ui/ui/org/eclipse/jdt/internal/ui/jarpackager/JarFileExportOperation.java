@@ -191,6 +191,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				} catch (JavaModelException ex) {
 					continue;
 				}
+				
+				// Should not happen since we only export source files
+				if (resource == null)
+					continue;
 			}
 			else
 				resource= (IResource)element;
