@@ -53,6 +53,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.wizard.IWizardPage;
 
@@ -235,8 +236,8 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo#isNoAction()
 		 */
-		public boolean isNoAction() {
-			return getAction() == NO_ACTION;
+		public boolean isActive() {
+			return getAction() != NO_ACTION;
 		}
 	}
 	
@@ -789,5 +790,27 @@ class PullUpInputPage1 extends UserInputWizardPage {
 				result.add(macs[i].getMember());
 		}
 		return (IMember[]) result.toArray(new IMember[result.size()]);
+	}
+	
+	private MemberActionInfo[] getActiveInfos() {
+		MemberActionInfo[] infos= getTableInputAsMemberActionInfoArray();
+		List result= new ArrayList(infos.length);
+		for (int i= 0; i < infos.length; i++) {
+			MemberActionInfo info= infos[i];
+			if (info.isActive())
+				result.add(info);
+		}
+		return (MemberActionInfo[]) result.toArray(new MemberActionInfo[result.size()]);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+	 */
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible){
+			fTableViewer.setSelection(new StructuredSelection(getActiveInfos()), true);
+			fTableViewer.getControl().setFocus();
+		}
 	}
 }

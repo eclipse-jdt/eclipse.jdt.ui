@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -50,6 +51,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 
 import org.eclipse.ui.PlatformUI;
@@ -236,7 +238,7 @@ class PushDownInputPage extends UserInputWizardPage {
 		layouter.addColumnData(new ColumnWeightData(60, true));
 		layouter.addColumnData(new ColumnWeightData(40, true));
 
-		final Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
+		final Table table= new Table(layouter, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		
@@ -284,6 +286,17 @@ class PushDownInputPage extends UserInputWizardPage {
 		fTableViewer.setInput(getPushDownRefactoring().getMemberActionInfos());
 		updateUIElements(null);
 		setupCellEditors(table);
+	}
+
+	private MemberActionInfo[] getActiveInfos() {
+		MemberActionInfo[] infos= getPushDownRefactoring().getMemberActionInfos();
+		List result= new ArrayList(infos.length);
+		for (int i= 0; i < infos.length; i++) {
+			PushDownRefactoring.MemberActionInfo info= infos[i];
+			if (info.isActive())
+				result.add(info);
+		}
+		return (MemberActionInfo[]) result.toArray(new MemberActionInfo[result.size()]);
 	}
 
 	private void setupCellEditors(final Table table) {
@@ -515,4 +528,14 @@ class PushDownInputPage extends UserInputWizardPage {
 		return (PushDownRefactoring)getRefactoring();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+	 */
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible){
+			fTableViewer.setSelection(new StructuredSelection(getActiveInfos()), true);
+			fTableViewer.getControl().setFocus();
+		}
+	}
 }
