@@ -67,9 +67,9 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 			binding= decl.resolveBinding();
 			listRewrite= rewrite.getListRewrite(decl, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 		} else {
-			TypeDeclaration decl= (TypeDeclaration) fTypeNode;
+			AbstractTypeDeclaration decl= (AbstractTypeDeclaration) fTypeNode;
 			binding= decl.resolveBinding();
-			listRewrite= rewrite.getListRewrite(decl, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+			listRewrite= rewrite.getListRewrite(decl, decl.getBodyDeclarationsProperty());
 		}
 		IMethodBinding[] methods= evalUnimplementedMethods(binding);
 		fMethodsToOverride= methods;

@@ -313,11 +313,9 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			if (fSenderBinding.isInterface() || fVariableKind == CONST_FIELD) {
 				fragment.setInitializer(ASTNodeFactory.newDefaultExpression(ast, type, 0));
 			}
-		
-			boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
 			
-			ChildListPropertyDescriptor property= isAnonymous ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
-			List decls= (List) newTypeDecl.getStructuralProperty(property);
+			ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
+			List decls= (List) newTypeDecl.getStructuralProperty(property); 
 						
 			int insertIndex= findFieldInsertIndex(decls, node.getStartPosition());
 			

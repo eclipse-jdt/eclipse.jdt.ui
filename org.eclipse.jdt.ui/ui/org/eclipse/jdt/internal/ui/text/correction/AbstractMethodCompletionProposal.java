@@ -74,7 +74,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 			
 			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
 			
-			ChildListPropertyDescriptor property= fSenderBinding.isAnonymous() ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
+			ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
 			List members= (List) newTypeDecl.getStructuralProperty(property);
 			
 			int insertIndex;
