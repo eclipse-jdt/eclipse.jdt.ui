@@ -57,7 +57,7 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		IRenameRefactoring ref= getRenameRefactoring();
 		ref.setNewName(newName);
 		try{
-			return ref.checkNewName();
+			return ref.checkNewName(newName);
 		} catch (JavaModelException e){
 			//XXX: should log the exception
 			String msg= e.getMessage() == null ? "": e.getMessage(); //$NON-NLS-1$
