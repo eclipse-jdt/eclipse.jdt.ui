@@ -107,8 +107,9 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 	private Object getParent(Object object) {
 		if (object instanceof IJavaElement)
 			return ((IJavaElement)object).getParent();
-		else
+		else if (object instanceof IResource)
 			return ((IResource)object).getParent();
+		return null;
 	}
 
 	private void collectRemoved(Set potentiallyRemovedSet, Set removedElements, IJavaElementDelta delta) {

@@ -540,7 +540,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 	
 	/*private Control createParticipants(Composite result) {
-		if (!SearchParticipantsPreferencePage.hasAnyParticipants())
+		if (!SearchParticipantsExtensionPoint.hasAnyParticipants())
 			return new Composite(result, SWT.NULL);
 		Button selectParticipants= new Button(result, SWT.PUSH);
 		selectParticipants.setText(SearchMessages.getString("SearchPage.select_participants.label")); //$NON-NLS-1$
@@ -553,7 +553,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		selectParticipants.setLayoutData(gd);
 		selectParticipants.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PreferencePageSupport.showPreferencePage(getShell(), "org.eclipse.jdt.ui.preferences.SearchParticipantsPreferencePage", new SearchParticipantsPreferencePage()); //$NON-NLS-1$
+				PreferencePageSupport.showPreferencePage(getShell(), "org.eclipse.jdt.ui.preferences.SearchParticipantsExtensionPoint", new SearchParticipantsExtensionPoint()); //$NON-NLS-1$
 			}
 
 		});

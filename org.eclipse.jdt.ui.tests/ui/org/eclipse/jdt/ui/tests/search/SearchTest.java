@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 import org.eclipse.jdt.internal.ui.search.ReferenceScopeFactory;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
+import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 
 public class SearchTest {
 	public static Test suite() {
@@ -33,6 +34,7 @@ public class SearchTest {
 		//suite.addTestSuite(WorkspaceScopeTest.class);
 		suite.addTest(WorkspaceReferenceTest.allTests());
 		suite.addTest(TreeContentProviderTest.allTests());
+		suite.addTest(ParticipantTest.allTests());
 		return suite;
 	}
 
@@ -41,6 +43,13 @@ public class SearchTest {
 		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();
 		return result.getMatchCount();
 	}
+	
+	static int countMethodRefs(String methodName, String[] parameterTypes) throws JavaModelException {
+		JavaSearchQuery query= runMethodRefQuery(methodName, parameterTypes);
+		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();
+		return result.getMatchCount();
+	}
+
 
 	static JavaSearchQuery runMethodRefQuery(String TypeName, String methodName, String[] parameterTypes) throws JavaModelException {
 		IMethod method= getMethod(TypeName, methodName, parameterTypes);
@@ -50,8 +59,17 @@ public class SearchTest {
 		return query;
 	}
 
+	static JavaSearchQuery runMethodRefQuery(String methodName, String[] parameterTypes) throws JavaModelException {
+		NewSearchUI.activateSearchResultView();
+		JavaSearchQuery query= new JavaSearchQuery(new PatternQuerySpecification(methodName, IJavaSearchConstants.METHOD, true, IJavaSearchConstants.REFERENCES, ReferenceScopeFactory.createWorkspaceScope(true), "workspace scope"));
+		NewSearchUI.runQueryInForeground(null, query);
+		return query;
+	}
+
 	static IMethod getMethod(String TypeName, String methodName, String[] parameterTypes) throws JavaModelException {
 		IType type= getType(TypeName);
+		if (type == null)
+			return null;
 		IMethod method= type.getMethod(methodName, parameterTypes);
 		return method;
 	}
