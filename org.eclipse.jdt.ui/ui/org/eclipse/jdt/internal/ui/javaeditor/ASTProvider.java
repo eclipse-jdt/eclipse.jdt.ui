@@ -317,7 +317,9 @@ public class ASTProvider implements IJavaReconcilingListener {
 	public void dispose() {
 
 		// Dispose activation listener
-		PlatformUI.getWorkbench().removeWindowListener(fActivationListener);
+		
+		// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=55246
+		// PlatformUI.getWorkbench().removeWindowListener(fActivationListener);
 		fActivationListener= null;
 		
 		fActiveEditor= null;
@@ -325,7 +327,8 @@ public class ASTProvider implements IJavaReconcilingListener {
 		
 		disposeAST();
 		
-		notify();
+		// FIXME: not yet working
+		//notify();
 	}
 
 	/*
