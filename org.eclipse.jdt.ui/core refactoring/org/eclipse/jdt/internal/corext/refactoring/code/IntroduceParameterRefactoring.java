@@ -15,8 +15,10 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -27,7 +29,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -87,6 +88,8 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class IntroduceParameterRefactoring extends Refactoring {
+	
+	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
 	
 	private ICompilationUnit fSourceCU;
 	private int fSelectionStart;
@@ -257,29 +260,80 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		fParameterName= name;
 	}
 	
-	/** must only be called <i>after</i> checkActivation() */
+	/** 
+	 * must only be called <i>after</i> checkActivation() 
+	 * @return guessed parameter name
+	 */
 	public String guessedParameterName() {
-		String candidate= guessParameterNameFromExpression(fSelectedExpression);
-		if (candidate != null)
-			return candidate;
-		return fParameterName;
+		String[] proposals= guessParameterNames();
+		if (proposals.length == 0)
+			return fParameterName;
+		else
+			return proposals[0];
 	}
-
-	private String guessParameterNameFromExpression(Expression selectedExpression) {
+	
+// --- TODO: copied from ExtractTempRefactoring - should extract ------------------------------
+	
+	/**
+	 * Must only be called <i>after</i> checkActivation().
+	 * The first proposal should be used as "best guess" (if it exists).
+	 * @return proposed variable names (may be empty, but not null).
+	 */
+	public String[] guessParameterNames() {
+		LinkedHashSet proposals= new LinkedHashSet(); //retain ordering, but prevent duplicates
+		try {
+			String[] excludedVariableNames= getExcludedVariableNames();
+			if (fSelectedExpression instanceof MethodInvocation){
+				proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) fSelectedExpression, excludedVariableNames));
+			}
+			proposals.addAll(guessTempNamesFromExpression(fSelectedExpression, excludedVariableNames));
+		} catch (JavaModelException e) {
+			// too bad ... no proposals this time
+		}
+		return (String[]) proposals.toArray(new String[proposals.size()]);
+	}
+	
+	private List/*<String>*/ guessTempNamesFromMethodInvocation(MethodInvocation selectedMethodInvocation, String[] excludedVariableNames) {
+		String methodName= selectedMethodInvocation.getName().getIdentifier();
+		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
+			String prefix= KNOWN_METHOD_NAME_PREFIXES[i];
+			if (! methodName.startsWith(prefix))
+				continue; //not this prefix
+			if (methodName.length() == prefix.length())
+				return Collections.EMPTY_LIST; // prefix alone -> don't take method name
+			char firstAfterPrefix= methodName.charAt(prefix.length());
+			if (! Character.isUpperCase(firstAfterPrefix))
+				continue; //not uppercase after prefix
+			//found matching prefix
+			String proposal= Character.toLowerCase(firstAfterPrefix) + methodName.substring(prefix.length() + 1);
+			methodName= proposal;
+			break;
+		}
+		String[] proposals= StubUtility.getLocalNameSuggestions(fSourceCU.getJavaProject(), methodName, 0, excludedVariableNames);
+		return Arrays.asList(proposals);
+	}
+	
+	private List/*<String>*/ guessTempNamesFromExpression(Expression selectedExpression, String[] excluded) {
 		ITypeBinding expressionBinding= selectedExpression.resolveTypeBinding();
-			
-		String packageName= getPackageName(expressionBinding);
 		String typeName= getQualifiedName(expressionBinding);
 		if (typeName.length() == 0)
 			typeName= expressionBinding.getName();
 		if (typeName.length() == 0)			
-			return fParameterName;
-		String[] candidates= NamingConventions.suggestArgumentNames(fSourceCU.getJavaProject(),
-				packageName, typeName, expressionBinding.getDimensions(), fExcludedParameterNames);
-		if (candidates.length > 0)
-			return candidates[0];
-		return null;
+			return Collections.EMPTY_LIST;
+		String[] proposals= StubUtility.getLocalNameSuggestions(fSourceCU.getJavaProject(), typeName, expressionBinding.getDimensions(), excluded);
+		return Arrays.asList(proposals);
 	}
+	
+	private String[] getExcludedVariableNames() throws JavaModelException {
+		IBinding[] bindings= new ScopeAnalyzer(fSource.getRoot()).getDeclarationsInScope(fSelectedExpression.getStartPosition(), ScopeAnalyzer.VARIABLES);
+		String[] names= new String[bindings.length];
+		for (int i= 0; i < names.length; i++) {
+			names[i]= bindings[i].getName();
+		}
+		return names;
+	}
+	
+// ----------------------------------------------------------------------
 	
 	private static String getPackageName(ITypeBinding typeBinding) {
 		if (typeBinding.getPackage() != null)
@@ -356,7 +410,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 	
 	private void changeSource() {
-		//TODO: for constructors, must update implicit super(..) calls in some subclasses' constructors 
+		//TODO (47547): for constructors, must update implicit super(..) calls in some subclasses' constructors 
 		replaceSelectedExpression();		
 		addParameter();
 		addJavadoc();

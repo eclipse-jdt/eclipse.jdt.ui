@@ -1,5 +1,5 @@
 //selection: 10, 28, 10, 37
-//name: f -> ship
+//name: ship -> ship
 package simple;
 
 public class Javadoc2 {

@@ -1,5 +1,5 @@
 //selection: 9, 32, 9, 37
-//name: j -> foo
+//name: foo -> foo
 package simple.out;
 
 public class StaticGetter1 {

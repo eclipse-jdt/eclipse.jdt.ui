@@ -20,12 +20,15 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.text.Assert;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.TempNameProcessor;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -41,17 +44,24 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		addPage(new IntroduceParameterInputPage());
+		addPage(new IntroduceParameterInputPage(getIntroduceParameterRefactoring().guessParameterNames()));
+	}
+	
+	private IntroduceParameterRefactoring getIntroduceParameterRefactoring(){
+		return (IntroduceParameterRefactoring)getRefactoring();
 	}
 	
 	private static class IntroduceParameterInputPage extends UserInputWizardPage {
 
 		private static final String DESCRIPTION = RefactoringMessages.getString("IntroduceParameterInputPage.description"); //$NON-NLS-1$
 		public static final String PAGE_NAME= "IntroduceParameterInputPage";//$NON-NLS-1$
+		private String[] fParamNameProposals;
     
-		public IntroduceParameterInputPage() {
+		public IntroduceParameterInputPage(String[] tempNameProposals) {
 			super(PAGE_NAME);
 			setDescription(DESCRIPTION);
+			Assert.isNotNull(tempNameProposals);
+			fParamNameProposals= tempNameProposals; //$NON-NLS-1$
 		}
 
 		private IntroduceParameterRefactoring getIntroduceParameterRefactoring(){
@@ -67,9 +77,10 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			result.setLayout(layout);
 			
 			Text textField= addParameterNameField(result);
-			textField.setText(getIntroduceParameterRefactoring().guessedParameterName());
+			textField.setText(fParamNameProposals.length == 0 ? "" : fParamNameProposals[0]); //$NON-NLS-1$
 			textField.selectAll();
 			textField.setFocus();
+			ControlContentAssistHelper.createTextContentAssistant(textField, new TempNameProcessor(fParamNameProposals));
 
 			updateStatus();
 			Dialog.applyDialogFont(result);
