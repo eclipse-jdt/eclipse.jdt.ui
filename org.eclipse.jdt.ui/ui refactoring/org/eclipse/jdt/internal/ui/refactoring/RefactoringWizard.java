@@ -292,9 +292,13 @@ public class RefactoringWizard extends Wizard {
 			op.setChangeContext(context);
 			undoManager.aboutToPerformRefactoring();
 			getContainer().run(false, false, op);	
-			if (op.changeExecuted())
-				undoManager.addUndo(fRefactoring.getName(), op.getChange().getUndoChange());
-			success= true;
+			if (! op.getChange().isUndoable()){
+				success= false;
+			} else { 
+				if (op.changeExecuted())
+					undoManager.addUndo(fRefactoring.getName(), op.getChange().getUndoChange());
+				success= true;
+			}	
 		} catch (InvocationTargetException e) {
 			Throwable t= e.getTargetException();
 			if (t instanceof ChangeAbortException) {
