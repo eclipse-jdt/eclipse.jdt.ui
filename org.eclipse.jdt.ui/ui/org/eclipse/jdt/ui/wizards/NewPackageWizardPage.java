@@ -103,7 +103,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		
 		initContainerPage(jelem);
 		String pName= ""; //$NON-NLS-1$
-		if (jelem.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+		if (jelem != null && jelem.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 			IPackageFragment pf= (IPackageFragment)jelem;
 			if (!pf.isDefaultPackage())
 				pName= jelem.getElementName();
