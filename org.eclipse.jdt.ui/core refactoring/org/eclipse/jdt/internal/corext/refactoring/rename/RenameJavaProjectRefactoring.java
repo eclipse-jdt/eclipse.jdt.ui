@@ -16,7 +16,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class RenameJavaProjectRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring {
@@ -116,7 +115,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	 */
 	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		RefactoringStatus result= RefactoringStatus.create(JavaPlugin.getWorkspace().validateName(newName, IResource.PROJECT));
+		RefactoringStatus result= RefactoringStatus.create(ResourcesPlugin.getWorkspace().validateName(newName, IResource.PROJECT));
 		if (result.hasFatalError())
 			return result;
 		
