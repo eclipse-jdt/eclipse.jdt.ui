@@ -14,9 +14,11 @@ package org.eclipse.jdt.text.tests;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.osgi.framework.Bundle;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -86,12 +88,6 @@ public class PluginsNotLoadedTest extends TestCase {
 	}
 	
 	public void testComparePluginNotLoaded() {
-		/*
-		 * FIXME: Can be uncommented once the following bugs:
-		 * 	https://bugs.eclipse.org/bugs/show_bug.cgi?id=78315
-		 *	https://bugs.eclipse.org/bugs/show_bug.cgi?id=78317
-		 * have been fixed.
-		 */
-//		assertFalse(Platform.getBundle("org.eclipse.compare").getState() == Bundle.ACTIVE);
+		assertFalse(Platform.getBundle("org.eclipse.compare").getState() == Bundle.ACTIVE);
 	}
 }
