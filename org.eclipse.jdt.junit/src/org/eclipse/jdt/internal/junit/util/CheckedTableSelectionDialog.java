@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
