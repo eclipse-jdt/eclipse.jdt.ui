@@ -622,8 +622,15 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		CompilationUnitInfo info= getCompilationUnitForMethod(document, offset);
 		if (info == null)
 			return false;
+			
+		CompilationUnit compilationUnit= null;
+		try {
+			compilationUnit= AST.parseCompilationUnit(info.buffer);
+		} catch (ArrayIndexOutOfBoundsException x) {
+			// work around for parser problem
+			return false;
+		}
 		
-		final CompilationUnit compilationUnit= AST.parseCompilationUnit(info.buffer);
 		IProblem[] problems= compilationUnit.getProblems();
 		for (int i= 0; i != problems.length; ++i) {
 			if (problems[i].getID() == IProblem.UnmatchedBracket)
