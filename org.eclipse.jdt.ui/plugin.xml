@@ -202,13 +202,13 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             name="%perspectiveName"
-            icon="icons/full/cview16/jperspective.gif"
+            icon="icons/full/eview16/jperspective.gif"
             class="org.eclipse.jdt.internal.ui.JavaPerspectiveFactory"
             id="org.eclipse.jdt.ui.JavaPerspective">
       </perspective>
       <perspective
             name="%typeHierarchyName"
-            icon="icons/full/cview16/hierch_persp.gif"
+            icon="icons/full/eview16/hierch_persp.gif"
             class="org.eclipse.jdt.internal.ui.JavaHierarchyPerspectiveFactory"
             id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
       </perspective>
@@ -280,14 +280,14 @@
       </category>
       <view
             name="%packagesViewName"
-            icon="icons/full/cview16/package.gif"
+            icon="icons/full/eview16/package.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart"
             id="org.eclipse.jdt.ui.PackageExplorer">
       </view>
       <view
             name="%hierarchyViewName"
-            icon="icons/full/cview16/class_hi.gif"
+            icon="icons/full/eview16/class_hi.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart"
             id="org.eclipse.jdt.ui.TypeHierarchy">
@@ -301,7 +301,7 @@
       </category>
       <wizard
             name="%NewJavaProject.label"
-            icon="icons/full/ctool16/newjprj_wiz.gif"
+            icon="icons/full/etool16/newjprj_wiz.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard"
             preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
@@ -314,7 +314,7 @@
       </wizard>
       <wizard
             name="%NewJavaPackage.label"
-            icon="icons/full/ctool16/newpack_wiz.gif"
+            icon="icons/full/etool16/newpack_wiz.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.internal.ui.wizards.NewPackageCreationWizard"
             id="org.eclipse.jdt.ui.wizards.NewPackageCreationWizard">
@@ -324,7 +324,7 @@
       </wizard>
       <wizard
             name="%NewJavaClass.label"
-            icon="icons/full/ctool16/newclass_wiz.gif"
+            icon="icons/full/etool16/newclass_wiz.gif"
             category="org.eclipse.jdt.ui.java"
             id="org.eclipse.jdt.ui.wizards.NewClassCreationWizard">
          <class class="org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard">
@@ -336,7 +336,7 @@
       </wizard>
       <wizard
             name="%NewJavaInterface.label"
-            icon="icons/full/ctool16/newint_wiz.gif"
+            icon="icons/full/etool16/newint_wiz.gif"
             category="org.eclipse.jdt.ui.java"
             id="org.eclipse.jdt.ui.wizards.NewInterfaceCreationWizard">
          <class class="org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard">
@@ -348,7 +348,7 @@
       </wizard>
       <wizard
             name="%NewSourceFolderCreationWizard.label"
-            icon="icons/full/ctool16/newpackfolder_wiz.gif"
+            icon="icons/full/etool16/newpackfolder_wiz.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard"
             id="org.eclipse.jdt.ui.wizards.NewSourceFolderCreationWizard">
@@ -861,7 +861,6 @@
          <action
                id="org.eclipse.jdt.ui.actions.NewTypeDropDown"
                toolbarPath="Normal/JavaWizards"
-               hoverIcon="icons/full/ctool16/newclass_wiz.gif"
                class="org.eclipse.jdt.internal.ui.wizards.NewTypeDropDownAction"
                disabledIcon="icons/full/dtool16/newclass_wiz.gif"
                icon="icons/full/etool16/newclass_wiz.gif"
@@ -871,7 +870,7 @@
          </action>
          <action
                label="%OpenPackageWizardAction.label"
-               icon="icons/full/ctool16/newpack_wiz.gif"
+               icon="icons/full/etool16/newpack_wiz.gif"
                tooltip="%OpenPackageWizardAction.tooltip"
                class="org.eclipse.jdt.internal.ui.wizards.OpenPackageWizardAction"
                toolbarPath="Normal/JavaWizards"
@@ -879,7 +878,7 @@
          </action>
          <action
                label="%OpenProjectWizardAction.label"
-               icon="icons/full/ctool16/newjprj_wiz.gif"
+               icon="icons/full/etool16/newjprj_wiz.gif"
                tooltip="%OpenProjectWizardAction.tooltip"
                class="org.eclipse.jdt.internal.ui.wizards.OpenProjectWizardAction"
                toolbarPath="Normal/JavaWizards"
@@ -908,7 +907,7 @@
       <sorter
             pageId="org.eclipse.jdt.ui.JavaSearchPage"
             label="%ElementNameSorter.label"
-            icon="icons/full/clcl16/search_sortmatch.gif"
+            icon="icons/full/elcl16/search_sortmatch.gif"
             tooltip="%ElementNameSorter.tooltip"
             class="org.eclipse.jdt.internal.ui.search.ElementNameSorter"
             id="org.eclipse.search.internal.ui.ElementNameSorter">
@@ -916,7 +915,7 @@
       <sorter
             pageId="org.eclipse.jdt.ui.JavaSearchPage"
             label="%ParentNameSorter.label"
-            icon="icons/full/clcl16/search_sortmatch.gif"
+            icon="icons/full/elcl16/search_sortmatch.gif"
             tooltip="%ParentNameSorter.tooltip"
             class="org.eclipse.jdt.internal.ui.search.ParentNameSorter"
             id="org.eclipse.search.internal.ui.ParentNameSorter">
@@ -924,7 +923,7 @@
       <sorter
             pageId="org.eclipse.jdt.ui.JavaSearchPage"
             label="%PathNameSorter.label"
-            icon="icons/full/clcl16/search_sortmatch.gif"
+            icon="icons/full/elcl16/search_sortmatch.gif"
             tooltip="%PathNameSorter.tooltip"
             class="org.eclipse.jdt.internal.ui.search.PathNameSorter"
             id="org.eclipse.search.internal.ui.PathNameSorter">
@@ -932,7 +931,7 @@
       <sorter
             pageId="org.eclipse.jdt.ui.JavaFileSearch"
             label="%PositionSorter.label"
-            icon="icons/full/clcl16/search_sortmatch.gif"
+            icon="icons/full/elcl16/search_sortmatch.gif"
             tooltip="%PositionSorter.tooltip"
             class="org.eclipse.jdt.internal.ui.search.MatchPositionSorter"
             id="org.eclipse.search.internal.ui.MatchPositionSorter">
@@ -1145,7 +1144,7 @@
          point="org.eclipse.ui.exportWizards">
       <wizard
             name="%jarExportWizard.label"
-            icon="icons/full/ctool16/exportjar_wiz.gif"
+            icon="icons/full/etool16/exportjar_wiz.gif"
             class="org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard"
             id="org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard">
          <description>
@@ -1193,7 +1192,7 @@
 <!-- Change to necessary NLS -->
       <wizard
             name="%JavadocWizard.name"
-            icon="icons/full/ctool16/javadoc.gif"
+            icon="icons/full/etool16/javadoc.gif"
             class="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard"
             id="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard">
          <description>
@@ -1246,7 +1245,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             name="%Browsing.perspectiveName"
-            icon="icons/full/cview16/browse_persp.gif"
+            icon="icons/full/eview16/browse_persp.gif"
             class="org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPerspectiveFactory"
             id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
       </perspective>
@@ -1298,28 +1297,28 @@
       </category>
       <view
             name="%Browsing.projectsViewName"
-            icon="icons/full/cview16/projects.gif"
+            icon="icons/full/eview16/projects.gif"
             category="org.eclipse.jdt.ui.java.browsing"
             class="org.eclipse.jdt.internal.ui.browsing.ProjectsView"
             id="org.eclipse.jdt.ui.ProjectsView">
       </view>
       <view
             name="%Browsing.packagesViewName"
-            icon="icons/full/cview16/packages.gif"
+            icon="icons/full/eview16/packages.gif"
             category="org.eclipse.jdt.ui.java.browsing"
             class="org.eclipse.jdt.internal.ui.browsing.PackagesView"
             id="org.eclipse.jdt.ui.PackagesView">
       </view>
       <view
             name="%Browsing.typesViewName"
-            icon="icons/full/cview16/types.gif"
+            icon="icons/full/eview16/types.gif"
             category="org.eclipse.jdt.ui.java.browsing"
             class="org.eclipse.jdt.internal.ui.browsing.TypesView"
             id="org.eclipse.jdt.ui.TypesView">
       </view>
       <view
             name="%Browsing.membersViewName"
-            icon="icons/full/cview16/members.gif"
+            icon="icons/full/eview16/members.gif"
             category="org.eclipse.jdt.ui.java.browsing"
             class="org.eclipse.jdt.internal.ui.browsing.MembersView"
             id="org.eclipse.jdt.ui.MembersView">
@@ -1349,7 +1348,7 @@
                toolbarPath="org.eclipse.search.searchActionSet/Search"
                class="org.eclipse.jdt.internal.ui.actions.OpenTypeAction"
                definitionId="org.eclipse.jdt.ui.navigate.open.type"
-               icon="icons/full/ctool16/opentype.gif"
+               icon="icons/full/etool16/opentype.gif"
                helpContextId="org.eclipse.jdt.ui.open_type_action"
                label="%OpenTypeAction.label"
                menubarPath="navigate/open.ext2"
@@ -3970,7 +3969,7 @@
          point="org.eclipse.ui.views">
       <view
             name="%callHierarchyViewName"
-            icon="icons/full/cview16/call_hierarchy.gif"
+            icon="icons/full/eview16/call_hierarchy.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyViewPart"
             id="org.eclipse.jdt.callhierarchy.view">
@@ -4112,7 +4111,7 @@
          point="org.eclipse.ui.views">
       <view
             name="%JavaSourceView"
-            icon="icons/full/cview16/source.gif"
+            icon="icons/full/eview16/source.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.internal.ui.infoviews.SourceView"
             id="org.eclipse.jdt.ui.SourceView">
@@ -4122,7 +4121,7 @@
          point="org.eclipse.ui.views">
       <view
             name="%JavadocView"
-            icon="icons/full/cview16/javadoc.gif"
+            icon="icons/full/eview16/javadoc.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.internal.ui.infoviews.JavadocView"
             id="org.eclipse.jdt.ui.JavadocView">

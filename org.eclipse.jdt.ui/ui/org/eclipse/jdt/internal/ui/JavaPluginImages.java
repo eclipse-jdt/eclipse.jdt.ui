@@ -133,18 +133,18 @@ public class JavaPluginImages {
 	private static final String T_OBJ= "obj16"; 		//$NON-NLS-1$
 	private static final String T_OVR= "ovr16"; 		//$NON-NLS-1$
 	private static final String T_WIZBAN= "wizban"; 	//$NON-NLS-1$
-	private static final String T_CLCL= "clcl16"; 	//$NON-NLS-1$
+	private static final String T_ELCL= "elcl16"; 	//$NON-NLS-1$
 	private static final String T_DLCL= "dlcl16"; 	//$NON-NLS-1$
-	private static final String T_CTOOL= "ctool16"; 	//$NON-NLS-1$
-	private static final String T_CVIEW= "cview16"; //$NON-NLS-1$
+	private static final String T_ETOOL= "etool16"; 	//$NON-NLS-1$
+	private static final String T_EVIEW= "eview16"; //$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_VIEW_ERRORWARNING_TAB= create(T_CVIEW, "errorwarning_tab.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_VIEW_CLASSFILEGENERATION_TAB= create(T_CVIEW, "classfilegeneration_tab.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_VIEW_JDKCOMPLIANCE_TAB= create(T_CVIEW, "jdkcompliance_tab.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_VIEW_ERRORWARNING_TAB= create(T_EVIEW, "errorwarning_tab.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_VIEW_CLASSFILEGENERATION_TAB= create(T_EVIEW, "classfilegeneration_tab.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_VIEW_JDKCOMPLIANCE_TAB= create(T_EVIEW, "jdkcompliance_tab.gif"); //$NON-NLS-1$
 	
-	public static final ImageDescriptor DESC_CLCL_FILTER= create(T_CLCL, "filter_ps.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_CLCL_FILTER= create(T_ELCL, "filter_ps.gif"); //$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_CLCL_CODE_ASSIST= createManaged(T_CLCL, IMG_VIEW_MENU); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_CLCL_CODE_ASSIST= createManaged(T_ELCL, IMG_VIEW_MENU); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_DLCL_CODE_ASSIST= create(T_DLCL, "metharg_obj.gif"); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_MISC_PUBLIC= createManaged(T_OBJ, IMG_MISC_PUBLIC);
@@ -157,8 +157,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_FIELD_PRIVATE= createManaged(T_OBJ, IMG_FIELD_PRIVATE); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_FIELD_DEFAULT= createManaged(T_OBJ, IMG_FIELD_DEFAULT); //$NON-NLS-1$
 	
-	public static final ImageDescriptor DESC_MENU_SHIFT_RIGHT= create(T_CTOOL, "shift_r_edit.gif"); 	//$NON-NLS-1$
-	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= create(T_CTOOL, "shift_l_edit.gif"); 	//$NON-NLS-1$
+	public static final ImageDescriptor DESC_MENU_SHIFT_RIGHT= create(T_ETOOL, "shift_r_edit.gif"); 	//$NON-NLS-1$
+	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= create(T_ETOOL, "shift_l_edit.gif"); 	//$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_GHOST= createManaged(T_OBJ, IMG_OBJS_GHOST);
 	public static final ImageDescriptor DESC_OBJS_PACKDECL= createManaged(T_OBJ, IMG_OBJS_PACKDECL);
@@ -271,7 +271,6 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_OVR_MAX_LEVEL= create(T_OVR, "maxlevel_co.gif");                    //$NON-NLS-1$
 		
 	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= create(T_WIZBAN, "newclass_wiz.gif"); 			//$NON-NLS-1$
-	public static final ImageDescriptor DESC_WIZBAN_NEWFIELD= create(T_WIZBAN, "newfield_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWINT= create(T_WIZBAN, "newint_wiz.gif"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= create(T_WIZBAN, "newjprj_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSRCFOLDR= create(T_WIZBAN, "newsrcfldr_wiz.gif"); 	//$NON-NLS-1$
@@ -295,21 +294,16 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_ADD_LIBRARY= create(T_WIZBAN, "addlibrary_wiz.gif");//$NON-NLS-1$
 
 		
-	// public static final ImageDescriptor DESC_TOOL_DISPLAYSNIPPET= create(T_CTOOL, "disp_sbook.gif"); 			//$NON-NLS-1$
-	// public static final ImageDescriptor DESC_TOOL_RUNSNIPPET= create(T_CTOOL, "run_sbook.gif"); 				//$NON-NLS-1$
-	// public static final ImageDescriptor DESC_TOOL_INSPSNIPPET= create(T_CTOOL, "insp_sbook.gif"); 			//$NON-NLS-1$
-	// public static final ImageDescriptor DESC_TOOL_PACKSNIPPET= create(T_CTOOL, "pack_sbook.gif"); 			//$NON-NLS-1$
-	// public static final ImageDescriptor DESC_TOOL_TERMSNIPPET= create(T_CTOOL, "term_sbook.gif"); 			//$NON-NLS-1$
-	public static final ImageDescriptor DESC_TOOL_SHOW_EMPTY_PKG= create(T_CTOOL, "show_empty_pkg.gif"); 		//$NON-NLS-1$
-	public static final ImageDescriptor DESC_TOOL_SHOW_SEGMENTS= create(T_CTOOL, "segment_edit.gif"); 		//$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_SHOW_EMPTY_PKG= create(T_ETOOL, "show_empty_pkg.gif"); 		//$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_SHOW_SEGMENTS= create(T_ETOOL, "segment_edit.gif"); 		//$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_TOOL_OPENTYPE= create(T_CTOOL, "opentype.gif"); 					//$NON-NLS-1$
-	public static final ImageDescriptor DESC_TOOL_NEWPROJECT= create(T_CTOOL, "newjprj_wiz.gif"); 			//$NON-NLS-1$
-	public static final ImageDescriptor DESC_TOOL_NEWPACKAGE= create(T_CTOOL, "newpack_wiz.gif"); 			//$NON-NLS-1$
-	public static final ImageDescriptor DESC_TOOL_NEWCLASS= create(T_CTOOL, "newclass_wiz.gif"); 				//$NON-NLS-1$
-	public static final ImageDescriptor DESC_TOOL_NEWINTERFACE= create(T_CTOOL, "newint_wiz.gif"); 			//$NON-NLS-1$
-	public static final ImageDescriptor DESC_TOOL_NEWSNIPPET= create(T_CTOOL, "newsbook_wiz.gif"); 			//$NON-NLS-1$
-	public static final ImageDescriptor DESC_TOOL_NEWPACKROOT= create(T_CTOOL, "newpackfolder_wiz.gif"); 		//$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_OPENTYPE= create(T_ETOOL, "opentype.gif"); 					//$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWPROJECT= create(T_ETOOL, "newjprj_wiz.gif"); 			//$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWPACKAGE= create(T_ETOOL, "newpack_wiz.gif"); 			//$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWCLASS= create(T_ETOOL, "newclass_wiz.gif"); 				//$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWINTERFACE= create(T_ETOOL, "newint_wiz.gif"); 			//$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWSNIPPET= create(T_ETOOL, "newsbook_wiz.gif"); 			//$NON-NLS-1$
+	public static final ImageDescriptor DESC_TOOL_NEWPACKROOT= create(T_ETOOL, "newpackfolder_wiz.gif"); 		//$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= create(T_OBJ, "cp_order_obj.gif"); 		//$NON-NLS-1$
 
@@ -386,14 +380,18 @@ public class JavaPluginImages {
 		} catch (MalformedURLException e) {
 		}
 	
+		/*
 		try {
 			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("c" + type, relPath)); //$NON-NLS-1$
 			if (id != null)
 				action.setHoverImageDescriptor(id);
 		} catch (MalformedURLException e) {
 		}
+		*/
 	
-		action.setImageDescriptor(create("e" + type, relPath)); //$NON-NLS-1$
+		ImageDescriptor descriptor= create("e" + type, relPath); //$NON-NLS-1$
+		action.setHoverImageDescriptor(descriptor);
+		action.setImageDescriptor(descriptor); 
 	}
 	
 	private static ImageDescriptor createManaged(String prefix, String name) {
