@@ -141,6 +141,12 @@
             <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
 		</factory>
 		
+		<factory 
+            class="org.eclipse.jdt.internal.ui.refactoring.RefactoringAdapterFactory" 
+            adaptableType="org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange">
+            <adapter type="org.eclipse.ltk.internal.ui.refactoring.IChangeElementChildrenCreator"/>
+		</factory>
+		
    </extension>     	
 
 
