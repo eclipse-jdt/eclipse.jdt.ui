@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Table;
 
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -317,23 +318,27 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		}
 	}
 		
+	
 	/*
-	 * @see StructuredViewer#associate(Object, Item)
+	 * @see StructuredViewer#mapElement(Object, Widget)
 	 */
-	protected void associate(Object element, Item item) {
-		if (item.getData() != element) {
-			fProblemItemMapper.addToMap(element, item);	
+	protected void mapElement(Object element, Widget item) {
+		super.mapElement(element, item);
+		if (item instanceof Item) {
+			fProblemItemMapper.addToMap(element, (Item) item);
 		}
-		super.associate(element, item);		
 	}
 
 	/*
-	 * @see StructuredViewer#disassociate(Item)
+	 * @see StructuredViewer#unmapElement(Object, Widget)
 	 */
-	protected void disassociate(Item item) {
-		fProblemItemMapper.removeFromMap(item.getData(), item);
-		super.disassociate(item);	
-	}
+	protected void unmapElement(Object element, Widget item) {
+		if (item instanceof Item) {
+			fProblemItemMapper.removeFromMap(element, (Item) item);
+		}		
+		super.unmapElement(element, item);
+	}	
+	
 
 	/*
 	 * @see StructuredViewer#handleInvalidSelection(ISelection, ISelection)
@@ -351,9 +356,11 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 					Object curr= oldSelections.get(i);
 					if (curr instanceof IMethod && !newSelections.contains(curr)) {
 						IMethod method= (IMethod) curr;
-						IMethod similar= findSimilarMethod(method, currElements);
-						if (similar != null) {
-							newSelectionElements.add(similar);
+						if (method.exists()) {
+							IMethod similar= findSimilarMethod(method, currElements);
+							if (similar != null) {
+								newSelectionElements.add(similar);
+							}
 						}
 					}
 				}
