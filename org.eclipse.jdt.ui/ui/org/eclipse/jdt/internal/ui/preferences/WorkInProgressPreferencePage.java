@@ -263,14 +263,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 			}
 		});
 	
-	
-		group= new Group(result, SWT.NONE);
-		group.setLayout(new GridLayout());
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setText(PreferencesMessages.getString(PREFIX + "quickassist.group")); //$NON-NLS-1$
-		
-		addCheckBox(group, PreferencesMessages.getString(PREFIX + "quickassist.option"), PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB); //$NON-NLS-1$ //$NON-NLS-2$
-	
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -364,7 +356,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		store.setDefault(PreferenceConstants.EDITOR_SMART_SEMICOLON, false);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, false);
 		
-		store.setDefault(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB, false);
+		store.setDefault(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, false);
 		store.setDefault(PREF_SEARCH_MENU, true);
 		store.setDefault(PREF_BGSEARCH, true);
 		store.setDefault(PREF_SEARCH_IGNORE_IMPORTS, false);

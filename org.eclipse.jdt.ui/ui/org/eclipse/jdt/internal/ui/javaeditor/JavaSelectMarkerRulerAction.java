@@ -96,7 +96,7 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 			return null;
 		}
 		
-		boolean hasAssistLightbulb= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB);
+		boolean hasAssistLightbulb= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB);
 		Annotation assistAnnotation= null;
 			
 		Iterator iter= model.getAnnotationIterator();

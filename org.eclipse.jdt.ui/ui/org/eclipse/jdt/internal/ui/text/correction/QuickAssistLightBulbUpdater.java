@@ -120,7 +120,7 @@ public class QuickAssistLightBulbUpdater {
 	}
 	
 	public boolean isSetInPreferences() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB);
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB);
 	}
 	
 	private void installSelectionListener() {
@@ -166,7 +166,7 @@ public class QuickAssistLightBulbUpdater {
 	}
 	
 	protected void doPropertyChanged(String property) {
-		if (property.equals(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB)) {
+		if (property.equals(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB)) {
 			if (isSetInPreferences()) {
 				ICompilationUnit cu= getCompilationUnit();
 				if (cu != null) {

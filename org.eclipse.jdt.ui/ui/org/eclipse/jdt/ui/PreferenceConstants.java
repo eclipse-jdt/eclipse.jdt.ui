@@ -69,7 +69,7 @@ public class PreferenceConstants {
 	 * for quick assists.
 	 * </p>
 	 */
-	public static final String APPEARANCE_QUICKASSIST_LIGHTBULB="org.eclipse.jdt.quickassist.lightbulb"; //$NON-NLS-1$
+	public static final String EDITOR_QUICKASSIST_LIGHTBULB="org.eclipse.jdt.quickassist.lightbulb"; //$NON-NLS-1$
 
 
 

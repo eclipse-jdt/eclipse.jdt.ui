@@ -291,6 +291,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_OCCURRENCES));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_STICKY_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB));
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR));
 
@@ -638,6 +639,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.stickyOccurrences"); //$NON-NLS-1$
 		fStickyOccurrencesButton= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, fStickyOccurrencesButton);
+
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.quickassist.lightbulb"); //$NON-NLS-1$
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0); //$NON-NLS-1$
 
 		Label l= new Label(appearanceComposite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
