@@ -14,14 +14,21 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jface.dialogs.MessageDialog;
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
+
 import org.eclipse.ui.PartInitException;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -36,9 +43,11 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
@@ -160,7 +169,6 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 	private IAnnotationModel fAnnotationModel;
 	private Object fAnnotationModelLockObject;
 	private Annotation[] fOverrideAnnotations;
-	private boolean fCancelled= false;
 	private IJavaElement fJavaElement;
 
 	
@@ -172,7 +180,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		fAnnotationModel=annotationModel; 
 		fAnnotationModelLockObject= getLockObject(fAnnotationModel);
 
-		updateAnnotations(ast);
+		updateAnnotations(ast, new NullProgressMonitor());
 	}
 
 	/**
@@ -194,11 +202,12 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 	 * on the given AST.
 	 * 
 	 * @param ast the compilation unit AST
+	 * @param progressMonitor the progress monitor
 	 * @since 3.0
 	 */
-	protected void updateAnnotations(CompilationUnit ast) {
+	protected void updateAnnotations(CompilationUnit ast, IProgressMonitor progressMonitor) {
 		
-		if (ast == null)
+		if (ast == null || progressMonitor.isCanceled())
 			return;
 		
 		final Map annotationMap= new HashMap(50);
@@ -236,7 +245,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 			}
 		});
 		
-		if (fCancelled)
+		if (progressMonitor.isCanceled())
 			return;
 		
 		synchronized (fAnnotationModelLockObject) {
@@ -275,17 +284,14 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
 	 */
-	public void aboutToBeReconciled() {
-		fCancelled= false;
+	public synchronized void aboutToBeReconciled() {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit, boolean, boolean)
+	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 */
-	public void reconciled(CompilationUnit ast, boolean cancelled, boolean forced) {
-		if (cancelled)
-			return;
-		updateAnnotations(ast);
+	public synchronized void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
+		updateAnnotations(ast, progressMonitor);
 	}
 }
 

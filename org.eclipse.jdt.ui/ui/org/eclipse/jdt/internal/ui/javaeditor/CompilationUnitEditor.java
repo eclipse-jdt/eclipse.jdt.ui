@@ -1721,10 +1721,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit, boolean, boolean)
+	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 * @since 3.0
 	 */
-	public void reconciled(CompilationUnit ast, boolean cancelled, boolean forced) {
+	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
 
 		// Always notify AST provider
 		JavaPlugin.getDefault().getASTProvider().reconciled(ast, getInputJavaElement());
@@ -1732,10 +1732,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		// Notify listeners
 		Object[] listeners = fReconcilingListeners.getListeners();
 		for (int i = 0, length= listeners.length; i < length; ++i)
-			((IJavaReconcilingListener)listeners[i]).reconciled(ast, cancelled, forced);
+			((IJavaReconcilingListener)listeners[i]).reconciled(ast, forced, progressMonitor);
 
 		// Update Java Outline page selection
-		if (!forced && !cancelled) {
+		if (!forced && !progressMonitor.isCanceled()) {
 			Shell shell= getSite().getShell();
 			if (shell != null && !shell.isDisposed()) {
 				shell.getDisplay().asyncExec(new Runnable() {

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 
@@ -27,11 +29,10 @@ public interface IJavaReconcilingListener {
 	
 	/**
 	 * Called after reconciling has been finished.
-	 * 
-	 * @param ast			the compilation unit AST or <code>null</code> if
-	 * 							the working copy was consistent or reconciliation has been cancelled
-	 * @param cancelled		<code>true</code> iff the reconciliation has been cancelled
-	 * @param forced		<code>true</code> iff this reconciliation was forced
+	 * @param ast				the compilation unit AST or <code>null</code> if
+ * 								the working copy was consistent or reconciliation has been cancelled
+	 * @param forced			<code>true</code> iff this reconciliation was forced
+	 * @param progressMonitor	the progress monitor
 	 */
-	void reconciled(CompilationUnit ast, boolean cancelled, boolean forced);
+	void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor);
 }

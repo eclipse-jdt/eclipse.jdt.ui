@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.text.Assert;
@@ -109,8 +110,12 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 		} finally {
 			// Always notify listeners, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=55969 for the final solution
 			try {
-				if (fIsJavaReconcilingListener)
-					fJavaReconcilingListener.reconciled(ast, fProgressMonitor != null && fProgressMonitor.isCanceled(), !fNotify);
+				if (fIsJavaReconcilingListener) {
+					IProgressMonitor pm= fProgressMonitor;
+					if (pm == null)
+						pm= new NullProgressMonitor();
+					fJavaReconcilingListener.reconciled(ast, !fNotify, pm);
+				}
 			} finally {
 				fNotify= true;
 			}

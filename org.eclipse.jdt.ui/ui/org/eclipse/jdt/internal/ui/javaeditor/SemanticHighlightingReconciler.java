@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextPresentation;
 
@@ -141,9 +143,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener 
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit, boolean, boolean)
+	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 */
-	public void reconciled(CompilationUnit ast, boolean cancelled, boolean forced) {
+	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
 		// TODO: get timestamp from document when copying its content for parsing
 		Object timeStamp= fPresenter.getTimestamp();
 		
