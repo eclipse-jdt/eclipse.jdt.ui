@@ -25,6 +25,8 @@ import org.eclipse.jdt.internal.ui.text.java.ExperimentalPreference;
  */
 public class WorkInProgressPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
+	public static final String PREF_COMPRESS_PKG_NAME_IN_PKG_VIEW= "PackagesView.isCompressingPkgNameInPackagesView"; //$NON-NLS-1$
+
 	public WorkInProgressPreferencePage() {
 		super(GRID);
 
@@ -33,7 +35,8 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, true);
+		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, false);
+		store.setDefault(PREF_COMPRESS_PKG_NAME_IN_PKG_VIEW, false);
 	}
 	
 	/*
@@ -54,6 +57,18 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 			parent
         );
 		addField(boolEditor);
+
+		boolEditor= new BooleanFieldEditor(
+			PREF_COMPRESS_PKG_NAME_IN_PKG_VIEW,
+			JavaUIMessages.getString("WorkInProgressPreferencePage.packagesView.isCompressingPkgNameInPackagesView"), //$NON-NLS-1$
+			parent
+        );
+		addField(boolEditor);
+	}
+
+	static public boolean isCompressingPkgNameInPackagesView() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(PREF_COMPRESS_PKG_NAME_IN_PKG_VIEW);
 	}
 	
 	/*
