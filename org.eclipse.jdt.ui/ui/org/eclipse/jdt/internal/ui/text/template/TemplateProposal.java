@@ -17,9 +17,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.changes.TextBuffer;
+
 /**
  * A template proposal.
  */
@@ -27,30 +29,24 @@ public class TemplateProposal implements ICompletionProposal {
 
 	private final Template fTemplate;
 	private final TemplateContext fContext;
-	
+
+	// initialized by apply()	
 	private int fSelectionStart;
 	private int fSelectionEnd;
 	
-	private CursorSelectionEvaluator fCursorSelectionEvaluator= new CursorSelectionEvaluator();
 	private TemplateInterpolator fInterpolator= new TemplateInterpolator();
-	private ArgumentEvaluator fArgumentEvaluator;
-	private ModelEvaluator fModelEvaluator= new ModelEvaluator();
+	private CursorSelectionEvaluator fCursorSelectionEvaluator= new CursorSelectionEvaluator();
 	
-	private boolean fDisposed;	
-
 	/**
-	 * Creates a template proposal with a template and the range of its key.
+	 * Creates a template proposal with a template and its context.
 	 * @param template  the template
-	 * @param arguments arguments to the template, or <code>null</code> for no arguments
-	 * @param start     the starting position of the key.
-	 * @param end       the ending position of the key (exclusive).
+	 * @param context   the context in which the template was requested.
 	 */	
-	TemplateProposal(Template template, String[] arguments, TemplateContext context) {
+	TemplateProposal(Template template, TemplateContext context) {
 		Assert.isNotNull(template);
 		Assert.isNotNull(context);
 		
 		fTemplate= template;
-		fArgumentEvaluator= new ArgumentEvaluator(arguments);
 		fContext= context;
 	}
 
@@ -63,11 +59,11 @@ public class TemplateProposal implements ICompletionProposal {
 		String pattern= fTemplate.getPattern();
 
 		// resolve variables automatically
-		pattern= fInterpolator.interpolate(pattern, fArgumentEvaluator);		
 		pattern= fInterpolator.interpolate(pattern, fContext);
 
-		fInterpolator.interpolate(pattern, fModelEvaluator);
-		TemplateModel model= fModelEvaluator.getModel();
+		ModelEvaluator modelEvaluator= new ModelEvaluator();
+		fInterpolator.interpolate(pattern, modelEvaluator);
+		TemplateModel model= modelEvaluator.getModel();
 
 		if (model.getEditableCount() == 0) {		
 			pattern= fInterpolator.interpolate(pattern, fCursorSelectionEvaluator);
@@ -158,7 +154,9 @@ public class TemplateProposal implements ICompletionProposal {
 		try {
 			document.replace(start, length, finalString);
 			fContext.getViewer().revealRange(start, finalString.length());
-		} catch (BadLocationException x) {} // ignore		
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}
 	}
 	
 	private static String trimBegin(String string) {
@@ -180,7 +178,6 @@ public class TemplateProposal implements ICompletionProposal {
 	 */
 	public String getAdditionalProposalInfo() {
 		String pattern= fTemplate.getPattern();
-		pattern= fInterpolator.interpolate(pattern, fArgumentEvaluator);		
 		pattern= fInterpolator.interpolate(pattern, fContext);		
 		pattern= fInterpolator.interpolate(pattern, fCursorSelectionEvaluator);
 		

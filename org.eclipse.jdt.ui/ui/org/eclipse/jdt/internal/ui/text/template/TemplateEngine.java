@@ -66,37 +66,17 @@ public class TemplateEngine {
 		IDocument document= viewer.getDocument();
 		String source= document.get();
 
-		// inspect context
+		// template key
 		int end = completionPosition;
-		int start= guessStart(source, end, fPartitionType);
-				
-		// handle optional argument
-		String request= source.substring(start, end);
-		int index= request.indexOf(ARGUMENTS_BEGIN);
+		int start= guessStart(source, end, fPartitionType);				
+		String key= source.substring(start, end);
 
-		String key;
-		String[] arguments;
-		if (index == -1) {
-			key= request;
-			arguments= null;
-		} else {
-			key= request.substring(0, index);
-			
-			String allArguments= request.substring(index + 1, request.length() - 1);			
-			List list= new ArrayList();
-			StringTokenizer tokenizer= new StringTokenizer(allArguments, ","); // $NON-NLS-1$ //$NON-NLS-1$
-			while (tokenizer.hasMoreTokens()) {
-				String token= tokenizer.nextToken().trim();
-				list.add(token);
-			}			
-			arguments= (String[]) list.toArray(new String[list.size()]);			
-		}
-
-		Template[] templates= TemplateSet.getInstance().getMatchingTemplates(key, fPartitionType);
 		TemplateContext context= new TemplateContext(viewer, start, end, sourceUnit);
 
+		Template[] templates= TemplateSet.getInstance().getMatchingTemplates(key, fPartitionType);
+
 		for (int i= 0; i != templates.length; i++) {
-			TemplateProposal proposal= new TemplateProposal(templates[i], arguments, context);
+			TemplateProposal proposal= new TemplateProposal(templates[i], context);
 			fProposals.add(proposal);
 		}
 	}
@@ -104,20 +84,7 @@ public class TemplateEngine {
 	private static final int guessStart(String source, int end, String partitionType) {
 		int start= end;
 
-		if (partitionType.equals(TemplateContext.JAVA)) {
-			
-			// optional arguments
-			if ((start != 0) && (source.charAt(start - 1) == ARGUMENTS_END)) {
-				start--;
-				
-				while ((start != 0) && (source.charAt(start - 1) != ARGUMENTS_BEGIN))
-					start--;
-				start--;
-					
-				if ((start != 0) && Character.isWhitespace(source.charAt(start - 1)))
-					start--;
-			}				
-
+		if (partitionType.equals(TemplateContext.JAVA)) {				
 			while ((start != 0) && Character.isUnicodeIdentifierPart(source.charAt(start - 1)))
 				start--;
 			
