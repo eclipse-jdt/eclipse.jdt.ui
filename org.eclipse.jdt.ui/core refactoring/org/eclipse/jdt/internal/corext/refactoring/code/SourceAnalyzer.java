@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
@@ -77,7 +78,7 @@ class SourceAnalyzer  {
 		}
 		public boolean visit(MethodInvocation node) {
 			if (fBinding != null && fBinding == node.getName().resolveBinding() && !status.hasFatalError()) {
-				status.addFatalError("Method declaration contains recursive call.");
+				status.addFatalError(RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.recursive_call")); //$NON-NLS-1$
 				return false;
 			}
 			return true;
@@ -85,7 +86,7 @@ class SourceAnalyzer  {
 		public boolean visit(SimpleName node) {
 			if (node.resolveBinding() == null && !status.hasFatalError()) {
 				status.addFatalError(
-					"Method declaration has compile errors. Please fix errors first.",
+					RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.declaration_has_errors"), //$NON-NLS-1$
 					JavaSourceContext.create(fCUnit, fDeclaration));
 			}
 			return true;
@@ -93,7 +94,7 @@ class SourceAnalyzer  {
 		public boolean visit(ThisExpression node) {
 			if (node.getQualifier() != null) {
 				status.addFatalError(
-					"Can't inline a method that uses qualified this expressions.",
+					RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.qualified_this_expressions"), //$NON-NLS-1$
 					JavaSourceContext.create(fCUnit, node));
 				return false;
 			}
@@ -205,22 +206,28 @@ class SourceAnalyzer  {
 		RefactoringStatus result= new RefactoringStatus();
 		if (!fCUnit.isStructureKnown()) {
 			result.addFatalError(		
-				"Compilation unit containing method declaration has syntax errors. Please fix errors first.",
+				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.syntax_errors"), //$NON-NLS-1$
 				JavaSourceContext.create(fCUnit));		
 			return result;
 		}
 		IProblem[] problems= ASTNodes.getProblems(fDeclaration, ASTNodes.NODE_ONLY, ASTNodes.ERROR);
 		if (problems.length > 0) {
 			result.addFatalError(		
-				"Method declaration has compile errors. Please fix errors first.",
+				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.declaration_has_errors"), //$NON-NLS-1$
 				JavaSourceContext.create(fCUnit, fDeclaration));		
 			return result;
 		}
 		if (fDeclaration.getBody() == null) {
 			result.addFatalError(
-				"Can't inline abstract methods.", 
+				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.abstract_methods"),  //$NON-NLS-1$
 				JavaSourceContext.create(fCUnit, fDeclaration));
 				return result;
+		}
+		if (fDeclaration.isConstructor()) {
+			result.addFatalError(
+				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.constructors"),  //$NON-NLS-1$
+				JavaSourceContext.create(fCUnit, fDeclaration));
+			return result;
 		}
 		ActivationAnalyzer analyzer= new ActivationAnalyzer();
 		fDeclaration.accept(analyzer);
