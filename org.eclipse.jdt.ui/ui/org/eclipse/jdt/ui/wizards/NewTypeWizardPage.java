@@ -1405,6 +1405,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * Returns a runnable that creates a type using the current settings.
+	 * To be called in the UI thread.
 	 */		
 	public IRunnableWithProgress getRunnable() {				
 		return new IRunnableWithProgress() {
