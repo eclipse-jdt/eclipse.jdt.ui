@@ -359,6 +359,15 @@ public class Checks {
 		}
 		return true;
 	}
+	
+	public static boolean isInsideJavadoc(ASTNode node) {
+		do {
+			if (node.getNodeType() == ASTNode.JAVADOC)
+				return true;
+			node= node.getParent();
+		} while (node != null);
+		return false;
+	}
 
 	//---- Private helpers ----------------------------------------------------------------------
 	

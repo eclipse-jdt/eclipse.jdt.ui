@@ -899,10 +899,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 		
 		IASTFragment selectedFragment= ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(fSelectionStart, fSelectionLength), fCompilationUnitNode, fCu);
 		
-		if (selectedFragment instanceof IExpressionFragment)
-			return fSelectedExpression= (IExpressionFragment) selectedFragment;
-		else
-			return null;
+		if (selectedFragment instanceof IExpressionFragment
+				&& ! Checks.isInsideJavadoc(selectedFragment.getAssociatedNode())) {
+			fSelectedExpression= (IExpressionFragment) selectedFragment;
+		}
+		
+		return fSelectedExpression;
 	}
 
 	//returns non-null

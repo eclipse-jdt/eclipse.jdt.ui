@@ -918,8 +918,10 @@ public class ExtractTempRefactoring extends Refactoring {
 			return fSelectedExpression;
 		IASTFragment selectedFragment= ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(fSelectionStart, fSelectionLength), fCompilationUnitNode, fCu);
 		
-		if (selectedFragment instanceof IExpressionFragment)
+		if (selectedFragment instanceof IExpressionFragment
+				&& ! Checks.isInsideJavadoc(selectedFragment.getAssociatedNode())) {
 			fSelectedExpression= (IExpressionFragment) selectedFragment;
+		}
 
 		return fSelectedExpression;
 	}

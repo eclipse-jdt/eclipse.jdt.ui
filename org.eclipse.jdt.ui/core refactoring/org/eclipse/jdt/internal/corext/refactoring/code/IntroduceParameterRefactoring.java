@@ -169,6 +169,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 				|| fragment.getLength() != expression.getLength())
 			return;
 		
+		if (Checks.isInsideJavadoc(expression))
+			return;
 		//TODO: exclude invalid selections
 		fSelectedExpression= expression;
 	}
