@@ -160,20 +160,27 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		IJavaSearchScope scope= null;
 		String scopeDescription= ""; //$NON-NLS-1$
 		switch (getContainer().getSelectedScope()) {
-			case ISearchPageContainer.WORKSPACE_SCOPE:
+			case ISearchPageContainer.WORKSPACE_SCOPE :
 				scopeDescription= NLSSearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
 				scope= SearchEngine.createWorkspaceScope();
 				break;
-			case ISearchPageContainer.SELECTION_SCOPE:
+			case ISearchPageContainer.SELECTION_SCOPE :
 				scopeDescription= NLSSearchMessages.getString("SelectionScope"); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getSelection());				
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getSelection());
 				break;
-			case ISearchPageContainer.WORKING_SET_SCOPE:
+			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE :
+				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(getSelection());
+				if (JavaSearchScopeFactory.getInstance().getEnclosingProjectsCount(scope) > 1)
+					scopeDescription= NLSSearchMessages.getString("EnclosingProjectsScope"); //$NON-NLS-1$
+				else
+					scopeDescription= NLSSearchMessages.getString("EnclosingProjectScope"); //$NON-NLS-1$
+				break;
+			case ISearchPageContainer.WORKING_SET_SCOPE :
 				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
 				// should not happen - just to be sure
 				if (workingSets == null || workingSets.length < 1)
 					return false;
-				scopeDescription= NLSSearchMessages.getFormattedString("WorkingSetScope", new String[] {SearchUtil.toString(workingSets)}); //$NON-NLS-1$
+				scopeDescription= NLSSearchMessages.getFormattedString("WorkingSetScope", new String[] { SearchUtil.toString(workingSets)}); //$NON-NLS-1$
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets());
 				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		}

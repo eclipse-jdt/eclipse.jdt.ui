@@ -855,6 +855,7 @@
          icon="icons/full/obj16/nls_search_obj.gif"
          extensions="java:89, properties:90"
 		 showScopeSection="true"         
+		 canSearchEnclosingProjects="true"
          class="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchPage"
          sizeHint="460,160"
          enabled="false">
