@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.text.java.*;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
-import org.eclipse.jdt.internal.core.Util;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -182,7 +181,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			int id= marker.getAttribute(IJavaModelMarker.ID, -1);
 			int start= marker.getAttribute(IMarker.CHAR_START, -1);
 			int end= marker.getAttribute(IMarker.CHAR_END, -1);
-			String[] arguments= Util.getProblemArgumentsFromMarker(marker.getAttribute(IJavaModelMarker.ARGUMENTS, "")); //$NON-NLS-1$
+			String[] arguments= JavaModelUtil.getProblemArgumentsFromMarker(marker.getAttribute(IJavaModelMarker.ARGUMENTS, "")); //$NON-NLS-1$
 			if (cu != null && id != -1 && start != -1 && end != -1 && arguments != null) {
 				return new ProblemLocation(start, end - start, id, arguments);
 			}			
