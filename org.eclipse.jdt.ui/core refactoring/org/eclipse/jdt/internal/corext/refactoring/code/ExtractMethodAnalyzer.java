@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -43,11 +42,12 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -62,7 +62,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /* package */ class ExtractMethodAnalyzer extends CodeAnalyzer {
 
@@ -367,7 +366,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		// or are covered by the selection
 		CompilationUnit compilationUnit= (CompilationUnit)fEnclosingBodyDeclaration.getRoot();
 		for (int i= 0; i < bindings.length; i++) {
-			ASTNode decl= findDeclaringNode(compilationUnit, bindings[i]);
+			ASTNode decl= compilationUnit.findDeclaringNode(bindings[i]);
 			if (decl == null || (!selection.covers(decl) && decl.getParent() instanceof MethodDeclaration))
 				result.add(bindings[i]);
 		}
@@ -376,26 +375,12 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 			IVariableBinding arg= fArguments[i];
 			ITypeBinding type= arg.getType();
 			if (type != null && type.isTypeVariable()) {
-				ASTNode decl= findDeclaringNode(compilationUnit, type);
+				ASTNode decl= compilationUnit.findDeclaringNode(type);
 				if (decl == null || (!selection.covers(decl) && decl.getParent() instanceof MethodDeclaration))
 					result.add(type);
 			}
 		}
 		return (ITypeBinding[])result.toArray(new ITypeBinding[result.size()]);
-	}
-	
-	private static ASTNode findDeclaringNode(CompilationUnit root, final ITypeBinding binding) {
-		if (!binding.isTypeVariable())
-			return root.findDeclaringNode(binding);
-		final ASTNode[] result= new ASTNode[1];
-		root.accept(new ASTVisitor() {
-			public boolean visit(TypeParameter node) {
-				if (node.resolveBinding().isEqualTo(binding))
-					result[0]= node;
-				return false;
-			}
-		});
-		return result[0];
 	}
 	
 	private void computeOutput(RefactoringStatus status) {
