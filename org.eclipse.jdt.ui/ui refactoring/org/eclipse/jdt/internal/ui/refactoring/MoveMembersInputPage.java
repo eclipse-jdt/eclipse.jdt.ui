@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -141,8 +142,8 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 		dialog.setFilter(createInitialFilter());
 		if (dialog.open() == Dialog.CANCEL)
 			return;
-		IType firstResult= (IType)dialog.getFirstResult();
-		fTextField.setText(firstResult.getFullyQualifiedName());	
+		IType firstResult= (IType)dialog.getFirstResult();		
+		fTextField.setText(JavaModelUtil.getFullyQualifiedName(firstResult));	
 	}
 
 	private String createInitialFilter() {
