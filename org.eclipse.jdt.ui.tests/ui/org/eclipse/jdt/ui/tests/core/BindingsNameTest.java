@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
-import java.util.Hashtable;
 import java.util.List;
 
 import junit.framework.Test;
@@ -23,7 +22,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -46,8 +44,6 @@ public class BindingsNameTest extends TestCase {
 	private IPackageFragmentRoot fSourceFolder;
 	private ICompilationUnit fCompilationUnit;
 	
-	private String fComplianceLevel;
-
 	public BindingsNameTest(String name) {
 		super(name);
 	}
@@ -66,14 +62,8 @@ public class BindingsNameTest extends TestCase {
 		}
 	}
 	protected void setUp() throws Exception {
-		Hashtable  options= JavaCore.getOptions();
-		fComplianceLevel= (String)options.get(JavaCore.COMPILER_COMPLIANCE);
-		options.put(JavaCore.COMPILER_COMPLIANCE, "1.3");
-		JavaCore.setOptions(options);
-		
-		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
+		JavaProjectHelper.addRTJar13(fJProject1);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
@@ -100,10 +90,6 @@ public class BindingsNameTest extends TestCase {
 
 
 	protected void tearDown() throws Exception {
-		Hashtable  options= JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, fComplianceLevel);
-		JavaCore.setOptions(options);
-		
 		JavaProjectHelper.delete(fJProject1);
 	}
 	

@@ -302,7 +302,7 @@ public class ContentProviderTests1 extends TestCase {
 		assertNotNull(fFile2);
 		
 		//set up project #1 : External Jar and zip file
-		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, JavaProjectHelper.RT_STUBS_15, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
+		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
 		assertTrue("jdk not found", jdk != null);//$NON-NLS-1$
 
 		java.io.File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);

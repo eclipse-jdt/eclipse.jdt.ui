@@ -128,7 +128,7 @@ public class JavaProjectHelper {
 	
 	/**
 	 * Creates a Java project with JUnit source and rt.jar from
-	 * {@link #addVariableRTJar(IJavaProject, IPath, String, String, String)}.
+	 * {@link #addVariableRTJar(IJavaProject, String, String, String)}.
 	 * 
 	 * @param projectName the project name
 	 * @param srcContainerName the source container name
@@ -141,9 +141,8 @@ public class JavaProjectHelper {
 	 */	
 	public static IJavaProject createJavaProjectWithJUnitSource(String projectName, String srcContainerName, String outputFolderName) throws CoreException, IOException, InvocationTargetException {
 		IJavaProject project= createJavaProject(projectName, outputFolderName); //$NON-NLS-2$
-		set15CompilerOptions(project);
 		
-		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, RT_STUBS_15, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
+		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
 		Assert.assertNotNull(jdk);
 		
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JUNIT_SRC_381);
@@ -183,6 +182,18 @@ public class JavaProjectHelper {
 	public static void set14CompilerOptions(Map options) {
 		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
 		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
+	}
+	
+	/**
+	 * Sets the compiler options to 1.3
+	 * @param options The compiler options to configure
+	 */	
+	public static void set13CompilerOptions(Map options) {
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_3);
+		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
 		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
@@ -396,7 +407,9 @@ public class JavaProjectHelper {
 	}	
 
 	/**
-	 * Adds a 1.5 library entry pointing to a current JRE (stubs only).
+	 * Adds a library entry pointing to a JRE (stubs only)
+	 * and sets the right compiler options.
+	 * <p>Currently, the compiler compliance level is 1.5.
 	 * 
 	 * @param jproject target
 	 * @return the new package fragment root
@@ -404,6 +417,17 @@ public class JavaProjectHelper {
 	 */	
 	public static IPackageFragmentRoot addRTJar(IJavaProject jproject) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_15);
+		set15CompilerOptions(jproject);
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+	}
+	
+	public static IPackageFragmentRoot addRTJar13(IJavaProject jproject) throws CoreException {
+		IPath[] rtJarPath= findRtJar(RT_STUBS_13);
+		
+		Map options= jproject.getOptions(false);
+		JavaProjectHelper.set13CompilerOptions(options);
+		jproject.setOptions(options);
+		
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 	
@@ -421,19 +445,40 @@ public class JavaProjectHelper {
 		return null;
 	}
 	
+	public static IPackageFragmentRoot addVariableRTJar13(IJavaProject jproject, String libVarName, String srcVarName, String srcrootVarName) throws CoreException {
+		return addVariableRTJar(jproject, RT_STUBS_13, libVarName, srcVarName, srcrootVarName);
+	}
+	
 	/**
-	 * Adds a variable entry pointing to a current JRE (stubs only).
-	 * The arguments specify the names of the variable to be used.
+	 * Adds a variable entry pointing to a current JRE (stubs only)
+	 * and sets the compiler compliance level on the project accordingly.
+	 * The arguments specify the names of the variables to be used.
+	 * Currently, the compiler compliance level is set to 1.5.
 	 * 
 	 * @param jproject the project to add the variable RT JAR
-	 * @param rtSubsPath XXX
 	 * @param libVarName Name of the variable for the library
+	 * @param srcVarName Name of the variable for the source attachment. Can be <code>null</code>.
+	 * @param srcrootVarName name of the variable for the source attachment root. Can be <code>null</code>.
+	 * @return the new package fragment root
+	 */	
+	public static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, String libVarName, String srcVarName, String srcrootVarName) throws CoreException {
+		return addVariableRTJar(jproject, RT_STUBS_15, libVarName, srcVarName, srcrootVarName);
+	}
+	
+	/**
+	 * Adds a variable entry pointing to a current JRE (stubs only).
+	 * The arguments specify the names of the variables to be used.
+	 * Clients must not forget to set the right compiler compliance level on the project.
+	 * 
+	 * @param jproject the project to add the variable RT JAR
+	 * @param rtStubsPath path to an rt.jar
+	 * @param libVarName name of the variable for the library
 	 * @param srcVarName Name of the variable for the source attachment. Can be <code>null</code>.
 	 * @param srcrootVarName Name of the variable for the source attachment root. Can be <code>null</code>.
 	 * @return the new package fragment root
 	 */	
-	public static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, IPath rtSubsPath, String libVarName, String srcVarName, String srcrootVarName) throws CoreException {
-		IPath[] rtJarPaths= findRtJar(rtSubsPath);
+	private static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, IPath rtStubsPath, String libVarName, String srcVarName, String srcrootVarName) throws CoreException {
+		IPath[] rtJarPaths= findRtJar(rtStubsPath);
 		IPath libVarPath= new Path(libVarName);
 		IPath srcVarPath= null;
 		IPath srcrootVarPath= null;

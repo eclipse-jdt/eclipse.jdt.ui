@@ -107,7 +107,7 @@ public class ContentProviderTests5 extends TestCase{
 		assertNotNull(fDotProject);
 
 		//add rt.jar
-		jdk= JavaProjectHelper.addVariableRTJar(fJProject, JavaProjectHelper.RT_STUBS_15, "JRE_LIB_TEST", null, null);
+		jdk= JavaProjectHelper.addVariableRTJar(fJProject, "JRE_LIB_TEST", null, null);
 		assertTrue("jdk not found", jdk != null);
 		
 		setUpView();

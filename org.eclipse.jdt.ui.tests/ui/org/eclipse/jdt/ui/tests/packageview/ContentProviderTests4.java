@@ -222,7 +222,7 @@ public class ContentProviderTests4 extends TestCase{
 		assertNotNull(fFile2);
 
 		//add rt.jar
-		jdk= JavaProjectHelper.addVariableRTJar(fJProject3, JavaProjectHelper.RT_STUBS_15, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
+		jdk= JavaProjectHelper.addVariableRTJar(fJProject3, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
 		assertTrue("jdk not found", jdk != null);//$NON-NLS-1$
 		
 		//create the PackageFragmentRoot that represents the project as source folder
