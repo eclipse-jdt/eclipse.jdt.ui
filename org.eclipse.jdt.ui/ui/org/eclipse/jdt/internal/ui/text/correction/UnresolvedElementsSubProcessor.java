@@ -437,7 +437,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 			curr= ASTResolving.normalizeTypeBinding(curr);
 			if (curr == null) {
-				curr= expression.getAST().resolveWellKnownType("java.lang.Object");
+				curr= expression.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			}
 			res[i]= curr;
 		}

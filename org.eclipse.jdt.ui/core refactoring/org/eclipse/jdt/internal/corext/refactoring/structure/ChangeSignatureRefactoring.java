@@ -495,7 +495,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private RefactoringStatus collectAndCheckImports(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		List notDeleted= getNotDeletedInfos();
-		pm.beginTask("", notDeleted.size());
+		pm.beginTask("", notDeleted.size()); //$NON-NLS-1$
 		for (Iterator iter= notDeleted.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
 			if (! info.isTypeNameChanged())
