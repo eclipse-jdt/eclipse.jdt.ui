@@ -415,7 +415,7 @@ public class ASTResolving {
 	 * @return CompilationUnit
 	 */
 	public static ASTNode findParentType(ASTNode node) {
-		while ((node instanceof AbstractTypeDeclaration) || (node instanceof AnnotationTypeDeclaration)) {
+		while (!(node instanceof AbstractTypeDeclaration) && !(node instanceof AnonymousClassDeclaration)) {
 			node= node.getParent();
 		}
 		return node;
