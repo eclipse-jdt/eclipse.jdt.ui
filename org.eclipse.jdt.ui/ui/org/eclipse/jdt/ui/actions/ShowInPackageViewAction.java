@@ -128,47 +128,44 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		boolean showMembers= JavaPlugin.getDefault().getPreferenceStore().getBoolean(JavaBasePreferencePage.SHOW_CU_CHILDREN);
 		PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
 		if (view != null) {
-			Object selectedElement= element;
-			if (showMembers) {
-				view.selectReveal(new StructuredSelection(element));
-				selectedElement= getSelectedElement(view);
+			if (reveal(view, element))
+				return;
+			if (showMembers && element instanceof IMember) {
 				// Since the packages view shows working copy elements it can happen that we try to show an original element
 				// in the packages view. Fall back to working copy element
-				if (!element.equals(selectedElement) && element instanceof IMember) {
-					IMember member= (IMember)element;
-					if (!member.getCompilationUnit().isWorkingCopy()) {
-						try {
-							element= EditorUtility.getWorkingCopy(member);
-							view.selectReveal(new StructuredSelection(element));
-							selectedElement= getSelectedElement(view);
-						} catch (JavaModelException e) {
-						}
+				IMember member= (IMember)element;
+				if (!member.getCompilationUnit().isWorkingCopy()) {
+					try {
+						element= EditorUtility.getWorkingCopy(member);
+						if (reveal(view, element))
+							return;
+					} catch (JavaModelException e) {
 					}
 				}
 			}
-			if (!element.equals(selectedElement)) {
-				element= getVisibleParent(element);
-				if (element != null) {
-					view.selectReveal(new StructuredSelection(element));
-					selectedElement= getSelectedElement(view);
-					if (!element.equals(selectedElement)) {
-						IResource resource= null;
-						try {
-							resource= element.getCorrespondingResource();
-						} catch (JavaModelException e) {
-						}
-						if (resource != null) {
-							view.selectReveal(new StructuredSelection(resource));
-							selectedElement= getSelectedElement(view);
-							if (resource.equals(selectedElement))
-								return;
-						}
-						MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("ShowInPackageViewAction.not_found")); //$NON-NLS-1$
-					}
+			element= getVisibleParent(element);
+			if (element != null) {
+				if (reveal(view, element))
+					return;
+				IResource resource= null;
+				try {
+					resource= element.getCorrespondingResource();
+				} catch (JavaModelException e) {
+				}
+				if (resource != null) {
+					if (reveal(view, resource))
+						return;
 				}
 			}
-			return;
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("ShowInPackageViewAction.not_found")); //$NON-NLS-1$
 		}
+	}
+
+	private boolean reveal(PackageExplorerPart view, Object element) {
+		view.selectReveal(new StructuredSelection(element));
+		if (element.equals(getSelectedElement(view)))
+			return true;
+		return false;
 	}
 
 	private Object getSelectedElement(PackageExplorerPart view) {
