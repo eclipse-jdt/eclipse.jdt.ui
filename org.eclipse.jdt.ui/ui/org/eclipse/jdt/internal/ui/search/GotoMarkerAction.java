@@ -73,21 +73,21 @@ class GotoMarkerAction extends Action {
 			}
 		}
 		if (editor == null) {
-			if (fEditor != null) {
-				if (!fEditor.isDirty()) {
+			if (fEditor != null && !fEditor.isDirty())
 					page.closeEditor(fEditor, false);
-				}
-			}
 			try {
 				editor= page.openEditor(input, editorId, false);
-				fEditor = editor;
 			} catch (PartInitException ex) {
 				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.openEditor.");
+				return;
 			}
 		} else {
 			page.bringToTop(editor);
 		}
-		editor.gotoMarker(marker);
+		if (editor != null) {
+			editor.gotoMarker(marker);
+			fEditor = editor;
+		}
 	}
 	
 	private IClassFile getClassFile(IJavaElement jElement) {
