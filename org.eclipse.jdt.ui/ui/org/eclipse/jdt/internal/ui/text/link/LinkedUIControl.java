@@ -636,7 +636,19 @@ public class LinkedUIControl {
 		fExitPolicy= policy;
 	}
 
-	public void setExitPosition(LinkedUITarget target, int offset, int length, boolean isTabStop) throws BadLocationException {
+	/**
+	 * Sets the exit position to move the caret to when linked mode is exited.
+	 * 
+	 * @param target the target where the exit position is located
+	 * @param offset the offset of the exit position
+	 * @param length the length of the exit position (in case there should be a
+	 *        selection)
+	 * @param sequence set to the tab stop position of the exit position, or 
+	 * 		  <code>LinkedPositionGroup.NO_STOP</code> if there should be no tab stop.
+	 * @throws BadLocationException if the position is not valid in the
+	 *         viewer's document
+	 */
+	public void setExitPosition(LinkedUITarget target, int offset, int length, int sequence) throws BadLocationException {
 		// remove any existing exit position
 		if (fExitPosition != null) {
 			fExitPosition.getDocument().removePosition(fExitPosition);
@@ -649,9 +661,9 @@ public class LinkedUIControl {
 			return;
 
 		// if we are a tabstop, we are the last one -> MAX_VALUE
-		fExitPosition= new LinkedPosition(doc, offset, length, isTabStop ? Integer.MAX_VALUE : LinkedPositionGroup.NO_STOP);
+		fExitPosition= new LinkedPosition(doc, offset, length, sequence);
 		doc.addPosition(fExitPosition); // gets removed in leave()
-		if (isTabStop)
+		if (sequence != LinkedPositionGroup.NO_STOP)
 			fIterator.addPosition(fExitPosition);
 
 	}
@@ -663,13 +675,13 @@ public class LinkedUIControl {
 	 * @param offset the offset of the exit position
 	 * @param length the length of the exit position (in case there should be a
 	 *        selection)
-	 * @param isTabStop set to <code>true</code> if there should be a tab
-	 *        stop a the exit position (important when cycling is on)
+	 * @param sequence set to the tab stop position of the exit position, or 
+	 * 		  <code>LinkedPositionGroup.NO_STOP</code> if there should be no tab stop.
 	 * @throws BadLocationException if the position is not valid in the
 	 *         viewer's document
 	 */
-	public void setExitPosition(ITextViewer viewer, int offset, int length, boolean isTabStop) throws BadLocationException {
-		setExitPosition(new EditorTarget(viewer, null), offset, length, isTabStop);
+	public void setExitPosition(ITextViewer viewer, int offset, int length, int sequence) throws BadLocationException {
+		setExitPosition(new EditorTarget(viewer, null), offset, length, sequence);
 	}
 
 	/**

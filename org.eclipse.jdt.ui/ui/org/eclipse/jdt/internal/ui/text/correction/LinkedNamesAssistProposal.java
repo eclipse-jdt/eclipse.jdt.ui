@@ -103,7 +103,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			
 			LinkedUIControl ui= new LinkedUIControl(enviroment, viewer);
 //			ui.setInitialOffset(offset);
-			ui.setExitPosition(viewer, offset, 0, false);
+			ui.setExitPosition(viewer, offset, 0, LinkedPositionGroup.NO_STOP);
 			ui.enter();
 			
 			fSelectedRegion= ui.getSelectedRegion();

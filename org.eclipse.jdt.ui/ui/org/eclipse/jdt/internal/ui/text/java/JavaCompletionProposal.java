@@ -207,7 +207,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 						
 						LinkedUIControl ui= new LinkedUIControl(env, fTextViewer);
 						ui.setExitPolicy(new ExitPolicy(')'));
-						ui.setExitPosition(fTextViewer, newOffset + 1, 0, true);
+						ui.setExitPosition(fTextViewer, newOffset + 1, 0, Integer.MAX_VALUE);
 						ui.setCyclingMode(LinkedUIControl.CYCLE_NEVER);
 						ui.enter();
 					}

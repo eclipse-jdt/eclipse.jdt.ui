@@ -184,6 +184,7 @@ class TabStopIterator {
 
 	public void addPosition(Position position) {
 		fList.add(fSize++, position);
+		Collections.sort(fList, fComparator);
 	}
 	
 	public void removePosition(Position position) {

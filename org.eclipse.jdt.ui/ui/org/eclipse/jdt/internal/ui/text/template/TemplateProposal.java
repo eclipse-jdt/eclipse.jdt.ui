@@ -163,7 +163,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			if (hasPositions) {
 				env.forceInstall();
 				LinkedUIControl editor= new LinkedUIControl(env, viewer);
-				editor.setExitPosition(viewer, getCaretOffset(templateBuffer) + start, 0, true);
+				editor.setExitPosition(viewer, getCaretOffset(templateBuffer) + start, 0, Integer.MAX_VALUE);
 				editor.enter();
 				
 				fSelectedRegion= editor.getSelectedRegion();

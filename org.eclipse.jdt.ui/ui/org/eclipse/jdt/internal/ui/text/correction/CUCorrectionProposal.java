@@ -337,12 +337,12 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				if (textEdits.length > 0) {
 					IRegion range= change.getNewTextRange(textEdits);
 					if (range != null)
-						ui.setExitPosition(viewer, range.getOffset() + range.getLength(), 0, true);
+						ui.setExitPosition(viewer, range.getOffset() + range.getLength(), 0, Integer.MAX_VALUE);
 				}					
 			} else {
 				int cursorPosition= viewer.getSelectedRange().x;
 				if (cursorPosition != 0) {
-					ui.setExitPosition(viewer, cursorPosition, 0, true);
+					ui.setExitPosition(viewer, cursorPosition, 0, Integer.MAX_VALUE);
 				}
 			}	
 			ui.enter();

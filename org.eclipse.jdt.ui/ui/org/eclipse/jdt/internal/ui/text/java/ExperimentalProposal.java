@@ -75,7 +75,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 				env.forceInstall();
 				
 				LinkedUIControl ui= new LinkedUIControl(env, fViewer);
-				ui.setExitPosition(fViewer, replacementOffset + replacementString.length(), 0, true);
+				ui.setExitPosition(fViewer, replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setDoContextInfo(true);
 				ui.enter();
 	
