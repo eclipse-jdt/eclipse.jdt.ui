@@ -46,11 +46,9 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
  */
 public final class MethodProposalInfo extends ProposalInfo {
 	
-	/* configuration received from the completion proposal */
+	/* configuration */
 	private final IJavaProject fJavaProject;
-	private final char[] fName;
-	private final char[] fSignature;
-	private final char[] fDeclarationSignature;
+	private final CompletionProposal fProposal;
 	
 	/* cache filled lazily */
 	private boolean fMemberResolved= false;
@@ -67,10 +65,7 @@ public final class MethodProposalInfo extends ProposalInfo {
 		Assert.isNotNull(project);
 		Assert.isNotNull(proposal);
 		fJavaProject= project;
-		// TODO copy values if it turns out that the values returned from the proposal are not to be kept  
-		fName= proposal.getName();
-		fSignature= proposal.getSignature();
-		fDeclarationSignature= proposal.getDeclarationSignature();
+		fProposal= proposal;
 	}
 	
 	/**
@@ -97,11 +92,16 @@ public final class MethodProposalInfo extends ProposalInfo {
 	 * @throws JavaModelException if accessing the java model fails
 	 */
 	protected final IMember resolveMember() throws JavaModelException {
-		String typeName= SignatureUtil.stripSignatureToFQN(String.valueOf(fDeclarationSignature));
+		char[] declarationSignature= fProposal.getDeclarationSignature();
+		String typeName;
+		if (declarationSignature == null) // for synthetic methods on arrays
+			typeName= "java.lang.Object"; //$NON-NLS-1$
+		else
+			typeName= SignatureUtil.stripSignatureToFQN(String.valueOf(declarationSignature));
 		IType type= fJavaProject.findType(typeName);
 		if (type != null) {
-			String name= String.valueOf(fName);
-			String[] parameters= Signature.getParameterTypes(String.valueOf(SignatureUtil.fix83600(fSignature)));
+			String name= String.valueOf(fProposal.getName());
+			String[] parameters= Signature.getParameterTypes(String.valueOf(SignatureUtil.fix83600(fProposal.getSignature())));
 			for (int i= 0; i < parameters.length; i++) {
 				parameters[i]= SignatureUtil.getLowerBound(parameters[i]);
 			}
@@ -186,15 +186,21 @@ public final class MethodProposalInfo extends ProposalInfo {
 	 * @throws JavaModelException if accessing the java model fails
 	 */
 	private Map computeTypeVariables(IType type) throws JavaModelException {
-		char[][] concreteParameters= Signature.getTypeArguments(fDeclarationSignature);
-		
 		Map map= new HashMap();
+		char[] declarationSignature= fProposal.getDeclarationSignature();
+		if (declarationSignature == null) // array methods don't contain a declaration signature
+			return map;
+		char[][] concreteParameters= Signature.getTypeArguments(declarationSignature);
+		
 		ITypeParameter[] typeParameters= type.getTypeParameters();
 		for (int i= 0; i < typeParameters.length; i++) {
 			String variable= typeParameters[i].getElementName();
-			// use lower bound since method searching is only parameter based
 			if (concreteParameters.length > i)
+				// use lower bound since method equality is only parameter based
 				map.put(variable, SignatureUtil.getLowerBound(concreteParameters[i]));
+			else
+				// fProposal.getDeclarationSignature() is a raw type - use Object
+				map.put(variable, "Ljava.lang.Object;".toCharArray()); //$NON-NLS-1$
 		}
 		
 		return map;
@@ -241,8 +247,8 @@ public final class MethodProposalInfo extends ProposalInfo {
 			if (isConstructor == curr.isConstructor()) {
 				String[] currParamTypes= curr.getParameterTypes();
 				if (paramTypes.length == currParamTypes.length) {
-					// no need to check method type variables since these are not yet bound
-					// when proposing a method
+					// no need to check method type variables since these are
+					// not yet bound when proposing a method
 					for (int i= 0; i < paramTypes.length; i++) {
 						// method equality uses erased types 
 						String erasure1= Signature.getTypeErasure(paramTypes[i]);

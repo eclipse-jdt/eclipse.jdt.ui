@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -200,7 +202,7 @@ public class ResultCollector extends CompletionRequestor {
 	}
 	
 	private void internalAcceptMethod(CompletionProposal method) {
-		String rawDeclaringType= SignatureUtil.stripSignatureToFQN(String.valueOf(method.getDeclarationSignature()));
+		String rawDeclaringType= extractTypeFQN(method);
 		if (TypeFilter.isFiltered(rawDeclaringType))
 			return;
 		
@@ -229,10 +231,20 @@ public class ResultCollector extends CompletionRequestor {
 		
 		fMethods.add(proposal);	
 	}
+
+	private String extractTypeFQN(CompletionProposal method) {
+		char[] declaringTypeSignature= method.getDeclarationSignature();
+		// special methods may not have a declaring type: methods defined on arrays etc.
+		if (declaringTypeSignature == null)
+			return "java.lang.Object"; //$NON-NLS-1$
+		return SignatureUtil.stripSignatureToFQN(String.valueOf(declaringTypeSignature));
+	}
 	
 	/**
 	 * Creates and returns a parameter list of the given method proposal
-	 * suitable for display. The list does not include parentheses.
+	 * suitable for display. The list does not include parentheses. The
+	 * parameter types are filtered trough
+	 * {@link SignatureUtil#getLowerBound(char[])}.
 	 * 
 	 * @param methodProposal the method proposal to create the parameter list
 	 *        for
@@ -251,16 +263,22 @@ public class ResultCollector extends CompletionRequestor {
 
 	private char[] computeTypeDisplayName(char[] typeSignature) {
 		char[] displayName= Signature.getSimpleName(Signature.toCharArray(typeSignature));
+		// XXX see https://bugs.eclipse.org/bugs/show_bug.cgi?id=84675
 		boolean useShortGenerics= false;
 		if (useShortGenerics) {
 			StringBuffer buf= new StringBuffer();
 			buf.append(displayName);
-			int pos= buf.indexOf("? extends "); //$NON-NLS-1$
-			if (pos >= 0)
-				buf.replace(pos, pos + 10, "+"); //$NON-NLS-1$
-			pos= buf.indexOf("? super "); //$NON-NLS-1$
-			if (pos >= 0)
-				buf.replace(pos, pos + 9, "-"); //$NON-NLS-1$
+			int pos;
+			do {
+				pos= buf.indexOf("? extends "); //$NON-NLS-1$
+				if (pos >= 0) {
+					buf.replace(pos, pos + 10, "+"); //$NON-NLS-1$
+				} else {
+					pos= buf.indexOf("? super "); //$NON-NLS-1$
+					if (pos >= 0)
+						buf.replace(pos, pos + 8, "-"); //$NON-NLS-1$
+				}
+			} while (pos >= 0);
 			return buf.toString().toCharArray();
 		} else {
 			return displayName;
@@ -291,19 +309,17 @@ public class ResultCollector extends CompletionRequestor {
 	}
 	
 	protected final StringBuffer createMethodDisplayString(CompletionProposal methodProposal, String parameterList) {
-		
-		char[] signature= methodProposal.getSignature();
-		
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(methodProposal.getName());
 		nameBuffer.append('(');
 		nameBuffer.append(parameterList);
 		nameBuffer.append(")  "); //$NON-NLS-1$
 		
-		char[] returnType= computeTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(signature)));
+		char[] returnType= computeTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
 		nameBuffer.append(returnType);
 
-		char[] declaringType= Signature.getSignatureSimpleName(Signature.getTypeErasure(methodProposal.getDeclarationSignature()));
+		String declaringType= extractTypeFQN(methodProposal);
+		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(" - "); //$NON-NLS-1$
 		nameBuffer.append(declaringType);
 
@@ -651,120 +667,68 @@ public class ResultCollector extends CompletionRequestor {
 		if (isIgnored(proposal.getKind()))
 			return;
 		
-		switch(proposal.getKind()) {
-			case CompletionProposal.KEYWORD:
-				internalAcceptKeyword(
-						proposal.getName(),
-						proposal.getReplaceStart(),
-						proposal.getReplaceEnd(),
-						proposal.getRelevance());
-				break;
-			case CompletionProposal.PACKAGE_REF:
-				internalAcceptPackage(
-						proposal.getDeclarationSignature(),
-						proposal.getCompletion(),
-						proposal.getReplaceStart(),
-						proposal.getReplaceEnd(),
-						proposal.getRelevance());
-				break;
-			case CompletionProposal.TYPE_REF:
-				internalAcceptType(proposal);
-				break;
-			case CompletionProposal.FIELD_REF:
-				char[] signatureSimpleName= Signature.getSignatureSimpleName(proposal.getSignature());
-				if (signatureSimpleName == null) signatureSimpleName= CharOperation.NO_CHAR;
-				internalAcceptField(
-						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
-						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
-						proposal.getName(),
-						Signature.getSignatureQualifier(proposal.getSignature()),
-						signatureSimpleName, 
-						proposal.getCompletion(),
-						proposal.getFlags(),
-						proposal.getReplaceStart(),
-						proposal.getReplaceEnd(),
-						proposal.getRelevance()
-				);
-				break;
-			case CompletionProposal.METHOD_REF:
-				internalAcceptMethod(proposal);
-				break;
-			case CompletionProposal.METHOD_DECLARATION:
-				internalAcceptMethodDeclaration(
-						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
-						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
-						proposal.getName(),
-						getParameterPackages(proposal.getSignature()),
-						getParameterTypes(proposal.getSignature()),
-						proposal.findParameterNames(null) == null ? CharOperation.NO_CHAR_CHAR : proposal.findParameterNames(null),
-						Signature.getSignatureQualifier(Signature.getReturnType(proposal.getSignature())),
-						Signature.getSignatureSimpleName(Signature.getReturnType(proposal.getSignature())),
-						proposal.getCompletion(),
-						proposal.getFlags(),
-						proposal.getReplaceStart(),
-						proposal.getReplaceEnd(),
-						proposal.getRelevance()
-				);
-				break;
-			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
-				internalAcceptAnonymousType(
-						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
-						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()), 
-						getParameterPackages(proposal.getSignature()),
-						getParameterTypes(proposal.getSignature()),
-						proposal.findParameterNames(null) == null ? CharOperation.NO_CHAR_CHAR : proposal.findParameterNames(null),
-						proposal.getCompletion(),
-						proposal.getFlags(),
-						proposal.getReplaceStart(),
-						proposal.getReplaceEnd(),
-						proposal.getRelevance()
-				);
-				break;
-			case CompletionProposal.LABEL_REF :
-				internalAcceptLabel(
-						proposal.getCompletion(),
-						proposal.getReplaceStart(),
-						proposal.getReplaceEnd(),
-						proposal.getRelevance()
-				);
-				break;
-			case CompletionProposal.LOCAL_VARIABLE_REF:
-				signatureSimpleName= Signature.getSignatureSimpleName(proposal.getSignature());
-				if (signatureSimpleName == null) signatureSimpleName= CharOperation.NO_CHAR;
-				internalAcceptLocalVariable(
-						proposal.getCompletion(),
-						Signature.getSignatureQualifier(proposal.getSignature()),
-						signatureSimpleName,
-						proposal.getFlags(),
-						proposal.getReplaceStart(),
-						proposal.getReplaceEnd(),
-						proposal.getRelevance()
-				);
-				break;
-			case CompletionProposal.VARIABLE_DECLARATION:
-				signatureSimpleName= Signature.getSignatureSimpleName(proposal.getSignature());
-				if (signatureSimpleName == null) signatureSimpleName= CharOperation.NO_CHAR;
-				internalAcceptLocalVariable(
-						proposal.getCompletion(),
-						Signature.getSignatureQualifier(proposal.getSignature()),
-						signatureSimpleName,
-						proposal.getFlags(),
-						proposal.getReplaceStart(),
-						proposal.getReplaceEnd(),
-						proposal.getRelevance()
-				);
-				break;
-			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
-				internalAcceptPotentialMethodDeclaration(
-						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
-						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
-						proposal.getName(),
-						proposal.getReplaceStart(),
-						proposal.getReplaceEnd(),
-						proposal.getRelevance()
-				);
-				break;
-				
+		try {
+			switch (proposal.getKind()) {
+				case CompletionProposal.KEYWORD:
+					internalAcceptKeyword(proposal.getName(), proposal.getReplaceStart(), proposal.getReplaceEnd(), proposal.getRelevance());
+					break;
+				case CompletionProposal.PACKAGE_REF:
+					internalAcceptPackage(proposal.getDeclarationSignature(), proposal.getCompletion(), proposal.getReplaceStart(), proposal.getReplaceEnd(), proposal.getRelevance());
+					break;
+				case CompletionProposal.TYPE_REF:
+					internalAcceptType(proposal);
+					break;
+				case CompletionProposal.FIELD_REF:
+					char[] signatureSimpleName= Signature.getSignatureSimpleName(proposal.getSignature());
+					if (signatureSimpleName == null)
+						signatureSimpleName= CharOperation.NO_CHAR;
+					internalAcceptField(Signature.getSignatureQualifier(proposal.getDeclarationSignature()), Signature.getSignatureSimpleName(proposal.getDeclarationSignature()), proposal.getName(),
+							Signature.getSignatureQualifier(proposal.getSignature()), signatureSimpleName, proposal.getCompletion(), proposal.getFlags(), proposal.getReplaceStart(), proposal
+									.getReplaceEnd(), proposal.getRelevance());
+					break;
+				case CompletionProposal.METHOD_REF:
+					internalAcceptMethod(proposal);
+					break;
+				case CompletionProposal.METHOD_DECLARATION:
+					internalAcceptMethodDeclaration(Signature.getSignatureQualifier(proposal.getDeclarationSignature()), Signature.getSignatureSimpleName(proposal.getDeclarationSignature()), proposal
+							.getName(), getParameterPackages(proposal.getSignature()), getParameterTypes(proposal.getSignature()),
+							proposal.findParameterNames(null) == null ? CharOperation.NO_CHAR_CHAR : proposal.findParameterNames(null), Signature.getSignatureQualifier(Signature
+									.getReturnType(proposal.getSignature())), Signature.getSignatureSimpleName(Signature.getReturnType(proposal.getSignature())), proposal.getCompletion(), proposal
+									.getFlags(), proposal.getReplaceStart(), proposal.getReplaceEnd(), proposal.getRelevance());
+					break;
+				case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
+					internalAcceptAnonymousType(Signature.getSignatureQualifier(proposal.getDeclarationSignature()), Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
+							getParameterPackages(proposal.getSignature()), getParameterTypes(proposal.getSignature()), proposal.findParameterNames(null) == null ? CharOperation.NO_CHAR_CHAR
+									: proposal.findParameterNames(null), proposal.getCompletion(), proposal.getFlags(), proposal.getReplaceStart(), proposal.getReplaceEnd(), proposal.getRelevance());
+					break;
+				case CompletionProposal.LABEL_REF:
+					internalAcceptLabel(proposal.getCompletion(), proposal.getReplaceStart(), proposal.getReplaceEnd(), proposal.getRelevance());
+					break;
+				case CompletionProposal.LOCAL_VARIABLE_REF:
+					signatureSimpleName= Signature.getSignatureSimpleName(proposal.getSignature());
+					if (signatureSimpleName == null)
+						signatureSimpleName= CharOperation.NO_CHAR;
+					internalAcceptLocalVariable(proposal.getCompletion(), Signature.getSignatureQualifier(proposal.getSignature()), signatureSimpleName, proposal.getFlags(), proposal
+							.getReplaceStart(), proposal.getReplaceEnd(), proposal.getRelevance());
+					break;
+				case CompletionProposal.VARIABLE_DECLARATION:
+					signatureSimpleName= Signature.getSignatureSimpleName(proposal.getSignature());
+					if (signatureSimpleName == null)
+						signatureSimpleName= CharOperation.NO_CHAR;
+					internalAcceptLocalVariable(proposal.getCompletion(), Signature.getSignatureQualifier(proposal.getSignature()), signatureSimpleName, proposal.getFlags(), proposal
+							.getReplaceStart(), proposal.getReplaceEnd(), proposal.getRelevance());
+					break;
+				case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
+					internalAcceptPotentialMethodDeclaration(Signature.getSignatureQualifier(proposal.getDeclarationSignature()), Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
+							proposal.getName(), proposal.getReplaceStart(), proposal.getReplaceEnd(), proposal.getRelevance());
+					break;
+
+			}
+		} catch (IllegalArgumentException e) {
+			// all signature processing method may throw IAEs
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=84657
+			// don't abort, but log and show all the valid proposals
+			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "Exception when processing proposal for: " + String.valueOf(proposal.getName()), e)); //$NON-NLS-1$
 		}
 	}	
 	
