@@ -13,19 +13,38 @@ package org.eclipse.jdt.internal.ui.text;
 
 import java.io.IOException;
 import java.io.Reader;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 
 
 /**
  * Provides a set of convenience methods for creating HTML pages.
  */
 public class HTMLPrinter {
+	
+	private static RGB BG_COLOR_RGB= null;
+	
+	static {
+		final Display display= Display.getDefault();
+		if (display != null && !display.isDisposed()) {
+			try {
+				display.asyncExec(new Runnable() {
+					/*
+					 * @see java.lang.Runnable#run()
+					 */
+					public void run() {
+						BG_COLOR_RGB= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND).getRGB();
+					}
+				});
+			} catch (SWTError err) {
+				// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=45294
+				if (err.code != SWT.ERROR_DEVICE_DISPOSED)
+					throw err;
+			}
+		}
+	}
 			
 	private HTMLPrinter() {
 	}
@@ -93,17 +112,15 @@ public class HTMLPrinter {
 	}
 
 	public static void insertPageProlog(StringBuffer buffer, int position) {
-		RGB bgColor= null;
-		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (window != null) {
-			Display display= window.getShell().getDisplay();
-			if (display != null && !display.isDisposed())
-				bgColor= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND).getRGB();
-		}
-		if (bgColor == null)
-			bgColor= new RGB(255,255, 225); // RGB value of info bg color on WindowsXP
-			
-		insertPageProlog(buffer, position, bgColor); //$NON-NLS-1$
+		insertPageProlog(buffer, position, getBgColor()); //$NON-NLS-1$
+	}
+	
+	private static RGB getBgColor() {
+		if (BG_COLOR_RGB != null)
+			return BG_COLOR_RGB;
+		else
+			return new RGB(255,255, 225); // RGB value of info bg color on WindowsXP
+		
 	}
 	
 	public static void addPageProlog(StringBuffer buffer) {
