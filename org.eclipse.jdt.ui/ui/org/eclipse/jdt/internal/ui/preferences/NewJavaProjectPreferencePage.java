@@ -30,10 +30,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
@@ -310,7 +312,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		
 		labelControl.setLayoutData(gd);
 		
-		gd= new GridData();
+		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(40);
 		
 		Text text= new Text(parent, SWT.SINGLE | SWT.BORDER);
@@ -326,51 +328,53 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
 		
-		Composite composite= new Composite(parent, SWT.NONE);
+		Composite result= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.numColumns= 2;
+		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		layout.marginWidth= 0;
-		composite.setLayout(layout);
+		layout.verticalSpacing= convertVerticalDLUsToPixels(10);
+		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+		layout.numColumns= 2;
+		result.setLayout(layout);
 		
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		
-		Label label= new Label(composite, SWT.WRAP);
-		label.setText(JavaUIMessages.getString("NewJavaProjectPreferencePage.sourcefolder.label")); //$NON-NLS-1$
-		label.setLayoutData(gd);
+		Group sourceFolderGroup= new Group(result, SWT.WRAP);
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		sourceFolderGroup.setLayout(layout);
+		sourceFolderGroup.setLayoutData(gd);
+		sourceFolderGroup.setText(JavaUIMessages.getString("NewJavaProjectPreferencePage.sourcefolder.label")); //$NON-NLS-1$
 		
-		int indent= convertWidthInCharsToPixels(1);
+		int indent= 0;
 		
-		fProjectAsSourceFolder= addRadioButton(composite, JavaUIMessages.getString("NewJavaProjectPreferencePage.sourcefolder.project"), SRCBIN_FOLDERS_IN_NEWPROJ, IPreferenceStore.FALSE, indent); //$NON-NLS-1$
+		fProjectAsSourceFolder= addRadioButton(sourceFolderGroup, JavaUIMessages.getString("NewJavaProjectPreferencePage.sourcefolder.project"), SRCBIN_FOLDERS_IN_NEWPROJ, IPreferenceStore.FALSE, indent); //$NON-NLS-1$
 		fProjectAsSourceFolder.addSelectionListener(fSelectionListener);
 
-		fFoldersAsSourceFolder= addRadioButton(composite, JavaUIMessages.getString("NewJavaProjectPreferencePage.sourcefolder.folder"), SRCBIN_FOLDERS_IN_NEWPROJ, IPreferenceStore.TRUE, indent); //$NON-NLS-1$
+		fFoldersAsSourceFolder= addRadioButton(sourceFolderGroup, JavaUIMessages.getString("NewJavaProjectPreferencePage.sourcefolder.folder"), SRCBIN_FOLDERS_IN_NEWPROJ, IPreferenceStore.TRUE, indent); //$NON-NLS-1$
 		fFoldersAsSourceFolder.addSelectionListener(fSelectionListener);
 		
 		indent= convertWidthInCharsToPixels(4);
 
-		fSrcFolderNameLabel= new Label(composite, SWT.NONE);
+		fSrcFolderNameLabel= new Label(sourceFolderGroup, SWT.NONE);
 		fSrcFolderNameLabel.setText(JavaUIMessages.getString("NewJavaProjectPreferencePage.folders.src")); //$NON-NLS-1$
-		fSrcFolderNameText= addTextControl(composite, fSrcFolderNameLabel, SRCBIN_SRCNAME, indent); //$NON-NLS-1$
+		fSrcFolderNameText= addTextControl(sourceFolderGroup, fSrcFolderNameLabel, SRCBIN_SRCNAME, indent); //$NON-NLS-1$
 		fSrcFolderNameText.addModifyListener(fModifyListener);
 
-		fBinFolderNameLabel= new Label(composite, SWT.NONE);
+		fBinFolderNameLabel= new Label(sourceFolderGroup, SWT.NONE);
 		fBinFolderNameLabel.setText(JavaUIMessages.getString("NewJavaProjectPreferencePage.folders.bin")); //$NON-NLS-1$
-		fBinFolderNameText= addTextControl(composite, fBinFolderNameLabel, SRCBIN_BINNAME, indent); //$NON-NLS-1$
+		fBinFolderNameText= addTextControl(sourceFolderGroup, fBinFolderNameLabel, SRCBIN_BINNAME, indent); //$NON-NLS-1$
 		fBinFolderNameText.addModifyListener(fModifyListener);
 
-		new Label(composite, SWT.NONE);
-		new Label(composite, SWT.NONE);
-		
 		String[] jreNames= getJRENames();
 		if (jreNames.length > 0) {
-			Label jreSelectionLabel= new Label(composite, SWT.NONE);
+			Label jreSelectionLabel= new Label(result, SWT.NONE);
 			jreSelectionLabel.setText(JavaUIMessages.getString("NewJavaProjectPreferencePage.jrelibrary.label")); //$NON-NLS-1$
 			jreSelectionLabel.setLayoutData(new GridData());
 		
 			int index= getPreferenceStore().getInt(CLASSPATH_JRELIBRARY_INDEX);
-			fJRECombo= new Combo(composite, SWT.READ_ONLY);
+			fJRECombo= new Combo(result, SWT.READ_ONLY);
 			fJRECombo.setItems(jreNames);
 			fJRECombo.select(index);
 			fJRECombo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
@@ -378,7 +382,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 					
 		validateFolders();
 	
-		return composite;
+		return result;
 	}
 	
 	private void validateFolders() {

@@ -2,23 +2,24 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.StringTokenizer;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaConventions;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -29,8 +30,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class CodeGenerationPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -190,44 +192,47 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		GridLayout layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		layout.numColumns= 2;
+		initializeDialogUnits(parent);
 		
-		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(layout);
+		Composite result= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+		layout.marginWidth= 0;
+		layout.verticalSpacing= convertVerticalDLUsToPixels(10);
+		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+		result.setLayout(layout);
 		
 		int horizontalIndent= convertWidthInCharsToPixels(4);
 
-		(new Separator()).doFillIntoGrid(composite, 2, 4);
-	
-		DialogField javaDocLabel= new DialogField();
-		javaDocLabel.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.comments.label")); //$NON-NLS-1$
-		javaDocLabel.doFillIntoGrid(composite, 2);
+		Group javaDocGroup= new Group(result, SWT.NONE);
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		javaDocGroup.setLayout(layout);
+		javaDocGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		javaDocGroup.setText(JavaUIMessages.getString("CodeGenerationPreferencePage.comments.label")); //$NON-NLS-1$
+		fCreateJavaDocComments.doFillIntoGrid(javaDocGroup, 2);
+		fCreateNonJavadocComments.doFillIntoGrid(javaDocGroup, 2);
+		fCreateFileComments.doFillIntoGrid(javaDocGroup, 2);
 		
-		fCreateJavaDocComments.doFillIntoGrid(composite, 2);
-		fCreateNonJavadocComments.doFillIntoGrid(composite, 2);
-		fCreateFileComments.doFillIntoGrid(composite, 2);
-		
-		(new Separator()).doFillIntoGrid(composite, 2, 4);
-		
-		DialogField getterSetterLabel= new DialogField();
-		getterSetterLabel.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.gettersetter.label")); //$NON-NLS-1$
-		getterSetterLabel.doFillIntoGrid(composite, 2);
+		Group getterSetterGroup= new Group(result, SWT.NONE);
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		getterSetterGroup.setLayout(layout);
+		getterSetterGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		getterSetterGroup.setText(JavaUIMessages.getString("CodeGenerationPreferencePage.gettersetter.label")); //$NON-NLS-1$
 
-		fUseGetterSetterPrefix.doFillIntoGrid(composite, 2);
-		fGetterSetterPrefix.doFillIntoGrid(composite, 2);
+		fUseGetterSetterPrefix.doFillIntoGrid(getterSetterGroup, 2);
+		fGetterSetterPrefix.doFillIntoGrid(getterSetterGroup, 2);
 		LayoutUtil.setHorizontalIndent(fGetterSetterPrefix.getLabelControl(null), horizontalIndent);
 		LayoutUtil.setHorizontalGrabbing(fGetterSetterPrefix.getTextControl(null));
 		
-		fUseGetterSetterSuffix.doFillIntoGrid(composite, 2);
-		fGetterSetterSuffix.doFillIntoGrid(composite, 2);		
+		fUseGetterSetterSuffix.doFillIntoGrid(getterSetterGroup, 2);
+		fGetterSetterSuffix.doFillIntoGrid(getterSetterGroup, 2);		
 		LayoutUtil.setHorizontalIndent(fGetterSetterSuffix.getLabelControl(null), horizontalIndent);
 		
 		initFields();
 		
-		return composite;
+		return result;
 	}
 	
 	private void doDialogFieldChanged(DialogField field) {

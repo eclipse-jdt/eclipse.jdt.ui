@@ -19,10 +19,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
@@ -178,70 +180,57 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
 		
-		Composite composite= new Composite(parent, SWT.NONE);
+		Composite result= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
-		layout.marginHeight= 0;
+		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		layout.marginWidth= 0;
-		composite.setLayout(layout);
+		layout.verticalSpacing= convertVerticalDLUsToPixels(10);
+		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+		result.setLayout(layout);
 		
-		new Label(composite, SWT.NONE); // spacer
-		new Label(composite, SWT.NONE).setText(JavaUIMessages.getString("JavaBasePreferencePage.linkSettings.text")); //$NON-NLS-1$
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkJavaBrowsingViewsCheckbox.text"), LINK_BROWSING_VIEW_TO_EDITOR); //$NON-NLS-1$
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
+		// new Label(composite, SWT.NONE); // spacer
+		Group linkSettings= new Group(result, SWT.NONE);
+		linkSettings.setLayout(new GridLayout());
+		linkSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		linkSettings.setText(JavaUIMessages.getString("JavaBasePreferencePage.linkSettings.text")); //$NON-NLS-1$
+		addCheckBox(linkSettings, JavaUIMessages.getString("JavaBasePreferencePage.linkJavaBrowsingViewsCheckbox.text"), LINK_BROWSING_VIEW_TO_EDITOR); //$NON-NLS-1$
+		addCheckBox(linkSettings, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
+		addCheckBox(linkSettings, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
 
-		new Label(composite, SWT.NONE); // spacer
-		Label doubleClickLabel1= new Label(composite, SWT.NONE);
-		doubleClickLabel1.setText(JavaUIMessages.getString("JavaBasePreferencePage.updateJavaViews")); //$NON-NLS-1$
+		// new Label(result, SWT.NONE); // spacer
 
-		Composite doubleClickRadioGroup1= new Composite(composite, SWT.NONE);
-		layout= new GridLayout();
-		layout.marginHeight= 0;
-		doubleClickRadioGroup1.setLayout(layout);		
-		addRadioButton(doubleClickRadioGroup1, JavaUIMessages.getString("JavaBasePreferencePage.onSave"), UPDATE_JAVA_VIEWS, UPDATE_ON_SAVE); //$NON-NLS-1$
-		addRadioButton(doubleClickRadioGroup1, JavaUIMessages.getString("JavaBasePreferencePage.whileEditing"), UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);  //$NON-NLS-1$
-		Label notice= new Label(composite, SWT.WRAP);
+		Group updateGroup= new Group(result, SWT.NONE);
+		updateGroup.setLayout(new GridLayout());
+		updateGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		updateGroup.setText(JavaUIMessages.getString("JavaBasePreferencePage.updateJavaViews")); //$NON-NLS-1$
+		addRadioButton(updateGroup, JavaUIMessages.getString("JavaBasePreferencePage.onSave"), UPDATE_JAVA_VIEWS, UPDATE_ON_SAVE); //$NON-NLS-1$
+		addRadioButton(updateGroup, JavaUIMessages.getString("JavaBasePreferencePage.whileEditing"), UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);  //$NON-NLS-1$
+		Label notice= new Label(updateGroup, SWT.WRAP);
 		notice.setText(JavaUIMessages.getString("JavaBasePreferencePage.notice.outliner"));  //$NON-NLS-1$
 		GridData noticeData= new GridData(GridData.FILL_HORIZONTAL);
 		noticeData.grabExcessHorizontalSpace= true;
 		noticeData.widthHint= convertWidthInCharsToPixels(60);
 		notice.setLayoutData(noticeData);
 
-		new Label(composite, SWT.NONE); // spacer
-		Label doubleClickLabel= new Label(composite, SWT.NONE);
-		doubleClickLabel.setText(JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.action"));  //$NON-NLS-1$
+		// new Label(result, SWT.NONE); // spacer
 
-		Composite doubleClickRadioGroup= new Composite(composite, SWT.NONE);
-		layout= new GridLayout();
-		layout.marginHeight= 0;
-		doubleClickRadioGroup.setLayout(layout);		
-		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.gointo"), DOUBLE_CLICK, DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
-		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.expand"), DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS); //$NON-NLS-1$
+		Group doubleClickGroup= new Group(result, SWT.NONE);
+		doubleClickGroup.setLayout(new GridLayout());		
+		doubleClickGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		doubleClickGroup.setText(JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.action"));  //$NON-NLS-1$
+		addRadioButton(doubleClickGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.gointo"), DOUBLE_CLICK, DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
+		addRadioButton(doubleClickGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.expand"), DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS); //$NON-NLS-1$
 
-		new Label(composite, SWT.NONE); // spacer
-		Label label= new Label(composite, SWT.NONE);
-		label.setText(JavaUIMessages.getString("JavaBasePreferencePage.openTypeHierarchy")); //$NON-NLS-1$
+		// new Label(result, SWT.NONE); // spacer
 		
-		Composite radioGroup= new Composite(composite, SWT.NONE);
-		layout= new GridLayout();
-		layout.marginHeight= 0;
-		radioGroup.setLayout(layout);		
+		Group typeHierarchyGroup= new Group(result, SWT.NONE);
+		typeHierarchyGroup.setLayout(new GridLayout());		
+		typeHierarchyGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		typeHierarchyGroup.setText(JavaUIMessages.getString("JavaBasePreferencePage.openTypeHierarchy")); //$NON-NLS-1$
+		addRadioButton(typeHierarchyGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  //$NON-NLS-1$
+		addRadioButton(typeHierarchyGroup, JavaUIMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART); //$NON-NLS-1$
 
-		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  //$NON-NLS-1$
-		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART); //$NON-NLS-1$
-
-		/* Need support from workbench for this. See http://dev.eclipse.org/bugs/show_bug.cgi?id=3962
-		final Button reuse= addCheckBox(composite, "&Reuse Type Hierarchy perspective in same window", OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE);
-		reuse.setEnabled(perspective.getSelection());
-		perspective.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				reuse.setEnabled(perspective.getSelection());
-			}
-		});
-		*/
-
-	
-		return composite;
+		return result;
 	}
 	
 		

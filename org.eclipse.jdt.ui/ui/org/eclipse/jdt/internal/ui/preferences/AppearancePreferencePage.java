@@ -7,6 +7,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
@@ -145,38 +146,37 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
 		int nColumns= 1;
-		
+				
+		Composite result= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
-		layout.marginHeight= 0;
+		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		layout.marginWidth= 0;
 		layout.numColumns= nColumns;
-		
-		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(layout);
+		result.setLayout(layout);
 				
-		fShowMethodReturnType.doFillIntoGrid(composite, nColumns);
-		fShowOverrideIndicator.doFillIntoGrid(composite, nColumns);
-		fShowMembersInPackageView.doFillIntoGrid(composite, nColumns);				
-		fFoldPackagesInPackageExplorer.doFillIntoGrid(composite, nColumns);
+		fShowMethodReturnType.doFillIntoGrid(result, nColumns);
+		fShowOverrideIndicator.doFillIntoGrid(result, nColumns);
+		fShowMembersInPackageView.doFillIntoGrid(result, nColumns);				
+		fFoldPackagesInPackageExplorer.doFillIntoGrid(result, nColumns);
 
-		new Separator().doFillIntoGrid(composite, nColumns);
+		new Separator().doFillIntoGrid(result, nColumns);
 		
-		fCompressPackageNames.doFillIntoGrid(composite, nColumns);
-		fPackageNamePattern.doFillIntoGrid(composite, 2);
+		fCompressPackageNames.doFillIntoGrid(result, nColumns);
+		fPackageNamePattern.doFillIntoGrid(result, 2);
 		LayoutUtil.setHorizontalGrabbing(fPackageNamePattern.getTextControl(null));
 		LayoutUtil.setWidthHint(fPackageNamePattern.getLabelControl(null), convertWidthInCharsToPixels(65));
 		
-		new Separator().doFillIntoGrid(composite, nColumns);
-		fStackBrowsingViewsVertically.doFillIntoGrid(composite, nColumns);
+		new Separator().doFillIntoGrid(result, nColumns);
+		fStackBrowsingViewsVertically.doFillIntoGrid(result, nColumns);
 		
 		
 		DialogField field= new DialogField();
 		field.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.preferenceOnlyEffectiveForNewPerspectives")); //$NON-NLS-1$
-		field.doFillIntoGrid(composite, 2);
+		field.doFillIntoGrid(result, 2);
 		
 		initFields();
 		
-		return composite;
+		return result;
 	}
 	
 	private void doDialogFieldChanged(DialogField field) {
