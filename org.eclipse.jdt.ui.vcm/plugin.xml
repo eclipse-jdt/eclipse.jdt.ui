@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!-- ======================================================================= -->
-<!-- This plugin provides basic VCM functionality to the Eclipse Java UI     -->
+<!-- This plugin provides basic VCM functionality to the Eclipse Java UI	     -->
 <!-- ======================================================================= -->
 <plugin
 	name = "Java Development Tools VCM UI"
@@ -46,7 +46,7 @@
 <!-- **************** PROPERTY PAGES ******************* -->
 	<extension
 		point="org.eclipse.ui.propertyPages">
-	   	<page name="Managing"
+	   	<page name="Team"
 	  	   id="org.eclipse.jdt.ui.vcm.propertypages.managing"
 	           objectClass="org.eclipse.jdt.core.IJavaElement"
 	           class="org.eclipse.vcm.internal.ui.VCMPropertyPage">
@@ -63,7 +63,7 @@
 		<menu
 			id="vcm.managing"
 			path="additions"
-			label="Mana&amp;ge">
+			label="Team">
 			<separator name="manageGroup"/>
 		</menu>
 	</objectContribution>
@@ -120,7 +120,7 @@
 		
 		<action 
 			id="org.eclipse.jdt.ui.vcm.ReplaceWithTeamStream"
-			label="&amp;Stream Resource"
+			label="&amp;Stream Contents"
 			tooltip="Replace the selected resources with their stream version"
 			menubarPath="replaceWithMenu/replaceWithGroup"
 			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithTeamStreamAction">
@@ -137,7 +137,7 @@
 		
 		<action 
 			id="org.eclipse.jdt.ui.vcm.CompareWithTeamStream"
-			label="&amp;Stream Resource"
+			label="&amp;Stream Contents"
 			tooltip="Compare the selected resource with its stream version"
 			menubarPath="compareWithMenu/compareWithGroup"
 			enablesFor="1"
@@ -182,7 +182,7 @@
 		
 		<action 
 			id="org.eclipse.jdt.ui.vcm.ReplaceWithTeamStream"
-			label="&amp;Stream Resource"
+			label="&amp;Stream Contents"
 			tooltip="Replace the selected resources with their stream version"
 			menubarPath="replaceWithMenu/replaceWithGroup"
 			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithTeamStreamAction">
@@ -199,7 +199,7 @@
 		
 		<action 
 			id="org.eclipse.jdt.ui.vcm.CompareWithTeamStream"
-			label="&amp;Stream Resource"
+			label="&amp;Stream Contents"
 			tooltip="Compare the selected resource with its stream version"
 			menubarPath="compareWithMenu/compareWithGroup"
 			enablesFor="1"
@@ -243,7 +243,7 @@
 		
 		<action 
 			id="org.eclipse.jdt.ui.vcm.ReplaceWithTeamStream"
-			label="&amp;Stream Resource"
+			label="&amp;Stream Contents"
 			tooltip="Replace the selected resources with their stream version"
 			menubarPath="replaceWithMenu/replaceWithGroup"
 			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithTeamStreamAction">
@@ -260,7 +260,7 @@
 		
 		<action 
 			id="org.eclipse.jdt.ui.vcm.CompareWithTeamStream"
-			label="&amp;Stream Resource"
+			label="&amp;Stream Contents"
 			tooltip="Compare the selected resource with its stream version"
 			menubarPath="compareWithMenu/compareWithGroup"
 			enablesFor="1"
@@ -306,7 +306,7 @@
 		
 		<action 
 			id="org.eclipse.jdt.ui.vcm.ReplaceWithTeamStream"
-			label="&amp;Stream Resource"
+			label="&amp;Stream Contents"
 			tooltip="Replace the selected resources with their stream version"
 			menubarPath="replaceWithMenu/replaceWithGroup"
 			class="org.eclipse.vcm.internal.ui.actions.ReplaceWithTeamStreamAction">
@@ -323,7 +323,7 @@
 		
 		<action 
 			id="org.eclipse.jdt.ui.vcm.CompareWithTeamStream"
-			label="&amp;Stream Resource"
+			label="&amp;Stream Contents"
 			tooltip="Compare the selected resource with its stream version"
 			menubarPath="compareWithMenu/compareWithGroup"
 			enablesFor="1"
