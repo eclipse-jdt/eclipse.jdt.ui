@@ -144,8 +144,9 @@ public class JavaModelUtilTest extends TestCase {
 		assertElementName("InnerInner", type, IJavaElement.TYPE);	
 	}
 	
-	
-	
+	/**
+	 * @deprecated Tests a deprecated method
+	 */
 	public void testFindType2() throws Exception {
 		IType type= JavaModelUtil.findType(fJProject1, "junit.extensions", "ExceptionTestCase");
 		assertElementName("ExceptionTestCase", type, IJavaElement.TYPE);
@@ -252,7 +253,7 @@ public class JavaModelUtilTest extends TestCase {
 	private void assertClasspathEntry(String name, IJavaElement elem, IPath path, int type) throws Exception {
 		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(elem);
 		assertNotNull(name + "-noroot", root);
-		IClasspathEntry entry= JavaModelUtil.getRawClasspathEntry(root);
+		IClasspathEntry entry= root.getRawClasspathEntry();
 		assertNotNull(name + "-nocp", entry);
 		assertEquals(name + "-wrongpath", entry.getPath(), path);
 		assertTrue(name + "-wrongtype", type == entry.getEntryKind());
@@ -279,7 +280,10 @@ public class JavaModelUtilTest extends TestCase {
 		path= fJProject2.getProject().getFullPath().append("src");
 		assertClasspathEntry("ReqProjType", type, path, IClasspathEntry.CPE_SOURCE);		
 	}
-	
+
+	/**
+	 * @deprecated Tests a deprecated method
+	 */	
 	public void testIsOnBuildPath() throws Exception {
 		IType type= JavaModelUtil.findType(fJProject1, "junit.extensions.ExceptionTestCase");
 		assertElementName("ExceptionTestCase", type, IJavaElement.TYPE);

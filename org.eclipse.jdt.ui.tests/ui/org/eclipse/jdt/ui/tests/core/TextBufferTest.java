@@ -605,7 +605,7 @@ public class TextBufferTest extends TestCase {
 		}
 		
 		assertTrue("Can perform edits", editor.canPerformEdits());
-		UndoMemento undo= editor.performEdits(null);
+		editor.performEdits(null);
 
 		String result= "3, foo(1, 2)";
 		assertEquals("Buffer content", result, buffer.getContent());
@@ -636,7 +636,7 @@ public class TextBufferTest extends TestCase {
 		editor.add(innerRoot);
 		
 		assertTrue("Can perform edits", editor.canPerformEdits());
-		UndoMemento undo= editor.performEdits(null);
+		editor.performEdits(null);
 
 		String result= "foo(2, 1), 3";
 		assertEquals("Buffer content", result, buffer.getContent());
@@ -683,7 +683,7 @@ public class TextBufferTest extends TestCase {
 		}
 
 		assertTrue("Can perform edits", editor.canPerformEdits());
-		UndoMemento undo= editor.performEdits(null);
+		editor.performEdits(null);
 
 		String result= "3, foo(2, 1)";
 		assertEquals("Buffer content", result, buffer.getContent());
