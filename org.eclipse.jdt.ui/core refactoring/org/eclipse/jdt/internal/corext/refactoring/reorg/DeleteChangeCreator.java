@@ -116,8 +116,7 @@ class DeleteChangeCreator{
 			TextFileChange tfc= (TextFileChange)textChange;
 			tfc.setSave(! cu.isWorkingCopy());
 		}
-		//TODO fix the descriptions
-		String message= "Delete elements from " + cu.getElementName();
+		String message= RefactoringCoreMessages.getString("DeleteChangeCreator.1"); //$NON-NLS-1$
 		textChange.addTextEdit(message, resultingEdits);
 		rewrite.removeModifications();
 		return textChange;
