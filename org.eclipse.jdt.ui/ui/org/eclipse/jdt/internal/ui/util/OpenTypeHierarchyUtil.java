@@ -202,7 +202,7 @@ public class OpenTypeHierarchyUtil {
 		if (page != null) {
 			window.setActivePage(page);
 		} else {
-			window.openPage(pd.getId(), input);
+			page= window.openPage(pd.getId(), input);
 			if (input instanceof IMember) {
 				openEditor(input);
 			}
