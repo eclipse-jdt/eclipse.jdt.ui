@@ -62,6 +62,7 @@ public abstract class FindOccurrencesEngine {
 	
 	public static final String IS_WRITEACCESS= "writeAccess"; //$NON-NLS-1$
 	public static final String IS_VARIABLE= "variable"; //$NON-NLS-1$
+	private CompilationUnit fRoot;
 	
 	private static class SearchGroupByKeyComputer implements IGroupByKeyComputer {
 		public Object computeGroupByKey(IMarker marker) {
@@ -142,40 +143,53 @@ public abstract class FindOccurrencesEngine {
 	protected abstract void addSpecialAttributes(Map attributes) throws JavaModelException;
 
 	/**
-	 * Finds occurrences in this engines input.
+	 * Resolves the target in this engines input.
 	 * 
 	 * @param offset the offset of the current selection
-	 * @param length the lenght of the current selection
+	 * @param length the length of the current selection
 	 * 
-	 * @return the matches as ASTNode list or <code>null</code> if there was an error
+	 * @return the binding for the target
 	 * @throws JavaModelException
 	 */
-	public List findOccurrences(int offset, int length) throws JavaModelException {
+	public IBinding resolveTarget(int offset, int length) throws JavaModelException {
 		ISourceReference sr= getSourceReference();
 		if (sr.getSourceRange() == null) {
 			return null; 
 		}
 		
-		final CompilationUnit root= createAST();
-		if (root == null) {
+		fRoot= createAST();
+		if (fRoot == null) {
 			return null;
 		}
-		final Name name= getNameNode(root, offset, length);
+		final Name name= getNameNode(fRoot, offset, length);
 		if (name == null) 
 			return null;
 		
-		final IBinding target;
 		if (name.getParent() instanceof ClassInstanceCreation)
-			target= ((ClassInstanceCreation)name.getParent()).resolveConstructorBinding();
+			return ((ClassInstanceCreation)name.getParent()).resolveConstructorBinding();
 		else
-			target= name.resolveBinding();
-		
+			return name.resolveBinding();
+	}
+	
+	/**
+	 * Finds occurrences in this engines input for the
+	 * given binding.
+	 * 
+	 * @param target the binding for which to find its occurrences
+	 * @param length the length of the current selection
+	 * 
+	 * @return the matches as ASTNode list or <code>null</code> if there was an error
+	 * @throws JavaModelException
+	 */
+	public List findOccurrences(IBinding target) throws JavaModelException {
 		if (target == null)
 			return null;
 		
 		OccurrencesFinder finder= new OccurrencesFinder(target);
-		root.accept(finder);
-		return finder.getUsages();
+		fRoot.accept(finder);
+		List result= finder.getUsages();
+		fRoot= null;
+		return result;
 	}
 	
 	public String run(int offset, int length) throws JavaModelException {
@@ -316,5 +330,12 @@ public abstract class FindOccurrencesEngine {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Clears this engine's target.
+	 */
+	public void clearTarget() {
+		fRoot= null;
 	}
 }
