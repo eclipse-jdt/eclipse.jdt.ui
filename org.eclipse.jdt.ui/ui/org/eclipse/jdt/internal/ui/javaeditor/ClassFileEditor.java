@@ -20,30 +20,7 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IClasspathContainer;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModelStatusConstants;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.util.IClassFileDisassembler;
-import org.eclipse.jdt.core.util.IClassFileReader;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
 
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.IWidgetTokenKeeper;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
@@ -66,12 +43,40 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ScrollBar;
+
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
+import org.eclipse.jface.text.IWidgetTokenKeeper;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.SourceViewer;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.util.IClassFileDisassembler;
+import org.eclipse.jdt.core.util.IClassFileReader;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
 
 /**
  * Java specific text editor.
@@ -367,6 +372,74 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				styledText.setText(content == null ? "" : content); //$NON-NLS-1$
 			}	
 		};
+		
+		/**
+		 *  Updater that takes care of minimizing changes of the editor input.
+		 */
+		private class InputUpdater implements Runnable {
+			
+			/** Has the runnable already been posted? */
+			private boolean fPosted= false;
+			/** Editor input */
+			private IClassFileEditorInput fClassFileEditorInput;
+			
+			
+			public InputUpdater() {
+			}
+			
+			/*
+			 * @see Runnable#run()
+			 */
+			public void run() {
+				
+				IClassFileEditorInput input;
+				synchronized (this) {
+					input= fClassFileEditorInput;
+				}
+				
+				try {
+					
+					if (getSourceViewer() != null)
+						setInput(input);				
+				
+				} finally {
+					synchronized (this) {
+						fPosted= false;
+					}
+				}
+			}
+			
+			/**
+			 * Posts this runnable into the event queue if not already there.
+			 * 
+			 * @param input the input to be set when executed
+			 */
+			public void post(IClassFileEditorInput input) {
+				
+				synchronized(this) {
+					if (fPosted) {
+						if (input != null && input.equals(fClassFileEditorInput))
+							fClassFileEditorInput= input;
+						return;
+					}
+				}
+				
+				if (input != null && input.equals(getEditorInput())) {	
+					ISourceViewer viewer= getSourceViewer();
+					if (viewer != null) {
+						StyledText textWidget= viewer.getTextWidget();
+						if (textWidget != null && !textWidget.isDisposed()) {
+							synchronized (this) {
+								fPosted= true;
+								fClassFileEditorInput= input;
+							}
+							textWidget.getDisplay().asyncExec(this);
+						}
+					}
+				}
+			}
+		};	
+
 	
 	
 	
@@ -375,6 +448,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 	private Composite fViewerComposite;
 	private Control fSourceAttachmentForm;
+	
+	private InputUpdater fInputUpdater= new InputUpdater();
 	
 	/**
 	 * Default constructor.
@@ -601,25 +676,13 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				fParent.layout();
 			}
 		}		
-	}	
-
+	}
+	
 	/*
 	 * @see ClassFileDocumentProvider.InputChangeListener#inputChanged(IClassFileEditorInput)
 	 */
-	public void inputChanged(final IClassFileEditorInput input) {
-		if (input != null && input.equals(getEditorInput())) {	
-			ISourceViewer viewer= getSourceViewer();
-			if (viewer != null) {
-				StyledText textWidget= viewer.getTextWidget();
-				if (textWidget != null && !textWidget.isDisposed()) {
-					textWidget.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							setInput(input);
-						}
-					});
-				}
-			}						
-		}
+	public void inputChanged(IClassFileEditorInput input) {
+		fInputUpdater.post(input);
 	}
 	
 	/*
