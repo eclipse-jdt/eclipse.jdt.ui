@@ -351,5 +351,17 @@
          category="org.eclipse.search.ui.category.search"
          id="org.eclipse.jdt.junit.gotoTest">
       </command>
+      <command
+            name="%ViewCommand.junitView.name"
+            description="%ViewCommand.junitView.description"
+            category="org.eclipse.ui.category.views"
+            id="org.eclipse.jdt.junit.ResultView">
+      </command>
+      <keyBinding
+            string=""
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.junit.ResultView"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
    </extension>
 </plugin>
