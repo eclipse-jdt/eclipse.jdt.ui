@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -253,6 +254,31 @@ public class ASTResolving {
 		scanner.resetTo(pos, buf.getLength());
 		return scanner;
 	}
+	
+	public static void overreadToken(IScanner scanner, int[] prevTokens) throws InvalidInputException {
+		boolean found;
+		do {
+			found= false;
+			int curr= scanner.getNextToken();
+			for (int i= 0; i < prevTokens.length; i++) {
+				if (prevTokens[i] == curr) {
+					found= true;
+					break;
+				}
+			}
+		} while (found);
+	}
+	
+	public static void readToToken(IScanner scanner, int tok) throws InvalidInputException {
+		int curr= 0;
+		do {
+			curr= scanner.getNextToken();
+			if (curr == ITerminalSymbols.TokenNameEOF) {
+				throw new InvalidInputException("End of File");
+			}
+		} while (curr != tok); 
+	}	
+	
 	
 	public static Expression getNullExpression(Type type) {
 		AST ast= type.getAST();
