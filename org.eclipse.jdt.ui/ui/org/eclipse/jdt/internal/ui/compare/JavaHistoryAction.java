@@ -60,7 +60,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		}
 		
 		public InputStream getContents() {
-			return new ByteArrayInputStream(fBuffer.getContent().getBytes());
+			return new ByteArrayInputStream(JavaCompareUtilities.getBytes(fBuffer.getContent()));
 		}
 	}
 

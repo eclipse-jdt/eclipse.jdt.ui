@@ -270,6 +270,14 @@ class JavaCompareUtilities {
 		return null;
 	}
 	
+	static byte[] getBytes(String s) {
+		try {
+			return s.getBytes(ResourcesPlugin.getEncoding());
+		} catch (UnsupportedEncodingException e) {
+			return s.getBytes();
+		}
+	}
+	
 	/**
 	 * Breaks the given string into lines.
 	 */
