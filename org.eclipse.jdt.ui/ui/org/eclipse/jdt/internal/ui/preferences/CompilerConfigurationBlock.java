@@ -20,6 +20,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -31,6 +33,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -672,7 +676,16 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		group.setLayout(layout);
 	
 		String label= PreferencesMessages.getString("CompilerConfigurationBlock.compiler_compliance.label"); //$NON-NLS-1$
-		addComboBox(group, label, PREF_COMPLIANCE, values345, values345Labels, 0);	
+		final Combo compliance= addComboBox(group, label, PREF_COMPLIANCE, values345, values345Labels, 0);
+		compliance.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if ("1.5".equals(compliance.getText())) { //$NON-NLS-1$
+					MessageDialog.openWarning(compliance.getShell(), 
+						"Compiler Settings",  //$NON-NLS-1$
+						"Please note that the J2SE 5.0 support is still under development."); //$NON-NLS-1$
+				}
+			}
+		});
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.default_settings.label"); //$NON-NLS-1$
 		addCheckBox(group, label, INTR_DEFAULT_COMPLIANCE, new String[] { DEFAULT_CONF, USER_CONF }, 0);	
