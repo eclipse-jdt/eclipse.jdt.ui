@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -57,14 +58,17 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -248,7 +252,7 @@ class UseSupertypeWherePossibleUtil {
 
 	private boolean hasIndirectProblems(ASTNode node, Collection nodesToRemove, IProgressMonitor pm) throws JavaModelException {
 		try{
-			ASTNode parentNode= node.getParent();
+			ASTNode parentNode= getUnparenthesizedParent(node);
 			if (parentNode instanceof VariableDeclarationStatement){
 				VariableDeclarationStatement vds= (VariableDeclarationStatement)parentNode;
 				if (vds.getType() != node)
@@ -481,7 +485,7 @@ class UseSupertypeWherePossibleUtil {
 	}
 		
 	private boolean isReferenceUpdatable(ASTNode node, Collection nodesToRemove) throws JavaModelException{
-		ASTNode parent= node.getParent();
+		ASTNode parent= getUnparenthesizedParent(node);
 		if (node instanceof SimpleName && parent instanceof ArrayInitializer){
 			//there are only 2 places where ArrayInitializers can be used
 			ArrayInitializer initializer= (ArrayInitializer)parent;
@@ -496,35 +500,106 @@ class UseSupertypeWherePossibleUtil {
 			VariableDeclarationFragment r1= (VariableDeclarationFragment)parent;
 			if (node == r1.getInitializer()){
 				IVariableBinding vb= r1.resolveBinding();
-				if (vb != null && fBadVarSet.contains(getCompilationUnitNode(node).findDeclaringNode(vb)))
+				if (vb == null || fBadVarSet.contains(getCompilationUnitNode(node).findDeclaringNode(vb)))
 					return false;
 			}
 		} else if (parent instanceof Assignment){
 			Assignment assmnt= (Assignment)parent;
-			if (node == assmnt.getRightHandSide()){
-				Expression lhs= assmnt.getLeftHandSide();
-				if (lhs instanceof SimpleName){
-					IBinding binding= ((SimpleName)lhs).resolveBinding();
-					if (binding != null && fBadVarSet.contains(getCompilationUnitNode(lhs).findDeclaringNode(binding)))
-						return false;
-				} else if (lhs instanceof FieldAccess){
-					IBinding binding= ((FieldAccess)lhs).getName().resolveBinding();
-					if (binding != null && fBadVarSet.contains(getCompilationUnitNode(lhs).findDeclaringNode(binding)))
-						return false;
-				}
-			}
+			if (node == assmnt.getRightHandSide())
+				return isLHSUpdatable(assmnt.getLeftHandSide(), nodesToRemove);
 		} else if (isInvocation(parent)) {
 			return isReferenceInInvocationUpdatable(node, nodesToRemove);
 		} else if (parent instanceof ReturnStatement){
 			MethodDeclaration md= (MethodDeclaration)ASTNodes.getParent(parent, MethodDeclaration.class);
 			if (nodesToRemove.contains(md.getReturnType()))
 				return false;
-		} 
+		} else if (parent instanceof ArrayAccess){
+			return isReferenceUpdatable(parent, nodesToRemove);
+		}
 		return true;
 	}
 	
+	private boolean isLHSUpdatable(Expression lhs, Collection nodesToRemove) throws JavaModelException {
+		if (lhs instanceof Name){
+			IBinding binding= ((Name)lhs).resolveBinding();
+			return ! isBindingForExcludedElement(lhs, binding, nodesToRemove);
+
+		} else if (lhs instanceof MethodInvocation){
+			IBinding binding= ((MethodInvocation)lhs).resolveMethodBinding();
+			return ! isBindingForExcludedElement(lhs, binding, nodesToRemove);
+ 
+		} else if (lhs instanceof SuperMethodInvocation){
+			IBinding binding= ((SuperMethodInvocation)lhs).resolveMethodBinding();
+			return ! isBindingForExcludedElement(lhs, binding, nodesToRemove);
+		
+		} else if (lhs instanceof FieldAccess){
+			IBinding binding= ((FieldAccess)lhs).getName().resolveBinding();
+			return ! isBindingForExcludedElement(lhs, binding, nodesToRemove);
+
+		} else if (lhs instanceof SuperFieldAccess){
+			IBinding binding= ((SuperFieldAccess)lhs).getName().resolveBinding();
+			return ! isBindingForExcludedElement(lhs, binding, nodesToRemove);
+
+		} else if (lhs instanceof ArrayCreation){
+			ArrayCreation arrayCreation= (ArrayCreation)lhs;
+			if (nodesToRemove.contains(arrayCreation.getType().getComponentType()))
+				return false;
+				
+		} else if (lhs instanceof Assignment){
+			Assignment assignment= (Assignment)lhs;
+			return isLHSUpdatable(assignment.getLeftHandSide(), nodesToRemove);
+
+		} else if (lhs instanceof ParenthesizedExpression){	
+			ParenthesizedExpression expression= (ParenthesizedExpression)lhs;
+			return isLHSUpdatable(expression.getExpression(), nodesToRemove);
+
+		} else if (lhs instanceof ConditionalExpression){	
+			ConditionalExpression expression= (ConditionalExpression)lhs;
+			return isLHSUpdatable(expression.getThenExpression(), nodesToRemove) && 
+					isLHSUpdatable(expression.getElseExpression(), nodesToRemove);
+
+		} else if (lhs instanceof ArrayAccess){
+			ArrayAccess arrayAccess= (ArrayAccess)lhs;
+			return isLHSUpdatable(arrayAccess.getArray(), nodesToRemove);
+		}
+		return true;
+	}
+	
+	private boolean isBindingForExcludedElement(Expression lhs, IBinding binding, Collection nodesToRemove) throws JavaModelException {
+		if (binding == null)
+			return true;
+		IJavaProject scope= getCompilationUnit(lhs).getJavaProject();
+		if (binding instanceof IVariableBinding){
+			IVariableBinding vb= (IVariableBinding)binding;
+			if (! vb.isField())
+				return fBadVarSet.contains(getCompilationUnitNode(lhs).findDeclaringNode(binding));
+			IField field= Binding2JavaModel.find(vb, scope);
+			if (field == null)
+				return true;
+			VariableDeclarationFragment fragment= getFieldDeclarationFragmentNode(field);
+			return fBadVarSet.contains(fragment);
+		} else if (binding instanceof IMethodBinding){
+			IMethodBinding mb= (IMethodBinding)binding;
+			IMethod method= Binding2JavaModel.find(mb, scope);
+			if (method == null)
+				return true;
+			MethodDeclaration declaration= getMethodDeclarationNode(method);
+			if (declaration == null)
+				return true;
+			return nodesToRemove.contains(getElementType(declaration.getReturnType()));
+		} 
+		return fBadVarSet.contains(getCompilationUnitNode(lhs).findDeclaringNode(binding));
+	}
+
+	private static Type getElementType(Type type){
+		if (type.isArrayType())
+			return ((ArrayType)type).getElementType();
+		else
+			return type;
+	}	
+	
 	private boolean isReferenceInInvocationUpdatable(ASTNode node, Collection nodesToRemove) throws JavaModelException{
-		ASTNode parent= node.getParent();
+		ASTNode parent= getUnparenthesizedParent(node);
 		Assert.isTrue(isInvocation(parent));
 		                   
 		int argumentIndex= getArgumentIndexInInvocation(node);
@@ -554,10 +629,12 @@ class UseSupertypeWherePossibleUtil {
 	}
 	
 	private static int getArgumentIndexInInvocation(ASTNode node){
-		ASTNode parent= node.getParent();
+		ASTNode parent= getUnparenthesizedParent(node);
 		Assert.isTrue(isInvocation(parent));
 		if (parent instanceof MethodInvocation)
 			return ((MethodInvocation)parent).arguments().indexOf(node);
+		if (parent instanceof SuperMethodInvocation)
+			return ((SuperMethodInvocation)parent).arguments().indexOf(node);
 		else if (parent instanceof ConstructorInvocation)	
 			return ((ConstructorInvocation)parent).arguments().indexOf(node);
 		else if (parent instanceof ClassInstanceCreation)
@@ -567,14 +644,13 @@ class UseSupertypeWherePossibleUtil {
 	}
 	
 	private static IMethodBinding resolveMethodBindingInInvocation(ASTNode node){
-		ASTNode parent= node.getParent();
+		ASTNode parent= getUnparenthesizedParent(node);
 		Assert.isTrue(isInvocation(parent));
-		if (parent instanceof MethodInvocation){
-			IBinding bin= ((MethodInvocation)parent).getName().resolveBinding();
-			if (! (bin instanceof IMethodBinding))
-				return null;
-			return (IMethodBinding)bin;
-		} else if (parent instanceof ConstructorInvocation)	
+		if (parent instanceof MethodInvocation)
+			return ((MethodInvocation)parent).resolveMethodBinding();
+		else if (parent instanceof SuperMethodInvocation)	
+			return ((SuperMethodInvocation)parent).resolveMethodBinding();
+		else if (parent instanceof ConstructorInvocation)	
 			return ((ConstructorInvocation)parent).resolveConstructorBinding();
 		else if (parent instanceof ClassInstanceCreation)
 			return ((ClassInstanceCreation)parent).resolveConstructorBinding();
@@ -587,6 +663,7 @@ class UseSupertypeWherePossibleUtil {
 			node instanceof MethodInvocation ||
 		    node instanceof ConstructorInvocation ||
 		    node instanceof SuperConstructorInvocation ||
+			node instanceof SuperMethodInvocation ||
 		    node instanceof ClassInstanceCreation;
 	}
 	
@@ -595,9 +672,7 @@ class UseSupertypeWherePossibleUtil {
 	}
 
 	private static ASTNode getUnparenthesizedParent(ASTNode node){
-		if (! (node.getParent() instanceof ParenthesizedExpression))
-			return node.getParent();
-		ASTNode parent= (ParenthesizedExpression)node.getParent();
+		ASTNode parent= node.getParent();
 		while(parent instanceof ParenthesizedExpression){
 			parent= parent.getParent();
 		}
@@ -858,6 +933,15 @@ class UseSupertypeWherePossibleUtil {
 				return !(isVariableBindingOk((IVariableBinding)binding));
 			return true;	
 		}	
+
+		if (unparenthesizedParent instanceof SuperFieldAccess){
+			if (fSuperTypeToUse == null)
+				return true;
+			IBinding binding= ((SuperFieldAccess)unparenthesizedParent).getName().resolveBinding();
+			if (binding instanceof IVariableBinding)
+				return !(isVariableBindingOk((IVariableBinding)binding));
+			return true;	
+		}	
 			
 		if (unparenthesizedParent instanceof QualifiedName){
 			IBinding binding= ((QualifiedName)unparenthesizedParent).resolveBinding();
@@ -876,10 +960,10 @@ class UseSupertypeWherePossibleUtil {
 			
 			int argumentIndex= mi.arguments().indexOf(parentNode);
 			if (argumentIndex != -1){
-				IBinding bin= mi.getName().resolveBinding();
-				if (! (bin instanceof IMethodBinding))
+				IMethodBinding bin= mi.resolveMethodBinding();
+				if (bin == null)
 					return true;
-				IMethod method= Binding2JavaModel.find((IMethodBinding)bin, fInputClass.getJavaProject());
+				IMethod method= Binding2JavaModel.find(bin, fInputClass.getJavaProject());
 				if (method == null)
 					return true;
 				IType paramType= getMethodParameterType(method, argumentIndex);
@@ -969,10 +1053,6 @@ class UseSupertypeWherePossibleUtil {
 		return fASTMappingManager.getCompilationUnit(node);
 	}
 
-	private MethodDeclaration getMethodDeclarationNode(IMethod iMethod) throws JavaModelException{
-		return ASTNodeSearchUtil.getMethodDeclarationNode(iMethod, fASTMappingManager);
-	}
-	
 	private static VariableDeclarationFragment[] getVariableDeclarationFragments(VariableDeclarationStatement vds){
 		return (VariableDeclarationFragment[]) vds.fragments().toArray(new VariableDeclarationFragment[vds.fragments().size()]);
 	}
@@ -988,5 +1068,13 @@ class UseSupertypeWherePossibleUtil {
 		if (result == null)
 			return result;
 		return (IType)WorkingCopyUtil.getWorkingCopyIfExists(result);	
+	}
+	
+	private VariableDeclarationFragment getFieldDeclarationFragmentNode(IField field) throws JavaModelException {
+		return ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, fASTMappingManager);
+	}
+
+	private MethodDeclaration getMethodDeclarationNode(IMethod iMethod) throws JavaModelException{
+		return ASTNodeSearchUtil.getMethodDeclarationNode(iMethod, fASTMappingManager);
 	}
 }
