@@ -10,23 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
 
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRewriteTarget;
+import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITypedRegion;
 
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.ITextEditorExtension2;
-import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.internal.core.Assert;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 /**
  * Action that encloses the editor's current selection with Java block comment terminators
@@ -34,7 +32,7 @@ import org.eclipse.jdt.internal.core.Assert;
  * 
  * @since 3.0
  */
-public class AddBlockCommentAction extends TextEditorAction {
+public class AddBlockCommentAction extends BlockCommentAction {
 
 	/**
 	 * Creates a new instance.
@@ -50,127 +48,149 @@ public class AddBlockCommentAction extends TextEditorAction {
 	}
 	
 	/*
-	 * @see org.eclipse.jface.action.Action#run()
+	 * @see org.eclipse.jdt.internal.ui.actions.BlockCommentAction#runInternal(org.eclipse.jface.text.ITextSelection, org.eclipse.jface.text.IDocumentExtension3, org.eclipse.jdt.internal.ui.actions.BlockCommentAction.Edit.EditFactory)
 	 */
-	public void run() {
-		if (!isEnabled())
-			return;
-			
-		ITextEditor editor= getTextEditor();
-		if (editor == null || !ensureEditable(editor))
-			return;
-			
-		ITextSelection selection= getCurrentSelection();
-		if (!validSelection(selection))
-			return;
-		
-		IDocumentProvider docProvider= editor.getDocumentProvider();
-		IEditorInput input= editor.getEditorInput();
-		if (docProvider == null || input == null)
-			return;
-			
-		IDocument document= docProvider.getDocument(input);
-		if (document == null)
-			return;
-		
-		IRewriteTarget target= (IRewriteTarget)editor.getAdapter(IRewriteTarget.class);
-		if (target != null) {
-			target.beginCompoundChange();
+	protected void runInternal(ITextSelection selection, IDocumentExtension3 docExtension, Edit.EditFactory factory) throws BadLocationException, BadPartitioningException {
+		int selectionOffset= selection.getOffset();
+		int selectionEndOffset= selectionOffset + selection.getLength();
+		List edits= new LinkedList();
+		ITypedRegion partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, selectionOffset);
+
+		handleFirstPartition(partition, edits, factory, selectionOffset);
+
+		while (partition.getOffset() + partition.getLength() < selectionEndOffset) {
+			partition= handleInteriorPartition(partition, edits, factory, docExtension);
 		}
 		
-		try {
-			int offset= selection.getOffset();
-			String start= getCommentStart();
-			document.replace(offset, 0, start);
-			document.replace(offset + selection.getLength() + start.length(), 0, getCommentEnd());
-		} catch (BadLocationException e) {
-			// can happen on concurrent modification, deletion etc. of the document 
-			// -> don't complain, just bail out
-		} finally {
-			if (target != null) {
-				target.endCompoundChange();
+		handleLastPartition(partition, edits, factory, selectionEndOffset);
+		
+		executeEdits(edits);
+	}
+
+	/**
+	 * Handle the first partition of the selected text.
+	 * 
+	 * @param partition
+	 * @param edits
+	 * @param factory
+	 * @param offset
+	 */
+	private void handleFirstPartition(ITypedRegion partition, List edits, Edit.EditFactory factory, int offset) throws BadLocationException {
+		
+		int partOffset= partition.getOffset();
+		String partType= partition.getType();
+		
+		Assert.isTrue(partOffset <= offset, "illegal partition"); //$NON-NLS-1$
+		
+		// first partition: mark start of comment
+		if (partType == IDocument.DEFAULT_CONTENT_TYPE) {
+			// Java code: right where selection starts
+			edits.add(factory.createEdit(offset, 0, getCommentStart()));
+		} else if (isSpecialPartition(partType)) {
+			// special types: include the entire partition
+			edits.add(factory.createEdit(partOffset, 0, getCommentStart()));
+		}	// javadoc: no mark, will only start after comment
+		
+	}
+
+	/**
+	 * Handles the end of the given partition and the start of the next partition, which is returned.
+	 * 
+	 * @param partition
+	 * @param edits
+	 * @param factory
+	 * @param docExtension
+	 * @return
+	 * @throws BadLocationException
+	 * @throws BadPartitioningException
+	 */
+	private ITypedRegion handleInteriorPartition(ITypedRegion partition, List edits, Edit.EditFactory factory, IDocumentExtension3 docExtension) throws BadPartitioningException, BadLocationException {
+
+		// end of previous partition
+		String partType= partition.getType();
+		int partEndOffset= partition.getOffset() + partition.getLength();
+		int tokenLength= getCommentStart().length();
+		
+		boolean wasJavadoc= false; // true if the previous partition is javadoc
+		
+		if (partType == IJavaPartitions.JAVA_DOC) {
+			
+			wasJavadoc= true;
+			
+		} else if (partType == IJavaPartitions.JAVA_MULTI_LINE_COMMENT) {
+			
+			// already in a comment - remove ending mark
+			edits.add(factory.createEdit(partEndOffset - tokenLength, tokenLength, "")); //$NON-NLS-1$
+			
+		}
+
+		// advance to next partition
+		partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, partEndOffset);
+		partType= partition.getType();
+
+		// start of next partition
+		if (wasJavadoc) {
+			
+			// if previous was javadoc, and the current one is not, then add block comment start
+			if (partType == IDocument.DEFAULT_CONTENT_TYPE
+					|| isSpecialPartition(partType)) {
+				edits.add(factory.createEdit(partition.getOffset(), 0, getCommentStart()));
+			}
+			
+		} else { // !wasJavadoc
+		
+			if (partType == IJavaPartitions.JAVA_DOC) {
+				// if next is javadoc, end block comment before
+				edits.add(factory.createEdit(partition.getOffset(), 0, getCommentEnd()));
+			} else if (partType == IJavaPartitions.JAVA_MULTI_LINE_COMMENT) {
+				// already in a comment - remove startToken
+				edits.add(factory.createEdit(partition.getOffset(), getCommentStart().length(), "")); //$NON-NLS-1$
 			}
 		}
+		
+		return partition;
 	}
-	
-	/**
-	 * Ensures that the editor is modifyable. If the editor is an instance of
-	 * <code>ITextEditorExtension2</code>, its <code>validateEditorInputState</code> method 
-	 * is called, otherwise, the result of <code>isEditable</code> is returned.
-	 * 
-	 * @param editor the editor to be checked
-	 * @return <code>true</code> if the editor is editable, <code>false</code> otherwise
-	 */
-	private boolean ensureEditable(ITextEditor editor) {
-		Assert.isNotNull(editor);
 
-		if (editor instanceof ITextEditorExtension2) {
-			ITextEditorExtension2 ext= (ITextEditorExtension2) editor;
-			return ext.validateEditorInputState();
+	/**
+	 * Handles the end of the last partition.
+	 * 
+	 * @param partition
+	 * @param edits
+	 * @param factory
+	 * @param endOffset
+	 */
+	private void handleLastPartition(ITypedRegion partition, List edits, Edit.EditFactory factory, int endOffset) throws BadLocationException {
+
+		String partType= partition.getType();
+		
+		if (partType == IDocument.DEFAULT_CONTENT_TYPE) {
+			// normal java: end comment where selection ends
+			edits.add(factory.createEdit(endOffset, 0, getCommentEnd()));
+		} else if (isSpecialPartition(partType)) {
+			// special types: consume entire partition
+			edits.add(factory.createEdit(partition.getOffset() + partition.getLength(), 0, getCommentEnd()));
 		}
 		
-		return editor.isEditable();
 	}
 
 	/**
-	 * Returns the text to be inserted at the selection start.
+	 * Returns whether <code>partType</code> is special, i.e. a Java <code>String</code>,
+	 * <code>Character</code>, or <code>Line End Comment</code> partition.
 	 * 
-	 * @return the text to be inserted at the selection start
+	 * @param partType the partition type to check
+	 * @return <code>true</code> if <code>partType</code> is special, <code>false</code> otherwise
 	 */
-	protected String getCommentStart() {
-		// for now: no space story
-		return "/*";
-	}
-
-	/**
-	 * Returns the text to be inserted at the selection end.
-	 * 
-	 * @return the text to be inserted at the selection end
-	 */
-	protected String getCommentEnd() {
-		// for now: no space story
-		return "*/";
+	private boolean isSpecialPartition(String partType) {
+		return partType == IJavaPartitions.JAVA_CHARACTER
+				|| partType == IJavaPartitions.JAVA_STRING
+				|| partType == IJavaPartitions.JAVA_SINGLE_LINE_COMMENT;
 	}
 
 	/*
-	 * @see org.eclipse.ui.texteditor.TextEditorAction#update()
+	 * @see org.eclipse.jdt.internal.ui.actions.BlockCommentAction#validSelection(org.eclipse.jface.text.ITextSelection)
 	 */
-	public void update() {
-		super.update();
-		
-		if (isEnabled()) {
-			if (!validSelection(getCurrentSelection()))
-				setEnabled(false);
-		}
-	}
-	
-	/**
-	 * Checks whether <code>selection</code> is valid, i.e. neither <code>null</code> or empty.
-	 * 
-	 * @param selection the selection to check
-	 * @return <code>true</code> if the selection is valid, <code>false</code> otherwise
-	 */
-	private boolean validSelection(ITextSelection selection) {
+	protected boolean isValidSelection(ITextSelection selection) {
 		return selection != null && !selection.isEmpty() && selection.getLength() > 0;
-	}
-
-	/**
-	 * Returns the editor's selection, or <code>null</code> if no selection can be obtained or the 
-	 * editor is <code>null</code>.
-	 * 
-	 * @return the selection of the action's editor, or <code>null</code>
-	 */
-	private ITextSelection getCurrentSelection() {
-		ITextEditor editor= getTextEditor();
-		if (editor != null) {
-			ISelectionProvider provider= editor.getSelectionProvider();
-			if (provider != null) {
-				ISelection selection= provider.getSelection();
-				if (selection instanceof ITextSelection) 
-					return (ITextSelection) selection;
-			}
-		}
-		return null;
 	}
 
 }
