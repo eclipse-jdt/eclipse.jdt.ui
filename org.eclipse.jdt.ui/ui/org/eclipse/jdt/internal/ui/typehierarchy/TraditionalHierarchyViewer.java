@@ -115,14 +115,15 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 		}	
 		
 		private void updateSuperTypesList() {
-			if (fUpdateNeeded) {
-				fInput= getInputType();
-				if (fInput != null) {
+			IType hierarchyInput= getInputType();
+			if (hierarchyInput != null) {
+				if (fUpdateNeeded || !hierarchyInput.equals(fInput)) {
 					fSuperTypesList= getHierarchy().getAllSuperclasses(fInput);
-				} else {
-					fSuperTypesList= null;
 				}
+			} else {
+				fSuperTypesList= null;
 			}
+			fInput= hierarchyInput;
 		}		
 		
 		/**
