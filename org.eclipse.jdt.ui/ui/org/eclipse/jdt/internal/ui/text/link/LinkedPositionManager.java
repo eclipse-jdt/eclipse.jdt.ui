@@ -28,6 +28,7 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -138,7 +139,8 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	}
 	
 	/**
-	 * Adds a linked position to the manager.
+	 * Adds a linked position to the manager with the type being the content of
+	 * the document at the specified range.
 	 * There are the following constraints for linked positions:
 	 * 
 	 * <ul>
@@ -152,6 +154,26 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 * @param length the length of the position.
 	 */
 	public void addPosition(int offset, int length) throws BadLocationException {
+		String type= fDocument.get(offset, length);
+		addPosition(offset, length, type);
+	}
+	
+	/**
+	 * Adds a linked position of the specified position type to the manager. 
+	 * There are the following constraints for linked positions:
+	 * 
+	 * <ul>
+	 *   <li>Any two positions have spacing of at least one character.
+	 *       This implies that two positions must not overlap.</li>
+	 *
+	 *   <li>The string at any position must not contain line delimiters.</li>
+	 * </ul>
+	 * 
+	 * @param offset the offset of the position.
+	 * @param length the length of the position.
+	 * @param type the position type name - any positions with the same type are linked.
+	 */
+	public void addPosition(int offset, int length, String type) throws BadLocationException {
 		Position[] positions= getPositions(fDocument);
 
 		if (positions != null) {
@@ -160,9 +182,9 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 					throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.error.position.collision"))); //$NON-NLS-1$
 		}
 		
-		String type= fDocument.get(offset, length);		
+		String content= fDocument.get(offset, length);		
 
-		if (containsLineDelimiters(type))
+		if (containsLineDelimiters(content))
 			throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.error.contains.line.delimiters"))); //$NON-NLS-1$
 
 		try {
@@ -172,7 +194,75 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 			Assert.isTrue(false);
 		}
 	}
+	
+	/**
+	 * Adds a linked position to the manager. The current document content at the specified range is
+	 * taken as the position type.
+	 * <p> 
+	 * There are the following constraints for linked positions:
+	 * 
+	 * <ul>
+	 *   <li>Any two positions have spacing of at least one character.
+	 *       This implies that two positions must not overlap.</li>
+	 *
+	 *   <li>The string at any position must not contain line delimiters.</li>
+	 * </ul>
+	 * 
+	 * It is usually best to set the first item in <code>additionalChoices</code> to be equal with
+	 * the text inserted at the current position.
+	 * </p>
+	 * 
+	 * @param offset the offset of the position.
+	 * @param length the length of the position.
+	 * @param additionalChoices a number of additional choices to be displayed when selecting 
+	 * a position of this <code>type</code>.
+	 */
+	public void addPosition(int offset, int length, ICompletionProposal[] additionalChoices) throws BadLocationException {
+		String type= fDocument.get(offset, length);
+		addPosition(offset, length, type, additionalChoices);
+	}
+	/**
+	 * Adds a linked position of the specified position type to the manager. 
+	 * There are the following constraints for linked positions:
+	 * 
+	 * <ul>
+	 *   <li>Any two positions have spacing of at least one character.
+	 *       This implies that two positions must not overlap.</li>
+	 *
+	 *   <li>The string at any position must not contain line delimiters.</li>
+	 * </ul>
+	 * 
+	 * It is usually best to set the first item in <code>additionalChoices</code> to be equal with
+	 * the text inserted at the current position.
+	 * 
+	 * @param offset the offset of the position.
+	 * @param length the length of the position.
+	 * @param type the position type name - any positions with the same type are linked.
+	 * @param additionalChoices a number of additional choices to be displayed when selecting 
+	 * a position of this <code>type</code>.
+	 */
+	public void addPosition(int offset, int length, String type, ICompletionProposal[] additionalChoices) throws BadLocationException {
+		Position[] positions= getPositions(fDocument);
 
+		if (positions != null) {
+			for (int i = 0; i < positions.length; i++)
+				if (collides(positions[i], offset, length))
+					throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.error.position.collision"))); //$NON-NLS-1$
+		}
+		
+		String content= fDocument.get(offset, length);		
+
+		if (containsLineDelimiters(content))
+			throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.error.contains.line.delimiters"))); //$NON-NLS-1$
+
+		try {
+			fDocument.addPosition(fPositionCategoryName, new ProposalPosition(offset, length, type, additionalChoices));
+		} catch (BadPositionCategoryException e) {
+			JavaPlugin.log(e);
+			Assert.isTrue(false);
+		}
+	}
+	
 	/**
 	 * Tests if a manager is already active for a document.
 	 */
@@ -252,6 +342,22 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 */
 	public Position getFirstPosition() {
 		return getNextPosition(-1);
+	}
+	
+	public Position getLastPosition() {
+		Position[] positions= getPositions(fDocument);
+		for (int i= positions.length - 1; i >= 0; i--) {			
+			String type= ((TypedPosition) positions[i]).getType();
+			int j;
+			for (j = 0; j != i; j++)
+				if (((TypedPosition) positions[j]).getType().equals(type))
+					break;
+
+			if (j == i)
+				return positions[i];				
+		}
+
+		return null;
 	}
 
 	/**
@@ -365,7 +471,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		if (position == null) {
 			// check for destruction of constraints (spacing of at least 1)
 			if ((event.getText() == null || event.getText().length() == 0) &&
-				(findCurrentPosition(positions, event.getOffset()) != null) &&
+				(findCurrentPosition(positions, event.getOffset()) != null) && // will never become true, see condition above
 				(findCurrentPosition(positions, event.getOffset() + event.getLength()) != null))
 			{
 				leave(true);

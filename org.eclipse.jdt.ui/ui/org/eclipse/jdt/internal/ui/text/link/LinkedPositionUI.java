@@ -59,6 +59,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.link.contentassist.ContentAssistant2;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -105,6 +106,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	private Color fFrameColor;
 
 	private int fFinalCaretOffset= -1; // no final caret offset
+	private Position fFinalCaretPosition;
 
 	private Position fFramePosition;
 	private int fInitialOffset= -1;
@@ -117,6 +119,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	
 	private String fContentType;
 	private Position fPreviousPosition;
+	private ContentAssistant2 fAssistant;
 
 	/**
 	 * Creates a user interface for <code>LinkedPositionManager</code>.
@@ -194,6 +197,8 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	/**
 	 * Sets the final position of the caret when the linked mode is exited
 	 * successfully by leaving the last linked position using TAB.
+	 * The set position will be a TAB stop as well as the positions configured in the
+	 * <code>LinkedPositionManager</code>.
 	 */
 	public void setFinalCaretOffset(int offset) {
 		fFinalCaretOffset= offset;	
@@ -241,8 +246,10 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 		document.addPositionUpdater(fUpdater);
 
 		try {
-			if (fFinalCaretOffset != -1)
-				document.addPosition(fPositionCategoryName, new Position(fFinalCaretOffset));
+			if (fFinalCaretOffset != -1) {
+				fFinalCaretPosition= new Position(fFinalCaretOffset);
+				document.addPosition(fPositionCategoryName, fFinalCaretPosition);
+			}
 		} catch (BadLocationException e) {
 			handleException(fViewer.getTextWidget().getShell(), e);
 
@@ -285,6 +292,9 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 		} catch (BadLocationException e) {
 			handleException(fViewer.getTextWidget().getShell(), e);
 		}
+
+		selectRegion();
+		triggerContentAssist();
 	}
 
 	/*
@@ -327,6 +337,11 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 
 		Shell shell= text.getShell();
 		shell.removeShellListener(this);
+		
+		if (fAssistant != null) {
+			fAssistant.uninstall();
+			fAssistant= null;
+		}
 
 		ITextViewerExtension extension= (ITextViewerExtension) fViewer;
 		extension.removeVerifyKeyListener(this);
@@ -386,11 +401,21 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	private void next() {
 		redrawRegion();
 		
-		fFramePosition= fManager.getNextPosition(fFramePosition.getOffset());
+		if (fFramePosition == fFinalCaretPosition)
+			fFramePosition= fManager.getFirstPosition();
+		else
+			fFramePosition= fManager.getNextPosition(fFramePosition.getOffset());
+		if (fFramePosition == null) {
+			if (fFinalCaretPosition != null)
+				fFramePosition= fFinalCaretPosition;
+			else
+				fFramePosition= fManager.getFirstPosition();
+		}
 		if (fFramePosition == null) {
 			leave(UNINSTALL | COMMIT | UPDATE_CARET);
 		} else {
 			selectRegion();
+			triggerContentAssist();
 			redrawRegion();
 		}
 	}
@@ -398,14 +423,41 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	private void previous() {
 		redrawRegion();
 		
-		Position position= fManager.getPreviousPosition(fFramePosition.getOffset());
-		if (position == null) {
-			fViewer.getTextWidget().getDisplay().beep();
+		fFramePosition= fManager.getPreviousPosition(fFramePosition.getOffset());
+		if (fFramePosition == null) {
+			if (fFinalCaretPosition != null)
+				fFramePosition= fFinalCaretPosition;
+			else
+				fFramePosition= fManager.getLastPosition();
+		}
+		if (fFramePosition == null) {
+			leave(UNINSTALL | COMMIT | UPDATE_CARET);
 		} else {
-			fFramePosition= position;
 			selectRegion();
+			triggerContentAssist();
 			redrawRegion();
 		}
+	}
+
+	/** Trigger content assist on choice positions */
+	private void triggerContentAssist() {
+		if (fFramePosition instanceof ProposalPosition) {
+			
+			ProposalPosition pp= (ProposalPosition) fFramePosition;
+			initializeContentAssistant();
+			if (fAssistant == null)
+				return;
+			fAssistant.setCompletions(pp.getChoices());
+			fAssistant.showPossibleCompletions();
+		}
+	}
+	
+	/** Lazy initialize content assistant for this linked ui */
+	private void initializeContentAssistant() {
+		if (fAssistant != null)
+			return;
+		fAssistant= new ContentAssistant2();
+		fAssistant.install(fViewer);
 	}
 
 	/*
@@ -448,6 +500,14 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 
 		// ENTER
 		case 0x0D:
+			{
+				// if tab was treated as a document change, would it exceed variable range?
+				if (!LinkedPositionManager.includes(fFramePosition, offset, length)) {
+					leave(UNINSTALL | COMMIT);
+					return;
+				}
+			}
+		
 			leave(UNINSTALL | COMMIT | UPDATE_CARET);
 			event.doit= false;
 			break;
@@ -458,9 +518,14 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 			event.doit= false;
 			break;
 			
+		case ';':
+			leave(UNINSTALL | COMMIT);
+			event.doit= true;
+			break;
+			
 		default:
 			if (event.character != 0) {
-				if (!controlUndoBehavior(offset, length)) {
+				if (!controlUndoBehavior(offset, length) || fFramePosition == fFinalCaretPosition) {
 					leave(UNINSTALL | COMMIT);
 					break;					
 				}
