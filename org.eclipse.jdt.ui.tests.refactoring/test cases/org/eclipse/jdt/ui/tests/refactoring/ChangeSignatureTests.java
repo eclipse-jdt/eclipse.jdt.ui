@@ -885,33 +885,25 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll47()throws Exception{
-//Commented everything out because of erroneous compilation error in nightly build.
-//See http://download.eclipse.org/downloads/drops/N-N20030923-200309230010/index.php
-		
-//		if (true) {
-			printTestDisabledMessage("disabled: see PR: https://bugs.eclipse.org/bugs/show_bug.cgi?id=43444");
-//			return;
-//		}
-//		
-//		if (! RUN_CONSTRUCTOR_TEST){
-//			printTestDisabledMessage("disabled for constructors for now");
-//			return;
-//		}
-//
-//		String[] signature= {};
-//		String[] newNames= {"i"};
-//		String[] newTypes= {"int"};
-//		String[] newDefaultValues= {"1"};
-//		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
-//		int[] newIndices= {0};
-//
-//		String[] oldParamNames= {};
-//		String[] newParamNames= {};
-//		int[] permutation= {0};
-//		int[] deletedIndices= null;
-//		int newVisibility= Modifier.NONE;
-//		String newReturnTypeName= null;
-//		helperDoAll("A", "A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+
+		String[] signature= {};
+		String[] newNames= {"i"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"1"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", "A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 
 	public void testAll48()throws Exception{

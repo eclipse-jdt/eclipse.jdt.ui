@@ -840,10 +840,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.preview"), 2); //$NON-NLS-1$
 		TextChangeManager manager= new TextChangeManager();
 		boolean isNoArgConstructor= isNoArgConstructor();
-		Map subtypeMapping= null;
+		Map namedSubclassMapping= null;
 		if (isNoArgConstructor){
-			//create only when needed
-			subtypeMapping= createSubclassMapping(new SubProgressMonitor(pm, 1));
+			//create only when needed;
+			namedSubclassMapping= createNamedSubclassMapping(new SubProgressMonitor(pm, 1));
 		}else{
 			pm.worked(1);
 		}
@@ -858,8 +858,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			for (int j= 0; j < nodes.length; j++) {
 				updateMethodOccurrenceNode(rewrite, nodes[j]);
 			}
-			if (isNoArgConstructor && subtypeMapping.containsKey(cu)){
-				Set subtypes= (Set)subtypeMapping.get(cu);
+			if (isNoArgConstructor && namedSubclassMapping.containsKey(cu)){
+				//only non-anonymous subclasses may have noArgConstructors to modify - see bug 43444
+				Set subtypes= (Set)namedSubclassMapping.get(cu);
 				for (Iterator iter= subtypes.iterator(); iter.hasNext();) {
 					IType subtype= (IType) iter.next();
 					TypeDeclaration subtypeNode= ASTNodeSearchUtil.getTypeDeclarationNode(subtype, cuNode);
@@ -882,15 +883,17 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}	
 	
 	//Map<ICompilationUnit, Set<IType>>
-	private Map createSubclassMapping(IProgressMonitor pm) throws JavaModelException{
-		IType[] subtypes= getSubclasses(pm);
+	private Map createNamedSubclassMapping(IProgressMonitor pm) throws JavaModelException{
+		IType[] subclasses= getSubclasses(pm);
 		Map result= new HashMap();
-		for (int i= 0; i < subtypes.length; i++) {
-			IType subtype= subtypes[i];
-			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(subtype.getCompilationUnit());
+		for (int i= 0; i < subclasses.length; i++) {
+			IType subclass= subclasses[i];
+			if (subclass.isAnonymous())
+				continue;
+			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(subclass.getCompilationUnit());
 			if (! result.containsKey(cu))
 				result.put(cu, new HashSet());
-			((Set)result.get(cu)).add(subtype);
+			((Set)result.get(cu)).add(subclass);
 		}
 		return result;
 	}
