@@ -196,27 +196,26 @@ public class JavadocConfigurationBlock {
 		}
 
 		public void spawnInBrowser(URL url) {
-				OpenBrowserUtil.open(url, fShell, fTitle);
+			OpenBrowserUtil.open(url, fShell, fTitle);
 		}
 
 		private void validateURL(URL indexURL, URL packagelistURL) {
 
-			InputStream in = null;
+			InputStream in1= null;
+			InputStream in2= null;
 			try {
-				URLConnection connect = indexURL.openConnection();
-				in = connect.getInputStream();
-				in.close();
+				in1= indexURL.openConnection().getInputStream();
+				in2= packagelistURL.openConnection().getInputStream();
 
-				connect = packagelistURL.openConnection();
-				in = connect.getInputStream();
-
-				if(MessageDialog.openConfirm(fShell, fTitle, fValidMessage)) //$NON-NLS-1$
+				if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage))
 					spawnInBrowser(indexURL);
 
 			} catch (IOException e) {
-				MessageDialog.openInformation(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
-				JavaPlugin.log(e);
-			}
+				MessageDialog.openInformation(fShell, fTitle, fInvalidMessage);
+			} finally {
+				if (in1 != null) { try { in1.close(); } catch (IOException e) {} }
+				if (in2 != null) { try { in2.close(); } catch (IOException e) {} }
+			}				
 		}
 	}
 	
