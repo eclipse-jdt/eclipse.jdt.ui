@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 /**
  * Class that implements the three operations <code>and</code>,
  * <code>or</code> and </code>not</code> for the group formed
@@ -18,44 +20,70 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
  * 
  * TODO some mathematical background.
  */
-public class TestResult implements ITestResult {
+public class TestResult {
+	
+	private int fValue;
+	
+	public static final TestResult FALSE= new TestResult(0);
+	public static final TestResult TRUE= new TestResult(1);
+	public static final TestResult NOT_LOADED= new TestResult(2);
 
-	private static final int[][] AND= new int[][] {
+	private static final TestResult[][] AND= new TestResult[][] {
 						// FALSE	//TRUE		//NOT_LOADED
 		/* FALSE   */ { FALSE,		FALSE,		FALSE		},
 		/* TRUE    */ { FALSE,		TRUE,		NOT_LOADED	},
 		/* PNL     */ { FALSE,		NOT_LOADED, NOT_LOADED	},
 	};
 
-	private static final int[][] OR= new int[][] {
+	private static final TestResult[][] OR= new TestResult[][] {
 						// FALSE	//TRUE	//NOT_LOADED
 		/* FALSE   */ { FALSE,		TRUE,	NOT_LOADED	},
 		/* TRUE    */ { TRUE,		TRUE,	TRUE		},
 		/* PNL     */ { NOT_LOADED,	TRUE, 	NOT_LOADED	},
 	};
 
-	private static final int[] NOT= new int[] {
+	private static final TestResult[] NOT= new TestResult[] {
 		//FALSE		//TRUE	//NOT_LOADED
 		TRUE,		FALSE,	NOT_LOADED
 	};
 
-	private TestResult() {
-		// no instance
+	/*
+	 * No instances outside of <code>TestResult</code>
+	 */
+	private TestResult(int value) {
+		fValue= value;
 	}
 	
-	public static int and(int left, int right) {
-		return AND[left][right];
+	public TestResult and(TestResult op) {
+		return AND[fValue][op.fValue];
 	}
 	
-	public static int or(int left, int right) {
-		return OR[left][right];
+	public TestResult or(TestResult op) {
+		return OR[fValue][op.fValue];
 	}
 	
-	public static int not(int op) {
-		return NOT[op];
+	public TestResult not() {
+		return NOT[fValue];
 	}
 	
-	public static int asTestResult(boolean b) {
+	public static TestResult valueOf(boolean b) {
 		return b ? TRUE : FALSE;
+	}
+	
+	public static TestResult valueOf(Boolean b) {
+		return b.booleanValue() ? TRUE : FALSE;
+	}
+	
+	public String toString() {
+		switch (fValue) {
+			case 0:
+				return "false"; //$NON-NLS-1$
+			case 1:
+				return "true"; //$NON-NLS-1$
+			case 2:
+				return "not_loaded"; //$NON-NLS-1$
+		}
+		Assert.isTrue(false);
+		return null;
 	}
 }

@@ -17,18 +17,18 @@ public abstract class Expression {
 	protected static final String ATT_VALUE= "value"; //$NON-NLS-1$
 	
 	public static final Expression TRUE= new Expression() {
-		public int evaluate(Object element) throws CoreException {
-			return ITestResult.TRUE;
+		public TestResult evaluate(IScope scope) throws CoreException {
+			return TestResult.TRUE;
 		}	
 	};
 	
 	public static final Expression FALSE= new Expression() {
-		public int evaluate(Object element) throws CoreException {
-			return ITestResult.FALSE;
+		public TestResult evaluate(IScope scope) throws CoreException {
+			return TestResult.FALSE;
 		}	
 	};
 	
-	public abstract int evaluate(Object element) throws CoreException;
+	public abstract TestResult evaluate(IScope scope) throws CoreException;
 		
 	protected static boolean isInstanceOf(Object element, String type) {
 		return isSubtype(element.getClass(), type); 

@@ -18,20 +18,23 @@ import org.eclipse.core.runtime.IPluginDescriptor;
 
 public class ObjectStateExpression extends CompositeExpression {
 	
-	private IConfigurationElement fElement;
+	private IConfigurationElement fConfigElement;
 	
 	public static final String NAME= "objectState"; //$NON-NLS-1$
 	
 	private static final String ADAPTABLE= "adaptable"; //$NON-NLS-1$
 	
 	public ObjectStateExpression(IConfigurationElement element) {
-		fElement= element;
+		fConfigElement= element;
 	}
 
-	public int evaluate(Object element) throws CoreException {
-		String adaptable= fElement.getAttribute(ADAPTABLE);
+	public TestResult evaluate(IScope scope) throws CoreException {
+		String adaptable= fConfigElement.getAttribute(ADAPTABLE);
+		Object element= scope.getDefaultVariable();
+		if (element == null)
+			return TestResult.FALSE;
 		if (adaptable != null && element instanceof IAdaptable) {
-			IPluginDescriptor pd= fElement.getDeclaringExtension().getDeclaringPluginDescriptor();
+			IPluginDescriptor pd= fConfigElement.getDeclaringExtension().getDeclaringPluginDescriptor();
 			ClassLoader loader= pd.getPluginClassLoader();
 			try {
 				Class clazz= loader.loadClass(adaptable);
@@ -39,9 +42,10 @@ public class ObjectStateExpression extends CompositeExpression {
 			} catch (ClassNotFoundException e) {
 				element= null;
 			}
+			if (element == null)
+				return TestResult.FALSE;
+			scope= new Scope(scope, element);
 		}
-		if (element == null)
-			return ITestResult.FALSE;
-		return evaluateAnd(element);
+		return evaluateAnd(scope);
 	}
 }

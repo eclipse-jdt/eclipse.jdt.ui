@@ -102,7 +102,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 			new String[]{fField.getElementName(), getNewElementName()});
 	 }
 	
-	public IProject[] getScope() throws CoreException {
+	public IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fField);
 	}
 

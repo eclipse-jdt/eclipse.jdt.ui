@@ -79,19 +79,20 @@ public class TestExpression extends Expression {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public int evaluate(Object element) throws CoreException {
+	public TestResult evaluate(IScope scope) throws CoreException {
+		Object element= scope.getDefaultVariable();
 		// hard coded instanceof check to ensure it is evaluated fast.
 		if ("instanceof".equals(fProperty)) { //$NON-NLS-1$
-			return isInstanceOf(element, (String)fArgs[0]) ? ITestResult.TRUE : ITestResult.FALSE;
+			return TestResult.valueOf(isInstanceOf(element, (String)fArgs[0]));
 		}
 		Object returnValue= TypeExtension.perform(element, fProperty, fArgs);
 		if (returnValue == TypeExtension.NOT_LOADED)
-			return ITestResult.NOT_LOADED;
+			return TestResult.NOT_LOADED;
 		if (!(returnValue instanceof Boolean)) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
 				"Expected result must be of type Boolean", null));
 		}
-		return ((Boolean)returnValue).booleanValue() ? ITestResult.TRUE : ITestResult.FALSE;
+		return TestResult.valueOf((Boolean)returnValue);
 	}
 	
 	//---- Argument parsing --------------------------------------------

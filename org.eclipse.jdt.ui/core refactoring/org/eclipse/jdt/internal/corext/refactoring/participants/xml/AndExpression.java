@@ -19,7 +19,7 @@ public class AndExpression extends CompositeExpression {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public int evaluate(Object element) throws CoreException {
-		return evaluateAnd(element);
+	public TestResult evaluate(IScope scope) throws CoreException {
+		return evaluateAnd(scope);
 	}	
 }

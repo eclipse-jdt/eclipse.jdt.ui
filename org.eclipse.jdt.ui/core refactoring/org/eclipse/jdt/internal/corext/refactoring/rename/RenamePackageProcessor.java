@@ -113,7 +113,7 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 						new String[]{fPackage.getElementName(), fNewElementName});
 	}
 	
-	public IProject[] getScope() throws CoreException {
+	public IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fPackage);
 	}
 	

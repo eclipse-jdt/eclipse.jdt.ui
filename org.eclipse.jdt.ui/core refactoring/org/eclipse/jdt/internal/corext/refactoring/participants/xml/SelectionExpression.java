@@ -37,6 +37,25 @@ public class SelectionExpression extends CompositeExpression {
 	private static final int NONE= 			1;
 	private static final int UNKNOWN= 		0;
 	
+	private class SharedScope implements IScope {
+
+		private IScope fParent;
+		private Object fDefault;
+		
+		public SharedScope(IScope parent) {
+			fParent= parent;
+		}
+		public IScope getParent() {
+			return fParent;
+		}
+		public Object getDefaultVariable() {
+			return fDefault;
+		}
+		public void setDefaultVariable(Object defaultVariable) {
+			fDefault= defaultVariable;
+		}
+	}
+	
 	
 	public SelectionExpression(IConfigurationElement element) {
 		fElement= element;
@@ -62,7 +81,7 @@ public class SelectionExpression extends CompositeExpression {
 		}
 	}
 
-	public int evaluate(Object element) throws CoreException {
+	public TestResult evaluate(IScope scope) throws CoreException {
 		Class clazz= null;
 		if (fAdaptable != null) {
 			IPluginDescriptor pd= fElement.getDeclaringExtension().getDeclaringPluginDescriptor();
@@ -76,18 +95,20 @@ public class SelectionExpression extends CompositeExpression {
 					e));
 			}
 		}
-		Object[] elements= (Object[])element;
+		Object[] elements= (Object[])scope.getDefaultVariable();
 		if (!checkSize(elements))
-			return ITestResult.FALSE;
-		int result= ITestResult.TRUE;
+			return TestResult.FALSE;
+		TestResult result= TestResult.TRUE;
+		SharedScope sharedScope= new SharedScope(scope);
 		for (int i= 0; i < elements.length; i++) {
 			Object o= elements[i];
 			if (clazz != null && o instanceof IAdaptable) {
 				o= ((IAdaptable)o).getAdapter(clazz);
 				if (o == null)
-					return ITestResult.FALSE;
+					return TestResult.FALSE;
 			}
-			result= TestResult.and(result, evaluateAnd(o));
+			sharedScope.setDefaultVariable(o);	
+			result= result.and(evaluateAnd(sharedScope));
 		}
 		return result;
 	}

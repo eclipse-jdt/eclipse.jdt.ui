@@ -16,7 +16,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.AndExpression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ITestResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Scope;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
 
 public abstract class AbstractDescriptor {
 
@@ -37,7 +38,7 @@ public abstract class AbstractDescriptor {
 	
 	public boolean matches(Object element) throws CoreException {
 		Expression exp= getExpression();
-		if (exp.evaluate(element) == ITestResult.FALSE)
+		if (exp.evaluate(new Scope(null, element)) == TestResult.FALSE)
 			return false;
 		return true;
 	}

@@ -93,7 +93,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		return RefactoringCoreMessages.getString("DeleteRefactoring.7"); //$NON-NLS-1$
 	}
 	
-	public IProject[] getScope() throws CoreException {
+	public IProject[] getAffectedProjects() throws CoreException {
 		IProject[] jScope= JavaProcessors.computeScope(fJavaElements);
 		IProject[] rScope= ResourceProcessors.computeScope(fResources);
 		Set result= new HashSet();

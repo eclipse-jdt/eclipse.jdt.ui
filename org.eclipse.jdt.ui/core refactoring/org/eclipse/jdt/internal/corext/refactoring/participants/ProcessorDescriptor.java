@@ -17,9 +17,10 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IElementHandler;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ITestResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Scope;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.SelectionExpression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.StandardElementHandler;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
 
 public class ProcessorDescriptor {
 	
@@ -54,12 +55,12 @@ public class ProcessorDescriptor {
 		IConfigurationElement selectionState= configElements.length > 0 ? configElements[0] : null; 
 		if (selectionState != null) {
 			Expression exp= PARSER.parse(selectionState);
-			return (convert(exp.evaluate(elements)));
+			return (convert(exp.evaluate(new Scope(null, elements))));
 		} else if (elements.length == 1) {
 			IConfigurationElement objectState= fConfigurationElement.getChildren(OBJECT_STATE)[0];
 			if (objectState != null) {
 				Expression exp= PARSER.parse(objectState);
-				return (convert(exp.evaluate(elements[0])));
+				return (convert(exp.evaluate(new Scope(null, elements[0]))));
 			}
 		}
 		return false;
@@ -69,8 +70,8 @@ public class ProcessorDescriptor {
 		return (IRefactoringProcessor)fConfigurationElement.createExecutableExtension(CLASS);
 	}
 	
-	private boolean convert(int eval) {
-		if (eval == ITestResult.FALSE)
+	private boolean convert(TestResult eval) {
+		if (eval == TestResult.FALSE)
 			return false;
 		return true;
 	}	

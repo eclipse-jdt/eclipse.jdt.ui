@@ -67,7 +67,7 @@ public class RenameJavaProjectProcessor extends RenameProcessor implements IRefe
 			new String[]{getCurrentElementName(), getNewElementName()});
 	}
 	
-	public IProject[] getScope() throws CoreException {
+	public IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fProject);
 	}
 	

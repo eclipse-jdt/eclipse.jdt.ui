@@ -99,7 +99,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 			new String[]{fMethod.getElementName(), getNewElementName()});
 	}
 	
-	public IProject[] getScope() throws CoreException {
+	public IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fMethod);
 	}
 

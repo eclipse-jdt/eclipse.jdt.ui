@@ -30,7 +30,7 @@ public class NotExpression extends Expression {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public int evaluate(Object element) throws CoreException {
-		return TestResult.not(fExpression.evaluate(element));
+	public TestResult evaluate(IScope scope) throws CoreException {
+		return fExpression.evaluate(scope).not();
 	}
 }

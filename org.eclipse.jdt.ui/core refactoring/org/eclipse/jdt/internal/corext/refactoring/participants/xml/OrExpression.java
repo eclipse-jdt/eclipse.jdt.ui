@@ -19,7 +19,7 @@ public class OrExpression extends CompositeExpression {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public int evaluate(Object element) throws CoreException {
-		return evaluateOr(element);
+	public TestResult evaluate(IScope scope) throws CoreException {
+		return evaluateOr(scope);
 	}	
 }

@@ -37,27 +37,27 @@ public abstract class CompositeExpression extends Expression {
 		return (Expression[])fExpressions.toArray(new Expression[fExpressions.size()]);
 	}
 	
-	protected int evaluateAnd(Object element) throws CoreException {
+	protected TestResult evaluateAnd(IScope scope) throws CoreException {
 		if (fExpressions == null)
-			return ITestResult.TRUE;
-		int result= ITestResult.TRUE;
+			return TestResult.TRUE;
+		TestResult result= TestResult.TRUE;
 		for (Iterator iter= fExpressions.iterator(); iter.hasNext();) {
 			Expression expression= (Expression)iter.next();
-			result= TestResult.and(result, expression.evaluate(element));
-			if (result != ITestResult.TRUE)
+			result= result.and(expression.evaluate(scope));
+			if (result != TestResult.TRUE)
 				return result;
 		}
 		return result;
 	}
 	
-	protected int evaluateOr(Object element) throws CoreException {
+	protected TestResult evaluateOr(IScope scope) throws CoreException {
 		if (fExpressions == null)
-			return ITestResult.TRUE;
-		int result= ITestResult.FALSE;
+			return TestResult.TRUE;
+		TestResult result= TestResult.FALSE;
 		for (Iterator iter= fExpressions.iterator(); iter.hasNext();) {
 			Expression expression= (Expression)iter.next();
-			result= TestResult.or(result, expression.evaluate(element));
-			if (result == ITestResult.TRUE)
+			result= result.or(expression.evaluate(scope));
+			if (result == TestResult.TRUE)
 				return result;
 		}
 		return result;

@@ -15,8 +15,12 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.*;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ITestResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IElementHandler;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Scope;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.StandardElementHandler;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -65,14 +69,14 @@ public class ParticipantDescriptor {
 	public boolean matches(IRefactoringProcessor processor, Object element) throws CoreException {
 		IConfigurationElement scopeState= fConfigurationElement.getChildren(SCOPE_STATE)[0];
 		Expression exp= EXPRESSION_PARSER.parse(scopeState);
-		if (exp.evaluate(processor.getScope()) == ITestResult.FALSE)
+		if (exp.evaluate(new Scope(null, processor.getAffectedProjects())) == TestResult.FALSE)
 			return false;
 		
 		IConfigurationElement[] children= fConfigurationElement.getChildren(OBJECT_STATE);
 		if (children.length == 1) {
 			IConfigurationElement objectState= children[0];
 			exp= EXPRESSION_PARSER.parse(objectState);
-			return convert(exp.evaluate(element));
+			return convert(exp.evaluate(new Scope(null, element)));
 			
 		}
 		return true;
@@ -82,8 +86,8 @@ public class ParticipantDescriptor {
 		return (IRefactoringParticipant)fConfigurationElement.createExecutableExtension(CLASS);
 	}
 	
-	private boolean convert(int eval) {
-		if (eval == ITestResult.FALSE)
+	private boolean convert(TestResult eval) {
+		if (eval == TestResult.FALSE)
 			return false;
 		return true;
 	}

@@ -18,15 +18,17 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ITestResult;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ObjectStateExpression;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Scope;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class ContributedProcessorDescriptor {
 	
 	private IConfigurationElement fConfigurationElement;
 	private Object fProcessorInstance;
-	private ICompilationUnit fLastScope;
+	private ICompilationUnit fLastCUnit;
 	private boolean fLastResult;
 
 	private static final String ID= "id"; //$NON-NLS-1$
@@ -35,7 +37,7 @@ public class ContributedProcessorDescriptor {
 	public ContributedProcessorDescriptor(IConfigurationElement element) {
 		fConfigurationElement= element;
 		fProcessorInstance= null;
-		fLastScope= null;
+		fLastCUnit= null;
 	}
 			
 	public IStatus checkSyntax() {
@@ -47,25 +49,25 @@ public class ContributedProcessorDescriptor {
 		return new StatusInfo(IStatus.OK, "Syntactically correct quick assist/fix processor"); //$NON-NLS-1$
 	}
 	
-	private boolean matches(ICompilationUnit scope) throws CoreException {
+	private boolean matches(ICompilationUnit cunit) throws CoreException {
 		IConfigurationElement[] children= fConfigurationElement.getChildren(ObjectStateExpression.NAME);
 		if (children.length == 1) {
-			if (scope.equals(fLastScope)) {
+			if (cunit.equals(fLastCUnit)) {
 				return fLastResult;
 			}
 			
 			ExpressionParser parser= ExpressionParser.getStandard();
 			Expression expression= parser.parse(children[0]);
-			fLastResult= !(expression.evaluate(scope) != ITestResult.TRUE);
-			fLastScope= scope;
+			fLastResult= !(expression.evaluate(new Scope(null, cunit)) != TestResult.TRUE);
+			fLastCUnit= cunit;
 			return fLastResult;
 
 		}
 		return true;
 	}
 
-	public Object getProcessor(ICompilationUnit scope) throws CoreException {
-		if (matches(scope)) {
+	public Object getProcessor(ICompilationUnit cunit) throws CoreException {
+		if (matches(cunit)) {
 			if (fProcessorInstance == null) {
 				fProcessorInstance= fConfigurationElement.createExecutableExtension(CLASS);
 			}

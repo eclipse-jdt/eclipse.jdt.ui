@@ -17,7 +17,8 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.xml.CompositeExp
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IElementHandler;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ITestResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IScope;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
 
 
 public class ScopeStateExpression extends CompositeExpression {
@@ -44,9 +45,9 @@ public class ScopeStateExpression extends CompositeExpression {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public int evaluate(Object element) throws CoreException {
+	public TestResult evaluate(IScope scope) throws CoreException {
 		if (fExpressions == null || fExpressions.size() == 0)
-			return ITestResult.FALSE;
-		return evaluateAnd(element);
+			return TestResult.FALSE;
+		return evaluateAnd(scope);
 	}	
 }

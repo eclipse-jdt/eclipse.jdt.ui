@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatin
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
 public class RenameCompilationUnitProcessor extends RenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
@@ -71,7 +72,7 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 			return false;
 		if (! fCu.exists())
 			return false;
-		if (fCu.isWorkingCopy())
+		if (!JavaModelUtil.isPrimary(fCu))
 			return false; //needs to be fed with a real cu
 		if (fCu.isReadOnly())
 			return false;
@@ -84,7 +85,7 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 			new String[]{fCu.getElementName(), getNewElementName()});
 	}
 
-	public IProject[] getScope() throws CoreException {
+	public IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fCu);
 	}
 

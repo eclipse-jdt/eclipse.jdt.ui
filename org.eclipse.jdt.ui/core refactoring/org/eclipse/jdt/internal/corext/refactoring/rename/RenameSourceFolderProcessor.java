@@ -76,7 +76,7 @@ public class RenameSourceFolderProcessor extends RenameProcessor {
 			new String[]{fSourceFolder.getElementName(), fNewElementName});
 	}
 	
-	public IProject[] getScope() throws CoreException {
+	public IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fSourceFolder);
 	}
 	

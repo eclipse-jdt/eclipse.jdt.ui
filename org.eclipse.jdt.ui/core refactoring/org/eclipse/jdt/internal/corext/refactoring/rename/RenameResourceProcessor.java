@@ -80,7 +80,7 @@ public class RenameResourceProcessor extends RenameProcessor {
 		return null;	
 	}
 		
-	public IProject[] getScope() {
+	public IProject[] getAffectedProjects() {
 		return ResourceProcessors.computeScope(fResource);
 	}
 

@@ -30,7 +30,7 @@ public interface IRefactoringProcessor extends IAdaptable {
 	
 	public int getStyle();
 	
-	public IProject[] getScope() throws CoreException;
+	public IProject[] getAffectedProjects() throws CoreException;
 	
 	public Object[] getElements();
 	

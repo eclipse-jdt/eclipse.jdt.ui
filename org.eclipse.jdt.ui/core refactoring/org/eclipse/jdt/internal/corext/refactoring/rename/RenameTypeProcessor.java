@@ -124,7 +124,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 			new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewElementName});
 	}
 	
-	public IProject[] getScope() throws CoreException {
+	public IProject[] getAffectedProjects() throws CoreException {
 		return JavaProcessors.computeScope(fType);
 	}
 

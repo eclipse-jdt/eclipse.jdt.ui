@@ -16,7 +16,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ITestResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IScope;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
 
 
 public class NatureExpression extends Expression {
@@ -32,12 +33,12 @@ public class NatureExpression extends Expression {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public int evaluate(Object element) throws CoreException {
-		IProject[] projects= (IProject[])element;
+	public TestResult evaluate(IScope scope) throws CoreException {
+		IProject[] projects= (IProject[])scope.getDefaultVariable();
 		for (int i= 0; i < projects.length; i++) {
 			if (projects[i].hasNature(fValue))
-				return ITestResult.TRUE;
+				return TestResult.TRUE;
 		}
-		return ITestResult.FALSE;
+		return TestResult.FALSE;
 	}
 }
