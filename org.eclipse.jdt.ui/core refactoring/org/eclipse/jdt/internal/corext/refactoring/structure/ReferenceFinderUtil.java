@@ -27,13 +27,13 @@ public class ReferenceFinderUtil {
 
 	//----- referenced types -
 	
-	public static IType[] getTypesReferencedIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
+	public static IType[] getTypesReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		SearchResult[] results= getTypeReferencesIn(elements, pm);
 		List referencedTypes= extractElements(results);
 		return (IType[]) referencedTypes.toArray(new IType[referencedTypes.size()]);	
 	}
 	
-	private static SearchResult[] getTypeReferencesIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
+	private static SearchResult[] getTypeReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		List referencedFields= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
@@ -43,7 +43,7 @@ public class ReferenceFinderUtil {
 		return (SearchResult[]) referencedFields.toArray(new SearchResult[referencedFields.size()]);
 	}
 	
-	private static List getTypeReferencesIn(IMember element, IProgressMonitor pm) throws JavaModelException {
+	private static List getTypeReferencesIn(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
 		SearchResultCollector collector= new SearchResultCollector(pm);
 		new SearchEngine().searchDeclarationsOfReferencedTypes(ResourcesPlugin.getWorkspace(), element, collector);
 		return collector.getResults();
@@ -51,13 +51,13 @@ public class ReferenceFinderUtil {
 	
 	//----- referenced fields ----
 	
-	public static IField[] getFieldsReferencedIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
+	public static IField[] getFieldsReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		SearchResult[] results= getFieldReferencesIn(elements, pm);
 		List referencedFields= extractElements(results);
 		return (IField[]) referencedFields.toArray(new IField[referencedFields.size()]);
 	}
 
-	private static SearchResult[] getFieldReferencesIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
+	private static SearchResult[] getFieldReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		List referencedFields= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
@@ -67,7 +67,7 @@ public class ReferenceFinderUtil {
 		return (SearchResult[]) referencedFields.toArray(new SearchResult[referencedFields.size()]);
 	}
 	
-	private static List getFieldReferencesIn(IMember element, IProgressMonitor pm) throws JavaModelException {
+	private static List getFieldReferencesIn(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
 		SearchResultCollector collector= new SearchResultCollector(pm);
 		new SearchEngine().searchDeclarationsOfAccessedFields(ResourcesPlugin.getWorkspace(), element, collector);
 		return collector.getResults();
@@ -75,13 +75,13 @@ public class ReferenceFinderUtil {
 	
 	//----- referenced methods ----
 	
-	public static IMethod[] getMethodsReferencedIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
+	public static IMethod[] getMethodsReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		SearchResult[] results= getMethodReferencesIn(elements, pm);
 		List referencedMethods= extractElements(results);
 		return (IMethod[]) referencedMethods.toArray(new IMethod[referencedMethods.size()]);
 	}
 	
-	private static SearchResult[] getMethodReferencesIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
+	private static SearchResult[] getMethodReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		List referencedMethods= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
@@ -91,7 +91,7 @@ public class ReferenceFinderUtil {
 		return (SearchResult[]) referencedMethods.toArray(new SearchResult[referencedMethods.size()]);
 	}
 	
-	private static List getMethodReferencesIn(IMember element, IProgressMonitor pm) throws JavaModelException {
+	private static List getMethodReferencesIn(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
 		SearchResultCollector collector= new SearchResultCollector(pm);
 		new SearchEngine().searchDeclarationsOfSentMessages(ResourcesPlugin.getWorkspace(), element, collector);
 		return collector.getResults();
