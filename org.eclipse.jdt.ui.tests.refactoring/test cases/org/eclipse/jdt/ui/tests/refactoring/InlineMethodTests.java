@@ -671,8 +671,16 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getGenericPackage(), getName(), COMPARE_WITH_OUTPUT, "generic_out");
 	}
 	
+	private void performGenericTestInlineMethod() throws Exception {
+		performTestInlineMethod(fgTestSetup.getGenericPackage(), getName(), COMPARE_WITH_OUTPUT, "generic_out");
+	}
+	
 	public void testClassInstance() throws Exception {
 		performGenericTest();
+	}
+	
+	public void testClassInstance2() throws Exception {
+		performGenericTestInlineMethod();
 	}
 	
 	public void testSubClass1() throws Exception {
@@ -689,5 +697,9 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	
 	public void testMethodInstance2() throws Exception {
 		performGenericTest();
+	}
+	
+	public void testMethodInstance3() throws Exception {
+		performGenericTestInlineMethod();
 	}
 }

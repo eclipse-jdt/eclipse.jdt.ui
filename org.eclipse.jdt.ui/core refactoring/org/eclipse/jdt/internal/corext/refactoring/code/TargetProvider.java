@@ -23,6 +23,8 @@ import java.util.Stack;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -36,6 +38,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
@@ -48,13 +51,10 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 abstract class TargetProvider {
 
@@ -177,28 +177,29 @@ abstract class TargetProvider {
 		private IMethodBinding fBinding;
 		public InvocationFinder(IMethodBinding binding) {
 			Assert.isNotNull(binding);
-			fBinding= binding;
+			fBinding= binding.getMethodDeclaration();
+			Assert.isNotNull(fBinding);
 		}
 		public boolean visit(MethodInvocation node) {
-			if (Bindings.equals(fBinding, node.getName().resolveBinding()) && fCurrent != null) {
+			if (matches(node.getName().resolveBinding()) && fCurrent != null) {
 				fCurrent.addInvocation(node);
 			}
 			return true;
 		}
 		public boolean visit(SuperMethodInvocation node) {
-			if (Bindings.equals(fBinding, node.getName().resolveBinding()) && fCurrent != null) {
+			if (matches(node.getName().resolveBinding()) && fCurrent != null) {
 				fCurrent.addInvocation(node);
 			}
 			return true;
 		}
 		public boolean visit(ConstructorInvocation node) {
-			if (Bindings.equals(fBinding, node.resolveConstructorBinding()) && fCurrent != null) {
+			if (matches(node.resolveConstructorBinding()) && fCurrent != null) {
 				fCurrent.addInvocation(node);
 			}
 			return true;
 		}
 		public boolean visit(ClassInstanceCreation node) {
-			if (Bindings.equals(fBinding, node.resolveConstructorBinding()) && fCurrent != null) {
+			if (matches(node.resolveConstructorBinding()) && fCurrent != null) {
 				fCurrent.addInvocation(node);
 			}
 			return true;
@@ -263,6 +264,11 @@ abstract class TargetProvider {
 			}
 			endVisitType();
 		}
+		private boolean matches(IBinding binding) {
+			if (!(binding instanceof IMethodBinding))
+				return false;
+			return fBinding.isEqualTo(((IMethodBinding)binding).getMethodDeclaration());
+		}
 	}
 	
 	private static class LocalTypeTargetProvider extends TargetProvider {
@@ -324,7 +330,7 @@ abstract class TargetProvider {
 		}
 
 		public ICompilationUnit[] getAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException {
-			IMethod method= Bindings.findMethod(fMethod.resolveBinding(), fCUnit.getJavaProject());
+			IMethod method= (IMethod)fMethod.resolveBinding().getJavaElement();
 			Assert.isTrue(method != null);
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 			engine.setFiltering(true, true);

@@ -297,7 +297,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		if (declaration != null) {
 			return new SourceProvider(unit, declaration);
 		}
-		IMethod method= Bindings.findMethod(methodBinding, unit.getJavaProject());
+		IMethod method= (IMethod)methodBinding.getJavaElement();
 		if (method != null) {
 			ICompilationUnit source= method.getCompilationUnit();
 			if (source == null) {
