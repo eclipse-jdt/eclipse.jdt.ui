@@ -105,7 +105,7 @@ public final class OldASTRewrite extends ASTRewrite { // illegal subclassing
 		}
 	}
 	
-	/**
+	/*
 	 * New API.
 	 */
 	public TextEdit rewriteAST(IDocument document, Map options) {

@@ -69,6 +69,7 @@ public class CompilationUnitBuffer {
 	 * are ignored if <code>considerComments</code> is set to <code>false
 	 * </code>.
 	 * 
+	 * @param start the start offset
 	 * @param considerComments <code>true</code> if comments are to be
 	 * 	considered; otherwise <code>false</code>
 	 * @return the index of the next token or -1 if no appropriate toke was found

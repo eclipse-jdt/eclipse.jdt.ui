@@ -37,6 +37,12 @@ public class NodeFinder extends GenericVisitor {
 	 *   <li>otherwise <code>null</code> is returned.</li>
 	 * </ul>
 	 * 
+	 * @param root the root node from which the search starts
+	 * @param start the start offset
+	 * @param length the length
+	 * 
+	 * @return the result node
+	 * 
 	 * @since		2.1
 	 */
 	public static ASTNode perform(ASTNode root, int start, int length) {
@@ -67,6 +73,14 @@ public class NodeFinder extends GenericVisitor {
 	 *       start or end position matches <code>start</code>.</li>
 	 *   <li>otherwise <code>null</code> is returned.</li>
 	 * </ul>
+	 * 
+	 * @param root the root node from which the search starts
+	 * @param start the start offset
+	 * @param length the length
+	 * @param source the source of the compilation unit
+	 * 
+	 * @return the result node
+	 * @throws JavaModelException if an error occurs in the Java model
 	 * 
 	 * @since		3.0
 	 */

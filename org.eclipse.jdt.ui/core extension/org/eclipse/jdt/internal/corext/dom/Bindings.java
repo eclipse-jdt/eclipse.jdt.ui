@@ -208,7 +208,9 @@ public class Bindings {
 	}
 	
 	/**
-	 * Checks whether	the passed type binding is a runtime exception.
+	 * Checks whether the passed type binding is a runtime exception.
+	 * 
+	 * @param thrownException the type binding
 	 * 
 	 * @return <code>true</code> if the passed type binding is a runtime exception;
 	 * 	otherwise <code>false</code> is returned
@@ -222,6 +224,9 @@ public class Bindings {
 	/**
 	 * Finds the field specified by <code>fieldName<code> in
 	 * the given <code>type</code>. Returns <code>null</code> if no such field exits.
+	 * @param type the type to search the field in
+	 * @param fieldName the field name
+	 * @return the binding representing the field or <code>null</code>
 	 */
 	public static IVariableBinding findFieldInType(ITypeBinding type, String fieldName) {
 		if (type.isPrimitive())
@@ -241,6 +246,7 @@ public class Bindings {
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
+	 * @return the method binding representing the method
 	 */
 	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
 		if (type.isPrimitive())
@@ -265,6 +271,7 @@ public class Bindings {
 	 * returned. First the super class is examined and than the implemented interfaces.
 	 * @param type The type to search the field in
 	 * @param fieldName The name of the field to find
+	 * @return the variable binding representing the field
 	 */
 	public static IVariableBinding findFieldInHierarchy(ITypeBinding type, String fieldName) {
 		IVariableBinding field= findFieldInType(type, fieldName);
@@ -294,6 +301,7 @@ public class Bindings {
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
+	 * @return the method binding representing the method
 	 */
 	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding parameters[]) {
 		IMethodBinding method= findMethodInType(type, methodName, parameters);
@@ -318,6 +326,7 @@ public class Bindings {
 	 * Finds the method that is defines the given method. The returned method might not be visible.
 	 * @param method The method to find
 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
+	 * @return the method binding representing the method
 	 */
 	public static IMethodBinding findMethodDefininition(IMethodBinding method, boolean testVisibility) {
 		ITypeBinding type= method.getDeclaringClass();
@@ -346,6 +355,7 @@ public class Bindings {
 	 * Finds the method that is implemented by the given method.
 	 * @param method The method to find
  	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
+	 * @return the method binding representing the method
 	 */
 	public static IMethodBinding findMethodImplementation(IMethodBinding method, boolean testVisibility) {
 		ITypeBinding superClass= method.getDeclaringClass().getSuperclass();
@@ -384,6 +394,7 @@ public class Bindings {
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
+	 * @return the method binding representing the method
 	 */
 	public static IMethodBinding findDeclarationInHierarchy(ITypeBinding type, String methodName, ITypeBinding parameters[]) {
 		ITypeBinding[] interfaces= type.getInterfaces();
@@ -439,6 +450,7 @@ public class Bindings {
 	 * 
 	 * @param type the type which hierarchy is to be visited
 	 * @param visitor the visitor
+	 * @return <code>false</code> if the visiting got interrupted
 	 */
 	public static boolean visitHierarchy(ITypeBinding type, TypeBindingVisitor visitor) {
 		boolean result= visitSuperclasses(type, visitor);
@@ -453,6 +465,7 @@ public class Bindings {
 	 * 
 	 * @param type the type which interface hierarchy is to be visited
 	 * @param visitor the visitor
+	 * @return <code>false</code> if the visiting got interrupted
 	 */
 	public static boolean visitInterfaces(ITypeBinding type, TypeBindingVisitor visitor) {
 		ITypeBinding[] interfaces= type.getInterfaces();
@@ -469,6 +482,7 @@ public class Bindings {
 	 * 
 	 * @param type the type which super class hierarchy is to be visited
 	 * @param visitor the visitor
+	 * @return <code>false</code> if the visiting got interrupted
 	 */
 	public static boolean visitSuperclasses(ITypeBinding type, TypeBindingVisitor visitor) {
 		while ((type= type.getSuperclass()) != null) {
@@ -496,6 +510,9 @@ public class Bindings {
 	/**
 	 * Finds a type binding for a given fully qualified type in the hierarchy of a type.
 	 * Returns <code>null</code> if no type binding is found.
+	 * @param hierarchyType the binding representing the hierarchy
+	 * @param fullyQualifiedTypeName the fully qualified name to search for
+	 * @return the type binding
 	 */
 	public static ITypeBinding findTypeInHierarchy(ITypeBinding hierarchyType, String fullyQualifiedTypeName) {
 		if (hierarchyType.isArray() || hierarchyType.isPrimitive()) {
@@ -545,6 +562,10 @@ public class Bindings {
 	/**
 	 * Returns <code>true</code> if the given type is a super type of a candidate.
 	 * <code>true</code> is returned if the two type bindings are identical (TODO)
+	 * @param type the type to inspect
+	 * @param candidate the candidates
+	 * @return <code>true</code> is a super type of one of the candidates; otherwise
+	 *  <code>false</code>
 	 */
 	public static boolean isSuperType(ITypeBinding type, ITypeBinding candidate) {
 		if (candidate.isArray() || candidate.isPrimitive()) {
@@ -578,6 +599,10 @@ public class Bindings {
 	 * Finds the compilation unit where the type of the given <code>ITypeBinding</code> is defined,
 	 * using the class path defined by the given Java project. Returns <code>null</code>
 	 * if no compilation unit is found (e.g. type binding is from a binary type)
+	 * @param typeBinding the type binding to search for
+	 * @param project the project used as a scope
+	 * @return the compilation unit containing the type
+	 * @throws JavaModelException if an errors occurs in the Java model
 	 */
 	public static ICompilationUnit findCompilationUnit(ITypeBinding typeBinding, IJavaProject project) throws JavaModelException {
 		if (!typeBinding.isFromSource()) {
@@ -601,6 +626,10 @@ public class Bindings {
 	 * Finds a field for the given <code>IVariableBinding</code>
 	 * using the class path defined by the given Java project. Returns <code>null</code>
 	 * if the field could not be found.
+	 * @param field the field to search for
+	 * @param in the project defining the scope
+	 * @return the corresponding IField
+	 * @throws JavaModelException if an error occurs in the Java model
 	 */
 	public static IField findField(IVariableBinding field, IJavaProject in) throws JavaModelException {
 		Assert.isTrue(field.isField());
@@ -620,6 +649,10 @@ public class Bindings {
 	 * Finds a type for the given <code>ITypeBinding</code>
 	 * using the class path defined by the given Java project. Returns <code>null</code>
 	 * if the type could not be found.
+	 * @param type the type to find
+	 * @param scope the project scope
+	 * @return the corresponding IType or <code>null</code>
+	 * @throws JavaModelException if an error occurs in the Java model
 	 */
 	public static IType findType(ITypeBinding type, IJavaProject scope) throws JavaModelException {
 		if (type.isPrimitive() || type.isAnonymous() || type.isNullType())
@@ -652,6 +685,10 @@ public class Bindings {
 	/**
 	 * Finds a method for the given <code>IMethodBinding</code>. Returns
 	 * <code>null</code> if the method can not be found in the declaring type of the method binding.
+	 * @param method the method to find
+	 * @param scope the project scope 
+	 * @return the corresponding IMethod or <code>null</code> 
+	 * @throws JavaModelException if an error occurs in the Java model
 	 */
 	public static IMethod findMethod(IMethodBinding method, IJavaProject scope) throws JavaModelException {
 		IType type= findType(method.getDeclaringClass(), scope);
@@ -663,6 +700,10 @@ public class Bindings {
 	/**
 	 * Finds a method for the given <code>IMethodBinding</code>. Returns
 	 * <code>null</code> if the type doesn't contain a corresponding method.
+	 * @param method the method to find
+	 * @param type the type to look in
+	 * @return the corresponding IMethod or <code>null</code>
+	 * @throws JavaModelException if an error occurs in the Java model
 	 */
 	public static IMethod findMethod(IMethodBinding method, IType type) throws JavaModelException {
 		IMethod[] candidates= type.getMethods();
@@ -758,6 +799,8 @@ public class Bindings {
 	 * Normalizes a type binding received from an expression to a type binding that can be used in a declaration signature. 
 	 * Anonymous types are normalized, to the super class or interface. For null or void bindings
 	 * <code>null</code> is returned. 
+	 * @param binding the binding to normalize
+	 * @return the normalized binding
 	 */
 	public static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
 		if (binding != null && !binding.isNullType() && !"void".equals(binding.getName())) { //$NON-NLS-1$
@@ -803,6 +846,7 @@ public class Bindings {
 		private final TypeBindingVisitor fVisitor;
 		
 		private static class VisitCancelledException extends RuntimeException {
+			private static final long serialVersionUID= 1L;
 		}
 
 		public AllBindingsVisitor(TypeBindingVisitor visitor) {

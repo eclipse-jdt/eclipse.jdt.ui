@@ -90,6 +90,8 @@ public class Selection {
 	 * values are <code>INTERSECTS</code>, <code>BEFORE</code>, <code>SELECTED</code>, and
 	 * <code>AFTER</code>.
 	 * 
+	 * @param node the node to return the visit mode for
+	 * 
 	 * @return the selection mode of the given AST node regarding this selection
 	 * @see #INTERSECTS
 	 * @see #BEFORE
