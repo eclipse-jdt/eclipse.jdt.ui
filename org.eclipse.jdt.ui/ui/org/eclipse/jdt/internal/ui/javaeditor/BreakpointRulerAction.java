@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -25,10 +26,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.debug.core.IJavaBreakpoint;
-import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -78,7 +79,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 				if (resource instanceof IFile)
 					markers= resource.findMarkers(IBreakpoint.BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
 				else {
-					IWorkspaceRoot root= JavaPlugin.getWorkspace().getRoot();
+					IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 					//fix for: 1GEUMGZ
 					markers= root.findMarkers(IBreakpoint.BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
 				}
@@ -122,12 +123,12 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 					IClassFileEditorInput input= (IClassFileEditorInput) editorInput;
 					type = input.getClassFile().getType();
 				} else if (editorInput instanceof IFileEditorInput) {
-					IFileEditorInput input= (IFileEditorInput) editorInput;
-					ICompilationUnit cu = (ICompilationUnit) JavaCore.create(input.getFile());
-					IJavaElement e = cu.getElementAt(line.getOffset());
-					if (e instanceof IType) 
+					IWorkingCopyManager manager= JavaUI.getWorkingCopyManager();
+					ICompilationUnit unit= manager.getWorkingCopy(editorInput);
+					IJavaElement e = unit.getElementAt(line.getOffset());
+					if (e instanceof IType) {
 						type = (IType)e;
-					else if (e != null && e instanceof IMember) {
+					} else if (e != null && e instanceof IMember) {
 						type = ((IMember)e).getDeclaringType();
 					}
 				}
@@ -136,7 +137,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 						Map attributes = new HashMap(10);
 						JavaCore.addJavaElementMarkerAttributes(attributes, type);
 						attributes.put("org.eclipse.jdt.debug.ui.JAVA_ELEMENT_HANDLE_ID", type.getHandleIdentifier());
-						IJavaLineBreakpoint bp = JDIDebugModel.createLineBreakpoint(getBreakpointResource(type), type.getFullyQualifiedName(), lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0, true, attributes);
+						JDIDebugModel.createLineBreakpoint(getBreakpointResource(type), type.getFullyQualifiedName(), lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0, true, attributes);
 					}
 				}
 			}
@@ -184,6 +185,10 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 	 *  underlying resource or Java model elements
 	 */
 	public IResource getBreakpointResource(IMember member) throws CoreException {
+		ICompilationUnit cu = member.getCompilationUnit();
+		if (cu != null && cu.isWorkingCopy()) {
+			member = (IMember)cu.getOriginal(member);
+		}
 		IResource res = member.getUnderlyingResource();
 		if (res == null) {
 			res = member.getJavaProject().getProject();
