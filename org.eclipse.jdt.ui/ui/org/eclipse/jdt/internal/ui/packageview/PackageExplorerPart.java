@@ -600,7 +600,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 		saveExpansionState(memento);
 		saveSelectionState(memento);
-		saveScrollState(memento, fViewer.getTree());
+		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
+		//saveScrollState(memento, fViewer.getTree());
 		savePatternFilterState(memento);
 		saveFilterState(memento);
 		fActionSet.saveState(memento);
@@ -667,7 +668,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	void restoreState(IMemento memento) {
 		restoreExpansionState(memento);
 		restoreSelectionState(memento);
-		restoreScrollState(memento, fViewer.getTree());
+		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
+		//restoreScrollState(memento, fViewer.getTree());
 		fActionSet.restoreState(memento);		
 	}
 
