@@ -66,6 +66,7 @@ public interface IJavaHelpContextIds {
 	public static final String EXTERNALIZE_STRINGS_ACTION= 								PREFIX + "externalize_strings_action"; //$NON-NLS-1$	
 	public static final String EXTRACT_METHOD_ACTION= 										PREFIX + "extract_method_action"; //$NON-NLS-1$	
 	public static final String EXTRACT_TEMP_ACTION= 											PREFIX + "extract_temp_action"; //$NON-NLS-1$	
+	public static final String PROMOTE_TEMP_TO_FIELD_ACTION= 								PREFIX + "promote_temp_to_field_action"; //$NON-NLS-1$	
 	public static final String EXTRACT_CONSTANT_ACTION= 											PREFIX + "extract_constant_action"; //$NON-NLS-1$	
 	public static final String EXTRACT_INTERFACE_ACTION= 									PREFIX + "extract_interface_action"; //$NON-NLS-1$	
 	public static final String MOVE_INNER_TO_TOP_ACTION= 									PREFIX + "move_inner_to_top_level_action"; //$NON-NLS-1$
@@ -196,6 +197,8 @@ public interface IJavaHelpContextIds {
 	public static final String EXTRACT_TEMP_ERROR_WIZARD_PAGE= 				PREFIX + "extract_temp_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String EXTRACT_CONSTANT_WIZARD_PAGE= 						PREFIX + "extract_constant_page_context"; //$NON-NLS-1$
 	public static final String EXTRACT_CONSTANT_ERROR_WIZARD_PAGE= 				PREFIX + "extract_constant_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String PROMOTE_TEMP_TO_FIELD_WIZARD_PAGE= 					PREFIX + "promote_temp_to_field_page_context"; //$NON-NLS-1$
+	public static final String PROMOTE_TEMP_TO_FIELD_ERROR_WIZARD_PAGE= 				PREFIX + "promote_temp_to_field_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String MODIFY_PARAMETERS_WIZARD_PAGE= 				PREFIX + "modify_parameters_wizard_page_context"; //$NON-NLS-1$
 	public static final String MODIFY_PARAMETERS_ERROR_WIZARD_PAGE= 		PREFIX + "modify_parameters_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String MOVE_MEMBERS_WIZARD_PAGE= 						PREFIX + "move_members_wizard_page_context"; //$NON-NLS-1$
