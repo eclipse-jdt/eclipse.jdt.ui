@@ -17,11 +17,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 public final class CompilationUnitRange {
-	
+
 	private final ICompilationUnit fCompilationUnit;
 	private final ISourceRange fSourceRange;
 
@@ -31,11 +30,11 @@ public final class CompilationUnitRange {
 		fCompilationUnit= unit;
 		fSourceRange= range;
 	}
-	
+
 	public CompilationUnitRange(ICompilationUnit unit, ASTNode node) {
 		this(unit, new SourceRange(node));
 	}
-	
+
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
@@ -43,17 +42,17 @@ public final class CompilationUnitRange {
 	public ISourceRange getSourceRange() {
 		return fSourceRange;
 	}
-	
+
 	//rootNode must be the ast root for fCompilationUnit
-	public ASTNode getNode(CompilationUnit rootNode){
-		Selection selection= Selection.createFromStartLength(fSourceRange.getOffset(), fSourceRange.getLength());
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, true);
-		rootNode.accept(analyzer);
-		if (analyzer.getFirstSelectedNode() != null)
-			return analyzer.getFirstSelectedNode();
-		return analyzer.getLastCoveringNode();
+	public ASTNode getNode(CompilationUnit rootNode) {
+		NodeFinder finder= new NodeFinder(fSourceRange.getOffset(), fSourceRange.getLength());
+		rootNode.accept(finder);
+		ASTNode result= finder.getCoveringNode();
+		if (result != null)
+			return result;
+		return finder.getCoveredNode();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -64,12 +63,12 @@ public final class CompilationUnitRange {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (! (obj instanceof CompilationUnitRange))
+		if (!(obj instanceof CompilationUnitRange))
 			return false;
 		CompilationUnitRange other= (CompilationUnitRange)obj;
 		return fCompilationUnit.equals(other.fCompilationUnit) && fSourceRange.equals(other.fSourceRange);
 	}
-	
+
 	public int hashCode() {
 		return (37 * fCompilationUnit.hashCode()) ^ fSourceRange.hashCode();
 	}
