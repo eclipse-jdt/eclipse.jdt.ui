@@ -209,6 +209,10 @@ public class CodingStyleConfigurationBlock {
 			JavaPlugin.getDefault().getDialogSettings().put(PREF_LASTSAVEPATH, dialog.getFilterPath());
 			
 			final File file= new File(path);
+			if (file.exists() && !MessageDialog.openQuestion(fComposite.getShell(), FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.overwrite.title"), FormatterMessages.getFormattedString("CodingStyleConfigurationBlock.save_profile.overwrite.message", path))) { //$NON-NLS-1$ //$NON-NLS-2$
+				return;
+			}
+			
 			final Collection profiles= new ArrayList();
 			profiles.add(fProfileManager.getSelected());
 			try {
