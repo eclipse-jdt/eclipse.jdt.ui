@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
 import org.eclipse.jdt.internal.corext.Assert;
 
 public class CompositeOrTypeConstraint implements ITypeConstraint{
@@ -18,9 +22,24 @@ public class CompositeOrTypeConstraint implements ITypeConstraint{
 	
 	public CompositeOrTypeConstraint(ITypeConstraint[] constraints){
 		Assert.isNotNull(constraints);
-		fConstraints= constraints;
+		fConstraints= sort(getCopy(constraints));
 	}
 	
+	private static ITypeConstraint[] getCopy(ITypeConstraint[] constraints) {
+		List l= Arrays.asList(constraints);
+		return (ITypeConstraint[]) l.toArray(new ITypeConstraint[l.size()]);
+	}
+
+	private static ITypeConstraint[] sort(ITypeConstraint[] constraints) {
+		//TODO bogus to sort by toString - will have to come up with something better
+		Arrays.sort(constraints, new Comparator(){
+			public int compare(Object o1, Object o2) {
+				return o2.toString().compareTo(o1.toString());
+			}
+		});
+		return constraints;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.experiments.ITypeConstraint#isSatisfied()
 	 */
@@ -74,6 +93,8 @@ public class CompositeOrTypeConstraint implements ITypeConstraint{
 	public boolean equals(Object obj) {
 		if (! (obj instanceof CompositeOrTypeConstraint))
 			return false;
+			
+		//TODO this is too restrictive - the sequence should not matter	
 		CompositeOrTypeConstraint other= (CompositeOrTypeConstraint)obj;
 		if (fConstraints.length != other.fConstraints.length);	
 		for (int i= 0; i < fConstraints.length; i++) {
