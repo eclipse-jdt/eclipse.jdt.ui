@@ -243,6 +243,11 @@ public class QuickFixTest extends TestCase {
 		ArrayList proposals= new ArrayList();
 		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		
+		if (!proposals.isEmpty()) {
+			assertTrue("should be marked as 'has assist'", JavaCorrectionProcessor.hasAssists(context));
+		}
+		
+		
 		if (filteredTypes != null && filteredTypes.length > 0) {
 			for (Iterator iter= proposals.iterator(); iter.hasNext(); ) {
 				if (isFiltered(iter.next(), filteredTypes)) {
