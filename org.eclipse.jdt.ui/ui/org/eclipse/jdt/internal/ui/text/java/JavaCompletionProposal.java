@@ -115,6 +115,7 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 	public void setCursorPosition(int cursorPosition) {
 		Assert.isTrue(cursorPosition >= 0);
 		fCursorPosition= cursorPosition;
+		fContextInformationPosition= (fContextInformation != null ? fCursorPosition : -1);
 	}	
 	
 	protected void applyImports(IDocument document) {
