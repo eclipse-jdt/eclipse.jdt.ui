@@ -789,18 +789,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 			
 			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer == null)
-				return;
-				
-			sourceViewer.removeTextInputListener(this);
-
-			IDocument document= sourceViewer.getDocument();
-			if (document != null)
-				document.removeDocumentListener(this);
+			if (sourceViewer != null)
+				sourceViewer.removeTextInputListener(this);
+			
+			IDocumentProvider documentProvider= getDocumentProvider();
+			if (documentProvider != null) {
+				IDocument document= documentProvider.getDocument(getEditorInput());
+				if (document != null)
+					document.removeDocumentListener(this);
+			}
 				
 			IPreferenceStore preferenceStore= getPreferenceStore();
 			if (preferenceStore != null)
 				preferenceStore.removePropertyChangeListener(this);
+			
+			if (sourceViewer == null)
+				return;
 			
 			StyledText text= sourceViewer.getTextWidget();
 			if (text == null || text.isDisposed())
@@ -1359,6 +1363,76 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}	
 			
 			return maxLocation;
+		}
+	}
+	
+	/**
+	 * Cancels the occurrences finder job upon document changes.
+	 * 
+	 * @since 3.0
+	 */
+	class OccurrencesFinderJobCanceler implements IDocumentListener, ITextInputListener {
+
+		public void install() {
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer == null)
+				return;
+				
+			StyledText text= sourceViewer.getTextWidget();			
+			if (text == null || text.isDisposed())
+				return;
+
+			sourceViewer.addTextInputListener(this);
+			
+			IDocument document= sourceViewer.getDocument();
+			if (document != null)
+				document.addDocumentListener(this);			
+		}
+		
+		public void uninstall() {
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer != null)
+				sourceViewer.removeTextInputListener(this);
+
+			IDocumentProvider documentProvider= getDocumentProvider();
+			if (documentProvider != null) {
+				IDocument document= documentProvider.getDocument(getEditorInput());
+				if (document != null)
+					document.removeDocumentListener(this);
+			}
+		}
+				
+
+		/*
+		 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
+		 */
+		public void documentAboutToBeChanged(DocumentEvent event) {
+			fOccurrencesFinderJob.doCancel();
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
+		 */
+		public void documentChanged(DocumentEvent event) {
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentAboutToBeChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
+		 */
+		public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
+			if (oldInput == null)
+				return;
+
+			oldInput.removeDocumentListener(this);
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
+		 */
+		public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
+			if (newInput == null)
+				return;
+			newInput.addDocumentListener(this);
 		}
 	}
 	
@@ -2166,6 +2240,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	private ActivationListener fActivationListener= new ActivationListener();
 	private ISelectionListenerWithAST fPostSelectionListenerWithAST;
 	private OccurrencesFinderJob fOccurrencesFinderJob;
+	/** The occcurrences finder job canceler */
+	private OccurrencesFinderJobCanceler fOccurrencesFinderJobCanceler;
 	/** 
 	 * This editor's projection support 
 	 * @since 3.0
@@ -3414,12 +3490,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * 
 	 * @since 3.0
 	 */
-	class OccurrencesFinderJob extends Job implements IDocumentListener {
+	class OccurrencesFinderJob extends Job {
 		
 		private IDocument fDocument;
 		private ISelection fSelection;
 		private ISelectionValidator fPostSelectionValidator;
-		private boolean fCancelled= false;
+		private boolean fCanceled= false;
 		private IProgressMonitor fProgressMonitor;
 		private Position[] fPositions;
 		
@@ -3428,14 +3504,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fDocument= document;
 			fSelection= selection;
 			fPositions= positions;
-			fDocument.addDocumentListener(this);
 			
 			if (getSelectionProvider() instanceof ISelectionValidator)
 				fPostSelectionValidator= (ISelectionValidator)getSelectionProvider(); 
 		}
 		
-		private boolean isCancelled() {
-			return fCancelled || fProgressMonitor.isCanceled()
+		// cannot use cancel() because it is declared final
+		void doCancel() {
+			fCanceled= true;
+			cancel();
+		}
+		
+		private boolean isCanceled() {
+			return fCanceled || fProgressMonitor.isCanceled()
 				||  fPostSelectionValidator != null && !(fPostSelectionValidator.isValid(fSelection) || fForcedMarkOccurrencesSelection == fSelection)
 				|| LinkedModeModel.hasInstalledModel(fDocument);
 		}
@@ -3447,83 +3528,66 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			
 			fProgressMonitor= progressMonitor;
 			
-			try {
-				
-				if (isCancelled())
-					return Status.CANCEL_STATUS;
-				
-				ITextViewer textViewer= getViewer(); 
-				if (textViewer == null)
-					return Status.CANCEL_STATUS;
-				
-				IDocument document= textViewer.getDocument();
-				if (document == null)
-					return Status.CANCEL_STATUS;
-				
-				IDocumentProvider documentProvider= getDocumentProvider();
-				if (documentProvider == null)
-					return Status.CANCEL_STATUS;
+			if (isCanceled())
+				return Status.CANCEL_STATUS;
 			
-				IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
-				if (annotationModel == null)
-					return Status.CANCEL_STATUS;
+			ITextViewer textViewer= getViewer(); 
+			if (textViewer == null)
+				return Status.CANCEL_STATUS;
+			
+			IDocument document= textViewer.getDocument();
+			if (document == null)
+				return Status.CANCEL_STATUS;
+			
+			IDocumentProvider documentProvider= getDocumentProvider();
+			if (documentProvider == null)
+				return Status.CANCEL_STATUS;
+		
+			IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
+			if (annotationModel == null)
+				return Status.CANCEL_STATUS;
+			
+			// Add occurrence annotations
+			int length= fPositions.length;
+			Map annotationMap= new HashMap(length);
+			for (int i= 0; i < length; i++) {
 				
-				// Add occurrence annotations
-				int length= fPositions.length;
-				Map annotationMap= new HashMap(length);
-				for (int i= 0; i < length; i++) {
-					
-					if (isCancelled())
-						return Status.CANCEL_STATUS; 
-					
-					String message;
-					Position position= fPositions[i];
-					
-					// Create & add annotation
-					try {
-						message= document.get(position.offset, position.length);
-					} catch (BadLocationException ex) {
-						// Skip this match
-						continue;
-					}
-					annotationMap.put(
-							new Annotation("org.eclipse.jdt.ui.occurrences", false, message), //$NON-NLS-1$
-							position);
+				if (isCanceled())
+					return Status.CANCEL_STATUS; 
+				
+				String message;
+				Position position= fPositions[i];
+				
+				// Create & add annotation
+				try {
+					message= document.get(position.offset, position.length);
+				} catch (BadLocationException ex) {
+					// Skip this match
+					continue;
 				}
-				
-				if (isCancelled())
-					return Status.CANCEL_STATUS;
-				
-				synchronized (getLockObject(annotationModel)) {
-					if (annotationModel instanceof IAnnotationModelExtension) {
-						((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, annotationMap);
-					} else {
-						removeOccurrenceAnnotations();
-						Iterator iter= annotationMap.entrySet().iterator();
-						while (iter.hasNext()) {
-							Map.Entry mapEntry= (Map.Entry)iter.next(); 
-							annotationModel.addAnnotation((Annotation)mapEntry.getKey(), (Position)mapEntry.getValue());
-						}
-					}
-					fOccurrenceAnnotations= (Annotation[])annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
-				}
-			} finally {
-				fDocument.removeDocumentListener(this);
+				annotationMap.put(
+						new Annotation("org.eclipse.jdt.ui.occurrences", false, message), //$NON-NLS-1$
+						position);
 			}
+			
+			if (isCanceled())
+				return Status.CANCEL_STATUS;
+			
+			synchronized (getLockObject(annotationModel)) {
+				if (annotationModel instanceof IAnnotationModelExtension) {
+					((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, annotationMap);
+				} else {
+					removeOccurrenceAnnotations();
+					Iterator iter= annotationMap.entrySet().iterator();
+					while (iter.hasNext()) {
+						Map.Entry mapEntry= (Map.Entry)iter.next(); 
+						annotationModel.addAnnotation((Annotation)mapEntry.getKey(), (Position)mapEntry.getValue());
+					}
+				}
+				fOccurrenceAnnotations= (Annotation[])annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
+			}
+
 			return Status.OK_STATUS;
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
-		 */
-		public void documentAboutToBeChanged(DocumentEvent event) {
-			fCancelled= true;
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
-		 */
-		public void documentChanged(DocumentEvent event) {
 		}
 	}	
 	
@@ -3622,6 +3686,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
 			SelectionListenerWithASTManager.getDefault().forceSelectionChange(this, (ITextSelection)fForcedMarkOccurrencesSelection);
 		}
+		
+		if (fOccurrencesFinderJobCanceler == null) {
+			fOccurrencesFinderJobCanceler= new OccurrencesFinderJobCanceler();
+			fOccurrencesFinderJobCanceler.install();
+		}
 	}
 	
 	protected void uninstallOccurrencesFinder() {
@@ -3630,6 +3699,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (fOccurrencesFinderJob != null) {
 			fOccurrencesFinderJob.cancel();
 			fOccurrencesFinderJob= null;
+		}
+
+		if (fOccurrencesFinderJobCanceler != null) {
+			fOccurrencesFinderJobCanceler.uninstall();
+			fOccurrencesFinderJobCanceler= null;
 		}
 		
 		if (fPostSelectionListenerWithAST != null) {
