@@ -29,6 +29,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Preferences;
 
 public class ResourceTestHelper {
 
@@ -128,11 +129,13 @@ public class ResourceTestHelper {
 		}
 	}
 
-	public static void copy(String src, String dest, String srcName, String destName) throws IOException, CoreException {
-		StringBuffer buf= read(src);
-		List positions= identifierPositions(buf, srcName);
-		replacePositions(buf, srcName.length(), destName, positions);
-		write(dest, buf.toString());
+	public static void copy(String src, String dest, String srcName, String destName, int ifExists) throws IOException, CoreException {
+		if (handleExisting(dest, ifExists)) {
+			StringBuffer buf= read(src);
+			List positions= identifierPositions(buf, srcName);
+			replacePositions(buf, srcName.length(), destName, positions);
+			write(dest, buf.toString());
+		}
 	}
 
 	private static void replacePositions(StringBuffer c, int origLength, String string, List positions) {
@@ -164,14 +167,6 @@ public class ResourceTestHelper {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
-	public static boolean enableAutoBuilding() {
-		IWorkspaceDescription description= ResourcesPlugin.getWorkspace().getDescription();
-		boolean wasOff= !description.isAutoBuilding();
-		if (wasOff)
-			description.setAutoBuilding(true);
-		return wasOff;
-	}
-
 	public static void incrementalBuild() throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
 	}
@@ -186,5 +181,21 @@ public class ResourceTestHelper {
 		if (wasOn)
 			description.setAutoBuilding(false);
 		return wasOn;
+	}
+
+	public static boolean enableAutoBuilding() {
+		IWorkspaceDescription description= ResourcesPlugin.getWorkspace().getDescription();
+		boolean wasOff= !description.isAutoBuilding();
+		if (wasOff)
+			description.setAutoBuilding(true);
+		return wasOff;
+	}
+	
+	public static boolean setAutoBuilding(boolean value) {
+		Preferences preferences= ResourcesPlugin.getPlugin().getPluginPreferences();
+		boolean oldValue= preferences.getBoolean(ResourcesPlugin.PREF_AUTO_BUILDING);
+		if (value != oldValue)
+			preferences.setValue(ResourcesPlugin.PREF_AUTO_BUILDING, value);
+		return oldValue;
 	}
 }
