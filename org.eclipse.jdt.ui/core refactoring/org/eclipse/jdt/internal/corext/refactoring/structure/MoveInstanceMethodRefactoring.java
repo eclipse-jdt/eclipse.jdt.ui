@@ -12,8 +12,10 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -32,6 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 
 public class MoveInstanceMethodRefactoring extends Refactoring {
@@ -54,8 +57,20 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 
 	private InstanceMethodMover fMover;
 	
-	public static MoveInstanceMethodRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings) {		
-		return new MoveInstanceMethodRefactoring(cu, selectionStart, selectionLength, codeGenerationSettings);
+	public static boolean isAvailable(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {
+		if (! method.exists() || method.isBinary() || method.getCompilationUnit() == null || JdtFlags.isStatic(method))
+			return false;
+		//this refactoring is invoked polymophically - so we need to check more here
+		MoveInstanceMethodRefactoring instance= new MoveInstanceMethodRefactoring(method.getCompilationUnit(), method.getNameRange().getOffset(), method.getNameRange().getLength(), codeGenerationSettings);
+		if (instance.checkActivation(new NullProgressMonitor()).hasFatalError())
+			return false;
+		return true;
+	}
+
+	public static MoveInstanceMethodRefactoring create(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {		
+		if (! isAvailable(method, codeGenerationSettings))	
+			return null;
+		return new MoveInstanceMethodRefactoring(method.getCompilationUnit(), method.getNameRange().getOffset(), method.getNameRange().getLength(), codeGenerationSettings);
 	}
 	
 	private MoveInstanceMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings) {
@@ -87,7 +102,8 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 			return status;
 		Assert.isNotNull(declaration);
 		fMover= InstanceMethodMover.create(declaration, fCU, fCodeGenerationSettings);
-		
+		if (fMover == null)
+			return RefactoringStatus.createFatalErrorStatus("The selected method cannot be moved");
 		return new RefactoringStatus();
 	}
 	
