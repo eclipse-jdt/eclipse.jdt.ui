@@ -112,7 +112,7 @@ public class CreateChangeOperation implements IWorkspaceRunnable {
 					fChange= fRefactoring.createChange(new SubProgressMonitor(pm, 2));
 					fChange.initializeValidationData(new SubProgressMonitor(pm, 1));
 				} else {
-					pm.worked(2);
+					pm.worked(3);
 				}
 			} else {
 				pm.beginTask("", 3); //$NON-NLS-1$
