@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -428,19 +430,26 @@ public class SemanticHighlightings {
 				return null;
 			
 			switch (parent.getNodeType()) {
-				// TODO also add other method like nodes
-				case ASTNode.METHOD_INVOCATION:
-					// return declared argument type
-					MethodInvocation invocation= (MethodInvocation) parent;
-					StructuralPropertyDescriptor location= child.getLocationInParent();
-					if (MethodInvocation.ARGUMENTS_PROPERTY == location) {
-						IMethodBinding methodBinding= invocation.resolveMethodBinding();
-						List arguments= invocation.arguments();
-						int index= arguments.indexOf(child);
-						if (index != -1) {
-							ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
-							if (parameterTypes.length > index)
-								return parameterTypes[index];
+				// method-like nodes
+				case ASTNode.METHOD_INVOCATION :
+				case ASTNode.SUPER_METHOD_INVOCATION :
+				case ASTNode.CLASS_INSTANCE_CREATION :
+				case ASTNode.CONSTRUCTOR_INVOCATION :
+				case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
+				case ASTNode.ENUM_CONSTANT_DECLARATION :
+					if (isArgument(child)) {
+						/* resolve the method binding before asking for the
+						 * arguments getArguments() may return an empty list
+						 * otherwise */
+						IMethodBinding methodBinding= getMethodBinding(parent);
+						List arguments= getArguments(parent);
+						if (methodBinding != null && arguments != null) {
+							int argumentIndex= arguments.indexOf(child);
+							if (argumentIndex != -1) {
+								ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+								if (parameterTypes.length > argumentIndex)
+									return parameterTypes[argumentIndex];
+							}
 						}
 					}
 					break;
@@ -500,6 +509,97 @@ public class SemanticHighlightings {
 				return ((Expression) parent).resolveTypeBinding();
 			
 			return null;
+		}
+
+		/**
+		 * Returns the arguments of a method-like <code>ASTNode</code>.
+		 * Method-like nodes are:
+		 * <ul>
+		 * <li>{@link MethodInvocation}</li>
+		 * <li>{@link SuperMethodInvocation}</li>
+		 * <li>{@link ClassInstanceCreation}</li>
+		 * <li>{@link ConstructorInvocation}</li>
+		 * <li>{@link SuperConstructorInvocation}</li>
+		 * <li>{@link EnumConstantDeclaration}</li>
+		 * </ul>
+		 * 
+		 * @param methodLike the method-like <code>ASTNode</code> to get the
+		 *        arguments of
+		 * @return the arguments of <code>methodLike</code>
+		 * @throws IllegalArgumentException if <code>methodLike</code> is not
+		 *         a method like <code>ASTNode</code>
+		 */
+		private List getArguments(ASTNode methodLike) throws IllegalArgumentException {
+			switch (methodLike.getNodeType()) {
+				case ASTNode.METHOD_INVOCATION :
+					return ((MethodInvocation) methodLike).arguments();
+				case ASTNode.SUPER_METHOD_INVOCATION :
+					return ((SuperMethodInvocation) methodLike).arguments();
+				case ASTNode.CLASS_INSTANCE_CREATION :
+					return ((ClassInstanceCreation) methodLike).arguments();
+				case ASTNode.CONSTRUCTOR_INVOCATION :
+					return ((ConstructorInvocation) methodLike).arguments();
+				case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
+					return ((SuperConstructorInvocation) methodLike).arguments();
+				case ASTNode.ENUM_CONSTANT_DECLARATION :
+					return ((EnumConstantDeclaration) methodLike).arguments();
+			}
+			throw new IllegalArgumentException("not a method-like node: " + methodLike); //$NON-NLS-1$
+		}
+
+		/**
+		 * Returns the method binding of a method-like <code>ASTNode</code>.
+		 * Method-like nodes are:
+		 * <ul>
+		 * <li>{@link MethodInvocation}</li>
+		 * <li>{@link SuperMethodInvocation}</li>
+		 * <li>{@link ClassInstanceCreation}</li>
+		 * <li>{@link ConstructorInvocation}</li>
+		 * <li>{@link SuperConstructorInvocation}</li>
+		 * <li>{@link EnumConstantDeclaration}</li>
+		 * </ul>
+		 * 
+		 * @param methodLike the method-like <code>ASTNode</code> to get the
+		 *        method binding of
+		 * @return the method binding of <code>methodLike</code> or
+		 *         <code>null</code> if it is not available
+		 * @throws IllegalArgumentException if <code>methodLike</code> is not
+		 *         a method like <code>ASTNode</code>
+		 */
+		private IMethodBinding getMethodBinding(ASTNode methodLike) throws IllegalArgumentException {
+			switch (methodLike.getNodeType()) {
+				case ASTNode.METHOD_INVOCATION :
+					return ((MethodInvocation) methodLike).resolveMethodBinding();
+				case ASTNode.SUPER_METHOD_INVOCATION :
+					return ((SuperMethodInvocation) methodLike).resolveMethodBinding();
+				case ASTNode.CLASS_INSTANCE_CREATION :
+					return ((ClassInstanceCreation) methodLike).resolveConstructorBinding();
+				case ASTNode.CONSTRUCTOR_INVOCATION :
+					return ((ConstructorInvocation) methodLike).resolveConstructorBinding();
+				case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
+					return ((SuperConstructorInvocation) methodLike).resolveConstructorBinding();
+				case ASTNode.ENUM_CONSTANT_DECLARATION :
+					// TODO get constructor binding for enum constant declarations
+					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=85226
+					return null;
+			}
+			throw new IllegalArgumentException("not a method-like node: " + methodLike); //$NON-NLS-1$
+		}
+
+		/**
+		 * Returns <code>true</code> if the parent location of
+		 * <code>node</code> is the <code>ARGUMENTS_PROPERTY</code>. The
+		 * comparison succeeds if the property name is equal to the id of
+		 * {@link MethodInvocation#ARGUMENTS_PROPERTY} (<code>"arguments</code>).
+		 * 
+		 * @param node the node to check whether it is an argument to a
+		 *        method-like node
+		 * @return <code>true</code> if <code>node</code> is an argument,
+		 *         <code>false</code> if it is not
+		 */
+		private boolean isArgument(ASTNode node) {
+			StructuralPropertyDescriptor location= node.getLocationInParent();
+			return location != null && MethodInvocation.ARGUMENTS_PROPERTY.getId().equals(location.getId());
 		}
 
 		/**
