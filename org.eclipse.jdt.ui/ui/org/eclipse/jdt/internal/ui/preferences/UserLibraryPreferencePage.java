@@ -938,8 +938,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			} else if (curr instanceof CPUserLibraryElement) {
 				editUserLibraryElement((CPUserLibraryElement) curr);
 			} else if (curr instanceof CPListElement) {
-				CPListElement elem= (CPListElement) curr;
-				openExtJarFileDialog(elem, elem.getParentContainer());
+				CPListElement elem= (CPListElement) curr;				
+				editArchiveElement(elem, (CPUserLibraryElement) elem.getParentContainer());
 			}
 		}
 	}
