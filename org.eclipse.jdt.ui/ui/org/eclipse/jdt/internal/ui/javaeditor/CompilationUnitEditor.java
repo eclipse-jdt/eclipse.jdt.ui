@@ -700,6 +700,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);		
 		setAction("Format", action); //$NON-NLS-1$
+		markAsSelectionDependentAction("Format", true); //$NON-NLS-1$
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"ShowOutline.", this, JavaCorrectionSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
