@@ -7,6 +7,9 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
+ *       bug "inline method - doesn't handle implicit cast" (see
+ *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -57,7 +60,8 @@ public class SourceProvider {
 	private ASTRewrite fRewriter;
 	private SourceAnalyzer fAnalyzer;
 	private boolean fMustEvalReturnedExpression;
-	private boolean fReturnValueNeedsLocalVariable= true;
+	private boolean fReturnValueNeedsLocalVariable;
+	private List fReturnExpressions;
 	
 	private class ReturnAnalyzer extends ASTVisitor {
 		public boolean visit(ReturnStatement node) {
@@ -68,6 +72,7 @@ public class SourceProvider {
 			if (ASTNodes.isInvocation(expression) || expression instanceof ClassInstanceCreation) {
 				fReturnValueNeedsLocalVariable= false;
 			}
+			fReturnExpressions.add(expression);
 			return false;
 		}
 	}
@@ -84,6 +89,8 @@ public class SourceProvider {
 		}
 		fRewriter= new ASTRewrite(fDeclaration);
 		fAnalyzer= new SourceAnalyzer(fCUnit, fDeclaration);
+		fReturnValueNeedsLocalVariable= true;
+		fReturnExpressions= new ArrayList();
 	}
 	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
@@ -140,6 +147,10 @@ public class SourceProvider {
 	
 	public ITypeBinding getReturnType() {
 		return fDeclaration.resolveBinding().getReturnType();
+	}
+	
+	public List getReturnExpressions() {
+		return fReturnExpressions;
 	}
 	
 	public ParameterData getParameterData(int index) {

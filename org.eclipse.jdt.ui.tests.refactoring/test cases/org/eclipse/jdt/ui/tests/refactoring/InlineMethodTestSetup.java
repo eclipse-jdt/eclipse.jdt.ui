@@ -40,6 +40,7 @@ public class InlineMethodTestSetup extends TestSetup {
 	private IPackageFragment fControlStatement;
 	private IPackageFragment fReceiver;
 	private IPackageFragment fImport;
+	private IPackageFragment fCast;
 
 	public InlineMethodTestSetup(Test test) {
 		super(test);
@@ -71,6 +72,7 @@ public class InlineMethodTestSetup extends TestSetup {
 		fControlStatement= fRoot.createPackageFragment("controlStatement_in", true, null);
 		fReceiver= fRoot.createPackageFragment("receiver_in", true, null);
 		fImport= fRoot.createPackageFragment("import_in", true, null);
+		fCast= fRoot.createPackageFragment("cast_in", true, null);
 		
 		fImport.createCompilationUnit(
 			"Provider.java",
@@ -168,5 +170,9 @@ public class InlineMethodTestSetup extends TestSetup {
 	
 	public IPackageFragment getImportPackage() {
 		return fImport;
+	}	
+
+	public IPackageFragment getCastPackage() {
+		return fCast;
 	}	
 }

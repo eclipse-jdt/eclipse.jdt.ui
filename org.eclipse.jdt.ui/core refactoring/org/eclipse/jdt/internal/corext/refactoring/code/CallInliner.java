@@ -7,6 +7,9 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
+ *       bug "inline method - doesn't handle implicit cast" (see
+ *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -19,19 +22,23 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -52,6 +59,7 @@ import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
@@ -230,7 +238,11 @@ public class CallInliner {
 			Expression expression= (Expression)arguments.get(i);
 			ParameterData parameter= fSourceProvider.getParameterData(i);
 			if (canInline(expression, parameter)) {
-				realArguments[i]= getContent(expression);
+				realArguments[i] = getContent(expression);
+				// fixes bug #35905
+				if(expression instanceof CastExpression) {
+					realArguments[i] = "(" + realArguments[i] + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			} else {
 				String name= fInvocationScope.createName(parameter.getName(), true);
 				realArguments[i]= name;
@@ -284,7 +296,7 @@ public class CallInliner {
 		}
 	}
 
-	private void replaceCall(int callType, String[] blocks) {
+	private void replaceCall(int callType, String[] blocks) throws CoreException {
 		// Inline empty body
 		if (blocks.length == 0) {
 			if (fNeedsStatement) {
@@ -319,6 +331,18 @@ public class CallInliner {
 				}
 			} else if (fTargetNode instanceof Expression) {
 				node= fRewriter.createPlaceholder(block, ASTRewrite.EXPRESSION);
+				
+				// fixes bug #24941
+				if(needsExplicitCast()) {
+					AST ast= node.getAST();
+					CastExpression castExpression= ast.newCastExpression();
+					ITypeBinding returnType= fSourceProvider.getReturnType();
+					fImportEdit.addImport(returnType);
+					castExpression.setType(ASTNodeFactory.newType(ast, returnType, false));
+					castExpression.setExpression((Expression)node);
+					node= castExpression;
+				}
+				
 				if (needsParenthesis()) {
 					ParenthesizedExpression pExp= fTargetNode.getAST().newParenthesizedExpression();
 					pExp.setExpression((Expression)node);
@@ -342,6 +366,89 @@ public class CallInliner {
 				}
 			}
 		}
+	}
+
+	/**
+	 * @return <code>true</code> if explicit cast is needed otherwise <code>false</code>
+	 * @throws JavaModelException
+	 */
+	private boolean needsExplicitCast() {
+		ASTNode parent= fTargetNode.getParent();
+		int nodeType= parent.getNodeType();
+		if (nodeType == ASTNode.METHOD_INVOCATION) {
+			MethodInvocation methodInvocation= (MethodInvocation)parent;
+			IMethodBinding method= methodInvocation.resolveMethodBinding();
+			ITypeBinding[] parameters= method.getParameterTypes();
+			int argumentIndex= methodInvocation.arguments().indexOf(fInvocation);
+			if (argumentIndex == -1)
+				return false;
+			List returnExprs= fSourceProvider.getReturnExpressions();
+			// it is infered that only methods consisting of a single 
+			// return statement can be inlined as parameters in other 
+			// method invocations
+			if (returnExprs.size() != 1)
+				return false;
+			parameters[argumentIndex]= ((Expression)returnExprs.get(0)).resolveTypeBinding();
+
+			ITypeBinding type= ASTNodes.getReceiverTypeBinding(methodInvocation);
+			// finds all overloaded methods with the same name in hierarchy
+			IMethodBinding[] methods= findMethodsInHierarchy(type, method.getName());
+			for (int i= 0; i < methods.length; i++) {
+				if (methods[i] != method) {
+					// method access type can disallow the call but still it is 
+					// better to have explicit cast in the place
+					if (canImplicitlyCall(methods[i], parameters)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * The method returns all methods with the specified name found in the type 
+	 * hierarchy.
+	 * 
+	 * @param type type to start from
+	 * @param methodName name of the method to search for in the hierarchy
+	 * @return array of methods with the name specified
+	 */
+	private IMethodBinding[] findMethodsInHierarchy(ITypeBinding type, String methodName) {
+		
+		ArrayList result = new ArrayList();
+		
+		while(type != null) {
+			IMethodBinding[] methods = type.getDeclaredMethods();
+			for(int i = 0; i < methods.length; i++) {
+				if(methodName.equals(methods[i].getName())) {
+					result.add(methods[i]);
+				}
+			}
+			type = type.getSuperclass();
+		}
+		
+		return (IMethodBinding[])result.toArray(new IMethodBinding[result.size()]);
+	}
+
+	/**
+	 * @param method method binding to query for
+	 * @param types types of method parameters
+	 * @return <code>true</code> if the method can be called with specified 
+	 * parameters without explicit casts, otherwise <code>false</code>.
+	 * @throws JavaModelException
+	 */
+	private boolean canImplicitlyCall(IMethodBinding method, ITypeBinding[] types) {
+		ITypeBinding[] parameters= method.getParameterTypes();
+		if (types.length != parameters.length) {
+			return false;
+		}
+		for (int i= 0; i < parameters.length; i++) {
+			if (!TypeRules.canAssign(types[i], parameters[i])) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private boolean needsParenthesis() {

@@ -7,6 +7,9 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
+ *       bug "inline method - doesn't handle implicit cast" (see
+ *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -348,8 +351,6 @@ public class ASTNodes {
 		return false;
 	}
 	
-
-	
 	public static int getExclusiveEnd(ASTNode node){
 		return node.getStartPosition() + node.getLength();
 	}
@@ -393,6 +394,26 @@ public class ASTNodes {
 		if (binding instanceof ITypeBinding)
 			return (ITypeBinding)binding;
 		return null;
+	}
+
+	/**
+	 * Returns the receiver's type binding of the given method invocation. 
+	 * 
+	 * @param invocation method invocation to resolve type of
+	 * @return the type binding of the receiver
+	 */
+	public static ITypeBinding getReceiverTypeBinding(MethodInvocation invocation) {
+		ITypeBinding result= null;
+		Expression exp= invocation.getExpression();
+		if(exp != null) {
+			return exp.resolveTypeBinding();
+		}
+		else {
+			TypeDeclaration type= (TypeDeclaration)getParent(invocation, ASTNode.TYPE_DECLARATION);
+			if (type != null)
+				return type.resolveBinding();
+		}
+		return result;
 	}
 
 	/**

@@ -419,4 +419,38 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testUseInLocalClass() throws Exception {
 		performImportTest();
 	}	
+
+	/************************ Receiver Tests ********************************/
+
+	private void performCastTest() throws Exception {
+		performTest(fgTestSetup.getCastPackage(), getName(), COMPARE_WITH_OUTPUT, "cast_out");
+	}
+	
+	public void testNotOverloaded() throws Exception {
+		performCastTest();
+	}
+
+	public void testOverloadedPrimitives() throws Exception {
+		performCastTest();
+	}
+
+	public void testNotCastableOverloaded() throws Exception {
+		performCastTest();
+	}
+
+	public void testOverloaded() throws Exception {
+		performCastTest();
+	}
+
+	public void testHierarchyOverloadedPrimitives() throws Exception {
+		performCastTest();
+	}
+
+	public void testHierarchyOverloaded() throws Exception {
+		performCastTest();
+	}
+
+	public void testHierarchyOverloadedPrivate() throws Exception {
+		performCastTest();
+	}
 }
