@@ -95,7 +95,11 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	     		!Character.isLowerCase(leftString.charAt(0)))
 	     		return -1;
 	     	
-			return leftString.compareToIgnoreCase(rightString);
+			int result= leftString.compareToIgnoreCase(rightString);			
+			if (result == 0)
+				result= leftString.compareTo(rightString);
+
+			return result;
 	    }
 	}
 
