@@ -329,7 +329,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		labelControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		GridData gd= new GridData();
-		gd.horizontalAlignment= GridData.END;
+		gd.horizontalAlignment= GridData.FILL;
 		
 		Combo comboBox= new Combo(parent, SWT.READ_ONLY);
 		comboBox.setItems(valueLabels);
