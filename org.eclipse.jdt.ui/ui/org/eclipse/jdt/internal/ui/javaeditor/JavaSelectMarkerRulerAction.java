@@ -25,7 +25,6 @@ import org.eclipse.ui.texteditor.ITextEditorExtension;
 import org.eclipse.ui.texteditor.SelectMarkerRulerAction;
 
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
-import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 
 /**
  * A special select marker ruler action which activates quick fix if clicked on a quick fixable problem.
@@ -45,7 +44,7 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 			if (fPosition == null)
 				break superCall;
 			ITextOperationTarget operation= (ITextOperationTarget) fMyTextEditor.getAdapter(ITextOperationTarget.class);
-			final int opCode= JavaCorrectionSourceViewer.CORRECTIONASSIST_PROPOSALS;
+			final int opCode= CompilationUnitEditor.CORRECTIONASSIST_PROPOSALS;
 			if (operation == null || !operation.canDoOperation(opCode)) {
 				break superCall;
 			}

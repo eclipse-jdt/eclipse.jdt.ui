@@ -9,7 +9,8 @@
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.text.correction;
+package org.eclipse.jdt.internal.ui.javaeditor;
+
 
 import org.eclipse.swt.widgets.Composite;
 
@@ -19,17 +20,11 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
-import org.eclipse.ui.IEditorPart;
-
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
-public class JavaCorrectionSourceViewer extends SourceViewer {
 
-	/** 
-	 * Text operation code for requesting correction assist to show correction
-	 * proposals for the current position. 
-	 */
-	public static final int CORRECTIONASSIST_PROPOSALS= 50;
+
+public class JavaSourceViewer extends SourceViewer {
 
 	/**
 	 * Text operation code for requesting the outline for the current input.
@@ -41,16 +36,12 @@ public class JavaCorrectionSourceViewer extends SourceViewer {
 	 */
 	public static final int OPEN_STRUCTURE= 52;
 
-	private JavaCorrectionAssistant fCorrectionAssistant;
+
 	private IInformationPresenter fOutlinePresenter;
 	private IInformationPresenter fStructurePresenter;
-	
-	private IEditorPart fEditor;
 
-
-	public JavaCorrectionSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IEditorPart editor) {
+	public JavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles) {
 		super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
-		fEditor= editor;
 	}
 
 	/*
@@ -61,9 +52,6 @@ public class JavaCorrectionSourceViewer extends SourceViewer {
 			return;
 
 		switch (operation) {
-			case CORRECTIONASSIST_PROPOSALS:
-				fCorrectionAssistant.showPossibleCompletions();
-				return;
 			case SHOW_OUTLINE:
 				fOutlinePresenter.showInformation();
 				return;
@@ -71,6 +59,7 @@ public class JavaCorrectionSourceViewer extends SourceViewer {
 				fStructurePresenter.showInformation();
 				return;
 		}
+		
 		super.doOperation(operation);
 	}
 
@@ -78,15 +67,10 @@ public class JavaCorrectionSourceViewer extends SourceViewer {
 	 * @see ITextOperationTarget#canDoOperation(int)
 	 */
 	public boolean canDoOperation(int operation) {
-		if (operation == CORRECTIONASSIST_PROPOSALS) {
-			return true;
-		}
-		if (operation == SHOW_OUTLINE) {
+		if (operation == SHOW_OUTLINE)
 			return fOutlinePresenter != null;
-		}
-		if (operation == OPEN_STRUCTURE) {
+		if (operation == OPEN_STRUCTURE)
 			return fStructurePresenter != null;
-		}
 		return super.canDoOperation(operation);
 	}
 
@@ -95,8 +79,6 @@ public class JavaCorrectionSourceViewer extends SourceViewer {
 	 */
 	public void configure(SourceViewerConfiguration configuration) {
 		super.configure(configuration);
-		fCorrectionAssistant= new JavaCorrectionAssistant(fEditor);
-		fCorrectionAssistant.install(this);
 		if (configuration instanceof JavaSourceViewerConfiguration) {
 			fOutlinePresenter= ((JavaSourceViewerConfiguration)configuration).getOutlinePresenter(this, false);
 			fOutlinePresenter.install(this);
@@ -111,10 +93,6 @@ public class JavaCorrectionSourceViewer extends SourceViewer {
 	 * @see TextViewer#handleDispose()
 	 */
 	protected void handleDispose() {
-		if (fCorrectionAssistant != null) {
-			fCorrectionAssistant.uninstall();
-			fCorrectionAssistant= null;
-		}
 		if (fOutlinePresenter != null) {
 			fOutlinePresenter.uninstall();	
 			fOutlinePresenter= null;
@@ -125,5 +103,4 @@ public class JavaCorrectionSourceViewer extends SourceViewer {
 		}
 		super.handleDispose();
 	}
-
-};
+}

@@ -18,9 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
@@ -46,14 +43,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.GroupMarker;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
@@ -74,23 +67,43 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
+import org.eclipse.jface.text.source.IAnnotationAccess;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IOverviewRuler;
+import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.ISourceViewerExtension;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.IVerticalRulerColumn;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
+import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPartService;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
@@ -102,13 +115,17 @@ import org.eclipse.ui.texteditor.AddTaskAction;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceAction;
+import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.StatusTextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.eclipse.ui.views.tasklist.TaskList;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -139,6 +156,7 @@ import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
@@ -198,7 +216,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * Link mode.  
 	 */
 	class MouseClickListener implements KeyListener, MouseListener, MouseMoveListener,
-		FocusListener, PaintListener, IPropertyChangeListener, IDocumentListener, ITextInputListener {		
+		FocusListener, PaintListener, IPropertyChangeListener, IDocumentListener, ITextInputListener {
 
 		/** The session is active. */
 		private boolean fActive;
@@ -631,7 +649,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					return;
 				// Ctrl was already pressed
 				fActive= true;
-	}
+			}
 	
 			ISourceViewer viewer= getSourceViewer();
 			if (viewer == null) {
@@ -816,8 +834,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			
 			return maxLocation;
 		}
-
-	}	
+	};
 	
 	/**
 	 * This action dispatches into two behaviours: If there is no current text
@@ -930,16 +947,103 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 
 		}
-	}
+	};
+	
+	static protected class AnnotationAccess implements IAnnotationAccess {
+
+		/*
+		 * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
+		 */
+		public Object getType(Annotation annotation) {
+			if (annotation instanceof IProblemAnnotation) {
+				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
+				if (problemAnnotation.isRelevant())
+					return problemAnnotation.getAnnotationType();
+			}
+			return null;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isMultiLine(org.eclipse.jface.text.source.Annotation)
+		 */
+		public boolean isMultiLine(Annotation annotation) {
+			return true;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isTemporary(org.eclipse.jface.text.source.Annotation)
+		 */
+		public boolean isTemporary(Annotation annotation) {
+			if (annotation instanceof IProblemAnnotation) {
+				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
+				if (problemAnnotation.isRelevant())
+					return problemAnnotation.isTemporary();
+			}
+			return false;
+		}
+	};
 
 	
 	/** Preference key for showing the line number ruler */
-	private final static String LINE_NUMBER_RULER= PreferenceConstants.EDITOR_LINE_NUMBER_RULER;
+	protected final static String LINE_NUMBER_RULER= PreferenceConstants.EDITOR_LINE_NUMBER_RULER;
 	/** Preference key for the foreground color of the line numbers */
-	private final static String LINE_NUMBER_COLOR= PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR;
+	protected final static String LINE_NUMBER_COLOR= PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR;
 	/** Preference key for the link color */
-	private final static String LINK_COLOR= PreferenceConstants.EDITOR_LINK_COLOR;
+	protected final static String LINK_COLOR= PreferenceConstants.EDITOR_LINK_COLOR;
+	/** Preference key for matching brackets */
+	protected final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
+	/** Preference key for matching brackets color */
+	protected final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
+	/** Preference key for highlighting current line */
+	protected final static String CURRENT_LINE= PreferenceConstants.EDITOR_CURRENT_LINE;
+	/** Preference key for highlight color of current line */
+	protected final static String CURRENT_LINE_COLOR= PreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
+	/** Preference key for showing print marging ruler */
+	protected final static String PRINT_MARGIN= PreferenceConstants.EDITOR_PRINT_MARGIN;
+	/** Preference key for print margin ruler color */
+	protected final static String PRINT_MARGIN_COLOR= PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR;
+	/** Preference key for print margin ruler column */
+	protected final static String PRINT_MARGIN_COLUMN= PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN;
+	/** Preference key for error indication */
+	protected final static String ERROR_INDICATION= PreferenceConstants.EDITOR_PROBLEM_INDICATION;
+	/** Preference key for error color */
+	protected final static String ERROR_INDICATION_COLOR= PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR;
+	/** Preference key for warning indication */
+	protected final static String WARNING_INDICATION= PreferenceConstants.EDITOR_WARNING_INDICATION;
+	/** Preference key for warning color */
+	protected final static String WARNING_INDICATION_COLOR= PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR;
+	/** Preference key for task indication */
+	protected final static String TASK_INDICATION= PreferenceConstants.EDITOR_TASK_INDICATION;
+	/** Preference key for task color */
+	protected final static String TASK_INDICATION_COLOR= PreferenceConstants.EDITOR_TASK_INDICATION_COLOR;
+	/** Preference key for bookmark indication */
+	protected final static String BOOKMARK_INDICATION= PreferenceConstants.EDITOR_BOOKMARK_INDICATION;
+	/** Preference key for bookmark color */
+	protected final static String BOOKMARK_INDICATION_COLOR= PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR;
+	/** Preference key for search result indication */
+	protected final static String SEARCH_RESULT_INDICATION= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION;
+	/** Preference key for search result color */
+	protected final static String SEARCH_RESULT_INDICATION_COLOR= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR;
+	/** Preference key for unknown annotation indication */
+	protected final static String UNKNOWN_INDICATION= PreferenceConstants.EDITOR_UNKNOWN_INDICATION;
+	/** Preference key for unknown annotation color */
+	protected final static String UNKNOWN_INDICATION_COLOR= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR;
+	/** Preference key for shwoing the overview ruler */
+	protected final static String OVERVIEW_RULER= PreferenceConstants.EDITOR_OVERVIEW_RULER;
+	/** Preference key for error indication in overview ruler */
+	protected final static String ERROR_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER;
+	/** Preference key for warning indication in overview ruler */
+	protected final static String WARNING_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER;
+	/** Preference key for task indication in overview ruler */
+	protected final static String TASK_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER;
+	/** Preference key for bookmark indication in overview ruler */
+	protected final static String BOOKMARK_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER;
+	/** Preference key for search result indication in overview ruler */
+	protected final static String SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER;
+	/** Preference key for unknown annotation indication in overview ruler */
+	protected final static String UNKNOWN_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
 	
+	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
 
 	/** The outline page */
 	protected JavaOutlinePage fOutlinePage;
@@ -947,6 +1051,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected String fOutlinerContextMenuId;
 	/** The selection changed listener */
 	protected ISelectionChangedListener fSelectionChangedListener= new SelectionChangedListener();
+	/** The editor's bracket matcher */
+	protected JavaPairMatcher fBracketMatcher= new JavaPairMatcher(BRACKETS);
 	/** The outline page selection updater */
 	private OutlinePageSelectionUpdater fUpdater;
 	/** Indicates whether this editor should react on outline page selection changes */
@@ -959,6 +1065,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	private MouseClickListener fMouseListener;
 	/** The information presenter. */
 	private InformationPresenter fInformationPresenter;
+	/** The annotation access */
+	protected IAnnotationAccess fAnnotationAccess= new AnnotationAccess();
+	/** The overview ruler */
+	protected OverviewRuler isOverviewRulerVisible;
+	/** The source viewer decoration support */
+	protected SourceViewerDecorationSupport fSourceViewerDecorationSupport;
+	/** The overview ruler */
+	protected OverviewRuler fOverviewRuler;
 	
 	protected CompositeActionGroup fActionGroups;
 	private CompositeActionGroup fContextMenuGroup;
@@ -999,23 +1113,31 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	/*
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
-	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-		ISourceViewer viewer= createJavaSourceViewer(parent, ruler, styles);
+	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles) {
+		
+		ISharedTextColors sharedColors= JavaPlugin.getDefault().getJavaTextTools().getColorManager();
+		fOverviewRuler= new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);		
+		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, fOverviewRuler, isOverviewRulerVisible(), styles);
+		
 		StyledText text= viewer.getTextWidget();
 		text.addBidiSegmentListener(new  BidiSegmentListener() {
 			public void lineGetSegments(BidiSegmentEvent event) {
 				event.segments= getBidiLineSegments(event.lineOffset, event.lineText);
 			}
 		});
+		
 		JavaUIHelp.setHelp(this, text, IJavaHelpContextIds.JAVA_EDITOR);
+				
+		fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(viewer, fOverviewRuler, fAnnotationAccess, sharedColors);
+		configureSourceViewerDecorationSupport();
 		return viewer;
 	}
 	
 	/*
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
-	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-			return super.createSourceViewer(parent, ruler, styles);
+	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles) {
+			return new JavaSourceViewer(parent, verticalRuler, fOverviewRuler, isOverviewRulerVisible(), styles);
 	}
 	
 	/*
@@ -1382,43 +1504,66 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				fEncodingSupport.dispose();
 				fEncodingSupport= null;
 		}
+		
+		if (fSourceViewerDecorationSupport != null) {
+			fSourceViewerDecorationSupport.dispose();
+			fSourceViewerDecorationSupport= null;
+		}
+		
+		if (fBracketMatcher != null) {
+			fBracketMatcher.dispose();
+			fBracketMatcher= null;
+		}
+		
 		super.dispose();
 	}
 	
 	protected void createActions() {
 		super.createActions();
 		
-		ResourceAction action= new AddTaskAction(JavaEditorMessages.getResourceBundle(), "AddTask.", this); //$NON-NLS-1$
-		action.setHelpContextId(IAbstractTextEditorHelpContextIds.ADD_TASK_ACTION);
-		action.setActionDefinitionId(ITextEditorActionDefinitionIds.ADD_TASK);
-		setAction(ITextEditorActionConstants.ADD_TASK, action);
+		ResourceAction resAction= new AddTaskAction(JavaEditorMessages.getResourceBundle(), "AddTask.", this); //$NON-NLS-1$
+		resAction.setHelpContextId(IAbstractTextEditorHelpContextIds.ADD_TASK_ACTION);
+		resAction.setActionDefinitionId(ITextEditorActionDefinitionIds.ADD_TASK);
+		setAction(ITextEditorActionConstants.ADD_TASK, resAction);
 
 		ActionGroup oeg, ovg, sg, jsg;
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
-				oeg= new OpenEditorActionGroup(this),
-				ovg= new OpenViewActionGroup(this),
-				sg= new ShowActionGroup(this),
+			oeg= new OpenEditorActionGroup(this),
+			ovg= new OpenViewActionGroup(this),
+			sg= new ShowActionGroup(this),
 			jsg= new JavaSearchActionGroup(this)
 		});
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
 		
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
-		action= new InformationDispatchAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", (TextOperationAction) action); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
-		setAction("ShowJavaDoc", action); //$NON-NLS-1$
-	
-		Action searchAction= new SearchUsagesInFileAction(this);
-		searchAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_REFERENCES);
-		setAction(SearchUsagesInFileAction.SHOWREFERENCES, searchAction);
-	
+		resAction= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
+		resAction= new InformationDispatchAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", (TextOperationAction) resAction); //$NON-NLS-1$
+		resAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
+		setAction("ShowJavaDoc", resAction); //$NON-NLS-1$
+		
+		Action action= new GotoMatchingBracketAction(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);				
+		setAction(GotoMatchingBracketAction.GOTO_MATCHING_BRACKET, action);
+			
+		action= new SearchUsagesInFileAction(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_REFERENCES);
+		setAction(SearchUsagesInFileAction.SHOWREFERENCES, action);
+		
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"ShowOutline.", this, JavaSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
+		setAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE, action);
+
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"OpenStructure.", this, JavaSourceViewer.OPEN_STRUCTURE, true); //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE);
+		setAction(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE, action);
+		
 		fEncodingSupport= new DefaultEncodingSupport();
 		fEncodingSupport.initialize(this);
 		
 		if (fMouseListener == null) {
-				fMouseListener= new MouseClickListener();
-				fMouseListener.install();	
-	}
+			fMouseListener= new MouseClickListener();
+			fMouseListener.install();	
 		}
+	}
 	
 	private boolean isTextSelectionEmpty() {
 		ISelection selection= getSelectionProvider().getSelection();
@@ -1454,6 +1599,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				return;
 			}
 			
+			if (OVERVIEW_RULER.equals(property))  {
+				if (isOverviewRulerVisible())
+					showOverviewRuler();
+				else
+					hideOverviewRuler();
+				return;
+			}
+			
 			if (LINE_NUMBER_RULER.equals(property)) {
 				if (isLineNumberRulerVisible())
 					showLineNumberRuler();
@@ -1470,9 +1623,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					initializeLineNumberRulerColumn(fLineNumberRulerColumn);
 			}
 				
-			if (isJavaEditorHoverProperty(property)) {
+			if (isJavaEditorHoverProperty(property))
 				updateHoverBehavior();
-			}				
 			
 		} finally {
 			super.handlePreferenceStoreChanged(event);
@@ -1745,5 +1897,255 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		fInformationPresenter= new InformationPresenter(informationControlCreator);
 		fInformationPresenter.setSizeConstraints(60, 10, true, true);		
 		fInformationPresenter.install(getSourceViewer());
+	}
+
+	protected void showOverviewRuler() {
+		if (fOverviewRuler != null) {
+			if (getSourceViewer() instanceof ISourceViewerExtension) {
+				((ISourceViewerExtension) getSourceViewer()).showAnnotationsOverview(true);
+				fSourceViewerDecorationSupport.updateOverviewDecorations();
+			}
+		}
+	}
+
+	protected void hideOverviewRuler() {
+		if (getSourceViewer() instanceof ISourceViewerExtension) {
+			fSourceViewerDecorationSupport.hideAnnotationOverview();
+			((ISourceViewerExtension) getSourceViewer()).showAnnotationsOverview(false);
+		}
+	}
+
+	protected boolean isOverviewRulerVisible() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(OVERVIEW_RULER);
+	}
+
+	protected void configureSourceViewerDecorationSupport() {
+	
+		fSourceViewerDecorationSupport.setCharacterPairMatcher(fBracketMatcher);
+				
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.UNKNOWN, UNKNOWN_INDICATION_COLOR, UNKNOWN_INDICATION, UNKNOWN_INDICATION_IN_OVERVIEW_RULER, 0);
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.BOOKMARK, BOOKMARK_INDICATION_COLOR, BOOKMARK_INDICATION, BOOKMARK_INDICATION_IN_OVERVIEW_RULER, 1);
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.TASK, TASK_INDICATION_COLOR, TASK_INDICATION, TASK_INDICATION_IN_OVERVIEW_RULER, 2);
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.SEARCH, SEARCH_RESULT_INDICATION_COLOR, SEARCH_RESULT_INDICATION, SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER, 3);
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.WARNING, WARNING_INDICATION_COLOR, WARNING_INDICATION, WARNING_INDICATION_IN_OVERVIEW_RULER, 4);
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.ERROR, ERROR_INDICATION_COLOR, ERROR_INDICATION, ERROR_INDICATION_IN_OVERVIEW_RULER, 5);
+				
+		
+		fSourceViewerDecorationSupport.setCursorLinePainterPreferenceKeys(CURRENT_LINE, CURRENT_LINE_COLOR);
+		fSourceViewerDecorationSupport.setMarginPainterPreferenceKeys(PRINT_MARGIN, PRINT_MARGIN_COLOR, PRINT_MARGIN_COLUMN);
+		fSourceViewerDecorationSupport.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR);
+		
+		fSourceViewerDecorationSupport.install(getPreferenceStore());
+	}
+	
+	/**
+	 * Jumps to the matching bracket.
+	 */
+	public void gotoMatchingBracket() {
+		
+		ISourceViewer sourceViewer= getSourceViewer();
+		IDocument document= sourceViewer.getDocument();
+		if (document == null)
+			return;
+		
+		IRegion selection= getSignedSelection(sourceViewer);
+
+		int selectionLength= Math.abs(selection.getLength());
+		if (selectionLength > 1) {
+			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.invalidSelection"));	//$NON-NLS-1$		
+			sourceViewer.getTextWidget().getDisplay().beep();
+			return;
+		}
+
+		// #26314
+		int sourceCaretOffset= selection.getOffset() + selection.getLength();
+		if (isSurroundedByBrackets(document, sourceCaretOffset))
+			sourceCaretOffset -= selection.getLength();
+
+		IRegion region= fBracketMatcher.match(document, sourceCaretOffset);
+		if (region == null) {
+			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.noMatchingBracket"));	//$NON-NLS-1$		
+			sourceViewer.getTextWidget().getDisplay().beep();
+			return;		
+		}
+		
+		int offset= region.getOffset();
+		int length= region.getLength();
+		
+		if (length < 1)
+			return;
+			
+		int anchor= fBracketMatcher.getAnchor();
+		int targetOffset= (JavaPairMatcher.RIGHT == anchor) ? offset : offset + length - 1;
+		
+		boolean visible= false;
+		if (sourceViewer instanceof ITextViewerExtension3) {
+			ITextViewerExtension3 extension= (ITextViewerExtension3) sourceViewer;
+			visible= (extension.modelOffset2WidgetOffset(targetOffset) > -1);
+		} else {
+			IRegion visibleRegion= sourceViewer.getVisibleRegion();
+			visible= (targetOffset >= visibleRegion.getOffset() && targetOffset < visibleRegion.getOffset() + visibleRegion.getLength());
+		}
+		
+		if (!visible) {
+			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.bracketOutsideSelectedElement"));	//$NON-NLS-1$		
+			sourceViewer.getTextWidget().getDisplay().beep();
+			return;
+		}
+		
+		if (selection.getLength() < 0)
+			targetOffset -= selection.getLength();
+			
+		sourceViewer.setSelectedRange(targetOffset, selection.getLength());
+		sourceViewer.revealRange(targetOffset, selection.getLength());
+	}
+
+	/**
+	 * Ses the given message as error message to this editor's status line.
+	 * @param msg message to be set
+	 */
+	protected void setStatusLineErrorMessage(String msg) {
+		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
+		if (statusLine != null)
+			statusLine.setMessage(true, msg, null);	
+	}
+	
+	private static IRegion getSignedSelection(ITextViewer viewer) {
+
+		StyledText text= viewer.getTextWidget();
+		int caretOffset= text.getCaretOffset();
+		Point selection= text.getSelection();
+		
+		// caret left
+		int offset, length;
+		if (caretOffset == selection.x) {
+			offset= selection.y;
+			length= selection.x - selection.y;			
+			
+		// caret right
+		} else {
+			offset= selection.x;
+			length= selection.y - selection.x;			
+		}
+		
+		return new Region(offset, length);
+	}
+	
+	private static boolean isBracket(char character) {
+		for (int i= 0; i != BRACKETS.length; ++i)
+			if (character == BRACKETS[i])
+				return true;
+		return false;
+	}
+
+	private static boolean isSurroundedByBrackets(IDocument document, int offset) {
+		if (offset == 0 || offset == document.getLength())
+			return false;
+
+		try {
+			return
+				isBracket(document.getChar(offset - 1)) &&
+				isBracket(document.getChar(offset));
+			
+		} catch (BadLocationException e) {
+			return false;	
+		}
+	}
+
+	/**
+	 * Jumps to the error next according to the given direction.
+	 */
+	public void gotoError(boolean forward) {
+		
+		ISelectionProvider provider= getSelectionProvider();
+		
+		ITextSelection s= (ITextSelection) provider.getSelection();
+		Position errorPosition= new Position(0, 0);
+		IProblemAnnotation nextError= getNextError(s.getOffset(), forward, errorPosition);
+		
+		if (nextError != null) {
+			
+			IMarker marker= null;
+			if (nextError instanceof MarkerAnnotation)
+				marker= ((MarkerAnnotation) nextError).getMarker();
+			else {
+				Iterator e= nextError.getOverlaidIterator();
+				if (e != null) {
+					while (e.hasNext()) {
+						Object o= e.next();
+						if (o instanceof MarkerAnnotation) {
+							marker= ((MarkerAnnotation) o).getMarker();
+							break;
+						}
+					}
+				}
+			}
+			
+			if (marker != null) {
+				IWorkbenchPage page= getSite().getPage();
+				IViewPart view= view= page.findView("org.eclipse.ui.views.TaskList"); //$NON-NLS-1$
+				if (view instanceof TaskList) {
+					StructuredSelection ss= new StructuredSelection(marker);
+					((TaskList) view).setSelection(ss, true);
+				}
+			}
+			
+			selectAndReveal(errorPosition.getOffset(), errorPosition.getLength());
+			setStatusLineErrorMessage(nextError.getMessage());
+			
+		} else {
+			
+			setStatusLineErrorMessage(null);
+			
+		}
+	}
+
+	private IProblemAnnotation getNextError(int offset, boolean forward, Position errorPosition) {
+		
+		IProblemAnnotation nextError= null;
+		Position nextErrorPosition= null;
+		
+		IDocument document= getDocumentProvider().getDocument(getEditorInput());
+		int endOfDocument= document.getLength(); 
+		int distance= 0;
+		
+		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
+		Iterator e= new ProblemAnnotationIterator(model, false);
+		while (e.hasNext()) {
+			
+			IProblemAnnotation a= (IProblemAnnotation) e.next();
+			if (a.hasOverlay() || !a.isProblem())
+				continue;
+				
+			Position p= model.getPosition((Annotation) a);
+			if (!p.includes(offset)) {
+				
+				int currentDistance= 0;
+				
+				if (forward) {
+					currentDistance= p.getOffset() - offset;
+					if (currentDistance < 0)
+						currentDistance= endOfDocument - offset + p.getOffset();
+				} else {
+					currentDistance= offset - p.getOffset();
+					if (currentDistance < 0)
+						currentDistance= offset + endOfDocument - p.getOffset();
+				}						
+										
+				if (nextError == null || currentDistance < distance) {
+					distance= currentDistance;
+					nextError= a;
+					nextErrorPosition= p;
+				}
+			}
+		}
+		
+		if (nextErrorPosition != null) {
+			errorPosition.setOffset(nextErrorPosition.getOffset());
+			errorPosition.setLength(nextErrorPosition.getLength());
+		}
+		
+		return nextError;
 	}
 }

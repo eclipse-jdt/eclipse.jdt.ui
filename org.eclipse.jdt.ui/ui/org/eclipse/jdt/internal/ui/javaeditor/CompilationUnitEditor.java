@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -42,24 +41,15 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationAccess;
-import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IOverviewRuler;
-import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.ISourceViewerExtension;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.jface.action.Action;
@@ -72,12 +62,9 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
@@ -87,12 +74,8 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
-import org.eclipse.ui.texteditor.MarkerAnnotation;
-import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextOperationAction;
-import org.eclipse.ui.views.tasklist.TaskList;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
@@ -121,8 +104,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
-import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
-import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
 import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
@@ -137,18 +119,25 @@ import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
 public class CompilationUnitEditor extends JavaEditor implements IReconcilingParticipant {
 	
 	
+	/** 
+	 * Text operation code for requesting correction assist to show correction
+	 * proposals for the current position. 
+	 */
+	public static final int CORRECTIONASSIST_PROPOSALS= 50;
+
+	
 	interface ITextConverter {
 		void customizeDocumentCommand(IDocument document, DocumentCommand command);
 	};
 	
-	class AdaptedSourceViewer extends JavaCorrectionSourceViewer  {
-		
+	class AdaptedSourceViewer extends JavaSourceViewer  {
+				
 		private List fTextConverters;
 		private boolean fIgnoreTextConverters= false;
-		
+		private JavaCorrectionAssistant fCorrectionAssistant;
 		
 		public AdaptedSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles) {
-			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles, CompilationUnitEditor.this);
+			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
 		}
 				
 		public IContentAssistant getContentAssistant() {
@@ -168,6 +157,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					String msg= fContentAssistant.showPossibleCompletions();
 					setStatusLineErrorMessage(msg);
 					return;
+				case CORRECTIONASSIST_PROPOSALS:
+					fCorrectionAssistant.showPossibleCompletions();
+					return;
 				case UNDO:
 					fIgnoreTextConverters= true;
 					break;
@@ -177,6 +169,26 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			}
 			
 			super.doOperation(operation);
+		}
+		
+		/*
+		 * @see ITextOperationTarget#canDoOperation(int)
+		 */
+		public boolean canDoOperation(int operation) {
+			if (operation == CORRECTIONASSIST_PROPOSALS)
+				return true;
+			return super.canDoOperation(operation);
+		}
+		
+		/*
+		 * @see TextViewer#handleDispose()
+		 */
+		protected void handleDispose() {
+			if (fCorrectionAssistant != null) {
+				fCorrectionAssistant.uninstall();
+				fCorrectionAssistant= null;
+			}
+			super.handleDispose();
 		}
 		
 		public void insertTextConverter(ITextConverter textConverter, int index) {
@@ -236,6 +248,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		 */
 		public void configure(SourceViewerConfiguration configuration) {
 			super.configure(configuration);
+			fCorrectionAssistant= new JavaCorrectionAssistant(CompilationUnitEditor.this);
+			fCorrectionAssistant.install(this);
 			prependAutoEditStrategy(new SmartBracesAutoEditStrategy(this), IDocument.DEFAULT_CONTENT_TYPE);
 		}
 	};
@@ -322,40 +336,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		 */
 		public void propertyChange(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
 			handlePreferencePropertyChanged(event);
-		}
-	};
-	
-	static class AnnotationAccess implements IAnnotationAccess {
-
-		/*
-		 * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
-		 */
-		public Object getType(Annotation annotation) {
-			if (annotation instanceof IProblemAnnotation) {
-				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
-				if (problemAnnotation.isRelevant())
-					return problemAnnotation.getAnnotationType();
-			}
-			return null;
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isMultiLine(org.eclipse.jface.text.source.Annotation)
-		 */
-		public boolean isMultiLine(Annotation annotation) {
-			return true;
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isTemporary(org.eclipse.jface.text.source.Annotation)
-		 */
-		public boolean isTemporary(Annotation annotation) {
-			if (annotation instanceof IProblemAnnotation) {
-				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
-				if (problemAnnotation.isRelevant())
-					return problemAnnotation.isTemporary();
-			}
-			return false;
 		}
 	};
 	
@@ -552,64 +532,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	};
 	
-	/* Preference key for code formatter tab size */
+	/** Preference key for code formatter tab size */
 	private final static String CODE_FORMATTER_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
-	/** Preference key for matching brackets */
-	private final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
-	/** Preference key for matching brackets color */
-	private final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
-	/** Preference key for highlighting current line */
-	private final static String CURRENT_LINE= PreferenceConstants.EDITOR_CURRENT_LINE;
-	/** Preference key for highlight color of current line */
-	private final static String CURRENT_LINE_COLOR= PreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
-	/** Preference key for showing print marging ruler */
-	private final static String PRINT_MARGIN= PreferenceConstants.EDITOR_PRINT_MARGIN;
-	/** Preference key for print margin ruler color */
-	private final static String PRINT_MARGIN_COLOR= PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR;
-	/** Preference key for print margin ruler column */
-	private final static String PRINT_MARGIN_COLUMN= PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN;
 	/** Preference key for inserting spaces rather than tabs */
 	private final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
-	/** Preference key for error indication */
-	private final static String ERROR_INDICATION= PreferenceConstants.EDITOR_PROBLEM_INDICATION;
-	/** Preference key for error color */
-	private final static String ERROR_INDICATION_COLOR= PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR;
-	/** Preference key for warning indication */
-	private final static String WARNING_INDICATION= PreferenceConstants.EDITOR_WARNING_INDICATION;
-	/** Preference key for warning color */
-	private final static String WARNING_INDICATION_COLOR= PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR;
-	/** Preference key for task indication */
-	private final static String TASK_INDICATION= PreferenceConstants.EDITOR_TASK_INDICATION;
-	/** Preference key for task color */
-	private final static String TASK_INDICATION_COLOR= PreferenceConstants.EDITOR_TASK_INDICATION_COLOR;
-	/** Preference key for bookmark indication */
-	private final static String BOOKMARK_INDICATION= PreferenceConstants.EDITOR_BOOKMARK_INDICATION;
-	/** Preference key for bookmark color */
-	private final static String BOOKMARK_INDICATION_COLOR= PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR;
-	/** Preference key for search result indication */
-	private final static String SEARCH_RESULT_INDICATION= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION;
-	/** Preference key for search result color */
-	private final static String SEARCH_RESULT_INDICATION_COLOR= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR;
-	/** Preference key for unknown annotation indication */
-	private final static String UNKNOWN_INDICATION= PreferenceConstants.EDITOR_UNKNOWN_INDICATION;
-	/** Preference key for unknown annotation color */
-	private final static String UNKNOWN_INDICATION_COLOR= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR;
 	/** Preference key for linked position color */
 	private final static String LINKED_POSITION_COLOR= PreferenceConstants.EDITOR_LINKED_POSITION_COLOR;
-	/** Preference key for shwoing the overview ruler */
-	private final static String OVERVIEW_RULER= PreferenceConstants.EDITOR_OVERVIEW_RULER;
-	/** Preference key for error indication in overview ruler */
-	private final static String ERROR_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER;
-	/** Preference key for warning indication in overview ruler */
-	private final static String WARNING_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER;
-	/** Preference key for task indication in overview ruler */
-	private final static String TASK_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER;
-	/** Preference key for bookmark indication in overview ruler */
-	private final static String BOOKMARK_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER;
-	/** Preference key for search result indication in overview ruler */
-	private final static String SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER;
-	/** Preference key for unknown annotation indication in overview ruler */
-	private final static String UNKNOWN_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
 	/** Preference key for automatically closing strings */
 	private final static String CLOSE_STRINGS= PreferenceConstants.EDITOR_CLOSE_STRINGS;
 	/** Preference key for automatically wrapping Java strings */
@@ -625,15 +553,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	/** Preference key for smart paste */
 	private final static String SMART_PASTE= PreferenceConstants.EDITOR_SMART_PASTE;
 	
-	private final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
-
 	
 	/** The editor's save policy */
 	protected ISavePolicy fSavePolicy;
 	/** Listener to annotation model changes that updates the error tick in the tab image */
 	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
-	/** The editor's bracket matcher */
-	private JavaPairMatcher fBracketMatcher= new JavaPairMatcher(BRACKETS);
 	/** The editor's tab converter */
 	private TabConverter fTabConverter;
 	/** History for structure select action */
@@ -648,12 +572,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private int fRememberedElementOffset;
 	/** The bracket inserter. */
 	private BracketInserter fBracketInserter= new BracketInserter();
-	/** The annotation access */
-	private IAnnotationAccess fAnnotationAccess= new AnnotationAccess();
-	/** The overview ruler */
-	private OverviewRuler fOverviewRuler;
-	/** The source viewer decoration support */
-	private SourceViewerDecorationSupport fSourceViewerDecorationSupport;
 	
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
@@ -681,50 +599,37 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		super.createActions();
 
-		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, JavaCorrectionSourceViewer.CORRECTIONASSIST_PROPOSALS); //$NON-NLS-1$
+		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, CORRECTIONASSIST_PROPOSALS); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);		
 		setAction("CorrectionAssistProposal", action); //$NON-NLS-1$
+		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
 
 		action= new ContentAssistAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);		
 		setAction("ContentAssistProposal", action); //$NON-NLS-1$
+		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);	//$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);		
 		setAction("ContentAssistContextInformation", action); //$NON-NLS-1$
+		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.COMMENT);		
 		setAction("Comment", action); //$NON-NLS-1$
+		markAsStateDependentAction("Comment", true); //$NON-NLS-1$
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.UNCOMMENT);		
 		setAction("Uncomment", action); //$NON-NLS-1$
+		markAsStateDependentAction("Uncomment", true); //$NON-NLS-1$
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);		
 		setAction("Format", action); //$NON-NLS-1$
-		markAsSelectionDependentAction("Format", true); //$NON-NLS-1$
-
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"ShowOutline.", this, JavaCorrectionSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
-		setAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE, action);
-
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"OpenStructure.", this, JavaCorrectionSourceViewer.OPEN_STRUCTURE, true); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE);
-		setAction(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE, action);
-
-		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
-		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
-		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
-		markAsStateDependentAction("Comment", true); //$NON-NLS-1$
-		markAsStateDependentAction("Uncomment", true); //$NON-NLS-1$
 		markAsStateDependentAction("Format", true); //$NON-NLS-1$
-
-		action= new GotoMatchingBracketAction(this);
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);				
-		setAction(GotoMatchingBracketAction.GOTO_MATCHING_BRACKET, action);
-
+		markAsSelectionDependentAction("Format", true); //$NON-NLS-1$		
+		
 		action= GoToNextPreviousMemberAction.newGoToNextMemberAction(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_NEXT_MEMBER);				
 		setAction(GoToNextPreviousMemberAction.NEXT_MEMBER, action);
@@ -948,219 +853,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return true;
 	}
 	
-	/**
-	 * Jumps to the error next according to the given direction.
-	 */
-	public void gotoError(boolean forward) {
-		
-		ISelectionProvider provider= getSelectionProvider();
-		
-		ITextSelection s= (ITextSelection) provider.getSelection();
-		Position errorPosition= new Position(0, 0);
-		IProblemAnnotation nextError= getNextError(s.getOffset(), forward, errorPosition);
-		
-		if (nextError != null) {
-			
-			IMarker marker= null;
-			if (nextError instanceof MarkerAnnotation)
-				marker= ((MarkerAnnotation) nextError).getMarker();
-			else {
-				Iterator e= nextError.getOverlaidIterator();
-				if (e != null) {
-					while (e.hasNext()) {
-						Object o= e.next();
-						if (o instanceof MarkerAnnotation) {
-							marker= ((MarkerAnnotation) o).getMarker();
-							break;
-						}
-					}
-				}
-			}
-			
-			if (marker != null) {
-				IWorkbenchPage page= getSite().getPage();
-				IViewPart view= view= page.findView("org.eclipse.ui.views.TaskList"); //$NON-NLS-1$
-				if (view instanceof TaskList) {
-					StructuredSelection ss= new StructuredSelection(marker);
-					((TaskList) view).setSelection(ss, true);
-				}
-			}
-			
-			selectAndReveal(errorPosition.getOffset(), errorPosition.getLength());
-			setStatusLineErrorMessage(nextError.getMessage());
-			
-		} else {
-			
-			setStatusLineErrorMessage(null);
-			
-		}
-	}
-
-	private static IRegion getSignedSelection(ITextViewer viewer) {
-
-		StyledText text= viewer.getTextWidget();
-		int caretOffset= text.getCaretOffset();
-		Point selection= text.getSelection();
-		
-		// caret left
-		int offset, length;
-		if (caretOffset == selection.x) {
-			offset= selection.y;
-			length= selection.x - selection.y;			
-			
-		// caret right
-		} else {
-			offset= selection.x;
-			length= selection.y - selection.x;			
-		}
-		
-		return new Region(offset, length);
-	}
-
-	private static boolean isBracket(char character) {
-		for (int i= 0; i != BRACKETS.length; ++i)
-			if (character == BRACKETS[i])
-				return true;
-		return false;
-	}
-
-	private static boolean isSurroundedByBrackets(IDocument document, int offset) {
-		if (offset == 0 || offset == document.getLength())
-			return false;
-
-		try {
-			return
-				isBracket(document.getChar(offset - 1)) &&
-				isBracket(document.getChar(offset));
-			
-		} catch (BadLocationException e) {
-			return false;	
-		}
-	} 
-
-	/**
-	 * Jumps to the matching bracket.
-	 */
-	public void gotoMatchingBracket() {
-		
-		ISourceViewer sourceViewer= getSourceViewer();
-		IDocument document= sourceViewer.getDocument();
-		if (document == null)
-			return;
-		
-		IRegion selection= getSignedSelection(sourceViewer);
-
-		int selectionLength= Math.abs(selection.getLength());
-		if (selectionLength > 1) {
-			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.invalidSelection"));	//$NON-NLS-1$		
-			sourceViewer.getTextWidget().getDisplay().beep();
-			return;
-		}
-
-		// #26314
-		int sourceCaretOffset= selection.getOffset() + selection.getLength();
-		if (isSurroundedByBrackets(document, sourceCaretOffset))
-			sourceCaretOffset -= selection.getLength();
-
-		IRegion region= fBracketMatcher.match(document, sourceCaretOffset);
-		if (region == null) {
-			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.noMatchingBracket"));	//$NON-NLS-1$		
-			sourceViewer.getTextWidget().getDisplay().beep();
-			return;		
-		}
-		
-		int offset= region.getOffset();
-		int length= region.getLength();
-		
-		if (length < 1)
-			return;
-			
-		int anchor= fBracketMatcher.getAnchor();
-		int targetOffset= (JavaPairMatcher.RIGHT == anchor) ? offset : offset + length - 1;
-		
-		boolean visible= false;
-		if (sourceViewer instanceof ITextViewerExtension3) {
-			ITextViewerExtension3 extension= (ITextViewerExtension3) sourceViewer;
-			visible= (extension.modelOffset2WidgetOffset(targetOffset) > -1);
-		} else {
-			IRegion visibleRegion= sourceViewer.getVisibleRegion();
-			visible= (targetOffset >= visibleRegion.getOffset() && targetOffset < visibleRegion.getOffset() + visibleRegion.getLength());
-		}
-		
-		if (!visible) {
-			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.bracketOutsideSelectedElement"));	//$NON-NLS-1$		
-			sourceViewer.getTextWidget().getDisplay().beep();
-			return;
-		}
-		
-		if (selection.getLength() < 0)
-			targetOffset -= selection.getLength();
-			
-		sourceViewer.setSelectedRange(targetOffset, selection.getLength());
-		sourceViewer.revealRange(targetOffset, selection.getLength());
-	}
-	
-	/**
-	 * Ses the given message as error message to this editor's status line.
-	 * @param msg message to be set
-	 */
-	protected void setStatusLineErrorMessage(String msg) {
-		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
-		if (statusLine != null)
-			statusLine.setMessage(true, msg, null);	
-	}
-	
-	private IProblemAnnotation getNextError(int offset, boolean forward, Position errorPosition) {
-		
-		IProblemAnnotation nextError= null;
-		Position nextErrorPosition= null;
-		
-		IDocument document= getDocumentProvider().getDocument(getEditorInput());
-		int endOfDocument= document.getLength(); 
-		int distance= 0;
-		
-		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		Iterator e= new ProblemAnnotationIterator(model, false);
-		while (e.hasNext()) {
-			
-			IProblemAnnotation a= (IProblemAnnotation) e.next();
-			if (a.hasOverlay() || !a.isProblem())
-				continue;
-				
-			Position p= model.getPosition((Annotation) a);
-			if (!p.includes(offset)) {
-				
-				int currentDistance= 0;
-				
-				if (forward) {
-					currentDistance= p.getOffset() - offset;
-					if (currentDistance < 0)
-						currentDistance= endOfDocument - offset + p.getOffset();
-				} else {
-					currentDistance= offset - p.getOffset();
-					if (currentDistance < 0)
-						currentDistance= offset + endOfDocument - p.getOffset();
-				}						
-										
-				if (nextError == null || currentDistance < distance) {
-					distance= currentDistance;
-					nextError= a;
-					nextErrorPosition= p;
-				}
-			}
-		}
-		
-		if (nextErrorPosition != null) {
-			errorPosition.setOffset(nextErrorPosition.getOffset());
-			errorPosition.setLength(nextErrorPosition.getLength());
-		}
-		
-		return nextError;
-	}
-	
-	/*
-	 * @see AbstractTextEditor#isSaveAsAllowed() 
-	 */
 	public boolean isSaveAsAllowed() {
 		return true;
 	}
@@ -1297,30 +989,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return store.getBoolean(SPACES_FOR_TABS);
 	}
 	
-	private void showOverviewRuler() {
-		if (fOverviewRuler != null) {
-			if (getSourceViewer() instanceof ISourceViewerExtension) {
-				((ISourceViewerExtension) getSourceViewer()).showAnnotationsOverview(true);
-				fSourceViewerDecorationSupport.updateOverviewDecorations();
-			}
-		}
-	}
-	
-	private void hideOverviewRuler() {
-		if (getSourceViewer() instanceof ISourceViewerExtension) {
-			fSourceViewerDecorationSupport.hideAnnotationOverview();
-			((ISourceViewerExtension) getSourceViewer()).showAnnotationsOverview(false);
-		}
-	}
-	
-	private boolean isOverviewRulerVisible() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(OVERVIEW_RULER);
-	}
-	
-	/*
-	 * @see AbstractTextEditor#dispose()
-	 */
 	public void dispose() {
 
 		ISourceViewer sourceViewer= getSourceViewer();
@@ -1348,16 +1016,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			fActionGroups= null;
 		}
 			
-		if (fSourceViewerDecorationSupport != null) {
-			fSourceViewerDecorationSupport.dispose();
-			fSourceViewerDecorationSupport= null;
-		}
-		
-		if (fBracketMatcher != null) {
-			fBracketMatcher.dispose();
-			fBracketMatcher= null;
-		}
-			
 		super.dispose();
 	}
 	
@@ -1367,10 +1025,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public void createPartControl(Composite parent) {
 		
 		super.createPartControl(parent);
-		
-		if (isOverviewRulerVisible())
-			showOverviewRuler();
-			
+					
 		if (isTabConversionEnabled())
 			startTabConversion();			
 			
@@ -1441,14 +1096,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 
-				if (OVERVIEW_RULER.equals(p))  {
-					if (isOverviewRulerVisible())
-						showOverviewRuler();
-					else
-						hideOverviewRuler();
-					return;
-				}
-
 				IContentAssistant c= asv.getContentAssistant();
 				if (c instanceof ContentAssistant)
 					ContentAssistPreference.changeConfiguration((ContentAssistant) c, getPreferenceStore(), event);
@@ -1479,52 +1126,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	/*
-	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#createJavaSourceViewer(org.eclipse.swt.widgets.Composite, org.eclipse.jface.text.source.IVerticalRuler, org.eclipse.jface.text.source.IOverviewRuler, boolean, int)
 	 */
-	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
-		String p= event.getProperty();
-		boolean affects=MATCHING_BRACKETS_COLOR.equals(p) || CURRENT_LINE_COLOR.equals(p) || 
-									ERROR_INDICATION_COLOR.equals(p) || WARNING_INDICATION_COLOR.equals(p) || TASK_INDICATION_COLOR.equals(p);
-		return affects ? affects : super.affectsTextPresentation(event);
+	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles) {
+		return new AdaptedSourceViewer(parent, verticalRuler, overviewRuler, isOverviewRulerVisible, styles);
 	}
 	
-	/*
-	 * @see JavaEditor#createJavaSourceViewer(Composite, IVerticalRuler, int)
-	 */
-	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-		ISharedTextColors sharedColors= JavaPlugin.getDefault().getJavaTextTools().getColorManager();
-		fOverviewRuler= new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);
-		ISourceViewer sourceViewer= new AdaptedSourceViewer(parent, ruler, fOverviewRuler, isOverviewRulerVisible(), styles);
-		fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(sourceViewer, fOverviewRuler, fAnnotationAccess, sharedColors);
-		configureSourceViewerDecorationSupport();
-		return sourceViewer;
-	}
-	
-	/**
-	 * Method configureSourceViewerDecorationSupport.
-	 */
-	private void configureSourceViewerDecorationSupport() {
-
-		fSourceViewerDecorationSupport.setCharacterPairMatcher(fBracketMatcher);
-				
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.UNKNOWN, UNKNOWN_INDICATION_COLOR, UNKNOWN_INDICATION, UNKNOWN_INDICATION_IN_OVERVIEW_RULER, 0);
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.BOOKMARK, BOOKMARK_INDICATION_COLOR, BOOKMARK_INDICATION, BOOKMARK_INDICATION_IN_OVERVIEW_RULER, 1);
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.TASK, TASK_INDICATION_COLOR, TASK_INDICATION, TASK_INDICATION_IN_OVERVIEW_RULER, 2);
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.SEARCH, SEARCH_RESULT_INDICATION_COLOR, SEARCH_RESULT_INDICATION, SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER, 3);
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.WARNING, WARNING_INDICATION_COLOR, WARNING_INDICATION, WARNING_INDICATION_IN_OVERVIEW_RULER, 4);
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.ERROR, ERROR_INDICATION_COLOR, ERROR_INDICATION, ERROR_INDICATION_IN_OVERVIEW_RULER, 5);
-				
-		
-		fSourceViewerDecorationSupport.setCursorLinePainterPreferenceKeys(CURRENT_LINE, CURRENT_LINE_COLOR);
-		fSourceViewerDecorationSupport.setMarginPainterPreferenceKeys(PRINT_MARGIN, PRINT_MARGIN_COLOR, PRINT_MARGIN_COLUMN);
-		fSourceViewerDecorationSupport.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR);
-		
-		fSourceViewerDecorationSupport.install(getPreferenceStore());
-	}
-
-	/*
-	 * @see JavaEditor#synchronizeOutlinePageSelection()
-	 */
 	public void synchronizeOutlinePageSelection() {
 		
 		if (isEditingScriptRunning())
