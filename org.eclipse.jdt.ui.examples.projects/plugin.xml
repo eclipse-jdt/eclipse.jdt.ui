@@ -41,7 +41,7 @@
       </wizard>	
 	<wizard 
 		id="org.eclipse.jdt.examples.projects.JUnitProjectExampleCreationWizard"
-		name="JUnit with Source Folders"
+		name="JUnit - Using Source Folders"
 		class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectCreationWizard"
 		category="org.eclipse.jdt.ui.examples.projects"
 		project="true"
