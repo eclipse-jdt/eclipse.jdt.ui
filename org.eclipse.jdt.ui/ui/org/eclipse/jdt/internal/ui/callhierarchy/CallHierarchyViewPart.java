@@ -128,6 +128,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private OpenLocationAction fOpenLocationAction;
     private FocusOnSelectionAction fFocusOnSelectionAction;
     private CopyCallHierarchyAction fCopyAction;
+    private CancelSearchAction fCancelSearchAction;
     private CompositeActionGroup fActionGroups;
     private CallHierarchyViewer fCallHierarchyViewer;
     private boolean fShowCallDetails;
@@ -336,15 +337,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         } else {
             fPagebook.showPage(fHierarchyLocationSplitter);
         }
-
-        enableActions(page != PAGE_EMPTY);
-    }
-
-    /**
-     * @param b
-     */
-    private void enableActions(boolean enabled) {
-        // TODO: Is it possible to disable the actions on the toolbar and on the view menu? 
     }
 
     /**
@@ -425,13 +417,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         viewMenu.add(new Separator());
 
-// TODO: Should be reenabled if this toggle should actually be used
-//        for (int i = 0; i < fToggleImplementorsActions.length; i++) {
-//            viewMenu.add(fToggleImplementorsActions[i]);
-//        }
-//
-//        viewMenu.add(new Separator());
-        
         for (int i = 0; i < fToggleOrientationActions.length; i++) {
             viewMenu.add(fToggleOrientationActions[i]);
         }
@@ -508,7 +493,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param selection
      */
     private void methodSelectionChanged(ISelection selection) {
-        if (selection instanceof IStructuredSelection) {
+        if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
             Object selectedElement = ((IStructuredSelection) selection).getFirstElement();
 
             if (selectedElement instanceof MethodWrapper) {
@@ -692,7 +677,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         fActionGroups.fillActionBars(actionBars);
         toolBar.add(fHistoryDropDownAction);
-
+        toolBar.add(fCancelSearchAction);
+        
         for (int i = 0; i < fToggleCallModeActions.length; i++) {
             toolBar.add(fToggleCallModeActions[i]);
         }
@@ -728,6 +714,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
                 fCallHierarchyViewer);
         fHistoryDropDownAction = new HistoryDropDownAction(this);
         fHistoryDropDownAction.setEnabled(false);
+        fCancelSearchAction = new CancelSearchAction(this);
         fToggleOrientationActions = new ToggleOrientationAction[] {
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
@@ -781,7 +768,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      */
     private void updateView() {
         if ((fShownMethod != null)) {
-            clearView();
             showPage(PAGE_VIEWER);
             
             CallHierarchy.getDefault().setSearchScope(getSearchScope());
@@ -815,5 +801,12 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         }
 
         return callersView;
+    }
+
+    /**
+     * Cancels the caller/callee search jobs that are currently running.  
+     */
+    void cancelJobs() {
+        fCallHierarchyViewer.cancelJobs();
     }
 }

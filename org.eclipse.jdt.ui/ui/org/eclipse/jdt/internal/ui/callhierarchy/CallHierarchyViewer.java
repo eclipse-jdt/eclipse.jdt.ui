@@ -17,12 +17,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IWorkbenchPartSite;
@@ -37,6 +37,8 @@ class CallHierarchyViewer extends TreeViewer {
 
     private OpenLocationAction fOpen;
 
+    private CallHierarchyContentProvider fContentProvider;
+
     /**
      * @param parent
      */
@@ -48,7 +50,8 @@ class CallHierarchyViewer extends TreeViewer {
         getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
         setUseHashlookup(true);
         setAutoExpandLevel(2);
-        setContentProvider(new CallHierarchyContentProvider());
+        fContentProvider = new CallHierarchyContentProvider();
+        setContentProvider(fContentProvider);
         setLabelProvider(new CallHierarchyLabelProvider());
 
         JavaUIHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
@@ -69,8 +72,8 @@ class CallHierarchyViewer extends TreeViewer {
     void setMethodWrapper(MethodWrapper wrapper) {
         setInput(getTreeRoot(wrapper));
 
-        getTree().setFocus();
-        getTree().setSelection(new TreeItem[] { getTree().getItems()[0] });
+        setFocus();
+        setSelection(new StructuredSelection(wrapper), true);
     }
 
     CallHierarchyViewPart getPart() {
@@ -125,5 +128,9 @@ class CallHierarchyViewer extends TreeViewer {
      */
     void clearViewer() {
         setInput(TreeRoot.EMPTY_ROOT);
+    }
+    
+    void cancelJobs() {
+        fContentProvider.cancelJobs();
     }
 }

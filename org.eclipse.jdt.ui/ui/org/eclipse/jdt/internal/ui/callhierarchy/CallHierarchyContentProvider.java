@@ -134,11 +134,6 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
             return false;
         }
 
-        if (manager != null) {
-            if (manager.isDeferredAdapter(element))
-                return manager.mayHaveChildren(element);
-        }
-
         // Only methods can have subelements, so there's no need to fool the user into believing that there is more
         if (element instanceof MethodWrapper) {
             MethodWrapper methodWrapper= (MethodWrapper) element;
@@ -148,17 +143,30 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
             if (shouldStopTraversion(methodWrapper)) {
                 return false;
             }
+            return true;
+        } else if (element instanceof TreeRoot) {
+        	return true;
         }
 
-        return true;
+        return false; // the "Update ..." placeholder has no children
     }
 
     /**
      * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
      */
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+        cancelJobs();
         if (viewer instanceof AbstractTreeViewer) {
             manager = new DeferredTreeContentManager(this, (AbstractTreeViewer) viewer);
+        }
+    }
+
+    /**
+     * Cancel all current jobs. 
+     */
+    void cancelJobs() {
+        if (manager != null) {
+        	manager.cancel(null);
         }
     }
 }

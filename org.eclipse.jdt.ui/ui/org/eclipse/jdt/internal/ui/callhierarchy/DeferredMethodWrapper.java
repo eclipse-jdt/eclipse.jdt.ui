@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -75,6 +76,9 @@ class DeferredMethodWrapper implements IDeferredWorkbenchAdapter {
         try {
             DeferredMethodWrapper methodWrapper = (DeferredMethodWrapper) object;
             collector.add((Object[]) methodWrapper.getCalls(monitor), monitor);
+            collector.done();
+        } catch (OperationCanceledException e) {
+            collector.add(new Object[] { TreeTermination.SEARCH_CANCELED }, monitor);
         } catch (Exception e) {
             JavaPlugin.log(e);
         }
