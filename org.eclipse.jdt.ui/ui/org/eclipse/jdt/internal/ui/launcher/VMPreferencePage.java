@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.lang.reflect.InvocationTargetException;import java.util.Iterator;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.viewers.CheckStateChangedEvent;import org.eclipse.jface.viewers.CheckboxTableViewer;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ICheckStateListener;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.swt.widgets.TableItem;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import java.lang.reflect.InvocationTargetException;import java.util.Iterator;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.viewers.CheckStateChangedEvent;import org.eclipse.jface.viewers.CheckboxTableViewer;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ICheckStateListener;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.swt.widgets.TableItem;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 /*
  * The page for setting the default java runtime preference.
@@ -17,7 +17,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 	private Button fRemoveButton;
 	private Button fEditButton;
 	
-	private IVMInstallType[] fVMTypes;
+	protected Text fJreLib;	protected Text fJreSource;	protected Text fPkgRoot;		private IVMInstallType[] fVMTypes;
 	
 	private IPath[] fClasspathVariables= new IPath[3];
 
@@ -76,7 +76,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		
 		fVMList.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {				IVMInstall vm=  (IVMInstall)event.getElement();
-				fVMList.setCheckedElements(new Object[] { vm });				JavaRuntime.setDefaultVMInstall(vm);
+				JavaRuntime.setDefaultVMInstall(vm);				updateDefaultVM();
 			}
 		});
 		
@@ -110,9 +110,9 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 			public void handleEvent(Event evt) {
 				editVM();
 			}
-		});
+		});				Composite jreVarsContainer= new Composite(parent, SWT.NULL);		jreVarsContainer.setLayoutData(new GridData(GridData.FILL_BOTH));		GridLayout jreLayout= new GridLayout();		jreLayout.numColumns= 2;		jreVarsContainer.setLayout(jreLayout);
 						
-		return parent;
+		Label l= new Label(jreVarsContainer, SWT.NULL);		l.setText(ClasspathVariablesPreferencePage.JRELIB_VARIABLE);		l.setLayoutData(new GridData());				fJreLib= new Text(jreVarsContainer, SWT.READ_ONLY | SWT.BORDER);		fJreLib.setLayoutData(new GridData(gd.FILL_HORIZONTAL));		 		l= new Label(jreVarsContainer, SWT.NULL);		l.setText(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);		l.setLayoutData(new GridData());				fJreSource= new Text(jreVarsContainer, SWT.READ_ONLY | SWT.BORDER);		fJreSource.setLayoutData(new GridData(gd.FILL_HORIZONTAL));		l= new Label(jreVarsContainer, SWT.NULL);		l.setText(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);		l.setLayoutData(new GridData());				fPkgRoot= new Text(jreVarsContainer, SWT.READ_ONLY | SWT.BORDER);		fPkgRoot.setLayoutData(new GridData(gd.FILL_HORIZONTAL));				return parent;
 	}
 	
 	public void setVisible(boolean visible) {
@@ -183,7 +183,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 	}
 	
 	private void updateDefaultVM() {		IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall();		if (defaultVM != null) {
-			fVMList.setCheckedElements(new Object[] { defaultVM });		} else {			fVMList.setCheckedElements(new Object[0]);		}	}
+			fVMList.setCheckedElements(new Object[] { defaultVM });		} else {			fVMList.setCheckedElements(new Object[0]);		}		updateJREVariables(defaultVM);	}		private void updateJREVariables(IVMInstall defaultVM) {		String jreLib= "";		String jreSrc= "";		String pkgPath= "";		if (defaultVM != null) {			LibraryLocation location= defaultVM.getLibraryLocation();			if (location == null)				location= defaultVM.getVMInstallType().getDefaultLibraryLocation(defaultVM.getInstallLocation());			jreLib= location.getSystemLibrary().getAbsolutePath();			jreSrc= location.getSystemLibrarySource().getAbsolutePath();			pkgPath= location.getPackageRootPath().toString();		} else {			IPath lib= JavaCore.getClasspathVariable(ClasspathVariablesPreferencePage.JRELIB_VARIABLE);			if (lib != null)				jreLib= lib.toOSString();			IPath src= JavaCore.getClasspathVariable(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);			if (src != null)				jreSrc= src.toOSString();			IPath pkgRoot= JavaCore.getClasspathVariable(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);			if (pkgRoot != null)				pkgPath= pkgRoot.toOSString();		}		fJreLib.setText(jreLib);		fJreSource.setText(jreSrc);		fPkgRoot.setText(pkgPath);	}
 	
 	private void selectVM(IVMInstall vm) {
 		if (vm == null)
