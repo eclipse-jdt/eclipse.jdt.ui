@@ -13,12 +13,14 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.lang.reflect.Method;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.eclipse.swt.events.PaintEvent;
 
 import org.eclipse.jface.text.source.AnnotationPainter;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 /**
  * Measure the number of invocations of {@link org.eclipse.jface.text.source.AnnotationPainter#paintControl(PaintEvent)}
@@ -32,6 +34,11 @@ public class ScrollAnnotatedJavaEditorInvocationCountTest extends AbstractScroll
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
+	}
+	
+	protected void setUp(AbstractTextEditor editor) throws Exception {
+		editor.showChangeInformation(false); // don't need to test quick diff...
+		super.setUp(editor);
 	}
 
 	/**

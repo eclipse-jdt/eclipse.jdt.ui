@@ -51,8 +51,7 @@ public abstract class RevertEditorTest extends TextPerformanceTestCase {
 			EditorTestHelper.revertEditor(part, true);
 			if (i >= warmUpRuns)
 				fPerformanceMeter.stop();
-			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
-			EditorTestHelper.runEventQueue(part);
+			EditorTestHelper.runEventQueue(2000);
 		}
 		
 		fPerformanceMeter.commit();
@@ -63,13 +62,6 @@ public abstract class RevertEditorTest extends TextPerformanceTestCase {
 		super.tearDown();
 		fPerformanceMeter.dispose();
 		EditorTestHelper.closeAllEditors();
-	}
-
-	private synchronized void sleep(int time) {
-		try {
-			wait(time);
-		} catch (InterruptedException e) {
-		}
 	}
 
 	protected void dirtyEditor(ITextEditor part) throws BadLocationException {
