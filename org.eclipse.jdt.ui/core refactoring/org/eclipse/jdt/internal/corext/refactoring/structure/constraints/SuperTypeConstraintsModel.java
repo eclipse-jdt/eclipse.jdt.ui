@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUn
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CompositeSubTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
@@ -222,23 +221,6 @@ public final class SuperTypeConstraintsModel {
 			return result;
 		}
 		return null;
-	}
-
-	/**
-	 * Creates a composite subtype constraint variable.
-	 * 
-	 * @param first the first type constraint variable
-	 * @param second the second type constraint variable
-	 */
-	public final void createCompositeSubtypeConstraint(final ConstraintVariable2 first, final ConstraintVariable2 second) {
-		Assert.isNotNull(first);
-		Assert.isNotNull(second);
-		final ITypeConstraint2 constraint= new CompositeSubTypeConstraint2(first, second);
-		if (!fTypeConstraints.contains(constraint)) {
-			fTypeConstraints.add(constraint);
-			setVariableUsage(first, constraint);
-			setVariableUsage(second, constraint);
-		}
 	}
 
 	/**

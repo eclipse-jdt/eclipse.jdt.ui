@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -189,7 +188,9 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.CastExpression)
 	 */
 	public final void endVisit(final CastExpression node) {
-		endVisitCompositeSubTypeConstraint(node.getType(), node.getExpression());
+		final ConstraintVariable2 variable= (ConstraintVariable2) node.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		if (variable != null)
+			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, variable);
 	}
 
 	/*
@@ -306,13 +307,6 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 				}
 			}
 		}
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.InstanceofExpression)
-	 */
-	public final void endVisit(final InstanceofExpression node) {
-		endVisitCompositeSubTypeConstraint(node.getRightOperand(), node.getLeftOperand());
 	}
 
 	/**
@@ -616,19 +610,6 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 */
 	public final void endVisit(final VariableDeclarationStatement node) {
 		endVisit(node.fragments(), node.getType(), node);
-	}
-
-	/**
-	 * End of visit the or-or subtype constraint.
-	 * 
-	 * @param type the type
-	 * @param expression the expression
-	 */
-	private void endVisitCompositeSubTypeConstraint(final Type type, final Expression expression) {
-		final ConstraintVariable2 leftVariable= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		final ConstraintVariable2 rightVariable= (ConstraintVariable2) type.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		if (leftVariable != null && rightVariable != null)
-			fModel.createCompositeSubtypeConstraint(leftVariable, rightVariable);
 	}
 
 	/*
