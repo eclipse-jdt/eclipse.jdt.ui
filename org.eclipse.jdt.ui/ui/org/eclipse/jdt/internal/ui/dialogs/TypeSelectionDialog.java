@@ -85,6 +85,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		try {
 			IType type= ref.resolveType(fScope);			
 			if (type == null) {
+				// not a class file or compilation unit
 				String title= JavaUIMessages.getString("TypeSelectionDialog.errorTitle"); //$NON-NLS-1$
 				String message= JavaUIMessages.getString("TypeSelectionDialog.errorMessage"); //$NON-NLS-1$
 				MessageDialog.openError(getShell(), title, message);
@@ -95,7 +96,6 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 				setResult(result);
 			}
 
-		// not a class file or compilation unit
 		} catch (JavaModelException e) {
 			String title= JavaUIMessages.getString("TypeSelectionDialog.errorTitle"); //$NON-NLS-1$
 			String message= JavaUIMessages.getString("TypeSelectionDialog.errorMessage"); //$NON-NLS-1$

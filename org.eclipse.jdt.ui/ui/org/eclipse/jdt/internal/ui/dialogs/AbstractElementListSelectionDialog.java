@@ -34,7 +34,6 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	private Label fMessage;
 	private ISelectionValidator fValidator;	
 	
-	private String fMessageText= ""; //$NON-NLS-1$
 	private String fEmptyListMessage= ""; //$NON-NLS-1$
 	private String fNothingSelectedMessage= ""; //$NON-NLS-1$
 		
@@ -82,14 +81,6 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 */
 	public void setNothingSelectedMessage(String message) {
 		fNothingSelectedMessage= message;
-	}
-	
-	/**
-	 * Sets the message to be shown above the match text field.
-	 * Must be set before widget creation
-	 */
-	public void setMessage(String message) {
-		fMessageText= message;
 	}
 	
 	/**
@@ -177,21 +168,19 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	/**
 	 * Creates the message text widget and sets layout data.
 	 */
-	protected Label createMessage(Composite parent) {
-		Label text= new Label(parent, SWT.NULL);
+	protected Label createMessageArea(Composite composite) {
+		Label label= super.createMessageArea(composite);
 
-		text.setText(fMessageText);
-		
 		GridData data= new GridData();
 		data.grabExcessVerticalSpace= false;
 		data.grabExcessHorizontalSpace= true;
 		data.horizontalAlignment= GridData.FILL;
 		data.verticalAlignment= GridData.BEGINNING;
-		text.setLayoutData(data);
+		label.setLayoutData(data);
 		
-		return text;
-	}
-	
+		return label;
+	}	
+
 	/**
 	 * Creates the selection list.
 	 */
@@ -271,7 +260,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	protected Control createDialogArea(Composite parent) {
 		Composite contents= (Composite) super.createDialogArea(parent);
 		
-		fMessage= createMessage(contents);
+		fMessage= createMessageArea(contents);
 		fSelectionList= createSelectionList(contents);
 		
 		return contents;

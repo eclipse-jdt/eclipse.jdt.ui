@@ -165,7 +165,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	/**
 	 * @private
 	 */
-	protected Label createMessage(Composite parent) {
+	protected Label createMessageArea(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 
 		GridLayout layout= new GridLayout();
@@ -178,7 +178,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		composite.setLayoutData(data);
 		
-		Label messageLabel= super.createMessage(composite);
+		Label messageLabel= super.createMessageArea(composite);
 		
 		fPageInfoLabel= new Label(composite, SWT.NULL);
 		fPageInfoLabel.setText(getPageInfoMessage());
