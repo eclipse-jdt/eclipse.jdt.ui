@@ -668,10 +668,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		IWorkingSet ws= fWorkingSetFilter.getWorkingSet();
 		if (ws == null)
 			return result;
-		String wsstr= "Working Set: "+ws.getName();
+
+		String wsstr= JavaBrowsingMessages.getFormattedString("JavaBrowsingPart.toolTip", new String[] { ws.getName() }); //$NON-NLS-1$
 		if (result.length() == 0)
 			return wsstr;
-		return result + " - " + wsstr;
+		return JavaBrowsingMessages.getFormattedString("JavaBrowsingPart.toolTip2", new String[] { result, ws.getName() }); //$NON-NLS-1$
 	}
 	
 	public String getTitleToolTip() {
