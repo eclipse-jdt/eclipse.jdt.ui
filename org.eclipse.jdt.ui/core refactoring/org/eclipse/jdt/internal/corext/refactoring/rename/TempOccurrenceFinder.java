@@ -1,7 +1,9 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -27,7 +29,7 @@ public class TempOccurrenceFinder {
 	} 
 	
 	private static class TempOccurrenceAnalyzer extends ASTVisitor {
-		private List fOffsets;
+		private Set fOffsets;
 		private boolean fIncludeReferences;
 		private boolean fIncludeDeclaration;
 		private VariableDeclaration fTempDeclaration;
@@ -35,7 +37,7 @@ public class TempOccurrenceFinder {
 		
 		TempOccurrenceAnalyzer(VariableDeclaration tempDeclaration, boolean includeReferences, boolean includeDeclaration){
 			Assert.isNotNull(tempDeclaration);
-			fOffsets= new ArrayList();
+			fOffsets= new HashSet();
 			fIncludeDeclaration= includeDeclaration;
 			fIncludeReferences= includeReferences;
 			fTempDeclaration= tempDeclaration;
@@ -61,7 +63,7 @@ public class TempOccurrenceFinder {
 				return true;
 			
 			if (fTempDeclaration.equals(localDeclaration))
-				fOffsets.add(new Integer(localDeclaration.getStartPosition()));
+				fOffsets.add(new Integer(localDeclaration.getName().getStartPosition()));
 			
 			return true;
 		}
