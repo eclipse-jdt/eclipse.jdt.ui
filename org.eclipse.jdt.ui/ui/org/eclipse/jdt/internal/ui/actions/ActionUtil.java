@@ -25,11 +25,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /*
  * http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
@@ -40,7 +38,7 @@ public class ActionUtil {
 	}
 
 	//bug 31998	we will have to disable renaming of linked packages (and cus)
-	public static boolean mustDisableJavaModelAction(Shell shell, Object element) throws JavaModelException{
+	public static boolean mustDisableJavaModelAction(Shell shell, Object element) {
 		if (!(element instanceof IPackageFragment) && !(element instanceof IPackageFragmentRoot))
 			return false;
 		
