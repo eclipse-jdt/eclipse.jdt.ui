@@ -87,6 +87,11 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	}
 	
 	
+	protected boolean canRunForked() {
+		return true;
+	}
+	
+	
 	protected void handleFinishException(Shell shell, InvocationTargetException e) {
 		String title= NewWizardMessages.getString("NewElementWizard.op_error.title"); //$NON-NLS-1$
 		String message= NewWizardMessages.getString("NewElementWizard.op_error.message"); //$NON-NLS-1$
@@ -107,7 +112,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 			}
 		};
 		try {
-			getContainer().run(false, true, new WorkbenchRunnableAdapter(op, getSchedulingRule()));
+			getContainer().run(canRunForked(), true, new WorkbenchRunnableAdapter(op, getSchedulingRule()));
 		} catch (InvocationTargetException e) {
 			handleFinishException(getShell(), e);
 			return false;

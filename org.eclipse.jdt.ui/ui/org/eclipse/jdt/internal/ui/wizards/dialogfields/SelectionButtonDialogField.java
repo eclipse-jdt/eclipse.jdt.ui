@@ -107,7 +107,7 @@ public class SelectionButtonDialogField extends DialogField {
 
 	/**
 	 * Returns the selection button widget. When called the first time, the widget will be created.
-	 * @param The parent composite when called the first time, or <code>null</code>
+	 * @param group The parent composite when called the first time, or <code>null</code>
 	 * after.
 	 */		
 	public Button getSelectionButton(Composite group) {
@@ -186,7 +186,15 @@ public class SelectionButtonDialogField extends DialogField {
 		}		
 	}
 	
-	
+	/*(non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
+	 */
+	public void refresh() {
+		super.refresh();
+		if (isOkToUse(fButton)) {
+			fButton.setSelection(fIsSelected);
+		}
+	}
 	
 		
 }

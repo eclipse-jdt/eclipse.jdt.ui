@@ -54,11 +54,19 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
      */
     protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
     	fSecondPage.performFinish(monitor); // use the full progress monitor
-        BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
-       
-		selectAndReveal(fSecondPage.getJavaProject().getProject());
     }
-        
+    
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
+	 */
+	public boolean performFinish() {
+		boolean res= super.performFinish();
+		if (res) {
+	        BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
+	 		selectAndReveal(fSecondPage.getJavaProject().getProject());
+		}
+		return res;
+	}
     
     protected void handleFinishException(Shell shell, InvocationTargetException e) {
         String title= NewWizardMessages.getString("JavaProjectWizard.op_error.title"); //$NON-NLS-1$

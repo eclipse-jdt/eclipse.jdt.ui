@@ -241,4 +241,12 @@ public class ComboDialogField extends DialogField {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
+	 */
+	public void refresh() {
+		super.refresh();
+		setTextWithoutUpdate(fText);
+	}
+	
 }

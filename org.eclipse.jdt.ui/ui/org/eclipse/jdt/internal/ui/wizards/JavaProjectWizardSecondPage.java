@@ -96,7 +96,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		};
 	
 		try {
-			getContainer().run(false, true, new WorkspaceModifyDelegatingOperation(op, newProjectHandle));
+			getContainer().run(true, true, new WorkspaceModifyDelegatingOperation(op, newProjectHandle));
 		} catch (InvocationTargetException e) {
 			final String title= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.title"); //$NON-NLS-1$
 			final String message= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.message"); //$NON-NLS-1$
@@ -219,7 +219,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		};
 	
 		try {
-			getContainer().run(false, true, new WorkspaceModifyDelegatingOperation(op, fCurrProject));
+			getContainer().run(true, true, new WorkspaceModifyDelegatingOperation(op, fCurrProject));
 		} catch (InvocationTargetException e) {
 			final String title= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.remove.title"); //$NON-NLS-1$
 			final String message= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.remove.message"); //$NON-NLS-1$

@@ -175,4 +175,14 @@ public class StringDialogField extends DialogField {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
+	 */
+	public void refresh() {
+		super.refresh();
+		if (isOkToUse(fTextControl)) {
+			setTextWithoutUpdate(fText);
+		}
+	}
+	
 }

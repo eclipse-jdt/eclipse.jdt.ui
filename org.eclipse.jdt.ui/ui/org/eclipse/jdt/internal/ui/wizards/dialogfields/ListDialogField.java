@@ -86,6 +86,7 @@ public class ListDialogField extends DialogField {
 	}
 	
 	protected TableViewer fTable;
+	protected Control fTableControl;
 	protected ILabelProvider fLabelProvider;
 	protected ListViewerAdapter fListViewerAdapter;
 	protected List fElements;
@@ -102,7 +103,7 @@ public class ListDialogField extends DialogField {
 	
 	private Label fLastSeparator;
 	
-	private Control fTableControl;
+
 	private Composite fButtonsControl;
 	private ISelection fSelectionWhenEnabled;
 	
@@ -286,7 +287,7 @@ public class ListDialogField extends DialogField {
 	
 	/**
 	 * Returns the list control. When called the first time, the control will be created.
-	 * @param The parent composite when called the first time, or <code>null</code>
+	 * @param parent The parent composite when called the first time, or <code>null</code>
 	 * after.
 	 */
 	public Control getListControl(Composite parent) {
@@ -398,7 +399,7 @@ public class ListDialogField extends DialogField {
 	/**
 	 * Returns the composite containing the buttons. When called the first time, the control
 	 * will be created.
-	 * @param The parent composite when called the first time, or <code>null</code>
+	 * @param parent The parent composite when called the first time, or <code>null</code>
 	 * after.
 	 */	
 	public Composite getButtonBox(Composite parent) {
@@ -480,7 +481,7 @@ public class ListDialogField extends DialogField {
 	 * Updates the enable state of the all buttons
 	 */ 
 	protected void updateButtonState() {
-		if (fButtonControls != null) {
+		if (fButtonControls != null && isOkToUse(fTableControl)) {
 			ISelection sel= fTable.getSelection();
 			for (int i= 0; i < fButtonControls.length; i++) {
 				Button button= fButtonControls[i];
@@ -545,7 +546,7 @@ public class ListDialogField extends DialogField {
 	 */
 	public void setElements(Collection elements) {
 		fElements= new ArrayList(elements);
-		if (fTable != null) {
+		if (isOkToUse(fTableControl)) {
 			fTable.refresh();
 		}
 		dialogFieldChanged();
@@ -580,7 +581,7 @@ public class ListDialogField extends DialogField {
 		int idx= fElements.indexOf(oldElement);
 		if (idx != -1) {
 			fElements.set(idx, newElement);
-			if (fTable != null) {
+			if (isOkToUse(fTableControl)) {
 				List selected= getSelectedElements();
 				if (selected.remove(oldElement)) {
 					selected.add(newElement);
@@ -609,7 +610,7 @@ public class ListDialogField extends DialogField {
 			return;
 		}
 		fElements.add(index, element);
-		if (fTable != null) {
+		if (isOkToUse(fTableControl)) {
 			fTable.add(element);
 			fTable.setSelection(new StructuredSelection(element));
 		}
@@ -634,7 +635,7 @@ public class ListDialogField extends DialogField {
 				}	
 			}
 			fElements.addAll(elementsToAdd);
-			if (fTable != null) {
+			if (isOkToUse(fTableControl)) {
 				fTable.add(elementsToAdd.toArray());
 				fTable.setSelection(new StructuredSelection(elementsToAdd));
 			}
@@ -650,7 +651,7 @@ public class ListDialogField extends DialogField {
 	public void removeAllElements() {
 		if (fElements.size() > 0) {
 			fElements.clear();
-			if (fTable != null) {
+			if (isOkToUse(fTableControl)) {
 				fTable.refresh();
 			}
 			dialogFieldChanged();
@@ -662,7 +663,7 @@ public class ListDialogField extends DialogField {
 	 */		
 	public void removeElement(Object element) throws IllegalArgumentException {
 		if (fElements.remove(element)) {
-			if (fTable != null) {
+			if (isOkToUse(fTableControl)) {
 				fTable.remove(element);
 			}
 			dialogFieldChanged();
@@ -677,7 +678,7 @@ public class ListDialogField extends DialogField {
 	public void removeElements(List elements) {
 		if (elements.size() > 0) {
 			fElements.removeAll(elements);
-			if (fTable != null) {
+			if (isOkToUse(fTableControl)) {
 				fTable.remove(elements.toArray());
 			}
 			dialogFieldChanged();
@@ -694,7 +695,7 @@ public class ListDialogField extends DialogField {
 
 	public void selectElements(ISelection selection) {
 		fSelectionWhenEnabled= selection;
-		if (fTable != null) {
+		if (isOkToUse(fTableControl)) {
 			fTable.setSelection(selection, true);
 		}
 	}
@@ -735,7 +736,8 @@ public class ListDialogField extends DialogField {
 	 * Refreshes the table.
 	 */
 	public void refresh() {
-		if (fTable != null) {
+		super.refresh();
+		if (isOkToUse(fTableControl)) {
 			fTable.refresh();
 		}
 	}
@@ -828,7 +830,7 @@ public class ListDialogField extends DialogField {
 	 */
 	public List getSelectedElements() {
 		List result= new ArrayList();
-		if (fTable != null) {
+		if (isOkToUse(fTableControl)) {
 			ISelection selection= fTable.getSelection();
 			if (selection instanceof IStructuredSelection) {
 				Iterator iter= ((IStructuredSelection)selection).iterator();

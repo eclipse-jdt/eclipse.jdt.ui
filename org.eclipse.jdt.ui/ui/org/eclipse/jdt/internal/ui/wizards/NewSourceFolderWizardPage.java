@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
@@ -428,26 +429,33 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-
-		IPath projPath= fCurrJProject.getProject().getFullPath();
-		if (fOutputLocation.equals(projPath) && !fNewOutputLocation.equals(projPath)) {
-			if (BuildPathsBlock.hasClassfiles(fCurrJProject.getProject())) {
-				if (BuildPathsBlock.getRemoveOldBinariesQuery(getShell()).doQuery(projPath)) {
-					BuildPathsBlock.removeOldClassfiles(fCurrJProject.getProject());
+		monitor.beginTask(NewWizardMessages.getString("NewSourceFolderWizardPage.operation"), 3); //$NON-NLS-1$
+		try {
+			IPath projPath= fCurrJProject.getProject().getFullPath();
+			if (fOutputLocation.equals(projPath) && !fNewOutputLocation.equals(projPath)) {
+				if (BuildPathsBlock.hasClassfiles(fCurrJProject.getProject())) {
+					if (BuildPathsBlock.getRemoveOldBinariesQuery(getShell()).doQuery(projPath)) {
+						BuildPathsBlock.removeOldClassfiles(fCurrJProject.getProject());
+					}
 				}
-			}
-		}		
-		
-		String relPath= fRootDialogField.getText();
+			}		
 			
-		IFolder folder= fCurrJProject.getProject().getFolder(relPath);
-		if (!folder.exists()) {
-			CoreUtility.createFolder(folder, true, true, null);			
+			String relPath= fRootDialogField.getText();
+				
+			IFolder folder= fCurrJProject.getProject().getFolder(relPath);
+			if (!folder.exists()) {
+				CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));			
+			}
+			if (monitor.isCanceled()) {
+				throw new InterruptedException();
+			}
+			
+			fCurrJProject.setRawClasspath(fNewEntries, fNewOutputLocation, new SubProgressMonitor(monitor, 2));
+	
+			fCreatedRoot= fCurrJProject.getPackageFragmentRoot(folder);
+		} finally {
+			monitor.done();
 		}
-		
-		fCurrJProject.setRawClasspath(fNewEntries, fNewOutputLocation, monitor);
-
-		fCreatedRoot= fCurrJProject.getPackageFragmentRoot(folder);
 	}
 		
 	// ------------- choose dialogs

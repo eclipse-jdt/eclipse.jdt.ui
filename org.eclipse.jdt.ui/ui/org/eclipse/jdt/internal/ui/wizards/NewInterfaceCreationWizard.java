@@ -40,17 +40,19 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 		addPage(fPage);
 		fPage.init(getSelection());	
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#canRunForked()
+	 */
+	protected boolean canRunForked() {
+		return !fPage.isEnclosingTypeSelected();
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createType(monitor); // use the full progress monitor
-		IResource resource= fPage.getModifiedResource();
-		if (resource != null) {
-			selectAndReveal(resource);
-			openResource((IFile) resource);
-		}	
 	}
 		
 	/* (non-Javadoc)
@@ -58,7 +60,15 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 	 */
 	public boolean performFinish() {
 		warnAboutTypeCommentDeprecation();
-		return super.performFinish();
+		boolean res= super.performFinish();
+		if (res) {
+			IResource resource= fPage.getModifiedResource();
+			if (resource != null) {
+				selectAndReveal(resource);
+				openResource((IFile) resource);
+			}	
+		}
+		return res;
 	}
 	
 	

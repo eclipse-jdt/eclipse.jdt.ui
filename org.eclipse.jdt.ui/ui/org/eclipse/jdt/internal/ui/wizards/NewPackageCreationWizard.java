@@ -44,7 +44,17 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	 */
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createPackage(monitor); // use the full progress monitor
-		selectAndReveal(fPage.getModifiedResource());
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
+	 */
+	public boolean performFinish() {
+		boolean res= super.performFinish();
+		if (res) {
+			selectAndReveal(fPage.getModifiedResource());
+		}
+		return res;
 	}
 	
 }

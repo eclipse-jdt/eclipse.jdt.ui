@@ -185,7 +185,7 @@ public class DialogField {
 	 * Tests is the control is not <code>null</code> and not disposed.
 	*/
 	protected final boolean isOkToUse(Control control) {
-		return (control != null) && !(control.isDisposed());
+		return (control != null) && (Display.getCurrent() != null) && !control.isDisposed();
 	}
 	
 	// --------- enable / disable management
@@ -208,6 +208,14 @@ public class DialogField {
 		if (fLabel != null) {
 			fLabel.setEnabled(fEnabled);
 		}
+	}
+	
+	/**
+	 * Brings the UI in sync with the model. Only needed when model was changed
+	 * in different thread whil UI was lready created.
+	 */
+	public void refresh() {
+		updateEnableState();
 	}
 
 	/**

@@ -141,7 +141,6 @@ public class BuildPathsBlock {
 		
 		fPageIndex= pageToShow;
 		
-		
 		fSourceContainerPage= null;
 		fLibrariesPage= null;
 		fProjectsPage= null;
@@ -322,15 +321,29 @@ public class BuildPathsBlock {
 		fBuildPathDialogField.enableButton(projectExists);
 		fClassPathList.setElements(newClassPath);
 		fClassPathList.setCheckedElements(exportedEntries);
-
+		
+		if (Display.getCurrent() != null) {
+			updateUI();
+		} else {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					updateUI();
+				}
+			});
+		}
+		initializeTimeStamps();
+	}
+	
+	protected void updateUI() {
+		fBuildPathDialogField.refresh();
+		fClassPathList.refresh();
+	
 		if (fSourceContainerPage != null) {
 			fSourceContainerPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
 		}
-
 		doStatusLineUpdate();
-		initializeTimeStamps();
 	}
 	
 	private String getEncodedSettings() {
@@ -476,8 +489,10 @@ public class BuildPathsBlock {
 	// -------- verification -------------------------------
 	
 	private void doStatusLineUpdate() {
-		IStatus res= findMostSevereStatus();
-		fContext.statusChanged(res);
+		if (Display.getCurrent() != null) {
+			IStatus res= findMostSevereStatus();
+			fContext.statusChanged(res);
+		}
 	}
 	
 	private IStatus findMostSevereStatus() {

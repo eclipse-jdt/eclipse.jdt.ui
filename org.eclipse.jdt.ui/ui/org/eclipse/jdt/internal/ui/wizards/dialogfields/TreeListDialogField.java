@@ -155,7 +155,7 @@ public class TreeListDialogField extends DialogField {
 	
 	public void setTreeExpansionLevel(int level) {
 		fTreeExpandLevel= level;
-		if (fTree != null && fTreeExpandLevel > 0) {
+		if (isOkToUse(fTreeControl) && fTreeExpandLevel > 0) {
 			fTree.expandToLevel(level);
 		}
 	}	
@@ -491,7 +491,7 @@ public class TreeListDialogField extends DialogField {
 	public void setElements(List elements) {
 		fElements= new ArrayList(elements);
 		refresh();
-		if (fTree != null) {
+		if (isOkToUse(fTreeControl)) {
 			fTree.expandToLevel(fTreeExpandLevel);
 		}
 		dialogFieldChanged();
@@ -526,7 +526,7 @@ public class TreeListDialogField extends DialogField {
 		int idx= fElements.indexOf(oldElement);
 		if (idx != -1) {
 			fElements.set(idx, newElement);
-			if (fTree != null) {
+			if (isOkToUse(fTreeControl)) {
 				List selected= getSelectedElements();
 				if (selected.remove(oldElement)) {
 					selected.add(newElement);
@@ -553,7 +553,7 @@ public class TreeListDialogField extends DialogField {
 			return;
 		}
 		fElements.add(element);
-		if (fTree != null) {
+		if (isOkToUse(fTreeControl)) {
 			fTree.add(fParentElement, element);
 			fTree.expandToLevel(element, fTreeExpandLevel);
 		}
@@ -577,7 +577,7 @@ public class TreeListDialogField extends DialogField {
 				}
 			}
 			fElements.addAll(elementsToAdd);
-			if (fTree != null) {
+			if (isOkToUse(fTreeControl)) {
 				fTree.add(fParentElement, elementsToAdd.toArray());
 				for (int i= 0; i < elementsToAdd.size(); i++) {
 					fTree.expandToLevel(elementsToAdd.get(i), fTreeExpandLevel);
@@ -595,7 +595,7 @@ public class TreeListDialogField extends DialogField {
 			return;
 		}
 		fElements.add(index, element);
-		if (fTree != null) {
+		if (isOkToUse(fTreeControl)) {
 			fTree.add(fParentElement, element);
 			if (fTreeExpandLevel != -1) {
 				fTree.expandToLevel(element, fTreeExpandLevel);
@@ -621,7 +621,7 @@ public class TreeListDialogField extends DialogField {
 	*/
 	public void removeElement(Object element) throws IllegalArgumentException {
 		if (fElements.remove(element)) {
-			if (fTree != null) {
+			if (isOkToUse(fTreeControl)) {
 				fTree.remove(element);
 			}
 			dialogFieldChanged();
@@ -636,7 +636,7 @@ public class TreeListDialogField extends DialogField {
 	public void removeElements(List elements) {
 		if (elements.size() > 0) {
 			fElements.removeAll(elements);
-			if (fTree != null) {
+			if (isOkToUse(fTreeControl)) {
 				fTree.remove(elements.toArray());
 			}
 			dialogFieldChanged();
@@ -652,7 +652,7 @@ public class TreeListDialogField extends DialogField {
 
 	public void selectElements(ISelection selection) {
 		fSelectionWhenEnabled= selection;
-		if (fTree != null) {
+		if (isOkToUse(fTreeControl)) {
 			fTree.setSelection(selection, true);
 		}
 	}
@@ -692,7 +692,8 @@ public class TreeListDialogField extends DialogField {
 	* Refreshes the tree.
 	*/
 	public void refresh() {
-		if (fTree != null) {
+		super.refresh();
+		if (isOkToUse(fTreeControl)) {
 			fTree.refresh();
 		}
 	}
@@ -701,7 +702,7 @@ public class TreeListDialogField extends DialogField {
 	* Refreshes the tree.
 	*/
 	public void refresh(Object element) {
-		if (fTree != null) {
+		if (isOkToUse(fTreeControl)) {
 			fTree.refresh(element);
 		}
 	}	
@@ -795,7 +796,7 @@ public class TreeListDialogField extends DialogField {
 	*/
 	public List getSelectedElements() {
 		ArrayList result= new ArrayList();
-		if (fTree != null) {
+		if (isOkToUse(fTreeControl)) {
 			ISelection selection= fTree.getSelection();
 			if (selection instanceof IStructuredSelection) {
 				Iterator iter= ((IStructuredSelection)selection).iterator();
@@ -808,7 +809,7 @@ public class TreeListDialogField extends DialogField {
 	}
 	
 	public void expandElement(Object element, int level) {
-		if (fTree != null) {
+		if (isOkToUse(fTreeControl)) {
 			fTree.expandToLevel(element, level);
 		}
 	}

@@ -24,31 +24,31 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.WizardPage;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
  * The first page of the <code>SimpleProjectWizard</code>.
@@ -60,9 +60,9 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	 * Request a project name. Fires an event whenever the text field is
 	 * changed, regardless of its content.
 	 */
-	private final class NameGroup extends Observable {
+	private final class NameGroup extends Observable implements IDialogFieldListener {
 
-		protected final Text fNameField;
+		protected final StringDialogField fNameField;
 
 		public NameGroup(Composite composite, String initialName) {
 			final Composite nameComposite= new Composite(composite, SWT.NONE);
@@ -70,29 +70,15 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			nameComposite.setLayout(initGridLayout(new GridLayout(2, false), false));
 			nameComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-			// label "Project name:"
-			final Label nameLabel= new Label(nameComposite, SWT.NONE);
-			nameLabel.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.NameGroup.label.text")); //$NON-NLS-1$
-			nameLabel.setFont(composite.getFont());
-
 			// text field for project name
-			fNameField= new Text(nameComposite, SWT.BORDER);
-			fNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fNameField.setFont(composite.getFont());
-
-			fNameField.addFocusListener(new FocusAdapter() {
-				public void focusGained(FocusEvent e) {
-					fNameField.setSelection(0, fNameField.getText().length());
-				}
-			});
-
-			fNameField.addModifyListener(new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					fireEvent();
-				}
-			});
+			fNameField= new StringDialogField();
+			fNameField.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.NameGroup.label.text")); //$NON-NLS-1$
+			fNameField.setDialogFieldListener(this);
 
 			setName(initialName);
+
+			fNameField.doFillIntoGrid(nameComposite, 2);
+			LayoutUtil.setHorizontalGrabbing(fNameField.getTextControl(null));
 		}
 		
 		protected void fireEvent() {
@@ -104,12 +90,18 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			return fNameField.getText().trim();
 		}
 
-		public void setFocus() {
-			//fNameField.setFocus();
+		public void postSetFocus() {
+			fNameField.postSetFocusOnDialogField(getShell().getDisplay());
 		}
 		
 		public void setName(String name) {
 			fNameField.setText(name);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
+		 */
+		public void dialogFieldChanged(DialogField field) {
 			fireEvent();
 		}
 		
@@ -120,102 +112,50 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	 * field is changed, regardless of whether the change originates from the
 	 * user or has been invoked programmatically.
 	 */
-	private final class LocationGroup extends Observable implements Observer {
+	private final class LocationGroup extends Observable implements Observer, IStringButtonAdapter, IDialogFieldListener {
 
-		protected final Button fWorkspaceRadio;
-		protected final Button fExternalRadio;
-		protected final Label fLocationLabel;
-		protected final Text fLocationField;
-		protected final Button fLocationButton;
-		protected String fExternalLocation;
+		protected final SelectionButtonDialogField fWorkspaceRadio;
+		protected final SelectionButtonDialogField fExternalRadio;
+		protected final StringButtonDialogField fLocation;
+		
+		private String fPreviousExternalLocation;
+		
+		private static final String DIALOGSTORE_LAST_EXTERNAL_LOC= JavaUI.ID_PLUGIN + ".last.external.project"; //$NON-NLS-1$
 
 		public LocationGroup(Composite composite) {
 
 			final int numColumns= 3;
-			
-			fExternalLocation= ""; //$NON-NLS-1$
 
 			final Group group= new Group(composite, SWT.NONE);
 			group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			group.setLayout(initGridLayout(new GridLayout(numColumns, false), true));
 			group.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.title")); //$NON-NLS-1$
 
-			fWorkspaceRadio= new Button(group, SWT.RADIO | SWT.RIGHT);
-			fWorkspaceRadio.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.workspace.desc")); //$NON-NLS-1$
+			fWorkspaceRadio= new SelectionButtonDialogField(SWT.RADIO);
+			fWorkspaceRadio.setDialogFieldListener(this);
+			fWorkspaceRadio.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.workspace.desc")); //$NON-NLS-1$
+
+			fExternalRadio= new SelectionButtonDialogField(SWT.RADIO);
+			fExternalRadio.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.external.desc")); //$NON-NLS-1$
+
+			fLocation= new StringButtonDialogField(this);
+			fLocation.setDialogFieldListener(this);
+			fLocation.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.locationLabel.desc")); //$NON-NLS-1$
+			fLocation.setButtonLabel(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.browseButton.desc")); //$NON-NLS-1$
+
+			fExternalRadio.attachDialogField(fLocation);
+			
 			fWorkspaceRadio.setSelection(true);
-			
-			final GridData gd= new GridData();
-			gd.horizontalSpan= numColumns;
-			fWorkspaceRadio.setLayoutData(gd);
-			
-			fExternalRadio= new Button(group, SWT.RADIO | SWT.RIGHT);
-			fExternalRadio.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.external.desc")); //$NON-NLS-1$
 			fExternalRadio.setSelection(false);
+			
+			fPreviousExternalLocation= ""; //$NON-NLS-1$
 
-			final GridData gd2= new GridData();
-			gd2.horizontalSpan= numColumns;
-			fExternalRadio.setLayoutData(gd2);
-
-			fLocationLabel= new Label(group, SWT.NONE);
-			fLocationLabel.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.locationLabel.desc")); //$NON-NLS-1$
-			fLocationLabel.setEnabled(false);
-			fLocationLabel.setLayoutData(new GridData());
-
-			fLocationField= new Text(group, SWT.BORDER);
-			fLocationField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fLocationField.setEnabled(false);
-			fLocationField.addModifyListener(new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					if (fLocationField.getEnabled()) {
-						fExternalLocation= fLocationField.getText();
-						fireEvent();
-					}
-				}
-			});
-			fLocationField.addFocusListener(new FocusAdapter() {
-				public void focusGained(FocusEvent e) {
-					fLocationField.setSelection(0, fLocationField.getText().length());
-				}
-			});
-
-			fLocationButton= new Button(group, SWT.PUSH);
-			setButtonLayoutData(fLocationButton);
-			fLocationButton.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LocationGroup.browseButton.desc")); //$NON-NLS-1$
-			fLocationButton.setEnabled(false);
-			fLocationButton.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					final DirectoryDialog dialog= new DirectoryDialog(fLocationField.getShell());
-					dialog.setMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.directory.message")); //$NON-NLS-1$
-					final String directoryName = fLocationField.getText().trim();
-					if (directoryName.length() > 0) {
-						final File path = new File(directoryName);
-						if (path.exists())
-							dialog.setFilterPath(new Path(directoryName).toOSString());
-					}
-					final String selectedDirectory = dialog.open();
-					if (selectedDirectory != null) {
-						fExternalLocation= selectedDirectory;
-						fLocationField.setText(fExternalLocation);
-						fireEvent();
-					}
-				}
-			});
-			fWorkspaceRadio.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					final boolean checked= fWorkspaceRadio.getSelection();
-					fLocationLabel.setEnabled(!checked);
-					fLocationField.setEnabled(!checked);
-					fLocationButton.setEnabled(!checked);
-					if (checked) {
-						fLocationField.setText(getDefaultPath(fNameGroup.getName()));
-					} else {
-						fLocationField.setText(fExternalLocation);
-					}
-					fireEvent();
-				}
-			});
+			fWorkspaceRadio.doFillIntoGrid(group, numColumns);
+			fExternalRadio.doFillIntoGrid(group, numColumns);
+			fLocation.doFillIntoGrid(group, numColumns);
+			LayoutUtil.setHorizontalGrabbing(fLocation.getTextControl(null));
 		}
-		
+				
 		protected void fireEvent() {
 			setChanged();
 			notifyObservers();
@@ -233,8 +173,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		 *      java.lang.Object)
 		 */
 		public void update(Observable o, Object arg) {
-			if (fWorkspaceRadio.getSelection()) {
-				fLocationField.setText(getDefaultPath(fNameGroup.getName()));
+			if (isInWorkspace()) {
+				fLocation.setText(getDefaultPath(fNameGroup.getName()));
 			}
 			fireEvent();
 		}
@@ -243,20 +183,62 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			if (isInWorkspace()) {
 				return Platform.getLocation();
 			}
-			return new Path(fLocationField.getText().trim());
+			return new Path(fLocation.getText().trim());
 		}
 
 		public boolean isInWorkspace() {
-			return fWorkspaceRadio.getSelection();
+			return fWorkspaceRadio.isSelected();
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter#changeControlPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
+		 */
+		public void changeControlPressed(DialogField field) {
+			final DirectoryDialog dialog= new DirectoryDialog(getShell());
+			dialog.setMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.directory.message")); //$NON-NLS-1$
+			String directoryName = fLocation.getText().trim();
+			if (directoryName.length() == 0) {
+				String prevLocation= JavaPlugin.getDefault().getDialogSettings().get(DIALOGSTORE_LAST_EXTERNAL_LOC);
+				if (prevLocation != null) {
+					directoryName= prevLocation;
+				}
+			}
+		
+			if (directoryName.length() > 0) {
+				final File path = new File(directoryName);
+				if (path.exists())
+					dialog.setFilterPath(new Path(directoryName).toOSString());
+			}
+			final String selectedDirectory = dialog.open();
+			if (selectedDirectory != null) {
+				fLocation.setText(selectedDirectory);
+				JavaPlugin.getDefault().getDialogSettings().put(DIALOGSTORE_LAST_EXTERNAL_LOC, selectedDirectory);
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
+		 */
+		public void dialogFieldChanged(DialogField field) {
+			if (field == fWorkspaceRadio) {
+				final boolean checked= fWorkspaceRadio.isSelected();
+				if (checked) {
+					fPreviousExternalLocation= fLocation.getText();
+					fLocation.setText(getDefaultPath(fNameGroup.getName()));
+				} else {
+					fLocation.setText(fPreviousExternalLocation);
+				}
+			}
+			fireEvent();
 		}
 	}
 
 	/**
 	 * Request a project layout.
 	 */
-	private final class LayoutGroup implements Observer, SelectionListener {
+	private final class LayoutGroup implements Observer, IDialogFieldListener {
 
-		protected final Button fStdRadio, fSrcBinRadio, fConfigureButton;
+		protected final SelectionButtonDialogField fStdRadio, fSrcBinRadio, fConfigureButton;
 		protected final Group fGroup;
 		
 		public LayoutGroup(Composite composite) {
@@ -266,23 +248,26 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fGroup.setLayout(initGridLayout(new GridLayout(), true));
 			fGroup.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.title")); //$NON-NLS-1$
 			
-			fStdRadio= new Button(fGroup, SWT.RADIO);
-			fStdRadio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fStdRadio.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.option.oneFolder")); //$NON-NLS-1$
+			fStdRadio= new SelectionButtonDialogField(SWT.RADIO);
+			fStdRadio.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.option.oneFolder")); //$NON-NLS-1$
 			
-			fSrcBinRadio= new Button(fGroup, SWT.RADIO);
-			fSrcBinRadio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fSrcBinRadio.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.option.separateFolders")); //$NON-NLS-1$
-						
+			fSrcBinRadio= new SelectionButtonDialogField(SWT.RADIO);
+			fSrcBinRadio.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.option.separateFolders")); //$NON-NLS-1$
+			
+			fStdRadio.doFillIntoGrid(fGroup, 1);
+			fSrcBinRadio.doFillIntoGrid(fGroup, 1);
+			
+			fConfigureButton= new SelectionButtonDialogField(SWT.PUSH);
+			fConfigureButton.setLabelText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.configure")); //$NON-NLS-1$
+			fConfigureButton.setDialogFieldListener(this);
+
+			
+			fConfigureButton.doFillIntoGrid(composite, 1);
+			fConfigureButton.getSelectionButton(null).setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+			
 			boolean useSrcBin= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ);
 			fSrcBinRadio.setSelection(useSrcBin);
 			fStdRadio.setSelection(!useSrcBin);
-			
-			fConfigureButton= new Button(composite, SWT.PUSH);
-			fConfigureButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-			fConfigureButton.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.configure")); //$NON-NLS-1$
-			fConfigureButton.addSelectionListener(this);
-			
 		}
 
 		public void update(Observable o, Object arg) {
@@ -293,22 +278,16 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 		
 		public boolean isSrcBin() {
-			return fSrcBinRadio.getSelection();
+			return fSrcBinRadio.isSelected();
 		}
 
 		/* (non-Javadoc)
-		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
-		public void widgetSelected(SelectionEvent e) {
-			if (e.widget == fConfigureButton) {
+		public void dialogFieldChanged(DialogField field) {
+			if (field == fConfigureButton) {
 				PreferencePageSupport.showPreferencePage(getShell(), NewJavaProjectPreferencePage.ID, new NewJavaProjectPreferencePage());
 			}
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-		 */
-		public void widgetDefaultSelected(SelectionEvent e) {
 		}
 	}
 
@@ -541,11 +520,12 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	 * see @DialogPage.setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
-		if (visible) fNameGroup.setFocus();
 		super.setVisible(visible);
+		if (visible) {
+			fNameGroup.postSetFocus();
+		}
 	}
-
-	
+		
 	/**
 	 * Initialize a grid layout with the default Dialog settings.
 	 */

@@ -166,5 +166,17 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 		if (isOkToUse(fStatusLabelControl)) {
 			fStatusLabelControl.setEnabled(isEnabled());
 		}
-	}	
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
+	 */
+	public void refresh() {
+		super.refresh();
+		if (fStatus instanceof String) {
+			setStatus((String) fStatus);
+		} else {
+			setStatus((Image) fStatus);
+		}
+	}
 }
