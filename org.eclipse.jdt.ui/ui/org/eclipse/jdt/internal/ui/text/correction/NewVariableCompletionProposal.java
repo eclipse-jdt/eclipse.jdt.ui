@@ -165,15 +165,17 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
 	private ASTRewrite doAddField(CompilationUnit astRoot) throws CoreException {
 		SimpleName node= fOriginalNode;
+		boolean isInDifferentCU= false;
 		
 		ASTNode newTypeDecl= astRoot.findDeclaringNode(fSenderBinding);
 		if (newTypeDecl == null) {
 			astRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
 			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
+			isInDifferentCU= true;
 		}
 		
 		if (newTypeDecl != null) {
-			ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
+			ASTRewrite rewrite= new ASTRewrite(astRoot);
 			
 			AST ast= newTypeDecl.getAST();
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
@@ -195,10 +197,12 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			decls.add(findFieldInsertIndex(decls, node.getStartPosition()), newDecl);
 			rewrite.markAsInserted(newDecl);
 			
-			markAsLinked(rewrite, node, true, KEY_NAME);	
-			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
+			if (isInDifferentCU) {
+				markAsLinked(rewrite, node, true, KEY_NAME);
+			}
 			markAsLinked(rewrite, fragment.getName(), false, KEY_NAME);
-			
+			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
+
 			return rewrite;
 		}
 		return null;
@@ -240,23 +244,22 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			return 0;
 		}
 		int modifiers= 0;
-		
-		ASTNode node= ASTResolving.findParentType(fOriginalNode);
-		if (newTypeDecl.equals(node)) {
-			modifiers |= Modifier.PRIVATE;
-			if (ASTResolving.isInStaticContext(fOriginalNode)) {
+
+		ASTNode parent= fOriginalNode.getParent();	
+		if (parent instanceof QualifiedName) {
+			Name qualifier= ((QualifiedName)parent).getQualifier();
+			if (qualifier.resolveBinding().getKind() == IBinding.TYPE) {
 				modifiers |= Modifier.STATIC;
-			}
-		} else if (node instanceof AnonymousClassDeclaration) {
-			modifiers |= Modifier.PROTECTED;
+			}			
 		} else {
-			modifiers |= Modifier.PUBLIC;
-			ASTNode parent= fOriginalNode.getParent();	
-			if (parent instanceof QualifiedName) {
-				Name qualifier= ((QualifiedName)parent).getQualifier();
-				if (qualifier.resolveBinding().getKind() == IBinding.TYPE) {
+			ASTNode node= ASTResolving.findParentType(fOriginalNode);
+			if (newTypeDecl.equals(node)) {
+				modifiers |= Modifier.PRIVATE;
+				if (ASTResolving.isInStaticContext(fOriginalNode)) {
 					modifiers |= Modifier.STATIC;
 				}
+			} else if (node instanceof AnonymousClassDeclaration) {
+				modifiers |= Modifier.PROTECTED;
 			}
 		}
 		return modifiers;
