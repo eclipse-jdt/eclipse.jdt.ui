@@ -20,13 +20,16 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCollector;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintOperator;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVariableFactory;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.FullConstraintCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstraintFactory;
+import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 public class TypeConstraintTests extends RefactoringTest {
 
@@ -64,7 +67,7 @@ public class TypeConstraintTests extends RefactoringTest {
 
 	private void numberHelper(int number) throws Exception {
 		CompilationUnit cuNode= getCuNode();
-		ConstraintCollector collector= new ConstraintCollector();
+		ConstraintCollector collector= getCollector();
 		cuNode.accept(collector);
 		ITypeConstraint[] constraints= collector.getConstraints();
 		assertEquals(Arrays.asList(constraints).toString(), number, constraints.length);
@@ -82,6 +85,16 @@ public class TypeConstraintTests extends RefactoringTest {
 		numberHelper(10);
 	}
 
+	private ConstraintCollector getCollector() {
+		TypeConstraintFactory factory = new TypeConstraintFactory(){
+			public boolean filter(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator o){
+				return false;
+			}
+		};
+		ConstraintCollector collector= new ConstraintCollector(new FullConstraintCreator(new ConstraintVariableFactory(), factory));
+		return collector;
+	}
+	
 	private static List allToStrings(Object[] elements) {
 		String[] strings= new String[elements.length];
 		for (int i= 0; i < elements.length; i++) {
@@ -92,7 +105,7 @@ public class TypeConstraintTests extends RefactoringTest {
 	
 	private void testConstraints(String[] constraintStrings) throws Exception{
 		CompilationUnit cuNode= getCuNode();
-		ConstraintCollector collector= new ConstraintCollector();
+		ConstraintCollector collector= getCollector();
 		cuNode.accept(collector);
 		ITypeConstraint[] constraints= collector.getConstraints();
 		
@@ -125,8 +138,7 @@ public class TypeConstraintTests extends RefactoringTest {
 
 	public void testConstraints4() throws Exception{
 		String[] strings= {"[as0] =^= A[]", "[a0] <= A", "[{a0,}] <= [as0]", "Decl(A:f()) =^= p.A", "[null] <= [a0]", "[a0] =^= A"};
-//		testConstraints(strings);
-		printTestDisabledMessage("see bug 50658");
+		testConstraints(strings);
 	}	
 
 	public void testConstraints5() throws Exception{
@@ -145,9 +157,8 @@ public class TypeConstraintTests extends RefactoringTest {
 	}	
 
 	public void testConstraints8() throws Exception{
-		String[] strings= {"Decl(A:x) =^= p.A", "Decl(A:f()) =^= p.A", "[aField.x] =^= java.lang.Object", "Decl(A:aField) =^= p.A", "[this] <= [aField.x]", "[aField] =^= A", "[x] =^= Object", "[this] =^= p.A", "[aField] <= Decl(A:x)"};
-//		testConstraints(strings);
-		printTestDisabledMessage("see bug 50658");
+		String[] strings= {"Decl(A:x) =^= p.A", "Decl(A:f()) =^= p.A", "[x] =^= java.lang.Object", "Decl(A:aField) =^= p.A", "[this] <= [x]", "[aField] =^= A", "[x] =^= Object", "[this] =^= p.A", "[aField] <= Decl(A:x)"};
+		testConstraints(strings);
 	}	
 
 	public void testConstraints9() throws Exception{
@@ -210,9 +221,8 @@ public class TypeConstraintTests extends RefactoringTest {
 	}	
 
 	public void testConstraints19() throws Exception{
-		String[] strings= {"[super.aField] =^= p.A", "[a] =^= A", "Decl(B:f()) =^= p.B", "[a] <= [super.aField]", "[null] <= [a]", "Decl(A:aField) =^= p.A", "[aField] =^= A"};
-		//testConstraints(strings);
-		printTestDisabledMessage("see bug 50658");
+		String[] strings= {"[aField] =^= p.A", "[a] =^= A", "Decl(B:f()) =^= p.B", "[a] <= [aField]", "[null] <= [a]", "Decl(A:aField) =^= p.A", "[aField] =^= A"};
+		testConstraints(strings);
 	}	
 
 	public void testConstraints20() throws Exception{
