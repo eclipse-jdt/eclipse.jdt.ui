@@ -32,6 +32,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		}
 	};
 	
+	
 	private List fParameters;
 	private String fReturn;
 	private List fExceptions;
@@ -91,13 +92,13 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		}
 	}
 	
-	private void printReturn(StringBuffer buffer) {
-		if  (fReturn != null) {
+	private void print(StringBuffer buffer, String tag, String content) {
+		if  (content != null) {
 			buffer.append("<dt>");
-			buffer.append("returns");
+			buffer.append(tag);
 			buffer.append("</dt>");
 			buffer.append("<dd>");
-			buffer.append(fReturn);
+			buffer.append(content);
 			buffer.append("</dd>");
 		}
 	}
@@ -110,9 +111,11 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 				buffer.append("<dt>");
 				if (p.fTag != null)
 					buffer.append(p.fTag);
+				buffer.append("</dt>");
 				buffer.append("<dd>");
 				if (p.fContent != null)
 					buffer.append(p.fContent);
+				buffer.append("</dd>");
 			}
 		}
 	}
@@ -120,10 +123,10 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	private String print() {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append("<dl>");
-		print(buffer, "parameters", fParameters, true);
-		printReturn(buffer);
-		print(buffer, "exceptions", fExceptions, true);
-		print(buffer, "see also", fSees, false);
+		print(buffer, "Parameters:", fParameters, true);
+		print(buffer, "Returns:", fReturn);
+		print(buffer, "Throws:", fExceptions, true);
+		print(buffer, "See Also:", fSees, false);
 		printRest(buffer);
 		buffer.append("</dl>");
 		

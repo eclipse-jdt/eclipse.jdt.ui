@@ -19,9 +19,8 @@ public class LineBreakingReader {
 	public String readLine() throws IOException {
 		if (fLine == null) {
 			String line= fReader.readLine();
-			if (line == null) {
-				return null;
-			}								
+			if (line == null)
+				return null;								
 			int lineLen= fGC.textExtent(line).x;
 			if (lineLen < fMaxWidth) {
 				return line;

@@ -39,6 +39,8 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		fgTags.add("dl");
 		fgTags.add("dt");
 		fgTags.add("dd");
+		fgTags.add("li");
+		fgTags.add("ul");
 		
 		fgEntityLookup= new HashMap(7);
 		fgEntityLookup.put("lt", "<"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -104,7 +106,12 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		if (!fgTags.contains(tag))
 			return "";
 			
-		if ("b".equals(html) || "h5".equals(html) || "dt".equals(html)) {
+		if ("b".equals(html)) {
+			startBold();
+			return "";
+		}
+				
+		if ("h5".equals(html) || "dt".equals(html)) {
 			startBold();
 			return "";
 		}
@@ -114,15 +121,18 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		
 		if ("dd".equals(html))
 			return "\t";
-			
-		if ("/p".equals(html))
-			return LINE_DELIM;
-			
+		
+		if ("li".equals(html))
+			return LINE_DELIM + "\t" + "- ";
+					
 		if ("/b".equals(html)) {
 			stopBold();
 			return "";
 		}
 		
+		if ("/p".equals(html))
+			return LINE_DELIM;
+			
 		if ("/h5".equals(html) || "/dt".equals(html)) {
 			stopBold();
 			return LINE_DELIM;
@@ -130,7 +140,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		
 		if ("/dd".equals(html))
 			return LINE_DELIM;
-			
+				
 		return "";
 	}
 	
@@ -142,7 +152,9 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		StringBuffer buf= new StringBuffer();
 		int ch;
 		do {		
+			
 			ch= nextChar();
+			
 			while (ch != -1 && ch != '>') {
 				// to be done: skip strings
 				buf.append(Character.toLowerCase((char)ch));

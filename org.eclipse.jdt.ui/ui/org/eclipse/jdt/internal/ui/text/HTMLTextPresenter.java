@@ -29,9 +29,15 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 	private static final String LINE_DELIM= System.getProperty("line.separator", "\n");
 	
 	private int fCounter;
+	private boolean fEnforceUpperLineLimit;
+	
+	public HTMLTextPresenter(boolean enforceUpperLineLimit) {
+		super();
+		fEnforceUpperLineLimit= enforceUpperLineLimit;
+	}
 	
 	public HTMLTextPresenter() {
-		super();
+		this(true);
 	}
 	
 	protected Reader createReader(String hoverInfo, TextPresentation presentation) {
@@ -103,7 +109,10 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 			String line=reader.readLine();
 			boolean lineFormatted= reader.isFormattedLine();
 			
-			while (maxNumberOfLines > 0 && line != null) {
+			while (line != null) {
+				
+				if (fEnforceUpperLineLimit && maxNumberOfLines <= 0)
+					break;
 				
 				if (buffer.length() > 0) {
 					if (!lastLineFormatted)

@@ -6,6 +6,7 @@ package org.eclipse.jdt.ui.text;
  */
 
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
@@ -263,9 +264,14 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getHoverControlCreator(ISourceViewer)
 	 */
 	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
+		return getInformationControlCreator(sourceViewer, true);
+	}
+	
+	private IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer, final boolean cutDown) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, new HTMLTextPresenter());
+				int style= cutDown ? SWT.NONE : (SWT.V_SCROLL | SWT.H_SCROLL);
+				return new DefaultInformationControl(parent, style, new HTMLTextPresenter(cutDown));
 				// return new HoverBrowserControl(parent);
 			}
 		};
@@ -275,10 +281,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getInformationPresenter(ISourceViewer)
 	 */
 	public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
-		InformationPresenter presenter= new InformationPresenter(getInformationControlCreator(sourceViewer));
+		InformationPresenter presenter= new InformationPresenter(getInformationControlCreator(sourceViewer, false));
 		IInformationProvider provider= new JavaTextHover(getEditor());
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_DOC);
+		presenter.setSizeConstraints(60, 10, true, true);		
 		return presenter;
 	}
 }
