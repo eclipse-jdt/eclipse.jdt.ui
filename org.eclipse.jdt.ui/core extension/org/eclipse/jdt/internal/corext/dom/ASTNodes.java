@@ -65,11 +65,9 @@ public class ASTNodes {
 	private static final Message[] EMPTY_MESSAGES= new Message[0];
 	private static final IProblem[] EMPTY_PROBLEMS= new IProblem[0];
 	
-	private static final int[] MODIFIERS= {Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.ABSTRACT, Modifier.STATIC,
-		Modifier.FINAL, Modifier.TRANSIENT, Modifier.VOLATILE, Modifier.NATIVE, Modifier.SYNCHRONIZED, Modifier.STRICTFP };
-	private static final String[] MODIFIER_STRINGS= { "public", "protected", "private", "abstract", "static",  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		"final", "transient", "volatile", "native", "synchronized", "strictfp" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-
+	/**
+	 * @deprecated Use list finder
+	 */
 	private static class NextSiblingVisitor extends GenericVisitor {
 		private ASTNode fNode;
 		private ASTNode fParent;
@@ -147,19 +145,6 @@ public class ASTNodes {
 		return flattener.getFormattedResult(indent, lineDelim);
 	}	
 
-    public static String modifierString(int mod) {
-		StringBuffer result = new StringBuffer();
-		int counter= 0;
-		for (int i= 0; i < MODIFIERS.length; i++) {
-			if ((mod & MODIFIERS[i]) != 0) {
-				if (counter++ > 0)
-					result.append(" "); //$NON-NLS-1$
-				result.append(MODIFIER_STRINGS[i]);
-			}
-		}
-		return result.toString();
-    }
-    
     /**
      * Returns the list that contains the given ASTNode. If the node
      * isn't part of any list, <code>null</code> is returned.
@@ -381,20 +366,6 @@ public class ASTNodes {
 		return null;
 	}
 
-	public static int getDelimiterToken(ASTNode node) {
-		if (node instanceof VariableDeclarationFragment)
-			return ITerminalSymbols.TokenNameCOMMA;
-		if (node instanceof SingleVariableDeclaration)
-			return ITerminalSymbols.TokenNameCOMMA;
-		ASTNode parent= node.getParent();
-		if (node instanceof Expression && parent instanceof ForStatement) {
-			List updaters= ((ForStatement)parent).updaters();
-			if (updaters.contains(node))
-				return ITerminalSymbols.TokenNameCOMMA;
-		}
-		return -1;
-	}
-	
 	/**
 	 * Expands the range of the node passed in <code>nodes</code> to cover all comments
 	 * determined by <code>start</code> and <code>length</code> in the given text buffer. 
@@ -498,6 +469,9 @@ public class ASTNodes {
 	}
 	
 	//recursive
+	/**
+	 * @deprecated Use ASTNodes.asString(name)
+	 */
 	public static String getNameIdentifier(Name name) {
 		if (name.isSimpleName())
 			return ((SimpleName) name).getIdentifier();
@@ -509,6 +483,9 @@ public class ASTNodes {
 		return ""; //$NON-NLS-1$
 	}
 	
+	/**
+	 * @deprecated Use flags & ~ (Modifier.PROTECTED | Modifier.PUBLIC | Modifier.PRIVATE)
+	 */
 	public static int clearAccessModifiers(int flags) {
 		return clearFlag(Modifier.PROTECTED, clearFlag(Modifier.PUBLIC, clearFlag(Modifier.PRIVATE, flags)));
 	}
@@ -517,6 +494,10 @@ public class ASTNodes {
 		return flags & ~ flag;
 	}
 	
+	/**
+	 * @deprecated Looking at the references of this method this can be coded as
+	 * ASTNode.copySubtree(ast, qualifiedName);
+	 */
 	public static String[] getIdentifiers(QualifiedName qualifiedName) {
 		List result= getIdentifierList(qualifiedName);
 		return (String[]) result.toArray(new String[result.size()]);
