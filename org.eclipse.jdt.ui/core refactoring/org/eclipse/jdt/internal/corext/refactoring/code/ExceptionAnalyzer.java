@@ -25,10 +25,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 
 /* package */ class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 
-	private MethodDeclaration fEnclosingMethod;
-	
 	private ExceptionAnalyzer(MethodDeclaration enclosingMethod) {
-		fEnclosingMethod= enclosingMethod;
 	}
 	
 	public static ITypeBinding[] perform(MethodDeclaration enclosingMethod, ASTNode[] statements) {
