@@ -150,7 +150,7 @@ public class JavaApplicationLauncherDelegate implements ILauncherDelegate {
 			
 			IRunnableWithProgress r= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
-					pm.beginTask(LauncherMessages.getString("javaAppLauncher.progress.build"), 4); //$NON-NLS-1$
+					pm.beginTask(LauncherMessages.getString("javaAppLauncher.progress.startVM"), 4); //$NON-NLS-1$
 					IProject proj= jproject.getProject();
 					if (!proj.getWorkspace().isAutoBuilding()) {
 						try {

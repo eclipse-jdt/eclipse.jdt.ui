@@ -301,9 +301,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 			fPositions= new ArrayList(references);
 		}
 		
-		public void acceptFieldReference(char[] fieldName, int sourcePosition) {
-			System.out.println("Field: " + new String(fieldName));
-		}
+		public void acceptFieldReference(char[] fieldName, int sourcePosition) {}
 		public void acceptInitializer(int modifiers, int declarationSourceStart, int declarationSourceEnd) {}
 		public void acceptLineSeparatorPositions(int[] positions) {}
 		public void acceptMethodReference(char[] methodName, int argCount, int sourcePosition) {}

@@ -149,8 +149,9 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 			ICompilationUnit cu= (ICompilationUnit) openable;
 			if (cu.isWorkingCopy()) {
 				res= cu.getOriginalElement().getUnderlyingResource();
+			} else {
+				res= cu.getUnderlyingResource();
 			}
-			res= cu.getUnderlyingResource();
 		} else if (openable instanceof IClassFile) {
 			res= ((IClassFile)openable).getUnderlyingResource();
 		}
