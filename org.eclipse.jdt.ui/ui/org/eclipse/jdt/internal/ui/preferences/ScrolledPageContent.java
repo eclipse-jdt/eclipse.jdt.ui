@@ -17,6 +17,8 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
@@ -59,6 +61,13 @@ public class ScrolledPageContent extends SharedScrolledComposite {
 		setContent(new Composite(this, SWT.NONE));
 		fVisibilityHandler= new VisibilityHandler();
 		fKeyboardHandler= new KeyboardHandler();
+		addListener(SWT.Activate, new Listener() {
+			public void handleEvent(Event event) {
+				if (event.type == SWT.Activate) {
+					forceFocus();
+				}
+			}
+		});
 	}
 	
 	public void adaptChild(Control childControl) {
