@@ -238,12 +238,17 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 
 		if (newText.equals(newText.trim()) == false)
 			errorMessage = WorkingSetMessages.getString("JavaWorkingSetPage.warning.nameWhitespace"); //$NON-NLS-1$
-		else if (fFirstCheck) {
-			fFirstCheck = false;
-			return;
+		if (newText.equals("")) { //$NON-NLS-1$
+			if (fFirstCheck) {
+				setPageComplete(false);
+				fFirstCheck= false;
+				return;
+			}
+			else				
+				errorMessage= WorkingSetMessages.getString("JavaWorkingSetPage.warning.nameMustNotBeEmpty"); //$NON-NLS-1$
 		}
-		if (newText.equals("")) //$NON-NLS-1$
-			errorMessage= WorkingSetMessages.getString("JavaWorkingSetPage.warning.nameMustNotBeEmpty"); //$NON-NLS-1$
+
+		fFirstCheck= false;
 
 		if (errorMessage == null && (fWorkingSet == null || newText.equals(fWorkingSet.getName()) == false)) {
 			IWorkingSet[] workingSets= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets();
