@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
-import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.RGB;
+
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.RGB;
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -3088,13 +3089,9 @@ public class PreferenceConstants {
 		store.setToDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR); // global
 		store.setToDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR); // global
 
-		store.setToDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS); // global
-		store.setToDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER); // global
-		store.setToDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK); // global
-		store.setToDefault(PreferenceConstants.EDITOR_LINK_COLOR); // global
 		store.setToDefault(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE); // global
 		
-		store.setToDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED); // remoevd
+		store.setToDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED); // removed
 	}
 
 	/**
