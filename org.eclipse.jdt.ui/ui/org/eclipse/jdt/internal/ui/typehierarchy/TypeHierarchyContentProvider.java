@@ -85,7 +85,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * @see IReconciled#providesWorkingCopies()
 	 */
 	public boolean providesWorkingCopies() {
-		return fTypeHierarchy.isReconciled();
+		return true;
 	}		
 	
 	

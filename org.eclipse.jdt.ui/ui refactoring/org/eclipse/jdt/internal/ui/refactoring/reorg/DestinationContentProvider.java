@@ -29,11 +29,11 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 	private final int fStopExpandingAtType;
 
 	public DestinationContentProvider(){
-		this(IJavaElement.PACKAGE_FRAGMENT, false, false);//default
+		this(IJavaElement.PACKAGE_FRAGMENT, false);//default
 	}
 	
-	public DestinationContentProvider(int stopExpandingAtType, boolean provideMembers, boolean provideWorkingCopy){
-		super(provideMembers, provideWorkingCopy);
+	public DestinationContentProvider(int stopExpandingAtType, boolean provideMembers){
+		super(provideMembers);
 		fStopExpandingAtType= stopExpandingAtType;
 	}
 	

@@ -460,8 +460,7 @@ public class PackageExplorerPart extends ViewPart
 	public PackageExplorerContentProvider createContentProvider() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		boolean showCUChildren= store.getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
-		boolean reconcile= PreferenceConstants.UPDATE_WHILE_EDITING.equals(store.getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
-		return new PackageExplorerContentProvider(this, showCUChildren, reconcile);
+		return new PackageExplorerContentProvider(this, showCUChildren);
 	}
 	
 	private PackageExplorerLabelProvider createLabelProvider() {
@@ -1218,7 +1217,7 @@ public class PackageExplorerPart extends ViewPart
         String[] filters= filterGroup.removeFiltersFor(getVisibleParent(element), element, getTreeViewer().getContentProvider()); 
         if (filters.length > 0) {
             String message= PackagesMessages.getString("PackageExplorer.removeFilters"); //$NON-NLS-1$
-            if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.getString("PackageExplorer.filteredDialog.title"), message)) {
+            if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.getString("PackageExplorer.filteredDialog.title"), message)) { //$NON-NLS-1$
                 filterGroup.setFilters(filters);		
                 if (revealElementOrParent(element))
                     return true;

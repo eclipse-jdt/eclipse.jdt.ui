@@ -214,10 +214,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fIsRefreshRunnablePosted= false;
 		fSelectInEditor= true;
 		
-		boolean isReconciled= PreferenceConstants.UPDATE_WHILE_EDITING.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
-
 		fHierarchyLifeCycle= new TypeHierarchyLifeCycle();
-		fHierarchyLifeCycle.setReconciled(isReconciled);
 		fTypeHierarchyLifeCycleListener= new ITypeHierarchyLifeCycleListener() {
 			public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchy, IType[] changedTypes) {
 				doTypeHierarchyChanged(typeHierarchy, changedTypes);

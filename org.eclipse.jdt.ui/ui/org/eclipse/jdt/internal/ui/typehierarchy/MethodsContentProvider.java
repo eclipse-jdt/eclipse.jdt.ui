@@ -23,9 +23,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -39,13 +37,11 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 	private boolean fShowInheritedMethods;
 	private TypeHierarchyLifeCycle fHierarchyLifeCycle;
 	private TableViewer fViewer;
-	private boolean fIsReconciled;
 	
 	public MethodsContentProvider(TypeHierarchyLifeCycle lifecycle) {
 		fHierarchyLifeCycle= lifecycle;
 		fShowInheritedMethods= false;
 		fViewer= null;
-		fIsReconciled= PreferenceConstants.UPDATE_WHILE_EDITING.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
 	}
 	
 	/**
@@ -64,7 +60,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 	 * @see IStructuredContentProvider#providesWorkingCopies()
 	 */
 	public boolean providesWorkingCopies() {
-		return fIsReconciled;
+		return true;
 	}	
 	
 	/**
@@ -98,7 +94,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 					// sort in from last to first: elements with same name
 					// will show up in hierarchy order 
 					for (int i= allSupertypes.length - 1; i >= 0; i--) {
-						IType superType= providesWorkingCopies() ? (IType) JavaModelUtil.toWorkingCopy(allSupertypes[i]) : allSupertypes[i];
+						IType superType= allSupertypes[i];
 						if (superType.exists()) {
 							addAll(superType.getMethods(), res);
 							addAll(superType.getInitializers(), res);
@@ -106,7 +102,6 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 						}
 					}
 				}
-				type= providesWorkingCopies() ? (IType) JavaModelUtil.toWorkingCopy(type) : type;
 				if (type.exists()) {
 					addAll(type.getMethods(), res);
 					addAll(type.getInitializers(), res);

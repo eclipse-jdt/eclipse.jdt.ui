@@ -62,8 +62,8 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	/**
 	 * Creates a new content provider for Java elements.
 	 */
-	public PackageExplorerContentProvider(PackageExplorerPart part, boolean provideMembers, boolean provideWorkingCopy) {
-		super(provideMembers, provideWorkingCopy);	
+	public PackageExplorerContentProvider(PackageExplorerPart part, boolean provideMembers) {
+		super(provideMembers);	
 		fPart= part;
 	}
 	
@@ -287,13 +287,6 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 				return;
 			}
 			
-			if (!JavaPlugin.USE_WORKING_COPY_OWNERS && cu.isWorkingCopy()) {
-				if (kind == IJavaElementDelta.REMOVED || kind == IJavaElementDelta.ADDED) {
-					// switch between original and working copy or vice versa
-					postRefresh(JavaModelUtil.toOriginal(cu), false);
-					return;
-				}
-			}
 		}
 		
 		if (elementType == IJavaElement.JAVA_PROJECT) {
@@ -345,7 +338,6 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		if (elementType == IJavaElement.COMPILATION_UNIT) {
 			if (kind == IJavaElementDelta.CHANGED) {
 				// isStructuralCUChange already performed above
-				element= JavaModelUtil.toOriginal((ICompilationUnit) element);
 				postRefresh(element);
 				updateSelection(delta);
 			}

@@ -163,7 +163,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 * @param showInheritedMembers <code>true</code> iff inherited members are shown
 		 */
 		public OutlineContentProvider(boolean showInheritedMembers) {
-			super(true, true);
+			super(true);
 			fShowInheritedMembers= showInheritedMembers;
 		}
 		

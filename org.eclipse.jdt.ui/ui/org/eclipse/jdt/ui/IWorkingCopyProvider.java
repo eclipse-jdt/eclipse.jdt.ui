@@ -20,7 +20,6 @@ package org.eclipse.jdt.ui;
  * </p>
  *
  * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider
- * @see org.eclipse.jdt.core.IWorkingCopy
  * 
  * @since 2.0 
  */

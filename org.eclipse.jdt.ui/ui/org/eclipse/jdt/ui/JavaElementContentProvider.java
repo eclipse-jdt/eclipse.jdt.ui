@@ -20,18 +20,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IWorkingCopy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.*;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -115,11 +104,15 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		int flags= delta.getFlags();
 		IJavaElement element= delta.getElement();
 
-		if (!getProvideWorkingCopy() && isWorkingCopy(element))
-			return;
-
-		if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT && !isOnClassPath((ICompilationUnit)element))
-			return;
+		if (element instanceof ICompilationUnit) {
+			if (!getProvideWorkingCopy())
+				return;
+		
+			ICompilationUnit cu= (ICompilationUnit) element;
+			if (!JavaModelUtil.isPrimary(cu) || !isOnClassPath((ICompilationUnit)element)) {
+				return;
+			}
+		}
 			 
 		// handle open and closing of a solution or project
 		if (((flags & IJavaElementDelta.F_CLOSED) != 0) || ((flags & IJavaElementDelta.F_OPENED) != 0)) {			
@@ -128,12 +121,6 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		}
 
 		if (kind == IJavaElementDelta.REMOVED) {
-			// when a working copy is removed all we have to do
-			// is to refresh the compilation unit
-			if (isWorkingCopy(element)) {
-				refreshWorkingCopy((IWorkingCopy)element);
-				return;
-			}
 			Object parent= internalGetParent(element);			
 			postRemove(element);
 			if (parent instanceof IPackageFragment) 
@@ -148,12 +135,6 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		}
 
 		if (kind == IJavaElementDelta.ADDED) { 
-			// when a working copy is added all we have to do
-			// is to refresh the compilation unit
-			if (isWorkingCopy(element)) {
-				refreshWorkingCopy((IWorkingCopy)element);
-				return;
-			}
 			Object parent= internalGetParent(element);
 			// we are filtering out empty subpackages, so we
 			// have to handle additions to them specially. 
@@ -177,9 +158,6 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		}
 
 		if (element instanceof ICompilationUnit) {
-			if (getProvideWorkingCopy()) {
-				element= JavaModelUtil.toOriginal((ICompilationUnit) element);
-			}
 			if (kind == IJavaElementDelta.CHANGED) {
 				postRefresh(element);
 				return;
@@ -231,26 +209,13 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		}
 	}
 
-	private boolean isOnClassPath(ICompilationUnit element) throws JavaModelException {
+	private boolean isOnClassPath(ICompilationUnit element) {
 		IJavaProject project= element.getJavaProject();
 		if (project == null || !project.exists())
 			return false;
 		return project.isOnClasspath(element);
 	}
 
-	/*
-	 * Refreshes the Compilation unit corresponding to the workging copy
-	 * @param iWorkingCopy
-	 */
-	private void refreshWorkingCopy(IWorkingCopy workingCopy) {
-		IJavaElement original= workingCopy.getOriginalElement();
-		if (original != null)
-			postRefresh(original);
-	}
-
-	private boolean isWorkingCopy(IJavaElement element) {
-		return (element instanceof IWorkingCopy) && ((IWorkingCopy)element).isWorkingCopy();
-	}
 	
 	/*
 	 * Updates the package icon

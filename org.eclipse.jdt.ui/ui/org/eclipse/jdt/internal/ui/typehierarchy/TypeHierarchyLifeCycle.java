@@ -19,22 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IRegion;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
-import org.eclipse.jdt.core.IWorkingCopy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.*;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -49,8 +34,6 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	private IJavaElement fInputElement;
 	private boolean fIsSuperTypesOnly;
 	
-	private boolean fReconciled;
-	
 	private List fChangeListeners;
 	
 	public TypeHierarchyLifeCycle() {
@@ -62,7 +45,6 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		fInputElement= null;
 		fIsSuperTypesOnly= isSuperTypesOnly;
 		fChangeListeners= new ArrayList(2);
-		fReconciled= false;
 	}
 	
 	public ITypeHierarchy getHierarchy() {
@@ -178,9 +160,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	 */
 	public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
 	 	fHierarchyRefreshNeeded= true;
-	 	if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
-	 		fireChange(null);
-	 	}
+ 		fireChange(null);
 	}		
 
 	/*
@@ -191,16 +171,8 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			return;
 		}
 		
-		IJavaElement elem= event.getDelta().getElement();
-		if (!isReconciled() && elem instanceof IWorkingCopy && ((IWorkingCopy)elem).isWorkingCopy()) {
+		if (fHierarchyRefreshNeeded) {
 			return;
-		}
-		if (fHierarchyRefreshNeeded ) {
-			if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
-				fireChange(null);
-			} else {
-				return;
-			}
 		} else {
 			ArrayList changedTypes= new ArrayList();
 			processDelta(event.getDelta(), changedTypes);
@@ -232,11 +204,8 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 					return;
 				}
 				
-				boolean isWorkingCopyRemove= isWorkingCopyRemove(cu, delta.getKind());
-				if (isWorkingCopyRemove || delta.getKind() == IJavaElementDelta.CHANGED && isPossibleStructuralChange(delta.getFlags())) {
+				if (delta.getKind() == IJavaElementDelta.CHANGED && isPossibleStructuralChange(delta.getFlags())) {
 					try {
-						if (isWorkingCopyRemove)
-							cu= JavaModelUtil.toOriginal(cu);
 						if (cu.exists()) {
 							IType[] types= cu.getAllTypes();
 							for (int i= 0; i < types.length; i++) {
@@ -268,13 +237,8 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	private boolean isPossibleStructuralChange(int flags) {
 		return (flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT;
 	}
-
-	private boolean isWorkingCopyRemove(ICompilationUnit cu, int deltaKind) {
-		return isReconciled() && deltaKind == IJavaElementDelta.REMOVED && cu.isWorkingCopy() && JavaPlugin.USE_WORKING_COPY_OWNERS;
-	}
 	
 	private void processTypeDelta(IType type, ArrayList changedTypes) {
-		type= (IType) JavaModelUtil.toOriginal(type);
 		if (getHierarchy().contains(type)) {
 			changedTypes.add(type);
 		}
@@ -287,13 +251,5 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		}
 	}
 	
-	public boolean isReconciled() {
-		return fReconciled;
-	}
-
-	public void setReconciled(boolean reconciled) {
-		fReconciled= reconciled;
-	}
-
 
 }

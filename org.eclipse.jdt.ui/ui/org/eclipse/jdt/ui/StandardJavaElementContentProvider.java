@@ -61,43 +61,40 @@ Java model (<code>IJavaModel</code>)
  * the corresponding package fragment root element that normally appears between the
  * Java project and the package fragments is automatically filtered out.
  * </p>
- * This content provider can optionally return working copy elements for members 
- * below compilation units. If enabled, working copy members are returned for those
- * compilation units in the Java element hierarchy for which a shared working copy exists 
- * in JDT core.
- * 
- * @see org.eclipse.jdt.ui.IWorkingCopyProvider
- * @see JavaCore#getSharedWorkingCopies(org.eclipse.jdt.core.IBufferFactory)
  * 
  * @since 2.0
  */
 public class StandardJavaElementContentProvider implements ITreeContentProvider, IWorkingCopyProvider {
 
 	protected static final Object[] NO_CHILDREN= new Object[0];
-
-	protected boolean fProvideMembers= false;
-	protected boolean fProvideWorkingCopy= false;
+	protected boolean fProvideMembers;
 	
 	/**
 	 * Creates a new content provider. The content provider does not
-	 * provide members of compilation units or class files and it does 
-	 * not provide working copy elements.
+	 * provide members of compilation units or class files.
 	 */	
 	public StandardJavaElementContentProvider() {
+		this(false);
 	}
+	
+	/**
+	 *@deprecated Use {@link #StandardJavaElementContentProvider(boolean)} instead.
+	 * Since 3.0 compilation unit children are always provided as working copies. The Java Model
+	 * does not support the 'original' mode anymore.
+	 */
+	public StandardJavaElementContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
+		this(provideMembers);
+	}
+	
 	
 	/**
 	 * Creates a new <code>StandardJavaElementContentProvider</code>.
 	 *
 	 * @param provideMembers if <code>true</code> members below compilation units 
 	 * and class files are provided. 
-	 * @param provideWorkingCopy if <code>true</code> the element provider provides
-	 * working copies members of compilation units which have an associated working 
-	 * copy in JDT core. Otherwise only original elements are provided.
 	 */
-	public StandardJavaElementContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
+	public StandardJavaElementContentProvider(boolean provideMembers) {
 		fProvideMembers= provideMembers;
-		fProvideWorkingCopy= provideWorkingCopy;
 	}
 	
 	/**
@@ -124,36 +121,26 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 	
 	/**
-	 * Returns whether the provided members are from a working
-	 * copy or the original compilation unit. 
-	 * 
-	 * @return <code>true</code> if the content provider provides
-	 * working copy members; otherwise <code>false</code> is
-	 * returned
-	 * 
-	 * @see #setProvideWorkingCopy(boolean)
+	 * @deprecated Since 3.0 compilation unit children are always provided as working copies. The Java Model
+	 * does not support the 'original' mode anymore. therefore, this returned state of this method is now equals
+	 * to the result of {@link #getProvideMembers()}.
 	 */
 	public boolean getProvideWorkingCopy() {
-		return fProvideWorkingCopy;
+		return fProvideMembers;
 	}
 
 	/**
-	 * Sets whether the members are provided from a shared working copy 
-	 * that exists for a original compilation unit in the Java element hierarchy.
-	 * 
-	 * @param b if <code>true</code> members are provided from a 
-	 * working copy if one exists in JDT core. If <code>false</code> the 
-	 * provider always returns original elements.
+	 * @deprecated Since 3.0 compilation unit children are always provided from the working copy. The Java Model
+	 * offers a unified world and does not support the 'original' mode anymore. 
 	 */
 	public void setProvideWorkingCopy(boolean b) {
-		fProvideWorkingCopy= b;
 	}
 
 	/* (non-Javadoc)
 	 * @see IWorkingCopyProvider#providesWorkingCopies()
 	 */
 	public boolean providesWorkingCopies() {
-		return fProvideWorkingCopy;
+		return getProvideWorkingCopy();
 	}
 
 	/* (non-Javadoc)
@@ -199,9 +186,6 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 				return getResources((IFolder)element);
 			
 			if (getProvideMembers() && element instanceof ISourceReference && element instanceof IParent) {
-				if (getProvideWorkingCopy() && element instanceof ICompilationUnit) {
-					element= JavaModelUtil.toWorkingCopy((ICompilationUnit) element);
-				}
 				return ((IParent)element).getChildren();
 			}
 		} catch (JavaModelException e) {

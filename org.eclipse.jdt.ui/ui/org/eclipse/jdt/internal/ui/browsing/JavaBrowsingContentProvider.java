@@ -28,31 +28,13 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.IWorkingCopy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.*;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 
 class JavaBrowsingContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener {
@@ -64,16 +46,12 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 
 	
 	public JavaBrowsingContentProvider(boolean provideMembers, JavaBrowsingPart browsingPart) {
-		super(provideMembers, reconcileJavaViews());
+		super(provideMembers);
 		fBrowsingPart= browsingPart;
 		fViewer= fBrowsingPart.getViewer();
 		JavaCore.addElementChangedListener(this);
 	}
 
-	private static boolean reconcileJavaViews() {
-		return PreferenceConstants.UPDATE_WHILE_EDITING.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
-	}
-	
 	public boolean hasChildren(Object element) {
 		startReadInDisplayThread();
 		try{
@@ -122,13 +100,6 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		ISourceReference[] sourceRefs;
 		if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE) {
 			sourceRefs= fragment.getCompilationUnits();
-			if (getProvideWorkingCopy()) {
-				for (int i= 0; i < sourceRefs.length; i++) {
-					IWorkingCopy wc= EditorUtility.getWorkingCopy((ICompilationUnit)sourceRefs[i]);
-					if (wc != null)
-						sourceRefs[i]= (ICompilationUnit)wc;
-				}
-			}
 		}
 		else {
 			IClassFile[] classFiles= fragment.getClassFiles();
@@ -161,15 +132,6 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			parent= type.getClassFile();
 		else {
 			parent= type.getCompilationUnit();
-			if (getProvideWorkingCopy()) {
-				IWorkingCopy wc= EditorUtility.getWorkingCopy((ICompilationUnit)parent);
-				if (wc != null) {
-					parent= (IParent)wc;
-					IMember wcType= EditorUtility.getWorkingCopy(type);
-					if (wcType != null)
-						type= (IType)wcType;
-				}
-			}
 		}
 		if (type.getDeclaringType() != null)
 			return type.getChildren();
