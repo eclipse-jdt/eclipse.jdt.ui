@@ -202,7 +202,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		
 		fOrderListField.doFillIntoGrid(composite, 3);
 		LayoutUtil.setHorizontalSpan(fOrderListField.getLabelControl(null), 2);
-		LayoutUtil.setHorizontalGrabbing(fOrderListField.getLabelControl(null));
+		LayoutUtil.setHorizontalGrabbing(fOrderListField.getListControl(null));
 		
 		fThresholdField.doFillIntoGrid(composite, 2);
 		((GridData) fThresholdField.getTextControl(null).getLayoutData()).grabExcessHorizontalSpace= false;
