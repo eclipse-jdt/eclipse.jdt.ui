@@ -96,13 +96,13 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private Label fDocletLabel;
 	private Label fDocletTypeLabel;
 	private Label fDestinationLabel;
-	private CLabel fDescriptionLabel;
+	protected CLabel fDescriptionLabel;
 	
 	protected String fVisibilitySelection;
 	protected boolean fDocletSelected;
 
-	private JavadocOptionsManager fStore;
-	private JavadocWizard fWizard;
+	protected JavadocOptionsManager fStore;
+	protected JavadocWizard fWizard;
 
 	protected StatusInfo fJavadocStatus;
 	protected StatusInfo fDestinationStatus;
@@ -143,11 +143,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		initializeDialogUnits(parent);
 		fWizard= (JavadocWizard) this.getWizard();
 
-		Composite composite= new Composite(parent, SWT.NONE);
-		GridLayout compositeGridLayout= new GridLayout();
-		composite.setLayoutData(createGridData(GridData.FILL_BOTH, 0, 0));
-		compositeGridLayout.numColumns= 6;
-		composite.setLayout(compositeGridLayout);
+		final Composite composite= new Composite(parent, SWT.NONE);
+		final GridLayout layout= new GridLayout();
+		layout.numColumns= 6;
+		composite.setLayout(layout);
 
 		createJavadocCommandSet(composite);
 		createInputGroup(composite);
@@ -161,23 +160,25 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	
 	protected void createJavadocCommandSet(Composite composite) {
 		
-		GridLayout commandSetLayout= createGridLayout(2);
-		commandSetLayout.marginHeight= 0;
-		commandSetLayout.marginWidth= 0;
-		Composite c = new Composite(composite, SWT.NONE);
-		c.setLayoutData(createGridData(GridData.FILL_BOTH, 6, 0));
-		c.setLayout(commandSetLayout);
+		final int numColumns= 2;
+		
+		GridLayout layout= createGridLayout(numColumns);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		Composite group = new Composite(composite, SWT.NONE);
+		group.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 6, 0));
+		group.setLayout(layout);
 
-		createLabel(c, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccommand.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 2, 0)); //$NON-NLS-1$
-		fJavadocCommandText= createText(c, SWT.READ_ONLY | SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
-		((GridData) fJavadocCommandText.getLayoutData()).widthHint= 200;
+		createLabel(group, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccommand.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, numColumns, 0)); //$NON-NLS-1$
+		fJavadocCommandText= createText(group, SWT.READ_ONLY | SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, numColumns - 1, 0));
+
 		fJavadocCommandText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				doValidation(JAVADOCSTATUS);
 			}
 		});
 
-		Button javadocCommandBrowserButton= createButton(c, SWT.PUSH, JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccommand.button.label"), createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, 0)); //$NON-NLS-1$
+		final Button javadocCommandBrowserButton= createButton(group, SWT.PUSH, JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccommand.button.label"), createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, 0)); //$NON-NLS-1$
 		SWTUtil.setButtonDimensionHint(javadocCommandBrowserButton);
 
 		javadocCommandBrowserButton.addSelectionListener(new SelectionAdapter() {
@@ -202,7 +203,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		c.setLayout(layout);
-		c.setLayoutData(createGridData(GridData.FILL_BOTH, 6, 0));
+		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 6, 0));
 		
 		ITreeContentProvider treeContentProvider= new JavadocProjectContentProvider();
 		ITreeContentProvider listContentProvider= new JavadocMemberContentProvider();
@@ -302,37 +303,39 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	private void createOptionsSet(Composite composite) {
+		
+		final int numColumns= 4;
 
-		GridLayout optionSetLayout= createGridLayout(3);
-		optionSetLayout.marginHeight= 0;
-		optionSetLayout.marginWidth= 0;
-		Composite optionSetGroup= new Composite(composite, SWT.NONE);
-		optionSetGroup.setLayoutData(createGridData(GridData.FILL_BOTH, 6, 0));
-		optionSetGroup.setLayout(optionSetLayout);
+		final GridLayout layout= createGridLayout(numColumns);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		Composite group= new Composite(composite, SWT.NONE);
+		group.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 6, 0));
+		group.setLayout(layout);
 
-		fStandardButton= createButton(optionSetGroup, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.standarddocletbutton.label"), createGridData(GridData.HORIZONTAL_ALIGN_FILL, 3, 0)); //$NON-NLS-1$
+		fStandardButton= createButton(group, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.standarddocletbutton.label"), createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns, 0)); //$NON-NLS-1$
 
-		GridData gd= new GridData();
-		gd.horizontalSpan= 1;
-		fDestinationLabel= createLabel(optionSetGroup, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.destinationfield.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, convertWidthInCharsToPixels(3))); //$NON-NLS-1$
-		fDestinationText= createText(optionSetGroup, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
-		//there really aught to be a way to specify this
-		 ((GridData) fDestinationText.getLayoutData()).widthHint= 200;
+		fDestinationLabel= createLabel(group, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.destinationfield.label"), createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, convertWidthInCharsToPixels(3))); //$NON-NLS-1$?
+		fDestinationText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, numColumns - 2, 0));
+		((GridData) fDestinationText.getLayoutData()).widthHint= 0;
 		fDestinationText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				doValidation(STANDARDSTATUS);
 			}
 		});
 
-		fDestinationBrowserButton= createButton(optionSetGroup, SWT.PUSH, JavadocExportMessages.getString("JavadocTreeWizardPage.destinationbrowse.label"), createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, 0)); //$NON-NLS-1$
+		fDestinationBrowserButton= createButton(group, SWT.PUSH, JavadocExportMessages.getString("JavadocTreeWizardPage.destinationbrowse.label"), createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0)); //$NON-NLS-1$
 		SWTUtil.setButtonDimensionHint(fDestinationBrowserButton);
 
 		//Option to use custom doclet
-		fCustomButton= createButton(optionSetGroup, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.customdocletbutton.label"), createGridData(3)); //$NON-NLS-1$
-
+		fCustomButton= createButton(group, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.customdocletbutton.label"), createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns, 0)); //$NON-NLS-1$
+		
 		//For Entering location of custom doclet
-		fDocletTypeLabel= createLabel(optionSetGroup, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.docletnamefield.label"), createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, convertWidthInCharsToPixels(3))); //$NON-NLS-1$
-		fDocletTypeText= createText(optionSetGroup, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, 2, 0));
+		fDocletTypeLabel= createLabel(group, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.docletnamefield.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, convertWidthInCharsToPixels(3))); //$NON-NLS-1$
+		fDocletTypeText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns - 1, 0));
+		((GridData) fDocletTypeText.getLayoutData()).widthHint= 0;
+		
+		
 		fDocletTypeText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				doValidation(CUSTOMSTATUS);
@@ -340,8 +343,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 		});
 
-		fDocletLabel= createLabel(optionSetGroup, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.docletpathfield.label"), createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, convertWidthInCharsToPixels(3))); //$NON-NLS-1$
-		fDocletText= createText(optionSetGroup, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, 2, 0));
+		fDocletLabel= createLabel(group, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.docletpathfield.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, convertWidthInCharsToPixels(3))); //$NON-NLS-1$
+		fDocletText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns - 1, 0));
+		((GridData) fDocletText.getLayoutData()).widthHint= 0;
+		
 		fDocletText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				doValidation(CUSTOMSTATUS);
@@ -590,7 +595,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		}
 	}
 
-	private void doValidation(int validate) {
+	protected void doValidation(int validate) {
 
 		switch (validate) {
 			case PREFERENCESTATUS :
@@ -666,7 +671,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		return true;
 	}
 
-	private boolean showPreferencePage(String id, IPreferencePage page) {
+	protected boolean showPreferencePage(String id, IPreferencePage page) {
 		final IPreferenceNode targetNode = new PreferenceNode(id, page);
 		
 		PreferenceManager manager = new PreferenceManager();

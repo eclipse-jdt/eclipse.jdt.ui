@@ -42,9 +42,8 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 	}
 
 	protected GridLayout createGridLayout(int columns) {
-		GridLayout gl= new GridLayout();
-		gl.numColumns= columns;
-		return gl;
+		return new GridLayout(columns, false);
+
 	}
 
 	protected GridData createGridData(int flag, int hspan, int vspan, int indent) {
