@@ -56,7 +56,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		int codeAssistOffset, ICompilationUnit compilationUnit)
 	{
 		// replacementString is set in apply()
-		super("", replacementOffset, replacementLength, image, displayString, relevance);		
+		super("", replacementOffset, replacementLength, image, displayString, relevance); //$NON-NLS-1$		
 
 		fName= name;
 		fParamaterTypePackageNames= paramaterTypePackageNames;
@@ -198,7 +198,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		String[] parameters= guessParameters();
 		for (int i= 0; i < parameters.length; i++) {
 			if (i != 0)
-				buffer.append(", ");
+				buffer.append(", "); //$NON-NLS-1$
 			offsets[i]= buffer.length();
 			buffer.append(parameters[i]);
 			lengths[i]= buffer.length() - offsets[i];			

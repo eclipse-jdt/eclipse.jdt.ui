@@ -242,7 +242,10 @@ public class ParameterGuesser {
 		
 		for (Iterator i= typeMatches.iterator(); i.hasNext(); ) {
 			
-			Variable variable= (Variable) i.next();
+			Variable variable= (Variable) i.next();			
+			if (variable.alreadyMatched)
+				continue;
+			
 			int subStringScore= getLongestCommonSubstring(variable.name, paramName).length();
 	
 			if (bestMatch == null) {
@@ -262,7 +265,10 @@ public class ParameterGuesser {
 			} else if (bestMatch.alreadyMatched && !variable.alreadyMatched) {
 				bestMatch= variable;
 			}
-		} 
+		}		 
+
+		if (bestMatch == null)
+			return null;
 		
 		bestMatch.alreadyMatched= true;
 		return bestMatch.name;
