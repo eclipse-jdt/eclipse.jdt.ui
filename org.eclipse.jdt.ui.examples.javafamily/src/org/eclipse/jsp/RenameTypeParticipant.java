@@ -29,7 +29,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameParticipant;
-import org.eclipse.jdt.internal.corext.refactoring.participants.RenameRefactoring;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
 
