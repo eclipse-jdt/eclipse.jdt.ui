@@ -429,12 +429,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		setAction("Uncomment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("Format", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT)); //$NON-NLS-1$ //$NON-NLS-2$
 				
-		setAction("ManageBreakpoints", new BreakpointRulerAction(getVerticalRuler(), this)); //$NON-NLS-1$
 		setAction("SurroundWithTryCatch", new SurroundWithTryCatchAction(this)); //$NON-NLS-1$
-		
-		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		 //$NON-NLS-1$
-		
-		
+
 		fSelectionHistory= new SelectionHistory(this);
 		setAction(StructureSelectionAction.ENCLOSING, new StructureSelectEnclosingAction(this, fSelectionHistory));
 		setAction(StructureSelectionAction.NEXT, new StructureSelectNextAction(this, fSelectionHistory));
@@ -512,14 +508,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Comment"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Uncomment"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format"); //$NON-NLS-1$
-	}
-	
-	/*
-	 * @see AbstractTextEditor#rulerContextMenuAboutToShow(IMenuManager)
-	 */
-	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
-		super.rulerContextMenuAboutToShow(menu);
-		addAction(menu, "ManageBreakpoints"); //$NON-NLS-1$
 	}
 	
 	/*

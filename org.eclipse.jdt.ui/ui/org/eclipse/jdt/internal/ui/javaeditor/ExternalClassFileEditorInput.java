@@ -41,4 +41,14 @@ public class ExternalClassFileEditorInput extends FileEditorInput implements ICl
 		if (element instanceof IClassFile)
 			fClassFile= (IClassFile) element;
 	}
+
+	/*
+	 * @see IAdaptable#getAdapter(Class)
+	 */
+	public Object getAdapter(Class adapter) {
+		if (adapter == IClassFile.class)
+			return fClassFile;
+		return fClassFile.getAdapter(adapter);
+	}
+	
 }

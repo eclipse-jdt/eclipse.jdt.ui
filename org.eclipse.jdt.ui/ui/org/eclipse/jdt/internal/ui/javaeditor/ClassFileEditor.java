@@ -59,8 +59,6 @@ public class ClassFileEditor extends JavaEditor {
 		setAction(ITextEditorActionConstants.SAVE, null);
 		setAction(ITextEditorActionConstants.REVERT_TO_SAVED, null);
 		
-		setAction("ManageBreakpoints", new BreakpointRulerAction(getVerticalRuler(), this)); //$NON-NLS-1$
-		
 		/*
 		 * 1GF82PL: ITPJUI:ALL - Need to be able to add bookmark to classfile
 		 *
@@ -73,10 +71,6 @@ public class ClassFileEditor extends JavaEditor {
 		 */
 		setAction(ITextEditorActionConstants.BOOKMARK, null);
 		setAction(ITextEditorActionConstants.ADD_TASK, null);
-		setAction(ITextEditorActionConstants.RULER_MANAGE_BOOKMARKS, null);
-		setAction(ITextEditorActionConstants.RULER_MANAGE_TASKS, null);
-		
-		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		 //$NON-NLS-1$
 		
 		fStandardActionGroups= new CompositeActionGroup(
 			new ActionGroup[] {new OpenActionGroup(this), new ShowActionGroup(this) });
@@ -113,26 +107,6 @@ public class ClassFileEditor extends JavaEditor {
 	 * @see IEditorPart#saveState(IMemento)
 	 */
 	public void saveState(IMemento memento) {
-	}
-	
-	/**
-	 * @see AbstractTextEditor#rulerContextMenuAboutToShow(IMenuManager)
-	 */
-	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
-		super.rulerContextMenuAboutToShow(menu);
-		
-		if (getEditorInput() instanceof IClassFileEditorInput) {
-			
-			IClassFileEditorInput input= (IClassFileEditorInput) getEditorInput();
-			IClassFile file= input.getClassFile();
-			
-			try {
-				if (file.getSource() != null)
-					addAction(menu, "ManageBreakpoints"); //$NON-NLS-1$
-			} catch (JavaModelException x) {
-				// ignore
-			}
-		}
 	}
 	
 	/**
