@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 public class ClasspathContainerDescriptor {
 
 	private IConfigurationElement fConfigElement;
+	private IClasspathContainerPage fPage;
 
 	private static final String ATT_EXTENSION = "classpathContainerPage"; //$NON-NLS-1$
 
@@ -42,6 +43,7 @@ public class ClasspathContainerDescriptor {
 	public ClasspathContainerDescriptor(IConfigurationElement configElement) throws CoreException {
 		super();
 		fConfigElement = configElement;
+		fPage= null;
 
 		String id = fConfigElement.getAttribute(ATT_ID);
 		String name = configElement.getAttribute(ATT_NAME);
@@ -55,13 +57,31 @@ public class ClasspathContainerDescriptor {
 		}
 	}
 
-	public IClasspathContainerPage createPage() throws CoreException {
-		Object elem= CoreUtility.createExtension(fConfigElement, ATT_PAGE_CLASS);
-		if (elem instanceof IClasspathContainerPage) {
-			return (IClasspathContainerPage) elem;
-		} else {
-			String id= fConfigElement.getAttribute(ATT_ID);
-			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, "Invalid extension (page not of type IClasspathContainerPage): " + id, null)); //$NON-NLS-1$
+	public IClasspathContainerPage createPage() throws CoreException  {
+		if (fPage == null) {
+			Object elem= CoreUtility.createExtension(fConfigElement, ATT_PAGE_CLASS);
+			if (elem instanceof IClasspathContainerPage) {
+				fPage= (IClasspathContainerPage) elem;
+			} else {
+				String id= fConfigElement.getAttribute(ATT_ID);
+				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, "Invalid extension (page not of type IClasspathContainerPage): " + id, null)); //$NON-NLS-1$
+			}
+		}
+		return fPage;
+	}
+	
+	public IClasspathContainerPage getPage() {
+		return fPage;
+	}
+	
+	public void setPage(IClasspathContainerPage page) {
+		fPage= page;
+	}
+	
+	public void dispose() {
+		if (fPage != null) {
+			fPage.dispose();
+			fPage= null;
 		}
 	}
 

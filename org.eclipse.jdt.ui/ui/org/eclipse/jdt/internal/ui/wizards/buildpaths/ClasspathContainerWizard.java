@@ -136,6 +136,10 @@ public class ClasspathContainerWizard extends Wizard {
 	private IClasspathContainerPage getContainerPage(ClasspathContainerDescriptor pageDesc) {
 		IClasspathContainerPage containerPage= null;
 		if (pageDesc != null) {
+			IClasspathContainerPage page= pageDesc.getPage();
+			if (page != null) {
+				return page; // if page is already created, avoid double initialization
+			}
 			try {
 				containerPage= pageDesc.createPage();
 			} catch (CoreException e) {
@@ -146,6 +150,9 @@ public class ClasspathContainerWizard extends Wizard {
 
 		if (containerPage == null)	{
 			containerPage= new ClasspathContainerDefaultPage();
+			if (pageDesc != null) {
+				pageDesc.setPage(containerPage); // avoid creation next time
+			}
 		}
 
 		if (containerPage instanceof IClasspathContainerPageExtension) {
@@ -165,11 +172,11 @@ public class ClasspathContainerWizard extends Wizard {
 
 			ClasspathContainerDescriptor selected= fSelectionWizardPage.getSelected();
 			fContainerPage= getContainerPage(selected);
+			
 			return fContainerPage;
 		}
 		return super.getNextPage(page);
 	}
-	
 	
 	private void handlePageCreationFailed(CoreException e) {
 		String title= NewWizardMessages.getString("ClasspathContainerWizard.pagecreationerror.title"); //$NON-NLS-1$
@@ -187,6 +194,18 @@ public class ClasspathContainerWizard extends Wizard {
 		return null;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.wizard.Wizard#dispose()
+	 */
+	public void dispose() {
+		if (fSelectionWizardPage != null) {
+			ClasspathContainerDescriptor[] descriptors= fSelectionWizardPage.getContainers();
+			for (int i= 0; i < descriptors.length; i++) {
+				descriptors[i].dispose();
+			}
+		}
+		super.dispose();
+	}
 
 	/* (non-Javadoc)
 	 * @see IWizard#canFinish()

@@ -121,6 +121,10 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		return null;
 	}
 	
+	public ClasspathContainerDescriptor[] getContainers() {
+		return fContainers;
+	}
+	
 	protected void doDoubleClick() {
 		if (canFlipToNextPage()) {
 			getContainer().showPage(getNextPage());
