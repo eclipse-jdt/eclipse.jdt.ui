@@ -697,11 +697,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
-			doValidation(JAVADOCSTATUS);
 			doValidation(STANDARDSTATUS);
 			doValidation(CUSTOMSTATUS);
 			doValidation(TREESTATUS);
 			doValidation(PREFERENCESTATUS);
+			doValidation(JAVADOCSTATUS);
 		}
 	}
 
