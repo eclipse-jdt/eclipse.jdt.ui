@@ -161,13 +161,7 @@ public abstract class RefactoringTest extends TestCase {
 			return pack.getCompilationUnit(name);
 		ICompilationUnit cu= pack.createCompilationUnit(name, contents, true, null);
 		cu.save(null, true);
-		forceIndexing();
 		return cu;
-	}
-
-	//BOGUS??
-	protected void forceIndexing() {
-		JavaModelManager.getJavaModelManager().getIndexManager().checkIndexConsistency();
 	}
 
 	/**
@@ -180,7 +174,7 @@ public abstract class RefactoringTest extends TestCase {
 		InputStream in= getFileInputStream(fileName);
 		BufferedReader br= new BufferedReader(new InputStreamReader(in));
 		
-		StringBuffer sb= new StringBuffer();
+		StringBuffer sb= new StringBuffer(300);
 		try {
 			int read= 0;
 			while ((read= br.read()) != -1)
