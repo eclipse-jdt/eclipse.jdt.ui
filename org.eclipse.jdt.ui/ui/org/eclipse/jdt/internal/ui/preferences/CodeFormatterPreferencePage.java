@@ -422,7 +422,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			String key= allKeys[i];
 			String val=  (String) fWorkingValues.get(key);
 			actualOptions.put(key, val);
-			store.putValue(key, val);
+			store.setValue(key, val);
 		}
 		JavaCore.setOptions(actualOptions);
 		return super.performOk();
