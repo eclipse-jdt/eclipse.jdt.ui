@@ -102,6 +102,7 @@ import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+import org.eclipse.jdt.internal.ui.filters.OutputFolderFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -841,6 +842,7 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	private void restoreFilterAndSorter() {
+		fViewer.addFilter(new OutputFolderFilter());
 		fViewer.setSorter(new JavaElementSorter());
 		if (fMemento != null)	
 			fActionSet.restoreFilterAndSorterState(fMemento);
