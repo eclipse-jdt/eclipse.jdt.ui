@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
@@ -31,14 +31,17 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
+
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Wizard for exporting resources from the workspace to a Java Archive (JAR) file.
@@ -66,9 +69,10 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	
 	private IWorkbench fWorkbench;
 	private IStructuredSelection fSelection;
-	private JarPackage fJarPackage;
+	private JarPackageData fJarPackage;
 	private JarPackageWizardPage fJarPackageWizardPage;
 	private boolean fHasNewDialogSettings;
+	private boolean fInitializeFromJarPackage;
 	
 	/**
 	 * Creates a wizard for exporting workspace resources to a JAR file.
@@ -104,8 +108,8 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		fWorkbench= workbench;
 		// ignore the selection argument since the main export wizard changed it
 		fSelection= getValidSelection();
-		fJarPackage= new JarPackage();
-		fJarPackage.setIsUsedToInitialize(false);
+		fJarPackage= new JarPackageData();
+		setInitializeFromJarPackage(false);
 		setWindowTitle(JarPackagerMessages.getString("JarPackageWizard.windowTitle")); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
@@ -117,13 +121,13 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 * @param workbench	the workbench which launched this wizard
 	 * @param jarPackage the JAR package description used to initialize this wizard
 	 */
-	public void init(IWorkbench workbench, JarPackage jarPackage) {
+	public void init(IWorkbench workbench, JarPackageData jarPackage) {
 		Assert.isNotNull(workbench);
 		Assert.isNotNull(jarPackage);		
 		fWorkbench= workbench;
 		fJarPackage= jarPackage;
-		fJarPackage.setIsUsedToInitialize(true);
-		fSelection= new StructuredSelection(fJarPackage.getSelectedElements());
+		setInitializeFromJarPackage(true);
+		fSelection= new StructuredSelection(fJarPackage.getElements());
 		setWindowTitle(JarPackagerMessages.getString("JarPackageWizard.windowTitle")); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
@@ -135,14 +139,11 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 */
 	public boolean performFinish() {
 		/*
-		 * Compute and assign the minmal export list for the JAR description.
-		 * This is not done on each model update since it is only if the JAR
-		 * description is saved to a file.
+		 * Compute and assign the minmal export list
 		 */
-		if (fJarPackage.isDescriptionSaved())
-			fJarPackageWizardPage.setSelectedElementsWithoutContainedChildren();
+		fJarPackage.setElements(fJarPackageWizardPage.getSelectedElementsWithoutContainedChildren());
 
-		if (!executeExportOperation(new JarFileExportOperation(fJarPackage, getShell())))
+		if (!executeExportOperation(fJarPackage.createJarExportRunnable(getShell())))
 			return false;
 		
 		// Save the dialog settings
@@ -166,7 +167,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 *
 	 * @return	a boolean indicating success or failure
 	 */
-	protected boolean executeExportOperation(JarFileExportOperation op) {
+	protected boolean executeExportOperation(IJarExportRunnable op) {
 		try {
 			getContainer().run(true, true, op);
 		} catch (InterruptedException e) {
@@ -263,5 +264,13 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 			}
 			
 		}
+	}
+
+	boolean isInitializingFromJarPackage() {
+		return fInitializeFromJarPackage;
+	}
+
+	void setInitializeFromJarPackage(boolean state) {
+		fInitializeFromJarPackage= state;
 	}
 }

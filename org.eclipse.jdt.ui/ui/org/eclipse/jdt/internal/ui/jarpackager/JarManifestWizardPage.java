@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -42,10 +43,10 @@ import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -56,6 +57,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -70,11 +73,12 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 
 /**
  *	Page 3 of the JAR Package wizard
  */
-public class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage {
+class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage {
 
 	// Untyped listener
 	private class UntypedListener implements Listener {
@@ -90,7 +94,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 	private UntypedListener fUntypedListener= new UntypedListener();
 
 	// Model
-	private JarPackage fJarPackage;
+	private JarPackageData fJarPackage;
 	
 	// Cache for main types
 	private IType[] fMainTypes;
@@ -136,7 +140,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 	/**
 	 *	Create an instance of this class
 	 */
-	public JarManifestWizardPage(JarPackage jarPackage) {
+	public JarManifestWizardPage(JarPackageData jarPackage) {
 		super(PAGE_NAME);
 		setTitle(JarPackagerMessages.getString("JarManifestWizardPage.title")); //$NON-NLS-1$
 		setDescription(JarPackagerMessages.getString("JarManifestWizardPage.description")); //$NON-NLS-1$
@@ -374,7 +378,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 			 * @see KeyListener#keyReleased(KeyEvent)
 			 */
 			public void keyReleased(KeyEvent e) {
-				fJarPackage.setMainClass(findMainMethodByName(fMainClassText.getText()));
+				fJarPackage.setManifestMainClass(findMainMethodByName(fMainClassText.getText()));
 				update();
 			}
 		});
@@ -417,7 +421,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 
 	protected void handleManifestFileBrowseButtonPressed() {
 		ElementTreeSelectionDialog dialog= createWorkspaceFileSelectionDialog(JarPackagerMessages.getString("JarManifestWizardPage.manifestSelectionDialog.title"), JarPackagerMessages.getString("JarManifestWizardPage.manifestSelectionDialog.message")); //$NON-NLS-2$ //$NON-NLS-1$
-		if (fJarPackage.doesManifestExist())
+		if (fJarPackage.isManifestAccessible())
 			dialog.setInitialSelections(new IResource[] {fJarPackage.getManifestFile()});
 		if (dialog.open() ==  dialog.OK) {
 			Object[] resources= dialog.getResult();
@@ -433,7 +437,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 
 	private IType findMainMethodByName(String name) {
 		if (fMainTypes == null) {
-			List resources= fJarPackage.getSelectedResources();
+			List resources= JarPackagerUtil.asResources(fJarPackage.getElements());
 			if (resources == null)
 				setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.noResourceSelected")); //$NON-NLS-1$
 			IJavaSearchScope searchScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope((IResource[])resources.toArray(new IResource[resources.size()]));
@@ -454,7 +458,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 	}
 
 	protected void handleMainClassBrowseButtonPressed() {
-		List resources= fJarPackage.getSelectedResources();
+		List resources= JarPackagerUtil.asResources(fJarPackage.getElements());
 		if (resources == null) {
 			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.noResourceSelected")); //$NON-NLS-1$
 			return;
@@ -463,21 +467,21 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 		SelectionDialog dialog= JavaUI.createMainTypeDialog(getContainer().getShell(), getContainer(), searchScope, 0, false, ""); //$NON-NLS-1$
 		dialog.setTitle(JarPackagerMessages.getString("JarManifestWizardPage.mainTypeSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.mainTypeSelectionDialog.message")); //$NON-NLS-1$
-		if (fJarPackage.getMainClass() != null)
-			dialog.setInitialSelections(new Object[] {fJarPackage.getMainClass()});
+		if (fJarPackage.getManifestMainClass() != null)
+			dialog.setInitialSelections(new Object[] {fJarPackage.getManifestMainClass()});
 
 		if (dialog.open() == dialog.OK) {
-			fJarPackage.setMainClass((IType)dialog.getResult()[0]);
-			fMainClassText.setText(fJarPackage.getMainClassName());
+			fJarPackage.setManifestMainClass((IType)dialog.getResult()[0]);
+			fMainClassText.setText(JarPackagerUtil.getMainClassName(fJarPackage));
 		} else if (!fJarPackage.isMainClassValid(getContainer())) {
 			// user did not cancel: no types were found
-			fJarPackage.setMainClass(null);
-			fMainClassText.setText(fJarPackage.getMainClassName());
+			fJarPackage.setManifestMainClass(null);
+			fMainClassText.setText(JarPackagerUtil.getMainClassName(fJarPackage));
 		}
 	}
 
 	protected void handleSealPackagesDetailsButtonPressed() {
-		SelectionDialog dialog= createPackageDialog(fJarPackage.getPackagesForSelectedResources());
+		SelectionDialog dialog= createPackageDialog(getPackagesForSelectedResources(fJarPackage));
 		dialog.setTitle(JarPackagerMessages.getString("JarManifestWizardPage.sealedPackagesSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.sealedPackagesSelectionDialog.message")); //$NON-NLS-1$
 		dialog.setInitialSelections(fJarPackage.getPackagesToSeal());
@@ -487,7 +491,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 	}
 
 	protected void handleUnSealPackagesDetailsButtonPressed() {
-		SelectionDialog dialog= createPackageDialog(fJarPackage.getPackagesForSelectedResources());
+		SelectionDialog dialog= createPackageDialog(getPackagesForSelectedResources(fJarPackage));
 		dialog.setTitle(JarPackagerMessages.getString("JarManifestWizardPage.unsealedPackagesSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JarPackagerMessages.getString("JarManifestWizardPage.unsealedPackagesSelectionDialog.message")); //$NON-NLS-1$
 		dialog.setInitialSelections(fJarPackage.getPackagesToUnseal());
@@ -578,24 +582,25 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 				}
 			}
 		}
-		if (!fJarPackage.isManifestGenerated() && !fJarPackage.doesManifestExist()) {
+		if (!fJarPackage.isManifestGenerated() && !fJarPackage.isManifestAccessible()) {
 			if (fJarPackage.getManifestLocation().toString().length() == 0)
 				setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.noManifestFile")); //$NON-NLS-1$
 			else
 				setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.invalidManifestFile")); //$NON-NLS-1$
 			return false;
 		}
+		Set selectedPackages= getPackagesForSelectedResources(fJarPackage);
 		if (fJarPackage.isJarSealed()
-				&& !fJarPackage.getPackagesForSelectedResources().containsAll(Arrays.asList(fJarPackage.getPackagesToUnseal()))) {
+				&& !selectedPackages.containsAll(Arrays.asList(fJarPackage.getPackagesToUnseal()))) {
 			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.unsealedPackagesNotInSelection")); //$NON-NLS-1$
 			return false;
 		}
 		if (!fJarPackage.isJarSealed()
-				&& !fJarPackage.getPackagesForSelectedResources().containsAll(Arrays.asList(fJarPackage.getPackagesToSeal()))) {
+				&& !selectedPackages.containsAll(Arrays.asList(fJarPackage.getPackagesToSeal()))) {
 			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.sealedPackagesNotInSelection")); //$NON-NLS-1$
 			return false;
 		}
-		if (!fJarPackage.isMainClassValid(getContainer()) || (fJarPackage.getMainClass() == null && fMainClassText.getText().length() > 0)) {
+		if (!fJarPackage.isMainClassValid(getContainer()) || (fJarPackage.getManifestMainClass() == null && fMainClassText.getText().length() > 0)) {
 			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.invalidMainClass")); //$NON-NLS-1$
 			return false;
 		}
@@ -614,6 +619,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 	public void setPreviousPage(IWizardPage page) {
 		super.setPreviousPage(page);
 		fMainTypes= null;
+		updateEnableState();
 		if (getContainer() != null)
 			updatePageCompletion();
 	}
@@ -659,7 +665,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 	 *	last time this wizard was used to completion.
 	 */
 	protected void restoreWidgetValues() {
-		if (!fJarPackage.isUsedToInitialize())
+		if (!((JarPackageWizard)getWizard()).isInitializingFromJarPackage())
 			initializeJarPackage();
 
 		// Manifest creation
@@ -679,7 +685,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 			fSealPackagesRadioButton.setSelection(true);
 		
 		// Main-Class
-		fMainClassText.setText(fJarPackage.getMainClassName());
+		fMainClassText.setText(JarPackagerUtil.getMainClassName(fJarPackage));
 	}
 	/**
 	 *	Initializes the JAR package from last used wizard page values.
@@ -939,5 +945,23 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 		dialog.setStatusLineAboveButtons(true);
 		dialog.setInput(JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()));
 		return dialog;
+	}
+
+	/**
+	 * Returns the minimal set of packages which contain all the selected Java resources.
+	 * @return	the Set of IPackageFragments which contain all the selected resources
+	 */
+	private Set getPackagesForSelectedResources(JarPackageData jarPackage) {
+		Set packages= new HashSet();
+		int n= fJarPackage.getElements().length;
+		for (int i= 0; i < n; i++) {
+			Object element= fJarPackage.getElements()[i];
+			if (element instanceof ICompilationUnit) {
+				IJavaElement pack= JavaModelUtil.findParentOfKind((IJavaElement)element, org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT);
+				if (pack != null)
+					packages.add(pack);
+			}
+		}
+		return packages;
 	}
 }

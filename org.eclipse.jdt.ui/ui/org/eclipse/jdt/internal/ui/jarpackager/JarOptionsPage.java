@@ -1,17 +1,47 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Text;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardPage;
+
+import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  *	Page 2 of the JAR Package wizard
  */
-public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
+class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 
 	// Untyped listener
 	private class UntypedListener implements Listener {
@@ -25,7 +55,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		}
 	}
 
-	private JarPackage fJarPackage;
+	private JarPackageData fJarPackage;
 
 	// widgets
 	private Button		fExportErrorsCheckbox;
@@ -51,7 +81,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 	/**
 	 *	Create an instance of this class
 	 */
-	public JarOptionsPage(JarPackage jarPackage) {
+	public JarOptionsPage(JarPackageData jarPackage) {
 		super(PAGE_NAME);
 		setTitle(JarPackagerMessages.getString("JarOptionsPage.title")); //$NON-NLS-1$
 		setDescription(JarPackagerMessages.getString("JarOptionsPage.description")); //$NON-NLS-1$
@@ -135,7 +165,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
 			settings.put(STORE_EXPORT_WARNINGS, fJarPackage.exportWarnings());
-			settings.put(STORE_EXPORT_ERRORS, fJarPackage.exportErrors());
+			settings.put(STORE_EXPORT_ERRORS, fJarPackage.areErrorsExported());
 			settings.put(STORE_USE_SRC_FOLDERS, fJarPackage.useSourceFolderHierarchy());
 			settings.put(STORE_BUILD_IF_NEEDED, fJarPackage.isBuildingIfNeeded());
 			settings.put(STORE_SAVE_DESCRIPTION, fJarPackage.isDescriptionSaved());
@@ -156,11 +186,11 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 	 *	last time this wizard was used to completion.
 	 */
 	protected void restoreWidgetValues() {
-		if (!fJarPackage.isUsedToInitialize())
+		if (!((JarPackageWizard)getWizard()).isInitializingFromJarPackage())
 			initializeJarPackage();
 
 		fExportWarningsCheckbox.setSelection(fJarPackage.exportWarnings());
-		fExportErrorsCheckbox.setSelection(fJarPackage.exportErrors());
+		fExportErrorsCheckbox.setSelection(fJarPackage.areErrorsExported());
 		fBuildIfNeededCheckbox.setSelection(fJarPackage.isBuildingIfNeeded());
 		fUseSourceFoldersCheckbox.setSelection(fJarPackage.useSourceFolderHierarchy());
 		fSaveDescriptionCheckbox.setSelection(fJarPackage.isDescriptionSaved());
@@ -218,7 +248,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		dialog.setOriginalFile(createFileHandle(fJarPackage.getDescriptionLocation()));
 		if (dialog.open() == dialog.OK) {
 			IPath path= dialog.getResult();
-			path= path.removeFileExtension().addFileExtension(JarPackage.DESCRIPTION_EXTENSION);
+			path= path.removeFileExtension().addFileExtension(JarPackagerUtil.DESCRIPTION_EXTENSION);
 			fDescriptionFileText.setText(path.toString());
 		}
 	}
@@ -259,8 +289,8 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 				return false;
 			}
 			String fileExtension= fJarPackage.getDescriptionLocation().getFileExtension();
-			if (fileExtension == null || !fileExtension.equals(JarPackage.DESCRIPTION_EXTENSION)) {
-				setErrorMessage(JarPackagerMessages.getFormattedString("JarOptionsPage.error.invalidDescriptionExtension", JarPackage.DESCRIPTION_EXTENSION)); //$NON-NLS-1$
+			if (fileExtension == null || !fileExtension.equals(JarPackagerUtil.DESCRIPTION_EXTENSION)) {
+				setErrorMessage(JarPackagerMessages.getFormattedString("JarOptionsPage.error.invalidDescriptionExtension", JarPackagerUtil.DESCRIPTION_EXTENSION)); //$NON-NLS-1$
 				return false;
 			}
 		}
