@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableContext;
 
@@ -27,10 +28,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  */
 public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 
-	private static final String SECTION_NAME= "OpenTypeSelectionDialog"; //$NON-NLS-1$
-	private static final String SHOW_IN_TYPE_HIERARCHY= "showInTypeHierarchy"; //$NON-NLS-1$
-
-	private boolean fShowInTypeHierarchy;
+	public static final int IN_HIERARCHY= IDialogConstants.CLIENT_ID + 1;
 
 	/**
 	 * Constructs an instance of <code>OpenTypeSelectionDialog</code>.
@@ -44,7 +42,6 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 		IJavaSearchScope scope)
 	{
 		super(parent, context, elementKinds, scope);
-		fShowInTypeHierarchy= getDialogSetting().getBoolean(SHOW_IN_TYPE_HIERARCHY);
 	}
 	
 	/**
@@ -55,51 +52,21 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.OPEN_TYPE_DIALOG);
 	}	
 
-	/**
-	 * Returns whether the opened type is shown in the type hierarchy as well.
+	/*
+	 * @see Dialog#createButtonsForButtonBar(Composite)
 	 */
-	public boolean showInTypeHierarchy() {
-		return fShowInTypeHierarchy;
+	protected void createButtonsForButtonBar(Composite parent) {
+		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		createButton(parent, IN_HIERARCHY, JavaUIMessages.getString("OpenTypeSelectionDialog.hierarchy.label"), false);		
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
 	
-	private IDialogSettings getDialogSetting() {
-		IDialogSettings mainStore= JavaPlugin.getDefault().getDialogSettings(); 
-		IDialogSettings result= mainStore.getSection(SECTION_NAME);
-
-		if (result == null) {
-			result= mainStore.addNewSection(SECTION_NAME);
-			result.put(SHOW_IN_TYPE_HIERARCHY, true);
+	protected void buttonPressed(int buttonId) {
+		super.buttonPressed(buttonId);
+		if (buttonId == IN_HIERARCHY) {
+			setReturnCode(buttonId);
+			computeResult();
+			close();
 		}
-
-		return result;
 	}
-	
-	/*
-	 * @see Dialog#createDialogArea(Composite)
-	 */
-	public Control createDialogArea(Composite parent) {
-		Composite contents= (Composite)super.createDialogArea(parent);
-		
-		final Button check= new Button(contents, SWT.CHECK);
-		check.setText(JavaUIMessages.getString("OpenTypeSelectionDialog.checkboxtext")); //$NON-NLS-1$
-		check.setSelection(fShowInTypeHierarchy);
-		check.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent event) {
-				fShowInTypeHierarchy= check.getSelection();
-			}
-		});
-		
-		return contents;
-	}
-
-	/*
-	 * @see Window#close()
-	 */
-	public boolean close() {
-		if (getReturnCode() != CANCEL)
-			getDialogSetting().put(SHOW_IN_TYPE_HIERARCHY, fShowInTypeHierarchy);
-
-		return super.close();
-	}
-	
 }

@@ -48,14 +48,14 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		dialog.setMatchEmptyString(true);	
 		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
 		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
-		if (dialog.open() == IDialogConstants.CANCEL_ID) {
+		int result= dialog.open();
+		if (result != OpenTypeSelectionDialog.IN_HIERARCHY && result != IDialogConstants.OK_ID)
 			return;
-		}
 		
 		Object[] types= dialog.getResult();
 		if (types != null && types.length > 0) {
 			IType type= (IType)types[0];
-			if (dialog.showInTypeHierarchy()) {
+			if (result == OpenTypeSelectionDialog.IN_HIERARCHY) {
 				OpenTypeHierarchyUtil.open(new IType[] { type }, JavaPlugin.getActiveWorkbenchWindow());
 			} else {
 				try {
