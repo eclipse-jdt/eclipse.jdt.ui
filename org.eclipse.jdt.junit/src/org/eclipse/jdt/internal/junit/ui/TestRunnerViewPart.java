@@ -547,6 +547,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fStackViewIcon.dispose();
 		fTestRunOKDirtyIcon.dispose();
 		fTestRunFailDirtyIcon.dispose();
+		getSite().getKeyBindingService().unregisterAction(fRerunLastTestAction);
 	}
 
 	private void start(final int total) {
