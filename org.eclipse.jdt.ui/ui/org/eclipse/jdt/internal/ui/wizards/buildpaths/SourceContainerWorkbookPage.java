@@ -18,6 +18,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -40,6 +42,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
@@ -59,12 +62,15 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private ListDialogField fFoldersList;
 	private CPListElement fProjectCPEntry;
 	
+	private StringDialogField fOutputLocationField;
+	
 	private boolean fIsProjSelected;
 
-	public SourceContainerWorkbookPage(IWorkspaceRoot root, ListDialogField classPathList, boolean isNewProject) {
+	public SourceContainerWorkbookPage(IWorkspaceRoot root, ListDialogField classPathList, StringDialogField outputLocationField, boolean isNewProject) {
 		fWorkspaceRoot= root;
 		fClassPathList= classPathList;
 		fProjectCPEntry= null;
+		fOutputLocationField= outputLocationField;
 		
 		fShell= null;
 				
@@ -179,6 +185,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				if (!elementsToAdd.isEmpty()) {
 					fFoldersList.addElements(elementsToAdd);
 					fFoldersList.postSetSelection(new StructuredSelection(elementsToAdd));
+					// if no source folders up to now
+					if (fFoldersList.getSize() == elementsToAdd.size()) {
+						askForChangingBuildPathDialog();
+					}
 				}
 			}
 		}
@@ -197,6 +207,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				if (fFolderRadioButton.isSelected()) {
 					fIsProjSelected= false;
 					updateClasspathList();
+					if (fFoldersList.getSize() > 0) {
+						askForChangingBuildPathDialog();
+					}
 				}
 			} else if (field == fProjectRadioButton) {
 				if (fProjectRadioButton.isSelected()) {
@@ -256,6 +269,22 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 		return null;
 	}
+	
+	/**
+	 * Asks to change the output folder to 'proj/bin' when no source folders were existing
+	 */ 
+	private void askForChangingBuildPathDialog() {
+		IPath outputFolder= new Path(fOutputLocationField.getText());
+		if (outputFolder.equals(fCurrJProject.getProject().getFullPath())) {
+			IPath newPath= outputFolder.append("bin");
+			String title= NewWizardMessages.getString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.title"); //$NON-NLS-1$
+			String message= NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.message", newPath); //$NON-NLS-1$
+			if (MessageDialog.openQuestion(fShell, title, message)) {
+				fOutputLocationField.setText(newPath.toString());
+			}
+		}
+	}
+	
 			
 			
 	private CPListElement[] chooseSourceContainers() {	

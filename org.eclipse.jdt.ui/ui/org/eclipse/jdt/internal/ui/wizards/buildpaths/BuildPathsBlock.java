@@ -173,7 +173,7 @@ public class BuildPathsBlock {
 		
 		TabItem item;
 				
-		fSourceContainerPage= new SourceContainerWorkbookPage(fWorkspaceRoot, fClassPathList, fIsNewProject);		
+		fSourceContainerPage= new SourceContainerWorkbookPage(fWorkspaceRoot, fClassPathList, fBuildPathDialogField, fIsNewProject);		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.source")); //$NON-NLS-1$
 		item.setImage(imageRegistry.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
