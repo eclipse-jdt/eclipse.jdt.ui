@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -58,6 +60,13 @@ public class MySetup extends TestSetup {
 		JavaProjectHelper.addRTJar(fgJavaTestProject);
 		fgRoot= JavaProjectHelper.addSourceContainer(fgJavaTestProject, CONTAINER);
 		fgPackageP= fgRoot.createPackageFragment("p", true, null);
+		
+		
+		StringBuffer comment= new StringBuffer();
+		comment.append("/**\n");
+		comment.append(" * ${tags}\n");
+		comment.append(" */");
+		CodeTemplates.getCodeTemplate(CodeTemplates.CONSTRUCTORCOMMENT).setPattern(comment.toString());
 	}
 	
 	protected void tearDown() throws Exception {
