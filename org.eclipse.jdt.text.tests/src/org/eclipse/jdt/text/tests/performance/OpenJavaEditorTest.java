@@ -45,12 +45,12 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 
 	public void testOpenJavaEditor1() throws PartInitException {
 		// cold run
-		measureOpenInEditor(EditorTestHelper.findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
+		measureOpenInEditor(EditorTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
 	}
 	
 	public void testOpenJavaEditor2() throws PartInitException {
 		// warm run
-		measureOpenInEditor(EditorTestHelper.findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
+		measureOpenInEditor(EditorTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
 	}
 
 	public static void setUpWorkspace() throws WorkbenchException, IOException {
@@ -60,7 +60,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 		
 		workbench.showPerspective(PERSPECTIVE, activeWindow);
 		
-		duplicate(workspacePath + OpenEditorTestSetup.PROJECT + OpenJavaEditorTest.PATH, OpenJavaEditorTest.FILE_PREFIX, OpenJavaEditorTest.FILE_SUFFIX, OpenJavaEditorTest.N_OF_COPIES);
+		duplicate(workspacePath + PerformanceTestSetup.PROJECT + OpenJavaEditorTest.PATH, OpenJavaEditorTest.FILE_PREFIX, OpenJavaEditorTest.FILE_SUFFIX, OpenJavaEditorTest.N_OF_COPIES);
 	}
 
 	private static void duplicate(String origPrefix, String origName, String origPostfix, int n) throws IOException {

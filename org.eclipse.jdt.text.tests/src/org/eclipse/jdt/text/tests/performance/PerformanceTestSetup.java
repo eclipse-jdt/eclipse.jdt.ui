@@ -36,9 +36,9 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
-public class OpenEditorTestSetup extends TestSetup {
+public class PerformanceTestSetup extends TestSetup {
 
-	public OpenEditorTestSetup(Test test) {
+	public PerformanceTestSetup(Test test) {
 		super(test);
 	}
 

@@ -57,8 +57,8 @@ public abstract class OpenEditorTest extends TestCase {
 	 */
 	protected void ensureTestProjectOpened() throws CoreException {
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IProject project= workspace.getRoot().getProject(OpenEditorTestSetup.PROJECT);
-		IProjectDescription description= workspace.newProjectDescription(OpenEditorTestSetup.PROJECT);
+		IProject project= workspace.getRoot().getProject(PerformanceTestSetup.PROJECT);
+		IProjectDescription description= workspace.newProjectDescription(PerformanceTestSetup.PROJECT);
 		description.setLocation(null);
 
 		project.open(null);

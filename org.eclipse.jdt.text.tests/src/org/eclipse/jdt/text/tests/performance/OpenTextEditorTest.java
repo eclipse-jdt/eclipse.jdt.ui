@@ -39,17 +39,17 @@ public class OpenTextEditorTest extends OpenEditorTest {
 
 	public void testOpenTextEditor1() throws PartInitException {
 		// cold run
-		measureOpenInEditor(EditorTestHelper.findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
+		measureOpenInEditor(EditorTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
 	}
 	public void testOpenTextEditor2() throws PartInitException {
 		// warm run
-		measureOpenInEditor(EditorTestHelper.findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
+		measureOpenInEditor(EditorTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
 	}
 	
 	public static void setUpWorkspace() throws IOException {
 		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
-		String src= workspacePath + OpenEditorTestSetup.PROJECT + ORIG_FILE;
-		String destPrefix= workspacePath + OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX;
+		String src= workspacePath + PerformanceTestSetup.PROJECT + ORIG_FILE;
+		String destPrefix= workspacePath + PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX;
 		for (int i= 0; i < N_OF_COPIES; i++)
 			FileTool.copy(new File(src), new File(destPrefix + i + FILE_SUFFIX));
 	}
