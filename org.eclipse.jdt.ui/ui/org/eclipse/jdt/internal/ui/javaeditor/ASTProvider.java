@@ -18,6 +18,14 @@ import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.text.Assert;
 
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -25,6 +33,9 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import org.eclipse.jdt.ui.JavaUI;
+
 
 /**
  * Provides ASTs for clients with the option to cache it.
@@ -36,6 +47,111 @@ public final class ASTProvider {
 	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ASTProvider"));  //$NON-NLS-1$//$NON-NLS-2$
 
 	
+	private class ActivationListener implements IPartListener2, IWindowListener {
+
+		
+		/*
+		 * @see org.eclipse.ui.IPartListener2#partActivated(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partActivated(IWorkbenchPartReference ref) {
+			if (isJavaEditor(ref) && !isActiveEditor(ref))
+				activeJavaEditorChanged(ref.getPart(true));
+		}
+		
+		/*
+		 * @see org.eclipse.ui.IPartListener2#partBroughtToTop(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partBroughtToTop(IWorkbenchPartReference ref) {
+			if (isJavaEditor(ref) && !isActiveEditor(ref))
+				activeJavaEditorChanged(ref.getPart(true));
+		}
+		
+		/*
+		 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partClosed(IWorkbenchPartReference ref) {
+		}
+		
+		/*
+		 * @see org.eclipse.ui.IPartListener2#partDeactivated(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partDeactivated(IWorkbenchPartReference ref) {
+		}
+		
+		/*
+		 * @see org.eclipse.ui.IPartListener2#partOpened(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partOpened(IWorkbenchPartReference ref) {
+			if (isJavaEditor(ref) && !isActiveEditor(ref))
+				activeJavaEditorChanged(ref.getPart(true));
+		}
+		
+		/*
+		 * @see org.eclipse.ui.IPartListener2#partHidden(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partHidden(IWorkbenchPartReference ref) {
+		}
+		
+		/*
+		 * @see org.eclipse.ui.IPartListener2#partVisible(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partVisible(IWorkbenchPartReference ref) {
+			if (isJavaEditor(ref) && !isActiveEditor(ref))
+				activeJavaEditorChanged(ref.getPart(true));
+		}
+		
+		/*
+		 * @see org.eclipse.ui.IPartListener2#partInputChanged(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partInputChanged(IWorkbenchPartReference ref) {
+		}
+
+		/*
+		 * @see org.eclipse.ui.IWindowListener#windowActivated(org.eclipse.ui.IWorkbenchWindow)
+		 */
+		public void windowActivated(IWorkbenchWindow window) {
+			IWorkbenchPartReference ref= window.getPartService().getActivePartReference();
+			if (isJavaEditor(ref) && !isActiveEditor(ref))
+				activeJavaEditorChanged(ref.getPart(true));
+		}
+
+		/*
+		 * @see org.eclipse.ui.IWindowListener#windowDeactivated(org.eclipse.ui.IWorkbenchWindow)
+		 */
+		public void windowDeactivated(IWorkbenchWindow window) {
+		}
+
+		/*
+		 * @see org.eclipse.ui.IWindowListener#windowClosed(org.eclipse.ui.IWorkbenchWindow)
+		 */
+		public void windowClosed(IWorkbenchWindow window) {
+			window.getPartService().removePartListener(this);
+		}
+
+		/*
+		 * @see org.eclipse.ui.IWindowListener#windowOpened(org.eclipse.ui.IWorkbenchWindow)
+		 */
+		public void windowOpened(IWorkbenchWindow window) {
+			window.getPartService().addPartListener(this);
+		}
+		
+		private boolean isActiveEditor(IWorkbenchPartReference ref) {
+			return ref != null && isActiveEditor(ref.getPart(false));
+		}
+		
+		private boolean isActiveEditor(IWorkbenchPart part) {
+			return part != null && (part == fActiveEditor);
+		}
+		
+		private boolean isJavaEditor(IWorkbenchPartReference ref) {
+			if (ref == null)
+				return false;
+			
+			String id= ref.getId();
+			return JavaUI.ID_CF_EDITOR.equals(id) || JavaUI.ID_CU_EDITOR.equals(id); 
+		}
+	}
+	
 	private static final String AST_DISPOSED= "org.eclipse.jdt.internal.ui.astDisposed"; //$NON-NLS-1$
 	private static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
 	
@@ -43,24 +159,71 @@ public final class ASTProvider {
 	private IJavaElement fReconcilingJavaElement;
 	private IJavaElement fActiveJavaElement;
 	private CompilationUnit fAST;
+	private ActivationListener fActivationListener;
 	private Object fReconcileLock= new Object();
 	private Object fWaitLock= new Object();
 	private boolean fIsReconciling;
-
+	private IWorkbench fWorkbench;
+	private IWorkbenchPart fActiveEditor;
 	
 	/**
 	 * Creates a new AST provider. 
 	 */
 	public ASTProvider() {
+		install();
 	}
 	
-	boolean isDisposed(CompilationUnit ast) {
-		Assert.isNotNull(ast);
+	/**
+	 * Installs this AST provider.
+	 */
+	void install() {
+		// Create and register activation listener
+		fActivationListener= new ActivationListener();
 		
-		return ((Boolean)ast.getProperty(AST_DISPOSED)).booleanValue(); 
+		/*
+		 * XXX: Don't in-line this field unless the following bug has been fixed:
+		 *      https://bugs.eclipse.org/bugs/show_bug.cgi?id=55246
+		 */
+		fWorkbench= PlatformUI.getWorkbench();
+		
+		fWorkbench.addWindowListener(fActivationListener);
+		
+		// Ensure existing windows get connected
+		IWorkbenchWindow[] windows= fWorkbench.getWorkbenchWindows();
+		for (int i= 0, length= windows.length; i < length; i++)
+			windows[i].getPartService().addPartListener(fActivationListener);
+	}
+	
+	private void activeJavaEditorChanged(IWorkbenchPart editor) {
+		fActiveEditor= editor;
+		IJavaElement javaElement= ((JavaEditor)editor).getInputJavaElement();
+		
+		if (DEBUG)
+			System.out.println(DEBUG_PREFIX + "active editor is: " + toString(javaElement)); //$NON-NLS-1$
+
+		synchronized (fReconcileLock) {
+			if (fIsReconciling && !fReconcilingJavaElement.equals(javaElement)) {
+				fIsReconciling= false;
+				fReconcilingJavaElement= null;
+			}
+		}
+
+		cache(null, javaElement);
+	}
+
+	/**
+	 * Returns whether the given compilation unit AST is
+	 * cached by this AST provided.
+	 * 
+	 * @param ast the compilation unit AST
+	 * @return <code>true</code if the given AST is the cached one
+	 */
+	public boolean isCached(CompilationUnit ast) {
+		return ast != null && fAST == ast; 
 	}
 
 	void aboutToBeReconciled(IJavaElement javaElement) {
+		Assert.isNotNull(javaElement);
 		
 		if (DEBUG)
 			System.out.println(DEBUG_PREFIX + "about to reconcile: " + toString(javaElement)); //$NON-NLS-1$
@@ -69,9 +232,10 @@ public final class ASTProvider {
 			fIsReconciling= true;
 			fReconcilingJavaElement= javaElement;
 		}
+		cache(null, javaElement);
 	}
 	
-	synchronized void disposeAST() {
+	private synchronized void disposeAST() {
 		
 		if (fAST == null)
 			return;
@@ -118,19 +282,17 @@ public final class ASTProvider {
 
 	private synchronized void cache(CompilationUnit ast, IJavaElement javaElement) {
 		
+		if (DEBUG && (javaElement != null || ast != null)) // don't report call from disposeAST()
+			System.out.println(DEBUG_PREFIX + "caching AST:" + toString(ast) + " for: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
+
 		if (fAST != null)
 			disposeAST();
-		
-		if (DEBUG && ast != null)
-			System.out.println(DEBUG_PREFIX + "caching AST:" + toString(ast)); //$NON-NLS-1$
 
 		fAST= ast;
+		
 		fActiveJavaElement= javaElement;
 		
-		if (fAST != null)
-			fAST.setProperty(AST_DISPOSED, Boolean.FALSE);
-		
-		// Signal arrival of AST
+		// Signal AST change
 		synchronized (fWaitLock) {
 			fWaitLock.notifyAll();
 		}
@@ -181,6 +343,9 @@ public final class ASTProvider {
 		
 		if (DEBUG)
 			System.out.println(DEBUG_PREFIX + "created AST for: " + je.getElementName()); //$NON-NLS-1$
+
+		if (ast != null && je.equals(fActiveJavaElement))
+			cache(ast, je);
 		
 		return ast;
 	}
@@ -222,6 +387,10 @@ public final class ASTProvider {
 	 */
 	public void dispose() {
 
+		// Dispose activation listener
+		fWorkbench.removeWindowListener(fActivationListener);
+		fActivationListener= null;
+		
 		disposeAST();
 		
 		synchronized (fWaitLock) {
@@ -241,10 +410,10 @@ public final class ASTProvider {
 
 		
 			fIsReconciling= false;
-			if (javaElement != fReconcilingJavaElement) {
+			if (!fReconcilingJavaElement.equals(javaElement)) {
 				
 				if (DEBUG)
-					System.out.println(DEBUG_PREFIX + "  ignoring AST of outdated editor"); //$NON-NLS-1$
+					System.out.println(DEBUG_PREFIX + "  ignoring AST of out-dated editor"); //$NON-NLS-1$
 				
 				return;
 			}

@@ -71,9 +71,6 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 		if (unit != null) {
 			try {
 				
-				if (fNotify && fIsJavaReconcilingListener)
-					fJavaReconcilingListener.aboutToBeReconciled();
-								
 				/* fix for missing cancel flag communication */
 				IProblemRequestorExtension extension= getProblemRequestorExtension();
 				if (extension != null)
@@ -153,5 +150,15 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	 */
 	public void notifyListeners(boolean notify) {
 		fNotify= notify;
+	}
+	
+	/**
+	 * Called before reconciling is started.
+	 * 
+	 * @since 3.0
+	 */
+	public void aboutToBeReconciled() {
+		if (fNotify && fIsJavaReconcilingListener)
+			fJavaReconcilingListener.aboutToBeReconciled();
 	}
 }

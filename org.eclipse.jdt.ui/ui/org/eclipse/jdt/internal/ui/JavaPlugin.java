@@ -264,10 +264,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		if (USE_WORKING_COPY_OWNERS)
 			DefaultWorkingCopyOwner.PRIMARY.factory= getBufferFactory();
-
+	
 		installPreferenceStoreBackwardsCompatibility();
 		
 		AllTypesCache.initialize();
+		
+		// Initialize AST provider
+		getASTProvider();
 	}
 	
 	/**

@@ -256,6 +256,15 @@ public class JavaReconciler extends MonoReconciler {
 	}
     
 	/*
+	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#aboutToReconcile()
+	 * @since 3.0
+	 */
+	protected void aboutToBeReconciled() {
+		JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
+		strategy.aboutToBeReconciled();
+	}
+	
+	/*
 	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#reconcilerReset()
 	 */
 	protected void reconcilerReset() {

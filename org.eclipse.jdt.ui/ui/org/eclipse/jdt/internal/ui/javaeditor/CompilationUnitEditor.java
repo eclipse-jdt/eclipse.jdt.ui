@@ -1321,9 +1321,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
 		configureTabConverter();
-
-		// Must inform the AST provider in UI thread to prevent other from creating the AST
-		JavaPlugin.getDefault().getASTProvider().aboutToBeReconciled(getInputJavaElement());
 	}
 
 	private void configureTabConverter() {
@@ -1513,8 +1510,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	public void aboutToBeReconciled() {
 
 		// Notify AST provider
-		if (isActiveEditor())
-			JavaPlugin.getDefault().getASTProvider().aboutToBeReconciled(getInputJavaElement());
+		JavaPlugin.getDefault().getASTProvider().aboutToBeReconciled(getInputJavaElement());
 		
 		// Notify listeners
 		synchronized (fReconcilingListeners) {
@@ -1531,8 +1527,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	public void reconciled(CompilationUnit ast) {
 
 		// Notify AST provider
-		if (isActiveEditor())
-			JavaPlugin.getDefault().getASTProvider().reconciled(ast, getInputJavaElement());
+		JavaPlugin.getDefault().getASTProvider().reconciled(ast, getInputJavaElement());
 		
 		// Notify listeners
 		synchronized (fReconcilingListeners) {

@@ -128,4 +128,14 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 			super.initialReconcile();
 		}
 	}
+
+	/**
+	 * Called before reconciling is started.
+	 * 
+	 * @since 3.0
+	 */
+	public void aboutToBeReconciled() {
+		fJavaStrategy.aboutToBeReconciled();
+		
+	}
 }
