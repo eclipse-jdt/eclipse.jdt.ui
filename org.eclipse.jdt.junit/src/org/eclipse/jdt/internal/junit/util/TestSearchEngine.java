@@ -180,7 +180,7 @@ public class TestSearchEngine {
 		return searchEngine.searchMethod(pm, scope);
 	}
 		
-	private static boolean hasSuiteMethod(IType type) throws JavaModelException {
+	public static boolean hasSuiteMethod(IType type) throws JavaModelException {
 		IMethod method= type.getMethod("suite", new String[0]); //$NON-NLS-1$
 		if (method == null || !method.exists()) 
 			return false;
@@ -216,4 +216,7 @@ public class TestSearchEngine {
 		return false;
 	}
 
+	public static boolean isTestOrTestSuite(IType type) throws JavaModelException {
+		return hasSuiteMethod(type) || isTestType(type);
+	}
 }

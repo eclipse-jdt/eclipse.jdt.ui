@@ -535,7 +535,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			IType type = jProject.findType(className);
 			if (type == null)
 				setErrorMessage(JUnitMessages.getString("JUnitMainTab.error.testnotexists")); //$NON-NLS-1$
-			else if (!TestSearchEngine.isTestImplementor(type))
+			else if (!TestSearchEngine.isTestOrTestSuite(type))
 				setErrorMessage(JUnitMessages.getString("JUnitMainTab.error.invalidTest")); //$NON-NLS-1$
 		} catch (Exception e) {
 		}
