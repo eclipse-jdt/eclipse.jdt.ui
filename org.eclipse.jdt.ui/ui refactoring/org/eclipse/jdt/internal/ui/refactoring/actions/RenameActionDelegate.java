@@ -4,17 +4,16 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbenchWindow;
 
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.reorg.RenameAction;
-import org.eclipse.jdt.internal.ui.actions.*;
 
 public class RenameActionDelegate extends RefactoringActionDelegate {
 
 	public RenameActionDelegate() {
 		super("Rename", "Operation unavailable on the current selection.\n"
-		       +"Select a java project, source folder, resource, package, compilation unit, type, field or method.");
+		       + "Select a java project, source folder, resource, package, compilation unit, type, field, method or local variable.");
 	}
 	
 	/* (non-Javadoc)
@@ -22,9 +21,15 @@ public class RenameActionDelegate extends RefactoringActionDelegate {
 	 */
 	public void init(IWorkbenchWindow window) {
 		super.init(window);
+		
+		RenameTempAction rta= new RenameTempAction();
+		rta.init(window);
+		
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(window.getSelectionService());
-		initPossibleTargets(new RefactoringAction[] {
-			new RenameAction(provider)		
+		initPossibleTargets(new IRefactoringAction[] {
+			//the sequence is important here
+			new RenameAction(provider),
+			rta
 		});
 	}
 }
