@@ -87,7 +87,7 @@ public class ResourceTestHelper {
 	}
 
 	public static IFile[] findFiles(String prefix, String suffix, int i, int n) {
-		List files= new ArrayList(n - i);
+		List files= new ArrayList(n);
 		for (int j= i; j < i + n; j++) {
 			String path= prefix + j + suffix;
 			files.add(findFile(path));
