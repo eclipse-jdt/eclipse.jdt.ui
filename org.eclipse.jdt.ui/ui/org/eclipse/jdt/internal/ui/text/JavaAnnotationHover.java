@@ -27,8 +27,9 @@ import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
+import org.eclipse.ui.editors.text.EditorsUI;
+
 import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -47,7 +48,6 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	public static final JavaAnnotationHoverType TEXT_RULER_HOVER= new JavaAnnotationHoverType();
 	public static final JavaAnnotationHoverType VERTICAL_RULER_HOVER= new JavaAnnotationHoverType();
 	
-	private AnnotationPreferenceLookup fPreferenceLookup= new AnnotationPreferenceLookup();
 	private IPreferenceStore fStore= JavaPlugin.getDefault().getPreferenceStore();
 	
 	private JavaAnnotationHoverType fType;
@@ -248,6 +248,6 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	 * @return the annotation preference or <code>null</code> if none
 	 */	
 	private AnnotationPreference getAnnotationPreference(Annotation annotation) {
-		return fPreferenceLookup.getAnnotationPreference(annotation);
+		return EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
 	}
 }

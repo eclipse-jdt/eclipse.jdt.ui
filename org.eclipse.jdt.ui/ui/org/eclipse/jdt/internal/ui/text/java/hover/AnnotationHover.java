@@ -21,9 +21,10 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
+import org.eclipse.ui.editors.text.EditorsUI;
+
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
@@ -39,7 +40,6 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 
 	private IPreferenceStore fStore= JavaPlugin.getDefault().getPreferenceStore();
 	private DefaultMarkerAnnotationAccess fAnnotationAccess= new DefaultMarkerAnnotationAccess();
-	private AnnotationPreferenceLookup fPreferenceLookup= new AnnotationPreferenceLookup();
 	
 	/*
 	 * Formats a message as HTML text.
@@ -113,7 +113,7 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 		
 		if (annotation.isMarkedDeleted())
 			return null;
-		return fPreferenceLookup.getAnnotationPreference(annotation);
+		return EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
 	}
 
 	static boolean isJavaProblemHover(String id) {

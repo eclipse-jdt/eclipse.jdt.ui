@@ -32,10 +32,11 @@ import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
 
+import org.eclipse.ui.editors.text.EditorsUI;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -65,8 +66,7 @@ public class QuickAssistLightBulbUpdater {
 		
 		static {
 			Annotation annotation= new Annotation("org.eclipse.jdt.ui.error", false, null); //$NON-NLS-1$
-			// XXX: This should be offered by Editor plug-in
-			AnnotationPreference preference= new AnnotationPreferenceLookup().getAnnotationPreference(annotation);
+			AnnotationPreference preference= EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
 			if (preference != null)
 				LAYER= preference.getPresentationLayer() + 1;
 			else

@@ -51,6 +51,7 @@ import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
 
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
 import org.eclipse.ui.IFileEditorInput;
@@ -113,8 +114,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			private static final int ERROR_LAYER;
 			
 			static {
-				// XXX: This should be offered by Editor plug-in
-				AnnotationPreferenceLookup lookup= new AnnotationPreferenceLookup();
+				AnnotationPreferenceLookup lookup= EditorsUI.getAnnotationPreferenceLookup();
 				TASK_LAYER= computeLayer("org.eclipse.ui.workbench.texteditor.task", lookup); //$NON-NLS-1$
 				INFO_LAYER= computeLayer("org.eclipse.jdt.ui.info", lookup); //$NON-NLS-1$
 				WARNING_LAYER= computeLayer("org.eclipse.jdt.ui.warning", lookup); //$NON-NLS-1$

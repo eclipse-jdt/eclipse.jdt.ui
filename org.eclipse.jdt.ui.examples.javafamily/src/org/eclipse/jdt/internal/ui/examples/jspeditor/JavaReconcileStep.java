@@ -29,6 +29,8 @@ import org.eclipse.jface.text.reconciler.IReconcileResult;
 import org.eclipse.jface.text.reconciler.IReconcileStep;
 import org.eclipse.jface.text.source.Annotation;
 
+import org.eclipse.ui.editors.text.EditorsUI;
+
 import org.eclipse.ui.texteditor.AnnotationTypeLookup;
 
 import org.eclipse.jdt.core.IBuffer;
@@ -59,7 +61,7 @@ import org.eclipse.jdt.internal.core.BufferManager;
  */
 public class JavaReconcileStep extends AbstractReconcileStep {
 
-	private AnnotationTypeLookup fAnnotationTypeLookup= new AnnotationTypeLookup();
+	private AnnotationTypeLookup fAnnotationTypeLookup= EditorsUI.getAnnotationTypeLookup();
 	
 	private static class TemporaryWorkingCopyOwner extends WorkingCopyOwner  {
 
