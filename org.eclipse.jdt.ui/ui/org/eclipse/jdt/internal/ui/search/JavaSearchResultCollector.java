@@ -26,8 +26,10 @@ import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.SearchUI;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
@@ -116,16 +118,19 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		IMarker marker= resource.createMarker(SearchUI.SEARCH_MARKER);
 		HashMap attributes;
 		Object groupKey= enclosingElement;
+		attributes= new HashMap(7);
 		if (accuracy == POTENTIAL_MATCH) {
 			fPotentialMatchCount++;
-			attributes= new HashMap(6);
 			attributes.put(IJavaSearchUIConstants.ATT_ACCURACY, POTENTIAL_MATCH_VALUE);
 			if (groupKey == null)
 				groupKey= "?:null"; //$NON-NLS-1$
 			else
 				groupKey= "?:" + enclosingElement.getHandleIdentifier(); //$NON-NLS-1$
-		} else
-			attributes= new HashMap(5);
+		}			
+		ICompilationUnit cu= SearchUtil.getCompilationUnit(enclosingElement);
+		if (cu != null && cu.isWorkingCopy())
+			attributes.put("isWorkingCopy", new Boolean(true)); //$NON-NLS-1$
+			
 		JavaCore.addJavaElementMarkerAttributes(attributes, enclosingElement);
 		attributes.put(IJavaSearchUIConstants.ATT_JE_HANDLE_ID, enclosingElement.getHandleIdentifier());
 		attributes.put(IMarker.CHAR_START, new Integer(Math.max(start, 0)));

@@ -117,9 +117,6 @@ public abstract class ElementSearchAction extends JavaElementAction {
 		else if (element instanceof IMember)
 			type= ((IMember)element).getDeclaringType();
 		if (type != null) {
-			ICompilationUnit cu= type.getCompilationUnit();
-			if (cu != null && cu.isWorkingCopy())
-				type= (IType)cu.getOriginal(type);
 			return type;
 		}
 		return null;

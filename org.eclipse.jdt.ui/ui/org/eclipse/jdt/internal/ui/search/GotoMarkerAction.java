@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -12,8 +14,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -26,17 +26,19 @@ import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.SearchUI;
 
-import org.eclipse.search.internal.ui.SearchPlugin;
-
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IPackagesViewPart;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -59,11 +61,11 @@ class GotoMarkerAction extends Action {
 
 	private void show(IMarker marker) {
 		IResource resource= marker.getResource();
-		if (resource == null)
+		if (resource == null || !resource.exists())
 			return;
 		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
-		IJavaElement javaElement= getJavaElement(marker);
-		if (javaElement == null || !javaElement.exists()) {
+		IJavaElement javaElement= SearchUtil.getJavaElement(marker);
+		if (javaElement == null) {
 			beep();
 			return;
 		}
@@ -163,15 +165,6 @@ class GotoMarkerAction extends Action {
 		if (jElement instanceof IMember)
 			return ((IMember)jElement).getClassFile();
 		return null;
-	}
-
-	private IJavaElement getJavaElement(IMarker marker) {
-		try {
-			return JavaCore.create((String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
-		} catch (CoreException ex) {
-			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
-			return null;
-		}
 	}
 
 	private boolean isBinary(IJavaElement jElement) {

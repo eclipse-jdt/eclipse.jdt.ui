@@ -53,7 +53,7 @@ public class GroupByKeyComputer implements IGroupByKeyComputer {
 		
 		if (!handle.equals(fLastHandle)) {
 			fLastHandle= handle;
-			fLastJavaElement= JavaCore.create(handle);
+			fLastJavaElement= SearchUtil.getJavaElement(marker);
 			IResource handleResource= null;
 			try {
 				if (fLastJavaElement != null)

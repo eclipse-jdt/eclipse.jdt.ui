@@ -493,7 +493,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		if (o instanceof IJavaElement) {
 			return determineInitValuesFrom((IJavaElement)o);
 		} else if (o instanceof ISearchResultViewEntry) {
-			IJavaElement element= getJavaElement(((ISearchResultViewEntry)o).getSelectedMarker());
+			IJavaElement element= SearchUtil.getJavaElement(((ISearchResultViewEntry)o).getSelectedMarker());
 			return determineInitValuesFrom(element);
 		} else if (o instanceof IAdaptable) {
 			IJavaElement element= (IJavaElement)((IAdaptable)o).getAdapter(IJavaElement.class);

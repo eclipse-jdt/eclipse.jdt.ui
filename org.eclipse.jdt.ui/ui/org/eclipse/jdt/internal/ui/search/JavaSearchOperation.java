@@ -74,7 +74,10 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 	
 	protected void execute(IProgressMonitor monitor) throws CoreException {
 		fCollector.setProgressMonitor(monitor);
-		SearchEngine engine= new SearchEngine();
+		
+		// Also search working copies
+		SearchEngine engine= new SearchEngine(SearchUtil.getWorkingCopies());
+		
 		if (fElementPattern != null)
 			engine.search(fWorkspace, fElementPattern, fLimitTo, fScope, fCollector);
 		else

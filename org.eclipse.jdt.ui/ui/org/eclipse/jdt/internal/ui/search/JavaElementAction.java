@@ -93,13 +93,8 @@ public abstract class JavaElementAction extends Action {
 		}
 		return o;
 	}
-	private IJavaElement getJavaElement(IMarker o, boolean silent) {
-		try {
-			return getJavaElement(JavaCore.create((String) ((IMarker) o).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID)), silent);
-		} catch (CoreException ex) {
-			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
-			return null;
-		}
+	private IJavaElement getJavaElement(IMarker marker, boolean silent) {
+		return getJavaElement(SearchUtil.getJavaElement(marker), silent);
 	}
 	private IJavaElement getJavaElement(Object o, boolean silent) {
 		if (o instanceof IJavaElement)
