@@ -1705,6 +1705,7 @@
          </action>
 <!-- Generate Group -->
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
                label="%AddJavaDocCommentAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
@@ -1725,12 +1726,14 @@
                id="org.eclipse.jdt.ui.actions.GenerateConstructorUsingFields">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.create.delegate.methods"
                label="%GenerateDelegateMethodsAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
                id="org.eclipse.jdt.ui.actions.GenerateDelegateMethods">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.create.getter.setter"
                label="%GenerateGetterSetterAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
@@ -1781,12 +1784,14 @@
                id="org.eclipse.jdt.ui.actions.Format">
          </action>
          <action
+               definitionId="org.eclipse.ui.edit.text.shiftLeft"
                label="%ShiftLeftAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
                id="org.eclipse.jdt.ui.actions.ShiftLeft">
          </action>
          <action
+               definitionId="org.eclipse.ui.edit.text.shiftRight"
                label="%ShiftRightAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
@@ -1835,6 +1840,7 @@
             </separator>
          </menu>
          <action
+               definitionId="org.eclipse.ui.edit.text.convert.lineDelimiters.toMac"
                label="%ConvertLineDelimitersToMacAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
@@ -1842,6 +1848,7 @@
                id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac">
          </action>
          <action
+               definitionId="org.eclipse.ui.edit.text.convert.lineDelimiters.toUNIX"
                label="%ConvertLineDelimitersToUNIXAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
@@ -1849,6 +1856,7 @@
                id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX">
          </action>
          <action
+               definitionId="org.eclipse.ui.edit.text.convert.lineDelimiters.toWindows"
                label="%ConvertLineDelimitersToWindowsAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
