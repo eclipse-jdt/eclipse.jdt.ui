@@ -175,13 +175,14 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					case IJavaElement.INITIALIZER:
 					case IJavaElement.METHOD:
 					case IJavaElement.FIELD:
+					case IJavaElement.LOCAL_VARIABLE:
 						ICompilationUnit cu= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
 						if (cu != null) {
 							ISourceReference ref= (type == IJavaElement.COMPILATION_UNIT) ? null : (ISourceReference) element;
 							// The assumption is that only source elements in compilation unit can have markers
 							if (cu.isWorkingCopy()) {
 								// working copy: look at annotation model
-								return getErrorTicksFromWorkingCopy((ICompilationUnit) cu.getOriginalElement(), ref);
+								return getErrorTicksFromWorkingCopy(cu, ref);
 							}
 							return getErrorTicksFromMarkers(cu.getResource(), IResource.DEPTH_ONE, ref);
 						}
