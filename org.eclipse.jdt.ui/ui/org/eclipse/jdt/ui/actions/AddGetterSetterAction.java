@@ -31,7 +31,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
@@ -42,7 +41,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -50,7 +48,6 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -82,6 +79,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -118,6 +116,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private boolean fSynchronized;
 	private boolean fFinal;	
 	private boolean fNative;
+	private static int fNumEntries;
 	private CompilationUnitEditor fEditor;
 	private static final String dialogTitle= ActionMessages.getString("AddGetterSetterAction.error.title"); //$NON-NLS-1$
 
@@ -135,6 +134,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		setToolTipText(ActionMessages.getString("AddGetterSetterAction.tooltip")); //$NON-NLS-1$
 		
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GETTERSETTER_ACTION);
+		fNumEntries= 0;
 	}
 
 	/**
@@ -145,8 +145,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(editor) != null);
 		fEditor.getEditorSite();
+		fNumEntries= 0;
 	}
-	
+		
 	//---- Structured Viewer -----------------------------------------------------------
 	
 	/* (non-Javadoc)
@@ -211,7 +212,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private static boolean canEnableOn(IField[] fields) throws JavaModelException {
 		return fields != null && fields.length > 0;
 	}
-	
+
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {		
 		if (!ElementValidator.check(type, getShell(), dialogTitle, editor))
 			return;
@@ -230,7 +231,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		dialog.setTitle(dialogTitle);
 		String message= ActionMessages.getString("AddGetterSetterAction.dialog.title");//$NON-NLS-1$
 		dialog.setMessage(message);
-		dialog.setValidator(createValidator());
+		dialog.setValidator(createValidator(fNumEntries));
 		dialog.setContainerMode(true);
 		dialog.setSize(60, 18);
 		dialog.setInput(type);
@@ -300,29 +301,35 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			return atMethodPosition(allFields, comboBoxIndex);			
 	}
 	
-	private static ISelectionStatusValidator createValidator() {
-		return new ISelectionStatusValidator(){
-			public IStatus validate(Object[] selection) {
-				int count= countSelectedMethods(selection);
-				if (count == 0)
-					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-				if (count == 1)	
-					return new StatusInfo(IStatus.INFO, ActionMessages.getString("AddGetterSetterAction.one_selected")); //$NON-NLS-1$
-					
-				String message= ActionMessages.getFormattedString("AddGetterSetterAction.methods_selected", String.valueOf(count));//$NON-NLS-1$
-				return new StatusInfo(IStatus.INFO, message);
-			}
-
-			private int countSelectedMethods(Object[] selection){
-				int count= 0;
-				for (int i = 0; i < selection.length; i++) {
-					if (selection[i] instanceof GetterSetterEntry)
-						count++;
-				}
-				return count;
-			}			
+	private static class AddGetterSetterSelectionStatusValidator implements ISelectionStatusValidator {
+		private static int fEntries;
 			
-		};
+		AddGetterSetterSelectionStatusValidator(int entries) {
+			fEntries= entries;
+		}
+		
+		public IStatus validate(Object[] selection) {
+			int count= countSelectedMethods(selection);
+			if (count == 0)
+				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+			String message= ActionMessages.getFormattedString("AddGetterSetterAction.methods_selected", //$NON-NLS-1$
+																new Object[] { String.valueOf(count), String.valueOf(fEntries)} ); 																	
+			return new StatusInfo(IStatus.INFO, message);
+		}
+
+		private int countSelectedMethods(Object[] selection){
+			int count= 0;
+			for (int i = 0; i < selection.length; i++) {
+				if (selection[i] instanceof GetterSetterEntry)
+					count++;
+			}
+			return count;
+		}			
+	}
+	
+	private static ISelectionStatusValidator createValidator(int entries) {
+		AddGetterSetterSelectionStatusValidator validator= new AddGetterSetterSelectionStatusValidator(entries);
+		return validator;
 	}
 
 	//	returns a list of fields with setter entries checked
@@ -720,11 +727,15 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		Map result= new HashMap();
 		for (int i= 0; i < fields.length; i++) {
 			List l= new ArrayList(2);
-			if (GetterSetterUtil.getGetter(fields[i]) == null)
+			if (GetterSetterUtil.getGetter(fields[i]) == null) {
 				l.add(new GetterSetterEntry(fields[i], true));
+				fNumEntries++;
+			}
 				
-			if (GetterSetterUtil.getSetter(fields[i]) == null)
+			if (GetterSetterUtil.getSetter(fields[i]) == null) {		
 				l.add(new GetterSetterEntry(fields[i], false));	
+				fNumEntries++;
+			}
 
 			if (! l.isEmpty())
 				result.put(fields[i], (GetterSetterEntry[]) l.toArray(new GetterSetterEntry[l.size()]));
@@ -790,7 +801,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 	}
 	
-	private static class GetterSetterTreeSelectionDialog extends CheckedTreeSelectionDialog {
+	private static class GetterSetterTreeSelectionDialog extends SourceActionDialog {
 
 		private boolean fSort;
 		private int fVisibility;
@@ -802,7 +813,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		private ITreeContentProvider fContentProvider;
 		private static final int SELECT_GETTERS_ID= IDialogConstants.CLIENT_ID + 1;
 		private static final int SELECT_SETTERS_ID= IDialogConstants.CLIENT_ID + 2;
-		
+				
 		public GetterSetterTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor) {
 			super(parent, labelProvider, contentProvider);
 			fEditor= editor;
@@ -831,32 +842,21 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		
 		public boolean getSynchronized() {
 			return fSynchronized;
-		}	
-						
-		/**
-		 * Adds the Select Getters and Select Setters buttons.
-		 * Adds modifiers radio buttons and alphabetical order radio buttons. 
-		 * 
-		 * @param composite the parent composite
-		 */
-		protected Composite createSelectionButtons(Composite composite) {
-			Composite buttonComposite= super.createSelectionButtons(composite);
-
-			GridLayout layout = new GridLayout();
-			buttonComposite.setLayout(layout);						
-			
-			// Add buttons for selecting getters or setters only: http://bugs.eclipse.org/bugs/show_bug.cgi?id=35870
+		}						
+		
+		protected void createCustomButtons(Composite buttonComposite) {
 			createButton(buttonComposite, SELECT_GETTERS_ID, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_getters"), false); //$NON-NLS-1$	
-			createButton(buttonComposite, SELECT_SETTERS_ID, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_setters"), false); //$NON-NLS-1$	
-			
-			layout.marginHeight= 0;
-			layout.marginWidth= 0;						
-			layout.numColumns= 1;
-			
-			return buttonComposite;
-		}	
+			createButton(buttonComposite, SELECT_SETTERS_ID, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_setters"), false); //$NON-NLS-1$				
+		}
+		
+		protected void createCustomComposites(Composite composite) {
+			Composite selectionComposite= createSelectionCombos(composite);	
+			GridData gd= new GridData(GridData.FILL_BOTH);
+			selectionComposite.setLayoutData(gd);												
+		}
 		
 		protected void buttonPressed(int buttonId) {
+			super.buttonPressed(buttonId);
 			switch(buttonId) {
 				case SELECT_GETTERS_ID: {
 					getTreeViewer().setCheckedElements(getGetterSetterElements(true));
@@ -866,14 +866,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				case SELECT_SETTERS_ID: {
 					getTreeViewer().setCheckedElements(getGetterSetterElements(false));
 					updateOKStatus();									
-					break;
-				}
-				case IDialogConstants.OK_ID: {
-					okPressed();
-					break;
-				}
-				case IDialogConstants.CANCEL_ID: {
-					cancelPressed();
 					break;
 				}
 			}
@@ -889,57 +881,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			addVisibilityAndModifiersChoices(selectionComposite);	
 											
 			return selectionComposite;
-		}
-		
-		/*
-		 * @see Dialog#createDialogArea(Composite)
-		 */
-		protected Control createDialogArea(Composite parent) {
-			initializeDialogUnits(parent);
-			
-			Composite composite = new Composite(parent, SWT.NONE);
-			GridLayout layout = new GridLayout();
-			layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
-			layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
-			layout.verticalSpacing=	convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
-			layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);			
-			composite.setLayout(layout);
-			composite.setFont(parent.getFont());	
-						
-			Label messageLabel = createMessageArea(composite);			
-			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-			gd.horizontalSpan= 2;
-			messageLabel.setLayoutData(gd);			
-			
-			Composite inner= new Composite(composite, SWT.NONE);
-			GridLayout innerLayout = new GridLayout();
-			innerLayout.numColumns= 2;
-			innerLayout.marginHeight= 0;
-			innerLayout.marginWidth= 0;
-			inner.setLayout(innerLayout);
-			inner.setFont(parent.getFont());		
-			
-			CheckboxTreeViewer treeViewer= createTreeViewer(inner);
-			gd= new GridData(GridData.FILL_BOTH);
-			gd.heightHint = convertHeightInCharsToPixels(20);
-			treeViewer.getControl().setLayoutData(gd);			
-					
-			Composite buttonComposite= createSelectionButtons(inner);
-			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL);
-			buttonComposite.setLayoutData(gd);
-			
-			gd= new GridData(GridData.FILL_BOTH);
-			inner.setLayoutData(gd);
-			
-			Composite selectionComposite= createSelectionCombos(composite);	
-			gd= new GridData(GridData.FILL_BOTH);
-			selectionComposite.setLayoutData(gd);												
-			
-			gd= new GridData(GridData.FILL_BOTH);
-			composite.setLayoutData(gd);
-			
-			return composite;
-		}				
+		}						
 		
 		private Composite addVisibilityAndModifiersChoices(Composite buttonComposite) {
 			// Add visibility and modifiers buttons: http://bugs.eclipse.org/bugs/show_bug.cgi?id=35870
@@ -1042,7 +984,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				else if (type == IJavaElement.FIELD)
 					elementOffset= ((IField)element).getSourceRange().getOffset();
 				else {
-					GoToNextPreviousMemberAction action= GoToNextPreviousMemberAction.newGoToNextMemberAction(fEditor);
+					GoToNextPreviousMemberAction action= GoToNextPreviousMemberAction.newGoToPreviousMemberAction(fEditor);
 					ITextSelection textSelect= (ITextSelection)fEditor.getSelectionProvider().getSelection();	
 					ISourceRange sourceRange= action.getNewSelectionRange(createSourceRange(textSelect), null);
 					IJavaElement nextElement= SelectionConverter.getElementAtOffset(SelectionConverter.getInput(fEditor), createTextSelection(sourceRange));
