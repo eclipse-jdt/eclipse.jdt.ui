@@ -2,7 +2,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 
@@ -227,16 +226,6 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		}	
 		return new String[] { title, message };
 	}	
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getDefaultOptions()
-	 */
-	protected Map getDefaultOptions() {
-		Map map= super.getDefaultOptions();
-		map.put(PREF_COMPILER_TASK_TAGS, "TODO"); //$NON-NLS-1$
-		map.put(PREF_COMPILER_TASK_PRIORITIES, PRIORITY_NORMAL);
-		return map;
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
