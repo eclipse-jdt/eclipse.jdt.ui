@@ -613,8 +613,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (fViewer.isExpandable(element)) {
 			if (JavaBasePreferencePage.doubleClockGoesInto())
 				fZoomInAction.run();
-			else
+			else {
 				fViewer.setExpandedState(element, !fViewer.getExpandedState(element));
+				expandMainType(element);
+			}
 		}
 	}
 
