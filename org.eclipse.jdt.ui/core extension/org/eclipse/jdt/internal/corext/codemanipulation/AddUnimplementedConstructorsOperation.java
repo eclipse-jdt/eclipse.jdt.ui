@@ -84,7 +84,7 @@ public class AddUnimplementedConstructorsOperation implements IWorkspaceRunnable
 				int indent= StubUtility.getIndentUsed(fType) + 1;
 				
 				for (int i= 0; i < nToImplement; i++) {
-					String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, toImplement[i], indent, null, lineDelim, null) + lineDelim;
+					String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, toImplement[i], indent, null, lineDelim, fType.getJavaProject()) + lineDelim;
 					IMethod curr= fType.createMethod(formattedContent, fInsertPosition, true, null);
 					createdMethods.add(curr);
 				}

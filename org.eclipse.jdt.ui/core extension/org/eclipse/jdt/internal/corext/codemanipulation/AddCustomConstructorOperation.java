@@ -174,7 +174,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			String lineDelim= StubUtility.getLineDelimiterUsed(fType);
 			int indent= StubUtility.getIndentUsed(fType) + 1;
 			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
+			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, fType.getJavaProject()) + lineDelim;
 			fConstructorCreated= fType.createMethod(formattedContent, fInsertPosition, true, null);
 
 			monitor.worked(1);		

@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.MultiTextEdit;
@@ -447,7 +448,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private String formatCuSource(String source) {
-  return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, source, 0, null, getLineSeperator(), null);
+		return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, source, 0, null, getLineSeperator(), fInputType.getJavaProject());
 	}
 	
 	private String getCuNameForNewInterface() {

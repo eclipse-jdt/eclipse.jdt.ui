@@ -1122,7 +1122,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private String formatConstructorSource(String src, int indentationLevel){
-  return CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, src, indentationLevel, null, getLineSeperator(), null);
+		return CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, src, indentationLevel, null, getLineSeperator(), fType.getJavaProject());
 	}
 
 	private static String getFullyQualifiedImportName(ITypeBinding type) {

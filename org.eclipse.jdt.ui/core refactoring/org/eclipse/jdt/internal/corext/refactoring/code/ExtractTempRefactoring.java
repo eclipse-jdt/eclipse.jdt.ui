@@ -679,7 +679,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		String semicolon= ";"; //$NON-NLS-1$
 		String dummyDeclaration= modifier + getTempTypeName() + " " + fTempName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$
 		int[] position= {dummyDeclaration.length() - dummyInitializer.length()  - semicolon.length()};
-  String formattedDeclaration= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, dummyDeclaration, 0, position, getLineDelimiter(), null);
+		String formattedDeclaration= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, dummyDeclaration, 0, position, getLineDelimiter(), fCu.getJavaProject());
 		StringBuffer formattedDummyDeclaration= new StringBuffer(formattedDeclaration);
 		String tail= addTrailingLineDelimiter ? getLineDelimiter(): ""; //$NON-NLS-1$
 		return formattedDummyDeclaration.replace(position[0], position[0] + dummyInitializer.length(), initializerSource)

@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.MultiTextEdit;
@@ -514,10 +515,11 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         }
         constructorBody.statements().add(superConstructorInvocation);
 
+        Map options= fCu.getJavaProject().getOptions(true);
         for (int i= 0; i < usedLocals.length; i++) {
             IVariableBinding local= usedLocals[i];
             String unformattedAssigmentCode= "this." + local.getName() + "=" + local.getName(); //$NON-NLS-1$ //$NON-NLS-2$
-            String assignmentCode= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, unformattedAssigmentCode, 0, null, getLineSeparator(), null);
+            String assignmentCode= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, unformattedAssigmentCode, 0, null, getLineSeparator(), options);
             Expression assignmentExpression= (Expression)rewrite.createPlaceholder(assignmentCode, ASTRewrite.EXPRESSION);
             ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignmentExpression);
             constructorBody.statements().add(assignmentStatement);

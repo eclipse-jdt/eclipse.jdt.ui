@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.text.edits.DeleteEdit;
@@ -153,7 +154,7 @@ public class JavaFormatter implements ITemplateEditor {
 
 		int[] offsets= variablesToOffsets(variables);
 		
-		string= CodeFormatterUtil.format(CodeFormatter.K_UNKNOWN, string, fInitialIndentLevel, offsets, fLineDelimiter, null);
+		string= CodeFormatterUtil.format(CodeFormatter.K_UNKNOWN, string, fInitialIndentLevel, offsets, fLineDelimiter, (Map) null);
 				
 		offsetsToVariables(offsets, variables);
 

@@ -134,7 +134,7 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 					sibling = existingMethods[0];
 				}
 	
-				String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, content, indent, null, lineDelim, null) + lineDelim;
+				String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, content, indent, null, lineDelim, fType.getJavaProject()) + lineDelim;
 				IMethod created= fType.createMethod(formattedContent, sibling, true, null);
 				fCreatedMethods.add(created);
 					

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
@@ -224,7 +225,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			else
 				sibling= getInsertPosition();
 			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
+			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, field.getJavaProject()) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
 	}
@@ -305,7 +306,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			else
 				sibling= getInsertPosition();			
 			
-   String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
+			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, field.getJavaProject()) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
 	}			

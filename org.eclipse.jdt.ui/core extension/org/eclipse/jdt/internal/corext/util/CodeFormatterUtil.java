@@ -26,6 +26,7 @@ import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.Position;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -43,7 +44,7 @@ public class CodeFormatterUtil {
 	 * Creates a string that represents the given number of indents (can be spaces or tabs..)
 	 */
 	public static String createIndentString(int indent) {
-		String str= format(CodeFormatter.K_EXPRESSION, "x", indent, null, "", null); //$NON-NLS-1$ //$NON-NLS-2$
+		String str= format(CodeFormatter.K_EXPRESSION, "x", indent, null, "", (Map) null); //$NON-NLS-1$ //$NON-NLS-2$
 		return str.substring(0, str.indexOf('x'));
 	} 
 		
@@ -58,6 +59,11 @@ public class CodeFormatterUtil {
 	 * Old API. Consider to use format2 (TextEdit)
 	 */	
 	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+		return format(kind, string, 0, string.length(), indentationLevel, positions, lineSeparator, options);
+	}
+	
+	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, IJavaProject project) {
+		Map options= project != null ? project.getOptions(true) : null;
 		return format(kind, string, 0, string.length(), indentationLevel, positions, lineSeparator, options);
 	}
 	

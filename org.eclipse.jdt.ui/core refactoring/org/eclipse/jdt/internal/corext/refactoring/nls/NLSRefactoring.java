@@ -798,7 +798,7 @@ public class NLSRefactoring extends Refactoring {
 	
 	//--bundle class source creation
 	private String createAccessorCUSource(IProgressMonitor pm) throws CoreException {
-		return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, null, null, null);
+		return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, null, null, fCu.getJavaProject());
 	}
 
 	private String getUnformattedSource(IProgressMonitor pm) throws CoreException {
