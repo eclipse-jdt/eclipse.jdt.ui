@@ -111,6 +111,76 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 	
+	public void testInheritedAccessOnStatic() throws Exception {
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class A {\n");
+		buf.append("    public static void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("A.java", buf.toString(), false, null);		
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class B extends A {\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("B.java", buf.toString(), false, null);		
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import pack.B;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(B b) {\n");
+		buf.append("        b.foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import pack.B;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(B b) {\n");
+		buf.append("        B.foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import pack.A;\n");		
+		buf.append("import pack.B;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(B b) {\n");
+		buf.append("        A.foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}	
+	
+	
 	public void testQualifiedAccessToStatic() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

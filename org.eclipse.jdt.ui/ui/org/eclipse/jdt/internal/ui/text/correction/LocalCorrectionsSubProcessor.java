@@ -323,34 +323,58 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		Expression qualifier= null;
+		IBinding accessBinding= null;
 		
         if (selectedNode instanceof QualifiedName) {
-            qualifier= ((QualifiedName) selectedNode).getQualifier();
+        	QualifiedName name= (QualifiedName) selectedNode; 
+            qualifier= name.getQualifier();
+        	accessBinding= name.resolveBinding();
         } else if (selectedNode instanceof SimpleName) {
         	ASTNode parent= selectedNode.getParent();
         	if (parent instanceof FieldAccess) {
-        		qualifier= ((FieldAccess) parent).getExpression();
+        		FieldAccess fieldAccess= (FieldAccess) parent;
+        		qualifier= fieldAccess.getExpression();
+        		accessBinding= fieldAccess.getName().resolveBinding();
         	}
         } else if (selectedNode instanceof MethodInvocation) {
-        	qualifier= ((MethodInvocation) selectedNode).getExpression();
+        	MethodInvocation methodInvocation= (MethodInvocation) selectedNode;
+        	qualifier= methodInvocation.getExpression();
+        	accessBinding= methodInvocation.getName().resolveBinding();
         }
-		if (qualifier != null) {
-			ITypeBinding typeBinding= ASTResolving.normalizeTypeBinding(qualifier.resolveTypeBinding());
-			if (typeBinding != null) {
+		ITypeBinding declaringTypeBinding= null;
+		if (accessBinding != null) {
+			if (accessBinding instanceof IMethodBinding) {
+				declaringTypeBinding= ((IMethodBinding) accessBinding).getDeclaringClass();
+			} else if (accessBinding instanceof IVariableBinding) {
+				declaringTypeBinding= ((IVariableBinding) accessBinding).getDeclaringClass();
+			}
+			if (declaringTypeBinding != null) {
 				ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
-				rewrite.markAsReplaced(qualifier, astRoot.getAST().newSimpleName(typeBinding.getName()));
-				
-				String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.changeaccesstostatic.description");
+				rewrite.markAsReplaced(qualifier, astRoot.getAST().newSimpleName(declaringTypeBinding.getName()));
+
+				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changeaccesstostaticdefining.description", declaringTypeBinding.getName());
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
-				proposal.addImport(typeBinding);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
+				proposal.addImport(declaringTypeBinding);
 				proposal.ensureNoModifications();
 
 				proposals.add(proposal);
 			}
-			
-			
-			
+		}        
+		if (qualifier != null) {
+			ITypeBinding instanceTypeBinding= ASTResolving.normalizeTypeBinding(qualifier.resolveTypeBinding());
+			if (instanceTypeBinding != null && instanceTypeBinding != declaringTypeBinding) {
+				ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
+				rewrite.markAsReplaced(qualifier, astRoot.getAST().newSimpleName(instanceTypeBinding.getName()));
+				
+				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changeaccesstostatic.description", instanceTypeBinding.getName());
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+				proposal.addImport(instanceTypeBinding);
+				proposal.ensureNoModifications();
+
+				proposals.add(proposal);
+			}
 		}
 	}
 
