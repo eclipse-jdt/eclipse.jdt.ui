@@ -400,7 +400,11 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 						if (workingCopy != null)
 							workingCopy.reconcile(true, null);
 					} catch (JavaModelException ex) {
-						handleCoreException(ex, ex.getMessage());
+						if (!ex.isDoesNotExist())
+							handleCoreException(ex, ex.getMessage());
+					} finally {
+						// ensure problem requestor gets deactivated
+						fCollectedProblems= null;
 					}
 				}
 			}

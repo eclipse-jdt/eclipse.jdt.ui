@@ -708,7 +708,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return unit.getElementAt(offset);
 					
 			} catch (JavaModelException x) {
-				JavaPlugin.log(x.getStatus());
+				if (!x.isDoesNotExist())
+					JavaPlugin.log(x.getStatus());
 				// nothing found, be tolerant and go on
 			}
 		}
