@@ -11,7 +11,7 @@ import org.eclipse.jface.resource.ImageDescriptor;import org.eclipse.jface.view
  */
 public class NewSnippetFileCreationWizard extends Wizard implements INewWizard {
 
-	private NewSnippetFileCreationWizardPage fPage;
+	private NewSnippetFileWizardPage fPage;
 	private IWorkbench fWorkbench;
 	private IStructuredSelection fSelection;
 	
@@ -32,7 +32,7 @@ public class NewSnippetFileCreationWizard extends Wizard implements INewWizard {
 				fSelection= StructuredSelection.EMPTY;
 			}
 		}
-		fPage= new NewSnippetFileCreationWizardPage(fSelection);
+		fPage= new NewSnippetFileWizardPage(fSelection);
 		addPage(fPage);
 	}
 

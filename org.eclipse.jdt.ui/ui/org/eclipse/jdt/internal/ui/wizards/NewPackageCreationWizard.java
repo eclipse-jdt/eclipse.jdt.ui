@@ -5,17 +5,18 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.wizards.NewPackageWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class NewPackageCreationWizard extends NewElementWizard {
 
-	private NewPackageCreationWizardPage fPage;
+	private NewPackageWizardPage fPage;
 
 	public NewPackageCreationWizard() {
 		super();
@@ -29,7 +30,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	 */	
 	public void addPages() {
 		super.addPages();
-		fPage= new NewPackageCreationWizardPage();
+		fPage= new NewPackageWizardPage();
 		addPage(fPage);
 		fPage.init(getSelection());
 	}	

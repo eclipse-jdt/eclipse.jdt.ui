@@ -11,13 +11,13 @@ import org.eclipse.ui.IWorkbenchPart;import org.eclipse.ui.IWorkbenchWindow;im
 /**
  * Page to create a new Java snippet file.
  */
-public class NewSnippetFileCreationWizardPage extends WizardNewFileCreationPage {
+public class NewSnippetFileWizardPage extends WizardNewFileCreationPage {
 	
 	private static final String fgDefaultExtension= ".jpage"; //$NON-NLS-1$
 	
-	public NewSnippetFileCreationWizardPage(IStructuredSelection selection) {
+	public NewSnippetFileWizardPage(IStructuredSelection selection) {
 		super("createScrapBookPage", selection); //$NON-NLS-1$
-		setTitle(NewWizardMessages.getString("NewSnippetFileCreationWizardPage.title")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.getString("NewSnippetFileWizardPage.title")); //$NON-NLS-1$
 	}
 
 	public boolean finish() {
@@ -50,7 +50,7 @@ public class NewSnippetFileCreationWizardPage extends WizardNewFileCreationPage 
 				return true;
 			} catch (PartInitException e) {
 				JavaPlugin.log(e);
-				MessageDialog.openError(shell, NewWizardMessages.getString("NewSnippetFileCreationWizardPage.open_error.message"),  e.getMessage()); //$NON-NLS-1$
+				MessageDialog.openError(shell, NewWizardMessages.getString("NewSnippetFileWizardPage.open_error.message"),  e.getMessage()); //$NON-NLS-1$
 			}
 		}
 		return false;
@@ -71,7 +71,7 @@ public class NewSnippetFileCreationWizardPage extends WizardNewFileCreationPage 
 			IProject project= workspaceRoot.getProject(containerPath.segment(0));
 			try {
 				if (!project.hasNature(JavaCore.NATURE_ID)) {
-					setErrorMessage(NewWizardMessages.getString("NewSnippetFileCreationWizardPage.error.OnlyInJavaProject")); //$NON-NLS-1$
+					setErrorMessage(NewWizardMessages.getString("NewSnippetFileWizardPage.error.OnlyInJavaProject")); //$NON-NLS-1$
 					return false;
 				}
 			} catch (CoreException e) {
@@ -85,7 +85,7 @@ public class NewSnippetFileCreationWizardPage extends WizardNewFileCreationPage 
 			IPath path= getContainerFullPath();
 			
 			if (path != null && workspaceRoot.exists(path.append(fileName))) {
-				setErrorMessage(NewWizardMessages.getString("NewSnippetFileCreationWizardPage.error.AlreadyExists")); //$NON-NLS-1$
+				setErrorMessage(NewWizardMessages.getString("NewSnippetFileWizardPage.error.AlreadyExists")); //$NON-NLS-1$
 				return false;
 			}
 		}

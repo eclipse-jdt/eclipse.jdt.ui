@@ -29,9 +29,10 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
+import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
+
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
-import org.eclipse.jdt.internal.ui.wizards.NewElementWizardPage;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 

@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.wizards;
+package org.eclipse.jdt.ui.wizards;
 
 import org.eclipse.core.runtime.IStatus;
 
@@ -17,22 +17,27 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-public class NewInterfaceCreationWizardPage extends TypePage {
+/**
+ * Wizard page for a new interface. This class is not intended to be subclassed.
+ * To implement a different kind of new type wizard, extend <code>NewTypeWizardPage</code>.
+ */
+public class NewInterfaceWizardPage extends NewTypeWizardPage {
 	
-	private final static String PAGE_NAME= "NewInterfaceCreationWizardPage"; //$NON-NLS-1$
+	private final static String PAGE_NAME= "NewInterfaceWizardPage"; //$NON-NLS-1$
 		
-	public NewInterfaceCreationWizardPage() {
+	public NewInterfaceWizardPage() {
 		super(false, PAGE_NAME);
 		
-		setTitle(NewWizardMessages.getString("NewInterfaceCreationWizardPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("NewInterfaceCreationWizardPage.description"));			 //$NON-NLS-1$
+		setTitle(NewWizardMessages.getString("NewInterfaceWizardPage.title")); //$NON-NLS-1$
+		setDescription(NewWizardMessages.getString("NewInterfaceWizardPage.description"));			 //$NON-NLS-1$
 	}
 
 	// -------- Initialization ---------
 
 	/**
-	 * Should be called from the wizard with the input element.
+	 * Called from the wizard with the initial selection.
 	 */
 	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= getInitialJavaElement(selection);
@@ -45,7 +50,7 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 	// ------ validation --------
 
 	private void doStatusUpdate() {
-		// status of all used components
+		// all used component status
 		IStatus[] status= new IStatus[] {
 			fContainerStatus,
 			isEnclosingTypeSelected() ? fEnclosingTypeStatus : fPackageStatus,
@@ -60,7 +65,7 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 
 			
 	/*
-	 * @see ContainerPage#handleFieldChanged
+	 * @see NewContainerWizardPage#handleFieldChanged
 	 */
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);

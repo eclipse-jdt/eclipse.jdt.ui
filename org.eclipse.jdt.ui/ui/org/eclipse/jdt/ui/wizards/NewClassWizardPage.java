@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.wizards;
+package org.eclipse.jdt.ui.wizards;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,35 +27,42 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
 
-public class NewClassCreationWizardPage extends TypePage {
+/**
+ * Wizard page for creating a new class. This class is not intended to be subclassed.
+ * To implement a different kind of type wizard, extend <code>NewTypeWizardPage</code>.
+ */
+public class NewClassWizardPage extends NewTypeWizardPage {
 	
-	private final static String PAGE_NAME= "NewClassCreationWizardPage"; //$NON-NLS-1$
+	private final static String PAGE_NAME= "NewClassWizardPage"; //$NON-NLS-1$
 	
 	private final static String SETTINGS_CREATEMAIN= "create_main"; //$NON-NLS-1$
 	private final static String SETTINGS_CREATECONSTR= "create_constructor"; //$NON-NLS-1$
 	private final static String SETTINGS_CREATEUNIMPLEMENTED= "create_unimplemented"; //$NON-NLS-1$
 	
 	private SelectionButtonDialogFieldGroup fMethodStubsButtons;
-	public NewClassCreationWizardPage() {
+	
+	public NewClassWizardPage() {
 		super(true, PAGE_NAME);
 		
-		setTitle(NewWizardMessages.getString("NewClassCreationWizardPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("NewClassCreationWizardPage.description")); //$NON-NLS-1$
+		setTitle(NewWizardMessages.getString("NewClassWizardPage.title")); //$NON-NLS-1$
+		setDescription(NewWizardMessages.getString("NewClassWizardPage.description")); //$NON-NLS-1$
 		
 		String[] buttonNames3= new String[] {
-			NewWizardMessages.getString("NewClassCreationWizardPage.methods.main"), NewWizardMessages.getString("NewClassCreationWizardPage.methods.constructors"), //$NON-NLS-1$ //$NON-NLS-2$
-			NewWizardMessages.getString("NewClassCreationWizardPage.methods.inherited") //$NON-NLS-1$
+			NewWizardMessages.getString("NewClassWizardPage.methods.main"), NewWizardMessages.getString("NewClassWizardPage.methods.constructors"), //$NON-NLS-1$ //$NON-NLS-2$
+			NewWizardMessages.getString("NewClassWizardPage.methods.inherited") //$NON-NLS-1$
 		};		
 		fMethodStubsButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames3, 1);
-		fMethodStubsButtons.setLabelText(NewWizardMessages.getString("NewClassCreationWizardPage.methods.label"));		 //$NON-NLS-1$
+		fMethodStubsButtons.setLabelText(NewWizardMessages.getString("NewClassWizardPage.methods.label"));		 //$NON-NLS-1$
 	}
+	
 	// -------- Initialization ---------
 	/**
-	 * Should be called from the wizard with the input element.
+	 * Called from the wizard with the initial selection.
 	 */
 	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= getInitialJavaElement(selection);
@@ -72,12 +79,11 @@ public class NewClassCreationWizardPage extends TypePage {
 			createConstructors= section.getBoolean(SETTINGS_CREATECONSTR);
 			createUnimplemented= section.getBoolean(SETTINGS_CREATEUNIMPLEMENTED);
 		}
-		fMethodStubsButtons.setSelection(0, createMain);
-		fMethodStubsButtons.setSelection(1, createConstructors);
-		fMethodStubsButtons.setSelection(2, createUnimplemented);
+		
+		setMethodStubSelection(createMain, createConstructors, createUnimplemented, true);
 	}
-	// ------ validation --------
 	
+	// ------ validation --------
 	private void doStatusUpdate() {
 		// status of all used components
 		IStatus[] status= new IStatus[] {
@@ -95,7 +101,7 @@ public class NewClassCreationWizardPage extends TypePage {
 	
 	
 	/*
-	 * @see ContainerPage#handleFieldChanged
+	 * @see NewContainerWizardPage#handleFieldChanged
 	 */
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
@@ -142,7 +148,7 @@ public class NewClassCreationWizardPage extends TypePage {
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_CLASS_WIZARD_PAGE);	
 	}
 	
-	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {
+	private void createMethodStubSelectionControls(Composite composite, int nColumns) {
 		Control labelControl= fMethodStubsButtons.getLabelControl(composite);
 		LayoutUtil.setHorizontalSpan(labelControl, nColumns);
 		
@@ -150,19 +156,55 @@ public class NewClassCreationWizardPage extends TypePage {
 		
 		Control buttonGroup= fMethodStubsButtons.getSelectionButtonsGroup(composite);
 		LayoutUtil.setHorizontalSpan(buttonGroup, nColumns - 1);	
+	}
+	
+	/**
+	 * Returns the current selection of the 'Create Main' checkbox.
+	 */
+	public boolean isCreateMain() {
+		return fMethodStubsButtons.isSelected(0);
+	}
+
+	/**
+	 * Returns the current selection of the 'Create Constructors' checkbox.
+	 */
+	public boolean isCreateConstructors() {
+		return fMethodStubsButtons.isSelected(1);
+	}
+	
+	/**
+	 * Returns the current selection of the 'Create inherited abstract methods' checkbox.
+	 */
+	public boolean isCreateInherited() {
+		return fMethodStubsButtons.isSelected(2);
+	}
+
+	/**
+	 * Sets the selection of the method stub buttons.
+	 * @param createMain Selection of the 'Create Main' checkbox.
+	 * @param createConstructors Selection of the 'Create Constructors' checkbox.
+	 * @param createInherited Selection of the 'Create inherited abstract methods' checkbox.
+	 * @param canBeModified Selects if the method stub buttons can be changed by the user
+	 */
+	public void setMethodStubSelection(boolean createMain, boolean createConstructors, boolean createInherited, boolean canBeModified) {
+		fMethodStubsButtons.setSelection(0, createMain);
+		fMethodStubsButtons.setSelection(1, createConstructors);
+		fMethodStubsButtons.setSelection(2, createInherited);
+		
+		fMethodStubsButtons.setEnabled(canBeModified);
 	}	
 	
 	// ---- creation ----------------
 	
 	/*
-	 * @see TypePage#evalMethods
+	 * @see NewTypeWizardPage#evalMethods
 	 */
 	protected String[] evalMethods(IType type, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		List newMethods= new ArrayList();
 		
-		boolean doMain= fMethodStubsButtons.isSelected(0);
-		boolean doConstr= fMethodStubsButtons.isSelected(1);
-		boolean doInherited= fMethodStubsButtons.isSelected(2);
+		boolean doMain= isCreateMain();
+		boolean doConstr= isCreateConstructors();
+		boolean doInherited= isCreateInherited();
 		String[] meth= constructInheritedMethods(type, doConstr, doInherited, imports, new SubProgressMonitor(monitor, 1));
 		for (int i= 0; i < meth.length; i++) {
 			newMethods.add(meth[i]);

@@ -15,7 +15,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class NewSourceFolderCreationWizard extends NewElementWizard {
 
-	private NewSourceFolderCreationWizardPage fPage;
+	private NewSourceFolderWizardPage fPage;
 
 	public NewSourceFolderCreationWizard() {
 		super();
@@ -29,7 +29,7 @@ public class NewSourceFolderCreationWizard extends NewElementWizard {
 	 */	
 	public void addPages() {
 		super.addPages();
-		fPage= new NewSourceFolderCreationWizardPage();
+		fPage= new NewSourceFolderWizardPage();
 		addPage(fPage);
 		fPage.init(getSelection());
 	}			

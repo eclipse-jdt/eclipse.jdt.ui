@@ -2,13 +2,12 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.wizards;
+package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -65,6 +64,8 @@ import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
@@ -79,17 +80,17 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialog
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
- * <code>TypePage</code> contains controls and validation routines for a 'New Type WizardPage'
+ * <code>NewTypeWizardPage</code> contains controls and validation routines for a 'New Type WizardPage'
  * Implementors decide which components to add and to enable. Implementors can also
  * customize the validation code.
- * <code>TypePage</code> is intended to serve as base class of all wizards that create types.
+ * <code>NewTypeWizardPage</code> is intended to serve as base class of all wizards that create types.
  * Applets, Servlets, Classes, Interfaces...
- * See <code>NewClassCreationWizardPage</code> or <code>NewInterfaceCreationWizardPage</code> for an
- * example usage of TypePage.
+ * See <code>NewClassWizardPage</code> or <code>NewInterfaceWizardPage</code> for an
+ * example usage of NewTypeWizardPage.
  */
-public abstract class TypePage extends ContainerPage {
+public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
-	private final static String PAGE_NAME= "TypePage"; //$NON-NLS-1$
+	private final static String PAGE_NAME= "NewTypeWizardPage"; //$NON-NLS-1$
 	
 	protected final static String PACKAGE= PAGE_NAME + ".package";	 //$NON-NLS-1$
 	protected final static String ENCLOSING= PAGE_NAME + ".enclosing"; //$NON-NLS-1$
@@ -151,14 +152,7 @@ public abstract class TypePage extends ContainerPage {
 	private final int PUBLIC_INDEX= 0, DEFAULT_INDEX= 1, PRIVATE_INDEX= 2, PROTECTED_INDEX= 3;
 	private final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1;
 
-	/**
-	 * @deprecated use TypePage(boolean, String) instead.
-	 */
-	public TypePage(boolean isClass, String pageName, IWorkspaceRoot root) {
-		this(isClass, pageName);
-	}
-	
-	public TypePage(boolean isClass, String pageName) {
+	public NewTypeWizardPage(boolean isClass, String pageName) {
 		super(pageName);
 		fCreatedType= null;
 		
@@ -168,60 +162,60 @@ public abstract class TypePage extends ContainerPage {
 		
 		fPackageDialogField= new StringButtonStatusDialogField(adapter);
 		fPackageDialogField.setDialogFieldListener(adapter);
-		fPackageDialogField.setLabelText(NewWizardMessages.getString("TypePage.package.label")); //$NON-NLS-1$
-		fPackageDialogField.setButtonLabel(NewWizardMessages.getString("TypePage.package.button")); //$NON-NLS-1$
-		fPackageDialogField.setStatusWidthHint(NewWizardMessages.getString("TypePage.default")); //$NON-NLS-1$
+		fPackageDialogField.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.package.label")); //$NON-NLS-1$
+		fPackageDialogField.setButtonLabel(NewWizardMessages.getString("NewTypeWizardPage.package.button")); //$NON-NLS-1$
+		fPackageDialogField.setStatusWidthHint(NewWizardMessages.getString("NewTypeWizardPage.default")); //$NON-NLS-1$
 				
 		fEnclosingTypeSelection= new SelectionButtonDialogField(SWT.CHECK);
 		fEnclosingTypeSelection.setDialogFieldListener(adapter);
-		fEnclosingTypeSelection.setLabelText(NewWizardMessages.getString("TypePage.enclosing.selection.label")); //$NON-NLS-1$
+		fEnclosingTypeSelection.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.enclosing.selection.label")); //$NON-NLS-1$
 		
 		fEnclosingTypeDialogField= new StringButtonDialogField(adapter);
 		fEnclosingTypeDialogField.setDialogFieldListener(adapter);
-		fEnclosingTypeDialogField.setButtonLabel(NewWizardMessages.getString("TypePage.enclosing.button")); //$NON-NLS-1$
+		fEnclosingTypeDialogField.setButtonLabel(NewWizardMessages.getString("NewTypeWizardPage.enclosing.button")); //$NON-NLS-1$
 		
 		fTypeNameDialogField= new StringDialogField();
 		fTypeNameDialogField.setDialogFieldListener(adapter);
-		fTypeNameDialogField.setLabelText(NewWizardMessages.getString("TypePage.typename.label")); //$NON-NLS-1$
+		fTypeNameDialogField.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.typename.label")); //$NON-NLS-1$
 		
 		fSuperClassDialogField= new StringButtonDialogField(adapter);
 		fSuperClassDialogField.setDialogFieldListener(adapter);
-		fSuperClassDialogField.setLabelText(NewWizardMessages.getString("TypePage.superclass.label")); //$NON-NLS-1$
-		fSuperClassDialogField.setButtonLabel(NewWizardMessages.getString("TypePage.superclass.button")); //$NON-NLS-1$
+		fSuperClassDialogField.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.superclass.label")); //$NON-NLS-1$
+		fSuperClassDialogField.setButtonLabel(NewWizardMessages.getString("NewTypeWizardPage.superclass.button")); //$NON-NLS-1$
 		
 		String[] addButtons= new String[] {
-			/* 0 */ NewWizardMessages.getString("TypePage.interfaces.add"), //$NON-NLS-1$
+			/* 0 */ NewWizardMessages.getString("NewTypeWizardPage.interfaces.add"), //$NON-NLS-1$
 			/* 1 */ null,
-			/* 2 */ NewWizardMessages.getString("TypePage.interfaces.remove") //$NON-NLS-1$
+			/* 2 */ NewWizardMessages.getString("NewTypeWizardPage.interfaces.remove") //$NON-NLS-1$
 		}; 
 		fSuperInterfacesDialogField= new ListDialogField(adapter, addButtons, new InterfacesListLabelProvider());
 		fSuperInterfacesDialogField.setDialogFieldListener(adapter);
-		String interfaceLabel= fIsClass ? NewWizardMessages.getString("TypePage.interfaces.class.label") : NewWizardMessages.getString("TypePage.interfaces.ifc.label"); //$NON-NLS-1$ //$NON-NLS-2$
+		String interfaceLabel= fIsClass ? NewWizardMessages.getString("NewTypeWizardPage.interfaces.class.label") : NewWizardMessages.getString("NewTypeWizardPage.interfaces.ifc.label"); //$NON-NLS-1$ //$NON-NLS-2$
 		fSuperInterfacesDialogField.setLabelText(interfaceLabel);
 		fSuperInterfacesDialogField.setRemoveButtonIndex(2);
 	
 		String[] buttonNames1= new String[] {
-			/* 0 == PUBLIC_INDEX */ NewWizardMessages.getString("TypePage.modifiers.public"), //$NON-NLS-1$
-			/* 1 == DEFAULT_INDEX */ NewWizardMessages.getString("TypePage.modifiers.default"), //$NON-NLS-1$
-			/* 2 == PRIVATE_INDEX */ NewWizardMessages.getString("TypePage.modifiers.private"), //$NON-NLS-1$
-			/* 3 == PROTECTED_INDEX*/ NewWizardMessages.getString("TypePage.modifiers.protected") //$NON-NLS-1$
+			/* 0 == PUBLIC_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.public"), //$NON-NLS-1$
+			/* 1 == DEFAULT_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.default"), //$NON-NLS-1$
+			/* 2 == PRIVATE_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.private"), //$NON-NLS-1$
+			/* 3 == PROTECTED_INDEX*/ NewWizardMessages.getString("NewTypeWizardPage.modifiers.protected") //$NON-NLS-1$
 		};
 		fAccMdfButtons= new SelectionButtonDialogFieldGroup(SWT.RADIO, buttonNames1, 4);
 		fAccMdfButtons.setDialogFieldListener(adapter);
-		fAccMdfButtons.setLabelText(NewWizardMessages.getString("TypePage.modifiers.acc.label"));		 //$NON-NLS-1$
+		fAccMdfButtons.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.modifiers.acc.label"));		 //$NON-NLS-1$
 		fAccMdfButtons.setSelection(0, true);
 		
 		String[] buttonNames2;
 		if (fIsClass) {
 			buttonNames2= new String[] {
-				/* 0 == ABSTRACT_INDEX */ NewWizardMessages.getString("TypePage.modifiers.abstract"), //$NON-NLS-1$
-				/* 1 == FINAL_INDEX */ NewWizardMessages.getString("TypePage.modifiers.final"), //$NON-NLS-1$
-				/* 2 */ NewWizardMessages.getString("TypePage.modifiers.static") //$NON-NLS-1$
+				/* 0 == ABSTRACT_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.abstract"), //$NON-NLS-1$
+				/* 1 == FINAL_INDEX */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.final"), //$NON-NLS-1$
+				/* 2 */ NewWizardMessages.getString("NewTypeWizardPage.modifiers.static") //$NON-NLS-1$
 			};
 			fStaticMdfIndex= 2; // index of the static checkbox is 2
 		} else {
 			buttonNames2= new String[] {
-				NewWizardMessages.getString("TypePage.modifiers.static") //$NON-NLS-1$
+				NewWizardMessages.getString("NewTypeWizardPage.modifiers.static") //$NON-NLS-1$
 			};
 			fStaticMdfIndex= 0; // index of the static checkbox is 0
 		}
@@ -248,7 +242,8 @@ public abstract class TypePage extends ContainerPage {
 	
 	/**
 	 * Initializes all fields provided by the type page with a given
-	 * Java element as selection.
+	 * Java element as selection. To implement a different selection strategy do not call this
+	 * method or overwrite it.
 	 * @param elem The initial selection of this page or null if no
 	 *             selection was available
 	 */
@@ -305,7 +300,7 @@ public abstract class TypePage extends ContainerPage {
 	// -------- UI Creation ---------
 	
 	/**
-	 * Creates a separator line.
+	 * Creates a separator line. Expects a GridLayout with at least 1 column.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */
@@ -314,17 +309,17 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Creates the controls for the package name field.
+	 * Creates the controls for the package name field. Expects a GridLayout with at least 4 columns.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */	
 	protected void createPackageControls(Composite composite, int nColumns) {
-		fPackageDialogField.doFillIntoGrid(composite, 4);
+		fPackageDialogField.doFillIntoGrid(composite, nColumns);
 		LayoutUtil.setWidthHint(fPackageDialogField.getTextControl(null), getMaxFieldWidth());	
 	}
 
 	/**
-	 * Creates the controls for the enclosing type name field.
+	 * Creates the controls for the enclosing type name field. Expects a GridLayout with at least 4 columns.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */		
@@ -352,7 +347,7 @@ public abstract class TypePage extends ContainerPage {
 	}	
 
 	/**
-	 * Creates the controls for the type name field.
+	 * Creates the controls for the type name field. Expects a GridLayout with at least 2 columns.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */		
@@ -364,7 +359,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Creates the controls for the modifiers radio/ceckbox buttons.
+	 * Creates the controls for the modifiers radio/ceckbox buttons. Expects a GridLayout with at least 3 columns.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */		
@@ -389,7 +384,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Creates the controls for the superclass name field.
+	 * Creates the controls for the superclass name field. Expects a GridLayout with at least 3 columns.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */		
@@ -399,7 +394,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Creates the controls for the superclass name field.
+	 * Creates the controls for the superclass name field. Expects a GridLayout with at least 3 columns.
 	 * @param composite The parent composite
 	 * @param nColumns Number of columns to span
 	 */			
@@ -531,7 +526,7 @@ public abstract class TypePage extends ContainerPage {
 
 	/**
 	 * Called whenever a content of a field has changed.
-	 * Implementors of TypePage can hook in.
+	 * Implementors of NewTypeWizardPage can hook in.
 	 * @see ContainerPage#handleFieldChanged
 	 */			
 	protected void handleFieldChanged(String fieldName) {
@@ -752,10 +747,10 @@ public abstract class TypePage extends ContainerPage {
 		if (packName.length() > 0) {
 			IStatus val= JavaConventions.validatePackageName(packName);
 			if (val.getSeverity() == IStatus.ERROR) {
-				status.setError(NewWizardMessages.getFormattedString("TypePage.error.InvalidPackageName", val.getMessage())); //$NON-NLS-1$
+				status.setError(NewWizardMessages.getFormattedString("NewTypeWizardPage.error.InvalidPackageName", val.getMessage())); //$NON-NLS-1$
 				return status;
 			} else if (val.getSeverity() == IStatus.WARNING) {
-				status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.DiscouragedPackageName", val.getMessage())); //$NON-NLS-1$
+				status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.DiscouragedPackageName", val.getMessage())); //$NON-NLS-1$
 				// continue
 			}
 		}
@@ -771,7 +766,7 @@ public abstract class TypePage extends ContainerPage {
 					// like the bin folder
 					IPath packagePath= pack.getUnderlyingResource().getFullPath();
 					if (outputPath.isPrefixOf(packagePath)) {
-						status.setError(NewWizardMessages.getString("TypePage.error.ClashOutputLocation")); //$NON-NLS-1$
+						status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.ClashOutputLocation")); //$NON-NLS-1$
 						return status;
 					}
 				}
@@ -794,7 +789,7 @@ public abstract class TypePage extends ContainerPage {
 		String packName= getPackageText();
 		
 		if (packName.length() == 0) {
-			fPackageDialogField.setStatus(NewWizardMessages.getString("TypePage.default")); //$NON-NLS-1$
+			fPackageDialogField.setStatus(NewWizardMessages.getString("NewTypeWizardPage.default")); //$NON-NLS-1$
 		} else {
 			fPackageDialogField.setStatus(""); //$NON-NLS-1$
 		}
@@ -829,28 +824,28 @@ public abstract class TypePage extends ContainerPage {
 		
 		String enclName= getEnclosingTypeText();
 		if (enclName.length() == 0) {
-			status.setError(NewWizardMessages.getString("TypePage.error.EnclosingTypeEnterName")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingTypeEnterName")); //$NON-NLS-1$
 			return status;
 		}
 		try {
 			IType type= JavaModelUtil.findType(root.getJavaProject(), enclName);
 			if (type == null) {
-				status.setError(NewWizardMessages.getString("TypePage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
 				return status;
 			}
 
 			if (type.getCompilationUnit() == null) {
-				status.setError(NewWizardMessages.getString("TypePage.error.EnclosingNotInCU")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingNotInCU")); //$NON-NLS-1$
 				return status;
 			}
 			fCurrEnclosingType= type;
 			IPackageFragmentRoot enclosingRoot= JavaModelUtil.getPackageFragmentRoot(type);
 			if (!enclosingRoot.equals(root)) {
-				status.setWarning(NewWizardMessages.getString("TypePage.warning.EnclosingNotInSourceFolder")); //$NON-NLS-1$
+				status.setWarning(NewWizardMessages.getString("NewTypeWizardPage.warning.EnclosingNotInSourceFolder")); //$NON-NLS-1$
 			}
 			return status;
 		} catch (JavaModelException e) {
-			status.setError(NewWizardMessages.getString("TypePage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
 			JavaPlugin.log(e);
 			return status;
 		}
@@ -866,19 +861,19 @@ public abstract class TypePage extends ContainerPage {
 		String typeName= getTypeName();
 		// must not be empty
 		if (typeName.length() == 0) {
-			status.setError(NewWizardMessages.getString("TypePage.error.EnterTypeName")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnterTypeName")); //$NON-NLS-1$
 			return status;
 		}
 		if (typeName.indexOf('.') != -1) {
-			status.setError(NewWizardMessages.getString("TypePage.error.QualifiedName")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.QualifiedName")); //$NON-NLS-1$
 			return status;
 		}
 		IStatus val= JavaConventions.validateJavaTypeName(typeName);
 		if (val.getSeverity() == IStatus.ERROR) {
-			status.setError(NewWizardMessages.getFormattedString("TypePage.error.InvalidTypeName", val.getMessage())); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getFormattedString("NewTypeWizardPage.error.InvalidTypeName", val.getMessage())); //$NON-NLS-1$
 			return status;
 		} else if (val.getSeverity() == IStatus.WARNING) {
-			status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.TypeNameDiscouraged", val.getMessage())); //$NON-NLS-1$
+			status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.TypeNameDiscouraged", val.getMessage())); //$NON-NLS-1$
 			// continue checking
 		}		
 
@@ -888,7 +883,7 @@ public abstract class TypePage extends ContainerPage {
 			if (pack != null) {
 				ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
 				if (cu.exists()) {
-					status.setError(NewWizardMessages.getString("TypePage.error.TypeNameExists")); //$NON-NLS-1$
+					status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.TypeNameExists")); //$NON-NLS-1$
 					return status;
 				}
 			}
@@ -897,7 +892,7 @@ public abstract class TypePage extends ContainerPage {
 			if (type != null) {
 				IType member= type.getType(typeName);
 				if (member.exists()) {
-					status.setError(NewWizardMessages.getString("TypePage.error.TypeNameExists")); //$NON-NLS-1$
+					status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.TypeNameExists")); //$NON-NLS-1$
 					return status;
 				}
 			}
@@ -924,7 +919,7 @@ public abstract class TypePage extends ContainerPage {
 		}
 		IStatus val= JavaConventions.validateJavaTypeName(sclassName);
 		if (!val.isOK()) {
-			status.setError(NewWizardMessages.getString("TypePage.error.InvalidSuperClassName")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.InvalidSuperClassName")); //$NON-NLS-1$
 			return status;
 		}
 		
@@ -932,25 +927,25 @@ public abstract class TypePage extends ContainerPage {
 			try {		
 				IType type= resolveSuperTypeName(root.getJavaProject(), sclassName);
 				if (type == null) {
-					status.setWarning(NewWizardMessages.getString("TypePage.warning.SuperClassNotExists")); //$NON-NLS-1$
+					status.setWarning(NewWizardMessages.getString("NewTypeWizardPage.warning.SuperClassNotExists")); //$NON-NLS-1$
 					return status;
 				} else {
 					if (type.isInterface()) {
-						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.SuperClassIsNotClass", sclassName)); //$NON-NLS-1$
+						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsNotClass", sclassName)); //$NON-NLS-1$
 						return status;
 					}
 					int flags= type.getFlags();
 					if (Flags.isFinal(flags)) {
-						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.SuperClassIsFinal", sclassName)); //$NON-NLS-1$
+						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsFinal", sclassName)); //$NON-NLS-1$
 						return status;
 					} else if (!JavaModelUtil.isVisible(type, getPackageFragment())) {
-						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.SuperClassIsNotVisible", sclassName)); //$NON-NLS-1$
+						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsNotVisible", sclassName)); //$NON-NLS-1$
 						return status;
 					}
 				}
 				fSuperClass= type;
 			} catch (JavaModelException e) {
-				status.setError(NewWizardMessages.getString("TypePage.error.InvalidSuperClassName")); //$NON-NLS-1$
+				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.InvalidSuperClassName")); //$NON-NLS-1$
 				JavaPlugin.log(e);
 			}							
 		} else {
@@ -1011,15 +1006,15 @@ public abstract class TypePage extends ContainerPage {
 				try {
 					IType type= JavaModelUtil.findType(root.getJavaProject(), intfname);
 					if (type == null) {
-						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.InterfaceNotExists", intfname)); //$NON-NLS-1$
+						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.InterfaceNotExists", intfname)); //$NON-NLS-1$
 						return status;
 					} else {
 						if (type.isClass()) {
-							status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.InterfaceIsNotInterface", intfname)); //$NON-NLS-1$
+							status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.InterfaceIsNotInterface", intfname)); //$NON-NLS-1$
 							return status;
 						}
 						if (!JavaModelUtil.isVisible(type, getPackageFragment())) {
-							status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.InterfaceIsNotVisible", intfname)); //$NON-NLS-1$
+							status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.InterfaceIsNotVisible", intfname)); //$NON-NLS-1$
 							return status;
 						}
 					}
@@ -1041,7 +1036,7 @@ public abstract class TypePage extends ContainerPage {
 		StatusInfo status= new StatusInfo();
 		int modifiers= getModifiers();
 		if (Flags.isFinal(modifiers) && Flags.isAbstract(modifiers)) {
-			status.setError(NewWizardMessages.getString("TypePage.error.ModifiersFinalAndAbstract")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.ModifiersFinalAndAbstract")); //$NON-NLS-1$
 		}
 		return status;
 	}
@@ -1065,9 +1060,9 @@ public abstract class TypePage extends ContainerPage {
 		
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		dialog.setIgnoreCase(false);
-		dialog.setTitle(NewWizardMessages.getString("TypePage.ChoosePackageDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.description")); //$NON-NLS-1$
-		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.getString("NewTypeWizardPage.ChoosePackageDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.ChoosePackageDialog.description")); //$NON-NLS-1$
+		dialog.setEmptyListMessage(NewWizardMessages.getString("NewTypeWizardPage.ChoosePackageDialog.empty")); //$NON-NLS-1$
 		dialog.setElements(packages);
 		if (fCurrPackage != null) {
 			dialog.setInitialSelections(new Object[] { fCurrPackage });
@@ -1088,8 +1083,8 @@ public abstract class TypePage extends ContainerPage {
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { root });
 			
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.TYPE, scope);
-		dialog.setTitle(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.getString("NewTypeWizardPage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
 		if (fCurrEnclosingType != null) {
 			dialog.setInitialSelections(new Object[] { fCurrEnclosingType });
 			dialog.setFilter(fCurrEnclosingType.getElementName().substring(0, 1));
@@ -1111,8 +1106,8 @@ public abstract class TypePage extends ContainerPage {
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.CLASS, scope);
-		dialog.setTitle(NewWizardMessages.getString("TypePage.SuperClassDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("TypePage.SuperClassDialog.message")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.getString("NewTypeWizardPage.SuperClassDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.SuperClassDialog.message")); //$NON-NLS-1$
 		if (fSuperClass != null) {
 			dialog.setFilter(fSuperClass.getElementName());
 		}
@@ -1131,8 +1126,8 @@ public abstract class TypePage extends ContainerPage {
 
 		IJavaProject project= root.getJavaProject();
 		SuperInterfaceSelectionDialog dialog= new SuperInterfaceSelectionDialog(getShell(), getWizard().getContainer(), fSuperInterfacesDialogField, project);
-		dialog.setTitle(fIsClass ? NewWizardMessages.getString("TypePage.InterfacesDialog.class.title") : NewWizardMessages.getString("TypePage.InterfacesDialog.interface.title"));
-		dialog.setMessage(NewWizardMessages.getString("TypePage.InterfacesDialog.message")); //$NON-NLS-1$
+		dialog.setTitle(fIsClass ? NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.class.title") : NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.interface.title"));
+		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.message")); //$NON-NLS-1$
 		dialog.open();
 		return;
 	}	
@@ -1145,7 +1140,7 @@ public abstract class TypePage extends ContainerPage {
 	 * Creates a type using the current field values.
 	 */
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
-		monitor.beginTask(NewWizardMessages.getString("TypePage.operationdesc"), 10); //$NON-NLS-1$
+		monitor.beginTask(NewWizardMessages.getString("NewTypeWizardPage.operationdesc"), 10); //$NON-NLS-1$
 		
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		IPackageFragment pack= getPackageFragment();
@@ -1367,7 +1362,7 @@ public abstract class TypePage extends ContainerPage {
 	
 	/**
 	 * Creates the bodies of all unimplemented methods or/and all constructors.
-	 * Can be used by implementors of TypePage to add method stub checkboxes.
+	 * Can be used by implementors of NewTypeWizardPage to add method stub checkboxes.
 	 */
 	protected String[] constructInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		List newMethods= new ArrayList();
@@ -1399,8 +1394,8 @@ public abstract class TypePage extends ContainerPage {
 	
 	// ---- creation ----------------
 
-	/*
-	 * @see NewElementWizardPage#getRunnable
+	/**
+	 * Returns a runnable that creates a type using the current settings.
 	 */		
 	public IRunnableWithProgress getRunnable() {				
 		return new IRunnableWithProgress() {

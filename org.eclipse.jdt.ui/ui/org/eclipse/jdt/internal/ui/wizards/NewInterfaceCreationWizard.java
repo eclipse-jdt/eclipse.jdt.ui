@@ -9,12 +9,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class NewInterfaceCreationWizard extends NewElementWizard {
 
-	private NewInterfaceCreationWizardPage fPage;
+	private NewInterfaceWizardPage fPage;
 	
 	public NewInterfaceCreationWizard() {
 		super();
@@ -28,7 +30,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 	 */	
 	public void addPages() {
 		super.addPages();		
-		fPage= new NewInterfaceCreationWizardPage();
+		fPage= new NewInterfaceWizardPage();
 		addPage(fPage);
 		fPage.init(getSelection());	
 	}
@@ -40,7 +42,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 		if (finishPage(fPage.getRunnable())) {
 			ICompilationUnit cu= fPage.getCreatedType().getCompilationUnit();
 			if (cu.isWorkingCopy()) {
-				cu= (ICompilationUnit)cu.getOriginalElement();
+				cu= (ICompilationUnit) cu.getOriginalElement();
 			}	
 
 			try {

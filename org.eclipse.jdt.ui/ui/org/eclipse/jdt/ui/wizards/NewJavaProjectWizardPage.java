@@ -4,9 +4,6 @@
  */
 package org.eclipse.jdt.ui.wizards;import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
@@ -20,12 +17,14 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IClasspathEntry;

@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.wizards;
+package org.eclipse.jdt.ui.wizards;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -38,18 +38,24 @@ import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
-public abstract class ContainerPage extends NewElementWizardPage {
+/**
+ * Base class for Java wizards. Provides source folder selection UI, validation and creation.
+ */
+public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	
 	/**
 	 * container field id
 	 */
-	protected static final String CONTAINER= "ContainerPage.container"; //$NON-NLS-1$
+	protected static final String CONTAINER= "NewContainerWizardPage.container"; //$NON-NLS-1$
 
 	/**
 	 * Status of last validation
@@ -65,22 +71,15 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	
 	private IWorkspaceRoot fWorkspaceRoot;
 	
-	/**
-	 * @deprecated use ContainerPage(String) instead
-	 */
-	public ContainerPage(String name, IWorkspaceRoot root) {
-		this(name);
-	}
-	
-	public ContainerPage(String name) {
+	public NewContainerWizardPage(String name) {
 		super(name);
 		fWorkspaceRoot= ResourcesPlugin.getWorkspace().getRoot();	
 		ContainerFieldAdapter adapter= new ContainerFieldAdapter();
 		
 		fContainerDialogField= new StringButtonDialogField(adapter);
 		fContainerDialogField.setDialogFieldListener(adapter);
-		fContainerDialogField.setLabelText(NewWizardMessages.getString("ContainerPage.container.label")); //$NON-NLS-1$
-		fContainerDialogField.setButtonLabel(NewWizardMessages.getString("ContainerPage.container.button")); //$NON-NLS-1$
+		fContainerDialogField.setLabelText(NewWizardMessages.getString("NewContainerWizardPage.container.label")); //$NON-NLS-1$
+		fContainerDialogField.setButtonLabel(NewWizardMessages.getString("NewContainerWizardPage.container.button")); //$NON-NLS-1$
 		
 		fContainerStatus= new StatusInfo();
 		fCurrRoot= null;
@@ -165,7 +164,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	
 	
 	/**
-	 * Creates the controls for the container field.
+	 * Creates the controls for the container field. Expects a GridLayout with at least 3 columns.
 	 * @param parent The parent composite
 	 * @param nColumns The number of columns to span
 	 */
@@ -222,9 +221,9 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		StatusInfo status= new StatusInfo();
 		
 		fCurrRoot= null;
-		String str= getContainerText();
+		String str= getPackageFragmentRootText();
 		if (str.length() == 0) {
-			status.setError(NewWizardMessages.getString("ContainerPage.error.EnterContainerName")); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("NewContainerWizardPage.error.EnterContainerName")); //$NON-NLS-1$
 			return status;
 		}
 		IPath path= new Path(str);
@@ -234,7 +233,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 			if (resType == IResource.PROJECT || resType == IResource.FOLDER) {
 				IProject proj= res.getProject();
 				if (!proj.isOpen()) {
-					status.setError(NewWizardMessages.getFormattedString("ContainerPage.error.ProjectClosed", proj.getFullPath().toString())); //$NON-NLS-1$
+					status.setError(NewWizardMessages.getFormattedString("NewContainerWizardPage.error.ProjectClosed", proj.getFullPath().toString())); //$NON-NLS-1$
 					return status;
 				}				
 				IJavaProject jproject= JavaCore.create(proj);
@@ -243,34 +242,34 @@ public abstract class ContainerPage extends NewElementWizardPage {
 					try {
 						if (!proj.hasNature(JavaCore.NATURE_ID)) {
 							if (resType == IResource.PROJECT) {
-								status.setWarning(NewWizardMessages.getString("ContainerPage.warning.NotAJavaProject")); //$NON-NLS-1$
+								status.setWarning(NewWizardMessages.getString("NewContainerWizardPage.warning.NotAJavaProject")); //$NON-NLS-1$
 							} else {
-								status.setWarning(NewWizardMessages.getString("ContainerPage.warning.NotInAJavaProject")); //$NON-NLS-1$
+								status.setWarning(NewWizardMessages.getString("NewContainerWizardPage.warning.NotInAJavaProject")); //$NON-NLS-1$
 							}
 							return status;
 						}
 					} catch (CoreException e) {
-						status.setWarning(NewWizardMessages.getString("ContainerPage.warning.NotAJavaProject")); //$NON-NLS-1$
+						status.setWarning(NewWizardMessages.getString("NewContainerWizardPage.warning.NotAJavaProject")); //$NON-NLS-1$
 					}
 					try {
 						if (!JavaModelUtil.isOnBuildPath(jproject, fCurrRoot)) {
-							status.setWarning(NewWizardMessages.getFormattedString("ContainerPage.warning.NotOnClassPath", str)); //$NON-NLS-1$
+							status.setWarning(NewWizardMessages.getFormattedString("NewContainerWizardPage.warning.NotOnClassPath", str)); //$NON-NLS-1$
 						}		
 					} catch (JavaModelException e) {
-						status.setWarning(NewWizardMessages.getFormattedString("ContainerPage.warning.NotOnClassPath", str)); //$NON-NLS-1$
+						status.setWarning(NewWizardMessages.getFormattedString("NewContainerWizardPage.warning.NotOnClassPath", str)); //$NON-NLS-1$
 					}					
 					if (fCurrRoot.isArchive()) {
-						status.setError(NewWizardMessages.getFormattedString("ContainerPage.error.ContainerIsBinary", str)); //$NON-NLS-1$
+						status.setError(NewWizardMessages.getFormattedString("NewContainerWizardPage.error.ContainerIsBinary", str)); //$NON-NLS-1$
 						return status;
 					}
 				}
 				return status;
 			} else {
-				status.setError(NewWizardMessages.getFormattedString("ContainerPage.error.NotAFolder", str)); //$NON-NLS-1$
+				status.setError(NewWizardMessages.getFormattedString("NewContainerWizardPage.error.NotAFolder", str)); //$NON-NLS-1$
 				return status;
 			}
 		} else {
-			status.setError(NewWizardMessages.getFormattedString("ContainerPage.error.ContainerDoesNotExist", str)); //$NON-NLS-1$
+			status.setError(NewWizardMessages.getFormattedString("NewContainerWizardPage.error.ContainerDoesNotExist", str)); //$NON-NLS-1$
 			return status;
 		}
 	}
@@ -294,7 +293,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	/**
 	 * Returns the workspace root.
 	 */ 
-	public IWorkspaceRoot getWorkspaceRoot() {
+	protected IWorkspaceRoot getWorkspaceRoot() {
 		return fWorkspaceRoot;
 	}	
 	
@@ -310,7 +309,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	/**
 	 * Returns the text of the container field.
 	 */ 	
-	public String getContainerText() {
+	public String getPackageFragmentRootText() {
 		return fContainerDialogField.getText();
 	}
 	
@@ -368,8 +367,8 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, provider);
 		dialog.setValidator(validator);
 		dialog.setSorter(new JavaElementSorter());
-		dialog.setTitle(NewWizardMessages.getString("ContainerPage.ChooseSourceContainerDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("ContainerPage.ChooseSourceContainerDialog.description")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.getString("NewContainerWizardPage.ChooseSourceContainerDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("NewContainerWizardPage.ChooseSourceContainerDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
 		dialog.setInput(JavaCore.create(fWorkspaceRoot));
 		dialog.setInitialSelection(initElement);

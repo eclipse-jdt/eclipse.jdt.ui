@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -69,9 +70,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 
-public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
+public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		
-	private static final String PAGE_NAME= "NewSourceFolderCreationWizardPage"; //$NON-NLS-1$
+	private static final String PAGE_NAME= "NewSourceFolderWizardPage"; //$NON-NLS-1$
 
 	private StringButtonDialogField fProjectField;
 	private StatusInfo fProjectStatus;
@@ -89,11 +90,11 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 	
 	private IPackageFragmentRoot fCreatedRoot;
 	
-	public NewSourceFolderCreationWizardPage() {
+	public NewSourceFolderWizardPage() {
 		super(PAGE_NAME);
 		
-		setTitle(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.title")); //$NON-NLS-1$
-		setDescription(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.description"));		 //$NON-NLS-1$
+		setTitle(NewWizardMessages.getString("NewSourceFolderWizardPage.title")); //$NON-NLS-1$
+		setDescription(NewWizardMessages.getString("NewSourceFolderWizardPage.description"));		 //$NON-NLS-1$
 		
 		fWorkspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
 		
@@ -101,17 +102,17 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		
 		fProjectField= new StringButtonDialogField(adapter);
 		fProjectField.setDialogFieldListener(adapter);
-		fProjectField.setLabelText(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.project.label")); //$NON-NLS-1$
-		fProjectField.setButtonLabel(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.project.button"));	 //$NON-NLS-1$
+		fProjectField.setLabelText(NewWizardMessages.getString("NewSourceFolderWizardPage.project.label")); //$NON-NLS-1$
+		fProjectField.setButtonLabel(NewWizardMessages.getString("NewSourceFolderWizardPage.project.button"));	 //$NON-NLS-1$
 		
 		fRootDialogField= new StringButtonDialogField(adapter);
 		fRootDialogField.setDialogFieldListener(adapter);
-		fRootDialogField.setLabelText(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.root.label")); //$NON-NLS-1$
-		fRootDialogField.setButtonLabel(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.root.button")); //$NON-NLS-1$
+		fRootDialogField.setLabelText(NewWizardMessages.getString("NewSourceFolderWizardPage.root.label")); //$NON-NLS-1$
+		fRootDialogField.setButtonLabel(NewWizardMessages.getString("NewSourceFolderWizardPage.root.button")); //$NON-NLS-1$
 		
 		fEditClassPathField= new SelectionButtonDialogField(SWT.PUSH);
 		fEditClassPathField.setDialogFieldListener(adapter);
-		fEditClassPathField.setLabelText(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.editclasspath.button"));		 //$NON-NLS-1$
+		fEditClassPathField.setLabelText(NewWizardMessages.getString("NewSourceFolderWizardPage.editclasspath.button"));		 //$NON-NLS-1$
 		
 		fRootStatus= new StatusInfo();
 		fProjectStatus= new StatusInfo();
@@ -261,17 +262,17 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		
 		String str= fProjectField.getText();
 		if (str.length() == 0) {
-			fProjectStatus.setError(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.error.EnterProjectName")); //$NON-NLS-1$
+			fProjectStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.EnterProjectName")); //$NON-NLS-1$
 			return;
 		}
 		IPath path= new Path(str);
 		if (path.segmentCount() != 1) {
-			fProjectStatus.setError(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.error.InvalidProjectPath")); //$NON-NLS-1$
+			fProjectStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.InvalidProjectPath")); //$NON-NLS-1$
 			return;
 		}
 		IProject project= fWorkspaceRoot.getProject(path.toString());
 		if (!project.exists()) {
-			fProjectStatus.setError(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.error.ProjectNotExists")); //$NON-NLS-1$
+			fProjectStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.ProjectNotExists")); //$NON-NLS-1$
 			return;
 		}
 		try {
@@ -286,7 +287,7 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 			JavaPlugin.log(e);
 			fCurrJProject= null;
 		}	
-		fProjectStatus.setError(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.error.NotAJavaProject")); //$NON-NLS-1$
+		fProjectStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.NotAJavaProject")); //$NON-NLS-1$
 	}
 
 	
@@ -298,16 +299,16 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		}
 		String str= fRootDialogField.getText();
 		if (str.length() == 0) {
-			fRootStatus.setError(NewWizardMessages.getFormattedString("NewSourceFolderCreationWizardPage.error.EnterRootName", fCurrJProject.getProject().getFullPath().toString())); //$NON-NLS-1$
+			fRootStatus.setError(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.error.EnterRootName", fCurrJProject.getProject().getFullPath().toString())); //$NON-NLS-1$
 		} else {
 			IPath path= fCurrJProject.getProject().getFullPath().append(str);
 			if (!fWorkspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER).isOK()) {
-				fRootStatus.setError(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.error.InvalidRootName")); //$NON-NLS-1$
+				fRootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.InvalidRootName")); //$NON-NLS-1$
 			} else {
 				IResource res= fWorkspaceRoot.findMember(path);
 				if (res != null) {
 					if (res.getType() != IResource.FOLDER) {
-						fRootStatus.setError(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.error.NotAFolder")); //$NON-NLS-1$
+						fRootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.NotAFolder")); //$NON-NLS-1$
 						return;
 					}
 				}
@@ -316,7 +317,7 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 					IClasspathEntry curr= fEntries[i];
 					if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 						if (path.equals(curr.getPath())) {
-							fRootStatus.setError(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.error.AlreadyExisting")); //$NON-NLS-1$
+							fRootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.AlreadyExisting")); //$NON-NLS-1$
 							return;
 						}
 					}
@@ -392,8 +393,8 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
 		dialog.setValidator(validator);
-		dialog.setTitle(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.ChooseExistingRootDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.ChooseExistingRootDialog.description")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.getString("NewSourceFolderWizardPage.ChooseExistingRootDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("NewSourceFolderWizardPage.ChooseExistingRootDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
 		dialog.setInput(fCurrJProject.getProject());
 		IResource res= fWorkspaceRoot.findMember(new Path(fRootDialogField.getText()));
@@ -418,8 +419,8 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
-		dialog.setTitle(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.ChooseProjectDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.ChooseProjectDialog.description")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.getString("NewSourceFolderWizardPage.ChooseProjectDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("NewSourceFolderWizardPage.ChooseProjectDialog.description")); //$NON-NLS-1$
 		dialog.setElements(projects);
 		dialog.setInitialSelections(new Object[] { fCurrJProject });
 		if (dialog.open() == dialog.OK) {			
@@ -474,8 +475,8 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 				getWizard().getContainer().run(false, true, op);
 			} catch (InvocationTargetException e) {
 				Shell shell= getShell();
-				String title= NewWizardMessages.getString("NewSourceFolderCreationWizardPage.op_error.title"); //$NON-NLS-1$
-				String message= NewWizardMessages.getString("NewSourceFolderCreationWizardPage.op_error.message");				 //$NON-NLS-1$
+				String title= NewWizardMessages.getString("NewSourceFolderWizardPage.op_error.title"); //$NON-NLS-1$
+				String message= NewWizardMessages.getString("NewSourceFolderWizardPage.op_error.message");				 //$NON-NLS-1$
 				ExceptionHandler.handle(e, shell, title, message);
 				return false;
 			} catch  (InterruptedException e) {
@@ -487,7 +488,7 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 	
 	private boolean showClassPathPropertyPage() {
 		EditClassPathDialog dialog= new EditClassPathDialog(getShell());
-		dialog.setTitle(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.EditClassPathDialog.title")); //$NON-NLS-1$
+		dialog.setTitle(NewWizardMessages.getString("NewSourceFolderWizardPage.EditClassPathDialog.title")); //$NON-NLS-1$
 		return (dialog.open() == EditClassPathDialog.OK);
 	}
 

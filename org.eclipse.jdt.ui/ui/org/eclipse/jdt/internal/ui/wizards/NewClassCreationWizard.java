@@ -9,12 +9,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class NewClassCreationWizard extends NewElementWizard {
 
-	private NewClassCreationWizardPage fPage;
+	private NewClassWizardPage fPage;
 
 	public NewClassCreationWizard() {
 		super();
@@ -28,7 +30,7 @@ public class NewClassCreationWizard extends NewElementWizard {
 	 */	
 	public void addPages() {
 		super.addPages();
-		fPage= new NewClassCreationWizardPage();
+		fPage= new NewClassWizardPage();
 		addPage(fPage);
 		fPage.init(getSelection());
 	}	
