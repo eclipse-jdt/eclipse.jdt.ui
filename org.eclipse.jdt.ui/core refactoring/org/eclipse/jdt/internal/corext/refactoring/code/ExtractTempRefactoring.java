@@ -77,7 +77,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private boolean fDeclareFinal;
 	private String fTempName;
 	private CompilationUnit fCompilationUnitNode;
-	
+
 	public ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
@@ -163,7 +163,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 9); //$NON-NLS-1$
+			pm.beginTask("", 8); //$NON-NLS-1$
 	
 			Expression selectedExpression= getSelectedExpression();
 			
@@ -186,10 +186,6 @@ public class ExtractTempRefactoring extends Refactoring {
 			
 			if (getSelectedMethodNode() == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.expression_in_method"));			 //$NON-NLS-1$
-			pm.worked(1);				
-			
-			if (selectedExpression.getParent() instanceof ExpressionStatement)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.statements")); //$NON-NLS-1$
 			pm.worked(1);				
 			
 			if (selectedExpression instanceof Name && selectedExpression.getParent() instanceof ClassInstanceCreation)
@@ -331,10 +327,23 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private TextEdit createTempDeclarationEdit() throws CoreException {
+		if (getSelectedExpression().getParent() instanceof ExpressionStatement)
+			return replaceSelectedExpressionWithTempDeclaration();
+		else	
+			return createAndInsertTempDeclaration();
+	}
+
+	private TextEdit createAndInsertTempDeclaration() throws JavaModelException, CoreException {
 		ASTNode insertBefore= getNodeToInsertTempDeclarationBefore();		
 		int insertOffset= insertBefore.getStartPosition();
-		String text= createTempDeclarationSource() + getIndent(insertBefore);
+		String text= createTempDeclarationSource(getInitializerSource(), true) + getIndent(insertBefore);
 		return SimpleTextEdit.createInsert(insertOffset, text); 
+	}
+
+	private TextEdit replaceSelectedExpressionWithTempDeclaration() throws CoreException {
+		String nodeSource= fCu.getBuffer().getText(getSelectedExpression().getStartPosition(), getSelectedExpression().getLength());
+		String text= createTempDeclarationSource(nodeSource, false);
+		return SimpleTextEdit.createReplace(getSelectedExpression().getParent().getStartPosition(), getSelectedExpression().getParent().getLength(), text);
 	}
 
 	private TextEdit createImportEditIfNeeded() throws JavaModelException {
@@ -452,7 +461,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	//without the trailing indent
-	private String createTempDeclarationSource() throws CoreException {
+	private String createTempDeclarationSource(String initializerSource, boolean addTrailingLineDelimiter) throws CoreException {
 		String modifier= fDeclareFinal ? "final ": ""; //$NON-NLS-1$ //$NON-NLS-2$
 		ICodeFormatter formatter= ToolFactory.createCodeFormatter();
 		String dummyInitializer= "0"; //$NON-NLS-1$
@@ -460,9 +469,12 @@ public class ExtractTempRefactoring extends Refactoring {
 		String dummyDeclaration= modifier + getTempTypeName() + " " + fTempName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$
 		int[] position= {dummyDeclaration.length() - dummyInitializer.length()  - semicolon.length()};
 		StringBuffer formattedDummyDeclaration= new StringBuffer(formatter.format(dummyDeclaration, 0, position, getLineDelimiter()));
-		return formattedDummyDeclaration.replace(position[0], position[0] + dummyInitializer.length(), getInitializerSource()).append(getLineDelimiter()).toString();
+		String tail= addTrailingLineDelimiter ? getLineDelimiter(): "";
+		return formattedDummyDeclaration.replace(position[0], position[0] + dummyInitializer.length(), initializerSource)
+														.append(tail)
+														.toString();
 	}
-
+	
 	private String getTempTypeName() throws JavaModelException {
 		Expression expression= getSelectedExpression();
 		String name= expression.resolveTypeBinding().getName();
@@ -539,9 +551,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (fReplaceAllOccurrences){
 			ASTNode[] allMatches= AstMatchingNodeFinder.findMatchingNodes(getSelectedMethodNode(), getSelectedExpression());
 			return retainOnlyReplacableMatches(allMatches);
-		} else {
+		} else if (canReplace(getSelectedExpression()))
 			return new ASTNode[]{getSelectedExpression()};	
-		}	
+		else	
+			return new ASTNode[0];
 	}
 
     private static ASTNode[] retainOnlyReplacableMatches(ASTNode[] allMatches) {
