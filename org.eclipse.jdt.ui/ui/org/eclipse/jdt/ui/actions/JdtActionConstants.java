@@ -75,6 +75,12 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.ShowJavaDoc"</code>).
 	 */
 	public static final String SHOW_JAVA_DOC= "org.eclipse.jdt.ui.actions.ShowJavaDoc"; //$NON-NLS-1$
+	
+	/**
+	 * Edit menu: name of standard Code Assist global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ContentAssist"</code>).
+	 */
+	public static final String CONTENT_ASSIST= "org.eclipse.jdt.ui.actions.ContentAssist"; //$NON-NLS-1$
 
 	// Source menu	
 	
