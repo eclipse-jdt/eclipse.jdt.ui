@@ -829,7 +829,7 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try {
-			pm.beginTask("", 5); //$NON-NLS-1$
+			pm.beginTask("", 4); //$NON-NLS-1$
 
 			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[] { fCu }));
 			if (result.hasFatalError())
@@ -840,9 +840,6 @@ public class InlineConstantRefactoring extends Refactoring {
 				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "This file has syntax errors - please fix them first", null, null, RefactoringStatusCodes.SYNTAX_ERRORS);
 			pm.worked(1);
 
-			initializeAST();
-			pm.worked(1);
-
 			return checkSelection(new SubProgressMonitor(pm, 2));
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
@@ -851,7 +848,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		}	
 	}
 
-	private void initializeAST() throws JavaModelException {
+	private void initializeAST() {
 		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
 	}
 
@@ -861,6 +858,12 @@ public class InlineConstantRefactoring extends Refactoring {
 			if(result.hasFatalError())
 				return result;
 			subProgressMonitor.worked(1);
+
+			/* For now, we don't perform the inline if getField() == null.
+			 * XXX: Handle constants with no IField f for which f.exists():
+			 */
+			if(getField()  == null)
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "Inlining of constants defined in local or anonymous classes is currently not supported.", null, null, RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED);
 		
 			checkDeclarationSelected();
 
@@ -879,16 +882,11 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 	}
 	
-	private RefactoringStatus checkStaticFinalConstantNameSelected() throws JavaModelException {
+	public RefactoringStatus checkStaticFinalConstantNameSelected(){
+		initializeAST();
 
 		if(getConstantNameNode() == null)
 			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "A static final field must be selected", null, null, RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED);
-		
-		/* For now, we don't perform the inline if getField() == null.
-		 * XXX: Handle constants with no IField f for which f.exists():
-		 */		
-		if(getField()  == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "Inlining of constants defined in local or anonymous classes is currently not supported.", null, null, RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED);
 		
 		return new RefactoringStatus();
 	}
@@ -904,7 +902,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	}
 	
 	
-	private Name getConstantNameNode() throws JavaModelException {
+	private Name getConstantNameNode() {
 		ASTNode node= getSelectedNode();
 		if(node == null)
 			return null;
