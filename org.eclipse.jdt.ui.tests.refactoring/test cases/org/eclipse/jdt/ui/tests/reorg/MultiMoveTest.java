@@ -56,6 +56,11 @@ public class MultiMoveTest extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=47316
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
+	}
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
