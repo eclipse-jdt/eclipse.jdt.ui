@@ -620,6 +620,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showProblemsBeforeCompiling"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, 0);
 
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightProblems"); //$NON-NLS-1$
+		addCheckBox(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
+
+		label= "&Indicate problems solvable with Quick Fix in vertical ruler";
+		addCheckBox(behaviorComposite, label, WorkInProgressPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
+
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.OVERVIEW_RULER, 0);
 				
@@ -631,13 +637,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightCurrentLine"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.CURRENT_LINE, 0);
-		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightProblems"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
-
-		label= "Show &temporary problems solvable with Quick Fix in vertical ruler";
-		addCheckBox(behaviorComposite, label, WorkInProgressPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
-		
+				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
 
