@@ -15,17 +15,13 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.internal.OpenNewWindowAction;
+import org.eclipse.ui.actions.OpenInNewWindowAction;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * XXX: This is a workaround for: http://dev.eclipse.org/bugs/show_bug.cgi?id=13070
@@ -33,19 +29,22 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 2.0
  */
-public class PatchedOpenNewWindowAction extends OpenNewWindowAction {
+public class PatchedOpenInNewWindowAction extends OpenInNewWindowAction {
 	
 	private IWorkbenchWindow fWorkbenchWindow;
 	
-	public PatchedOpenNewWindowAction(IWorkbenchWindow window, IAdaptable input) {
+	public PatchedOpenInNewWindowAction(IWorkbenchWindow window, IAdaptable input) {
 		super(window, input);
 		fWorkbenchWindow= window;
 	}
 
 	public void run() {
 		JavaBrowsingPerspectiveFactory.setInputFromAction(getSelectedJavaElement());
-		super.run();
-		JavaBrowsingPerspectiveFactory.setInputFromAction(null);
+		try {
+			super.run();
+		} finally {
+			JavaBrowsingPerspectiveFactory.setInputFromAction(null);
+		}
 	}
 
 	private IJavaElement getSelectedJavaElement() {

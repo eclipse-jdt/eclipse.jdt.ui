@@ -76,10 +76,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.actions.NewWizardMenu;
+import org.eclipse.ui.actions.OpenInNewWindowAction;
 import org.eclipse.ui.actions.OpenWithMenu;
 import org.eclipse.ui.actions.RefreshAction;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
-import org.eclipse.ui.internal.OpenNewWindowAction;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
@@ -180,7 +180,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private Menu fContextMenu;		
 	private OpenResourceAction fOpenCUAction;
 	private Action fOpenToAction;
-	private OpenNewWindowAction fOpenNewWindowAction;
+	private OpenInNewWindowAction fOpenNewWindowAction;
 	private Action fShowTypeHierarchyAction;
 	private Action fShowNavigatorAction;
 	private PropertyDialogAction fPropertyDialogAction;
@@ -576,7 +576,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			return;
 		menu.appendToGroup(
 			IContextMenuConstants.GROUP_OPEN, 
-			new OpenNewWindowAction(getSite().getWorkbenchWindow(), (IContainer)element));
+			new OpenInNewWindowAction(getSite().getWorkbenchWindow(), (IContainer)element));
 	}
 
 	private boolean onlyFilesSelected(IStructuredSelection selection) {

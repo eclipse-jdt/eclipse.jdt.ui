@@ -63,7 +63,6 @@ import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenWithMenu;
 import org.eclipse.ui.actions.RefreshAction;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
-import org.eclipse.ui.internal.OpenNewWindowAction;
 import org.eclipse.ui.part.ViewPart;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -131,7 +130,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private IWorkbenchPart fPreviousSelectionProvider;
 	private Object fPreviousSelectedElement;
 	private Image fOriginalTitleImage;
-	private PatchedOpenNewWindowAction fBrowseAction;
+	private PatchedOpenInNewWindowAction fBrowseAction;
 	
 	private ActionGroup fStandardActionGroups;
 		
@@ -371,7 +370,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return;
 		menu.appendToGroup(
 			IContextMenuConstants.GROUP_OPEN, 
-			new PatchedOpenNewWindowAction(getSite().getWorkbenchWindow(), (IContainer)element));
+			new PatchedOpenInNewWindowAction(getSite().getWorkbenchWindow(), (IContainer)element));
 	}
 	private void addRefactoring(IMenuManager menu){
 		MenuManager refactoring= new MenuManager(PackagesMessages.getString("PackageExplorer.refactoringTitle"));  //$NON-NLS-1$
