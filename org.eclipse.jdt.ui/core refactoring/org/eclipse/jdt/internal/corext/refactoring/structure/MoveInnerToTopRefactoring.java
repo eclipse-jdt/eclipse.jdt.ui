@@ -261,7 +261,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		StringBuffer buffer= new StringBuffer();
 		if (fCodeGenerationSettings.createFileComments)
 			buffer.append(TemplateUtil.createFileCommentsSource(newCu));
-		buffer.append(createPackageDeclarationSource());
+		if (! getInputTypePackage().isDefaultPackage())	
+			buffer.append(createPackageDeclarationSource());
 		buffer.append(createImportsSource(new SubProgressMonitor(pm, 1)));
 		buffer.append(getLineSeperator());
 		ICodeFormatter codeFormatter= ToolFactory.createCodeFormatter();
