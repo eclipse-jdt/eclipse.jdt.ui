@@ -12,29 +12,31 @@
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 
-public class FiltersDialog extends Dialog {
+public class FiltersDialog extends StatusDialog {
     private Button fFilterOnNames;
     private Text fNames;
     private Text fMaxCallDepth;
@@ -53,29 +55,6 @@ public class FiltersDialog extends Dialog {
     }
 
     /* (non-Javadoc)
-     * Method declared on Dialog.
-     */
-    protected Control createDialogArea(Composite parent) {
-        Composite superComposite = (Composite) super.createDialogArea(parent);
-
-        Font font = parent.getFont();
-        Composite composite = new Composite(superComposite, SWT.NONE);
-        composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        composite.setFont(font);
-
-        GridLayout layout = new GridLayout();
-        layout.numColumns = 2;
-        composite.setLayout(layout);
-
-        createNamesArea(composite);
-        createMaxCallDepthArea(composite);
-    
-        updateUIFromFilter();
-        
-        return composite;
-    }
-
-    /* (non-Javadoc)
      * Method declared on Window.
      */
     protected void configureShell(Shell newShell) {
@@ -83,29 +62,66 @@ public class FiltersDialog extends Dialog {
         newShell.setText(CallHierarchyMessages.getString("FiltersDialog.filter")); //$NON-NLS-1$
         WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_FILTERS_DIALOG);
     }
+
+    /* (non-Javadoc)
+     * Method declared on Dialog.
+     */
+    protected Control createDialogArea(Composite parent) {
+        Composite superComposite = (Composite) super.createDialogArea(parent);
+
+        Composite composite = new Composite(superComposite, SWT.NONE);
+        composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+        GridLayout layout = new GridLayout();
+        layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+        layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+        layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+        layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+        composite.setLayout(layout);
+
+        createNamesArea(composite);
+        new Label(composite, SWT.NONE);         // Filler
+        createMaxCallDepthArea(composite);
+
+        applyDialogFont(parent);
+            
+        updateUIFromFilter();
+        
+        return composite;
+    }
     
     void createMaxCallDepthArea(Composite parent) {
         new Label(parent, SWT.NONE).setText(CallHierarchyMessages.getString("FiltersDialog.maxCallDepth")); //$NON-NLS-1$
         
         fMaxCallDepth = new Text(parent, SWT.SINGLE | SWT.BORDER);
         fMaxCallDepth.setTextLimit(6);
+        fMaxCallDepth.addModifyListener(new ModifyListener() {
+                public void modifyText(ModifyEvent e) {
+                    validateInput();
+                }
+            });
 
         GridData gridData = new GridData();
         gridData.widthHint = convertWidthInCharsToPixels(10);
         fMaxCallDepth.setLayoutData(gridData);
-        fMaxCallDepth.setFont(parent.getFont());
     }
 
     void createNamesArea(Composite parent) {
         fFilterOnNames = createCheckbox(parent,
-                CallHierarchyMessages.getString("FiltersDialog.filterOnNames"), false); //$NON-NLS-1$
-        fFilterOnNames.setLayoutData(new GridData());
+                CallHierarchyMessages.getString("FiltersDialog.filterOnNames"), true); //$NON-NLS-1$
+        
         fNames= new Text(parent, SWT.SINGLE | SWT.BORDER);
+        fNames.addModifyListener(new ModifyListener() {
+                public void modifyText(ModifyEvent e) {
+                    validateInput();
+                }
+            });
 
-        GridData gridData = new GridData();
-        gridData.widthHint = convertWidthInCharsToPixels(30);
+        GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
+        gridData.widthHint = convertWidthInCharsToPixels(60);
         fNames.setLayoutData(gridData);
-        fNames.setFont(parent.getFont());
+        
+        new Label(parent, SWT.LEFT).setText(CallHierarchyMessages.getString("FiltersDialog.filterOnNamesSubCaption")); //$NON-NLS-1$
     }
 
     /**
@@ -128,7 +144,6 @@ public class FiltersDialog extends Dialog {
 
         button.setText(text);
         button.addSelectionListener(selectionListener);
-        button.setFont(parent.getFont());
 
         return button;
     }
@@ -169,6 +184,7 @@ public class FiltersDialog extends Dialog {
      * Handles selection on a check box or combo box.
      */
     void widgetSelected(SelectionEvent e) {
+        validateInput();
         updateEnabledState();
     }
     
@@ -178,29 +194,36 @@ public class FiltersDialog extends Dialog {
      * because after super.open() is called, the widgetry is disposed.
      */
     protected void okPressed() {
-        try {
-            int maxCallDepth = Integer.parseInt(this.fMaxCallDepth.getText());
-    
-            if (maxCallDepth < 1 || maxCallDepth > 99) {
-                throw new NumberFormatException();
-            }           
+            if (!isMaxCallDepthValid()) {
+                if (fMaxCallDepth.forceFocus()) {
+                    fMaxCallDepth.setSelection(0, fMaxCallDepth.getCharCount());
+                    fMaxCallDepth.showSelection();
+                }
+            }
             
             updateFilterFromUI();
             super.okPressed();
-        }
-        catch (NumberFormatException eNumberFormat) {
-            MessageBox messageBox = new MessageBox(getShell(), 
-                    SWT.OK | SWT.APPLICATION_MODAL | SWT.ICON_ERROR);
-            messageBox.setText(CallHierarchyMessages.getString(
-                    "FiltersDialog.titleMaxCallDepthInvalid")); //$NON-NLS-1$
-            messageBox.setMessage(CallHierarchyMessages.getString(
-                    "FiltersDialog.messageMaxCallDepthInvalid")); //$NON-NLS-1$
-            messageBox.open();
+    }
+
+    private boolean isMaxCallDepthValid() {
+        String text= fMaxCallDepth.getText();
+        if (text.length() == 0)
+            return false;
+            
+        try {
+            int maxCallDepth= Integer.parseInt(text);
+
+            return (maxCallDepth >= 1 && maxCallDepth <= 99); 
+        } catch (NumberFormatException e) {
+            return false;
+        }           
+    }
     
-            if (fMaxCallDepth.forceFocus()) {
-                fMaxCallDepth.setSelection(0, fMaxCallDepth.getCharCount());
-                fMaxCallDepth.showSelection();
-            }
+    private void validateInput() {
+        StatusInfo status= new StatusInfo();
+        if (!isMaxCallDepthValid()) {
+            status.setError(CallHierarchyMessages.getString("FiltersDialog.messageMaxCallDepthInvalid")); //$NON-NLS-1$
         }
+        updateStatus(status);
     }
 }
