@@ -11,9 +11,13 @@
 
 package org.eclipse.jdt.internal.ui.text.comment;
 
+import java.util.Map;
+
 import org.eclipse.jface.text.formatter.FormattingContext;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterPreferenceConstants;
 
 /**
  * Formatting context for the comment formatter.
@@ -21,12 +25,12 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * @since 3.0
  */
 public class CommentFormattingContext extends FormattingContext {
-
-	/*
-	 * @see org.eclipse.jface.text.formatter.IFormattingContext#getPreferenceKeys()
+	
+	/**
+	 * Preference keys of this context's preferences.
+	 * @since 3.1
 	 */
-	public String[] getPreferenceKeys() {
-		return new String[] { 
+	private static final String[] PREFERENCE_KEYS= new String[] { 
 		    PreferenceConstants.FORMATTER_COMMENT_FORMAT, 
 		    PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, 
 		    PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE, 
@@ -37,6 +41,28 @@ public class CommentFormattingContext extends FormattingContext {
 		    PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 
 		    PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, 
 		    PreferenceConstants.FORMATTER_COMMENT_FORMATHTML };
+	
+	/**
+	 * Mapped preference keys of this context's preferences.
+	 * @since 3.1
+	 */
+	private static final String[] MAPPED_PREFERENCE_KEYS= new String[] { 
+		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMAT, 
+		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, 
+		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE, 
+		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, 
+		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS, 
+		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER, 
+		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS, 
+		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 
+		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, 
+		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATHTML };
+
+	/*
+	 * @see org.eclipse.jface.text.formatter.IFormattingContext#getPreferenceKeys()
+	 */
+	public String[] getPreferenceKeys() {
+		return PREFERENCE_KEYS;
 	}
 
 	
@@ -52,5 +78,22 @@ public class CommentFormattingContext extends FormattingContext {
 	 */
 	public boolean isIntegerPreference(String key) {
 		return key.equals(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH);
+	}
+
+	/**
+	 * Copy UI's comment formatter preferences
+	 * 
+	 * @param preferences the preferences
+	 * @since 3.1
+	 */
+	public static void mapOptions(Map preferences) {
+		String[] keys= PREFERENCE_KEYS;
+		int n= keys.length;
+		Object[] values= new Object[n];
+		for (int i= 0; i < n; i++)
+			values[i]= preferences.get(keys[i]);
+		String[] remapedKeys= MAPPED_PREFERENCE_KEYS;
+		for (int i= 0; i < n; i++)
+			preferences.put(remapedKeys[i], values[i]);
 	}
 }

@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.corext.text.comment.CommentFormatter;
 import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
 
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
 /**
  * Utilities for the comment formatter.
@@ -66,6 +67,7 @@ public class CommentFormatterUtil {
 		final IDocument document= new Document(source);
 		final TypedPosition position= new TypedPosition(offset, length, type);
 
+		CommentFormattingContext.mapOptions(preferences);
 		return new CommentFormatter(textMeasurement, preferences).format(document, position);
 	}
 }

@@ -65,6 +65,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		final TypedPosition position= (TypedPosition)fPartitions.removeFirst();
 		
 		if (document != null && position != null) {
+			CommentFormattingContext.mapOptions(getPreferences());
 			CommentFormatter commentFormatter= new CommentFormatter(fTextMeasurement, getPreferences());
 			TextEdit edit= commentFormatter.format(document, position);
 			try {
