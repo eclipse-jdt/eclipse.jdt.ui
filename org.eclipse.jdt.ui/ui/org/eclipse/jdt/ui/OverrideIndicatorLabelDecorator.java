@@ -147,6 +147,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 			} else if (Flags.isProtected(flags)) {
 				return JavaElementImageDescriptor.OVERRIDES;
 			}
+			return 0;
 		}
 		
 		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
