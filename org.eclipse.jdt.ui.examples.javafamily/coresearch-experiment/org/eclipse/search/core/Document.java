@@ -29,15 +29,15 @@ public abstract class Document {
 	 */
 	public abstract char[] getCharContents();
 
-	/**
-	 * Returns the original source position of a given position in the document contents.
-	 * Since contents may be different from actual resource at corresponding document path,
-	 * (in case of preprocessing), then the position in the (virtual) document contents will need to
-	 * be remapped back for the original resource contents.
-	 */
-	public int getOriginalPosition(int sourcePosition) {
-		return sourcePosition; // by default, assume no mapping
-	}
+//	/**
+//	 * Returns the original source position of a given position in the document contents.
+//	 * Since contents may be different from actual resource at corresponding document path,
+//	 * (in case of preprocessing), then the position in the (virtual) document contents will need to
+//	 * be remapped back for the original resource contents.
+//	 */
+//	public int getOriginalPosition(int sourcePosition) {
+//		return sourcePosition; // by default, assume no mapping
+//	}
 
 	/**
 	 * Path to the original document to publicly mention in index or search results.
