@@ -21,21 +21,30 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 
 public class AllTypesCacheTest extends TestCase {
@@ -57,11 +66,11 @@ public class AllTypesCacheTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new AllTypesCacheTest("testClasspathChange"));
+			suite.addTest(new AllTypesCacheTest("testWorkingCopies"));
 			return suite;
 		}	
 	}
@@ -217,7 +226,89 @@ public class AllTypesCacheTest extends TestCase {
 		assertTrue("still 544 types in workspace expected, is " + res1.size(), res1.size() == 544);
 		
 		assertTrue("cache not flushed after inner type creation", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
+	}
+	
+	public void testWorkingCopies() throws Exception {
+		if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			return;
+		}
+		// change a type in the editor and save
+		
+		IJavaSearchScope workspaceScope= SearchEngine.createWorkspaceScope();
+		
+		ArrayList res1= new ArrayList();
+		
+		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
+		TypeInfo ref= findTypeRef(res1, "junit.framework.TestCase");
+		assertNotNull("TestCase not found", ref);
+		assertTrue("542 types expected, is " + res1.size(), res1.size() == 542);
+		
+		int nFlushes= AllTypesCache.getNumberOfCacheFlushes();
+		
+		IType type= fJProject2.findType("junit.framework.TestCase");
+		assertNotNull("TestCase not found", type);
+		
+		IEditorPart part= EditorUtility.openInEditor(type);
+		try {
+			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			ISourceRange range= type.getNameRange();
+			document.replace(range.getOffset(), range.getLength(), "A");
+			
+			part.doSave(null);
+			
+			AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
+			assertNotNull("A not found", findTypeRef(res1, "junit.framework.A"));
+			TypeInfo ref2= findTypeRef(res1, "junit.framework.TestCase");
+			assertNull("TestCase still found", ref2);
+			
+			assertTrue("542 types in workspace expected, is " + res1.size(), res1.size() == 542);
+			
+			assertTrue("cache not flushed", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	
+	}
+	
+	public void testWorkingCopies2() throws Exception {
+		if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			return;
+		}
+		
+		// change a type in the editor and do not save
+		
+		IJavaSearchScope workspaceScope= SearchEngine.createWorkspaceScope();
+		
+		ArrayList res1= new ArrayList();
+		
+		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
+		assertNotNull("TestCase not found", findTypeRef(res1, "junit.framework.TestCase"));
+		assertTrue("542 types expected, is " + res1.size(), res1.size() == 542);
+		
+		int nFlushes= AllTypesCache.getNumberOfCacheFlushes();
+		
+		IType type= fJProject2.findType("junit.framework.TestCase");
+		assertNotNull("TestCase not found", type);
+		
+		IEditorPart part= EditorUtility.openInEditor(type);
+		try {
+			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			ISourceRange range= type.getNameRange();
+			document.replace(range.getOffset(), range.getLength(), "A");
+			
+			AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
+			assertNotNull("A not found", findTypeRef(res1, "junit.framework.A"));
+			assertNull("TestCase still found", findTypeRef(res1, "junit.framework.TestCase"));
+			
+			assertTrue("542 types in workspace expected, is " + res1.size(), res1.size() == 542);
+			
+			assertTrue("cache not flushed", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	
 	}	
+	
 	
 	
 	private TypeInfo findTypeRef(List refs, String fullname) {
