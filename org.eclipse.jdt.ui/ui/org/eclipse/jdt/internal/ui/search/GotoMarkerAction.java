@@ -4,38 +4,11 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
-
-import org.eclipse.search.ui.ISearchResultView;
-import org.eclipse.search.ui.ISearchResultViewEntry;
-import org.eclipse.search.ui.SearchUI;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.ui.IPackagesViewPart;
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.Action;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.PartInitException;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.search.internal.ui.SearchPlugin;import org.eclipse.search.ui.ISearchResultView;import org.eclipse.search.ui.ISearchResultViewEntry;import org.eclipse.search.ui.SearchUI;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.ui.IPackagesViewPart;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class GotoMarkerAction extends Action {
+
+	private IEditorPart fEditor;
 
 	public GotoMarkerAction() {
 		super(JavaPlugin.getResourceString("Search.GotoMarkerAction.label"));
@@ -75,27 +48,46 @@ class GotoMarkerAction extends Action {
 			}
 		}			
 		else if (!isBinary(javaElement)) {
-			// This is the workbench's default
-			try {
-				wbPage.openEditor(marker, false);
-			} catch (PartInitException ex) {
-				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.openEditor.");
-			}
+			if (resource instanceof IFile)
+				showInEditor(marker, new FileEditorInput((IFile)resource), JavaUI.ID_CU_EDITOR);
 		}
 		else {
 			IClassFile cf= getClassFile(javaElement);
-			if (cf != null) {
-				IEditorPart editor= null;
-				try {		
-					editor= wbPage.openEditor(new ClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR, false);
-				} catch (PartInitException ex) {
-					ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.openEditor.");
-				}
-				if (editor != null) {
-					editor.gotoMarker(marker);
-				}
+			if (cf != null)
+				showInEditor(marker, new ClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR);
+		}
+	}
+
+	public void showInEditor(IMarker marker, IEditorInput input, String editorId) {
+		IWorkbenchPage page= SearchPlugin.getActivePage();
+		if (page == null)
+			return;
+		
+		IEditorPart editor= null;
+		IEditorPart[] editorParts= page.getEditors();
+		for (int i= 0; i < editorParts.length; i++) {
+			IEditorPart part= editorParts[i];
+			if (input.equals(part.getEditorInput())) {
+				editor= part;
+				break;
 			}
 		}
+		if (editor == null) {
+			if (fEditor != null) {
+				if (!fEditor.isDirty()) {
+					page.closeEditor(fEditor, false);
+				}
+			}
+			try {
+				editor= page.openEditor(input, editorId, false);
+				fEditor = editor;
+			} catch (PartInitException ex) {
+				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.openEditor.");
+			}
+		} else {
+			page.bringToTop(editor);
+		}
+		editor.gotoMarker(marker);
 	}
 	
 	private IClassFile getClassFile(IJavaElement jElement) {
