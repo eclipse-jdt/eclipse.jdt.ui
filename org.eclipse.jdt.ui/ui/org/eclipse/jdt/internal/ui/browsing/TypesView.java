@@ -1,9 +1,10 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.browsing;
 
+import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 
@@ -39,8 +40,7 @@ public class TypesView extends JavaBrowsingPart {
 		return new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
 						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
-						AppearanceAwareLabelProvider.getDecorators(true, null)
-						);
+						new ILabelDecorator[] { new TopLevelTypeProblemsLabelDecorator(null)});
 	}
 
 	/**
