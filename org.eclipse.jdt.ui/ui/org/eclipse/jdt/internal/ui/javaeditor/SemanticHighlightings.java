@@ -402,7 +402,7 @@ public class SemanticHighlightings {
 				if (parent.getNodeType() == ASTNode.POSTFIX_EXPRESSION) {
 					if (child instanceof Expression) {
 						ITypeBinding binding= ((Expression) child).resolveTypeBinding();
-						if (!binding.isPrimitive())
+						if (binding != null && !binding.isPrimitive())
 							return true;
 					}
 				}
@@ -526,7 +526,9 @@ public class SemanticHighlightings {
 						InfixExpression infix= (InfixExpression) parent;
 						ITypeBinding binding= infix.resolveTypeBinding();
 						ITypeBinding type= ((Expression) child).resolveTypeBinding();
-						return binding.isAssignmentCompatible(type);
+						if (binding != null && type != null) {
+							return binding.isAssignmentCompatible(type);
+						}
 					}
 					break;
 					
