@@ -717,14 +717,14 @@ public class StubUtility {
 		String typeName= type.getElementName();
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < superMethods.length; i++) {
-			IMethod curr= superMethods[i];
-			if (curr.isConstructor())  {
-				constuctorFound= true;
-				if (JavaModelUtil.isVisible(curr, type.getPackageFragment()) || Flags.isProtected(curr.getFlags())
-					&& (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null))  {
-						constructorMethods.add(curr);
+				IMethod curr= superMethods[i];
+				if (curr.isConstructor())  {
+					constuctorFound= true;
+					if (JavaModelUtil.isVisible(curr, type.getPackageFragment()) || Flags.isProtected(curr.getFlags()))
+						if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null)
+							constructorMethods.add(curr);
+		
 				}
-			}
 		}
 		
 		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38487
