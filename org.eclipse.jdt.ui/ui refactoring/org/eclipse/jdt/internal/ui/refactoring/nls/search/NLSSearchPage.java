@@ -113,6 +113,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 
 	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.nls.NLSSearchPage"; //$NON-NLS-1$
 	private static final String RESOURCE_BUNDLE_FIELD= "RESOURCE_BUNDLE"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME_FIELD= "BUNDLE_NAME"; //$NON-NLS-1$
 
 	private static java.util.List fgPreviousSearchPatterns= new ArrayList(20);
 
@@ -645,31 +646,39 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				break;
 		}
 		if (searchFor == TYPE && pattern != null) {
-			String propertyFilePathStr= ""; //$NON-NLS-1$
-			// make suggestion for properties file
+			String propertyFilePathStr= null; //$NON-NLS-1$
+			// make suggestions for properties file: look for string constants according to conventions
 			if (mainType != null) {
-				IField bundle= mainType.getField(RESOURCE_BUNDLE_FIELD);
-				if (bundle.exists()) {
-					try {
-						Object constant= bundle.getConstant();
-						if (constant instanceof String) {
-							String string= (String) constant;
-							propertyFilePathStr= mainType.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT).getPath().toString()
-								+ IPath.SEPARATOR + string.substring(1, string.length() - 1).replace('.', IPath.SEPARATOR)
-								+ ".properties"; //$NON-NLS-1$
-						}
-					} catch (JavaModelException e) {
-						//failed
-					}
-				}
+				propertyFilePathStr= getPropertyFilePathStr(mainType, RESOURCE_BUNDLE_FIELD);
+				if (propertyFilePathStr == null)
+					propertyFilePathStr= getPropertyFilePathStr(mainType, BUNDLE_NAME_FIELD);
 			}
-			if (propertyFilePathStr.length() == 0) {
+			if (propertyFilePathStr == null) {
+				//fallback:
 				IPath path= element.getPath().removeFileExtension().addFileExtension("properties"); //$NON-NLS-1$
 				propertyFilePathStr= path.toString();
 			}
 			return new SearchPatternData(pattern, element, propertyFilePathStr); //$NON-NLS-1$
 		}
 
+		return null;
+	}
+
+	private String getPropertyFilePathStr(IType mainType, String fieldName) {
+		IField bundle= mainType.getField(fieldName);
+		if (bundle.exists()) {
+			try {
+				Object constant= bundle.getConstant();
+				if (constant instanceof String) {
+					String string= (String) constant;
+					return mainType.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT).getPath().toString()
+						+ IPath.SEPARATOR + string.substring(1, string.length() - 1).replace('.', IPath.SEPARATOR)
+						+ ".properties"; //$NON-NLS-1$
+				}
+			} catch (JavaModelException e) {
+				return null; //failed
+			}
+		}
 		return null;
 	}
 
@@ -700,6 +709,15 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				// try to be smarter and find a corresponding CU
 				IPath cuPath= propertyFullPath.removeFileExtension().addFileExtension("java"); //$NON-NLS-1$
 				IFile cuFile= (IFile)JavaPlugin.getWorkspace().getRoot().findMember(cuPath);
+				if (cuFile == null) { //try with uppercase first char
+					String filename= cuPath.removeFileExtension().lastSegment();
+					if (filename != null && filename.length() > 0) {
+						filename= Character.toUpperCase(filename.charAt(0)) + filename.substring(1);
+						IPath dirPath= propertyFullPath.removeLastSegments(1).addTrailingSeparator();
+						cuPath= dirPath.append(filename).addFileExtension("java"); //$NON-NLS-1$
+						cuFile= (IFile)JavaPlugin.getWorkspace().getRoot().findMember(cuPath);
+					}
+				}
 				IType type= null;
 				if (cuFile != null && cuFile.exists()) {
 					IJavaElement  cu= JavaCore.create(cuFile);
