@@ -7,7 +7,7 @@
 	name = "Eclipse Java Development Tools VCM UI"
 	id = "org.eclipse.jdt.ui.vcm"
 	version = "0.9"
-	vendor-name = "Object Technology International, Inc.">
+	provider-name = "Object Technology International, Inc.">
 
 	<requires>
 		<import plugin="org.eclipse.core.resources"/>

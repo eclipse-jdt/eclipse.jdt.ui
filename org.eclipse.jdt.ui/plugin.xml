@@ -4,7 +4,7 @@
     name = "Java Development Tools UI"
     id = "org.eclipse.jdt.ui"
     version = "0.9"
-    vendor-name = "Object Technology International, Inc."
+    provider-name = "Object Technology International, Inc."
     class="org.eclipse.jdt.internal.ui.JavaPlugin">
 
 <requires> 
