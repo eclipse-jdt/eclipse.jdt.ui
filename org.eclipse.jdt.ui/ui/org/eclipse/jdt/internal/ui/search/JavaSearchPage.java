@@ -35,14 +35,14 @@ import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -53,7 +53,6 @@ import org.eclipse.search.ui.IWorkingSet;
 import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -66,16 +65,12 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
@@ -475,9 +470,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	
 	private void initSelections() {
 		ISelection selection= getSelection();
-		fInitialData= tryTypedTextSelection(selection);
-		if (fInitialData == null)
-			fInitialData= trySelection(selection);
+		fInitialData= tryStructuredSelection(selection);
 		if (fInitialData == null)
 			fInitialData= trySimpleTextSelection(selection);
 		if (fInitialData == null)
@@ -492,43 +485,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fPattern.setText(fInitialData.pattern);
 	}
 
-	private SearchPatternData tryTypedTextSelection(ISelection selection) {
-		if (selection instanceof ITextSelection) {
-			IEditorPart e= getEditorPart();
-			if (e != null) {
-				ITextSelection ts= (ITextSelection)selection;
-				ICodeAssist assist= getCodeAssist(e);
-				if (assist != null) {
-					IJavaElement[] elements= null;
-					try {
-						elements= assist.codeSelect(ts.getOffset(), ts.getLength());
-					} catch (JavaModelException ex) {
-						ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
-					}
-					if (elements != null && elements.length > 0) {
-						IJavaElement javaElement= null;
-						if (elements.length == 1)
-							javaElement= elements[0];
-//						else
-//							javaElement= chooseFromList(elements);
-						if (javaElement != null)
-							return determineInitValuesFrom(javaElement);
-					}
-				}
-			}
-		}
-		return null;
-	}
-	
-	private ICodeAssist getCodeAssist(IEditorPart editorPart) {
-		IEditorInput input= editorPart.getEditorInput();
-		if (input instanceof IClassFileEditorInput)
-			return ((IClassFileEditorInput)input).getClassFile();
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
-		return manager.getWorkingCopy(input);
-	}
-
-	private SearchPatternData trySelection(ISelection selection) {
+	private SearchPatternData tryStructuredSelection(ISelection selection) {
 		if (!(selection instanceof IStructuredSelection))
 			return null;
 
@@ -688,18 +645,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		return new SearchPatternData(TYPE, REFERENCES, "", null); //$NON-NLS-1$
 	}	
 
-	private IJavaElement chooseFromList(IJavaElement[] openChoices) {
-		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED;
-		ILabelProvider labelProvider= new JavaElementLabelProvider(flags);
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
-		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
-		dialog.setElements(openChoices);
-		if (dialog.open() == dialog.OK)
-			return (IJavaElement)dialog.getFirstResult();
-		return null;
-	}
-
 	/*
 	 * Implements method from ISearchPage
 	 */
@@ -718,7 +663,15 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	 * Returns the current active selection.
 	 */
 	private ISelection getSelection() {
-		return fContainer.getSelection();
+		IWorkbenchWindow wbWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (wbWindow == null)
+			return fContainer.getSelection();
+		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(wbWindow.getSelectionService());
+		ISelection selection= provider.getSelection();
+		if (selection.equals(StructuredSelection.EMPTY))
+			return fContainer.getSelection();
+		else
+			return selection;
 	}
 	
 	/**

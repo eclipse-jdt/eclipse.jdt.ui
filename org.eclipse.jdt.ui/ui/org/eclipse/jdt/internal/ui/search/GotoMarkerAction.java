@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 class GotoMarkerAction extends Action {
 
@@ -49,11 +50,7 @@ class GotoMarkerAction extends Action {
 
 	public void run() {
 		ISearchResultView view= SearchUI.getSearchResultView();		
-		view.getSelection();
-		ISelection selection= view.getSelection();
-		Object element= null;
-		if (selection instanceof IStructuredSelection)
-			element= ((IStructuredSelection)selection).getFirstElement();
+		Object element= SelectionUtil.getSingleElement(view.getSelection());
 		if (element instanceof ISearchResultViewEntry) {
 			ISearchResultViewEntry entry= (ISearchResultViewEntry)element;
 			show(entry.getSelectedMarker());

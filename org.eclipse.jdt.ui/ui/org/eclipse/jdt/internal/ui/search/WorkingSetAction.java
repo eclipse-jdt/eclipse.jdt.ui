@@ -5,7 +5,7 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 public class WorkingSetAction extends ElementSearchAction {
 
@@ -21,7 +21,7 @@ public class WorkingSetAction extends ElementSearchAction {
 		fAction.run();
 	}
 
-	public boolean canOperateOn(ISelection sel) {
+	public boolean canOperateOn(IStructuredSelection sel) {
 		return fAction.canOperateOn(sel);
 	}
 

@@ -4,14 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -25,7 +26,7 @@ public class FindImplementorsAction extends ElementSearchAction {
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 	}
 
-	public boolean canOperateOn(ISelection sel) {
+	public boolean canOperateOn(IStructuredSelection sel) {
 		if (!super.canOperateOn(sel))
 			return false;
 

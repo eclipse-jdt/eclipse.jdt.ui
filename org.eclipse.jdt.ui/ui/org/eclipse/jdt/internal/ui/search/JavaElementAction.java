@@ -3,31 +3,36 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.search;
-import java.util.Arrays;import java.util.List;import org.eclipse.core.resources.IMarker;import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.jface.action.Action;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.text.TextSelection;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.search.ui.ISearchResultViewEntry;
+
+import org.eclipse.search.ui.ISearchResultViewEntry;
+
 import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Abstract class for actions that run on IJavaElement.
  */
@@ -42,7 +47,7 @@ public abstract class JavaElementAction extends Action {
 		super(label);
 		fValidTypes= validTypes;
 	}
-	public boolean canOperateOn(ISelection sel) {
+	public boolean canOperateOn(IStructuredSelection sel) {
 		boolean hasSelection= !sel.isEmpty();
 		if (!hasSelection || fValidTypes == null)
 			return hasSelection;
@@ -96,21 +101,13 @@ public abstract class JavaElementAction extends Action {
 			return null;
 		}
 	}
-	protected IJavaElement getJavaElement(ISelection selection, boolean silent) {
-		if (selection instanceof ITextSelection)
-			return getJavaElement((ITextSelection) selection);
-		else
-			if (selection instanceof IStructuredSelection)
-				return getJavaElement((IStructuredSelection) selection, silent);
-		return null;
-	}
-	private IJavaElement getJavaElement(Object o, boolean silent) {
+	private IJavaElement getJavaElement(Object o, boolean silent) {
 		if (o instanceof IJavaElement)
 			return getJavaElement((IJavaElement)o, silent);
 		else if (o instanceof IMarker)
 			return getJavaElement((IMarker)o, silent);
 		else if (o instanceof ISelection)
-			return getJavaElement((ISelection)o, silent);
+			return getJavaElement((IStructuredSelection)o, silent);
 		else if (o instanceof ISearchResultViewEntry)
 			return getJavaElement((ISearchResultViewEntry)o, silent);
 		return null;
@@ -122,51 +119,18 @@ public abstract class JavaElementAction extends Action {
 		return null;
 	}
 
-	private IJavaElement getJavaElement(IStructuredSelection selection, boolean silent) {
+	protected IJavaElement getJavaElement(IStructuredSelection selection, boolean silent) {
 		if (selection.size() == 1)
 			// Selection only enabled if one element selected.
 			return getJavaElement(selection.getFirstElement(), silent);
 		return null;
 	}
-	protected IJavaElement getJavaElement(ITextSelection selection) {
-		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
-		if (wbPage == null)
-			return null;
-		IEditorPart editorPart= wbPage.getActiveEditor();
-		if (editorPart == null)
-			return null;
-		ICodeAssist assist= getCodeAssist(editorPart);
-		ITextSelection ts= (ITextSelection) selection;
-		if (assist != null) {
-			IJavaElement[] elements;
-			try {
-				elements= assist.codeSelect(ts.getOffset(), ts.getLength());
-			} catch (JavaModelException ex) {
-				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
-				return null;
-			}
-			if (elements != null && elements.length > 0) {
-				if (elements.length == 1 || !shouldUserBePrompted())
-					return elements[0];
-				else if (elements.length > 1)
-					return chooseFromList(elements);
-			}
-		}
-		return null;
-	}
-	public ISelection getSelection() {
+	public IStructuredSelection getSelection() {
 		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
 		if (window != null)
-			return window.getSelectionService().getSelection();
+			return StructuredSelectionProvider.createFrom(window.getSelectionService()).getSelection();
 		else
-			return TextSelection.emptySelection();
-	}
-	protected ICodeAssist getCodeAssist(IEditorPart editorPart) {
-		IEditorInput input= editorPart.getEditorInput();
-		if (input instanceof IClassFileEditorInput)
-			return ((IClassFileEditorInput)input).getClassFile();
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
-		return manager.getWorkingCopy(input);
+			return StructuredSelection.EMPTY;
 	}
 	private IJavaElement chooseFromList(IJavaElement[] openChoices) {
 		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED;
