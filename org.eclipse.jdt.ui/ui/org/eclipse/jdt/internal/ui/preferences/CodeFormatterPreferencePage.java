@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -21,10 +25,12 @@ import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.part.PageBook;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.preferences.formatter.CodingStyleConfigurationBlock;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /*
@@ -32,7 +38,13 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
  */
 public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IStatusChangeListener {
 
-	private CodeFormatterConfigurationBlock fConfigurationBlock;
+	private CodeFormatterConfigurationBlock fOldConfigurationBlock;
+	private CodingStyleConfigurationBlock fNewConfigurationBlock;
+	
+	private PageBook fPagebook;
+	
+	private Control fControlNew;
+	private Control fControlOld;
 
 	public CodeFormatterPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
@@ -41,7 +53,22 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		// only used when page is shown programatically
 		setTitle(PreferencesMessages.getString("CodeFormatterPreferencePage.title"));		 //$NON-NLS-1$
 		
-		fConfigurationBlock= new CodeFormatterConfigurationBlock(this, null);
+		fOldConfigurationBlock= new CodeFormatterConfigurationBlock(this, null);
+		fNewConfigurationBlock= new CodingStyleConfigurationBlock();
+	}
+	
+	private boolean useNewFormatter() {
+		return getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_FORMATTER);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+	 */
+	public void setVisible(boolean visible) {
+		if (visible)  {
+			updateVisibility();
+		}
+		super.setVisible(visible);
 	}
 		
 	/*
@@ -56,24 +83,44 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE);
-	}	
+	}
+	
 
 	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		Control result= fConfigurationBlock.createContents(parent);
-		Dialog.applyDialogFont(result);
-		return result;
+		
+		fPagebook= new PageBook(parent, SWT.NONE);
+		fControlNew= fNewConfigurationBlock.createContents(fPagebook);
+		fControlOld= fOldConfigurationBlock.createContents(fPagebook); 
+		updateVisibility();
+		
+		Dialog.applyDialogFont(fControlNew);
+		Dialog.applyDialogFont(fControlOld);
+		return fPagebook;
+	}
+	
+	private void updateVisibility() {
+		if (useNewFormatter()) {
+			fPagebook.showPage(fControlNew);
+		} else {
+			fPagebook.showPage(fControlOld);
+		}
 	}
 
 	/*
 	 * @see IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		if (!fConfigurationBlock.performOk(true)) {
-			return false;
-		}	
+		if (useNewFormatter()) {
+			fNewConfigurationBlock.performOk();
+			return true;
+		} else {
+			if (!fOldConfigurationBlock.performOk(true)) {
+				return false;
+			}	
+		}
 		return super.performOk();
 	}
 	
@@ -81,7 +128,11 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		fConfigurationBlock.performDefaults();
+		if (useNewFormatter()) {
+			// not supported
+		} else {
+			fOldConfigurationBlock.performDefaults();
+		}
 		super.performDefaults();
 	}
 	

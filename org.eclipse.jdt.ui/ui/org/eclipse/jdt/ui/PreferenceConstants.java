@@ -28,6 +28,7 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 
 /**
  * Preference constants used in the JDT-UI preference store. Clients should only read the
@@ -1971,6 +1972,18 @@ public class PreferenceConstants {
 	public static final String TEMPLATES_USE_CODEFORMATTER= "org.eclipse.jdt.ui.template.format"; //$NON-NLS-1$
 	
 	/**
+	 * A named preference that controls which profile is used by the code formatter.
+	 * <p>
+	 * Value is of type <code>String</code>.
+	 * </p>
+	 *
+	 * @since 2.1
+	 */	
+	public static final String FORMATTER_PROFILE = "formatter_profile"; //$NON-NLS-1$
+	
+	
+	
+	/**
 	 * Initializes the given preference store with the default values.
 	 * 
 	 * @param store the preference store to be initialized
@@ -2171,6 +2184,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, false);
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMATHTML, true);
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 80);
+		
+		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, ProfileManager.DEFAULT_PROFILE);
 
 		// work in progress
 		WorkInProgressPreferencePage.initDefaults(store);	

@@ -136,6 +136,14 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		fPixelConverter= new PixelConverter(parent);
 		setShell(parent.getShell());
 		
+//		final Composite parent = new Composite(top, SWT.NONE);
+//		GridLayout layout = new GridLayout(1, false);
+//		layout.marginHeight = 0;
+//		layout.marginWidth = 0;
+//		parent.setLayout(layout);
+		
+		
+		
 		int textWidth= fPixelConverter.convertWidthInCharsToPixels(6);
 		
 		int nColumns= 3;
@@ -264,7 +272,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		item.setText(PreferencesMessages.getString("CodeFormatterPreferencePage.tab.comment.tabtitle")); //$NON-NLS-1$
 		item.setControl(commentComposite);
 
-		fSourceViewer= createPreview(parent);
+		fSourceViewer= createPreview(composite);
 			
 		updatePreview();
 					
