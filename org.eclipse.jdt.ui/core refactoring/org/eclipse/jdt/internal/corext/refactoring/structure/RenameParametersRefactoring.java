@@ -3,6 +3,10 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.corext.refactoring.structure;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,10 +16,14 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
 
-import org.eclipse.jdt.internal.corext.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -23,13 +31,18 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.rename.ProblemNodeFinder;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 class RenameParametersRefactoring extends Refactoring implements IMultiRenameRefactoring, IReferenceUpdatingRefactoring{
 
@@ -136,11 +149,9 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 				return result;
 			pm.subTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.checking")); //$NON-NLS-1$
 			result.merge(checkNewNames());
+			if (result.hasFatalError())
+				return result;
 			pm.worked(3);
-			/*
-			 * only one resource is affected - no need to check its availability
-			 * (done in MethodRefactoring::checkActivation)
-			 */
 			if (fUpdateReferences && mustAnalyzeAst()) 
 				result.merge(analyzeAst()); 
 			pm.worked(7);
@@ -235,10 +246,63 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 		else 
 			return true;
 	}
+
+	private ICompilationUnit getCu() {
+		return fMethod.getCompilationUnit();
+	}
 	
 	private RefactoringStatus analyzeAst() throws JavaModelException{		
-		AbstractRefactoringASTAnalyzer analyzer= new RenameParameterASTAnalyzer(fMethod, fRenamings);
-		return analyzer.analyze(fMethod.getCompilationUnit());
+		try {
+			RefactoringStatus result= new RefactoringStatus();
+						
+			Map map= getEditMapping();
+			TextEdit[] allEdits= getAllEdits(map);
+			
+			CompilationUnit compliationUnitNode= AST.parseCompilationUnit(getCu(), true);
+			TextChange change= new TextBufferChange("Rename Paremeters Variable", TextBuffer.create(getCu().getSource()));
+			change.setTrackPositionChanges(true);
+		
+			ICompilationUnit wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(allEdits, change, getCu());
+			CompilationUnit newCUNode= AST.parseCompilationUnit(wc, true);
+			
+			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(allEdits, change, wc, newCUNode, compliationUnitNode));
+			if (result.hasError())
+				return result;
+
+			String[] oldNames= getRenamedParameterNames();				
+			for (int i= 0; i < oldNames.length; i++) {
+				TextEdit[] paramRenameEdits= (TextEdit[])map.get(oldNames[i]);
+				String fullKey= RefactoringAnalyzeUtil.getFullDeclarationBindingKey(paramRenameEdits, compliationUnitNode);
+				MethodDeclaration methodNode= RefactoringAnalyzeUtil.getMethodDeclaration(allEdits[0], change, newCUNode);
+				SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(methodNode, paramRenameEdits, change, fullKey);
+				result.merge(RefactoringAnalyzeUtil.reportProblemNodes(wc, problemNodes));
+			}
+
+			return result;
+		} catch(CoreException e) {
+			throw new JavaModelException(e);
+		}
+	}
+
+	//String -> TextEdit[]
+	private Map getEditMapping() throws JavaModelException {
+		String[] oldNames= getRenamedParameterNames();	
+		Map map= new HashMap();
+		for (int i= 0; i < oldNames.length; i++) {
+			TextEdit[] paramRenameEdits= getParameterRenameEdits(oldNames[i]);
+			map.put(oldNames[i], paramRenameEdits);
+		}
+		return map;
+	}
+	
+	//String -> TextEdit[]
+	private static TextEdit[] getAllEdits(Map map){
+		Collection result= new ArrayList();
+		for (Iterator iter= map.keySet().iterator(); iter.hasNext();) {
+			TextEdit[] array= (TextEdit[])map.get(iter.next());
+			result.addAll(Arrays.asList(array));	
+		}
+		return (TextEdit[]) result.toArray(new TextEdit[result.size()]);
 	}
 	
 	//-------- changes ----
@@ -249,23 +313,31 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		TextChangeManager manager= new TextChangeManager();
 		createChange(pm, manager);
-		return new CompositeChange("rename parameters", manager.getAllChanges());
+		return new CompositeChange("Rename parameters", manager.getAllChanges());
 	}
-	
+
 	public void createChange(IProgressMonitor pm, TextChangeManager manager) throws JavaModelException {
 		try{
-			String[] renamed= getRenamedParameterNames();
-			pm.beginTask("Preparing preview", renamed.length); 
 			TextChange change= manager.get(WorkingCopyUtil.getWorkingCopyIfExists(fMethod.getCompilationUnit()));
-			for (int i = 0; i < renamed.length; i++) {
-				addParameterRenaming(renamed[i], change);
-				pm.worked(1);
+			TextEdit[] edits= getAllRenameEdits();
+			pm.beginTask("Preparing preview", edits.length); 
+			for (int i= 0; i < edits.length; i++) {
+				change.addTextEdit("Rename method parameter.", edits[i]);
 			}
 		}catch (CoreException e)	{
 			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}	
+	}
+	
+	private TextEdit[] getAllRenameEdits() throws JavaModelException {
+		Collection edits= new ArrayList();
+		String[] renamed= getRenamedParameterNames();
+		for (int i= 0; i < renamed.length; i++) {
+			edits.addAll(Arrays.asList(getParameterRenameEdits(renamed[i])));
+		}
+		return (TextEdit[]) edits.toArray(new TextEdit[edits.size()]);
 	}
 		
 	private String[] getRenamedParameterNames(){
@@ -279,20 +351,18 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 	
-	private void addParameterRenaming(String oldParameterName, TextChange change) throws JavaModelException{
-		int[] offsets= findParameterOccurrenceOffsets(oldParameterName);
+	private TextEdit[] getParameterRenameEdits(String oldParameterName) throws JavaModelException{
+		Collection edits= new ArrayList(); 
+		int[] offsets= ParameterOffsetFinder.findOffsets(fMethod, oldParameterName, fUpdateReferences);
 		Assert.isTrue(offsets.length > 0); //at least the method declaration
 		for (int i= 0; i < offsets.length; i++){
-			addParameterRenameChange(oldParameterName, offsets[i], change);
+			edits.add(getParameterRenameEdit(oldParameterName, offsets[i]));
 		};
+		return (TextEdit[]) edits.toArray(new TextEdit[edits.size()]);
 	}	
 	
-	private int[] findParameterOccurrenceOffsets(String oldParameterName) throws JavaModelException{
-		return ParameterOffsetFinder.findOffsets(fMethod, oldParameterName, fUpdateReferences);
+	private TextEdit getParameterRenameEdit(String oldParameterName, int occurrenceOffset){
+		return SimpleTextEdit.createReplace(occurrenceOffset, oldParameterName.length(), getNewName(oldParameterName));
 	}
 	
-	private void addParameterRenameChange(String oldParameterName, int occurrenceOffset, TextChange change){
-		String name=  RefactoringCoreMessages.getString("RenameParametersRefactoring.update_reference");//$NON-NLS-1$
-		change.addTextEdit(name, SimpleTextEdit.createReplace(occurrenceOffset, oldParameterName.length(), getNewName(oldParameterName)));
-	}
 }
