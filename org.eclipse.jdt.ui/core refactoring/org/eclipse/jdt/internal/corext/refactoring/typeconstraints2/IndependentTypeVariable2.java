@@ -14,9 +14,9 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 
-public class IndependentTypeVariable2 extends TypeConstraintVariable2 {
+public class IndependentTypeVariable2 extends ConstraintVariable2 {
 
-	protected IndependentTypeVariable2(TType typeBinding) {
+	public IndependentTypeVariable2(TType typeBinding) {
 		super(typeBinding);
 	}
 

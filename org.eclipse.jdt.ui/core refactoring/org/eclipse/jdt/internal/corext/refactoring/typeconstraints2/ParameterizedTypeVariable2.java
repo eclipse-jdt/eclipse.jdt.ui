@@ -18,10 +18,9 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
  * A ParameterizedTypeVariable2 is a ConstraintVariable which stands for
  * a unique parameterization of a generic type (without an updatable source location)
  */
+public class ParameterizedTypeVariable2 extends ConstraintVariable2 {
 
-public class ParameterizedTypeVariable2 extends TypeConstraintVariable2 {
-
-	protected ParameterizedTypeVariable2(TType type) {
+	public ParameterizedTypeVariable2(TType type) {
 		super(type);
 		Assert.isTrue(! type.isWildcardType());
 		Assert.isTrue(! type.isTypeVariable());

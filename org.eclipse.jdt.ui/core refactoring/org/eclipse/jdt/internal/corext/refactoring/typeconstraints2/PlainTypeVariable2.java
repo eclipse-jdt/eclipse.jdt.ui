@@ -11,16 +11,15 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
-
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 /**
  * A PlainTypeVariable is a ConstraintVariable which stands for a
  * plain type (without an updatable Source location)
  */
 
-public class PlainTypeVariable2 extends TypeConstraintVariable2 {
+public class PlainTypeVariable2 extends ConstraintVariable2 {
 
 	public PlainTypeVariable2(TType type) {
 		super(type);

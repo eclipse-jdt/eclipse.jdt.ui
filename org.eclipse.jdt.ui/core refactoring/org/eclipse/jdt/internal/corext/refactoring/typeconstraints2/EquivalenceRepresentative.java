@@ -8,61 +8,59 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 public class EquivalenceRepresentative {
 	
-	private TypeConstraintVariable2[] fElements;
+	private ConstraintVariable2[] fElements;
 	private ITypeSet fTypeEstimate;
 	
 	
-	public EquivalenceRepresentative(TypeConstraintVariable2 leftElement, TypeConstraintVariable2 rightElement) {
-		fElements= new TypeConstraintVariable2[] {leftElement, rightElement };
+	public EquivalenceRepresentative(ConstraintVariable2 leftElement, ConstraintVariable2 rightElement) {
+		fElements= new ConstraintVariable2[] {leftElement, rightElement };
 	}
 
-	public EquivalenceRepresentative(TypeConstraintVariable2 element) {
-		fElements= new TypeConstraintVariable2[] {element};
+	public EquivalenceRepresentative(ConstraintVariable2 element) {
+		fElements= new ConstraintVariable2[] {element};
 	}
 
-	public void add(TypeConstraintVariable2 element) {
+	public void add(ConstraintVariable2 element) {
 		for (int i= 0; i < fElements.length; i++)
 			if (fElements[i] == element)
 				return;
 		
 		int len= fElements.length;
-		TypeConstraintVariable2[] newElements= new TypeConstraintVariable2[len + 1];
+		ConstraintVariable2[] newElements= new ConstraintVariable2[len + 1];
 		System.arraycopy(fElements, 0, newElements, 0, len);
 		newElements[len]= element;
 		fElements= newElements;
 	}
 	
-	public TypeConstraintVariable2[] getElements() {
+	public ConstraintVariable2[] getElements() {
 		return fElements;
 	}
 
-	public void addAll(TypeConstraintVariable2[] rightElements) {
+	public void addAll(ConstraintVariable2[] rightElements) {
 		List elements= Arrays.asList(fElements);
 		ArrayList result= new ArrayList(fElements.length + rightElements.length);
 		result.addAll(elements);
 		for (int i= 0; i < rightElements.length; i++) {
-			TypeConstraintVariable2 right= rightElements[i];
+			ConstraintVariable2 right= rightElements[i];
 			if (! result.contains(right))
 				result.add(right);
 		}
-		fElements= (TypeConstraintVariable2[]) result.toArray(new TypeConstraintVariable2[result.size()]);
+		fElements= (ConstraintVariable2[]) result.toArray(new ConstraintVariable2[result.size()]);
 	}
 
 	public void setTypeEstimate(ITypeSet typeSet) {
 		fTypeEstimate= typeSet;
 	}
 	
-	public ITypeSet getTypeEstimate() {
+	ITypeSet getTypeEstimate() {
 		return fTypeEstimate;
 	}
 	

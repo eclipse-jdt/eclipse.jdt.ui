@@ -17,12 +17,12 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUn
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 
-public class CastVariable2 extends TypeConstraintVariable2 implements IDeclaredConstraintVariable {
+public class CastVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
 
 	private final CompilationUnitRange fRange;
-	private TypeConstraintVariable2 fExpressionVariable;
+	private ConstraintVariable2 fExpressionVariable;
 
-	public CastVariable2(TType type, CompilationUnitRange range, TypeConstraintVariable2 expressionVariable) {
+	public CastVariable2(TType type, CompilationUnitRange range, ConstraintVariable2 expressionVariable) {
 		super(type);
 		fRange= range;
 		fExpressionVariable= expressionVariable;
@@ -40,7 +40,7 @@ public class CastVariable2 extends TypeConstraintVariable2 implements IDeclaredC
 		throw new UnsupportedOperationException();
 	}
 	
-	public TypeConstraintVariable2 getExpressionVariable() {
+	public ConstraintVariable2 getExpressionVariable() {
 		return fExpressionVariable;
 	}
 	
