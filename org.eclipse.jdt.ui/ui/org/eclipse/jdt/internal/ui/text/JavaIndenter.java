@@ -289,8 +289,13 @@ public class JavaIndenter {
 			spaces= visualLength;
 		} else if (JavaCore.TAB.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
 			int tabSize= prefTabSize();
-			tabs= visualLength / tabSize;
-			spaces= visualLength % tabSize;
+			if (tabSize > 0) {
+				tabs= visualLength / tabSize;
+				spaces= visualLength % tabSize;	
+			} else {
+				tabs= 0;
+				spaces= 0;	
+			}
 		} else {
 			tabs= visualLength / prefIndentationSize();
 			spaces= 0;

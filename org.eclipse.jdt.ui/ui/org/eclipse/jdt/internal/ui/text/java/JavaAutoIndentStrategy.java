@@ -847,7 +847,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		
 		for (int i= 0; i < seq.length(); i++) {
 			char ch= seq.charAt(i);
-			if (ch == '\t')
+			if (ch == '\t' && tablen > 0)
 				size += tablen - size % tablen;
 			else
 				size++;

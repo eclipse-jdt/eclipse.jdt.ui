@@ -159,10 +159,11 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	private int inferIndentationLevel(String reference, int tabSize) {
 		StringBuffer expanded= expandTabs(reference, tabSize);
 		
-		int spaceWidth, referenceWidth;
-		spaceWidth= 1;
-		referenceWidth= expanded.length();
+		int referenceWidth= expanded.length();
+		if (tabSize == 0)
+			return referenceWidth;
 		
+		int spaceWidth= 1;
 		int level= referenceWidth / (tabSize * spaceWidth);
 		if (referenceWidth % (tabSize * spaceWidth) > 0)
 			level++;
