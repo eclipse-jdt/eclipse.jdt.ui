@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.junit.launcher;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -126,11 +127,21 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		Set result= new HashSet();
 		try {
 			TestSearchEngine.doFindTests(new Object[]{container}, result, pm);
+			// fix for bug 36449  JUnit should constrain tests to selected project [JUnit] 
+			filterNonProjectTests(javaProject, result);
 		} catch (InterruptedException e) {
 		}
 		return (IType[]) result.toArray(new IType[result.size()]) ;
 	}
 
+
+	private void filterNonProjectTests(IJavaProject javaProject, Set result) {
+		for (Iterator iter= result.iterator(); iter.hasNext();) {
+			IType type= (IType) iter.next();
+			if (!type.getJavaProject().equals(javaProject)) 
+				iter.remove();
+		}
+	}
 
 	public IType[] findSingleTest(IJavaProject javaProject, String testName) throws CoreException {
 		IType type = null;
