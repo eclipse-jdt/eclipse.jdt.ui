@@ -7,22 +7,22 @@ package org.eclipse.jdt.internal.core.refactoring.changes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Change;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.changes.*;
-import org.eclipse.jdt.internal.core.refactoring.*;
 
 public class AddToClasspathChange extends Change {
 	
@@ -37,6 +37,18 @@ public class AddToClasspathChange extends Change {
 		fProjectHandle= project.getHandleIdentifier();
 		fEntryKind= IClasspathEntry.CPE_SOURCE;
 		fPath= project.getProject().getFullPath().append(sourceFolderName);
+	}
+	
+	/**
+	 * Adds a new project class path entry to the project.
+	 * @param project
+	 * @param newProjectEntry (must be absolute <code>IPath</code>)
+	 */
+	public AddToClasspathChange(IJavaProject project, IPath newProjectEntry){
+		Assert.isTrue(newProjectEntry.isAbsolute());
+		fProjectHandle= project.getHandleIdentifier();
+		fEntryKind= IClasspathEntry.CPE_PROJECT;
+		fPath= newProjectEntry;
 	}
 	
 	public AddToClasspathChange(IJavaProject project, int entryKind, int contentKind, IPath path, IPath sourceAttachmentPath, IPath sourceAttachmentRootPath){
@@ -112,7 +124,7 @@ public class AddToClasspathChange extends Change {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return "Add entry to classpath";
+		return "Add entry to classpath of Java project: '" + getJavaProject().getElementName() + "'";
 	}
 
 	/* non java-doc
