@@ -19,10 +19,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -36,9 +39,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
@@ -234,11 +238,25 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 			}
 		};
 	}
+	
+	private static boolean loadCheckboxState(boolean defaultValue){
+		String res= JavaPlugin.getDefault().getDialogSettings().get(FIND_STRINGS_CHECKBOX);
+		if (res == null)
+			return defaultValue;
+		return Boolean.valueOf(res).booleanValue();	
+	}
+	
+	private static void storeCheckboxState(boolean selected){
+		JavaPlugin.getDefault().getDialogSettings().put(FIND_STRINGS_CHECKBOX, selected);	
+	}
 		
 	//-------private classes --------------
 		
 	private static class NonNLSListDialog extends ListDialog{
+		private static final int OPEN_BUTTON_ID= IDialogConstants.CLIENT_ID + 1;
+		
 		private Button fCheckbox;
+		private Button fOpenButton;
 		
 		NonNLSListDialog(Object input, int count){
 			super(JavaPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell());
@@ -260,13 +278,31 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 
 		protected Control createDialogArea(Composite parent) {
 			Composite result= (Composite)super.createDialogArea(parent);
+			addCheckbox(result);
+			getTableViewer().addSelectionChangedListener(new ISelectionChangedListener(){
+				public void selectionChanged(SelectionChangedEvent event){
+					if (fOpenButton != null){
+						fOpenButton.setEnabled(! getTableViewer().getSelection().isEmpty());
+					}
+				}
+			});
+			getTableViewer().getTable().addSelectionListener(new SelectionAdapter(){
+				public void widgetDefaultSelected(SelectionEvent e) {
+					NonNLSElement element= (NonNLSElement)e.item.getData();
+					ExternalizeAction.openExternalizeStringsWizard(element.cu);
+				}
+			});
+			return result;
+		}
+		
+		private void addCheckbox(Composite result) {
 			fCheckbox= new Button(result, SWT.CHECK);
-			fCheckbox.setText("Hide compilation units with no strings to externalize");
+			fCheckbox.setText("&Hide compilation units with no strings to externalize");
 			fCheckbox.setSelection(loadCheckboxState(true));
-
+			
 			if (fCheckbox.getSelection() && ! NonNLSListDialog.this.hasFilters())
 				getTableViewer().addFilter(new ZeroStringsFilter());
-				
+			
 			fCheckbox.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					storeCheckboxState(NonNLSListDialog.this.fCheckbox.getSelection());
@@ -277,27 +313,29 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 						NonNLSListDialog.this.getTableViewer().addFilter(new ZeroStringsFilter());
 				}
 			});
-			getTableViewer().getTable().addSelectionListener(new SelectionAdapter(){
-				public void widgetDefaultSelected(SelectionEvent e) {
-					ICompilationUnit selectedCu= (ICompilationUnit)(((NonNLSElement)e.item.getData()).cu);
-					ExternalizeAction.openExternalizeStringsWizard(selectedCu);
-				}
-			});
-			return result;
 		}	
+		
+		protected void createButtonsForButtonBar(Composite parent) {
+			fOpenButton= createButton(parent, OPEN_BUTTON_ID, "&Externalize", true);
+			fOpenButton.setEnabled(false);
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		}
+
+		protected void buttonPressed(int buttonId) {
+			if (buttonId != OPEN_BUTTON_ID){
+				super.buttonPressed(buttonId);
+				return;
+			}	
+			ISelection s= getTableViewer().getSelection();
+			if (s instanceof IStructuredSelection){
+				IStructuredSelection ss= (IStructuredSelection)s;
+				if (ss.getFirstElement() instanceof NonNLSElement)
+					ExternalizeAction.openExternalizeStringsWizard(((NonNLSElement)ss.getFirstElement()).cu);
+			}
+		}
+
 	}
-	
-	private static boolean loadCheckboxState(boolean defaultValue){
-		String res= JavaPlugin.getDefault().getDialogSettings().get(FIND_STRINGS_CHECKBOX);
-		if (res == null)
-			return defaultValue;
-		return Boolean.valueOf(res).booleanValue();	
-	}
-	
-	private static void storeCheckboxState(boolean selected){
-		JavaPlugin.getDefault().getDialogSettings().put(FIND_STRINGS_CHECKBOX, selected);	
-	}
-	
+		
 	private static class NonNLSElement{
 		ICompilationUnit cu;
 		int count;
