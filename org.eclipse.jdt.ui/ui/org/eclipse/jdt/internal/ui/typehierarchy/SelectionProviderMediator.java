@@ -43,7 +43,8 @@ public class SelectionProviderMediator implements ISelectionProvider {
 	     * @see FocusListener#focusLost
 	     */
 	    public void focusLost(FocusEvent e) {
-	    	fViewerInFocus= null;
+	    	// do not reset due to focus behaviour on GTK
+	    	//fViewerInFocus= null;
 	    }
 	}
 	
