@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
@@ -25,19 +26,23 @@ import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
+import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.NewMoveWrapper;
 
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 
 public class ReorgGroup extends ContextMenuGroup {
 	private static final String GROUP_NAME= IContextMenuConstants.GROUP_REORGANIZE;
 	
-	private SelectionDispatchAction[] fBasicActions; //always added - just grayed out if disabled
-	private IAction[] fDynamicActions; //added only if enabled
+	private IAction[] fBasicActions; //always added - just grayed out if disabled
 	
 	private UnifiedSite fSite;
+
 	public ReorgGroup(UnifiedSite site){
+		Assert.isNotNull(site);
 		fSite= site;
 	}	
 	
@@ -45,18 +50,9 @@ public class ReorgGroup extends ContextMenuGroup {
 		createActions(context.getSelectionProvider());
 		
 		for (int i= 0; i < fBasicActions.length; i++) {
-			fBasicActions[i].update();
+			if (fBasicActions[i] instanceof IUpdate)
+				((IUpdate)fBasicActions[i]).update();
 			manager.appendToGroup(GROUP_NAME, fBasicActions[i]);
-		}
-		
-		for (int i= 0; i < fDynamicActions.length; i++) {
-			if (fDynamicActions[i] instanceof IRefactoringAction)
-				((IRefactoringAction)fDynamicActions[i]).update();
-			if (fDynamicActions[i] instanceof SelectionDispatchAction)
-				((SelectionDispatchAction)fDynamicActions[i]).update();
-				
-			if (fDynamicActions[i].isEnabled())
-				manager.appendToGroup(GROUP_NAME, fDynamicActions[i]);
 		}
 	}
 	
@@ -64,15 +60,11 @@ public class ReorgGroup extends ContextMenuGroup {
 		if (fBasicActions != null)
 			return;
 			
-		fBasicActions= new SelectionDispatchAction[] {	
+		fBasicActions= new IAction[] {	
 			createCutAction(fSite, p),
 			createCopyAction(fSite, p),
 			createPasteAction(fSite, p),
-			createDeleteAction(fSite, p)
-		};
-		fDynamicActions= new IRefactoringAction[]{			
-			new JdtMoveAction(StructuredSelectionProvider.createFrom(p)),
-			new RenameAction(p)
+			createDeleteAction(fSite, p),
 		};
 	}	
 	
