@@ -61,7 +61,7 @@ public class JavaElementLabels {
 	public final static long M_PRE_TYPE_PARAMETERS= 1L << 31;
 	
 	/**
-	 * Method names contain type parameters prepended.
+	 * Method names contain type parameters appended.
 	 * e.g. <code>foo(A index) <A></code>
 	 */
 	public final static long M_APP_TYPE_PARAMETERS= 1L << 32;
