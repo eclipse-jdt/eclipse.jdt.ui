@@ -292,6 +292,9 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @return the repair description
 	 */
 	public TextPresentation createPresentation(List addedPositions, List removedPositions, Object timeStamp) {
+		if (fSourceViewer == null)
+			return null;
+		
 		if (timeStamp != getTimestamp())
 			return null;
 		
@@ -331,6 +334,9 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @param timeStamp the timestamp
 	 */
 	public void updatePresentation(final TextPresentation textPresentation, List addedPositions, List removedPositions, final Object timeStamp) {
+		if (fSourceViewer == null)
+			return;
+		
 		// TODO: do clustering of positions and post multiple fast runnables
 		final HighlightedPosition[] added= new SemanticHighlightingManager.HighlightedPosition[addedPositions.size()];
 		addedPositions.toArray(added);
@@ -356,6 +362,9 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @param addedPositions The added positions
 	 */
 	private void internalUpdatePresentation(TextPresentation textPresentation, HighlightedPosition[] addedPositions, HighlightedPosition[] removedPositions, Object timeStamp) {
+		if (fSourceViewer == null)
+			return;
+		
 		checkOrdering("added positions: ", Arrays.asList(addedPositions)); //$NON-NLS-1$
 		checkOrdering("removed positions: ", Arrays.asList(removedPositions)); //$NON-NLS-1$
 		checkOrdering("old positions: ", fPositions); //$NON-NLS-1$
@@ -568,7 +577,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * </p>
 	 */
 	public Object getTimestamp() {
-		IDocument document= fSourceViewer.getDocument();
+		IDocument document= fSourceViewer != null ? fSourceViewer.getDocument() : null;
 		if (document == null)
 			return fTimestamp;
 		
