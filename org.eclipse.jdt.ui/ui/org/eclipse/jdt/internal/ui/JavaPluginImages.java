@@ -83,19 +83,19 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_CLASSALT= NAME_PREFIX + "classfo_obj.gif"; 			//$NON-NLS-1$	
 	public static final String IMG_OBJS_CLASS_DEFAULT= NAME_PREFIX + "class_default_obj.gif"; 			//$NON-NLS-1$
 	
-	public static final String IMG_OBJS_INNER_CLASS_PUBLIC= "innerclass_public_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_CLASS_DEFAULT= "innerclass_default_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_CLASS_PROTECTED= "innerclass_protected_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_CLASS_PRIVATE= "innerclass_private_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_CLASS_PUBLIC= NAME_PREFIX + "innerclass_public_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_CLASS_DEFAULT= NAME_PREFIX + "innerclass_default_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_CLASS_PROTECTED= NAME_PREFIX + "innerclass_protected_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_CLASS_PRIVATE= NAME_PREFIX + "innerclass_private_obj.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_OBJS_INTERFACE= NAME_PREFIX + "int_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_INTERFACEALT= NAME_PREFIX + "intf_obj.gif"; 			//$NON-NLS-1$	
 	public static final String IMG_OBJS_INTERFACE_DEFAULT= NAME_PREFIX + "int_default_obj.gif"; 		//$NON-NLS-1$
 	
-	public static final String IMG_OBJS_INNER_INTERFACE_PUBLIC= "innerinterface_public_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_INTERFACE_DEFAULT= "innerinterface_default_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_INTERFACE_PROTECTED= "innerinterface_protected_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_INTERFACE_PRIVATE= "innerinterface_private_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_INTERFACE_PUBLIC= NAME_PREFIX + "innerinterface_public_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_INTERFACE_DEFAULT= NAME_PREFIX + "innerinterface_default_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_INTERFACE_PROTECTED= NAME_PREFIX + "innerinterface_protected_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_INTERFACE_PRIVATE= NAME_PREFIX + "innerinterface_private_obj.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_OBJS_CUNIT= NAME_PREFIX + "jcu_obj.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_CUNIT_RESOURCE= NAME_PREFIX + "jcu_resource_obj.gif"; 				//$NON-NLS-1$
