@@ -1,6 +1,6 @@
-package org.eclipse.jdt.internal.ui.launcher;import java.io.File;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.AbstractVMType;import org.eclipse.jdt.launching.IVM;
+package org.eclipse.jdt.internal.ui.launcher;import java.io.File;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.AbstractVMInstallType;import org.eclipse.jdt.launching.IVMInstall;
 
-public class StandardVMType extends AbstractVMType {
+public class StandardVMType extends AbstractVMInstallType {
 	
 	/**
 	 * @see IVMType#validateInstallLocation(File)
@@ -22,7 +22,7 @@ public class StandardVMType extends AbstractVMType {
 	}
 
 	
-	protected IVM doCreateVM(String id) {
+	protected IVMInstall doCreateVM(String id) {
 		return new StandardVM(this, id);
 	}
 }

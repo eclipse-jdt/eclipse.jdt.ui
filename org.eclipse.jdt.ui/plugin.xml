@@ -452,11 +452,11 @@
    		modes="debug" />
 </extension>	
 
-<extension point = "org.eclipse.jdt.launching.vmTypes">
-	<vmType
+<extension point = "org.eclipse.jdt.launching.vmInstallTypes">
+	<vmInstallType
 	   	class="org.eclipse.jdt.internal.ui.launcher.StandardVMType"
 	    id="org.eclipse.jdt.internal.ui.launcher.StandardVMType"/>
-	<vmType
+	<vmInstallType
 	   	class="org.eclipse.jdt.internal.ui.launcher.J9VMType"
 	    id="org.eclipse.jdt.internal.ui.launcher.J9Type"/>
 </extension>

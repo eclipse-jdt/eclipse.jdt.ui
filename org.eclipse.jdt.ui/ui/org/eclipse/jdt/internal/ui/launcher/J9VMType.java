@@ -1,8 +1,8 @@
-package org.eclipse.jdt.internal.ui.launcher;import java.io.File;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.IVM;
+package org.eclipse.jdt.internal.ui.launcher;import java.io.File;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.IVMInstall;
 
 public class J9VMType extends StandardVMType {
 
-	public IVM doCreateVM(String id) {
+	public IVMInstall doCreateVM(String id) {
 		return new J9VM(this, id);
 	}
 	

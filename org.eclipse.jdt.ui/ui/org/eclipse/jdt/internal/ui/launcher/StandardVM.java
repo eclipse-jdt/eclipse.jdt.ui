@@ -1,12 +1,12 @@
-package org.eclipse.jdt.internal.ui.launcher;import java.io.File;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.jdt.launching.AbstractVM;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jdt.launching.IVMType;
+package org.eclipse.jdt.internal.ui.launcher;import java.io.File;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.jdt.launching.AbstractVMInstall;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jdt.launching.IVMInstallType;
 
-public class StandardVM extends AbstractVM {
-	private IVMType fType;
+public class StandardVM extends AbstractVMInstall {
+	private IVMInstallType fType;
 	private String fId;
 	private String fName;
 	private File fInstallLocation;
 	
-	StandardVM(IVMType type, String id) {
+	StandardVM(IVMInstallType type, String id) {
 		super(type, id);
 	}
 	/**

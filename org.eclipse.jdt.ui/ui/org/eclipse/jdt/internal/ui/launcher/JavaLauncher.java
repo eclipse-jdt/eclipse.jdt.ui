@@ -6,16 +6,16 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.text.DateFormat;import java.util.Date;import java.util.List;import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jdt.internal.ui.util.Utilities;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.swt.widgets.Display;import com.sun.jdi.VirtualMachine;
+import java.io.File;import java.text.DateFormat;import java.util.Date;import java.util.List;import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jdt.internal.ui.util.Utilities;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.swt.widgets.Display;import com.sun.jdi.VirtualMachine;
 
 public abstract class JavaLauncher implements IVMRunner {
 	protected final static String PREFIX= "launcher.";
 	protected final static String ERROR_CREATE_PROCESS= PREFIX+"error.create_process.";
 	protected final static String ERROR_LAUNCHING= PREFIX+"error.launch.";
 
-	protected IVM fVMInstance;
+	protected IVMInstall fVMInstance;
 
-	public JavaLauncher(IVM vmInstance) {
+	public JavaLauncher(IVMInstall vmInstance) {
 		fVMInstance= vmInstance;
 	}
 	

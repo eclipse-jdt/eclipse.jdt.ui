@@ -6,7 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.util.List;import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.IVMType;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableItem;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;
+import java.util.List;import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableItem;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;
 
 /*
  * The page for setting the default java runtime preference.
@@ -23,7 +23,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 	private Button fEditButton;
 	private Button fDefaultCheckbox;
 	
-	private IVMType[] fVMTypes;
+	private IVMInstallType[] fVMTypes;
 
 	public VMPreferencePage() {
 		super();
@@ -144,25 +144,25 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		}
 	}
 	
-	private void vmTypeChanged(IVMType vmType) {
+	private void vmTypeChanged(IVMInstallType vmType) {
 		fVMList.removeAll();
-		IVM[] vms= vmType.getVMs();
+		IVMInstall[] vms= vmType.getVMs();
 		for (int i= 0; i < vms.length; i++) {
 			addVMItem(vms[i]);
 		}
 		vmSelectionChanged();
 	}
 	
-	private void addVMItem(IVM vm) {
+	private void addVMItem(IVMInstall vm) {
 		TableItem item= new TableItem(fVMList, SWT.NULL);
 		item.setText(vm.getName());
 		item.setData(vm);
 	}
 
-	protected void updateVMItem(TableItem item, IVM vm) {
+	protected void updateVMItem(TableItem item, IVMInstall vm) {
 	}
 	
-	private IVMType getVMType() {
+	private IVMInstallType getVMType() {
 		int selected= fVMTypeCombo.getSelectionIndex();
 		if (selected < 0)
 			return null;
@@ -171,24 +171,24 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 	
 	// adding
 	private void addVM() {
-		IVMType vmType= getVMType();
+		IVMInstallType vmType= getVMType();
 		if (vmType != null)
 			addVM(vmType);
 	}
 	
-	private void addVM(IVMType vmType) {
+	private void addVM(IVMInstallType vmType) {
 		AddVMDialog dialog= new AddVMDialog(getShell(), vmType);
 		dialog.setTitle("Add VM");
 		dialog.setVMName("");
 		if (dialog.open() != dialog.OK)
 			return;
-		IVM vm= vmType.createVM(createUniqueId(vmType));
+		IVMInstall vm= vmType.createVM(createUniqueId(vmType));
 		vm.setInstallLocation(dialog.getInstallLocation());
 		vm.setName(dialog.getVMName());
 		addVMItem(vm);
 	}
 	
-	private String createUniqueId(IVMType vmType) {
+	private String createUniqueId(IVMInstallType vmType) {
 		String id= null;
 		do {
 			id= String.valueOf(System.currentTimeMillis());
@@ -198,15 +198,15 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 	
 	// removing
 	private void removeVMs() {
-		IVMType vmType= getVMType();
+		IVMInstallType vmType= getVMType();
 		if (vmType != null)
 			removeVMs(vmType);
 	}
 	
-	private void removeVMs(IVMType vmType) {
+	private void removeVMs(IVMInstallType vmType) {
 		TableItem[] items= fVMList.getSelection();
 		for (int i= 0; i < items.length; i++) {
-			vmType.disposeVM(((IVM)items[i].getData()).getId());
+			vmType.disposeVM(((IVMInstall)items[i].getData()).getId());
 			items[i].dispose();
 		}
 	}
@@ -215,11 +215,11 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 	private void editVM() {
 		TableItem[] selection= fVMList.getSelection();
 		// assume it's length one, otherwise this will not be called
-		IVM vm= (IVM)selection[0].getData();
+		IVMInstall vm= (IVMInstall)selection[0].getData();
 		editVM(selection[0], vm);
 	}
 	
-	private void editVM(TableItem item, IVM vm) {
+	private void editVM(TableItem item, IVMInstall vm) {
 		EditVMDialog dialog= new EditVMDialog(getShell(), vm);
 		dialog.setTitle("Edit VM");
 		dialog.setInstallLocation(vm.getInstallLocation());
@@ -257,7 +257,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		if (fDefaultCheckbox.getSelection()) {
 			TableItem[] selection= fVMList.getSelection();
 			// assume it's length one, otherwise this will not be called
-			IVM vm= (IVM)selection[0].getData();
+			IVMInstall vm= (IVMInstall)selection[0].getData();
 			JavaRuntime.setDefaultVM(vm);
 		} else {
 			JavaRuntime.setDefaultVM(null);
@@ -270,15 +270,15 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 			fDefaultCheckbox.setSelection(false);
 		
 		} else {			
-			IVM vm= (IVM)selection[0].getData();
+			IVMInstall vm= (IVMInstall)selection[0].getData();
 			fDefaultCheckbox.setSelection(vm == JavaRuntime.getDefaultVM());
 		}
 	}
 	
-	private void selectVM(IVM vm) {
+	private void selectVM(IVMInstall vm) {
 		if (vm == null)
 			return;
-		IVMType vmType= vm.getVMType();
+		IVMInstallType vmType= vm.getVMType();
 		selectVMType(vmType);
 		TableItem[] items= fVMList.getItems();
 		for (int i= 0; i < items.length; i++) {
@@ -289,7 +289,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		}
 	}
 	
-	private void selectVMType(IVMType vmType) {
+	private void selectVMType(IVMInstallType vmType) {
 		for (int i= 0; i < fVMTypes.length; i++) {
 			if (fVMTypes[i] == vmType) {
 				fVMTypeCombo.select(i);

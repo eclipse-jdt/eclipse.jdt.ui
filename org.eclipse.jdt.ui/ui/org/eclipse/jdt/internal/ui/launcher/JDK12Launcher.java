@@ -6,7 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.List;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jdt.ui.JavaUI;
+import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.List;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jdt.ui.JavaUI;
 
 public class JDK12Launcher extends JavaLauncher {
 	private static final String PREFIX= "launcher.jdk12.";
@@ -14,7 +14,7 @@ public class JDK12Launcher extends JavaLauncher {
 	private final static String ERROR_NO_JDK12_SPECIFIED= "launcher.error.noJDKspecified.";	
 	
 	
-	public JDK12Launcher(IVM vmInstance) {
+	public JDK12Launcher(IVMInstall vmInstance) {
 		super(vmInstance);
 	}
 	

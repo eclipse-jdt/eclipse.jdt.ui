@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.IVMType;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ILabelProviderListener;import org.eclipse.jface.viewers.ITableLabelProvider;import org.eclipse.swt.graphics.Image;
+package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ILabelProviderListener;import org.eclipse.jface.viewers.ITableLabelProvider;import org.eclipse.swt.graphics.Image;
 
 public class VMLabelProvider implements ITableLabelProvider, ILabelProvider {
 
@@ -31,10 +31,10 @@ public class VMLabelProvider implements ITableLabelProvider, ILabelProvider {
 	 * @see ITableLabelProvider#getColumnText(Object, int)
 	 */
 	public String getColumnText(Object element, int columnIndex) {
-		if (element instanceof IVM)
-			return ((IVM)element).getName();
-		if (element instanceof IVMType)
-			return ((IVMType)element).getName();
+		if (element instanceof IVMInstall)
+			return ((IVMInstall)element).getName();
+		if (element instanceof IVMInstallType)
+			return ((IVMInstallType)element).getName();
 		return element.toString();
 	}
 

@@ -6,7 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.util.Vector;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jdt.ui.JavaUI;
+import java.io.File;import java.io.IOException;import java.util.Vector;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jdt.ui.JavaUI;
 
 public class J9Launcher extends JavaLauncher {
 	
@@ -14,7 +14,7 @@ public class J9Launcher extends JavaLauncher {
 	
 	protected final static String ERROR_NO_J9_SPECIFIED= "launcher.error.noJ9specified.";
 
-	public J9Launcher(IVM vmInstance) {
+	public J9Launcher(IVMInstall vmInstance) {
 		super(vmInstance);
 	}
 

@@ -1,11 +1,11 @@
-package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jdt.launching.IVMType;
+package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jdt.launching.IVMInstallType;
 
 public class J9VM extends StandardVM {
 
 	/**
 	 * Constructor for J9VM
 	 */
-	J9VM(IVMType type, String id) {
+	J9VM(IVMInstallType type, String id) {
 		super(type, id);
 	}
 

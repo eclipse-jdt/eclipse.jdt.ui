@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.IVMType;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.Viewer;
+package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.Viewer;
 
 public class VMContentProvider implements ITreeContentProvider {
 
@@ -18,8 +18,8 @@ public class VMContentProvider implements ITreeContentProvider {
 	 * @see IStructuredContentProvider#getElements(Object)
 	 */
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof IVMType[]) {
-			return (IVMType[])inputElement;
+		if (inputElement instanceof IVMInstallType[]) {
+			return (IVMInstallType[])inputElement;
 		}
 		return new Object[0];
 	}
@@ -35,8 +35,8 @@ public class VMContentProvider implements ITreeContentProvider {
 	 * @see ITreeContentProvider#getParent(Object)
 	 */
 	public Object getParent(Object element) {
-		if (element instanceof IVM) 
-			return ((IVM)element).getVMType();
+		if (element instanceof IVMInstall) 
+			return ((IVMInstall)element).getVMType();
 		return null;
 	}
 
@@ -44,8 +44,8 @@ public class VMContentProvider implements ITreeContentProvider {
 	 * @see ITreeContentProvider#getChildren(Object)
 	 */
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof IVMType) {
-			return ((IVMType)parentElement).getVMs();
+		if (parentElement instanceof IVMInstallType) {
+			return ((IVMInstallType)parentElement).getVMs();
 		}	
 		return new Object[0];
 	}

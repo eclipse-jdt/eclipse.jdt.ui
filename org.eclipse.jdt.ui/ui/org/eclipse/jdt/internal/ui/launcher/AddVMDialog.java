@@ -1,14 +1,14 @@
 package org.eclipse.jdt.internal.ui.launcher;
-import java.io.File;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.IVMType;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;
+import java.io.File;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.DirectoryDialog;
 
 public class AddVMDialog extends StatusDialog {
-	protected IVMType fVMType;
+	protected IVMInstallType fVMType;
 	
 	protected StringButtonDialogField fJDKRoot;
 	protected StringDialogField fVMName;
 	
-	public AddVMDialog(Shell shell, IVMType type) {
+	public AddVMDialog(Shell shell, IVMInstallType type) {
 		super(shell);
 		
 		fVMType= type;
@@ -74,7 +74,7 @@ public class AddVMDialog extends StatusDialog {
 	}
 
 	protected void validateVMName() {
-		IVM[] vms= fVMType.getVMs();
+		IVMInstall[] vms= fVMType.getVMs();
 		for (int i= 0; i < vms.length; i++) {
 			if (vms[i].getName().equals(fVMName.getText())) {
 				updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The name is already ussed", null));

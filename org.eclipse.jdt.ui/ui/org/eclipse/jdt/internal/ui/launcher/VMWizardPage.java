@@ -6,7 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.lang.reflect.InvocationTargetException;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.NewElementWizardPage;import org.eclipse.jdt.launching.IVM;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.NewElementWizardPage;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 /*
  * The page for setting the default java runtime preference.
@@ -39,7 +39,7 @@ public class VMWizardPage extends NewElementWizardPage {
 	
 	public boolean finish() {
 		try {
-			IVM vm= fVMSelector.getSelectedVM();
+			IVMInstall vm= fVMSelector.getSelectedVM();
 			if (vm == null)
 				vm= JavaRuntime.getDefaultVM();
 			if (vm != null)
