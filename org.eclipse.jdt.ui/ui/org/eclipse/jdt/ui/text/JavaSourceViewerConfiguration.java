@@ -62,6 +62,8 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
  */
 public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
+	/** Key used to look up tab width */
+	public final static String PREFERENCE_TAB_WIDTH= "org.eclipse.jdt.ui.editor.tab.width"; //$NON-NLS-1$
 	
 	private JavaTextTools fJavaTextTools;
 	private ITextEditor fTextEditor;
@@ -241,7 +243,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		return 4;
+		return getPreferenceStore().getInt(PREFERENCE_TAB_WIDTH);
 	}
 
 	/*

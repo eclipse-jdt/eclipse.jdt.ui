@@ -7,24 +7,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.Iterator;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
-import org.eclipse.jdt.internal.ui.actions.AddWatchpointAction;
-import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
-import org.eclipse.jdt.internal.ui.actions.OpenSuperImplementationAction;
-import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
+
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.ITextSelection;
@@ -34,7 +20,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPartService;
@@ -45,6 +31,26 @@ import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
+import org.eclipse.jdt.internal.ui.actions.AddWatchpointAction;
+import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
+import org.eclipse.jdt.internal.ui.actions.OpenSuperImplementationAction;
+import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 
 
 
@@ -335,5 +341,30 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	
 	public void updatedTitleImage(Image image) {
 		setTitleImage(image);
+	}
+	
+	/**
+	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
+	 */
+	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
+
+		super.handlePreferenceStoreChanged(event);
+		
+		ISourceViewer sourceViewer= getSourceViewer();
+		if (sourceViewer == null)
+			return;
+			
+		String property= event.getProperty();	
+		
+		if (JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH.equals(property)) {
+			Object value= event.getNewValue();
+			
+			if (value instanceof Integer) {
+				sourceViewer.getTextWidget().setTabs(((Integer) value).intValue());
+					
+			} else if (value instanceof String) {
+				sourceViewer.getTextWidget().setTabs(Integer.parseInt((String) value));
+			}
+		}
 	}
 }

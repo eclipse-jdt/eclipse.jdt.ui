@@ -191,6 +191,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private IDocument fPreviewDocument;
 	
 	private Text fTabSizeTextBox;
+	private SourceViewer fSourceViewer;
 	
 
 	public CodeFormatterPreferencePage() {
@@ -300,7 +301,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 
 		label= JavaUIMessages.getString("CodeFormatterPreferencePage.tab_size.label"); //$NON-NLS-1$
 		fTabSizeTextBox= addTextField(styleComposite, label, PREF_TAB_SIZE);		
-		fTabSizeTextBox.setEnabled(!usesTabs());
 
 		TabItem item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("CodeFormatterPreferencePage.tab.newline.tabtitle")); //$NON-NLS-1$
@@ -317,18 +317,19 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_REF));
 		item.setControl(styleComposite);		
 		
-		createPreview(parent);
+		fSourceViewer= createPreview(parent);
 			
 		updatePreview();
 					
 		return composite;
 	}
 	
-	private Control createPreview(Composite parent) {
+	private SourceViewer createPreview(Composite parent) {
 		SourceViewer previewViewer= new SourceViewer(parent, null, SWT.V_SCROLL | SWT.H_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		previewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
 		previewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
+		previewViewer.getTextWidget().setTabs(Integer.parseInt((String) fWorkingValues.get(PREF_TAB_SIZE)));
 		previewViewer.setEditable(false);
 		previewViewer.setDocument(fPreviewDocument);
 		Control control= previewViewer.getControl();
@@ -336,7 +337,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		gdata.widthHint= convertWidthInCharsToPixels(80);
 		gdata.heightHint= convertHeightInCharsToPixels(15);
 		control.setLayoutData(gdata);
-		return control;
+		return previewViewer;
 	}
 
 	
@@ -389,7 +390,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		updatePreview();
 		
 		if (PREF_TAB_CHAR.equals(data.getKey())) {
-			fTabSizeTextBox.setEnabled(!selection);
 			updateStatus(new StatusInfo());
 			if (selection) {
 				fTabSizeTextBox.setText((String)fWorkingValues.get(PREF_TAB_SIZE));
@@ -404,6 +404,9 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		if (!status.matches(IStatus.ERROR)) {
 			fWorkingValues.put(key, number);
 		}
+		if (PREF_TAB_SIZE.equals(key)) {
+			fSourceViewer.getTextWidget().setTabs(Integer.parseInt(number));
+		}		
 		updateStatus(status);
 		updatePreview();
 	}
@@ -478,7 +481,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			String currValue= (String) fWorkingValues.get(key);
 			curr.setText(currValue);
 		}
-		fTabSizeTextBox.setEnabled(!usesTabs());	
 	}
 	
 	private IStatus validatePositiveNumber(String number) {

@@ -38,9 +38,9 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.SourceViewer;
-
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.DialogPageContextComputer;
@@ -70,6 +70,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND),
+
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + "_bold"),
@@ -192,6 +194,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		color= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
 		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, color.getRGB());		
+		
+		store.setDefault(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 4);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT, new RGB(63, 127, 95));
 		store.setDefault(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + "_bold", false);
@@ -402,6 +406,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= "Text font:";
 		addTextFontEditor(behaviorComposite, label, AbstractTextEditor.PREFERENCE_FONT);
 		
+		label= "&Displayed tab width:";
+		addTextField(behaviorComposite, label, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 2, 0);
+
 		return behaviorComposite;
 	}
 	
