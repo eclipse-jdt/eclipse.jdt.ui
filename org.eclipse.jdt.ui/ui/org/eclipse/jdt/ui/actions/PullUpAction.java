@@ -170,7 +170,7 @@ public class PullUpAction extends SelectionDispatchAction{
 	private void startRefactoring() {
 		Assert.isNotNull(fRefactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), fRefactoring.getMembersToPullUp()[0]))
+		if (!ActionUtil.isProcessable(getShell(), fRefactoring.getDeclaringType()))
 			return;
 		
 		try{
