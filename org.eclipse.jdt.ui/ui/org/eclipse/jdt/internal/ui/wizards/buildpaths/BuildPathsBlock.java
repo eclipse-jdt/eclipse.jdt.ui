@@ -495,16 +495,6 @@ public class BuildPathsBlock {
 				fBuildPathStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.InvalidBuildPath")); //$NON-NLS-1$
 				return;
 			}
-		} else {
-			// allows the build path to be in a different project, but must exists and be open
-			IPath projPath= path.uptoSegment(1);
-			if (!projPath.equals(fCurrJProject.getProject().getFullPath())) {
-				IProject proj= (IProject)fWorkspaceRoot.findMember(projPath);
-				if (proj == null || !proj.isOpen()) {
-					fBuildPathStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.BuildPathProjNotExists")); //$NON-NLS-1$
-					return;
-				}
-			}
 		}
 		fOutputLocationPath= path;
 		
