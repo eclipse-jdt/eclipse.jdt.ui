@@ -19,9 +19,6 @@ import java.util.Vector;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 
-import org.eclipse.jface.text.Assert;
-import org.eclipse.jface.text.ITextSelection;
- 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.DND;
@@ -44,6 +41,8 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -62,15 +61,15 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.part.IShowInSource;
-import org.eclipse.ui.part.IShowInTarget;
-import org.eclipse.ui.part.IShowInTargetList;
-import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.internal.model.WorkbenchAdapter;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.part.IPageSite;
+import org.eclipse.ui.part.IShowInSource;
+import org.eclipse.ui.part.IShowInTarget;
+import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.Page;
+import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -108,6 +107,7 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
@@ -732,6 +732,35 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			}
 		};
 
+		/**
+		 * This action toggles whether this Java Outline page links
+		 * its selection to the active editor.
+		 * 
+		 * @since 3.0
+		 */
+		public class ToggleLinkingAction extends AbstractToggleLinkingAction {
+		
+			JavaOutlinePage fJavaOutlinePage;
+		
+			/**
+			 * Constructs a new action.
+			 */
+			public ToggleLinkingAction(JavaOutlinePage outlinePage) {
+				boolean isLinkingEnabled= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE);
+				setChecked(isLinkingEnabled);
+				fJavaOutlinePage= outlinePage;
+			}
+	
+			/**
+			 * Runs the action.
+			 */
+			public void run() {
+				PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE, isChecked());
+			}
+	
+		}
+
+
 	/** A flag to show contents of top level type only */
 	private boolean fTopLevelTypeOnly;
 			
@@ -753,6 +782,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	private TextEditorAction fShowJavadoc;
 	private TextOperationAction fUndo;
 	private TextOperationAction fRedo;
+	
+	private ToggleLinkingAction fToggleLinkingAction;
 	
 	private CompositeActionGroup fActionGroups;
 	private CCPActionGroup fCCPActionGroup;
@@ -906,6 +937,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			
 			fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "JavaOutlineViewer"); //$NON-NLS-1$
 			fMemberFilterActionGroup.contributeToToolBar(toolBarManager);
+
+			fToggleLinkingAction= new ToggleLinkingAction(this);
+			toolBarManager.add(fToggleLinkingAction);
 		}
 	}
 	
@@ -976,7 +1010,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		
 		fActionGroups.fillActionBars(bars);
 
-		IStatusLineManager statusLineManager= site.getActionBars().getStatusLineManager();
+		IStatusLineManager statusLineManager= bars.getStatusLineManager();
 		if (statusLineManager != null) {
 			StatusBarUpdater updater= new StatusBarUpdater(statusLineManager);
 			fOutlineViewer.addPostSelectionChangedListener(updater);
@@ -1138,10 +1172,17 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 */
 	private boolean isInnerType(IJavaElement element) {
 		
-		if (element.getElementType() == IJavaElement.TYPE) {
-			IJavaElement parent= element.getParent();
-			int type= parent.getElementType();
-			return (type != IJavaElement.COMPILATION_UNIT && type != IJavaElement.CLASS_FILE);
+		if (element != null && element.getElementType() == IJavaElement.TYPE) {
+			IType type= (IType)element;
+			try {
+				return type.isMember();
+			} catch (JavaModelException e) {
+				IJavaElement parent= type.getParent();
+				if (parent != null) {
+					int parentElementType= parent.getElementType();
+					return (parentElementType != IJavaElement.COMPILATION_UNIT && parentElementType != IJavaElement.CLASS_FILE);
+				}
+			}
 		}
 		
 		return false;		
