@@ -236,7 +236,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			
 		//set default and focus
 		fClassToTestText.setText(fDefaultClassToTest);
-		fClassToTestText.setFocus();
+		setFocus();
 	}
 
 	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {
@@ -824,5 +824,10 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		return max;
 	}
 
-
+	/**
+	 * Sets the focus on the type name.
+	 */		
+	protected void setFocus() {
+		fTestClassText.setFocus();
+	}
 }
