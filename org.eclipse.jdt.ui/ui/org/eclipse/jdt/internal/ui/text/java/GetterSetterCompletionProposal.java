@@ -21,7 +21,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -34,7 +33,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -47,11 +45,6 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 			relevance--;
 		}
 		
-		// make sure we get all the fields
-		ICompilationUnit cu= type.getCompilationUnit();
-		if (cu != null && !cu.isConsistent()) {
-			JavaModelUtil.reconcile(cu);
-		}
 		IField[] fields= type.getFields();
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < fields.length; i++) {
