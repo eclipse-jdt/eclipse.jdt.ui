@@ -988,6 +988,12 @@ JavaStructureDiffViewerCreator
       		label="%Refactoring.moveInnerToTopAction.label"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
 			retarget="true" />
+
+		<action id="org.eclipse.jdt.ui.actions.UseSupertype"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+      		label="%Refactoring.useSupertypeAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.use.supertype"
+			retarget="true" />
 		
 		<action id="org.eclipse.jdt.ui.actions.Move"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
@@ -1449,6 +1455,7 @@ JavaStructureDiffViewerCreator
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
 
 	<!-- navigate -->
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
@@ -1529,7 +1536,8 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
-			
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
+					
 		<!-- navigate -->
 		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation" />
@@ -1603,6 +1611,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
 	
 		<!-- navigate -->
 		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
