@@ -346,7 +346,7 @@ public abstract class OptionsConfigurationBlock {
 	
 	protected ScrolledPageContent getParentScrolledComposite(Control control) {
 		Control parent= control.getParent();
-		while (!(parent instanceof ScrolledPageContent)) {
+		while (!(parent instanceof ScrolledPageContent) && parent != null) {
 			parent= parent.getParent();
 		}
 		if (parent instanceof ScrolledPageContent) {
