@@ -91,9 +91,10 @@ public class NLSHolder {
 	private static String unwindEscapeChars(String s){
 		StringBuffer sb= new StringBuffer(s.length());
 		int last= s.length() - 1;
-		for (int i= 0; i < s.length(); i++){
+		int length= s.length();
+		for (int i= 0; i < length; i++){
 			char c= s.charAt(i);
-			if (i == 0 || i == last) //the first and last " should not be converted to \"
+			if ((c == '\"') && (i == 0 || i == last)) //the first and last " should not be converted to \"
 				sb.append(c);
 			else	
 				sb.append(getUnwoundString(c));
