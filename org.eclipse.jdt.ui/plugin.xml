@@ -2676,7 +2676,21 @@
             id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters">
       </command>
       <keyBinding
-            string=""
+            string="Alt+Shift+C"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Alt+Shift+C"
+            scope="org.eclipse.ui.globalScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Alt+C"
             scope="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
