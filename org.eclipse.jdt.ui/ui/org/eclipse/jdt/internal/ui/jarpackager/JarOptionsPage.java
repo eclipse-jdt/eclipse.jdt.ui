@@ -162,7 +162,10 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 			fJarPackage.setExportWarnings(settings.getBoolean(STORE_EXPORT_WARNINGS));
 			fJarPackage.setExportErrors(settings.getBoolean(STORE_EXPORT_ERRORS));
 			fJarPackage.setSaveDescription(settings.getBoolean(STORE_SAVE_DESCRIPTION));
-			fJarPackage.setDescriptionLocation(new Path(settings.get(STORE_DESCRIPTION_LOCATION)));
+			String pathStr= settings.get(STORE_DESCRIPTION_LOCATION);
+			if (pathStr == null)
+				pathStr= "";
+			fJarPackage.setDescriptionLocation(new Path(pathStr));
 		}
 	}
 	/**

@@ -34,44 +34,26 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 *
 	 * @param element the resource or JavaElement to export
 	 */
-	protected void exportElement(Object element, IProgressMonitor progressMonitor) throws InterruptedException {		int leadSegmentsToRemove= 1;		IPackageFragmentRoot pkgRoot= null;		boolean isInJavaProject= false;		IResource resource= null;		IJavaProject jProject= null;		if (element instanceof IJavaElement) {			isInJavaProject= true;			IJavaElement je= (IJavaElement)element;			try {				resource= je.getUnderlyingResource();			} catch (JavaModelException ex) {				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.underlyingResourceNotFound", je.getElementName()), ex); //$NON-NLS-1$				return;			}			jProject= je.getJavaProject();			pkgRoot= JavaModelUtility.getPackageFragmentRoot(je);			if (pkgRoot != null)				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();		}		else			resource= (IResource)element;		if (!resource.isAccessible()) {			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.resourceNotFound", resource.getFullPath()), null); //$NON-NLS-1$			return;		}
+	protected void exportElement(Object element, IProgressMonitor progressMonitor) throws InterruptedException {		int leadSegmentsToRemove= 1;		IPackageFragmentRoot pkgRoot= null;		boolean isInJavaProject= false;		IResource resource= null;		IJavaProject jProject= null;		if (element instanceof IJavaElement) {			isInJavaProject= true;			IJavaElement je= (IJavaElement)element;			try {				resource= je.getUnderlyingResource();			} catch (JavaModelException ex) {				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.underlyingResourceNotFound", je.getElementName()), ex); //$NON-NLS-1$				return;			}			jProject= je.getJavaProject();			pkgRoot= JavaModelUtility.getPackageFragmentRoot(je);		}		else			resource= (IResource)element;		if (!resource.isAccessible()) {			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.resourceNotFound", resource.getFullPath()), null); //$NON-NLS-1$			return;		}
 		if (resource.getType() == IResource.FILE) {			if (!resource.isLocal(IResource.DEPTH_ZERO))
 				try {					resource.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);				} catch (CoreException ex) {
 					addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.resourceNotLocal", resource.getFullPath()), ex); //$NON-NLS-1$					return;				}			if (!isInJavaProject) {				// check if it's a Java resource				try {					isInJavaProject= resource.getProject().hasNature(JavaCore.NATURE_ID);				} catch (CoreException ex) {					addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.projectNatureNotDeterminable", resource.getFullPath()), ex); //$NON-NLS-1$					return;				}				if (isInJavaProject) {
 					jProject= JavaCore.create(resource.getProject());
-					try {
-						IPackageFragment pkgFragment= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
-						if (pkgFragment != null) {
-							pkgRoot= JavaModelUtility.getPackageFragmentRoot(pkgFragment);
-							if (pkgRoot != null)
-								leadSegmentsToRemove= pkgRoot.getPath().segmentCount();
-						}
-					} catch (JavaModelException ex) {
+					try {						IPackageFragment pkgFragment= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
+						if (pkgFragment != null)
+							pkgRoot= JavaModelUtility.getPackageFragmentRoot(pkgFragment);						else							pkgRoot= jProject.findPackageFragmentRoot(resource.getFullPath().uptoSegment(2));					} catch (JavaModelException ex) {
 						addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.javaPackageNotDeterminable", resource.getFullPath()), ex); //$NON-NLS-1$						return;					}
-				}			}
+				}			}						if (pkgRoot != null)				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();			
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
 			progressMonitor.subTask(destinationPath.toString());
 			
-			try {				// Binary Export				if (fJarPackage.areClassFilesExported() && isInJavaProject && pkgRoot != null) {
-					// find corresponding file(s) on classpath and export
+			// Binary Export			if (fJarPackage.areClassFilesExported() && isInJavaProject && pkgRoot != null) {				try {					// find corresponding file(s) on classpath and export
 					Iterator iter= filesOnClasspath((IFile)resource, destinationPath, jProject, progressMonitor);
 					IPath baseDestinationPath= destinationPath.removeLastSegments(1);
 					while (iter.hasNext()) {
-						IFile file= (IFile)iter.next();						if (!resource.isLocal(IResource.DEPTH_ZERO))													file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);						fJarWriter.write(file, baseDestinationPath.append(file.getName()));					}				}				// Java Files and resources				if (fJarPackage.areJavaFilesExported() && (!isInJavaProject || ((fJarPackage.areClassFilesExported()  && isJavaFile(resource)) || (!fJarPackage.areClassFilesExported() && !isClassFile(resource)))))					fJarWriter.write((IFile) resource, destinationPath);								} catch (IOException ex) {
-				String message= ex.getMessage();
-				if (message == null)
-					message= JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$
-				addWarning(message , ex);
-			} catch (CoreException ex) {
-				String message= ex.getMessage();
-				if (message == null)
-					message= JarPackagerMessages.getFormattedString("JarFileExportOperation.coreErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$
-				addWarning(message, ex);
-			}
-
-			progressMonitor.worked(1);
+						IFile file= (IFile)iter.next();						if (!resource.isLocal(IResource.DEPTH_ZERO))													file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);						fJarWriter.write(file, baseDestinationPath.append(file.getName()));					}				} catch (IOException ex) {					String message= ex.getMessage();					if (message == null)						message= JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$					addWarning(message , ex);				} catch (CoreException ex) {					String message= ex.getMessage();					if (message == null)						message= JarPackagerMessages.getFormattedString("JarFileExportOperation.coreErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$					addWarning(message, ex);				}			}							// Java Files and resources			if (fJarPackage.areJavaFilesExported() && (!isInJavaProject || pkgRoot == null || ((fJarPackage.areClassFilesExported()  && isJavaFile(resource)) || (!fJarPackage.areClassFilesExported() && !isClassFile(resource))))) {				try {					fJarWriter.write((IFile) resource, destinationPath);				} catch (IOException ex) {					String message= ex.getMessage();					if (message == null)						message= JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$					addWarning(message , ex);				} catch (CoreException ex) {					String message= ex.getMessage();					if (message == null)						message= JarPackagerMessages.getFormattedString("JarFileExportOperation.coreErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$					addWarning(message, ex);				}			}								progressMonitor.worked(1);
 			ModalContext.checkCanceled(progressMonitor);
-		} else {
+		} else {
 			IResource[] children= null;
 
 			try {
