@@ -163,7 +163,8 @@ public class OpenOnConsoleTypeAction extends Action implements IViewActionDelega
 			return (TypeInfo)typeInfoList.get(0);
 		}
 
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED));
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), 
+													new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED | TypeInfoLabelProvider.SHOW_ROOT_POSTFIX));
 		dialog.setTitle("Open Type");
 		dialog.setMessage("Choose a type to open"); 
 		dialog.setElements(typeInfoList.toArray(new TypeInfo[typeInfoList.size()]));
