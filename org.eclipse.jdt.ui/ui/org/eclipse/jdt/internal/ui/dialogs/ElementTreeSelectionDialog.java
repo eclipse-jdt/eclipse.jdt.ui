@@ -314,7 +314,7 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		if (fDoubleClickSelects) {
 			Tree tree= fViewer.getTree();
 			tree.addSelectionListener(new SelectionAdapter() {
-				public void widgetDoubleSelected(SelectionEvent e) {
+				public void widgetDefaultSelected(SelectionEvent e) {
 					updateOKStatus();
 					if (fCurrStatus.isOK()) {
 						access$superButtonPressed(IDialogConstants.OK_ID);
