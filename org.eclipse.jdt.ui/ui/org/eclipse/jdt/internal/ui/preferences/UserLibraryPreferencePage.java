@@ -153,6 +153,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fNameField, fIsSystemField }, true, SWT.DEFAULT, SWT.DEFAULT);
+			fNameField.postSetFocusOnDialogField(parent.getDisplay());
 			return composite;
 		}
 		
