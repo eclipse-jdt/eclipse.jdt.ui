@@ -407,6 +407,9 @@ public class ImportsStructure implements IImportsStructure {
 	 * @param textBuffer The textBuffer
 	 */
 	public TextRange getReplaceRange(TextBuffer textBuffer) throws JavaModelException {
+		synchronized (fCompilationUnit) {
+			fCompilationUnit.reconcile();
+		}
 		IImportContainer container= fCompilationUnit.getImportContainer();
 		if (container.exists()) {
 			ISourceRange importSourceRange= container.getSourceRange();
@@ -662,7 +665,7 @@ public class ImportsStructure implements IImportsStructure {
 					String name= curr.getElementName();
 					if (name.endsWith(simpleName)) {
 						int dotPos= name.length() - simpleName.length() - 1;
-						if ((dotPos == -1) || (name.charAt(dotPos) == '.')) {
+						if ((dotPos == -1) || (dotPos > 0 && name.charAt(dotPos) == '.')) {
 							return curr;
 						}
 					}						
