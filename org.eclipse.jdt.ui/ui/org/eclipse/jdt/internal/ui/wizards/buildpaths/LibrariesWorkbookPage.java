@@ -296,7 +296,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				}
 			}
 		} catch (JavaModelException e) {
-			// ignore it here
+			// ignore it here, just log
+			JavaPlugin.log(e.getStatus());
 		}	
 			
 		List cplist= fLibrariesList.getElements();
@@ -346,7 +347,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		IPath filterPath= new Path(dialog.getFilterPath());
 		CPListElement[] elems= new CPListElement[nChosen];
 		for (int i= 0; i < nChosen; i++) {
-			IPath path= filterPath.append(fileNames[i]);
+			IPath path= filterPath.append(fileNames[i]).makeAbsolute();
 			IFile file= fWorkspaceRoot.getFileForLocation(path);
 			if (file != null) {
 				path= file.getFullPath();  // modify path if internal

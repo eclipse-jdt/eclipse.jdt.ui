@@ -39,25 +39,9 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	
 	private final static String PREFIX= "type_selector.";
 	private final static String NO_MAPPING_PREFIX= PREFIX+"no_mapping.";
-	
-	private static class PackageRenderer extends LabelProvider {
-		private final Image PACKAGE_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKAGE);
-		
-		public String getText(Object element) {
-			String packName= ((TypeRef) element).getPackageName();
-			if (packName.length() == 0) {
-				return JavaPlugin.getResourceString("DefaultPackage.label");
-			} else {
-				return packName;
-			}							
-		}
-		public Image getImage(Object element) {
-			return PACKAGE_ICON;
-		}
-	}
-		
+			
 	public TypeSelectionDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString) {
-		super(parent, "", null, new TypeRefLabelProvider(0), new PackageRenderer(), ignoreCase, matchEmtpyString);		
+		super(parent, "", null, new TypeRefLabelProvider(0), new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_ONLY + TypeRefLabelProvider.SHOW_ROOT_POSTFIX), ignoreCase, matchEmtpyString);		
 		fRunnableContext= context;
 		Assert.isNotNull(fRunnableContext);
 		fScope= scope;

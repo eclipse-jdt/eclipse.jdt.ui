@@ -304,7 +304,9 @@ public class BuildPathsBlock {
 					elem.setSourceAttachment(attach[0], attach[1]);
 				}*/
 				CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, new Path(ClasspathVariablesPreferencePage.JRELIB_VARIABLE), null);
-				elem.setSourceAttachment(new Path(ClasspathVariablesPreferencePage.JRESRC_VARIABLE), new Path("src"));
+				IPath attachPath= new Path(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);
+				IPath attachRoot= new Path(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);
+				elem.setSourceAttachment(attachPath, attachRoot);
 				vec.add(elem);
 			}
 		}

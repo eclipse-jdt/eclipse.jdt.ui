@@ -174,26 +174,4 @@ public class NewClassCreationWizardPage extends TypePage {
 		return (String[]) newMethods.toArray(new String[newMethods.size()]);
 	}
 	
-	/**
-	 * Creates the bodies of all unimplemented methods or/and all constructors
-	 * Can be used by implementors of TypePage to add method stub checkboxes
-	 */
-	protected String[] constructInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
-		List newMethods= new ArrayList();
-		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(monitor);
-		if (doConstructors) {
-			IType superclass= hierarchy.getSuperclass(type);
-			if (superclass != null) {
-				StubUtility.evalConstructors(type, superclass, newMethods, imports);
-			}
-		}
-		if (doUnimplementedMethods) {
-			StubUtility.evalUnimplementedMethods(type, hierarchy, newMethods, imports);
-		}
-		return (String[]) newMethods.toArray(new String[newMethods.size()]);		
-		
-	}
-	
-	
-
 }

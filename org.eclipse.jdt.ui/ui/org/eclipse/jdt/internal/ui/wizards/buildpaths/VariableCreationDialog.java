@@ -216,7 +216,7 @@ public class VariableCreationDialog extends StatusDialog {
 		String res= dialog.open();
 		if (res != null) {
 			fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTEXTJAR, dialog.getFilterPath());
-			return new Path(res);
+			return new Path(res).makeAbsolute();
 		}
 		return null;
 	}

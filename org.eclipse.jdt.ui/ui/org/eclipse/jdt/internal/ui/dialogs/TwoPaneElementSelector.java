@@ -143,7 +143,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 			}
 		});
 		GridData spec= new GridData();
-		spec.widthHint= convertWidthInCharsToPixels(40);
+		spec.widthHint= convertWidthInCharsToPixels(50);
 		spec.heightHint= convertHeightInCharsToPixels(15);
 		spec.grabExcessVerticalSpace= true;
 		spec.grabExcessHorizontalSpace= true;
@@ -175,7 +175,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 			}
 		});
 		GridData spec= new GridData();
-		spec.widthHint= convertWidthInCharsToPixels(40);
+		spec.widthHint= convertWidthInCharsToPixels(50);
 		spec.heightHint= convertHeightInCharsToPixels(5);
 		spec.grabExcessVerticalSpace= true;
 		spec.grabExcessHorizontalSpace= true;

@@ -33,7 +33,7 @@ public class MethodsViewer extends TableViewer {
 		
 	private OpenSourceReferenceAction fOpen;
 
-	private IAction fShowInheriredMembersAction;
+	private IAction fShowInheritedMembersAction;
 
 	private ContextMenuGroup[] fStandardGroups;	
 	
@@ -95,7 +95,7 @@ public class MethodsViewer extends TableViewer {
 		
 		addFilter(filter);
 		
-		fShowInheriredMembersAction= new ShowInheriredMembersAction(this, false);		
+		fShowInheritedMembersAction= new ShowInheritedMembersAction(this, false);		
 		
 		fStandardGroups= new ContextMenuGroup[] {
 			new JavaSearchGroup(), new GenerateGroup()
@@ -182,7 +182,7 @@ public class MethodsViewer extends TableViewer {
 		submenu.add(fShowDefault);
 		menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, submenu);
 		
-		menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fShowInheriredMembersAction);
+		menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fShowInheritedMembersAction);
 	}
 
 	/**
@@ -190,7 +190,7 @@ public class MethodsViewer extends TableViewer {
 	 * Should be called by the creator of the tool bar
 	 */
 	public void contributeToToolBar(ToolBarManager tbm) {
-		tbm.add(fShowInheriredMembersAction);
+		tbm.add(fShowInheritedMembersAction);
 		tbm.add(new Separator());
 		tbm.add(fShowFields);
 		tbm.add(fShowStatic);

@@ -107,7 +107,8 @@ public class VariableBlock {
 	private String[] getReservedVariableNames() {
 		return new String[] {
 			ClasspathVariablesPreferencePage.JRELIB_VARIABLE,
-			ClasspathVariablesPreferencePage.JRESRC_VARIABLE
+			ClasspathVariablesPreferencePage.JRESRC_VARIABLE,
+			ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE,
 		};
 	}
 	

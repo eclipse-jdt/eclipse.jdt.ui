@@ -13,7 +13,8 @@ public class TypeRefLabelProvider extends LabelProvider {
 	public static final int SHOW_FULLYQUALIFIED= 0x01;
 	public static final int SHOW_PACKAGE_POSTFIX= 0x02;
 	
-	public static final int SHOW_CONTAINER_ONLY= 0x04;
+	public static final int SHOW_PACKAGE_ONLY= 0x04;
+	public static final int SHOW_ROOT_POSTFIX= 0x08;
 	
 	private final Image CLASS_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS);
 	private final Image INTFC_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE);
@@ -29,6 +30,15 @@ public class TypeRefLabelProvider extends LabelProvider {
 		return (fFlags & flag) != 0;
 	}
 
+	private String getPackageName(TypeRef typeRef) {
+		String packName= typeRef.getPackageName();
+		if (packName.length() == 0) {
+			return JavaPlugin.getResourceString("DefaultPackage.label");
+		} else {
+			return packName;
+		}
+	}
+
 	/**
 	 * @see ILabelProvider#getText
 	 */
@@ -36,7 +46,7 @@ public class TypeRefLabelProvider extends LabelProvider {
 		if (element instanceof TypeRef) {
 			TypeRef typeRef= (TypeRef) element;
 			StringBuffer buf= new StringBuffer();
-			if (!isSet(SHOW_CONTAINER_ONLY)) {
+			if (!isSet(SHOW_PACKAGE_ONLY)) {
 				if (isSet(SHOW_FULLYQUALIFIED)) {
 					buf.append(typeRef.getFullyQualifiedName());
 				} else {
@@ -44,16 +54,15 @@ public class TypeRefLabelProvider extends LabelProvider {
 				}
 				if (isSet(SHOW_PACKAGE_POSTFIX)) {
 					buf.append(" - ");
-					String packName= typeRef.getPackageName();
-					if (packName.length() == 0) {
-						buf.append(JavaPlugin.getResourceString("DefaultPackage.label"));
-					} else {
-						buf.append(packName);
-					}
+					buf.append(getPackageName(typeRef));
 				}
 			} else {
-				buf.append(typeRef.getTypeContainerName());
-			}	
+				buf.append(getPackageName(typeRef));
+			}
+			if (isSet(SHOW_ROOT_POSTFIX)) {
+				buf.append(" - ");
+				buf.append(typeRef.getPackageFragmentRootPath().toString());
+			}
 			return buf.toString();				
 		}
 		return super.getText(element);
@@ -66,10 +75,10 @@ public class TypeRefLabelProvider extends LabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof TypeRef) {
 			TypeRef typeRef= (TypeRef) element;
-			if (!isSet(SHOW_CONTAINER_ONLY)) {
+			if (!isSet(SHOW_PACKAGE_ONLY)) {
 				return typeRef.isInterface() ? INTFC_ICON : CLASS_ICON;
 			} else {
-				return (typeRef.getEnclosingName().length() > 0) ? PKG_ICON : CLASS_ICON;
+				return PKG_ICON;
 			}
 		}
 		return super.getImage(element);	

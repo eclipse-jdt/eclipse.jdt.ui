@@ -11,7 +11,6 @@ public class VariableSelectionBlock {
 	private static final String ERR_NAMENOTEXISTS= PAGE_NAME + ".error.namenotexists";
 	private static final String ERR_PATHEXISTS= PAGE_NAME + ".error.pathexists";
 
-	private static final String DIALOG_CHOOSEVARIABLE= PAGE_NAME + ".variabledialog";
 	private static final String DIALOG_EDITVARIABLE= PAGE_NAME + ".editvariabledialog";
 
 	private List fExistingPaths;
@@ -232,7 +231,7 @@ public class VariableSelectionBlock {
 		if (res == null) {
 			return null;
 		}
-		IPath resPath= new Path(res);
+		IPath resPath= new Path(res).makeAbsolute();
 		if (!entryPath.isPrefixOf(resPath)) {
 			return new Path(resPath.lastSegment());
 		} else {
@@ -248,51 +247,7 @@ public class VariableSelectionBlock {
 		}
 		
 		return null;
-		
 	}
 		
-	private class ChooseVariableDialog extends StatusDialog implements IStatusChangeListener, IDoubleClickListener {
-		private VariableBlock fVariableBlock;
-				
-		public ChooseVariableDialog(Shell parent, String lastVariableSelection) {
-			super(parent);
-			setTitle(JavaPlugin.getResourceString(DIALOG_CHOOSEVARIABLE + ".title"));
-			fVariableBlock= new VariableBlock(this, true, lastVariableSelection);
-		}
-				
-		protected Control createDialogArea(Composite parent) {
-			Composite composite= (Composite)super.createDialogArea(parent);
-			fVariableBlock.createContents(composite);
-			fVariableBlock.addDoubleClickListener(this);
-			return composite;
-		}
-		
-		protected void okPressed() {
-			fVariableBlock.performOk();
-			super.okPressed();
-		}
-		
-		public String getSelectedVariable() {
-			return fVariableBlock.getSelectedVariable();
-		}
-		
-		/**
-	 	 * @see IStatusChangeListener#statusChanged(IStatus)
-	 	 */
-		public void statusChanged(IStatus status) {
-			updateStatus(status);
-			
-		}
-		
-		/**
-	 	 * @see IDoubleClickListener#doubleClick(DoubleClickEvent)
-	 	 */
-		public void doubleClick(DoubleClickEvent event) {
-			if (getStatus().isOK()) {
-				okPressed();
-			}
-		}
-
-	}	
 
 }

@@ -134,6 +134,28 @@ public class TypeRef {
 		}
 		buf.append(fName);
 		return buf.toString();
+	}
+	
+	/**
+	 * Contructs the package fragment root name from the type ref path
+	 */	
+	public IPath getPackageFragmentRootPath() {
+		int index= fPath.indexOf('|');
+		if (index > 0) {
+			return new Path(fPath.substring(0, index));
+		} else {
+			int removeSegments= 1; // the file name
+			int packNameLen= fPackage.length;
+			if (packNameLen > 0) {
+				removeSegments++;
+				for (int i= 0; i < packNameLen; i++) {
+					if (fPackage[i] == '.') {
+						removeSegments++;
+					}
+				}
+			}
+			return (new Path(fPath)).removeLastSegments(removeSegments);
+		}
 	}	
 	
 	/**
@@ -144,7 +166,7 @@ public class TypeRef {
 	public IType resolveType(IJavaSearchScope scope) throws JavaModelException {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IJavaElement elem;
-		int index= fPath.indexOf("|");		
+		int index= fPath.indexOf('|');		
 		if (index > 0) {
 			String jarName= fPath.substring(0, index);
 			IPath elementPath= new Path(fPath.substring(index + 1));			

@@ -96,7 +96,7 @@ public class AddImportOnSelectionAction extends JavaUIAction implements IUpdate 
 					int nameStart= getNameStart(doc, selStart);
 					int len= selStart - nameStart + selection.getLength();
 					
-					String name= doc.get(nameStart, len);
+					String name= doc.get(nameStart, len).trim();
 					String typeName= Signature.getSimpleName(name);
 					String packName= Signature.getQualifier(name);
 					

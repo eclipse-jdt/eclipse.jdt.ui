@@ -4,6 +4,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 
 	public static final String JRELIB_VARIABLE= "JRE_LIB";
 	public static final String JRESRC_VARIABLE= "JRE_SRC";
+	public static final String JRESRCROOT_VARIABLE= "JRE_SRCROOT";
 	
 	private VariableBlock fVariableBlock;
 	
@@ -67,6 +68,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		try {
 			updateJRELibEntry();
 			updateJRESrcEntry();
+			updateJRESrcRootEntry();
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, "Error", "");
 		}				
@@ -78,9 +80,10 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 					String prop= event.getProperty();
 					if (prop.equals(JavaBasePreferencePage.PROP_JDK)) {
 						updateJRELibEntry();
-					} else if (prop.equals(JDKZipFieldEditor.PROP_SOURCE) 
-						|| prop.equals(JDKZipFieldEditor.PROP_PREFIX)) {
+					} else if (prop.equals(JDKZipFieldEditor.PROP_SOURCE)) {
 						updateJRESrcEntry();
+					} else if (prop.equals(JDKZipFieldEditor.PROP_PREFIX)) {
+						updateJRESrcRootEntry();
 					}
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e.getStatus());
@@ -107,5 +110,16 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		}
 		JavaCore.setClasspathVariable(JRESRC_VARIABLE, srcPath);		
 	}
+	
+	private static void updateJRESrcRootEntry() throws JavaModelException {
+		IPath[] srcAttachPath= JavaBasePreferencePage.getJDKSourceAttachment();
+		IPath srcRootPath;
+		if (srcAttachPath == null) {
+			srcRootPath= new Path("");
+		} else {
+			srcRootPath= srcAttachPath[1];
+		}
+		JavaCore.setClasspathVariable(JRESRCROOT_VARIABLE, srcRootPath);		
+	}	
 
 }
