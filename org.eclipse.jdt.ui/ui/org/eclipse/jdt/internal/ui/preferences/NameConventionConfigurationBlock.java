@@ -341,9 +341,14 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		LayoutUtil.setHorizontalSpan(fNameConventionList.getLabelControl(null), 2);
 		Table table= fNameConventionList.getTableViewer().getTable();
 		GridData data= (GridData)fNameConventionList.getListControl(null).getLayoutData();
-		data.grabExcessHorizontalSpace= true;
-		data.verticalAlignment= 0;
 		data.heightHint= SWTUtil.getTableHeightHint(table, 5);
+		data.grabExcessHorizontalSpace= true;
+		data.verticalAlignment= GridData.BEGINNING;
+		data.grabExcessVerticalSpace= false;
+		
+		data= (GridData)fNameConventionList.getButtonBox(null).getLayoutData();
+		data.grabExcessVerticalSpace= false;
+		data.verticalAlignment= GridData.BEGINNING;
 
 		fUseKeywordThisBox.doFillIntoGrid(composite, 2);
 		fUseIsForBooleanGettersBox.doFillIntoGrid(composite, 2);
