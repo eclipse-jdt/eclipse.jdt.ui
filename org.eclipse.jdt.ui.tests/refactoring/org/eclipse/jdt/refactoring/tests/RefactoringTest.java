@@ -102,7 +102,7 @@ public abstract class RefactoringTest extends TestCase {
 		IChange change= ref.createChange(fgNullProgressMonitor);
 		change.perform(new ChangeContext(new TestExceptionHandler()), fgNullProgressMonitor);
 
-		//XXX: this should be done by someone else
+		// XXX: this should be done by someone else
 		Refactoring.getUndoManager().addUndo(ref.getName(), change.getUndoChange());
 
 		return null;
