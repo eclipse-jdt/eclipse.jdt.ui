@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -115,7 +116,12 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 		TableViewer viewer= new TableViewer(table);
 		viewer.setContentProvider(new StaticObjectArrayContentProvider());
 		viewer.setLabelProvider(createReceiverArrayLabelProvider());
-		viewer.setInput(getMoveRefactoring().getPossibleNewReceivers());
+		INewReceiver[] possibleNewReceivers= getMoveRefactoring().getPossibleNewReceivers();
+		Assert.isTrue(possibleNewReceivers.length > 0);
+		viewer.setInput(possibleNewReceivers);
+		INewReceiver chosen= possibleNewReceivers[0];
+		viewer.setSelection(new StructuredSelection(new Object[]{chosen}));
+		getMoveRefactoring().chooseNewReceiver(chosen);
 		
 		viewer.addSelectionChangedListener(new ISelectionChangedListener(){
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -129,7 +135,6 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
 		gd.heightHint= table.getGridLineWidth() + table.getItemHeight() * ROW_COUNT;
-//		gd.widthHint= 40;
 		gd.horizontalSpan= 2;
 		layouter.setLayoutData(gd);
 	}
