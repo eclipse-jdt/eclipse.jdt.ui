@@ -126,8 +126,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 			preconditionResult= null;
 		assertEquals("precondition was supposed to pass", null, preconditionResult);
 
-		IChange change= ref.createChange(new NullProgressMonitor());
-		performChange(change);
+		performChange(ref.createChange(new NullProgressMonitor()));
         		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
