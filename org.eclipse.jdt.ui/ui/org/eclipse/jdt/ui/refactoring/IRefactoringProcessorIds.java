@@ -218,11 +218,11 @@ public interface IRefactoringProcessorIds {
 	 * <ul>
 	 *   <li><code>IJavaProject</code>: no participants are loaded.</li>
 	 *   <li><code>IPackageFragmentRoot</code>: participants registered for copying 
-	 *       <code>IPackageFragmentRoot</code> and <code>IFolder</code>.</li>
+	 *       <code>IPackageFragmentRoot</code> and <code>ResourceMapping</code>.</li>
 	 *   <li><code>IPackageFragment</code>: participants registered for copying 
-	 *       <code>IPackageFragment</code>.</li>
-	 *   <li><code>ICompilationUnit</code>: participants registered for copying compilation
-	 *       units and files.</li>
+	 *       <code>IPackageFragment</code> and <code>ResourceMapping</code>.</li>
+	 *   <li><code>ICompilationUnit</code>: participants registered for copying 
+	 *       <code>ICompilationUnit</code> and <code>ResourceMapping</code>.</li>
 	 *   <li><code>IType</code>: like ICompilationUnit if the primary top level type is copied.
 	 *       Otherwise no participants are loaded.</li>
 	 *   <li><code>IMember</code>: no participants are loaded.</li>
@@ -230,6 +230,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li><code>IFile</code>: participants registered for copying files.</li>
 	 * </ul>
 	 * 
+	 * @see org.eclipse.core.resources.mapping.ResourceMapping
 	 * @since 3.1
 	 */
 	public static String COPY_PROCESSOR= "org.eclipse.jdt.ui.CopyProcessor";  //$NON-NLS-1$
