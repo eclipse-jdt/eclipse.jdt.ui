@@ -16,24 +16,25 @@ import java.util.Map;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-public class ASTCreator {
+public class RefactoringASTParser {
 
-	private ASTCreator() {
+	private ASTParser fParser;
+	
+	public RefactoringASTParser(int level) {
+		fParser= ASTParser.newParser(level);
 	}
 	
 	public static final String SOURCE_PROPERTY= "org.eclipse.jdt.ui.refactoring.ast_source"; //$NON-NLS-1$
 	
-	public static CompilationUnit perform(ICompilationUnit unit, boolean resolveBindings) {
-		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
-		parser.setResolveBindings(resolveBindings);
-		parser.setSource(unit);
-		parser.setCompilerOptions(getCompilerOptions(unit));
-		CompilationUnit result= (CompilationUnit)parser.createAST(null);
+	public CompilationUnit parse(ICompilationUnit unit, boolean resolveBindings) {
+		fParser.setResolveBindings(resolveBindings);
+		fParser.setSource(unit);
+		fParser.setCompilerOptions(getCompilerOptions(unit));
+		CompilationUnit result= (CompilationUnit)fParser.createAST(null);
 		result.setProperty(SOURCE_PROPERTY, unit);
 		return result;
 	}
@@ -55,6 +56,7 @@ public class ASTCreator {
 			String key= (String)iter.next();
 			String value= (String)options.get(key);
 			if ("error".equals(value) || "warning".equals(value)) {  //$NON-NLS-1$//$NON-NLS-2$
+				System.out.println("Ignoring - " + key);
 				options.put(key, "ignore"); //$NON-NLS-1$
 			}
 		}
