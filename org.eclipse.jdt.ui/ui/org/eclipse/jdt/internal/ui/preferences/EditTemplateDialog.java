@@ -79,7 +79,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * Dialog to edit a template.
@@ -353,9 +352,7 @@ public class EditTemplateDialog extends StatusDialog {
 	}	
 
 	private static GridData getButtonGridData(Button button) {
-		GridData data= new GridData(GridData.FILL_HORIZONTAL);
-		data.heightHint= SWTUtil.getButtonHeightHint(button);
-	
+		GridData data= new GridData(GridData.FILL_HORIZONTAL);	
 		return data;
 	}
 
