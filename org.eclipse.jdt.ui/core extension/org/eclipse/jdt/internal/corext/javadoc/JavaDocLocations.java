@@ -220,7 +220,7 @@ public class JavaDocLocations {
 	}
 	
 	private static boolean loadOldForCompatibility() {
-		// in 2.1, the Javadoc locations were store in a file in the meta data
+		// in 2.1, the Javadoc locations were stored in a file in the meta data
 		// note that it is wrong to use a stream reader with XML declaring to be UTF-8
 		try {
 			final String STORE_FILE= "javadoclocations.xml"; //$NON-NLS-1$
@@ -230,6 +230,8 @@ public class JavaDocLocations {
 				try {
 					reader= new FileReader(file);
 					loadFromStream(new InputSource(reader));
+					storeLocations();
+					file.delete(); // remove file after successful store
 					return true;
 				} catch (IOException e) {
 					JavaPlugin.log(e); // log but ignore
@@ -239,14 +241,13 @@ public class JavaDocLocations {
 							reader.close();
 						}
 					} catch (IOException e) {}
-					file.delete(); // remove file
 				}
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e); // log but ignore
 		}	
 		
-		// in 2.0, the Javadoc locations were store as one big string im the persistent properties
+		// in 2.0, the Javadoc locations were stored as one big string in the persistent properties
 		// note that it is wrong to use a stream reader with XML declaring to be UTF-8
 		try {
 			final QualifiedName QUALIFIED_NAME= new QualifiedName(JavaUI.ID_PLUGIN, "jdoclocation"); //$NON-NLS-1$
@@ -257,9 +258,11 @@ public class JavaDocLocations {
 				Reader reader= new StringReader(xmlString);
 				try {
 					loadFromStream(new InputSource(reader));
+					storeLocations();
+					root.setPersistentProperty(QUALIFIED_NAME, null); // clear property
 					return true;
 				} finally {
-					root.setPersistentProperty(QUALIFIED_NAME, null); // clear property
+
 					try {
 						reader.close();
 					} catch (IOException e) {

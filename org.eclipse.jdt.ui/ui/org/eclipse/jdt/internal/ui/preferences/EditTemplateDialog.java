@@ -234,6 +234,7 @@ public class EditTemplateDialog extends StatusDialog {
 			composite.setLayout(layout);
 			
 			fNameText= createText(composite);
+			fNameText.addModifyListener(listener);
 			fNameText.addFocusListener(new FocusListener() {
 				
 				public void focusGained(FocusEvent e) {
@@ -294,7 +295,6 @@ public class EditTemplateDialog extends StatusDialog {
 		fDescriptionText.setText(fTemplate.getDescription());
 		if (fIsNameModifiable) {
 			fNameText.setText(fTemplate.getName());
-			fNameText.addModifyListener(listener);
 			fContextCombo.select(getIndex(fTemplate.getContextTypeId()));
 		} else {
 			fPatternEditor.getControl().setFocus();
@@ -307,7 +307,6 @@ public class EditTemplateDialog extends StatusDialog {
 	
 	protected void doTextWidgetChanged(Widget w) {
 		if (w == fNameText) {
-			fSuppressError= false;
 			String name= fNameText.getText();
 			fTemplate.setName(name);
 			updateButtons();			
