@@ -168,6 +168,8 @@ public final class ASTProvider {
 		}
 	}
 	
+	public static final int AST_LEVEL= AST.JLS2;
+	
 	private static final String AST_DISPOSED= "org.eclipse.jdt.internal.ui.astDisposed"; //$NON-NLS-1$
 	private static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
 	
@@ -424,7 +426,7 @@ public final class ASTProvider {
 	 * 					insufficient, contradictory, or otherwise unsupported
 	 */
 	private CompilationUnit createAST(IJavaElement je, IProgressMonitor progressMonitor) {
-		ASTParser parser = ASTParser.newParser(AST.JLS2);
+		ASTParser parser = ASTParser.newParser(AST_LEVEL);
 		parser.setResolveBindings(true);
 		
 		if (je.getElementType() == IJavaElement.COMPILATION_UNIT)

@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
@@ -81,7 +82,7 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		
 		refactoring.setLeaveDirty(true);
-		ASTParser parser= ASTParser.newParser(AST.JLS2);
+		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		parser.setFocalPosition(selectedNode.getStartPosition());

@@ -136,7 +136,12 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 				}
 			}
 		}
-		Expression defaultExpression= ASTNodeFactory.newDefaultExpression(ast, fMethodDecl.getReturnType(), fMethodDecl.getExtraDimensions());
+		Expression defaultExpression;
+		if (ast.apiLevel() == AST.JLS2) {
+			defaultExpression= ASTNodeFactory.newDefaultExpression(ast, fMethodDecl.getReturnType(), fMethodDecl.getExtraDimensions());
+		} else {
+			defaultExpression= ASTNodeFactory.newDefaultExpression(ast, fMethodDecl.getReturnType2(), fMethodDecl.getExtraDimensions());
+		}
 		addLinkedPositionProposal(RETURN_EXPRESSION_KEY, ASTNodes.asString(defaultExpression), null);
 		if (result == null) {
 			return defaultExpression;

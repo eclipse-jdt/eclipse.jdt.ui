@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.ChangeDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.EditDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.InsertDescription;
@@ -987,7 +988,7 @@ public class UnresolvedElementsSubProcessor {
 					return false;
 				}
 			}
-			ASTParser parser= ASTParser.newParser(AST.JLS2);
+			ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			parser.setSource(targetCU);
 			parser.setFocalPosition(0);
 			parser.setResolveBindings(true);
