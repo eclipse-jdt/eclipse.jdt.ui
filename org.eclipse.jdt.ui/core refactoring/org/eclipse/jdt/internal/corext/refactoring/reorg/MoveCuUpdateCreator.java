@@ -13,13 +13,12 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,12 +35,15 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -54,7 +56,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.ltk.core.refactoring.TextChange;
 
@@ -62,57 +65,27 @@ public class MoveCuUpdateCreator {
 	
 	private ICompilationUnit[] fCus;
 	private IPackageFragment fDestination;
-	private CodeGenerationSettings fSettings;
 	
 	private Map fImportRewrites; //ICompilationUnit -> ImportEdit
 	
-	public MoveCuUpdateCreator(ICompilationUnit cu, IPackageFragment pack, CodeGenerationSettings settings){
-		this(new ICompilationUnit[]{cu}, pack, settings);
+	public MoveCuUpdateCreator(ICompilationUnit cu, IPackageFragment pack){
+		this(new ICompilationUnit[]{cu}, pack);
 	}
 	
-	public MoveCuUpdateCreator(ICompilationUnit[] cus, IPackageFragment pack, CodeGenerationSettings settings){
+	public MoveCuUpdateCreator(ICompilationUnit[] cus, IPackageFragment pack){
 		Assert.isNotNull(cus);
 		Assert.isNotNull(pack);
-		Assert.isNotNull(settings);
-		fCus= convertToOriginals(cus);
+		fCus= cus;
 		fDestination= pack;
-		fSettings= settings;
 		fImportRewrites= new HashMap();
 	}
 	
-	private static ICompilationUnit[] convertToOriginals(ICompilationUnit[] cus){
-		ICompilationUnit[] result= new ICompilationUnit[cus.length];
-		for (int i= 0; i < cus.length; i++) {
-			result[i]= convertToOriginal(cus[i]);
-		}
-		return result;
-	}
-	
-	private static ICompilationUnit convertToOriginal(ICompilationUnit cu){
-		return JavaModelUtil.toOriginal(cu);
-	}
-	
 	public TextChangeManager createChangeManager(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 2); //$NON-NLS-1$
+		pm.beginTask("", 5); //$NON-NLS-1$
 		try{
 			TextChangeManager changeManager= new TextChangeManager();
-			addUpdates(changeManager, new SubProgressMonitor(pm, 1));
-			addImportsToDestinationPackage(new SubProgressMonitor(pm, 1));
-			
-			for (Iterator iter= fImportRewrites.keySet().iterator(); iter.hasNext();) {
-				ICompilationUnit cu= (ICompilationUnit)iter.next();
-				ImportRewrite importRewrite= (ImportRewrite)fImportRewrites.get(cu);
-				if (importRewrite != null && ! importRewrite.isEmpty()) {
-					TextBuffer buffer= null;
-					try {
-						buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(cu).getResource());
-						TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer.getDocument())); //$NON-NLS-1$
-					} finally {
-						if (buffer != null)
-							TextBuffer.release(buffer);
-					}
-				}
-			}
+			addUpdates(changeManager, new SubProgressMonitor(pm, 4));
+			addImportRewriteUpdates(changeManager);
 			return changeManager;
 		} catch (JavaModelException e){
 			throw e;
@@ -122,6 +95,23 @@ public class MoveCuUpdateCreator {
 			pm.done();
 		}
 		
+	}
+
+	private void addImportRewriteUpdates(TextChangeManager changeManager) throws CoreException {
+		for (Iterator iter= fImportRewrites.keySet().iterator(); iter.hasNext();) {
+			ICompilationUnit cu= (ICompilationUnit)iter.next();
+			ImportRewrite importRewrite= (ImportRewrite)fImportRewrites.get(cu);
+			if (importRewrite != null && ! importRewrite.isEmpty()) {
+				TextBuffer buffer= null;
+				try {
+					buffer= TextBuffer.acquire((IFile) cu.getResource());
+					TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer.getDocument())); //$NON-NLS-1$
+				} finally {
+					if (buffer != null)
+						TextBuffer.release(buffer);
+				}
+			}
+		}
 	}
 
 	private void addUpdates(TextChangeManager changeManager, IProgressMonitor pm) throws CoreException {
@@ -146,33 +136,53 @@ public class MoveCuUpdateCreator {
 
 		  	addImportToSourcePackageTypes(movedUnit, new SubProgressMonitor(pm, 1));
 			removeImportsToDestinationPackageTypes(movedUnit);
-			addReferenceUpdates(changeManager, movedUnit, new SubProgressMonitor(pm, 1));
+			addReferenceUpdates(changeManager, movedUnit, new SubProgressMonitor(pm, 2));
 		} finally{
 			pm.done();
 		}
 	}
 
 	private void addReferenceUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException, CoreException {
-		SearchResultGroup[] references = getReferences(movedUnit, pm);
+		List cuList= Arrays.asList(fCus);
+		SearchResultGroup[] references= getReferences(movedUnit, pm);
 		for (int i= 0; i < references.length; i++){
-			ICompilationUnit referencingCu= references[i].getCompilationUnit();
+			SearchResultGroup searchResultGroup= references[i];
+			ICompilationUnit referencingCu= searchResultGroup.getCompilationUnit();
 			if (referencingCu == null)
 				continue;
-			SearchResult[] results= references[i].getSearchResults();
+			
+			boolean simpleReferencesNeedNewImport= simpleReferencesNeedNewImport(movedUnit, referencingCu, cuList);
+			SearchResult[] results= searchResultGroup.getSearchResults();
 			for (int j= 0; j < results.length; j++) {
+				//TODO: should update type references with results from addImport
 				TypeReference reference= (TypeReference)results[j];
-				if (!reference.isImportDeclaration()) {
-					reference.addEdit(changeManager.get(referencingCu), fDestination.getElementName());
-				} else {	
+				if (reference.isImportDeclaration()) {
 					ImportRewrite importEdit= getImportRewrite(referencingCu);
 					IImportDeclaration importDecl= (IImportDeclaration)results[j].getEnclosingElement();
 					importEdit.removeImport(importDecl.getElementName());
                     importEdit.addImport(createStringForNewImport(movedUnit, importDecl));
-				}	
+				} else if (reference.isQualified()) {
+					TextChange textChange= changeManager.get(referencingCu);
+					String changeName= RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"); //$NON-NLS-1$
+					String newPackage= fDestination.isDefaultPackage() ? "" : fDestination.getElementName() + '.'; //$NON-NLS-1$
+					TextEdit replaceEdit= new ReplaceEdit(reference.getStart(), reference.getSimpleNameStart() - reference.getStart(), newPackage);
+					TextChangeCompatibility.addTextEdit(textChange, changeName, replaceEdit);
+				} else if (simpleReferencesNeedNewImport) {
+					ImportRewrite importEdit= getImportRewrite(referencingCu);
+					String typeName= reference.getSimpleName();
+                    importEdit.addImport(getQualifiedType(fDestination.getElementName(), typeName));
+				}
 			}
 		}
 	}
-
+	
+	private String getQualifiedType(String packageName, String typeName) {
+		if (packageName.length() == 0)
+			return typeName;
+		else
+			return packageName + '.' + typeName;
+	}
+	
     private String createStringForNewImport(ICompilationUnit movedUnit, IImportDeclaration importDecl) {
     	String old= importDecl.getElementName();
 		int oldPackLength= movedUnit.getParent().getElementName().length();
@@ -223,32 +233,6 @@ public class MoveCuUpdateCreator {
 		}
 	}
 	
-	private void addImportsToDestinationPackage(IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", fCus.length); //$NON-NLS-1$
-		ICompilationUnit[] cusThatNeedIt= collectCusThatWillImportDestinationPackage(pm);
-		for (int i= 0; i < cusThatNeedIt.length; i++) {
-			if (pm.isCanceled())
-				throw new OperationCanceledException();
-			
-			ICompilationUnit iCompilationUnit= cusThatNeedIt[i];
-			addImport(false, fDestination, iCompilationUnit);
-			pm.worked(1);
-		}
-	}
-	
-	private boolean addImport(boolean force, IPackageFragment pack, ICompilationUnit cu) throws CoreException {		
-		if (pack.isDefaultPackage())
-			return false;
-
-		if (cu.getImport(pack.getElementName() + ".*").exists())  //$NON-NLS-1$
-			return false;
-
-		ImportRewrite importEdit= getImportRewrite(cu);
-		importEdit.setFilterImplicitImports(!force);
-		importEdit.addImport(pack.getElementName() + ".*"); //$NON-NLS-1$
-		return true;
-	}
-	
 	private ImportRewrite getImportRewrite(ICompilationUnit cu) throws CoreException{
 		if (fImportRewrites.containsKey(cu))	
 			return (ImportRewrite)fImportRewrites.get(cu);
@@ -257,62 +241,35 @@ public class MoveCuUpdateCreator {
 		return importEdit;	
 	}
 	
-	private ICompilationUnit[] collectCusThatWillImportDestinationPackage(IProgressMonitor pm) throws JavaModelException{
-		Set collected= new HashSet(); //use set to remove dups
-		pm.beginTask("", fCus.length); //$NON-NLS-1$
-		for (int i= 0; i < fCus.length; i++) {
-			collected.addAll(collectCusThatWillImportDestinationPackage(fCus[i], new SubProgressMonitor(pm, 1)));
-		}
-		return (ICompilationUnit[]) collected.toArray(new ICompilationUnit[collected.size()]);
-	}
-	
-	private Set collectCusThatWillImportDestinationPackage(ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException{
-		SearchResultGroup[] references= getReferences(movedUnit, pm);
-		Set result= new HashSet();
-		List cuList= Arrays.asList(fCus);
-		for (int i= 0; i < references.length; i++) {
-			SearchResultGroup searchResultGroup= references[i];
-			ICompilationUnit referencingCu= references[i].getCompilationUnit();
-			if (referencingCu == null)
-				continue;
-			if (needsImportToDestinationPackage(movedUnit, cuList, searchResultGroup, referencingCu))
-				result.add(referencingCu);
-		}
-		return result;
-	}
-
-	private boolean needsImportToDestinationPackage(ICompilationUnit movedUnit, List cuList, SearchResultGroup searchResultGroup, ICompilationUnit referencingCu) {
-		if (! hasSimpleReference(searchResultGroup))
-			return false;
+	private boolean simpleReferencesNeedNewImport(ICompilationUnit movedUnit, ICompilationUnit referencingCu, List cuList) {
 		if (referencingCu.equals(movedUnit))	
 			return false;
 		if (cuList.contains(referencingCu))	
 			return false;
-		if (isDestinationAnotherFragmentOfSamePackage(movedUnit))
-			return false;
-		
-		if (isReferenceInAnotherFragmentOfSamePackage(searchResultGroup, movedUnit))
+		if (isReferenceInAnotherFragmentOfSamePackage(referencingCu, movedUnit)) {
+			/* Destination package is different from source, since
+			 * isDestinationAnotherFragmentOfSamePackage(movedUnit) was false in addUpdates(.) */
 			return true;
+		}
 		
 		//heuristic	
 		if (referencingCu.getImport(movedUnit.getParent().getElementName() + ".*").exists()) //$NON-NLS-1$
-			return true;
-		if (! referencingCu.getParent().equals(movedUnit.getParent()))	
-			return false;
-		return true;
+			return true; // has old star import
+		if (referencingCu.getParent().equals(movedUnit.getParent()))
+			return true; //is moved away from same package
+		return false; 
 	}
-	
+
 	private boolean isDestinationAnotherFragmentOfSamePackage(ICompilationUnit movedUnit) {
 		return isInAnotherFragmentOfSamePackage(movedUnit, fDestination);
 	}
 
-	private boolean isReferenceInAnotherFragmentOfSamePackage(SearchResultGroup searchResultGroup, ICompilationUnit movedUnit) {
-		ICompilationUnit cu= searchResultGroup.getCompilationUnit();
-		if (cu == null)
+	private boolean isReferenceInAnotherFragmentOfSamePackage(ICompilationUnit referencingCu, ICompilationUnit movedUnit) {
+		if (referencingCu == null)
 			return false;
-		if (! (cu.getParent() instanceof IPackageFragment))
+		if (! (referencingCu.getParent() instanceof IPackageFragment))
 			return false;
-		IPackageFragment pack= (IPackageFragment) cu.getParent();
+		IPackageFragment pack= (IPackageFragment) referencingCu.getParent();
 		return isInAnotherFragmentOfSamePackage(movedUnit, pack);
 	}
 	
@@ -323,15 +280,6 @@ public class MoveCuUpdateCreator {
 		return ! cuPack.equals(pack) && JavaModelUtil.isSamePackage(cuPack, pack);
 	}
 	
-	private static boolean hasSimpleReference(SearchResultGroup searchResultGroup) {
-		SearchResult[] results= searchResultGroup.getSearchResults();
-		for (int i= 0; i < results.length; i++) {
-			if (! ((TypeReference)results[i]).isQualified())
-				return true;
-		}
-		return false;
-	}
-
 	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm) throws JavaModelException {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(unit);
 		ISearchPattern pattern= createSearchPattern(unit);
@@ -349,56 +297,109 @@ public class MoveCuUpdateCreator {
 
 	private final static class Collector extends SearchResultCollector {
 		private IPackageFragment fSource;
+		private IScanner fScanner;
+		
 		public Collector(IProgressMonitor pm, IPackageFragment source) {
 			super(pm);
 			fSource= source;
+			fScanner= ToolFactory.createScanner(false, false, false, false);
 		}
+		
 		public void accept(IResource res, int start, int end, IJavaElement element, int accuracy) throws CoreException {
+			/*
+			 * Processing is done in collector to reuse the buffer which was
+			 * already required by the search engine to locate the matches.
+			 */
+			// [start, end[ include qualification.
 			if (element.getAncestor(IJavaElement.IMPORT_DECLARATION) != null) {
-				getResults().add(new TypeReference(res, start, end, element, accuracy, true));
+				getResults().add(TypeReference.createImportReference(res, start, end, element, accuracy));
 			} else {
-				if (fSource.isDefaultPackage()) {
-					end= start + 1; // this means a length of zero which is an insert;
-					getResults().add(new TypeReference(res, start, end, element, accuracy, false));
-				} else {
-					ICompilationUnit unit= (ICompilationUnit)element.getAncestor(IJavaElement.COMPILATION_UNIT);
-					if (unit != null) {
-						IBuffer buffer= unit.getBuffer();
-						String currectPackageName= fSource.getElementName();
-						String match= buffer.getText(start, end - start);
-						//TODO: must know where package reference ends
-						//match= CommentAnalyzer.normalizeReference(match);
-						if (match.startsWith(currectPackageName)) {
-							end= start + currectPackageName.length();
-							getResults().add(new TypeReference(res, start, end, element, accuracy, true));
+				ICompilationUnit unit= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
+				if (unit != null) {
+					IBuffer buffer= unit.getBuffer();
+					String matchText= buffer.getText(start, end - start);
+					if (fSource.isDefaultPackage()) {
+						getResults().add(TypeReference.createSimpleReference(res, start, end, element, accuracy, matchText));
+					} else {
+						int simpleNameStart= getLastSimpleNameStart(matchText);
+						if (simpleNameStart != 0) {
+							getResults().add(TypeReference.createQualifiedReference(res, start, end, element, accuracy, start + simpleNameStart));
 						} else {
-							// start, end never read iff not qualified
-							getResults().add(new TypeReference(res, start, end, element, accuracy, false));
+							getResults().add(TypeReference.createSimpleReference(res, start, end, element, accuracy, matchText));
 						}
 					}
 				}
 			}
 		}
+		
+		private int getLastSimpleNameStart(String reference) {
+			fScanner.setSource(reference.toCharArray());
+			int lastIdentifierStart= -1;
+			try {
+				int tokenType= fScanner.getNextToken();
+				while (tokenType != ITerminalSymbols.TokenNameEOF) {
+					if (tokenType == ITerminalSymbols.TokenNameIdentifier)
+						lastIdentifierStart= fScanner.getCurrentTokenStartPosition();
+					tokenType= fScanner.getNextToken();
+				}
+			} catch (InvalidInputException e) {
+				JavaPlugin.log(e);
+			}
+			return lastIdentifierStart;
+		}
 	}
 	
+	
 	private final static class TypeReference extends SearchResult {
-		private boolean fQualified;
-		public TypeReference(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy, boolean qualified) {
+		private String fSimpleTypeName;
+		private int fSimpleNameStart;
+		
+		private TypeReference(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy,
+				int simpleNameStart, String simpleName) {
 			super(resource, start, end, enclosingElement, accuracy);
-			fQualified= qualified;
+			fSimpleNameStart= simpleNameStart;
+			fSimpleTypeName= simpleName;
+		}
+		
+		public static TypeReference createQualifiedReference(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy,
+				int simpleNameStart) {
+			Assert.isTrue(start < simpleNameStart && simpleNameStart < end);
+			return new TypeReference(resource, start, end, enclosingElement, accuracy, simpleNameStart, null);
+		}
+		
+		public static TypeReference createImportReference(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
+			return new TypeReference(resource, start, end, enclosingElement, accuracy, -1, null);
+		}
+		
+		public static TypeReference createSimpleReference(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy,
+				String simpleName) {
+			return new TypeReference(resource, start, end, enclosingElement, accuracy, -1, simpleName);
 		}
 		
 		public boolean isImportDeclaration() {
 			return getEnclosingElement().getAncestor(IJavaElement.IMPORT_DECLARATION) != null;
 		}
 		
-		public void addEdit(TextChange change, String text) {
-			if (fQualified) {
-				TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"), new ReplaceEdit(getStart(), getEnd() - getStart(), text)); //$NON-NLS-1$
-			}
-		}
 		public boolean isQualified() {
-			return fQualified;
+			return fSimpleNameStart != -1;
+		}
+		
+		public boolean isSimpleReference() {
+			return fSimpleTypeName != null;
+		}
+		
+		/**
+		 * @return start offset of simple type name, or -1 iff ! isQualified()
+		 */
+		public int getSimpleNameStart() {
+			return fSimpleNameStart;
+		}
+		
+		/**
+		 * @return simple type name, or null iff ! isSimpleName()
+		 */
+		public String getSimpleName() {
+			return fSimpleTypeName;
 		}
 	}
 

@@ -982,7 +982,7 @@ public class MoveTest extends RefactoringTest {
 		IPackageFragmentRoot testSrc= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "testSrc");
 		IPackageFragment testP= testSrc.createPackageFragment("p", true, new NullProgressMonitor());
 		String oldRef= "package p;\npublic class Ref { A t = new A(); }";
-		String newRef= "package p;\n\nimport otherPackage.*;\n\npublic class Ref { A t = new A(); }";
+		String newRef= "package p;\n\nimport otherPackage.A;\n\npublic class Ref { A t = new A(); }";
 		ICompilationUnit cuRef= testP.createCompilationUnit("Ref.java", oldRef, false, new NullProgressMonitor());
 		try{
 			IJavaElement[] javaElements= {cuA};

@@ -1599,7 +1599,7 @@ class ReorgPolicyFactory {
 			
 				IPackageFragment packageDest= getDestinationAsPackageFragment();
 				if (packageDest != null){			
-					MoveCuUpdateCreator creator= new MoveCuUpdateCreator(getCus(), packageDest, fSettings);
+					MoveCuUpdateCreator creator= new MoveCuUpdateCreator(getCus(), packageDest);
 					return creator.createChangeManager(new SubProgressMonitor(pm, 1));
 				} else 
 					return new TextChangeManager();
@@ -1690,12 +1690,11 @@ class ReorgPolicyFactory {
 		
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException {
 			try{
-				pm.beginTask("", 3); //$NON-NLS-1$
+				pm.beginTask("", fUpdateQualifiedNames ? 7 : 3); //$NON-NLS-1$
 				confirmMovingReadOnly(reorgQueries);
-				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
-				if (fUpdateQualifiedNames) {
-					computeQualifiedNameMatches(new SubProgressMonitor(pm, 2));
-				}
+				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 2));
+				if (fUpdateQualifiedNames)
+					computeQualifiedNameMatches(new SubProgressMonitor(pm, 4));
 				RefactoringStatus status= super.checkFinalConditions(new SubProgressMonitor(pm, 1), context, reorgQueries);
 				return status;
 			} catch (JavaModelException e){
