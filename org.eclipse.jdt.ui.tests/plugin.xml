@@ -34,6 +34,18 @@
              adaptable="true">
          </decorator> 
 	</extension>    
+	
+<extension 
+	point="org.eclipse.ui.views">
+	<view
+		id="org.eclipse.jdt.ui.tests.packageview.MockPluginView"
+		name="MochPluginView"
+		category="org.eclipse.jdt.ui.java.packageview"
+		class="org.eclipse.jdt.ui.tests.packageview.MockPluginView"
+		icon="icons/full/cview16/packages.gif">
+	</view>
+</extension>
+
 
 <!-- **************** TEST MARKER for quick fix ******************* -->
 

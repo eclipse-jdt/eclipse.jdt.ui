@@ -9,16 +9,21 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.ui.tests.astrewrite.ASTRewritingTest;
 import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
+import org.eclipse.jdt.ui.tests.core.HierarchicalASTVisitorTest;
 import org.eclipse.jdt.ui.tests.core.ImportOrganizeTest;
 import org.eclipse.jdt.ui.tests.core.JavaModelUtilTest;
 import org.eclipse.jdt.ui.tests.core.TextBufferTest;
 import org.eclipse.jdt.ui.tests.core.TypeHierarchyTest;
 import org.eclipse.jdt.ui.tests.core.TypeInfoTest;
+import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests1;
+import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests2;
+import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests3;
+import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests4;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
-import org.eclipse.jdt.ui.tests.core.HierarchicalASTVisitorTest;
 import org.eclipse.jdt.ui.tests.text.HTML2TextReaderTester;
 import org.eclipse.jdt.ui.tests.text.JavaDoc2HTMLTextReaderTester;
-import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
+import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
+
 
 /**
  * Test all areas of the UI.
@@ -53,6 +58,11 @@ public class AutomatedSuite extends TestSuite {
 		addTest(NewJavaProjectWizardTest.suite());
 		
 		addTest(HierarchicalASTVisitorTest.suite());
+
+		addTest(ContentProviderTests1.suite());
+		addTest(ContentProviderTests2.suite());
+		addTest(ContentProviderTests3.suite());
+		addTest(ContentProviderTests4.suite());						
 	}
 	
 }
