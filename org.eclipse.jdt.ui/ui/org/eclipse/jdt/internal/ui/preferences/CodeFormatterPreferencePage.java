@@ -57,7 +57,7 @@ public class CodeFormatterPreferencePage extends PropertyAndPreferencePage {
 	}
 	
 	protected void openWorkspacePreferences() {
-		CodeStylePreferencePage page= new CodeStylePreferencePage();
+		CodeFormatterPreferencePage page= new CodeFormatterPreferencePage();
 		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
 	}
 	
