@@ -80,7 +80,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	
 	private static final int BREAK_LENGTH= "break".length(); //$NON-NLS-1$
 	private static final int CONTINUE_LENGTH= "continue".length(); //$NON-NLS-1$
-	 
+		 
 	public SelectionAnalyzer(IBuffer buffer, int start, int length) {
 		fBuffer= new ExtendedBuffer(buffer);
 		Assert.isTrue(fBuffer != null);
@@ -275,6 +275,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 			}
 			return fTraverseSelectedNodes;
 		} else if (fSelection.coveredBy(start, end)) {
+			handleSelectionCoveredByNode(node);
 			return true;
 		} else if (fSelection.endsIn(start, end)) {
 			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.ends_middle_of_statement")); //$NON-NLS-1$
@@ -283,6 +284,10 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		// There is a possibility that the user has selected trailing semicolons that don't belong
 		// to the statement. So dive into it to check if sub nodes are fully covered.
 		return true;
+	}
+	
+	//hook for subclasses
+	protected void handleSelectionCoveredByNode(AstNode node){
 	}
 	
 	private boolean firstCoveredNode() {
@@ -884,7 +889,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 			return;
 		int pos= fBuffer.indexOfStatementCharacter(fSelection.start);
 		AstNode node= (AstNode)fSelectedNodes.get(0);
-		if (ASTUtil.getSourceStart(node) != pos) {
+		if (ASTUtil.getSourceStart(node) != pos && ! isOkToIncludeExtraCharactersAtBeginning()) {
 			invalidSelection("Beginning of selection contains characters that do not belong to a statement.");
 			return;
 		}	
@@ -900,7 +905,18 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		}
 		node= getLastSelectedNode();	
 		pos= fBuffer.indexOfStatementCharacter(ASTUtil.getSourceEnd(node) + 1);
-		if (pos != -1 && pos <= fSelection.end)
+		if (pos != -1 && pos <= fSelection.end && !isOkToIncludeExtraCharactersAtEnd())
 			invalidSelection("End of selection contains characters that do not belong to a statement.");
 	}		
+	
+	//hook
+	protected boolean isOkToIncludeExtraCharactersAtBeginning(){
+		return false;
+	}
+	
+	//hook
+	protected boolean isOkToIncludeExtraCharactersAtEnd(){
+		return false;
+	}
+	
 }
