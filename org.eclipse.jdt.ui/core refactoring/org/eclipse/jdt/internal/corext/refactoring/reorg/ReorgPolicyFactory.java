@@ -16,12 +16,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -31,9 +35,21 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.NullChange;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
+import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
+import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -91,6 +107,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifica
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
@@ -100,21 +117,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.NullChange;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.TextFileChange;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
-import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
-import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
-import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 class ReorgPolicyFactory {
 	private ReorgPolicyFactory() {
@@ -2043,37 +2045,28 @@ class ReorgPolicyFactory {
 			return superStatus;
 		}
 
-		private CompilationUnit createSourceCuNode(ICompilationUnit cu){
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
-			parser.setSource(cu);
-			return (CompilationUnit) parser.createAST(null);
-		}
-
 		public Change createChange(IProgressMonitor pm) throws JavaModelException {
 			try {
-				CompilationUnit sourceCuNode= createSourceCuNode(getSourceCu());
+				final ICompilationUnit sourceCu= getSourceCu();
+				CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(sourceCu);
 				ICompilationUnit destinationCu= getDestinationCu();
-				CompilationUnit destinationCuNode= getSourceCu().equals(destinationCu) ? sourceCuNode: createSourceCuNode(destinationCu);
-				ASTRewrite targetRewrite= ASTRewrite.create(destinationCuNode.getAST());
+				CompilationUnitRewrite targetRewriter= sourceCu.equals(destinationCu) ? sourceRewriter : new CompilationUnitRewrite(destinationCu);
 				IJavaElement[] javaElements= getJavaElements();
 				for (int i= 0; i < javaElements.length; i++) {
-					copyToDestination(javaElements[i], targetRewrite, sourceCuNode, destinationCuNode);
+					copyToDestination(javaElements[i], targetRewriter.getASTRewrite(), sourceRewriter.getRoot(), targetRewriter.getRoot());
 				}
-				ASTRewrite sourceRewrite= getSourceCu().equals(destinationCu) ? targetRewrite: ASTRewrite.create(sourceCuNode.getAST());
-				ASTNodeDeleteUtil.markAsDeleted(javaElements, sourceCuNode, sourceRewrite);
-				Change targetCuChange= addTextEditFromRewrite(destinationCu, targetRewrite);
-				if (getSourceCu().equals(destinationCu)){
+				ASTNodeDeleteUtil.markAsDeleted(javaElements, sourceRewriter, null);
+				Change targetCuChange= addTextEditFromRewrite(destinationCu, targetRewriter.getASTRewrite());
+				if (sourceCu.equals(destinationCu)) {
 					return targetCuChange;
-				} else{
+				} else {
 					CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("ReorgPolicy.move_members")); //$NON-NLS-1$
 					result.markAsSynthetic();
 					result.add(targetCuChange);
-					if (Arrays.asList(getJavaElements()).containsAll(Arrays.asList(getSourceCu().getTypes())))
-						result.add(DeleteChangeCreator.createDeleteChange(null, 
-							new IResource[0], new ICompilationUnit[]{getSourceCu()},
-							RefactoringCoreMessages.getString("ReorgPolicy.move"))); //$NON-NLS-1$);
+					if (Arrays.asList(getJavaElements()).containsAll(Arrays.asList(sourceCu.getTypes())))
+						result.add(DeleteChangeCreator.createDeleteChange(null, new IResource[0], new ICompilationUnit[] { sourceCu}, RefactoringCoreMessages.getString("ReorgPolicy.move"))); //$NON-NLS-1$);
 					else
-						result.add(addTextEditFromRewrite(getSourceCu(), sourceRewrite));						
+						result.add(addTextEditFromRewrite(sourceCu, sourceRewriter.getASTRewrite()));
 					return result;
 				}
 			} catch (JavaModelException e){

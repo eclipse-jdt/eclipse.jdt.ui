@@ -15,8 +15,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -24,9 +28,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.NullChange;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -34,8 +40,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceManipulation;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -48,14 +52,9 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragment
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.NullChange;
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 
 class DeleteChangeCreator {
@@ -104,14 +103,14 @@ class DeleteChangeCreator {
 	}
 
 	/*
-	 * List<IJavaElement> javaElements 
+	 * List<IJavaElement> javaElements
 	 */
 	private static Change createDeleteChange(ICompilationUnit cu, List javaElements, TextChangeManager manager) throws CoreException {
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(cu, false);
-		ASTRewrite rewrite= ASTRewrite.create(cuNode.getAST());
+		CompilationUnitRewrite rewriter= new CompilationUnitRewrite(cu);
+		rewriter.setResolveBindings(false);
 		IJavaElement[] elements= (IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]);
-		ASTNodeDeleteUtil.markAsDeleted(elements, cuNode, rewrite);
-		return addTextEditFromRewrite(manager, cu, rewrite);
+		ASTNodeDeleteUtil.markAsDeleted(elements, rewriter, null);
+		return addTextEditFromRewrite(manager, cu, rewriter.getASTRewrite());
 	}
 
 	private static TextChange addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
