@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
-import org.eclipse.core.runtime.IPath;
-import java.lang.StringBuffer;
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.core.runtime.Path;
-import java.lang.String;
 
 /**
  * A <tt>IFileTypeInfo</tt> represents a type in a class or java file.
@@ -42,11 +42,20 @@ public class IFileTypeInfo extends TypeInfo {
 	}
 	
 	protected IJavaElement getJavaElement(IJavaSearchScope scope) {
-		return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(getPath())));
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		IPath path= new Path(getPath());
+		
+		IJavaElement elem= JavaCore.create(root.findMember(path));
+		if (elem.exists()) {
+			return elem;
+		}
+		return null;
 	}
 	
 	public IPath getPackageFragmentRootPath() {
-		StringBuffer buffer= new StringBuffer(fProject);
+		StringBuffer buffer= new StringBuffer();
+		buffer.append(TypeInfo.SEPARATOR);
+		buffer.append(fProject);
 		if (fFolder != null && fFolder.length() > 0) {
 			buffer.append(TypeInfo.SEPARATOR);
 			buffer.append(fFolder);
