@@ -99,7 +99,7 @@ public class NewGroup extends ContextMenuGroup {
 				protected Wizard createWizard() { return new NewPackageRootCreationWizard(); }
 				protected boolean shouldAcceptElement(Object obj) { return !isOnBuildPath(obj); }
 			};
-		fNewPackageRootAction.setImageDescriptor(null);	
+		fNewPackageRootAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);	
 		fNewPackageRootAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGEROOT + ".tooltip"));
 		fNewPackageRootAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGEROOT + ".description"));
 

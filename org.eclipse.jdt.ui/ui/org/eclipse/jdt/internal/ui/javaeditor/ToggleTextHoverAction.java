@@ -29,7 +29,7 @@ public class ToggleTextHoverAction extends TextEditorAction {
 	public ToggleTextHoverAction(ResourceBundle bundle, String prefix) {
 		super(bundle, prefix, null);
 		
-		JavaPluginImages.setImageDescriptors(this, "tool16", "format_edit.gif");
+		JavaPluginImages.setImageDescriptors(this, "tool16", "jdoc_hover_edit.gif");
 		
 		fToolTipChecked= getString(bundle, prefix + "tooltip.checked", prefix + "tooltip.checked");
 		fToolTipUnchecked= getString(bundle, prefix + "tooltip.unchecked", prefix + "tooltip.unchecked");

@@ -149,7 +149,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
 					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE;
-		fViewer.setLabelProvider(new JavaElementLabelProvider(labelFlags));
+		JavaElementLabelProvider labelProvider = new JavaElementLabelProvider(labelFlags);
+		fViewer.setLabelProvider(new DecoratingLabelProvider(labelProvider, null));
 		fViewer.setSorter(new PackageViewerSorter());
 		fViewer.addFilter(new EmptyInnerPackageFilter());
 		fViewer.setUseHashlookup(true);
@@ -850,7 +851,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * @param decorator a label decorator or <code>null</code> for no decorations.
 	 */
 	public void setLabelDecorator(ILabelDecorator decorator) {
-		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_SMALL_ICONS;
+		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
+					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE;
 		ILabelProvider javaProvider= new JavaElementLabelProvider(labelFlags);
 		if (decorator == null) {
 			fViewer.setLabelProvider(javaProvider);

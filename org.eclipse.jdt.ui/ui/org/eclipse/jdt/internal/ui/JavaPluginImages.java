@@ -75,14 +75,14 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_CFILEINT= NAME_PREFIX + "classfi_obj.gif"; 
 	public static final String IMG_OBJS_PACKAGE= NAME_PREFIX + "package_obj.gif";
 	public static final String IMG_OBJS_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_obj.gif";
-	public static final String IMG_OBJS_MISSING_PACKFRAG_ROOT= NAME_PREFIX + "missing_packagefolder_obj.gif";
-	public static final String IMG_OBJS_MISSING_JAR= NAME_PREFIX + "missing_jar_obj.gif";
+	public static final String IMG_OBJS_MISSING_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_nonexist_obj.gif";
+	public static final String IMG_OBJS_MISSING_JAR= NAME_PREFIX + "jar_nonexist_obj.gif";
 	public static final String IMG_OBJS_JAR= NAME_PREFIX + "jar_obj.gif";
 	public static final String IMG_OBJS_EXTJAR= NAME_PREFIX + "jar_l_obj.gif";
 	public static final String IMG_OBJS_JAR_WSRC= NAME_PREFIX + "jar_src_obj.gif";
 	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.gif";	
 	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif";
-	public static final String IMG_OBJS_MISSING_ENV_VAR= NAME_PREFIX + "missing_envvar_obj.gif";
+	public static final String IMG_OBJS_MISSING_ENV_VAR= NAME_PREFIX + "envvar_nonexist_obj.gif";
 	
 	public static final String IMG_OBJS_LIBRARY= NAME_PREFIX + "library_obj.gif";
 	
@@ -239,6 +239,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_TOOL_NEWCLASS= create(T_CTOOL, "newclass_wiz.gif");
 	public static final ImageDescriptor DESC_TOOL_NEWINTERFACE= create(T_CTOOL, "newint_wiz.gif");
 	public static final ImageDescriptor DESC_TOOL_NEWSNIPPET= create(T_CTOOL, "newsbook_wiz.gif");
+	public static final ImageDescriptor DESC_TOOL_NEWPACKROOT= create(T_CTOOL, "newpackfolder_wiz.gif");
 
 	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= create(T_OBJ, "cp_order_obj.gif");
 		
