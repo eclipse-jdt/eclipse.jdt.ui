@@ -141,10 +141,7 @@ public final class SignatureUtil {
 		if (signature == null || signature.length < 2)
 			return signature;
 		
-		if (signature[0] != Signature.C_PARAM_START)
-			throw new IllegalArgumentException(String.valueOf(signature));
-
-		// XXX the signature somehow contain double '+'
+		// XXX the signature somehow contains double '+'
 		StringBuffer sig= new StringBuffer();
 		sig.append(signature);
 		do {
@@ -153,12 +150,25 @@ public final class SignatureUtil {
 				break;
 			sig.deleteCharAt(pos);
 		} while (true);
-		
 		signature= sig.toString().toCharArray();
 		
+		int pos= 0;
+		// skip type declaration
+		if (signature[pos] == Signature.C_GENERIC_START) {
+			pos= Util.scanIdentifier(signature, pos + 1);
+			if (signature[pos + 1] != Signature.C_COLON)
+				throw new IllegalArgumentException(String.valueOf(signature));
+			pos= Util.scanTypeArgumentSignature(signature, pos + 2) + 1;
+			if (signature[pos] != Signature.C_GENERIC_END)
+				throw new IllegalArgumentException(String.valueOf(signature));
+			pos++;
+		}
+		
+		if (signature[pos] != Signature.C_PARAM_START)
+			throw new IllegalArgumentException(String.valueOf(signature));
+		pos++;
 		
 		StringBuffer res= new StringBuffer("("); //$NON-NLS-1$
-		int pos= 1;
 		boolean isReturnType= false;
 		while (pos < signature.length) {
 			char ch= signature[pos];
