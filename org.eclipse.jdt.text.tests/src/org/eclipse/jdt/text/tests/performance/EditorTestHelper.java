@@ -19,7 +19,11 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.text.tests.Accessor;
+
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.reconciler.AbstractReconciler;
+import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -30,8 +34,11 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 
 
 /**
@@ -177,5 +184,58 @@ public class EditorTestHelper {
 
 	public static void bringToTop() {
 		getActiveWorkbenchWindow().getShell().forceActive();
+	}
+	
+	public static void forceReconcile(SourceViewer sourceViewer) {
+		Accessor reconcilerAccessor= new Accessor(getReconciler(sourceViewer), AbstractReconciler.class);
+		reconcilerAccessor.invoke("forceReconciling", new Object[0]);
+	}
+	
+	public static boolean joinReconciler(SourceViewer sourceViewer, long minTime, long maxTime, long intervalTime) {
+		if (minTime > 0)
+			runEventQueue(minTime);
+		
+		long endTime= maxTime > 0 ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
+		AbstractReconciler reconciler= getReconciler(sourceViewer);
+		Accessor backgroundThreadAccessor= getBackgroundThreadAccessor(reconciler);
+		Accessor javaReconcilerAccessor= null;
+		if (reconciler instanceof JavaReconciler)
+			javaReconcilerAccessor= new Accessor(reconciler, JavaReconciler.class);
+		boolean isRunning= isRunning(javaReconcilerAccessor, backgroundThreadAccessor);
+		while (isRunning && System.currentTimeMillis() < endTime) {
+			runEventQueue(intervalTime);
+			isRunning= isRunning(javaReconcilerAccessor, backgroundThreadAccessor);
+		}
+		return !isRunning;
+	}
+
+	public static AbstractReconciler getReconciler(SourceViewer sourceViewer) {
+		return (AbstractReconciler) new Accessor(sourceViewer, SourceViewer.class).get("fReconciler");
+	}
+
+	public static SourceViewer getSourceViewer(AbstractTextEditor editor) {
+		SourceViewer sourceViewer= (SourceViewer) new Accessor(editor, AbstractTextEditor.class).invoke("getSourceViewer", new Object[0]);
+		return sourceViewer;
+	}
+
+	private static Accessor getBackgroundThreadAccessor(AbstractReconciler reconciler) {
+		Object backgroundThread= new Accessor(reconciler, AbstractReconciler.class).get("fThread");
+		return new Accessor(backgroundThread, backgroundThread.getClass());
+	}
+
+	private static boolean isRunning(Accessor javaReconcilerAccessor, Accessor backgroundThreadAccessor) {
+		return (javaReconcilerAccessor != null ? !isInitialProcessDone(javaReconcilerAccessor) : false) || isDirty(backgroundThreadAccessor) || isActive(backgroundThreadAccessor);
+	}
+
+	private static boolean isInitialProcessDone(Accessor javaReconcilerAccessor) {
+		return ((Boolean) javaReconcilerAccessor.get("fIninitalProcessDone")).booleanValue();
+	}
+
+	private static boolean isDirty(Accessor backgroundThreadAccessor) {
+		return ((Boolean) backgroundThreadAccessor.invoke("isDirty", new Object[0])).booleanValue();
+	}
+
+	private static boolean isActive(Accessor backgroundThreadAccessor) {
+		return ((Boolean) backgroundThreadAccessor.invoke("isActive", new Object[0])).booleanValue();
 	}
 }

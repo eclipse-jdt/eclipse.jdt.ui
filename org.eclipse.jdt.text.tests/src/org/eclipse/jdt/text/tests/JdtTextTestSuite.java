@@ -45,6 +45,7 @@ public class JdtTextTestSuite {
 		
 		suite.addTest(SpellingTestSuite.suite());
 		suite.addTest(CommentsTestSuite.suite());
+		suite.addTest(SemanticHighlightingTest.suite());
 		
 		return suite;
 	}
