@@ -95,9 +95,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  */
 public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
-	private static boolean fgReplaceFlag = false;
-	private static boolean fgOverrideFinalsFlag = false;
-
 	private static final String DIALOG_TITLE = ActionMessages.getString("AddDelegateMethodsAction.error.title"); //$NON-NLS-1$
 
 	private CompilationUnitEditor fEditor;
@@ -452,14 +449,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				if (overwrittenMethod == null) {
 					content = createStub(field, curr, addComments, overwrittenMethod, imports);
 				} else {
-					int flags = overwrittenMethod.getFlags();
-					if (Flags.isFinal(flags) || Flags.isPrivate(flags)) {
-						// we could ask before overwriting final methods
-						if (fgOverrideFinalsFlag) {
-							System.out.println("method final"); //$NON-NLS-1$
-							System.out.println(overwrittenMethod);
-						}
-					}
+					// we could ask before overwriting final methods
 
 					IMethod declaration =
 						JavaModelUtil.findMethodDeclarationInHierarchy(
@@ -479,14 +469,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						existingMethods);
 				if (existing != null) {
 					// we could ask before replacing a method
-					if (fgReplaceFlag) {
-						System.out.println("method does already exists"); //$NON-NLS-1$
-						System.out.println(existing);
-						sibling = StubUtility.findNextSibling(existing);
-						existing.delete(false, null);
-					} else {
-						continue;
-					}
+					continue;
 				} else if (curr.isConstructor() && existingMethods.length > 0) {
 					// add constructors at the beginning
 					sibling = existingMethods[0];
