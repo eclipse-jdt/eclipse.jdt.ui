@@ -38,7 +38,7 @@ public abstract class SimpleTextEdit extends TextEdit {
 	}
 	
 	protected SimpleTextEdit() {
-		this(new TextRange(0,0), "");
+		this(TextRange.UNDEFINED, "");
 	}
 	
 	protected SimpleTextEdit(int offset, int length, String text) {

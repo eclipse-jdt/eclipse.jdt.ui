@@ -47,7 +47,8 @@ class PasteInCompilationUnitEdit extends SimpleTextEdit {
 	 */
 	public void connect(TextBufferEditor editor) throws CoreException {	
 		setText(fSource);
-		setTextRange(new TextRange(computeOffset(), 0));	
+		setTextRange(new TextRange(computeOffset(), 0));
+		super.connect(editor);
 	}
 	
 	private int computeOffset() throws JavaModelException{

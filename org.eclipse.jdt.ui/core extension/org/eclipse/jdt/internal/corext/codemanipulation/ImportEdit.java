@@ -105,7 +105,11 @@ public class ImportEdit extends SimpleTextEdit {
 		if (text != null) {
 			setText(text);
 			setTextRange(range);
+		} else {
+			setText("");
+			setTextRange(new TextRange(0,0));
 		}
+		super.connect(editor);
 	}
 	
 	/* non Java-doc

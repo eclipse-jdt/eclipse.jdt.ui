@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.compare.CompareConfiguration;
@@ -42,6 +43,9 @@ public class ComparePreviewer extends CompareViewerSwitchingPane implements IPre
 			this(new ByteArrayInputStream(l.getBytes()), new ByteArrayInputStream(r.getBytes()), t);
 		}
 		public CompareInput(InputStream l, InputStream r, String t) {
+			Assert.isNotNull(l);
+			Assert.isNotNull(r);
+			Assert.isNotNull(t);
 			left= l;
 			right= r;
 			type= t;

@@ -287,6 +287,7 @@ public class MoveCuUpdateCreator {
 			}
 			setText(newText);
 			setTextRange(new TextRange(offset, length));
+			super.connect(editor);
 		}
 	}
 }

@@ -195,7 +195,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 					String type= ComparePreviewer.TEXT_TYPE;
 					if (change instanceof CompilationUnitChange)
 						type= ComparePreviewer.JAVA_TYPE;
-					return new CompareInput(
+					return createCompareInput(
 						cuc.getCurrentContent(),
 						cuc.getPreviewContent(),
 						type);
@@ -207,13 +207,13 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 					ISourceReference sourceReference= findSourceReference(element);
 					if (sourceReference != null) {
 						CompilationUnitChange cuc= (CompilationUnitChange)change;
-						return new CompareInput(
+						return createCompareInput(
 							cuc.getCurrentContent(sourceReference),
 							cuc.getPreviewContent(sourceReference, new EditChange[] {tec}),
 							ComparePreviewer.JAVA_TYPE);
 					}
 				}
-				return new CompareInput(
+				return createCompareInput(
 					change.getCurrentContent(tec, 2),
 					change.getPreviewContent(tec, 2),
 					ComparePreviewer.TEXT_TYPE);
@@ -224,7 +224,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 					EditChange[] changes= (EditChange[]) l.toArray(new EditChange[l.size()]);
 					CompilationUnitChange change= (CompilationUnitChange)changes[0].getTextChange();
 					ISourceReference sourceReference= (ISourceReference)pjce.getJavaElement();
-					return new CompareInput(
+					return createCompareInput(
 						change.getCurrentContent(sourceReference),
 						change.getPreviewContent(sourceReference, changes),
 						ComparePreviewer.JAVA_TYPE);
@@ -234,6 +234,12 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 			ExceptionHandler.handle(e, getShell(), "Showing preview", "Unexpected exception while computing input for compare preview");
 		}
 		return null;
+	}
+	
+	private CompareInput createCompareInput(String left, String right, String type) {
+		if (left == null || right == null || type == null)
+			return null;
+		return new CompareInput(left, right, type);
 	}
 	
 	/**

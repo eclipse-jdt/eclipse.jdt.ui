@@ -16,6 +16,8 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -46,6 +48,12 @@ public class ChangeElementContentProvider  implements ITreeContentProvider {
 				return 1;
 			// same offset
 			return 0;	
+		}
+		private int getOffset(EditChange edit) {
+			TextRange range= getTextRange(edit);
+			if (range.isUndefined())
+				return -1;
+			return range.getOffset();
 		}
 	}
 	
@@ -170,20 +178,31 @@ public class ChangeElementContentProvider  implements ITreeContentProvider {
 		Object element= edit.getModifiedElement();
 		if (element instanceof IJavaElement)
 			return (IJavaElement)element;
-		int offset= getOffset(edit);
-		if (offset == -1)
+		TextRange range= getTextRange(edit);
+		if (range.isUndefined() || (range.getOffset() == 0 && range.getLength() == 0))
 			return cunit;
-		IJavaElement elementAtOffset= cunit.getElementAt(offset);
-		if (elementAtOffset != null)
-			return elementAtOffset;
-		return cunit;
+		IJavaElement result= cunit.getElementAt(range.getOffset());
+		if (result == null)
+			return cunit;
+		
+		if (result instanceof ISourceReference) {
+			try {
+				ISourceRange elementRange= ((ISourceReference)result).getSourceRange();
+				// An insertion point before the element. So we actually modify the parent.
+				if (elementRange.getOffset() == range.getOffset() && range.getLength() == 0 && result.getParent() != null)
+					result= result.getParent();
+			} catch(JavaModelException e) {
+				// do nothing. Use old value.
+			}
+		}
+		return result;
 	}
 
-	private static int getOffset(EditChange edit) {
+	private static TextRange getTextRange(EditChange edit) {
 		TextRange range= edit.getTextRange();
 		if (range == null)
-			return -1;
-		return range.getOffset();
+			range= TextRange.UNDEFINED;
+		return range;
 	}	
 }
 

@@ -11,6 +11,8 @@ public final class TextRange {
 
 	/* package */ int fOffset;
 	/* package */ int fLength;
+	
+	public static final TextRange UNDEFINED= new TextRange((TextRange)null);
 
 	/**
 	 * Creates a insert position with the given offset.
@@ -32,6 +34,14 @@ public final class TextRange {
 		Assert.isTrue(fOffset >= 0);
 		fLength= length;
 		Assert.isTrue(fLength >= 0);
+	}
+	
+	/**
+	 * Constructor for the undefined text range.
+	 */
+	private TextRange(TextRange dummy) {
+		fOffset= -1;
+		fLength= -1;
 	}
 	
 	public static TextRange createFromStartAndInclusiveEnd(int start, int end) {
@@ -95,7 +105,17 @@ public final class TextRange {
 	 * @return a copy of this <code>TextRange</code>
 	 */
 	public TextRange copy() {
+		if (isUndefined())
+			return this;
 		return new TextRange(fOffset, fLength);
+	}
+	
+	/**
+	 * Returns <code>true</code> if this text range is the <code>UNDEFINED</code>
+	 * text range. Otherwise <code>false</code> is returned.
+	 */
+	public boolean isUndefined() {
+		return UNDEFINED == this;
 	}
 	
 	/* package */ boolean isInsertionPoint() {

@@ -46,7 +46,7 @@ public abstract class TextEdit {
 	 * Returns the <code>TextRange</code> that this text edit is going to
 	 * manipulate. If this method is called before the <code>TextEdit</code>
 	 * has been added to a <code>TextBufferEditor</code> it may return <code>
-	 * null</code> to indicate this situation.
+	 * null</code> or <code>TextRange.UNDEFINED</code> to indicate this situation.
 	 * 
 	 * @return the <code>TextRange</code>s this <code>TextEdit is going
 	 * 	to manipulate
