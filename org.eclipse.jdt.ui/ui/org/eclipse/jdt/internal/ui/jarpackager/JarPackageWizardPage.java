@@ -688,9 +688,9 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	 * Overrides method from WizardExportResourcePage
 	 */
 	protected void setupBasedOnInitialSelections() {
-		Iterator enum= fInitialSelection.iterator();
-		while (enum.hasNext()) {
-			Object selectedElement= enum.next();
+		Iterator iterator= fInitialSelection.iterator();
+		while (iterator.hasNext()) {
+			Object selectedElement= iterator.next();
 
 			if (selectedElement instanceof IResource && !((IResource)selectedElement).isAccessible())
 				continue;

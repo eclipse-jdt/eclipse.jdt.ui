@@ -114,8 +114,8 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		String message= NLSSearchMessages.getFormattedString("NLSSearchResultCollector.unusedKeys", fPropertiesFile.getName()); //$NON-NLS-1$
 		FileEntry groupElement= new FileEntry(fPropertiesFile, message);
 		
-		for (Enumeration enum= fProperties.propertyNames(); enum.hasMoreElements();) {
-			String propertyName= (String) enum.nextElement();
+		for (Enumeration enumeration= fProperties.propertyNames(); enumeration.hasMoreElements();) {
+			String propertyName= (String) enumeration.nextElement();
 			if (!fUsedPropertyNames.contains(propertyName)) {
 				addMatch(groupElement, propertyName);
 				hasUnused= true;
