@@ -16,6 +16,8 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,16 +35,24 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodRef;
+import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -52,6 +62,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -66,6 +77,9 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -143,13 +157,17 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		IASTFragment fragment= ASTFragmentFactory.createFragmentForSourceRange(
 				new SourceRange(fSelectionStart, fSelectionLength), fSource.getRoot(), fSource.getCu());
 		
-		if (fragment instanceof IExpressionFragment) {
-			//TODO: doesn't handle selection of partial Expressions
-			Expression expression= ((IExpressionFragment) fragment).getAssociatedExpression();
-			if (fragment.getStartPosition() == expression.getStartPosition()
-					&& fragment.getLength() == expression.getLength())
-				fSelectedExpression= expression;
-		}
+		if (! (fragment instanceof IExpressionFragment))
+			return;
+		
+		//TODO: doesn't handle selection of partial Expressions
+		Expression expression= ((IExpressionFragment) fragment).getAssociatedExpression();
+		if (fragment.getStartPosition() != expression.getStartPosition()
+				|| fragment.getLength() != expression.getLength())
+			return;
+		
+		//TODO: exclude invalid selections
+		fSelectedExpression= expression;
 	}
 	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) {
@@ -338,21 +356,78 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 	
 	private void changeSource() {
-		AST ast= fSource.getRoot().getAST();
+		//TODO: for constructors, must update implicit super(..) calls in some subclasses' constructors 
+		replaceSelectedExpression();		
+		addParameter();
+		addJavadoc();
+	}
+	
+	private void replaceSelectedExpression() {
+		ASTNode newExpression= fSource.getRoot().getAST().newSimpleName(fParameterName);
+		String description= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.replace"); //$NON-NLS-1$
+		fSource.getASTRewrite().replace(fSelectedExpression, newExpression, fSource.createGroupDescription(description));
+	}
 
-		//replace selected expression
-		ASTNode newExpression= ast.newSimpleName(fParameterName);
-		fSource.getASTRewrite().replace(fSelectedExpression, newExpression,
-				fSource.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.replace"))); //$NON-NLS-1$
+	private void addParameter() {
+		AST ast= fSource.getRoot().getAST();
+		ASTRewrite astRewrite= fSource.getASTRewrite();
 		
-		//add parameter
 		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		param.setName(ast.newSimpleName(fParameterName));
 		String type= fSource.getImportRewrite().addImport(fSelectedExpression.resolveTypeBinding());
-		param.setType((Type) fSource.getASTRewrite().createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
-		fMethodDeclaration.parameters().add(param);
-		fSource.getOldRewrite().markAsInserted(param,
-				fSource.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_parameter"))); //$NON-NLS-1$
+		param.setType((Type) astRewrite.createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
+		ListRewrite parameters= astRewrite.getListRewrite(fMethodDeclaration, MethodDeclaration.PARAMETERS_PROPERTY);
+		String description= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_parameter"); //$NON-NLS-1$
+		parameters.insertLast(param, fSource.createGroupDescription(description));
+	}
+
+	/**
+	 * @return method has javadoc && (method had no parameter before || there is already an @param tag)
+	 */
+	private boolean shouldAddParamJavadoc() {
+		Javadoc javadoc= fMethodDeclaration.getJavadoc();
+		if (javadoc == null)
+			return false;
+		if (fMethodDeclaration.parameters().size() == 0)
+			return true;
+		List tags= javadoc.tags();
+		for (Iterator iter= tags.iterator(); iter.hasNext();) {
+			TagElement element= (TagElement) iter.next();
+			if (TagElement.TAG_PARAM.equals(element.getTagName()))
+				return true;
+		}
+		return false;
+	}
+
+	private void addJavadoc() {
+		if (! shouldAddParamJavadoc())
+			return;
+		
+		ListRewrite tagsRewrite= fSource.getASTRewrite().getListRewrite(fMethodDeclaration.getJavadoc(), Javadoc.TAGS_PROPERTY);
+		HashSet leadingNames= new HashSet();
+		for (Iterator iter= fMethodDeclaration.parameters().iterator(); iter.hasNext();) {
+			SingleVariableDeclaration curr= (SingleVariableDeclaration) iter.next();
+			leadingNames.add(curr.getName().getIdentifier());
+		}
+		JavadocTagsSubProcessor.insertTag(tagsRewrite, createParamTag(fParameterName), leadingNames);
+	}
+	
+	//TODO: is a copy of ChangeSignatureRefactoring.DeclarationUpdate#createParamTag(..)
+	private TagElement createParamTag(String name) {
+		AST ast= fSource.getASTRewrite().getAST();
+		TagElement paramNode= ast.newTagElement();
+		paramNode.setTagName(TagElement.TAG_PARAM);
+
+		SimpleName simpleName= ast.newSimpleName(name);
+		paramNode.fragments().add(simpleName);
+
+		TextElement textElement= ast.newTextElement();
+		String text= StubUtility.getTodoTaskTag(fSourceCU.getJavaProject());
+		if (text != null)
+			textElement.setText(text); //TODO: use template with {@todo} ...
+		paramNode.fragments().add(textElement);
+		
+		return paramNode;
 	}
 	
 	private RefactoringStatus changeReferences(SubProgressMonitor pm) throws CoreException {
@@ -374,26 +449,98 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 	
-	private static class ReferenceAnalyzer extends ASTVisitor {
+	private class ReferenceAnalyzer extends ASTVisitor {
 		private CompilationUnitRewrite fCURewrite;
 		private IMethodBinding fMethodBinding;
 		private Expression fExpression;
 
 		public ReferenceAnalyzer(CompilationUnitRewrite cuRewrite, IMethodBinding methodBinding, Expression expression) {
+			super(true);
 			fExpression= expression;
 			fCURewrite= cuRewrite;
 			fMethodBinding= methodBinding;
 		}
 		
+		private void addArgument(ASTRewrite astRewrite, ListRewrite argumentListRewrite) {
+			Expression argument;
+			if (fExpression.getAST() == astRewrite.getAST()) {
+				argument= (Expression) astRewrite.createCopyTarget(fExpression);
+			} else {
+				try {
+					String expression= fSource.getCu().getBuffer().getText(fExpression.getStartPosition(), fExpression.getLength());
+					argument= (Expression) astRewrite.createStringPlaceholder(expression, fExpression.getNodeType());
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+					argument= (Expression) ASTNode.copySubtree(fCURewrite.getRoot().getAST(), fExpression);
+				}
+			}
+			String description= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_argument"); //$NON-NLS-1$
+			argumentListRewrite.insertLast(argument, fCURewrite.createGroupDescription(description));
+		}
+
 		public boolean visit(MethodInvocation node) {
 			if (Bindings.equals(fMethodBinding, node.resolveMethodBinding())) {
 				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
-				Expression argument= (Expression) astRewrite.createCopyTarget(fExpression);
 				ListRewrite listRewrite= astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY);
-				listRewrite.insertLast(argument, 
-						fCURewrite.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_argument"))); //$NON-NLS-1$
+				addArgument(astRewrite, listRewrite);
 			}
 			return super.visit(node);
+		}
+		
+		public boolean visit(ClassInstanceCreation node) {
+			if (Bindings.equals(fMethodBinding, node.resolveConstructorBinding())) {
+				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
+				ListRewrite listRewrite= astRewrite.getListRewrite(node, ClassInstanceCreation.ARGUMENTS_PROPERTY);
+				addArgument(astRewrite, listRewrite);
+			}
+			return super.visit(node);
+		}
+		
+		public boolean visit(ConstructorInvocation node) {
+			if (Bindings.equals(fMethodBinding, node.resolveConstructorBinding())) {
+				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
+				ListRewrite listRewrite= astRewrite.getListRewrite(node, ConstructorInvocation.ARGUMENTS_PROPERTY);
+				addArgument(astRewrite, listRewrite);
+			}
+			return super.visit(node);
+		}
+		
+		public boolean visit(SuperMethodInvocation node) {
+			if (Bindings.equals(fMethodBinding, node.resolveMethodBinding())) {
+				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
+				ListRewrite listRewrite= astRewrite.getListRewrite(node, SuperMethodInvocation.ARGUMENTS_PROPERTY);
+				addArgument(astRewrite, listRewrite);
+			}
+			return super.visit(node);
+		}
+		
+		public boolean visit(SuperConstructorInvocation node) {
+			if (Bindings.equals(fMethodBinding, node.resolveConstructorBinding())) {
+				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
+				ListRewrite listRewrite= astRewrite.getListRewrite(node, SuperConstructorInvocation.ARGUMENTS_PROPERTY);
+				addArgument(astRewrite, listRewrite);
+			}
+			return super.visit(node);
+		}
+		
+		public boolean visit(MethodRef node) {
+			if (Bindings.equals(fMethodBinding, node.resolveBinding())) {
+				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
+				ListRewrite listRewrite= astRewrite.getListRewrite(node, MethodRef.PARAMETERS_PROPERTY);
+				
+				List parameters= listRewrite.getOriginalList();
+				MethodRefParameter newParam= astRewrite.getAST().newMethodRefParameter();
+				// only add name iff first parameter already has a name:
+				if (parameters.size() > 0)
+					if (((MethodRefParameter) parameters.get(0)).getName() != null)
+						newParam.setName(astRewrite.getAST().newSimpleName(fParameterName));
+				
+				String type= fCURewrite.getImportRewrite().addImport(fSelectedExpression.resolveTypeBinding());
+				newParam.setType((Type) astRewrite.createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
+				String description= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_javadoc_parameter"); //$NON-NLS-1$
+				listRewrite.insertLast(newParam, fCURewrite.createGroupDescription(description));
+			}
+			return false;
 		}
 	}
 	
@@ -404,8 +551,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 	
 	private ICompilationUnit[] findAffectedCompilationUnits(IProgressMonitor pm) throws CoreException {
-		IMethod method= Bindings.findMethod(fMethodDeclaration.resolveBinding(), fSourceCU.getJavaProject());
-		Assert.isTrue(method != null);
+		IMethod method= (IMethod) fSourceCU.getElementAt(fMethodDeclaration.getName().getStartPosition());
 		ICompilationUnit[] result= RefactoringSearchEngine.findAffectedCompilationUnits(
 			SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(method),
 			pm);

@@ -161,4 +161,16 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	public void testSimple_Formatting1() throws Exception {
 		performOK();
 	}
+	
+	public void testSimple_Javadoc1() throws Exception {
+		performOK();
+	}
+
+	public void testSimple_Javadoc2() throws Exception {
+		performOK();
+	}
+	
+	public void testSimple_Constructor1() throws Exception {
+		performOK();
+	}
 }
