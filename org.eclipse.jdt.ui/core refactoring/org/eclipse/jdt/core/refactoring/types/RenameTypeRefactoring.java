@@ -131,10 +131,10 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				result.addError("Type " + getType().getFullyQualifiedName() + " encloses a type named " + fNewName);
 			pm.worked(1);	
 			if (typeNameExistsInPackage(getType().getPackageFragment(), fNewName))
-				result.addError("Type " + fNewName + " already exists in package " + getType().getPackageFragment().getElementName());
+				result.addError("Type named " + fNewName + " already exists in package " + getType().getPackageFragment().getElementName());
 			pm.worked(1);	
 			if (compilationUnitImportsType(getType().getCompilationUnit(), fNewName))	
-				result.addError("Type " + fNewName + " is imported (single-type-import) in " + getResource(getType()).getFullPath() + " (a compilation unit must not import and declare a type with the same name)");
+				result.addError("Type named " + fNewName + " is imported (single-type-import) in " + getResource(getType()).getFullPath() + " (a compilation unit must not import and declare a type with the same name)");
 			pm.worked(1);	
 			result.merge(Checks.checkForNativeMethods(getType()));
 			pm.worked(1);	
@@ -204,12 +204,14 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		RefactoringStatus result= new RefactoringStatus();
 		if (Checks.isTopLevel(getType())){
 			ICompilationUnit cu= (ICompilationUnit)getType().getParent();
-			HackFinder.fixMeSoon("ICompilation unit feature - walkback if not simple name");
+			/*
+			 * ICompilationUnit.getType feature - walkback if not simple name
+			 */ 
 			if ((fNewName.indexOf(".") == -1) && cu.getType(fNewName).exists())
-				result.addError("Type " + fNewName + " already exists in " + cu.getElementName());
+				result.addError("Type " + fNewName + " already exists in \"" + cu.getElementName() +"\"");
 		} else {
 			if (getType().getDeclaringType().getType(fNewName).exists())
-				result.addError("Member type " + fNewName + " already exists in " + getType().getDeclaringType().getFullyQualifiedName());
+				result.addError("Another member type " + fNewName + " already exists in " + getType().getDeclaringType().getFullyQualifiedName());
 		}
 		return result;
 	}
@@ -229,7 +231,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				if (typeDeclaration.methods != null){
 					for (int i=0; i < typeDeclaration.methods.length; i++){
 						if (typeDeclaration.methods[i].isNative())
-							result.addWarning("A local type enclosed in type " + type.getElementName() + " declares a native method");
+							result.addWarning("A local type enclosed in type " + type.getElementName() + " declares a native method. Renaming will cause UnsatisfiedLinkError on runtime.");
 					}	
 				}	
 				return true;
@@ -242,7 +244,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				if (typeDeclaration.methods != null){
 					for (int i=0; i < typeDeclaration.methods.length; i++){
 						if (typeDeclaration.methods[i].isNative())
-							result.addWarning("A type enclosed in type " + type.getElementName() + " declares a native method");
+							result.addWarning("A type enclosed in type " + type.getElementName() + " declares a native method. Renaming will cause UnsatisfiedLinkError on runtime.");
 					}	
 				}	
 				return true;
@@ -290,7 +292,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		for (int i= 0; i < types.length; i++) {
 			//could this be a problem (same package imports)?
 			if (Flags.isPublic(types[i].getFlags()) && types[i].getElementName().equals(fNewName)){
-				result.addError("Possible name conflict with " + types[i].getFullyQualifiedName() + " in " + getFullPath(getCompilationUnit(imp)));
+				result.addError("Name conflict with type" + types[i].getFullyQualifiedName() + " in " + getFullPath(getCompilationUnit(imp)));
 			}
 		}
 	}
@@ -301,7 +303,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		if (!imp.isOnDemand()){
 			IType importedType= (IType)JavaModelUtility.convertFromImportDeclaration(imp);
 			if (name.substring(name.lastIndexOf(".") + 1).equals(fNewName))
-				result.addError("Possible name conflict with " + importedType.getFullyQualifiedName() + " in "+ getFullPath(getCompilationUnit(imp)));
+				result.addError("Name conflict with type" + importedType.getFullyQualifiedName() + " in "+ getFullPath(getCompilationUnit(imp)));
 			return;
 		}
 		IJavaElement imported= JavaModelUtility.convertFromImportDeclaration(imp);
@@ -373,13 +375,14 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	 */
 	private RefactoringStatus analyzeCompilationUnit(ICompilationUnit cu) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		HackFinder.fixMeSoon("ICompilation unit feature - walkback if not simple name");
-		String name;
+		/*
+		 * ICompilationUnit.getType feature - walkback if not simple name
+		 */ 
+		String name= fNewName;
 		if (fNewName.indexOf(".") != -1)
 			name= fNewName.substring(0, fNewName.indexOf("."));
-		else name= fNewName;	
 		if (cu.getType(name).exists())
-			result.addError("Possible name conflict with type " + fNewName + " declared in \"" + getResource(cu).getFullPath() + "\"");
+			result.addError("Name conflict with type " + fNewName + " declared in \"" + getResource(cu).getFullPath() + "\"");
 		return result;
 	}
 	
@@ -441,7 +444,6 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			builder.addChange(change);
 			pm.worked(1);
 		}
-		HackFinder.fixMeSoon("maybe add dispose() method?");
 		fOccurrences= null; //to prevent memory leak
 	}
 	
