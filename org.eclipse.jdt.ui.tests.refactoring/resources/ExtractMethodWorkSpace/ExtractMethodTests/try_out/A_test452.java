@@ -7,6 +7,7 @@ public class A_test452 {
 		} catch (IOException e) {
 		}
 	}
+
 	protected void extracted() throws IOException {
 		g();
 	}
