@@ -199,18 +199,17 @@ public class InferTypeArgumentsConstraintsSolver {
 	}
 	
 	public static TType getChosenType(ConstraintVariable2 cv) {
-		if (cv instanceof CollectionElementVariable2) {
-			CollectionElementVariable2 collectionElementCv= (CollectionElementVariable2) cv;
-			TypeEquivalenceSet set= collectionElementCv.getTypeEquivalenceSet();
-			if (set == null) { //TODO: should not have to set this here. Clean up when caching chosen type
-				// no representative == no restriction
-				set= new TypeEquivalenceSet(collectionElementCv);
-				set.setTypeEstimate(TypeSet.getTypeUniverse());
-				collectionElementCv.setTypeEquivalenceSet(set);
-			}
-			return collectionElementCv.getTypeEstimate().chooseSingleType();
+		TType type= (TType) cv.getData(TYPE_ESTIMATE);
+		if (type != null)
+			return type;
+		TypeEquivalenceSet set= cv.getTypeEquivalenceSet();
+		if (set == null) { //TODO: should not have to set this here. Clean up when caching chosen type
+			// no representative == no restriction
+			set= new TypeEquivalenceSet(cv);
+			set.setTypeEstimate(TypeSet.getTypeUniverse());
+			cv.setTypeEquivalenceSet(set);
 		}
-		return (TType) cv.getData(TYPE_ESTIMATE);
+		return cv.getTypeEstimate().chooseSingleType();
 	}
 
 	private static void setChosenType(ConstraintVariable2 cv, TType type) {

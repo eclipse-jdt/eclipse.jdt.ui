@@ -270,8 +270,7 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	}
 	
 	public void testCuCollectionsMin() throws Exception {
-		printTestDisabledMessage("inference of method type arguments does not work yet");
-//		performCuOK(); //TODO
+		performCuOK();
 	}
 	
 	public void testCuAddStringInteger() throws Exception {

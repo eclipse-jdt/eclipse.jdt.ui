@@ -34,6 +34,14 @@ public class TTypes {
 //TODO: Ask JDT/Core for API for this?
 	
 	public static TType mostSpecificCommonType(TType[] types) {
+		//TODO: support for type variable bounds missing (e.g. for Collections.min(...)...)
+		ArrayList types2= new ArrayList();
+		for (int i= 0; i < types.length; i++) {
+			if (! types[i].isTypeVariable())
+				types2.add(types[i]);
+		}
+		types= (TType[]) types2.toArray(new TType[types2.size()]);
+		
 		//workaround for bug 77929 Augment Raw Container Clients is not deterministic
 		Arrays.sort(types, new Comparator() {
 			public int compare(Object o1, Object o2) {

@@ -308,7 +308,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables= createMethodTypeParameters(methodBinding);
 		doVisitMethodInvocationReturnType(node, methodBinding, receiver, methodTypeVariables);
 		List arguments= node.arguments();
-		doVisitMethodInvocationArguments(methodBinding, arguments, receiver, methodTypeVariables);
+		doVisitMethodInvocationArguments(methodBinding, arguments, receiver, methodTypeVariables, null);
 		
 	}
 
@@ -394,13 +394,12 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		}
 	}
 
-	private void doVisitMethodInvocationArguments(IMethodBinding methodBinding, List arguments, Expression receiver, Map methodTypeVariables) {
+	private void doVisitMethodInvocationArguments(IMethodBinding methodBinding, List arguments, Expression receiver, Map methodTypeVariables, Type createdType) {
 		//TODO: connect generic method type parameters, e.g. <T> void take(T t, List<T> ts)
 		ITypeBinding[] declaredParameterTypes= methodBinding.getMethodDeclaration().getParameterTypes();
 		for (int i= 0; i < declaredParameterTypes.length; i++) {
 			ITypeBinding declaredParameterType= declaredParameterTypes[i];
 			if (declaredParameterType.isTypeVariable()) {
-				ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
 				Expression arg= (Expression) arguments.get(i);
 				ConstraintVariable2 argCv= getConstraintVariable(arg);
 				
@@ -410,25 +409,33 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 					fTCModel.createSubtypeConstraint(argCv, methodTypeVariableCv);
 					
 				} else {
-					if (receiver == null) //TODO: ???
-						continue;
-					//e.g. "Collection<E>: boolean add(E o)"
-					ConstraintVariable2 elementCv= fTCModel.getElementVariable(expressionCv, declaredParameterType);
-
-					//	//TypeVariableConstraintVariable2 typeVariableCv= fTCModel.makeTypeVariableVariable(declaredParameterType);
-					//				ConstraintVariable2 elementCv= fTCModel.makeElementVariable(expressionCv, typeVariableCv);
-					//TODO: Somebody must connect typeVariableCv to corresponding typeVariableCVs of supertypes.
-					//- Do only once for binaries.
-					//- Do when passing for sources.
-					//- Keep a flag in CV whether done?
-					//- Do in one pass over all TypeVarCvs at the end?
-
-					// [arg] <= Elem[receiver]:
-					fTCModel.createSubtypeConstraint(argCv, elementCv);
+					if (createdType != null) {
+						//e.g. Tuple<T1, T2>: constructor Tuple(T1 t1, T2 t2)
+						ConstraintVariable2 createdTypeCv= getConstraintVariable(createdType);
+						ConstraintVariable2 elementCv= fTCModel.getElementVariable(createdTypeCv, declaredParameterType);
+						// [arg] <= Elem[createdType]:
+						fTCModel.createSubtypeConstraint(argCv, elementCv);
+					}
+					if (receiver != null) {
+						//e.g. "Collection<E>: boolean add(E o)"
+						ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
+						ConstraintVariable2 elementCv= fTCModel.getElementVariable(expressionCv, declaredParameterType);
+	
+						//	//TypeVariableConstraintVariable2 typeVariableCv= fTCModel.makeTypeVariableVariable(declaredParameterType);
+						//				ConstraintVariable2 elementCv= fTCModel.makeElementVariable(expressionCv, typeVariableCv);
+						//TODO: Somebody must connect typeVariableCv to corresponding typeVariableCVs of supertypes.
+						//- Do only once for binaries.
+						//- Do when passing for sources.
+						//- Keep a flag in CV whether done?
+						//- Do in one pass over all TypeVarCvs at the end?
+	
+						// [arg] <= Elem[receiver]:
+						fTCModel.createSubtypeConstraint(argCv, elementCv);
+					} else {
+						//TODO: ???
+					}
 				}
 			} else if (declaredParameterType.isParameterizedType()) {
-				if (receiver == null) //TODO: ???
-					continue;
 				Expression arg= (Expression) arguments.get(i);
 				ConstraintVariable2 argCv= getConstraintVariable(arg);
 				ITypeBinding[] typeArguments= declaredParameterType.getTypeArguments();
@@ -449,8 +456,21 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 //								fTCModel.createSubtypeConstraint(methodTypeVariableCv, argElementCv);
 								
 							} else {
-								//e.g. Collection<E>: boolean addAll(Collection<? extends E> c)
-								//TODO
+								if (createdType != null) {
+									CollectionElementVariable2 argElementCv= fTCModel.getElementVariable(argCv, typeParameters[ta]);
+									ConstraintVariable2 createdTypeCv= getConstraintVariable(createdType);
+									ConstraintVariable2 elementCv= fTCModel.getElementVariable(createdTypeCv, declaredParameterType);
+									fTCModel.createEqualsConstraint(argElementCv, elementCv);
+								}
+								if (receiver != null) {
+									//e.g. Collection<E>: boolean addAll(Collection<? extends E> c)
+									CollectionElementVariable2 argElementCv= fTCModel.getElementVariable(argCv, typeParameters[ta]);
+									ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
+									ConstraintVariable2 elementCv= fTCModel.getElementVariable(expressionCv, declaredParameterType);
+									fTCModel.createSubtypeConstraint(argElementCv, elementCv);
+								} else {
+									//TODO: ???
+								}
 							}
 						
 						} else {
@@ -492,14 +512,15 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 
 	public void endVisit(ClassInstanceCreation node) {
 		Expression receiver= node.getExpression();
+		Type createdType= node.getType();
 		
-		TypeVariable2 typeCv= (TypeVariable2) getConstraintVariable(node.getType());
+		TypeVariable2 typeCv= (TypeVariable2) getConstraintVariable(createdType);
 		setConstraintVariable(node, typeCv);
 		
 		IMethodBinding methodBinding= node.resolveConstructorBinding();
 		Map methodTypeVariables= createMethodTypeParameters(methodBinding);
 		List arguments= node.arguments();
-		doVisitMethodInvocationArguments(methodBinding, arguments, receiver, methodTypeVariables);
+		doVisitMethodInvocationArguments(methodBinding, arguments, receiver, methodTypeVariables, createdType);
 		//TODO: return type?
 	}
 	
