@@ -283,6 +283,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 		store.setDefault(IPreferencesConstants.ATTACH_LAUNCH_PORT, "8000");
 		store.setDefault(IPreferencesConstants.ATTACH_LAUNCH_HOST, "localhost");
 		
+		store.setDefault(IPreferencesConstants.EDITOR_SHOW_HOVER, true);
+		store.setDefault(IPreferencesConstants.EDITOR_SHOW_SEGMENTS, false);
+		
 		JavaBasePreferencePage.initDefaults(store);
 		ImportOrganizePreferencePage.initDefaults(store);
 		ClasspathVariablesPreferencePage.initDefaults(store);

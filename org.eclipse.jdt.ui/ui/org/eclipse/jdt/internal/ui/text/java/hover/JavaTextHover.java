@@ -15,7 +15,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
+import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
 /**
@@ -68,16 +68,13 @@ public class JavaTextHover implements ITextHover {
 		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 		 */
 		public void propertyChange(PropertyChangeEvent event) {
-			if (ENABLED.equals(event.getProperty())) {
+			if (IPreferencesConstants.EDITOR_SHOW_HOVER.equals(event.getProperty())) {
 				Object newValue= event.getNewValue();
 				if (newValue instanceof Boolean)
 					fEnabled= ((Boolean) newValue).booleanValue();
 			}
 		}
 	};
-	
-	
-	public final static String ENABLED= "JavaTextHover.isEnabled";
 	
 	
 	protected IEditorPart fEditor;
@@ -103,7 +100,7 @@ public class JavaTextHover implements ITextHover {
 			fPropertyChangeListener= new PropertyChangeListener();
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			store.addPropertyChangeListener(fPropertyChangeListener);
-			fEnabled= store.getBoolean(ENABLED);
+			fEnabled= store.getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
 			
 			update();
 		}

@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover;
+import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover;
 
 
 /**
@@ -19,13 +19,20 @@ public class ToggleTextHoverAction extends TextEditorAction {
 	private IPreferenceStore fStore;
 	private boolean fIsEnabled;
 	
+	private String fToolTipChecked;
+	private String fToolTipUnchecked;
+	
 	
 	/**
 	 * Constructs and updates the action.
 	 */
 	public ToggleTextHoverAction(ResourceBundle bundle, String prefix) {
 		super(bundle, prefix, null);
+		
 		JavaPluginImages.setImageDescriptors(this, "tool16", "format_edit.gif");
+		
+		fToolTipChecked= getString(bundle, prefix + "tooltip.checked", prefix + "tooltip.checked");
+		fToolTipUnchecked= getString(bundle, prefix + "tooltip.unchecked", prefix + "tooltip.unchecked");
 	}
 	
 	private IPreferenceStore getStore() {
@@ -34,21 +41,27 @@ public class ToggleTextHoverAction extends TextEditorAction {
 		return fStore;
 	}
 	
+	private String getToolTipText(boolean checked) {
+		return checked ? fToolTipChecked : fToolTipUnchecked;
+	}
+	
 	/**
 	 * @see IAction#actionPerformed
 	 */
 	public void run() {
 		fIsEnabled= !fIsEnabled;
-		getStore().setValue(JavaTextHover.ENABLED, fIsEnabled);
+		getStore().setValue(IPreferencesConstants.EDITOR_SHOW_HOVER, fIsEnabled);
 		setChecked(fIsEnabled);
+		setToolTipText(getToolTipText(fIsEnabled));
 	}
 	
 	/**
 	 * @see TextEditorAction#update
 	 */
 	public void update() {
-		fIsEnabled= getStore().getBoolean(JavaTextHover.ENABLED);
+		fIsEnabled= getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
 		setChecked(fIsEnabled);
+		setToolTipText(getToolTipText(fIsEnabled));
 		setEnabled(true);
 	}
 	

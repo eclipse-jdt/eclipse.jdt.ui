@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.text.IRegion;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.text.IRegion;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 /**
@@ -15,16 +15,21 @@ import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenc
  * only or always the whole document.
  */
 public class TogglePresentationAction extends TextEditorAction {
-	
-	private final static String SHOW_SEGMENTS= "TooglePresentationAction.show_segments";
-	
-	
+		
+	private String fToolTipChecked;
+	private String fToolTipUnchecked;
+
 	/**
 	 * Constructs and updates the action.
 	 */
 	public TogglePresentationAction(ResourceBundle bundle, String prefix) {
 		super(bundle, prefix, null);
+		
 		JavaPluginImages.setImageDescriptors(this, "tool16", "segment_edit.gif");
+		
+		fToolTipChecked= getString(bundle, prefix + "tooltip.checked", prefix + "tooltip.checked");
+		fToolTipUnchecked= getString(bundle, prefix + "tooltip.unchecked", prefix + "tooltip.unchecked");
+		
 		update();
 	}
 	
@@ -42,13 +47,18 @@ public class TogglePresentationAction extends TextEditorAction {
 		
 		boolean showAll= !editor.showsHighlightRangeOnly();
 		setChecked(showAll);
+		setToolTipText(getToolTipText(showAll));
 		
 		editor.showHighlightRangeOnly(showAll);
 		if (remembered != null)
 			editor.setHighlightRange(remembered.getOffset(), remembered.getLength(), true);
 		
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(SHOW_SEGMENTS, showAll);
+		store.setValue(IPreferencesConstants.EDITOR_SHOW_SEGMENTS, showAll);
+	}
+	
+	private String getToolTipText(boolean checked) {
+		return checked ? fToolTipChecked : fToolTipUnchecked;
 	}
 	
 	/**
@@ -56,7 +66,9 @@ public class TogglePresentationAction extends TextEditorAction {
 	 */
 	public void update() {
 		ITextEditor editor= getTextEditor();
-		setChecked(editor != null && editor.showsHighlightRangeOnly());
+		boolean checked= (editor != null && editor.showsHighlightRangeOnly());
+		setChecked(checked);
+		setToolTipText(getToolTipText(checked));
 		setEnabled(true);
 	}
 	
@@ -69,10 +81,12 @@ public class TogglePresentationAction extends TextEditorAction {
 		
 		if (editor != null) {
 			
-			boolean showSegments= JavaPlugin.getDefault().getPreferenceStore().getBoolean(SHOW_SEGMENTS);
+			boolean showSegments= JavaPlugin.getDefault().getPreferenceStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_SEGMENTS);
 			
-			if (isChecked() != showSegments)
+			if (isChecked() != showSegments) {
 				setChecked(showSegments);
+				setToolTipText(getToolTipText(showSegments));
+			}
 			
 			if (editor.showsHighlightRangeOnly() != showSegments) {
 				IRegion remembered= editor.getHighlightRange();
