@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 public class AnnotationHover extends AbstractJavaEditorTextHover {
 
-	private IPreferenceStore fStore= JavaPlugin.getDefault().getPreferenceStore();
+	private IPreferenceStore fStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 	private DefaultMarkerAnnotationAccess fAnnotationAccess= new DefaultMarkerAnnotationAccess();
 	
 	/*

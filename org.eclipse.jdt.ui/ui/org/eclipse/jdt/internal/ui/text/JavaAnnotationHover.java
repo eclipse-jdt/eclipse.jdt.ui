@@ -48,7 +48,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	public static final JavaAnnotationHoverType TEXT_RULER_HOVER= new JavaAnnotationHoverType();
 	public static final JavaAnnotationHoverType VERTICAL_RULER_HOVER= new JavaAnnotationHoverType();
 	
-	private IPreferenceStore fStore= JavaPlugin.getDefault().getPreferenceStore();
+	private IPreferenceStore fStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 	
 	private JavaAnnotationHoverType fType;
 	
