@@ -1692,14 +1692,6 @@
 		id="org.eclipse.jdt.ui.category.refactoring">
 	</category>
       
-	<scope
-		name="%scope.javaEditor.name"
-		parent="org.eclipse.ui.textEditorScope"
-		description="%scope.javaEditor.description"
-		id="org.eclipse.jdt.ui.javaEditorScope">
-	</scope>
-
-      
 <!-- edit -->
 
 	<command
