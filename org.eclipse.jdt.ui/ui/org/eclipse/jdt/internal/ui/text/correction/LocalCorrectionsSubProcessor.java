@@ -38,9 +38,9 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ListRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
@@ -72,17 +72,29 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		Expression nodeToCast= (Expression) selectedNode;
+		Name receiverNode= null;
+		ITypeBinding castTypeBinding= null;
 		
 		int parentNodeType= selectedNode.getParent().getNodeType();
 		if (parentNodeType == ASTNode.ASSIGNMENT) {
 			Assignment assign= (Assignment) selectedNode.getParent();
-			if (selectedNode.equals(assign.getLeftHandSide())) {
+			Expression leftHandSide= assign.getLeftHandSide();
+			if (selectedNode.equals(leftHandSide)) {
 				nodeToCast= assign.getRightHandSide();
+			}
+			castTypeBinding= assign.getLeftHandSide().resolveTypeBinding();
+			if (leftHandSide instanceof Name) {
+				receiverNode= (Name) leftHandSide;
 			}
 		} else if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) selectedNode.getParent();
 			if (selectedNode.equals(frag.getName())) {
 				nodeToCast= frag.getInitializer();
+				IVariableBinding varBinding= frag.resolveBinding();
+				if (varBinding != null) {
+					castTypeBinding= varBinding.getType();
+				}
+				receiverNode= frag.getName();
 			}
 		}
 
@@ -131,41 +143,66 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 
-		if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			VariableDeclarationFragment fragment= (VariableDeclarationFragment) selectedNode.getParent();
-			ASTNode parent= fragment.getParent();
-
-			Type typeNode= null;			
-			if (parent instanceof VariableDeclarationStatement) {
-				VariableDeclarationStatement stmt= (VariableDeclarationStatement) parent;
-				if (stmt.fragments().size() == 1) {
-					typeNode= stmt.getType();
-				}
-			} else if (parent instanceof FieldDeclaration) {
-				FieldDeclaration decl= (FieldDeclaration) parent;
-				if (decl.fragments().size() == 1) {
-					typeNode= decl.getType();
-				}
+		if (receiverNode != null) {
+			currBinding= Bindings.normalizeTypeBinding(currBinding);
+			if (currBinding == null) {
+				currBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			}
-			
-			if (typeNode != null) {
-				currBinding= Bindings.normalizeTypeBinding(currBinding);
-				if (currBinding == null) {
-					currBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-				}
-							
-				ImportRewrite importRewrite= new ImportRewrite(cu);
-				String typeName= importRewrite.addImport(currBinding);
+			addChangeSenderTypeProposals(context, receiverNode, currBinding, true, 4, proposals);
+		}
+		
+		
+		if (castTypeBinding != null) {
+			addChangeSenderTypeProposals(context, nodeToCast, castTypeBinding, false, 5, proposals);
+		}
+	}
 	
-				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changevartype.description", typeName); //$NON-NLS-1$
-				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, typeNode.getStartPosition(), typeNode.getLength(), typeName, 5);
-				varProposal.setImportRewrite(importRewrite);
-				
-				proposals.add(varProposal);
+	public static void addChangeSenderTypeProposals(IInvocationContext context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean offerSuperTypeProposals, int relevance, Collection proposals) throws JavaModelException {
+		IBinding callerBinding= null;
+		switch (nodeToCast.getNodeType()) {
+			case ASTNode.METHOD_INVOCATION:
+				callerBinding= ((MethodInvocation) nodeToCast).resolveMethodBinding();
+				break;
+			case ASTNode.SUPER_METHOD_INVOCATION:
+				callerBinding= ((SuperMethodInvocation) nodeToCast).resolveMethodBinding();
+				break;			
+			case ASTNode.FIELD_ACCESS:
+				callerBinding= ((FieldAccess) nodeToCast).resolveFieldBinding();
+				break;
+			case ASTNode.SUPER_FIELD_ACCESS:
+				callerBinding= ((SuperFieldAccess) nodeToCast).resolveFieldBinding();
+				break;
+			case ASTNode.SIMPLE_NAME:
+			case ASTNode.QUALIFIED_NAME:
+				callerBinding= ((Name) nodeToCast).resolveBinding();
+				break;
+		}
+		
+		ICompilationUnit cu= context.getCompilationUnit();
+		CompilationUnit astRoot= context.getASTRoot();
+		
+		ICompilationUnit targetCu= null;
+		ITypeBinding declaringType= null;
+		if (callerBinding instanceof IVariableBinding) {
+			IVariableBinding variableBinding= (IVariableBinding) callerBinding;
+			if (!variableBinding.isField()) {
+				targetCu= cu;
+			} else {
+				declaringType= variableBinding.getDeclaringClass();
+			}
+		} else if (callerBinding instanceof IMethodBinding) {
+			IMethodBinding methodBinding= (IMethodBinding) callerBinding;
+			if (!methodBinding.isConstructor()) {
+				declaringType= methodBinding.getDeclaringClass();
 			}
 		}
-			
-	}	
+		if (declaringType != null && declaringType.isFromSource()) {
+			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
+		}
+		if (targetCu != null) {
+			proposals.add(new TypeChangeCompletionProposal(targetCu, callerBinding, astRoot, castTypeBinding, offerSuperTypeProposals, relevance));
+		}
+	}
 
 	private static boolean canCast(String castTarget, ITypeBinding bindingToCast) {
 		bindingToCast= Bindings.normalizeTypeBinding(bindingToCast);
@@ -352,7 +389,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 	
 	private static void addExceptionTypeLinkProposals(LinkedCorrectionProposal proposal, ITypeBinding exc, String key) {
-		// all superclasses except Object
+		// all super classes except Object
 		while (exc != null && !"java.lang.Object".equals(exc.getQualifiedName())) { //$NON-NLS-1$
 			proposal.addLinkedPositionProposal(key, exc);
 			exc= exc.getSuperclass();
