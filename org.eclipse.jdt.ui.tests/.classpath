@@ -18,5 +18,6 @@
     <classpathentry kind="var" path="JRE_LIB" rootpath="src" sourcepath="JRE_SRC"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
     <classpathentry kind="src" path="/org.eclipse.ui.test.harness"/>
+    <classpathentry kind="src" path="Java UI Examples"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
