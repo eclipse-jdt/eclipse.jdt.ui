@@ -11,7 +11,12 @@
 package org.eclipse.jdt.text.tests.performance;
 
 
+import java.util.ArrayList;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
@@ -38,6 +43,14 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.ITypeNameRequestor;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 
 
@@ -46,6 +59,13 @@ import org.eclipse.jdt.internal.ui.text.JavaReconciler;
  */
 public class EditorTestHelper {
 
+	private static class Requestor implements ITypeNameRequestor {
+		public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+		}
+		public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+		}
+	}
+	
 	public static IEditorPart openInEditor(IFile file, boolean runEventLoop) throws PartInitException {
 		IEditorPart part= IDE.openEditor(getActivePage(), file);
 		if (runEventLoop)
@@ -114,6 +134,39 @@ public class EditorTestHelper {
 		return window != null ? window.getShell().getDisplay() : null;
 	}
 
+	public void joinBackgroundActivities(SourceViewer sourceViewer) throws CoreException {
+		joinBackgroundActivities();
+		joinReconciler(sourceViewer, 0, Long.MAX_VALUE, 500);
+	}
+	
+	public void joinBackgroundActivities() throws CoreException {
+		// Join Building
+		boolean interrupted= true;
+		while (interrupted) {
+			try {
+				Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+				interrupted= false;
+			} catch (InterruptedException e) {
+				interrupted= true;
+			}
+		}
+		// Join indexing
+		new SearchEngine().searchAllTypeNames(
+			null,
+			null,
+			SearchPattern.R_EXACT_MATCH,
+			IJavaSearchConstants.CLASS,
+			SearchEngine.createJavaSearchScope(new IJavaElement[0]),
+			new Requestor(),
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+			null);
+		// Join all types cache
+		AllTypesCache.getTypes(SearchEngine.createJavaSearchScope(new IJavaElement[0]), 
+			IJavaSearchConstants.CLASS, new NullProgressMonitor(), new ArrayList());
+		// Join jobs
+		joinJobs(0, Long.MAX_VALUE, 500);
+	}
+	
 	public static boolean joinJobs(long minTime, long maxTime, long intervalTime) {
 		long startTime= System.currentTimeMillis() + minTime;
 		runEventQueue();
