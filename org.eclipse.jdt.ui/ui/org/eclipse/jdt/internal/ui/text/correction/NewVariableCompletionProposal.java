@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal {
 
@@ -34,14 +35,25 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 	private SimpleName fOriginalNode;
 	private ITypeBinding fSenderBinding;
 	
+	private GroupDescription fSelectionDescription;
+	
 	public NewVariableCompletionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, ITypeBinding senderBinding, int relevance, Image image) {
 		super(label, cu, null, relevance, image);
 	
 		fVariableKind= variableKind;
 		fOriginalNode= node;
 		fSenderBinding= senderBinding;
-	}
 		
+		fSelectionDescription= new GroupDescription("sel"); //$NON-NLS-1$
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
+	 */
+	protected GroupDescription getSelectionDescription() {
+		return fSelectionDescription;
+	}
+	
 	protected ASTRewrite getRewrite() throws CoreException {
 
 		CompilationUnit cu= ASTResolving.findParentCompilationUnit(fOriginalNode);
@@ -168,7 +180,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 							
 			decls.add(findInsertIndex(decls, node.getStartPosition()), newDecl);
 			
-			rewrite.markAsInserted(newDecl, SELECTION_GROUP_DESC);
+			rewrite.markAsInserted(newDecl, fSelectionDescription);
 			
 			return rewrite;
 		}

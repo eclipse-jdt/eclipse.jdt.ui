@@ -102,13 +102,13 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ArrayAccess right= (ArrayAccess) assignment.getRightHandSide();
 			
 			NumberLiteral name= ast.newNumberLiteral("1");
-			rewrite.markAsReplaced(left.getIndex(), name, "Replace left array index with 1");
+			rewrite.markAsReplaced(left.getIndex(), name);
 			
 			ASTNode placeHolder= rewrite.createCopy(left.getIndex());
-			rewrite.markAsReplaced(right.getIndex(), placeHolder, "Replace right array index with left array index");
+			rewrite.markAsReplaced(right.getIndex(), placeHolder);
 			
 			SimpleName newName= ast.newSimpleName("o");
-			rewrite.markAsReplaced(right.getArray(), newName, "Rename array");
+			rewrite.markAsReplaced(right.getArray(), newName);
 		}
 
 				

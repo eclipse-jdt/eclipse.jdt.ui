@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
@@ -41,13 +42,35 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	private ITypeBinding fSenderBinding;
 	private boolean fIsInDifferentCU;
 	
+	private GroupDescription fSelectionDescription;
+	private ArrayList fLinkedPositions;
+	
 	public NewMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode,  List arguments, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
 		
 		fNode= invocationNode;
 		fArguments= arguments;
 		fSenderBinding= binding;
+		
+		fLinkedPositions= new ArrayList();
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
+	 */
+	protected GroupDescription getSelectionDescription() {
+		return fSelectionDescription;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getLinkedRanges()
+	 */
+	protected GroupDescription[] getLinkedRanges() {
+		if (fLinkedPositions.isEmpty()) {
+			return null;
+		}
+		return (GroupDescription[]) fLinkedPositions.toArray(new GroupDescription[fLinkedPositions.size()]);
+	}	
 		
 	protected ASTRewrite getRewrite() throws CoreException {
 		
@@ -80,7 +103,28 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			} else {
 				members.add(newStub);
 			}
-			rewrite.markAsInserted(newStub, SELECTION_GROUP_DESC); 
+			rewrite.markAsInserted(newStub);
+
+			fSelectionDescription= new GroupDescription("sel"); //$NON-NLS-1$
+			GroupDescription link1= new GroupDescription("link1"); //$NON-NLS-1$
+			GroupDescription link2= new GroupDescription("link2"); //$NON-NLS-1$
+			GroupDescription link3= new GroupDescription("link3"); //$NON-NLS-1$
+			fLinkedPositions.add(link1);
+			fLinkedPositions.add(link2);
+			fLinkedPositions.add(link3);
+			
+			rewrite.markAsTracked(newStub.getName(), link2); //$NON-NLS-1$\
+			if (!newStub.isConstructor()) {
+				rewrite.markAsTracked(newStub.getReturnType(), link1); //$NON-NLS-1$\
+			}
+		
+			if (!fIsInDifferentCU) {
+				rewrite.markAsTracked(fNode, fSelectionDescription);
+				Name invocationName= getInvocationName();
+				if (invocationName != null) {
+					rewrite.markAsTracked(invocationName, link3); //$NON-NLS-1$\
+				}
+			}			
 			return rewrite;
 		}
 		return null;
@@ -202,7 +246,19 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			}
 		}
 		return lastMethod;
-	}	
+	}
+	
+	private Name getInvocationName() {
+		if (fNode instanceof MethodInvocation) {
+			return ((MethodInvocation)fNode).getName();
+		} else if (fNode instanceof SuperMethodInvocation) {
+			return ((SuperMethodInvocation)fNode).getName();
+		} else if (fNode instanceof ClassInstanceCreation) {
+			return ((ClassInstanceCreation)fNode).getName();
+		}		
+		return null;
+	}
+	
 	
 	private String getMethodName() {
 		if (fNode instanceof MethodInvocation) {

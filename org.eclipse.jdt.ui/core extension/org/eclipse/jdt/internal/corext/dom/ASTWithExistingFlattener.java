@@ -65,6 +65,9 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite.TrackData;
 		for (int i= 0, k= 0; i < nExistingNodes; i++) {
 			int startPos= markers[i].offset;
 			int length= markers[i].length;
+			if (length == -1) {
+				startPos--;
+			}
 			positions[k++]= startPos;
 			if (length > 0) {
 				positions[k++]= startPos + length - 1;
@@ -78,8 +81,13 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite.TrackData;
 		
 		for (int i= 0, k= 0; i < nExistingNodes; i++) {
 			int startPos= positions[k++];
+			int markerLength= markers[i].length;
+			if (markerLength == -1) {
+				startPos++;
+				markers[i].length= 0;
+			}
 			markers[i].offset= startPos;
-			if (markers[i].length > 0) {
+			if (markerLength > 0) {
 				int endPos= positions[k++] + 1;
 				markers[i].length= endPos - startPos;
 			}
@@ -93,7 +101,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite.TrackData;
 	public void preVisit(ASTNode node) {
 		TrackData data= fRewrite.getTrackData(node);
 		if (data != null) {
-			addMarker(data, fResult.length());
+			addMarker(data, fResult.length(), 0);
 		}
 	}
 
@@ -104,17 +112,17 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite.TrackData;
 		TrackData data= fRewrite.getTrackData(node);
 		if (data != null) {
 			if (data instanceof AnnotationData) {
-				addMarker(data, fResult.length());
+				addMarker(data, fResult.length(), -1);
 			} else {
 				fixupLength(data, fResult.length());
 			}
 		}
 	}
 	
-	private NodeMarker addMarker(Object annotation, int startOffset) {
+	private NodeMarker addMarker(Object annotation, int startOffset, int length) {
 		NodeMarker marker= new NodeMarker();
 		marker.offset= startOffset;
-		marker.length= 0;
+		marker.length= length;
 		marker.data= annotation;
 		fExistingNodes.add(marker);
 		return marker;

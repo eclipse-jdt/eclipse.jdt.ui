@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal {
 	
@@ -74,6 +75,7 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 	private CompilationUnit fRoot;
 	private IMethodBinding fSenderBinding;
 	private ChangeDescription[] fParameterChanges;
+	private GroupDescription fSelectionDescription;
 		
 	public ChangeMethodSignatureProposal(String label, ICompilationUnit targetCU, CompilationUnit root, IMethodBinding binding, ChangeDescription[] changes, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
@@ -82,6 +84,13 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 		fSenderBinding= binding;
 		fParameterChanges= changes;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
+	 */
+	protected GroupDescription getSelectionDescription() {
+		return fSelectionDescription;
+	}	
 	
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTNode methodDecl= fRoot.findDeclaringNode(fSenderBinding);
@@ -107,7 +116,10 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 	private final String NAME_SUGGESTION= "name_suggestion"; //$NON-NLS-1$
 	
 	protected void modifySignature(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
-		String rewriteDesc= isInDifferentCU ? SELECTION_GROUP_DESC : null;
+		if (isInDifferentCU) {
+			fSelectionDescription= new GroupDescription("selection"); //$NON-NLS-1$
+		}
+		
 		List parameters= methodDecl.parameters();
 		// create a copy to not loose the indexes
 		SingleVariableDeclaration[] oldParameters= (SingleVariableDeclaration[]) parameters.toArray(new SingleVariableDeclaration[parameters.size()]);
@@ -136,10 +148,10 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 
 				createdVariables.add(newNode);
 				
-				rewrite.markAsInserted(newNode, rewriteDesc);
+				rewrite.markAsInserted(newNode, fSelectionDescription);
 				parameters.add(i, newNode);
 			} else if (curr instanceof RemoveDescription) {
-				rewrite.markAsRemoved(oldParameters[k], rewriteDesc);
+				rewrite.markAsRemoved(oldParameters[k], fSelectionDescription);
 				k++;
 			} else if (curr instanceof EditDescription) {
 				EditDescription desc= (EditDescription) curr;
@@ -157,8 +169,8 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 				SingleVariableDeclaration decl1= oldParameters[k];
 				SingleVariableDeclaration decl2= oldParameters[((SwapDescription) curr).index];
 				
-				rewrite.markAsReplaced(decl1, rewrite.createCopy(decl2), rewriteDesc);
-				rewrite.markAsReplaced(decl2, rewrite.createCopy(decl1), rewriteDesc);
+				rewrite.markAsReplaced(decl1, rewrite.createCopy(decl2), fSelectionDescription);
+				rewrite.markAsReplaced(decl2, rewrite.createCopy(decl1), fSelectionDescription);
 				
 				usedNames.add(decl1.getName().getIdentifier());
 				k++;	

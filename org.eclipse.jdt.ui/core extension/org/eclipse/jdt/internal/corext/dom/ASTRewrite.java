@@ -14,11 +14,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
@@ -97,6 +99,7 @@ public final class ASTRewrite {
 	private HashMap fCopyCounts;
 	private HashSet fMoveSources;
 	private HashMap fTrackedAnnotations;
+	private HashMap fGroupDescriptions;
 	private boolean fHasASTModifications;
 	
 	/**
@@ -116,6 +119,16 @@ public final class ASTRewrite {
 		return fRootNode;
 	}
 	
+	/**
+	 * @deprecated use rewriteNode(TextBuffer, TextEdit)
+	 */
+	public final void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit, Collection resultingGroupDescription) {
+		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(textBuffer, rootEdit, this);
+		fRootNode.accept(visitor);
+		if (resultingGroupDescription != null && fGroupDescriptions != null) {
+			resultingGroupDescription.addAll(fGroupDescriptions.values());
+		}
+	}
 	
 	/**
 	 * Perform rewriting: Analyses AST modifications and creates text edits that describe changes to the
@@ -123,19 +136,10 @@ public final class ASTRewrite {
 	 * is formatted using the standard code formatter.
 	 * @param textBuffer Text buffer which is describing the code of the AST passed in in the
 	 * constructor. This buffer is accessed read-only.
-	 * @param groupDescription All resulting GroupDescription will be added to this collection. For each used
-	 * description (see last parameter of {@link #markAsInserted}, {@link #markAsModified}, {@link #markAsRemoved}
-	 * and {@link #markAsReplaced)}  a group description is added.
-	 * A group description contains all text edits that resulted from the changes with the group's description.
-	 * <code>null</code> can be passed, if no descriptions should be collected. 
 	 */
-	public final void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit, Collection resultingGroupDescription) {
-		HashMap descriptions= resultingGroupDescription == null ? null : new HashMap(5);
-		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(textBuffer, rootEdit, this, descriptions);
+	public final void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit) {
+		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(textBuffer, rootEdit, this);
 		fRootNode.accept(visitor); 
-		if (resultingGroupDescription != null) {
-			resultingGroupDescription.addAll(descriptions.values());
-		}
 	}
 	
 	/**
@@ -150,6 +154,7 @@ public final class ASTRewrite {
 		fCopyCounts= null;
 		fMoveSources= null;
 		fTrackedAnnotations= null;
+		fGroupDescriptions= null;
 	}
 
 	/**
@@ -161,13 +166,20 @@ public final class ASTRewrite {
 	 * This option is only used for nodes in lists.
 	 * @param description Description of the change.
 	 */
-	public final void markAsInserted(ASTNode node, boolean boundToPrevious, String description) {
+	public final void markAsInserted(ASTNode node, boolean boundToPrevious, GroupDescription description) {
 		Assert.isTrue(getCollapsedNodes(node) == null, "Tries to insert a collapsed node"); //$NON-NLS-1$
 		ASTInsert insert= new ASTInsert();
-		insert.description= description;
 		insert.isBoundToPrevious= boundToPrevious;
 		setChangeProperty(node, insert);
 		fHasASTModifications= true;
+		setDescription(node, description);
+	}
+
+	/**
+	 * @deprecated use markAsInserted(node, boolean, GroupDescription)
+	 */
+	public final void markAsInserted(ASTNode node, boolean boundToPrevious, String description) {
+		markAsInserted(node, boundToPrevious, getGroupDescriptionForName(description));
 	}
 
 	/**
@@ -179,16 +191,23 @@ public final class ASTRewrite {
 	 * This option is only used for nodes in lists.
 	 */
 	public final void markAsInserted(ASTNode node, boolean boundToPrevious) {
-		markAsInserted(node, boundToPrevious, null);
+		markAsInserted(node, boundToPrevious, (GroupDescription) null);
 	}
 	
+	/**
+	 * @deprecated
+	 */
+	public final void markAsInserted(ASTNode node, String description) {
+		markAsInserted(node, getGroupDescriptionForName(description));
+	}
+		
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
 	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 * @param node The node to be marked as inserted.
 	 * @param description Description of the change.
 	 */
-	public final void markAsInserted(ASTNode node, String description) {
+	public final void markAsInserted(ASTNode node, GroupDescription description) {
 		markAsInserted(node, getDefaultBoundBehaviour(node), description);
 	}
 
@@ -197,7 +216,7 @@ public final class ASTRewrite {
 	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 */
 	public final void markAsInserted(ASTNode node) {
-		markAsInserted(node, getDefaultBoundBehaviour(node), null);
+		markAsInserted(node, getDefaultBoundBehaviour(node), (GroupDescription) null);
 	}
 	
 	private boolean getDefaultBoundBehaviour(ASTNode node) {
@@ -208,17 +227,23 @@ public final class ASTRewrite {
 	public boolean hasASTModifications() {
 		return fHasASTModifications;
 	}
+	/**
+	 * @deprecated Use markAsRemoved(node, GroupDescription)
+	 */
+	public final void markAsRemoved(ASTNode node, String description) {
+		markAsRemoved(node, getGroupDescriptionForName(description));
+	}
 	
 	/**
 	 * Marks an existing node as removed.
 	 * @param node The node to be marked as removed.
 	 * @param node Description of the change.
 	 */
-	public final void markAsRemoved(ASTNode node, String description) {
+	public final void markAsRemoved(ASTNode node, GroupDescription description) {
 		assertIsInside(node);
 		ASTRemove remove= new ASTRemove();
-		remove.description= description;
 		setChangeProperty(node, remove);
+		setDescription(node, description);
 	}
 
 	/**
@@ -226,7 +251,7 @@ public final class ASTRewrite {
 	 * @param node The node to be marked as removed.
 	 */	
 	public final void markAsRemoved(ASTNode node) {
-		markAsRemoved(node, null);
+		markAsRemoved(node, (GroupDescription) null);
 	}
 
 	/**
@@ -237,14 +262,21 @@ public final class ASTRewrite {
 	 * @param node The node replacing the node.
 	 * @param node Description of the change. 
 	 */		
-	public final void markAsReplaced(ASTNode node, ASTNode replacingNode, String description) {
+	public final void markAsReplaced(ASTNode node, ASTNode replacingNode, GroupDescription description) {
 		Assert.isTrue(replacingNode != null, "Tries to replace with null (use remove instead)"); //$NON-NLS-1$
 		Assert.isTrue(replacingNode.getStartPosition() == -1, "Tries to replace with existing node"); //$NON-NLS-1$
 		assertIsInside(node);
 		ASTReplace replace= new ASTReplace();	
 		replace.replacingNode= replacingNode;
-		replace.description= description;
 		setChangeProperty(node, replace);
+		setDescription(node, description);
+	}
+	
+	/**
+	 * @deprecated use markAsReplaced(ASTNode, ASTNode, GroupDescription)
+	 */
+	public final void markAsReplaced(ASTNode node, ASTNode replacingNode, String description) {
+		markAsReplaced(node, replacingNode, getGroupDescriptionForName(description));
 	}
 
 
@@ -256,7 +288,7 @@ public final class ASTRewrite {
 	 * @param replacingNode The node replacing the node.
 	 */		
 	public final void markAsReplaced(ASTNode node, ASTNode replacingNode) {
-		markAsReplaced(node, replacingNode, null);
+		markAsReplaced(node, replacingNode, (GroupDescription) null);
 	}
 
 	/**
@@ -269,7 +301,14 @@ public final class ASTRewrite {
 	 * @param replacements the replacing nodes
 	 */	
 	public final void markAsReplaced(ASTNode node, List container, ASTNode[] replacements) {
-		markAsReplaced(node, container, replacements, null);
+		markAsReplaced(node, container, replacements, (GroupDescription) null);
+	}
+
+	/**
+	 * @deprecated
+	 */
+	public final void markAsModified(ASTNode node, ASTNode modifiedNode, String description) {
+		markAsModified(node, modifiedNode, getGroupDescriptionForName(description));
 	}
 
 	/**
@@ -279,13 +318,20 @@ public final class ASTRewrite {
 	 * @param modifiedNode The node of the same type as the modified node but with the new properties.
 	 * @param description Description of the change. 
 	 */			
-	public final void markAsModified(ASTNode node, ASTNode modifiedNode, String description) {
+	public final void markAsModified(ASTNode node, ASTNode modifiedNode, GroupDescription description) {
 		Assert.isTrue(node.getClass().equals(modifiedNode.getClass()), "Tries to modify with a node of different type"); //$NON-NLS-1$
 		assertIsInside(node);
 		ASTModify modify= new ASTModify();
 		modify.modifiedNode= modifiedNode;
-		modify.description= description;
 		setChangeProperty(node, modify);
+		setDescription(node, description);
+	}
+
+	/**
+	 * @deprecated use markAsReplaced(ASTNode, List, ASTNode[], GroupDescription)
+	 */
+	public final void markAsReplaced(ASTNode node, List container, ASTNode[] replacements, String description) {
+		markAsReplaced(node, container, replacements, getGroupDescriptionForName(description));
 	}
 
 	/**
@@ -298,7 +344,7 @@ public final class ASTRewrite {
 	 * @param replacements the replacing nodes
 	 * @param description the description of the change
 	 */	
-	public final void markAsReplaced(ASTNode node, List container, ASTNode[] replacements, String description) {
+	public final void markAsReplaced(ASTNode node, List container, ASTNode[] replacements, GroupDescription description) {
 		if (replacements == null || replacements.length == 0) {
 			markAsRemoved(node, description);
 			return;
@@ -321,13 +367,13 @@ public final class ASTRewrite {
 	 * @param modifiedNode The node of the same type as the modified node but with the new properties.
 	 */		
 	public final void markAsModified(ASTNode node, ASTNode modifiedNode) {
-		markAsModified(node, modifiedNode, null);
+		markAsModified(node, modifiedNode, (GroupDescription) null);
 	}
 	
 	/**
 	 * Marks a node as tracked. 
 	 */
-	public final void markAsTracked(ASTNode node, String description) {
+	public final void markAsTracked(ASTNode node, GroupDescription description) {
 		AnnotationData data= new AnnotationData();
 		data.description= description;
 		setTrackData(node, data);
@@ -518,6 +564,24 @@ public final class ASTRewrite {
 		}
 	}
 	
+	// to be removed
+	private GroupDescription getGroupDescriptionForName(String name) {
+		if (name == null) {
+			return null;
+		}
+		if (fGroupDescriptions != null) {
+			Iterator iter= fGroupDescriptions.values().iterator();
+			while (iter.hasNext()) {
+				GroupDescription curr= (GroupDescription) iter.next();
+				if (name.equals(curr.getName())) {
+					return curr;
+				}
+			}
+		}
+		return new GroupDescription(name);
+	}
+	
+	
 	public final int getChangeKind(ASTNode node) {
 		Object object= getChangeProperty(node);
 		if (object == null) {
@@ -563,13 +627,22 @@ public final class ASTRewrite {
 		return 0;
 	}
 	
-	public final String getDescription(ASTNode node) {
-		Object info= getChangeProperty(node);
-		if (info instanceof ASTChange) {
-			return ((ASTChange) info).description;
+	public final GroupDescription getDescription(ASTNode node) {
+		if (fGroupDescriptions == null) {
+			return null;
 		}
-		return null;
+		return (GroupDescription) fGroupDescriptions.get(node);
 	}
+	
+	private final void setDescription(ASTNode node, GroupDescription desc) {
+		if (desc != null) {
+			if (fGroupDescriptions == null) {
+				fGroupDescriptions= new HashMap(5);
+			}	
+			fGroupDescriptions.put(node, desc);
+		}
+	}
+	
 	
 	public final ASTNode getModifiedNode(ASTNode node) {
 		Object info= getChangeProperty(node);
@@ -632,7 +705,7 @@ public final class ASTRewrite {
 	}
 	
 	
-	private final void setChangeProperty(ASTNode node, ASTChange change) {
+	private final void setChangeProperty(ASTNode node, Object change) {
 		fChangedProperties.put(node, change);
 	}
 	
@@ -646,25 +719,20 @@ public final class ASTRewrite {
 			Assert.isTrue(false, "Node that is changed is not located inside of ASTRewrite root"); //$NON-NLS-1$
 		}
 	}
-	
-
-	private static abstract class ASTChange {
-		String description;
-	}
-	
-	private static final class ASTInsert extends ASTChange {
+		
+	private static final class ASTInsert {
 		public boolean isBoundToPrevious;
 	}
 	
-	private static final class ASTRemove extends ASTChange {
+	private static final class ASTRemove {
 		public boolean isMoveSource;
 	}	
 		
-	private static final class ASTReplace extends ASTChange {
+	private static final class ASTReplace {
 		public ASTNode replacingNode;
 	}
 	
-	private static final class ASTModify extends ASTChange {
+	private static final class ASTModify {
 		public ASTNode modifiedNode;
 	}
 	
@@ -684,7 +752,7 @@ public final class ASTRewrite {
 	}
 	
 	public static final class AnnotationData extends TrackData {
-		public String description;
+		public GroupDescription description;
 	}	
 	
 }

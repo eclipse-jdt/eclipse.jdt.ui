@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.tests.astrewrite;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -25,17 +26,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
@@ -87,6 +77,12 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 	
+	private GroupDescription getDescription(List all, String name) {
+		GroupDescription desc= new GroupDescription(name);
+		all.add(desc);
+		return desc;
+	}
+	
 	
 	public void testNamesWithDelete() throws Exception {
 		
@@ -108,20 +104,22 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
+		ArrayList gd= new ArrayList();
+		
 		TypeDeclaration typeC= findTypeDeclaration(astRoot, "C");
-		rewrite.markAsTracked(typeC.getName(), "C");
+		rewrite.markAsTracked(typeC.getName(), getDescription(gd, "C"));
 		
 		List decls= typeC.bodyDeclarations();
 		
 		MethodDeclaration method= (MethodDeclaration) decls.get(1);
-		rewrite.markAsTracked(method.getName(), "foo");
+		rewrite.markAsTracked(method.getName(), getDescription(gd, "foo"));
 		
 		FieldDeclaration field= (FieldDeclaration) decls.get(0);
 		rewrite.markAsRemoved(field);
 						
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
-		
+		proposal.getCompilationUnitChange().setKeepExecutedTextEdits(true);
 		proposal.apply(null);
 		
 		buf= new StringBuffer();
@@ -138,8 +136,9 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), expected);
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
+
 		
-		GroupDescription[] descriptions= change.getGroupDescriptions();
+		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
@@ -171,18 +170,20 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
+		ArrayList gd= new ArrayList();
+		
 		TypeDeclaration typeC= findTypeDeclaration(astRoot, "C");
-		rewrite.markAsTracked(typeC.getName(), "C");
+		rewrite.markAsTracked(typeC.getName(), getDescription(gd, "C"));
 		
 		List decls= typeC.bodyDeclarations();
 		
 		MethodDeclaration method= (MethodDeclaration) decls.get(1);
-		rewrite.markAsTracked(method.getName(), "foo");
+		rewrite.markAsTracked(method.getName(), getDescription(gd, "foo"));
 		
 		FieldDeclaration field= (FieldDeclaration) decls.get(0);
 		List fragments= field.fragments();
 		VariableDeclarationFragment frag1= (VariableDeclarationFragment) fragments.get(0);
-		rewrite.markAsTracked(frag1.getName(), "x1");
+		rewrite.markAsTracked(frag1.getName(),  getDescription(gd, "x1"));
 		
 		VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
 		newFrag.setName(ast.newSimpleName("newVariable"));
@@ -192,7 +193,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 						
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
-		
+		proposal.getCompilationUnitChange().setKeepExecutedTextEdits(true);
 		proposal.apply(null);
 		
 		buf= new StringBuffer();
@@ -212,7 +213,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
-		GroupDescription[] descriptions= change.getGroupDescriptions();
+		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
@@ -244,25 +245,27 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
+		ArrayList gd= new ArrayList();
+		
 		// change type name
 		TypeDeclaration typeC= findTypeDeclaration(astRoot, "C");
 		SimpleName newName= ast.newSimpleName("XX");
 		rewrite.markAsReplaced(typeC.getName(), newName);
-		rewrite.markAsTracked(newName, "XX");
+		rewrite.markAsTracked(newName,  getDescription(gd, "XX"));
 		
 		List decls= typeC.bodyDeclarations();
 		
 		MethodDeclaration method= (MethodDeclaration) decls.get(1);
-		rewrite.markAsTracked(method.getName(), "foo");
+		rewrite.markAsTracked(method.getName(), getDescription(gd, "foo"));
 		
 		WhileStatement whileStatement= (WhileStatement) method.getBody().statements().get(0);
 		PrefixExpression prefixExpression= (PrefixExpression) ((ExpressionStatement) ((Block) whileStatement.getBody()).statements().get(0)).getExpression();
-		rewrite.markAsTracked(prefixExpression.getOperand(), "i");
+		rewrite.markAsTracked(prefixExpression.getOperand(),  getDescription(gd, "i"));
 				
 		FieldDeclaration field= (FieldDeclaration) decls.get(0);
 		List fragments= field.fragments();
 		VariableDeclarationFragment frag1= (VariableDeclarationFragment) fragments.get(0);
-		rewrite.markAsTracked(frag1.getName(), "x1");
+		rewrite.markAsTracked(frag1.getName(),  getDescription(gd, "x1"));
 		
 		// change modifier
 		FieldDeclaration modifiedField= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
@@ -272,7 +275,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 								
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
-		
+		proposal.getCompilationUnitChange().setKeepExecutedTextEdits(true);
 		proposal.apply(null);
 		
 		buf= new StringBuffer();
@@ -292,7 +295,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
-		GroupDescription[] descriptions= change.getGroupDescriptions();
+		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
@@ -322,23 +325,25 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
+		ArrayList gd= new ArrayList();
+		
 		// change type name
 		TypeDeclaration typeC= findTypeDeclaration(astRoot, "C");
-		rewrite.markAsTracked(typeC.getName(), "C");
+		rewrite.markAsTracked(typeC.getName(), getDescription(gd, "C"));
 		
 		List decls= typeC.bodyDeclarations();
 		
 		MethodDeclaration method= (MethodDeclaration) decls.get(1);
-		rewrite.markAsTracked(method.getName(), "foo");
+		rewrite.markAsTracked(method.getName(), getDescription(gd, "foo"));
 		
 		WhileStatement whileStatement= (WhileStatement) method.getBody().statements().get(0);
 		PrefixExpression prefixExpression= (PrefixExpression) ((ExpressionStatement) ((Block) whileStatement.getBody()).statements().get(0)).getExpression();
-		rewrite.markAsTracked(prefixExpression.getOperand(), "i");
+		rewrite.markAsTracked(prefixExpression.getOperand(),  getDescription(gd, "i"));
 					
 		FieldDeclaration field= (FieldDeclaration) decls.get(0);
 		List fragments= field.fragments();
 		VariableDeclarationFragment frag1= (VariableDeclarationFragment) fragments.get(0);
-		rewrite.markAsTracked(frag1.getName(), "x1");
+		rewrite.markAsTracked(frag1.getName(),  getDescription(gd, "x1"));
 
 		// move method before field
 		ASTNode placeHolder= rewrite.createMove(method);
@@ -347,7 +352,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 								
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
-		
+		proposal.getCompilationUnitChange().setKeepExecutedTextEdits(true);
 		proposal.apply(null);
 		
 		buf= new StringBuffer();
@@ -367,7 +372,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
-		GroupDescription[] descriptions= change.getGroupDescriptions();
+		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
@@ -395,18 +400,20 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
+		ArrayList gd= new ArrayList();
+		
 		// change type name
 		TypeDeclaration typeC= findTypeDeclaration(astRoot, "C");
-		rewrite.markAsTracked(typeC.getName(), "C");
+		rewrite.markAsTracked(typeC.getName(), getDescription(gd, "C"));
 		
 		List decls= typeC.bodyDeclarations();
 		
 		MethodDeclaration method= (MethodDeclaration) decls.get(0);
-		rewrite.markAsTracked(method.getName(), "foo");
+		rewrite.markAsTracked(method.getName(), getDescription(gd, "foo"));
 		
 		WhileStatement whileStatement= (WhileStatement) method.getBody().statements().get(0);
 		PrefixExpression prefixExpression= (PrefixExpression) ((ExpressionStatement) ((Block) whileStatement.getBody()).statements().get(0)).getExpression();
-		rewrite.markAsTracked(prefixExpression.getOperand(), "i");
+		rewrite.markAsTracked(prefixExpression.getOperand(),  getDescription(gd, "i"));
 					
 
 		// move method before field
@@ -419,7 +426,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 								
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
-		
+		proposal.getCompilationUnitChange().setKeepExecutedTextEdits(true);
 		proposal.apply(null);
 		
 		buf= new StringBuffer();
@@ -439,7 +446,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
-		GroupDescription[] descriptions= change.getGroupDescriptions();
+		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
@@ -466,14 +473,16 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
+		ArrayList gd= new ArrayList();
+		
 		// change type name
 		TypeDeclaration typeC= findTypeDeclaration(astRoot, "C");
-		rewrite.markAsTracked(typeC.getName(), "C");
+		rewrite.markAsTracked(typeC.getName(), getDescription(gd, "C"));
 		
 		List decls= typeC.bodyDeclarations();
 		
 		MethodDeclaration method= (MethodDeclaration) decls.get(1);
-		rewrite.markAsTracked(method.getName(), "foo");
+		rewrite.markAsTracked(method.getName(), getDescription(gd, "foo"));
 		
 		// move method before field
 		ASTNode placeHolder= rewrite.createMove(method);
@@ -482,7 +491,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 								
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
-		
+		proposal.getCompilationUnitChange().setKeepExecutedTextEdits(true);
 		proposal.apply(null);
 		
 		buf= new StringBuffer();
@@ -499,7 +508,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
-		GroupDescription[] descriptions= change.getGroupDescriptions();
+		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());

@@ -11,18 +11,10 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.swt.graphics.Point;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -37,13 +29,9 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 
-public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal implements ICompletionProposalExtension2 {
+public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal {
 
 	public static final int LOCAL= 1;
 	public static final int FIELD= 2;
@@ -51,8 +39,10 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 	private int  fVariableKind;
 	private ExpressionStatement fExpressionStatement;
 	private ITypeBinding fTypeBinding;
-	private IRegion fSelectedRegion;
-
+	
+	private GroupDescription fSelectionDescription;
+	private ArrayList fLinkedPositions;
+	
 	public AssignToVariableAssistProposal(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance) {
 		super(null, cu, null, relevance, null);
 	
@@ -66,8 +56,27 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 			setDisplayName(CorrectionMessages.getString("AssignToVariableAssistProposal.assigntofield.description")); //$NON-NLS-1$
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 		}
+		
+		fLinkedPositions= new ArrayList();
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
+	 */
+	protected GroupDescription getSelectionDescription() {
+		return fSelectionDescription;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getLinkedRanges()
+	 */
+	protected GroupDescription[] getLinkedRanges() {
+		if (fLinkedPositions.isEmpty()) {
+			return null;
+		}
+		return (GroupDescription[]) fLinkedPositions.toArray(new GroupDescription[fLinkedPositions.size()]);
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(java.lang.String, org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.internal.corext.textmanipulation.TextEdit)
 	 */
@@ -92,8 +101,11 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 
 		String varName= suggestLocalVariableNames(fTypeBinding);
 
+		GroupDescription link1= new GroupDescription("link1"); //$NON-NLS-1$
+		fSelectionDescription= new GroupDescription("sel"); //$NON-NLS-1$
+		
 		SimpleName name= ast.newSimpleName(varName);
-		rewrite.markAsTracked(name, "LINKED"); //$NON-NLS-1$
+		rewrite.markAsTracked(name, link1); //$NON-NLS-1$
 		
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 		newDeclFrag.setName(name);
@@ -103,8 +115,10 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		String typeName= addImport(fTypeBinding);
 		newDecl.setType(ASTNodeFactory.newType(ast, typeName));
 		
-		rewrite.markAsReplaced(fExpressionStatement, newDecl); //$NON-NLS-1$
-		rewrite.markAsTracked(newDecl, "ENDPOS"); //$NON-NLS-1$
+		rewrite.markAsReplaced(fExpressionStatement, newDecl); 
+		rewrite.markAsTracked(newDecl, fSelectionDescription);
+
+		fLinkedPositions.add(link1);
 		return rewrite;
 	}
 
@@ -115,13 +129,19 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
 		List decls= isAnonymous ?  ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations() :  ((TypeDeclaration) newTypeDecl).bodyDeclarations();
 		
+		fSelectionDescription= new GroupDescription("sel"); //$NON-NLS-1$
+		GroupDescription link1= new GroupDescription("link1"); //$NON-NLS-1$
+		GroupDescription link2= new GroupDescription("link2"); //$NON-NLS-1$
+		fLinkedPositions.add(link1);
+		fLinkedPositions.add(link2);
+				
 		ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
 		AST ast= fExpressionStatement.getAST();
 		
 		String varName= suggestFieldNames(fTypeBinding);
 
 		SimpleName name= ast.newSimpleName(varName);
-		rewrite.markAsTracked(name, "LINKED-1"); //$NON-NLS-1$
+		rewrite.markAsTracked(name, link2); //$NON-NLS-1$
 		
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 		newDeclFrag.setName(name);
@@ -135,7 +155,8 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		assignment.setRightHandSide((Expression) rewrite.createCopy(expression));
 
 		SimpleName accessName= ast.newSimpleName(varName);
-		rewrite.markAsTracked(accessName, "LINKED"); //$NON-NLS-1$
+		rewrite.markAsTracked(accessName, link1); //$NON-NLS-1$
+		
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS)) {
 			FieldAccess fieldAccess= ast.newFieldAccess();
 			fieldAccess.setName(accessName);
@@ -144,12 +165,13 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		} else {
 			assignment.setLeftHandSide(accessName);
 		}
-		rewrite.markAsReplaced(expression, assignment); //$NON-NLS-1$
-		rewrite.markAsTracked(fExpressionStatement, "ENDPOS"); //$NON-NLS-1$
+		rewrite.markAsReplaced(expression, assignment);
+		rewrite.markAsTracked(fExpressionStatement, fSelectionDescription);
 		
 		decls.add(findInsertIndex(decls, fExpressionStatement.getStartPosition()), newDecl);
 		
 		rewrite.markAsInserted(newDecl);
+		
 		return rewrite;		
 	}
 	
@@ -211,71 +233,6 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 	public int getVariableKind() {
 		return fVariableKind;
 	}
-	
-
-	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-		try {
-			IDocument document= viewer.getDocument();
-
-			super.apply(document);
-			
-			LinkedPositionManager manager= new LinkedPositionManager(document);
-			LinkedPositionUI editor= new LinkedPositionUI(viewer, manager);
-			
-			CompilationUnitChange change= getCompilationUnitChange();
-			GroupDescription[] descriptions= change.getGroupDescriptions();
-			for (int i= 0; i < descriptions.length; i++) {
-				GroupDescription curr= descriptions[i];
-				String name= curr.getName();
-				if (name.startsWith("LINKED")) { //$NON-NLS-1$
-					TextRange range= change.getNewTextRange(curr.getTextEdits());
-					manager.addPosition(range.getOffset(), range.getLength());
-					if (name.equals("LINKED")) { //$NON-NLS-1$
-						editor.setInitialOffset(range.getOffset());
-					}
-				} else if (name.equals("ENDPOS")) { //$NON-NLS-1$
-					TextRange range= change.getNewTextRange(curr.getTextEdits());
-					editor.setFinalCaretOffset(range.getExclusiveEnd());
-				}
-			}
-			editor.enter();
-			
-			fSelectedRegion= editor.getSelectedRegion();
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		}
-	}
-		
-	/*
-	 * @see ICompletionProposal#getSelection(IDocument)
-	 */
-	public Point getSelection(IDocument document) {
-		if (fSelectedRegion != null) {
-			return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
-		}
-		return null;
-	}	
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer, boolean)
-	 */
-	public void selected(ITextViewer viewer, boolean smartToggle) {
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
-	 */
-	public void unselected(ITextViewer viewer) {
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
-	 */
-	public boolean validate(IDocument document, int offset, DocumentEvent event) {
-		return false;
-	}	
 	
 
 }

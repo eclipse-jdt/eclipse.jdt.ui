@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionProposal {
 
@@ -37,24 +38,33 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 	private int fIncludedModifiers;
 	private int fExcludedModifiers;
 	
+	private GroupDescription fSelectionDescription;
+	
 	public ModifierChangeCompletionProposal(String label, ICompilationUnit targetCU, IBinding binding, ASTNode node, int includedModifiers, int excludedModifiers, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
 		fBinding= binding;
 		fNode= node;
 		fIncludedModifiers= includedModifiers;
 		fExcludedModifiers= excludedModifiers;
+		fSelectionDescription= null;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
+	 */
+	protected GroupDescription getSelectionDescription() {
+		return fSelectionDescription;
 	}
 	
 	protected ASTRewrite getRewrite() throws CoreException {
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode boundNode= astRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
-		String groupDesc= null;
 		
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
-			groupDesc= SELECTION_GROUP_DESC; // in different CU, needs selection
+			fSelectionDescription= new GroupDescription("selection"); // in different CU, needs selection //$NON-NLS-1$
 			CompilationUnit newRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 		}
@@ -70,7 +80,7 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 				modifiedNode.setExtraDimensions(methodDecl.getExtraDimensions()); // no change
 				modifiedNode.setModifiers(newModifiers);
 				
-				rewrite.markAsModified(methodDecl, modifiedNode, groupDesc);
+				rewrite.markAsModified(methodDecl, modifiedNode, fSelectionDescription);
 			} else if (declNode instanceof VariableDeclarationFragment) {
 				ASTNode parent= declNode.getParent();
 				if (parent instanceof FieldDeclaration) {
@@ -80,7 +90,7 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 					FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
 					modifiedNode.setModifiers(newModifiers);
 					
-					rewrite.markAsModified(fieldDecl, modifiedNode, groupDesc);					
+					rewrite.markAsModified(fieldDecl, modifiedNode, fSelectionDescription);					
 				} else if (parent instanceof VariableDeclarationStatement) {
 					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
 					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
@@ -88,7 +98,7 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 					VariableDeclarationStatement modifiedNode= ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
 					modifiedNode.setModifiers(newModifiers);
 					
-					rewrite.markAsModified(varDecl, modifiedNode, groupDesc);
+					rewrite.markAsModified(varDecl, modifiedNode, fSelectionDescription);
 				} else if (parent instanceof VariableDeclarationExpression) {
 					VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
 					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
@@ -96,7 +106,7 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 					VariableDeclarationExpression modifiedNode= ast.newVariableDeclarationExpression(ast.newVariableDeclarationFragment());
 					modifiedNode.setModifiers(newModifiers);
 					
-					rewrite.markAsModified(varDecl, modifiedNode, groupDesc);					
+					rewrite.markAsModified(varDecl, modifiedNode, fSelectionDescription);					
 				}
 			} else if (declNode instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration variableDeclaration= (SingleVariableDeclaration) declNode;
@@ -106,7 +116,7 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 				modifiedNode.setExtraDimensions(variableDeclaration.getExtraDimensions()); // no change
 				modifiedNode.setModifiers(newModifiers);
 				
-				rewrite.markAsModified(variableDeclaration, modifiedNode, groupDesc);				
+				rewrite.markAsModified(variableDeclaration, modifiedNode, fSelectionDescription);				
 			} else if (declNode instanceof TypeDeclaration) {
 				TypeDeclaration typeDecl= (TypeDeclaration) declNode;
 				int newModifiers= (typeDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
@@ -115,7 +125,7 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 				modifiedNode.setInterface(typeDecl.isInterface()); // no change
 				modifiedNode.setModifiers(newModifiers);
 				
-				rewrite.markAsModified(typeDecl, modifiedNode, groupDesc);				
+				rewrite.markAsModified(typeDecl, modifiedNode, fSelectionDescription);				
 			}
 			return rewrite;
 		}

@@ -11,21 +11,24 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import org.eclipse.compare.contentmergeviewer.ITokenComparator;
+import org.eclipse.compare.rangedifferencer.RangeDifference;
+import org.eclipse.compare.rangedifferencer.RangeDifferencer;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.compare.contentmergeviewer.ITokenComparator;
-import org.eclipse.compare.rangedifferencer.RangeDifference;
-import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -44,16 +47,16 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 
 
-public class CUCorrectionProposal extends ChangeCorrectionProposal {
-
-	public static final String SELECTION_GROUP_DESC= "select"; //$NON-NLS-1$
+public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	private ICompilationUnit fCompilationUnit;
 	private TextEdit fRootEdit;
-
-
+	
 	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance) {
 		this(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
@@ -91,6 +94,14 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 	protected final void addEdits(CompilationUnitChange change) throws CoreException {
 	}
 	
+	protected GroupDescription[] getLinkedRanges() {
+		return null;
+	}
+	
+	protected GroupDescription getSelectionDescription() {
+		return null;
+	}	
+		
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
@@ -183,14 +194,14 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 			}
 			
 			CompilationUnitChange change= getCompilationUnitChange();
-			GroupDescription[] descriptions= change.getGroupDescriptions();
-			if (descriptions.length > 0) {
-				change.setKeepExecutedTextEdits(true);
-			}
-			GroupDescription selection= change.getGroupDescription(SELECTION_GROUP_DESC);
+			
+			GroupDescription selection= getSelectionDescription();
+			GroupDescription[] linked= getLinkedRanges();
 			
 			IEditorPart part= null;
-			if (selection != null) {
+			if (selection != null || linked != null) {
+				change.setKeepExecutedTextEdits(true);
+				
 				part= EditorUtility.isOpenInEditor(unit);
 				if (part == null) {
 					part= EditorUtility.openInEditor(unit, true);
@@ -203,15 +214,47 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 			
 			super.apply(document);
 
-			if (part instanceof ITextEditor) {
+			if (part == null) {
+				return;
+			}
+			
+			if (linked != null && part instanceof JavaEditor) {
+				// enter linked mode
+				ITextViewer viewer= ((JavaEditor) part).getViewer();
+
+				LinkedPositionManager manager= new LinkedPositionManager(viewer.getDocument());
+				LinkedPositionUI editor= new LinkedPositionUI(viewer, manager);
+				
+				for (int i= 0; i < linked.length; i++) {
+					GroupDescription curr= linked[i];
+					TextRange range= change.getNewTextRange(curr.getTextEdits());
+					manager.addPosition(range.getOffset(), range.getLength());
+					if (i == 0) {
+						editor.setInitialOffset(range.getOffset());
+					}
+				}
+				if (selection != null) {
+					TextRange range= change.getNewTextRange(selection.getTextEdits());
+					editor.setFinalCaretOffset(range.getExclusiveEnd());					
+				}
+				editor.enter();
+				
+				IRegion region= editor.getSelectedRegion();
+				viewer.setSelectedRange(region.getOffset(), region.getLength());	
+
+			} else if (selection != null && part instanceof ITextEditor) {
+				// select a result
 				TextRange range= change.getNewTextRange(selection.getTextEdits());
 				((ITextEditor) part).selectAndReveal(range.getOffset(), range.getLength());
+
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
 		}		
 	}
-			
+					
 	/**
 	 * Gets the compilationUnitChange.
 	 * @return Returns a CompilationUnitChange
