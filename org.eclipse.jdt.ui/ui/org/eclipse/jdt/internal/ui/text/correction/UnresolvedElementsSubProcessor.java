@@ -43,7 +43,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -269,18 +268,37 @@ public class UnresolvedElementsSubProcessor {
 		if (varsInScope.length > 0) {
 			// avoid corrections like int i= i;
 			String otherNameInAssign= null;
+			
+			// help with x.getString() -> y.getString()
+			String methodSenderName= null;
+			String fieldSenderName= null;
+			
 			ASTNode parent= node.getParent();
-			if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			switch (parent.getNodeType()) {
+			case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
 				// node must be initializer
 				otherNameInAssign= ((VariableDeclarationFragment) parent).getName().getIdentifier();
-			} else if (parent.getNodeType() == ASTNode.ASSIGNMENT) {
+				break;
+			case ASTNode.ASSIGNMENT:
 				Assignment assignment= (Assignment) parent;
 				if (isWriteAccess && assignment.getRightHandSide() instanceof SimpleName) {
 					otherNameInAssign= ((SimpleName) assignment.getRightHandSide()).getIdentifier();
 				} else if (!isWriteAccess && assignment.getLeftHandSide() instanceof SimpleName) {
 					otherNameInAssign= ((SimpleName) assignment.getLeftHandSide()).getIdentifier();
 				}
+				break;
+			case ASTNode.METHOD_INVOCATION:
+				MethodInvocation inv= (MethodInvocation) parent;
+				if (inv.getExpression() == node) {
+					methodSenderName= inv.getName().getIdentifier();
+				}
+			case ASTNode.QUALIFIED_NAME:
+				QualifiedName qualName= (QualifiedName) parent;
+				if (qualName.getQualifier() == node) {
+					fieldSenderName= qualName.getName().getIdentifier();
+				}
 			}
+				
 			
 			ITypeBinding guessedType= ASTResolving.guessBindingForReference(node);
 			if (astRoot.getAST().resolveWellKnownType("java.lang.Object") == guessedType) { //$NON-NLS-1$
@@ -301,10 +319,19 @@ public class UnresolvedElementsSubProcessor {
 						relevance+= 5;
 					}
 					ITypeBinding varType= curr.getType();
-					if (guessedType != null && varType != null) {
-						if (!isWriteAccess && TypeRules.canAssign(varType, guessedType)
-								|| isWriteAccess && TypeRules.canAssign(guessedType, varType)) {
-							relevance += 2; // unresolved variable can be assign to this variable
+					if (varType != null) {
+						if (guessedType != null) {
+							// var type is compatible with the guessed type
+							if (!isWriteAccess && TypeRules.canAssign(varType, guessedType)
+									|| isWriteAccess && TypeRules.canAssign(guessedType, varType)) {
+								relevance += 2; // unresolved variable can be assign to this variable
+							}
+						}
+						if (methodSenderName != null && hasMethodWithName(varType, methodSenderName)) {
+							relevance += 2;
+						}
+						if (fieldSenderName != null && hasFieldWithName(varType, fieldSenderName)) {
+							relevance += 2;
 						}
 					}
 								
@@ -322,6 +349,35 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 	}
+	
+	private static boolean hasMethodWithName(ITypeBinding typeBinding, String name) {
+		IVariableBinding[] fields= typeBinding.getDeclaredFields();
+		for (int i= 0; i < fields.length; i++) {
+			if (fields[i].getName().equals(name)) {
+				return true;
+			}
+		}
+		ITypeBinding superclass= typeBinding.getSuperclass();
+		if (superclass != null) {
+			return hasMethodWithName(superclass, name);
+		}
+		return false;
+	}
+	
+	private static boolean hasFieldWithName(ITypeBinding typeBinding, String name) {
+		IMethodBinding[] methods= typeBinding.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (methods[i].getName().equals(name)) {
+				return true;
+			}
+		}
+		ITypeBinding superclass= typeBinding.getSuperclass();
+		if (superclass != null) {
+			return hasMethodWithName(superclass, name);
+		}
+		return false;
+	}
+	
 
 	public static void getTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -638,11 +694,23 @@ public class UnresolvedElementsSubProcessor {
 			while (target instanceof ParenthesizedExpression) {
 				target= ((ParenthesizedExpression) target).getExpression();
 			}
+			String targetName= null;
+			if (target.getLength() <= 18) {
+				targetName= '\'' + ASTNodes.asString(target) + '\'';
+			}
 			String label;
 			if (invocationNode.getNodeType() == ASTNode.CAST_EXPRESSION) {
-				label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.sendercast.description"); //$NON-NLS-1$
+				if (targetName == null) {
+					label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.methodtargetcast.description"); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.methodtargetcast2.description", targetName); //$NON-NLS-1$
+				}
 			} else {
-				label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.changesendercast.description"); //$NON-NLS-1$
+				if (targetName == null) {
+					label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.changemethodtargetcast.description"); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethodtargetcast2.description", targetName); //$NON-NLS-1$
+				}
 			}
 			proposals.add(new CastCompletionProposal(label, cu, sender, null, 3));
 		}
@@ -799,25 +867,13 @@ public class UnresolvedElementsSubProcessor {
 		if (expr.getLength() > 18) {
 			return def;
 		}
-		try {
-			String str= cu.getBuffer().getText(expr.getStartPosition(), expr.getLength());
-			for (int i= 0; i < str.length(); i++) {
-				if (Strings.isLineDelimiterChar(str.charAt(i))) {
-					return def;
-				}
+		ASTMatcher matcher= new ASTMatcher();
+		for (int i= 0; i < arguments.size(); i++) {
+			if (i != index && matcher.safeSubtreeMatch(expr, arguments.get(i))) {
+				return def;
 			}
-			ASTMatcher matcher= new ASTMatcher();
-			for (int i= 0; i < arguments.size(); i++) {
-				if (i != index && matcher.safeSubtreeMatch(expr, arguments.get(i))) {
-					return def;
-				}
-			}
-			return '\'' + str + '\'';
-			
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
 		}
-		return def;
+		return '\'' + ASTNodes.asString(expr) + '\'';
 	}
 
 	private static void doMoreArguments(IInvocationContext context, IProblemLocation problem, ASTNode invocationNode, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
@@ -1058,7 +1114,12 @@ public class UnresolvedElementsSubProcessor {
 					String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;					
 					changeDesc[diffIndex]= new EditDescription(argTypes[diffIndex], name);
 				}
-				String[] args=  new String[] { getMethodSignature(methodBinding, !targetCU.equals(cu)), getMethodSignature(methodBinding.getName(), arguments) };
+				ITypeBinding[] newParamTypes= new ITypeBinding[changeDesc.length];
+				for (int i= 0; i < newParamTypes.length; i++) {
+					newParamTypes[i]= changeDesc[i] == null ? paramTypes[i] : ((EditDescription) changeDesc[i]).type;
+				}
+				
+				String[] args=  new String[] { getMethodSignature(methodBinding, !targetCU.equals(cu)), getMethodSignature(methodBinding.getName(), newParamTypes) };
 				String label;
 				if (methodBinding.isConstructor()) {
 					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changeparamsignature.constr.description", args); //$NON-NLS-1$
@@ -1080,9 +1141,11 @@ public class UnresolvedElementsSubProcessor {
 			if (curr == null) {
 				return null;
 			}
-			curr= Bindings.normalizeTypeBinding(curr);
-			if (curr == null) {
-				curr= expression.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+			if (!curr.isNullType()) {	// don't normalize null type
+				curr= Bindings.normalizeTypeBinding(curr);
+				if (curr == null) {
+					curr= expression.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+				}
 			}
 			res[i]= curr;
 		}
