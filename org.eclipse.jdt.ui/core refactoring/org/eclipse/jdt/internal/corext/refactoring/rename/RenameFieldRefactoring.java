@@ -331,6 +331,8 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			else
 				pm.worked(1);
 			
+			if (result.hasFatalError())
+				return result;
 			fChangeManager= createTextChangeManager(new SubProgressMonitor(pm, 5));
 			result.merge(validateModifiesFiles());
 			return result;

@@ -324,8 +324,10 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			else
 				pm.worked(25);
 			
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 35));
+			if (result.hasFatalError())
+				return result;
 			
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 35));
 			result.merge(validateModifiesFiles());
 			return result;
 		} catch (CoreException e){

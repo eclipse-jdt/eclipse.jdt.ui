@@ -312,6 +312,9 @@ public class PullUpRefactoring extends Refactoring {
 			pm.worked(1);
 			result.merge(checkMembersInSubclasses(new SubProgressMonitor(pm, 1)));
 			
+			if (result.hasFatalError())
+				return result;
+			
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;

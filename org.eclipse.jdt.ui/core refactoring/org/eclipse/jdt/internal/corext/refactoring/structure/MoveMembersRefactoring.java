@@ -158,6 +158,9 @@ public class MoveMembersRefactoring extends Refactoring {
 			
 			result.merge(checkNativeMovedMethods(new SubProgressMonitor(pm, 1)));
 			
+			if (result.hasFatalError())
+				return result;
+			
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;

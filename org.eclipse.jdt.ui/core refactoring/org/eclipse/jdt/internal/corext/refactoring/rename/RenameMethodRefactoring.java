@@ -220,6 +220,9 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			else
 				pm.worked(3);
 			
+			if (result.hasFatalError())
+				return result;
+			
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
 			result.merge(validateModifiesFiles());
 			return result;
