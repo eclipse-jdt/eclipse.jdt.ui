@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -51,6 +52,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class RenameFieldRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
 	
+	private static final String DECLARED_SUPERTYPE= "Cannot be renamed because it is declared in a supertype";
 	private IField fField;
 	private String fNewName;
 	private SearchResultGroup[] fReferences;
@@ -164,16 +166,35 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	
 	//-- getter/setter
 	
-	public boolean canEnableGetterRenaming() throws JavaModelException{
+	/**
+	 * @return Error message or <code>null</code> if getter can be renamed.	 */
+	public String canEnableGetterRenaming() throws JavaModelException{
 		if (fField.getDeclaringType().isInterface())
-			return false;
-		return getGetter() != null;	
+			return null;
+		IMethod getter= getGetter();
+		if (getter == null) 
+			return "";	
+		if (null != MethodChecks.isDeclaredInInterface(getter, new NullProgressMonitor()))
+			return DECLARED_SUPERTYPE;
+		if (null != MethodChecks.overridesAnotherMethod(getter, new NullProgressMonitor()))
+			return DECLARED_SUPERTYPE;
+		return null;	
 	}
 	
-	public boolean canEnableSetterRenaming() throws JavaModelException{
+	/**
+	 * @return Error message or <code>null</code> if setter can be renamed.
+	 */
+	public String canEnableSetterRenaming() throws JavaModelException{
 		if (fField.getDeclaringType().isInterface())
-			return false;
-		return getSetter() != null;	
+			return null;
+		IMethod setter= getSetter();
+		if (setter == null) 
+			return "";	
+		if (null != MethodChecks.isDeclaredInInterface(setter, new NullProgressMonitor()))
+			return DECLARED_SUPERTYPE;
+		if (null != MethodChecks.overridesAnotherMethod(setter, new NullProgressMonitor()))
+			return DECLARED_SUPERTYPE;
+		return null;	
 	}
 	
 	public boolean getRenameGetter() {
