@@ -99,11 +99,13 @@ public class UnknownTypeEvaluator {
 	}
 	
 	
-	public static void getTypeProposals(ICompilationUnit cu, ProblemPosition problemPos, int kind, ArrayList proposals) throws CoreException {
+	public static void getTypeProposals(ProblemPosition problemPos, int kind, ArrayList proposals) throws CoreException {
 		String[] args= problemPos.getArguments();
 		if (args.length < 1) {
 			return;
 		}
+		
+		ICompilationUnit cu= problemPos.getCompilationUnit();
 		
 		// corrections
 		String typeName= cu.getBuffer().getText(problemPos.getOffset(), problemPos.getLength());
@@ -125,7 +127,7 @@ public class UnknownTypeEvaluator {
 			String simpleName= Signature.getSimpleName(curr);
 			boolean importOnly= simpleName.equals(typeName);
 			
-			CUCorrectionProposal proposal= new CUCorrectionProposal("", cu, problemPos);
+			CUCorrectionProposal proposal= new CUCorrectionProposal("", problemPos);
 			proposals.add(proposal);
 			
 			CompilationUnitChange change= proposal.getCompilationUnitChange();

@@ -16,8 +16,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 
-	public CorrectPackageDeclarationProposal(ICompilationUnit cu, ProblemPosition problemPos) throws CoreException {
-		super("Correct package declaration", cu, problemPos);
+	public CorrectPackageDeclarationProposal(ProblemPosition problemPos) throws CoreException {
+		super("Correct package declaration", problemPos);
 	}
 
 	/*

@@ -1,6 +1,8 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,18 +49,23 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit cu= manager.getWorkingCopy(fCompilationUnitEditor.getEditorInput());
 		
-		IDocumentProvider dp= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-		IAnnotationModel m= dp.getAnnotationModel(fCompilationUnitEditor.getEditorInput());
+		IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+		IAnnotationModel model= provider.getAnnotationModel(fCompilationUnitEditor.getEditorInput());
 
 		ArrayList proposals= new ArrayList();
+		HashSet idsProcessed= new HashSet();
 			
-		for (Iterator e = new ProblemAnnotationIterator(m); e.hasNext();) {
-			IProblemAnnotation a= (IProblemAnnotation) e.next();
-			Position p= m.getPosition((Annotation) a);
+		for (Iterator iter= new ProblemAnnotationIterator(model); iter.hasNext();) {
+			IProblemAnnotation annot= (IProblemAnnotation) iter.next();
+			Position pos= model.getPosition((Annotation) annot);
 			
-			ProblemPosition pp = new ProblemPosition(p, a);
+			ProblemPosition pp = new ProblemPosition(pos, annot, cu);
 			if (pp.overlapsWith(documentOffset, 1)) {
-				collectCorrections(cu, pp, proposals);
+				Integer probId= new Integer(annot.getId());
+				if (!idsProcessed.contains(probId)) {
+					idsProcessed.add(probId);
+					collectCorrections(pp, proposals);
+				}
 			}
 		}
 		if (proposals.isEmpty()) {
@@ -67,42 +74,42 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 	
-	private void collectCorrections(ICompilationUnit cu, ProblemPosition problemPos, ArrayList proposals) {
+	private void collectCorrections(ProblemPosition problemPos, ArrayList proposals) {
 		try {
 			int id= problemPos.getId();
 			switch (id) {
 				case IProblem.UnterminatedString:
-					proposals.add(new InsertCharacterCorrectionProposal(cu, problemPos, "Insert missing quote", "\"", false));
+					proposals.add(new InsertCharacterCorrectionProposal(problemPos, "Insert missing quote", "\"", false));
 					break;
 				case IProblem.UnterminatedComment:
-					proposals.add(new InsertCharacterCorrectionProposal(cu, problemPos, "Terminate Comment", "*/", false));
+					proposals.add(new InsertCharacterCorrectionProposal(problemPos, "Terminate Comment", "*/", false));
 					break;
 				case IProblem.UndefinedMethod:
-					UnknownMethodEvaluator.getProposals(cu, problemPos, proposals);
+					UnknownMethodEvaluator.getProposals(problemPos, proposals);
 					break;
 				case IProblem.PublicClassMustMatchFileName:
-					ReorgEvaluator.getWrongTypeNameProposals(cu, problemPos, proposals);
+					ReorgEvaluator.getWrongTypeNameProposals(problemPos, proposals);
 					break;
 				case IProblem.PackageIsNotExpectedPackage:
-					ReorgEvaluator.getWrongPackageDeclNameProposals(cu, problemPos, proposals);
+					ReorgEvaluator.getWrongPackageDeclNameProposals(problemPos, proposals);
 					break;
 				case IProblem.UndefinedType:
 				case IProblem.FieldTypeNotFound:
 				case IProblem.ArgumentTypeNotFound:
 				case IProblem.ReturnTypeNotFound:
-					UnknownTypeEvaluator.getTypeProposals(cu, problemPos, UnknownTypeEvaluator.TYPE, proposals);
+					UnknownTypeEvaluator.getTypeProposals(problemPos, UnknownTypeEvaluator.TYPE, proposals);
 					break;
 				case IProblem.SuperclassNotFound:
 				case IProblem.ExceptionTypeNotFound:
-					UnknownTypeEvaluator.getTypeProposals(cu, problemPos, UnknownTypeEvaluator.CLASS, proposals);
+					UnknownTypeEvaluator.getTypeProposals(problemPos, UnknownTypeEvaluator.CLASS, proposals);
 					break;				
 				case IProblem.InterfaceNotFound: 
-					UnknownTypeEvaluator.getTypeProposals(cu, problemPos, UnknownTypeEvaluator.INTERFACE, proposals);
+					UnknownTypeEvaluator.getTypeProposals(problemPos, UnknownTypeEvaluator.INTERFACE, proposals);
 					break;	
 				default:
 					//proposals.add(new NoCorrectionProposal(problemPos));
 			}
-		} catch(CoreException e) {
+		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
 	}

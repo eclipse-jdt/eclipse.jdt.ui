@@ -46,11 +46,13 @@ public class UnknownMethodEvaluator {
 	}
 	
 	
-	public static void getProposals(ICompilationUnit cu, ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+	public static void getProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		String[] args= problemPos.getArguments();
 		if (args.length < 3) {
 			return;
 		}
+		
+		ICompilationUnit cu= problemPos.getCompilationUnit();
 		
 		// corrections
 		String methodName= args[1];
@@ -65,7 +67,7 @@ public class UnknownMethodEvaluator {
 		while (iter.hasNext()) {
 			String curr= (String) iter.next();
 			String label= "Change to " + curr + "(...)";
-			proposals.add(new ReplaceCorrectionProposal(cu, problemPos, label, curr));
+			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr));
 		}
 		
 		// new method

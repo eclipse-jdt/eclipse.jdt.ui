@@ -26,9 +26,9 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 	private CompilationUnitChange fCompilationUnitChange;
 	private ICompilationUnit fCompilationUnit;
 
-	public CUCorrectionProposal(String name, ICompilationUnit cu, ProblemPosition problemPos) throws CoreException {
+	public CUCorrectionProposal(String name, ProblemPosition problemPos) throws CoreException {
 		super(name, problemPos);
-		fCompilationUnit= cu;
+		fCompilationUnit= problemPos.getCompilationUnit();
 		fCompilationUnitChange= null;
 	}
 	

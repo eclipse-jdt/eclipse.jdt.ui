@@ -18,8 +18,8 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	
 	private String fReplacementString;
 
-	public ReplaceCorrectionProposal(ICompilationUnit cu, ProblemPosition problemPos, String label, String replacementString) throws CoreException {
-		super(label, cu, problemPos);
+	public ReplaceCorrectionProposal(ProblemPosition problemPos, String label, String replacementString) throws CoreException {
+		super(label, problemPos);
 		fReplacementString= replacementString;
 	}
 

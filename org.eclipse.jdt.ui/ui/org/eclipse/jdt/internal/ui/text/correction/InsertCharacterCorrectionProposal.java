@@ -21,8 +21,8 @@ public class InsertCharacterCorrectionProposal extends CUCorrectionProposal {
 	private boolean fAtBeginning;
 
 
-	public InsertCharacterCorrectionProposal(ICompilationUnit cu, ProblemPosition problemPos, String label, String insertString, boolean atBeginning) throws CoreException {
-		super(label, cu, problemPos);
+	public InsertCharacterCorrectionProposal(ProblemPosition problemPos, String label, String insertString, boolean atBeginning) throws CoreException {
+		super(label, problemPos);
 		fInsertionString= insertString;
 		fAtBeginning= atBeginning;
 	}

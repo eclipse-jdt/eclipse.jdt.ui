@@ -23,14 +23,16 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class ReorgEvaluator {
 	
-	public static void getWrongTypeNameProposals(ICompilationUnit cu, ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+	public static void getWrongTypeNameProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		String[] args= problemPos.getArguments();
 		if (args.length == 2) {
+			ICompilationUnit cu= problemPos.getCompilationUnit();
+			
 			// rename type
 			Path path= new Path(args[0]);
 			String newName= path.removeFileExtension().lastSegment();
 			String label= "Rename type to '" + newName + "'";
-			proposals.add(new ReplaceCorrectionProposal(cu, problemPos, label, newName));
+			proposals.add(new ReplaceCorrectionProposal(problemPos, label, newName));
 			
 			String newCUName= args[1] + ".java";
 			final RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
@@ -44,11 +46,13 @@ public class ReorgEvaluator {
 		}
 	}
 	
-	public static void getWrongPackageDeclNameProposals(ICompilationUnit cu, ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+	public static void getWrongPackageDeclNameProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		String[] args= problemPos.getArguments();
 		if (args.length == 1) {
+			ICompilationUnit cu= problemPos.getCompilationUnit();
+			
 			// correct pack decl
-			proposals.add(new CorrectPackageDeclarationProposal(cu, problemPos));
+			proposals.add(new CorrectPackageDeclarationProposal(problemPos));
 
 			// move to pack
 			IPackageFragment currPack= (IPackageFragment) cu.getParent();

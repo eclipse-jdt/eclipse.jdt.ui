@@ -30,7 +30,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	private String[] fParamTypes;
 
 	public NewMethodCompletionProposal(IType type, ProblemPosition problemPos, String label, String methodName, String[] paramTypes) throws CoreException {
-		super(label, type.getCompilationUnit(), problemPos);
+		super(label, problemPos);
 		
 		fMethodName= methodName;
 		fParamTypes= paramTypes;
