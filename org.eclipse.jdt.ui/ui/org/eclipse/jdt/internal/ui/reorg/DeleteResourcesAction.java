@@ -136,11 +136,19 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 		String label;
 		if (selection.size() == 1){
 			String pattern= "Are you sure you want to delete ''{0}''?";
-			label= MessageFormat.format(pattern, new String[]{ReorgUtils.getName(selection.getFirstElement())});
+			label= MessageFormat.format(pattern, new String[]{getName(selection.getFirstElement())});
 		} else {
 			String pattern= "Are you sure you want to delete these {0} resources?";
 			label= MessageFormat.format(pattern, new String[]{String.valueOf(selection.size())});
 		}
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, label);
+	}
+	
+	private static String getName(Object element){
+		//need to render 1 case differently
+		if (element instanceof IPackageFragment && ((IPackageFragment)element).isDefaultPackage())
+			return "(default package)";
+		else
+			return ReorgUtils.getName(element);
 	}
 }
