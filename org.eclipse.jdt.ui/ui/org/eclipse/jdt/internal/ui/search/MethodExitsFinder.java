@@ -17,12 +17,14 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -113,12 +115,22 @@ public class MethodExitsFinder extends ASTVisitor {
 		// Don't dive into a local type.
 		return false;
 	}
-	
+
 	public boolean visit(AnonymousClassDeclaration node) {
 		// Don't dive into a local type.
 		return false;
 	}
-	
+
+	public boolean visit(AnnotationTypeDeclaration node) {
+		// Don't dive into a local type.
+		return false;
+	}
+
+	public boolean visit(EnumDeclaration node) {
+		// Don't dive into a local type.
+		return false;
+	}
+
 	public boolean visit(ReturnStatement node) {
 		fResult.add(node);
 		return super.visit(node);

@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -35,7 +36,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -52,11 +52,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
- * This class is used to find references to construcotors.
+ * This class is used to find references to constructors.
  */
 class ConstructorReferenceFinder {
 	private final IType fType;
@@ -135,7 +134,7 @@ class ConstructorReferenceFinder {
 	//XXX this method is a workaround for jdt core bug 27236
 	private boolean isRealConstructorReferenceNode(ASTNode node){
 		String typeName= fConstructors[0].getDeclaringType().getElementName();
-		if (node.getParent() instanceof TypeDeclaration)
+		if (node.getParent() instanceof AbstractTypeDeclaration)
 			return false;
 		if (node.getParent() instanceof MethodDeclaration){
 			MethodDeclaration md= (MethodDeclaration)node.getParent();

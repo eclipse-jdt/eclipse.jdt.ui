@@ -13,7 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
@@ -23,11 +26,10 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.WhileStatement;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jface.text.IRegion;
 
 public class InputFlowAnalyzer extends FlowAnalyzer {
 	
@@ -107,7 +109,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	}
 
 	public FlowInfo perform(BodyDeclaration node) {
-		Assert.isTrue(!(node instanceof TypeDeclaration));
+		Assert.isTrue(!(node instanceof AbstractTypeDeclaration));
 		node.accept(this);
 		return getFlowInfo(node);
 	}

@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.text.edits.TextEdit;
@@ -64,7 +65,6 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -703,7 +703,7 @@ class ReorgPolicyFactory {
 					if (typeDestination.isAnonymous()) {
 						destinationContainer= ASTNodeSearchUtil.getClassInstanceCreationNode(typeDestination, destinationCuNode).getAnonymousClassDeclaration();
 					} else {
-						destinationContainer= ASTNodeSearchUtil.getTypeDeclarationNode(typeDestination, destinationCuNode);
+						destinationContainer= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(typeDestination, destinationCuNode);
 					}
 					break;
 				default:
@@ -727,7 +727,8 @@ class ReorgPolicyFactory {
 				return; //could insert into/after destination
 			}
 			// fall-back / default:
-			targetRewrite.getListRewrite(ASTNodeSearchUtil.getTypeDeclarationNode(getDestinationAsType(), destinationCuNode), TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertLast(newMember, null);
+			final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getDestinationAsType(), destinationCuNode);
+			targetRewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertLast(newMember, null);
 		}
 
 		private static String getUnindentedSource(ISourceReference sourceReference) throws JavaModelException {
@@ -1443,13 +1444,17 @@ class ReorgPolicyFactory {
 			}
 			return false;
 		}
-		
+
 		public boolean canEnable() throws JavaModelException {
-			if (! super.canEnable()) return false;
+			if (!super.canEnable())
+				return false;
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			for (int i= 0; i < roots.length; i++) {
-				if (roots[i].isReadOnly() && 
-						! (roots[i].isArchive() && ! roots[i].getResource().isReadOnly()))	return  false;
+				if (roots[i].isReadOnly() && !(roots[i].isArchive())) {
+					final ResourceAttributes attributes= roots[i].getResource().getResourceAttributes();
+					if (attributes == null || attributes.isReadOnly())
+						return false;
+				}
 			}
 			return true;
 		}

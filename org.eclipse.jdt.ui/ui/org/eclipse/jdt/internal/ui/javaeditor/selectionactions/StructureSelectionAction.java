@@ -12,6 +12,14 @@ package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 
 import java.util.Collection;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ui.IEditorInput;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
@@ -20,16 +28,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -185,8 +186,8 @@ public abstract class StructureSelectionAction extends Action {
 	static ASTNode[] getChildNodes(ASTNode node){
 		if (node instanceof Block)
 			return convertToNodeArray(((Block)node).statements());	
-		if (node instanceof TypeDeclaration)
-			return convertToNodeArray(((TypeDeclaration)node).bodyDeclarations());	
+		if (node instanceof AbstractTypeDeclaration)
+			return convertToNodeArray(((AbstractTypeDeclaration)node).bodyDeclarations());	
 		if (node instanceof CompilationUnit)
 			return convertToNodeArray(((CompilationUnit)node).types());	
 		return null;	

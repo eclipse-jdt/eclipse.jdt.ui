@@ -41,9 +41,11 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -984,7 +986,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				Set subtypes= (Set)namedSubclassMapping.get(cu);
 				for (Iterator iter= subtypes.iterator(); iter.hasNext();) {
 					IType subtype= (IType) iter.next();
-					TypeDeclaration subtypeNode= ASTNodeSearchUtil.getTypeDeclarationNode(subtype, cuRewrite.getRoot());
+					AbstractTypeDeclaration subtypeNode= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(subtype, cuRewrite.getRoot());
 					if (subtypeNode != null)
 						modifyImplicitCallsToNoArgConstructor(subtypeNode, cuRewrite);
 				}
@@ -1014,7 +1016,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private void modifyImplicitCallsToNoArgConstructor(TypeDeclaration subclass, CompilationUnitRewrite cuRewrite) {
+	private void modifyImplicitCallsToNoArgConstructor(AbstractTypeDeclaration subclass, CompilationUnitRewrite cuRewrite) {
 		MethodDeclaration[] constructors= getAllConstructors(subclass);
 		if (constructors.length == 0){
 			addNewConstructorToSubclass(subclass, cuRewrite);
@@ -1057,7 +1059,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return true;
 	}
 	
-	private void addNewConstructorToSubclass(TypeDeclaration subclass, CompilationUnitRewrite cuRewrite) {
+	private void addNewConstructorToSubclass(AbstractTypeDeclaration subclass, CompilationUnitRewrite cuRewrite) {
 		AST ast= subclass.getAST();
 		MethodDeclaration newConstructor= ast.newMethodDeclaration();
 		newConstructor.setName(ast.newSimpleName(subclass.getName().getIdentifier()));
@@ -1074,10 +1076,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		
 		String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.add_constructor"); //$NON-NLS-1$
 		TextEditGroup description= cuRewrite.createGroupDescription(msg);
-		cuRewrite.getASTRewrite().getListRewrite(subclass, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertFirst(newConstructor, description);
+		cuRewrite.getASTRewrite().getListRewrite(subclass, subclass.getBodyDeclarationsProperty()).insertFirst(newConstructor, description);
+		
+		// TODO use AbstractTypeDeclaration
 	}
 	
-	private static int getAccessModifier(TypeDeclaration subclass) {
+	private static int getAccessModifier(AbstractTypeDeclaration subclass) {
 		int modifiers= subclass.getModifiers();
 		if (Modifier.isPublic(modifiers))
 			return Modifier.PUBLIC;
@@ -1089,12 +1093,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return Modifier.NONE;
 	}
 	
-	private MethodDeclaration[] getAllConstructors(TypeDeclaration typeDeclaration) {
-		MethodDeclaration[] methods= typeDeclaration.getMethods();
+	private MethodDeclaration[] getAllConstructors(AbstractTypeDeclaration typeDeclaration) {
+		BodyDeclaration decl;
 		List result= new ArrayList(1);
-		for (int i= 0; i < methods.length; i++) {
-			if (methods[i].isConstructor())
-				result.add(methods[i]);
+		for (Iterator it = typeDeclaration.bodyDeclarations().listIterator(); it.hasNext(); ) {
+			decl= (BodyDeclaration) it.next();
+			if (decl instanceof MethodDeclaration && ((MethodDeclaration) decl).isConstructor())
+				result.add(decl);
 		}
 		return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
 	}
@@ -1809,6 +1814,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 		
 		private String getFullTypeName(MethodDeclaration decl) {
+			// TODO use AbstractTypeDeclaration
+			
 			TypeDeclaration typeDecl= (TypeDeclaration) ASTNodes.getParent(decl, TypeDeclaration.class);
 			AnonymousClassDeclaration anonymous= (AnonymousClassDeclaration) ASTNodes.getParent(decl, AnonymousClassDeclaration.class);
 			if (anonymous != null && ASTNodes.isParent(typeDecl, anonymous)){
