@@ -12,9 +12,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
@@ -37,6 +39,19 @@ public class CreateFileChange extends Change {
 		fSource= source;
 	}
 	
+	protected void setSource(String source){
+		fSource= source;
+	}
+
+	protected void setPath(IPath path){
+		fPath= path;
+	}	
+	
+	protected IPath getPath(){
+		return fPath;
+	}	
+	
+	
 	/*
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
@@ -44,12 +59,12 @@ public class CreateFileChange extends Change {
 
 		InputStream is= null;
 		try {
-			pm.beginTask(NLSChangesMessages.getString("createFile.creating_resource"), 1); //$NON-NLS-1$
+			pm.beginTask(NLSChangesMessages.getString("createFile.creating_resource"), 2); //$NON-NLS-1$
 
 			if (!isActive()){
 				fUndoChange= new NullChange();	
 			} else{
-				IFile file= getOldFile();
+				IFile file= getOldFile(new SubProgressMonitor(pm, 1));
 				if (file.exists()){
 					CompositeChange composite= new CompositeChange();
 					composite.add(new DeleteFileChange(file));
@@ -77,7 +92,7 @@ public class CreateFileChange extends Change {
 		}
 	}
 	
-	protected IFile getOldFile(){
+	protected IFile getOldFile(IProgressMonitor pm){
 		return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 	}
 
