@@ -17,14 +17,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
 import org.eclipse.search.internal.core.text.TextSearchEngine;
@@ -55,18 +55,18 @@ public class QualifiedNameFinder {
 			// do nothing;
 		}
 
-		public void accept(IResource resource, String line, int start, int length, int lineNumber) throws CoreException {
-			if (resource.getType() != IResource.FILE)
+		public void accept(IResourceProxy proxy, String line, int start, int length, int lineNumber) throws CoreException {
+			if (proxy.getType() != IResource.FILE)
 				return;
 			// Make sure we don't change Compilation Units
-			IFile file= (IFile)resource;
+			IFile file= (IFile)proxy.requestResource();
 			IJavaElement element= JavaCore.create(file);
 			if (element != null && element.exists())
 				return;
 			TextChange change= (TextChange)fChanges.get(file);
 			if (change == null) {
-				change= new TextFileChange(resource.getName(), file);
-				fChanges.put(resource, change);
+				change= new TextFileChange(file.getName(), file);
+				fChanges.put(file, change);
 				fChangesList.add(change);
 			}
 			change.addTextEdit(RefactoringCoreMessages.getString("QualifiedNameFinder.update_name"), SimpleTextEdit.createReplace(start, length, fNewValue)); //$NON-NLS-1$
