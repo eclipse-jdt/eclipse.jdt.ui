@@ -5,7 +5,6 @@
 package org.eclipse.jdt.ui.tests.refactoring.infra;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;

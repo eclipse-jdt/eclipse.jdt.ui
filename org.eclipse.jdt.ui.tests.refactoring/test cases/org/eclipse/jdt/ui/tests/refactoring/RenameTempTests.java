@@ -11,11 +11,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class RenameTempTests extends RefactoringTest{
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;public class RenameTempTests extends RefactoringTest{
 	
 	private static final Class clazz= RenameTempTests.class;
 	private static final String REFACTORING_PATH= "RenameTemp/";

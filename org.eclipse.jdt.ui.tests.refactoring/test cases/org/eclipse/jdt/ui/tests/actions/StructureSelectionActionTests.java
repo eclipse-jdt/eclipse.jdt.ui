@@ -14,18 +14,15 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.*;
-import org.eclipse.jdt.internal.corext.SourceRange;
-
-import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectEnclosingAction;
-import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectNextAction;
-import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectPreviousAction;
-import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
-
 import org.eclipse.jdt.ui.tests.refactoring.ExtractMethodTests;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class StructureSelectionActionTests extends RefactoringTest{
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectEnclosingAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectPreviousAction;public class StructureSelectionActionTests extends RefactoringTest{
 	
 	private static final Class clazz= StructureSelectionActionTests.class;
 	private static final String REFACTORING_PATH= "StructureSelectionAction/";

@@ -1,19 +1,16 @@
 package org.eclipse.jdt.ui.tests.actions;
 
-import org.eclipse.swt.dnd.Clipboard;
-
 import junit.framework.Assert;
 
-import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.dnd.Clipboard;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.tests.refactoring.infra.*;
+import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 class SourceReferenceTestUtil {
 	

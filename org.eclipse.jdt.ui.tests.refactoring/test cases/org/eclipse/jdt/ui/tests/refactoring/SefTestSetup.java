@@ -15,9 +15,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 
 public class SefTestSetup extends TestSetup {
 	

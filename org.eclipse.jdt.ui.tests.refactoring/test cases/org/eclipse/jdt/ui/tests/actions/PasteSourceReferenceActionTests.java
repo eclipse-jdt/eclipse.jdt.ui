@@ -2,11 +2,11 @@ package org.eclipse.jdt.ui.tests.actions;
 
 import java.io.IOException;
 
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.widgets.Display;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceReference;

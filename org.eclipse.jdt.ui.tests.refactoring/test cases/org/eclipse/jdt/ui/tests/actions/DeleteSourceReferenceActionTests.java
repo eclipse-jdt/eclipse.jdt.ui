@@ -4,10 +4,7 @@ import java.io.IOException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jface.viewers.ISelectionProvider;
-
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;

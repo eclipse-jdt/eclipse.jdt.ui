@@ -7,9 +7,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageChange;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageChange;
 
 public class CopyPackageChangeTest extends RefactoringTest {
 

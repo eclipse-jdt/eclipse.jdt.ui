@@ -3,7 +3,6 @@ package org.eclipse.jdt.ui.tests.refactoring.infra;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
-import org.eclipse.jdt.internal.corext.*;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 

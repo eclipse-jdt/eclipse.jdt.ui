@@ -9,10 +9,10 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 public class UndoManagerTests extends RefactoringTest {
 	
