@@ -70,7 +70,9 @@ public class ResourceToItemsMapper {
 	}
 		
 	private void updateItem(Item item) {
-		fContentViewerAccess.doUpdateItem(item);
+		if (!item.isDisposed()) {
+			fContentViewerAccess.doUpdateItem(item);
+		}
 	}
 
 	/**
