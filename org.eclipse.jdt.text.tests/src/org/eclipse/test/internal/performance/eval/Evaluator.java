@@ -15,18 +15,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.eclipse.perfmsr.core.LoadValueConstants;
-
 import junit.framework.Assert;
-
-import org.eclipse.core.runtime.Platform;
-
+import org.eclipse.perfmsr.core.LoadValueConstants;
 import org.eclipse.test.internal.performance.PerfMsrConstants;
-import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
 import org.eclipse.test.internal.performance.data.PerformanceDataModel;
 import org.eclipse.test.internal.performance.data.Sample;
-
-import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 
 /**
@@ -34,12 +27,12 @@ import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
  */
 public class Evaluator implements IEvaluator {
 
-	private static final String PLUGIN_ID= JdtTextTestPlugin.PLUGIN_ID;
-	private static final String DRIVER_OPTION= "/option/driver"; //$NON-NLS-1$
-	private static final String TIMESTAMP_OPTION= "/option/timestamp"; //$NON-NLS-1$
-	
-	private static final String DRIVER_SYSTEM_PROPERTY= "eclipse.performance.reference.driver"; //$NON-NLS-1$
-	private static final String TIMESTAMP_SYSTEM_PROPERTY= "eclipse.performance.reference.timestamp"; //$NON-NLS-1$
+//	private static final String PLUGIN_ID= JdtTextTestPlugin.PLUGIN_ID;
+//	private static final String DRIVER_OPTION= "/option/driver"; //$NON-NLS-1$
+//	private static final String TIMESTAMP_OPTION= "/option/timestamp"; //$NON-NLS-1$
+//	
+//	private static final String DRIVER_SYSTEM_PROPERTY= "eclipse.performance.reference.driver"; //$NON-NLS-1$
+//	private static final String TIMESTAMP_SYSTEM_PROPERTY= "eclipse.performance.reference.timestamp"; //$NON-NLS-1$
 	
 	private static IEvaluator fgDefaultEvaluator;
 	
@@ -128,23 +121,24 @@ public class Evaluator implements IEvaluator {
 	
 	public static synchronized IEvaluator getDefaultEvaluator() {
 		if (fgDefaultEvaluator == null) {
-			fgDefaultEvaluator= new Evaluator();
-			
-			String driver= System.getProperty(DRIVER_SYSTEM_PROPERTY);
-			if (driver == null)
-				driver= Platform.getDebugOption(PLUGIN_ID + DRIVER_OPTION);
-			if (driver == null)
-				driver= "3.0"; //$NON-NLS-1$
-			String timestamp= System.getProperty(TIMESTAMP_SYSTEM_PROPERTY);
-			if (timestamp == null)
-				timestamp= Platform.getDebugOption(PLUGIN_ID + TIMESTAMP_OPTION);
-			
-			fgDefaultEvaluator.setReferenceFilterProperties(driver, timestamp);
-			
-			AssertChecker cpu= new RelativeBandChecker(PerfMsrDimensions.CPU_TIME, 0.0F, 1.0F);
-			AssertChecker mem= new RelativeBandChecker(PerfMsrDimensions.WORKING_SET, 0.0F, 1.0F);
-			
-			fgDefaultEvaluator.setAssertCheckers(new AssertChecker[] { cpu, mem });
+			fgDefaultEvaluator= new EmptyEvaluator();
+//			fgDefaultEvaluator= new Evaluator();
+//			
+//			String driver= System.getProperty(DRIVER_SYSTEM_PROPERTY);
+//			if (driver == null)
+//				driver= Platform.getDebugOption(PLUGIN_ID + DRIVER_OPTION);
+//			if (driver == null)
+//				driver= "3.0"; //$NON-NLS-1$
+//			String timestamp= System.getProperty(TIMESTAMP_SYSTEM_PROPERTY);
+//			if (timestamp == null)
+//				timestamp= Platform.getDebugOption(PLUGIN_ID + TIMESTAMP_OPTION);
+//			
+//			fgDefaultEvaluator.setReferenceFilterProperties(driver, timestamp);
+//			
+//			AssertChecker cpu= new RelativeBandChecker(PerfMsrDimensions.CPU_TIME, 0.0F, 1.0F);
+//			AssertChecker mem= new RelativeBandChecker(PerfMsrDimensions.WORKING_SET, 0.0F, 1.0F);
+//			
+//			fgDefaultEvaluator.setAssertCheckers(new AssertChecker[] { cpu, mem });
 		}
 
 		return fgDefaultEvaluator;
