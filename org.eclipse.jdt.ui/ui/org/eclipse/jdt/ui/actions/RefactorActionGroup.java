@@ -55,6 +55,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractMethodAction;
 	private SelectionDispatchAction fExtractInterfaceAction;
 	private SelectionDispatchAction fMoveInnerToTopAction;
+	private SelectionDispatchAction fUseSupertypeAction;
 	
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
@@ -137,6 +138,11 @@ public class RefactorActionGroup extends ActionGroup {
 		fMoveInnerToTopAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
 		fMoveInnerToTopAction.update(selection);
 		editor.setAction("MoveInnerToTop", fMoveInnerToTopAction); //$NON-NLS-1$
+
+		fUseSupertypeAction= new UseSupertypeAction(editor);
+		fUseSupertypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
+		fUseSupertypeAction.update(selection);
+		editor.setAction("UseSupertype", fUseSupertypeAction); //$NON-NLS-1$
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site) {
@@ -165,6 +171,9 @@ public class RefactorActionGroup extends ActionGroup {
 
 		fMoveInnerToTopAction= new MoveInnerToTopAction(fSite);
 		initAction(fMoveInnerToTopAction, provider, selection);
+
+		fUseSupertypeAction= new UseSupertypeAction(fSite);
+		initAction(fUseSupertypeAction, provider, selection);
 	}
 
 	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
@@ -191,6 +200,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.MOVE_INNER_TO_TOP, fMoveInnerToTopAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
 	}
 	
 	/* (non-Javadoc)
@@ -216,6 +226,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fExtractMethodAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
 		disposeAction(fMoveInnerToTopAction, provider);
+		disposeAction(fUseSupertypeAction, provider);
 		super.dispose();
 	}
 	
@@ -231,6 +242,7 @@ public class RefactorActionGroup extends ActionGroup {
 		addAction(refactorSubmenu, fPullUpAction);
 		addAction(refactorSubmenu, fModifyParametersAction);
 		addAction(refactorSubmenu, fExtractInterfaceAction);
+		addAction(refactorSubmenu, fUseSupertypeAction);
 		addAction(refactorSubmenu, fMoveInnerToTopAction);
 		if (! refactorSubmenu.isEmpty())
 			refactorSubmenu.add(new Separator());
