@@ -228,8 +228,6 @@ class AstNodeMatcher extends AbstractSyntaxTreeVisitorAdapter{
 			return no();	
 
 		ArrayReference other= (ArrayReference)nextNode;
-		if (other.isFieldReference() != arrayReference.isFieldReference())		
-			return no();
 		
 		if (other.arrayElementBinding != arrayReference.arrayElementBinding)	
 			return no();
