@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
@@ -153,8 +154,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			else if (firstElement instanceof ICompilationUnit)	
 				run(JavaElementUtil.getMainType((ICompilationUnit)firstElement), new IField[0]);
 		} catch (CoreException e) {
-			JavaPlugin.log(e.getStatus());
-			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
 				
 	}
@@ -361,8 +361,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			MessageDialog.openInformation(getShell(), dialogTitle, 
 				ActionMessages.getString("AddGetterSetterAction.not_applicable")); //$NON-NLS-1$
 		} catch (CoreException e) {
-			JavaPlugin.log(e.getStatus());
-			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
 	}
 	
@@ -394,8 +393,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				EditorUtility.revealInEditor(editor, createdMethods[0]);
 			}		
 		} catch (InvocationTargetException e) {
-			JavaPlugin.log(e);
-			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
+			String message= ActionMessages.getString("AddGetterSetterAction.error.actionfailed"); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), dialogTitle, message);
 		} catch (InterruptedException e) {
 			// operation cancelled
 		}

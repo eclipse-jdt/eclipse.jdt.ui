@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.compare.JavaHistoryAction.JavaTextBufferNode;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -178,8 +177,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			}
 
 	 	} catch(InvocationTargetException ex) {
-			JavaPlugin.log(ex);
-			MessageDialog.openError(shell, errorTitle, errorMessage);
+			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
 			
 		} catch(InterruptedException ex) {
 			// shouldn't be called because is not cancable

@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddJavaDocStubOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -43,6 +42,7 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Creates a Java Doc Stubs for the selected members.
@@ -146,8 +146,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			EditorUtility.revealInEditor(editor, members[0]);
 			
 		} catch (CoreException e) {
-			JavaPlugin.log(e.getStatus());
-			showError(ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
 		}
 	}
 	
@@ -184,8 +183,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			}
 			run(new IMember[] { (IMember)element });
 		} catch (CoreException e) {
-			JavaPlugin.log(e.getStatus());
-			showError(ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
 		}
 	}
 
@@ -199,8 +197,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 			dialog.run(false, true, new WorkbenchRunnableAdapter(op));					
 		} catch (InvocationTargetException e) {
-			JavaPlugin.log(e);
-			showError(ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// operation cancelled
 		}
