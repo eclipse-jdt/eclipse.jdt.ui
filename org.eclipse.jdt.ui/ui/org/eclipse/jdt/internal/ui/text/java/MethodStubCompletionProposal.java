@@ -71,7 +71,7 @@ public class MethodStubCompletionProposal extends JavaCompletionProposal {
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
 			fImportStructure= null;
-			IType declaringType= JavaModelUtil.findType(fJavaProject, fTypeName);
+			IType declaringType= fJavaProject.findType(fTypeName);
 			if (declaringType != null) {
 				IMethod method= JavaModelUtil.findMethod(fMethodName, fParamTypes, false, declaringType);
 				if (method != null) {

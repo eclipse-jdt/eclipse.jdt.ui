@@ -56,7 +56,7 @@ public class MainMethodSearchEngine{
 				if (enclosingElement instanceof IMethod) { // defensive code
 					try {
 						IMethod curr= (IMethod) enclosingElement;
-						if (JavaModelUtil.isMainMethod(curr)) {
+						if (curr.isMainMethod()) {
 							if (!considerExternalJars()) {
 								IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(curr);
 								if (root == null || root.isArchive()) {

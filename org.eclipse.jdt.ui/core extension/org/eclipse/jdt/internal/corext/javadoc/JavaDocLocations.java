@@ -307,7 +307,7 @@ public class JavaDocLocations {
 						appendPackageSummaryPath((IPackageFragment) cont, pathBuffer);
 					}
 				} else {
-					IType imp= JavaModelUtil.findType(element.getJavaProject(), decl.getElementName());
+					IType imp= element.getJavaProject().findType(decl.getElementName());
 					appendTypePath((IType) imp, pathBuffer);
 				}
 				break;

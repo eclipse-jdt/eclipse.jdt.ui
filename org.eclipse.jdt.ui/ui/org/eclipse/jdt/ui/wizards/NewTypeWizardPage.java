@@ -832,7 +832,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			return status;
 		}
 		try {
-			IType type= JavaModelUtil.findType(root.getJavaProject(), enclName);
+			IType type= root.getJavaProject().findType(enclName);
 			if (type == null) {
 				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
 				return status;
@@ -966,7 +966,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			if (enclosingType != null) {
 				String[][] res= enclosingType.resolveType(sclassName);
 				if (res != null && res.length > 0) {
-					type= JavaModelUtil.findType(jproject, res[0][0], res[0][1]);
+					type= jproject.findType(res[0][0], res[0][1]);
 				}
 			}
 		} else {
@@ -975,16 +975,16 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				String packName= currPack.getElementName();
 				// search in own package
 				if (!currPack.isDefaultPackage()) {
-					type= JavaModelUtil.findType(jproject, packName, sclassName);
+					type= jproject.findType(packName, sclassName);
 				}
 				// search in java.lang
 				if (type == null && !"java.lang".equals(packName)) { //$NON-NLS-1$
-					type= JavaModelUtil.findType(jproject, "java.lang", sclassName); //$NON-NLS-1$
+					type= jproject.findType("java.lang", sclassName); //$NON-NLS-1$
 				}
 			}
 			// search fully qualified
 			if (type == null) {
-				type= JavaModelUtil.findType(jproject, sclassName);
+				type= jproject.findType(sclassName);
 			}
 		}
 		return type;
@@ -1007,7 +1007,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			for (int i= 0; i < nElements; i++) {
 				String intfname= (String)elements.get(i);
 				try {
-					IType type= JavaModelUtil.findType(root.getJavaProject(), intfname);
+					IType type= root.getJavaProject().findType(intfname);
 					if (type == null) {
 						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.InterfaceNotExists", intfname)); //$NON-NLS-1$
 						return status;

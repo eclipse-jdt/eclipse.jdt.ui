@@ -70,7 +70,7 @@ public class ProposalInfo {
 	
 	private IMember getMember() throws JavaModelException {
 		if (fMember == null) {
-			IType type= JavaModelUtil.findType(fJavaProject, new String(fPackageName), new String(fTypeName));
+			IType type= fJavaProject.findType(new String(fPackageName), new String(fTypeName));
 			if (type != null) {
 				if (fMemberName != null) {
 					String name= new String(fMemberName);

@@ -33,30 +33,10 @@ public class JavaModelUtil {
 	 * @param jproject The java project to search in
 	 * @param str The fully qualified name (type name with enclosing type names and package (all separated by dots))
 	 * @return The type found, or null if not existing
-	 * The method only finds top level types and its inner types. Waiting for a Java Core solution
+	 * @deprecated Use IJavaProject.findType(String) instead
 	 */	
 	public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
-		String pathStr= fullyQualifiedName.replace('.', '/') + ".java"; //$NON-NLS-1$
-		IJavaElement jelement= jproject.findElement(new Path(pathStr));
-		if (jelement == null) {
-			// try to find it as inner type
-			String qualifier= Signature.getQualifier(fullyQualifiedName);
-			if (qualifier.length() > 0) {
-				IType type= findType(jproject, qualifier); // recursive!
-				if (type != null) {
-					IType res= type.getType(Signature.getSimpleName(fullyQualifiedName));
-					if (res.exists()) {
-						return res;
-					}
-				}
-			}
-		} else if (jelement.getElementType() == IJavaElement.COMPILATION_UNIT) {
-			String simpleName= Signature.getSimpleName(fullyQualifiedName);
-			return ((ICompilationUnit) jelement).getType(simpleName);
-		} else if (jelement.getElementType() == IJavaElement.CLASS_FILE) {
-			return ((IClassFile) jelement).getType();
-		}
-		return null;
+		return jproject.findType(fullyQualifiedName);
 	}
 
 	/** 
@@ -65,33 +45,10 @@ public class JavaModelUtil {
 	 * @param pack The package name
 	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
 	 * @return the type found, or null if not existing
-	 * The method only finds top level types and its inner types. Waiting for a Java Core solution
+	 * @deprecated Use IJavaProject.findType(String, String) instead
 	 */	
 	public static IType findType(IJavaProject jproject, String pack, String typeQualifiedName) throws JavaModelException {
-		// should be supplied from java core
-		int dot= typeQualifiedName.indexOf('.');
-		if (dot == -1) {
-			return findType(jproject, concatenateName(pack, typeQualifiedName));
-		}
-		IPath packPath;
-		if (pack.length() > 0) {
-			packPath= new Path(pack.replace('.', '/'));
-		} else {
-			packPath= new Path(""); //$NON-NLS-1$
-		}
-		// fixed for 1GEXEI6: ITPJUI:ALL - Incorrect error message on class creation wizard
-		IPath path= packPath.append(typeQualifiedName.substring(0, dot) + ".java"); //$NON-NLS-1$
-		IJavaElement elem= jproject.findElement(path);
-		if (elem instanceof ICompilationUnit) {
-			return findTypeInCompilationUnit((ICompilationUnit)elem, typeQualifiedName);
-		} else if (elem instanceof IClassFile) {
-			path= packPath.append(typeQualifiedName.replace('.', '$') + ".class"); //$NON-NLS-1$
-			elem= jproject.findElement(path);
-			if (elem instanceof IClassFile) {
-				return ((IClassFile)elem).getType();
-			}
-		}
-		return null;
+		return jproject.findType(pack, typeQualifiedName);
 	}
 	
 	/**
@@ -104,7 +61,7 @@ public class JavaModelUtil {
 	 */
 	public static IJavaElement findTypeContainer(IJavaProject jproject, String typeContainerName) throws JavaModelException {
 		// try to find it as type
-		IJavaElement result= findType(jproject, typeContainerName);
+		IJavaElement result= jproject.findType(typeContainerName);
 		if (result == null) {
 			// find it as package
 			IPath path= new Path(typeContainerName.replace('.', '/'));
@@ -186,9 +143,7 @@ public class JavaModelUtil {
 	 * this is ambiguous. JavaCore PR: 1GCFUNT
 	 */
 	public static String getTypeQualifiedName(IType type) {
-		StringBuffer buf= new StringBuffer();
-		getTypeQualifiedName(type, buf);
-		return buf.toString();
+		return type.getTypeQualifiedName('.');
 	}
 	
 	private static void getTypeQualifiedName(IType type, StringBuffer buf) {
@@ -207,14 +162,7 @@ public class JavaModelUtil {
 	 * this is ambiguous. JavaCore PR: 1GCFUNT
 	 */
 	public static String getFullyQualifiedName(IType type) {
-		StringBuffer buf= new StringBuffer();
-		String packName= type.getPackageFragment().getElementName();
-		if (packName.length() > 0) {
-			buf.append(packName);
-			buf.append('.');
-		}
-		getTypeQualifiedName(type, buf);
-		return buf.toString();
+		return type.getFullyQualifiedName('.');
 	}
 	
 	/**
@@ -223,7 +171,7 @@ public class JavaModelUtil {
 	public static String getTypeContainerName(IType type) {
 		IType outerType= type.getDeclaringType();
 		if (outerType != null) {
-			return getFullyQualifiedName(outerType);
+			return outerType.getFullyQualifiedName('.');
 		} else {
 			return type.getPackageFragment().getElementName();
 		}
@@ -459,31 +407,22 @@ public class JavaModelUtil {
 	 * Checks whether the given type has a valid main method or not.
 	 */
 	public static boolean hasMainMethod(IType type) throws JavaModelException {
-		String[] paramSignature=  { Signature.createArraySignature(Signature.createTypeSignature("String", false), 1) }; //$NON-NLS-1$
-		IMethod method= findMethod("main", paramSignature, false, type); //$NON-NLS-1$
-		if (method != null) {
-			int flags= method.getFlags();
-			return Flags.isStatic(flags) && Flags.isPublic(flags) && Signature.SIG_VOID.equals(method.getReturnType());
+		IMethod[] methods= type.getMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (methods[i].isMainMethod()) {
+				return true;
+			}
 		}
-		return false;		
+		return false;
 	}
 	
 	/**
 	 * Tests if a method is a main method. Does not resolve the parameter types.
 	 * Method must exist.
+	 * @deprecated Use IMethod.isMainMethod
 	 */
 	public static boolean isMainMethod(IMethod method) throws JavaModelException {
-		if ("main".equals(method.getElementName()) && Signature.SIG_VOID.equals(method.getReturnType())) { //$NON-NLS-1$
-			int flags= method.getFlags();
-			if (Flags.isStatic(flags) && Flags.isPublic(flags)) {
-				String[] paramTypes= method.getParameterTypes();
-				if (paramTypes.length == 1) {
-					String name=  Signature.toString(paramTypes[0]);
-					return "String[]".equals(Signature.getSimpleName(name)); //$NON-NLS-1$
-				}
-			}
-		}
-		return false;
+		return method.isMainMethod();
 	}
 	
 	/**

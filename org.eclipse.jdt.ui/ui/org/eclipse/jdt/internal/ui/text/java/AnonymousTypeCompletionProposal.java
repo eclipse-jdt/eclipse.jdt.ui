@@ -63,7 +63,7 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 	
 	private IType getDeclaringType(IJavaProject project, String typeName) {
 		try {
-			return JavaModelUtil.findType(project, typeName);
+			return project.findType(typeName);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}

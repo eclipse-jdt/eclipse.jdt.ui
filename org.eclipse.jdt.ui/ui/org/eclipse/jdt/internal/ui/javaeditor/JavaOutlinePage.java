@@ -347,7 +347,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					if (element instanceof IMethod) {
 						if ((delta.getKind() & IJavaElementDelta.ADDED) != 0) {
 							try {
-								return JavaModelUtil.isMainMethod((IMethod)element);
+								return ((IMethod)element).isMainMethod();
 							} catch (JavaModelException e) {
 								JavaPlugin.log(e.getStatus());
 							}
