@@ -46,7 +46,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 			if (method.isConstructor())
 				searchFor= IJavaSearchConstants.CONSTRUCTOR;
 			String pattern= PrettySignature.getUnqualifiedMethodSignature(method);
-			return new JavaSearchOperation(JavaPlugin.getWorkspace(), pattern, searchFor, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
+			return new JavaSearchOperation(JavaPlugin.getWorkspace(), pattern, true, searchFor, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());
 		}
 		else
 			return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSet), getScopeDescription(workingSet), getCollector());

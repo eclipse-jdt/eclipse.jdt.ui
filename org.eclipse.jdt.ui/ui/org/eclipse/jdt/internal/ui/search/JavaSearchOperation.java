@@ -26,6 +26,7 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 	private IJavaElement fElementPattern;
 	private int fLimitTo;
 	private String fStringPattern;
+	private boolean fIsCaseSensitive;
 	private int fSearchFor;
 	private IJavaSearchScope fScope;
 	private String fScopeDescription;
@@ -59,6 +60,7 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 	public JavaSearchOperation(
 				IWorkspace workspace,
 				String pattern,
+				boolean caseSensitive,
 				int searchFor, 
 				int limitTo,
 				IJavaSearchScope scope,
@@ -66,6 +68,7 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 				JavaSearchResultCollector collector) {
 		this(workspace, limitTo, scope, scopeDescription, collector);
 		fStringPattern= pattern;
+		fIsCaseSensitive= caseSensitive;
 		fSearchFor= searchFor;
 	}
 	
@@ -75,7 +78,7 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 		if (fElementPattern != null)
 			engine.search(fWorkspace, fElementPattern, fLimitTo, fScope, fCollector);
 		else
-			engine.search(fWorkspace, fStringPattern, fSearchFor, fLimitTo, fScope, fCollector);
+			engine.search(fWorkspace, engine.createSearchPattern(fStringPattern, fSearchFor, fLimitTo, fIsCaseSensitive), fScope, fCollector);
 	}
 
 	String getSingularLabel() {

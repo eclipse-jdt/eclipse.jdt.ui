@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -67,6 +68,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -74,19 +76,28 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
 
 	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.JavaSearchPage"; //$NON-NLS-1$
 
+	// Dialog store id constants
+	private final static String PAGE_NAME= "JavaSearchPage"; //$NON-NLS-1$
+	private final static String STORE_CASE_SENSITIVE= PAGE_NAME + "CASE_SENSITIVE"; //$NON-NLS-1$
+
+
 	private static List fgPreviousSearchPatterns= new ArrayList(20);
 
-	private Combo fPattern;
-	private String fInitialPattern;
+	private SearchPatternData fInitialData;
+	private IJavaElement fJavaElement;
 	private boolean fFirstTime= true;
+	private IDialogSettings fDialogSettings;
+	private boolean fIsCaseSensitive;
+	
+	private Combo fPattern;
 	private ISearchPageContainer fContainer;
+	private Button fCaseSensitive;
 	
 	private Button[] fSearchFor;
 	private String[] fSearchForText= {
@@ -105,25 +116,26 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		SearchMessages.getString("SearchPage.limitTo.readReferences"), //$NON-NLS-1$		
 		SearchMessages.getString("SearchPage.limitTo.writeReferences")}; //$NON-NLS-1$
 	
-	private IJavaElement fJavaElement;
-	
-	private static class SearchPatternData {
 
-		int				searchFor;
-		int				limitTo;
+	private class SearchPatternData {
+
+		int			searchFor;
+		int			limitTo;
 		String			pattern;
+		boolean		isCaseSensitive;
 		IJavaElement	javaElement;
-		int				scope;
+		int			scope;
 		IWorkingSet	 	workingSet;
 		
 		public SearchPatternData(int s, int l, String p, IJavaElement element) {
-			this(s, l, p, element, ISearchPageContainer.WORKSPACE_SCOPE, null);
+			this(s, l, p, fIsCaseSensitive || element != null, element, ISearchPageContainer.WORKSPACE_SCOPE, null);
 		}
 		
-		public SearchPatternData(int s, int l, String p, IJavaElement element, int scope, IWorkingSet workingSet) {
+		public SearchPatternData(int s, int l, String p, boolean i, IJavaElement element, int scope, IWorkingSet workingSet) {
 			searchFor= s;
 			limitTo= l;
 			pattern= p;
+			isCaseSensitive= i;
 			javaElement= element;
 			this.scope= scope;
 			this.workingSet= workingSet;
@@ -161,11 +173,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		
 		JavaSearchResultCollector collector= new JavaSearchResultCollector();
 		JavaSearchOperation op= null;
-		if (data.javaElement != null && getPattern().equals(fInitialPattern))
+		if (data.javaElement != null && getPattern().equals(fInitialData.pattern))
 			op= new JavaSearchOperation(workspace, data.javaElement, data.limitTo, scope, scopeDescription, collector);
 		else {
 			data.javaElement= null;
-			op= new JavaSearchOperation(workspace, data.pattern, data.searchFor, data.limitTo, scope, scopeDescription, collector);
+			op= new JavaSearchOperation(workspace, data.pattern, data.isCaseSensitive, data.searchFor, data.limitTo, scope, scopeDescription, collector);
 		}
 		Shell shell= getControl().getShell();
 		try {
@@ -259,6 +271,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 							getSearchFor(),
 							getLimitTo(),
 							getPattern(),
+							fCaseSensitive.getSelection(),
 							fJavaElement,
 							getContainer().getSelectedScope(),
 							getContainer().getSelectedWorkingSet());
@@ -267,6 +280,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		else {
 			match.searchFor= getSearchFor();
 			match.limitTo= getLimitTo();
+			match.isCaseSensitive= fCaseSensitive.getSelection();
 			match.javaElement= fJavaElement;
 			match.scope= getContainer().getSelectedScope();
 			match.workingSet= getContainer().getSelectedWorkingSet();
@@ -301,6 +315,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	 * Creates the page's content.
 	 */
 	public void createControl(Composite parent) {
+		readConfiguration();
+		
 		GridData gd;
 		Composite result= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -320,8 +336,12 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		
 		SelectionAdapter javaElementInitializer= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				fJavaElement= null;
+				if (getSearchFor() == fInitialData.searchFor)
+					fJavaElement= fInitialData.javaElement;
+				else
+					fJavaElement= null;
 				setLimitTo(getSearchFor());
+				updateCaseSensitiveCheckbox();
 			}
 		};
 
@@ -340,7 +360,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		Group result= new Group(parent, SWT.NONE);
 		result.setText(SearchMessages.getString("SearchPage.expression.label")); //$NON-NLS-1$
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 1;
+		layout.numColumns= 2;
 		result.setLayout(layout);
 		
 		// Pattern combo
@@ -353,39 +373,67 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fPattern.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				getContainer().setPerformActionEnabled(getPattern().length() > 0 && getContainer().hasValidScope());
+				updateCaseSensitiveCheckbox();
 			}
 		});
 
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(30);
+		gd.horizontalSpan= 2;
 		fPattern.setLayoutData(gd);
 		
 		// Pattern info
 		Label label= new Label(result, SWT.LEFT);
 		label.setText(SearchMessages.getString("SearchPage.expression.pattern")); //$NON-NLS-1$
+
+		// Ignore case checkbox		
+		fCaseSensitive= new Button(result, SWT.CHECK);
+		fCaseSensitive.setText(SearchMessages.getString("SearchPage.expression.caseSensitive")); //$NON-NLS-1$
+		gd= new GridData(); gd.horizontalAlignment= gd.END;
+		fCaseSensitive.setLayoutData(gd);
+		fCaseSensitive.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fIsCaseSensitive= fCaseSensitive.getSelection();
+				writeConfiguration();
+			}
+		});
+		
 		return result;
+	}
+
+	private void updateCaseSensitiveCheckbox() {
+		if (getPattern().equals(fInitialData.pattern) && fJavaElement != null) {
+			fCaseSensitive.setEnabled(false);
+			fCaseSensitive.setSelection(true);
+		}
+		else {
+			fCaseSensitive.setEnabled(true);
+			fCaseSensitive.setSelection(fIsCaseSensitive);
+		}
 	}
 
 	private void handlePatternSelected() {
 		if (fPattern.getSelectionIndex() < 0)
 			return;
 		int index= fgPreviousSearchPatterns.size() - 1 - fPattern.getSelectionIndex();
-		SearchPatternData values= (SearchPatternData) fgPreviousSearchPatterns.get(index);
+		fInitialData= (SearchPatternData) fgPreviousSearchPatterns.get(index);
 		for (int i= 0; i < fSearchFor.length; i++)
 			fSearchFor[i].setSelection(false);
 		for (int i= 0; i < fLimitTo.length; i++)
 			fLimitTo[i].setSelection(false);
-		fSearchFor[values.searchFor].setSelection(true);
-		setLimitTo(values.searchFor);
-		fLimitTo[values.limitTo].setSelection(true);
-		
-		fInitialPattern= values.pattern;
-		fPattern.setText(fInitialPattern);
-		fJavaElement= values.javaElement;
-		if (values.workingSet != null)
-			getContainer().setSelectedWorkingSet(values.workingSet);
+		fSearchFor[fInitialData.searchFor].setSelection(true);
+		setLimitTo(fInitialData.searchFor);
+		fLimitTo[fInitialData.limitTo].setSelection(true);
+
+		fPattern.setText(fInitialData.pattern);
+		fIsCaseSensitive= fInitialData.isCaseSensitive;
+		fCaseSensitive.setEnabled(fInitialData.javaElement == null);
+		fCaseSensitive.setSelection(fInitialData.isCaseSensitive);
+
+		if (fInitialData.workingSet != null)
+			getContainer().setSelectedWorkingSet(fInitialData.workingSet);
 		else
-			getContainer().setSelectedScope(values.scope);
+			getContainer().setSelectedScope(fInitialData.scope);
 	}
 
 	private Control createSearchFor(Composite parent) {
@@ -423,23 +471,23 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}	
 	
 	private void initSelections() {
-		fJavaElement= null;
 		ISelection selection= getSelection();
-		SearchPatternData values= null;
-		values= tryTypedTextSelection(selection);
-		if (values == null)
-			values= trySelection(selection);
-		if (values == null)
-			values= trySimpleTextSelection(selection);
-		if (values == null)
-			values= getDefaultInitValues();
-					
-		fSearchFor[values.searchFor].setSelection(true);
-		setLimitTo(values.searchFor);
-		fLimitTo[values.limitTo].setSelection(true);		
-		fInitialPattern= values.pattern;
-		fPattern.setText(fInitialPattern);
-		fJavaElement= values.javaElement;
+		fInitialData= null;
+		fInitialData= tryTypedTextSelection(selection);
+		if (fInitialData == null)
+			fInitialData= trySelection(selection);
+		if (fInitialData == null)
+			fInitialData= trySimpleTextSelection(selection);
+		if (fInitialData == null)
+			fInitialData= getDefaultInitValues();
+
+		fJavaElement= fInitialData.javaElement;
+		fCaseSensitive.setSelection(fInitialData.isCaseSensitive);
+		fCaseSensitive.setEnabled(fInitialData.javaElement == null);
+		fSearchFor[fInitialData.searchFor].setSelection(true);
+		setLimitTo(fInitialData.searchFor);
+		fLimitTo[fInitialData.limitTo].setSelection(true);		
+		fPattern.setText(fInitialData.pattern);
 	}
 
 	private SearchPatternData tryTypedTextSelection(ISelection selection) {
@@ -456,12 +504,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 						ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 					}
 					if (elements != null && elements.length > 0) {
+						IJavaElement javaElement;
 						if (elements.length == 1)
-							fJavaElement= elements[0];
+							javaElement= elements[0];
 						else
-							fJavaElement= chooseFromList(elements);
-						if (fJavaElement != null)
-							return determineInitValuesFrom(fJavaElement);
+							javaElement= chooseFromList(elements);
+						if (javaElement != null)
+							return determineInitValuesFrom(javaElement);
 					}
 				}
 			}
@@ -485,11 +534,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		if (selection instanceof IStructuredSelection)
 			o= ((IStructuredSelection)selection).getFirstElement();
 		if (o instanceof IJavaElement) {
-			fJavaElement= (IJavaElement)o;
-			result= determineInitValuesFrom(fJavaElement);
+			result= determineInitValuesFrom((IJavaElement)o);
 		} else if (o instanceof ISearchResultViewEntry) {
-			fJavaElement= getJavaElement(((ISearchResultViewEntry)o).getSelectedMarker());
-			result= determineInitValuesFrom(fJavaElement);
+			IJavaElement element= getJavaElement(((ISearchResultViewEntry)o).getSelectedMarker());
+			result= determineInitValuesFrom(element);
 		} else if (o instanceof IAdaptable) {
 			IJavaElement element= (IJavaElement)((IAdaptable)o).getAdapter(IJavaElement.class);
 			if (element != null) {
@@ -684,5 +732,36 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				return page.getActiveEditor();
 		}
 		return null;
+	}
+
+	//--------------- Configuration handling --------------
+	
+	/**
+	 * Returns the page settings for this Java search page.
+	 * 
+	 * @return the page settings to be used
+	 */
+	private IDialogSettings getDialogSettings() {
+		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+		fDialogSettings= settings.getSection(PAGE_NAME);
+		if (fDialogSettings == null)
+			fDialogSettings= settings.addNewSection(PAGE_NAME);
+		return fDialogSettings;
+	}
+	
+	/**
+	 * Initializes itself from the stored page settings.
+	 */
+	private void readConfiguration() {
+		IDialogSettings s= getDialogSettings();
+		fIsCaseSensitive= s.getBoolean(STORE_CASE_SENSITIVE);
+	}
+	
+	/**
+	 * Stores it current configuration in the dialog store.
+	 */
+	private void writeConfiguration() {
+		IDialogSettings s= getDialogSettings();
+		s.put(STORE_CASE_SENSITIVE, fIsCaseSensitive);
 	}
 }
