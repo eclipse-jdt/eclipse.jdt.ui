@@ -32,15 +32,19 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-
-public abstract class OpenActionUtil {
+public class OpenActionUtil {
+	
+	private OpenActionUtil() {
+		// no instance.
+	}
 		
 	/**
 	 * Opens the editor on the given element and subsequently selects it.
 	 */
-	public static void open(IJavaElement element) throws JavaModelException, PartInitException {
+	public static void open(Object element) throws JavaModelException, PartInitException {
 		IEditorPart part= EditorUtility.openInEditor(element);
-		EditorUtility.revealInEditor(part, element);
+		if (element instanceof IJavaElement)
+			EditorUtility.revealInEditor(part, (IJavaElement)element);
 	}
 	
 	/**

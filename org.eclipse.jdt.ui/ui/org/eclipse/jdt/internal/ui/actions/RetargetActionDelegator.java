@@ -36,7 +36,7 @@ import org.eclipse.ui.actions.RetargetAction;
 
 	public void init(IWorkbenchWindow window) {
 		fWindow= window;
-		fTargetAction= new RetargetAction(getId(), "label");
+		fTargetAction= createRetargetAction();
 		window.getPartService().addPartListener(fTargetAction);
 		fTargetAction.addPropertyChangeListener(new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
@@ -60,6 +60,10 @@ import org.eclipse.ui.actions.RetargetAction;
 			fMenuBarAction= action;
 			fMenuBarAction.setEnabled(fTargetAction.isEnabled());
 		}
+	}
+	
+	protected RetargetAction createRetargetAction() {
+		return new RetargetAction(getId(), "label");
 	}
 	
 	protected abstract String getId();

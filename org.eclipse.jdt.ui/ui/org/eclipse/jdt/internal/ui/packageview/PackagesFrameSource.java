@@ -5,8 +5,8 @@
 
 package org.eclipse.jdt.internal.ui.packageview;
 
-import org.eclipse.ui.views.internal.framelist.TreeFrame;
-import org.eclipse.ui.views.internal.framelist.TreeViewerFrameSource;
+import org.eclipse.ui.views.framelist.TreeFrame;
+import org.eclipse.ui.views.framelist.TreeViewerFrameSource;
 
 class PackagesFrameSource extends TreeViewerFrameSource {
 	private PackageExplorerPart fPackagesExplorer;

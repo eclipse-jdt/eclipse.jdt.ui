@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
@@ -77,11 +83,11 @@ import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.views.internal.framelist.BackAction;
-import org.eclipse.ui.views.internal.framelist.ForwardAction;
-import org.eclipse.ui.views.internal.framelist.FrameList;
-import org.eclipse.ui.views.internal.framelist.GoIntoAction;
-import org.eclipse.ui.views.internal.framelist.UpAction;
+import org.eclipse.ui.views.framelist.BackAction;
+import org.eclipse.ui.views.framelist.ForwardAction;
+import org.eclipse.ui.views.framelist.FrameList;
+import org.eclipse.ui.views.framelist.GoIntoAction;
+import org.eclipse.ui.views.framelist.UpAction;
 
 import org.eclipse.search.ui.IWorkingSet;
 import org.eclipse.search.ui.SearchUI;
@@ -385,9 +391,16 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$
 		
 		fStandardActionGroups.fillActionBars(actionBars);
-		
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.REFRESH, fRefreshAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BOOKMARK, fAddBookmarkAction);
+		
+		// Navigate Go Into and Go To actions.
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.GO_INTO, fZoomInAction);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BACK, fBackAction);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.FORWARD, fForwardAction);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.UP, fUpAction);
+		
 		ReorgGroup.addGlobalReorgActions(actionBars, getSelectionProvider());
 	}
 	
@@ -531,10 +544,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		if (onlyFilesSelected(selection)) {
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fAddBookmarkAction);
-			fAddBookmarkAction.selectionChanged(selection);
 		}
+		
 		menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
-		fRefreshAction.selectionChanged(selection);
 
 		menu.add(new Separator());
 		if (fPropertyDialogAction.isApplicableForSelection())
@@ -590,6 +602,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		fDeleteAction= ReorgGroup.createDeleteAction(provider);
 		fRefreshAction= new RefreshAction(getShell());
+		provider.addSelectionChangedListener(fRefreshAction);
 		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
 		fShowLibrariesAction = new ShowLibrariesAction(this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
 		fShowBinariesAction = new ShowBinariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.binaryProjects")); //$NON-NLS-1$
@@ -1000,12 +1013,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			return;		
 		
 		int key= event.keyCode;
-		if (key == SWT.F5) {
-			fRefreshAction.selectionChanged(
-				(IStructuredSelection) fViewer.getSelection());
-			if (fRefreshAction.isEnabled())
-				fRefreshAction.run();
-		} if (event.character == SWT.DEL){
+		if (event.character == SWT.DEL){
 			fDeleteAction.update();
 			if (fDeleteAction.isEnabled())
 				fDeleteAction.run();
@@ -1200,6 +1208,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		boolean showbin= plugin.getPreferenceStore().getBoolean(TAG_SHOWBINARIES);
 		getBinaryFilter().setShowBinaries(showbin);
 	}
+	
+	boolean isExpandable(Object element) {
+		if (fViewer == null)
+			return false;
+		return fViewer.isExpandable(element);
+	}
+	
 	/**
 	 * Updates the title text and title tool tip.
 	 * Called whenever the input of the viewer changes.

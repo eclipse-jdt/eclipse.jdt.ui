@@ -10,11 +10,18 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.ui.actions.LabelRetargetAction;
+import org.eclipse.ui.actions.RetargetAction;
+
+
 public class ActionDelegates {
 	
 	// Navigate menu
 	
 	public static class OpenAction extends RetargetActionDelegator {
+		protected RetargetAction createRetargetAction() {
+			return new LabelRetargetAction(getId(), ActionMessages.getString("OpenAction.label"));
+		}
 		protected String getId() {
 			return RetargetActionIDs.OPEN;
 		}

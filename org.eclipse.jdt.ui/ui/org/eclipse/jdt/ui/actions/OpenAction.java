@@ -10,12 +10,18 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import java.util.List;
+import java.util.Iterator;
 
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.ui.PartInitException;
 
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -23,12 +29,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.ActionChecker;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 
 /**
  * This action opens a java editor on the element represented by either
@@ -68,6 +75,7 @@ public class OpenAction extends SelectionDispatchAction {
 	public OpenAction(JavaEditor editor) {
 		this(UnifiedSite.create(editor.getEditorSite()));
 		fEditor= editor;
+		setText(ActionMessages.getString("OpenAction.declaration.label")); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
@@ -81,20 +89,25 @@ public class OpenAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		boolean enabled= false;
-		ActionChecker checker= ActionChecker.create(getSelectionProvider());
-		if (checker.elementsAreInstancesOf(selection, ISourceReference.class, false)) {
-			enabled= true;
-		} else {
-			if (!selection.isEmpty() && selection instanceof IStructuredSelection) {
-				IStructuredSelection ss= (IStructuredSelection)selection;
-				if (ss.size() == 1) {
-					Object element= ss.getFirstElement();
-					enabled= checkImportDeclaration(element);
-				}
-			}
+		setEnabled(checkEnabled(selection));
+	}
+	
+	private boolean checkEnabled(IStructuredSelection selection) {
+		if (selection.isEmpty())
+			return false;
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object element= (Object)iter.next();
+			if (element instanceof IImportDeclaration && !((IImportDeclaration)element).isOnDemand())
+				continue;
+			if (element instanceof ISourceReference)
+				continue;
+			if (element instanceof IResource)
+				continue;
+			if (element instanceof IStorage)
+				continue;
+			return false;
 		}
-		setEnabled(enabled);		
+		return true;
 	}
 	
 	/* (non-Javadoc)
@@ -108,43 +121,46 @@ public class OpenAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(IStructuredSelection selection) {
-		run(SelectionConverter.getElements(selection));
+		if (!checkEnabled(selection))
+			return;
+		run(selection.toArray());
 	}
 	
-	private void run(IJavaElement[] elements) {
-		if (elements != null && elements.length > 0) {
-			IJavaElement candidate= null;
-			if (elements.length == 1 && checkImportDeclaration(elements[0])) {
-				IJavaElement declaration= elements[0];
-				try {
-					candidate= JavaModelUtil.findTypeContainer(declaration.getJavaProject(), declaration.getElementName());
-				} catch(JavaModelException e) {
+	private void run(Object[] elements) {
+		if (elements == null)
+			return;
+		for (int i= 0; i < elements.length; i++) {
+			Object element= elements[i];
+			try {
+				OpenActionUtil.open(element);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
+					JavaStatusConstants.INTERNAL_ERROR, PackagesMessages.getString("OpenAction.error.message"), e)); //$NON-NLS-1$
+				
+				ErrorDialog.openError(getShell(), 
+					ActionMessages.getString("OpenAction.error.title"), //$NON-NLS-1$
+					ActionMessages.getString("OpenAction.error.messageProblems"),  //$NON-NLS-1$
+					e.getStatus());
+			
+			} catch (PartInitException x) {
+								
+				String name= null;
+				
+				if (element instanceof IJavaElement) {
+					name= ((IJavaElement) element).getElementName();
+				} else if (element instanceof IStorage) {
+					name= ((IStorage) element).getName();
+				} else if (element instanceof IResource) {
+					name= ((IResource) element).getName();
 				}
-			} else {
-				List filtered= OpenActionUtil.filterResolveResults(elements);
-				if (filtered.size() == 1) {
-					candidate= (IJavaElement)filtered.get(0);
-				} else if (filtered.size() > 1) {
-					candidate= OpenActionUtil.selectJavaElement(filtered, getShell(), 
-						ActionMessages.getString("OpenAction.dialog.title"), 	//$NON-NLS-1$
-						ActionMessages.getString("OpenAction.dialog.message")); //$NON-NLS-1$
+				
+				if (name != null) {
+					MessageDialog.openError(getShell(),
+						ActionMessages.getString("OpenAction.error.messageProblems"),  //$NON-NLS-1$
+						ActionMessages.getFormattedString("OpenAction.error.messageArgs",  //$NON-NLS-1$
+							new String[] { name, x.getMessage() } ));			
 				}
-			}
-			if (candidate != null) {
-				try {
-					OpenActionUtil.open(candidate);
-				} catch (JavaModelException x) {
-					JavaPlugin.log(x.getStatus());
-				} catch (PartInitException x) {
-					JavaPlugin.log(x);
-				}
-				return;
-			}
+			}		
 		}
-		getShell().getDisplay().beep();		
 	}
-	
-	private boolean checkImportDeclaration(Object element) {
-		return element instanceof IImportDeclaration && !((IImportDeclaration)element).isOnDemand();
-	}	
 }
