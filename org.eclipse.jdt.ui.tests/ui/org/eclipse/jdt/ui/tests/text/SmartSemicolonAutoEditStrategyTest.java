@@ -104,7 +104,7 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 	
 	public void testFor() throws BadLocationException {
 		fDocument.set("for (int i= 0)");
-		verifySemicolonPosition(13, 13);
+		verifySemicolonPosition(13, -1);
 	}
 	
 	public void testWithExistingBefore() throws BadLocationException {
@@ -146,17 +146,17 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 
 	public void testEndLineCommentWithFor() throws BadLocationException {
 		fDocument.set("for (int i= 0; i < 2; i++) // comment");
-		verifySemicolonPosition(13, 13);
+		verifySemicolonPosition(13, -1);
 	}
 
 	public void testFakeEndLineCommentWithFor() throws BadLocationException {
 		fDocument.set("for (int i= 0; i < 2; i++) /* comment */  ");
-		verifySemicolonPosition(13, 13);
+		verifySemicolonPosition(13, -1);
 	}
 
 	public void testMultiLineCommentWithFor() throws BadLocationException {
 		fDocument.set("for (int i= 0; i < 2; i++) /* comment\r\n comment2 */  ");
-		verifySemicolonPosition(13, 13);
+		verifySemicolonPosition(13, -1);
 	}
 
 	/* brace tests */
