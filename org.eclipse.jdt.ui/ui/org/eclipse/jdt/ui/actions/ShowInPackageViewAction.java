@@ -93,9 +93,15 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(ITextSelection selection) {
-		IJavaElement element= SelectionConverter.codeResolveOrInputHandled(fEditor, getShell(), getDialogTitle(), ActionMessages.getString("ShowInPackageViewAction.select_name")); //$NON-NLS-1$
-		if (element != null)
-			run(element);
+		try {
+			IJavaElement element= SelectionConverter.elementAtOffset(fEditor);
+			if (element != null)
+				run(element);
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			String message= ActionMessages.getString("ShowInPackageViewAction.error.message"); //$NON-NLS-1$
+			ErrorDialog.openError(getShell(), getDialogTitle(), message, e.getStatus());
+		}	
 	}
 	
 	/* (non-Javadoc)
