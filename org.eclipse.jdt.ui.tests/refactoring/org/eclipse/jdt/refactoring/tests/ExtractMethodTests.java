@@ -354,6 +354,10 @@ public class ExtractMethodTests extends RefactoringTest {
 		invalidSelectionTest();
 	}
 	
+	public void test048() throws Exception {
+		invalidSelectionTest();
+	}
+	
 	//---- While
 	
 	public void test050() throws Exception {

@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 		Assert.isTrue(start <= end);
 	}
 	
-	// enclosed* methods do a open interval check.
+	// enclosed* methods do an open interval check.
 	
 	public boolean enclosedBy(AstNode node) {
 		return node.sourceStart < start && end < node.sourceEnd;		

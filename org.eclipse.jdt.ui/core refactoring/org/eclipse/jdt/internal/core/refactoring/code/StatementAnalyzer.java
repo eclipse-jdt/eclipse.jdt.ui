@@ -120,7 +120,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 		fLocalTypeAnalyzer.checkActivation(status);
 		fReturnAnalyzer.checkActivation(status, fTopNodes);
 		if (fLocalVariableAnalyzer.hasReturnType() && fReturnAnalyzer.hasReturnStatement())
-			status.addFatalError("Ambigious return value: return statement is to be extracted and new method must return a value due to an assignment to a local variable.");
+			status.addFatalError(RefactoringCoreMessages.getString("StatementAnalyzer.expression_and_return_value")); //$NON-NLS-1$
 	}
 	
 	/**
@@ -781,6 +781,8 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 				start= forStatement.initializations[forStatement.initializations.length - 1].sourceEnd;
 			}
 			fCursorPosition= fBuffer.indexOf(')', start + 1);
+			if (fSelection.start <= fCursorPosition)
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.for_statement")); //$NON-NLS-1$
 		}
 		return true;
 	}
