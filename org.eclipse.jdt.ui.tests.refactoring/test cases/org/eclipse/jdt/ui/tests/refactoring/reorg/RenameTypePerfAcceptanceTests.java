@@ -59,7 +59,7 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 		IType control= fProject.findType("org.eclipse.swt.widgets.Control");
 		RenameTypeProcessor processor= new RenameTypeProcessor(control);
 		processor.setNewElementName("Control2");
-		executeRefactoring(new RenameRefactoring(processor));
+		executeRefactoring(new RenameRefactoring(processor), false);
 	}
 	
 	public void testWarm() throws Exception {
@@ -67,6 +67,6 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 		IType control= fProject.findType("org.eclipse.swt.widgets.Control2");
 		RenameTypeProcessor processor= new RenameTypeProcessor(control);
 		processor.setNewElementName("Control");
-		executeRefactoring(new RenameRefactoring(processor));
+		executeRefactoring(new RenameRefactoring(processor), true);
 	}
 }

@@ -38,19 +38,19 @@ public class RenamePackagePerfTests1 extends AbstractRenamePackagePerfTest {
 	}
 	
 	public void testCold_10_10() throws Exception {
-		executeRefactoring(generateSources(10, 10));
+		executeRefactoring(10, 10, false, 2);
 	}
 	
 	public void test_10_10() throws Exception {
-		executeRefactoring(generateSources(10, 10));
+		executeRefactoring(10, 10, true, 2);
 	}
 	
 	public void test_100_10() throws Exception {
 		tagAsSummary("Rename package", Dimension.CPU_TIME);
-		executeRefactoring(generateSources(100, 10));
+		executeRefactoring(100, 10, true, 1);
 	}
 	
 	public void test_1000_10() throws Exception {
-		executeRefactoring(generateSources(1000, 10));
+		executeRefactoring(1000, 10, true, 1);
 	}
 }

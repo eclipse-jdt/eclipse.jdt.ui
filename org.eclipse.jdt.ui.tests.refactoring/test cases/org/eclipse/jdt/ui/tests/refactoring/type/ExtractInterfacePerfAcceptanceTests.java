@@ -74,6 +74,6 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 	}
 	
 	public void testExtractControl() throws Exception {
-		executeRefactoring(fRefactoring);
+		executeRefactoring(fRefactoring, true);
 	}
 }
