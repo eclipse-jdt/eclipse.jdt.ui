@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.SWT;
@@ -25,15 +26,21 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.VariableNamesProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -62,23 +69,17 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			messageType= IMessageProvider.NONE;
 		}
 		
-		addPage(new ExtractConstantInputPage(message, messageType, guessName()));
-	}
-
-	private String guessName() {
-		try {
-			return getExtractConstantRefactoring().guessConstantName();
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			return "";//default value. no ui here, just log //$NON-NLS-1$
-		}
+		String[] guessedNames= getExtractConstantRefactoring().guessConstantNames();
+		String initialValue= guessedNames.length == 0 ? "" : guessedNames[0]; //$NON-NLS-1$
+		addPage(new ExtractConstantInputPage(message, messageType, initialValue, guessedNames));
 	}
 
 	private ExtractConstantRefactoring getExtractConstantRefactoring(){
-		return (ExtractConstantRefactoring)getRefactoring();
+		return (ExtractConstantRefactoring) getRefactoring();
 	}
 
 	private static class ExtractConstantInputPage extends TextInputWizardPage {
+		private static final String QUALIFY_REFERENCES= "qualifyReferences"; //$NON-NLS-1$
 
 		private Label fLabel;
 		private final boolean fInitialValid;
@@ -86,13 +87,17 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		private final String fOriginalMessage;
 		
 		private Button fQualifyReferences;
-		private static final String QUALIFY_REFERENCES= "qualifyReferences"; //$NON-NLS-1$
+		private String[] fConstNameProposals;
+
+		private VariableNamesProcessor fContentAssistProcessor;
+		private String fAccessModifier;
 	
-		public ExtractConstantInputPage(String description, int messageType, String initialValue) {
+		public ExtractConstantInputPage(String description, int messageType, String initialValue, String[] guessedNames) {
 			super(description, true, initialValue);
 			fOriginalMessage= description;
 			fOriginalMessageType= messageType;
 			fInitialValid= ! ("".equals(initialValue)); //$NON-NLS-1$
+			fConstNameProposals= guessedNames;
 		}
 
 		public void createControl(Composite parent) {
@@ -110,6 +115,10 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			Text text= createTextInputField(result);
 			text.selectAll();
 			text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			if (fConstNameProposals.length > 0) {
+				fContentAssistProcessor= new VariableNamesProcessor(fConstNameProposals);
+				ControlContentAssistHelper.createTextContentAssistant(text, fContentAssistProcessor);
+			}
 				
 			layouter.perform(label, text, 1);
 		
@@ -146,12 +155,13 @@ public class ExtractConstantWizard extends RefactoringWizard {
 										  ExtractConstantRefactoring.PACKAGE,
 										  ExtractConstantRefactoring.PRIVATE }; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 
-			String visibility= getExtractConstantRefactoring().getAccessModifier();
+			fAccessModifier= getExtractConstantRefactoring().getAccessModifier();
+			updateContentAssistImage();
 			for (int i= 0; i < labels.length; i++) {
 				Button radio= new Button(group, SWT.RADIO);
 				radio.setText(labels[i]);
 				radio.setData(data[i]);
-				if (data[i] == visibility)
+				if (data[i] == fAccessModifier)
 					radio.setSelection(true);
 				radio.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent event) {
@@ -162,6 +172,25 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			layouter.perform(label, group, 1);	
 		}
 	
+		private void updateContentAssistImage() {
+			if (fContentAssistProcessor == null)
+				return;
+			
+			int flags;
+			if (fAccessModifier == ExtractConstantRefactoring.PRIVATE) {
+				flags= Flags.AccPrivate;
+			} else if (fAccessModifier == ExtractConstantRefactoring.PROTECTED) {
+				flags= Flags.AccProtected;
+			} else if (fAccessModifier == ExtractConstantRefactoring.PUBLIC) {
+				flags= Flags.AccPublic;
+			} else {
+				flags= Flags.AccDefault;
+			}
+			ImageDescriptor imageDesc= JavaElementImageProvider.getFieldImageDescriptor(false, flags);
+			imageDesc= new JavaElementImageDescriptor(imageDesc, JavaElementImageDescriptor.STATIC | JavaElementImageDescriptor.FINAL, JavaElementImageProvider.BIG_SIZE);
+			fContentAssistProcessor.setProposalImageDescriptor(imageDesc);
+		}
+
 		private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
 			String title= RefactoringMessages.getString("ExtractConstantInputPage.replace_all"); //$NON-NLS-1$
 			boolean defaultValue= getExtractConstantRefactoring().replaceAllOccurrences();
@@ -230,6 +259,8 @@ public class ExtractConstantWizard extends RefactoringWizard {
 
 		private void setAccessModifier(String accessModifier) {
 			getExtractConstantRefactoring().setAccessModifier(accessModifier);
+			fAccessModifier= accessModifier;
+			updateContentAssistImage();
 			updatePreviewLabel();
 		}
 	

@@ -11,8 +11,11 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.eclipse.text.edits.ReplaceEdit;
@@ -28,6 +31,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -37,12 +41,14 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -50,6 +56,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -63,6 +70,8 @@ import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
@@ -79,12 +88,12 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
 public class ExtractConstantRefactoring extends Refactoring {
 
-	private static final char UNDERSCORE= '_';
 	public static final String PUBLIC= 	JdtFlags.VISIBILITY_STRING_PUBLIC;
 	public static final String PROTECTED= JdtFlags.VISIBILITY_STRING_PROTECTED;
 	public static final String PACKAGE= 	JdtFlags.VISIBILITY_STRING_PACKAGE;
@@ -105,6 +114,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	private String fAccessModifier= PRIVATE; //default value
 	private String fConstantName= ""; //$NON-NLS-1$;
+	private String[] fExcludedVariableNames;
 
 	private boolean fSelectionAllStaticFinal;
 	private boolean fAllStaticFinalCheckPerformed= false;
@@ -165,85 +175,152 @@ public class ExtractConstantRefactoring extends Refactoring {
 		fQualifyReferencesWithDeclaringClassName= qualify;
 	}
 	
-	//XXX similar to code in ExtractTemp
 	public String guessConstantName() throws JavaModelException {
-		IExpressionFragment selectedFragment= getSelectedExpression();
-		if (selectedFragment == null)
-			return fConstantName;
-		Expression selected= selectedFragment.getAssociatedExpression();
-		if (selected instanceof MethodInvocation){
-			String candidate= guessContantName((MethodInvocation) selected);
-			if (candidate != null)
-				return candidate;
-		} else if (selected instanceof StringLiteral) {
-			String candidate= guessContantName((StringLiteral) selected);
-			if (candidate != null)
-				return candidate;
-		}
-		return fConstantName;
+		String[] proposals= guessConstantNames();
+		if (proposals.length > 0)
+			return proposals[0];
+		else
+			return ""; //$NON-NLS-1$
 	}
 	
-	private static String guessContantName(StringLiteral literal) {
-		return convertNonLettersToUnderscores(literal.getLiteralValue()).toUpperCase();
-	}
-
-	private static String convertNonLettersToUnderscores(String string) {
-		if (string.length() == 0)
-			return ""; //$NON-NLS-1$
-		
-		StringBuffer result= new StringBuffer(string.length());
-		if (Character.isJavaIdentifierStart(string.charAt(0)))
-			result.append(string.charAt(0));
-		else
-			result.append(UNDERSCORE);
-		
-		for (int i= 1; i < string.length(); i++) {
-			if (Character.isJavaIdentifierPart(string.charAt(i)))
-				result.append(string.charAt(i));
-			else
-				result.append(UNDERSCORE);
+	/**
+	 * @return proposed variable names (may be empty, but not null).
+	 * The first proposal should be used as "best guess" (if it exists).
+	 */
+	public String[] guessConstantNames() {
+		LinkedHashSet proposals= new LinkedHashSet(); // retain ordering, but prevent duplicates
+		try {
+			String[] excludedVariableNames= getExcludedVariableNames();
+			ASTNode associatedNode= getSelectedExpression().getAssociatedNode();
+			if (associatedNode instanceof StringLiteral) {
+				String literal= ((StringLiteral) associatedNode).getLiteralValue();
+				String guess= guessConstantNameFromString(literal, excludedVariableNames);
+				return guess.length() == 0 ? new String[0] : new String[] { guess };
+			} else if (associatedNode instanceof NumberLiteral) {
+				String literal= ((NumberLiteral) associatedNode).getToken();
+				String guess= guessConstantNameFromString(literal, excludedVariableNames);
+				return guess.length() == 0 ? new String[0] : new String[] { guess };
+			}
+				
+			if (associatedNode instanceof MethodInvocation) {
+				proposals.addAll(guessConstNamesFromMethodInvocation((MethodInvocation) associatedNode, excludedVariableNames));
+			} else if (associatedNode instanceof CastExpression) {
+				Expression expression= ((CastExpression) associatedNode).getExpression();
+				if (expression instanceof MethodInvocation) {
+					proposals.addAll(guessConstNamesFromMethodInvocation((MethodInvocation) expression, excludedVariableNames));
+				}
+			}
+			if (associatedNode instanceof Expression) {
+				proposals.addAll(guessConstNamesFromExpression((Expression) associatedNode, excludedVariableNames));
+			}
+		} catch (JavaModelException e) {
+			// too bad ... no proposals this time
+			JavaPlugin.log(e); //no ui here, just log
+			return new String[0];
 		}
+		return (String[]) proposals.toArray(new String[proposals.size()]);
+	}
+	
+	private String[] getExcludedVariableNames() {
+		if (fExcludedVariableNames == null) {
+			try {
+				IBinding[] bindings= new ScopeAnalyzer(fCuRewrite.getRoot()).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES);
+				fExcludedVariableNames= new String[bindings.length];
+				for (int i= 0; i < bindings.length; i++) {
+					fExcludedVariableNames[i]= bindings[i].getName();
+				}
+			} catch (JavaModelException e) {
+				fExcludedVariableNames= new String[0];
+			}
+		}
+		return fExcludedVariableNames;
+	}
+	
+	private static String guessConstantNameFromString(String string, String[] excludedNames) {
+		StringBuffer result= new StringBuffer();
+		int i= 0;
+		char ch= '_';
+
+		// run to first valid identifier part:
+		for (; i < string.length(); i++) {
+			ch= string.charAt(i);
+			if (Character.isJavaIdentifierStart(ch)) {
+				result.append(ch);
+				i++;
+				break;
+			} else if (Character.isJavaIdentifierPart(ch)) {
+				result.append('_').append(ch);
+				i++;
+				break;
+			}
+		}
+
+		// add remaining characters, replacing titleCase by TITLE_CASE and sequences of invalid characters by _:
+		boolean wasLastCharLowerCase= Character.isLowerCase(ch);
+		boolean wasJavaIdentifierPart= Character.isJavaIdentifierPart(ch);
+		for (; i < string.length(); i++) {
+			ch= string.charAt(i);
+			if (Character.isJavaIdentifierPart(ch)) {
+				if (wasLastCharLowerCase && Character.isUpperCase(ch))
+					result.append('_').append(Character.toUpperCase(ch));
+				else
+					result.append(Character.toUpperCase(ch));
+				wasLastCharLowerCase= Character.isLowerCase(ch);
+				wasJavaIdentifierPart= true;
+				
+			} else {
+				if (wasLastCharLowerCase || wasJavaIdentifierPart)
+					result.append('_');
+				wasLastCharLowerCase= false;
+				wasJavaIdentifierPart= false;
+			}
+		}
+		
+		if (result.length() > 0 && result.charAt(result.length() - 1) == '_')
+			result.deleteCharAt(result.length() - 1);
+		
 		return result.toString();
 	}
-
-	private static String guessContantName(MethodInvocation selectedNode) {
+	
+	private List guessConstNamesFromMethodInvocation(MethodInvocation selectedMethodInvocation, String[] excludedVariableNames) {
+		String methodName= selectedMethodInvocation.getName().getIdentifier();
 		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
-			String proposal= tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], selectedNode.getName().getIdentifier());
-			if (proposal != null)
-				return proposal;
+			String prefix= KNOWN_METHOD_NAME_PREFIXES[i];
+			if (!methodName.startsWith(prefix))
+				continue; // not this prefix
+			if (methodName.length() == prefix.length())
+				return Collections.EMPTY_LIST;
+			char firstAfterPrefix= methodName.charAt(prefix.length());
+			if (!Character.isUpperCase(firstAfterPrefix))
+				continue;
+			String proposal= Character.toLowerCase(firstAfterPrefix) + methodName.substring(prefix.length() + 1);
+			methodName= proposal;
+			break;
 		}
-		return null;	
-	}
-	
-	private static String tryTempNamePrefix(String prefix, String methodName){
-		if (isPrefixOk(prefix, methodName))
-			return splitByUpperCaseChars(methodName.substring(prefix.length())).toUpperCase();
-		else	
-			return null;
+		return getConstantNameSuggestions(methodName, 0, excludedVariableNames);
 	}
 
-	//XXX similar to code in ExtractTemp
-	private static boolean isPrefixOk(String prefix, String methodName){
-		if (! methodName.startsWith(prefix))
-			return false;
-		else if (methodName.length() <= prefix.length())
-			return false;
-		else if (! Character.isUpperCase(methodName.charAt(prefix.length())))
-			return false;
-		else 
-			return true;
+	private List guessConstNamesFromExpression(Expression selectedExpression, String[] excludedVariableNames) {
+		ITypeBinding expressionBinding= selectedExpression.resolveTypeBinding();
+		ITypeBinding normalizedBinding= Bindings.normalizeTypeBinding(expressionBinding).getTypeDeclaration();
+		if (normalizedBinding.isArray())
+			normalizedBinding= normalizedBinding.getElementType();
+		
+		if (normalizedBinding.isPrimitive())
+			return Collections.EMPTY_LIST;
+		
+		String typeName= normalizedBinding.getName();
+		if (typeName.length() == 0)
+			return Collections.EMPTY_LIST;
+		
+		return getConstantNameSuggestions(typeName, expressionBinding.getDimensions(), excludedVariableNames);
 	}
-	
-    private static String splitByUpperCaseChars(String string) {
-    	StringBuffer buff= new StringBuffer(string.length());
-    	for (int i= 0, n= string.length(); i < n; i++) {
-			char c= string.charAt(i);
-			if (i != 0 && Character.isUpperCase(c))
-				buff.append(UNDERSCORE);
-			buff.append(c);	
-        }
-    	return buff.toString();
-    }
+
+	private List getConstantNameSuggestions(String baseName, int dimensions, String[] excludedVariableNames) {
+		int staticFinal= Flags.AccStatic | Flags.AccFinal;
+		String[] proposals= StubUtility.getFieldNameSuggestions(fCu.getJavaProject(), baseName, dimensions, staticFinal, excludedVariableNames);
+		return Arrays.asList(proposals);
+	}
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
@@ -279,10 +356,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 		fAllStaticFinalCheckPerformed= true;
 	}
 
-	private String getModifier() {
-		return getAccessModifier() + " " + MODIFIER;	 //$NON-NLS-1$
-	}
-	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try {
 			pm.beginTask("", 2); //$NON-NLS-1$
@@ -383,18 +456,15 @@ public class ExtractConstantRefactoring extends Refactoring {
 	 * contents are changed.
 	 */
 	public RefactoringStatus checkConstantNameOnChange() throws JavaModelException {
-		if (fieldExistsInThisType())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("ExtractConstantRefactoring.field_exists", getConstantName())); //$NON-NLS-1$
+		if (Arrays.asList(getExcludedVariableNames()).contains(fConstantName))
+			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("ExtractConstantRefactoring.another_variable", getConstantName())); //$NON-NLS-1$
 		return Checks.checkConstantName(getConstantName());
 	}
 	
 	// !! similar to ExtractTempRefactoring equivalent
 	public String getConstantSignaturePreview() throws JavaModelException {
-		return getModifier() + " " + getConstantTypeName() + " " + fConstantName; //$NON-NLS-2$//$NON-NLS-1$
-	}
-
-	private boolean fieldExistsInThisType() throws JavaModelException {
-		return getContainingType().getField(getConstantName()).exists();
+		String space= " "; //$NON-NLS-1$
+		return getAccessModifier() + space + MODIFIER + space + getConstantTypeName() + space + fConstantName;
 	}
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {

@@ -1292,8 +1292,39 @@ public class StubUtility {
 		 
 	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int dimensions, int modifiers, String[] excluded) {
 		String name= workaround38111(baseName);
-		String[] res= NamingConventions.suggestFieldNames(project, "", name, dimensions, modifiers, excluded); //$NON-NLS-1$
+		String[] res;
+		if (modifiers == (Flags.AccStatic | Flags.AccFinal)) {
+			//TODO: workaround JDT/Core bug 85946:
+			List excludedList= Arrays.asList(excluded);
+			String[] camelCase= NamingConventions.suggestLocalVariableNames(project, "", name, dimensions, new String[0]); //$NON-NLS-1$
+			ArrayList result= new ArrayList(camelCase.length);
+			for (int i= 0; i < camelCase.length; i++) {
+				String upper= getUpperFromCamelCase(camelCase[i]);
+				if (! excludedList.contains(upper))
+					result.add(upper);
+			}
+			res= (String[]) result.toArray(new String[result.size()]);
+		} else {
+			res= NamingConventions.suggestFieldNames(project, "", name, dimensions, modifiers, excluded); //$NON-NLS-1$
+		}
 		return sortByLength(res); // longest first
+	}
+	
+	private static String getUpperFromCamelCase(String string) {
+		StringBuffer result= new StringBuffer();
+		boolean lastWasLowerCase= false;
+		for (int i= 0; i < string.length(); i++) {
+			char ch= string.charAt(i);
+			if (Character.isUpperCase(ch)) {
+				if (lastWasLowerCase)
+					result.append('_');
+				result.append(ch);
+			} else {
+				result.append(Character.toUpperCase(ch));
+			}
+			lastWasLowerCase= Character.isLowerCase(ch);
+		}
+		return result.toString();
 	}
 	
 	public static String[] getLocalNameSuggestions(IJavaProject project, String baseName, int dimensions, String[] excluded) {

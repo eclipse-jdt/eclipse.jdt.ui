@@ -172,63 +172,63 @@ public class ExtractConstantTests extends RefactoringTest {
 	//--- TESTS
 	
 	public void test0() throws Exception {
-		helper1(5, 16, 5, 17, true, false, "CONSTANT");
+		helper1(5, 16, 5, 17, true, false, "CONSTANT", "_0");
 	}
 	
 	public void test1() throws Exception {
-		helper1(5, 16, 5, 21, false, false, "CONSTANT");	
+		helper1(5, 16, 5, 21, false, false, "CONSTANT", "");
 	}
 	
 	public void test2() throws Exception {
-		helper1(8, 16, 8, 27, false, false, "CONSTANT");
+		helper1(8, 16, 8, 27, false, false, "CONSTANT", "");
 	}
 	
 	public void test3() throws Exception {
-		helper1(8, 16, 8, 27, true, false, "CONSTANT");	
+		helper1(8, 16, 8, 27, true, false, "CONSTANT", "");
 	}
 		
 	public void test4() throws Exception {
-		helper1(5, 23, 5, 34, true, false, "CONSTANT");
+		helper1(5, 23, 5, 34, true, false, "CONSTANT", "");
 	}
 	
 	public void test5() throws Exception {
-		helper1(11, 20, 11, 26, true, true, "CONSTANT");		
+		helper1(11, 20, 11, 26, true, true, "CONSTANT", "RG");
 	}	
 	
 	public void test6() throws Exception {
-		helper1(13, 20, 13, 35, true, true, "CONSTANT");		
+		helper1(13, 20, 13, 35, true, true, "CONSTANT", "RF");
 	}
 		
 	public void test7() throws Exception {
-		helper1(12, 20, 12, 28, true, true, "CONSTANT");		
+		helper1(12, 20, 12, 28, true, true, "CONSTANT", "RG");
 	}
 		
 	public void test8() throws Exception {
-		helper1(8, 16, 8, 22, true, true, "CONSTANT");	
+		helper1(8, 16, 8, 22, true, true, "CONSTANT", "");
 	}
 	
 	public void test9() throws Exception {
-		helper1(6, 24, 6, 29, true, true, "CONSTANT");	
+		helper1(6, 24, 6, 29, true, true, "CONSTANT", "");
 	}
 
 	public void test10() throws Exception {
-		helper1(8, 17, 8, 22, true, true, "CONSTANT");	
+		helper1(8, 17, 8, 22, true, true, "CONSTANT", "");
 	}			
 	
 	public void test11() throws Exception {
-		helper1(10, 37, 10, 43, true, true, "CONSTANT");	
+		helper1(10, 37, 10, 43, true, true, "CONSTANT", "");
 	}
 	
 	public void test12() throws Exception {
-		helper1(9, 19, 9, 24, true, true, "CONSTANT");	
+		helper1(9, 19, 9, 24, true, true, "CONSTANT", "");
 	}
 	
 	public void test13() throws Exception{
-		helper1(9, 16, 9, 28, true, true, "CONSTANT");		
+		helper1(9, 16, 9, 28, true, true, "CONSTANT", "F");
 	}
 		
 	public void test14() throws Exception{
-		helper1(10, 28, 10, 44, true, true, "CONSTANT");
+		helper1(10, 28, 10, 44, true, true, "CONSTANT", "");
 	}	
 
 	public void test15() throws Exception{
@@ -244,27 +244,56 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 	
 	public void test18() throws Exception {
-		helper1(5, 16, 5, 17, true, false, true, "CONSTANT");	
+		helper1(5, 16, 5, 17, true, false, true, "CONSTANT", "_0");
 	}
 	
 	public void test19() throws Exception {
-		helper1(5, 23, 5, 38, false, false, "CONSTANT");
+		helper1(5, 23, 5, 38, false, false, "CONSTANT", "STRING");
 	}
 	
 	public void test20() throws Exception {
-		helper1(7, 19, 7, 28, false, false, "CONSTANT");
+		helper1(7, 19, 7, 28, false, false, "CONSTANT", "STRING");
 	}
 	
 	public void test21() throws Exception {
-		helper1(4, 28, 4, 37, false, false, "CONSTANT");	
+		helper1(4, 28, 4, 37, false, false, "CONSTANT", "STRING");
 	}
 
 	public void test22() throws Exception {
-		helper1(9, 35, 9, 59, false, false, "ITEMS");	
+		helper1(9, 35, 9, 59, false, false, "ITEMS", "ARRAY_LIST");
 	}
+	
+//
+//	public void test23() throws Exception {
+//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
+//	}
+//
+//	public void test24() throws Exception {
+//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
+//	}
+//
+//	public void test25() throws Exception {
+//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
+//	}
+//
+//	public void test26() throws Exception {
+//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
+//	}
+//
+//	public void test27() throws Exception {
+//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
+//	}
+//
+//	public void test28() throws Exception {
+//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
+//	}
+//
+//	public void test29() throws Exception {
+//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
+//	}
 
 	public void testZeroLengthSelection0() throws Exception {
-		helper1(5, 18, 5, 18, false, false, "CONSTANT");	
+		helper1(5, 18, 5, 18, false, false, "CONSTANT", "_100");
 	}
 	
 	// -- testing failing preconditions
@@ -325,25 +354,30 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 	
 	public void testFail16() throws Exception {
-		failHelper1(9, 20, 9, 38, true, false, "CONSTANT");	
+		failHelper1(9, 20, 9, 38, true, false, "CONSTANT");
 	}
 	
 	public void testGuessStringLiteral0() throws Exception {
 		//test for bug 37377
-		guessHelper(4, 19, 4, 32, "FOO_HASHMAP") ;
+		guessHelper(4, 19, 4, 32, "FOO_HASH_MAP");
 	}
 
 	public void testGuessStringLiteral1() throws Exception {
 		//test for bug 37377
-		guessHelper(4, 19, 4, 33, "FOO_HASH_MAP") ;
+		guessHelper(4, 19, 4, 33, "FOO_HASH_MAP");
+	}
+
+	public void testGuessStringLiteral2() throws Exception {
+		//test for bug 37377
+		guessHelper(4, 19, 4, 58, "SÄBEL_ÄND_SICHEL123_34_BLA_BLA");
 	}
 
 	public void testGuessFromGetterName0() throws Exception {
-		guessHelper(4, 19, 4, 30, "FOO_BAR") ;
+		guessHelper(4, 19, 4, 30, "FOO_BAR");
 	}
 
 	public void testGuessFromGetterName1() throws Exception {
-		guessHelper(4, 23, 4, 33, "FOO_BAR") ;
+		guessHelper(4, 23, 4, 33, "FOO_BAR");
 	}
 }
 

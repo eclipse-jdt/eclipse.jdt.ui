@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
-import org.eclipse.jdt.internal.ui.refactoring.contentassist.TempNameProcessor;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.VariableNamesProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
@@ -94,7 +94,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 			Text text= createTextInputField(result);
 			text.selectAll();
 			text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			ControlContentAssistHelper.createTextContentAssistant(text, new TempNameProcessor(fTempNameProposals));
+			ControlContentAssistHelper.createTextContentAssistant(text, new VariableNamesProcessor(fTempNameProposals));
 					
 			layouter.perform(label, text, 1);
 			

@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefact
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
-import org.eclipse.jdt.internal.ui.refactoring.contentassist.TempNameProcessor;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.VariableNamesProcessor;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -80,7 +80,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			textField.setText(fParamNameProposals.length == 0 ? "" : fParamNameProposals[0]); //$NON-NLS-1$
 			textField.selectAll();
 			textField.setFocus();
-			ControlContentAssistHelper.createTextContentAssistant(textField, new TempNameProcessor(fParamNameProposals));
+			ControlContentAssistHelper.createTextContentAssistant(textField, new VariableNamesProcessor(fParamNameProposals));
 
 			updateStatus();
 			Dialog.applyDialogFont(result);

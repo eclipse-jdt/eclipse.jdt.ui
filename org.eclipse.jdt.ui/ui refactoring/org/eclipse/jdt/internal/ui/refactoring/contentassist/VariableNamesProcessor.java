@@ -23,6 +23,8 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -31,15 +33,25 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 
-public class TempNameProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
+public class VariableNamesProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
 
-	private String[] fTempNameProposals;
 	private String fErrorMessage;
-	private ImageDescriptorRegistry fImageRegistry= JavaPlugin.getImageDescriptorRegistry();
+	
+	private String[] fTempNameProposals;
+	
+	private ImageDescriptorRegistry fImageRegistry;
+	private ImageDescriptor fProposalImageDescriptor;
 
-	public TempNameProcessor(String[] tempNameProposals) {
+	public VariableNamesProcessor(String[] tempNameProposals) {
 		fTempNameProposals= (String[]) tempNameProposals.clone();
 		Arrays.sort(fTempNameProposals);
+		fImageRegistry= JavaPlugin.getImageDescriptorRegistry();
+		fProposalImageDescriptor= JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE;
+
+	}
+	
+	public void setProposalImageDescriptor(ImageDescriptor proposalImageDescriptor) {
+		fProposalImageDescriptor= proposalImageDescriptor;
 	}
 
 	/*
@@ -103,7 +115,7 @@ public class TempNameProcessor implements IContentAssistProcessor, ISubjectContr
 		
 		ArrayList proposals= new ArrayList();
 		String prefix= input.substring(0, documentOffset);
-		Image image= fImageRegistry.get(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
+		Image image= fImageRegistry.get(fProposalImageDescriptor);
 		for (int i= 0; i < fTempNameProposals.length; i++) {
 			String tempName= fTempNameProposals[i];
 			if (tempName.length() == 0 || ! tempName.startsWith(prefix))
