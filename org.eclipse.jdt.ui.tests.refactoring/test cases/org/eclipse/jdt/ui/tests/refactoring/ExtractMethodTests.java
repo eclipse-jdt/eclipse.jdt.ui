@@ -1526,6 +1526,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		parameterNameTest(new String[] {"message"}, null);
 	}
 	
+	public void test906() throws Exception {
+		parameterNameTest(new String[] {"xxx"}, null);
+	}
+	
 	//---- Test duplicate code snippets ----------------------------------------
 	
 	public void test950() throws Exception {

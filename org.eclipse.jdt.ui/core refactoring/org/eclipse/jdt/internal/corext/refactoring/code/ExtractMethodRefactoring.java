@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -735,11 +736,21 @@ public class ExtractMethodRefactoring extends Refactoring {
 			IVariableBinding returnValue= fAnalyzer.getReturnValue();
 			if (returnValue != null) {
 				ReturnStatement rs= fAST.newReturnStatement();
-				rs.setExpression(fAST.newSimpleName(returnValue.getName()));
+				rs.setExpression(fAST.newSimpleName(getName(returnValue)));
 				statements.add(rs);				
 			}
 		}
 		return result;
+	}
+	
+	private String getName(IVariableBinding binding) {
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo)iter.next();
+			if (Bindings.equals(binding, info.getOldBinding())) {
+				return info.getNewName();
+			}
+		}
+		return binding.getName();
 	}
 	
 	private VariableDeclaration getVariableDeclaration(ParameterInfo parameter) {
