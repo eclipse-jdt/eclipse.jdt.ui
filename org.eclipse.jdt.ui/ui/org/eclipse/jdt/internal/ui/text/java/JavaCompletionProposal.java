@@ -418,7 +418,12 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementText()
 	 */
 	public CharSequence getCompletionText() {
-		return getReplacementString();
+		String string= getReplacementString();
+		int pos= string.indexOf('(');
+		if (pos > 0)
+			return string.subSequence(0, pos);
+		else
+			return string;
 	}
 
 	/**
