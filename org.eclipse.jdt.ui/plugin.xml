@@ -680,7 +680,7 @@ JavaStructureDiffViewerCreator
 	   name="%JavadocWizard.name"
 	   class="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard"
 	   icon="icons/full/ctool16/javadoc.gif">
-	   <description>Generate Javadoc</description>
+	   <description>%JavadocWizard.description</description>
 	   <selection class="org.eclipse.core.resources.IProject"/>
 	</wizard>
 </extension>
