@@ -20,13 +20,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import junit.framework.Assert;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 
 public class ResourceTestHelper {
 
@@ -36,30 +39,35 @@ public class ResourceTestHelper {
 	}
 
 	public static void copy(String src, String dest) throws CoreException {
-		IFile file= getRoot().getFile(new Path(src));
+		IFile file= getFile(src);
 		file.copy(new Path(dest), true, null);
 	}
 
-	public static void delete(String file) throws CoreException {
-		getRoot().getFile(new Path(file)).delete(true, null);
-	}
-
-	public static IFile findFile(String path) {
+	private static IFile getFile(String path) {
 		return getRoot().getFile(new Path(path));
 	}
 
+	public static void delete(String file) throws CoreException {
+		getFile(file).delete(true, null);
+	}
+
+	public static IFile findFile(String pathStr) {
+		IFile file= getFile(pathStr);
+		Assert.assertTrue(file != null && file.exists());
+		return file;
+	}
+
 	public static IFile[] findFiles(String prefix, String suffix, int i, int n) {
-		IWorkspaceRoot root= getRoot();
 		List files= new ArrayList(n - i);
 		for (int j= i; j < i + n; j++) {
-			String path= root.getLocation().toString() + "/" + prefix + j + suffix;
+			String path= prefix + j + suffix;
 			files.add(findFile(path));
 		}
 		return (IFile[]) files.toArray(new IFile[files.size()]);
 	}
 
 	public static StringBuffer read(String src) throws IOException, CoreException {
-		return FileTool.read(new InputStreamReader(getRoot().getFile(new Path(src)).getContents()));
+		return FileTool.read(new InputStreamReader(getFile(src).getContents()));
 	}
 
 	public static void write(String dest, final String content) throws IOException, CoreException {
@@ -69,7 +77,7 @@ public class ResourceTestHelper {
 				return fReader.read();
 			}
 		};
-		getRoot().getFile(new Path(dest)).create(stream, true, null);
+		getFile(dest).create(stream, true, null);
 	}
 	
 
