@@ -68,10 +68,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	private static final String PREF_LASTLOADPATH= JavaUI.ID_PLUGIN + ".importorder.loadpath"; //$NON-NLS-1$
 	private static final String PREF_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".importorder.savepath"; //$NON-NLS-1$
 
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */
-	public static String[] getImportOrderPreference() {
+	private static String[] getImportOrderPreference() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		String str= prefs.getString(PREF_IMPORTORDER);
 		if (str != null) {
@@ -79,8 +76,6 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		}
 		return new String[0];
 	}
-	
-	
 	
 	private static String[] unpackOrderList(String str) {
 		StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
@@ -101,10 +96,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		return buf.toString();
 	}	
 	
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */	
-	public static int getImportNumberThreshold() {
+	private static int getImportNumberThreshold() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		int threshold= prefs.getInt(PREF_ONDEMANDTHRESHOLD);
 		if (threshold < 0) {
@@ -113,10 +105,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		return threshold;
 	}
 
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */	
-	public static boolean doIgnoreLowerCaseNames() {
+	private static boolean doIgnoreLowerCaseNames() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		return prefs.getBoolean(PREF_IGNORELOWERCASE);
 	}
@@ -269,7 +258,13 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 			List existing= fOrderListField.getElements();
 			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing);
 			if (dialog.open() == Window.OK) {
-				fOrderListField.addElement(dialog.getResult());
+				List selectedElements= fOrderListField.getSelectedElements();
+				if (selectedElements.size() == 1) {
+					int insertionIndex= fOrderListField.getIndexOfElement(selectedElements.get(0)) + 1;
+					fOrderListField.addElement(dialog.getResult(), insertionIndex);
+				} else {
+					fOrderListField.addElement(dialog.getResult());
+				}
 			}
 		} else if (index == IDX_EDIT) { // edit
 			List selected= fOrderListField.getSelectedElements();
@@ -297,7 +292,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	}
 	
 	
-	/** 
+	/*
 	 * The import order file is a property file. The keys are
 	 * "0", "1" ... last entry. The values must be valid package names.
 	 */
