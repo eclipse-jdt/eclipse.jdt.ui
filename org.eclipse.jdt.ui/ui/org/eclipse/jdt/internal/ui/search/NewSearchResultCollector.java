@@ -59,6 +59,9 @@ public class NewSearchResultCollector implements IJavaSearchResultCollector {
 		return fProgressMonitor;
 	}
 	
+	public int getMatchCount() {
+		return fMatchCount;
+	}
 
 
 }

@@ -82,6 +82,7 @@ public class JavaSearchQuery implements ISearchQuery {
 		textResult.removeAll();
 		// Also search working copies
 		SearchEngine engine= new SearchEngine(JavaUI.getSharedWorkingCopiesOnClasspath());
+		int matchCount= 0;
 
 		try {
 
@@ -117,11 +118,13 @@ public class JavaSearchQuery implements ISearchQuery {
 				IProgressMonitor participantPM= new SubProgressMonitor(monitor, fParticipants[i].estimateTicks(fPatternData));
 				fParticipants[i].search(requestor, fPatternData, participantPM);
 			}
+			matchCount= collector.getMatchCount();
 			
 		} catch (CoreException e) {
 			return e.getStatus();
 		}
-		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
+		// TODO fix status message
+		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "Found "+matchCount+" matches.", null); //$NON-NLS-1$
 	}
 
 
