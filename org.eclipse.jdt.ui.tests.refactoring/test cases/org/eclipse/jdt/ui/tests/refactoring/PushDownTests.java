@@ -116,13 +116,13 @@ public class PushDownTests extends RefactoringTest {
 
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cuA.getSource();
-			SourceCompareUtil.compare(actual, expected);
+			SourceCompareUtil.compare("A.java", actual, expected);
 			
 			for (int i= 0; i < additonalCus.length; i++) {
 				ICompilationUnit unit= additonalCus[i];
 				String expectedS= getFileContents(getOutputTestFileName(additionalCuNames[i]));
 				String actualS= unit.getSource();
-				SourceCompareUtil.compare(actualS, expectedS);
+				SourceCompareUtil.compare(unit.getElementName(), actualS, expectedS);
 			}
 			
 		} finally{
@@ -715,6 +715,27 @@ public class PushDownTests extends RefactoringTest {
 		String[] namesOfMethodsToPushDown= selectedMethodNames;
 		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
 		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void test28() throws Exception{
+		if (true){
+			printTestDisabledMessage("37175");
+			return;
+		}
+		String[] selectedMethodNames= {};
+		String[][] selectedMethodSignatures= {};
+		String[] selectedFieldNames= {"i", "j"};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {"i", "j"};
 		String[] namesOfMethodsToDeclareAbstract= {};
 		String[][] signaturesOfMethodsToDeclareAbstract= {};
 		

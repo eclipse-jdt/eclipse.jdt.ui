@@ -25,11 +25,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class MoveInnerToTopLevelTests extends RefactoringTest {
 

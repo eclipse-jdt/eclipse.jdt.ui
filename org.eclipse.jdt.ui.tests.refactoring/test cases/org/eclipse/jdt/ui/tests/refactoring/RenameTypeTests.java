@@ -16,23 +16,22 @@ import java.io.InputStreamReader;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
+import org.eclipse.core.boot.BootLoader;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-
-import org.eclipse.core.boot.BootLoader;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
 
 public class RenameTypeTests extends RefactoringTest {
 	
