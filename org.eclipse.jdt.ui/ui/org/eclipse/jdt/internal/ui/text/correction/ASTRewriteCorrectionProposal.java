@@ -7,9 +7,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -59,6 +61,13 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		}
 		fImportEdit.addImport(qualifiedTypeName);
 	}
+	
+	public void addImport(ITypeBinding binding) {
+		ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
+		if (baseType.isMember() || baseType.isTopLevel()) {
+			addImport(Bindings.getFullyQualifiedName(baseType));
+		}
+	}	
 	
 	protected ASTRewrite getRewrite() {
 		return fRewrite;

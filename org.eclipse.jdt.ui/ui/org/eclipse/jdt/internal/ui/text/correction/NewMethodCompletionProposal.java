@@ -228,27 +228,20 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		
 	}
 	
-	
 	private Type evaluateMethodType(AST ast) {
 		ITypeBinding binding= ASTResolving.getTypeBinding(fNode);
 		if (binding != null) {
-			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
-			if (!baseType.isPrimitive()) {
-				addImport(Bindings.getFullyQualifiedName(baseType));
-			}
-			return ASTResolving.getTypeFromTypeBinding(ast, baseType);
+			addImport(binding);
+			return ASTResolving.getTypeFromTypeBinding(ast, binding);
 		}
 		return ast.newPrimitiveType(PrimitiveType.VOID);
 	}
 	
 	private Type evaluateParameterType(AST ast, Expression expr) {
-		ITypeBinding binding= expr.resolveTypeBinding();
-		if (binding != null && !binding.isNullType()) {
-			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
-			if (!baseType.isPrimitive()) {
-				addImport(Bindings.getFullyQualifiedName(baseType));
-			}
-			return ASTResolving.getTypeFromTypeBinding(ast, baseType);
+		ITypeBinding binding= ASTResolving.getTypeBinding(expr.resolveTypeBinding());
+		if (binding != null) {
+			addImport(binding);
+			return ASTResolving.getTypeFromTypeBinding(ast, binding);
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object"));
 	}

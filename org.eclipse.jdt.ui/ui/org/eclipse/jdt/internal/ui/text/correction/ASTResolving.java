@@ -94,17 +94,23 @@ public class ASTResolving {
 		return analyzer.getLastCoveringNode();
 	}
 	
-	public static ITypeBinding getTypeBinding(ASTNode node) {
-		ITypeBinding binding= getPossibleTypeBinding(node);
-		if (binding != null) {
-			String name= binding.getName();
-			if (binding.isNullType() || "void".equals(name)) { //$NON-NLS-1$
-				return node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-			} else if (binding.isAnonymous()) {
+	public static ITypeBinding getTypeBinding(ITypeBinding binding) {
+		if (binding != null && !binding.isNullType() && !"void".equals(binding.getName())) {
+			if (binding.isAnonymous()) {
+				ITypeBinding[] baseBindings= binding.getInterfaces();
+				if (baseBindings.length > 0) {
+					return baseBindings[0];
+				}
 				return binding.getSuperclass();
 			}
+			return binding;
 		}
-		return binding; 
+		return null;
+	}
+	
+	
+	public static ITypeBinding getTypeBinding(ASTNode node) {
+		return getTypeBinding(getPossibleTypeBinding(node));
 	}
 		
 	private static ITypeBinding getPossibleTypeBinding(ASTNode node) {	

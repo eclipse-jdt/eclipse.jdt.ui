@@ -189,10 +189,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 	private Type evaluateVariableType(AST ast) {
 		ITypeBinding binding= ASTResolving.getTypeBinding(fOriginalNode);
 		if (binding != null) {
-			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
-			if (!baseType.isPrimitive()) {
-				addImport(Bindings.getFullyQualifiedName(baseType));
-			}
+			addImport(binding);
 			return ASTResolving.getTypeFromTypeBinding(ast, binding);
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object"));
