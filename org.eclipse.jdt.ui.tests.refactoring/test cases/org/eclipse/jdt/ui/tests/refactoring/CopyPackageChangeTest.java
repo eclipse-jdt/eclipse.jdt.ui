@@ -3,7 +3,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
@@ -29,7 +28,7 @@ public class CopyPackageChangeTest extends RefactoringTest {
 	}
 	
 	public void test0() throws Exception{
-		ICompilationUnit cu= createCU(getPackageP(), "A.java", getFileContents(getRefactoringPath() + "A.java"));
+		createCU(getPackageP(), "A.java", getFileContents(getRefactoringPath() + "A.java"));
 		
 		IPackageFragmentRoot newRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "newName");
 		

@@ -144,7 +144,7 @@ public class MultiMoveTests extends RefactoringTest {
 		
 		IPackageFragment packP1= createPackage(p1Name);
 		ICompilationUnit p1A= createCu(packP1, getName() + inDir + p1Name + "/A.java", "A.java");
-		ICompilationUnit p1B= createCu(packP1, getName() + inDir + p1Name + "/B.java", "B.java");
+		createCu(packP1, getName() + inDir + p1Name + "/B.java", "B.java");
 		
 		String p2Name= "p2";
 		IPackageFragment packP2= createPackage(p2Name);

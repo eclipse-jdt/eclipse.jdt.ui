@@ -238,7 +238,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IPackageFragment packageP2= getRoot().createPackageFragment("p2", true, null);
 
 		IType classA= getClassFromTestFile(packageP1, "A");
-		IType classAA= getClassFromTestFile(packageP2, "AA");
+		getClassFromTestFile(packageP2, "AA");
 
 		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
@@ -745,7 +745,7 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	public void test29() throws Exception { 
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
-		ICompilationUnit cuC= createCUfromTestFile(packageP1, "C");
+		createCUfromTestFile(packageP1, "C");
 		
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
@@ -766,7 +766,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void test30() throws Exception { 
-		ICompilationUnit cuAA= createCUfromTestFile(getPackageP(), "AA");
+		createCUfromTestFile(getPackageP(), "AA");
 		
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
@@ -781,7 +781,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEquals("invalid renaming AA", getFileContents(getOutputTestFileName("AA")), newcuAA.getSource());		
 	}
 	public void test31() throws Exception {
-		ICompilationUnit cuAA= createCUfromTestFile(getPackageP(), "AA");
+		createCUfromTestFile(getPackageP(), "AA");
 		
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
@@ -858,7 +858,7 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	public void test46() throws Exception { 	
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
-		ICompilationUnit cuC= createCUfromTestFile(packageP1, "C");
+		createCUfromTestFile(packageP1, "C");
 		
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
@@ -891,7 +891,7 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	public void test51() throws Exception { 
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
-		ICompilationUnit cuC= createCUfromTestFile(packageP1, "C");
+		createCUfromTestFile(packageP1, "C");
 		
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");

@@ -302,15 +302,18 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 	}
 	
 	public void testFail7() throws Exception{
-		helper2(new String[]{"j"}, new String[]{"I"});
+		printTestDisabledMessage("waiting for better conflict detection story from DB");
+//		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 	
 	public void testFail8() throws Exception{
-		helper2(new String[]{"j"}, new String[]{"I"});
+		printTestDisabledMessage("waiting for better conflict detection story from DB");
+//		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 	
 	public void testFail9() throws Exception{
-		helper2(new String[]{"j"}, new String[]{"I"});
+		printTestDisabledMessage("waiting for better conflict detection story from DB");
+//		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 	
 	public void testFail10() throws Exception{
@@ -322,15 +325,18 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 	}
 	
 	public void testFail12() throws Exception{
-		helper2(new String[]{"j"}, new String[]{"I"});
+		printTestDisabledMessage("waiting for better conflict detection story from DB");
+		//		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 	
 	public void testFail13() throws Exception{
-		helper2(new String[]{"j"}, new String[]{"I"});
+		printTestDisabledMessage("waiting for better conflict detection story from DB");
+//		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 	
 	public void testFail14() throws Exception{
-		helper2(new String[]{"j"}, new String[]{"QA;"});
+		printTestDisabledMessage("waiting for better conflict detection story from DB");
+//		helper2(new String[]{"j"}, new String[]{"QA;"});
 	}
 	
 	public void testFail15() throws Exception{
@@ -350,11 +356,13 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 	}
 	
 	public void testFail19() throws Exception{
-		helper2(new String[]{"j"}, new String[]{"I"});
+		printTestDisabledMessage("waiting for better conflict detection story from DB");
+//		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
 	public void testFail20() throws Exception{
-		helper2(new String[]{"j"}, new String[]{"I"});
+		printTestDisabledMessage("waiting for better conflict detection story from DB");
+//		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 	
 	public void testFail21() throws Exception{
