@@ -29,6 +29,8 @@ public class CopyTraceAction extends Action {
 	public CopyTraceAction(FailureTraceView view, String trace) {
 		super("Copy Trace"); 
 		fTrace= trace;
+		if (fTrace == null)
+			fTrace= "";
 		fView= view;
 	}
 

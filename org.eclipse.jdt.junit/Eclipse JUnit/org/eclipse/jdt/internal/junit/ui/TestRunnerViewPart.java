@@ -176,11 +176,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	 * @see ITestRunListener#testStarted
 	 */
 	public void testStarted(String testName) {
-		//postInfo("Started: " + testName);
+		postInfo("Started: " + testName);
 		TestRunInfo testInfo= getTestInfo(testName);
-		if (testInfo == null) {
+		if (testInfo == null) 
 			fTestInfos.put(testName, new TestRunInfo(testName));
-		}
 	}
 	
 	/*

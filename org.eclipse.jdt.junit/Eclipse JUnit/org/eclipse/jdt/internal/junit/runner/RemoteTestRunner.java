@@ -494,6 +494,7 @@ public class RemoteTestRunner implements TestListener {
 
 	private void notifyTestStarted(String testName) {
 		sendMessage(MessageIds.TEST_START + testName);
+		fWriter.flush();
 	}
 
 	private void notifyTestEnded(String testName) {
