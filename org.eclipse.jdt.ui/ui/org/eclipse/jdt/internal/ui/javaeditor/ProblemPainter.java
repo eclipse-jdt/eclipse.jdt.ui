@@ -80,6 +80,7 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	
 	private void setModel(IAnnotationModel model) {
 		
+		
 		if (fModel != model) {
 			if (fModel != null)
 				fModel.removeAnnotationModelListener(this);
@@ -88,15 +89,17 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 				fModel.addAnnotationModelListener(this);
 		}
 		
-		fProblemPositions.clear();
-		if (fModel != null) {
-			Iterator e= new ProblemAnnotationIterator(fModel);
-			while (e.hasNext()) {
-				IProblemAnnotation pa= (IProblemAnnotation) e.next();
-				if (pa.isProblem()) {
-					Annotation a= (Annotation) pa;
-					Position p= fModel.getPosition(a);
-					fProblemPositions.add(p);
+		if (fProblemPositions != null) {
+			fProblemPositions.clear();
+			if (fModel != null) {
+				Iterator e= new ProblemAnnotationIterator(fModel);
+				while (e.hasNext()) {
+					IProblemAnnotation pa= (IProblemAnnotation) e.next();
+					if (pa.isProblem()) {
+						Annotation a= (Annotation) pa;
+						Position p= fModel.getPosition(a);
+						fProblemPositions.add(p);
+					}
 				}
 			}
 		}
@@ -111,14 +114,19 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 			if (d != null) {
 				d.asyncExec(new Runnable() {
 					public void run() {
-						disablePainting(true);
-						try {
-							fIsModelChanging= true;
-							setModel(model);
-						} finally {
-							fIsModelChanging= false;
-						}
-						enablePainting();					
+						if (fTextWidget != null && !fTextWidget.isDisposed()) {
+							
+							disablePainting(true);
+							
+							try {
+								fIsModelChanging= true;
+								setModel(model);
+							} finally {
+								fIsModelChanging= false;
+							}
+							
+							enablePainting();
+						}				
 					}
 				});
 			}	
