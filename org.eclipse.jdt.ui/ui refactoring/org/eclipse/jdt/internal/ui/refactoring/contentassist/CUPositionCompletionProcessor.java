@@ -38,6 +38,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -60,9 +61,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	private char[] fProposalAutoActivationSet;
 	private JavaCompletionProposalComparator fComparator;
 	
-	private ICompilationUnit fOriginalCu;
-	private String fBeforeString;
-	private String fAfterString;
+	private CompletionContextRequestor fCompletionContextRequestor;
 
 	private CUPositionCompletionRequestor fCompletionRequestor;
 
@@ -81,19 +80,26 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	}
 
 	/**
-	 * @param cu the {@link ICompilationUnit} in whose context codeComplete will be invoked.
+	 * @param cuHandle the {@link ICompilationUnit} in whose context codeComplete will be invoked.
 	 * 		The given cu doesn't have to exist (and if it exists, it will not be modified).
 	 * 		An independent working copy consisting of
 	 * 		<code>beforeString</code> + ${current_input} + <code>afterString</code> will be used.
 	 * @param beforeString the string before the input position
 	 * @param afterString the string after the input position
 	 */
-	public void setCompletionContext(ICompilationUnit cu, String beforeString, String afterString) {
-		fOriginalCu= cu;
-		fBeforeString= beforeString;
-		fAfterString= afterString;
-		if (cu != null)
-			fCompletionRequestor.setJavaProject(cu.getJavaProject());
+	public void setCompletionContext(final ICompilationUnit cuHandle, final String beforeString, final String afterString) {
+		fCompletionContextRequestor= new CompletionContextRequestor() {
+			final StubTypeContext fStubTypeContext= new StubTypeContext(cuHandle, beforeString, afterString);
+			public StubTypeContext getStubTypeContext() {
+				return fStubTypeContext;
+			}
+		};
+		if (cuHandle != null)
+			fCompletionRequestor.setJavaProject(cuHandle.getJavaProject());
+	}
+	
+	public void setCompletionContextRequestor(CompletionContextRequestor completionContextRequestor) {
+		fCompletionContextRequestor= completionContextRequestor;
 	}
 
 	/**
@@ -155,7 +161,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	 * @see ISubjectControlContentAssistProcessor#computeCompletionProposals(IContentAssistSubjectControl, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
-		if (fOriginalCu == null)
+		if (fCompletionContextRequestor.getOriginalCu() == null)
 			return null;
 		String input= contentAssistSubjectControl.getDocument().get();
 		if (documentOffset == 0)
@@ -166,7 +172,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	}
 
 	private ICompletionProposal[] internalComputeCompletionProposals(int documentOffset, String input) {
-		String cuString= fBeforeString + input + fAfterString;
+		String cuString= fCompletionContextRequestor.getBeforeString() + input + fCompletionContextRequestor.getAfterString();
 		ICompilationUnit cu= null;
 		try {
 			/*
@@ -176,9 +182,9 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			 * has no dispose() lifecycle method. A workaround could be to pass in a WorkingCopyOwner
 			 * and dispose the owner's working copies from the caller's dispose().
 			 */
-			cu= fOriginalCu.getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, null, new NullProgressMonitor());
+			cu= fCompletionContextRequestor.getOriginalCu().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, null, new NullProgressMonitor());
 			cu.getBuffer().setContents(cuString);
-			int cuPrefixLength= fBeforeString.length();
+			int cuPrefixLength= fCompletionContextRequestor.getBeforeString().length();
 			fCompletionRequestor.setOffsetReduction(cuPrefixLength);
 			cu.codeComplete(cuPrefixLength + documentOffset, fCompletionRequestor);
 			

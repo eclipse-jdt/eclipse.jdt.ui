@@ -311,7 +311,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (resolveBindings)
 				typeStati= TypeContextChecker.checkAndResolveMethodTypes(fMethod, getStubTypeContext(), getNotDeletedInfos(), fReturnTypeInfo);
 			else
-				typeStati= TypeContextChecker.checkMethodTypesSyntax(fMethod, getStubTypeContext(), getNotDeletedInfos(), fReturnTypeInfo);
+				typeStati= TypeContextChecker.checkMethodTypesSyntax(fMethod, getNotDeletedInfos(), fReturnTypeInfo);
 			for (int i= 0; i < typeStati.length; i++)
 				result.merge(typeStati[i]);
 			

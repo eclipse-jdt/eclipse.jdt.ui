@@ -25,35 +25,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.window.Window;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.templates.Template;
-import org.eclipse.jface.text.templates.TemplateException;
-
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.dialogs.PreferencesUtil;
-
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
-import org.eclipse.ui.forms.widgets.FormText;
-import org.eclipse.ui.forms.widgets.FormToolkit;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -69,6 +40,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -81,10 +53,41 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateException;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
+import org.eclipse.ui.forms.widgets.FormText;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
@@ -95,14 +98,16 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
+import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
-
-import org.eclipse.jdt.ui.CodeGeneration;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -112,6 +117,7 @@ import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.CompletionContextRequestor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
@@ -130,6 +136,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+
+import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * The class <code>NewTypeWizardPage</code> contains controls and validation routines 
@@ -194,6 +203,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			return fImportsStructure.addImport(qualifiedTypeName);
 		}
 				
+		public String addImport(ITypeBinding typeBinding) {
+			// don't know what's added -> add created imports in getAddedTypes()
+			return fImportsStructure.addImport(typeBinding);
+		}
+				
 		/* package */ void create(boolean needsSave, SubProgressMonitor monitor) throws CoreException {
 			fImportsStructure.create(needsSave, monitor);
 		}
@@ -205,6 +219,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		
 		/* package */ Set getAddedTypes() {
+			String[] createdImports= fImportsStructure.getCreatedImports();
+			for (int i= 0; i < createdImports.length; i++) {
+				fAddedTypes.add(createdImports[i]);
+			}
 			return fAddedTypes;
 		}
 	}
@@ -275,8 +293,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private StringButtonDialogField fSuperClassDialogField;
 	private ListDialogField fSuperInterfacesDialogField;
 	
-	private IType fSuperClass;
-	
 	private SelectionButtonDialogFieldGroup fAccMdfButtons;
 	private SelectionButtonDialogFieldGroup fOtherMdfButtons;
 	
@@ -288,7 +304,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 	private JavaPackageCompletionProcessor fCurrPackageCompletionProcessor;
 	private JavaTypeCompletionProcessor fEnclosingTypeCompletionProcessor;
-	private JavaTypeCompletionProcessor fSuperClassCompletionProcessor;
+	private StubTypeContext fSuperClassStubTypeContext;
 	
 	protected IStatus fEnclosingTypeStatus;
 	protected IStatus fPackageStatus;
@@ -436,7 +452,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		fCurrPackageCompletionProcessor= new JavaPackageCompletionProcessor();
 		fEnclosingTypeCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
-		fSuperClassCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
 		
 		fPackageStatus= new StatusInfo();
 		fEnclosingTypeStatus= new StatusInfo();
@@ -634,7 +649,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperClassDialogField.doFillIntoGrid(composite, nColumns);
 		Text text= fSuperClassDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
-		ControlContentAssistHelper.createTextContentAssistant(text, fSuperClassCompletionProcessor);
+		
+		JavaTypeCompletionProcessor superClassCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
+		superClassCompletionProcessor.setCompletionContextRequestor(new CompletionContextRequestor() {
+			public StubTypeContext getStubTypeContext() {
+				return getSuperClassStubTypeContext();
+			}
+		});
+
+		ControlContentAssistHelper.createTextContentAssistant(text, superClassCompletionProcessor);
 	}
 
 	/**
@@ -833,13 +856,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			fTypeNameStatus= typeNameChanged();
 			fSuperClassStatus= superClassChanged();
 			fSuperInterfacesStatus= superInterfacesChanged();
-		}
-		if (fCurrType != null) {
-			fSuperClassCompletionProcessor.setExtendsCompletionContext(fCurrType);
-		} else if (fCurrPackage != null) {
-			fSuperClassCompletionProcessor.setExtendsCompletionContext(fCurrPackage);
-		} else {
-			fSuperClassCompletionProcessor.setExtendsCompletionContext(null);
 		}
 	}
 	
@@ -1381,92 +1397,96 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		fSuperClassDialogField.enableButton(root != null);
 		
-		fSuperClass= null;
+		fSuperClassStubTypeContext= null;
 		
 		String sclassName= getSuperClass();
 		if (sclassName.length() == 0) {
 			// accept the empty field (stands for java.lang.Object)
 			return status;
 		}
-		IStatus val= JavaConventions.validateJavaTypeName(sclassName);
-		if (val.getSeverity() == IStatus.ERROR) {
-			status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.InvalidSuperClassName")); //$NON-NLS-1$
-			return status;
-		} 
+		
 		if (root != null) {
-			try {		
-				IType type= resolveSuperTypeName(root.getJavaProject(), sclassName);
-				if (type == null) {
-					status.setWarning(NewWizardMessages.getString("NewTypeWizardPage.warning.SuperClassNotExists")); //$NON-NLS-1$
-					return status;
-				} else {
-					if (type.isAnnotation()) {
-						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsAnnotation", sclassName)); //$NON-NLS-1$
-						return status;
-					}
-					if (type.isInterface()) {
-						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsInterface", sclassName)); //$NON-NLS-1$
-						return status;
-					}
-					if (type.isEnum()) {
-						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsEnum", sclassName)); //$NON-NLS-1$
-						return status;
-					}
-					int flags= type.getFlags();
-					if (Flags.isFinal(flags)) {
-						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsFinal", sclassName)); //$NON-NLS-1$
-						return status;
-					} else if (!JavaModelUtil.isVisible(type, getPackageFragment())) {
-						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsNotVisible", sclassName)); //$NON-NLS-1$
-						return status;
-					}
-				}
-				fSuperClass= type;
-			} catch (JavaModelException e) {
+			if (! sclassName.trim().equals(sclassName)) {
 				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.InvalidSuperClassName")); //$NON-NLS-1$
-				JavaPlugin.log(e);
-			}							
+				return status;
+			}
+
+			StringBuffer cuBuff= new StringBuffer();
+			cuBuff.append("class __X__ extends "); //$NON-NLS-1$
+			int offset= cuBuff.length();
+			cuBuff.append(sclassName).append(" {}"); //$NON-NLS-1$
+
+			ASTParser p= ASTParser.newParser(AST.JLS3);
+			p.setSource(cuBuff.toString().toCharArray());
+			p.setProject(root.getJavaProject());
+			CompilationUnit cu= (CompilationUnit) p.createAST(null);
+			Selection selection= Selection.createFromStartLength(offset, sclassName.length());
+			SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
+			cu.accept(analyzer);
+			ASTNode selected= analyzer.getFirstSelectedNode();
+			if (! (selected instanceof Type) || selected instanceof PrimitiveType) {
+				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.InvalidSuperClassName")); //$NON-NLS-1$
+				return status;
+			}
+			Type type= (Type) selected;
+			
+			String typeNodeRange= cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type));
+			if (! sclassName.equals(typeNodeRange)){
+				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.InvalidSuperClassName")); //$NON-NLS-1$
+				return status;
+			}
+			
+			if (type instanceof ParameterizedType && ! JavaModelUtil.is50OrHigher(root.getJavaProject())) {
+				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.SuperClassNotParameterized")); //$NON-NLS-1$
+				return status;
+			}
 		} else {
 			status.setError(""); //$NON-NLS-1$
 		}
 		return status;
+	}
+
+	private StubTypeContext getSuperClassStubTypeContext() {
+		if (fSuperClassStubTypeContext != null)
+			return fSuperClassStubTypeContext;
 		
+		StubTypeContext stubTypeContext;
+		String typeName= fCurrType != null ? fCurrType.getElementName() : JavaTypeCompletionProcessor.DUMMY_CLASS_NAME;
+		String prolog= "class " + typeName + " extends "; //$NON-NLS-1$ //$NON-NLS-2$
+		String epilog= " {} "; //$NON-NLS-1$
+		
+		
+		if (isEnclosingTypeSelected() && fCurrEnclosingType != null) {
+			try {
+				ICompilationUnit cu= fCurrEnclosingType.getCompilationUnit();
+				ISourceRange typeSourceRange= fCurrEnclosingType.getSourceRange();
+				int focalPosition= typeSourceRange.getOffset() + typeSourceRange.getLength() - 1; // before closing brace
+
+				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setSource(cu);
+				parser.setFocalPosition(focalPosition);
+				CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
+
+				stubTypeContext= TypeContextChecker.createStubTypeContext(cu, compilationUnit, focalPosition);
+				stubTypeContext= new StubTypeContext(stubTypeContext.getCuHandle(),
+						stubTypeContext.getBeforeString() + prolog,
+						epilog + stubTypeContext.getAfterString());
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+				stubTypeContext= new StubTypeContext(null, null, null);
+			}
+			
+		} else if (fCurrPackage != null) {
+			ICompilationUnit cu= fCurrPackage.getCompilationUnit(JavaTypeCompletionProcessor.DUMMY_CU_NAME);
+			stubTypeContext= new StubTypeContext(cu, "package " + fCurrPackage.getElementName() + ";" + prolog, epilog);  //$NON-NLS-1$//$NON-NLS-2$
+			
+		} else {
+			stubTypeContext= new StubTypeContext(null, null, null);
+		}
+		fSuperClassStubTypeContext= stubTypeContext;
+		return fSuperClassStubTypeContext;
 	}
 	
-	private IType resolveSuperTypeName(IJavaProject jproject, String sclassName) throws JavaModelException {
-		if (!jproject.exists()) {
-			return null;
-		}
-		IType type= null;
-		if (isEnclosingTypeSelected()) {
-			// search in the context of the enclosing type
-			IType enclosingType= getEnclosingType();
-			if (enclosingType != null) {
-				String[][] res= enclosingType.resolveType(sclassName);
-				if (res != null && res.length > 0) {
-					type= jproject.findType(res[0][0], res[0][1]);
-				}
-			}
-		} else {
-			IPackageFragment currPack= getPackageFragment();
-			if (type == null && currPack != null) {
-				String packName= currPack.getElementName();
-				// search in own package
-				if (!currPack.isDefaultPackage()) {
-					type= jproject.findType(packName, sclassName);
-				}
-				// search in java.lang
-				if (type == null && !"java.lang".equals(packName)) { //$NON-NLS-1$
-					type= jproject.findType("java.lang", sclassName); //$NON-NLS-1$
-				}
-			}
-			// search fully qualified
-			if (type == null) {
-				type= jproject.findType(sclassName);
-			}
-		}
-		return type;
-	}
 	
 	private IType findType(IJavaProject project, String typeName) throws JavaModelException {
 		if (project.exists()) {
@@ -1874,12 +1894,48 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	// ---- construct CU body----------------
 		
 	private void writeSuperClass(StringBuffer buf, ImportsManager imports) {
-		String typename= getSuperClass();
-		if (fTypeKind == CLASS_TYPE && typename.length() > 0 && !"java.lang.Object".equals(typename)) { //$NON-NLS-1$
+		String superclass= getSuperClass();
+		if (fTypeKind == CLASS_TYPE && superclass.length() > 0 && !"java.lang.Object".equals(superclass)) { //$NON-NLS-1$
 			buf.append(" extends "); //$NON-NLS-1$
 			
-			String qualifiedName= fSuperClass != null ? JavaModelUtil.getFullyQualifiedName(fSuperClass) : typename; 
-			buf.append(imports.addImport(qualifiedName));
+			ITypeBinding binding= resolveSuperClass(superclass);
+			if (binding != null) {
+				buf.append(imports.addImport(binding));
+			} else if (superclass.indexOf('<') == -1) {
+				buf.append(imports.addImport(superclass));
+			} else {
+				buf.append(superclass);
+			}
+		}
+	}
+	
+	private ITypeBinding resolveSuperClass(String superclass) {
+		StubTypeContext stubTypeContext= getSuperClassStubTypeContext();
+		StringBuffer cuString= new StringBuffer();
+		cuString.append(stubTypeContext.getBeforeString());
+		cuString.append(superclass);
+		cuString.append(stubTypeContext.getAfterString());
+		
+		try {
+			ICompilationUnit wc= fCurrType.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, null, new NullProgressMonitor());
+			try {
+				wc.getBuffer().setContents(cuString.toString());
+				CompilationUnit compilationUnit= new RefactoringASTParser(AST.JLS3).parse(wc, true);
+				ASTNode type= NodeFinder.perform(compilationUnit, stubTypeContext.getBeforeString().length(),
+						superclass.length());
+				if (type instanceof Type) {
+					return ((Type) type).resolveBinding();
+				} else if (type instanceof Name) {
+					ASTNode parent= type.getParent();
+					if (parent instanceof Type)
+						return ((Type) parent).resolveBinding();
+				}
+				throw new IllegalStateException();
+			} finally {
+				wc.discardWorkingCopy();
+			}
+		} catch (JavaModelException e) {
+			return null;
 		}
 	}
 	

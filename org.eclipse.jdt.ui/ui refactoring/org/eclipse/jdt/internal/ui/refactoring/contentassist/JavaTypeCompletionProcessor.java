@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 	
-	private static final String DUMMY_CLASS_NAME= "$$__$$"; //$NON-NLS-1$
+	public static final String DUMMY_CLASS_NAME= "$$__$$"; //$NON-NLS-1$
 	
 	/**
 	 * The CU name to be used if no parent ICompilationUnit is available.
@@ -115,7 +115,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 			switch (proposal.getKind()) {
 				case CompletionProposal.PACKAGE_REF :
 					addAdjustedCompletion(
-							new String(proposal.getDeclarationSignature()), //TODO bug 80384: Cannot decode package signature CompletionProposal - need API
+							new String(proposal.getDeclarationSignature()),
 							new String(proposal.getCompletion()),
 							proposal.getReplaceStart(),
 							proposal.getReplaceEnd(),

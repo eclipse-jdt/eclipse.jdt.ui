@@ -20,11 +20,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -64,6 +59,9 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -76,8 +74,9 @@ import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 public class TypeContextChecker {
-	//TODO: generalize to also work in a packageFragment (no base cu/root)
 
 	private static class MethodTypesChecker {
 
@@ -96,7 +95,7 @@ public class TypeContextChecker {
 		}
 		
 		public RefactoringStatus[] checkAndResolveMethodTypes() throws CoreException {
-			RefactoringStatus[] results= checkSyntax();
+			RefactoringStatus[] results= new MethodTypesSyntaxChecker(fMethod, fParameterInfos, fReturnTypeInfo).checkSyntax();
 			for (int i= 0; i < results.length; i++)
 				if (results[i] != null && results[i].hasFatalError())
 					return results;
@@ -138,157 +137,16 @@ public class TypeContextChecker {
 			return results;
 		}
 
-		public RefactoringStatus[] checkSyntax() {
-			int parameterCount= fParameterInfos.size();
-			RefactoringStatus[] results= new RefactoringStatus[parameterCount + 1];
-			results[parameterCount]= checkReturnTypeSyntax();
-			for (int i= 0; i < parameterCount; i++) {
-				ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
-				results[i]= checkParameterTypeSyntax(info);
-			}
-			return results;
-		}
-		
-		private RefactoringStatus checkParameterTypeSyntax(ParameterInfo info) {
-			if (! info.isAdded() && ! info.isTypeNameChanged())
-				return null;
-
-			String newTypeName= ParameterInfo.stripEllipsis(info.getNewTypeName().trim()).trim();
-			
-			if ("".equals(newTypeName.trim())){ //$NON-NLS-1$
-				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_type", new String[]{info.getNewName()}); //$NON-NLS-1$
-				return RefactoringStatus.createFatalErrorStatus(msg);
-			}
-			
-			if (info.isNewVarargs() && ! JavaModelUtil.is50OrHigher(fMethod.getJavaProject())) {
-				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.no_vararg_below_50", new String[]{info.getNewName()}); //$NON-NLS-1$
-				return RefactoringStatus.createFatalErrorStatus(msg);
-			}
-			
-			List problemsCollector= new ArrayList(0);
-			Type parsedType= parseType(newTypeName, problemsCollector);
-			boolean valid= parsedType != null;
-			if (valid && parsedType instanceof PrimitiveType)
-				valid= ! PrimitiveType.VOID.equals(((PrimitiveType) parsedType).getPrimitiveTypeCode());
-			if (! valid) {
-				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_type_name", new String[]{newTypeName}); //$NON-NLS-1$
-				return RefactoringStatus.createFatalErrorStatus(msg);
-			}
-			if (problemsCollector.size() == 0)
-				return null;
-			
-			RefactoringStatus result= new RefactoringStatus();
-			for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
-				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_type_syntax", new String[]{newTypeName, (String) iter.next()}); //$NON-NLS-1$
-				result.addError(msg);
-			}
-			return result;
-		}
-		
-		private RefactoringStatus checkReturnTypeSyntax() {
-			String newTypeName= fReturnTypeInfo.getNewTypeName();
-			if ("".equals(newTypeName.trim())) { //$NON-NLS-1$
-				String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.return_type_not_empty"); //$NON-NLS-1$
-				return RefactoringStatus.createFatalErrorStatus(msg);
-			}
-			List problemsCollector= new ArrayList(0);
-			Type parsedType= parseType(newTypeName, problemsCollector);
-			if (parsedType == null) {
-				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type", new String[]{newTypeName}); //$NON-NLS-1$
-				return RefactoringStatus.createFatalErrorStatus(msg);
-			}
-			if (problemsCollector.size() == 0)
-				return null;
-			
-			RefactoringStatus result= new RefactoringStatus();
-			for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
-				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type_syntax", new String[]{newTypeName, (String) iter.next()}); //$NON-NLS-1$
-				result.addError(msg);
-			}
-			return result;
-		}
-
-		private Type parseType(String typeString, List/*<IProblem>*/ problemsCollector) {
-			if ("".equals(typeString.trim())) //speed up for a common case //$NON-NLS-1$
-				return null;
-			if (! typeString.trim().equals(typeString))
-				return null;
-
-			StringBuffer cuBuff= new StringBuffer();
-			cuBuff.append("interface A{"); //$NON-NLS-1$
-			int offset= cuBuff.length();
-			cuBuff.append(typeString).append(" m();}"); //$NON-NLS-1$
-
-			ASTParser p= ASTParser.newParser(AST.JLS3);
-			p.setSource(cuBuff.toString().toCharArray());
-			p.setProject(fMethod.getJavaProject());
-			CompilationUnit cu= (CompilationUnit) p.createAST(null);
-			Selection selection= Selection.createFromStartLength(offset, typeString.length());
-			SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
-			cu.accept(analyzer);
-			ASTNode selected= analyzer.getFirstSelectedNode();
-			if (!(selected instanceof Type))
-				return null;
-			Type type= (Type)selected;
-			if (isVoidArrayType(type))
-				return null;
-			IProblem[] problems= ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS);
-			if (problems.length > 0) {
-				for (int i= 0; i < problems.length; i++)
-					problemsCollector.add(problems[i].getMessage());
-			}
-			
-			String typeNodeRange= cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type));
-			if (typeString.equals(typeNodeRange))
-				return type;
-			else
-				return null;
-		}
-
-		private static boolean isVoidArrayType(Type type){
-			if (! type.isArrayType())
-				return false;
-			
-			ArrayType arrayType= (ArrayType)type;
-			if (! arrayType.getComponentType().isPrimitiveType())
-				return false;
-			PrimitiveType primitiveType= (PrimitiveType)arrayType.getComponentType();
-			return (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID);
-		}
-		
 		private ITypeBinding[] resolveBindings(String[] types, RefactoringStatus[] results, boolean firstPass) throws CoreException {
 			//TODO: split types into parameterTypes and returnType
 			int parameterCount= types.length - 1;
 			ITypeBinding[] typeBindings= new ITypeBinding[types.length];
+			
 			StringBuffer cuString= new StringBuffer();
 			cuString.append(fStubTypeContext.getBeforeString());
-			
-			if (Flags.isStatic(fMethod.getFlags()))
-				cuString.append("static "); //$NON-NLS-1$
-
-			ITypeParameter[] methodTypeParameters= fMethod.getTypeParameters();
-			if (methodTypeParameters.length != 0) {
-				cuString.append('<');
-				for (int i= 0; i < methodTypeParameters.length; i++) {
-					ITypeParameter typeParameter= methodTypeParameters[i];
-					if (i > 0)
-						cuString.append(',');
-					cuString.append(typeParameter.getElementName());
-				}
-				cuString.append("> "); //$NON-NLS-1$
-			}
-			
-			cuString.append(types[parameterCount]).append(' ');
-			int offsetBeforeMethodName= cuString.length();
-			cuString.append(METHOD_NAME).append('('); //$NON-NLS-1$
-			for (int i= 0; i < parameterCount; i++) {
-				if (i > 0)
-					cuString.append(',');
-				cuString.append(types[i]).append(" p").append(i); //$NON-NLS-1$
-			}
-			cuString.append(");"); //$NON-NLS-1$
-
+			int offsetBeforeMethodName= appendMethodDeclaration(cuString, types, parameterCount);
 			cuString.append(fStubTypeContext.getAfterString());
+			
 			// need a working copy to tell the parser where to resolve (package visible) types
 			ICompilationUnit wc= fMethod.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, null, new NullProgressMonitor());
 			try {
@@ -325,7 +183,7 @@ public class TypeContextChecker {
 						typeBindings[i]= null;
 					}
 					if (firstPass && typeBindings[i] == null)
-						types[i]= qualifyTypes(types[i], type, results[i]);
+						types[i]= qualifyTypes(type, results[i]);
 				}
 				return typeBindings;
 			} finally {
@@ -333,7 +191,36 @@ public class TypeContextChecker {
 			}
 		}
 
-		private String qualifyTypes(String string, Type type, final RefactoringStatus result) throws CoreException {
+		private int appendMethodDeclaration(StringBuffer cuString, String[] types, int parameterCount) throws JavaModelException {
+			if (Flags.isStatic(fMethod.getFlags()))
+				cuString.append("static "); //$NON-NLS-1$
+
+			ITypeParameter[] methodTypeParameters= fMethod.getTypeParameters();
+			if (methodTypeParameters.length != 0) {
+				cuString.append('<');
+				for (int i= 0; i < methodTypeParameters.length; i++) {
+					ITypeParameter typeParameter= methodTypeParameters[i];
+					if (i > 0)
+						cuString.append(',');
+					cuString.append(typeParameter.getElementName());
+				}
+				cuString.append("> "); //$NON-NLS-1$
+			}
+			
+			cuString.append(types[parameterCount]).append(' ');
+			int offsetBeforeMethodName= cuString.length();
+			cuString.append(METHOD_NAME).append('('); //$NON-NLS-1$
+			for (int i= 0; i < parameterCount; i++) {
+				if (i > 0)
+					cuString.append(',');
+				cuString.append(types[i]).append(" p").append(i); //$NON-NLS-1$
+			}
+			cuString.append(");"); //$NON-NLS-1$
+
+			return offsetBeforeMethodName;
+		}
+
+		private String qualifyTypes(Type type, final RefactoringStatus result) throws CoreException {
 			class NestedException extends RuntimeException {
 				private static final long serialVersionUID= 1L;
 				NestedException(CoreException e) {
@@ -419,13 +306,145 @@ public class TypeContextChecker {
 
 	}
 	
+	private static class MethodTypesSyntaxChecker {
+	
+		private final IMethod fMethod;
+		private final List/*<ParameterInfo>*/ fParameterInfos;
+		private final ReturnTypeInfo fReturnTypeInfo;
+	
+		public MethodTypesSyntaxChecker(IMethod method, List/*<ParameterInfo>*/ parameterInfos, ReturnTypeInfo returnTypeInfo) {
+			fMethod= method;
+			fParameterInfos= parameterInfos;
+			fReturnTypeInfo= returnTypeInfo;
+		}
+		
+		public RefactoringStatus[] checkSyntax() {
+			int parameterCount= fParameterInfos.size();
+			RefactoringStatus[] results= new RefactoringStatus[parameterCount + 1];
+			results[parameterCount]= checkReturnTypeSyntax();
+			for (int i= 0; i < parameterCount; i++) {
+				ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
+				results[i]= checkParameterTypeSyntax(info);
+			}
+			return results;
+		}
+		
+		private RefactoringStatus checkParameterTypeSyntax(ParameterInfo info) {
+			if (! info.isAdded() && ! info.isTypeNameChanged())
+				return null;
+	
+			String newTypeName= ParameterInfo.stripEllipsis(info.getNewTypeName().trim()).trim();
+			
+			if ("".equals(newTypeName.trim())){ //$NON-NLS-1$
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_type", new String[]{info.getNewName()}); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(msg);
+			}
+			
+			if (info.isNewVarargs() && ! JavaModelUtil.is50OrHigher(fMethod.getJavaProject())) {
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.no_vararg_below_50", new String[]{info.getNewName()}); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(msg);
+			}
+			
+			List problemsCollector= new ArrayList(0);
+			Type parsedType= parseType(newTypeName, fMethod.getJavaProject(), problemsCollector);
+			boolean valid= parsedType != null;
+			if (valid && parsedType instanceof PrimitiveType)
+				valid= ! PrimitiveType.VOID.equals(((PrimitiveType) parsedType).getPrimitiveTypeCode());
+			if (! valid) {
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_type_name", new String[]{newTypeName}); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(msg);
+			}
+			if (problemsCollector.size() == 0)
+				return null;
+			
+			RefactoringStatus result= new RefactoringStatus();
+			for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_type_syntax", new String[]{newTypeName, (String) iter.next()}); //$NON-NLS-1$
+				result.addError(msg);
+			}
+			return result;
+		}
+		
+		private RefactoringStatus checkReturnTypeSyntax() {
+			String newTypeName= fReturnTypeInfo.getNewTypeName();
+			if ("".equals(newTypeName.trim())) { //$NON-NLS-1$
+				String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.return_type_not_empty"); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(msg);
+			}
+			List problemsCollector= new ArrayList(0);
+			Type parsedType= parseType(newTypeName, fMethod.getJavaProject(), problemsCollector);
+			if (parsedType == null) {
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type", new String[]{newTypeName}); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(msg);
+			}
+			if (problemsCollector.size() == 0)
+				return null;
+			
+			RefactoringStatus result= new RefactoringStatus();
+			for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type_syntax", new String[]{newTypeName, (String) iter.next()}); //$NON-NLS-1$
+				result.addError(msg);
+			}
+			return result;
+		}
+
+		private static Type parseType(String typeString, IJavaProject javaProject, List/*<IProblem>*/ problemsCollector) {
+			if ("".equals(typeString.trim())) //speed up for a common case //$NON-NLS-1$
+				return null;
+			if (! typeString.trim().equals(typeString))
+				return null;
+		
+			StringBuffer cuBuff= new StringBuffer();
+			cuBuff.append("interface A{"); //$NON-NLS-1$
+			int offset= cuBuff.length();
+			cuBuff.append(typeString).append(" m();}"); //$NON-NLS-1$
+		
+			ASTParser p= ASTParser.newParser(AST.JLS3);
+			p.setSource(cuBuff.toString().toCharArray());
+			p.setProject(javaProject);
+			CompilationUnit cu= (CompilationUnit) p.createAST(null);
+			Selection selection= Selection.createFromStartLength(offset, typeString.length());
+			SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
+			cu.accept(analyzer);
+			ASTNode selected= analyzer.getFirstSelectedNode();
+			if (!(selected instanceof Type))
+				return null;
+			Type type= (Type)selected;
+			if (MethodTypesSyntaxChecker.isVoidArrayType(type))
+				return null;
+			IProblem[] problems= ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS);
+			if (problems.length > 0) {
+				for (int i= 0; i < problems.length; i++)
+					problemsCollector.add(problems[i].getMessage());
+			}
+			
+			String typeNodeRange= cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type));
+			if (typeString.equals(typeNodeRange))
+				return type;
+			else
+				return null;
+		}
+	
+		private static boolean isVoidArrayType(Type type){
+			if (! type.isArrayType())
+				return false;
+			
+			ArrayType arrayType= (ArrayType)type;
+			if (! arrayType.getComponentType().isPrimitiveType())
+				return false;
+			PrimitiveType primitiveType= (PrimitiveType)arrayType.getComponentType();
+			return (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID);
+		}
+	
+	}
+
 	public static RefactoringStatus[] checkAndResolveMethodTypes(IMethod method, StubTypeContext stubTypeContext, List parameterInfos, ReturnTypeInfo returnTypeInfo) throws CoreException {
 		MethodTypesChecker checker= new MethodTypesChecker(method, stubTypeContext, parameterInfos, returnTypeInfo);
 		return checker.checkAndResolveMethodTypes();
 	}
 
-	public static RefactoringStatus[] checkMethodTypesSyntax(IMethod method, StubTypeContext stubTypeContext, List parameterInfos, ReturnTypeInfo returnTypeInfo) throws CoreException {
-		MethodTypesChecker checker= new MethodTypesChecker(method, stubTypeContext, parameterInfos, returnTypeInfo);
+	public static RefactoringStatus[] checkMethodTypesSyntax(IMethod method, List parameterInfos, ReturnTypeInfo returnTypeInfo) {
+		MethodTypesSyntaxChecker checker= new MethodTypesSyntaxChecker(method, parameterInfos, returnTypeInfo);
 		return checker.checkSyntax();
 	}
 	
@@ -567,6 +586,5 @@ public class TypeContextChecker {
 			}
 		}
 	}
-
 
 }

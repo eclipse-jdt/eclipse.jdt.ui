@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,31 +9,27 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.corext.refactoring;
+package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 
-public class StubTypeContext {
-	private String fBeforeString;
-	private String fAfterString;
-	private final ICompilationUnit fCuHandle;
+
+public abstract class CompletionContextRequestor {
 	
-	public StubTypeContext(ICompilationUnit cuHandle, String beforeString, String afterString) {
-		fCuHandle= cuHandle;
-		fBeforeString= beforeString;
-		fAfterString= afterString;
+	public abstract StubTypeContext getStubTypeContext();
+	
+	public ICompilationUnit getOriginalCu() {
+		return getStubTypeContext().getCuHandle();
 	}
-	
-	public ICompilationUnit getCuHandle() {
-		return fCuHandle;
-	}
-	
+
 	public String getBeforeString() {
-		return fBeforeString;
+		return getStubTypeContext().getBeforeString();
+	}
+
+	public String getAfterString() {
+		return getStubTypeContext().getAfterString();
 	}
 	
-	public String getAfterString() {
-		return fAfterString;
-	}
 }
