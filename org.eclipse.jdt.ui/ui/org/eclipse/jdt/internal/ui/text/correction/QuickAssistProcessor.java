@@ -683,7 +683,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
+		proposal.markAsSelection(rewrite, child);
 		proposal.ensureNoModifications();
 		resultingCollections.add(proposal);
 		return true;
