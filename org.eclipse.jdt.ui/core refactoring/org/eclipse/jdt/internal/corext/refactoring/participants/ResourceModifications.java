@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CreateArguments;
 import org.eclipse.ltk.core.refactoring.participants.CreateParticipant;
 import org.eclipse.ltk.core.refactoring.participants.DeleteArguments;
@@ -105,23 +106,23 @@ public class ResourceModifications {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getParticipants(org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor)
 	 */
-	public RefactoringParticipant[] getParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
+	public RefactoringParticipant[] getParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
 		List result= new ArrayList(5);
 		if (fDelete != null) {
 			DeleteArguments arguments= new DeleteArguments();
 			for (Iterator iter= fDelete.iterator(); iter.hasNext();) {
-				DeleteParticipant[] deletes= ParticipantManager.loadDeleteParticipants(processor, 
-					iter.next(), arguments, 
-					natures, shared);
+				DeleteParticipant[] deletes= ParticipantManager.loadDeleteParticipants(status, 
+					processor, iter.next(), 
+					arguments, natures, shared);
 				result.addAll(Arrays.asList(deletes));
 			}
 		}
 		if (fCreate != null) {
 			CreateArguments arguments= new CreateArguments();
 			for (Iterator iter= fCreate.iterator(); iter.hasNext();) {
-				CreateParticipant[] creates= ParticipantManager.loadCreateParticipants(processor, 
-					iter.next(), arguments, 
-					natures, shared);
+				CreateParticipant[] creates= ParticipantManager.loadCreateParticipants(status, 
+					processor, iter.next(), 
+					arguments, natures, shared);
 				result.addAll(Arrays.asList(creates));
 			}
 		}
@@ -129,9 +130,9 @@ public class ResourceModifications {
 			for (int i= 0; i < fMove.size(); i++) {
 				Object element= fMove.get(i);
 				MoveArguments arguments= (MoveArguments)fMoveArguments.get(i);
-				MoveParticipant[] moves= ParticipantManager.loadMoveParticipants(processor, 
-					element, arguments, 
-					natures, shared);
+				MoveParticipant[] moves= ParticipantManager.loadMoveParticipants(status, 
+					processor, element, 
+					arguments, natures, shared);
 				result.addAll(Arrays.asList(moves));
 				
 			}
@@ -149,9 +150,9 @@ public class ResourceModifications {
 		}
 		*/
 		if (fRename != null) {
-			RenameParticipant[] renames= ParticipantManager.loadRenameParticipants(processor, 
-				fRename, fRenameArguments, 
-				natures, shared);
+			RenameParticipant[] renames= ParticipantManager.loadRenameParticipants(status, 
+				processor, fRename, 
+				fRenameArguments, natures, shared);
 			result.addAll(Arrays.asList(renames));
 		}
 		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);

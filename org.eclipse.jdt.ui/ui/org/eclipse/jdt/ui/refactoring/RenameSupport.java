@@ -56,7 +56,9 @@ import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 /**
  * Central access point to execute rename refactorings.
- * 
+ * <p>
+ * Note: this class is not intended to be subclassed.
+ * </p>
  * @since 2.1
  */
 public class RenameSupport {
@@ -147,14 +149,20 @@ public class RenameSupport {
 	/** Flag indicating that references are to be updated as well. */
 	public static final int UPDATE_REFERENCES= 1 << 0;
 	
-	/** Flag indicating that Java doc comments are to be updated as well.
-	 * @deprecated use UPDATE_REFERENCES or UPDATE_TEXTUAL_MATCHES or both. */
+	/** 
+     * Flag indicating that Java doc comments are to be updated as well.
+	 * @deprecated use UPDATE_REFERENCES or UPDATE_TEXTUAL_MATCHES or both.
+     */
 	public static final int UPDATE_JAVADOC_COMMENTS= 1 << 1;
-	/** Flag indicating that regular comments are to be updated as well.
-	 * @deprecated use UPDATE_TEXTUAL_MATCHES */
+	/**
+     * Flag indicating that regular comments are to be updated as well.
+	 * @deprecated use UPDATE_TEXTUAL_MATCHES
+     */
 	public static final int UPDATE_REGULAR_COMMENTS= 1 << 2;
-	/** Flag indicating that string literals are to be updated as well.
-	 * @deprecated use UPDATE_TEXTUAL_MATCHES */
+	/**
+     * Flag indicating that string literals are to be updated as well.
+	 * @deprecated use UPDATE_TEXTUAL_MATCHES
+     */
 	public static final int UPDATE_STRING_LITERALS= 1 << 3;
 
 	/**

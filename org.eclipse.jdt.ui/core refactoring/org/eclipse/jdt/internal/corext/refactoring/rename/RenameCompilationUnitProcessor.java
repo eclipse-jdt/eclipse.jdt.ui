@@ -94,10 +94,10 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		return new Object[] {fCu};
 	}
 
-	protected void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException {
+	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
 		String newTypeName= removeFileNameExtension(getNewElementName());
 		RenameArguments arguments= new RenameArguments(newTypeName, getUpdateReferences());
-		loadDerivedParticipants(result, 
+		loadDerivedParticipants(status, result, 
 			computeDerivedElements(), arguments, 
 			computeResourceModifications(), natures, shared);
 	}

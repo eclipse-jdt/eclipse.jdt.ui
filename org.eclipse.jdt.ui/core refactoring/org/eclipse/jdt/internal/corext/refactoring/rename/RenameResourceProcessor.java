@@ -105,15 +105,15 @@ public class RenameResourceProcessor extends RenameProcessor implements INameUpd
 		return true;
 	}
 	
-	public RefactoringParticipant[] loadParticipants(SharableParticipants shared) throws CoreException {
+	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
 		Object[] elements= getElements();
 		String[] natures= getAffectedProjectNatures();
 		List result= new ArrayList();
 		RenameArguments arguments= new RenameArguments(getNewElementName(), getUpdateReferences());
 		for (int i= 0; i < elements.length; i++) {
-			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(this, 
-				elements[i], arguments,
-				natures, shared)));
+			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(status, 
+				this, elements[i],
+				arguments, natures, shared)));
 		}
 		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 	}

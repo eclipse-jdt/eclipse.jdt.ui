@@ -15,7 +15,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 /**
  * Problem information for quick fix and quick assist processors.
- * This interface is not intended to be implemented.
+ * <p>
+ * Note: this interface is not intended to be implemented.
+ * </p>
  *
  * @since 3.0
  */

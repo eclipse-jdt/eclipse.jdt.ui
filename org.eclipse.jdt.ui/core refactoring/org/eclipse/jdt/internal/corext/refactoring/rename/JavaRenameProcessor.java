@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
@@ -30,38 +31,38 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 	
 	private String fNewElementName;
 	
-	public final RefactoringParticipant[] loadParticipants(SharableParticipants sharedParticipants) throws CoreException {
+	public final RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants sharedParticipants) throws CoreException {
 		RenameArguments arguments= new RenameArguments(getNewElementName(), getUpdateReferences());
 		String[] natures= getAffectedProjectNatures();
 		List result= new ArrayList();
-		loadElementParticipants(result, arguments, natures, sharedParticipants);
-		loadDerivedParticipants(result, natures, sharedParticipants);
+		loadElementParticipants(status, result, arguments, natures, sharedParticipants);
+		loadDerivedParticipants(status, result, natures, sharedParticipants);
 		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 	}
 	
-	protected void loadElementParticipants(List result, RenameArguments arguments, String[] natures, SharableParticipants shared) throws CoreException {
+	protected void loadElementParticipants(RefactoringStatus status, List result, RenameArguments arguments, String[] natures, SharableParticipants shared) throws CoreException {
 		Object[] elements= getElements();
 		for (int i= 0; i < elements.length; i++) {
-			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(this, 
-				elements[i],  arguments,
-				natures, shared)));
+			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(status, 
+				this,  elements[i],
+				arguments, natures, shared)));
 		}
 	}
 	
-	protected abstract void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException;
+	protected abstract void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException;
 	
-	protected void loadDerivedParticipants(List result, Object[] derivedElements, RenameArguments arguments, 
-			ResourceModifications resourceModifications, String[] natures, SharableParticipants shared) throws CoreException {
+	protected void loadDerivedParticipants(RefactoringStatus status, List result, Object[] derivedElements, 
+			RenameArguments arguments, ResourceModifications resourceModifications, String[] natures, SharableParticipants shared) throws CoreException {
 		if (derivedElements != null) {
 			for (int i= 0; i < derivedElements.length; i++) {
-				RenameParticipant[] participants= ParticipantManager.loadRenameParticipants(this, 
-					derivedElements[i], arguments, 
-					natures, shared);
+				RenameParticipant[] participants= ParticipantManager.loadRenameParticipants(status, 
+					this, derivedElements[i], 
+					arguments, natures, shared);
 				result.addAll(Arrays.asList(participants));
 			}
 		}
 		if (resourceModifications != null) {
-			result.addAll(Arrays.asList(resourceModifications.getParticipants(this, natures, shared)));
+			result.addAll(Arrays.asList(resourceModifications.getParticipants(status, this, natures, shared)));
 		}
 	}
 	

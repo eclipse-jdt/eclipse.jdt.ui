@@ -52,11 +52,11 @@ public class UndoManagerTests extends RefactoringTest {
 	}
 	
 	private void performUndo() throws Exception {
-		RefactoringCore.getUndoManager().performUndo(new NullProgressMonitor());
+		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 	}
 	
 	private void performRedo() throws Exception {
-		RefactoringCore.getUndoManager().performRedo(new NullProgressMonitor());
+		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
 	}
 	
 	public void test0() throws Exception{

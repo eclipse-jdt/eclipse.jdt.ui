@@ -17,12 +17,16 @@ import org.eclipse.ui.PartInitException;
 /**
  * This interface serves to display elements that a search participant has contributed to a search
  * result.
- * Clients may implement this interface.
+ * <p>
  * Each <code>ISearchUIParticipant</code> is associated with a particular <code>IQueryParticipant</code>. The ISearchUIParticipant
  * will only be asked to handle elements and matches which its <code>IQueryParticipant</code> contributed to the 
  * search result. If two search participants report matches against the same element, one of them will
  * be chosen to handle the element.
- * 
+ * </p>
+ * <p>
+ * Clients may implement this interface.
+ * </p>
+ * @since 3.0 
  */
 public interface ISearchUIParticipant {
 	/**

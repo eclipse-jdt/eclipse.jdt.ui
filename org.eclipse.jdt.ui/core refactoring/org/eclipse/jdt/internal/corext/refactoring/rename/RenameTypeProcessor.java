@@ -140,10 +140,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		return new Object[] {fType};
 	}
 	
-	protected void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException {
+	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
 		String newCUName= getNewElementName() + ".java"; //$NON-NLS-1$
 		RenameArguments arguments= new RenameArguments(newCUName, getUpdateReferences());
-		loadDerivedParticipants(result, 
+		loadDerivedParticipants(status, result, 
 			computeDerivedElements(), arguments, 
 			computeResourceModifications(), natures, shared);
 	}

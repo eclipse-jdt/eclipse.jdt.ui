@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.ltk.core.refactoring.*;
 import org.eclipse.ltk.core.refactoring.Change;
@@ -82,8 +84,13 @@ public class CompilationUnitChange extends TextFileChange {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected Change createUndoChange(UndoEdit edit, ContentStamp stampToRestore) throws CoreException {
-		return new UndoCompilationUnitChange(getName(), fCUnit, edit, stampToRestore, getSaveMode());
+	protected Change createUndoChange(UndoEdit edit, ContentStamp stampToRestore) {
+		try {
+			return new UndoCompilationUnitChange(getName(), fCUnit, edit, stampToRestore, getSaveMode());
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			return null;
+		}
 	}
 	
 	/**

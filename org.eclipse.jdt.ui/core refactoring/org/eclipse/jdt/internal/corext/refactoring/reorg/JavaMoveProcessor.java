@@ -104,8 +104,8 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 		return isAvailable(fMovePolicy);
 	}
 	
-	public RefactoringParticipant[] loadParticipants(SharableParticipants shared) throws CoreException {
-		return fMovePolicy.loadParticipants(this, getAffectedProjectNatures(), shared);
+	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
+		return fMovePolicy.loadParticipants(status, this, getAffectedProjectNatures(), shared);
 	}
 
 	private String[] getAffectedProjectNatures() throws CoreException {

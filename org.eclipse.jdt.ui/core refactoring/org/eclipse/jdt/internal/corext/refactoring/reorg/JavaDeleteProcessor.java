@@ -183,7 +183,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		return fElements;
 	}
 	
-	public RefactoringParticipant[] loadParticipants(SharableParticipants shared) throws CoreException {
+	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
 		String[] natures= getAffectedProjectNatures();
 		ResourceModifications mod= new ResourceModifications();
 		List collected= new ArrayList();
@@ -195,11 +195,11 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		}
 		List result= new ArrayList();
 		for (Iterator iter= collected.iterator(); iter.hasNext();) {
-			result.addAll(Arrays.asList(ParticipantManager.loadDeleteParticipants(this, 
-				iter.next(), new DeleteArguments(), 
-				natures, shared)));
+			result.addAll(Arrays.asList(ParticipantManager.loadDeleteParticipants(status, 
+				this, iter.next(), 
+				new DeleteArguments(), natures, shared)));
 		}
-		result.addAll(Arrays.asList(mod.getParticipants(this, natures, shared)));
+		result.addAll(Arrays.asList(mod.getParticipants(status, this, natures, shared)));
 		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
 	}
 	

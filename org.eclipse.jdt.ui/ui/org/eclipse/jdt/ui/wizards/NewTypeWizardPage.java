@@ -1691,6 +1691,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * 
 	 * @return the type comment or <code>null</code> if a type comment 
 	 * is not desired
+     *
+     * @since 3.0
 	 */		
 	protected String getTypeComment(ICompilationUnit parentCU, String lineDelimiter) {
 		try {

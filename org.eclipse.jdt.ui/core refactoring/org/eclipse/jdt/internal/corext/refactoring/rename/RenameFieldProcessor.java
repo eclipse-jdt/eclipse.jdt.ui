@@ -111,24 +111,24 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return new Object[] {fField};
 	}
 	
-	protected void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException {
+	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
 		if (fRenameGetter) {
 			IMethod getter= getGetter();
 			if (getter != null) {
-				addParticipants(result, getter, getNewGetterName(), natures, shared);
+				addParticipants(status, result, getter, getNewGetterName(), natures, shared);
 			}
 		}
 		if (fRenameSetter) {
 			IMethod setter= getSetter();
 			if (setter != null) {
-				addParticipants(result, setter, getNewSetterName(), natures, shared);
+				addParticipants(status, result, setter, getNewSetterName(), natures, shared);
 			}
 		}
 	}
 
-	private void addParticipants(List result, IMethod method, String methodName, String[] natures, SharableParticipants shared) throws CoreException {
+	private void addParticipants(RefactoringStatus status, List result, IMethod method, String methodName, String[] natures, SharableParticipants shared) throws CoreException {
 		RenameArguments args= new RenameArguments(methodName, getUpdateReferences());
-		RenameParticipant[] participants= ParticipantManager.loadRenameParticipants(this, method, args, natures, shared);
+		RenameParticipant[] participants= ParticipantManager.loadRenameParticipants(status, this, method, args, natures, shared);
 		result.addAll(Arrays.asList(participants));
 	}
 

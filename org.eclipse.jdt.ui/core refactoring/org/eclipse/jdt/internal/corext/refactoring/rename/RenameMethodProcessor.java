@@ -116,7 +116,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return new Object[] {fMethod};
 	}
 
-	protected void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException {
+	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
 		// TODO must caclulate ripple ??
 	}
 	

@@ -236,6 +236,8 @@ public class JarPackageData {
 	 * This path is normally external to the workspace.
 	 * 
 	 * @return the absolute path representing the location of the JAR file
+	 * 
+	 * @since 3.0
 	 */
 	public IPath getAbsoluteJarLocation() {
 		IPath workspaceLocation= ResourcesPlugin.getWorkspace().getRoot().getLocation();

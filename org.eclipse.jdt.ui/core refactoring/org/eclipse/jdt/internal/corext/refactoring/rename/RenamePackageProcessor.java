@@ -145,8 +145,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		return new Object[] {fPackage};
 	}
 	
-	protected void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException {
-		loadDerivedParticipants(result, 
+	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
+		loadDerivedParticipants(status, result, 
 			null, null, 
 			computeResourceModifications(), natures, shared);
 	}

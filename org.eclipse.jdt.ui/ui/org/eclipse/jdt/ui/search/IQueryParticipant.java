@@ -16,11 +16,17 @@ import org.eclipse.jdt.internal.ui.search.QuerySpecification;
 
 /**
  * This is the interface expected of extension to the extension point.
-  * <code>org.eclipse.jdt.ui.queryParticipants</code>.
- * Clients may implement this interface.
+ * <code>org.eclipse.jdt.ui.queryParticipants</code>.
+ * <p> 
  * A <code>IQueryParticipant</code> is called during the execution of a 
  * Java search query. It can report matches via an <code>ISearchRequestor</code> and 
  * may contribute a <code>ISearchUIParticipant</code> to help render the elements it contributes.
+ * </p>
+ * <p>
+ * Clients may implement this interface.
+ * </p>
+ *
+ * @since 3.0
  */
 public interface IQueryParticipant {
 	/**

@@ -198,7 +198,9 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	
 	/**
 	 * Returns the test selection of the current editor. <code>null</code> is returned
-	 * when the current editor does not have focus or does not return a text selection. 
+	 * when the current editor does not have focus or does not return a text selection.
+     *
+     * @since 3.0 
 	 */
 	protected ITextSelection getCurrentTextSelection() {
 		IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();

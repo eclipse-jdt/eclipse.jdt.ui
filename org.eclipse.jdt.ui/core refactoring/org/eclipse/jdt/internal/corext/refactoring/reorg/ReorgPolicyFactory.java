@@ -907,7 +907,7 @@ class ReorgPolicyFactory {
 			super(javaElements);
 		}
 			
-		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
 			return new RefactoringParticipant[0];
 		}
 		
@@ -963,7 +963,7 @@ class ReorgPolicyFactory {
 			super(files, folders, cus);
 		}
 				
-		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
 			return new RefactoringParticipant[0];
 		}
 		
@@ -1048,7 +1048,7 @@ class ReorgPolicyFactory {
 			super(roots);
 		}
 		
-		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
 			return new RefactoringParticipant[0];
 		}
 		
@@ -1088,7 +1088,7 @@ class ReorgPolicyFactory {
 			super(packageFragments);
 		}
 
-		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
 			return new RefactoringParticipant[0];
 		}
 		
@@ -1131,7 +1131,7 @@ class ReorgPolicyFactory {
 		public boolean canEnable() throws JavaModelException {
 			return false;
 		}
-		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
 			return new RefactoringParticipant[0];
 		}
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
@@ -1239,7 +1239,7 @@ class ReorgPolicyFactory {
 		MovePackageFragmentRootsPolicy(IPackageFragmentRoot[] roots){
 			super(roots);
 		}
-		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
 			List result=new ArrayList();
 			ResourceModifications modifications= new ResourceModifications();
 			IJavaProject destination= getDestinationJavaProject();
@@ -1248,15 +1248,15 @@ class ReorgPolicyFactory {
 				IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 				for (int i= 0; i < roots.length; i++) {
 					IPackageFragmentRoot root= roots[i];
-					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
-						root, new MoveArguments(destination, updateReferences), 
-						natures, shared)));
+					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(status, 
+						processor, root, 
+						new MoveArguments(destination, updateReferences), natures, shared)));
 					if (root.getResource() != null && destination.getResource() != null)
 						modifications.addMove(root.getResource(), 
 							new MoveArguments(destination.getResource(), updateReferences));
 				}
 			}
-			result.addAll(Arrays.asList(modifications.getParticipants(processor, natures, shared)));
+			result.addAll(Arrays.asList(modifications.getParticipants(status, processor, natures, shared)));
 			return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 		}
 		
@@ -1334,7 +1334,7 @@ class ReorgPolicyFactory {
 		MovePackagesPolicy(IPackageFragment[] packageFragments){
 			super(packageFragments);
 		}
-		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
 			List result= new ArrayList();
 			ResourceModifications modifications= new ResourceModifications();
 			boolean updateReferences= canUpdateReferences() && getUpdateReferences();
@@ -1342,9 +1342,9 @@ class ReorgPolicyFactory {
 			IPackageFragmentRoot javaDestination= getDestinationAsPackageFragmentRoot();
 			for (int i= 0; i < packages.length; i++) {
 				IPackageFragment pack= packages[i];
-				result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
-					pack, new MoveArguments(javaDestination, updateReferences), 
-					natures, shared)));
+				result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(status, 
+					processor, pack, 
+					new MoveArguments(javaDestination, updateReferences), natures, shared)));
 				IResource resourceDestination= javaDestination.getResource();
 				IContainer container= (IContainer)pack.getResource();
 				if (container == null || resourceDestination == null)
@@ -1371,7 +1371,7 @@ class ReorgPolicyFactory {
 					modifications.addDelete(container);
 				}
 			}
-			result.addAll(Arrays.asList(modifications.getParticipants(processor, natures, shared)));
+			result.addAll(Arrays.asList(modifications.getParticipants(status, processor, natures, shared)));
 			return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
 		}
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
@@ -1451,7 +1451,7 @@ class ReorgPolicyFactory {
 			fSettings= settings;
 		}
 		
-		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
 			IPackageFragment pack= getDestinationAsPackageFragment();
 			IContainer container= getDestinationAsContainer();
 			List result= new ArrayList();
@@ -1470,15 +1470,15 @@ class ReorgPolicyFactory {
 				ICompilationUnit[] units= getCus();
 				for (int i= 0; i < units.length; i++) {
 					ICompilationUnit unit= units[i];
-					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
-						unit, new MoveArguments(unitDestination, updateReferenes), 
-						natures, shared)));
+					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(status, 
+						processor, unit, 
+						new MoveArguments(unitDestination, updateReferenes), natures, shared)));
 					IType[] types= unit.getTypes();
 					for (int tt= 0; tt < types.length; tt++) {
 						IType type= types[tt];
-						derived.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
-							type, new MoveArguments(unitDestination, updateReferenes), 
-							natures, shared)));
+						derived.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(status, 
+							processor, type, 
+							new MoveArguments(unitDestination, updateReferenes), natures, shared)));
 					}
 					if (container != null && unit.getResource() != null) {
 						modifications.addMove(unit.getResource(), new MoveArguments(container, updateReferenes));
@@ -1489,20 +1489,20 @@ class ReorgPolicyFactory {
 				IFile[] files= getFiles();
 				for (int i= 0; i < files.length; i++) {
 					IFile file= files[i];
-					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
-						file, new MoveArguments(container, updateReferenes), 
-						natures, shared)));
+					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(status, 
+						processor, file, 
+						new MoveArguments(container, updateReferenes), natures, shared)));
 				}
 				IFolder[] folders= getFolders();
 				for (int i= 0; i < folders.length; i++) {
 					IFolder folder= folders[i];
-					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
-						folder, new MoveArguments(container, updateReferenes), 
-						natures, shared)));
+					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(status, 
+						processor, folder, 
+						new MoveArguments(container, updateReferenes), natures, shared)));
 				}
 			}
 			result.addAll(derived);
-			result.addAll(Arrays.asList(modifications.getParticipants(processor, natures, shared)));
+			result.addAll(Arrays.asList(modifications.getParticipants(status, processor, natures, shared)));
 			return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 		}
 		
@@ -1772,7 +1772,7 @@ class ReorgPolicyFactory {
 		MoveSubCuElementsPolicy(IJavaElement[] javaElements){
 			super(javaElements);
 		}
-		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
 			return new RefactoringParticipant[0];
 		}
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
@@ -1843,7 +1843,7 @@ class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.noMoving")); //$NON-NLS-1$
 		}
-		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
 			return new RefactoringParticipant[0];
 		}
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {

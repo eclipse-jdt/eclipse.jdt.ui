@@ -104,13 +104,13 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
 		
-		RefactoringCore.getUndoManager().performUndo(new NullProgressMonitor());
+		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
 		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 		
-		RefactoringCore.getUndoManager().performRedo(new NullProgressMonitor());
+		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
 		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	

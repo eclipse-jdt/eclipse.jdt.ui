@@ -69,6 +69,8 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>: if <code>true</code> light bulbs are shown
 	 * for quick assists.
 	 * </p>
+	 * 
+	 * @since 3.0
 	 */
 	public static final String EDITOR_QUICKASSIST_LIGHTBULB="org.eclipse.jdt.quickassist.lightbulb"; //$NON-NLS-1$
 

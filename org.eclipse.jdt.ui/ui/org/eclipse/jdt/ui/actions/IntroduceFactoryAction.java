@@ -45,6 +45,9 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 /**
  * Action that encapsulates the a constructor call with a factory
  * method.
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
  * 
  * @since 3.0
  */

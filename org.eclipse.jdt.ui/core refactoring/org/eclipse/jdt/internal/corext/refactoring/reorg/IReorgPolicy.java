@@ -44,7 +44,7 @@ interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdatingRef
 	public boolean getUpdateReferences();
 	public boolean canUpdateQualifiedNames();
 	
-	public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException;
+	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException;
 	
 	static interface ICopyPolicy extends IReorgPolicy{
 		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException;

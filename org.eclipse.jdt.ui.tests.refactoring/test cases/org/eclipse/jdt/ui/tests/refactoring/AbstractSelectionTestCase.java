@@ -123,7 +123,7 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 				assertTrue("Undo manager is empty", undoManager.anythingToUndo());
 
 				if (doUndo) {
-					undoManager.performUndo(new NullProgressMonitor());
+					undoManager.performUndo(null, new NullProgressMonitor());
 					assertTrue("Undo manager still has undo", !undoManager.anythingToUndo());
 					assertTrue("Undo manager is empty", undoManager.anythingToRedo());
 					compareSource(original, unit.getSource());
