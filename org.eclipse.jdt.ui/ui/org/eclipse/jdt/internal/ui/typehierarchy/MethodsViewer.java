@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -81,7 +82,7 @@ public class MethodsViewer extends ProblemTableViewer {
 			StandardJavaUILabelProvider.getAdornmentProviders(true, new HierarchyAdornmentProvider(lifeCycle))
 		);
 		
-		setLabelProvider(new DecoratingLabelProvider(fLabelProvider, part.getSite().getDecoratorManager()));
+		setLabelProvider(new DecoratingLabelProvider(fLabelProvider, PlatformUI.getWorkbench().getDecoratorManager()));
 		setContentProvider(new MethodsContentProvider(lifeCycle));
 				
 		fOpen= new OpenJavaElementAction(this);

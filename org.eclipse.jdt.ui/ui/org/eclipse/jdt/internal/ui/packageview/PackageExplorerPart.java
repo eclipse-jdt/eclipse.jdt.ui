@@ -65,6 +65,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenPerspectiveMenu;
@@ -292,7 +293,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			);
 		
 		fViewer.setLabelProvider(new DecoratingLabelProvider(
-			fJavaElementLabelProvider, getViewSite().getDecoratorManager())
+			fJavaElementLabelProvider, PlatformUI.getWorkbench().getDecoratorManager())
 		);
 		fViewer.setSorter(new JavaElementSorter());
 		fViewer.addFilter(new EmptyInnerPackageFilter());

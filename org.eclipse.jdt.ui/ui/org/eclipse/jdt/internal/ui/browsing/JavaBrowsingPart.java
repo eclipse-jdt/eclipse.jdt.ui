@@ -56,6 +56,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenPerspectiveMenu;
 import org.eclipse.ui.actions.OpenWithMenu;
@@ -191,7 +192,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fViewer= createViewer(parent);
 
 		fLabelProvider= createLabelProvider();
-		ILabelDecorator decorationMgr= getViewSite().getDecoratorManager();
+		ILabelDecorator decorationMgr= PlatformUI.getWorkbench().getDecoratorManager();
 		fViewer.setLabelProvider(new DecoratingLabelProvider(fLabelProvider, decorationMgr));
 		
 		fViewer.setSorter(new JavaElementSorter());

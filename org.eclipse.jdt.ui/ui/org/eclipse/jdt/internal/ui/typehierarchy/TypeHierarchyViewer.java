@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
@@ -53,7 +54,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 			StandardJavaUILabelProvider.getAdornmentProviders(true, new HierarchyAdornmentProvider(lifeCycle))
 		);
 		
-		setLabelProvider(new DecoratingLabelProvider(baseLProvider, part.getSite().getDecoratorManager()));
+		setLabelProvider(new DecoratingLabelProvider(baseLProvider, PlatformUI.getWorkbench().getDecoratorManager()));
 			
 		setContentProvider(contentProvider);
 		setSorter(new ViewerSorter() {

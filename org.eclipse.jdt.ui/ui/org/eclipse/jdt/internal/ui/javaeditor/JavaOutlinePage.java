@@ -41,6 +41,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -657,7 +658,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fOutlineViewer= new JavaOutlineViewer(tree);		
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
 		fOutlineViewer.setLabelProvider(new DecoratingLabelProvider(
-			lprovider, fEditor.getSite().getDecoratorManager()));
+			lprovider, PlatformUI.getWorkbench().getDecoratorManager()));
 		
 		Object[] listeners= fSelectionChangedListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
