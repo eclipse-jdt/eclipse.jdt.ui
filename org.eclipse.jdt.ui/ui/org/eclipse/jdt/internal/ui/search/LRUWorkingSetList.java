@@ -46,7 +46,7 @@ public class LRUWorkingSetList {
 	}
 	
 	private void removeDeletedWorkingSets() {
-		Iterator iter= fLRUList.iterator();
+		Iterator iter= new ArrayList(fLRUList).iterator();
 		while (iter.hasNext()) {
 			IWorkingSet workingSet= (IWorkingSet)iter.next();
 			if (SearchUI.findWorkingSet(workingSet.getName()) == null)
