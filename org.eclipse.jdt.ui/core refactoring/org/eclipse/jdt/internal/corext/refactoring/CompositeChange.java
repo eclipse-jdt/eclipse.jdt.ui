@@ -151,7 +151,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 	 */	
 	public String toString(){
 		StringBuffer buff= new StringBuffer();
-		buff.append("CompositeChange\n");
+		buff.append("CompositeChange\n"); //$NON-NLS-1$
 		for (Iterator iter= fChanges.iterator(); iter.hasNext();){
 			buff.append("<").append(iter.next().toString()).append("/>\n"); //$NON-NLS-2$ //$NON-NLS-1$
 		};

@@ -13,6 +13,24 @@ Eclipse Build Input April 9th 2002
 
 <h2>
 What's new in this drop</h2>
+<p>Implemented the new menu proposal. During start up you get a message that the
+refactoring action set is missing. This message can be ignored. If the JDT
+perspectives (Java, Java Browsing, Type Hierarchy) are missing one of the
+Source, Refactor and Navigate menu in the menu bar you have to switch them on by
+hand. To do so go to Window-&gt;Customize Perspective-&gt;Actions and check the
+Java action set.</p>
+<p>Some general comments regarding the new menu structure:</p>
+<ul>
+  <li>the Edit menu contains actions only applicable to Java files (source and
+    class files).</li>
+  <li>the Source menu contains actions to manipulate Java element in general.
+    The Java element can either be selected in one of the JDT views (packages,
+    outliner, type hierarchy, ...) or in the Java text editor.</li>
+  <li>the Refactor menu is unchanged.</li>
+  <li>the Navigate menu contains actions to the selected Java element in a
+    different view part (Open Declaration, Open Super Implementation) or to
+    reveal it in the packages view or resource navigator.</li>
+</ul>
 <h2>
 Problem Reports</h2>
 <a href="http://dev.eclipse.org/bugs/buglist.cgi?bug_status=RESOLVED&bug_status=CLOSED&chfield=bug_status&chfieldfrom=2002%2F04%2F02&chfieldto=2002%2F04%2F09&product=JDT&component=UI&cmdtype=doit&&order=Bug+Number">Click

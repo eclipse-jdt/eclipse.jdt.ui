@@ -55,7 +55,7 @@ public class TextFileChange extends TextChange  {
 		public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
 			try{
 				acquireTextBuffer();
-				pm.beginTask("", 10);
+				pm.beginTask("", 10); //$NON-NLS-1$
 				super.perform(context, new SubProgressMonitor(pm, 8));
 				TextBuffer.aboutToChange(fAcquiredTextBuffer);
 				TextBuffer.save(fAcquiredTextBuffer, new SubProgressMonitor(pm, 2));
@@ -72,7 +72,7 @@ public class TextFileChange extends TextChange  {
 				try {
 					TextBuffer.changed(fAcquiredTextBuffer);
 				} catch (CoreException e) {
-					Assert.isTrue(false, "Should not happen since the buffer is acquired through a text buffer manager");	
+					Assert.isTrue(false, "Should not happen since the buffer is acquired through a text buffer manager");	 //$NON-NLS-1$
 				} finally {
 					releaseTextBuffer(fAcquiredTextBuffer);
 				}
@@ -167,7 +167,7 @@ public class TextFileChange extends TextChange  {
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
 		try{
 			acquireTextBuffer();
-			pm.beginTask("", 10);
+			pm.beginTask("", 10); //$NON-NLS-1$
 			super.perform(context, new SubProgressMonitor(pm, 8));
 			if (fSave) {
 				TextBuffer.aboutToChange(fAcquiredTextBuffer);
@@ -191,7 +191,7 @@ public class TextFileChange extends TextChange  {
 				if (fSave)
 					TextBuffer.changed(fAcquiredTextBuffer);
 			} catch (CoreException e) {
-				Assert.isTrue(false, "Should not happen since the buffer is acquired through a text buffer manager");	
+				Assert.isTrue(false, "Should not happen since the buffer is acquired through a text buffer manager");	 //$NON-NLS-1$
 			} finally {
 				releaseTextBuffer(fAcquiredTextBuffer);
 			}

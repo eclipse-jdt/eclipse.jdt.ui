@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -71,7 +72,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				if (edit.getTextRange().getOffset() == fOffset)
 					return;
 			}
-			editor.add(SimpleTextEdit.createInsert(fOffset, "\t"));
+			editor.add(SimpleTextEdit.createInsert(fOffset, "\t")); //$NON-NLS-1$
 		}
 		public MultiTextEdit copy() throws CoreException {
 			return new LocalDeclarationEdit(fOffset, getChildren(), true);	
@@ -93,7 +94,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Surround with try/catch block";
+		return RefactoringCoreMessages.getString("SurroundWithTryCatchRefactoring.name"); //$NON-NLS-1$
 	}
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
@@ -147,7 +148,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	}
 	
 	private void addEdits(TextChange change, TextBuffer buffer, String delimiter, String indent) throws JavaModelException {
-		final String NN= "";
+		final String NN= ""; //$NON-NLS-1$
 		final ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		final VariableDeclaration[] locals= fAnalyzer.getAffectedLocals();
 		int start= getStartOffset();
@@ -158,10 +159,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		for (int i= locals.length - 1; i >= 0; i--) {
 			change.addTextEdit(NN, SimpleTextEdit.createInsert(start, createLocal(buffer, locals[i], delimiter, indent)));
 		}
-		change.addTextEdit(NN, SimpleTextEdit.createInsert(start, "try {"));
+		change.addTextEdit(NN, SimpleTextEdit.createInsert(start, "try {")); //$NON-NLS-1$
 		ASTNode[] affectedLocals= getAffectedLocals(buffer.getLineInformation(firstLine), locals);
 		if (affectedLocals.length == 0) {
-			change.addTextEdit(NN, SimpleTextEdit.createInsert(start, delimiter + indent + "\t"));
+			change.addTextEdit(NN, SimpleTextEdit.createInsert(start, delimiter + indent + "\t")); //$NON-NLS-1$
 		} else {
 			for (int i= 0; i < affectedLocals.length; i++) {
 				change.addTextEdit(NN, new DeleteNodeEdit(affectedLocals[i], false));
@@ -177,7 +178,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			change.addTextEdit(NN, SimpleTextEdit.createInsert(offset, createCatchBlock(exception, delimiter, indent)));
 			importEdit.addImport(Bindings.getFullyQualifiedImportName(exception));
 		}
-		change.addTextEdit(NN, SimpleTextEdit.createInsert(offset, delimiter + indent + "}"));	
+		change.addTextEdit(NN, SimpleTextEdit.createInsert(offset, delimiter + indent + "}"));	 //$NON-NLS-1$
 		if (!importEdit.isEmpty())
 			change.addTextEdit(NN, importEdit);
 	}
@@ -194,7 +195,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		StringBuffer result= new StringBuffer();
 		if (local instanceof VariableDeclarationFragment) {
 			result.append(ASTNodes.asString(ASTNodes.getType(local)));
-			result.append(" ");
+			result.append(" "); //$NON-NLS-1$
 		}
 		result.append(buffer.getContent(local.getStartPosition(), local.getLength()));
 		result.append(';');
@@ -207,9 +208,9 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		TextRegion region= buffer.getLineInformation(line);
 		ASTNode[] coveredLocals= getAffectedLocals(region, locals);
 		if (coveredLocals.length == 0) {
-			change.addTextEdit("", SimpleTextEdit.createInsert(region.getOffset(), "\t"));			
+			change.addTextEdit("", SimpleTextEdit.createInsert(region.getOffset(), "\t"));			 //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
-			change.addTextEdit("", new LocalDeclarationEdit(region.getOffset(), coveredLocals));
+			change.addTextEdit("", new LocalDeclarationEdit(region.getOffset(), coveredLocals)); //$NON-NLS-1$
 		}
 	}
 	
@@ -231,9 +232,9 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(delimiter);
 		buffer.append(indent);
-		buffer.append("} catch(");
+		buffer.append("} catch("); //$NON-NLS-1$
 		buffer.append(exception.getName());
-		buffer.append(" e) {");
+		buffer.append(" e) {"); //$NON-NLS-1$
 		return buffer.toString();
 	}
 	

@@ -7,19 +7,16 @@ package org.eclipse.jdt.internal.corext.refactoring.surround;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.DoStatement;
-import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 
@@ -45,21 +42,21 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 			if (getStatus().hasFatalError())
 				break superCall;
 			if (!hasSelectedNodes()) {
-				invalidSelection("Selection does not cover a set of statements.");
+				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.doesNotCover")); //$NON-NLS-1$
 				break superCall;
 			}
 			MethodDeclaration enclosingMethod= (MethodDeclaration)ASTNodes.getParent(getFirstSelectedNode(), MethodDeclaration.class);
 			if (enclosingMethod == null) {
-				invalidSelection("Selection does not contain statements from a method body."); 
+				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.doesNotContain"));  //$NON-NLS-1$
 				break superCall;
 			}
 			fExceptions= ExceptionAnalyzer.perform(enclosingMethod, getSelection());
 			if (fExceptions == null || fExceptions.length == 0) {
-				invalidSelection("No uncaught exceptions are thrown by the selected code.");
+				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.noUncaughtExceptions")); //$NON-NLS-1$
 				break superCall;
 			}
 			if (!onlyStatements()) {
-				invalidSelection("Can only surround statements with a try/catch block.");
+				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.onlyStatements")); //$NON-NLS-1$
 			}
 			fLocals= LocalDeclarationAnalyzer.perform(enclosingMethod, getSelection());
 		}
@@ -68,7 +65,7 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 	
 	public void endVisit(SuperConstructorInvocation node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
-			invalidSelection("Cannot surround a super constructor call.", JavaSourceContext.create(fCUnit, node));
+			invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.cannotHandleSuper"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
 		}
 		super.endVisit(node);
 	}

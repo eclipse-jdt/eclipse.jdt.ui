@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 public class SelfEncapsulateFieldAction extends RefactoringAction {
 
 	public SelfEncapsulateFieldAction(StructuredSelectionProvider provider) {
-		super(RefactoringMessages.getString("SelfEncapsulateFieldAction.self_Encapsulate"), provider); //$NON-NLS-1$
+		super(RefactoringMessages.getString("SelfEncapsulateFieldAction.label"), provider); //$NON-NLS-1$
 	}
 	
 	public void run() {
@@ -34,7 +34,10 @@ public class SelfEncapsulateFieldAction extends RefactoringAction {
 		} catch (JavaModelException e) {
 		}
 		if (field == null) {
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("SelfEncapsulateFieldAction.self_Encapsulate1"), "Field '" + selectedField.getElementName() + "' doesn't exist in editor buffer anymore."); //$NON-NLS-1$
+			MessageDialog.openInformation(
+				JavaPlugin.getActiveWorkbenchShell(), 
+				RefactoringMessages.getString("SelfEncapsulateFieldAction.dialog.title"),  //$NON-NLS-1$
+				RefactoringMessages.getFormattedString("SelfEncapsulateFieldAction.dialog.field_doesnot_exit", selectedField.getElementName()));  //$NON-NLS-1$
 			return;
 		}
 			
@@ -43,9 +46,11 @@ public class SelfEncapsulateFieldAction extends RefactoringAction {
 			new RefactoringStarter().activate(
 				refactoring, 
 				new SelfEncapsulateFieldWizard(refactoring),
-				RefactoringMessages.getString("SelfEncapsulateFieldAction.self_Encapsulate1"), true); //$NON-NLS-1$
+				RefactoringMessages.getString("SelfEncapsulateFieldAction.dialog.title"), true); //$NON-NLS-1$
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("SelfEncapsulateFieldAction.self_Encapsulate1"), RefactoringMessages.getString("SelfEncapsulateFieldAction.cannot_perform")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, 
+				RefactoringMessages.getString("SelfEncapsulateFieldAction.dialog.title"), //$NON-NLS-1$
+				RefactoringMessages.getString("SelfEncapsulateFieldAction.dialog.cannot_perform")); //$NON-NLS-1$
 		}
 	}
 	
