@@ -368,6 +368,7 @@ public class MoveCuUpdateCreator {
 						String match= buffer.getText(start, end - start);
 						match= CommentAnalyzer.normalizeReference(match);
 						if (match.startsWith(currectPackageName)) {
+							end= start + currectPackageName.length();
 							getResults().add(new TypeReference(res, start, end, element, accuracy, true));
 						} else {
 							getResults().add(new TypeReference(res, start, end, element, accuracy, false));
