@@ -956,6 +956,42 @@ public class MoveTest extends RefactoringTest {
 		}
 	}
 
+	public void testDestination_yes_cuToOtherPackageWithMultiRoot() throws Exception {
+		//regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=47788
+		IPackageFragment otherPackage= getRoot().createPackageFragment("otherPackage", true, new NullProgressMonitor());
+		String oldA= "package p;public class A{}";
+		String newA= "package otherPackage;public class A{}";
+		ICompilationUnit cuA= getPackageP().createCompilationUnit("A.java", oldA, false, new NullProgressMonitor());
+		
+		IPackageFragmentRoot testSrc= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "testSrc");
+		IPackageFragment testP= testSrc.createPackageFragment("p", true, new NullProgressMonitor());
+		String oldRef= "package p;\npublic class Ref { A t = new A(); }";
+		String newRef= "package p;\n\nimport otherPackage.*;\n\npublic class Ref { A t = new A(); }";
+		ICompilationUnit cuRef= testP.createCompilationUnit("Ref.java", oldRef, false, new NullProgressMonitor());
+		try{
+			IJavaElement[] javaElements= {cuA};
+			IResource[] resources= {};
+			JavaMoveProcessor processor= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= otherPackage;
+			verifyValidDestination(processor, destination);
+			
+			assertTrue("source file does not exist before moving", cuA.exists());
+			RefactoringStatus status= performRefactoring(processor, false);
+			assertEquals(null, status);
+			assertTrue("source file exists after moving", ! cuA.exists());
+			ICompilationUnit newCu= otherPackage.getCompilationUnit(cuA.getElementName());
+			assertTrue("new file does not exist after moving", newCu.exists());
+			assertEqualLines("source differs", newA, newCu.getSource());
+			
+			assertEqualLines("Ref differs", newRef, cuRef.getSource());
+		}finally{
+			performDummySearch();
+			otherPackage.delete(true, new NullProgressMonitor());
+			JavaProjectHelper.removeSourceContainer(MySetup.getProject(), testSrc.getElementName());
+		}
+	}
+	
 	public void testDestination_yes_cuToRoot() throws Exception{
 		String newSource= "class A{void foo(){}class Inner{}}";
 		String oldSource= "package p;class A{void foo(){}class Inner{}}";

@@ -105,7 +105,7 @@ public class MoveCuUpdateCreator {
 					TextBuffer buffer= null;
 					try {
 						buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(cu).getResource());
-						TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer.getDocument()));
+						TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer.getDocument())); //$NON-NLS-1$
 					} finally {
 						if (buffer != null)
 							TextBuffer.release(buffer);
@@ -149,15 +149,6 @@ public class MoveCuUpdateCreator {
 		} finally{
 			pm.done();
 		}
-	}
-
-	private boolean isDestinationAnotherFragmentOfSamePackage(ICompilationUnit movedUnit) {
-		if (! (movedUnit.getParent() instanceof IPackageFragment))
-			return false;
-		IPackageFragment sourcePackage= (IPackageFragment)movedUnit.getParent();
-		return ! fDestination.equals(sourcePackage) &&
-				fDestination.getJavaProject().equals(sourcePackage.getJavaProject()) &&
-				fDestination.getElementName().equals(sourcePackage.getElementName());
 	}
 
 	private void addReferenceUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException, CoreException {
@@ -289,7 +280,7 @@ public class MoveCuUpdateCreator {
 		return result;
 	}
 
-	private boolean needsImportToDestinationPackage(ICompilationUnit movedUnit, List cuList, SearchResultGroup searchResultGroup, ICompilationUnit referencingCu) throws JavaModelException {
+	private boolean needsImportToDestinationPackage(ICompilationUnit movedUnit, List cuList, SearchResultGroup searchResultGroup, ICompilationUnit referencingCu) {
 		if (! hasSimpleReference(searchResultGroup))
 			return false;
 		if (referencingCu.equals(movedUnit))	
@@ -298,7 +289,10 @@ public class MoveCuUpdateCreator {
 			return false;
 		if (isDestinationAnotherFragmentOfSamePackage(movedUnit))
 			return false;
-
+		
+		if (isReferenceInAnotherFragmentOfSamePackage(searchResultGroup, movedUnit))
+			return true;
+		
 		//heuristic	
 		if (referencingCu.getImport(movedUnit.getParent().getElementName() + ".*").exists()) //$NON-NLS-1$
 			return true;
@@ -307,7 +301,28 @@ public class MoveCuUpdateCreator {
 		return true;
 	}
 	
-	private static boolean hasSimpleReference(SearchResultGroup searchResultGroup) throws JavaModelException{
+	private boolean isDestinationAnotherFragmentOfSamePackage(ICompilationUnit movedUnit) {
+		return isInAnotherFragmentOfSamePackage(movedUnit, fDestination);
+	}
+
+	private boolean isReferenceInAnotherFragmentOfSamePackage(SearchResultGroup searchResultGroup, ICompilationUnit movedUnit) {
+		ICompilationUnit cu= searchResultGroup.getCompilationUnit();
+		if (cu == null)
+			return false;
+		if (! (cu.getParent() instanceof IPackageFragment))
+			return false;
+		IPackageFragment pack= (IPackageFragment) cu.getParent();
+		return isInAnotherFragmentOfSamePackage(movedUnit, pack);
+	}
+	
+	private static boolean isInAnotherFragmentOfSamePackage(ICompilationUnit cu, IPackageFragment pack) {
+		if (! (cu.getParent() instanceof IPackageFragment))
+			return false;
+		IPackageFragment cuPack= (IPackageFragment) cu.getParent();
+		return ! cuPack.equals(pack) && JavaModelUtil.isSamePackage(cuPack, pack);
+	}
+	
+	private static boolean hasSimpleReference(SearchResultGroup searchResultGroup) {
 		SearchResult[] results= searchResultGroup.getSearchResults();
 		for (int i= 0; i < results.length; i++) {
 			if (! ((TypeReference)results[i]).isQualified())
@@ -316,7 +331,7 @@ public class MoveCuUpdateCreator {
 		return false;
 	}
 
-	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm) throws org.eclipse.jdt.core.JavaModelException {
+	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm) throws JavaModelException {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(unit);
 		ISearchPattern pattern= createSearchPattern(unit);
 		return RefactoringSearchEngine.search(scope, pattern, 
@@ -375,7 +390,7 @@ public class MoveCuUpdateCreator {
 		
 		public void addEdit(TextChange change, String text) {
 			if (fQualified) {
-				TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"), new ReplaceEdit(getStart(), getEnd() - getStart(), text));
+				TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"), new ReplaceEdit(getStart(), getEnd() - getStart(), text)); //$NON-NLS-1$
 			}
 		}
 		public boolean isQualified() {
@@ -384,4 +399,3 @@ public class MoveCuUpdateCreator {
 	}
 
 }
-
