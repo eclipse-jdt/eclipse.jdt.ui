@@ -7,6 +7,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.boot.BootLoader;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -132,6 +133,11 @@ public class RenameTypeTests extends RefactoringTest {
 
 	public void testIllegalTypeName8() throws Exception {
 		helper1_0("A", "A$B");
+	}
+	
+	public void testIllegalTypeName9() throws Exception {
+		if (BootLoader.getOS().equals(BootLoader.OS_WIN32))
+			helper1_0("A", "aux");
 	}
 
 	public void testNoOp() throws Exception {
