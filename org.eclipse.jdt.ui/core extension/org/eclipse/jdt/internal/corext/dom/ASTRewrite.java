@@ -199,7 +199,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	}
 	
 	
-	private ListRewriteEvent convertListChange(ASTNode parent, int property) {
+	private void convertListChange(ASTNode parent, int property) {
 		ListRewriteEvent event= (ListRewriteEvent) getEvent(parent, property);
 		if (event == null) {
 			List list= (List) ASTNodeConstants.getNodeChild(parent, property);
@@ -230,8 +230,8 @@ public final class ASTRewrite extends NewASTRewrite {
 				}
 			}
 			testSame(list, event.getListEntries());
+			addEvent(parent, property, event);
 		}
-		return event;
 	}
 	
 	private void testSame(List list, NodeRewriteEvent[] changes) {

@@ -51,12 +51,20 @@ public class NewASTRewrite {
 	public void addEvent(ASTNode parent, int childProperty, RewriteEvent change) {
 		if (change.isListRewrite() && !ASTNodeConstants.isListProperty(childProperty)) {
 			throw new IllegalArgumentException();
+		} else {
+			if (!ASTNodeConstants.hasChildProperty(parent, childProperty)) {
+				throw new IllegalArgumentException();
+			}
 		}
 		fEvents.add(new EventHolder(parent, childProperty, change));
 	}
 	
 	
 	public RewriteEvent getEvent(ASTNode parent, int property) {
+		if (!ASTNodeConstants.hasChildProperty(parent, property)) {
+			throw new IllegalArgumentException();
+		}
+		
 		// TODO: To optimize
 		for (int i= 0; i < fEvents.size(); i++) {
 			EventHolder event= (EventHolder) fEvents.get(i);
