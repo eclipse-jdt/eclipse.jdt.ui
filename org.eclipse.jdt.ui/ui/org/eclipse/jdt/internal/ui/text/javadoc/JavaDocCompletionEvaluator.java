@@ -52,7 +52,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor {
 		"@author", //$NON-NLS-1$
 		"@deprecated",  "@docRoot", //$NON-NLS-1$ //$NON-NLS-2$
 		"@exception", //$NON-NLS-1$
-		"@inheritdoc", //$NON-NLS-1$
+		"@inheritDoc", //$NON-NLS-1$
 		"@link", "@linkplain", //$NON-NLS-1$ //$NON-NLS-2$
 		"@param", //$NON-NLS-1$
 		"@return", //$NON-NLS-1$
