@@ -269,17 +269,15 @@ public class JavaPluginImages {
 			if (id != null)
 				action.setDisabledImageDescriptor(id);
 		} catch (MalformedURLException e) {
-			System.out.println("no d image: " + relPath);
 		}
-
+	
 		try {
 			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("full/c" + type, relPath));
 			if (id != null)
 				action.setHoverImageDescriptor(id);
 		} catch (MalformedURLException e) {
-			System.out.println("no c image: " + relPath);
 		}
-
+	
 		action.setImageDescriptor(create("full/e" + type, relPath));
 	}
 }
