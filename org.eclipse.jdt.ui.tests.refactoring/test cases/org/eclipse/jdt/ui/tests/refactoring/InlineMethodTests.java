@@ -15,8 +15,6 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
