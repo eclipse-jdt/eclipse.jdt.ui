@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -30,7 +31,21 @@ import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -47,7 +62,6 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class StubUtility {
 	
@@ -658,7 +672,7 @@ public class StubUtility {
 		List exceptions= decl.thrownExceptions();
 		String[] exceptionNames= new String[exceptions.size()];
 		for (int i= 0; i < exceptions.size(); i++) {
-			exceptionNames[i]= ASTResolving.getSimpleName((Name) exceptions.get(i));
+			exceptionNames[i]= ASTNodes.getSimpleNameIdentifier((Name) exceptions.get(i));
 		}
 		String returnType= !decl.isConstructor() ? ASTNodes.asString(decl.getReturnType()) : null;
 		int[] tagOffsets= position.getOffsets();
@@ -1077,20 +1091,33 @@ public class StubUtility {
 	 */
 	public static String[] getArgumentNameSuggestions(IJavaProject project, String baseName, String[] excluded) {
 		String name= workaround38111(baseName);
-		return NamingConventions.suggestArgumentNames(project, "", name, 0, excluded); //$NON-NLS-1$
+		String[] res= NamingConventions.suggestArgumentNames(project, "", name, 0, excluded); //$NON-NLS-1$
+		return sortByLength(res); // longest first
 	}
 	
 	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int modifiers, String[] excluded) {
-		return getFieldNameSuggestions(project, baseName, 0, modifiers, excluded);	}	
+		return getFieldNameSuggestions(project, baseName, 0, modifiers, excluded);
+	}	
 	 
 	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int dimensions, int modifiers, String[] excluded) {
 		String name= workaround38111(baseName);
-		return NamingConventions.suggestFieldNames(project, "", name, dimensions, modifiers, excluded); //$NON-NLS-1$
+		String[] res= NamingConventions.suggestFieldNames(project, "", name, dimensions, modifiers, excluded); //$NON-NLS-1$
+		return sortByLength(res); // longest first
 	}
-
+	
 	public static String[] getLocalNameSuggestions(IJavaProject project, String baseName, int dimensions, String[] excluded) {
 		String name= workaround38111(baseName);
-		return NamingConventions.suggestLocalVariableNames(project, "", name, dimensions, excluded); //$NON-NLS-1$
+		String[] res= NamingConventions.suggestLocalVariableNames(project, "", name, dimensions, excluded); //$NON-NLS-1$
+		return sortByLength(res); // longest first
+	}
+	
+	private static String[] sortByLength(String[] proposals) {
+		Arrays.sort(proposals, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((String) o2).length() - ((String) o1).length();
+			}
+		});
+		return proposals;
 	}
 	
 	private static String workaround38111(String baseName) {

@@ -38,6 +38,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
@@ -149,7 +150,7 @@ public class UnresolvedElementsSubProcessor {
 
 		// add type proposals
 		if (typeKind != 0) {
-			int relevance= Character.isUpperCase(ASTResolving.getSimpleName(node).charAt(0)) ? 3 : 0;
+			int relevance= Character.isUpperCase(ASTNodes.getSimpleNameIdentifier(node).charAt(0)) ? 3 : 0;
 			addSimilarTypeProposals(typeKind, cu, node, relevance + 1, proposals);
 			addNewTypeProposals(cu, node, SimilarElementsRequestor.REF_TYPES, relevance, proposals);
 		}
@@ -452,7 +453,7 @@ public class UnresolvedElementsSubProcessor {
 	private static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection proposals) throws JavaModelException {
 		Name node= refNode;
 		do {
-			String typeName= ASTResolving.getSimpleName(node);
+			String typeName= ASTNodes.getSimpleNameIdentifier(node);
 			Name qualifier= null;
 			// only propose to create types for qualifiers when the name starts with upper case
 			boolean isPossibleName= Character.isUpperCase(typeName.charAt(0)) || (node == refNode);

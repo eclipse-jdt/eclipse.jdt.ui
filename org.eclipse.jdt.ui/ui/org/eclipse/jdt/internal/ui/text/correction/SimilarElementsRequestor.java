@@ -54,7 +54,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		int pos= name.getStartPosition();
 		int nArguments= -1;
 		
-		String identifier= ASTResolving.getSimpleName(name);
+		String identifier= ASTNodes.getSimpleNameIdentifier(name);
 		String returnType= null;
 		ICompilationUnit preparedCU= null;
 		

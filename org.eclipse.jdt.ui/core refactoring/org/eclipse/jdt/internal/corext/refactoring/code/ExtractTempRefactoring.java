@@ -207,7 +207,6 @@ public class ExtractTempRefactoring extends Refactoring {
 			break;
 		}
 		String[] proposals= StubUtility.getLocalNameSuggestions(fCu.getJavaProject(), methodName, 0, excludedVariableNames);
-		sortByLength(proposals);
 		return Arrays.asList(proposals);
 	}
 	
@@ -219,18 +218,9 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (typeName.length() == 0)			
 			return Collections.EMPTY_LIST;
 		String[] proposals= StubUtility.getLocalNameSuggestions(fCu.getJavaProject(), typeName, expressionBinding.getDimensions(), excluded);
-		sortByLength(proposals);
 		return Arrays.asList(proposals);
 	}
 	
-	private void sortByLength(String[] proposals) {
-		Arrays.sort(proposals, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return ((String) o2).length() - ((String) o1).length();
-			}
-		});
-	}
-
 	private String[] getExcludedVariableNames() throws JavaModelException {
 		IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES);
 		String[] names= new String[bindings.length];

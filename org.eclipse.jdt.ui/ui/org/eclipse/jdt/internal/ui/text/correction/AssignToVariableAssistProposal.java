@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -87,10 +88,13 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
-		String varName= suggestLocalVariableNames(fTypeBinding);
+		String[] varNames= suggestLocalVariableNames(fTypeBinding, expression);
+		for (int i= 0; i < varNames.length; i++) {
+			addLinkedPositionProposal(KEY_NAME, varNames[i], null);
+		}
 				
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
-		newDeclFrag.setName(ast.newSimpleName(varName));
+		newDeclFrag.setName(ast.newSimpleName(varNames[0]));
 		newDeclFrag.setInitializer((Expression) rewrite.createCopyTarget(expression));
 		
 		// trick for bug 43248: use an VariableDeclarationExpression and keep the ExpressionStatement
@@ -144,7 +148,12 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			modifiers |= Modifier.FINAL;
 		}
 		
-		String varName= suggestFieldNames(fTypeBinding, expression, modifiers);
+		String[] varNames= suggestFieldNames(fTypeBinding, expression, modifiers);
+		for (int i= 0; i < varNames.length; i++) {
+			addLinkedPositionProposal(KEY_NAME, varNames[i], null);
+		}
+		String varName= varNames[0];
+		
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 		newDeclFrag.setName(ast.newSimpleName(varName));
 				
@@ -210,64 +219,68 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		return ASTNodeFactory.newType(ast, typeName);
 	}
 	
-	private String suggestLocalVariableNames(ITypeBinding binding) {
+	private String[] suggestLocalVariableNames(ITypeBinding binding, Expression expression) {
+		ArrayList res= new ArrayList();
+		
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
 		IPackageBinding packBinding= base.getPackage();
 		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
 		
 		String[] excludedNames= getUsedVariableNames();
+		
+		String name= ASTResolving.getBaseNameFromExpression(project, expression);
+		if (name != null) {
+			String[] argname= StubUtility.getLocalNameSuggestions(project, name, binding.getDimensions(), excludedNames);
+			for (int i= 0; i < argname.length; i++) {
+				String curr= argname[i];
+				if (!res.contains(curr)) {
+					res.add(curr);
+				}
+			}
+		}
+		
 		String typeName= base.getName();
 		String[] names= NamingConventions.suggestLocalVariableNames(project, packName, typeName, binding.getDimensions(), excludedNames);
-		if (names.length == 0) {
-			return "class1"; // fix for pr, remoev after 20030127 //$NON-NLS-1$
-		}
 		for (int i= 0; i < names.length; i++) {
-			addLinkedPositionProposal(KEY_NAME, names[i], null);
+			String curr= names[i];
+			if (!res.contains(curr)) {
+				res.add(curr);
+			}
 		}
-		return names[0]; 
+		return (String[]) res.toArray(new String[res.size()]);
 	}
 	
-	private String suggestFieldNames(ITypeBinding binding, Expression expression, int modifiers) {
+	private String[] suggestFieldNames(ITypeBinding binding, Expression expression, int modifiers) {
+		ArrayList res= new ArrayList();
+		
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
 		IPackageBinding packBinding= base.getPackage();
 		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
 		
 		String[] excludedNames= getUsedVariableNames();
-		String result= null;
-		HashSet taken= new HashSet();
 		
-		if (expression instanceof SimpleName) {
-			String name= ((SimpleName) expression).getIdentifier();
-			// bug 38111
+		String name= ASTResolving.getBaseNameFromExpression(project, expression);
+		if (name != null) {
 			String[] argname= StubUtility.getFieldNameSuggestions(project, name, modifiers, excludedNames);
 			for (int i= 0; i < argname.length; i++) {
 				String curr= argname[i];
-				if (result == null || curr.length() > result.length()) {
-					result= curr;
+				if (!res.contains(curr)) {
+					res.add(curr);
 				}
-				if (taken.add(curr)) {
-					addLinkedPositionProposal(KEY_NAME, curr, null);
-				}
-			}			
+			}
 		}
 
 		String typeName= base.getName();
 		String[] names= NamingConventions.suggestFieldNames(project, packName, typeName, binding.getDimensions(), modifiers, excludedNames);
-		if (names.length == 0) {
-			return "class1"; // fix for pr, remoev after 20030127 //$NON-NLS-1$
-		}
 		for (int i= 0; i < names.length; i++) {
 			String curr= names[i];
-			if (taken.add(curr)) {
-				addLinkedPositionProposal(KEY_NAME, curr, null);
+			if (!res.contains(curr)) {
+				res.add(curr);
 			}
 		}
-		if (result == null) {
-			result= names[0];
-		}
-		return result;		
+		return (String[]) res.toArray(new String[res.size()]);	
 	}
 	
 	private String[] getUsedVariableNames() {

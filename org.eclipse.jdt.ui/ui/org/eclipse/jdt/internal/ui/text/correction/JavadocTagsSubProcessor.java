@@ -267,7 +267,7 @@ public class JavadocTagsSubProcessor {
 		List list= ((MethodDeclaration) javadoc.getParent()).thrownExceptions();
 		for (int i= 0; i < list.size() && node != list.get(i); i++) {
 			Name curr= (Name) list.get(i);
-			previousArgs.add(ASTResolving.getSimpleName(curr));
+			previousArgs.add(ASTNodes.getSimpleNameIdentifier(curr));
 		}
 		List tags= rewriter.getRewrittenList();
 		
@@ -346,7 +346,7 @@ public class JavadocTagsSubProcessor {
 		if (!fragments.isEmpty()) {
 			Object first= fragments.get(0);
 			if (first instanceof Name) {
-				return ASTResolving.getSimpleName((Name) first);
+				return ASTNodes.getSimpleNameIdentifier((Name) first);
 			}
 		}
 		return null;

@@ -43,6 +43,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -78,8 +79,8 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		fIsClass= isClass;
 		fTypeContainer= typeContainer;
 
-		String containerName= ASTResolving.getQualifier(node);
-		String typeName= ASTResolving.getSimpleName(node);
+		String containerName= ASTNodes.getQualifier(node);
+		String typeName= ASTNodes.getSimpleNameIdentifier(node);
 		boolean isInnerType= typeContainer instanceof IType;
 		if (isClass) {
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS));
@@ -167,7 +168,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	 * @param page the wizard page.
 	 */
 	private void fillInWizardPageName(NewTypeWizardPage page) {
-		page.setTypeName(ASTResolving.getSimpleName(fNode), false);
+		page.setTypeName(ASTNodes.getSimpleNameIdentifier(fNode), false);
 		
 		boolean isInEnclosingType= fTypeContainer instanceof IType;
 		if (isInEnclosingType) {
@@ -267,7 +268,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		} else {
 			buf.append("interface <b>"); //$NON-NLS-1$
 		}
-		buf.append(ASTResolving.getSimpleName(fNode));
+		buf.append(ASTNodes.getSimpleNameIdentifier(fNode));
 		
 		ITypeBinding superclass= getPossibleSuperTypeBinding(fNode);
 		if (superclass != null) {

@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class ASTNodes {
 
@@ -754,5 +755,20 @@ public class ASTNodes {
 				return true;
 			}
 		});
+	}
+
+	public static String getQualifier(Name name) {
+		if (name.isQualifiedName()) {
+			return ASTResolving.getFullName(((QualifiedName) name).getQualifier());
+		}
+		return ""; //$NON-NLS-1$
+	}
+
+	public static String getSimpleNameIdentifier(Name name) {
+		if (name.isQualifiedName()) {
+			return ((QualifiedName) name).getName().getIdentifier();
+		} else {
+			return ((SimpleName) name).getIdentifier();
+		}
 	}
 }

@@ -58,7 +58,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -245,10 +245,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("\n");
 		buf.append("    private int fCount;\n");
-		buf.append("    private SecurityManager fManager;\n");
+		buf.append("    private SecurityManager fSecurityManager;\n");
 		buf.append("\n");				
 		buf.append("    public void foo() {\n");
-		buf.append("        this.fManager = System.getSecurityManager();\n");
+		buf.append("        this.fSecurityManager = System.getSecurityManager();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -263,7 +263,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    private int fCount;\n");
 		buf.append("\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        SecurityManager _manager = System.getSecurityManager();\n");
+		buf.append("        SecurityManager _securityManager = System.getSecurityManager();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -367,10 +367,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("\n");
 		buf.append("    private int fCount;\n");
-		buf.append("    private static SecurityManager fgManager;\n");
+		buf.append("    private static SecurityManager fgSecurityManager;\n");
 		buf.append("\n");				
 		buf.append("    public static void foo() {\n");
-		buf.append("        E.fgManager = System.getSecurityManager();\n");
+		buf.append("        E.fgSecurityManager = System.getSecurityManager();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -385,7 +385,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    private int fCount;\n");
 		buf.append("\n");
 		buf.append("    public static void foo() {\n");
-		buf.append("        SecurityManager _manager = System.getSecurityManager();\n");
+		buf.append("        SecurityManager _securityManager = System.getSecurityManager();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
