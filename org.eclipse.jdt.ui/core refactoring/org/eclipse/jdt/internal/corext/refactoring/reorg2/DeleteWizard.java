@@ -57,6 +57,14 @@ public class DeleteWizard extends RefactoringWizard{
 		return 0;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#hasPreviewPage()
+	 */
+	public boolean hasPreviewPage() {
+		return false;
+	}
+
+	
 	private static class DeleteInputPage extends UserInputWizardPage{
 		private static final String PAGE_NAME= "DeleteInputPage"; //$NON-NLS-1$
 	

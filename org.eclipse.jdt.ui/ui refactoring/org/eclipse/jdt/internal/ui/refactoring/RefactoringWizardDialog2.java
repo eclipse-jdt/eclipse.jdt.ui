@@ -527,7 +527,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	}
 	
 	protected void createButtonsForButtonBar(Composite parent) {
-		if (! (fCurrentPage instanceof PreviewWizardPage)) {
+		if (! (fCurrentPage instanceof PreviewWizardPage) && fWizard.hasPreviewPage()) {
 			Button preview= createButton(parent, PREVIEW_ID, RefactoringMessages.getString("RefactoringWizardDialog2.buttons.preview.label"), false); //$NON-NLS-1$
 			preview.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {

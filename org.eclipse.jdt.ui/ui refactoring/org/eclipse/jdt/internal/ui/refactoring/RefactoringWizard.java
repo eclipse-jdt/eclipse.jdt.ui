@@ -127,6 +127,10 @@ public class RefactoringWizard extends Wizard {
 	public boolean hasUserInputPages(){
 		return fHasUserInputPages;		
 	}
+	
+	public boolean hasPreviewPage() {
+		return true;
+	}
 
 	/**
 	 * Sets the change object.
