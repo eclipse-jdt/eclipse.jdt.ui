@@ -298,7 +298,7 @@ public class Bindings {
 	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
 	 * exists. If the method is defined in more than one super type only the first match is 
-	 * returned. First the super class is exaimined and than the implemented interfaces.
+	 * returned. First the super class is examined and than the implemented interfaces.
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
