@@ -110,10 +110,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fTestContainerRadioButton.setLayoutData(gd);
 		fTestContainerRadioButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				if (fTestContainerRadioButton.getSelection()) {
+				if (fTestContainerRadioButton.getSelection())
 					testModeChanged();
-					fTestText.setText("");
-				}
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
@@ -166,11 +164,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fTestRadioButton.setLayoutData(gd); 
 		fTestRadioButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				if (fTestRadioButton.getSelection()) {
+				if (fTestRadioButton.getSelection())
 					testModeChanged();
-					fContainerText.setText("");
-					fContainerElement= null;
-				}
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
@@ -308,10 +303,15 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	 */
 	public void performApply(ILaunchConfigurationWorkingCopy config) {
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)fProjText.getText());
-		if (fTestContainerRadioButton.getSelection() && fContainerElement != null) 
+		if (fTestContainerRadioButton.getSelection() && fContainerElement != null) {
 			config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, fContainerElement.getHandleIdentifier());
-		else 
+			//bug 26293
+			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
+		} else {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)fTestText.getText());
+			//bug 26293
+			config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$			
+		}
 		config.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
 	}
 

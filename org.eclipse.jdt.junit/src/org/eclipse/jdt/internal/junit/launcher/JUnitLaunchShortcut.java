@@ -62,6 +62,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 
 	protected void searchAndLaunch(Object[] search, String mode) {
 		if (search != null) {
+			if (search.length == 0) {
+				MessageDialog.openInformation(getShell(), JUnitMessages.getString("LaunchTestAction.dialog.title"), JUnitMessages.getString("LaunchTestAction.message.notests")); //$NON-NLS-1$ //$NON-NLS-1$
+				return;
+			}	
 			if (search[0] instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement)search[0];
 				if (element.getElementType() < IJavaElement.COMPILATION_UNIT) {

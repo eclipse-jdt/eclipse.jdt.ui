@@ -224,8 +224,25 @@ class FailureTraceView implements IMenuListener {
 	}
 	
 	private boolean filterLine(String[] patterns, String line) {
-		for (int i= 0; i < patterns.length; i++) {
-			if (line.indexOf(patterns[i]) > 0)
+		String pattern;
+		int len;
+		for (int i= (patterns.length - 1); i >= 0; --i) {
+			pattern= patterns[i];
+			len= pattern.length() - 1;
+			if (pattern.charAt(len) == '*') {
+				//strip trailing * from a package filter
+				pattern= pattern.substring(0, len);
+			} else if (Character.isUpperCase(pattern.charAt(0))) {
+				//class in the default package
+				pattern= FRAME_PREFIX + pattern + '.';
+			} else {
+				//class names start w/ an uppercase letter after the .
+				final int lastDotIndex= pattern.lastIndexOf('.');
+				if ((lastDotIndex != -1) && (lastDotIndex != len) && Character.isUpperCase(pattern.charAt(lastDotIndex + 1)))
+					pattern += '.'; //append . to a class filter
+			}
+
+			if (line.indexOf(pattern) > 0)
 				return true;
 		}		
 		return false;

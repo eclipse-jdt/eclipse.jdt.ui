@@ -4,13 +4,20 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractSet;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
@@ -19,9 +26,16 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
@@ -31,6 +45,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
@@ -234,5 +249,64 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		}
 		return display;
 	}		
-	
+	/**
+	 * Utility method to create and return a selection dialog that allows
+	 * selection of a specific Java package.  Empty packages are not returned.
+	 * If Java Projects are provided, only packages found within those projects
+	 * are included.  If no Java projects are provided, all Java projects in the
+	 * workspace are considered.
+	 */
+	public static ElementListSelectionDialog createAllPackagesDialog(Shell shell,	IJavaProject[] originals, final boolean includeDefaultPackage) throws JavaModelException {
+		final List packageList= new ArrayList();
+		if (originals == null) {
+			IWorkspaceRoot wsroot= ResourcesPlugin.getWorkspace().getRoot();
+			IJavaModel model= JavaCore.create(wsroot);
+			originals= model.getJavaProjects();
+		}
+		final IJavaProject[] projects= originals;
+		final JavaModelException[] exception= new JavaModelException[1];
+		ProgressMonitorDialog monitor= new ProgressMonitorDialog(shell);
+		IRunnableWithProgress r= new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				try {
+					Set packageNameSet= new HashSet();
+					monitor.beginTask(JUnitMessages.getString("JUnitPlugin.searching"), projects.length); //$NON-NLS-1$
+					for (int i= 0; i < projects.length; i++) {
+						IPackageFragment[] pkgs= projects[i].getPackageFragments();
+						for (int j= 0; j < pkgs.length; j++) {
+							IPackageFragment pkg= pkgs[j];
+							if (!pkg.hasChildren() && (pkg.getNonJavaResources().length > 0))
+								continue;
+
+							String pkgName= pkg.getElementName();
+							if (!includeDefaultPackage && pkgName.length() == 0)
+								continue;
+
+							if (packageNameSet.add(pkgName))
+								packageList.add(pkg);
+						}
+						monitor.worked(1);
+					}
+					monitor.done();
+				} catch (JavaModelException jme) {
+					exception[0]= jme;
+				}
+			}
+		};
+		try {
+			monitor.run(false, false, r);
+		} catch (InvocationTargetException e) {
+			JUnitPlugin.log(e);
+		} catch (InterruptedException e) {
+			JUnitPlugin.log(e);
+		}
+		if (exception[0] != null)
+			throw exception[0];
+
+		int flags= JavaElementLabelProvider.SHOW_DEFAULT;
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
+		dialog.setIgnoreCase(false);
+		dialog.setElements(packageList.toArray()); // XXX inefficient
+		return dialog;
+	}	
 }

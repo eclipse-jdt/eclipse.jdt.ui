@@ -593,6 +593,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 					methodName.append(Integer.toString(suffix));
 				}
 				newMethodsNames.add(new String(methodName));
+				if (fPage2.getCreateFinalMethodStubsButtonSelection())
+					newMethod.append("final "); //$NON-NLS-1$
 				newMethod.append("public void "+methodName.toString()+"() {}\n\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				type.createMethod(newMethod.toString(), null, false, null);	
 			}
@@ -792,7 +794,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		if (pack != null) {
 			ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
 			if (cu.exists()) {
-					status.setError(WizardMessages.getString("NewTestClassWizPage.error.testcase.already_exists")); //$NON-NLS-1$
+					status.setError(WizardMessages.getFormattedString("NewTestClassWizPage.error.testcase.already_exists", typeName));//$NON-NLS-1$
 				return status;
 			}
 		}

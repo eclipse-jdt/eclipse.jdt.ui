@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -42,12 +42,13 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 
 	private final static String PAGE_NAME= "NewTestCaseCreationWizardPage2"; //$NON-NLS-1$
 	private final static String STORE_USE_TASKMARKER= PAGE_NAME + ".USE_TASKMARKER"; //$NON-NLS-1$
-
+	private final static String STORE_CREATE_FINAL_METHOD_STUBS= PAGE_NAME + ".CREATE_FINAL_METHOD_STUBS"; //$NON-NLS-1$
 	public final static String PREFIX= "test"; //$NON-NLS-1$
 
 	private NewTestCaseCreationWizardPage fFirstPage;	
 	private IType fClassToTest;
 
+	private Button fCreateFinalMethodStubsButton;
 	private Button fCreateTasksButton;
 	private ContainerCheckedTreeViewer fMethodsTree;
 	private Button fSelectAllButton;
@@ -75,12 +76,38 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 
 		createMethodsTreeControls(container);
 		createSpacer(container);
+		createFinalMethodStubsControls(container);
 		createTasksControls(container);
 		setControl(container);
 		restoreWidgetValues();
 		WorkbenchHelp.setHelp(container, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE2);	
 	}
 
+	protected void createFinalMethodStubsControls(Composite container) {
+		GridLayout layout;
+		GridData gd;
+		Composite prefixContainer= new Composite(container, SWT.NONE);
+		gd= new GridData();
+		gd.horizontalAlignment = GridData.FILL;
+		gd.horizontalSpan = 2;
+		prefixContainer.setLayoutData(gd);
+		
+		layout = new GridLayout();
+		layout.numColumns = 2;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		prefixContainer.setLayout(layout);
+		
+		fCreateFinalMethodStubsButton= new Button(prefixContainer, SWT.CHECK | SWT.LEFT);
+		fCreateFinalMethodStubsButton.setText(WizardMessages.getString("NewTestClassWizPage2.create_final_method_stubs.text")); //$NON-NLS-1$
+		fCreateFinalMethodStubsButton.setEnabled(true);
+		fCreateFinalMethodStubsButton.setSelection(true);
+		gd= new GridData();
+		gd.horizontalAlignment= GridData.FILL;
+		gd.horizontalSpan= 2;
+		fCreateFinalMethodStubsButton.setLayoutData(gd);
+	}
+	
 	protected void createTasksControls(Composite container) {
 		GridLayout layout;
 		GridData gd;
@@ -119,7 +146,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		gd.heightHint= 180;
 		fMethodsTree.getTree().setLayoutData(gd);
 
-		fMethodsTree.setLabelProvider(new JavaElementLabelProvider());
+		fMethodsTree.setLabelProvider(new AppearanceAwareLabelProvider());
 		fMethodsTree.setAutoExpandLevel(2);			
 		fMethodsTree.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
@@ -342,12 +369,19 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	}
 
 	/**
-	 * Returns true iff the checkbox for creating tasks is checked.
+	 * Returns true if the checkbox for creating tasks is checked.
 	 */
 	public boolean getCreateTasksButtonSelection() {
 		return fCreateTasksButton.getSelection();
 	}
-	
+
+	/**
+	 * Returns true if the checkbox for final method stubs is checked.
+	 */
+	public boolean getCreateFinalMethodStubsButtonSelection() {
+		return fCreateFinalMethodStubsButton.getSelection();
+	}
+		
 	private void updateSelectedMethodsLabel() {
 		Object[] checked= fMethodsTree.getCheckedElements();
 		int checkedMethodCount= 0;
@@ -382,10 +416,10 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	 *	last time this wizard was used to completion
 	 */
 	private void restoreWidgetValues() {
-		
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
 			fCreateTasksButton.setSelection(settings.getBoolean(STORE_USE_TASKMARKER));
+			fCreateFinalMethodStubsButton.setSelection(settings.getBoolean(STORE_CREATE_FINAL_METHOD_STUBS));
 		}		
 	}	
 
@@ -397,7 +431,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
 			settings.put(STORE_USE_TASKMARKER, fCreateTasksButton.getSelection());
+			settings.put(STORE_CREATE_FINAL_METHOD_STUBS, fCreateFinalMethodStubsButton.getSelection());
 		}
 	}
-
 }
