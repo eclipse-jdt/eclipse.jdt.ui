@@ -108,7 +108,7 @@ public class TextPerformanceTestCase extends TestCase {
 				((PerformanceMeter) iter.next()).dispose();
 
 		if (DEBUG)
-			System.out.println("    teared down: " + System.currentTimeMillis());
+			System.out.println("    torn down: " + System.currentTimeMillis());
 	}
 	
 	/**
