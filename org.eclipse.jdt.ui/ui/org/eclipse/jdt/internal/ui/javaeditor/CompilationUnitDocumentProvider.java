@@ -653,7 +653,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			}
 			
 			private Object getAnnotations(Position position) {
-				return fReverseMap.get(position);
+				synchronized (getLockObject()) {
+					return fReverseMap.get(position);
+				}
 			}
 						
 			/*
@@ -662,17 +664,19 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged) throws BadLocationException {				
 				super.addAnnotation(annotation, position, fireModelChanged);
 
-				Object cached= fReverseMap.get(position);
-				if (cached == null)
-					fReverseMap.put(position, annotation);
-				else if (cached instanceof List) {
-					List list= (List) cached;
-					list.add(annotation);
-				} else if (cached instanceof Annotation) {
-					List list= new ArrayList(2);
-					list.add(cached);
-					list.add(annotation);
-					fReverseMap.put(position, list);
+				synchronized (getLockObject()) {
+					Object cached= fReverseMap.get(position);
+					if (cached == null)
+						fReverseMap.put(position, annotation);
+					else if (cached instanceof List) {
+						List list= (List) cached;
+						list.add(annotation);
+					} else if (cached instanceof Annotation) {
+						List list= new ArrayList(2);
+						list.add(cached);
+						list.add(annotation);
+						fReverseMap.put(position, list);
+					}
 				}
 			}
 			
@@ -681,7 +685,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 */
 			protected void removeAllAnnotations(boolean fireModelChanged) {
 				super.removeAllAnnotations(fireModelChanged);
-				fReverseMap.clear();
+				synchronized (getLockObject()) {
+					fReverseMap.clear();
+				}
 			}
 			
 			/*
@@ -689,16 +695,18 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 */
 			protected void removeAnnotation(Annotation annotation, boolean fireModelChanged) {
 				Position position= getPosition(annotation);
-				Object cached= fReverseMap.get(position);
-				if (cached instanceof List) {
-					List list= (List) cached;
-					list.remove(annotation);
-					if (list.size() == 1) {
-						fReverseMap.put(position, list.get(0));
-						list.clear();
+				synchronized (getLockObject()) {
+					Object cached= fReverseMap.get(position);
+					if (cached instanceof List) {
+						List list= (List) cached;
+						list.remove(annotation);
+						if (list.size() == 1) {
+							fReverseMap.put(position, list.get(0));
+							list.clear();
+						}
+					} else if (cached instanceof Annotation) {
+						fReverseMap.remove(position);
 					}
-				} else if (cached instanceof Annotation) {
-					fReverseMap.remove(position);
 				}
 				super.removeAnnotation(annotation, fireModelChanged);
 			}

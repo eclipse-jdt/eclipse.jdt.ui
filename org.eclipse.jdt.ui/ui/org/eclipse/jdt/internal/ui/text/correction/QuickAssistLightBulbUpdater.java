@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 import org.eclipse.swt.SWT;
@@ -254,14 +255,22 @@ public class QuickAssistLightBulbUpdater {
 				return false;
 			}
 			
+			// we access a document and annotation model from within a job
+			// since these are only read accesses, we won't hurt anyone else if
+			// this goes boink
+			
+			// may throw an IndexOutOfBoundsException upon concurrent document modification
 			int currLine= document.getLineOfOffset(offset);
 			
+			// this iterator is not protected, it may throw ConcurrentModificationExceptions
 			Iterator iter= model.getAnnotationIterator();
 			while (iter.hasNext()) {
 				Annotation annot= (Annotation) iter.next();
 				if (JavaCorrectionProcessor.isQuickFixableType(annot)) {
+					// may throw an IndexOutOfBoundsException upon concurrent annotation model changes
 					Position pos= model.getPosition(annot);
 					if (pos != null) {
+						// may throw an IndexOutOfBoundsException upon concurrent document modification
 						int startLine= document.getLineOfOffset(pos.getOffset());
 						if (startLine == currLine && JavaCorrectionProcessor.hasCorrections(annot)) {
 							return true;
@@ -271,6 +280,10 @@ public class QuickAssistLightBulbUpdater {
 			}
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
+		} catch (IndexOutOfBoundsException e) {
+			// concurrent modification - too bad, ignore
+		} catch (ConcurrentModificationException e) {
+			// concurrent modification - too bad, ignore
 		}
 		return false;
 	}
