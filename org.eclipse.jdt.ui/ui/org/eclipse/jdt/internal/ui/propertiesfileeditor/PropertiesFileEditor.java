@@ -121,4 +121,11 @@ public class PropertiesFileEditor extends TextEditor {
 			getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(null);
 		}
 	}
+	
+	/* 
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#getSourceViewer()
+	 */
+	ISourceViewer internalGetSourceViewer() {
+		return getSourceViewer();
+	}
 }

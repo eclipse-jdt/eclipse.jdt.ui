@@ -15,6 +15,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
+import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
@@ -23,6 +24,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -222,5 +224,26 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			fCommentScanner.adaptToPreferenceChange(event);
 		if (fPropertyValueScanner.affectsBehavior(event))
 			fPropertyValueScanner.adaptToPreferenceChange(event);
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkDetectors(org.eclipse.jface.text.source.ISourceViewer)
+	 */
+	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
+		if (!fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINKS_ENABLED))
+			return null;
+		
+		IHyperlinkDetector[] inheritedDetectors= super.getHyperlinkDetectors(sourceViewer);
+		
+		if (fTextEditor == null)
+			return inheritedDetectors;
+		
+		int inheritedDetectorsLength= inheritedDetectors != null ? inheritedDetectors.length : 0;
+		IHyperlinkDetector[] detectors= new IHyperlinkDetector[inheritedDetectorsLength + 2];
+		detectors[0]= new PropertiesKeyHyperlinkDetector(fTextEditor);
+		for (int i= 0; i < inheritedDetectorsLength; i++)
+			detectors[i+1]= inheritedDetectors[i];
+		
+		return detectors;
 	}
 }
