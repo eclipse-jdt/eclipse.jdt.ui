@@ -191,6 +191,18 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performArgumentTest();
 	}
 	
+	public void testOneRead() throws Exception {
+		performArgumentTest();
+	}
+	
+	public void testTwoReads() throws Exception {
+		performArgumentTest();
+	}
+	
+	public void testWrite() throws Exception {
+		performArgumentTest();
+	}
+	
 	/************************ Name Conflict Tests ********************************/
 		
 	private void performNameConflictTest() throws Exception {

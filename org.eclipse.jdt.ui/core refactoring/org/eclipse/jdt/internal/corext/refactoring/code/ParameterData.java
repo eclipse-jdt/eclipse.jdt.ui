@@ -73,4 +73,10 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 	public boolean isWrite() {
 		return (fAccessMode & (FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN)) != 0;
 	}
+	
+	public boolean needsEvaluation() {
+		if (fReferences.size() <= 1)
+			return false;
+		return true;
+	}
 }

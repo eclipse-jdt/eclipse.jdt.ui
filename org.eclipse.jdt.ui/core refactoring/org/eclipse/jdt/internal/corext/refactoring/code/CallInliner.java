@@ -319,7 +319,11 @@ public class CallInliner {
 	private boolean canInline(Expression actualParameter, ParameterData formalParameter) {
 		if (canInline(actualParameter))
 			return true;
-		return formalParameter.isReadOnly() && ASTNodes.isLiteral(actualParameter);
+		if (ASTNodes.isLiteral(actualParameter) && formalParameter.isReadOnly())
+			return true;
+		if (formalParameter.isWrite())
+			return false;
+		return !formalParameter.needsEvaluation();
 	}
 	
 	private boolean canInline(Expression expression) {
