@@ -67,6 +67,7 @@ public interface IJavaHelpContextIds {
 	public static final String EXTRACT_TEMP_ACTION= 											PREFIX + "extract_temp_action"; //$NON-NLS-1$	
 	public static final String EXTRACT_INTERFACE_ACTION= 									PREFIX + "extract_interface_action"; //$NON-NLS-1$	
 	public static final String MOVE_INNER_TO_TOP_ACTION= 									PREFIX + "move_inner_to_top_level_action"; //$NON-NLS-1$
+	public static final String USE_SUPERTYPE_ACTION= 										PREFIX + "use_supertype_action"; //$NON-NLS-1$
 	public static final String FIND_DECLARATIONS_IN_HIERARCHY_ACTION= 				PREFIX + "find_declarations_in_hierarchy_action"; //$NON-NLS-1$	
 	public static final String FIND_DECLARATIONS_IN_WORKING_SET_ACTION= 			PREFIX + "find_declarations_in_working_set_action"; //$NON-NLS-1$	
 	public static final String FIND_IMPLEMENTORS_IN_WORKING_SET_ACTION= 			PREFIX + "find_implementors_in_working_set_action"; //$NON-NLS-1$			
@@ -212,6 +213,8 @@ public interface IJavaHelpContextIds {
 	public static final String RENAME_FIELD_ERROR_WIZARD_PAGE= 				PREFIX + "rename_field_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String SEF_WIZARD_PAGE= 										PREFIX + "self_encapsulate_field_wizard_page_context"; //$NON-NLS-1$
 	public static final String SEF_ERROR_WIZARD_PAGE= 								PREFIX + "self_encapsulate_field_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String USE_SUPERTYPE_WIZARD_PAGE= 						PREFIX + "use_supertype_wizard_page_context"; //$NON-NLS-1$
+	public static final String USE_SUPERTYPE_ERROR_WIZARD_PAGE= 				PREFIX + "use_supertype_error_wizard_page_context"; //$NON-NLS-1$
 	// reused ui-blocks
 	public static final String BUILD_PATH_BLOCK= PREFIX + "build_paths_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_BLOCK= PREFIX + "source_attachment_context"; //$NON-NLS-1$
