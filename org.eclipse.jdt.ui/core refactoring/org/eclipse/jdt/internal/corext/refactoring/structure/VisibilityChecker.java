@@ -24,7 +24,7 @@ class VisibilityChecker {
 			return false;
 		if (JdtFlags.isPublic(member))
 			return true;
-		boolean samePackage= isInSamePackage(member, accessingNode, nodeCu);	
+		boolean samePackage= isInSamePackage(member, nodeCu);	
 		if (JdtFlags.isProtected(member))
 			return samePackage || isInSubtype(member, accessingNode, nodeCu.getJavaProject());
 		if (JdtFlags.isPackageVisible(member))	
@@ -32,15 +32,15 @@ class VisibilityChecker {
 		return isInSameType(member, accessingNode, nodeCu.getJavaProject());	
 	}
 	
-	private static boolean isInSamePackage(IMember member, ASTNode accessingNode, ICompilationUnit nodeCu){
-		return getPackage(member).equals(getPackage(accessingNode, nodeCu));
+	private static boolean isInSamePackage(IMember member, ICompilationUnit nodeCu){
+		return getPackage(member).equals(getPackage(nodeCu));
 	}
 	
 	private static IPackageFragment getPackage(IMember member){
 		return (IPackageFragment)member.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 	}
 	
-	private static IPackageFragment getPackage(ASTNode node, ICompilationUnit cu){
+	private static IPackageFragment getPackage(ICompilationUnit cu){
 		return (IPackageFragment)cu.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 	}
 	

@@ -23,7 +23,7 @@ public class CodeRefactoringUtil {
 
     private CodeRefactoringUtil() {}
 
-    public static RefactoringStatus checkMethodSyntaxErrors(int selectionStart, int selectionLength, CompilationUnit cuNode, ICompilationUnit cu, String invalidSelectionMessage){
+    public static RefactoringStatus checkMethodSyntaxErrors(int selectionStart, int selectionLength, CompilationUnit cuNode, String invalidSelectionMessage){
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(selectionStart, selectionLength), true);
 		cuNode.accept(analyzer);
 		ASTNode coveringNode= analyzer.getLastCoveringNode();

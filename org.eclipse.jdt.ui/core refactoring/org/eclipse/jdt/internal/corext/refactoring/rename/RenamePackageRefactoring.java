@@ -205,7 +205,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		try{
-			pm.beginTask("", 17); //$NON-NLS-1$
+			pm.beginTask("", 14); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkNewName(fNewName));
@@ -233,7 +233,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching"));	 //$NON-NLS-1$
 			fOccurrences= getReferences(new SubProgressMonitor(pm, 6));	
 			pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
-			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 3)));
+			result.merge(analyzeAffectedCompilationUnits());
 			result.merge(checkPackageName(fNewName));
 			pm.worked(1);
 			if (result.hasFatalError())
@@ -316,7 +316,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		return new RefactoringStatus();
 	}
 		
-	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
+	private RefactoringStatus analyzeAffectedCompilationUnits() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
 		if (result.hasFatalError())

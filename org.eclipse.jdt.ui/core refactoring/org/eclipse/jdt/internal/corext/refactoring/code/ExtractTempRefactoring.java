@@ -168,7 +168,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			
 			if (selectedExpression == null){
 				String message= RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression");//$NON-NLS-1$
-				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, fCu, message);
+				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
 			}	
 			pm.worked(1);
 			

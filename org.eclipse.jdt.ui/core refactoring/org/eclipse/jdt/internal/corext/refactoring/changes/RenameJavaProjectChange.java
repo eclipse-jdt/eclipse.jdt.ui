@@ -119,7 +119,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		IClasspathEntry[] newEntries= new IClasspathEntry[oldEntries.length];
 		for (int i= 0; i < newEntries.length; i++) {
 			if (isOurEntry(oldEntries[i]))
-				newEntries[i]= createModifiedEntry(oldEntries[i]);
+				newEntries[i]= createModifiedEntry();
 			else
 				newEntries[i]= oldEntries[i];	
 		}
@@ -135,7 +135,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		return true;	
 	}
 	
-	private IClasspathEntry createModifiedEntry(IClasspathEntry cpe){
+	private IClasspathEntry createModifiedEntry(){
 		return JavaCore.newProjectEntry(createNewPath());
 	}
 	

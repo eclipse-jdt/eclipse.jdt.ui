@@ -201,7 +201,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		try{
 			RefactoringStatus result= new RefactoringStatus();
-			pm.beginTask("", 6); //$NON-NLS-1$
+			pm.beginTask("", 4); //$NON-NLS-1$
 			result.merge(Checks.checkIfCuBroken(fMethod));
 			if (result.hasFatalError())
 				return result;
@@ -219,9 +219,8 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 				pm.worked(1);
 			
 			if (fUpdateReferences)
-				result.merge(analyzeCompilationUnits(new SubProgressMonitor(pm, 3)));	
-			else
-				pm.worked(3);
+				result.merge(analyzeCompilationUnits());	
+			pm.worked(1);
 			
 			if (result.hasFatalError())
 				return result;
@@ -322,7 +321,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
-	private RefactoringStatus analyzeCompilationUnits(IProgressMonitor pm) throws JavaModelException{
+	private RefactoringStatus analyzeCompilationUnits() throws JavaModelException{
 		if (fOccurrences.length == 0)
 			return null;
 			

@@ -88,7 +88,7 @@ class MoveCuUpdateCreator {
 		try{
 			TextChangeManager changeManager= new TextChangeManager();
 			addUpdates(changeManager, new SubProgressMonitor(pm, 1));
-			addImportsToDestinationPackage(changeManager, new SubProgressMonitor(pm, 1));
+			addImportsToDestinationPackage(new SubProgressMonitor(pm, 1));
 			
 			for (Iterator iter= fImportEdits.keySet().iterator(); iter.hasNext();) {
 				ICompilationUnit cu= (ICompilationUnit)iter.next();
@@ -120,8 +120,8 @@ class MoveCuUpdateCreator {
 			pm.beginTask("", 3);  //$NON-NLS-1$
 		  	pm.subTask(RefactoringCoreMessages.getString("MoveCuUpdateCreator.searching") + movedUnit.getElementName()); //$NON-NLS-1$
 		  	
-		  	addImportToSourcePackageTypes(changeManager, movedUnit, new SubProgressMonitor(pm, 1));
-			removedImportsToDestinationPackageTypes(changeManager, movedUnit, new SubProgressMonitor(pm, 1));
+		  	addImportToSourcePackageTypes(movedUnit, new SubProgressMonitor(pm, 1));
+			removedImportsToDestinationPackageTypes(movedUnit);
 			addReferenceUpdates(changeManager, movedUnit, new SubProgressMonitor(pm, 1));
 		} finally{
 			pm.done();
@@ -151,7 +151,7 @@ class MoveCuUpdateCreator {
 		}
 	}
 	
-	private void removedImportsToDestinationPackageTypes(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException{
+	private void removedImportsToDestinationPackageTypes(ICompilationUnit movedUnit) throws JavaModelException{
 		ImportEdit importEdit= getImportEdit(movedUnit);
 		IType[] destinationTypes= getDestinationPackageTypes();
 		for (int i= 0; i < destinationTypes.length; i++) {
@@ -168,7 +168,7 @@ class MoveCuUpdateCreator {
 		return (IType[]) types.toArray(new IType[types.size()]);
 	}
 	
-	private void addImportToSourcePackageTypes(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException{
+	private void addImportToSourcePackageTypes(ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException{
 		List cuList= Arrays.asList(fCus);
 		IType[] allCuTypes= movedUnit.getAllTypes();
 		IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(allCuTypes, pm);
@@ -187,7 +187,7 @@ class MoveCuUpdateCreator {
 		}
 	}
 	
-	private void addImportsToDestinationPackage(TextChangeManager changeManager, IProgressMonitor pm) throws CoreException{
+	private void addImportsToDestinationPackage(IProgressMonitor pm) throws CoreException{
 		pm.beginTask("", fCus.length); //$NON-NLS-1$
 		ICompilationUnit[] cusThatNeedIt= collectCusThatWillImportDestinationPackage(pm);
 		for (int i= 0; i < cusThatNeedIt.length; i++) {
@@ -195,12 +195,12 @@ class MoveCuUpdateCreator {
 				throw new OperationCanceledException();
 			
 			ICompilationUnit iCompilationUnit= cusThatNeedIt[i];
-			addImport(false, changeManager, fDestination, iCompilationUnit);
+			addImport(false, fDestination, iCompilationUnit);
 			pm.worked(1);
 		}
 	}
 	
-	private boolean addImport(boolean force, TextChangeManager changeManager, IPackageFragment pack, ICompilationUnit cu) throws JavaModelException {		
+	private boolean addImport(boolean force, IPackageFragment pack, ICompilationUnit cu) throws JavaModelException {		
 		if (cu.getImport(pack.getElementName() + ".*").exists())  //$NON-NLS-1$
 			return false;
 

@@ -373,7 +373,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 			if (selectedExpression == null) {
 				String message= RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"); //$NON-NLS-1$
-				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, fCu, message);
+				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
 			}
 			pm.worked(1);
 

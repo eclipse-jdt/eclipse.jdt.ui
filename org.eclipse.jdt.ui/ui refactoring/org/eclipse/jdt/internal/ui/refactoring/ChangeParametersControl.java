@@ -311,7 +311,7 @@ public class ChangeParametersControl extends Composite {
 					ParameterInfo parameterInfo= selected[0];
 					String key= RefactoringMessages.getString("ChangeParametersControl.inputdialog.message"); //$NON-NLS-1$
 					String message= MessageFormat.format(key, new String[] { parameterInfo.getOldName()});
-					IInputValidator validator= createParameterNameValidator(parameterInfo.getOldName());
+					IInputValidator validator= createParameterNameValidator();
 					InputDialog dialog= new InputDialog(getShell(), RefactoringMessages.getString("ChangeParametersControl.inputDialog.title"), message, parameterInfo.getNewName(), validator); //$NON-NLS-1$
 					if (dialog.open() == InputDialog.CANCEL) {
 						fTableViewer.setSelection(selection);
@@ -407,7 +407,7 @@ public class ChangeParametersControl extends Composite {
 
 	//---- editing -----------------------------------------------------------------------------------------------
 
-	private static IInputValidator createParameterNameValidator(final String oldName){
+	private static IInputValidator createParameterNameValidator(){
 		return new IInputValidator(){
 	        public String isValid(String newText) {
 	        	if (newText.equals("")) //$NON-NLS-1$

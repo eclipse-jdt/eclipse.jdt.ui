@@ -97,7 +97,7 @@ public class RefactoringSearchEngine {
 	
 	public static SearchResultGroup[] search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern, ICompilationUnit[] workingCopies) throws JavaModelException {
 		SearchResultCollector collector= new SearchResultCollector(pm);
-		search(pm, scope, pattern, collector, workingCopies);	
+		search(scope, pattern, collector, workingCopies);	
 		Map grouped= groupByResource(collector.getResults());
 		
 		SearchResultGroup[] result= new SearchResultGroup[grouped.keySet().size()];
@@ -126,7 +126,7 @@ public class RefactoringSearchEngine {
 		return grouped;
 	}
 	
-	private static void search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern, IJavaSearchResultCollector collector, ICompilationUnit[] workingCopies) throws JavaModelException {
+	private static void search(IJavaSearchScope scope, ISearchPattern pattern, IJavaSearchResultCollector collector, ICompilationUnit[] workingCopies) throws JavaModelException {
 		if (pattern == null)
 			return;
 		Assert.isNotNull(scope, "scope"); //$NON-NLS-1$

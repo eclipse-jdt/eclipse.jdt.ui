@@ -591,14 +591,17 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 		if (! isVisibilitySameAsInitial())
 			addVisibilityChanges(new SubProgressMonitor(pm, 1));
-
-		if (! areNamesSameAsInitial())
-			addRenamings(new SubProgressMonitor(pm, 1));
-		else
+		else	
 			pm.worked(1);	
+		
+		if (! areNamesSameAsInitial())
+			addRenamings();
+		pm.worked(1);	
 
-		addReorderings(new SubProgressMonitor(pm, 1));
-		addNewParameters(new SubProgressMonitor(pm, 1));
+		addReorderings();
+		pm.worked(1);	
+		addNewParameters();
+		pm.worked(1);	
 
 
 		TextChangeManager manager= new TextChangeManager();
@@ -694,7 +697,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return ASTNodeSearchUtil.findOccurrenceNodes(fRippleMethods, fAstManager, pm, createRefactoringScope());
 	}
 	
-	private void addRenamings(IProgressMonitor pm) throws JavaModelException {
+	private void addRenamings() throws JavaModelException {
 		MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fAstManager);
 		ParameterInfo[] infos= getRenamedParameterNames();
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fMethod.getCompilationUnit());
@@ -715,7 +718,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 	
-	private void addReorderings(IProgressMonitor pm) throws JavaModelException {
+	private void addReorderings() throws JavaModelException {
 		if (fOccurrenceNodes == null)
 			return;
 		int[] permutation= getPermutation();
@@ -750,7 +753,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}	
 	}
 	
-	private void addNewParameters(IProgressMonitor pm) throws CoreException {
+	private void addNewParameters() throws CoreException {
 		int i= 0;
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= (ParameterInfo) iter.next();

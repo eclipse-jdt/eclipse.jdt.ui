@@ -67,7 +67,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 		IClasspathEntry[] newEntries= new IClasspathEntry[oldEntries.length];
 		for (int i= 0; i < newEntries.length; i++) {
 			if (isOurEntry(oldEntries[i]))
-				newEntries[i]= createModifiedEntry(oldEntries[i]);
+				newEntries[i]= createModifiedEntry();
 			else
 				newEntries[i]= oldEntries[i];	
 		}
@@ -82,7 +82,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 		return true;	
 	}
 	
-	private IClasspathEntry createModifiedEntry(IClasspathEntry cpe){
+	private IClasspathEntry createModifiedEntry(){
 		IPath path= getJavaProject().getProject().getFullPath().append(getNewName());
 		return JavaCore.newSourceEntry(path);
 	}
