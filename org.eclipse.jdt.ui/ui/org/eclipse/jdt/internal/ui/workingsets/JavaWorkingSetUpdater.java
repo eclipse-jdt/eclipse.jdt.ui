@@ -72,8 +72,10 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	 * {@inheritDoc}
 	 */
 	public void add(IWorkingSet workingSet) {
-		checkElementExistence(workingSet);
-		fWorkingSets.add(workingSet);
+		synchronized (fWorkingSets) {
+			checkElementExistence(workingSet);
+			fWorkingSets.add(workingSet);
+		}
 		if (fListener == null) {
 			fListener= this;
 			JavaCore.addElementChangedListener(fListener);
@@ -84,7 +86,10 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	 * {@inheritDoc}
 	 */
 	public boolean remove(IWorkingSet workingSet) {
-		boolean result= fWorkingSets.remove(workingSet);
+		boolean result= false;
+		synchronized(fWorkingSets) {
+			result= fWorkingSets.remove(workingSet);
+		}
 		if (fWorkingSets.size() == 0) {
 			JavaCore.removeElementChangedListener(fListener);
 			fListener= null;
@@ -113,16 +118,18 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	 * {@inheritDoc}
 	 */
 	public void elementChanged(ElementChangedEvent event) {
-		for (Iterator iter= fWorkingSets.iterator(); iter.hasNext();) {
-			WorkingSetDelta workingSetDelta= new WorkingSetDelta((IWorkingSet)iter.next());
-			processJavaDelta(workingSetDelta, event.getDelta());
-			IResourceDelta[] resourceDeltas= event.getDelta().getResourceDeltas();
-			if (resourceDeltas != null) {
-				for (int i= 0; i < resourceDeltas.length; i++) {
-					processResourceDelta(workingSetDelta, resourceDeltas[i]);
+		synchronized(fWorkingSets) {
+			for (Iterator iter= fWorkingSets.iterator(); iter.hasNext();) {
+				WorkingSetDelta workingSetDelta= new WorkingSetDelta((IWorkingSet)iter.next());
+				processJavaDelta(workingSetDelta, event.getDelta());
+				IResourceDelta[] resourceDeltas= event.getDelta().getResourceDeltas();
+				if (resourceDeltas != null) {
+					for (int i= 0; i < resourceDeltas.length; i++) {
+						processResourceDelta(workingSetDelta, resourceDeltas[i]);
+					}
 				}
+				workingSetDelta.process();
 			}
-			workingSetDelta.process();
 		}
 	}
 
