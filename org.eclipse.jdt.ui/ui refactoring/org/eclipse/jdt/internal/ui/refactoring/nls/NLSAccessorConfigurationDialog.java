@@ -102,7 +102,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		fAccessorClassName= createStringButtonField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.className"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse6"), createAccessorFileBrowseAdapter()); //$NON-NLS-1$
 		fSubstitutionPattern= createStringField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.substitutionPattern")); //$NON-NLS-1$
-
+		fSubstitutionPattern.setDialogFieldListener(updateListener);
+		
 		fResourceBundlePackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.path"), //$NON-NLS-1$ 
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.package"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse3"), //$NON-NLS-1$
@@ -391,11 +392,16 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 	private void setValid(Object field) {
 		fErrorMap.remove(field);
+		updateErrorMessage();
 	}
 
 	private void updateErrorMessage() {
-		String msg= (String) fErrorMap.peek();
-		updateStatus(new StatusInfo(IStatus.ERROR, msg));
+		if (fErrorMap.isEmpty()) {
+			updateStatus(StatusInfo.OK_STATUS);
+		} else {
+			String msg= (String) fErrorMap.peek();
+			updateStatus(new StatusInfo(IStatus.ERROR, msg));
+		}
 	}
 
 

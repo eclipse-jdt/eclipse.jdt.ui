@@ -35,4 +35,8 @@ public class OrderedMap {
 		if (value != null)
 			fStack.remove(value);
 	}
+	
+	public boolean isEmpty() {
+		return fStack.isEmpty() && fMap.isEmpty();
+	}
 }
