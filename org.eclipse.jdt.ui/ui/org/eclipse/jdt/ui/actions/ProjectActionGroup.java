@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
@@ -67,7 +68,9 @@ public class ProjectActionGroup extends ActionGroup {
 		}
 		provider.addSelectionChangedListener(fOpenAction);
 		provider.addSelectionChangedListener(fCloseAction);
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(fOpenAction);
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		workspace.addResourceChangeListener(fOpenAction);
+		workspace.addResourceChangeListener(fCloseAction);
 	}
 	
 	/* (non-Javadoc)
@@ -98,7 +101,9 @@ public class ProjectActionGroup extends ActionGroup {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		provider.removeSelectionChangedListener(fOpenAction);
 		provider.removeSelectionChangedListener(fCloseAction);
-		ResourcesPlugin.getWorkspace().removeResourceChangeListener(fOpenAction);
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		workspace.removeResourceChangeListener(fOpenAction);
+		workspace.removeResourceChangeListener(fCloseAction);
 		super.dispose();
 	}
 }
