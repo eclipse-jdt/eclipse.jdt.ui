@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -40,8 +39,10 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 	
 	
-	public static List evaluateProposals(IType type, String prefix, int offset, int length) throws CoreException {
-		ArrayList result= new ArrayList();
+	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Collection result) throws CoreException {
+		if (prefix.length() == 0) {
+			relevance--;
+		}
 		
 		IField[] fields= type.getFields();
 		IMethod[] methods= type.getMethods();
@@ -49,15 +50,14 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 			IField curr= fields[i];
 			String getterName= GetterSetterUtil.getGetterName(curr, null);
 			if (getterName.startsWith(prefix) && !hasMethod(methods, getterName)) {
-				result.add(new GetterSetterCompletionProposal(curr, offset, length, true));
+				result.add(new GetterSetterCompletionProposal(curr, offset, length, true, relevance));
 			}
 				
 			String setterName= GetterSetterUtil.getSetterName(curr, null);
 			if (setterName.startsWith(prefix) && !hasMethod(methods, setterName)) {
-				result.add(new GetterSetterCompletionProposal(curr, offset, length, false));
+				result.add(new GetterSetterCompletionProposal(curr, offset, length, false, relevance));
 			}
 		}
-		return result;
 	}
 	
 	private static boolean hasMethod(IMethod[] methods, String name) {
@@ -69,13 +69,11 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 		return false;
 	}
 	
-	
-	
 	private final IField fField;
 	private final boolean fIsGetter;
 
-	public GetterSetterCompletionProposal(IField field, int start, int length, boolean isGetter) throws JavaModelException {
-		super("", field.getCompilationUnit(), start, length, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC), getDisplayName(field, isGetter), 0); //$NON-NLS-1$
+	public GetterSetterCompletionProposal(IField field, int start, int length, boolean isGetter, int relevance) throws JavaModelException {
+		super("", field.getCompilationUnit(), start, length, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC), getDisplayName(field, isGetter), relevance); //$NON-NLS-1$
 		Assert.isNotNull(field);
 		
 		fField= field;
@@ -89,10 +87,15 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 			buf.append(GetterSetterUtil.getGetterName(field, null));
 			buf.append("()  "); //$NON-NLS-1$
 			buf.append(Signature.toString(field.getTypeSignature()));
+			buf.append(" - "); //$NON-NLS-1$
+			buf.append(JavaTextMessages.getFormattedString("GetterSetterCompletionProposal.getter.label", field.getElementName())); //$NON-NLS-1$
 		} else {
 			buf.append(GetterSetterUtil.getSetterName(field, null));
 			buf.append('(').append(Signature.toString(field.getTypeSignature())).append(')');
+			buf.append("  "); //$NON-NLS-1$
 			buf.append(Signature.toString(Signature.SIG_VOID));
+			buf.append(" - "); //$NON-NLS-1$
+			buf.append(JavaTextMessages.getFormattedString("GetterSetterCompletionProposal.setter.label", field.getElementName())); //$NON-NLS-1$
 		}
 		return buf.toString();
 	}
@@ -117,6 +120,7 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 		
 		// use the code formatter
 		String lineDelim= StubUtility.getLineDelimiterFor(document);
+		
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int lineStart= region.getOffset();
 		int indent= Strings.computeIndent(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth);

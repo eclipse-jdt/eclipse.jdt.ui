@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 class JavaTextMessages {
 
-	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.ui.text.java.JavaTextMessages";//$NON-NLS-1$
-
+	private static final String RESOURCE_BUNDLE= JavaTextMessages.class.getName();
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
 
 	private JavaTextMessages() {
@@ -26,7 +26,11 @@ class JavaTextMessages {
 		try {
 			return fgResourceBundle.getString(key);
 		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
+			return '!' + key + '!';
 		}
+	}
+	
+	public static String getFormattedString(String key, Object arg) {
+		return MessageFormat.format(getString(key), new Object[] { arg });
 	}
 }

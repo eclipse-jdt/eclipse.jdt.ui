@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.text.java;
 
   
 import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -334,8 +333,8 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 			if (element != null) {
 				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
 				if (type != null) {
-					List res= GetterSetterCompletionProposal.evaluateProposals(type, prefix,completionStart , completionEnd);
-					fMethods.addAll(res);
+					GetterSetterCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, 100, fMethods);
+					MethodCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, 100, fMethods);
 				}
 			}
 		} catch (CoreException e) {
