@@ -115,7 +115,7 @@ public final class DebugUtils {
 
 	public static void dump(Object o){
 		if (o == null)
-			dump("null");		
+			dump("null");		 //$NON-NLS-1$
 		else
 			dump(o.toString());	
 	}
