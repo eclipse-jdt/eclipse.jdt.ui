@@ -56,7 +56,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int end= findEndOfWhiteSpace(d, start, c.offset);
 							
 			StringBuffer buf= new StringBuffer(c.text);
-			if (end > start) {			
+			if (end >= start) {	// 1GEYL1R: ITPJUI:ALL - java doc edit smartness not work for class comments
 				// append to input
 				buf.append(d.get(start, end - start));				
 				if (end < c.offset) {
