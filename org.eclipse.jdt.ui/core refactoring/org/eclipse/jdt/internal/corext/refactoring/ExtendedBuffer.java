@@ -5,10 +5,10 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 public class ExtendedBuffer {
 	private Scanner fScanner;
@@ -39,7 +39,7 @@ public class ExtendedBuffer {
 			fLength= -1;
 			fScanner.resetTo(start, end);
 			int token;
-			while((token= fScanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+			while((token= fScanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 				if (token == searchFor) {
 					return fScanner.startPosition;
 				}
@@ -69,7 +69,7 @@ public class ExtendedBuffer {
 			fLength= -1;
 			fScanner.resetTo(start, fEndPosition);
 			int token;
-			while ((token= fScanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+			while ((token= fScanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 				if (token == Scanner.TokenNameSEMICOLON)
 					continue;
 				return fScanner.startPosition;

@@ -8,10 +8,10 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 
@@ -55,9 +55,9 @@ public class RefactoringScanner {
 		scanner.setSourceBuffer(content);
 		int token = scanner.getNextToken();
 
-		while (token != TerminalSymbols.TokenNameEOF) {
+		while (token != ITerminalSymbols.TokenNameEOF) {
 			switch (token) {
-				case TerminalSymbols.TokenNameStringLiteral :
+				case ITerminalSymbols.TokenNameStringLiteral :
 					if (!fAnalyzeStrings)
 						break;
 					parseCurrentToken(stringResults, scanner);	

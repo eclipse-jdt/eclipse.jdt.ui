@@ -1,10 +1,10 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -51,11 +51,11 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 			int start= getTextRange().getOffset() + length;
 			scanner.currentPosition= start;
 			int token = scanner.getNextToken();
-			while (token != TerminalSymbols.TokenNameEOF) {
+			while (token != ITerminalSymbols.TokenNameEOF) {
 				switch (token) {
 					case Scanner.TokenNameWHITESPACE:
 						break;
-					case TerminalSymbols.TokenNameSEMICOLON:
+					case ITerminalSymbols.TokenNameSEMICOLON:
 						break;	
 					case Scanner.TokenNameCOMMENT_LINE :
 						break;

@@ -9,10 +9,10 @@ import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 public class NLSScanner {
 
@@ -44,9 +44,9 @@ public class NLSScanner {
 		int previousLineNr= -1;
 		NLSLine currentLine= null;
 		
-		while (token != TerminalSymbols.TokenNameEOF) {
+		while (token != ITerminalSymbols.TokenNameEOF) {
 			switch (token) {
-				case TerminalSymbols.TokenNameStringLiteral:
+				case ITerminalSymbols.TokenNameStringLiteral:
 					currentLineNr= scanner.linePtr;
 					if (currentLineNr != previousLineNr) {
 						currentLine= new NLSLine(currentLineNr);

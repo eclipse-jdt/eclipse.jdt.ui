@@ -4,10 +4,10 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -34,7 +34,7 @@ public class CommentAnalyzer {
 		
 		int token= 0;
 		try {
-			loop: while (token != TerminalSymbols.TokenNameEOF) {
+			loop: while (token != ITerminalSymbols.TokenNameEOF) {
 				token= scanner.getNextToken();
 				switch(token) {
 					case Scanner.TokenNameCOMMENT_LINE:

@@ -7,10 +7,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -73,11 +73,11 @@ public class SourceReferenceSourceRangeComputer {
 			int startLine= buff.getLineOfOffset(scanner.currentPosition);
 			
 			int token= scanner.getNextToken();
-			while (token != TerminalSymbols.TokenNameEOF) {
+			while (token != ITerminalSymbols.TokenNameEOF) {
 				switch (token) {
 					case Scanner.TokenNameWHITESPACE:
 						break;
-					case TerminalSymbols.TokenNameSEMICOLON:
+					case ITerminalSymbols.TokenNameSEMICOLON:
 						break;	
 					case Scanner.TokenNameCOMMENT_LINE :
 						break;
@@ -114,11 +114,11 @@ public class SourceReferenceSourceRangeComputer {
 			scanner.currentPosition= 0;
 
 			int token= scanner.getNextToken();
-			while (token != TerminalSymbols.TokenNameEOF) {
+			while (token != ITerminalSymbols.TokenNameEOF) {
 				switch (token) {
 					case Scanner.TokenNameWHITESPACE:
 						break;
-					case TerminalSymbols.TokenNameSEMICOLON:
+					case ITerminalSymbols.TokenNameSEMICOLON:
 						break;	
 					case Scanner.TokenNameCOMMENT_LINE :
 						break;
