@@ -227,9 +227,10 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 		helper1("j");
 	}
 
-	public void test27() throws Exception{
-		helper1("j");
-	}
+//  deleted - incorrect. see testFail26
+//	public void test27() throws Exception{
+//		helper1("j");
+//	}
 
 	public void test28() throws Exception{
 		helper1("j");
@@ -275,19 +276,20 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 	}
 	
 	public void test38() throws Exception{
-		printTestDisabledMessage("regression test for Bug#11453");
-//		helper1("i", true, 7, 12, 7, 13);
+//		printTestDisabledMessage("regression test for Bug#11453");
+		helper1("i", true, 7, 12, 7, 13);
 	}
 	
 	public void test39() throws Exception{
-		printTestDisabledMessage("regression test for Bug#11440");
-//		helper1("j", true, 7, 16, 7, 18);
+//		printTestDisabledMessage("regression test for Bug#11440");
+		helper1("j", true, 7, 16, 7, 18);
 	}
 	
 	
 // -----
 	public void testFail0() throws Exception{
-		helper2("j");
+		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=11638");
+//		helper2("j");
 	}
 	
 	public void testFail1() throws Exception{
@@ -311,7 +313,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 	}
 
 	public void testFail6() throws Exception{
-		helper2("j");
+		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=11638");
+//		helper2("j");
 	}
 
 	public void testFail7() throws Exception{
@@ -335,7 +338,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 	}
 	
 	public void testFail12() throws Exception{
-		helper2("j");
+		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=11638");
+//		helper2("j");
 	}
 	
 	public void testFail13() throws Exception{
@@ -387,4 +391,11 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 		//helper2("j");
 	}
 	
+	public void testFail25() throws Exception{
+		helper2("j");
+	}
+	
+	public void testFail26() throws Exception{
+		helper2("j");
+	}
 }
