@@ -238,25 +238,6 @@ public class JavaContext extends CompilationUnitContext {
 		}
 	}
 
-	private CompilationUnitCompletion guessVariableNames() {
-		ICompilationUnit unit= getCompilationUnit();
-		int start= getStart();
-		
-		if (unit == null)
-			return null;
-		
-		try {
-			CompilationUnitCompletion collector= new CompilationUnitCompletion(unit);
-			unit.codeComplete(start, collector);			
-			return collector;
-		
-		} catch (JavaModelException e) {
-			handleException(null, e);
-			return null;
-		}
-	}	
-	
-	
 	private static void handleException(Shell shell, Exception e) {
 		String title= JavaTemplateMessages.getString("JavaContext.error.title"); //$NON-NLS-1$
 		if (e instanceof CoreException)
