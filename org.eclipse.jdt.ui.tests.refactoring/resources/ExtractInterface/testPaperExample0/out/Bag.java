@@ -1,6 +1,7 @@
 package p;
 
 import java.util.Iterator;
+
 /** typecomment template*/
 interface Bag {
 	public abstract java.util.Iterator iterator();
