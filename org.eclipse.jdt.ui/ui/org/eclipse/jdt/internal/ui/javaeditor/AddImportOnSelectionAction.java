@@ -69,12 +69,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	}
 	
 	public void update() {
-		boolean isEnabled= false;
 		ISelection selection= fEditor.getSelectionProvider().getSelection();
-		if (selection instanceof ITextSelection) {
-			isEnabled= (((ITextSelection)selection).getLength() > 0);
-		}
-		setEnabled(isEnabled);
+		setEnabled(selection instanceof ITextSelection);
 	}	
 			
 	private ICompilationUnit getCompilationUnit () {
@@ -92,11 +88,11 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			IDocument doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
 			ITextSelection selection= (ITextSelection) s;
 			
-			if (selection.getLength() > 0 && doc != null) {
+			if (doc != null) {
 				try {
-					int selStart= selection.getOffset();
-					int nameStart= getNameStart(doc, selStart);
-					int len= selStart - nameStart + selection.getLength();
+					int nameStart= getNameStart(doc, selection.getOffset());
+					int nameEnd= getNameEnd(doc, selection.getOffset() + selection.getLength());
+					int len= nameEnd - nameStart;
 					
 					String name= doc.get(nameStart, len).trim();
 					String simpleName= Signature.getSimpleName(name);
@@ -146,18 +142,27 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	}
 	
 	private int getNameStart(IDocument doc, int pos) throws BadLocationException {
-		if (pos > 0 && doc.getChar(pos - 1) == '.') {
-			pos--;
-			while (pos > 0) {
-				char ch= doc.getChar(pos - 1);
-				if (!Character.isJavaIdentifierPart(ch) && ch != '.') {
-					return pos;
-				}
-				pos--;
+		while (pos > 0) {
+			char ch= doc.getChar(pos - 1);
+			if (!Character.isJavaIdentifierPart(ch) && ch != '.') {
+				return pos;
 			}
+			pos--;
 		}
 		return pos;
-	}	
+	}
+	
+	private int getNameEnd(IDocument doc, int pos) throws BadLocationException {
+		int len= doc.getLength();
+		while (pos < len) {
+			char ch= doc.getChar(pos);
+			if (!Character.isJavaIdentifierPart(ch)) {
+				return pos;
+			}
+			pos++;
+		}
+		return pos;
+	}		
 	
 	private void removeQualification(IDocument doc, int nameStart, TypeInfo typeInfo) throws BadLocationException {
 		String containerName= typeInfo.getTypeContainerName();
