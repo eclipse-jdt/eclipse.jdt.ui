@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
@@ -26,6 +27,9 @@ public class TextBufferChangeManager {
 	}
 	
 	private ITextBufferChange getTextBufferChange(ICompilationUnit cu) throws JavaModelException{
+		if (cu.isWorkingCopy()) {
+			cu= (ICompilationUnit)cu.getOriginalElement();
+		}
 		if (! fMap.containsKey(cu))
 			fMap.put(cu, fChangeCreator.create(cu.getElementName(), cu));
 		return (ITextBufferChange)fMap.get(cu);
