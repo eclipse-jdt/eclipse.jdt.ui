@@ -6,15 +6,12 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.preference.ColorFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.FontFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
@@ -24,6 +21,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.ui.texteditor.WorkbenchChainedTextFontFieldEditor;
 
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
@@ -62,7 +60,7 @@ public class JavaEditorPreferencePage extends FieldEditorPreferencePage implemen
 	 * @see FieldEditorPreferencePage#createFieldEditors
 	 */
 	public void createFieldEditors() {
-		addField(new FontFieldEditor(AbstractTextEditor.PREFERENCE_FONT, JavaUIMessages.getString("JavaEditorPreferencePage.font"), getFieldEditorParent())); //$NON-NLS-1$
+		addField(new WorkbenchChainedTextFontFieldEditor(AbstractTextEditor.PREFERENCE_FONT, JavaUIMessages.getString("JavaEditorPreferencePage.font"), getFieldEditorParent())); //$NON-NLS-1$
 		addField(new ColorFieldEditor(IJavaColorConstants.JAVA_DEFAULT, "Java code default:", getFieldEditorParent()));
 		addField(new ColorFieldEditor(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT, "Multi-line comments:", getFieldEditorParent()));
 		addField(new ColorFieldEditor(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT, "Single-line comments:", getFieldEditorParent()));
@@ -81,13 +79,10 @@ public class JavaEditorPreferencePage extends FieldEditorPreferencePage implemen
 	public void init(IWorkbench workbench) {
 	}
 	
+	
 	public static void initDefaults(IPreferenceStore store) {
-		Font font= JFaceResources.getTextFont();
-		if (font != null) {
-			FontData[] data= font.getFontData();
-			if (data != null && data.length > 0)
-				PreferenceConverter.setDefault(store, AbstractTextEditor.PREFERENCE_FONT, data[0]);
-		}
+		
+		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
 		
 		Display display= Display.getDefault();
 		Color color= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
