@@ -77,7 +77,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		ISharedImages workbenchImages= getWorkbenchSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
-		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_HOVER));
+		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 		update(getSelection());
 
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.COPY_ACTION);

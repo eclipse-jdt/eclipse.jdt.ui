@@ -15,11 +15,11 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
@@ -43,13 +43,13 @@ public abstract class MessageWizardPage extends UserInputWizardPage {
 	protected Image getMessageImage() {
 		switch (fStyle) {
 			case STYLE_ERROR :
-				return JFaceResources.getImage(Dialog.DLG_IMG_ERROR);
+				return Display.getCurrent().getSystemImage(SWT.ICON_ERROR);
 			case STYLE_WARNING :
-				return JFaceResources.getImage(Dialog.DLG_IMG_WARNING);
+				return Display.getCurrent().getSystemImage(SWT.ICON_WARNING);
 			case STYLE_INFORMATION :
-				return JFaceResources.getImage(Dialog.DLG_IMG_INFO);
+				return Display.getCurrent().getSystemImage(SWT.ICON_INFORMATION);
 			case STYLE_QUESTION :
-				return JFaceResources.getImage(Dialog.DLG_IMG_QUESTION);
+				return Display.getCurrent().getSystemImage(SWT.ICON_QUESTION);
 			default :
 				return null;
 		}
