@@ -143,44 +143,67 @@ public class ASTNodeSearchUtil {
 	}
 
 	public static MethodDeclaration getMethodDeclarationNode(IMethod iMethod, CompilationUnit cuNode) throws JavaModelException {
-		return (MethodDeclaration)ASTNodes.getParent(getDeclarationNode(iMethod, cuNode), MethodDeclaration.class);
+		return (MethodDeclaration)getDeclarationNode(iMethod, cuNode);
 	}
 
 	public static MethodDeclaration getMethodDeclarationNode(IMethod iMethod, ASTNodeMappingManager astManager) throws JavaModelException {
-		return (MethodDeclaration)ASTNodes.getParent(getDeclarationNode(iMethod, astManager), MethodDeclaration.class);
+		return getMethodDeclarationNode(iMethod, astManager.getAST(iMethod.getCompilationUnit()));
 	}
-	
+
+	public static VariableDeclarationFragment getFieldDeclarationFragmentNode(IField iField, CompilationUnit cuNode) throws JavaModelException {
+		ASTNode node= getNameNode(iField, cuNode);
+		if (node instanceof VariableDeclarationFragment)
+			return  (VariableDeclarationFragment)node;
+		return (VariableDeclarationFragment)ASTNodes.getParent(node, VariableDeclarationFragment.class);
+	}
+		
 	public static VariableDeclarationFragment getFieldDeclarationFragmentNode(IField iField, ASTNodeMappingManager astManager) throws JavaModelException {
-		ASTNode node= getDeclarationNode(iField, astManager);
+		ASTNode node= getNameNode(iField, astManager);
 		if (node instanceof VariableDeclarationFragment)
 			return  (VariableDeclarationFragment)node;
 		return (VariableDeclarationFragment)ASTNodes.getParent(node, VariableDeclarationFragment.class);
 	}
 	
 	public static FieldDeclaration getFieldDeclarationNode(IField iField, ASTNodeMappingManager astManager) throws JavaModelException {
-		return (FieldDeclaration)ASTNodes.getParent(getDeclarationNode(iField, astManager), FieldDeclaration.class);
+		return getFieldDeclarationNode(iField, astManager.getAST(iField.getCompilationUnit()));
+	}
+
+	public static FieldDeclaration getFieldDeclarationNode(IField iField, CompilationUnit cuNode) throws JavaModelException {
+		return (FieldDeclaration)getDeclarationNode(iField, cuNode);
 	}
 
 	public static TypeDeclaration getTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
-		return (TypeDeclaration)ASTNodes.getParent(getDeclarationNode(iType, cuNode), TypeDeclaration.class);
+		return (TypeDeclaration)getDeclarationNode(iType, cuNode);
 	}
 
 	public static TypeDeclaration getTypeDeclarationNode(IType iType, ASTNodeMappingManager astManager) throws JavaModelException {
-		return (TypeDeclaration)ASTNodes.getParent(getDeclarationNode(iType, astManager), TypeDeclaration.class);
+		return getTypeDeclarationNode(iType, astManager.getAST(iType.getCompilationUnit()));
 	}
 	
-	private static ASTNode getDeclarationNode(IMember iMember, CompilationUnit cuNode) throws JavaModelException {
+	public static ASTNode getDeclarationNode(IMember iMember, CompilationUnit cuNode) throws JavaModelException {
 		Assert.isTrue(! (iMember instanceof IInitializer));
+		ASTNode node= getNameNode(iMember, cuNode);
+		if (iMember instanceof IField)
+			return (FieldDeclaration)ASTNodes.getParent(node, FieldDeclaration.class);
+		if (iMember instanceof IType)
+			return (TypeDeclaration)ASTNodes.getParent(node, TypeDeclaration.class);
+		if (iMember instanceof IMethod)
+			return (MethodDeclaration)ASTNodes.getParent(node, MethodDeclaration.class);
+		Assert.isTrue(false);	
+		return node;
+	}
+
+	private static ASTNode getNameNode(IMember iMember, CompilationUnit cuNode) throws JavaModelException {
 		Selection selection= Selection.createFromStartLength(iMember.getNameRange().getOffset(), iMember.getNameRange().getLength());
 		SelectionAnalyzer selectionAnalyzer= new SelectionAnalyzer(selection, true);
 		cuNode.accept(selectionAnalyzer);
 		ASTNode node= selectionAnalyzer.getFirstSelectedNode();
 		if (node == null)
 			node= selectionAnalyzer.getLastCoveringNode();
-		return node;		
+		return node;
 	}
 
-	private static ASTNode getDeclarationNode(IMember iMember, ASTNodeMappingManager astManager) throws JavaModelException {
-		return getDeclarationNode(iMember, astManager.getAST(iMember.getCompilationUnit()));
+	private static ASTNode getNameNode(IMember iMember, ASTNodeMappingManager astManager) throws JavaModelException {
+		return getNameNode(iMember, astManager.getAST(iMember.getCompilationUnit()));
 	}
 }
