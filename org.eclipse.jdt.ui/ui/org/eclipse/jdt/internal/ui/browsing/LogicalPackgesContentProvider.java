@@ -24,11 +24,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-
-/**
- * @author Jen Thorsley
- */
-public class LogicalPackgesContentProvider implements IPropertyChangeListener {
+class LogicalPackgesContentProvider implements IPropertyChangeListener {
 
 	protected Map fMapToCompoundElement;
 	protected boolean fCompoundState;
@@ -54,21 +50,19 @@ public class LogicalPackgesContentProvider implements IPropertyChangeListener {
 	}
 
 	/**
-	 * Returns the CompoundElement that contains the fragment
-	 * or the fragment if it is not associated with a CompoundElement
-	 * @param fragment
-	 * @return Object
+	 * Returns the logical package for the given package fragment
+	 * or <code>null</code> if it is not grouped by logical package.
+	 * 
+	 * @param fragment the package fragment
+	 * @return the logical package
 	 */
-	public Object getCompoundElement(IPackageFragment fragment) {
+	public LogicalPackage findLogicalPackage(IPackageFragment fragment) {
 		Assert.isNotNull(fragment);
 		
 		if(fMapToCompoundElement == null)	
-			return fragment;
+			return null;
 		
-		Object object= fMapToCompoundElement.get(getKey(fragment));
-		if(object== null)
-			return fragment;
-		return object;
+		return (LogicalPackage)fMapToCompoundElement.get(getKey(fragment));
 	}
 
 	/* 

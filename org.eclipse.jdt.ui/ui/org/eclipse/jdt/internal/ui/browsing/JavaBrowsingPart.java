@@ -507,7 +507,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * Returns the shell to use for opening dialogs.
 	 * Used in this class, and in the actions.
 	 */
-	private Shell getShell() {
+	Shell getShell() {
 		return fViewer.getControl().getShell();
 	}
 
