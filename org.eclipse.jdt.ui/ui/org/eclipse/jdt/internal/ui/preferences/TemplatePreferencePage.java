@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -521,10 +522,30 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		
 		File file= new File(path);		
 
+		if (file.isHidden()) {
+			String title= TemplateMessages.getString("TemplatePreferencePage.export.error.title"); //$NON-NLS-1$ 
+			String message= TemplateMessages.getFormattedString("TemplatePreferencePage.export.error.hidden", file.getAbsolutePath()); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), title, message);
+			return;
+		}
+		
+		if (file.exists() && !file.canWrite()) {
+			String title= TemplateMessages.getString("TemplatePreferencePage.export.error.title"); //$NON-NLS-1$
+			String message= TemplateMessages.getFormattedString("TemplatePreferencePage.export.error.canNotWrite", file.getAbsolutePath()); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), title, message);
+			return;
+		}
+
 		if (!file.exists() || confirmOverwrite(file)) {
 			try {
-				templateSet.saveToFile(file);			
-			} catch (CoreException e) {			
+				templateSet.saveToFile(file);
+			} catch (CoreException e) {
+				if (e.getStatus().getException() instanceof FileNotFoundException) {
+					String title= TemplateMessages.getString("TemplatePreferencePage.export.error.title"); //$NON-NLS-1$
+					String message= TemplateMessages.getFormattedString("TemplatePreferencePage.export.error.fileNotFound", e.getStatus().getException().getLocalizedMessage()); //$NON-NLS-1$
+					MessageDialog.openError(getShell(), title, message);
+					return;
+				}
 				JavaPlugin.log(e);
 				openWriteErrorDialog(e);
 			}		
