@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Iterator;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -84,8 +85,10 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -481,6 +484,17 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return false;
 	}
 
+	private boolean isInputResetBy(IWorkbenchPart part) {
+		if (!(part instanceof JavaBrowsingPart))
+			return true;
+		Object thisInput= getViewer().getInput();
+		Object partInput= ((JavaBrowsingPart)part).getViewer().getInput();
+		if (thisInput instanceof IJavaElement && partInput instanceof IJavaElement)
+			return getTypeComparator().compare(partInput, thisInput) > 0;
+		else
+			return true;
+	}
+
 	protected boolean isAncestorOf(Object ancestor, Object element) {
 		if (element instanceof IJavaElement && ancestor instanceof IJavaElement)
 			return !element.equals(ancestor) && internalIsAncestorOf((IJavaElement)ancestor, (IJavaElement)element);
@@ -493,42 +507,42 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		else
 			return false;
 	}
-
+	
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		
 		if (!fProcessSelectionEvents || part == this || !(selection instanceof IStructuredSelection))
 			return;
 			
-		if (selection.isEmpty() && part instanceof JavaBrowsingPart && !(part instanceof ProjectsView))
-			return;
-		
-		// Set input
-		Object newInput= getElementFromSingleSelection(selection);
+		// Set selection
+		Object selectedElement= getSingleElementFromSelection(selection);
 		Object currentInput= (IJavaElement)getViewer().getInput();
-		if (newInput != null && newInput.equals(currentInput)) {
-			IJavaElement elementToSelect= findElementToSelect(getElementFromSingleSelection(selection));
-			if (elementToSelect != null && getTypeComparator().compare(newInput, elementToSelect) < 0)
+		if (selectedElement != null && selectedElement.equals(currentInput)) {
+			IJavaElement elementToSelect= findElementToSelect(getSingleElementFromSelection(selection));
+			if (elementToSelect != null && getTypeComparator().compare(selectedElement, elementToSelect) < 0)
 				setSelection(new StructuredSelection(elementToSelect), true);
 			fPreviousSelectionProvider= part;
 			return;
 		}
 
 		// Clear input if needed
-		if (part != fPreviousSelectionProvider && newInput != null && !newInput.equals(currentInput) && isInputResetBy(newInput, currentInput, part)) {
-			if (!isAncestorOf(newInput, currentInput))
+		if (part != fPreviousSelectionProvider && selectedElement != null && !selectedElement.equals(currentInput) && isInputResetBy(selectedElement, currentInput, part)) {
+			if (!isAncestorOf(selectedElement, currentInput))
 				setInput(null);
 			fPreviousSelectionProvider= part;
 			return;
-		} else if (newInput == null && part == fPreviousSelectionProvider) {
+		} else	if (selection.isEmpty() && !isInputResetBy(part)) {
+			fPreviousSelectionProvider= part;
+			return;
+		} else if (selectedElement == null && part == fPreviousSelectionProvider) {
 			setInput(null);
 			fPreviousSelectionProvider= part;
 			return;
 		}
 		fPreviousSelectionProvider= part;
 		
-		// Set selection
-		if (newInput instanceof IJavaElement)
-			adjustInputAndSetSelection((IJavaElement)newInput);
+		// Adjust input and set selection and 
+		if (selectedElement instanceof IJavaElement)
+			adjustInputAndSetSelection((IJavaElement)selectedElement);
 		else
 			setSelection(StructuredSelection.EMPTY, true);
 	}
@@ -622,7 +636,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	protected void setInitialInput() {
 		// Use the selection, if any
 		ISelection selection= getSite().getPage().getSelection();
-		Object input= getElementFromSingleSelection(selection);
+		Object input= getSingleElementFromSelection(selection);
 		if (!(input instanceof IJavaElement)) {
 			// Use the input of the page
 			input= getSite().getPage().getInput();
@@ -637,7 +651,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		Object input;
 		ISelection selection= getSite().getPage().getSelection();
 		if (selection != null && !selection.isEmpty())
-			input= getElementFromSingleSelection(selection);
+			input= getSingleElementFromSelection(selection);
 		else {
 			// Use the input of the page
 			input= getSite().getPage().getInput();
@@ -732,12 +746,32 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	abstract protected IJavaElement findElementToSelect(IJavaElement je);
 	
 
-	private Object getElementFromSingleSelection(ISelection selection) {
-		if (selection instanceof StructuredSelection
-			&& ((StructuredSelection)selection).size() == 1)
-				return ((StructuredSelection)selection).getFirstElement();
+	private Object getSingleElementFromSelection(ISelection selection) {
+		if (!(selection instanceof StructuredSelection) || selection.isEmpty())
+			return null;
+		
+		Iterator iter= ((StructuredSelection)selection).iterator();
+		Object firstElement= iter.next();
+		if (!(firstElement instanceof IJavaElement))
+			return firstElement;
+		Object currentInput= (IJavaElement)getViewer().getInput();
+		if (currentInput == null || !currentInput.equals(findInputForJavaElement((IJavaElement)firstElement)))
+			if (iter.hasNext())
+				// multi selection and view is empty
+				return null;
+			else
+				// ok: single selection and view is empty 
+				return firstElement;
 
-		return null;
+		// be nice to multi selection
+		while (iter.hasNext()) {
+			Object element= iter.next();
+			if (!(element instanceof IJavaElement))
+				return null;
+			if (!currentInput.equals(findInputForJavaElement((IJavaElement)element)))
+				return null;
+		}
+		return firstElement;
 	}
 
 	/**
