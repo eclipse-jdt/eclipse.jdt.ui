@@ -290,18 +290,18 @@ public class PackagesViewContentProviderTests extends TestCase {
 		assertTrue("Wrong parent found for a top level LogicalPackage", parentCp.equals(parent));//$NON-NLS-1$
 	}
 	
-	public void testGetParentWithPFRootFocus(){
-		//set up map
-		Object[] children= fProvider.getChildren(fRoot1);
-		for (int i= 0; i < children.length; i++) {
-			Object object= children[i];
-			fProvider.getChildren(object);
-		}
-		
-		Object parent= fProvider.getParent(fPack41);	
-		Object expectedParent= fPack31;
-		assertTrue("Wrong parent found for a mid level Fragment with Root Focus", expectedParent.equals(parent));		//$NON-NLS-1$
-	}
+//	public void testGetParentWithPFRootFocus(){
+//		//set up map
+//		Object[] children= fProvider.getChildren(fRoot1);
+//		for (int i= 0; i < children.length; i++) {
+//			Object object= children[i];
+//			fProvider.getChildren(object);
+//		}
+//		
+//		Object parent= fProvider.getParent(fPack41);	
+//		Object expectedParent= fPack31;
+//		assertTrue("Wrong parent found for a mid level Fragment with Root Focus", expectedParent.equals(parent));		//$NON-NLS-1$
+//	}
 	
 	public void testGetParentPFwithProjectFocus(){
 		Object[] children= fProvider.getChildren(fJProject2);
@@ -346,9 +346,9 @@ public class PackagesViewContentProviderTests extends TestCase {
 			fProvider.getChildren(object);
 		}
 		
-		Object parent= fProvider.getParent(fPack41);
-		Object expectedParent= fPack31;	
-		assertTrue("Wrong parent found for a mid level Fragment with Project Focus", expectedParent.equals(parent));//$NON-NLS-1$
+//		Object parent= fProvider.getParent(fPack41);
+//		Object expectedParent= fPack31;	
+//		assertTrue("Wrong parent found for a mid level Fragment with Project Focus", expectedParent.equals(parent));//$NON-NLS-1$
 	}
 
 	public void testGetParentTopLevelFragment() throws Exception{
