@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -531,18 +530,5 @@ public class ReorgUtils2 {
 		if (r1Location == null || r2Location == null)
 			return false;
 		return r1Location.equals(r2Location);
-	}
-
-	public static IResource[] getResourcesWithoutCorrespondingJavaElementsSelected(IResource[] resources, IJavaElement[] javaElements) {
-		Set javaElementSet= new HashSet(Arrays.asList(javaElements));	
-		Set result= new HashSet();
-		for (int i= 0; i < resources.length; i++) {
-			if (resources[i] == null)
-				continue;
-			IJavaElement element= JavaCore.create(resources[i]);
-			if (element == null || ! element.exists() || ! javaElementSet.contains(element))
-				result.add(resources[i]);
-		}
-		return (IResource[]) result.toArray(new IResource[result.size()]);
 	}
 }
