@@ -25,6 +25,7 @@ public class MemberCheckUtil {
 			if (members[i].getElementType() == IJavaElement.METHOD)
 				checkMethodInType(destinationType, result, (IMethod)members[i]);
 			else 
+			if (members[i].getElementType() == IJavaElement.FIELD)
 				checkFieldInType(destinationType, result, (IField)members[i]);
 		}
 		return result;	

@@ -228,6 +228,17 @@ public class PullUpRefactoring extends Refactoring {
 		return result;		
 	}
 	
+	/* non java-doc
+	 * @see Refactoring#checkPreconditions(IProgressMonitor)
+	 */
+	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= checkPreactivation();
+		if (result.hasFatalError())
+			return result;
+		result.merge(super.checkPreconditions(pm));
+		return result;
+	}
+	
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 					
@@ -352,8 +363,11 @@ public class PullUpRefactoring extends Refactoring {
 			if (JdtFlags.isStatic(member)) //for now
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_static_elements")); //$NON-NLS-1$
 			
-			if (member.getElementType() == IJavaElement.METHOD)
-				return checkMethod((IMethod)member);
+			if (member.getElementType() == IJavaElement.METHOD){
+				RefactoringStatus substatus= checkMethod((IMethod)member);
+				if (substatus != null && ! substatus.isOK())
+					return substatus;	
+			}	
 		}
 		return null;
 	}
