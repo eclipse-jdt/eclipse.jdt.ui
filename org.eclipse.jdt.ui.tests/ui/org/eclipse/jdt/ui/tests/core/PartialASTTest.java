@@ -372,6 +372,143 @@ public class PartialASTTest extends CoreTests {
 		assertAllBindings(astRoot);	
 	}		
 	
+	public void testPartialCUPositionNotInMethod1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class EInner {\n");
+		buf.append("        public int inner(int i) {\n");
+		buf.append("            return 0;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private int fField1;\n");
+		buf.append("    private int fField2;\n");
+		buf.append("    public void foo1() throws IOException, ParseException {\n");
+		buf.append("        fField1 = fField2;\n");
+		buf.append("        if (fField1 == 0) {\n");
+		buf.append("            fField2++;\n");
+		buf.append("        }\n");
+		buf.append("        EInner inner = new EInner();\n");
+		buf.append("    }\n");
+		buf.append("    public int foo2(int i) {\n");
+		buf.append("        private class Local {\n");
+		buf.append("            public int local(int i) {\n");
+		buf.append("                return 1;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("        Local local = new Local();\n");	
+		buf.append("        return i;\n");
+		buf.append("    }\n");
+		buf.append("}");
+		String existing= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", existing, false, null);
+		
+		int offset= existing.indexOf("private int fField1;");
+		
+		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
+		ASTFlattener flattener= new ASTFlattener();
+		astRoot.accept(flattener);
+		String string= flattener.getFormattedResult(0, String.valueOf('\n'));
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class EInner {\n");
+		buf.append("        public int inner(int i) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private int fField1;\n");
+		buf.append("    private int fField2;\n");
+		buf.append("    public void foo1() throws IOException, ParseException {\n");
+		buf.append("    }\n");
+		buf.append("    public int foo2(int i) {\n");
+		buf.append("    }\n");
+		buf.append("}");
+		String expected= buf.toString();
+		
+		assertEqualString(string, expected);
+		assertAllBindings(astRoot);	
+	}
+	
+	public void testPartialCUPositionNotInMethod2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class EInner {\n");
+		buf.append("        {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private int fField1;\n");
+		buf.append("    private int fField2;\n");
+		buf.append("    public void foo1() throws IOException, ParseException {\n");
+		buf.append("        fField1 = fField2;\n");
+		buf.append("        if (fField1 == 0) {\n");
+		buf.append("            fField2++;\n");
+		buf.append("        }\n");
+		buf.append("        EInner inner = new EInner();\n");
+		buf.append("    }\n");
+		buf.append("    public int foo2(int i) {\n");
+		buf.append("        private class Local {\n");
+		buf.append("            private int fField3;\n");
+		buf.append("            public int local(int i) {\n");
+		buf.append("                return 1;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("        Local local = new Local();\n");	
+		buf.append("        return i;\n");
+		buf.append("    }\n");
+		buf.append("}");
+		String existing= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", existing, false, null);
+		
+		int offset= existing.indexOf("private int fField3;");
+		
+		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
+		ASTFlattener flattener= new ASTFlattener();
+		astRoot.accept(flattener);
+		String string= flattener.getFormattedResult(0, String.valueOf('\n'));
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class EInner {\n");
+		buf.append("        {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private int fField1;\n");
+		buf.append("    private int fField2;\n");
+		buf.append("    public void foo1() throws IOException, ParseException {\n");
+		buf.append("    }\n");
+		buf.append("    public int foo2(int i) {\n");
+		buf.append("        private class Local {\n");
+		buf.append("            private int fField3;\n");
+		buf.append("            public int local(int i) {\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("        Local local = new Local();\n");	
+		buf.append("        return i;\n");
+		buf.append("    }\n");
+		buf.append("}");
+		String expected= buf.toString();
+		
+		assertEqualString(string, expected);
+		assertAllBindings(astRoot);	
+	}		
 	
 	private CompilationUnit getPartialCompilationUnit(ICompilationUnit cu, int offset) {
 		CompilationUnit unit= AST.parseCompilationUnit(cu, true);
@@ -391,7 +528,8 @@ public class PartialASTTest extends CoreTests {
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Block)
 		 */
 		public boolean visit(Block node) {
-			if (node.getParent() instanceof MethodDeclaration) {
+			ASTNode parent= node.getParent();
+			if (parent instanceof MethodDeclaration || parent instanceof Initializer) {
 				int start= node.getStartPosition();
 				int end= start + node.getLength();
 				
