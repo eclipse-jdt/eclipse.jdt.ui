@@ -3,15 +3,16 @@
  * All Rights Reserved.
  */
 
-package org.eclipse.jdt.internal.ui.refactoring;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.RenameInputWizardPage;import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.core.refactoring.methods.RenameParametersRefactoring;
+package org.eclipse.jdt.internal.ui.refactoring;import org.eclipse.jdt.internal.core.refactoring.methods.RenameParametersRefactoring;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class RenameParametersWizard extends RefactoringWizard {
 	
-	public RenameParametersWizard(){
-		super(getTitle(), IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE);
+	public RenameParametersWizard(RenameParametersRefactoring refactoring){
+		super(refactoring, getTitle(), IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE);
 	}
 
-	/**
+	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
@@ -20,7 +21,7 @@ public class RenameParametersWizard extends RefactoringWizard {
 		addPage(page);
 	}
 	
-	/**
+	/* non java-doc
 	 * @see RefactoringWizard#addPreviewPage
 	 */ 
 	protected void addPreviewPage(){

@@ -57,9 +57,7 @@ public abstract class OpenRefactoringWizardAction extends SelectionProviderActio
 	 * @see Action#run()
 	 */
 	public void run() {
-		RefactoringWizard wizard= createWizard();
-		wizard.init(fRefactoring);
-		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();
+		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), createWizard(fRefactoring)).open();
 	}
 		
 	/**
@@ -68,7 +66,7 @@ public abstract class OpenRefactoringWizardAction extends SelectionProviderActio
 	 */
 	protected abstract Refactoring createNewRefactoringInstance(Object obj) throws JavaModelException;	
 	
-	protected abstract RefactoringWizard createWizard();	
+	protected abstract RefactoringWizard createWizard(Refactoring refactoring);	
 	
 	/**
 	 * @param obj is guaranteed to be of the accepted type (passed in the constructor)

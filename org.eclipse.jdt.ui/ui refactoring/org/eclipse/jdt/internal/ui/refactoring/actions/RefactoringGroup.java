@@ -102,8 +102,8 @@ public class RefactoringGroup extends ContextMenuGroup {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameParametersRefactoring(changeCreator, (IMethod)obj);
 			}
-			protected RefactoringWizard createWizard(){
-				return new RenameParametersWizard();
+			protected RefactoringWizard createWizard(Refactoring ref){
+				return new RenameParametersWizard((RenameParametersRefactoring)ref);
 			}
 		};
 	}

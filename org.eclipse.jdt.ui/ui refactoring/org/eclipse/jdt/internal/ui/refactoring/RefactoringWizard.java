@@ -40,18 +40,15 @@ public class RefactoringWizard extends Wizard {
 	
 	private String fErrorPageContextHelpId;
 	
-	public RefactoringWizard(String pageTitle, String errorPageContextHelpId) {
+	public RefactoringWizard(Refactoring ref, String pageTitle, String errorPageContextHelpId) {
 		setNeedsProgressMonitor(true);
+		Assert.isNotNull(pageTitle);
+		Assert.isNotNull(ref);
+		fRefactoring= ref;
 		fPageTitle= pageTitle;
-		setWindowTitle(RefactoringMessages.getString("RefactoringWizard.title")); //$NON-NLS-1$
 		fErrorPageContextHelpId= errorPageContextHelpId;
-	}
-	
-	/**
-	 * Initializes the wizard with the given refactoring.
-	 */
-	public void init(Refactoring refactoring) {
-		fRefactoring= refactoring;
+		
+		setWindowTitle(RefactoringMessages.getString("RefactoringWizard.title")); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
 	}
 

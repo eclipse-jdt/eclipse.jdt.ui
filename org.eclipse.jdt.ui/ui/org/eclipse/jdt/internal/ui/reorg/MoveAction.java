@@ -153,17 +153,15 @@ public class MoveAction extends ReorgDestinationAction {
 			super.doReorg(refactoring);
 			return;
 		}	
-		RefactoringWizard wizard= new MoveWizard();	
-		wizard.init(refactoring);
-		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();	
+		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), new MoveWizard((MoveRefactoring)refactoring)).open();	
 	}
 	
 	//--- static inner classes
 		
 	private static class MoveWizard extends RefactoringWizard{
-		MoveWizard(){
+		MoveWizard(MoveRefactoring ref){
 			//XX incorrect help
-			super("Move", IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); 
+			super(ref, "Move", IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); 
 		}
 		
 		/* (non-Javadoc)

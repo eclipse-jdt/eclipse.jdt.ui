@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageRefactori
 import org.eclipse.jdt.internal.core.refactoring.projects.RenameJavaProjectRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.resources.RenameResourceRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.types.RenameTypeRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -40,7 +41,7 @@ import org.eclipse.swt.widgets.Shell;
 public class RefactoringSupportFactory {
 
 	private abstract static class RenameSupport implements IRefactoringRenameSupport {
-		private Refactoring fRefactoring;
+		private IRenameRefactoring fRefactoring;
 
 		public boolean canRename(Object element) {
 			try {
@@ -50,7 +51,7 @@ public class RefactoringSupportFactory {
 				if (fRefactoring instanceof IPreactivatedRefactoring)
 					canRename= ((IPreactivatedRefactoring)fRefactoring).checkPreactivation().isOK();
 				 else
-					canRename= fRefactoring.checkActivation(new NullProgressMonitor()).isOK();
+					canRename= ((Refactoring)fRefactoring).checkActivation(new NullProgressMonitor()).isOK();
 				 if (!canRename)	
 				 	fRefactoring= null;
 				 return canRename;	
@@ -63,153 +64,150 @@ public class RefactoringSupportFactory {
 		
 		public void rename(Object element) {
 			Assert.isNotNull(fRefactoring);
-			Shell parent= JavaPlugin.getActiveWorkbenchShell();
-			RefactoringWizard wizard= createWizard();
-			wizard.init(fRefactoring);
-			RefactoringWizardDialog dialog= new RefactoringWizardDialog(parent, wizard);
-			dialog.open();
+			new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), createWizard(fRefactoring)).open();
 			fRefactoring= null;
 		}
 		
-		abstract Refactoring createRefactoring(Object element, ITextBufferChangeCreator creator) throws JavaModelException;
+		abstract IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) throws JavaModelException;
 
-		abstract RefactoringWizard createWizard();
+		abstract RefactoringWizard createWizard(IRenameRefactoring ref);
 	}
 	
-	private static RefactoringWizard createRenameWizard(String title, String message, String wizardPageHelp, String errorPageHelp, ImageDescriptor image){
-		RenameRefactoringWizard w= new RenameRefactoringWizard(title, message, wizardPageHelp, errorPageHelp);
+	private static RefactoringWizard createRenameWizard(IRenameRefactoring ref, String title, String message, String wizardPageHelp, String errorPageHelp, ImageDescriptor image){
+		RenameRefactoringWizard w= new RenameRefactoringWizard(ref, title, message, wizardPageHelp, errorPageHelp);
 		w.setInputPageImageDescriptor(image);
 		return w;
 	}
 	
 	private static RenameSupport createPackageRename(){
 		return new RenameSupport(){
-			Refactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
+			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenamePackageRefactoring(creator, (IPackageFragment)element);
 			}
 			
-			RefactoringWizard createWizard() {
+			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= "Rename Package";
 				String message= "Enter the new name for this package. References to all types declared in it will be updated.";
 				String wizardPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE; 
 				String errorPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_ERROR_WIZARD_PAGE;
 				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_PACKAGE;
-				return createRenameWizard(title, message, wizardPageHelp, errorPageHelp, imageDesc);			}
+				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
+			}
 		};
 	}
 	
 	private static RenameSupport createCompilationUnitRename(){
 		return new RenameSupport(){
-			Refactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
+			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameCompilationUnitRefactoring(creator, (ICompilationUnit)element);
 			}
-			RefactoringWizard createWizard() {
+			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= "Rename Compilation Unit";
 				String message= "Enter the new name for this compilation unit. Refactoring will also rename and update references to the type (if any exists) that has the same name as this compilation unit.";
 				String wizardPageHelp= IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE; 
 				String errorPageHelp= IJavaHelpContextIds.RENAME_CU_ERROR_WIZARD_PAGE;
 				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_CU;
-				return createRenameWizard(title, message, wizardPageHelp, errorPageHelp, imageDesc);
+				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 			}
 		};
 	}
 	
 	private static RenameSupport createSourceFolderRename(){
 		return new RenameSupport(){
-			Refactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
+			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameSourceFolderRefactoring(creator, (IPackageFragmentRoot)element);
 			}
-			RefactoringWizard createWizard() {
+			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= "Rename Source Folder";
 				String message= "Enter the new name for this source folder.";
 				//FIX ME: wrong help and icon
 				String wizardPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE; 
 				String errorPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_ERROR_WIZARD_PAGE;
 				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR;
-				return createRenameWizard(title, message, wizardPageHelp, errorPageHelp, imageDesc);		
+				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 			}
 		};
 	}
 	
 	private static RenameSupport createJavaProjectRename(){
 		return new RenameSupport(){
-			Refactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
+			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameJavaProjectRefactoring(creator, (IJavaProject)element);
 			}
-			RefactoringWizard createWizard() {
+			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= "Rename Java Project";
 				String message= "Enter the new name for this Java project.";
 				//FIX ME: wrong help and icon
 				String wizardPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE; 
 				String errorPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_ERROR_WIZARD_PAGE;
 				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_NEWJPRJ;
-				return createRenameWizard(title, message, wizardPageHelp, errorPageHelp, imageDesc);
+				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 			}
 		};
 	}
 	
 	private static RenameSupport createResourceRename(){
 		return new RenameSupport(){
-			Refactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
+			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameResourceRefactoring(creator, (IResource)element);
 			}
-			RefactoringWizard createWizard() {
+			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 					String title= "Rename Resource";
 					String message= "Enter the new name for this resource.";
 					//FIX ME: wrong help and icon
 					String wizardPageHelp= IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE; 
 					String errorPageHelp= IJavaHelpContextIds.RENAME_CU_ERROR_WIZARD_PAGE;
 					ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_CU;
-					return createRenameWizard(title, message, wizardPageHelp, errorPageHelp, imageDesc);
+					return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 			}
 		};
 	}
 	
 	private static RenameSupport createTypeRename(){
 		return new RenameSupport(){
-			Refactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
+			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameTypeRefactoring(creator, (IType)element);
 			}
-			RefactoringWizard createWizard() {
+			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= RefactoringMessages.getString("RefactoringGroup.rename_type_title"); //$NON-NLS-1$
 				String message= RefactoringMessages.getString("RefactoringGroup.rename_type_message"); //$NON-NLS-1$
 				String wizardPageHelp= IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE; 
 				String errorPageHelp= IJavaHelpContextIds.RENAME_TYPE_ERROR_WIZARD_PAGE;
 				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_TYPE;
-				return createRenameWizard(title, message, wizardPageHelp, errorPageHelp, imageDesc);
+				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 			}
 		};
 	}
 	
 	private static RenameSupport createMethodRename(){
 		return new RenameSupport(){
-			Refactoring createRefactoring(Object element, ITextBufferChangeCreator creator) throws JavaModelException{
+			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) throws JavaModelException{
 				return RenameMethodRefactoring.createInstance(creator, (IMethod)element);
 			}
-			RefactoringWizard createWizard() {
+			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 				String title= RefactoringMessages.getString("RefactoringGroup.rename_method_title"); //$NON-NLS-1$
 				String message= RefactoringMessages.getString("RefactoringGroup.rename_method_message"); //$NON-NLS-1$
 				String wizardPageHelp= IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE;
 				String errorPageHelp= IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE;
 				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_METHOD;
-				return createRenameWizard(title, message, wizardPageHelp, errorPageHelp, imageDesc);
+				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 			}	
 		};
 	}
 	
 	private static RenameSupport createFieldRename(){
 		return new RenameSupport(){
-			Refactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
+			IRenameRefactoring createRefactoring(Object element, ITextBufferChangeCreator creator) {
 				return new RenameFieldRefactoring(creator, (IField)element);
 			}
-			RefactoringWizard createWizard(){
+			RefactoringWizard createWizard(IRenameRefactoring refactoring){
 				String title= RefactoringMessages.getString("RefactoringGroup.rename_field_title"); //$NON-NLS-1$
 				String message= RefactoringMessages.getString("RefactoringGroup.rename_field_message"); //$NON-NLS-1$
 				String wizardPageHelp= IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE; 
 				String errorPageHelp= IJavaHelpContextIds.RENAME_FIELD_ERROR_WIZARD_PAGE;
 				//XXX: missing icon for field
 				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_CU;
-				return createRenameWizard(title, message, wizardPageHelp, errorPageHelp, imageDesc);
+				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 			}	
 		};
 	}

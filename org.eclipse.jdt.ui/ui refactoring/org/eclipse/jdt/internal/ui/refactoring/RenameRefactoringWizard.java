@@ -5,15 +5,19 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jface.resource.ImageDescriptor;
 public class RenameRefactoringWizard extends RefactoringWizard {
 	
 	private String fPageMessage;
 	private String fPageContextHelpId;
 	private ImageDescriptor fInputPageImageDescriptor;
 	
-	public RenameRefactoringWizard(String title, String message, String pageContextHelpId, String errorContextHelpId){
-		super(title, errorContextHelpId);
+	public RenameRefactoringWizard(IRenameRefactoring ref, String title, String message, String pageContextHelpId, String errorContextHelpId){
+		super((Refactoring) ref, title, errorContextHelpId);
 		fPageMessage= message;
 		fPageContextHelpId= pageContextHelpId;
 	}

@@ -14,20 +14,22 @@ public class ExtractMethodWizard extends RefactoringWizard {
 	private IDocumentProvider fDocumentProvider;
 
 	public ExtractMethodWizard(ICompilationUnit cunit, ITextSelection selection, IDocumentProvider provider) {
-		super(RefactoringMessages.getString("ExtractMethodWizard.extract_method"), IJavaHelpContextIds.EXTRACT_METHOD_ERROR_WIZARD_PAGE); //$NON-NLS-1$
+		super(doGetRefactoring(cunit, selection, provider), 
+					RefactoringMessages.getString("ExtractMethodWizard.extract_method"), 
+					IJavaHelpContextIds.EXTRACT_METHOD_ERROR_WIZARD_PAGE); //$NON-NLS-1$
 		fCUnit= cunit;
-		Assert.isNotNull(fCUnit);
 		fSelection= selection;
-		Assert.isNotNull(fSelection);
 		fDocumentProvider= provider;
-		Assert.isNotNull(fDocumentProvider);
-		init(doGetRefactoring());
 	}
 
-	protected Refactoring doGetRefactoring() {
+	protected static Refactoring doGetRefactoring(ICompilationUnit cunit, ITextSelection selection, IDocumentProvider provider) {
+		Assert.isNotNull(cunit);
+		Assert.isNotNull(selection);	
+		Assert.isNotNull(provider);		
+		
 		return new ExtractMethodRefactoring(
-			fCUnit, new DocumentTextBufferChangeCreator(fDocumentProvider), 
-			fSelection.getOffset(), fSelection.getLength(),
+			cunit, new DocumentTextBufferChangeCreator(provider), 
+			selection.getOffset(), selection.getLength(),
 			CodeFormatterPreferencePage.isCompactingAssignment(),
 			CodeFormatterPreferencePage.getTabSize());
 	}
