@@ -71,7 +71,7 @@ public class ReorgMoveStarter {
 			if (fMoveRefactoring.hasAllInputSet()) {
 				IRunnableContext context= new ProgressMonitorDialog(parent);
 				fMoveRefactoring.setReorgQueries(new ReorgQueries(parent));
-				new RefactoringExecutionHelper(fMoveRefactoring, RefactoringPreferences.getStopSeverity(), parent, context).perform();
+				new RefactoringExecutionHelper(fMoveRefactoring, RefactoringPreferences.getStopSeverity(), true, parent, context).perform();
 			} else  {
 				RefactoringWizard wizard= new ReorgMoveWizard(fMoveRefactoring);
 				/*

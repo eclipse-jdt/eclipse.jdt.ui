@@ -121,7 +121,7 @@ public class RenameSupport {
 			throw new InvocationTargetException(e);
 		}
 		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(fRefactoring,
-			RefactoringPreferences.getStopSeverity(), parent, context);
+			RefactoringPreferences.getStopSeverity(), true, parent, context);
 		helper.perform();
 	}
 	

@@ -53,10 +53,11 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class RefactoringExecutionHelper {
 
-	private IRefactoring fRefactoring;
-	private Shell fParent;
-	private IRunnableContext fExecContext;
-	private int fStopSeverity;
+	private final IRefactoring fRefactoring;
+	private final Shell fParent;
+	private final IRunnableContext fExecContext;
+	private final int fStopSeverity;
+	private final boolean fNeedsSavedEditors;
 	private ChangeContext fContext;
 
 	private class Operation implements IRunnableWithProgress {
@@ -102,7 +103,7 @@ public class RefactoringExecutionHelper {
 		}
 	}
 	
-	public RefactoringExecutionHelper(IRefactoring refactoring, int stopSevertity, Shell parent, IRunnableContext context) {
+	public RefactoringExecutionHelper(IRefactoring refactoring, int stopSevertity, boolean needsSavedEditors, Shell parent, IRunnableContext context) {
 		super();
 		Assert.isNotNull(refactoring);
 		Assert.isNotNull(parent);
@@ -111,11 +112,12 @@ public class RefactoringExecutionHelper {
 		fStopSeverity= stopSevertity;
 		fParent= parent;
 		fExecContext= context;
+		fNeedsSavedEditors= needsSavedEditors;
 	}
 	
 	public void perform() throws InterruptedException, InvocationTargetException {
 		RefactoringSaveHelper saveHelper= new RefactoringSaveHelper();
-		if (!saveHelper.saveEditors())
+		if (fNeedsSavedEditors && !saveHelper.saveEditors())
 			throw new InterruptedException();
 		fContext= new ChangeContext(new ChangeExceptionHandler(fParent));
 		boolean success= false;
