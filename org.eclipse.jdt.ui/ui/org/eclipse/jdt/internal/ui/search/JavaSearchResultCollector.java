@@ -78,6 +78,8 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	
 	public JavaSearchResultCollector() {
 		fContextMenu= new ContextMenuContributor();
+		// This ensures that the image class is loaded correctly
+		JavaPlugin.getDefault().getImageRegistry();
 	}
 
 	/**
