@@ -17,8 +17,10 @@ import java.text.CollationElementIterator;
 import java.text.Collator;
 import java.text.RuleBasedCollator;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
@@ -98,6 +100,7 @@ import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -156,6 +159,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.IBinding;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -1721,14 +1725,25 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * Holds the current occurrence annotations.
 	 * @since 3.0
 	 */
-	private ArrayList fOccurrenceAnnotations= new ArrayList();
+	private Annotation[] fOccurrenceAnnotations= null;
 	/**
 	 * Counts the number of background computation requests.
 	 * @since 3.0
 	 */
 	private volatile int fComputeCount;
+	/**
+	 * Tells whether all occurrences of the element at the
+	 * current caret location are automatically marked in
+	 * this editor.
+	 * @since 3.0
+	 */
 	private boolean fMarkOccurrenceAnnotations;
-
+	/**
+	 * The last element used to highlight its occurrences
+	 * in this editor.
+	 * @since 3.0
+	 */
+	private IBinding fOccurrenceAnnotationsTarget;
 		
 	/**
 	 * Returns the most narrow java element including the given offset.
@@ -2706,11 +2721,32 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				if (isCancelled())
 					return;
 				
-				// Find occurrences
 				FindOccurrencesEngine engine= FindOccurrencesEngine.create(getInputJavaElement());
 				List matches= new ArrayList();
 				try {
-					matches= engine.findOccurrences(fSelection.getOffset(), fSelection.getLength());
+					IBinding newTarget= engine.resolveTarget(fSelection.getOffset(), fSelection.getLength());
+
+					if (isCancelled())
+						return;
+					
+					if (newTarget == null)
+						// Use previous element as target 
+						newTarget= fOccurrenceAnnotationsTarget;
+
+//					We no longer execute the code below because we want the 
+//					occurrence annotations be in sync with the code.
+//					Should flickering be a problem we could compare the new 
+//					matchers with the occurrence annotations and only apply
+//					the changes.
+//					if (newTarget == null || fOccurrenceAnnotationsTarget != null && Bindings.equals(fOccurrenceAnnotationsTarget, newTarget)) {
+//						engine.clearTarget();
+//						return;
+//					}
+					
+					fOccurrenceAnnotationsTarget= newTarget;
+					
+					// Find occurrences
+					matches= engine.findOccurrences(fOccurrenceAnnotationsTarget);
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 					return;
@@ -2721,8 +2757,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				
 				if (isCancelled())
 					return;
-				
-				removeOccurrenceAnnotations();
 				
 				if (isCancelled())
 					return;
@@ -2744,8 +2778,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					return;
 				
 				// Add occurrence annotations
-				ArrayList annotations= new ArrayList();
-				ArrayList positions= new ArrayList();
+				Map annotationMap= new HashMap(matches.size());
 				for (Iterator each= matches.iterator(); each.hasNext();) {
 					
 					if (isCancelled())
@@ -2763,19 +2796,27 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 						// Skip this match
 						continue;
 					}
-					annotations.add(new DefaultAnnotation(SearchUI.SEARCH_MARKER, IMarker.SEVERITY_INFO, true, message));
-					positions.add(new Position(node.getStartPosition(), node.getLength()));
+					annotationMap.put(
+							new DefaultAnnotation(SearchUI.SEARCH_MARKER, IMarker.SEVERITY_INFO, true, message),
+							new Position(node.getStartPosition(), node.getLength()));
 				}
 				
 				if (isCancelled())
 					return;
 				
 				synchronized (annotationModel) {
-					fOccurrenceAnnotations= annotations;
-					for (int i= 0, size= annotations.size(); i < size; i++)
-						annotationModel.addAnnotation((Annotation) annotations.get(i), (Position) positions.get(i));
+					if (annotationModel instanceof IAnnotationModelExtension) {
+						((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, annotationMap);
+					} else {
+						removeOccurrenceAnnotations();
+						Iterator iter= annotationMap.entrySet().iterator();
+						while (iter.hasNext()) {
+							Map.Entry mapEntry= (Map.Entry)iter.next(); 
+							annotationModel.addAnnotation((Annotation)mapEntry.getKey(), (Position)mapEntry.getValue());
+						}
+					}
+					fOccurrenceAnnotations= (Annotation[])annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
 				}
-				
 			} finally {
 				fDocument.removeDocumentListener(this);
 			}
@@ -2820,13 +2861,17 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			return;
 		
 		IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
-		if (annotationModel == null)
+		if (annotationModel == null || fOccurrenceAnnotations == null)
 			return;
 
 		synchronized (annotationModel) {
-			for (int i= 0, size= fOccurrenceAnnotations.size(); i < size; i++)
-				annotationModel.removeAnnotation((Annotation)fOccurrenceAnnotations.get(i));
-			fOccurrenceAnnotations.clear();
+			if (annotationModel instanceof IAnnotationModelExtension) {
+				((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, null);
+			} else {
+				for (int i= 0, length= fOccurrenceAnnotations.length; i < length; i++)
+					annotationModel.removeAnnotation(fOccurrenceAnnotations[i]);
+			}
+			fOccurrenceAnnotations= null;
 		}
 	}
 
