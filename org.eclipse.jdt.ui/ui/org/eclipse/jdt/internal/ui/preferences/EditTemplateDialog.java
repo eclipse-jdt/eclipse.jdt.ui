@@ -188,7 +188,7 @@ public class EditTemplateDialog extends StatusDialog {
 		ContextTypeRegistry registry= ContextTypeRegistry.getInstance();
 		for (Iterator iterator= registry.iterator(); iterator.hasNext(); )
 			fContextTypes.add(iterator.next());
-			
+
 		if (fContextTypes.size() > 0)
 			fProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType((String) fContextTypes.get(0)));
 	}
@@ -226,8 +226,14 @@ public class EditTemplateDialog extends StatusDialog {
 		createLabel(composite, TemplateMessages.getString("EditTemplateDialog.context")); //$NON-NLS-1$		
 		fContextCombo= new Combo(composite, SWT.READ_ONLY);
 
-		for (Iterator iterator= fContextTypes.iterator(); iterator.hasNext(); )
-			fContextCombo.add((String) iterator.next());
+		for (Iterator iterator= fContextTypes.iterator(); iterator.hasNext(); ) {
+			String contextName= (String) iterator.next();
+			
+			if (contextName.equals("java"))
+				fContextCombo.add(contextName, 0);
+			else
+				fContextCombo.add(contextName);
+		}
 
 		fContextCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
