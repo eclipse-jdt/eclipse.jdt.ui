@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -123,6 +124,10 @@ public abstract class AbstractTextChange extends Change {
 	 * Method declared in IChange
 	 */
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+		if (!isActive()) {
+			fUndoChange= new NullChange();
+			return;
+		}
 		TextBufferEditor editor= null;
 		try {
 			fUndoChange= null;

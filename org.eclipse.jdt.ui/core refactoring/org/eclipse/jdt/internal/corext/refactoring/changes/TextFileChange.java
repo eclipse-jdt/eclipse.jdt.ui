@@ -53,6 +53,10 @@ public class TextFileChange extends TextChange  {
 			return new UndoTextFileChange(getName(), fFile, changeKind, undo);
 		}
 		public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+			if (!isActive()) {
+				super.perform(context, pm);
+				return;
+			}
 			try{
 				acquireTextBuffer();
 				pm.beginTask("", 10); //$NON-NLS-1$
@@ -165,6 +169,10 @@ public class TextFileChange extends TextChange  {
 	 * Method declared in TextChange
 	 */
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+		if (!isActive()) {
+			super.perform(context, pm);
+			return;
+		}
 		try{
 			acquireTextBuffer();
 			pm.beginTask("", 10); //$NON-NLS-1$
