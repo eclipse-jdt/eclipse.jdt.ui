@@ -373,8 +373,8 @@ public class SearchUtil {
 			|| (first == Signature.C_RESOLVED && fieldType.substring(1, fieldType.length() - 1).equals(String.class.getName()));
 	}
 	
-	public static String getProjectScopeDescription(IType type) {
-		IJavaProject project= type.getJavaProject();
+	public static String getProjectScopeDescription(IJavaElement element) {
+		IJavaProject project= element.getJavaProject();
 		if (project != null)
 			return SearchMessages.getFormattedString("ProjectScope", project.getElementName()); //$NON-NLS-1$
 		else 
