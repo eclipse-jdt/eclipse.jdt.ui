@@ -93,8 +93,6 @@ public class SWTUtil {
 	 */		
 	public static void setButtonDimensionHint(Button button) {
 		Assert.isNotNull(button);
-		PixelConverter converter= new PixelConverter(button);
-		
 		Object gd= button.getLayoutData();
 		if (gd instanceof GridData) {
 			((GridData)gd).heightHint= getButtonHeigthHint(button);
