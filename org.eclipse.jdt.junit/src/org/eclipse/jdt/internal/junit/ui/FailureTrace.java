@@ -210,9 +210,23 @@ class FailureTrace implements IMenuListener {
 				return;
 				
 			TableItem tableItem= new TableItem(fTable, SWT.NONE);
-			String itemLabel= line.replace('\t', ' ');
-			tableItem.setText(itemLabel);
 			tableItem.setImage(fExceptionIcon);
+			String itemLabel= line.replace('\t', ' ');
+			final int labelLength= itemLabel.length();
+			final int MAX_LABEL_LENGTH= 256;
+			if (labelLength < MAX_LABEL_LENGTH) {
+				tableItem.setText(itemLabel);
+			} else {
+				// workaround for bug 74647: JUnit view truncates failure message
+				tableItem.setText(itemLabel.substring(0, MAX_LABEL_LENGTH));
+				int offset= MAX_LABEL_LENGTH;
+				while (offset < labelLength) {
+					int nextOffset= Math.min(labelLength, offset + MAX_LABEL_LENGTH);
+					tableItem= new TableItem(fTable, SWT.NONE);
+					tableItem.setText(itemLabel.substring(offset, nextOffset));
+					offset= nextOffset;
+				}
+			}
 			
 			// the stack frames of the trace
 			while ((line= bufferedReader.readLine()) != null) {
