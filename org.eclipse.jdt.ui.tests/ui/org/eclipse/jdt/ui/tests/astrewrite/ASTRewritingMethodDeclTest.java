@@ -1093,14 +1093,9 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
-	
-	private boolean BUG_24916= true;
-	
-	public void testMethodDeclaration_bug24916() throws Exception {
-		if (BUG_24916) {
-			return;
-		}
 		
+	public void testMethodDeclaration_bug24916() throws Exception {
+	
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1121,7 +1116,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
 			modifiedNode.setConstructor(true); // no change
 			modifiedNode.setModifiers(methodDecl.getModifiers()); // no change
-			modifiedNode.setExtraDimensions(methodDecl.getModifiers());// no change
+			modifiedNode.setExtraDimensions(0);// constructors have no return type
 			rewrite.markAsModified(methodDecl, modifiedNode);
 			
 			rewrite.markAsRemoved(methodDecl.getReturnType());
@@ -1135,7 +1130,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class DD {\n");
-		buf.append("    private DD()[]{\n");
+		buf.append("    private DD(){\n");
 		buf.append("    };\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
