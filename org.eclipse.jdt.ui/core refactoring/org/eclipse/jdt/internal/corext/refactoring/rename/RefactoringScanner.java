@@ -46,6 +46,8 @@ public class RefactoringScanner {
 		IImportContainer importContainer= cu.getImportContainer();
 		if (importContainer.exists())
 			fNoFlyZone= importContainer.getSourceRange();
+		else
+			fNoFlyZone= null;
 		
 		doScan();
 	}
