@@ -16,28 +16,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.search.ui.ISearchResultView;
+import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -45,13 +29,12 @@ import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
-import org.eclipse.search.ui.ISearchResultView;
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
@@ -66,12 +49,12 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	private List fWriteUsages= new ArrayList();
 
 	public OccurrencesFinder(IBinding target) {
-		super();
+		super(true);
 		fTarget= target;
 	}
 	
 	public OccurrencesFinder() {
-		
+		super(true);
 	}
 	
 	public String initialize(CompilationUnit root, int offset, int length) {
@@ -224,7 +207,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 			match(name, fWriteUsages, name.resolveBinding());
 		return super.visit(node);
 	}
-
+	
 	private boolean match(Name node, List result, IBinding binding) {
 		if (binding != null && Bindings.equals(binding, fTarget)) {
 			result.add(node);

@@ -33,6 +33,11 @@ public class ASTNodeFactory {
 	private static final String TYPE_FOOTER= " __f__(); }}"; //$NON-NLS-1$
 	
 	private static class PositionClearer extends GenericVisitor {
+		
+		public PositionClearer() {
+			super(true);
+		}
+		
 		protected boolean visitNode(ASTNode node) {
 			node.setSourceRange(-1, 0);
 			return true;

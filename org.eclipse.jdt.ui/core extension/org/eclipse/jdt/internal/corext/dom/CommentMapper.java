@@ -138,6 +138,7 @@ public class CommentMapper {
 		public List result;
 
 		public ChildrenCollector() {
+			super(true);
 			result= null;
 		}
 		protected boolean visitNode(ASTNode node) {

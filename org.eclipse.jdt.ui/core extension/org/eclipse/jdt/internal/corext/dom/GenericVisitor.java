@@ -14,6 +14,14 @@ import org.eclipse.jdt.core.dom.*;
 
 public class GenericVisitor extends ASTVisitor {
 	
+	public GenericVisitor() {
+		super();
+	}
+
+	public GenericVisitor(boolean visitJavadocTags) {
+		super(visitJavadocTags);
+	}
+
 	//---- Hooks for subclasses -------------------------------------------------
 
 	protected boolean visitNode(ASTNode node) {
@@ -111,7 +119,11 @@ public class GenericVisitor extends ASTVisitor {
 		return visitNode(node);
 	}
 	public boolean visit(Javadoc node) {
-		return visitNode(node);
+		//	do not visit Javadoc tags by default. Use constructor with boolean to enable.
+		if (super.visit(node)) { 
+			return visitNode(node);
+		}
+		return false;
 	}
 	public boolean visit(LabeledStatement node) {
 		return visitNode(node);
@@ -207,6 +219,29 @@ public class GenericVisitor extends ASTVisitor {
 		return visitNode(node);
 	}
 	public boolean visit(WhileStatement node) {
+		return visitNode(node);
+	}
+
+	/* since 3.0 */
+	public boolean visit(BlockComment node) {
+		return visitNode(node);
+	}
+	public boolean visit(LineComment node) {
+		return visitNode(node);
+	}
+	public boolean visit(MemberRef node) {
+		return visitNode(node);
+	}
+	public boolean visit(MethodRef node) {
+		return visitNode(node);
+	}
+	public boolean visit(MethodRefParameter node) {
+		return visitNode(node);
+	}
+	public boolean visit(TagElement node) {
+		return visitNode(node);
+	}
+	public boolean visit(TextElement node) {
 		return visitNode(node);
 	}
 
@@ -396,4 +431,28 @@ public class GenericVisitor extends ASTVisitor {
 	public void endVisit(WhileStatement node) {
 		endVisitNode(node);
 	}
+	
+	/* since 3.0 */
+	public void endVisit(BlockComment node) {
+		endVisitNode(node);
+	}
+	public void endVisit(LineComment node) {
+		endVisitNode(node);
+	}
+	public void endVisit(MemberRef node) {
+		endVisitNode(node);
+	}
+	public void endVisit(MethodRef node) {
+		endVisitNode(node);
+	}
+	public void endVisit(MethodRefParameter node) {
+		endVisitNode(node);
+	}
+	public void endVisit(TagElement node) {
+		endVisitNode(node);
+	}
+	public void endVisit(TextElement node) {
+		endVisitNode(node);
+	}
+
 }

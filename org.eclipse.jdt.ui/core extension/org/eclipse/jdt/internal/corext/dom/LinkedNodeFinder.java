@@ -173,6 +173,7 @@ public class LinkedNodeFinder  {
 		private ArrayList fResult;
 		
 		public LabelFinder(SimpleName label, ArrayList result) {
+			super(true);
 			fLabel= label;
 			fResult= result;
 			fDefiningLabel= null;
@@ -189,11 +190,7 @@ public class LinkedNodeFinder  {
 			}
 			return false;
 		}
-		
-		public boolean visit(Javadoc node) {
-			return true;
-		}
-		
+				
 		public boolean visit(ContinueStatement node) {
 			SimpleName label= node.getLabel();
 			if (fDefiningLabel != null && isSameLabel(label) && ASTNodes.isParent(label, fDefiningLabel)) {
@@ -221,6 +218,7 @@ public class LinkedNodeFinder  {
 		private ArrayList fResult;
 		
 		public BindingFinder(IBinding binding, ArrayList result) {
+			super(true);
 			fBinding= binding;
 			fResult= result;
 		}
@@ -234,10 +232,6 @@ public class LinkedNodeFinder  {
 					}
 				}
 			}
-			return true;
-		}
-		
-		public boolean visit(Javadoc node) {
 			return true;
 		}
 		

@@ -186,6 +186,7 @@ public class ASTNodes {
 		public List result;
 
 		public ChildrenCollector() {
+			super(true);
 			result= null;
 		}
 		protected boolean visitNode(ASTNode node) {

@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
+
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -61,20 +62,21 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	
 	private static class TypeRefASTVisitor extends GenericVisitor {
 
-		private Selection fRange;
+		private Selection fSubRange;
 		private Collection fResult;
 		private ArrayList fOldSingleImports;
 		private ArrayList fOldDemandImports;
 
 		public TypeRefASTVisitor(Selection rangeLimit, Collection result, ArrayList oldSingleImports, ArrayList oldDemandImports) {
+			super(true);
 			fResult= result;
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
-			fRange= rangeLimit;
+			fSubRange= rangeLimit;
 		}
 		
 		private boolean isAffected(ASTNode node) {
-			return fRange == null || !fRange.liesOutside(node);
+			return fSubRange == null || !fSubRange.liesOutside(node);
 		}
 		
 		
@@ -106,10 +108,16 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 		
-		private void visitChildren(List elements) {
+		private void doVisitChildren(List elements) {
 			int nElements= elements.size();
 			for (int i= 0; i < nElements; i++) {
 				((ASTNode) elements.get(i)).accept(this);
+			}
+		}
+		
+		private void doVisitNode(ASTNode node) {
+			if (node != null) {
+				node.accept(this);
 			}
 		}
 		
@@ -124,7 +132,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		 * @see ASTVisitor#visit(ArrayType)
 		 */
 		public boolean visit(ArrayType node) {
-			node.getElementType().accept(this);
+			doVisitNode(node.getElementType());
 			return false;
 		}
 
@@ -191,7 +199,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (node.getAnonymousClassDeclaration() != null) {
 				node.getAnonymousClassDeclaration().accept(this);
 			}
-			visitChildren(node.arguments());
+			doVisitChildren(node.arguments());
 			return false;
 		}
 
@@ -200,7 +208,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		 */
 		public boolean visit(MethodInvocation node) {
 			evalQualifyingExpression(node.getExpression());
-			visitChildren(node.arguments());
+			doVisitChildren(node.arguments());
 			return false;
 		}
 
@@ -213,7 +221,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			
 			evalQualifyingExpression(node.getExpression());
-			visitChildren(node.arguments());
+			doVisitChildren(node.arguments());
 			return false;	
 		}		
 
@@ -240,6 +248,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (!isAffected(node)) {
 				return false;
 			}
+			doVisitNode(node.getJavadoc());
 			
 			typeRefFound(node.getSuperclass());
 
@@ -247,7 +256,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			while (iter.hasNext()) {
 				typeRefFound((Name) iter.next());
 			}
-			visitChildren(node.bodyDeclarations());
+			doVisitChildren(node.bodyDeclarations());
 			return false;
 		}
 		
@@ -257,18 +266,57 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		public boolean visit(MethodDeclaration node) {
 			if (!isAffected(node)) {
 				return false;
-			}			
+			}
+			doVisitNode(node.getJavadoc());
 			
 			if (!node.isConstructor()) {
-				node.getReturnType().accept(this);
+				doVisitNode(node.getReturnType());
 			}
-			visitChildren(node.parameters());
-			Iterator iter= node.thrownExceptions().iterator();
+			doVisitChildren(node.parameters());
+			Iterator iter=node.thrownExceptions().iterator();
 			while (iter.hasNext()) {
 				typeRefFound((Name) iter.next());
 			}
-			if (node.getBody() != null) {
-				node.getBody().accept(this);
+			doVisitNode(node.getBody());
+			return false;
+		}
+		
+		public boolean visit(TagElement node) {
+			String name= node.getTagName();
+			List list= node.fragments();
+			if (name != null && !list.isEmpty()) {
+				int idx= 0;
+				Object first= list.get(0);
+				if (first instanceof Name) {
+					if ("@throws".equals(name) || "@exception".equals(name)) {  //$NON-NLS-1$//$NON-NLS-2$
+						typeRefFound((Name) first);
+					} else if ("@see".equals(name) || "@link".equals(name) || "@linkplain".equals(name)) {  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+						possibleTypeRefFound((Name) first);
+					}
+				}
+				for (int i= idx; i < list.size(); i++) {
+					doVisitNode((ASTNode) list.get(i));
+				}
+			}
+			return false;
+		}
+		
+		public boolean visit(MemberRef node) {
+			Name name= node.getName();
+			if (name != null) {
+				typeRefFound(name);
+			}
+			return false;
+		}
+		
+		public boolean visit(MethodRef node) {
+			Name name= node.getName();
+			if (name != null) {
+				typeRefFound(name);
+			}
+			List list= node.parameters();
+			if (list != null) {
+				doVisitChildren(list); // visit MethodRefParameter with Type
 			}
 			return false;
 		}
@@ -285,18 +333,18 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				
 		private ArrayList fTypeRefsFound; // cached array list for reuse
 		
-		private boolean fIgnoreLowerCaseNames;
+		private boolean fDoIgnoreLowerCaseNames;
 		
 		private IJavaSearchScope fSearchScope;
 		private IPackageFragment fCurrPackage;
 		
 		private ScopeAnalyzer fAnalyzer;
 		
-		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, CompilationUnit root, ImportsStructure impStructure, boolean ignoreLowerCaseNames) throws JavaModelException {
+		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, CompilationUnit root, ImportsStructure impStructure, boolean ignoreLowerCaseNames) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 			fImpStructure= impStructure;
-			fIgnoreLowerCaseNames= ignoreLowerCaseNames;
+			fDoIgnoreLowerCaseNames= ignoreLowerCaseNames;
 			fAnalyzer= new ScopeAnalyzer(root);
 
 			ICompilationUnit cu= fImpStructure.getCompilationUnit();
@@ -417,7 +465,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 		
 		private void findTypeRefs(String simpleTypeName, Collection typeRefsFound) throws JavaModelException {
-			if (fIgnoreLowerCaseNames && simpleTypeName.length() > 0 && Strings.isLowerCase(simpleTypeName.charAt(0))) {
+			if (fDoIgnoreLowerCaseNames && simpleTypeName.length() > 0 && Strings.isLowerCase(simpleTypeName.charAt(0))) {
 				return;
 			}
 			TypeInfo[] infos= AllTypesCache.getTypesForName(simpleTypeName, fSearchScope, null);
@@ -456,7 +504,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		fNumberOfImportsAdded= 0;
 		
 		fParsingError= null;
-		fASTRoot= AST.parseCompilationUnit(impStructure.getCompilationUnit(), true);
+		fASTRoot= AST.parseCompilationUnit(impStructure.getCompilationUnit(), true, null, null);
 	}
 	
 	public OrganizeImportsOperation(ICompilationUnit cu, String[] importOrder, int importThreshold, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException {
@@ -535,7 +583,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 	
 	// find type references in a compilation unit
-	private Iterator findTypeReferences(ArrayList oldSingleImports, ArrayList oldDemandImports) throws JavaModelException {
+	private Iterator findTypeReferences(ArrayList oldSingleImports, ArrayList oldDemandImports) {
 		IProblem[] problems= fASTRoot.getProblems();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem curr= problems[i];
