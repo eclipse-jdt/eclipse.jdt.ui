@@ -12,7 +12,6 @@ import java.util.List;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -21,7 +20,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -33,6 +31,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -41,7 +40,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -77,13 +75,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 	}
 	
-	private static class TypeRefVisitor extends ASTVisitor {
+	private static class TypeRefASTVisitor extends ASTVisitor {
 
 		private HashMap fReferences;
 		private ArrayList fOldSingleImports;
 		private ArrayList fOldDemandImports;
 
-		public TypeRefVisitor(HashMap references, ArrayList oldSingleImports, ArrayList oldDemandImports) {
+		public TypeRefASTVisitor(HashMap references, ArrayList oldSingleImports, ArrayList oldDemandImports) {
 			fReferences= references;
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
@@ -248,6 +246,24 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 		
 		/*
+		 * @see ASTVisitor#visit(MethodDeclaration)
+		 */
+		public boolean visit(MethodDeclaration node) {
+			if (!node.isConstructor()) {
+				node.getReturnType().accept(this);
+			}
+			visitChildren(node.parameters());
+			Iterator iter= node.thrownExceptions().iterator();
+			while (iter.hasNext()) {
+				typeRefFound((Name) iter.next());
+			}
+			if (node.getBody() != null) {
+				node.getBody().accept(this);
+			}
+			return false;
+		}		
+		
+		/*
 		 * @see ASTVisitor#preVisit(ASTNode)
 		 */		
 		public void preVisit(ASTNode node) {
@@ -255,6 +271,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				throw new ASTError(node);
 			}
 		}
+
 	}
 		
 	private static class TypeReferenceProcessor {
@@ -433,7 +450,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return;
 			}
 			
-			
 			int nOldImports= oldDemandImports.size() + oldSingleImports.size();
 						
 			oldDemandImports.add(""); //$NON-NLS-1$
@@ -481,12 +497,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	
 	// find type references in a compilation unit
 	private Iterator findTypeReferences(ArrayList oldSingleImports, ArrayList oldDemandImports) throws JavaModelException {
-		HashMap references= new HashMap();		
-
 		try {
 			CompilationUnit astRoot= AST.parseCompilationUnit(fCompilationUnit, fDoResolve);
-
-			TypeRefVisitor visitor = new TypeRefVisitor(references, oldSingleImports, oldDemandImports);
+			
+			HashMap references= new HashMap();
+			TypeRefASTVisitor visitor = new TypeRefASTVisitor(references, oldSingleImports, oldDemandImports);
 			astRoot.accept(visitor);
 
 			return references.values().iterator();
