@@ -11,14 +11,13 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.generics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,7 +29,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -44,19 +42,13 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.InferTypeArgumentsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
@@ -65,19 +57,19 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVari
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-public class AugmentRawContainerClientsRefactoring extends Refactoring {
+public class InferTypeArgumentsRefactoring extends Refactoring {
 
 	private TextChangeManager fChangeManager;
 	private final IJavaElement[] fElements;
-	private AugmentRawContainerClientsTCModel fTCModel;
+	private InferTypeArgumentsTCModel fTCModel;
 	
-	private AugmentRawContainerClientsRefactoring(IJavaElement[] elements) {
+	private InferTypeArgumentsRefactoring(IJavaElement[] elements) {
 		fElements= elements;
 	}
 	
@@ -85,9 +77,9 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 		return elements.length > 0;
 	}
 
-	public static AugmentRawContainerClientsRefactoring create(IJavaElement[] elements) {
+	public static InferTypeArgumentsRefactoring create(IJavaElement[] elements) {
 		if (isAvailable(elements)) {
-			return new AugmentRawContainerClientsRefactoring(elements);
+			return new InferTypeArgumentsRefactoring(elements);
 		}
 		return null;
 	}
@@ -96,7 +88,7 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("AugmentRawContainerClientsRefactoring.name"); //$NON-NLS-1$
+		return RefactoringCoreMessages.getString("InferTypeArgumentsRefactoring.name"); //$NON-NLS-1$
 	}
 	
 	/*
@@ -113,49 +105,46 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkFinalConditions(final IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask("", 4); //$NON-NLS-1$
-		pm.setTaskName(RefactoringCoreMessages.getString("AugmentRawContainerClientsRefactoring.checking_preconditions"));
+		pm.setTaskName(RefactoringCoreMessages.getString("InferTypeArgumentsRefactoring.checking_preconditions")); //$NON-NLS-1$
 		try {
+			HashMap/*<IJavaProject, List<JavaElement>>*/ projectsToElements= getJavaElementsPerProject(fElements);
 			RefactoringStatus result= check15();
 			
-			IJavaProject project= fElements[0].getJavaProject();
-			fTCModel= new AugmentRawContainerClientsTCModel(project);
+			fTCModel= new InferTypeArgumentsTCModel();
+			final InferTypeArgumentsConstraintCreator unitCollector= new InferTypeArgumentsConstraintCreator(fTCModel);
 			
-			pm.setTaskName("Building collections hierarchy...");
-			GenericContainers genericContainers= GenericContainers.create(project, new SubProgressMonitor(pm, 1));
-			IType[] containerTypes= genericContainers.getContainerTypes();
-			genericContainers= null;
-			
-			SearchPattern pattern= RefactoringSearchEngine.createOrPattern(containerTypes, IJavaSearchConstants.REFERENCES);
-			//TODO: Add container methods (from ContainerMethods)?
-			// -> still misses calls of kind myObj.takeList(myObj.getList()) in CU that doesn't import List
-			IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(fElements, IJavaSearchScope.SOURCES);
-			
-			pm.setTaskName("Finding affected compilation units...");
-			final ICompilationUnit[] cus= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, searchScope, new SubProgressMonitor(pm, 1), result);
-			//TODO: creation of bindings in ContainerMethods should be in loop.
-			//Problem: must be completed before loop starts. => do this as first action of first call to ASTRequestor#acceptAST()
-			final AugmentRawContClConstraintCreator unitCollector= new AugmentRawContClConstraintCreator(fTCModel);
 			pm.setTaskName("Building constraints system...");
 			
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
-			parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-			parser.setResolveBindings(true);
-			parser.setProject(project);
-			parser.createASTs(cus, new String[0], new ASTRequestor() {
-				public void acceptAST(CompilationUnit ast, ICompilationUnit source) {
-					pm.subTask(source.getElementName());
-					ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
-					ast.accept(unitCollector);
-					//TODO: add required methods/cus to "toscan" list
-					fTCModel.newCu();
-				}
-				public void acceptBinding(IBinding binding, String bindingKey) {
-				}
-			}, new SubProgressMonitor(pm, 1));
-			
-			fTCModel.newCu();
+			for (Iterator iter= projectsToElements.entrySet().iterator(); iter.hasNext(); ) {
+				Entry entry= (Entry) iter.next();
+				IJavaProject project= (IJavaProject) entry.getKey();
+				List javaElementsList= (List) entry.getValue();
+				IJavaElement[] javaElements= (IJavaElement[]) javaElementsList.toArray(new IJavaElement[javaElementsList.size()]);
+				final ICompilationUnit[] cus= JavaModelUtil.getAllCompilationUnits(javaElements);
+				
+				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+				parser.setResolveBindings(true);
+				parser.setProject(project);
+				parser.createASTs(cus, new String[0], new ASTRequestor() {
+
+					public void acceptAST(CompilationUnit ast, ICompilationUnit source) {
+						pm.subTask(source.getElementName());
+						ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
+						ast.accept(unitCollector);
+						//TODO: add required methods/cus to "toscan" list
+						fTCModel.newCu();
+					}
+
+					public void acceptBinding(IBinding binding, String bindingKey) {
+						//do nothing
+					}
+				}, new SubProgressMonitor(pm, 1));
+
+				fTCModel.newCu();
+			}
 			pm.setTaskName("Solving constraints...");
-			AugmentRawContClConstraintsSolver solver= new AugmentRawContClConstraintsSolver(fTCModel);
+			InferTypeArgumentsConstraintsSolver solver= new InferTypeArgumentsConstraintsSolver(fTCModel);
 			solver.solveConstraints();
 			HashMap declarationsToUpdate= solver.getDeclarationsToUpdate();
 			HashMap castsToRemove= solver.getCastsToRemove();
@@ -170,6 +159,21 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 		} finally {
 			pm.done();
 		}
+	}
+
+	private HashMap getJavaElementsPerProject(IJavaElement[] elements) {
+		HashMap/*<IJavaProject, List<JavaElement>>*/ result= new HashMap/*<IJavaProject, List<JavaElement>>*/();
+		for (int i= 0; i < fElements.length; i++) {
+			IJavaElement element= fElements[i];
+			IJavaProject javaProject= element.getJavaProject();
+			ArrayList javaElements= (ArrayList) result.get(javaProject);
+			if (javaElements == null) {
+				javaElements= new ArrayList();
+				result.put(javaProject, javaElements);
+			}
+			javaElements.add(element);
+		}
+		return result;
 	}
 
 	private RefactoringStatus check15() {
@@ -196,7 +200,6 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 	}
 
 	private void rewriteDeclarations(HashMap /*<ICompilationUnit, List<ConstraintVariable2>>*/ declarationsToUpdate, HashMap castsToRemove, IProgressMonitor pm) throws CoreException {
-		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		Set entrySet= declarationsToUpdate.entrySet();
 		pm.beginTask("", entrySet.size()); //$NON-NLS-1$
 		pm.setTaskName("Creating changes...");
@@ -207,47 +210,34 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 			pm.subTask(cu.getElementName());
 
 			//TODO: use CompilationUnitRewrite
-			CompilationUnit compilationUnit= parser.parse(cu, false);
-			AST ast= compilationUnit.getAST();
-			ASTRewrite rewrite= ASTRewrite.create(ast);
-			ImportRewrite importRewrite= new ImportRewrite(cu);
+			CompilationUnitRewrite rewrite= new CompilationUnitRewrite(cu);
+			rewrite.setResolveBindings(false);
 			List cvs= (List) entry.getValue();
 			for (Iterator cvIter= cvs.iterator(); cvIter.hasNext();) {
 				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
-				rewriteConstraintVariable(compilationUnit, ast, rewrite, importRewrite, cv);
+				rewriteConstraintVariable(cv, rewrite);
 			}
 			
-			//TODO: create AugmentRawContainerClientsUpdate which is a mapping from CU to {declarationsToUpdate, castsToRemove, ...}
+			//TODO: create InferTypeArgumentsUpdate which is a mapping from CU to {declarationsToUpdate, castsToRemove, ...}
 			List casts= (List) castsToRemove.get(cu);
 			if (casts != null) {
 				for (Iterator castsIter= casts.iterator(); castsIter.hasNext();) {
 					CastVariable2 castCv= (CastVariable2) castsIter.next();
-					CastExpression castExpression= (CastExpression) castCv.getRange().getNode(compilationUnit);
-					Expression newExpression= (Expression) rewrite.createMoveTarget(castExpression.getExpression());
-					rewrite.replace(castExpression, newExpression, null); //TODO: use ImportRemover
+					CastExpression castExpression= (CastExpression) castCv.getRange().getNode(rewrite.getRoot());
+					Expression newExpression= (Expression) rewrite.getASTRewrite().createMoveTarget(castExpression.getExpression());
+					rewrite.getASTRewrite().replace(castExpression, newExpression, null); //TODO: use ImportRemover
 				}
 			}
 			
-			TextBuffer buffer= null;
-			try {
-				buffer= TextBuffer.acquire((IFile) cu.getResource());
-				MultiTextEdit multiEdit= new MultiTextEdit();
-				TextEdit edit= rewrite.rewriteAST(buffer.getDocument(), null);
-				TextEdit edit2= importRewrite.createEdit(buffer.getDocument());
-				multiEdit.addChild(edit);
-				multiEdit.addChild(edit2);
-				CompilationUnitChange change= new CompilationUnitChange(cu.getElementName(), cu);
-				change.setEdit(multiEdit);
+			CompilationUnitChange change= rewrite.createChange();
+			if (change != null) {
 				fChangeManager.manage(cu, change);
-			} finally {
-				TextBuffer.release(buffer);
 			}
-			
 		}
 		
 	}
 
-	private void rewriteConstraintVariable(CompilationUnit compilationUnit, AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ConstraintVariable2 cv) {
+	private void rewriteConstraintVariable(ConstraintVariable2 cv, CompilationUnitRewrite rewrite) {
 		//TODO: make this clean
 		if (cv instanceof CollectionElementVariable2) {
 			CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
@@ -262,23 +252,23 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 //					if (originalType.isSimpleType() || originalType.isQualifiedType()) {
 //						Type movingType= (Type) rewrite.createMoveTarget(originalType);
 //						ParameterizedType newType= ast.newParameterizedType(movingType);
-//						TypeHandle chosenType= AugmentRawContClConstraintsSolver.getChosenType(elementCv);
+//						TypeHandle chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
 //						String typeName= chosenType.getSimpleName(); // TODO: use ImportRewrite
 //						newType.typeArguments().add(rewrite.createStringPlaceholder(typeName, ASTNode.SIMPLE_TYPE));
 //						rewrite.replace(originalType, newType, null); // TODO: description
 //					}
 //				}
 			} else if (element instanceof TypeVariable2) {
-				ASTNode node= ((TypeVariable2) element).getRange().getNode(compilationUnit);
+				ASTNode node= ((TypeVariable2) element).getRange().getNode(rewrite.getRoot());
 				if (node instanceof SimpleName) {
-					ITypeBinding chosenType= AugmentRawContClConstraintsSolver.getChosenType(elementCv);
+					ITypeBinding chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
 					if (chosenType == null)
 						return; // couldn't infer an element type
 					Type originalType= (Type) ((SimpleName) node).getParent();
-					Type movingType= (Type) rewrite.createMoveTarget(originalType);
-					ParameterizedType newType= ast.newParameterizedType(movingType);
-					newType.typeArguments().add(importRewrite.addImport(chosenType, ast));
-					rewrite.replace(originalType, newType, null);
+					Type movingType= (Type) rewrite.getASTRewrite().createMoveTarget(originalType);
+					ParameterizedType newType= rewrite.getAST().newParameterizedType(movingType);
+					newType.typeArguments().add(rewrite.getImportRewrite().addImport(chosenType, rewrite.getAST()));
+					rewrite.getASTRewrite().replace(originalType, newType, null);
 				} //TODO: other node types?
 			}
 			

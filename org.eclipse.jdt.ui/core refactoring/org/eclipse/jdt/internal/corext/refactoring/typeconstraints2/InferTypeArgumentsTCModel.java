@@ -22,11 +22,7 @@ import java.util.List;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -34,7 +30,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -42,7 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUn
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 
-public class AugmentRawContainerClientsTCModel {
+public class InferTypeArgumentsTCModel {
 	
 	private static class TypeConstraintComparer implements IElementComparer/*<ITypeConstraint2>*/ {
 		public boolean equals(Object a, Object b) {
@@ -92,21 +87,7 @@ public class AugmentRawContainerClientsTCModel {
 	private Collection fNewTypeConstraints;
 	private Collection fNewConstraintVariables; //TODO: remove?
 	
-	protected final ITypeBinding fPrimitiveBoolean;
-	protected final ITypeBinding fPrimitiveInt;
-	protected final ITypeBinding fVoid;
-	protected final ITypeBinding fObject;
-	protected final ITypeBinding fString;
-	protected final ITypeBinding fCollection;
-	protected final ITypeBinding fList;
-	protected final ITypeBinding fLinkedList;
-	protected final ITypeBinding fVector;
-	protected final ITypeBinding fIterator;
-	protected final ITypeBinding fListIterator;
-	protected final ITypeBinding fEnumeration;
-	protected final ITypeBinding fCollections;
-
-	public AugmentRawContainerClientsTCModel(IJavaProject project) {
+	public InferTypeArgumentsTCModel() {
 		fTypeConstraints= new CustomHashtable(new TypeConstraintComparer());
 		fConstraintVariables= new CustomHashtable(new ConstraintVariableComparer());
 		fEquivalenceRepresentatives= new HashSet();
@@ -115,34 +96,6 @@ public class AugmentRawContainerClientsTCModel {
 		fCuScopedConstraintVariables= new HashSet();
 		fNewTypeConstraints= new ArrayList();
 		fNewConstraintVariables= new ArrayList();
-		
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
-		
-		String source= "class X {java.util.Collection t0; " + //$NON-NLS-1$
-				"java.util.List t1; java.util.LinkedList t2; java.util.Vector t3; " + //$NON-NLS-1$
-				"java.util.Iterator t4; java.util.ListIterator t5; java.util.Enumeration t6; " + //$NON-NLS-1$
-				"java.util.Collections t7; }"; //$NON-NLS-1$
-		parser.setSource(source.toCharArray());
-		parser.setUnitName("X.java"); //$NON-NLS-1$
-		parser.setProject(project);
-		parser.setResolveBindings(true);
-		CompilationUnit unit= (CompilationUnit) parser.createAST(null);
-		TypeDeclaration type= (TypeDeclaration) unit.types().get(0);
-		List typeBodyDeclarations= type.bodyDeclarations();
-		//TODO: make sure this is in the compiler loop!
-		fPrimitiveInt= unit.getAST().resolveWellKnownType("int");
-		fPrimitiveBoolean= unit.getAST().resolveWellKnownType("boolean");
-		fVoid= unit.getAST().resolveWellKnownType("void");
-		fObject= unit.getAST().resolveWellKnownType("java.lang.Object");
-		fString= unit.getAST().resolveWellKnownType("java.lang.String");
-		fCollection= getTypeBinding(typeBodyDeclarations, 0);
-		fList= getTypeBinding(typeBodyDeclarations, 1);
-		fLinkedList= getTypeBinding(typeBodyDeclarations, 2);
-		fVector= getTypeBinding(typeBodyDeclarations, 3);
-		fIterator= getTypeBinding(typeBodyDeclarations, 4);
-		fListIterator= getTypeBinding(typeBodyDeclarations, 5);
-		fEnumeration= getTypeBinding(typeBodyDeclarations, 6);
-		fCollections= getTypeBinding(typeBodyDeclarations, 7);
 	}
 	
 	private ITypeBinding getTypeBinding(List typeBodyDeclarations, int idx) {
@@ -187,66 +140,14 @@ public class AugmentRawContainerClientsTCModel {
 		
 		//TODO: who needs these?
 		if (cv1 instanceof TypeConstraintVariable2)
-			if (TypeBindings.isSuperType(fCollection, ((TypeConstraintVariable2) cv1).getTypeBinding()))
+			if (isAGenericType(((TypeConstraintVariable2) cv1).getTypeBinding()))
 				return true;
 				
 		if (cv2 instanceof TypeConstraintVariable2)
-			if (TypeBindings.isSuperType(fCollection, ((TypeConstraintVariable2) cv2).getTypeBinding()))
+			if (isAGenericType(((TypeConstraintVariable2) cv2).getTypeBinding()))
 				return true;
 		
 		return false;
-	}
-	
-	public ITypeBinding getPrimitiveBooleanType() {
-		return fPrimitiveBoolean;
-	}
-
-	public ITypeBinding getPrimitiveIntType() {
-		return fPrimitiveInt;
-	}
-	
-	public ITypeBinding getVoidType() {
-		return fVoid;
-	}
-
-	public ITypeBinding getObjectType() {
-		return fObject;
-	}
-
-	public ITypeBinding getStringType() {
-		return fString;
-	}
-
-	public ITypeBinding getCollectionType() {
-		return fCollection;
-	}
-	
-	public ITypeBinding getListType() {
-		return fList;
-	}
-	
-	public ITypeBinding getLinkedListType() {
-		return fLinkedList;
-	}
-	
-	public ITypeBinding getVectorType() {
-		return fVector;
-	}
-	
-	public ITypeBinding getIteratorType() {
-		return fIterator;
-	}
-	
-	public ITypeBinding getListIteratorType() {
-		return fListIterator;
-	}
-	
-	public ITypeBinding getEnumerationType() {
-		return fEnumeration;
-	}
-	
-	public ITypeBinding getCollectionsType() {
-		return fCollections;
 	}
 	
 	/**
@@ -591,7 +492,7 @@ public class AugmentRawContainerClientsTCModel {
 		if (storedElementVariable != null)
 			return storedElementVariable;
 		
-		if (isACollectionType(expressionCv.getTypeBinding())) {
+		if (isAGenericType(expressionCv.getTypeBinding())) {
 			CollectionElementVariable2 cv= new CollectionElementVariable2(expressionCv);
 			cv= (CollectionElementVariable2) storedCv(cv); //TODO: Should not use storedCv(..) here!
 			setElementVariable(expressionCv, cv);
@@ -602,12 +503,11 @@ public class AugmentRawContainerClientsTCModel {
 			return null;
 		}
 	}
-
-	public boolean isACollectionType(ITypeBinding typeBinding) {
-		return TypeBindings.isSuperType(getCollectionType(), typeBinding)
-				|| TypeBindings.isSuperType(getIteratorType(), typeBinding)
-				|| TypeBindings.isSuperType(getEnumerationType(), typeBinding);
-		//TODO: other top level types?
+	
+	public boolean isAGenericType(ITypeBinding typeBinding) {
+		return typeBinding.isParameterizedType()
+				|| typeBinding.isRawType()
+				|| typeBinding.isGenericType();
 	}
 
 	public void makeCastVariable(CastExpression castExpression, TypeConstraintVariable2 expressionCv) {

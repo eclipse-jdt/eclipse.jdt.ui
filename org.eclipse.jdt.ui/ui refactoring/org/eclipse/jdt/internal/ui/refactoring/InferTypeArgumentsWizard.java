@@ -21,40 +21,34 @@ import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.refactoring.generics.AugmentRawContainerClientsRefactoring;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
-public class AugmentRawContainerClientsWizard extends RefactoringWizard {
+public class InferTypeArgumentsWizard extends RefactoringWizard {
 
-	public AugmentRawContainerClientsWizard(Refactoring refactoring) {
+	public InferTypeArgumentsWizard(Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
-		setDefaultPageTitle(RefactoringMessages.getString("AugmentRawContainerClientsWizard.defaultPageTitle")); //$NON-NLS-1$
+		setDefaultPageTitle(RefactoringMessages.getString("InferTypeArgumentsWizard.defaultPageTitle")); //$NON-NLS-1$
 	}
 
 	/*
 	 * @see org.eclipse.ltk.ui.refactoring.RefactoringWizard#addUserInputPages()
 	 */
 	protected void addUserInputPages() {
-		addPage(new AugmentRawContainerClientsInputPage());
+		addPage(new InferTypeArgumentsInputPage());
 	}
 
-	private static class AugmentRawContainerClientsInputPage extends UserInputWizardPage {
-		public static final String PAGE_NAME= "AugmentRawContainerClientsInputPage"; //$NON-NLS-1$
+	private static class InferTypeArgumentsInputPage extends UserInputWizardPage {
+		public static final String PAGE_NAME= "InferTypeArgumentsInputPage"; //$NON-NLS-1$
 
-		private static final String DESCRIPTION= RefactoringMessages.getString("AugmentRawContainerClientsInputPage.description"); //$NON-NLS-1$
+		private static final String DESCRIPTION= RefactoringMessages.getString("InferTypeArgumentsInputPage.description"); //$NON-NLS-1$
     
-		public AugmentRawContainerClientsInputPage() {
+		public InferTypeArgumentsInputPage() {
 			super(PAGE_NAME);
 			setDescription(DESCRIPTION);
-		}
-
-		private AugmentRawContainerClientsRefactoring getAugmentRawContainerClientsRefactoring(){
-			return (AugmentRawContainerClientsRefactoring) getRefactoring();
 		}
 
 		public void createControl(Composite parent) {
@@ -66,8 +60,8 @@ public class AugmentRawContainerClientsWizard extends RefactoringWizard {
 			result.setLayout(layout);
 			
 			Label doit= new Label(result, SWT.WRAP);
-			doit.setText("Infer generic type parameters for Collection classes and remove unnecessary casts.\n\n" +
-					"Note: This refactoring is work in progress.");
+			doit.setText(RefactoringMessages.getString("InferTypeArgumentsWizard.lengthyDescription") + //$NON-NLS-1$
+					RefactoringMessages.getString("InferTypeArgumentsWizard.workInProgress")); //$NON-NLS-1$
 			doit.setLayoutData(new GridData());
 			
 			updateStatus();
@@ -77,7 +71,7 @@ public class AugmentRawContainerClientsWizard extends RefactoringWizard {
 
 		private void updateStatus() {
 			setPageComplete(true);
-//			setPageComplete(getAugmentRawContainerClientsRefactoring().validateInput());
+			//TODO: validate?
 		}
 	}
 }

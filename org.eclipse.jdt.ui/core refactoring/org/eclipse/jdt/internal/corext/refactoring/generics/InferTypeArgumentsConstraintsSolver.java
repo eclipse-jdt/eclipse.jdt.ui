@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.InferTypeArgumentsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
@@ -39,11 +39,11 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable
 
 
 
-public class AugmentRawContClConstraintsSolver {
+public class InferTypeArgumentsConstraintsSolver {
 
 	private final static String TYPE_ESTIMATE= "typeEstimate"; //$NON-NLS-1$
 	
-	private final AugmentRawContainerClientsTCModel fTypeConstraintFactory;
+	private final InferTypeArgumentsTCModel fTypeConstraintFactory;
 	
 	/**
 	 * The work-list used by the type constraint solver to hold the set of
@@ -55,7 +55,7 @@ public class AugmentRawContClConstraintsSolver {
 	private HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ fDeclarationsToUpdate;
 	private HashMap/*<ICompilationUnit, List<CastVariable2>>*/ fCastsToRemove;
 	
-	public AugmentRawContClConstraintsSolver(AugmentRawContainerClientsTCModel typeConstraintFactory) {
+	public InferTypeArgumentsConstraintsSolver(InferTypeArgumentsTCModel typeConstraintFactory) {
 		fTypeConstraintFactory= typeConstraintFactory;
 		fWorkList= new LinkedList();
 	}
@@ -188,7 +188,9 @@ public class AugmentRawContClConstraintsSolver {
 				if (cu != null) //TODO: shouldn't be the case
 					addToMultiMap(fDeclarationsToUpdate, cu, cv);
 			} else {
-				setTypeEstimate(cv, null);
+				TypeSet typeSet= getTypeEstimate(cv);
+				if (typeSet != null)
+					setChosenType(cv, typeSet.chooseSingleType());
 			}
 		}
 	}
@@ -198,7 +200,7 @@ public class AugmentRawContClConstraintsSolver {
 		for (int i= 0; i < castVariables.length; i++) {
 			CastVariable2 castCv= castVariables[i];
 			TypeConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
-			ITypeBinding chosenType= AugmentRawContClConstraintsSolver.getChosenType(expressionVariable);
+			ITypeBinding chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(expressionVariable);
 			if (chosenType != null && TypeBindings.canAssign(chosenType, castCv.getTypeBinding())) {
 				ICompilationUnit cu= castCv.getCompilationUnit();
 				addToMultiMap(fCastsToRemove, cu, castCv);

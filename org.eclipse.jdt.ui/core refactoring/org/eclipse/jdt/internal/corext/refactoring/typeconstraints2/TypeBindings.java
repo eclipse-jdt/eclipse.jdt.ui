@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
@@ -45,6 +46,10 @@ public class TypeBindings {
 		return TypeRules.canAssign(expressionType, variableType);
 	}
 	
+	public static IBinding getStringBinding(ASTNode node) {
+		return node.getAST().resolveWellKnownType("java.lang.String"); //$NON-NLS-1$
+	}
+
 //*** copied from org.eclipse.jdt.internal.compiler.lookup.Scope ***
 //TODO: Ask JDT/Core for API for this?
 	
@@ -165,7 +170,6 @@ public class TypeBindings {
 		}
 		return object;
 	}
-
 //	public ITypeBinding lowerUpperBound(ITypeBinding[] types) {
 //		ArrayList invocations = new ArrayList(1);
 //		ITypeBinding mec = minimalErasedCandidate(types, invocations);

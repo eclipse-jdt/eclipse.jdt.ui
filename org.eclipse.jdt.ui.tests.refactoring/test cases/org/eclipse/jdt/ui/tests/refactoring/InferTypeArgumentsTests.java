@@ -24,12 +24,12 @@ import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.internal.corext.refactoring.generics.AugmentRawContainerClientsRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 
-public class AugmentRawContainerClientsTests extends RefactoringTest {
+public class InferTypeArgumentsTests extends RefactoringTest {
 
-	private static final Class clazz= AugmentRawContainerClientsTests.class;
-	private static final String REFACTORING_PATH= "AugmentRawContainerClients/";
+	private static final Class clazz= InferTypeArgumentsTests.class;
+	private static final String REFACTORING_PATH= "InferTypeArguments/";
 	
 	public static Test suite() {
 		return new Java15Setup(new TestSuite(clazz));
@@ -39,7 +39,7 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 		return new Java15Setup(someTest);
 	}
 	
-	public AugmentRawContainerClientsTests(String name) {
+	public InferTypeArgumentsTests(String name) {
 		super(name);
 	}
 	
@@ -50,7 +50,7 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 	private void performCu(int expectedInitialStatus, int expectedFinalStatus) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IJavaElement[] elements= { cu };
-		AugmentRawContainerClientsRefactoring refactoring= AugmentRawContainerClientsRefactoring.create(elements);
+		InferTypeArgumentsRefactoring refactoring= InferTypeArgumentsRefactoring.create(elements);
 		
 		NullProgressMonitor pm= new NullProgressMonitor();
 		RefactoringStatus initialStatus= refactoring.checkInitialConditions(pm);

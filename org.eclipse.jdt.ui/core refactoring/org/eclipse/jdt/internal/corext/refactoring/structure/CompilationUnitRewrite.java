@@ -39,22 +39,49 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.ltk.core.refactoring.TextChange;
-
+/**
+ * A {@link CompilationUnitRewrite} holds all data structures that are typically
+ * required for non-trivial refactorings. All getters are initialized lazily to
+ * avoid lengthy processing in
+ * {@link org.eclipse.ltk.core.refactoring.Refactoring#checkInitialConditions(org.eclipse.core.runtime.IProgressMonitor)}.
+ * <p>
+ * Bindings are resolved by default, but can be disabled with <code>setResolveBindings(false)</code>.
+ * </p>
+ */
 public class CompilationUnitRewrite {
 	//TODO: add RefactoringStatus fStatus;?
 	private ICompilationUnit fCu;
-	private CompilationUnit fRoot;
 	private List/*<TextEditGroup>*/ fTextEditGroups;
 	
+	private CompilationUnit fRoot; // lazily initialized
 	private OldASTRewrite fRewrite; // lazily initialized
 	private ImportRewrite fImportRewrite; // lazily initialized
-	private ImportRemover fImportRemover;
+	private ImportRemover fImportRemover; // lazily initialized
+	private boolean fResolveBindings;
 	
 	public CompilationUnitRewrite(ICompilationUnit cu) {
 		fCu= cu;
-		fRoot= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
 		fTextEditGroups= new ArrayList();
+		fResolveBindings= true;
+	}
+	
+	/**
+	 * Requests that the compiler should provide binding information for the AST
+	 * nodes it creates. To be effective, this method must be called before any
+	 * of {@link #getRoot()},{@link #getASTRewrite()},
+	 * {@link #getImportRemover()}.
+	 * <p>
+	 * Defaults to <b><code>true</code> </b> (do resolve bindings).
+	 * 
+	 * @param resolve
+	 *            <code>true</code> if bindings are wanted, and
+	 *            <code>false</code> if bindings are not of interest
+	 * @see org.eclipse.jdt.core.dom.ASTParser#setResolveBindings(boolean)
+	 *      Note: The default value (<code>true</code>) differs from the one of
+	 *      the corresponding method in ASTParser.
+	 */
+	public void setResolveBindings(boolean resolve) {
+		fResolveBindings= resolve;
 	}
 	
 	public void clearASTRewrite() {
@@ -79,11 +106,11 @@ public class CompilationUnitRewrite {
 	}
 	
 	/**
-	 * @return a {@link TextChange}, or <code>null</code> for an empty change
+	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
 	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
 	 * @throws IllegalArgumentException when the ast rewrite encounters problems
 	 */
-	public TextChange createChange() throws CoreException {
+	public CompilationUnitChange createChange() throws CoreException {
 		boolean needsAstRewrite= fRewrite != null; //TODO: do we need something like ASTRewrite#hasChanges() here? 
 		boolean needsImportRemoval= fImportRemover != null && fImportRemover.hasRemovedNodes();
 		boolean needsImportRewrite= fImportRewrite != null && ! fImportRewrite.isEmpty();
@@ -139,13 +166,19 @@ public class CompilationUnitRewrite {
 	}
 
 	public CompilationUnit getRoot() {
+		if (fRoot == null)
+			fRoot= new RefactoringASTParser(AST.JLS3).parse(fCu, fResolveBindings);
 		return fRoot;
+	}
+	
+	public AST getAST() {
+		return getRoot().getAST();
 	}
 	
 	/** @deprecated use {@link #getASTRewrite()} */
 	public OldASTRewrite getOldRewrite() {
 		if (fRewrite == null)
-			fRewrite= new OldASTRewrite(fRoot);
+			fRewrite= new OldASTRewrite(getRoot());
 		return fRewrite;
 	}
 	
@@ -168,7 +201,7 @@ public class CompilationUnitRewrite {
 	
 	public ImportRemover getImportRemover() {
 		if (fImportRemover == null) {
-			fImportRemover= new ImportRemover(fCu.getJavaProject(), fRoot);
+			fImportRemover= new ImportRemover(fCu.getJavaProject(), getRoot());
 		}
 		return fImportRemover;
 	}

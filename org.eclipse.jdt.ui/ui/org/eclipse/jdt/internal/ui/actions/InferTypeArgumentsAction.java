@@ -23,12 +23,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.jdt.internal.corext.refactoring.generics.AugmentRawContainerClientsRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.refactoring.AugmentRawContainerClientsWizard;
+import org.eclipse.jdt.internal.ui.refactoring.InferTypeArgumentsWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -38,35 +38,34 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
- * Changes clients of J2SE 1.4 container classes (collections, maps, enumerations, iterators)
- * to use generics (type parameters).
+ * Infers type argumnets for raw references to generic types.
  *  
  * @since 3.1
  */
-public class AugmentRawContainerClientsAction extends SelectionDispatchAction {
+public class InferTypeArgumentsAction extends SelectionDispatchAction {
 
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("AugmentRawContainerClientsAction.dialog_title");//$NON-NLS-1$
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("InferTypeArgumentsAction.dialog_title");//$NON-NLS-1$
 	private CompilationUnitEditor fEditor;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
-	public AugmentRawContainerClientsAction(CompilationUnitEditor editor) {
+	public InferTypeArgumentsAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
 	/**
-	 * Creates a new {@link AugmentRawContainerClientsAction}. The action requires
+	 * Creates a new {@link InferTypeArgumentsAction}. The action requires
 	 * that the selection provided by the site's selection provider is of type 
 	 * {@link org.eclipse.jface.viewers.IStructuredSelection}.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public AugmentRawContainerClientsAction(IWorkbenchSite site) {
+	public InferTypeArgumentsAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.getString("AugmentRawContainerClientsAction.label")); //$NON-NLS-1$
+		setText(RefactoringMessages.getString("InferTypeArgumentsAction.label")); //$NON-NLS-1$
 	}
 	
 	/*
@@ -99,7 +98,7 @@ public class AugmentRawContainerClientsAction extends SelectionDispatchAction {
 			if (canEnable(elements)) {
 				startRefactoring(elements);
 			} else {
-				String unavailable= RefactoringMessages.getString("AugmentRawContainerClientsAction.unavailable"); //$NON-NLS-1$;
+				String unavailable= RefactoringMessages.getString("InferTypeArgumentsAction.unavailable"); //$NON-NLS-1$;
 				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
 			}
 		} catch (JavaModelException e) {
@@ -119,7 +118,7 @@ public class AugmentRawContainerClientsAction extends SelectionDispatchAction {
 			if (element != null && canEnable(array)){
 				startRefactoring(array);	
 			} else {
-				String unavailable= RefactoringMessages.getString("AugmentRawContainerClientsAction.unavailable"); //$NON-NLS-1$;
+				String unavailable= RefactoringMessages.getString("InferTypeArgumentsAction.unavailable"); //$NON-NLS-1$;
 				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
 			}
 		} catch (JavaModelException e) {
@@ -142,12 +141,12 @@ public class AugmentRawContainerClientsAction extends SelectionDispatchAction {
 
 	private static boolean canEnable(IJavaElement[] elements) throws JavaModelException {
 		//TODO: LogicalPackages?
-		return AugmentRawContainerClientsRefactoring.isAvailable(elements);
+		return InferTypeArgumentsRefactoring.isAvailable(elements);
 	}
 	
 	private void startRefactoring(IJavaElement[] elements) {
 		try {
-			AugmentRawContainerClientsRefactoring refactoring= AugmentRawContainerClientsRefactoring.create(elements);
+			InferTypeArgumentsRefactoring refactoring= InferTypeArgumentsRefactoring.create(elements);
 			if (refactoring == null)
 				return;
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, true);
@@ -156,7 +155,7 @@ public class AugmentRawContainerClientsAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static RefactoringWizard createWizard(AugmentRawContainerClientsRefactoring refactoring) {
-		return new AugmentRawContainerClientsWizard(refactoring);
+	private static RefactoringWizard createWizard(InferTypeArgumentsRefactoring refactoring) {
+		return new InferTypeArgumentsWizard(refactoring);
 	}
 }

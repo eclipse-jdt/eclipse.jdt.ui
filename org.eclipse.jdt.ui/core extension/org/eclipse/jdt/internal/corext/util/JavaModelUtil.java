@@ -821,4 +821,53 @@ public final class JavaModelUtil {
 		}
 		return null; // attachment not possible
 	}
+	
+	/**
+	 * Get all compilation units of a selection.
+	 * @param javaElements the selected java elements
+	 * @return all compilation units containing and contained in elements from javaElements
+	 * @throws JavaModelException
+	 */
+	public static ICompilationUnit[] getAllCompilationUnits(IJavaElement[] javaElements) throws JavaModelException {
+		HashSet result= new HashSet();
+		for (int i= 0; i < javaElements.length; i++) {
+			addAllCus(result, javaElements[i]);
+		}
+		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
+	}
+
+	private static void addAllCus(HashSet/*<ICompilationUnit>*/ collector, IJavaElement javaElement) throws JavaModelException {
+		switch (javaElement.getElementType()) {
+			case IJavaElement.JAVA_PROJECT:
+				IJavaProject javaProject= (IJavaProject) javaElement;
+				IPackageFragmentRoot[] packageFragmentRoots= javaProject.getPackageFragmentRoots();
+				for (int i= 0; i < packageFragmentRoots.length; i++)
+					addAllCus(collector, packageFragmentRoots[i]);
+				return;
+		
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot) javaElement;
+				if (packageFragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE)
+					return;
+				IJavaElement[] packageFragments= packageFragmentRoot.getChildren();
+				for (int j= 0; j < packageFragments.length; j++)
+					addAllCus(collector, packageFragments[j]);
+				return;
+		
+			case IJavaElement.PACKAGE_FRAGMENT:
+				IPackageFragment packageFragment= (IPackageFragment) javaElement;
+				collector.addAll(Arrays.asList(packageFragment.getCompilationUnits()));
+				return;
+			
+			case IJavaElement.COMPILATION_UNIT:
+				collector.add(javaElement);
+				return;
+				
+			default:
+				IJavaElement cu= javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
+				if (cu != null)
+					collector.add(cu);
+		}
+	}
+
 }

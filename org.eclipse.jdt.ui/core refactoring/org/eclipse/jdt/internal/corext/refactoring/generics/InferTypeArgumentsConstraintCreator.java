@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -43,7 +44,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.InferTypeArgumentsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
@@ -57,21 +58,19 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
+public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * Property in <code>ASTNode</code>s that holds the node's <code>ConstraintVariable</code>.
 	 */
 	private static final String CV_PROP= "org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CONSTRAINT_VARIABLE"; //$NON-NLS-1$
 	
-	private AugmentRawContainerClientsTCModel fTCModel;
-	private ContainerMethods fContainerMethods;
+	private InferTypeArgumentsTCModel fTCModel;
 	private ICompilationUnit fCU;
 	
 
-	public AugmentRawContClConstraintCreator(AugmentRawContainerClientsTCModel model) {
+	public InferTypeArgumentsConstraintCreator(InferTypeArgumentsTCModel model) {
 		fTCModel= model;
-		fContainerMethods= new ContainerMethods(fTCModel);
 	}
 	
 	public boolean visit(CompilationUnit node) {
@@ -98,7 +97,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 			return;
 		
 		setConstraintVariable(node, typeVariable);
-		if (fTCModel.isACollectionType(typeVariable.getTypeBinding()))
+		if (fTCModel.isAGenericType(typeVariable.getTypeBinding()))
 			fTCModel.makeElementVariable(typeVariable);
 	}
 	
@@ -122,7 +121,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 			return;
 		
 		Assignment.Operator op= node.getOperator();
-		if (op == Assignment.Operator.PLUS_ASSIGN && TypeBindings.equals(lhs.resolveTypeBinding(), fTCModel.getStringType())) {
+		if (op == Assignment.Operator.PLUS_ASSIGN && TypeBindings.equals(lhs.resolveTypeBinding(), TypeBindings.getStringBinding(node))) {
 			//Special handling for automatic String conversion: do nothing; the RHS can be anything.
 		} else {
 			CollectionElementVariable2 leftElement= fTCModel.getElementVariable(left);
@@ -174,6 +173,13 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		ITypeBinding typeBinding= node.resolveTypeBinding();
 		PlainTypeVariable2 cv= fTCModel.makePlainTypeVariable(typeBinding);
 		setConstraintVariable(node, cv);
+	}
+	
+	public void endVisit(TypeLiteral node) {
+//		ITypeBinding typeBinding= node.resolveTypeBinding();
+//		PlainTypeVariable2 cv= fTCModel.makePlainTypeVariable(typeBinding);
+//		fTCModel.makeElementVariable(cv);
+//		setConstraintVariable(node, cv);
 	}
 	
 	public void endVisit(MethodDeclaration node) {
@@ -261,47 +267,121 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		if (methodBinding == null)
 			return;
 		
-		SpecialMethod specialMethod= fContainerMethods.getSpecialMethodFor(methodBinding);
-		if (specialMethod != null) {
-			specialMethod.generateConstraintsFor(node, this);
-		} else {
-			ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
-			List arguments= node.arguments();
-			doVisitMethodInvocationArguments(methodBinding, parameterTypes, arguments);
-			
-			ReturnTypeVariable2 returnTypeCv= fTCModel.makeReturnTypeVariable(methodBinding);
-			if (returnTypeCv == null)
-				return;
-			
-			CollectionElementVariable2 returnTypeElementCv= fTCModel.makeElementVariable(returnTypeCv);
-			setConstraintVariable(node, returnTypeCv);
-		}
+		Expression receiver= node.getExpression();
+		//TODO: Expression can be null when visiting a non-special method in a subclass of a container type.
+		
+		doVisitMethodInvocationReturnType(node, methodBinding, receiver);
+		List arguments= node.arguments();
+		doVisitMethodInvocationArguments(methodBinding, arguments, receiver);
+		
 	}
 	
-	private void doVisitMethodInvocationArguments(IMethodBinding methodBinding, ITypeBinding[] parameterTypes, List arguments) {
+	private void doVisitMethodInvocationReturnType(MethodInvocation node, IMethodBinding methodBinding, Expression receiver) {
+		ITypeBinding genericReturnType= methodBinding.getErasure().getReturnType();
+		if (methodBinding.getErasure().getTypeParameters().length == 1 &&
+				(genericReturnType.isTypeVariable() || genericReturnType.isWildcardType()) &&
+				methodBinding.getParameterTypes().length == 1 &&
+				methodBinding.getParameterTypes()[0].getErasure().isGenericType()) {
+			// e.g. in Collections: <T ..> T min(Collection<? extends T> coll):
+			TypeConstraintVariable2 argCv= (TypeConstraintVariable2) getConstraintVariable((Expression) node.arguments().get(0));
+			ConstraintVariable2 elementCv= fTCModel.makeElementVariable(argCv);
+			// [retVal] =^= Elem[arg]:
+			setConstraintVariable(node, elementCv); //TODO: should be [retVal] <= Elem[arg]
+			
+		} else if (isOneParameterGenericType(methodBinding.getDeclaringClass()) &&
+				(genericReturnType.isTypeVariable() || genericReturnType.isWildcardType())) {
+			if (receiver == null) //TODO: ???
+				return;
+			// e.g. in List<E>: E get(int index):
+			TypeConstraintVariable2 expressionCv= (TypeConstraintVariable2) getConstraintVariable(receiver);
+			ConstraintVariable2 elementCv= fTCModel.makeElementVariable(expressionCv);
+			// [retVal] =^= Elem[receiver]:
+			setConstraintVariable(node, elementCv);
+			
+		} else if (isOneParameterGenericType(methodBinding.getDeclaringClass()) && genericReturnType.isParameterizedType()) {
+			if (receiver == null) //TODO: ???
+				return;
+			//e.g. List<E>: Iterator<E> iterator()
+			ITypeBinding[] typeArguments= genericReturnType.getTypeArguments();
+			if (typeArguments.length == 1 && 
+					(typeArguments[0].isTypeVariable() || typeArguments[0].isWildcardType())) { //TODO: wildcard, more than one type arg, ...
+				TypeConstraintVariable2 expressionCv= (TypeConstraintVariable2) getConstraintVariable(receiver);
+				fTCModel.makeElementVariable(expressionCv); //TODO: needs index for element
+				
+				//TODO: retValCv has wrong raw type, but not used (refactoring only considers element types).
+				// Should avoid creating in the first place!
+				TypeConstraintVariable2 retValCv= expressionCv;
+				// Elem[retVal] =^= Elem[receiver]
+				setConstraintVariable(node, retValCv);
+			}
+			
+		} else {
+			ReturnTypeVariable2 returnTypeCv= fTCModel.makeReturnTypeVariable(methodBinding);
+			if (returnTypeCv != null) {
+				fTCModel.makeElementVariable(returnTypeCv);
+				setConstraintVariable(node, returnTypeCv);
+			}
+		}
+	}
+
+	private boolean isOneParameterGenericType(ITypeBinding type) {
+		//TODO: remove this temporary restriction
+		return type.getErasure().getTypeParameters().length == 1;
+	}
+
+	private void doVisitMethodInvocationArguments(IMethodBinding methodBinding, List arguments, Expression receiver) {
+		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
 		for (int i= 0; i < parameterTypes.length; i++) {
-			ITypeBinding parameterTypeBinding= parameterTypes[i];
-			if (! fTCModel.isACollectionType(parameterTypeBinding))
-				continue;
-			ParameterTypeVariable2 parameterTypeCv= fTCModel.makeParameterTypeVariable(methodBinding, i);
-			ConstraintVariable2 argumentCv= getConstraintVariable((ASTNode) arguments.get(i));
-			if (argumentCv == null)
-				continue;
-			CollectionElementVariable2 parameterElementCv= fTCModel.makeElementVariable(parameterTypeCv);
-			CollectionElementVariable2 argumentElementCv= fTCModel.getElementVariable(argumentCv);
-			// Elem[param] =^= Elem[arg]
-			fTCModel.createEqualsConstraint(parameterElementCv, argumentElementCv);
+			ITypeBinding genericArgumentType= methodBinding.getErasure().getParameterTypes()[i];
+			if (isOneParameterGenericType(methodBinding.getDeclaringClass()) && 
+					(genericArgumentType.isTypeVariable() || genericArgumentType.isWildcardType())) {
+				if (receiver == null) //TODO: ???
+					continue;
+				//e.g. Collection<E>: boolean add(E o)
+				TypeConstraintVariable2 expressionCv= (TypeConstraintVariable2) getConstraintVariable(receiver);
+				Expression arg= (Expression) arguments.get(i);
+				ConstraintVariable2 argCv= getConstraintVariable(arg);
+				ConstraintVariable2 elementCv= fTCModel.makeElementVariable(expressionCv);
+				// [arg] <= Elem[receiver]:
+				fTCModel.createSubtypeConstraint(argCv, elementCv);
+			
+			} else if (isOneParameterGenericType(methodBinding.getDeclaringClass()) && genericArgumentType.isParameterizedType()) {
+				if (receiver == null) //TODO: ???
+					continue;
+				//e.g. Collection<E>: boolean addAll(Collection<? extends E> c)
+				TypeConstraintVariable2 expressionCv= (TypeConstraintVariable2) getConstraintVariable(receiver);
+				Expression arg= (Expression) arguments.get(i);
+				ConstraintVariable2 argCv= getConstraintVariable(arg);
+				CollectionElementVariable2 argElementCv= fTCModel.getElementVariable(argCv);
+				CollectionElementVariable2 elementCv= fTCModel.makeElementVariable(expressionCv);
+				// Elem[arg] <= Elem[receiver]
+				fTCModel.createSubtypeConstraint(argElementCv, elementCv);
+
+			} else { //TODO: not else, but always?
+				ITypeBinding parameterTypeBinding= parameterTypes[i];
+				if (! fTCModel.isAGenericType(parameterTypeBinding))
+					continue;
+				ParameterTypeVariable2 parameterTypeCv= fTCModel.makeParameterTypeVariable(methodBinding, i);
+				ConstraintVariable2 argumentCv= getConstraintVariable((ASTNode) arguments.get(i));
+				if (argumentCv == null)
+					continue;
+				CollectionElementVariable2 parameterElementCv= fTCModel.makeElementVariable(parameterTypeCv);
+				CollectionElementVariable2 argumentElementCv= fTCModel.getElementVariable(argumentCv); //TODO: argument(Element)Cv is only visible inside the method body. Prune!
+				// Elem[param] =^= Elem[arg]
+				fTCModel.createEqualsConstraint(parameterElementCv, argumentElementCv);
+			}
 		}
 	}
 
 	public void endVisit(ClassInstanceCreation node) {
+		Expression receiver= node.getExpression();
+		
 		TypeVariable2 typeCv= (TypeVariable2) getConstraintVariable(node.getType());
 		setConstraintVariable(node, typeCv);
 		
 		IMethodBinding methodBinding= node.resolveConstructorBinding();
-		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
 		List arguments= node.arguments();
-		doVisitMethodInvocationArguments(methodBinding, parameterTypes, arguments);
+		doVisitMethodInvocationArguments(methodBinding, arguments, receiver);
 		//TODO: return type?
 	}
 	
@@ -445,7 +525,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	
 	//--------- private helpers ----------------//
 	
-	public AugmentRawContainerClientsTCModel getTCModel() {
+	public InferTypeArgumentsTCModel getTCModel() {
 		return fTCModel;
 	}
 	
