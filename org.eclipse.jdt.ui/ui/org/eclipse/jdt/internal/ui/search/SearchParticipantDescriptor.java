@@ -38,8 +38,7 @@ public class SearchParticipantDescriptor {
 	/**
 	 * checks whether a participant has all the proper attributes.
 	 * 
-	 * @param participant
-	 * @return
+	 * @return returns a status describing the result of the validation
 	 */
 	protected IStatus checkSyntax() {
 		if (fConfigurationElement.getAttribute(ID) == null) {

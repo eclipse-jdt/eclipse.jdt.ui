@@ -76,7 +76,7 @@ public class FiltersDialog extends SelectionStatusDialog {
 	}
 
 	/**
-	 * @return
+	 * @return returns the number of entries to limit the filters entry to
 	 */
 	public int getElementLimit() {
 		return fLimitElementCount;

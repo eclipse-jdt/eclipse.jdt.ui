@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 
 
 public class FilterAction extends Action {
@@ -18,7 +19,7 @@ public class FilterAction extends Action {
 	private JavaSearchResultPage fPage;
 	
 	public FilterAction(JavaSearchResultPage page, MatchFilter filter) {
-		super(filter.getActionLabel(), Action.AS_CHECK_BOX);
+		super(filter.getActionLabel(), IAction.AS_CHECK_BOX);
 		fPage= page;
 		fFilter= filter;
 	}
