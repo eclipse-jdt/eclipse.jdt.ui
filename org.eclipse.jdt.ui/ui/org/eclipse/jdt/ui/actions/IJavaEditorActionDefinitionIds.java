@@ -267,6 +267,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 */
 	public static final String PROMOTE_LOCAL_VARIABLE= "org.eclipse.jdt.ui.edit.text.java.promote.local.variable"; //$NON-NLS-1$
 
+	/**
+	 * Action definition ID of the refactor -> convert anonynous to nested action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String CONVERT_ANONYMOUS_TO_NESTED= "org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"; //$NON-NLS-1$
+
 	// navigate
 	
 	/**

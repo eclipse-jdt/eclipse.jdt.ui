@@ -59,6 +59,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fInlineMethodAction;	
 	private SelectionDispatchAction fExtractConstantAction;
     private SelectionDispatchAction fPromoteTempAction;
+    private SelectionDispatchAction fConvertAnonymousToNestedAction;
 	
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
@@ -142,6 +143,11 @@ public class RefactorActionGroup extends ActionGroup {
 		initAction(fPromoteTempAction, provider, selection);
 		editor.setAction("PromoteTemp", fPromoteTempAction); //$NON-NLS-1$
 
+		fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(editor);
+		fConvertAnonymousToNestedAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
+		initAction(fConvertAnonymousToNestedAction, provider, selection);
+		editor.setAction("ConvertAnonymousToNested", fConvertAnonymousToNestedAction); //$NON-NLS-1$
+
 		fInlineMethodAction= new InlineMethodAction(editor);
 		fInlineMethodAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE_METHOD);
 		fInlineMethodAction.update(selection);
@@ -222,6 +228,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.MOVE_INNER_TO_TOP, fMoveInnerToTopAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.PROMOTE_TEMP, fPromoteTempAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_ANONYMOUS_TO_NESTED, fConvertAnonymousToNestedAction);
 	}
 	
 	/* (non-Javadoc)
@@ -251,6 +258,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fMoveInnerToTopAction, provider);
 		disposeAction(fUseSupertypeAction, provider);
 		disposeAction(fPromoteTempAction, provider);
+		disposeAction(fConvertAnonymousToNestedAction, provider);
 		super.dispose();
 	}
 	
@@ -276,6 +284,7 @@ public class RefactorActionGroup extends ActionGroup {
 		addAction(refactorSubmenu, fInlineMethodAction);
 		addAction(refactorSubmenu, fInlineTempAction);
 		addAction(refactorSubmenu, fPromoteTempAction);
+		addAction(refactorSubmenu, fConvertAnonymousToNestedAction);
 		addAction(refactorSubmenu, fSelfEncapsulateField);
 		if (!refactorSubmenu.isEmpty())
 			menu.appendToGroup(fGroupName, refactorSubmenu);

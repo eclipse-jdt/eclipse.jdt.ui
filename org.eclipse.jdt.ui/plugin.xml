@@ -1032,6 +1032,12 @@ JavaStructureDiffViewerCreator
       		label="%Refactoring.promoteTempAction.label"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
 			retarget="true" />
+
+		<action id="org.eclipse.jdt.ui.actions.ConvertAnonymousToNested"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+      		label="%Refactoring.convertAnonymousToNestedAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
+			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.ExtractTemp"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
@@ -1477,6 +1483,7 @@ JavaStructureDiffViewerCreator
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested" />
 
 	<!-- navigate -->
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
@@ -1566,6 +1573,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested" />
 			
 		<!-- navigate -->
 		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
@@ -1644,6 +1652,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested" />
 	
 		<!-- navigate -->
 		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />

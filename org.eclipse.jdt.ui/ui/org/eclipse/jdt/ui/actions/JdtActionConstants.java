@@ -287,6 +287,14 @@ public class JdtActionConstants {
 	 * @since 2.1
 	 */
 	public static final String PROMOTE_TEMP= "org.eclipse.jdt.ui.actions.PromoteTemp"; //$NON-NLS-1$
+
+	/**
+	 * Refactor menu: name of standard Covert Anonymous to Nested global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ConvertAnonymousToNested"</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String CONVERT_ANONYMOUS_TO_NESTED= "org.eclipse.jdt.ui.actions.ConvertAnonymousToNested"; //$NON-NLS-1$
 	
 	// Search Menu
 	
