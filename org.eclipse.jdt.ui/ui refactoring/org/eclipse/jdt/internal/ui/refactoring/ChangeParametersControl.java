@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelection;
@@ -46,22 +45,22 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
+/**
+ * A special control to edit and reorder method parameters.
+ */
 public class ChangeParametersControl extends Composite {
 
 	private static class ParameterInfoContentProvider implements IStructuredContentProvider {
@@ -129,7 +128,6 @@ public class ChangeParametersControl extends Composite {
 	private boolean fEditable;
 	private Button fUpButton;
 	private Button fDownButton;
-	private Label fSignaturePreview;
 	private TableViewer fTableViewer;
 	private Button fEditButton;
 	private List fParameterInfos;
@@ -167,20 +165,31 @@ public class ChangeParametersControl extends Composite {
 	// ---- Parameter table -----------------------------------------------------------------------------------
 
 	private void createParameterList(Composite parent) {
-		fTableViewer= new TableViewer(parent, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-		fTableViewer.setUseHashlookup(true);
-		Table table= fTableViewer.getTable();
+		TableLayoutComposite layouter= new TableLayoutComposite(parent, SWT.NULL);
+		layouter.addColumnData(new ColumnWeightData(50, true));
+		layouter.addColumnData(new ColumnWeightData(50, true));
+		
+		Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
+		TableColumn tc;
+		tc= new TableColumn(table, SWT.NONE, TYPE_PROP);
+		tc.setResizable(true);
+		tc.setText(RefactoringMessages.getString("ChangeParametersControl.table.type")); //$NON-NLS-1$
+		
+		tc= new TableColumn(table, SWT.NONE, NEWNAME_PROP);
+		tc.setResizable(true);
+		tc.setText(RefactoringMessages.getString("ChangeParametersControl.table.name")); //$NON-NLS-1$
+		
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
 		gd.heightHint= table.getGridLineWidth() + table.getItemHeight() * ROW_COUNT;
 		gd.widthHint= 40;
-		table.setLayoutData(gd);
-		table.setLayout(createTableLayout(table));
+		layouter.setLayoutData(gd);
 
+		fTableViewer= new TableViewer(table);
+		fTableViewer.setUseHashlookup(true);
 		fTableViewer.setContentProvider(new ParameterInfoContentProvider());
 		fTableViewer.setLabelProvider(new ParameterInfoLabelProvider());
-
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateButtonsEnabledState();
@@ -191,26 +200,6 @@ public class ChangeParametersControl extends Composite {
 			addCellEditors();
 	}
 
-	private TableLayout createTableLayout(Table table) {
-		TableLayout layout= new TableLayout();
-		ColumnLayoutData typeColumn= new ColumnWeightData(50, true);
-		ColumnLayoutData nameColumn= new ColumnWeightData(50, true);
-
-		layout.addColumnData(typeColumn);
-		layout.addColumnData(nameColumn);
-
-		TableColumn tc;
-		tc= new TableColumn(table, SWT.NONE, TYPE_PROP);
-		tc.setResizable(true);
-		tc.setText(RefactoringMessages.getString("ModifyParametersInputPage.type")); //$NON-NLS-1$
-
-		tc= new TableColumn(table, SWT.NONE, NEWNAME_PROP);
-		tc.setResizable(true);
-		tc.setText(RefactoringMessages.getString("ModifyParametersInputPage.new_Name")); //$NON-NLS-1$
-
-		return layout;
-	}
-	
 	private ParameterInfo[] getSelectedItems() {
 		ISelection selection= fTableViewer.getSelection();
 		if (selection == null)
@@ -233,8 +222,8 @@ public class ChangeParametersControl extends Composite {
 		gl.marginWidth= 0;
 		buttonComposite.setLayout(gl);
 
-		fUpButton= createButton(buttonComposite, RefactoringMessages.getString("ModifyParametersInputPage.move_op"), true); //$NON-NLS-1$
-		fDownButton= createButton(buttonComposite, RefactoringMessages.getString("ModifyParametersInputPage.move_down"), false); //$NON-NLS-1$
+		fUpButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_up"), true); //$NON-NLS-1$
+		fDownButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_down"), false); //$NON-NLS-1$
 		if (fEditable)
 			fEditButton= createEditButton(buttonComposite);
 		updateButtonsEnabledState();
@@ -249,7 +238,7 @@ public class ChangeParametersControl extends Composite {
 
 	private Button createEditButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText(RefactoringMessages.getString("ModifyParametersInputPage.editButton.text")); //$NON-NLS-1$
+		button.setText(RefactoringMessages.getString("ChangeParametersControl.buttons.edit")); //$NON-NLS-1$
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -259,10 +248,10 @@ public class ChangeParametersControl extends Composite {
 					ParameterInfo[] selected= getSelectedItems();
 					Assert.isTrue(selected.length == 1);
 					ParameterInfo parameterInfo= selected[0];
-					String key= RefactoringMessages.getString("ModifyParametersInputPage.inputdialog.message"); //$NON-NLS-1$
+					String key= RefactoringMessages.getString("ChangeParametersControl.inputdialog.message"); //$NON-NLS-1$
 					String message= MessageFormat.format(key, new String[] { parameterInfo.getOldName()});
 					IInputValidator validator= createParameterNameValidator(parameterInfo.getOldName());
-					InputDialog dialog= new InputDialog(getShell(), RefactoringMessages.getString("ModifyParametersInputPage.inputDialog.title"), message, parameterInfo.getNewName(), validator); //$NON-NLS-1$
+					InputDialog dialog= new InputDialog(getShell(), RefactoringMessages.getString("ChangeParametersControl.inputDialog.title"), message, parameterInfo.getNewName(), validator); //$NON-NLS-1$
 					if (dialog.open() == InputDialog.CANCEL) {
 						fTableViewer.setSelection(selection);
 						return;
