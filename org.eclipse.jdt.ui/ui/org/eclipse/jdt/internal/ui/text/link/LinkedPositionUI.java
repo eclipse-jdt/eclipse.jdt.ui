@@ -219,10 +219,6 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	 */
 	public void enter() {
 
-		fFramePosition= (fInitialOffset == -1) ? fManager.getFirstPosition() : fManager.getPosition(fInitialOffset);
-		if (fFramePosition == null)
-			return;
-
 		// track final caret
 		IDocument document= fViewer.getDocument();
 		document.addPositionCategory(CARET_POSITION);
@@ -237,18 +233,6 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		} catch (BadPositionCategoryException e) {
 			JavaPlugin.log(e);
 			Assert.isTrue(false);
-		}
-
-		try {		
-			fContentType= document.getContentType(fFramePosition.offset);
-			if (fViewer instanceof ITextViewerExtension2) {
-				((ITextViewerExtension2) fViewer).prependAutoEditStrategy(fManager, fContentType);
-			} else {
-				Assert.isTrue(false);
-			}
-
-		} catch (BadLocationException e) {
-			handleException(fViewer.getTextWidget().getShell(), e);
 		}
 
 		fViewer.addTextInputListener(this);
@@ -266,7 +250,25 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		Shell shell= text.getShell();
 		shell.addShellListener(this);
 
+		fFramePosition= (fInitialOffset == -1) ? fManager.getFirstPosition() : fManager.getPosition(fInitialOffset);
+		if (fFramePosition == null) {
+			leave(UNINSTALL | COMMIT | UPDATE_CARET);
+			return;
+		}
+
 		fgStore.addPropertyChangeListener(this);
+
+		try {
+			fContentType= document.getContentType(fFramePosition.offset);
+			if (fViewer instanceof ITextViewerExtension2) {
+				((ITextViewerExtension2) fViewer).prependAutoEditStrategy(fManager, fContentType);
+			} else {
+				Assert.isTrue(false);
+			}
+
+		} catch (BadLocationException e) {
+			handleException(fViewer.getTextWidget().getShell(), e);
+		}
 	}
 
 	/*
@@ -313,7 +315,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		ITextViewerExtension extension= (ITextViewerExtension) fViewer;
 		extension.removeVerifyKeyListener(this);
 
-		if (fViewer instanceof ITextViewerExtension2)
+		if (fViewer instanceof ITextViewerExtension2 && fContentType != null)
 			((ITextViewerExtension2) fViewer).removeAutoEditStrategy(fManager, fContentType);
 		fContentType= null;
 
