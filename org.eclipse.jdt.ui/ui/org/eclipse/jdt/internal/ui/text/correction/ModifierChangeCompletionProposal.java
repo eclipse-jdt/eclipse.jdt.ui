@@ -12,15 +12,8 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -36,18 +29,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Resources;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionProposal {
 
 	private IBinding fBinding;
 	private ASTNode fNode;
-	private boolean fIsInDifferentCU;
 	private int fIncludedModifiers;
 	private int fExcludedModifiers;
 	
@@ -63,11 +49,12 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode boundNode= astRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
+		String groupDesc= null;
+		
 		if (boundNode != null) {
-			fIsInDifferentCU= false;
-			declNode= boundNode;
+			declNode= boundNode; // is same CU
 		} else {
-			fIsInDifferentCU= true;
+			groupDesc= SELECTION_GROUP_DESC; // in different CU, needs selection
 			CompilationUnit newRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 		}
@@ -83,7 +70,7 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 				modifiedNode.setExtraDimensions(methodDecl.getExtraDimensions()); // no change
 				modifiedNode.setModifiers(newModifiers);
 				
-				rewrite.markAsModified(methodDecl, modifiedNode);
+				rewrite.markAsModified(methodDecl, modifiedNode, groupDesc);
 			} else if (declNode instanceof VariableDeclarationFragment) {
 				ASTNode parent= declNode.getParent();
 				if (parent instanceof FieldDeclaration) {
@@ -93,7 +80,7 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 					FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
 					modifiedNode.setModifiers(newModifiers);
 					
-					rewrite.markAsModified(fieldDecl, modifiedNode);					
+					rewrite.markAsModified(fieldDecl, modifiedNode, groupDesc);					
 				} else if (parent instanceof VariableDeclarationStatement) {
 					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
 					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
@@ -101,7 +88,7 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 					VariableDeclarationStatement modifiedNode= ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
 					modifiedNode.setModifiers(newModifiers);
 					
-					rewrite.markAsModified(varDecl, modifiedNode);
+					rewrite.markAsModified(varDecl, modifiedNode, groupDesc);
 				} else if (parent instanceof VariableDeclarationExpression) {
 					VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
 					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
@@ -109,7 +96,7 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 					VariableDeclarationExpression modifiedNode= ast.newVariableDeclarationExpression(ast.newVariableDeclarationFragment());
 					modifiedNode.setModifiers(newModifiers);
 					
-					rewrite.markAsModified(varDecl, modifiedNode);					
+					rewrite.markAsModified(varDecl, modifiedNode, groupDesc);					
 				}
 			} else if (declNode instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration variableDeclaration= (SingleVariableDeclaration) declNode;
@@ -119,7 +106,7 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 				modifiedNode.setExtraDimensions(variableDeclaration.getExtraDimensions()); // no change
 				modifiedNode.setModifiers(newModifiers);
 				
-				rewrite.markAsModified(variableDeclaration, modifiedNode);				
+				rewrite.markAsModified(variableDeclaration, modifiedNode, groupDesc);				
 			} else if (declNode instanceof TypeDeclaration) {
 				TypeDeclaration typeDecl= (TypeDeclaration) declNode;
 				int newModifiers= (typeDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
@@ -128,38 +115,12 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 				modifiedNode.setInterface(typeDecl.isInterface()); // no change
 				modifiedNode.setModifiers(newModifiers);
 				
-				rewrite.markAsModified(typeDecl, modifiedNode);				
+				rewrite.markAsModified(typeDecl, modifiedNode, groupDesc);				
 			}
 			return rewrite;
 		}
 		return null;
 	}
-		
-	public void apply(IDocument document) {
-		try {
-			CompilationUnitChange change= getCompilationUnitChange();
-			
-			IEditorPart part= null;
-			if (fIsInDifferentCU) {
-				ICompilationUnit unit= getCompilationUnit();
-				IStatus status= Resources.makeCommittable(JavaModelUtil.toOriginal(unit).getResource(), null);
-				if (!status.isOK()) {
-					String label= CorrectionMessages.getString("ModifierChangeCompletionProposal.error.title"); //$NON-NLS-1$
-					String message= CorrectionMessages.getString("ModifierChangeCompletionProposal.error.message"); //$NON-NLS-1$
-					ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), label, message, status);
-					return;
-				}
-				change.setKeepExecutedTextEdits(true);
-				part= EditorUtility.openInEditor(unit, true);
-			}
-			super.apply(document);
-		
-			if (part instanceof ITextEditor) {
-				TextRange range= change.getExecutedTextEdit(change.getEdit()).getTextRange();		
-				((ITextEditor) part).selectAndReveal(range.getOffset(), range.getLength());
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		}		
-	}	
+	
+	
 }
