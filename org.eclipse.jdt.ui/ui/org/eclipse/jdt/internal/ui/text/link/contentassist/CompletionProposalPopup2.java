@@ -216,8 +216,8 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 			return;
 			
 		Control control= fViewer.getTextWidget();
-//		fProposalShell= new Shell(control.getShell(), SWT.ON_TOP);
-		fProposalShell= new Shell(control.getShell(), SWT.ON_TOP | SWT.RESIZE );
+		fProposalShell= new Shell(control.getShell(), SWT.ON_TOP);
+//		fProposalShell= new Shell(control.getShell(), SWT.ON_TOP | SWT.RESIZE );
 		fProposalTable= new Table(fProposalShell, SWT.H_SCROLL | SWT.V_SCROLL);
 //		fProposalTable= new Table(fProposalShell, SWT.H_SCROLL | SWT.V_SCROLL);
 		
