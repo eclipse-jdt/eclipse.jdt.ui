@@ -544,13 +544,18 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			
 			result.merge(checkVisibilityChanges());
 			
+			//TODO:
+			// We need a common way of dealing with possible compilation errors for all occurrences,
+			// including visibility problems, shadowing and missing throws declarations.
+			
 			if (! isOrderSameAsInitial())
 				result.merge(checkReorderings(new SubProgressMonitor(pm, 1)));
-				//TODO:
-				// We need a common way of dealing with possible compilation errors for all occurrences,
-				// including visibility problems, shadowing and missing throws declarations.
 			else
 				pm.worked(1);
+			
+			//TODO (bug 58616): check whether changed signature already exists somewhere in the ripple,
+			// - error if exists
+			// - warn if exists with different parameter types (may cause overloading)
 			
 			if (! areNamesSameAsInitial())
 				result.merge(checkRenamings(new SubProgressMonitor(pm, 1)));
@@ -1201,7 +1206,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			for (int i= nodes.length; i < newPermutation.length; i++) {
 				ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
 				if (info.isAdded()){
-					//TODO: Bug: m() -> m(int) adds parameter twice!
+					//TODO: Bug 54362: m() -> m(int) adds parameter twice!
 					ASTNode newElement= createNewParamgument(info);
 					paramguments.add(i, newElement);
 					fRewrite.markAsInserted(newElement);
@@ -1438,7 +1443,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private void changeReturnType() throws JavaModelException {
 		    if (! isReturnTypeSameAsInitial())
 		        replaceTypeNode(fMethDecl.getReturnType(), fReturnTypeName);
-		    	//TODO: remove expression from return statement when changed to void?
+		    	//TODO: Remove expression from return statement when changed to void?
+		    	//      Add return statement with default value and //TODO automatically generated ...
 		}
 	
 		private void removeExtraDimensions(SingleVariableDeclaration oldParam) {
