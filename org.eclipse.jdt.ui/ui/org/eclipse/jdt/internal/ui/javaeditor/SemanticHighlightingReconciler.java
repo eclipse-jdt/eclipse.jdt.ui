@@ -164,6 +164,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 */
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
+		if (fPresenter == null)
+			return;
+		
 		fPresenter.setCanceled(progressMonitor.isCanceled());
 		
 		if (ast == null || fPresenter.isCanceled())
