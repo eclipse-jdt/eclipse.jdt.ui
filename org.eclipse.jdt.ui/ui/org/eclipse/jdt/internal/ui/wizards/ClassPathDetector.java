@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,7 +57,17 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		
 	private IPath fResultOutputFolder;
 	private IClasspathEntry[] fResultClasspath;
-		
+	
+	private static class CPSorter implements Comparator {
+		private Collator fCollator= Collator.getInstance();
+		public int compare(Object o1, Object o2) {
+			IClasspathEntry e1= (IClasspathEntry) o1;
+			IClasspathEntry e2= (IClasspathEntry) o2;
+			return fCollator.compare(e1.getPath().toString(), e2.getPath().toString());
+		}
+	}
+	
+	
 	public ClassPathDetector(IProject project) throws CoreException {
 		fSourceFolders= new HashMap();
 		fJARFiles= new HashSet(10);
@@ -175,6 +188,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 
 
 	private void detectLibraries(ArrayList cpEntries, IPath outputLocation) {
+		ArrayList res= new ArrayList();
 		Set sourceFolderSet= fSourceFolders.keySet();
 		for (Iterator iter= fJARFiles.iterator(); iter.hasNext();) {
 			IPath path= (IPath) iter.next();
@@ -185,12 +199,15 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 				continue;
 			}
 			IClasspathEntry entry= JavaCore.newLibraryEntry(path, null, null);
-			cpEntries.add(entry);	
+			res.add(entry);	
 		}
+		Collections.sort(res, new CPSorter());
+		cpEntries.addAll(res);
 	}
 
 
 	private void detectSourceFolders(ArrayList resEntries) {
+		ArrayList res= new ArrayList();
 		Set sourceFolderSet= fSourceFolders.keySet();
 		for (Iterator iter= sourceFolderSet.iterator(); iter.hasNext();) {
 			IPath path= (IPath) iter.next();
@@ -204,8 +221,10 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 			}
 			IPath[] excludedPaths= (IPath[]) excluded.toArray(new IPath[excluded.size()]);
 			IClasspathEntry entry= JavaCore.newSourceEntry(path, excludedPaths);
-			resEntries.add(entry);
+			res.add(entry);
 		}
+		Collections.sort(res, new CPSorter());
+		resEntries.addAll(res);
 	}
 
 	private void visitCompilationUnit(IFile file) {
