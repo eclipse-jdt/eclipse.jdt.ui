@@ -43,9 +43,11 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -55,6 +57,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
@@ -63,7 +67,6 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
-import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
 
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -78,6 +81,100 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  * Window>Preferences>Java>Code Generation.
  */
 public class JavaOutlineInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension2 {
+
+
+	/**
+	 * The NamePatternFilter selects the elements which
+	 * match the given string patterns.
+	 * <p>
+	 * The following characters have special meaning:
+	 *   ? => any character
+	 *   * => any string
+	 * </p>
+	 *
+	 * @since 2.0
+	 */
+	private static class NamePatternFilter extends ViewerFilter {
+		private String fPattern;
+		private StringMatcher fMatcher;
+		private ILabelProvider fLabelProvider;
+		private Viewer fViewer;
+
+		private StringMatcher getMatcher() {
+			return fMatcher;
+		}
+
+
+		/* (non-Javadoc)
+		 * Method declared on ViewerFilter.
+		 */
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			if (fMatcher == null)
+				return true;
+
+			ILabelProvider labelProvider= getLabelProvider(viewer);
+
+			String matchName= null;
+			if (labelProvider != null)
+				matchName= ((ILabelProvider)labelProvider).getText(element);
+			else if (element instanceof IJavaElement)
+				matchName= ((IJavaElement) element).getElementName();
+
+			if (matchName != null && fMatcher.match(matchName))
+				return true;
+
+			return hasUnfilteredChild(viewer, element);
+		}
+
+		private ILabelProvider getLabelProvider(Viewer viewer) {
+			if (fViewer == viewer)
+				return fLabelProvider;
+
+			fLabelProvider= null;
+			IBaseLabelProvider baseLabelProvider= null;
+			if (viewer instanceof StructuredViewer)
+				baseLabelProvider= ((StructuredViewer)viewer).getLabelProvider();
+
+			if (baseLabelProvider instanceof ILabelProvider)
+				fLabelProvider= (ILabelProvider)baseLabelProvider;
+
+			return fLabelProvider;
+		}
+
+		private boolean hasUnfilteredChild(Viewer viewer, Object element) {
+			IJavaElement[] children;
+			if (element instanceof IParent) {
+				try {
+					children= ((IParent)element).getChildren();
+				} catch (JavaModelException ex) {
+					return false;
+				}
+				for (int i= 0; i < children.length; i++)
+					if (select(viewer, element, children[i]))
+						return true;
+			}
+			return false;
+		}
+
+		/**
+		 * Sets the patterns to filter out for the receiver.
+		 * <p>
+		 * The following characters have special meaning:
+		 *   ? => any character
+		 *   * => any string
+		 * </p>
+		 */
+		public void setPattern(String pattern) {
+			fPattern= pattern;
+			if (fPattern == null) {
+				fMatcher= null;
+				return;
+			}
+			boolean ignoreCase= pattern.toLowerCase().equals(pattern);
+			fMatcher= new StringMatcher(pattern, ignoreCase, false);
+		}
+	}
+
 
 	private static class BorderFillLayout extends Layout {
 
@@ -298,22 +395,18 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	}
 
 	private void installFilter() {
-		final NamePatternFilter viewerFilter= new NamePatternFilter(true);
+		final NamePatternFilter viewerFilter= new NamePatternFilter();
 		fTreeViewer.addFilter(viewerFilter);
 		fFilterText.setText("*"); //$NON-NLS-1$
 
 		fFilterText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				String pattern= fFilterText.getText();
-
-				if (pattern != null && pattern.length() > 0) {
-					viewerFilter.setPatterns(new String[] {pattern});
-					boolean ignoreCase= pattern.toLowerCase().equals(pattern);
-					fStringMatcher= new StringMatcher(pattern, ignoreCase, false);
-				} else {
-					viewerFilter.setPatterns(null);
-					fStringMatcher= null;
-				}
+				if (pattern != null && pattern.length() > 0)
+					viewerFilter.setPattern(pattern);
+				else
+					viewerFilter.setPattern(null);
+				fStringMatcher= viewerFilter.getMatcher();
 				fTreeViewer.refresh();
 				fTreeViewer.expandAll();
 				selectFirstMatch();
@@ -406,6 +499,8 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 				fShell.dispose();
 			fShell= null;
 			fTreeViewer= null;
+			fComposite= null;
+			fFilterText= null;
 		}
 	}
 
