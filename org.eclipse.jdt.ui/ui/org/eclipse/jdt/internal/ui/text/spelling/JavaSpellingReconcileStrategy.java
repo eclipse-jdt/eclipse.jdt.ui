@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.text.spelling;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -161,11 +160,8 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	 */
 	private IContentType getContentType() throws CoreException {
 		IDocumentProvider documentProvider= fEditor.getDocumentProvider();
-		if (documentProvider instanceof IDocumentProviderExtension4) {
-			IContentDescription desc= ((IDocumentProviderExtension4) documentProvider).getContentDescription(fEditor.getEditorInput());
-			if (desc != null)
-				return desc.getContentType();
-		}
+		if (documentProvider instanceof IDocumentProviderExtension4)
+			return ((IDocumentProviderExtension4) documentProvider).getContentType(fEditor.getEditorInput());
 		return null;
 	}
 
