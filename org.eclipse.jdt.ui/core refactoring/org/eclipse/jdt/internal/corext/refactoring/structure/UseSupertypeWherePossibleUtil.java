@@ -276,10 +276,12 @@ class UseSupertypeWherePossibleUtil {
 					if (isAnyParameterDeclarationExcluded(methods, parameterIndex, nodesToRemove)){
 						for (int i= 0; i < methods.length; i++) {
 							SingleVariableDeclaration svd= getParameterDeclarationNode(parameterIndex, methods[i]);
-							nodesToRemove.add(svd.getType());
-							addToBadVarSet(svd);
-							return true;
+							if (svd != null){
+								nodesToRemove.add(svd.getType());
+								addToBadVarSet(svd);
+							}	
 						}
+						return true;
 					}
 				} 
 				if (hasIndirectProblems((VariableDeclaration)parentNode, nodesToRemove, new SubProgressMonitor(pm, 1)))
@@ -356,6 +358,8 @@ class UseSupertypeWherePossibleUtil {
 	private boolean isAnyParameterDeclarationExcluded(IMethod[] methods, int parameterIndex, Collection nodesToRemove) throws JavaModelException{
 		for (int i= 0; i < methods.length; i++) {
 			SingleVariableDeclaration paramDecl= getParameterDeclarationNode(parameterIndex, methods[i]);
+			if (paramDecl == null)
+				return true;
 			if (fBadVarSet.contains(paramDecl))
 				return true;
 			if (nodesToRemove.contains(paramDecl.getType()))
@@ -369,13 +373,17 @@ class UseSupertypeWherePossibleUtil {
 	}
 	
 	private SingleVariableDeclaration getParameterDeclarationNode(int parameterIndex, MethodDeclaration md){
+		if (md == null)
+			return null;
 		return (SingleVariableDeclaration)md.parameters().get(parameterIndex);
 	}
 	
 	private Collection getAllReturnTypeNodes(IMethod[] methods) throws JavaModelException {
 		List result= new ArrayList(methods.length);
 		for (int i= 0; i < methods.length; i++) {
-			result.add(getMethodDeclarationNode(methods[i]).getReturnType());
+			MethodDeclaration methodDeclarationNode= getMethodDeclarationNode(methods[i]);
+			if (methodDeclarationNode != null)
+				result.add(methodDeclarationNode.getReturnType());
 		}
 		return result;
 	}
@@ -526,7 +534,10 @@ class UseSupertypeWherePossibleUtil {
 				return true;
 			return false;
 		}	
-		SingleVariableDeclaration parDecl= (SingleVariableDeclaration)getMethodDeclarationNode(method).parameters().get(argumentIndex);
+		MethodDeclaration methodDeclarationNode= getMethodDeclarationNode(method);
+		if (method == null)
+			return false;
+		SingleVariableDeclaration parDecl= (SingleVariableDeclaration)methodDeclarationNode.parameters().get(argumentIndex);
 		return ! fBadVarSet.contains(parDecl);
 	}
 	
@@ -693,7 +704,8 @@ class UseSupertypeWherePossibleUtil {
 					}
 					for (int i= 0; i < methods.length; i++) {
 						SingleVariableDeclaration svd= getParameterDeclarationNode(parameterIndex, methods[i]);
-						addToBadVarSet(svd);
+						if (svd != null)
+							addToBadVarSet(svd);
 					}
 					return true;
 				}	
