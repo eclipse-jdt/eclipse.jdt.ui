@@ -261,7 +261,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		
 	public void checkInput(RefactoringStatus status, String methodName, IJavaProject scope, AST ast) {
 		ITypeBinding[] arguments= getArgumentTypes();
-		ITypeBinding type= ASTNodes.getDeclaringType(fEnclosingBodyDeclaration);
+		ITypeBinding type= ASTNodes.getEnclosingType(fEnclosingBodyDeclaration);
 		status.merge(Checks.checkMethodInType(type, methodName, arguments, scope));
 		status.merge(Checks.checkMethodInHierarchy(type.getSuperclass(), methodName, null, arguments, scope));
 	}

@@ -28,6 +28,7 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 	private IPackageFragment fImport;
 	private IPackageFragment fCast;
 	private IPackageFragment fEnum;
+	private IPackageFragment fGeneric;
 
 	public InlineMethodTestSetup(Test test) {
 		super(test);
@@ -48,6 +49,7 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 		fImport= root.createPackageFragment("import_in", true, null);
 		fCast= root.createPackageFragment("cast_in", true, null);
 		fEnum= root.createPackageFragment("enum_in", true, null);
+		fGeneric= root.createPackageFragment("generic_in", true, null);
 		
 		fImport.createCompilationUnit(
 			"Provider.java",
@@ -147,5 +149,9 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 	
 	public IPackageFragment getEnumPackage() {
 		return fEnum;
+	}
+	
+	public IPackageFragment getGenericPackage() {
+		return fGeneric;
 	}
 }

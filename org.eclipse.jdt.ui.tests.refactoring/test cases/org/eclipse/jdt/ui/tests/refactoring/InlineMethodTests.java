@@ -539,7 +539,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performCastTest();
 	}
 	
-	/* *********************** Cast Tests ******************************* */
+	/* *********************** Enum Tests ******************************* */
 
 	private void performEnumTest() throws Exception {
 		performTest(fgTestSetup.getEnumPackage(), getName(), COMPARE_WITH_OUTPUT, "enum_out");
@@ -551,5 +551,31 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	
 	public void testAnonymousEnum() throws Exception {
 		performEnumTest();
+	}
+	
+	/* *********************** Generic Tests ******************************* */
+
+	private void performGenericTest() throws Exception {
+		performTest(fgTestSetup.getGenericPackage(), getName(), COMPARE_WITH_OUTPUT, "generic_out");
+	}
+	
+	public void testClassInstance() throws Exception {
+		performGenericTest();
+	}
+	
+	public void testSubClass1() throws Exception {
+		performGenericTest();
+	}
+	
+	public void testSubClass2() throws Exception {
+		performGenericTest();
+	}
+	
+	public void testMethodInstance1() throws Exception {
+		performGenericTest();
+	}
+	
+	public void testMethodInstance2() throws Exception {
+		performGenericTest();
 	}
 }

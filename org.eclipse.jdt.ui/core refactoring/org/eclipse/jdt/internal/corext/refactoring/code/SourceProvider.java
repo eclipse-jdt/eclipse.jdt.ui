@@ -22,8 +22,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.RangeMarker;
@@ -31,12 +29,16 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditProcessor;
 import org.eclipse.text.edits.UndoEdit;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -59,16 +61,16 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
+import org.eclipse.jdt.internal.corext.refactoring.code.SourceAnalyzer.NameData;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class SourceProvider {
 
@@ -265,6 +267,8 @@ public class SourceProvider {
 		updateImplicitReceivers(context);
 		makeNamesUnique(context.scope);
 		updateTypes(context);
+		updateTypeVariables(context);
+		updateMethodTypeVariable(context);
 		
 		List ranges= null;
 		if (hasReturnValue()) {
@@ -410,7 +414,7 @@ public class SourceProvider {
 	
 	private String getReceiver(CallContext context, int modifiers) {
 		String receiver= context.receiver;
-		ITypeBinding invocationType= ASTNodes.getDeclaringType(context.invocation);
+		ITypeBinding invocationType= ASTNodes.getEnclosingType(context.invocation);
 		ITypeBinding sourceType= fDeclaration.resolveBinding().getDeclaringClass();
 		if (!context.receiverIsStatic && Modifier.isStatic(modifiers)) {
 			if ("this".equals(receiver) && invocationType != null && Bindings.equals(invocationType, sourceType)) { //$NON-NLS-1$
@@ -422,6 +426,35 @@ public class SourceProvider {
 		return receiver;
 	}
 
+	private void updateTypeVariables(CallContext context) {
+		ITypeBinding type= context.getReceiverType();
+		if (type == null)
+			return;
+		rewriteReferences(type.getTypeArguments(), fAnalyzer.getTypeParameterReferences());
+	}
+	
+	private void updateMethodTypeVariable(CallContext context) {
+		IMethodBinding method= Invocations.resolveBinding(context.invocation);
+		if (method == null)
+			return;
+		rewriteReferences(method.getTypeArguments(), fAnalyzer.getMethodTypeParameterReferences());
+	}
+
+	private void rewriteReferences(ITypeBinding[] typeArguments, List typeParameterReferences) {
+		if (typeArguments.length == 0)
+			return;
+		Assert.isTrue(typeArguments.length == typeParameterReferences.size());
+		for (int i= 0; i < typeArguments.length; i++) {
+			SourceAnalyzer.NameData refData= (NameData)typeParameterReferences.get(i);
+			List references= refData.references();
+			String newName= typeArguments[i].getName();
+			for (Iterator iter= references.iterator(); iter.hasNext();) {
+				SimpleName name= (SimpleName)iter.next();
+				fRewriter.replace(name, fRewriter.createStringPlaceholder(newName, ASTNode.SIMPLE_NAME), null);
+			}
+		}
+	}
+	
 	private ASTNode getLastStatement() {
 		List statements= fDeclaration.getBody().statements();
 		if (statements.isEmpty())

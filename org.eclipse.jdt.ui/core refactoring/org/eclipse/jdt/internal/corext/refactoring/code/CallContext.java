@@ -11,6 +11,9 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
@@ -31,5 +34,17 @@ public class CallContext {
 		scope= s;
 		callMode= cm;
 		importer= i;
+	}
+	
+	public ITypeBinding getReceiverType() {
+		Expression expression= Invocations.getExpression(invocation);
+		if (expression != null) {
+			return expression.resolveTypeBinding();
+		}
+		IMethodBinding method= Invocations.resolveBinding(invocation);
+		if (method != null) {
+			return method.getDeclaringClass();
+		}
+		return null;
 	}
 }

@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -514,15 +513,12 @@ public class ASTNodes {
 		return result;
 	}
 
-	public static ITypeBinding getDeclaringType(ASTNode declaration) {
-		ASTNode node= declaration;
+	public static ITypeBinding getEnclosingType(ASTNode node) {
 		while(node != null) {
 			if (node instanceof AbstractTypeDeclaration) {
 				return ((AbstractTypeDeclaration)node).resolveBinding();
 			} else if (node instanceof AnonymousClassDeclaration) {
 				return ((AnonymousClassDeclaration)node).resolveBinding();
-			} else if (node instanceof EnumConstantDeclaration) {
-				Assert.isTrue(false, "Not implemented yet");
 			}
 			node= node.getParent();
 		}

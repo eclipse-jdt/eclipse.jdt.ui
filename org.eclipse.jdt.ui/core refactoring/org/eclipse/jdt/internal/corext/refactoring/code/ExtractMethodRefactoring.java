@@ -570,12 +570,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 		ASTNode current= getNextParent(decl);
 		result.add(current);
 		if (decl instanceof MethodDeclaration) {
-			ITypeBinding binding= ASTNodes.getDeclaringType(current);
+			ITypeBinding binding= ASTNodes.getEnclosingType(current);
 			ASTNode next= getNextParent(current);
 			while (next != null && binding != null && binding.isNested() && !Modifier.isStatic(binding.getDeclaredModifiers())) {
 				result.add(next);
 				current= next;
-				binding= ASTNodes.getDeclaringType(current);
+				binding= ASTNodes.getEnclosingType(current);
 				next= getNextParent(next);
 			}
 		}
