@@ -181,7 +181,7 @@ public class SourceAttachmentBlock {
 	//}	
 	
 
-	private Label createHelpText(Composite composite, int style, boolean indented, String text) {
+	private Label createHelpText(Composite composite, int style, int widthHint, boolean indented, String text) {
 		if (indented) {
 			DialogField.createEmptySpace(composite, 1);
 		}
@@ -189,6 +189,7 @@ public class SourceAttachmentBlock {
 		Label helpTextLabel= new Label(composite, style);
 		helpTextLabel.setText(text);
 		MGridData gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		gd.widthHint= widthHint;
 		helpTextLabel.setLayoutData(gd);
 		if (indented) {
 			DialogField.createEmptySpace(composite, 2);
@@ -198,6 +199,7 @@ public class SourceAttachmentBlock {
 		}
 		return helpTextLabel;
 	}		
+			
 
 	
 	/**
@@ -216,28 +218,33 @@ public class SourceAttachmentBlock {
 		layout.numColumns= 4;		
 		composite.setLayout(layout);
 		
-		createHelpText(composite, SWT.LEFT, false, NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fJARPath.lastSegment())); //$NON-NLS-1$
+		createHelpText(composite, SWT.LEFT, SWT.DEFAULT, false, NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fJARPath.lastSegment())); //$NON-NLS-1$
 		
 		if (fIsVariableEntry) {
-			createHelpText(composite, SWT.LEFT + SWT.WRAP, true, NewWizardMessages.getString("SourceAttachmentBlock.filename.description")); //$NON-NLS-1$
+			createHelpText(composite, SWT.LEFT + SWT.WRAP, 300, true, NewWizardMessages.getString("SourceAttachmentBlock.filename.description")); //$NON-NLS-1$
 		}			
 		
 		fFileNameField.doFillIntoGrid(composite, 4);
+		MGridData gd= (MGridData)fFileNameField.getTextControl(null).getLayoutData();
+		gd.widthHint= 300;
 		if (!fIsVariableEntry) {
 			DialogField.createEmptySpace(composite, 3);	
 			fInternalButtonField.doFillIntoGrid(composite, 1);
 		} else {
 			String label= NewWizardMessages.getString("SourceAttachmentBlock.filename.resolvedpath"); //$NON-NLS-1$
-			fFullPathResolvedLabel= createHelpText(composite, SWT.LEFT, true, getResolvedLabelString(fFileName));
+			fFullPathResolvedLabel= createHelpText(composite, SWT.LEFT + SWT.WRAP, 300, true, getResolvedLabelString(fFileName));
 		}
 		
 		// label
-		createHelpText(composite, SWT.LEFT + SWT.WRAP, true, NewWizardMessages.getString("SourceAttachmentBlock.prefix.description")); //$NON-NLS-1$
+		createHelpText(composite, SWT.LEFT + SWT.WRAP, 300, true, NewWizardMessages.getString("SourceAttachmentBlock.prefix.description")); //$NON-NLS-1$
 	
 		fPrefixField.doFillIntoGrid(composite, 4);
+		gd= (MGridData)fPrefixField.getTextControl(null).getLayoutData();
+		gd.widthHint= 300;		
+		
 		if (fIsVariableEntry) {
 			String label= NewWizardMessages.getString("SourceAttachmentBlock.prefix.resolvedpath"); //$NON-NLS-1$
-			fPrefixResolvedLabel= createHelpText(composite, SWT.LEFT, true, getResolvedLabelString(fPrefix));
+			fPrefixResolvedLabel= createHelpText(composite, SWT.LEFT + SWT.WRAP, 300, true, getResolvedLabelString(fPrefix));
 		}
 		
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
