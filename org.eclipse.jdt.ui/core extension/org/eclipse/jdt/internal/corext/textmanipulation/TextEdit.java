@@ -42,11 +42,6 @@ public abstract class TextEdit {
 		// does nothing
 	}
 	
-	/** @deprecated reimplement connect(TextBufferEditor) */
-	public final void connect(TextBuffer buffer) throws CoreException {
-		// does nothing
-	}
-	
 	/**
 	 * Returns the <code>TextRange</code> that this text edit is going to
 	 * manipulate. If this method is called before the <code>TextEdit</code>
