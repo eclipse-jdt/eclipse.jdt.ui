@@ -48,15 +48,15 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	}
 	
 	private static class ModifyDescription implements ChangeDescription {
-		String name;
-		ITypeBinding type;
+		public String name;
+		public ITypeBinding type;
 		SingleVariableDeclaration resultingNode;
-		TagElement resultingTag;
+		SimpleName resultingTagArg;
 		
 		public ModifyDescription(ITypeBinding type, String name) {
 			this.type= type;
 			this.name= name;
-		}		
+		}
 	}
 	
 	public static class EditDescription extends ModifyDescription {
@@ -156,10 +156,12 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				if (javadoc != null) {
 					TagElement newTagElement= ast.newTagElement();
 					newTagElement.setTagName(TagElement.TAG_PARAM);
+					SimpleName arg= ast.newSimpleName("x"); //$NON-NLS-1$
+					newTagElement.fragments().add(arg);
 					insertParamTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), parameters, k, newTagElement);
-					desc.resultingTag= newTagElement; // add the name later
+					desc.resultingTagArg= arg; // set the name later
 				} else {
-					desc.resultingTag= null;
+					desc.resultingTagArg= null;
 				}
 			} else if (curr instanceof RemoveDescription) {
 				SingleVariableDeclaration decl= (SingleVariableDeclaration) parameters.get(k);
@@ -190,7 +192,12 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				
 				TagElement tagNode= findParamTag(methodDecl, decl);
 				if (tagNode != null) {
-					desc.resultingTag= tagNode;
+					List fragments= tagNode.fragments();
+					if (!fragments.isEmpty()) {
+						SimpleName arg= ast.newSimpleName("x"); //$NON-NLS-1$
+						rewrite.replace((ASTNode) fragments.get(0), arg, null);
+						desc.resultingTagArg= arg;
+					}
 				}
 				
 			} else if (curr instanceof SwapDescription) {
@@ -273,17 +280,10 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				addLinkedPosition(rewrite.track(var.getType()), false, typeKey);
 				addLinkedPosition(rewrite.track(var.getName()), false, nameKey);
 				
-				TagElement tagElement= desc.resultingTag;
-				
-				if (tagElement != null) {
-					List fragments= tagElement.fragments();
-					ASTNode newRef= ast.newSimpleName(favourite);
-					if (fragments.isEmpty()) {
-						fragments.add(newRef);
-					} else {
-						rewrite.replace((ASTNode) fragments.get(0), newRef, null);
-					}
-					addLinkedPosition(rewrite.track(newRef), false, nameKey);
+				SimpleName tagArg= desc.resultingTagArg;
+				if (tagArg != null) {
+					tagArg.setIdentifier(favourite);
+					addLinkedPosition(rewrite.track(tagArg), false, nameKey);
 				}
 			}
 		}
