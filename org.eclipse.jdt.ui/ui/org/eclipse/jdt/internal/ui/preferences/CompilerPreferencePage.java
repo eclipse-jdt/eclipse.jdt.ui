@@ -378,10 +378,10 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	private void addComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {
 		ControlData data= new ControlData(key, values);
 		
-		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalIndent= indent;		
-		
-		Label labelControl= new Label(parent, SWT.NONE);
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= indent;
+				
+		Label labelControl= new Label(parent, SWT.LEFT | SWT.WRAP);
 		labelControl.setText(label);
 		labelControl.setLayoutData(gd);
 		
