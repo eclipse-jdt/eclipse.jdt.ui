@@ -356,7 +356,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @return <code>true</code> if the code is a conditional statement or loop without a block, <code>false</code> otherwise
 	 */
 	private boolean isBracelessBlockStart(IDocument document, int position, int bound) {
-		position= firstNonWhitespaceBackward(document, position, fPartitioning, bound);
+		if (position < 1)
+			return false;
+		position= firstNonWhitespaceBackward(document, position - 1, fPartitioning, bound);
 		if (position < 1)
 			return false;
 
@@ -1017,12 +1019,12 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			// if line is at end of a javadoc comment, take the indent from the comment's begin line
 			ITypedRegion typedRegion= TextUtilities.getPartition(document, fPartitioning, start);
 			if (typedRegion != null) {
-				if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType())) {
-					start= document.getLineInformationOfOffset(typedRegion.getOffset()).getOffset();
-				} else if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(typedRegion.getType())) {
-					buffer.append(COMMENT);
-					start += 2;
-				}
+			if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType())) {
+				start= document.getLineInformationOfOffset(typedRegion.getOffset()).getOffset();
+			} else if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(typedRegion.getType())) {
+				buffer.append(COMMENT);
+				start += 2;
+			}
 			}
 			
 			int whiteend= findEndOfWhiteSpace(document, start, command.offset);
