@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -106,6 +107,11 @@ public class EditTemplateDialog extends StatusDialog {
 
 			ContentAssistant assistant= new ContentAssistant();
 			assistant.setContentAssistProcessor(fProcessor, IDocument.DEFAULT_CONTENT_TYPE);
+				// Register the same processor for strings and single line comments to get code completion at the start of those partitions.
+			assistant.setContentAssistProcessor(fProcessor, JavaPartitionScanner.JAVA_STRING);
+			assistant.setContentAssistProcessor(fProcessor, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
+			
+			assistant.setContentAssistProcessor(fProcessor, JavaPartitionScanner.JAVA_DOC);
 
 			assistant.enableAutoInsert(store.getBoolean(ContentAssistPreference.AUTOINSERT));
 			assistant.enableAutoActivation(store.getBoolean(ContentAssistPreference.AUTOACTIVATION));
