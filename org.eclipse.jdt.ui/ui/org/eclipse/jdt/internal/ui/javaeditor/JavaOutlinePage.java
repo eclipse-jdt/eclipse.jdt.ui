@@ -755,11 +755,13 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 //		setAction("HideNonePublicMembers", new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideNonePublicMembers.", new VisibilityFilter(VisibilityFilter.PUBLIC)));		
 		
 		// let actions appear in the tool bar
-		IAction action= new LexicalSortingAction(JavaPlugin.getResourceBundle(), "Outliner.SortMembers.");
-		action.setImageDescriptor(JavaPluginImages.DESC_LCL_LOCK_VIEW);
+		JavaUIAction action= new LexicalSortingAction(JavaPlugin.getResourceBundle(), "Outliner.SortMembers.");
+		//action.setImageDescriptor(JavaPluginImages.DESC_LCL_LOCK_VIEW);
+		action.setImageDescriptors("lcl16", "lock_close.gif");
 		toolBarManager.add(action);
 		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideFields.", new FieldFilter());
-		action.setImageDescriptor(JavaPluginImages.DESC_LCL_SHOW_FIELDS);
+		//action.setImageDescriptor(JavaPluginImages.DESC_LCL_SHOW_FIELDS);
+		action.setImageDescriptors("lcl16", "fields_co.gif");
 		toolBarManager.add(action);
 		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideNonePublicMembers.", new VisibilityFilter(VisibilityFilter.PUBLIC));		
 		action.setImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC);

@@ -24,7 +24,8 @@ public class ShowInheriredMembersAction extends JavaUIAction {
 	 */
 	public ShowInheriredMembersAction(MethodsViewer viewer, boolean initValue) {
 		super(JavaPlugin.getResourceBundle(), RESOURCE_PREFIX);
-		setImageDescriptor(JavaPluginImages.DESC_LCL_SHOW_INHERITED);
+		//setImageDescriptor(JavaPluginImages.DESC_LCL_SHOW_INHERITED);
+		setImageDescriptors("lcl16", "inher_co.gif");
 		fMethodsViewer= viewer;
 		
 		setChecked(initValue);

@@ -20,7 +20,8 @@ public class EnableMemberFilterAction extends JavaUIAction {
 	
 	public EnableMemberFilterAction(TypeHierarchyViewPart v, boolean initValue) {
 		super(JavaPlugin.getResourceBundle(), RESOURCE_PREFIX);
-		setImageDescriptor(JavaPluginImages.DESC_LCL_MEMBER_FILTER);
+		setImageDescriptors("lcl16", "impl_co.gif");
+		//setImageDescriptor(JavaPluginImages.DESC_LCL_MEMBER_FILTER);
 		fView= v;
 		valueChanged(initValue);
 	}

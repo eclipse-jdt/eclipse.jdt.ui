@@ -58,14 +58,16 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		ResourceBundle bundle= JavaPlugin.getResourceBundle();
 		
 		fSwitchSubViewAction= new ToggleViewAction(this, 1, bundle, PREFIX_TOGGLE_SUB);
-		fSwitchSubViewAction.setImageDescriptor(JavaPluginImages.DESC_LCL_SUBTYPES_VIEW);
+		//fSwitchSubViewAction.setImageDescriptor(JavaPluginImages.DESC_LCL_SUBTYPES_VIEW);
+		fSwitchSubViewAction.setImageDescriptors("lcl16", "sub_co.gif");
 		
 		fSwitchSuperViewAction= new ToggleViewAction(this, 0, bundle, PREFIX_TOGGLE_SUPER);
-		fSwitchSuperViewAction.setImageDescriptor(JavaPluginImages.DESC_LCL_SUPERTYPES_VIEW);
+		//fSwitchSuperViewAction.setImageDescriptor(JavaPluginImages.DESC_LCL_SUPERTYPES_VIEW);
+		fSwitchSuperViewAction.setImageDescriptors("lcl16", "super_co.gif");
 
 		fSwitchVAJViewAction= new ToggleViewAction(this, 2, bundle, PREFIX_TOGGLE_VAJ);
-		fSwitchVAJViewAction.setImageDescriptor(JavaPluginImages.DESC_LCL_VAJHIERARCHY_VIEW);
-
+		//fSwitchVAJViewAction.setImageDescriptor(JavaPluginImages.DESC_LCL_VAJHIERARCHY_VIEW);
+		fSwitchVAJViewAction.setImageDescriptors("lcl16", "hierarchy_co.gif");
 		
 		fSwitchSubViewAction.setOthers(new ToggleViewAction[] { fSwitchSuperViewAction, fSwitchVAJViewAction });
 		fSwitchSuperViewAction.setOthers(new ToggleViewAction[] { fSwitchSubViewAction, fSwitchVAJViewAction });

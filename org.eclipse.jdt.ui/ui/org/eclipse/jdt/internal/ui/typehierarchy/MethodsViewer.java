@@ -69,11 +69,13 @@ public class MethodsViewer extends TableViewer {
 		
 		// fields	
 		fShowFields= new MethodsViewerFilterAction(this, filter,  bundle, PREFIX_FILTER_FIELDS, MethodsViewerFilter.FILTER_FIELDS, false);
-		fShowFields.setImageDescriptor(JavaPluginImages.DESC_LCL_SHOW_FIELDS);
+		//fShowFields.setImageDescriptor(JavaPluginImages.DESC_LCL_SHOW_FIELDS);
+		fShowFields.setImageDescriptors("lcl16", "fields_co.gif");
 		
 		// static
 		fShowStatic= new MethodsViewerFilterAction(this, filter, bundle, PREFIX_FILTER_STATIC, MethodsViewerFilter.FILTER_STATIC, true);
-		fShowStatic.setImageDescriptor(JavaPluginImages.DESC_LCL_SHOW_STATIC);
+		//fShowStatic.setImageDescriptor(JavaPluginImages.DESC_LCL_SHOW_STATIC);
+		fShowStatic.setImageDescriptors("lcl16", "static_co.gif");
 		
 		// private
 		fShowPrivate= new MethodsViewerFilterAction(this, filter, bundle, PREFIX_FILTER_PRIVATE, MethodsViewerFilter.FILTER_PRIVATE, true);

@@ -12,9 +12,10 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.action.IAction;
 
 /**
- * Bundle of all images used by the Java plugin.
+ * Bundle of most images used by the Java plugin.
  */
 public class JavaPluginImages {
 
@@ -136,18 +137,18 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_MISC_PRIVATE= createManaged(T_OBJ, IMG_MISC_PRIVATE);
 	public static final ImageDescriptor DESC_MISC_DEFAULT= createManaged(T_OBJ, IMG_MISC_DEFAULT);
 	
-	public static final ImageDescriptor DESC_LCL_SHOW_INHERITED= create(T_LCL, "inher_co.gif");
-	public static final ImageDescriptor DESC_LCL_SHOW_STATIC= create(T_LCL, "static_co.gif");
-	public static final ImageDescriptor DESC_LCL_SHOW_FINAL= create(T_LCL, "final_co.gif");
-	public static final ImageDescriptor DESC_LCL_SHOW_FIELDS= create(T_LCL, "fields_co.gif");
-	public static final ImageDescriptor DESC_LCL_LOCK_VIEW= create(T_LCL, "lock_close.gif");
-	public static final ImageDescriptor DESC_LCL_SUBTYPES_VIEW= create(T_LCL, "sub_co.gif");
-	public static final ImageDescriptor DESC_LCL_SUPERTYPES_VIEW= create(T_LCL, "super_co.gif");
-	public static final ImageDescriptor DESC_LCL_VAJHIERARCHY_VIEW= create(T_LCL, "hierarchy_co.gif");
-	public static final ImageDescriptor DESC_LCL_MEMBER_FILTER= create(T_LCL, "impl_co.gif");	
-	public static final ImageDescriptor DESC_LCL_ADD_EXCEPTION= create(T_LCL, "exc_catch.gif");
-	public static final ImageDescriptor DESC_LCL_DELETE= create(T_LCL, "remove_exc.gif");
-	public static final ImageDescriptor DESC_LCL_DELETE_ALL= create(T_LCL, "removea_exc.gif");
+	//public static final ImageDescriptor DESC_LCL_SHOW_INHERITED= create(T_LCL, "inher_co.gif");
+	//public static final ImageDescriptor DESC_LCL_SHOW_STATIC= create(T_LCL, "static_co.gif");
+	//public static final ImageDescriptor DESC_LCL_SHOW_FINAL= create(T_LCL, "final_co.gif");
+	//public static final ImageDescriptor DESC_LCL_SHOW_FIELDS= create(T_LCL, "fields_co.gif");
+	//public static final ImageDescriptor DESC_LCL_LOCK_VIEW= create(T_LCL, "lock_close.gif");
+	//public static final ImageDescriptor DESC_LCL_SUBTYPES_VIEW= create(T_LCL, "sub_co.gif");
+	//public static final ImageDescriptor DESC_LCL_SUPERTYPES_VIEW= create(T_LCL, "super_co.gif");
+	//public static final ImageDescriptor DESC_LCL_VAJHIERARCHY_VIEW= create(T_LCL, "hierarchy_co.gif");
+	//public static final ImageDescriptor DESC_LCL_MEMBER_FILTER= create(T_LCL, "impl_co.gif");	
+	//public static final ImageDescriptor DESC_LCL_ADD_EXCEPTION= create(T_LCL, "exc_catch.gif");
+	//public static final ImageDescriptor DESC_LCL_DELETE= create(T_LCL, "remove_exc.gif");
+	//public static final ImageDescriptor DESC_LCL_DELETE_ALL= create(T_LCL, "removea_exc.gif");
 	
 	public static final ImageDescriptor DESC_MENU_SHIFT_RIGHT= create(T_CTOOL, "shift_r_edit.gif");
 	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= create(T_CTOOL, "shift_l_edit.gif");
@@ -261,4 +262,24 @@ public class JavaPluginImages {
 		return new URL(fgIconBaseURL, buffer.toString());
 	}
 	
+	public static void setImageDescriptors(IAction action, String type, String relPath) {
+		
+		try {
+			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("full/d" + type, relPath));
+			if (id != null)
+				action.setDisabledImageDescriptor(id);
+		} catch (MalformedURLException e) {
+			System.out.println("no d image: " + relPath);
+		}
+
+		try {
+			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("full/c" + type, relPath));
+			if (id != null)
+				action.setHoverImageDescriptor(id);
+		} catch (MalformedURLException e) {
+			System.out.println("no c image: " + relPath);
+		}
+
+		action.setImageDescriptor(create("full/e" + type, relPath));
+	}
 }

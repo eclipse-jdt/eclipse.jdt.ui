@@ -13,6 +13,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 public abstract class JavaUIAction extends Action {
 	
 	private static final String LABEL_KEY= "label";
@@ -57,5 +59,9 @@ public abstract class JavaUIAction extends Action {
 	}
 	
 	public final void actionPerformed(Window window) {
+	}
+	
+	public void setImageDescriptors(String type, String name) {
+		JavaPluginImages.setImageDescriptors(this, type, name);
 	}
 }
