@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.IPostSelectionProvider;
 import org.eclipse.jface.text.ITextSelection;
  
 import org.eclipse.swt.SWT;
@@ -130,7 +131,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  * It is specified to show the content of ICompilationUnits and IClassFiles.
  * Pulishes its context menu under <code>JavaPlugin.getDefault().getPluginId() + ".outline"</code>.
  */
-public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdaptable {
+public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdaptable , IPostSelectionProvider {
 
 			static Object[] NO_CHILDREN= new Object[0];
    
@@ -746,6 +747,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 		
 	private ListenerList fSelectionChangedListeners= new ListenerList();
+	private ListenerList fPostSelectionChangedListeners= new ListenerList();
 	private Hashtable fActions= new Hashtable();
 	
 	private TogglePresentationAction fTogglePresentation;
@@ -842,7 +844,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 */
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		if (fOutlineViewer != null)
-			fOutlineViewer.addPostSelectionChangedListener(listener);
+			fOutlineViewer.addSelectionChangedListener(listener);
 		else
 			fSelectionChangedListeners.add(listener);
 	}
@@ -852,7 +854,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 */
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 		if (fOutlineViewer != null)
-			fOutlineViewer.removePostSelectionChangedListener(listener);
+			fOutlineViewer.removeSelectionChangedListener(listener);
 		else
 			fSelectionChangedListeners.remove(listener);
 	}
@@ -872,6 +874,26 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		if (fOutlineViewer == null)
 			return StructuredSelection.EMPTY;
 		return fOutlineViewer.getSelection();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.IPostSelectionProvider#addPostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+	 */
+	public void addPostSelectionChangedListener(ISelectionChangedListener listener) {
+		if (fOutlineViewer != null)
+			fOutlineViewer.addPostSelectionChangedListener(listener);
+		else
+			fPostSelectionChangedListeners.add(listener);
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.IPostSelectionProvider#removePostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+	 */
+	public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
+		if (fOutlineViewer != null)
+			fOutlineViewer.removePostSelectionChangedListener(listener);
+		else
+			fPostSelectionChangedListeners.remove(listener);	
 	}
 	
 	private void registerToolbarActions() {
@@ -905,14 +927,20 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		Object[] listeners= fSelectionChangedListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
 			fSelectionChangedListeners.remove(listeners[i]);
+			fOutlineViewer.addSelectionChangedListener((ISelectionChangedListener) listeners[i]);
+		}
+		
+		listeners= fPostSelectionChangedListeners.getListeners();
+		for (int i= 0; i < listeners.length; i++) {
+			fPostSelectionChangedListeners.remove(listeners[i]);
 			fOutlineViewer.addPostSelectionChangedListener((ISelectionChangedListener) listeners[i]);
 		}
-				
+						
 		MenuManager manager= new MenuManager(fContextMenuID, fContextMenuID);
 		manager.setRemoveAllWhenShown(true);
 		manager.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager manager) {
-				contextMenuAboutToShow(manager);
+			public void menuAboutToShow(IMenuManager m) {
+				contextMenuAboutToShow(m);
 			}
 		});
 		fMenu= manager.createContextMenu(tree);
@@ -979,6 +1007,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		fSelectionChangedListeners.clear();
 		fSelectionChangedListeners= null;
+		
+		fPostSelectionChangedListeners.clear();
+		fPostSelectionChangedListeners= null;
 
 		if (fPropertyChangeListener != null) {
 			JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);

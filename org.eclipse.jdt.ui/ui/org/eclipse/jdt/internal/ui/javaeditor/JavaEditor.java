@@ -64,6 +64,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IPostSelectionProvider;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextInputListener;
@@ -178,13 +179,58 @@ import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
  * Java specific text editor.
  */
 public abstract class JavaEditor extends StatusTextEditor implements IViewPartInputProvider {
+	
+	/**
+	 * Internal implementation class for a change listener.
+	 * @since 3.0
+	 */
+	protected abstract class AbstractSelectionChangedListener implements ISelectionChangedListener  {
+
+		/**
+		 * Installs this selection changed listener with the given selection provider. If
+		 * the selection provider is a post selection provider, post selection changed
+		 * events are the preferred choice, otherwise normal selection changed events
+		 * are requested.
+		 * 
+		 * @param selectionProvider
+		 */
+		public void install(ISelectionProvider selectionProvider) {
+			if (selectionProvider == null)
+				return;
+				
+			if (selectionProvider instanceof IPostSelectionProvider)  {
+				IPostSelectionProvider provider= (IPostSelectionProvider) selectionProvider;
+				provider.addPostSelectionChangedListener(this);
+			} else  {
+				selectionProvider.addSelectionChangedListener(this);
+			}
+		}
+
+		/**
+		 * Removes this selection changed listener from the given selection provider.
+		 * 
+		 * @param selectionProvider
+		 */
+		public void uninstall(ISelectionProvider selectionProvider) {
+			if (selectionProvider == null)
+				return;
+			
+			if (selectionProvider instanceof IPostSelectionProvider)  {
+				IPostSelectionProvider provider= (IPostSelectionProvider) selectionProvider;
+				provider.removePostSelectionChangedListener(this);
+			} else  {
+				selectionProvider.removeSelectionChangedListener(this);
+			}			
+		}
+	};
 
 	/**
 	 * Updates the Java outline page selection and this editor's range indicator.
 	 * 
 	 * @since 3.0
 	 */
-	class EditorSelectionChangedListener implements ISelectionChangedListener {
+	private class EditorSelectionChangedListener extends AbstractSelectionChangedListener {
+		
 		/*
 		 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 		 */
@@ -192,7 +238,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			selectionChanged();
 		}
 
-		private void selectionChanged() {
+		public void selectionChanged() {
 			if (isEditingScriptRunning())
 				return;
 			
@@ -200,11 +246,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			synchronizeOutlinePage(element);
 			setSelection(element, false);
 		}
-
 	};
 		
-	
-	class OutlineSelectionChangedListener  implements ISelectionChangedListener {
+	/**
+	 * Updates the selection in the editor's widget with the selection of the outline page. 
+	 */
+	class OutlineSelectionChangedListener  extends AbstractSelectionChangedListener {
 		public void selectionChanged(SelectionChangedEvent event) {
 			doSelectionChanged(event);
 		}
@@ -1135,9 +1182,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * 
 	 * @since 3.0
 	 */
-	private EditorSelectionChangedListener fOutlinePageUpdater;
+	private EditorSelectionChangedListener fEditorSelectionChangedListener;
 	/** The selection changed listener */
-	protected ISelectionChangedListener fOutlineSelectionChangedListener= new OutlineSelectionChangedListener();
+	protected AbstractSelectionChangedListener fOutlineSelectionChangedListener= new OutlineSelectionChangedListener();
 	/** The editor's bracket matcher */
 	protected JavaPairMatcher fBracketMatcher= new JavaPairMatcher(BRACKETS);
 	/** Indicates whether this editor should react on outline page selection changes */
@@ -1276,12 +1323,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * Creates the outline page used with this editor.
 	 */
 	protected JavaOutlinePage createOutlinePage() {
-		
 		JavaOutlinePage page= new JavaOutlinePage(fOutlinerContextMenuId, this);
-		
-		page.addSelectionChangedListener(fOutlineSelectionChangedListener);
+		fOutlineSelectionChangedListener.install(page);
 		setOutlinePageInput(page, getEditorInput());
-	
 		return page;
 	}
 	
@@ -1290,7 +1334,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	public void outlinePageClosed() {
 		if (fOutlinePage != null) {
-			fOutlinePage.removeSelectionChangedListener(fOutlineSelectionChangedListener);
+			fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 			fOutlinePage= null;
 			resetHighlightRange();
 		}
@@ -1304,9 +1348,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	protected void synchronizeOutlinePage(ISourceReference element) {
 		if (fOutlinePage != null && element != null) {
-			fOutlinePage.removeSelectionChangedListener(fOutlineSelectionChangedListener);
+			fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 			fOutlinePage.select(element);
-			fOutlinePage.addSelectionChangedListener(fOutlineSelectionChangedListener);
+			fOutlineSelectionChangedListener.install(fOutlinePage);
 		}
 	}
 	
@@ -1467,9 +1511,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			setSelection(reference, true);
 			// set outliner selection
 			if (fOutlinePage != null) {
-				fOutlinePage.removeSelectionChangedListener(fOutlineSelectionChangedListener);
+				fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 				fOutlinePage.select(reference);
-				fOutlinePage.addSelectionChangedListener(fOutlineSelectionChangedListener);
+				fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 			}
 		}
 	}
@@ -1523,9 +1567,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				if (offset < range.getOffset() + range.getLength() && range.getOffset() < offset + length) {
 					setHighlightRange(range.getOffset(), range.getLength(), true);
 					if (fOutlinePage != null) {
-						fOutlinePage.removeSelectionChangedListener(fOutlineSelectionChangedListener);
+						fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 						fOutlinePage.select((ISourceReference) element);
-						fOutlinePage.addSelectionChangedListener(fOutlineSelectionChangedListener);
+						fOutlineSelectionChangedListener.install(fOutlinePage);
 					}
 					return;
 				}
@@ -1626,8 +1670,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			fSelectionHistory= null;
 		}
 		
-		if (fOutlinePageUpdater != null)
-			getSelectionProvider().removeSelectionChangedListener(fOutlinePageUpdater);
+		if (fEditorSelectionChangedListener != null)  {
+			fEditorSelectionChangedListener.uninstall(getSelectionProvider());
+			fEditorSelectionChangedListener= null;
+		}
 				
 		super.dispose();
 	}
@@ -1769,12 +1815,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			
 			if (PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE.equals(property)) {
 				if ((event.getNewValue() instanceof Boolean) && ((Boolean)event.getNewValue()).booleanValue()) {
-					fOutlinePageUpdater= new EditorSelectionChangedListener();
-					getSelectionProvider().addSelectionChangedListener(fOutlinePageUpdater);
-					fOutlinePageUpdater.selectionChanged();
+					fEditorSelectionChangedListener= new EditorSelectionChangedListener();
+					fEditorSelectionChangedListener.install(getSelectionProvider());
+					fEditorSelectionChangedListener.selectionChanged();
 				} else {
-					getSelectionProvider().removeSelectionChangedListener(fOutlinePageUpdater);
-					fOutlinePageUpdater= null;
+					fEditorSelectionChangedListener.uninstall(getSelectionProvider());
+					fEditorSelectionChangedListener= null;
 				}
 				return;
 			}
@@ -2099,8 +2145,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		fInformationPresenter.install(getSourceViewer());
 		
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE)) {
-			fOutlinePageUpdater= new EditorSelectionChangedListener();
-			getSelectionProvider().addSelectionChangedListener(fOutlinePageUpdater);
+			fEditorSelectionChangedListener= new EditorSelectionChangedListener();
+			fEditorSelectionChangedListener.install(getSelectionProvider());
 		}
 		
 		if (isBrowserLikeLinks())
