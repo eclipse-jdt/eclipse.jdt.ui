@@ -15,7 +15,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DefaultAutoIndentStrategy;
+import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.ui.text.Symbols;
 /**
  * Auto indent strategy sensitive to brackets.
  */
-public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
+public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		
 	/** The line comment introducer. Value is "{@value}" */
 	private static final String LINE_COMMENT= "//"; //$NON-NLS-1$

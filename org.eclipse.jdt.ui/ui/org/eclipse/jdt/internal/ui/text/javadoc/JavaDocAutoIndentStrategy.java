@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DefaultAutoIndentStrategy;
+import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Auto indent strategy for Javadoc comments.
  */
-public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
+public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	/** The partitioning that this strategy operates on. */
 	private final String fPartitioning;

@@ -25,7 +25,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.text.AbstractInformationControlManager;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
-import org.eclipse.jface.text.IAutoIndentStrategy;
+import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -86,6 +86,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
@@ -429,17 +430,23 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		}
 		return null;
 	}
-
+	
 	/*
-	 * @see SourceViewerConfiguration#getAutoIndentStrategy(ISourceViewer, String)
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAutoEditStrategies(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
 	 */
-	public IAutoIndentStrategy getAutoIndentStrategy(ISourceViewer sourceViewer, String contentType) {
-		if (IJavaPartitions.JAVA_DOC.equals(contentType) ||
-				IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType))
-			return new JavaDocAutoIndentStrategy(getConfiguredDocumentPartitioning(sourceViewer));
+	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
+		String partitioning= getConfiguredDocumentPartitioning(sourceViewer);
+		if (IJavaPartitions.JAVA_DOC.equals(contentType) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType))
+			return new IAutoEditStrategy[] { new JavaDocAutoIndentStrategy(partitioning) };
 		else if (IJavaPartitions.JAVA_STRING.equals(contentType))
-			return new JavaStringAutoIndentStrategy(getConfiguredDocumentPartitioning(sourceViewer));
-		return new JavaAutoIndentStrategy(getConfiguredDocumentPartitioning(sourceViewer));
+			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaStringAutoIndentStrategy(partitioning) };
+		else if (IJavaPartitions.JAVA_CHARACTER.equals(contentType) || IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
+			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaAutoIndentStrategy(partitioning) };
+		else {
+			IAutoEditStrategy[] autoEditStrategies= new IAutoEditStrategy[] { new JavaAutoIndentStrategy(partitioning) };
+			autoEditStrategies.toString();
+			return autoEditStrategies;
+		}
 	}
 
 	/*

@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DefaultAutoIndentStrategy;
+import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Auto indent strategy for java strings
  */
-public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
+public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	
 	private String fPartitioning;
 	

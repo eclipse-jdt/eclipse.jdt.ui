@@ -51,7 +51,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension;
 import org.eclipse.jface.text.IDocumentListener;
@@ -130,7 +129,6 @@ import org.eclipse.jdt.internal.ui.text.Symbols;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
-import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
 
 
 
@@ -291,10 +289,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			super.configure(configuration);
 			fCorrectionAssistant= new JavaCorrectionAssistant(CompilationUnitEditor.this);
 			fCorrectionAssistant.install(this);
-			IAutoEditStrategy smartSemi= new SmartSemicolonAutoEditStrategy(IJavaPartitions.JAVA_PARTITIONING);
-			prependAutoEditStrategy(smartSemi, IDocument.DEFAULT_CONTENT_TYPE);
-			prependAutoEditStrategy(smartSemi, IJavaPartitions.JAVA_STRING);
-			prependAutoEditStrategy(smartSemi, IJavaPartitions.JAVA_CHARACTER);
 		}
 		
 		/*
