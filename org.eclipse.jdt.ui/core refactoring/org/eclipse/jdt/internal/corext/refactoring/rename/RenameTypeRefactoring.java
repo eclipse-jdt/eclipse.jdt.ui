@@ -374,8 +374,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private RefactoringStatus checkTypesInPackage() throws JavaModelException{
-		IType type= findTypeInPackage(fType.getPackageFragment(), fNewName);
-		if (type == null)
+		IType type= Checks.findTypeInPackage(fType.getPackageFragment(), fNewName);
+		if (type == null || ! type.exists())
 			return null;
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.exists", //$NON-NLS-1$
 																	new String[]{fNewName, fType.getPackageFragment().getElementName()});
@@ -399,21 +399,6 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed",//$NON-NLS-1$
 								new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewName});
 		return RefactoringStatus.createErrorStatus(msg, JavaSourceContext.create(enclosingType));
-	}
-	
-	private static IType findTypeInPackage(IPackageFragment pack, String name) throws JavaModelException{
-		Assert.isTrue(pack.exists(), RefactoringCoreMessages.getString("TypeRefactoring.assert.must_exist_1")); //$NON-NLS-1$
-		Assert.isTrue(!pack.isReadOnly(), RefactoringCoreMessages.getString("TypeRefactoring.assert.read-only")); //$NON-NLS-1$
-		
-		/* ICompilationUnit.getType expects simple name*/  
-		if (name.indexOf(".") != -1) //$NON-NLS-1$
-			name= name.substring(0, name.indexOf(".")); //$NON-NLS-1$
-		ICompilationUnit[] cus= pack.getCompilationUnits();
-		for (int i= 0; i < cus.length; i++){
-			if (cus[i].getType(name).exists())
-				return cus[i].getType(name);
-		}
-		return null;
 	}
 	
 	private static IType findEnclosedType(IType type, String newName) throws JavaModelException{

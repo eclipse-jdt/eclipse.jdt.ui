@@ -730,19 +730,7 @@ public class NLSRefactoring extends Refactoring {
 	}
 		
 	private static boolean typeNameExistsInPackage(IPackageFragment pack, String name) throws JavaModelException{
-		Assert.isTrue(pack.exists(), "package must exist"); //$NON-NLS-1$
-		Assert.isTrue(!pack.isReadOnly(), "package must not be read-only"); //$NON-NLS-1$
-		/*
-		 * ICompilationUnit.getType expects simple name
-		 */  
-		if (name.indexOf(".") != -1) //$NON-NLS-1$
-			name= name.substring(0, name.indexOf(".")); //$NON-NLS-1$
-		ICompilationUnit[] cus= pack.getCompilationUnits();
-		for (int i= 0; i < cus.length; i++){
-			if (cus[i].getType(name).exists())
-				return true;
-		}
-		return false;
+		return Checks.findTypeInPackage(pack, name) != null;
 	}
 	
 	public void setCreateAccessorClass(boolean create){
