@@ -697,12 +697,22 @@ public class Bindings {
 	public static boolean isEqualMethod(IMethodBinding method, String methodName, String[] parameters) {
 		if (!method.getName().equals(methodName))
 			return false;
-			
+
 		ITypeBinding[] methodParameters= method.getParameterTypes();
 		if (methodParameters.length != parameters.length)
 			return false;
+		String first, second;
+		int index;
 		for (int i= 0; i < parameters.length; i++) {
-			if (parameters[i].equals(methodParameters[i].getGenericType().getQualifiedName()))
+			first= parameters[i];
+			index= first.indexOf('<');
+			if (index > 0)
+				first= first.substring(0, index);
+			second= methodParameters[i].getGenericType().getQualifiedName();
+			index= second.indexOf('<');
+			if (index > 0)
+				second= second.substring(0, index);
+			if (!first.equals(second))
 				return false;
 		}
 		return true;
@@ -972,7 +982,7 @@ public class Bindings {
 	 * @throws JavaModelException if an error occurs in the Java model
 	 */
 	public static IMethod findMethod(IMethodBinding method, IType type) throws JavaModelException {
-		method= method.getErasure();
+		method= method.getGenericMethod();
 		
 		IMethod[] candidates= type.getMethods();
 		for (int i= 0; i < candidates.length; i++) {
@@ -1040,7 +1050,7 @@ public class Bindings {
 		} else {
 			// normalize (quick hack until binding.getJavaElement works)
 			candidate= Signature.getTypeErasure(candidate);
-			type= type.getErasure();
+			type= type.getGenericType();
 			
 			if (isResolvedType(candidate)) {
 				return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
@@ -1242,4 +1252,43 @@ public class Bindings {
 		return true;
 	}
 
+	public static boolean isOverriddenMethod(IMethodBinding overridden, IMethodBinding overridable) {
+
+		if (!overridden.getName().equals(overridable.getName()))
+			return false;
+
+		if (overridden.getParameterTypes().length != overridable.getParameterTypes().length)
+			return false;
+
+		ITypeBinding overriddenReturn= overridden.getReturnType();
+		ITypeBinding overridableReturn= overridable.getReturnType();
+		if (overriddenReturn == null || overridableReturn == null)
+			return false;
+
+		if (!overriddenReturn.getGenericType().isSubTypeCompatible(overridableReturn.getGenericType()))
+			return false;
+
+		ITypeBinding[] overriddenTypes= overridden.getParameterTypes();
+		ITypeBinding[] overridableTypes= overridable.getParameterTypes();
+		Assert.isTrue(overriddenTypes.length == overridableTypes.length);
+
+		for (int index= 0; index < overriddenTypes.length; index++) {
+			if (!overridableTypes[index].getGenericType().isSubTypeCompatible(overriddenTypes[index].getGenericType()))
+				return false;
+		}
+
+		ITypeBinding[] overriddenExceptions= overridden.getExceptionTypes();
+		ITypeBinding[] overridableExceptions= overridable.getExceptionTypes();
+		boolean checked= false;
+		for (int index= 0; index < overriddenExceptions.length; index++) {
+			checked= false;
+			for (int offset= 0; offset < overridableExceptions.length; offset++) {
+				if (overriddenExceptions[index].isSubTypeCompatible(overridableExceptions[offset]))
+					checked= true;
+			}
+			if (!checked)
+				return false;
+		}
+		return true;
+	}
 }
