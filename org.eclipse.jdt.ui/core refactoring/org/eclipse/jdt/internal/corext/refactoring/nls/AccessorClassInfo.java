@@ -8,17 +8,18 @@
  ****************************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
-import org.eclipse.jdt.internal.core.SourceRange;
 
 public class AccessorClassInfo {
     
     String fName;
-    SourceRange fSourceRange;
+    int fOffset;
+    int fLength;
     
-    public AccessorClassInfo(String name, SourceRange sourceRange) {
+    public AccessorClassInfo(String name, int offset, int length) {
         super();
         fName = name;
-        fSourceRange = sourceRange;
+        fOffset = offset;
+        fLength = length;
     }
     
     public boolean equals(Object obj) {

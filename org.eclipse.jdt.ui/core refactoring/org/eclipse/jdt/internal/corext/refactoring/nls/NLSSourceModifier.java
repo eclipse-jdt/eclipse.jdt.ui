@@ -96,8 +96,9 @@ public class NLSSourceModifier {
             TextChangeCompatibility.addTextEdit(
                     change, 
                     "", 
-                    new ReplaceEdit(accessorClassInfo.fSourceRange.getOffset(), 
-                            accessorClassInfo.fSourceRange.getLength(), "\"" + substitution.fValue + "\""));
+                    new ReplaceEdit(accessorClassInfo.fOffset, 
+                            accessorClassInfo.fLength, 
+                            "\"" + substitution.fValue + "\""));
         }           
     }
 

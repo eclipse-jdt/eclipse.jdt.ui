@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.internal.core.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
@@ -34,8 +33,9 @@ public class NLSInfo {
     private class AccessorClassHelper {
         
         private String fName;
-        private ITypeBinding fBinding;
-        private SourceRange fSourceRage;
+        private ITypeBinding fBinding;        
+        int fOffset;
+        int fLength;
         
         AccessorClassHelper(ASTNode atsNode, NLSElement nlsElement) {
             if (!nlsElement.hasTag()) {
@@ -50,13 +50,23 @@ public class NLSInfo {
                     IMethodBinding binding = methodInvocation.resolveMethodBinding();
                     if (binding != null && Modifier.isStatic(binding.getModifiers())) {
                         fName = binding.getDeclaringClass().getName();
-                        fSourceRage = new SourceRange(parent.getStartPosition(), parent.getLength());
+                        fOffset = parent.getStartPosition();
+                        fLength = parent.getLength();                        
                         fBinding = binding.getDeclaringClass();
                     }
                 }
             }
             
-            if ((fName == null) && (fBinding == null) && (fSourceRage == null)) {
+            ICompilationUnit cu;
+            try {
+                cu = Bindings.findCompilationUnit(fBinding, fCu.getJavaProject());
+                if (cu == null) {
+                    fBinding = null;
+                }
+            } catch (JavaModelException e) {                
+            }
+            
+            if ((fName == null) || (fBinding == null)) {
                 throw new IllegalArgumentException("AccessorClass Node does not exist");
             }
         }
@@ -69,8 +79,8 @@ public class NLSInfo {
             return fName;
         }
         
-        public SourceRange getSourceRage() {
-            return fSourceRage;
+        public AccessorClassInfo getInfo() {
+            return new AccessorClassInfo(fName, fOffset, fLength);
         }
     }    
     
@@ -109,7 +119,7 @@ public class NLSInfo {
         
         try {
             AccessorClassHelper accessorClass = new AccessorClassHelper(fAST, nlsElement);
-            return new AccessorClassInfo(accessorClass.getName(), accessorClass.getSourceRage());
+            return accessorClass.getInfo();
         } catch (Exception e) {
             // dont throw illegalargument for now !!!
         }
@@ -118,7 +128,10 @@ public class NLSInfo {
     }
     
     public IPackageFragment getPackageOfAccessorClass(ITypeBinding accessorBinding) throws JavaModelException {
-        return (IPackageFragment) Bindings.findCompilationUnit(accessorBinding, fCu.getJavaProject()).getParent();
+        if (accessorBinding != null) {
+            return (IPackageFragment) Bindings.findCompilationUnit(accessorBinding, fCu.getJavaProject()).getParent();
+        }
+        return null;
     }
     
     public String getResourceBundle(NLSElement nlsElement) throws JavaModelException {
@@ -150,7 +163,7 @@ public class NLSInfo {
             String resourceBundle = getResourceBundle(nlsElement);
             IPackageFragment packageFragment = getResourceBundlePackage(resourceBundle);
             if (packageFragment != null) {
-	            IPath path = packageFragment.getPath().append(getResourceNameHelper(resourceBundle));
+	            IPath path = packageFragment.getPath().append(getResourceNamePartHelper(resourceBundle));
 	            return (IFile) (ResourcesPlugin.getWorkspace().getRoot().findMember(path));
             }
         } catch (JavaModelException e) {
@@ -201,7 +214,7 @@ public class NLSInfo {
     
     private IPackageFragment findPackageFragmentOfResource(IJavaProject javaProject, String fullyQualifiedResource) throws JavaModelException {
         String packageString = getPackagePartHelper(fullyQualifiedResource);
-        String resourceName = getResourceNameHelper(fullyQualifiedResource);
+        String resourceName = getResourceNamePartHelper(fullyQualifiedResource);
         IPackageFragmentRoot[] allRoots = javaProject.getAllPackageFragmentRoots();
         for (int i = 0; i < allRoots.length; i++) {
             IPackageFragmentRoot root = allRoots[i];
@@ -224,7 +237,7 @@ public class NLSInfo {
         return null;
     }
 
-    private String getResourceNameHelper(String fullyQualifiedResource) {
+    public static String getResourceNamePartHelper(String fullyQualifiedResource) {
         int propertyDot = fullyQualifiedResource.lastIndexOf('.');
         int lastPackageDot = fullyQualifiedResource.lastIndexOf('.', propertyDot - 1);
         if (lastPackageDot == -1) {
@@ -234,7 +247,7 @@ public class NLSInfo {
         }
     }
 
-    private String getPackagePartHelper(String fullyQualifiedResource) {
+    public static String getPackagePartHelper(String fullyQualifiedResource) {
         int propertyDot = fullyQualifiedResource.lastIndexOf('.');
         int lastPackageDot = fullyQualifiedResource.lastIndexOf('.', propertyDot - 1);
         if (lastPackageDot == -1) {

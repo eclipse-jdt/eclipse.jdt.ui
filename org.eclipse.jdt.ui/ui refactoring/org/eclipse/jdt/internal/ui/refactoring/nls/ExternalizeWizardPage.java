@@ -197,7 +197,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	    }
 	    
 	    public String getColumnText(Object element, int columnIndex) {
-	        String columnText = ""; //$NON-NLS-1$
+	        String columnText = "";
 			if (element instanceof NLSSubstitution) {
 				NLSSubstitution substitution= (NLSSubstitution) element;
 				if (columnIndex == KEY_PROP){
@@ -212,8 +212,39 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				    columnText = substitution.fValue;				    
 				}
 			}
-			return columnText; 
+			return unwindEscapeChars(columnText); 
 		}
+	    
+	    private String unwindEscapeChars(String s){
+	        if (s != null) {
+	            StringBuffer sb= new StringBuffer(s.length());
+	            int length= s.length();
+	            for (int i= 0; i < length; i++){
+	                char c= s.charAt(i);
+	                sb.append(getUnwoundString(c));
+	            }
+	            return sb.toString();
+	        } 
+	        return null;
+	    }
+	    
+	    private String getUnwoundString(char c){
+	    	switch(c){
+	    		case '\b' :
+	    			return "\\b";//$NON-NLS-1$
+	    		case '\t' :
+	    			return "\\t";//$NON-NLS-1$
+	    		case '\n' :
+	    			return "\\n";//$NON-NLS-1$
+	    		case '\f' :
+	    			return "\\f";//$NON-NLS-1$	
+	    		case '\r' :
+	    			return "\\r";//$NON-NLS-1$
+	    		case '\\' :
+	    			return "\\\\";//$NON-NLS-1$
+	    	}
+	    	return String.valueOf(c);
+	    }
 		
 		public Image getColumnImage(Object element, int columnIndex) {
 		    if ((columnIndex == STATE_PROP) && (element instanceof NLSSubstitution)) {
@@ -409,7 +440,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		createDefaultExternalization(fSubstitutions, fDefaultPrefix);
 	}	
 
-    /*
+	/*
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
@@ -622,7 +653,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	        if (substitution.hasChanged()) {
 	            return substitution.hasDuplicateKey(fSubstitutions, fPrefixField.getText());	            
 	        } else {
-	            return substitution.hasDuplicateKey(fSubstitutions, ""); //$NON-NLS-1$
+	            return substitution.hasDuplicateKey(fSubstitutions, "");
 	        }
 	    }
 	    return false;

@@ -164,5 +164,5 @@ public class NLSSubstitution {
     
     private String createKey(int counter) {
     	return String.valueOf(counter);
-    }
+    }    
 }

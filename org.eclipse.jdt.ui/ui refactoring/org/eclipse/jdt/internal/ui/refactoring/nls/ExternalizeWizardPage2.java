@@ -111,7 +111,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			NLSUIMessages.getString("wizardPage2.accessor.dialog.emtpyMessage"), //$NON-NLS-1$
 			cu, root, updateListener, hint.getMessageClassPackage());
 
-		fAccessorClassName= createStringButtonField(NLSUIMessages.getString("wizardPage2.className"),
+		fAccessorClassName= createStringButtonField(NLSUIMessages.getString("wizardPage2.className"), //$NON-NLS-1$
 		        NLSUIMessages.getString("wizardPage2.browse6"), createAccessorFileBrowseAdapter()); //$NON-NLS-1$
 		fSubstitutionPattern= createStringField(NLSUIMessages.getString("wizardPage2.substitutionPattern")); //$NON-NLS-1$
 

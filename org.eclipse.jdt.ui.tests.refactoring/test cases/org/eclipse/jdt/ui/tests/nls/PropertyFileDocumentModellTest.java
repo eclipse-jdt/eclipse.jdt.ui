@@ -18,6 +18,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.MultiTextEdit;
 
 public class PropertyFileDocumentModellTest extends TestCase {
 
@@ -29,98 +30,128 @@ public class PropertyFileDocumentModellTest extends TestCase {
     	return new TestSuite(PropertyFileDocumentModellTest.class);
     }
     
-    public void testInsertIntoEmptyDoc() {        
+    public void testInsertIntoEmptyDoc() throws Exception {
+        Document props = new Document();
+        
         PropertyFileDocumentModell modell = 
-            new PropertyFileDocumentModell(new Document());
+            new PropertyFileDocumentModell(props);
         
         InsertEdit insertEdit = modell.insert("key", "value");
+        insertEdit.apply(props);
         
-        assertEquals("key=value\n", insertEdit.getText());
-        assertEquals(0, insertEdit.getOffset());
+        assertEquals("key=value\n", props.get());
     }
     
-    public void testInsertIntoDoc() {
-        String props = 
-            "org.eclipse.1=value\n" +
-            "org.eclipse.3=value\n";
-        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(new Document(props));
+    public void testInsertIntoDoc() throws Exception {
+        Document props = new Document( 
+            "org.eclipse.nls.1=value\n" +
+            "org.eclipse=value\n");
+        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(props);
         
-        InsertEdit insertEdit = modell.insert("org.eclipse.2", "value");
+        InsertEdit insertEdit = modell.insert("org.eclipse.nls.2", "value");
+        insertEdit.apply(props);
         
-        assertEquals("org.eclipse.2=value\n", insertEdit.getText());
-        assertEquals(20, insertEdit.getOffset());
+        assertEquals("org.eclipse.nls.1=value\n" +
+        		"org.eclipse.nls.2=value\n" +
+            	"org.eclipse=value\n", props.get());       
     }
     
-    public void testInsertIntoDocWithBlankLines1() {
-        String props = 
+    public void testManyInsertsIntoDoc() throws Exception {
+        Document props = new Document( 
+            "org.eclipse.nls.1=value\n" +
+            "\n" +
+            "org.eclipse=value\n");
+        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(props);
+        
+        KeyValuePair[] keyValuePairs = {
+                new KeyValuePair("org.eclipse.nls.2", "value"),
+                new KeyValuePair("org.eclipse.2", "value")};
+        
+        InsertEdit[] insertEdit = modell.insert(keyValuePairs);
+        MultiTextEdit multiEdit = new MultiTextEdit();
+        for (int i = 0; i < insertEdit.length; i++) {
+            multiEdit.addChild(insertEdit[i]);                        
+        }
+        multiEdit.apply(props);
+        
+        assertEquals("org.eclipse.nls.1=value\n" +
+        		"org.eclipse.nls.2=value\n" +
+        		"\n" +
+        		"org.eclipse=value\n" +
+            	"org.eclipse.2=value\n", props.get());       
+    }
+    
+    public void testBlockInsertsIntoDoc() throws Exception {
+        Document props = new Document(
+                "org.eclipse.1=value\n" +
+                "org.eclipse.2=value\n");
+        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(props);
+        
+        KeyValuePair[] keyValuePairs = {
+                new KeyValuePair("org.eclipse.nls.1", "value"),
+                new KeyValuePair("org.eclipse.nls.2", "value")};
+        
+        InsertEdit[] insertEdit = modell.insert(keyValuePairs);
+        MultiTextEdit multiEdit = new MultiTextEdit();
+        for (int i = 0; i < insertEdit.length; i++) {
+            multiEdit.addChild(insertEdit[i]);                        
+        }
+        multiEdit.apply(props);
+        
+        assertEquals("org.eclipse.1=value\n" +
+        		"org.eclipse.2=value\n" +
+        		"org.eclipse.nls.1=value\n" +
+            	"org.eclipse.nls.2=value\n", props.get());       
+    }
+    
+    public void testInsertIntoDocWithBlankLines1() throws Exception {
+        Document props = new Document(
             "org.eclipse=value\n" +
             "\n" +
-            "org.eclipse.test=value\n";
-        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(new Document(props));
+            "org.eclipse.test=value\n");
+        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(props);
         
         InsertEdit insertEdit = modell.insert("org.eclipse.test", "value2");
+        insertEdit.apply(props);
         
-        assertEquals("org.eclipse.test=value2\n", insertEdit.getText());
-        assertEquals(19, insertEdit.getOffset());
+        assertEquals("org.eclipse=value\n" +
+                "\n" +
+                "org.eclipse.test=value\n" +
+                "org.eclipse.test=value2\n", props.get());
     }
     
-    public void testInsertIntoDocWithBlankLines2() {
-        String props = 
+    public void testInsertIntoDocWithBlankLines2() throws Exception {
+        Document props = new Document( 
             "a.b=v\n" +
             "\n" +
-            "org.eclipse.test=value\n";
-        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(new Document(props));
+            "org.eclipse.test=value\n");
+        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(props);
         
         InsertEdit insertEdit = modell.insert("a.c", "v");
+        insertEdit.apply(props);
         
-        assertEquals("a.c=v\n", insertEdit.getText());
-        assertEquals(6, insertEdit.getOffset());
-    }
-    
-    public void testInsertIntoDocWithKeyValuePair() {
-        String props = 
-            "org.eclipse.1=value\n" +
-            "org.eclipse.3=value\n";
-        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(new Document(props));
-        
-        InsertEdit insertEdit = modell.insert(new KeyValuePair("org.eclipse.2", "value"));
-        
-        assertEquals("org.eclipse.2=value\n", insertEdit.getText());
-        assertEquals(20, insertEdit.getOffset());        
+        assertEquals("a.b=v\n" +
+        		"a.c=v\n" +
+                "\n" +
+            	"org.eclipse.test=value\n", 
+            	props.get());        
     }    
     
     public void testInsertIntoDocWithDifferentSeperationChar() throws Exception {
         Document props = new Document( 
-            "org.eclipse.1:value\n" +
-            "org.eclipse.3 value\n");
+            "org.eclipse.ok:value\n" +
+            "org.eclipse.what value\n");
         PropertyFileDocumentModell modell = new PropertyFileDocumentModell(props);
         
-        InsertEdit insertEdit = modell.insert(new KeyValuePair("org.eclipse.2", "value"));
+        InsertEdit insertEdit = modell.insert(new KeyValuePair("org.eclipse.nix", "value"));
         insertEdit.apply(props);
         
         assertEquals(
-    			"org.eclipse.1:value\n" +
-                "org.eclipse.2=value\n" +
-                "org.eclipse.3 value\n",
+    			"org.eclipse.ok:value\n" +
+                "org.eclipse.what value\n" +
+                "org.eclipse.nix=value\n",
 				props.get());
-    }
-    
-    public void testInserAfterUniCode() throws Exception {
-        Document doc = new Document( 
-            "org.eclipse.1=\\u00ea\n" +
-            "org.eclipse.3=value3\n");
-        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(doc);
-        
-        InsertEdit insertEdit = modell.insert(new KeyValuePair("org.eclipse.2", "value2"));
-        
-        insertEdit.apply(doc);
-        
-        assertEquals(
-        		"org.eclipse.1=\\u00ea\n" +
-        		"org.eclipse.2=value2\n" +
-            	"org.eclipse.3=value3\n",
-				doc.get());
-    }  
+    } 
     
     public void testRemovingOfKey() throws Exception {
     	Document props = new Document(
@@ -152,8 +183,9 @@ public class PropertyFileDocumentModellTest extends TestCase {
     			"org.eclipse.1=value1\n" +
                 "org.eclipse.2=value2\n",
 				props.get());
-    }    
+    }        
     
+    // Escaping stuff
     public void testEscapingOfComments() {
         PropertyFileDocumentModell modell = new PropertyFileDocumentModell(new Document());        
         InsertEdit insertEdit = modell.insert(new KeyValuePair("key", "value!please escape"));
@@ -163,8 +195,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
     public void testEscapingOfLineBreaks() {
     	PropertyFileDocumentModell modell = 
     		new PropertyFileDocumentModell(new Document());
-    	InsertEdit insertEdit = modell.insert(new KeyValuePair("key", "value1\nvalue2"));
-    	assertEquals("key=value1\\nvalue2\n", insertEdit.getText());    	
+    	InsertEdit insertEdit = modell.insert(new KeyValuePair("key", "value1\nvalue2\r"));
+    	assertEquals("key=value1\\nvalue2\\r\n", insertEdit.getText());    	
     }
     
     public void testEscapingOfUniCode() {

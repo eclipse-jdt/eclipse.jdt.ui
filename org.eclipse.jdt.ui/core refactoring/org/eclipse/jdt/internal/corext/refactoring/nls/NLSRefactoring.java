@@ -517,9 +517,8 @@ public class NLSRefactoring extends Refactoring {
         }
         return false;
     }
-
     
-    // TODO: necessary?
+    // TODO: necessary ?
     private boolean willAddImportDeclaration() {
         NLSSubstitution[] subs = fNlsHolder.getSubstitutions();
         if (NLSSubstitution.countItems(subs, NLSSubstitution.EXTERNALIZED) == 0) { return false; }
@@ -572,7 +571,7 @@ public class NLSRefactoring extends Refactoring {
 
     public NLSHint getNlsHint() {
         if (fNlsHint == null) {
-            fNlsHint = new NLSHint(fNlsHolder.getLines(), fCu);
+            fNlsHint = new NLSHint(fNlsHolder.getSubstitutions(), fCu);
         }
         return fNlsHint;
     }

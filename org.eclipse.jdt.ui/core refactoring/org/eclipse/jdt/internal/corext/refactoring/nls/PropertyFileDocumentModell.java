@@ -9,7 +9,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,12 +29,20 @@ public class PropertyFileDocumentModell {
     }
 
     public InsertEdit insert(KeyValuePair keyValuePair) {
-        return getAdjustetInsertEdit(findInsertPosition(keyValuePair), 
-                new KeyValuePairModell(keyValuePair));
+        KeyValuePairModell keyValuePairModell = new KeyValuePairModell(keyValuePair); 
+        int index = findInsertPosition(keyValuePairModell);
+        KeyValuePairModell insertHere = (KeyValuePairModell) fKeyValuePairs.get(index);
+        int offset = insertHere.fOffset - insertHere.fLeadingWhiteSpaces;
+        
+        return new InsertEdit(offset, keyValuePairModell.getEncodedText());
     }
 
     public InsertEdit[] insert(KeyValuePair[] keyValuePairs) {
-        return insertionSort(keyValuePairs);        
+        InsertEdit[] inserts = new InsertEdit[keyValuePairs.length];
+        for (int i = 0; i < keyValuePairs.length; i++) {            
+            inserts[i] = insert(keyValuePairs[i]);
+        }
+        return inserts;        
     }
     
     public DeleteEdit remove(String key) {
@@ -49,32 +56,24 @@ public class PropertyFileDocumentModell {
         return null;
     }
     
-    private int findInsertPosition(KeyValuePair keyValuePair) {
+    private int findInsertPosition(KeyValuePairModell keyValuePair) {
         int insertIndex = 0;
-        while (((KeyValuePairModell) fKeyValuePairs.get(insertIndex)).compareTo(keyValuePair) < 0) {
-            insertIndex++;
-        }
-        return insertIndex;
-    }
-
-    private InsertEdit[] insertionSort(KeyValuePair[] newKeyValuePairs) {
-        KeyValuePairModell[] newKeyValuePairModell = new KeyValuePairModell[newKeyValuePairs.length];
-        for (int i = 0; i < newKeyValuePairs.length; i++) {
-            newKeyValuePairModell[i] = new KeyValuePairModell(newKeyValuePairs[i]);
+        int maxMatch = Integer.MIN_VALUE;
+        for (int i=0; i<fKeyValuePairs.size(); i++) {
+            KeyValuePairModell element = (KeyValuePairModell) fKeyValuePairs.get(i);
+            int match = element.compareTo(keyValuePair);
+            if (match >= maxMatch) {
+                insertIndex = i;
+                maxMatch = match;
+            }            
         }
         
-        Arrays.sort(newKeyValuePairModell);
-        InsertEdit[] inserts = new InsertEdit[newKeyValuePairs.length];
-        int insertIndex = 0;
-        for (int i = 0; i < newKeyValuePairs.length; i++) {
-            KeyValuePairModell subsKeyValuePair = newKeyValuePairModell[i];
-            while (((KeyValuePairModell) fKeyValuePairs.get(insertIndex)).compareTo(subsKeyValuePair) < 0) {
-                insertIndex++;
-            }
-            inserts[i] = getAdjustetInsertEdit(insertIndex, subsKeyValuePair);
-        }        
-        return inserts;
-    }
+        if (insertIndex < fKeyValuePairs.size() - 1) {
+            insertIndex++;
+        }
+        
+        return insertIndex;
+    }    
 
     private void parsePropertyDocument(IDocument document) {
         fKeyValuePairs = new ArrayList();
@@ -120,24 +119,7 @@ public class PropertyFileDocumentModell {
     private boolean isCommentOrWhiteSpace(String line) {
         line = line.trim();
         return (line.length() == 0) || line.startsWith("!") || line.startsWith("#"); //$NON-NLS-1$
-    }
-
-    private InsertEdit getAdjustetInsertEdit(int insertIndex, KeyValuePairModell subsKeyValuePair) {
-        int offset;
-        KeyValuePairModell insertHere = (KeyValuePairModell) fKeyValuePairs.get(insertIndex);
-        if (insertIndex == 0) {
-            offset = insertHere.fOffset;
-        } else {
-            KeyValuePairModell insertAfter = (KeyValuePairModell) fKeyValuePairs.get(insertIndex - 1);
-
-            if (subsKeyValuePair.getBetterMatch(insertAfter, insertHere)) {
-                offset = insertHere.fOffset - insertHere.fLeadingWhiteSpaces;
-            } else {
-                offset = insertHere.fOffset;
-            }
-        }
-        return new InsertEdit(offset, subsKeyValuePair.getEncodedText());
-    }
+    }    
     
     private class KeyValuePairModell extends KeyValuePair implements Comparable {        
 
@@ -160,31 +142,17 @@ public class PropertyFileDocumentModell {
         }
         
         public int compareTo(Object o) {
-            KeyValuePair keyValuePair = (KeyValuePair) o;
-            return fKey.compareTo(keyValuePair.fKey);
-        }
-
-        // TODO bollock match on "this"
-        public boolean getBetterMatch(KeyValuePairModell first, KeyValuePairModell second) {
-            int points = countPoints(fKey);
-            int pointsFirst = countPoints(first.fKey);
-            int pointsSecond = countPoints(second.fKey);
-
-            int dif1 = Math.abs(points - pointsFirst);
-            int dif2 = Math.abs(points - pointsSecond);
-
-            return dif1 <= dif2;
-        }
-
-        private int countPoints(String s) {
-            int res = 0;
-            for (int i = 0; i < s.length(); i++) {
-                if (s.charAt(i) == '.') {
-                    res++;
+            int counter = 0;
+            String key = ((KeyValuePair) o).fKey;
+            int minLen = Math.min(key.length(), fKey.length());
+            int diffLen = Math.abs(key.length() - fKey.length());
+            for (int i=0; i<minLen; i++) {
+                if (key.charAt(i) == fKey.charAt(i)) {
+                    counter++;                    
                 }
-            }
-            return res;
-        }
+            }            
+            return counter - diffLen;
+        }        
         
         private String escapeCommentChars(String string) {
             StringBuffer sb = new StringBuffer(string.length() + 5);
