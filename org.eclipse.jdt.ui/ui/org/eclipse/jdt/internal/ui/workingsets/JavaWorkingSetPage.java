@@ -93,6 +93,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	 */
 	public JavaWorkingSetPage() {
 		super(PAGE_ID, PAGE_TITLE, JavaPluginImages.DESC_WIZBAN_JAVA_WORKINGSET);
+		fFirstCheck= true;
 	}
 
 	/**
@@ -174,6 +175,8 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			}
 		});
 
+		validateInput();
+
 		// Set help for the page 
 		JavaUIHelp.setHelp(fTree, IJavaHelpContextIds.JAVA_WORKING_SET_PAGE);
 	}
@@ -192,10 +195,11 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		Assert.isNotNull(workingSet, "Working set must not be null"); //$NON-NLS-1$
 		fWorkingSet= workingSet;
 		if (getShell() != null && fWorkingSetName != null) {
-			fFirstCheck= true;
+			fFirstCheck= false;
 			fWorkingSetName.setText(fWorkingSet.getName());
 			initializeCheckedState();
 			disableClosedProjects();
+			validateInput();
 		}
 	}
 
@@ -233,10 +237,6 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		String errorMessage= null; //$NON-NLS-1$
 		String newText= fWorkingSetName.getText();
 
-		if (fFirstCheck) {
-			fFirstCheck= false;
-			return;
-		}
 		if (newText.equals("")) //$NON-NLS-1$
 			errorMessage= WorkingSetMessages.getString("JavaWorkingSetPage.warning.nameMustNotBeEmpty"); //$NON-NLS-1$
 
@@ -251,7 +251,11 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		if (errorMessage == null && fTree.getCheckedElements().length == 0)
 			errorMessage= WorkingSetMessages.getString("JavaWorkingSetPage.warning.resourceMustBeChecked"); //$NON-NLS-1$
 
-		setErrorMessage(errorMessage);
+		if (fFirstCheck)
+			fFirstCheck= false;
+		else
+			setErrorMessage(errorMessage);
+
 		setPageComplete(errorMessage == null);
 	}
 	
