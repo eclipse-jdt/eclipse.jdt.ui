@@ -21,6 +21,10 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -56,13 +60,33 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
     	fSecondPage.performFinish(monitor); // use the full progress monitor
     }
     
+    private boolean is15Classpath(IJavaProject javaProject) {
+    	try {
+    		return javaProject.findType("java.lang.Enum") != null; //$NON-NLS-1$
+    	} catch (JavaModelException e) {
+    		// ignore
+    		return false;
+    	}
+    }
+    
+    private void checkCompliance() {
+    	IJavaProject javaProject= fSecondPage.getJavaProject();
+    	String projectCompatibility= javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true);
+    	boolean is15Configured= JavaCore.VERSION_1_5.equals(projectCompatibility);
+    	if (is15Classpath(javaProject) && !is15Configured) {
+    		new ChangeComplianceDialog(getShell(), javaProject).open();
+    	}
+    }
+    
+    
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
 	public boolean performFinish() {
 		boolean res= super.performFinish();
 		if (res) {
-	        BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
+			checkCompliance();
+			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 	 		selectAndReveal(fSecondPage.getJavaProject().getProject());
 		}
 		return res;
