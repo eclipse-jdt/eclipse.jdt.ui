@@ -320,7 +320,9 @@ class UseSupertypeWherePossibleUtil {
 						}
 					}
 				}		
-			}
+			} else if (parentNode instanceof ArrayType){
+				return hasIndirectProblems(parentNode, nodesToRemove, pm);
+			} 
 			return false;
 		} finally{
 			pm.done();
@@ -650,6 +652,8 @@ class UseSupertypeWherePossibleUtil {
 				if (parentNode == ((ArrayCreation)parentNode.getParent()).getType())
 					return true;
 			}
+			if (parentNode instanceof ArrayType)
+				return hasDirectProblems(parentNode, pm);
 				
 			if (parentNode instanceof MethodDeclaration){
 				MethodDeclaration md= (MethodDeclaration)parentNode;
@@ -686,8 +690,7 @@ class UseSupertypeWherePossibleUtil {
 					return true;						
 				}
 			}
-			if (parentNode instanceof ArrayType && parentNode.getParent() instanceof VariableDeclarationStatement)
-				return hasDirectProblems(parentNode, pm);
+							
 			if (parentNode instanceof VariableDeclarationStatement){
 				VariableDeclarationStatement vds= (VariableDeclarationStatement)parentNode;
 				if (vds.getType() == node && ! canReplaceTypeInVariableDeclarationStatement(vds, new SubProgressMonitor(pm, 1))){

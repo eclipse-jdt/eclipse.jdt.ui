@@ -526,6 +526,30 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	public void test81() throws Exception{
+//		printTestDisabledMessage("bug 33878 extract interface: incorrect handling of arrays ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test82() throws Exception{
+//		printTestDisabledMessage("bug 33878 extract interface: incorrect handling of arrays ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test83() throws Exception{
+//		printTestDisabledMessage("bug 33878 extract interface: incorrect handling of arrays ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
 	public void testPaperExample0() throws Exception{
 		String[] names= new String[]{"add", "addAll", "iterator"};
 		String[][] signatures= new String[][]{new String[]{"QComparable;"}, new String[]{"QA;"}, new String[0]};
