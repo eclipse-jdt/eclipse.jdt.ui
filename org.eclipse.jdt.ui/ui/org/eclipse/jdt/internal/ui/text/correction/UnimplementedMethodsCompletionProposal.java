@@ -96,11 +96,21 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		decl.setName(ast.newSimpleName(binding.getName()));
 		decl.setConstructor(false);
 		
-		//ITypeBinding[] typeParams= binding.getTypeParameters();
-		//List typeParameters= decl.typeParameters();
-		//for (int i= 0; i < typeParams.length; i++) {
-			//typeParameters.add(imports.addImport(typeParams[i], ast));
-		//}		
+		ITypeBinding[] typeParams= binding.getTypeParameters();
+		List typeParameters= decl.typeParameters();
+		for (int i= 0; i < typeParams.length; i++) {
+			ITypeBinding curr= typeParams[i];
+			TypeParameter newTypeParam= ast.newTypeParameter();
+			newTypeParam.setName(ast.newSimpleName(curr.getName()));
+			ITypeBinding[] typeBounds= curr.getTypeBounds();
+			if (typeBounds.length != 1 || typeBounds[0] != ast.resolveWellKnownType("java.lang.Object")) {//$NON-NLS-1$
+				List newTypeBounds= newTypeParam.typeBounds();
+				for (int k= 0; k < typeBounds.length; k++) {
+					newTypeBounds.add(imports.addImport(typeBounds[k], ast));
+				}
+			}
+			typeParameters.add(newTypeParam);
+		}		
 		
 		decl.setReturnType2(imports.addImport(binding.getReturnType(), ast));
 		
