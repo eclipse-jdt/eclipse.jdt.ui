@@ -640,6 +640,79 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	/**
+	 * Remembers data related to the current selection to be able to
+	 * restore it later.
+	 * 
+	 * @since 3.0
+	 */
+	private class RememberedSelection {
+		/** The remembered selection start. */
+		private RememberedOffset fStartOffset= new RememberedOffset();
+		/** The remembered selection end. */
+		private RememberedOffset fEndOffset= new RememberedOffset();
+
+		/**
+		 * Remember current selection.
+		 */
+		public void remember() {
+			IRegion selection= getSignedSelection(getSourceViewer());
+			int startOffset= selection.getOffset();
+			int endOffset= startOffset + selection.getLength();
+			
+			fStartOffset.setOffset(startOffset);
+			fEndOffset.setOffset(endOffset);
+		}
+
+		/**
+		 * Restore remembered selection.
+		 */
+		public void restore() {
+			try {
+				
+				int startOffset= fStartOffset.getOffset();
+				int endOffset= fEndOffset.getOffset();
+				
+				if (startOffset == -1)
+					startOffset= endOffset; // fallback to carret offset
+				
+				if (endOffset == -1)
+					endOffset= startOffset; // fallback to other offset
+				
+				IJavaElement element;
+				if (endOffset == -1) {
+					 // fallback to element selection
+					element= fEndOffset.getElement();
+					if (element == null)
+						element= fStartOffset.getElement();
+					if (element != null)
+						setSelection(element);
+					return;
+				}
+							
+				if (isValidSelection(startOffset, endOffset - startOffset))
+					selectAndReveal(startOffset, endOffset - startOffset);
+			} finally {
+				fStartOffset.clear();
+				fEndOffset.clear();
+			}
+		}
+
+		private boolean isValidSelection(int offset, int length) {
+			IDocumentProvider provider= getDocumentProvider();
+			if (provider != null) {
+				IDocument document= provider.getDocument(getEditorInput());
+				if (document != null) {
+					int end= offset + length;
+					int documentLength= document.getLength();
+					return 0 <= offset  && offset <= documentLength && 0 <= end && end <= documentLength;
+				}
+			}
+			return false;
+		}
+		
+	}
+
+	/**
 	 * Remembers additional data for a given
 	 * offset to be able restore it later.
 	 * 
@@ -709,9 +782,15 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				if (newElementLine == -1)
 					return -1;
 
-				int offset= document.getLineOffset(fLine + newElementLine - fElementLine) + fColumn;
+				int newLine= fLine + newElementLine - fElementLine;
+				int maxColumn= document.getLineLength(newLine) - document.getLineDelimiter(newLine).length();
+				int offset;
+				if (fColumn > maxColumn)
+					offset= document.getLineOffset(newLine) + maxColumn;
+				else
+					offset= document.getLineOffset(newLine) + fColumn;
 
-				if (!containsOffset(newElement, offset))
+				if (!containsOffset(newElement, offset) && (offset == 0 || !containsOffset(newElement, offset - 1)))
 					return -1;
 				
 				return offset;
@@ -849,20 +928,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	/** The editor's tab converter */
 	private TabConverter fTabConverter;
 	/**
-	 * The remembered selection start.
+	 * The remembered selection.
 	 * @since 3.0
 	 */
-	private RememberedOffset fRememberedSelectionStartOffset= new RememberedOffset();
-	/**
-	 * The remembered selection end.
-	 * @since 3.0
-	 */
-	private RememberedOffset fRememberedSelectionEndOffset= new RememberedOffset();
-	/**
-	 * The remembered selection sign (<code>true</code> for right-to-left selection).
-	 * @since 3.0
-	 */
-	private boolean fRememberedSelectionSign;
+	private RememberedSelection fRememberedSelection= new RememberedSelection();
 	/** The bracket inserter. */
 	private BracketInserter fBracketInserter= new BracketInserter();
 
@@ -1468,77 +1537,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * @see AbstractTextEditor#rememberSelection()
 	 */
 	protected void rememberSelection() {
-		IRegion selection= getSignedSelection(getSourceViewer());
-		int startOffset= selection.getOffset();
-		int endOffset= startOffset + selection.getLength();
-
-		
-		// remember offset of right-most selected character
-		fRememberedSelectionSign= startOffset > endOffset;
-		if (fRememberedSelectionSign)
-			startOffset--;
-		else
-			endOffset--;
-		
-		fRememberedSelectionStartOffset.setOffset(startOffset);
-		fRememberedSelectionEndOffset.setOffset(endOffset);
+		fRememberedSelection.remember();
 	}
 	
 	/*
 	 * @see AbstractTextEditor#restoreSelection()
 	 */
 	protected void restoreSelection() {
-		
-		try {
-			
-			int startOffset= fRememberedSelectionStartOffset.getOffset();
-			int endOffset= fRememberedSelectionEndOffset.getOffset();
-			
-			// restore offset of right-most selected character plus one
-			if (fRememberedSelectionSign) {
-				if (startOffset != -1)
-					startOffset++;
-			} else {
-				if (endOffset != -1)
-					endOffset++;
-			}
-			
-			if (startOffset == -1)
-				startOffset= endOffset; // fallback to carret offset
-			
-			if (endOffset == -1)
-				endOffset= startOffset; // fallback to other offset
-			
-			IJavaElement element;
-			if (endOffset == -1) {
-				 // fallback to element selection
-				element= fRememberedSelectionEndOffset.getElement();
-				if (element == null)
-					element= fRememberedSelectionStartOffset.getElement();
-				if (element != null)
-					setSelection(element);
-				return;
-			}
-						
-			if (isValidSelection(startOffset, endOffset - startOffset))
-				selectAndReveal(startOffset, endOffset - startOffset);
-		} finally {
-			fRememberedSelectionStartOffset.clear();
-			fRememberedSelectionEndOffset.clear();
-		}
-	}
-	
-	private boolean isValidSelection(int offset, int length) {
-		IDocumentProvider provider= getDocumentProvider();
-		if (provider != null) {
-			IDocument document= provider.getDocument(getEditorInput());
-			if (document != null) {
-				int end= offset + length;
-				int documentLength= document.getLength();
-				return 0 <= offset  && offset <= documentLength && 0 <= end && end <= documentLength;
-			}
-		}
-		return false;
+		fRememberedSelection.restore();
 	}
 	
 	/*
