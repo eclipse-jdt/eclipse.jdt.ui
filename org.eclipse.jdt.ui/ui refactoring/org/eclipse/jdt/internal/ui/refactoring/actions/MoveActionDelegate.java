@@ -9,7 +9,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchWindow;
 
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.reorg.MoveAction;
+import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 
 public class MoveActionDelegate extends RefactoringActionDelegate {
 
@@ -23,7 +23,7 @@ public class MoveActionDelegate extends RefactoringActionDelegate {
 		super.init(window);
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(window.getSelectionService());
 		initPossibleTargets(new RefactoringAction[] {
-			new MoveAction(provider),
+			new JdtMoveAction(provider),
 			RefactoringGroup.createMoveMembersAction(provider)
 		});
 	}
