@@ -19,6 +19,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.CRC32;
+import java.util.zip.ZipEntry;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -69,7 +70,7 @@ public class JarWriter {
 			throw new OperationCanceledException();
 
 		try {
-			if (fJarPackage.usesManifest() && fJarPackage.areClassFilesExported()) {
+			if (fJarPackage.usesManifest() && fJarPackage.areGeneratedFilesExported()) {
 				Manifest manifest=  fJarPackage.getManifestProvider().create(fJarPackage);
 				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getJarLocation().toOSString()), manifest);
 			} else
@@ -235,8 +236,8 @@ public class JarWriter {
 		for (int i= 0; i < projects.length; i++) {
 			IProject project= projects[i];
 			IPath projectLocation= project.getLocation();
-			boolean isInWorkspace= projectLocation != null && projectLocation.isPrefixOf(jarPath);
-			if (isInWorkspace)
+			boolean isInProject= projectLocation != null && projectLocation.isPrefixOf(jarPath);
+			if (isInProject) {
 				try {
 					jarPath= jarPath.removeFirstSegments(projectLocation.segmentCount());
 					jarPath= jarPath.removeLastSegments(1);
@@ -246,9 +247,8 @@ public class JarWriter {
 				} catch (CoreException ex) {
 					// don't refresh the folder but log the problem
 					JavaPlugin.log(ex);
-				} finally {
-					return;
 				}
+			}
 		}
 	}
 }

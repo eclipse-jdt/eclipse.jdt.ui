@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.JFaceResources;
+
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 
@@ -146,7 +147,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 		fUseSourceFoldersCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fUseSourceFoldersCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.useSourceFoldersHierarchy")); //$NON-NLS-1$
 		fUseSourceFoldersCheckbox.addListener(SWT.Selection, selectionListener);
-		fUseSourceFoldersCheckbox.setEnabled(fJarPackage.areJavaFilesExported() && !fJarPackage.areClassFilesExported());
+		fUseSourceFoldersCheckbox.setEnabled(fJarPackage.areJavaFilesExported() && !fJarPackage.areGeneratedFilesExported());
 
 		createSpacer(optionsGroup);
 
@@ -271,14 +272,14 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 		fDescriptionFileText.setEnabled(saveDescription);
 		fDescriptionFileLabel.setEnabled(saveDescription);
 		
-		boolean exportClassFiles= fJarPackage.areClassFilesExported();
+		boolean exportClassFiles= fJarPackage.areClassFilesExported() && !fJarPackage.areOutputFoldersExported();
 		fExportWarningsCheckbox.setEnabled(exportClassFiles);
 		fExportErrorsCheckbox.setEnabled(exportClassFiles);
 		
 		boolean isAutobuilding= ResourcesPlugin.getWorkspace().isAutoBuilding();
 		fBuildIfNeededCheckbox.setEnabled(exportClassFiles && !isAutobuilding);
 		
-		fUseSourceFoldersCheckbox.setEnabled(fJarPackage.areJavaFilesExported() && !fJarPackage.areClassFilesExported());		
+		fUseSourceFoldersCheckbox.setEnabled(fJarPackage.areJavaFilesExported() && !fJarPackage.areGeneratedFilesExported());		
 	}
 
 	/*
@@ -316,7 +317,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 	}
 	
 	public boolean canFlipToNextPage() {
-		return fJarPackage.areClassFilesExported() && super.canFlipToNextPage();
+		return fJarPackage.areGeneratedFilesExported() && super.canFlipToNextPage();
 	}
 	
 	/*

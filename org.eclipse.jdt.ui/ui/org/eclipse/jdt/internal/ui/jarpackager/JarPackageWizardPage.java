@@ -52,6 +52,7 @@ import org.eclipse.ui.dialogs.WizardExportResourcesPage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -85,6 +86,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	// widgets
 	private Text	fSourceNameField;	
 	private Button	fExportClassFilesCheckbox;
+	private Button	fExportOutputFoldersCheckbox;
 	private Button	fExportJavaFilesCheckbox;	
 	
 	private Combo	fDestinationNamesCombo;
@@ -97,6 +99,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	// dialog store id constants
 	private final static String PAGE_NAME= "JarPackageWizardPage"; //$NON-NLS-1$
 	
+	private static final String STORE_EXPORT_OUTPUT_FOLDERS= PAGE_NAME + ".EXPORT_OUTPUT_FOLDER"; //$NON-NLS-1$	private final static String STORE_EXPORT_CLASS_FILES= PAGE_NAME + ".EXPORT_CLASS_FILES"; //$NON-NLS-1$
 	private final static String STORE_EXPORT_CLASS_FILES= PAGE_NAME + ".EXPORT_CLASS_FILES"; //$NON-NLS-1$
 	private final static String STORE_EXPORT_JAVA_FILES= PAGE_NAME + ".EXPORT_JAVA_FILES"; //$NON-NLS-1$
 	
@@ -244,6 +247,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			settings.put(STORE_DESTINATION_NAMES, directoryNames);
 
 			settings.put(STORE_EXPORT_CLASS_FILES, fJarPackage.areClassFilesExported());
+			settings.put(STORE_EXPORT_OUTPUT_FOLDERS, fJarPackage.areOutputFoldersExported());
 			settings.put(STORE_EXPORT_JAVA_FILES, fJarPackage.areJavaFilesExported());
 
 			// options
@@ -269,6 +273,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			initializeJarPackage();
 
 		fExportClassFilesCheckbox.setSelection(fJarPackage.areClassFilesExported());
+		fExportOutputFoldersCheckbox.setSelection(fJarPackage.areOutputFoldersExported());
 		fExportJavaFilesCheckbox.setSelection(fJarPackage.areJavaFilesExported());
 
 		// destination
@@ -301,6 +306,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			// source
 			fJarPackage.setElements(getSelectedElements());
 			fJarPackage.setExportClassFiles(settings.getBoolean(STORE_EXPORT_CLASS_FILES));
+			fJarPackage.setExportOutputFolders(settings.getBoolean(STORE_EXPORT_OUTPUT_FOLDERS));
 			fJarPackage.setExportJavaFiles(settings.getBoolean(STORE_EXPORT_JAVA_FILES));
 
 			// options
@@ -323,16 +329,19 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			return;
 		
 		// source
-		fJarPackage.setElements(getSelectedElements());
+		if (fExportClassFilesCheckbox.getSelection() && !fJarPackage.areClassFilesExported())
+			fExportOutputFoldersCheckbox.setSelection(false);
+		if (fExportOutputFoldersCheckbox.getSelection() && !fJarPackage.areOutputFoldersExported())
+			fExportClassFilesCheckbox.setSelection(false);
 		fJarPackage.setExportClassFiles(fExportClassFilesCheckbox.getSelection());
+		fJarPackage.setExportOutputFolders(fExportOutputFoldersCheckbox.getSelection());
 		fJarPackage.setExportJavaFiles(fExportJavaFilesCheckbox.getSelection());
+		fJarPackage.setElements(getSelectedElements());
 
 		// destination
 		String comboText= fDestinationNamesCombo.getText();
 		IPath path= new Path(comboText);
-		if (!new File(comboText).isAbsolute())
-			// prepend workspace path
-			path= getWorkspaceLocation().append(path);
+
 		if (path.segmentCount() > 0 && ensureTargetFileIsValid(path.toFile()) && path.getFileExtension() == null) //$NON-NLS-1$
 			// append .jar
 			path= path.addFileExtension(JarPackagerUtil.JAR_EXTENSION);
@@ -506,6 +515,10 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		fExportClassFilesCheckbox.setText(JarPackagerMessages.getString("JarPackageWizardPage.exportClassFiles.text")); //$NON-NLS-1$
 		fExportClassFilesCheckbox.addListener(SWT.Selection, this);
 
+		fExportOutputFoldersCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
+		fExportOutputFoldersCheckbox.setText(JarPackagerMessages.getString("JarPackageWizardPage.exportOutputFolders.text")); //$NON-NLS-1$
+		fExportOutputFoldersCheckbox.addListener(SWT.Selection, this);
+
 		fExportJavaFilesCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fExportJavaFilesCheckbox.setText(JarPackagerMessages.getString("JarPackageWizardPage.exportJavaFiles.text")); //$NON-NLS-1$
 		fExportJavaFilesCheckbox.addListener(SWT.Selection, this);
@@ -603,8 +616,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	 * Overrides method from WizardDataTransferPage
 	 */
 	protected boolean validateSourceGroup() {
-		if (!fExportClassFilesCheckbox.getSelection()
-				&& !fExportJavaFilesCheckbox.getSelection()) {
+		if (!(fExportClassFilesCheckbox.getSelection() || fExportOutputFoldersCheckbox.getSelection() || fExportJavaFilesCheckbox.getSelection())) {
 			setErrorMessage(JarPackagerMessages.getString("JarPackageWizardPage.error.noExportTypeChecked")); //$NON-NLS-1$
 			return false;
 		}
@@ -613,14 +625,29 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 				setErrorMessage(null);
 			return false;
 		}
-		if (fExportClassFilesCheckbox.getSelection() || !fExportJavaFilesCheckbox.getSelection())
+		if (fExportClassFilesCheckbox.getSelection() || fExportOutputFoldersCheckbox.getSelection())
 			return true;
 			
-		// No class file export - check if there are source files
+		// Source file only export - check if there are source files
 		Iterator iter= getSelectedResourcesIterator();
 		while (iter.hasNext()) {
-			if (!(iter.next() instanceof IClassFile))
+			Object element= iter.next(); 
+			if (element instanceof IClassFile) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot)((IClassFile)element).getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				if (root == null)
+					continue;
+				IClasspathEntry cpEntry;
+				try {
+					cpEntry= root.getRawClasspathEntry();
+				} catch (JavaModelException e) {
+					continue;
+				}
+				if (cpEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
 				return true;
+		}
+			} else {
+				return true;
+			}
 		}
 
 		if (getErrorMessage() != null)

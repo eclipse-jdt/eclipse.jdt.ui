@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -26,7 +27,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.jarpackager.JarFileExportOperation;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageReader;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWriter;
@@ -52,6 +52,7 @@ public class JarPackageData {
 	 * The list fExported* is null if fExport* is false)
 	 */	
 	private boolean fExportClassFiles;	// export generated class files and resources
+	private boolean fExportOutputFolders;	// export all output folder of enclosing projects
 	private boolean fExportJavaFiles;		// export java files and resources
 
 	/*
@@ -120,6 +121,7 @@ public class JarPackageData {
 	
 	public JarPackageData() {
 		setExportClassFiles(true);
+		setExportOutputFolders(false);
 		setUseSourceFolderHierarchy(false);
 		setCompress(true);
 		setSaveDescription(false);
@@ -190,6 +192,44 @@ public class JarPackageData {
 	public void setExportClassFiles(boolean state) {
 		fExportClassFiles= state;
 	}
+	
+	/**
+	 * Tells whether all output folders for the
+	 * enclosing projects of the exported elements.
+	 * <p>
+	 * This method is for internal use only and not part of the API.
+	 * </p>
+	 * 
+	 * @return	<code>true</code> if output folder are exported
+	 */
+	public boolean areOutputFoldersExported() {
+		return fExportOutputFolders;
+	}
+
+	/**
+	 * Set option to export all output folders for the
+	 * enclosing projects of the exported elements.
+	 * <p>
+	 * This method is for internal use only and not part of the API.
+	 * </p>
+	 * 
+	 * @param state a boolean indicating the new state
+	 */
+	public void setExportOutputFolders(boolean state) {
+		fExportOutputFolders= state;
+	}
+
+	/**
+	 * Tells whether files created by the Java builder are exported.
+	 * <p>
+	 * This method is for internal use only and not part of the API.
+	 * </p>
+	 * 
+	 * @return	<code>true</code> if output folder are exported
+	 */
+	public boolean areGeneratedFilesExported() {
+		return fExportOutputFolders || fExportClassFiles;
+	}
 
 	/**
 	 * Tells whether java files and resources are exported.
@@ -231,6 +271,8 @@ public class JarPackageData {
 		fUseSourceFolderHierarchy= state;
 	}
 	
+
+
 	/**
 	 * Gets the location of the JAR file.
 	 * This path is normally external to the workspace.
@@ -734,10 +776,10 @@ public class JarPackageData {
 	 * Set if a build should be performed before exporting files.
 	 * This flag is only considered if auto-build is off.
 	 * 
-	 * @param a boolean telling if a build should be performed
+	 * @param buildIfNeeded a boolean telling if a build should be performed
 	 */
-	public void setBuildIfNeeded(boolean fBuildIfNeeded) {
-		this.fBuildIfNeeded= fBuildIfNeeded;
+	public void setBuildIfNeeded(boolean buildIfNeeded) {
+		fBuildIfNeeded= buildIfNeeded;
 	}
 	// ----------- Utility methods -----------
 	
@@ -837,7 +879,7 @@ public class JarPackageData {
 	 * @return <code>true</code> if the JAR Package info is valid
 	 */
 	public boolean isValid() {
-		return (areClassFilesExported() || areJavaFilesExported())
+		return (areGeneratedFilesExported() || areJavaFilesExported())
 			&& getElements() != null && getElements().length > 0
 			&& getJarLocation() != null
 			&& isManifestAccessible()

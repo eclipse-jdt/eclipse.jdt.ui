@@ -574,7 +574,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		boolean isPageComplete= true;
 		setMessage(null);
 		
-		if (!fJarPackage.areClassFilesExported())
+		if (!fJarPackage.areGeneratedFilesExported())
 			return true;
 		
 		if (fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved()) {
