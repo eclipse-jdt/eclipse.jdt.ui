@@ -51,8 +51,10 @@ public class NLSRefactoring extends Refactoring {
 	public static final String BUNDLE_NAME= "BUNDLE_NAME"; //$NON-NLS-1$
 	public static final String PROPERTY_FILE_EXT= ".properties"; //$NON-NLS-1$
 	public static final String DEFAULT_ACCESSOR_CLASSNAME= "Messages"; //$NON-NLS-1$
+	
 	public static final String KEY= "${key}"; //$NON-NLS-1$
-
+	public static final String DEFAULT_SUBST_PATTERN= "getString(" + KEY + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+	
 	private static final String DEFAULT_PROPERTY_FILENAME= "messages"; //$NON-NLS-1$
 
 	//private IPath fPropertyFilePath;
@@ -79,7 +81,7 @@ public class NLSRefactoring extends Refactoring {
 		fResourceBundleName= nlsHint.getResourceBundle();
 		fResourceBundlePackage= nlsHint.getResourceBundlePackage();
 
-		fSubstitutionPattern= getDefaultSubstitutionPattern(fAccessorClassName);
+		fSubstitutionPattern= getDefaultSubstitutionPattern();
 	}
 
 	public static NLSRefactoring create(ICompilationUnit cu) {
@@ -116,14 +118,11 @@ public class NLSRefactoring extends Refactoring {
 	 * to show the pattern in the ui
 	 */
 	public String getSubstitutionPattern() {
-		if (fSubstitutionPattern == null) {
-			return getDefaultSubstitutionPattern(fAccessorClassName);
-		}
 		return fSubstitutionPattern;
 	}
 
-	public static String getDefaultSubstitutionPattern(String accessorName) {
-		return accessorName + ".getString(" + KEY + ")"; //$NON-NLS-2$ //$NON-NLS-1$
+	public static String getDefaultSubstitutionPattern() {
+		return DEFAULT_SUBST_PATTERN;
 	}
 
 	public ICompilationUnit getCu() {

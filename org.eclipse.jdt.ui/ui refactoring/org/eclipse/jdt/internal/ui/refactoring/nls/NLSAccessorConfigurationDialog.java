@@ -57,18 +57,11 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 	private OrderedMap fErrorMap= new OrderedMap();
-
 	private SourceFirstPackageSelectionDialogField fResourceBundlePackage;
-
 	private StringButtonDialogField fResourceBundleFile;
-
 	private SourceFirstPackageSelectionDialogField fAccessorPackage;
-
 	private StringDialogField fAccessorClassName;
-
 	private StringDialogField fSubstitutionPattern;
-
-	private boolean fCodePatternInSync;
 
 	private NLSRefactoring fRefactoring;
 
@@ -134,7 +127,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		}
 		fAccessorClassName.setText(accessorClassName);
 
-		fSubstitutionPattern.setText(NLSRefactoring.getDefaultSubstitutionPattern(accessorClassName));
+		fSubstitutionPattern.setText(fRefactoring.getSubstitutionPattern());
 	}
 
 	protected Control createDialogArea(Composite ancestor) {
@@ -176,13 +169,6 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		});
 
 		fSubstitutionPattern.doFillIntoGrid(parent, nOfColumns);
-		fSubstitutionPattern.setDialogFieldListener(new IDialogFieldListener() {
-
-			public void dialogFieldChanged(DialogField field) {
-				updateSyncState();
-			}
-		});
-
 	}
 
 	private void createPropertyPart(Composite parent, final int nOfColumns, final int textWidth) {
@@ -198,12 +184,6 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 				validatePropertyFilename();
 			}
 		});
-	}
-
-	private void updateSyncState() {
-		String theDefault= NLSRefactoring.getDefaultSubstitutionPattern(fAccessorClassName.getText());
-		String current= fSubstitutionPattern.getText();
-		fCodePatternInSync= current.equals(theDefault);
 	}
 
 	private void createLabel(Composite parent, final String text, final int N_OF_COLUMNS) {
@@ -312,12 +292,6 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	private void validateAccessorClassName() {
 		if (fAccessorClassName != null) {
 			String className= fAccessorClassName.getText();
-
-			if (fCodePatternInSync == true) {
-				fSubstitutionPattern.setText(NLSRefactoring.getDefaultSubstitutionPattern(className));
-			} else {
-				updateSyncState();
-			}
 
 			IStatus status= JavaConventions.validateJavaTypeName(className);
 			if (status.getSeverity() == IStatus.ERROR) {

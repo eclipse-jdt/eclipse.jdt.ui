@@ -62,7 +62,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 				"package p;\r\nclass Test {String hello=\"helloworld\";}"); //$NON-NLS-1$
 
 		NLSRefactoring nls= createDefaultNls(cu);
-		nls.setSubstitutionPattern(nls.getDefaultSubstitutionPattern());
+		//nls.setSubstitutionPattern(NLSRefactoring.getDefaultSubstitutionPattern());
 		nls.setAccessorPackage(fHelper.getPackageFragment("/TestSetupProject/src2/p2")); //$NON-NLS-1$
 
 		performChange(nls);
@@ -77,7 +77,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		ICompilationUnit cu= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", //$NON-NLS-1$ //$NON-NLS-2$
 				testClass); //$NON-NLS-1$
 		NLSRefactoring nls= createDefaultNls(cu);
-		nls.setSubstitutionPattern(NLSRefactoring.getDefaultSubstitutionPattern("Messages")); //$NON-NLS-1$
+		//nls.setSubstitutionPattern(NLSRefactoring.getDefaultSubstitutionPattern("Messages")); //$NON-NLS-1$
 
 		performChange(nls);
 
@@ -109,7 +109,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 
 		performChange(nls);
 
-		checkContentOfCu("manipulated class", testClass, "package test;\n\n" + "import p.Accessor;\n\n" + "class Test {\n" + "  String hello=Messages.getString(\"test0\"); //$NON-NLS-1$\n" + "}\n");
+		checkContentOfCu("manipulated class", testClass, "package test;\n\n" + "import p.Accessor;\n\n" + "class Test {\n" + "  String hello=Accessor.getString(\"test0\"); //$NON-NLS-1$\n" + "}\n");
 	}
 
 	public void testCreateChangeWithNonDefaultSubstitution() throws Exception {
@@ -122,7 +122,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 
 		performChange(nls);
 		checkContentOfCu("manipulated class", //$NON-NLS-1$
-				cu, "package p;import p.another.Messages;\r\nclass Test {String hello=nonDefault(\"test0\");} //$NON-NLS-1$"); //$NON-NLS-1$
+				cu, "package p;import p.another.Messages;\r\nclass Test {String hello=p.Messages.nonDefault(\"test0\");} //$NON-NLS-1$"); //$NON-NLS-1$
 		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), "test0=helloworld\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 

@@ -40,12 +40,11 @@ public class NLSSourceModifier {
 
 	private NLSSourceModifier(String substitutionPattern) {
 		fSubstitutionPattern= substitutionPattern;
-
 	}
 
 	public static Change create(ICompilationUnit cu, NLSSubstitution[] subs, String substitutionPattern, IPackageFragment accessorPackage, String accessorClassName) throws CoreException {
 
-		NLSSourceModifier sourceModification= new NLSSourceModifier( substitutionPattern);
+		NLSSourceModifier sourceModification= new NLSSourceModifier(substitutionPattern);
 
 		String message= "Externalize strings in ''{0}''"; //$NON-NLS-1$
 
@@ -231,12 +230,17 @@ public class NLSSourceModifier {
 	}
 
 	private String createResourceGetter(String key, String accessorName) {
-		StringBuffer buff= new StringBuffer(fSubstitutionPattern);
+		StringBuffer buf= new StringBuffer();
+		buf.append(accessorName);
+		buf.append('.');
 
 		//we just replace the first occurrence of KEY in the pattern
-		int i= buff.indexOf(NLSRefactoring.KEY);
-		if (i != -1)
-			buff.replace(i, i + NLSRefactoring.KEY.length(), '"' + key + '"');
-		return buff.toString();
+		int i= fSubstitutionPattern.indexOf(NLSRefactoring.KEY);
+		if (i != -1) {
+			buf.append(fSubstitutionPattern.substring(0, i));
+			buf.append('"').append(key).append('"');
+			buf.append(fSubstitutionPattern.substring(i + NLSRefactoring.KEY.length()));
+		}
+		return buf.toString();
 	}
 }
