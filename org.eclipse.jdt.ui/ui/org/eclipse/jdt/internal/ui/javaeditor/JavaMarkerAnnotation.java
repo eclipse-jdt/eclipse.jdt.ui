@@ -120,9 +120,11 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	 * @see IProblemAnnotation#getMessage()
 	 */
 	public String getMessage() {
-		if (isProblem() || isTask())
-			return getMarker().getAttribute(IMarker.MESSAGE, ""); //$NON-NLS-1$
-		return ""; //$NON-NLS-1$
+		IMarker marker= getMarker();
+		if (marker == null)
+			return ""; //$NON-NLS-1$
+		else
+			return marker.getAttribute(IMarker.MESSAGE, ""); //$NON-NLS-1$
 	}
 
 	/*
