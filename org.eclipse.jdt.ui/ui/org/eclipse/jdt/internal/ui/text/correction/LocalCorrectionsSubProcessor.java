@@ -35,10 +35,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
@@ -217,7 +219,7 @@ public class LocalCorrectionsSubProcessor {
 		if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
 			label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changecast.description", castType); //$NON-NLS-1$
 			CastExpression expression= (CastExpression) nodeToCast;
-			rewrite.markAsReplaced(expression.getType(), rewrite.createPlaceholder(simpleCastType, ASTRewrite.TYPE));
+			rewrite.markAsReplaced(expression.getType(), rewrite.createPlaceholder(simpleCastType, NewASTRewrite.TYPE));
 		} else {
 			label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", castType); //$NON-NLS-1$
 			
@@ -232,7 +234,7 @@ public class LocalCorrectionsSubProcessor {
 				expressionCopy= parenthesizedExpression;
 			}
 			
-			Type typeCopy= (Type) rewrite.createPlaceholder(simpleCastType, ASTRewrite.TYPE);
+			Type typeCopy= (Type) rewrite.createPlaceholder(simpleCastType, NewASTRewrite.TYPE);
 			CastExpression castExpression= astRoot.getAST().newCastExpression();
 			castExpression.setExpression(expressionCopy);
 			castExpression.setType(typeCopy);
@@ -303,7 +305,7 @@ public class LocalCorrectionsSubProcessor {
 				newClause.setException(var);
 				String catchBody = StubUtility.getCatchBodyContent(cu, excBinding.getName(), varName, String.valueOf('\n'));
 				if (catchBody != null) {
-					ASTNode node= rewrite.createPlaceholder(catchBody, ASTRewrite.STATEMENT);
+					ASTNode node= rewrite.createPlaceholder(catchBody, NewASTRewrite.STATEMENT);
 					newClause.getBody().statements().add(node);
 				}
 				rewrite.markAsInserted(newClause);
@@ -376,35 +378,6 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		QuickAssistProcessor.getCatchClauseToThrowsProposals(context, selectedNode, proposals);
-		
-		if (true) {
-			return;
-		}
-		
-		ICompilationUnit cu= context.getCompilationUnit();
-		
-		if (selectedNode.getNodeType() == ASTNode.BLOCK && selectedNode.getParent().getNodeType() == ASTNode.CATCH_CLAUSE ) {
-			CatchClause clause= (CatchClause) selectedNode.getParent();
-			TryStatement tryStatement= (TryStatement) clause.getParent();
-			ASTRewrite rewrite= new ASTRewrite(tryStatement.getParent());
-			
-			if (tryStatement.catchClauses().size() > 1 || tryStatement.getFinally() != null) {
-				rewrite.markAsRemoved(clause);
-			} else {
-				List statements= tryStatement.getBody().statements();
-				if (statements.size() > 0) {
-					ASTNode placeholder= rewrite.collapseNodes(statements, 0, statements.size());
-					rewrite.markAsReplaced(tryStatement, rewrite.createCopy(placeholder));
-				} else {
-					rewrite.markAsRemoved(tryStatement);
-				}
-			}
-			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removecatchclause.description"); //$NON-NLS-1$
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
-			proposal.ensureNoModifications();
-			proposals.add(proposal);
-		}
 	}	
 	
 	public static void addNLSProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
@@ -594,8 +567,7 @@ public class LocalCorrectionsSubProcessor {
 			if (expression == null) {
 				return;
 			}
-			fragment.setInitializer(expression);
-			rewrite.markAsInserted(expression);
+			rewrite.markAsInsert(fragment, ASTNodeConstants.INITIALIZER, expression, null);
 
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.uninitializedvariable.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -771,7 +743,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 		String replacement= qualifier + '.' + name.getIdentifier();
-		rewrite.markAsReplaced(name, rewrite.createPlaceholder(replacement, ASTRewrite.NAME));
+		rewrite.markAsReplaced(name, rewrite.createPlaceholder(replacement, NewASTRewrite.NAME));
 
 		String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.unqualifiedfieldaccess.description", qualifier); //$NON-NLS-1$
 		proposal.setDisplayName(label);
