@@ -164,13 +164,16 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	
 	private void handleDrawRequest(GC gc) {
 		
+		int vOffset= fSourceViewer.getTopIndexStartOffset();
+		int vLength= fSourceViewer.getBottomIndexEndOffset();
+		
 		IRegion region= fSourceViewer.getVisibleRegion();
 		int offset= region.getOffset();
 		int length= region.getLength();
 		
 		for (Iterator e = fProblemPositions.iterator(); e.hasNext();) {
 			Position p = (Position) e.next();
-			if (p.overlapsWith(offset, length)) {
+			if (p.overlapsWith(vOffset, vLength)) {
 				int p1= Math.max(offset, p.getOffset());
 				int p2= Math.min(offset + length, p.getOffset() + p.getLength());
 				draw(gc, p1 - offset, p2 - p1);
