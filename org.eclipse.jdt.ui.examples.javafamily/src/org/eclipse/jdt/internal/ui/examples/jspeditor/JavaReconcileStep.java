@@ -29,7 +29,7 @@ import org.eclipse.jface.text.reconciler.IReconcileResult;
 import org.eclipse.jface.text.reconciler.IReconcileStep;
 import org.eclipse.jface.text.source.Annotation;
 
-import org.eclipse.ui.texteditor.DefaultAnnotation;
+import org.eclipse.ui.texteditor.AnnotationTypeLookup;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -59,7 +59,10 @@ import org.eclipse.jdt.internal.core.BufferManager;
  */
 public class JavaReconcileStep extends AbstractReconcileStep {
 
+	private AnnotationTypeLookup fAnnotationTypeLookup= new AnnotationTypeLookup();
+	
 	private static class TemporaryWorkingCopyOwner extends WorkingCopyOwner  {
+
 
 		/*
 		 * @see org.eclipse.jdt.core.WorkingCopyOwner#createBuffer(org.eclipse.jdt.core.ICompilationUnit)
@@ -70,7 +73,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 		}
 	}
 
-	private static class ProblemAdapter extends AnnotationAdapter  {
+	private class ProblemAdapter extends AnnotationAdapter  {
 		
 		private IProblem fProblem;
 		private Position fPosition;
@@ -100,7 +103,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 			else if (fProblem.isWarning())
 				type= IMarker.SEVERITY_WARNING;
 				
-			return new DefaultAnnotation(IMarker.PROBLEM, type, true, fProblem.getMessage());
+			return new Annotation(fAnnotationTypeLookup.getAnnotationType(IMarker.PROBLEM, type), false, fProblem.getMessage());
 		}
 		
 		private Position createPositionFromProblem() {
