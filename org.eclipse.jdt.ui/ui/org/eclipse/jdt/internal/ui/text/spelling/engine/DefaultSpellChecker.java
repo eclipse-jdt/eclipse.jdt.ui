@@ -194,11 +194,11 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 */
 	public void execute(final ISpellCheckIterator iterator) {
 
-		final boolean digits= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_DIGITS);
-		final boolean mixed= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_MIXED);
-		final boolean sentence= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_SENTENCE);
-		final boolean upper= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_UPPER);
-		final boolean urls= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_URLS);
+		final boolean ignoreDigits= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_DIGITS);
+		final boolean ignoreMixed= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_MIXED);
+		final boolean ignoreSentence= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_SENTENCE);
+		final boolean ignoreUpper= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_UPPER);
+		final boolean ignoreURLS= fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_IGNORE_URLS);
 
 		String word= null;
 		boolean starts= false;
@@ -212,13 +212,18 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 					starts= iterator.startsSentence();
 					if (!isCorrect(word)) {
-
-						if (!((mixed && !sentence && isMixedCase(word, starts)) || (upper && isUpperCase(word)) || (digits && isDigits(word)) || (urls && isUrl(word))))
-							fireEvent(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), starts, false));
+					    
+					    boolean isMixed=  isMixedCase(word, true);
+					    boolean isUpper= isUpperCase(word);
+					    boolean isDigits= isDigits(word);
+					    boolean isURL= isUrl(word);
+                        
+					    if ( !ignoreMixed && isMixed || !ignoreUpper && isUpper || !ignoreDigits && isDigits || !ignoreURLS && isURL || !(isMixed || isUpper || isDigits || isURL))			        
+					        fireEvent(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), starts, false));
 
 					} else {
 
-						if (!sentence && starts && Character.isLowerCase(word.charAt(0)))
+						if (!ignoreSentence && starts && Character.isLowerCase(word.charAt(0)))
 							fireEvent(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), true, true));
 					}
 				}
