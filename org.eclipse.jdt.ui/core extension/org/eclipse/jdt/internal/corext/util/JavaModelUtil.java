@@ -205,15 +205,6 @@ public class JavaModelUtil {
 		return type.getTypeQualifiedName('.');
 	}
 	
-	private static void getTypeQualifiedName(IType type, StringBuffer buf) {
-		IType outerType= type.getDeclaringType();
-		if (outerType != null) {
-			getTypeQualifiedName(outerType, buf);
-			buf.append('.');
-		}
-		buf.append(type.getElementName());
-	}	
-
 	/**
 	 * Returns the fully qualified name of the given type using '.' as separators.
 	 * This is a replace for IType.getFullyQualifiedTypeName

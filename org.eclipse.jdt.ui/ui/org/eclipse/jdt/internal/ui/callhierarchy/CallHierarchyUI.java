@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -24,7 +23,6 @@ import org.eclipse.jface.util.OpenStrategy;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -82,18 +80,6 @@ class CallHierarchyUI {
             false);
         store.setDefault(ICallHierarchyPreferencesConstants.PREF_USE_IMPLEMENTORS_FOR_CALLEE_SEARCH,
             false);
-    }
-
-    private IStatusLineManager getStatusLineManager() {
-        IStatusLineManager statusLineManager = PlatformUI.getWorkbench()
-                                                         .getActiveWorkbenchWindow()
-                                                         .getActivePage()
-                                                         .findView(CallHierarchyViewPart.CALLERS_VIEW_ID)
-                                                         .getViewSite().getActionBars()
-                                                         .getStatusLineManager();
-        statusLineManager.setCancelEnabled(true);
-
-        return statusLineManager;
     }
 
     public static void jumpToMember(IJavaElement element) {

@@ -355,14 +355,6 @@ public class GenerateActionGroup extends ActionGroup {
 		}
 	}
 	
-	private int appendToGroup(IMenuManager menu, IAction action) {
-		if (action != null && action.isEnabled()) {
-			menu.appendToGroup(fGroupName, action);
-			return 1;
-		}
-		return 0;
-	}	
-
 	private int addAction(IMenuManager menu, IAction action) {
 		if (action != null && action.isEnabled()) {
 			menu.add(action);
