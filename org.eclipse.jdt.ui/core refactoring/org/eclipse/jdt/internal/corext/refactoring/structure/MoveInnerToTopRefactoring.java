@@ -286,7 +286,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				updateConstructorReferences(manager, new SubProgressMonitor(pm, 1));
 				if (JavaElementUtil.getAllConstructors(fType).length == 0){
 					addConstructor(manager);
-					pm.worked(2);
+					pm.worked(1);
 				} else {
 					modifyConstructors(manager, new SubProgressMonitor(pm, 1));
 				}	
@@ -687,7 +687,12 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			} else if (refNode.getParent() instanceof SuperConstructorInvocation){
 				//XXX workaround for bug 23527
 				SuperConstructorInvocation sci= (SuperConstructorInvocation)refNode.getParent();
-				if (refNode == sci.getExpression())
+				if (refNode != sci.getExpression())
+					continue;
+				IMethodBinding cb= sci.resolveConstructorBinding();
+				if (cb == null)
+					continue;
+				if (isCorrespondingTypeBinding(cb.getDeclaringClass(), fType))
 					updateConstructorReferenceInSuperCall(manager, sci);
 			}
 		}
