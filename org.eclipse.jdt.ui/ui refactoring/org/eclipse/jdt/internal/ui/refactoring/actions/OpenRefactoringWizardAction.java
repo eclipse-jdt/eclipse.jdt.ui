@@ -129,7 +129,7 @@ abstract class OpenRefactoringWizardAction extends SelectionDispatchAction {
 	}
 	
 	private IJavaElement[] resolveElements() {
-		return SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring")); 
+		return SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"));  //$NON-NLS-1$
 	}
 	
 	protected void run(ITextSelection selection) {
