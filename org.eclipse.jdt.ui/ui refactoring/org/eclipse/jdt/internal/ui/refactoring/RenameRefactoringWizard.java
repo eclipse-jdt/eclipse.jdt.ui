@@ -21,8 +21,8 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
 public class RenameRefactoringWizard extends RefactoringWizard {
 	
-	private String fPageMessage;
-	private String fPageContextHelpId;
+	private final String fPageMessage;
+	private final String fPageContextHelpId;
 	private ImageDescriptor fInputPageImageDescriptor;
 	
 	public RenameRefactoringWizard(IRenameRefactoring ref, String title, String message, String pageContextHelpId, String errorContextHelpId){
