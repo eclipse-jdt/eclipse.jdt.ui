@@ -545,18 +545,21 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 			monitor.beginTask("", 2); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.creating")); //$NON-NLS-1$
 			final String delimiter= getLineDelimiter();
-			String comment= null;
+			String typeComment= null;
+			String fileComment= null;
 			if (fSettings.createComments) {
 				final ITypeParameter[] parameters= fType.getTypeParameters();
 				final String[] names= new String[parameters.length];
 				for (int index= 0; index < parameters.length; index++)
 					names[index]= parameters[index].getElementName();
-				comment= CodeGeneration.getTypeComment(copy, fType.getTypeQualifiedName('.'), names, delimiter);
+				typeComment= CodeGeneration.getTypeComment(copy, fType.getTypeQualifiedName('.'), names, delimiter);
+				fileComment= CodeGeneration.getFileComment(copy, delimiter);
+
 			}
 			final StringBuffer buffer= new StringBuffer(64);
 			createInterfaceDeclaration(sourceRewrite, declaration, buffer, status, new SubProgressMonitor(monitor, 1));
 			final String imports= createInterfaceImports(copy);
-			source= createInterfaceTemplate(copy, imports, comment, buffer.toString());
+			source= createInterfaceTemplate(copy, imports, fileComment, typeComment, buffer.toString());
 			if (source == null) {
 				if (!fType.getPackageFragment().isDefaultPackage()) {
 					if (imports.length() > 0)
@@ -576,12 +579,13 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	 * 
 	 * @param unit the working copy for the new interface
 	 * @param imports the generated imports declaration
+	 * @param fileComment the file comment
 	 * @param comment the type comment
 	 * @param content the type content
 	 * @return a template for the interface, or <code>null</code>
 	 * @throws CoreException if the template could not be evaluated
 	 */
-	protected String createInterfaceTemplate(final ICompilationUnit unit, final String imports, final String comment, final String content) throws CoreException {
+	protected String createInterfaceTemplate(final ICompilationUnit unit, final String imports, String fileComment, final String comment, final String content) throws CoreException {
 		Assert.isNotNull(unit);
 		Assert.isNotNull(imports);
 		Assert.isNotNull(content);
@@ -599,7 +603,9 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 			}
 			if (imports.length() > 0)
 				buffer.append(imports);
+
 			context.setVariable(CodeTemplateContextType.PACKAGE_DECLARATION, buffer.toString());
+			context.setVariable(CodeTemplateContextType.FILE_COMMENT, fileComment != null ? fileComment : ""); //$NON-NLS-1$
 			context.setVariable(CodeTemplateContextType.TYPE_COMMENT, comment != null ? comment : ""); //$NON-NLS-1$
 			context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, content);
 			context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getQualifier(unit.getElementName()));

@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
@@ -71,17 +72,24 @@ class AccessorClassCreator {
 		try {
 			newCu= WorkingCopyUtil.getNewWorkingCopy(fAccessorPackage, fAccessorPath.lastSegment());
 
-			String comment= CodeGeneration.getTypeComment(newCu, fAccessorClassName, lineDelim);
+			String typeComment= null, fileComment= null;
+			if (StubUtility.doAddComments(newCu.getJavaProject())) {
+				typeComment= CodeGeneration.getTypeComment(newCu, fAccessorClassName, lineDelim);
+				fileComment= CodeGeneration.getFileComment(newCu, lineDelim);
+			}
 			String classContent= createClass();
-			String cuContent= CodeGeneration.getCompilationUnitContent(newCu, comment, classContent, lineDelim);
+			String cuContent= CodeGeneration.getCompilationUnitContent(newCu, fileComment, typeComment, classContent, lineDelim);
 			if (cuContent == null) {
 				StringBuffer buf= new StringBuffer();
+				if (fileComment != null) {
+					buf.append(fileComment).append(lineDelim);
+				}
 				if (!fAccessorPackage.isDefaultPackage()) {
 					buf.append("package ").append(fAccessorPackage.getElementName()).append(';'); //$NON-NLS-1$
 				}
 				buf.append(lineDelim).append(lineDelim);
-				if (comment != null) {
-					buf.append(comment).append(lineDelim);
+				if (typeComment != null) {
+					buf.append(typeComment).append(lineDelim);
 				}
 				buf.append(classContent);
 				cuContent= buf.toString();

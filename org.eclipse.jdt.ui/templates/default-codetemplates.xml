@@ -26,16 +26,18 @@
  * ${tags}
  */</template>
 
+<template name="filecomment" id="org.eclipse.jdt.ui.text.codetemplates.filecomment" description="%CodeTemplates.filecomment" context="filecomment_context" enabled="true">/**
+ * 
+ */</template>
+
 <template name="typecomment" id="org.eclipse.jdt.ui.text.codetemplates.typecomment" description="%CodeTemplates.typecomment" context="typecomment_context" enabled="true">/**
  * @author ${user}
  *
- * ${todo} %CodeTemplates.typecomment.content1
- * %CodeTemplates.typecomment.content2
  * ${tags}
  */</template>
  
 <template name="fieldcomment" id="org.eclipse.jdt.ui.text.codetemplates.fieldcomment" description="%CodeTemplates.fieldcomment" context="fieldcomment_context" enabled="true">/**
- * %CodeTemplates.fieldcomment.content
+ * 
  */</template>
  
 <template name="methodcomment" id="org.eclipse.jdt.ui.text.codetemplates.methodcomment" description="%CodeTemplates.nonoverridingcomment" context="methodcomment_context" enabled="true">/**
@@ -46,12 +48,7 @@
  * ${see_to_overridden}
  */</template>
 
-<template name="newtype" id="org.eclipse.jdt.ui.text.codetemplates.newtype" description="%CodeTemplates.newfile" context="newtype_context" enabled="true">/*
- * %CodeTemplates.newfile.content1
- *
- * ${todo} %CodeTemplates.newfile.content2
- * %CodeTemplates.newfile.content3
- */
+<template name="newtype" id="org.eclipse.jdt.ui.text.codetemplates.newtype" description="%CodeTemplates.newfile" context="newtype_context" enabled="true">${filecomment}
 ${package_declaration}
 
 ${typecomment}

@@ -13,8 +13,13 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
+
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.MultiTextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -304,7 +309,7 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
 		context.setVariable(CodeTemplateContextType.BODY_STATEMENT, bodyStatement);
-		String str= evaluateTemplate(context, template);
+		String str= evaluateTemplate(context, template, new String[] { CodeTemplateContextType.BODY_STATEMENT });
 		if (str == null && !Strings.containsOnlyWhitespaces(bodyStatement)) {
 			return bodyStatement;
 		}
@@ -351,12 +356,12 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.EXCEPTION_TYPE, exceptionType);
 		context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, variableName); //$NON-NLS-1$
 		return evaluateTemplate(context, template);
-	}		
+	}
 	
 	/*
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String)
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String, String, String)
 	 */	
-	public static String getCompilationUnitContent(ICompilationUnit cu, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
+	public static String getCompilationUnitContent(ICompilationUnit cu, String fileComment, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String packDecl= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -370,10 +375,29 @@ public class StubUtility {
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.PACKAGE_DECLARATION, packDecl);
 		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment != null ? typeComment : ""); //$NON-NLS-1$
+		context.setVariable(CodeTemplateContextType.FILE_COMMENT, fileComment != null ? fileComment : ""); //$NON-NLS-1$
 		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
 		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getQualifier(cu.getElementName()));
+		
+		String[] fullLine= { CodeTemplateContextType.PACKAGE_DECLARATION, CodeTemplateContextType.FILE_COMMENT, CodeTemplateContextType.TYPE_COMMENT };
+		return evaluateTemplate(context, template, fullLine);
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getFileComment(ICompilationUnit, String)
+	 */	
+	public static String getFileComment(ICompilationUnit cu, String lineDelimiter) throws CoreException {
+		Template template= getCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, cu.getJavaProject());
+		if (template == null) {
+			return null;
+		}
+		
+		IJavaProject project= cu.getJavaProject();
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), project, lineDelimiter);
+		context.setCompilationUnitVariables(cu);
+		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getQualifier(cu.getElementName()));
 		return evaluateTemplate(context, template);
-	}		
+	}	
 
 	/**
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String[], String)
@@ -401,7 +425,7 @@ public class StubUtility {
 			return null;
 		}
 		
-		TemplateVariable position= findTagVariable(buffer); // look if Javadoc tags have to be added
+		TemplateVariable position= findVariable(buffer, CodeTemplateContextType.TAGS); // look if Javadoc tags have to be added
 		if (position == null) {
 			return str;
 		}
@@ -533,7 +557,7 @@ public class StubUtility {
 		if (Strings.containsOnlyWhitespaces(str)) {
 			return null;
 		}
-		TemplateVariable position= findTagVariable(buffer); // look if Javadoc tags have to be added
+		TemplateVariable position= findVariable(buffer, CodeTemplateContextType.TAGS); // look if Javadoc tags have to be added
 		if (position == null) {
 			return str;
 		}
@@ -554,6 +578,34 @@ public class StubUtility {
 		}
 		return document.get();
 	}
+	
+	// remove lines for empty variables
+	private static String fixEmptyVariables(TemplateBuffer buffer, String[] variables) throws MalformedTreeException, BadLocationException {
+		IDocument doc= new Document(buffer.getString());
+		int nLines= doc.getNumberOfLines();
+		MultiTextEdit edit= new MultiTextEdit();
+		HashSet removedLines= new HashSet();
+		for (int i= 0; i < variables.length; i++) {
+			TemplateVariable position= findVariable(buffer, variables[i]); // look if Javadoc tags have to be added
+			if (position == null || position.getLength() > 0) {
+				continue;
+			}
+			int[] offsets= position.getOffsets();
+			for (int k= 0; k < offsets.length; k++) {
+				int line= doc.getLineOfOffset(offsets[k]);
+				IRegion lineInfo= doc.getLineInformation(line);
+				int offset= lineInfo.getOffset();
+				String str= doc.get(offset, lineInfo.getLength());
+				if (Strings.containsOnlyWhitespaces(str) && nLines > line + 1 && removedLines.add(new Integer(line))) {
+					int nextStart= doc.getLineOffset(line + 1);
+					edit.addChild(new DeleteEdit(offset, nextStart - offset));
+				}
+			}
+		}
+		edit.apply(doc, 0);
+		return doc.get();
+	}
+	
 
 	public static String getFieldComment(ICompilationUnit cu, String typeName, String fieldName, String lineDelimiter) throws CoreException {
 		Template template= getCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, cu.getJavaProject());
@@ -628,6 +680,24 @@ public class StubUtility {
 		}
 		return str;
 	}
+	
+	public static String evaluateTemplate(CodeTemplateContext context, Template template, String[] fullLineVariables) throws CoreException {
+		TemplateBuffer buffer;
+		try {
+			buffer= context.evaluate(template);
+			if (buffer == null)
+				return null;
+			String str= fixEmptyVariables(buffer, fullLineVariables);
+			if (Strings.containsOnlyWhitespaces(str)) {
+				return null;
+			}
+			return str;
+		} catch (BadLocationException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		} catch (TemplateException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
+	}
 
 	/**
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, IMethodBinding, String)
@@ -701,7 +771,7 @@ public class StubUtility {
 		if (Strings.containsOnlyWhitespaces(str)) {
 			return null;
 		}
-		TemplateVariable position= findTagVariable(buffer);  // look if Javadoc tags have to be added
+		TemplateVariable position= findVariable(buffer, CodeTemplateContextType.TAGS);  // look if Javadoc tags have to be added
 		if (position == null) {
 			return str;
 		}
@@ -740,11 +810,11 @@ public class StubUtility {
 		return textBuffer.get();
 	}
 	
-	private static TemplateVariable findTagVariable(TemplateBuffer buffer) {
+	private static TemplateVariable findVariable(TemplateBuffer buffer, String variable) {
 		TemplateVariable[] positions= buffer.getVariables();
 		for (int i= 0; i < positions.length; i++) {
 			TemplateVariable curr= positions[i];
-			if (CodeTemplateContextType.TAGS.equals(curr.getType())) {
+			if (variable.equals(curr.getType())) {
 				return curr;
 			}
 		}

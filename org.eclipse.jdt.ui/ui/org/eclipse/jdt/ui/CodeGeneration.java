@@ -33,7 +33,7 @@ public class CodeGeneration {
 	
 	/**
 	 * Returns the content for a new compilation unit using the 'new Java file' code template.
-	 * @param cu The compilation to create the source for. The compilation unit does not need to exist.
+	 * @param cu The compilation unit to create the source for. The compilation unit does not need to exist.
 	 * @param typeComment The comment for the type to be created. Used when the code template contains a <i>${typecomment}</i> variable. Can be <code>null</code> if
 	 * no comment should be added.
 	 * @param typeContent The code of the type, including type declaration and body.
@@ -42,12 +42,41 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getCompilationUnitContent(ICompilationUnit cu, String typeComment, String typeContent, String lineDelimiter) throws CoreException {	
-		return StubUtility.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
+		return getCompilationUnitContent(cu, getFileComment(cu, lineDelimiter), typeComment, typeContent, lineDelimiter);
+	}
+	
+	/**
+	 * Returns the content for a new compilation unit using the 'new Java file' code template.
+	 * @param cu The compilation unit to create the source for. The compilation unit does not need to exist.
+	 * 	@param fileComment The file comment to be used when the code template contains a <i>${filecomment}</i> variable. Can be <code>null</code> if
+	 * no comment should be added.
+	 * @param typeComment The comment for the type to be created. Used when the code template contains a <i>${typecomment}</i> variable. Can be <code>null</code> if
+	 * no comment should be added.
+	 * @param typeContent The code of the type, including type declaration and body.
+	 * @param lineDelimiter The line delimiter to be used.
+	 * @return Returns the new content or <code>null</code> if the template is undefined or empty.
+	 * @throws CoreException Thrown when the evaluation of the code template fails.
+	 * @since 3.1
+	 */
+	public static String getCompilationUnitContent(ICompilationUnit cu, String fileComment, String typeComment, String typeContent, String lineDelimiter) throws CoreException {	
+		return StubUtility.getCompilationUnitContent(cu, fileComment, typeComment, typeContent, lineDelimiter);
+	}
+	
+	/**
+	 * Returns the content for a new file comment using the 'file comment' code template. The returned content is unformatted and is not indented.
+	 * @param cu The compilation unit to add the comment to. The compilation unit does not need to exist.
+	 * @param lineDelimiter The line delimiter to be used.
+	 * @return Returns the new content or <code>null</code> if the code template is undefined or empty. The returned content is unformatted and is not indented.
+	 * @throws CoreException Thrown when the evaluation of the code template fails.
+	 * @since 3.1
+	 */	
+	public static String getFileComment(ICompilationUnit cu, String lineDelimiter) throws CoreException {
+		return StubUtility.getFileComment(cu, lineDelimiter);
 	}
 	
 	/**
 	 * Returns the content for a new type comment using the 'type comment' code template. The returned content is unformatted and is not indented.
-	 * @param cu The compilation where the type is contained. The compilation unit does not need to exist.
+	 * @param cu The compilation unit where the type is contained. The compilation unit does not need to exist.
 	 * @param typeQualifiedName The name of the type to which the comment is added. For inner types the name must be qualified and include the outer
 	 * types names (dot separated). See {@link org.eclipse.jdt.core.IType#getTypeQualifiedName(char)}.
 	 * @param lineDelimiter The line delimiter to be used.
@@ -60,7 +89,7 @@ public class CodeGeneration {
 	
 	/**
 	 * Returns the content for a new type comment using the 'type comment' code template. The returned content is unformatted and is not indented.
-	 * @param cu The compilation where the type is contained. The compilation unit does not need to exist.
+	 * @param cu The compilation unit where the type is contained. The compilation unit does not need to exist.
 	 * @param typeQualifiedName The name of the type to which the comment is added. For inner types the name must be qualified and include the outer
 	 * types names (dot separated). See {@link org.eclipse.jdt.core.IType#getTypeQualifiedName(char)}.
 	 * @param typeParameterNames The type parameter names
@@ -75,7 +104,7 @@ public class CodeGeneration {
 
 	/**
 	 * Returns the content for a new field comment using the 'field comment' code template. The returned content is unformatted and is not indented.
-	 * @param cu The compilation where the field is contained. The compilation unit does not need to exist.
+	 * @param cu The compilation unit where the field is contained. The compilation unit does not need to exist.
 	 * @param typeName The name of the field declared type.
 	 * @param fieldName The name of the field to which the comment is added.
 	 * @param lineDelimiter The line delimiter to be used.

@@ -164,6 +164,8 @@ public class CodeTemplateBlock {
 				return PreferencesMessages.getString("CodeTemplateBlock.setterstub.label"); //$NON-NLS-1$
 			} else if (CodeTemplateContextType.NEWTYPE_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.newtype.label"); //$NON-NLS-1$
+			} else if (CodeTemplateContextType.FILECOMMENT_ID.equals(id)) {
+				return PreferencesMessages.getString("CodeTemplateBlock.filecomment.label"); //$NON-NLS-1$
 			} else if (CodeTemplateContextType.TYPECOMMENT_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.typecomment.label"); //$NON-NLS-1$
 			} else if (CodeTemplateContextType.FIELDCOMMENT_ID.equals(id)) {
