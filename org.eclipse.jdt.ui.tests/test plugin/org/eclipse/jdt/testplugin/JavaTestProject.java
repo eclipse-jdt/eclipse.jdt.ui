@@ -59,7 +59,7 @@ public class JavaTestProject {
 		fJavaProject= JavaCore.create(project);
 		
 		fJavaProject.setOutputLocation(outputLocation, null);
-		fJavaProject.setClasspath(new IClasspathEntry[0], null);
+		fJavaProject.setRawClasspath(new IClasspathEntry[0], null);
 	}
 	
 	public IJavaProject getJavaProject() {
@@ -96,7 +96,7 @@ public class JavaTestProject {
 		}
 		IPackageFragmentRoot root= fJavaProject.getPackageFragmentRoot(container);
 		
-		IClasspathEntry cpe= fJavaProject.newSourceEntry(root.getPath());
+		IClasspathEntry cpe= JavaCore.newSourceEntry(root.getPath());
 		addToClasspath(cpe);		
 		return root;
 	}
@@ -113,13 +113,9 @@ public class JavaTestProject {
 	}
 	
 	public IPackageFragmentRoot addLibrary(IPath path, IPath sourceAttachPath, IPath sourceAttachRoot) throws JavaModelException {
-		IClasspathEntry cpe= fJavaProject.newLibraryEntry(path);
+		IClasspathEntry cpe= JavaCore.newLibraryEntry(path, sourceAttachPath, sourceAttachRoot);
 		addToClasspath(cpe);
-		IPackageFragmentRoot root= fJavaProject.findPackageFragmentRoot(path);
-		if (root != null) {
-			root.attachSource(sourceAttachPath, sourceAttachRoot, null);
-		}
-		return root;
+		return fJavaProject.getPackageFragmentRoot(path.toString());
 	}
 	
 	public IPackageFragmentRoot addLibraryWithImport(IPath jarPath, IPath sourceAttachPath, IPath sourceAttachRoot) throws IOException, CoreException {
@@ -138,12 +134,12 @@ public class JavaTestProject {
 	}
 	
 	public void addRequiredProject(IJavaProject jproject) throws JavaModelException {
-		IClasspathEntry cpe= fJavaProject.newProjectEntry(jproject.getProject().getFullPath());
+		IClasspathEntry cpe= JavaCore.newProjectEntry(jproject.getProject().getFullPath());
 		addToClasspath(cpe);
 	}
 
 	private void addToClasspath(IClasspathEntry cpe) throws JavaModelException {
-		IClasspathEntry[] oldEntries= fJavaProject.getClasspath();
+		IClasspathEntry[] oldEntries= fJavaProject.getRawClasspath();
 		for (int i= 0; i < oldEntries.length; i++) {
 			if (oldEntries[i].equals(cpe)) {
 				return;
@@ -153,23 +149,22 @@ public class JavaTestProject {
 		IClasspathEntry[] newEntries= new IClasspathEntry[nEntries + 1];
 		System.arraycopy(oldEntries, 0, newEntries, 0, nEntries);
 		newEntries[nEntries]= cpe;
-		fJavaProject.setClasspath(newEntries, null);
+		fJavaProject.setRawClasspath(newEntries, null);
 	}
 	
 	private void removeFromClasspath(IPath path) throws JavaModelException {
-		IClasspathEntry[] oldEntries= fJavaProject.getClasspath();
+		IClasspathEntry[] oldEntries= fJavaProject.getRawClasspath();
 		int nEntries= oldEntries.length;
 		Vector vec= new Vector(nEntries);
 		for (int i= 0 ; i < nEntries ; i++) {
 			IClasspathEntry curr= oldEntries[i];
 			if (!path.equals(curr.getPath())) {
-				vec.addElement(curr);
-			}
+				vec.addElement(curr);			}
 		}
 		
 		IClasspathEntry[] newEntries= new IClasspathEntry[vec.size()];
 		vec.copyInto(newEntries);
-		fJavaProject.setClasspath(newEntries, null);
+		fJavaProject.setRawClasspath(newEntries, null);
 	}	
 		
 	private void importFiles(IPath sourcePath, IContainer destContainer, String[] suffixes) throws CoreException, JavaModelException, IOException {
@@ -262,7 +257,8 @@ public class JavaTestProject {
 		} else {
 			rtSrc= null;
 			rtRoot= null;
-		}			
+		}
+		// System.out.println(rtJar + " " + rtSrc + " " + rtRoot);			
 		return new IPath[] { rtJar, rtSrc, rtRoot };
 	}			
 

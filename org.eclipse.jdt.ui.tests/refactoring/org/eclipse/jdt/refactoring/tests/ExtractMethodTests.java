@@ -585,6 +585,14 @@ public class ExtractMethodTests extends RefactoringTest {
 		validSelectionTest();
 	}
 			
+	public void test248() throws Exception {
+		validSelectionTest();
+	}
+			
+	public void test249() throws Exception {
+		validSelectionTest();
+	}
+			
 	//---- While statement
 	
 	public void test250() throws Exception {
@@ -602,6 +610,14 @@ public class ExtractMethodTests extends RefactoringTest {
 	public void test253() throws Exception {
 		validSelectionTest();
 	}
+		
+	public void test254() throws Exception {
+		validSelectionTest();
+	}
+	
+	public void test255() throws Exception {
+		validSelectionTest();
+	}
 	
 	//---- do while statement
 	
@@ -612,6 +628,14 @@ public class ExtractMethodTests extends RefactoringTest {
 	public void test261() throws Exception {
 		validSelectionTest();
 	}	
+		
+	public void test262() throws Exception {
+		validSelectionTest();
+	}
+	
+	public void test263() throws Exception {
+		validSelectionTest();
+	}
 	
 	//---- switch
 	
@@ -628,6 +652,14 @@ public class ExtractMethodTests extends RefactoringTest {
 	}	
 	
 	public void test273() throws Exception {
+		validSelectionTest();
+	}
+	
+	public void test274() throws Exception {
+		validSelectionTest();
+	}
+	
+	public void test275() throws Exception {
 		validSelectionTest();
 	}
 	
@@ -692,6 +724,14 @@ public class ExtractMethodTests extends RefactoringTest {
 	}				
 	
 	public void test309() throws Exception {
+		validSelectionTest();
+	}
+	
+	public void test310() throws Exception {
+		validSelectionTest();
+	}
+	
+	public void test311() throws Exception {
 		validSelectionTest();
 	}
 	
