@@ -382,58 +382,6 @@
 		</action>
 	</objectContribution>
 	
-	<objectContribution
-		id="org.eclipse.jdt.internal.ui.compare.JavaCompareWithEditionAction"
-		objectClass="org.eclipse.jdt.core.IMember">
-		<action
-			id="javaCompareFromHistory"
-			label="%JavaCompareFromHistoryAction.label"
-			tooltip="%JavaCompareFromHistoryAction.tooltip"
-			menubarPath="compareWithMenu/compareWithGroup"
-			enablesFor="1"
-			class="org.eclipse.jdt.internal.ui.compare.JavaCompareWithEditionAction">
-		</action>
-	</objectContribution>
-		
-	<objectContribution
-		id="org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction"
-		objectClass="org.eclipse.jdt.core.IMember">
-		<action
-			id="javaReplaceFromHistory"
-			label="%JavaReplaceFromHistoryAction.label"
-			tooltip="%JavaReplaceFromHistoryAction.tooltip"
-			menubarPath="replaceWithMenu/replaceWithGroup"
-			enablesFor="1"
-			class="org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction">
-		</action>
-	</objectContribution>
-		
-	<objectContribution
-		id="org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistoryAction"
-		objectClass="org.eclipse.jdt.core.IMember">
-		<action
-			id="javaAddElementFromHistoryAction"
-			label="%JavaAddElementFromHistoryAction.label"
-			tooltip="%JavaAddElementFromHistoryAction.tooltip"
-			menubarPath="replaceWithMenu"
-			enablesFor="1"
-			class="org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory">
-		</action>
-	</objectContribution>
-	
-	<objectContribution
-		id="org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistoryAction"
-		objectClass="org.eclipse.jdt.core.ICompilationUnit">
-		<action
-			id="javaAddElementFromHistoryAction"
-			label="%JavaAddElementFromHistoryAction.label"
-			tooltip="%JavaAddElementFromHistoryAction.tooltip"
-			menubarPath="replaceWithMenu"
-			enablesFor="1"
-			class="org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory">
-		</action>
-	</objectContribution>
-		
 </extension>
 
 <!-- =========================================================================== -->
@@ -479,6 +427,62 @@
 <!-- =========================================================================== -->
 <!-- Java Compare                                                                -->
 <!-- =========================================================================== -->
+
+<extension point="org.eclipse.ui.popupMenus">
+	<objectContribution
+		id="org.eclipse.jdt.internal.ui.compare.JavaCompareActions"
+		objectClass="org.eclipse.jdt.core.IMember">
+		<menu
+			id="compareWithMenu"
+			path="additions"
+			label="%CompareWithMenu.label">
+			<separator name="compareWithGroup"/>
+		</menu>
+		<menu
+			id="replaceWithMenu"
+			path="additions"
+			label="%ReplaceWithMenu.label">
+			<separator name="replaceWithGroup"/>
+		</menu>
+		<action
+			id="javaCompareFromHistory"
+			label="%JavaCompareFromHistoryAction.label"
+			tooltip="%JavaCompareFromHistoryAction.tooltip"
+			menubarPath="compareWithMenu/compareWithGroup"
+			enablesFor="1"
+			class="org.eclipse.jdt.internal.ui.compare.JavaCompareWithEditionAction">
+		</action>
+		<action
+			id="javaReplaceFromHistory"
+			label="%JavaReplaceFromHistoryAction.label"
+			tooltip="%JavaReplaceFromHistoryAction.tooltip"
+			menubarPath="replaceWithMenu/replaceWithGroup"
+			enablesFor="1"
+			class="org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction">
+		</action>
+		<action
+			id="javaAddElementFromHistoryAction"
+			label="%JavaAddElementFromHistoryAction.label"
+			tooltip="%JavaAddElementFromHistoryAction.tooltip"
+			menubarPath="replaceWithMenu"
+			enablesFor="1"
+			class="org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory">
+		</action>
+	</objectContribution>
+			
+	<objectContribution
+		id="org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistoryAction"
+		objectClass="org.eclipse.jdt.core.ICompilationUnit">
+		<action
+			id="javaAddElementFromHistoryAction"
+			label="%JavaAddElementFromHistoryAction.label"
+			tooltip="%JavaAddElementFromHistoryAction.tooltip"
+			menubarPath="replaceWithMenu"
+			enablesFor="1"
+			class="org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory">
+		</action>
+	</objectContribution>
+</extension>
 
 <extension
 	point="org.eclipse.compare.structureCreators">
