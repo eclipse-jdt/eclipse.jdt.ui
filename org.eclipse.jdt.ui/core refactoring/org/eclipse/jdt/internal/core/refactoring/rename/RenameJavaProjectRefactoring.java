@@ -18,14 +18,16 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.DeleteFromClasspathChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameJavaProjectChange;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
-public class RenameJavaProjectRefactoring extends Refactoring implements IRenameRefactoring {
+public class RenameJavaProjectRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring {
 
 	private IJavaProject fProject;
 	private String fNewName;
+	private boolean fUpdateReferences;
 	
 	public RenameJavaProjectRefactoring(IJavaProject project){
 		Assert.isNotNull(project); 
@@ -60,6 +62,28 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	public String getName() {
 		return "Rename Java project '" + getCurrentName() + "' to:'" + fNewName + "'";
 	}
+	
+	/*
+	 * @see IReferenceUpdatingRefactoring#canEnableUpdateReferences()
+	 */
+	public boolean canEnableUpdateReferences() {
+		return true;
+	}
+
+	/*
+	 * @see IReferenceUpdatingRefactoring#setUpdateReferences(boolean)
+	 */
+	public void setUpdateReferences(boolean update) {
+		fUpdateReferences= update;
+	}
+
+	/*
+	 * @see IReferenceUpdatingRefactoring#getUpdateReferences()
+	 */
+	public boolean getUpdateReferences() {
+		return fUpdateReferences;
+	}
+	
 		
 	//-- preconditions
 	
@@ -131,9 +155,11 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 		pm.beginTask("", 1);
 		try{
 			CompositeChange composite= new CompositeChange("Renaming a Java Project");
-			addNewProjectToClasspaths(composite);
+			if (fUpdateReferences)
+				addNewProjectToClasspaths(composite);
 			composite.addChange(new RenameJavaProjectChange(fProject, fNewName));
-			removeOldProjectFromClasspaths(composite);
+			if (fUpdateReferences)
+				removeOldProjectFromClasspaths(composite);
 			return composite;
 		} finally{
 			pm.done();
