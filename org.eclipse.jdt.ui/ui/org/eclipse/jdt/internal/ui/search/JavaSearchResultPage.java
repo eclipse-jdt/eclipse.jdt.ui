@@ -12,23 +12,21 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.util.HashMap;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.ide.IDE;
@@ -41,11 +39,15 @@ import org.eclipse.search.ui.SearchUI;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 public class JavaSearchResultPage extends AbstractTextSearchViewPage {
+	private static final String KEY_GROUPING= "org.eclipse.jdt.search.resultpage.grouping"; //$NON-NLS-1$
 	private NewSearchViewActionGroup fActionGroup;
 	private JavaSearchContentProvider fContentProvider;
 	private int fCurrentSortOrder;
@@ -77,11 +79,10 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		JavaPluginImages.setLocalImageDescriptors(fGroupFileAction, "file_mode.gif"); //$NON-NLS-1$
 		fGroupTypeAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_type"), SearchMessages.getString("JavaSearchResultPage.groupby_type.tooltip"), this, LevelTreeContentProvider.LEVEL_TYPE); //$NON-NLS-1$ //$NON-NLS-2$
 		JavaPluginImages.setLocalImageDescriptors(fGroupTypeAction, "class_obj.gif"); //$NON-NLS-1$
-		fCurrentGrouping= LevelTreeContentProvider.LEVEL_PACKAGE;
+		fCurrentGrouping= JavaPlugin.getDefault().getPluginPreferences().getInt(KEY_GROUPING);
 	}
 
 	public void setViewPart(ISearchResultViewPart part) {
-		// TODO Auto-generated method stub
 		super.setViewPart(part);
 		fActionGroup= new NewSearchViewActionGroup(part);
 	}
@@ -220,7 +221,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 
 	/**
-	 * Precondition here: the viewer must be shwing a tree with a LevelContentProvider.
+	 * Precondition here: the viewer must be showing a tree with a LevelContentProvider.
 	 * @param order
 	 */
 	void setGrouping(int grouping) {
@@ -229,10 +230,38 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		LevelTreeContentProvider cp= (LevelTreeContentProvider) viewer.getContentProvider();
 		cp.setLevel(grouping);
 		updateGroupingActions();
+		JavaPlugin.getDefault().getPluginPreferences().setValue(KEY_GROUPING, fCurrentGrouping);
 	}
 	
 	protected StructuredViewer getViewer() {
 		// override so that it's visible in the package.
 		return super.getViewer();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#restoreState(org.eclipse.ui.IMemento)
+	 */
+	public void restoreState(IMemento memento) {
+		super.restoreState(memento);
+		if (memento != null) {
+			Integer value= memento.getInteger(KEY_GROUPING);
+			if (value != null)
+				fCurrentGrouping= value.intValue();
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#saveState(org.eclipse.ui.IMemento)
+	 */
+	public void saveState(IMemento memento) {
+		super.saveState(memento);
+		memento.putInteger(KEY_GROUPING, fCurrentGrouping);
+	}
+
+	/**
+	 * @param store
+	 */
+	public static void initializeDefaultValues(IPreferenceStore store) {
+		store.setDefault(KEY_GROUPING, LevelTreeContentProvider.LEVEL_PACKAGE);
 	}
 }

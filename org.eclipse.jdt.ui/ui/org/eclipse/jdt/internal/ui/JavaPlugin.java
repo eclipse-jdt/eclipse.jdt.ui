@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CompilationUnitDocumen
 import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CustomBufferFactory2;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.preferences.MockupPreferenceStore;
+import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
@@ -520,6 +521,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		super.initializeDefaultPreferences(store);
 		MarkerAnnotationPreferences.initializeDefaultValues(store);		
 		PreferenceConstants.initializeDefaultValues(store);
+		JavaSearchResultPage.initializeDefaultValues(store);
 	}
 	
 	private synchronized ImageDescriptorRegistry internalGetImageDescriptorRegistry() {
