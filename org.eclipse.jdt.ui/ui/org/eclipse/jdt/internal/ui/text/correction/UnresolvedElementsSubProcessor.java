@@ -142,7 +142,8 @@ public class UnresolvedElementsSubProcessor {
 		
 		if (node == null) {
 			return;
-		}		
+		}
+		
 
 		// add type proposals
 		if (typeKind != 0) {
@@ -262,7 +263,7 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, SimpleName node, boolean isWriteAccess, Collection proposals) {
-		IBinding[] varsInScope= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(node, ScopeAnalyzer.VARIABLES);
+		IBinding[] varsInScope= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(node, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);
 		if (varsInScope.length > 0) {
 			// avoid corrections like int i= i;
 			String otherNameInAssign= null;
@@ -862,7 +863,11 @@ public class UnresolvedElementsSubProcessor {
 					return false;
 				}
 			}
-			CompilationUnit unit= AST.parsePartialCompilationUnit(targetCU, 0, true, null, null);
+			ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+			parser.setSource(targetCU);
+			parser.setFocalPosition(0);
+			parser.setResolveBindings(true);
+			CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 			return unit.findDeclaringNode(meth.getKey()) == null;
 		}
 		return false;		

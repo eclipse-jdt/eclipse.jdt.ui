@@ -17,11 +17,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+
 import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.ui.text.java.*;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -38,7 +39,7 @@ public class ModifierCorrectionSubProcessor {
 	public static final int TO_NON_PRIVATE= 3;
 	public static final int TO_NON_STATIC= 4;
 	
-	public static void addNonAccessibleMemberProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind, int relevance) throws JavaModelException {
+	public static void addNonAccessibleMemberProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind, int relevance) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -116,6 +117,11 @@ public class ModifierCorrectionSubProcessor {
 			if (targetCU != null) {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, relevance, image));
+			}
+			if (kind == TO_VISIBLE && binding.getKind() == IBinding.VARIABLE && Modifier.isPrivate(binding.getModifiers())) {
+				if (selectedNode instanceof SimpleName || selectedNode instanceof FieldAccess && ((FieldAccess) selectedNode).getExpression() instanceof ThisExpression) {
+					UnresolvedElementsSubProcessor.getVariableProposals(context, problem, proposals);
+				}
 			}
 		}
 	}

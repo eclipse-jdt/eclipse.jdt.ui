@@ -269,7 +269,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NotVisibleField:
 			case IProblem.ImportNotVisible:
 			case IProblem.NotVisibleType + IProblem.Javadoc:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 5); 
+				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 10); 
 				break;
 			case IProblem.BodyForAbstractMethod:
 			case IProblem.AbstractMethodInAbstractClass:
