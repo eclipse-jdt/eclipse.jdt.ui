@@ -56,7 +56,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -2338,9 +2338,6 @@ public class AssistQuickFixTest extends QuickFixTest {
     
     
 	public void testAddTypeToArrayInitializer() throws Exception {
-			if (true)
-				return; // can enable with jdt.core dorm > 20040505
-		
 		
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 			StringBuffer buf= new StringBuffer();
@@ -2366,7 +2363,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
 			buf.append("    public void foo() {\n");
-			buf.append("        int[][] numbers= new int[][] {{ 1, 2 }, { 3, 4 }, { 4, 5 }};\n");		
+			buf.append("        int[][] numbers= new int[][]{{ 1, 2 }, { 3, 4 }, { 4, 5 }};\n");		
 			buf.append("    }\n");
 			buf.append("}\n");
 			assertEqualString(preview, buf.toString());	
