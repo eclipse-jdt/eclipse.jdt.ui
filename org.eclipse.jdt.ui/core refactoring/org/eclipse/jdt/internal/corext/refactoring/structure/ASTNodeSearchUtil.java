@@ -49,8 +49,10 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 public class ASTNodeSearchUtil {
 
 	private ASTNodeSearchUtil() {
+		//no instance
 	}
 
+	/** misses javadoc nodes */
 	public static ASTNode[] getAstNodes(SearchResult[] searchResults, CompilationUnit cuNode) {
 		List result= new ArrayList(searchResults.length);
 		for (int i= 0; i < searchResults.length; i++) {
@@ -61,6 +63,7 @@ public class ASTNodeSearchUtil {
 		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
 	}
 
+	/** misses javadoc nodes */
 	public static ASTNode getAstNode(SearchResult searchResult, CompilationUnit cuNode) {
 		ASTNode selectedNode= getAstNode(cuNode, searchResult.getStart(), searchResult.getEnd() - searchResult.getStart());
 		if (selectedNode == null)
@@ -70,6 +73,7 @@ public class ASTNodeSearchUtil {
 		return selectedNode;
 	}
 
+	/** misses javadoc nodes */
 	private static ASTNode getAstNode(CompilationUnit cuNode, int start, int length){
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(start, length), true);
 		cuNode.accept(analyzer);
@@ -199,5 +203,24 @@ public class ASTNodeSearchUtil {
 			return coveredNode;
 		else
 			return nodeFinder.getCoveringNode();		
+	}
+	
+	public static ASTNode[] findNodes(SearchResult[] searchResults, CompilationUnit cuNode) {
+		List result= new ArrayList(searchResults.length);
+		for (int i= 0; i < searchResults.length; i++) {
+			ASTNode node= findNode(searchResults[i], cuNode);
+			if (node != null)
+				result.add(node);
+		}
+		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
+	}
+
+	public static ASTNode findNode(SearchResult searchResult, CompilationUnit cuNode) {
+		ASTNode selectedNode= NodeFinder.perform(cuNode, searchResult.getStart(), searchResult.getEnd() - searchResult.getStart());
+		if (selectedNode == null)
+			return null;
+		if (selectedNode.getParent() == null)
+			return null;
+		return selectedNode;
 	}
 }
