@@ -118,7 +118,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 				return getHoverInfo(result);
 				
 			} catch (JavaModelException x) {
-				JavaPlugin.log(x.getStatus());
+				return null;
 			}
 		}
 		return null;
