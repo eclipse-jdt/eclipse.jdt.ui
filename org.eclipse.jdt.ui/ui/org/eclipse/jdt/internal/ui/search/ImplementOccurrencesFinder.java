@@ -131,6 +131,9 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	 */
 	public List perform() {
 		fStart.accept(new MethodVisitor());
+		if (fSelectedName != null)
+			fResult.add(fSelectedName);
+		
 		return fResult;
 	}
 	
