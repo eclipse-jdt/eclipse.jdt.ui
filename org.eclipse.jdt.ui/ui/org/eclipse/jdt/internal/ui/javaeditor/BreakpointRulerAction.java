@@ -131,7 +131,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 					}
 				}
 				if (type != null) {
-					if (!JDIDebugModel.isDuplicateLineBreakpoint(type, lineNumber)) {
+					if (!JDIDebugModel.lineBreakpointExists(type, lineNumber)) {
 							IBreakpoint breakpoint = JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
 					}
 				}

@@ -83,7 +83,7 @@ public class AddBreakpointAction extends AddMarkerAction {
 						}
 					}
 					if (type != null) {
-						if (!JDIDebugModel.isDuplicateLineBreakpoint(type, lineNumber)) {
+						if (!JDIDebugModel.lineBreakpointExists(type, lineNumber)) {
 							return JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
 						}
 					}
