@@ -584,8 +584,9 @@ public final class MemberVisibilityAdjustor {
 	 * @param threshold the visibility threshold, or <code>null</code> for default visibility
 	 * @param fragment the field declaration fragment
 	 * @param declaration the field declaration
+	 * @throws JavaModelException if an error occurs
 	 */
-	private void adjustOutgoingVisibility(final CompilationUnitRewrite rewrite, final IField field, final ModifierKeyword threshold, final VariableDeclarationFragment fragment, final FieldDeclaration declaration) {
+	private void adjustOutgoingVisibility(final CompilationUnitRewrite rewrite, final IField field, final ModifierKeyword threshold, final VariableDeclarationFragment fragment, final FieldDeclaration declaration) throws JavaModelException {
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(field);
 		Assert.isTrue(isVisibilityKeyword(threshold));
@@ -632,15 +633,20 @@ public final class MemberVisibilityAdjustor {
 	 * @param threshold the visibility keyword representing the required visibility, or <code>null</code> for default visibility
 	 * @param binding the binding of the body declaration
 	 * @param template the message template to use
+	 * @throws JavaModelException if an error occurs
 	 */
-	private void adjustOutgoingVisibility(final CompilationUnitRewrite rewrite, final IMember member, final BodyDeclaration declaration, final ModifierKeyword threshold, final IBinding binding, final String template) {
+	private void adjustOutgoingVisibility(final CompilationUnitRewrite rewrite, final IMember member, final BodyDeclaration declaration, final ModifierKeyword threshold, final IBinding binding, final String template) throws JavaModelException {
 		Assert.isNotNull(member);
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(declaration);
 		Assert.isTrue(isVisibilityKeyword(threshold));
 		Assert.isNotNull(binding);
 		Assert.isNotNull(template);
-		if (hasLowerVisibility((List) declaration.getStructuralProperty(declaration.getModifiersProperty()), threshold) && needsVisibilityAdjustment(member, threshold))
+		boolean adjust= true;
+		final IType declaring= member.getDeclaringType();
+		if (declaring != null && declaring.isInterface())
+			adjust= false;
+		if (adjust && hasLowerVisibility((List) declaration.getStructuralProperty(declaration.getModifiersProperty()), threshold) && needsVisibilityAdjustment(member, threshold))
 			fAdjustments.put(member, new OutgoingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, RefactoringCoreMessages.getFormattedString(template, new String[] { BindingLabels.getFullyQualified(binding), getLabel(threshold)}), JavaStatusContext.create(rewrite.getCu(), declaration), null, RefactoringStatusEntry.NO_CODE, null)));
 	}
 
