@@ -726,10 +726,10 @@ public class PushDownTests extends RefactoringTest {
 	}
 
 	public void test28() throws Exception{
-		if (true){
-			printTestDisabledMessage("37175");
-			return;
-		}
+//		if (true){
+//			printTestDisabledMessage("37175");
+//			return;
+//		}
 		String[] selectedMethodNames= {};
 		String[][] selectedMethodSignatures= {};
 		String[] selectedFieldNames= {"i", "j"};
