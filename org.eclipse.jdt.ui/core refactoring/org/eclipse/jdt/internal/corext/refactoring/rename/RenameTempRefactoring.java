@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -20,7 +19,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -124,24 +122,12 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		initAST();
 		if (fTempDeclarationNode == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.must_select_local")); //$NON-NLS-1$
-		if (! isDeclaredIn(fTempDeclarationNode, MethodDeclaration.class) 
-		 && ! isDeclaredIn(fTempDeclarationNode, Initializer.class))
+		if (! Checks.isDeclaredIn(fTempDeclarationNode, MethodDeclaration.class) 
+		 && ! Checks.isDeclaredIn(fTempDeclarationNode, Initializer.class))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.only_in_methods_and_initializers")); //$NON-NLS-1$
 				
 		initNames();			
 		return new RefactoringStatus();
-	}
-
-	private boolean isDeclaredIn(VariableDeclaration tempDeclaration, Class astNodeClass) {
-		ASTNode initializer= ASTNodes.getParent(tempDeclaration, astNodeClass);
-		if (initializer == null)
-			return false;
-		ASTNode anonymous= ASTNodes.getParent(tempDeclaration, AnonymousClassDeclaration.class);	
-		if (anonymous == null)
-			return true;
-		if (ASTNodes.isParent(anonymous, initializer))
-			return false;
-		return true;	
 	}
 
 	private void initAST(){
