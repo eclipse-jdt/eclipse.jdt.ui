@@ -251,8 +251,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 IClasspathInformationProvider.CREATE_LINK);
         op= new ResetAllOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CLEAR, JavaPluginImages.DESC_DLCL_CLEAR,
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.UndoAll.label"), //$NON-NLS-1$
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.UndoAll.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.ClearAll.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.ClearAll.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.RESET_ALL);
     }
 
