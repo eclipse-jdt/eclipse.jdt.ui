@@ -426,7 +426,7 @@ public class JavaElementLabels {
 		}
 	}
 
-	private static final boolean BUG_85811= true;
+	private static final boolean BUG_87362= true;
 	
 	/**
 	 * Appends the label for a method to a {@link StringBuffer}. Considers the M_* flags.
@@ -437,7 +437,7 @@ public class JavaElementLabels {
 	public static void getMethodLabel(IMethod method, long flags, StringBuffer buf) {
 		try {
 			BindingKey resolvedKey= getFlag(flags, USE_RESOLVED) && method.isResolved() ? new BindingKey(method.getKey()) : null;
-			String resolvedSig= (resolvedKey != null && !BUG_85811) ? resolvedKey.toSignature() : null;
+			String resolvedSig= (resolvedKey != null) ? resolvedKey.toSignature() : null;
 			
 			// return type
 			if (getFlag(flags, M_PRE_TYPE_PARAMETERS) && method.exists()) {
@@ -474,10 +474,9 @@ public class JavaElementLabels {
 			// parameters
 			buf.append('(');
 			if (getFlag(flags, M_PARAMETER_TYPES | M_PARAMETER_NAMES)) {
-				
 				String[] types= null;
 				if (getFlag(flags, M_PARAMETER_TYPES)) {
-					if (resolvedKey != null && !BUG_85811) {
+					if (resolvedKey != null) {
 						types= Signature.getParameterTypes(resolvedKey.toSignature());
 					} else {
 						types= method.getParameterTypes();
@@ -586,7 +585,7 @@ public class JavaElementLabels {
 	public static void getFieldLabel(IField field, long flags, StringBuffer buf) {
 		try {
 			if (getFlag(flags, F_PRE_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
-				if (getFlag(flags, USE_RESOLVED) && field.isResolved() && !BUG_85811) {
+				if (getFlag(flags, USE_RESOLVED) && field.isResolved() && !BUG_87362) {
 					getTypeSignatureLabel(new BindingKey(field.getKey()).toSignature(), flags, buf);
 				} else {
 					getTypeSignatureLabel(field.getTypeSignature(), flags, buf);
@@ -603,7 +602,7 @@ public class JavaElementLabels {
 			
 			if (getFlag(flags, F_APP_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
 				buf.append(DECL_STRING);
-				if (getFlag(flags, USE_RESOLVED) && field.isResolved() && !BUG_85811) {
+				if (getFlag(flags, USE_RESOLVED) && field.isResolved() && !BUG_87362) {
 					getTypeSignatureLabel(new BindingKey(field.getKey()).toSignature(), flags, buf);
 				} else {
 					getTypeSignatureLabel(field.getTypeSignature(), flags, buf);
