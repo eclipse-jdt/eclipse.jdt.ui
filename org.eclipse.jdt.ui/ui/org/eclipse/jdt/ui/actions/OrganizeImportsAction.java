@@ -253,17 +253,6 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		return false;
 	}
 	
-	private boolean hasSourceFolders(IJavaProject project) throws JavaModelException {
-		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			IPackageFragmentRoot root= roots[i];
-			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -296,6 +285,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 
 	/**
 	 * Peform organize import on multiple compilation units. No editors are opened.
+	 * @param cus The compilation units to run on
 	 */
 	public void runOnMultiple(final ICompilationUnit[] cus) {
 		try {
@@ -409,6 +399,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * @param cu The compilation unit to process
 	 */
 	public void run(ICompilationUnit cu) {
 		if (!ElementValidator.check(cu, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), fEditor != null)) //$NON-NLS-1$ 
