@@ -20,8 +20,13 @@ import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TableCursor;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -159,6 +164,7 @@ public class ChangeParametersControl extends Composite {
 	private Button fAddButton;
 	private Button fRemoveButton;
 	private List fParameterInfos;
+	private TableCursor fTableCursor;
 
 	public ChangeParametersControl(Composite parent, int style, String label, ParameterListChangeListener listener, boolean editable, boolean canAddParameters) {
 		super(parent, style);
@@ -196,7 +202,7 @@ public class ChangeParametersControl extends Composite {
 		TableLayoutComposite layouter= new TableLayoutComposite(parent, SWT.NULL);
 		addColumnLayoutData(layouter);
 		
-		Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+		final Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		TableColumn tc;
@@ -229,8 +235,67 @@ public class ChangeParametersControl extends Composite {
 			}
 		});
 
-		if (fEditable)
+		if (fEditable){
 			addCellEditors();
+			addTableCursor(table);
+		}	
+	}
+
+	private void addTableCursor(final Table table) {
+		fTableCursor = new TableCursor(table, SWT.NONE);
+		fTableCursor.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fTableViewer.setSelection(new StructuredSelection(fTableCursor.getRow().getData()));
+			}
+			public void widgetDefaultSelected(SelectionEvent e){
+				ChangeParametersControl.this.editFirstSelected();
+			}
+		});	
+		fTableCursor.addMouseListener(new MouseAdapter(){
+			public void mouseDoubleClick(MouseEvent e) {
+				ChangeParametersControl.this.editFirstSelected();
+			}
+			public void mouseDown(MouseEvent e) {
+				ChangeParametersControl.this.editFirstSelected();
+			}
+		});
+		// Hide the TableCursor when the user hits the "CTRL" or "SHIFT" key.
+		// This alows the user to select multiple items in the table.
+		fTableCursor.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (	e.keyCode == SWT.CTRL || 
+				    	e.keyCode == SWT.SHIFT || 
+				    (e.stateMask & SWT.CONTROL) != 0 || 
+				    (e.stateMask & SWT.SHIFT) != 0) {
+						fTableCursor.setVisible(false);
+				}
+			}
+		});
+		// Show the TableCursor when the user releases the "SHIFT" or "CTRL" key.
+		// This signals the end of the multiple selection task.
+		table.addKeyListener(new KeyAdapter() {
+			public void keyReleased(KeyEvent e) {
+				if (e.keyCode == SWT.CONTROL 	&& (e.stateMask & SWT.SHIFT) 	!= 0) return;
+				if (e.keyCode == SWT.SHIFT 	&& (e.stateMask & SWT.CONTROL) 	!= 0) return;
+				if (e.keyCode != SWT.CONTROL 	&& (e.stateMask & SWT.CONTROL) 	!= 0) return;
+				if (e.keyCode != SWT.SHIFT 	&& (e.stateMask & SWT.SHIFT) 	!= 0) return;
+				if (table.getSelectionCount() != 1) return;
+				
+				TableItem[] selection = table.getSelection();
+				TableItem row = (selection.length == 0) ? table.getItem(table.getTopIndex()) : selection[0];
+				table.showItem(row);
+				fTableCursor.setSelection(row, 0);
+				fTableCursor.setVisible(true);
+				fTableCursor.setFocus();
+			}
+		});
+	}
+	
+	private void editFirstSelected(){
+		ParameterInfo[]	selected= getSelectedItems();
+		if (selected.length != 1)
+			return;
+		fTableViewer.editElement(selected[0], fTableCursor.getColumn());
 	}
 
 	private void addColumnLayoutData(TableLayoutComposite layouter) {
@@ -347,6 +412,7 @@ public class ChangeParametersControl extends Composite {
 				fTableViewer.getControl().setFocus();
 				getTable().setSelection(getTableItemCount() - 1);
 				updateButtonsEnabledState();
+				fTableCursor.setVisible(false);
 			}
 		});	
 		return button;
@@ -381,6 +447,7 @@ public class ChangeParametersControl extends Composite {
 				}
 				fListener.parameterListChanged();
 				updateButtonsEnabledState();
+				fTableCursor.setVisible(false);
 			}
 		});	
 		return button;
@@ -409,6 +476,8 @@ public class ChangeParametersControl extends Composite {
 				fTableViewer.getControl().setFocus();
 				fTableViewer.setSelection(savedSelection);
 				fListener.parameterListChanged();
+				
+				fTableCursor.setVisible(false);
 			}
 		});
 		return button;
@@ -501,16 +570,29 @@ public class ChangeParametersControl extends Composite {
 	}
 
 	private boolean canMove(boolean up) {
-		if (fParameterInfos == null || fParameterInfos.size() == 0)
+		List notDeleted= getNotDeletedInfos();
+		if (notDeleted == null || notDeleted.size() == 0)
 			return false;
 		int[] indc= getTable().getSelectionIndices();
 		if (indc.length == 0)
 			return false;
-		int invalid= up ? 0 : fParameterInfos.size() - 1;
+		int invalid= up ? 0 : notDeleted.size() - 1;
 		for (int i= 0; i < indc.length; i++) {
 			if (indc[i] == invalid)
 				return false;
 		}
 		return true;
+	}
+	
+	private List getNotDeletedInfos(){
+		if (fParameterInfos == null)
+			return null;
+		List result= new ArrayList(fParameterInfos.size());
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			if (! info.isDeleted())
+				result.add(info);
+		}
+		return result;
 	}
 }
