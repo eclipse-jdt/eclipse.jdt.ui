@@ -18,6 +18,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -536,6 +537,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			addDropAdapters(fAllViewers[i], ops, transfers);
 		}	
 		addDragAdapters(fMethodsViewer, ops, transfers);
+
+		//dnd on empty hierarchy
+		DropTarget dropTarget = new DropTarget(fNoHierarchyShownLabel, ops);
+		dropTarget.setTransfer(transfers);
+		dropTarget.addDropListener(new TypeHierarchyTransferDropAdapter(this, fAllViewers[0]));
 	}
 	
 	private void addDropAdapters(AbstractTreeViewer viewer, int ops, Transfer[] transfers){
@@ -594,9 +600,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		fMethodViewerPaneLabel= new CLabel(fMethodViewerViewForm, SWT.NONE);
 		fMethodViewerViewForm.setTopLeft(fMethodViewerPaneLabel);
-		
-		initDragAndDrop();		
-		
+				
 		ToolBar methodViewerToolBar= new ToolBar(fMethodViewerViewForm, SWT.FLAT | SWT.WRAP);
 		fMethodViewerViewForm.setTopCenter(methodViewerToolBar);
 		
@@ -675,6 +679,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				new JavaSearchActionGroup(this, fSelectionProviderMediator)});
 		
 		fActionGroups.fillActionBars(getViewSite().getActionBars());
+		
+		initDragAndDrop();		
 	}
 
 
