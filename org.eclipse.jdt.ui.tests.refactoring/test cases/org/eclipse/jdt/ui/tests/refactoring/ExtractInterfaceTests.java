@@ -17,8 +17,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.Templates;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ExtractInterfaceTests extends RefactoringTest {
