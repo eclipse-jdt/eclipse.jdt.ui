@@ -1150,9 +1150,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 
 	private static int searchForClosingPeer(IDocument document, int position, final char openingPeer, final char closingPeer) {
-		Assert.isTrue(position < document.getLength());
 		Assert.isTrue(position >= 0);
-		Assert.isTrue(isDefaultPartition(document, position));
 
 		try {
 			int length= document.getLength();
@@ -1179,8 +1177,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	private static int searchForOpeningPeer(IDocument document, int position, final char openingPeer, final char closingPeer) {
 		Assert.isTrue(position < document.getLength());
-		Assert.isTrue(position >= 0);
-		Assert.isTrue(isDefaultPartition(document, position));
 
 		try {
 			int depth= 1;
@@ -1205,6 +1201,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 
 	private static IRegion getSurroundingBlock(IDocument document, int offset) {
+		if (offset < 1 || offset >= document.getLength())
+			return null;
+			
 		int begin= searchForOpeningPeer(document, offset - 1, '{', '}');
 		int end= searchForClosingPeer(document, offset, '{', '}');
 		if (begin == -1 || end == -1)
@@ -1238,6 +1237,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 	
 	private static boolean areBlocksConsistent(IDocument document, int offset) {
+		if (offset < 1 || offset >= document.getLength())
+			return false;
+		
 		int begin= offset;
 		int end= offset - 1;
 		
