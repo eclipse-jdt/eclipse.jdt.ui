@@ -166,8 +166,15 @@ public class DeleteRefactoring extends Refactoring {
 	}
 	
 	private static IPath getPath(Object o) throws JavaModelException {
-		if (o instanceof IJavaElement) 
-			return ((IJavaElement)o).getUnderlyingResource().getFullPath();
+		if (o instanceof IJavaElement) {
+			IJavaElement je= (IJavaElement)o;
+			IResource res= je.getUnderlyingResource();
+			if (res != null)
+				return res.getFullPath();	
+			res= je.getCorrespondingResource();
+			if (res != null)
+				return res.getFullPath();	
+		}	
 
 		if (o instanceof IResource)
 			return ((IResource)o).getFullPath();
@@ -182,7 +189,10 @@ public class DeleteRefactoring extends Refactoring {
 			}
 			private int getPathLength(Object o){
 				try{
-					return getPath(o).segmentCount();
+					IPath path= getPath(o);
+					if (path == null)
+						return 0;
+					return path.segmentCount();
 				} catch (JavaModelException e){
 					return 0;
 				}	
