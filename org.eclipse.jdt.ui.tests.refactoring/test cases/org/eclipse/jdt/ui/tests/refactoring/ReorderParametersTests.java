@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ReorderParametersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ReorderRenameParameterWrapperRefactoring;
 
 public class ReorderParametersTests extends RefactoringTest {
 	
@@ -58,7 +58,7 @@ public class ReorderParametersTests extends RefactoringTest {
 		//DebugUtils.dump("cu" + cu.getSource());
 		IType classA= getType(cu, "A");
 		//DebugUtils.dump("classA" + classA);
-		ReorderParametersRefactoring ref= new ReorderParametersRefactoring(classA.getMethod("m", signature));
+		ReorderRenameParameterWrapperRefactoring ref= new ReorderRenameParameterWrapperRefactoring(classA.getMethod("m", signature));
 		ref.setNewParameterOrder(newOrder);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -76,7 +76,7 @@ public class ReorderParametersTests extends RefactoringTest {
 	
 	private void helper2(String[] newOrder, String[] signature, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ReorderParametersRefactoring ref= new ReorderParametersRefactoring(classA.getMethod("m", signature));
+		ReorderRenameParameterWrapperRefactoring ref= new ReorderRenameParameterWrapperRefactoring(classA.getMethod("m", signature));
 		ref.setNewParameterOrder(newOrder);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
@@ -90,7 +90,7 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 	
 	public void testFail1() throws Exception{
-		helper2(new String[]{"i", "j"}, new String[]{"I", "I"}, RefactoringStatus.ERROR);
+		helper2(new String[]{"j", "i"}, new String[]{"I", "I"}, RefactoringStatus.ERROR);
 	}
 	
 	//---------
@@ -171,8 +171,8 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 	
 	public void test19() throws Exception{
-		printTestDisabledMessage("bug 7274 - reorder parameters: incorrect when parameters have more than 1 modifiers");
-//		helper1(new String[]{"b", "i"}, new String[]{"I", "Z"});
+//		printTestDisabledMessage("bug 7274 - reorder parameters: incorrect when parameters have more than 1 modifiers");
+		helper1(new String[]{"b", "i"}, new String[]{"I", "Z"});
 	}
 }
 

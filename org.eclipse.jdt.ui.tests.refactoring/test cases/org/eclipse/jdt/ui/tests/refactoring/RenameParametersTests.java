@@ -16,7 +16,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameParametersRefactoring;public class RenameParametersTests extends RefactoringTest{
+import org.eclipse.jdt.internal.corext.refactoring.structure.ReorderRenameParameterWrapperRefactoring;
+public class RenameParametersTests extends RefactoringTest{
 	
 	private static final Class clazz= RenameParametersTests.class;
 	private static final String REFACTORING_PATH= "RenameParameters/";
@@ -71,7 +72,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameParametersRefact
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method= classA.getMethod("m", signature);
-		RenameParametersRefactoring ref= new RenameParametersRefactoring(method);
+		ReorderRenameParameterWrapperRefactoring ref= new ReorderRenameParameterWrapperRefactoring(method);
 		ref.setUpdateReferences(updateReferences);
 		//ref.setNewParameterNames(newNames);
 		ref.setNewNames(createRenamings(method, newNames));
@@ -95,7 +96,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameParametersRefact
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
 		//DebugUtils.dump("classA" + classA);
 		IMethod method= classA.getMethod("m", signature);
-		RenameParametersRefactoring ref= new RenameParametersRefactoring(method);
+		ReorderRenameParameterWrapperRefactoring ref= new ReorderRenameParameterWrapperRefactoring(method);
 		if (newNames.length > 0)
 			ref.setNewNames(createRenamings(method, newNames));
 			//ref.setNewParameterNames(newNames);
