@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.text.spelling.newapi;
+package org.eclipse.jdt.internal.ui.text.spelling;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +57,7 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 
 	/**
 	 * Spelling problem collector that forwards {@link SpellingProblem}s as
-	 * {@link IProblem}s to the {@link IProblemRequestor}.
+	 * {@link IProblem}s to the {@link org.eclipse.jdt.core.IProblemRequestor}.
 	 */
 	private class SpellingProblemCollector implements ISpellingProblemCollector {
 

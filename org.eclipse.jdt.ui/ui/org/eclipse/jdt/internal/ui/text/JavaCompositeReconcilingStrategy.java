@@ -21,7 +21,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
-import org.eclipse.jdt.internal.ui.text.spelling.newapi.JavaSpellingReconcileStrategy;
+import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
 
 /**
  * Reconciling strategy for Java code. This is a composite strategy containing the

@@ -79,7 +79,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
-import org.eclipse.jdt.internal.ui.text.spelling.newapi.JavaSpellingReconcileStrategy;
+import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
 
 
 public class CompilationUnitDocumentProvider extends TextFileDocumentProvider implements ICompilationUnitDocumentProvider {

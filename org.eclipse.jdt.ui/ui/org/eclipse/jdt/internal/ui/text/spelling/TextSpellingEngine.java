@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.text.spelling.newapi;
+package org.eclipse.jdt.internal.ui.text.spelling;
 
 import java.util.Locale;
 
@@ -20,7 +20,6 @@ import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 
-import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckIterator;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 

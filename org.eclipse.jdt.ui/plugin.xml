@@ -4781,9 +4781,9 @@
         <engine
               preferencesClass="org.eclipse.jdt.internal.ui.preferences.SpellingPreferenceBlock"
               label="%defaultSpellingEngine.label"
-              class="org.eclipse.jdt.internal.ui.text.spelling.newapi.DefaultSpellingEngine"
+              class="org.eclipse.jdt.internal.ui.text.spelling.DefaultSpellingEngine"
               default="true"
-              id="org.eclipse.jdt.internal.ui.text.spelling.newapi.DefaultSpellingEngine">
+              id="org.eclipse.jdt.internal.ui.text.spelling.DefaultSpellingEngine">
         </engine>
     </extension>
 </plugin>

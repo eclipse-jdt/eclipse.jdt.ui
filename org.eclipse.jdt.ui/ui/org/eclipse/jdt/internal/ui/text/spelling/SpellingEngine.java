@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.text.spelling.newapi;
+package org.eclipse.jdt.internal.ui.text.spelling;
 
 import java.util.Locale;
 

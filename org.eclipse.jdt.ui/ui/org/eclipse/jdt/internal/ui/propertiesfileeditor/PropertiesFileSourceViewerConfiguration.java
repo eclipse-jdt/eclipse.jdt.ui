@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.hover.AnnotationHover;
-import org.eclipse.jdt.internal.ui.text.spelling.newapi.PropertiesSpellingReconcileStrategy;
+import org.eclipse.jdt.internal.ui.text.spelling.PropertiesSpellingReconcileStrategy;
 
 /**
  * Configuration for a source viewer which shows a properties file.

@@ -27,7 +27,6 @@ import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
-import org.eclipse.jdt.internal.ui.text.spelling.newapi.JavaSpellingReconcileStrategy;
 
 import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
 import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;

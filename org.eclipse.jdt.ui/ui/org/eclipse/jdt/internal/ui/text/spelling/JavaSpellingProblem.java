@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.text.spelling.newapi;
+package org.eclipse.jdt.internal.ui.text.spelling;
 
 import java.text.MessageFormat;
 
@@ -22,6 +22,9 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
 
 /**
  * A {@link SpellingProblem} that adapts a {@link ISpellEvent}.
+ * <p>
+ * TODO: remove {@link ISpellEvent} notification mechanism
+ * </p>
  */
 public class JavaSpellingProblem extends SpellingProblem {
 	

@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.text.spelling.newapi;
+package org.eclipse.jdt.internal.ui.text.spelling;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
