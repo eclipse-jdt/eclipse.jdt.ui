@@ -398,7 +398,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 				String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_reference");
 				change.addTextEdit(editName, createTextChange(results[j]));
 			}
-			builder.addChange(change);
+			builder.add(change);
 			pm.worked(1);
 		}
 	}
@@ -408,7 +408,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fMethod.getCompilationUnit());
 		TextChange change= new CompilationUnitChange(name, cu);
 		addDeclarationUpdate(change);
-		builder.addChange(change);
+		builder.add(change);
 	}
 	
 	void addDeclarationUpdate(TextChange change) throws JavaModelException{

@@ -93,7 +93,7 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 			
 		//there can be only 1 affected resource - the cu that declares the renamed method
 		addDeclarationUpdate(change);
-		builder.addChange(change);
+		builder.add(change);
 		pm.worked(1);
 	}
 	

@@ -218,7 +218,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			SubProgressMonitor sub= new SubProgressMonitor(pm, 8);
 			sub.beginTask("", changes.length);
 			for (int i= 0; i < changes.length; i++) {
-				result.addChange(changes[i]);
+				result.add(changes[i]);
 				sub.worked(1);
 			}
 			sub.done();

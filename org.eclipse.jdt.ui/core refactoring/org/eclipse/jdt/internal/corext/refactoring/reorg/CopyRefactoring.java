@@ -140,9 +140,9 @@ public class CopyRefactoring extends ReorgRefactoring {
 		String newName= createNewName(res, project);
 		if (newName == null )
 			newName= res.getName();
-		result.addChange(new CopyResourceChange(res, project, newName));
+		result.add(new CopyResourceChange(res, project, newName));
 		if (javaProject != null)
-			result.addChange(new AddToClasspathChange(javaProject, newName));
+			result.add(new AddToClasspathChange(javaProject, newName));
 		return result;
 	}
 	

@@ -56,8 +56,8 @@ public class CreateFileChange extends Change {
 				IFile file= getOldFile();
 				if (file.exists()){
 					CompositeChange composite= new CompositeChange();
-					composite.addChange(new DeleteFileChange(file));
-					composite.addChange(new CreateFileChange(fPath, fSource));
+					composite.add(new DeleteFileChange(file));
+					composite.add(new CreateFileChange(fPath, fSource));
 					composite.perform(context, pm);
 					fUndoChange= composite.getUndoChange();
 				} else {

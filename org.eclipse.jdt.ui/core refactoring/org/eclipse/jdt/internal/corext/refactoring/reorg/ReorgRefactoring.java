@@ -185,7 +185,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 		try{
 			CompositeChange composite= new CompositeChange("reorganize elements", fElements.size());
 			for (Iterator iter= fElements.iterator(); iter.hasNext();){
-				composite.addChange(createChange(iter.next()));
+				composite.add(createChange(iter.next()));
 			}
 			return composite;
 		} finally{

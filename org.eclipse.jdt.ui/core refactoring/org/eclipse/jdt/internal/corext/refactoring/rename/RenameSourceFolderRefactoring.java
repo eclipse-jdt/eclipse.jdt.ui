@@ -128,9 +128,9 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 		pm.beginTask("", 1);
 		try{
 			CompositeChange composite= new CompositeChange("Rename source folder", 3);
-			composite.addChange(new AddToClasspathChange(fSourceFolder.getJavaProject(), fNewName));
-			composite.addChange(new RenameSourceFolderChange(fSourceFolder, fNewName));
-			composite.addChange(new DeleteFromClasspathChange(fSourceFolder));
+			composite.add(new AddToClasspathChange(fSourceFolder.getJavaProject(), fNewName));
+			composite.add(new RenameSourceFolderChange(fSourceFolder, fNewName));
+			composite.add(new DeleteFromClasspathChange(fSourceFolder));
 			return composite;
 		} finally{
 			pm.done();

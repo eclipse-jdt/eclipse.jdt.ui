@@ -616,7 +616,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			CompositeChange builder= new CompositeChange();
 			addOccurrences(new SubProgressMonitor(pm, 2), builder);
 			if (willRenameCU())
-				builder.addChange(new RenameResourceChange(getResource(fType), fNewName + ".java")); //$NON-NLS-1$
+				builder.add(new RenameResourceChange(getResource(fType), fNewName + ".java")); //$NON-NLS-1$
 			pm.worked(1);	
 			return builder;	
 		} catch (CoreException e){
@@ -659,10 +659,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		addTextMatches(manager, new SubProgressMonitor(pm, 1));
 
 		//putting it together
-		IChange[] changes= manager.getAllChanges();
-		for (int i= 0; i < changes.length; i++){
-			builder.addChange(changes[i]);
-		}
+		builder.addAll(manager.getAllChanges());
 	}
 	
 	private void addTypeDeclarationUpdate(TextChangeManager manager) throws CoreException{

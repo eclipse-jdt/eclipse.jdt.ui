@@ -75,7 +75,7 @@ public class MoveCuUpdateCreator {
 				if (pm.isCanceled())
 					throw new OperationCanceledException();
 				
-				composite.addChange(allChanges[i]);
+				composite.add(allChanges[i]);
 				pm.worked(1);
 			}
 			return composite;

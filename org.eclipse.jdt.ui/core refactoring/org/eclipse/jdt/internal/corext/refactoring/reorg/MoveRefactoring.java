@@ -223,7 +223,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 			if (fileMove instanceof ICompositeChange){
 				addAllChildren(composite, (ICompositeChange)fileMove);		
 			} else{
-				composite.addChange(fileMove);
+				composite.add(fileMove);
 			}	
 			return composite;
 		} finally{
@@ -232,10 +232,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 	}
 	
 	private static void addAllChildren(CompositeChange collector, ICompositeChange composite){
-		IChange[] children= composite.getChildren();
-		for (int i= 0; i < children.length; i++){
-			collector.addChange(children[i]);
-		}
+		collector.addAll(composite.getChildren());
 	}
 		
 	private ICompilationUnit[] collectCus(){
@@ -267,9 +264,9 @@ public class MoveRefactoring extends ReorgRefactoring {
 		IProject project= getDestinationForSourceFolders(getDestination());
 		IJavaProject javaProject= JavaCore.create(project);
 		CompositeChange result= new CompositeChange("move source folder", 2);
-		result.addChange(new MoveResourceChange(res, project));
+		result.add(new MoveResourceChange(res, project));
 		if (javaProject != null)
-			result.addChange(new AddToClasspathChange(javaProject, root.getElementName()));
+			result.add(new AddToClasspathChange(javaProject, root.getElementName()));
 		return result;
 	}
 

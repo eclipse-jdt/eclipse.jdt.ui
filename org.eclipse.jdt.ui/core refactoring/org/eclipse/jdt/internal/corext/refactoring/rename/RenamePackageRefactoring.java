@@ -320,7 +320,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			if (fUpdateReferences)
 				addOccurrences(new SubProgressMonitor(pm, 3), builder);
 				
-			builder.addChange(new RenamePackageChange(fPackage, fNewName));
+			builder.add(new RenamePackageChange(fPackage, fNewName));
 			pm.worked(1);
 			return builder;
 		} catch (CoreException e){
@@ -349,10 +349,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		addReferenceUpdates(manager, new SubProgressMonitor(pm, 1));
 		
 		//putting it together
-		IChange[] changes= manager.getAllChanges();
-		for (int i= 0; i < changes.length; i++){
-			builder.addChange(changes[i]);
-		}
+		builder.addAll(manager.getAllChanges());
 	}
 	
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{

@@ -117,7 +117,7 @@ public class DeleteRefactoring extends Refactoring {
 			prepareElementList();
 			CompositeChange composite= new CompositeChange();
 			for (Iterator iter= fElements.iterator(); iter.hasNext() ;){
-				composite.addChange(createDeleteChange(iter.next()));
+				composite.add(createDeleteChange(iter.next()));
 			}
 			if (composite.getChildren() == null)
 				return new NullChange();
@@ -257,7 +257,7 @@ public class DeleteRefactoring extends Refactoring {
 			
 		CompositeChange composite= new CompositeChange("Delete resources", members.length);
 		for (int i= 0; i < members.length; i++){
-			composite.addChange(createDeleteChange(members[i]));
+			composite.add(createDeleteChange(members[i]));
 		}
 		return composite;
 	}
@@ -265,9 +265,9 @@ public class DeleteRefactoring extends Refactoring {
 	private IChange createDeleteChange(IPackageFragmentRoot root) throws JavaModelException {
 		CompositeChange composite= new CompositeChange("Delete package fragment root", 2);
 
-		composite.addChange(new DeleteFromClasspathChange(root));
+		composite.add(new DeleteFromClasspathChange(root));
 		if (! ReorgUtils.isClasspathDelete(root))
-			composite.addChange(createDeleteChange(getResourceToDelete(root)));
+			composite.add(createDeleteChange(getResourceToDelete(root)));
 
 		return composite;
 	}

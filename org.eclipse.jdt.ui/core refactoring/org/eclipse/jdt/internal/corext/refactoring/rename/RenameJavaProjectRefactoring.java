@@ -157,7 +157,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 			CompositeChange composite= new CompositeChange("Renaming a Java Project");
 			if (fUpdateReferences)
 				addNewProjectToClasspaths(composite);
-			composite.addChange(new RenameJavaProjectChange(fProject, fNewName));
+			composite.add(new RenameJavaProjectChange(fProject, fNewName));
 			if (fUpdateReferences)
 				removeOldProjectFromClasspaths(composite);
 			return composite;
@@ -173,7 +173,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 			IProject project= referencing[i];
 			IJavaProject jp= JavaCore.create(project);
 			if (jp != null)
-				composite.addChange(new AddToClasspathChange(jp, newProjectPath));
+				composite.add(new AddToClasspathChange(jp, newProjectPath));
 		}
 	}
 	
@@ -184,7 +184,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 			IProject project= referencing[i];
 			IJavaProject jp= JavaCore.create(project);
 			if (jp != null)
-				composite.addChange(new DeleteFromClasspathChange(oldProjectPath, jp));
+				composite.add(new DeleteFromClasspathChange(oldProjectPath, jp));
 		}
 	}
 	

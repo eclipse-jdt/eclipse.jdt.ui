@@ -447,15 +447,15 @@ public class NLSRefactoring extends Refactoring {
 			CompositeChange builder= new CompositeChange();
 			
 			if (willModifySource())
-				builder.addChange(createSourceModification());
+				builder.add(createSourceModification());
 			pm.worked(1);
 			
 			if (willModifyPropertyFile())
-				builder.addChange(createPropertyFile());
+				builder.add(createPropertyFile());
 			pm.worked(1);
 			
 			if (willCreateAccessorClass())
-				builder.addChange(createAccessorCU());
+				builder.add(createAccessorCU());
 			pm.worked(1);
 			
 			return builder;
