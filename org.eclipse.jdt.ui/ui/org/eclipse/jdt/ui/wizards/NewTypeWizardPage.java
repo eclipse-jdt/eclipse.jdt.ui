@@ -1349,14 +1349,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 										
 				ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$ //$NON-NLS-2$
 				createdWorkingCopy= (ICompilationUnit) parentCU.getSharedWorkingCopy(null, JavaUI.getBufferFactory(), null);
-			
-				// use the compiler template a first time to read the imports
-				String content= CodeGeneration.getCompilationUnitContent(createdWorkingCopy, null, "", lineDelimiter); //$NON-NLS-1$
-				if (content != null) {
-					createdWorkingCopy.getBuffer().setContents(content);
-				}
 							
-				imports= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, true);
+				imports= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, false);
 				// add an import that will be removed again. Having this import solves 14661
 				imports.addImport(pack.getElementName(), getTypeName());
 				

@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,7 +18,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -153,67 +151,5 @@ public class RefactoringScopeFactory {
 				elements.add(root);
 		}
 		return elements;
-	}
-
-	public static IJavaSearchScope createFindNamesakePackagesScope(IPackageFragment packageFragment) throws JavaModelException {
-		return SearchEngine.createJavaSearchScope(getAllFindNamesakePackagesScopeElements(packageFragment.getJavaProject()), false);
-	}
-	
-	private static IJavaElement[] getAllFindNamesakePackagesScopeElements(IJavaProject project) throws JavaModelException {
-		Set allProjects= new HashSet();
-		allProjects.addAll(getReferencingProjects(project));
-		allProjects.addAll(getReferencedProjects(project));
-		Collection allRoots= getAllPackageFragmentRootsInProjects(allProjects);
-		return (IPackageFragmentRoot[]) allRoots.toArray(new IPackageFragmentRoot[allRoots.size()]);
-	}
-
-	/**
-	 * @param focus
-	 * @return Collection		containing IJavaProject objects
-	 * @throws JavaModelException
-	 */
-	private static Collection getReferencedProjects(IJavaProject focus) throws JavaModelException {
-		Set projects= new HashSet();
-
-		addReferencedProjects(focus, projects);
-		projects.add(focus);
-		return projects;
-	}
-
-	/**
-	 * Adds to <code>projects</code> IJavaProject objects for all projects
-	 * directly or indirectly referenced by focus.
-	 * 
-	 * @param focus
-	 * @param projects		IJavaProjects will be added to this set
-	 * @throws JavaModelException
-	 */
-	private static void addReferencedProjects(IJavaProject focus, Set projects) throws JavaModelException {
-		IClasspathEntry[] classpathEntries= focus.getResolvedClasspath(true);
-		for (int i= 0; i < classpathEntries.length; i++) {
-			IClasspathEntry entry= classpathEntries[i];
-			if (entry.getEntryKind() != IClasspathEntry.CPE_PROJECT)
-				continue;
-			IJavaProject candidate= focus.getJavaModel().getJavaProject(entry.getPath().lastSegment());
-			if (candidate == null || !candidate.exists() || projects.contains(candidate))
-				continue;
-			projects.add(candidate);
-			addReferencedProjects(candidate, projects);
-		}
-	}
-
-	/**
-	 * @param projects		a collection of IJavaProject
-	 * @return Collection	a collection of IPackageFragmentRoot, one element
-	 * for each packageFragmentRoot which lies within a project in
-	 * <code>projects</code>. Includes all kinds of IPackageFragmentRoots.
-	 */
-	private static Collection getAllPackageFragmentRootsInProjects(Collection projects) throws JavaModelException {
-		List result= new ArrayList();
-		for (Iterator it= projects.iterator(); it.hasNext();) {
-			IJavaProject project= (IJavaProject) it.next();
-			result.addAll(Arrays.asList(project.getAllPackageFragmentRoots()));
-		}
-		return result;
 	}
 }
