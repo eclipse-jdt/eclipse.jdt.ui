@@ -4,7 +4,7 @@ class A{
 		int k;
 		private final int u;
 
-		public MyA(int u) {
+		public Inner(int u) {
 			this.u = u;
 			k= u;
 		}

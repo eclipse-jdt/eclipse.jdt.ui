@@ -4,8 +4,8 @@ class A{
 		int k;
 		private final int u;
 
-		public Inner(int s, int u) {
-			super(s);
+		public Inner(int x, int u) {
+			super(x);
 			this.u = u;
 			k= u;
 		}

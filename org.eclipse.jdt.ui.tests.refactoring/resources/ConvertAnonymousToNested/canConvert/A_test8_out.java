@@ -1,13 +1,13 @@
 package p;
-//private, static, final
+//private, nonstatic, final
 class A{
 	private final class Inner extends A {
-		private Inner(int i){
+		private Inner(int i) {
 			super(i);
 		}
 		void f(){
 			x();
-		}		
+		}
 	}
 	A(int i){
 	}
