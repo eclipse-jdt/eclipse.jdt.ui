@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -62,17 +64,12 @@ public final class CopyRefactoring extends Refactoring{
 		fReorgQueries= queries;
 	}
 
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1); //$NON-NLS-1$
-		try {
-			RefactoringStatus result= new RefactoringStatus();
-			result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fCopyPolicy.getResources()))));
-			IResource[] javaResources= ReorgUtils.getResources(fCopyPolicy.getJavaElements());
-			result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(javaResources))));
-			return result;
-		} finally {
-			pm.done();
-		}
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
+		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fCopyPolicy.getResources()))));
+		IResource[] javaResources= ReorgUtils.getResources(fCopyPolicy.getJavaElements());
+		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(javaResources))));
+		return result;
 	}
 
 	public Object getCommonParentForInputElements(){
@@ -95,7 +92,7 @@ public final class CopyRefactoring extends Refactoring{
 		return fCopyPolicy.setDestination(destination);
 	}
 
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fNewNameQueries, "Missing new name queries"); //$NON-NLS-1$
 		Assert.isNotNull(fReorgQueries, "Missing reorg queries"); //$NON-NLS-1$
 		return fCopyPolicy.checkInput(pm, fReorgQueries);
@@ -104,7 +101,7 @@ public final class CopyRefactoring extends Refactoring{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fNewNameQueries);
 		Assert.isTrue(fCopyPolicy.getJavaElementDestination() == null || fCopyPolicy.getResourceDestination() == null);
 		Assert.isTrue(fCopyPolicy.getJavaElementDestination() != null || fCopyPolicy.getResourceDestination() != null);		

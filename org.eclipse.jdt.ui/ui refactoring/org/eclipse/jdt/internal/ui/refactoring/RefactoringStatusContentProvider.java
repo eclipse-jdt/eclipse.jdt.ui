@@ -24,7 +24,7 @@ public class RefactoringStatusContentProvider implements IStructuredContentProvi
 		}
 
 		public Object[] getElements(Object obj) {
-			return ((RefactoringStatus)obj).getEntries().toArray();
+			return ((RefactoringStatus)obj).getEntries();
 		}
 }
 

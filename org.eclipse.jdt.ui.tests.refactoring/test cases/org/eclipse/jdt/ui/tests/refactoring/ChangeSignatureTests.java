@@ -282,7 +282,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
-		assertEquals("Severity:" + result.getFirstMessage(result.getSeverity()), expectedSeverity, result.getSeverity());
+		assertEquals("Severity:" + result.getMessageMatchingSeverity(result.getSeverity()), expectedSeverity, result.getSeverity());
 	}
 	
 	private void helperDoAllFail(String methodName, 
@@ -306,7 +306,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 			ref.setVisibility(newVisibility);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);	
-		assertEquals("Severity:" + result.getFirstMessage(result.getSeverity()), expectedSeverity, result.getSeverity());		
+		assertEquals("Severity:" + result.getMessageMatchingSeverity(result.getSeverity()), expectedSeverity, result.getSeverity());		
 	}
 	
 	private void helperException(String[] signature, String[] removeExceptions, String[] addExceptions) throws Exception {
@@ -315,13 +315,13 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
 		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
-
+	
 		// from RefactoringTest#performRefactoring():
 		RefactoringStatus status= ref.checkActivation(new NullProgressMonitor());
 		assertTrue("checkActivation was supposed to pass", status.isOK());
-
+	
 		mangleExceptions(ref.getExceptionInfos(), removeExceptions, addExceptions, method.getCompilationUnit());
-
+	
 		status= ref.checkInput(new NullProgressMonitor());
 		assertTrue("checkInput was supposed to pass", status.isOK());
 		IChange change= ref.createChange(new NullProgressMonitor());

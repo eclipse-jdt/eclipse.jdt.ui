@@ -3944,7 +3944,7 @@
          </enablement>
       </statusContextViewer>
       <statusContextViewer
-            class="org.eclipse.jdt.internal.ui.refactoring.TextStatusContextViewer"
+            class="org.eclipse.jdt.internal.ui.refactoring.FileStatusContextViewer"
             id="org.eclipse.jdt.ui.fileStatusContextViewer">
          <enablement>
             <test

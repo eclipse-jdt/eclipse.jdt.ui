@@ -231,7 +231,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				RefactoringStatus nameCheck= getChangeMethodSignatureRefactoring().checkSignature();
 				if (nameCheck.hasFatalError()){
 					if (displayErrorMessage)
-						setErrorMessage(nameCheck.getFirstMessage(RefactoringStatus.FATAL));
+						setErrorMessage(nameCheck.getMessageMatchingSeverity(RefactoringStatus.FATAL));
 					setPageComplete(false);
 				} else {
 					setErrorMessage(null);	

@@ -121,28 +121,14 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-		try {
-			result.merge(fProcessor.checkActivation());
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		}
-		try {
-			fElementParticipants= RenameExtensionManager.getParticipants(
-				fProcessor, fProcessor.getElements());
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		}		
+		result.merge(fProcessor.checkActivation());
+		fElementParticipants= RenameExtensionManager.getParticipants(
+			fProcessor, fProcessor.getElements());		
 		for (int i= 0; i < fElementParticipants.length; i++) {
 			IRenameParticipant participant= fElementParticipants[i];
-			try {
-				result.merge(participant.checkActivation());
-			} catch (JavaModelException e) {
-				throw e;
-			} catch (CoreException e) {
-				throw new JavaModelException(e);
-			}
+			result.merge(participant.checkActivation());
 		}
 		return result;
 	}
@@ -150,36 +136,30 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		
-		try {
-			initParticipants();
-			pm.beginTask("", 2 + fElementParticipants.length + fDerivedParticipants.length + fResourceParticipants.length); //$NON-NLS-1$
+		initParticipants();
+		pm.beginTask("", 2 + fElementParticipants.length + fDerivedParticipants.length + fResourceParticipants.length); //$NON-NLS-1$
+		
+		result.merge(fProcessor.checkInput(new SubProgressMonitor(pm, 1)));
+		if (result.hasFatalError())
+			return result;
 			
-			result.merge(fProcessor.checkInput(new SubProgressMonitor(pm, 1)));
-			if (result.hasFatalError())
-				return result;
-				
-			
-			for (int i= 0; i < fElementParticipants.length; i++) {
-				IRenameParticipant participant= fElementParticipants[i];
-				fProcessor.propagateDataTo(participant);
-				result.merge(participant.checkInput(new SubProgressMonitor(pm, fElementParticipants.length)));
-			}
-			for (int i= 0; i < fDerivedParticipants.length; i++) {
-				IRenameParticipant participant= fDerivedParticipants[i];
-				fProcessor.propagateDataTo(participant);
-				result.merge(participant.checkInput(new SubProgressMonitor(pm, fDerivedParticipants.length)));
-			}
-			for (int i= 0; i < fResourceParticipants.length; i++) {
-				IRefactoringParticipant participant= fResourceParticipants[i];
-				result.merge(participant.checkInput(new SubProgressMonitor(pm, fResourceParticipants.length)));
-			}
-		} catch (JavaModelException e) {
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
+		
+		for (int i= 0; i < fElementParticipants.length; i++) {
+			IRenameParticipant participant= fElementParticipants[i];
+			fProcessor.propagateDataTo(participant);
+			result.merge(participant.checkInput(new SubProgressMonitor(pm, fElementParticipants.length)));
+		}
+		for (int i= 0; i < fDerivedParticipants.length; i++) {
+			IRenameParticipant participant= fDerivedParticipants[i];
+			fProcessor.propagateDataTo(participant);
+			result.merge(participant.checkInput(new SubProgressMonitor(pm, fDerivedParticipants.length)));
+		}
+		for (int i= 0; i < fResourceParticipants.length; i++) {
+			IRefactoringParticipant participant= fResourceParticipants[i];
+			result.merge(participant.checkInput(new SubProgressMonitor(pm, fResourceParticipants.length)));
 		}
 		return result;		
 	}
@@ -187,30 +167,24 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", fElementParticipants.length + fDerivedParticipants.length + fResourceParticipants.length + 1); //$NON-NLS-1$
 		CompositeChange result= new CompositeChange();
-		try {
-			result.add(fProcessor.createChange(new SubProgressMonitor(pm, 1)));
-			
-			for (int i= 0; i < fElementParticipants.length; i++) {
-				IRenameParticipant participant= fElementParticipants[i];
-				fProcessor.propagateDataTo(participant);
-				result.add(participant.createChange(new SubProgressMonitor(pm, fElementParticipants.length)));
-			}
-			for (int i= 0; i < fDerivedParticipants.length; i++) {
-				IRenameParticipant participant= fDerivedParticipants[i];
-				fProcessor.propagateDataTo(participant);
-				result.add(participant.createChange(new SubProgressMonitor(pm, fDerivedParticipants.length)));
-			}
-			for (int i= 0; i < fResourceParticipants.length; i++) {
-				IRefactoringParticipant participant= fResourceParticipants[i];
-				result.add(participant.createChange(new SubProgressMonitor(pm, fResourceParticipants.length)));
-			}
-		} catch (JavaModelException e) {
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
+		result.add(fProcessor.createChange(new SubProgressMonitor(pm, 1)));
+		
+		for (int i= 0; i < fElementParticipants.length; i++) {
+			IRenameParticipant participant= fElementParticipants[i];
+			fProcessor.propagateDataTo(participant);
+			result.add(participant.createChange(new SubProgressMonitor(pm, fElementParticipants.length)));
+		}
+		for (int i= 0; i < fDerivedParticipants.length; i++) {
+			IRenameParticipant participant= fDerivedParticipants[i];
+			fProcessor.propagateDataTo(participant);
+			result.add(participant.createChange(new SubProgressMonitor(pm, fDerivedParticipants.length)));
+		}
+		for (int i= 0; i < fResourceParticipants.length; i++) {
+			IRefactoringParticipant participant= fResourceParticipants[i];
+			result.add(participant.createChange(new SubProgressMonitor(pm, fResourceParticipants.length)));
 		}
 		return result;		
 	}

@@ -242,7 +242,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fType);
 		if (orig == null || ! orig.exists()){
 			
@@ -257,9 +257,9 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2);//$NON-NLS-1$
-		try{
+		try {
 			RefactoringStatus result= new RefactoringStatus();		
 
 			if (isInputTypeStatic())
@@ -276,10 +276,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
@@ -329,18 +325,14 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.creating_preview"), 1); //$NON-NLS-1$
 			CompositeChange builder= new CompositeChange(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.move_to_Top")); //$NON-NLS-1$
 			builder.addAll(fChangeManager.getAllChanges());
 			builder.add(createCompilationUnitForMovedType(new SubProgressMonitor(pm, 1)));
 			return builder;
-		} catch (JavaModelException e){
-			throw e;	
-		} catch(CoreException e){
-			throw new JavaModelException(e);
-		} finally{
+		} finally {
 			fImportManager.clear();	
 		}
 	}

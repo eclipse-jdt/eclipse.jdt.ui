@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -107,13 +108,13 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("IntroduceParameterRefactoring.name");
+		return RefactoringCoreMessages.getString("IntroduceParameterRefactoring.name"); //$NON-NLS-1$
 	}
 
-//--- checkActivation
-	
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		try{
+	//--- checkActivation
+		
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask("", 7); //$NON-NLS-1$
 			
 			if (! fSourceCU.isStructureKnown())		
@@ -130,7 +131,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 			initializeExcludedParameterNames();
 			return result;
-		} finally{
+		} finally {
 			pm.done();
 		}	
 	}
@@ -149,33 +150,25 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
-		//TODO: no support for selecting a local variable declaration...
-		try{
-			pm.beginTask("", 7); //$NON-NLS-1$
-	
-			if (fSelectedExpression == null){
-				String message= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.select");//$NON-NLS-1$
-				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fSource.root, message);
-			}	
-			pm.worked(1);
-			
-			fMethodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
-			if (fMethodDeclaration == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
-			pm.worked(1);
-			//TODO: check for rippleMethods -> find matching fragments, consider callers of all rippleMethods
-			
-			RefactoringStatus result= new RefactoringStatus();
-			result.merge(checkExpression());
-			if (result.hasFatalError())
-				return result;
-			pm.worked(1);
-			
-			result.merge(checkExpressionBinding());
-			if (result.hasFatalError())
-				return result;				
-			pm.worked(1);
-			
+		if (fSelectedExpression == null){
+			String message= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.select");//$NON-NLS-1$
+			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fSource.root, message);
+		}	
+		
+		fMethodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
+		if (fMethodDeclaration == null)
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
+		//TODO: check for rippleMethods -> find matching fragments, consider callers of all rippleMethods
+		
+		RefactoringStatus result= new RefactoringStatus();
+		result.merge(checkExpression());
+		if (result.hasFatalError())
+			return result;
+		
+		result.merge(checkExpressionBinding());
+		if (result.hasFatalError())
+			return result;				
+		
 //			if (isUsedInForInitializerOrUpdater(getSelectedExpression().getAssociatedExpression()))
 //				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.for_initializer_updater")); //$NON-NLS-1$
 //			pm.worked(1);				
@@ -183,11 +176,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 //			if (isReferringToLocalVariableFromFor(getSelectedExpression().getAssociatedExpression()))
 //				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.refers_to_for_variable")); //$NON-NLS-1$
 //			pm.worked(1);
-			
-			return result;
-		} finally{
-			pm.done();
-		}		
+		
+		return result;		
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
@@ -227,10 +217,14 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		throws JavaModelException
 	{
 		switch(Checks.checkExpressionIsRValue(fSelectedExpression)) {
-			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("IntroduceParameterRefactoring.select"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE); //$NON-NLS-1$
-			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("IntroduceParameterRefactoring.no_void"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID); //$NON-NLS-1$
-			case Checks.IS_RVALUE:			return new RefactoringStatus();
-			default:						Assert.isTrue(false); return null;
+			case Checks.NOT_RVALUE_MISC:
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("IntroduceParameterRefactoring.select"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null); //$NON-NLS-1$
+			case Checks.NOT_RVALUE_VOID:
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("IntroduceParameterRefactoring.no_void"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null); //$NON-NLS-1$
+			case Checks.IS_RVALUE:
+				return new RefactoringStatus();
+			default:
+				Assert.isTrue(false); return null;
 		}		
 	}	
 
@@ -314,7 +308,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	
 //--- checkInput
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.preview"), 5);
 		RefactoringStatus result= checkExcludedParameterNames();
 		if (result.hasFatalError())
@@ -323,28 +317,24 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		// TODO: check for name clashes in ripple methods, ...
 		
 		fChange= new CompositeChange(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.introduce_parameter")); //$NON-NLS-1$
-		try {
-			fSource.reset(fSettings);
-			changeSource();
-			pm.worked(1);
-			
-			result.merge(changeReferences(new SubProgressMonitor(pm, 3)));
-			
-			fChange.add(fSource.createChange()); //ASTData#createChange() should add a GroupDescription "Update imports"
+		fSource.reset(fSettings);
+		changeSource();
+		pm.worked(1);
+		
+		result.merge(changeReferences(new SubProgressMonitor(pm, 3)));
+		
+		fChange.add(fSource.createChange()); //ASTData#createChange() should add a GroupDescription "Update imports"
 
-			HashSet cus= new HashSet();
-			cus.add(fSource.unit);
-			cus.addAll(Arrays.asList(fAffectedCUs));
-			result.merge(
-				Checks.validateModifiesFiles(ResourceUtil.getFiles(
-					(ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]))));
-			if (result.hasFatalError())
-				return result;
+		HashSet cus= new HashSet();
+		cus.add(fSource.unit);
+		cus.addAll(Arrays.asList(fAffectedCUs));
+		result.merge(
+			Checks.validateModifiesFiles(ResourceUtil.getFiles(
+				(ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]))));
+		if (result.hasFatalError())
+			return result;
 
-			pm.worked(1);
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		}
+		pm.worked(1);
 
 		return result;
 	}
@@ -421,7 +411,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return result;
 	}
 	
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.done();
 		return fChange;
 	}

@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
@@ -71,7 +71,7 @@ public class RefactoringAnalyzeUtil {
 	public static RefactoringStatus reportProblemNodes(String modifiedWorkingCopySource, SimpleName[] problemNodes){
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problemNodes.length; i++) {
-			Context context= new JavaStringStatusContext(modifiedWorkingCopySource, new SourceRange(problemNodes[i]));
+			RefactoringStatusContext context= new JavaStringStatusContext(modifiedWorkingCopySource, new SourceRange(problemNodes[i]));
 			result.addError(RefactoringCoreMessages.getFormattedString("RefactoringAnalyzeUtil.name_collision", problemNodes[i].getIdentifier()), context); //$NON-NLS-1$
 		}
 		return result;

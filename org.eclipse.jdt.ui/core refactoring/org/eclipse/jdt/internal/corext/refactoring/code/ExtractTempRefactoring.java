@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -230,7 +231,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		return Character.toLowerCase(firstAfterPrefix) + methodName.substring(prefix.length() + 1);
 	}
 	
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask("", 6); //$NON-NLS-1$
 			
@@ -250,7 +251,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
-		try{
+		try {
 			pm.beginTask("", 8); //$NON-NLS-1$
 	
 			IExpressionFragment selectedExpression= getSelectedExpression();
@@ -272,7 +273,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (selectedExpression.getAssociatedNode() instanceof Name && selectedExpression.getAssociatedNode().getParent() instanceof ClassInstanceCreation)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.name_in_new")); //$NON-NLS-1$
 			pm.worked(1);				
-
+	
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkExpression());
 			if (result.hasFatalError())
@@ -287,13 +288,13 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (isUsedInForInitializerOrUpdater(getSelectedExpression().getAssociatedExpression()))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.for_initializer_updater")); //$NON-NLS-1$
 			pm.worked(1);				
-
+	
 			if (isReferringToLocalVariableFromFor(getSelectedExpression().getAssociatedExpression()))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.refers_to_for_variable")); //$NON-NLS-1$
 			pm.worked(1);
 			
 			return result;
-		} finally{
+		} finally {
 			pm.done();
 		}		
 	}
@@ -307,10 +308,14 @@ public class ExtractTempRefactoring extends Refactoring {
 		throws JavaModelException
 	{
 		switch(Checks.checkExpressionIsRValue(getSelectedExpression().getAssociatedExpression())) {
-			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE); //$NON-NLS-1$
-			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.no_void"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID); //$NON-NLS-1$
-			case Checks.IS_RVALUE:			return new RefactoringStatus();
-			default:						Assert.isTrue(false); return null;
+			case Checks.NOT_RVALUE_MISC:	
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null); //$NON-NLS-1$
+			case Checks.NOT_RVALUE_VOID:
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.no_void"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null); //$NON-NLS-1$
+			case Checks.IS_RVALUE:
+				return new RefactoringStatus();
+			default:
+				Assert.isTrue(false); return null;
 		}		
 	}	
 	
@@ -349,9 +354,9 @@ public class ExtractTempRefactoring extends Refactoring {
 		fTempName= newName;
 	}
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		TextBuffer buffer= null;
-		try{
+		try {
 			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
@@ -369,10 +374,6 @@ public class ExtractTempRefactoring extends Refactoring {
                 	result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
             }
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);	
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);
@@ -472,9 +473,9 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 	}
 
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		TextBuffer buffer= null;		
-		try{
+		try {
 			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.preview"), 3);	 //$NON-NLS-1$
 			TextChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractTempRefactoring.extract_temp"), fCu); //$NON-NLS-1$
@@ -486,11 +487,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			pm.worked(1);
 			
 			return change;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);	
-		} finally{
+		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);
 			pm.done();

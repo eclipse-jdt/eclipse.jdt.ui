@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
@@ -223,7 +223,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		reset();
 	}
 	
-	protected void invalidSelection(String message, Context context) {
+	protected void invalidSelection(String message, RefactoringStatusContext context) {
 		fStatus.addFatalError(message, context);
 		reset();
 	}

@@ -12,13 +12,12 @@ package org.eclipse.jdt.internal.corext.refactoring.tagging;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 /**
  * Represents a refactoring that renames an <code>IJavaElement</code>.
  */
-public interface IRenameRefactoring extends IRefactoring {
+public interface IRenameRefactoring {
 	
 	/**
 	 * Sets new name for the entity that this refactoring is working on.

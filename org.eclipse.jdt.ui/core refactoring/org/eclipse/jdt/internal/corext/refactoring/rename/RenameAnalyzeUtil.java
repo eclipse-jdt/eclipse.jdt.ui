@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
@@ -50,7 +50,7 @@ class RenameAnalyzeUtil {
 				SearchResult searchResult= searchResults[j];
 				if (! RenameAnalyzeUtil.existsInNewOccurrences(searchResult, newOccurrences, manager)){
 					ISourceRange range= new SourceRange(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart());
-					Context context= JavaStatusContext.create(cunit, range); //XXX
+					RefactoringStatusContext context= JavaStatusContext.create(cunit, range); //XXX
 					String message= RefactoringCoreMessages.getFormattedString("RenameAnalyzeUtil.shadows", cunit.getElementName());	//$NON-NLS-1$
 					result.addError(message , context);
 				}	

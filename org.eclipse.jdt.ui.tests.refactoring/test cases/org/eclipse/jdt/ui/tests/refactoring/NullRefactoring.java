@@ -10,35 +10,42 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-
-
 
 /**
  * useful for tests
  */
-public class NullRefactoring implements IRefactoring {
+public class NullRefactoring extends Refactoring {
 	
-	public IChange createChange(IProgressMonitor pm){
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);
 		pm.worked(1);
 		pm.done();
 		return new NullChange("NullRefactoring");
 	}
 
-	public RefactoringStatus checkPreconditions(IProgressMonitor pm){
+
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+		pm.beginTask("", 1);
+		pm.worked(1);
+		pm.done();
+		return new RefactoringStatus();
+	}
+
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);
 		pm.worked(1);
 		pm.done();
 		return new RefactoringStatus();
 	}
 	
-	public String getName(){
+	public String getName() {
 		return "Null Refactoring";
 	}
 }

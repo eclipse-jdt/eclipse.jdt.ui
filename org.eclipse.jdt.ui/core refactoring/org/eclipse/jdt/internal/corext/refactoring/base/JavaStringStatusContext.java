@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.corext.Assert;
  * with detailed information about an error detected in Java source code represented
  * by a string.
  */
-public class JavaStringStatusContext extends Context {
+public class JavaStringStatusContext extends RefactoringStatusContext {
 	
 	private String fSource;
 	private ISourceRange fSourceRange;
@@ -43,5 +43,12 @@ public class JavaStringStatusContext extends Context {
 
 	public ISourceRange getSourceRange() {
 		return fSourceRange;
+	}
+	
+	/* (non-Javadoc)
+	 * @see RefactoringStatusContext#getCorrespondingElement()
+	 */
+	public Object getCorrespondingElement() {
+		return null;
 	}
 }

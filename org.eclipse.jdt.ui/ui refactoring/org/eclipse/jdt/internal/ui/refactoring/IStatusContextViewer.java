@@ -13,10 +13,23 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 
 /**
- * A special viewer to present a context for a <code>RefactoringStatusEntry</code>.
+ * A special viewer to present the context of a <code>RefactoringStatusEntry</code>.
+ * The life cycle of a status context viewer is as follows: first <code>createControl
+ * </code> is called, followed by an arbitray number of calls to <code>getControl</code>
+ * and <code>setInput</code>.
+ * <p>
+ * A status viewer is responsible to present a corresponding label for the viewer.
+ * To achieve a consistent layout it is recommened to surround the SWT control
+ * actually presenting the status inside a <code>ViewForm</code>.
+ * 
+ * TODO some words about the extension point this interface is connected to.
+ * 
+ * @see org.eclipse.swt.custom.ViewForm
+ * 
+ * @since 3.0
  */
 public interface IStatusContextViewer {
 	
@@ -43,6 +56,6 @@ public interface IStatusContextViewer {
 	 * 
 	 * @param input the input element
 	 */
-	public void setInput(Context input);
+	public void setInput(RefactoringStatusContext input);	
 }
 

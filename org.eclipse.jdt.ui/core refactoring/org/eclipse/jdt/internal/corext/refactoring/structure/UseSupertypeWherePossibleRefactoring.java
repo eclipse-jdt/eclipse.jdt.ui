@@ -74,7 +74,7 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fInputType);
 		if (orig == null || ! orig.exists()){
 			String[] keys= {fInputType.getCompilationUnit().getElementName()};
@@ -106,9 +106,9 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);//$NON-NLS-1$
-		try{
+		try {
 			RefactoringStatus result= new RefactoringStatus();		
 			
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
@@ -116,10 +116,6 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 				return result;
 			result.merge(validateModifiesFiles());
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
@@ -136,11 +132,11 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
-		try{
+		try {
 			return new CompositeChange(RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.name"), fChangeManager.getAllChanges());//$NON-NLS-1$
-		} finally{
+		} finally {
 			pm.done();
 		}
 	}

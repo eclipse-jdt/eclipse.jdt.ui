@@ -139,7 +139,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		CompilationUnit rootNode= AST.parseCompilationUnit(fCUnit, true);
 		return checkActivationBasics(rootNode, pm);
 	}
@@ -147,14 +147,14 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		return Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit}));
 	}
 
 	/* non Java-doc
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		final String NN= ""; //$NON-NLS-1$
 		TextBuffer buffer= null;
 		try {
@@ -207,10 +207,6 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			root.addChild(change);
 			result.addGroupDescription(new GroupDescription(NN, new TextEdit[] {change} ));
 			return result;
-		} catch (JavaModelException e) {
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
 		} finally {
 			fRewriter.removeModifications();
 			if (buffer != null)

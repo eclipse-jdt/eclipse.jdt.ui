@@ -285,7 +285,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(CUs[0], selection.getOffset(), selection.getLength(), 
 												   JavaPreferencesSettings.getCodeGenerationSettings());
 
-		RefactoringStatus	activationResult= ref.checkActivation(new NullProgressMonitor());	
+		RefactoringStatus	activationResult= ref.checkActivation(new NullProgressMonitor());
 
 		assertTrue("activation was supposed to be successful", activationResult.isOK());																
 

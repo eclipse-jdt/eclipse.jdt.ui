@@ -73,6 +73,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -83,7 +84,7 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -298,7 +299,7 @@ class InstanceMethodMover {
 			Assert.isTrue(inlineDelegator || ! removeDelegator);
 		
 			if( ! isReceiverModelClassAvailable())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.to_local_localunsupported"), null, null, RefactoringStatusCodes.CANNOT_MOVE_TO_LOCAL); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.to_local_localunsupported"), null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_MOVE_TO_LOCAL, null); //$NON-NLS-1$
 
 			RefactoringStatus result= new RefactoringStatus();
 			checkParameterNames(result, method, originalReceiverParameterName);
@@ -312,10 +313,10 @@ class InstanceMethodMover {
 			for (Iterator iter= method.getMethodDeclaration().parameters().iterator(); iter.hasNext();) {
 				SingleVariableDeclaration param= (SingleVariableDeclaration) iter.next();
 				if (originalReceiverParameterName.equals(param.getName().getIdentifier())){
-					Context context= JavaStatusContext.create(method.getDeclaringCU(), param);
+					RefactoringStatusContext context= JavaStatusContext.create(method.getDeclaringCU(), param);
 					String msg= RefactoringCoreMessages.getFormattedString("InstanceMethodMover.parameter_name_used", new String[]{originalReceiverParameterName}); //$NON-NLS-1$
 					int code= RefactoringStatusCodes.PARAM_NAME_ALREADY_USED;
-					RefactoringStatusEntry entry= new RefactoringStatusEntry(msg, RefactoringStatus.ERROR, context, null, code); 
+					RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.ERROR, msg, context, Corext.getPluginId(), code, null); 
 					result.addEntry(entry);
 					return; //cannot conflict with more than 1
 				}	
@@ -1186,24 +1187,24 @@ class InstanceMethodMover {
 		
 		public RefactoringStatus checkCanBeMoved() {
 			if(isStatic())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_static_methods"), null, null, RefactoringStatusCodes.CANNOT_MOVE_STATIC); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_static_methods"), null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_MOVE_STATIC, null); //$NON-NLS-1$
 			if(isAbstract())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.single_implementation"), null, null, RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION);				 //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.single_implementation"), null, Corext.getPluginId(), RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION, null);				 //$NON-NLS-1$
 			if(isNative())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_native_methods"), null, null, RefactoringStatusCodes.CANNOT_MOVE_NATIVE); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_native_methods"), null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_MOVE_NATIVE, null); //$NON-NLS-1$
 			if(isSynchronized())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_synchronized_methods"), null, null, RefactoringStatusCodes.CANNOT_MOVE_SYNCHRONIZED);	 //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_synchronized_methods"), null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_MOVE_SYNCHRONIZED, null);	 //$NON-NLS-1$
 			if(isConstructor())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_constructors"), null, null, RefactoringStatusCodes.CANNOT_MOVE_CONSTRUCTOR);	 //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_constructors"), null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_MOVE_CONSTRUCTOR, null);	 //$NON-NLS-1$
 			if(hasSuperReferences())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.uses_super"), null, null, RefactoringStatusCodes.SUPER_REFERENCES_NOT_ALLOWED); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.uses_super"), null, Corext.getPluginId(), RefactoringStatusCodes.SUPER_REFERENCES_NOT_ALLOWED, null); //$NON-NLS-1$
 			if(refersToEnclosingInstances())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.refers_enclosing_instances"), null, null, RefactoringStatusCodes.ENCLOSING_INSTANCE_REFERENCES_NOT_ALLOWED); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.refers_enclosing_instances"), null, Corext.getPluginId(), RefactoringStatusCodes.ENCLOSING_INSTANCE_REFERENCES_NOT_ALLOWED, null); //$NON-NLS-1$
 			if(mayBeDirectlyRecursive())				
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.potentially_recursive"), null, null, RefactoringStatusCodes.CANNOT_MOVE_RECURSIVE); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.potentially_recursive"), null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_MOVE_RECURSIVE, null); //$NON-NLS-1$
 		
 			if (getPossibleNewReceivers().length == 0)
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.cannot_be_moved"), null, null, RefactoringStatusCodes.NO_NEW_RECEIVERS); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.cannot_be_moved"), null, Corext.getPluginId(), RefactoringStatusCodes.NO_NEW_RECEIVERS, null); //$NON-NLS-1$
 			return new RefactoringStatus();
 		}
 	
@@ -1896,13 +1897,8 @@ class InstanceMethodMover {
 		return modelClass;
 	}
 
-	public RefactoringStatus checkInitialState(IProgressMonitor pm) {
-		try{
-			pm.beginTask("", 1); //$NON-NLS-1$
-			return fMethodToMove.checkCanBeMoved();
-		}finally{
-			pm.done();
-		}
+	public RefactoringStatus checkInitialState() {
+		return fMethodToMove.checkCanBeMoved();
 	}
 
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {

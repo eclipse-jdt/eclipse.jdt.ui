@@ -8,16 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.base;
+package org.eclipse.jdt.internal.corext;
 
-import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * A <code>Context<code> can be used to annotate a <code>RefactoringStatusEntry</code>with 
- * additional information presentable in the UI.
+ * Facade for JavaPlugin to not conterminate corext classes.
  */
-public class Context {
-	public IAdaptable getCorrespondingElement() {
-		return null;
+public class Corext {
+
+	public static String getPluginId() {
+		return JavaPlugin.getPluginId();
 	}
 }

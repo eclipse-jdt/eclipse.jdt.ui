@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 
@@ -53,7 +53,7 @@ public class ExtensionPointTests extends TestCase {
 			"A.java", 
 			"package test; class A { }",
 			true, null);
-		Context context= JavaStatusContext.create(unit);
+		RefactoringStatusContext context= JavaStatusContext.create(unit);
 		StatusContextViewerDescriptor descriptor= StatusContextViewerDescriptor.get(context);
 		assertNotNull(descriptor);
 		assertNotNull(descriptor.createViewer());

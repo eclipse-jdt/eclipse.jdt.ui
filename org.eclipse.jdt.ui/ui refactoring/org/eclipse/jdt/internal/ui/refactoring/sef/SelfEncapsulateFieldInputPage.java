@@ -223,7 +223,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		String message= null;
 		boolean valid= true;
 		if (status.hasFatalError()) {
-			message= status.getFirstMessage(RefactoringStatus.FATAL);
+			message= status.getMessageMatchingSeverity(RefactoringStatus.FATAL);
 			valid= false;
 		}
 		setErrorMessage(message);

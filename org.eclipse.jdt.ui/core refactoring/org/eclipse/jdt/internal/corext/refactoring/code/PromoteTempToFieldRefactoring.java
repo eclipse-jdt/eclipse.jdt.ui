@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -240,39 +240,34 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 	
     /*
-     * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
-     */
-    public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-    	try{
-    		
-    		RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
-			if (result.hasFatalError())
-				return result;
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
+		if (result.hasFatalError())
+			return result;
 
-    		initAST();
+		initAST();
 
-			if (fTempDeclarationNode == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.select_declaration")); //$NON-NLS-1$
-			
-			if (! Checks.isDeclaredIn(fTempDeclarationNode, MethodDeclaration.class))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.only_declared_in_methods")); //$NON-NLS-1$
-			
-			if (isMethodParameter())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.method_parameters")); //$NON-NLS-1$
+		if (fTempDeclarationNode == null)
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.select_declaration")); //$NON-NLS-1$
+		
+		if (! Checks.isDeclaredIn(fTempDeclarationNode, MethodDeclaration.class))
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.only_declared_in_methods")); //$NON-NLS-1$
+		
+		if (isMethodParameter())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.method_parameters")); //$NON-NLS-1$
 
-			if (isTempAnExceptionInCatchBlock())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.exceptions")); //$NON-NLS-1$
-	
-			result.merge(checkTempTypeForLocalTypeUsage());
-			if (result.hasFatalError())
-		        return result;
-		     
-		    initializeDefaults();
-	        return result;
-		} finally {
-    		pm.done();
-    	}
-    }
+		if (isTempAnExceptionInCatchBlock())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.exceptions")); //$NON-NLS-1$
+
+		result.merge(checkTempTypeForLocalTypeUsage());
+		if (result.hasFatalError())
+		    return result;
+		 
+		initializeDefaults();
+		return result;
+	}
     
     private void initializeDefaults() {
         fVisibility= Modifier.PRIVATE;
@@ -371,7 +366,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+    public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
     	try{
 	        RefactoringStatus result= new RefactoringStatus();
 	        
@@ -422,7 +417,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
                 VariableDeclarationFragment fragment= fragments[j];
                 if (fFieldName.equals(fragment.getName().getIdentifier())){
                 	//cannot conflict with more than 1 name
-                	Context context= JavaStatusContext.create(fCu, fragment);
+                	RefactoringStatusContext context= JavaStatusContext.create(fCu, fragment);
                 	return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.Name_conflict_with_field"), context); //$NON-NLS-1$
                 }
             }
@@ -457,9 +452,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+    public IChange createChange(IProgressMonitor pm) throws CoreException {
     	pm.beginTask("", 1); //$NON-NLS-1$
-    	try{
+    	try {
     		ASTRewrite rewrite= new ASTRewrite(fCompilationUnitNode);
     		addFieldDeclaration(rewrite);
     		if (fInitializeIn == INITIALIZE_IN_METHOD && tempHasInitializer())
@@ -471,11 +466,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     		if (! fFieldName.equals(fTempDeclarationNode.getName().getIdentifier()))	
     			addTempRenames(rewrite);
             return createChange(rewrite);
-    	} catch (JavaModelException e){
-    		throw e; 
-    	} catch (CoreException e) {
-    		throw new JavaModelException(e);
-        } finally{
+    	} finally {
     		pm.done();
     	}
     }

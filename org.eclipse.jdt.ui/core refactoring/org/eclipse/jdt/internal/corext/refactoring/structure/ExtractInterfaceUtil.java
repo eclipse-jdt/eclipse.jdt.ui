@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
@@ -159,7 +159,7 @@ class ExtractInterfaceUtil {
 			for (int j= 0; j < problems.length; j++) {
 				IProblem problem= problems[j];
 				if (problem.isError()) {
-					Context context= new JavaStringStatusContext(source,  new SourceRange(problem));
+					RefactoringStatusContext context= new JavaStringStatusContext(source,  new SourceRange(problem));
 					status.addFatalError(problem.getMessage(), context);
 				}
 			}

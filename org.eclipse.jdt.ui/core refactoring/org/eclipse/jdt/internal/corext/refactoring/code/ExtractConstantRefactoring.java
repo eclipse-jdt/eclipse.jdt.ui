@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -240,22 +241,22 @@ public class ExtractConstantRefactoring extends Refactoring {
     	return buff.toString();
     }
 
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 8); //$NON-NLS-1$
-
+	
 			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[] { fCu }));
 			if (result.hasFatalError())
 				return result;
 			pm.worked(1);
-
+	
 			if (!fCu.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.syntax_error")); //$NON-NLS-1$
 			pm.worked(1);
-
+	
 			initializeAST();
 			pm.worked(1);
-
+	
 			return checkSelection(new SubProgressMonitor(pm, 5));
 		} finally {
 			pm.done();
@@ -281,21 +282,21 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try {
 			pm.beginTask("", 2); //$NON-NLS-1$
-
+			
 			IExpressionFragment selectedExpression= getSelectedExpression();
-
+			
 			if (selectedExpression == null) {
 				String message= RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"); //$NON-NLS-1$
 				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
 			}
 			pm.worked(1);
-
+			
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkExpression());
 			if (result.hasFatalError())
 				return result;
 			pm.worked(1);
-
+			
 			return result;
 		} finally {
 			pm.done();
@@ -306,16 +307,18 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return checkExpressionFragmentIsRValue();
 	}
 	
-	private RefactoringStatus checkExpressionFragmentIsRValue() 
-		throws JavaModelException
-	{
+	private RefactoringStatus checkExpressionFragmentIsRValue() throws JavaModelException {
 		/* Moved this functionality to Checks, to allow sharing with
 		   ExtractTempRefactoring, others */
 		switch(Checks.checkExpressionIsRValue(getSelectedExpression().getAssociatedExpression())) {
-			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE); //$NON-NLS-1$
-			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.no_void"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID); //$NON-NLS-1$
-			case Checks.IS_RVALUE:			return new RefactoringStatus();
-			default:						Assert.isTrue(false); return null;
+			case Checks.NOT_RVALUE_MISC:
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null); //$NON-NLS-1$
+			case Checks.NOT_RVALUE_VOID:
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.no_void"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null); //$NON-NLS-1$
+			case Checks.IS_RVALUE:
+				return new RefactoringStatus();
+			default:
+				Assert.isTrue(false); return null;
 		}		
 	}
 
@@ -368,7 +371,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return getContainingType().getField(getConstantName()).exists();
 	}
 
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("ExtractConstantRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
 		
 		/* Note: some checks are performed on change of input widget
@@ -419,7 +422,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return getModifier() + " " + getConstantTypeName() + " " + fConstantName; //$NON-NLS-2$//$NON-NLS-1$
 	}
 
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		TextBuffer buffer= null;
 		try {
 			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
@@ -433,10 +436,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 			pm.worked(1);
 
 			return change;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);

@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -160,7 +159,7 @@ public abstract class RefactoringTest extends TestCase {
 		return fPackageP;
 	}
 
-	protected final RefactoringStatus performRefactoring(IRefactoring ref) throws Exception {
+	protected final RefactoringStatus performRefactoring(Refactoring ref) throws Exception {
 		performDummySearch();
 		RefactoringStatus status= ref.checkPreconditions(new NullProgressMonitor());
 		if (!status.isOK())
@@ -175,7 +174,7 @@ public abstract class RefactoringTest extends TestCase {
 		return null;
 	}
 	
-	protected final RefactoringStatus performRefactoringWithStatus(IRefactoring ref) throws Exception {
+	protected final RefactoringStatus performRefactoringWithStatus(Refactoring ref) throws Exception {
 		RefactoringStatus status= ref.checkPreconditions(new NullProgressMonitor());
 		if (status.hasFatalError())
 			return status;

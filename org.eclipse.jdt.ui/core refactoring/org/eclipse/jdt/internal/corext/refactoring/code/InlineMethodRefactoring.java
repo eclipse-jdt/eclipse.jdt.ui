@@ -18,9 +18,11 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -43,8 +45,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -173,10 +173,10 @@ public class InlineMethodRefactoring extends Refactoring {
 			fTargetProvider= TargetProvider.create(
 				fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration());
 		}
-		return fTargetProvider.checkActivation(new NullProgressMonitor());
+		return fTargetProvider.checkActivation();
 	}
 	
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		if (fSourceProvider == null && Invocations.isInvocation(fInitialNode)) {
 			fSourceProvider= resolveSourceProvider(result, fInitialCUnit, fInitialNode);
@@ -184,12 +184,12 @@ public class InlineMethodRefactoring extends Refactoring {
 				return result;
 		}
 		fTargetProvider.setSourceProvider(fSourceProvider);
-		result.merge(fSourceProvider.checkActivation(pm));
-		result.merge(fTargetProvider.checkActivation(pm));
+		result.merge(fSourceProvider.checkActivation());
+		result.merge(fTargetProvider.checkActivation());
 		return result;
 	}
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 3); //$NON-NLS-1$
 		fChangeManager= new TextChangeManager();
 		RefactoringStatus result= new RefactoringStatus();
@@ -246,10 +246,6 @@ public class InlineMethodRefactoring extends Refactoring {
 							new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.import"), new TextEdit[] {edit})); //$NON-NLS-1$
 					}
 				}
-			} catch (JavaModelException e){
-				throw e;
-			} catch (CoreException e) {
-				throw new JavaModelException(e);
 			} finally {
 				if (inliner != null)
 					inliner.dispose();
@@ -261,25 +257,19 @@ public class InlineMethodRefactoring extends Refactoring {
 		return result;
 	}
 
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		if (fDeleteSource && fCurrentMode == INLINE_ALL) {
-			try {
-				TextChange change= fChangeManager.get(fSourceProvider.getCompilationUnit());
-				TextEdit delete= fSourceProvider.getDeleteEdit();
-				GroupDescription description= new GroupDescription(
-					RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.delete"), new TextEdit[] { delete }); //$NON-NLS-1$
-				TextEdit root= change.getEdit();
-				if (root != null) {
-					root.addChild(delete);
-				} else {
-					change.setEdit(delete);
-				}
-				change.addGroupDescription(description);
-			} catch (JavaModelException e){
-				throw e;
-			} catch (CoreException e) {
-				throw new JavaModelException(e);
+			TextChange change= fChangeManager.get(fSourceProvider.getCompilationUnit());
+			TextEdit delete= fSourceProvider.getDeleteEdit();
+			GroupDescription description= new GroupDescription(
+				RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.delete"), new TextEdit[] { delete }); //$NON-NLS-1$
+			TextEdit root= change.getEdit();
+			if (root != null) {
+				root.addChild(delete);
+			} else {
+				change.setEdit(delete);
 			}
+			change.addGroupDescription(description);
 		}
 		return new CompositeChange(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inlineCall"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 	}

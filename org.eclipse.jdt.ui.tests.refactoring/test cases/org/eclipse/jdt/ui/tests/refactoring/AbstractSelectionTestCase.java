@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
@@ -139,7 +138,7 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 		}
 	}
 	
-	protected RefactoringStatus checkPreconditions(Refactoring refactoring, IProgressMonitor pm) throws JavaModelException {
+	protected RefactoringStatus checkPreconditions(Refactoring refactoring, IProgressMonitor pm) throws CoreException {
 		return refactoring.checkPreconditions(pm);
 	}
 }

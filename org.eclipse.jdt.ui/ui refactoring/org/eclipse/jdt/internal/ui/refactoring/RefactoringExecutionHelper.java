@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -53,7 +52,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class RefactoringExecutionHelper {
 
-	private final IRefactoring fRefactoring;
+	private final Refactoring fRefactoring;
 	private final Shell fParent;
 	private final IRunnableContext fExecContext;
 	private final int fStopSeverity;
@@ -103,7 +102,7 @@ public class RefactoringExecutionHelper {
 		}
 	}
 	
-	public RefactoringExecutionHelper(IRefactoring refactoring, int stopSevertity, boolean needsSavedEditors, Shell parent, IRunnableContext context) {
+	public RefactoringExecutionHelper(Refactoring refactoring, int stopSevertity, boolean needsSavedEditors, Shell parent, IRunnableContext context) {
 		super();
 		Assert.isNotNull(refactoring);
 		Assert.isNotNull(parent);

@@ -65,7 +65,7 @@ abstract class TargetProvider {
 	// constructor invocation is not an expression but a statement
 	public abstract ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm);
 	
-	public abstract RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException;
+	public abstract RefactoringStatus checkActivation() throws JavaModelException;
 	
 	public abstract int getStatusSeverity();
 	
@@ -131,8 +131,7 @@ abstract class TargetProvider {
 			fIterated= true;
 			return new ASTNode[] { fInvocation };
 		}
-		public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-			fastDone(pm);
+		public RefactoringStatus checkActivation() throws JavaModelException {
 			return new RefactoringStatus();
 		}
 		public int getStatusSeverity() {
@@ -274,8 +273,7 @@ abstract class TargetProvider {
 			return data.getInvocations();
 		}
 	
-		public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-			fastDone(pm);
+		public RefactoringStatus checkActivation() throws JavaModelException {
 			return new RefactoringStatus();
 		}
 		
@@ -323,8 +321,7 @@ abstract class TargetProvider {
 			return data.getInvocations();
 		}
 	
-		public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-			fastDone(pm);
+		public RefactoringStatus checkActivation() throws JavaModelException {
 			return new RefactoringStatus();
 		}
 		

@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -109,8 +109,8 @@ public class InlineTempRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			
 			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
@@ -145,11 +145,11 @@ public class InlineTempRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			return new RefactoringStatus();
-		} finally{
+		} finally {
 			pm.done();
 		}	
 	}
@@ -209,7 +209,7 @@ public class InlineTempRefactoring extends Refactoring {
 		int start= assignmentFinder.getFirstAssignment().getStartPosition();
 		int length= assignmentFinder.getFirstAssignment().getLength();
 		ISourceRange range= new SourceRange(start, length);
-		Context context= JavaStatusContext.create(fCu, range);	
+		RefactoringStatusContext context= JavaStatusContext.create(fCu, range);	
 		String message= RefactoringCoreMessages.getFormattedString("InlineTempRefactoring.assigned_more_once", getTempName());//$NON-NLS-1$
 		return RefactoringStatus.createFatalErrorStatus(message, context);
 	}
@@ -219,18 +219,14 @@ public class InlineTempRefactoring extends Refactoring {
 	/*
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask(RefactoringCoreMessages.getString("InlineTempRefactoring.preview"), 2); //$NON-NLS-1$
 			CompilationUnitChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("InlineTempRefactoring.inline"), fCu); //$NON-NLS-1$
 			inlineTemp(change, new SubProgressMonitor(pm, 1));
 			removeTemp(change);
 			return change;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);	
-		} finally{
+		} finally {
 			pm.done();	
 		}	
 	}

@@ -151,7 +151,7 @@ public class ExtractConstantTests extends RefactoringTest {
 			
 		assertNotNull("precondition was supposed to fail", result);
 		if(checkCode)
-			assertEquals(errorCode, result.getFirstEntry(RefactoringStatus.ERROR).getCode());
+			assertEquals(errorCode, result.getEntryMatchingSeverity(RefactoringStatus.ERROR).getCode());
 	}
 
 	//--- TESTS

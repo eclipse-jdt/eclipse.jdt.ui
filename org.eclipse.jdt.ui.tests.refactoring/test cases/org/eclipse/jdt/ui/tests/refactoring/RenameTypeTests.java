@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
@@ -62,7 +62,7 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	private void helper1_0(String className, String newName) throws Exception{
 		IType classA= getClassFromTestFile(getPackageP(), className);
-		IRefactoring ref= createRefactoring(classA, newName);
+		Refactoring ref= createRefactoring(classA, newName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
 		if (fIsVerbose)
@@ -709,7 +709,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(packageA, "A");
 		IType classA= getType(cu, "A");
 		
-		IRefactoring ref= createRefactoring(classA, "B");
+		Refactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
@@ -756,7 +756,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		IRefactoring ref= createRefactoring(classA, "B");
+		Refactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
@@ -777,7 +777,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		IRefactoring ref= createRefactoring(classA, "B");
+		Refactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
@@ -792,7 +792,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		IRefactoring ref= createRefactoring(classA, "B");
+		Refactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
@@ -869,7 +869,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		IRefactoring ref= createRefactoring(classA, "B");
+		Refactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
@@ -902,7 +902,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		IRefactoring ref= createRefactoring(classA, "B");
+		Refactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		

@@ -185,7 +185,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fInputType);
 		if (orig == null || ! orig.exists()){
 			String[] keys= new String[]{getInputTypeCU().getElementName()};
@@ -205,9 +205,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);//$NON-NLS-1$
-		try{
+		try {
 			RefactoringStatus result= new RefactoringStatus();		
 			result.merge(checkNewInterfaceName(fNewInterfaceName));
 			if (result.hasFatalError())
@@ -217,10 +217,6 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				return result;
 			result.merge(validateModifiesFiles());
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
@@ -268,18 +264,14 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			CompositeChange builder= new CompositeChange(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.name")); //$NON-NLS-1$
 			builder.addAll(fChangeManager.getAllChanges());
 			builder.add(createExtractedInterface(new SubProgressMonitor(pm, 1)));
 			return builder;
-		} catch(JavaModelException e){	
-			throw e;
-		} catch(CoreException e){
-			throw new JavaModelException(e);
-		}	finally{
+		} finally {
 			pm.done();
 		}
 	}

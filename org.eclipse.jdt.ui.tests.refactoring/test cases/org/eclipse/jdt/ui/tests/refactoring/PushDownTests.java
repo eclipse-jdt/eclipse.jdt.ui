@@ -18,7 +18,9 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
@@ -26,9 +28,11 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring.MemberActionInfo;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class PushDownTests extends RefactoringTest {
@@ -58,7 +62,7 @@ public class PushDownTests extends RefactoringTest {
 						String[] namesOfMethodsToPullUp, String[][] signaturesOfMethodsToPullUp, 
 						String[] namesOfFieldsToPullUp, 
 						String[] namesOfMethodsToDeclareAbstract, String[][] signaturesOfMethodsToDeclareAbstract,
-						ICompilationUnit cu) throws JavaModelException {
+						ICompilationUnit cu) throws CoreException {
 							
 		IType type= getType(cu, "A");
 		IMethod[] selectedMethods= getMethods(type, selectedMethodNames, selectedMethodSignatures);

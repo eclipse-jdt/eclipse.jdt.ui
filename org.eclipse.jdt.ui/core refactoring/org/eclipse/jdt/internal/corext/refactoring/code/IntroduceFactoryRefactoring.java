@@ -15,11 +15,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.text.edits.MultiTextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -50,6 +54,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -75,7 +80,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.text.edits.MultiTextEdit;
 
 /**
  * Refactoring class that permits the substitution of a factory method
@@ -277,49 +281,49 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.examiningSelection"), 2); //$NON-NLS-1$
-
+	
 			fSelectedNode= getTargetNode(fCUHandle, fSelectionStart, fSelectionLength);
-
+	
 			if (fSelectedNode == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.notAConstructorInvocation")); //$NON-NLS-1$
-
+	
 			// getTargetNode() must return either a ClassInstanceCreation or a
 			// constructor MethodDeclaration; nothing else.
 			if (fSelectedNode instanceof ClassInstanceCreation)
 				fCtorBinding= ((ClassInstanceCreation) fSelectedNode).resolveConstructorBinding();
 			else if (fSelectedNode instanceof MethodDeclaration)
 				fCtorBinding= ((MethodDeclaration) fSelectedNode).resolveBinding();
-
+	
 			if (fCtorBinding == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.unableToResolveConstructorBinding")); //$NON-NLS-1$
-
+	
 			if (fNewMethodName == null)
 				fNewMethodName= "create" + fCtorBinding.getName();//$NON-NLS-1$
-
+	
 			pm.worked(1);
-
+	
 			// We don't handle constructors of nested types at the moment
 			if (fCtorBinding.getDeclaringClass().isNested())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.unsupportedNestedTypes")); //$NON-NLS-1$
-
+	
 			ITypeBinding	ctorType= fCtorBinding.getDeclaringClass();
 			IType			ctorOwningType= Bindings.findType(ctorType, fCUHandle.getJavaProject());
-
+	
 			if (ctorOwningType.isBinary())
 				// Can't modify binary CU; don't know what CU to put factory method
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.constructorInBinaryClass")); //$NON-NLS-1$
-
+	
 			// Put the generated factory method inside the type that owns the constructor
 			fFactoryUnitHandle= ctorOwningType.getCompilationUnit();
 			fFactoryCU= getASTFor(fFactoryUnitHandle);
-
+	
 			Name	ctorOwnerName= (Name) NodeFinder.perform(fFactoryCU, ctorOwningType.getNameRange());
-
+	
 			fCtorOwningClass= (TypeDeclaration) ASTNodes.getParent(ctorOwnerName, TypeDeclaration.class);
 			fFactoryOwningClass= fCtorOwningClass;
-
+	
 			pm.worked(1);
-
+	
 			return new RefactoringStatus();
 		} finally {
 			pm.done();
@@ -329,16 +333,14 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.checkingActivation"), 1); //$NON-NLS-1$
-
+	
 			if (!fCUHandle.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.syntaxError")); //$NON-NLS-1$
-
+	
 			return checkSelection(new SubProgressMonitor(pm, 1));
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}
@@ -457,7 +459,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.checking_preconditions"), 1); //$NON-NLS-1$
 
@@ -472,9 +474,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getString("IntroduceFactory.callSitesInBinaryClass"))); //$NON-NLS-1$
 
 			return result;
-		} catch (JavaModelException e) {
-			throw e;
-		} finally{
+		} finally {
 			pm.done();
 		}
 	}
@@ -888,7 +888,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.createChanges"), fAllCallsTo.length); //$NON-NLS-1$
 		CompositeChange	topLevelChange= new CompositeChange(RefactoringCoreMessages.getString("IntroduceFactory.topLevelChangeLabel") + fCtorBinding.getName()); //$NON-NLS-1$
 
@@ -921,11 +921,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				topLevelChange.add(cuChange);
 			}
 			return topLevelChange;
-		} catch (JavaModelException e) {
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		} finally{
+		} finally {
 			pm.done();
 		}
 	}

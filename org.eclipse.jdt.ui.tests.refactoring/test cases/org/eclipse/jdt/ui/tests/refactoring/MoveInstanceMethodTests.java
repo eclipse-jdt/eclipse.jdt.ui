@@ -185,7 +185,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 			RefactoringStatus result= ref.checkActivation(new NullProgressMonitor());
 
 			if(!result.isOK()) {
-				assertEquals(errorCode, result.getFirstEntry(RefactoringStatus.ERROR).getCode());
+				assertEquals(errorCode, result.getEntryMatchingSeverity(RefactoringStatus.ERROR).getCode());
 				return;
 			} else {
 				chooseNewReceiver(ref, newReceiverType, newReceiverName);
@@ -200,7 +200,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 				result.merge(ref.checkInput(new NullProgressMonitor()));
 	
 				assertTrue("precondition checking is expected to fail.", !result.isOK());
-				assertEquals(errorCode, result.getFirstEntry(RefactoringStatus.ERROR).getCode());
+				assertEquals(errorCode, result.getEntryMatchingSeverity(RefactoringStatus.ERROR).getCode());
 			}
 		}
 	}	

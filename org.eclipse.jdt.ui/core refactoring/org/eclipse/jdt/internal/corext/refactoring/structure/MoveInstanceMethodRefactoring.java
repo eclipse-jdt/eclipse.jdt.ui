@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -84,11 +85,11 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus status= initializeMover();
 		if(status.hasFatalError())
 			return status;
-		status.merge(fMover.checkInitialState(pm));
+		status.merge(fMover.checkInitialState());
 		return status;
 	}
 	
@@ -116,7 +117,7 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 		if(parentNode != null)
 			return (MethodDeclaration) parentNode;
 		
-		status.merge(RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.method_declaration"), null, null, RefactoringStatusCodes.METHOD_NOT_SELECTED)); //$NON-NLS-1$
+		status.merge(RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.method_declaration"), null, Corext.getPluginId(), RefactoringStatusCodes.METHOD_NOT_SELECTED, null)); //$NON-NLS-1$
 		return null;
 	} 
 	
@@ -174,21 +175,15 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		return fMover.checkInput(pm);
 	}
 	
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		try {
-			return fMover.createChange(pm);
-		} catch(JavaModelException e) {
-			throw e;
-		} catch(CoreException e) {
-			throw new JavaModelException(e);
-		}
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
+		return fMover.createChange(pm);
 	}
 	
 	/*

@@ -20,8 +20,8 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 public class JavaRefactorings {
 
 	public static RefactoringStatusEntry createStatusEntry(IProblem problem, String newWcSource) {
-		Context context= new JavaStringStatusContext(newWcSource, new SourceRange(problem));
+		RefactoringStatusContext context= new JavaStringStatusContext(newWcSource, new SourceRange(problem));
 		int severity= problem.isError() ? RefactoringStatus.ERROR: RefactoringStatus.WARNING;
-		return new RefactoringStatusEntry(problem.getMessage(), severity, context);
+		return new RefactoringStatusEntry(severity, problem.getMessage(), context);
 	}
 }

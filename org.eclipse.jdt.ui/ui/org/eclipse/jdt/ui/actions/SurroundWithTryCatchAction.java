@@ -112,7 +112,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 			if (status.hasFatalError()) {
 				RefactoringErrorDialogUtil.open(getDialogTitle(), status, getShell());
-				RefactoringStatusEntry entry= status.getFirstEntry(RefactoringStatus.FATAL);
+				RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
 				if (entry.getContext() instanceof JavaStatusContext && fEditor != null) {
 					JavaStatusContext context= (JavaStatusContext)entry.getContext();
 					ISourceRange range= context.getSourceRange();

@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
@@ -64,7 +64,7 @@ public class RenamePackageTests extends RefactoringTest {
 				}	
 			}
 			IPackageFragment thisPackage= packages[0];
-			IRefactoring ref= createRefactoring(thisPackage, newPackageName);
+			Refactoring ref= createRefactoring(thisPackage, newPackageName);
 			performDummySearch();
 			RefactoringStatus result= performRefactoring(ref);
 			assertNotNull("precondition was supposed to fail", result);
@@ -91,7 +91,7 @@ public class RenamePackageTests extends RefactoringTest {
 				packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
 			}
 			IPackageFragment thisPackage= packages[0];
-			IRefactoring ref= createRefactoring(thisPackage, newPackageName);
+			Refactoring ref= createRefactoring(thisPackage, newPackageName);
 			performDummySearch();
 			RefactoringStatus result= performRefactoring(ref);
 			assertNotNull("precondition was supposed to fail", result);

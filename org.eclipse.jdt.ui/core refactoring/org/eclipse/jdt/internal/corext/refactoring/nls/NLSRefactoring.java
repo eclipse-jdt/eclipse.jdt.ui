@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -213,7 +213,7 @@ public class NLSRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		if (NLSHolder.create(fCu).getSubstitutions().length == 0)	{
 			String message= NLSMessages.getFormattedString("NLSRefactoring.no_strings", fCu.getElementName());//$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
@@ -224,8 +224,8 @@ public class NLSRefactoring extends Refactoring {
 	/**
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask(NLSMessages.getString("NLSrefactoring.checking"), 7); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkIfAnythingToDo());
@@ -252,8 +252,6 @@ public class NLSRefactoring extends Refactoring {
 			}
 			pm.worked(1);	
 			return result;
-		} catch (JavaModelException e){
-			throw e;
 		} finally {
 			pm.done();
 		}	
@@ -452,7 +450,7 @@ public class NLSRefactoring extends Refactoring {
 			result.addFatalError(NLSMessages.getString("NLSrefactoring.null")); //$NON-NLS-1$
 
 		if (key.startsWith("!") || key.startsWith("#")){ //$NON-NLS-1$ //$NON-NLS-2$
-			Context context= new JavaStringStatusContext(key, new SourceRange(0, 0));
+			RefactoringStatusContext context= new JavaStringStatusContext(key, new SourceRange(0, 0));
 			result.addWarning(NLSMessages.getString("NLSRefactoring.warning"), context); //$NON-NLS-1$
 		}	
 			
@@ -509,10 +507,7 @@ public class NLSRefactoring extends Refactoring {
 	
 	// --- changes
 	
-	/**
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(IProgressMonitor)
-	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask("", 3); //$NON-NLS-1$
 			CompositeChange builder= new CompositeChange();
@@ -531,10 +526,6 @@ public class NLSRefactoring extends Refactoring {
 				pm.worked(1);
 			
 			return builder;
-		} catch (JavaModelException e){
-			throw e;	
-		} catch (CoreException e){
-			throw new JavaModelException(e);	
 		} finally {
 			pm.done();
 		}	

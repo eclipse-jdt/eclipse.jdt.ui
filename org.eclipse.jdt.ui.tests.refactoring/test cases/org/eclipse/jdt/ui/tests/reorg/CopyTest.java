@@ -105,7 +105,7 @@ public class CopyTest extends RefactoringTest {
 			status= ref.setDestination((IJavaElement)destination);
 		else assertTrue(false);
 		
-		assertEquals("destination was expected to be valid: " + status.getFirstMessage(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
+		assertEquals("destination was expected to be valid: " + status.getMessageMatchingSeverity(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
 	}
 
 	private void verifyCopyingOfSubCuElements(ICompilationUnit[] cus, Object destination, IJavaElement[] javaElements) throws JavaModelException, Exception, IOException {

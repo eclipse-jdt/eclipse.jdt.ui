@@ -272,17 +272,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		try {
-			pm.beginTask("", 1); //$NON-NLS-1$
-			if (fCu == null || !fCu.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.invalidSelection")); //$NON-NLS-1$
-			return checkSelection(new SubProgressMonitor(pm, 1));
-		} catch (JavaModelException e){
-			throw e;
-		} finally {
-			pm.done();
-		}
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+		if (fCu == null || !fCu.isStructureKnown())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.invalidSelection")); //$NON-NLS-1$
+		return checkSelection(new SubProgressMonitor(pm, 1));
 	}
 
 	/**
@@ -431,7 +424,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.checking_preconditions"), 1); //$NON-NLS-1$	
 			
 		RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(fAffectedUnits));
@@ -453,7 +446,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeMessages.CreateChangesForChangeType"), 1); //$NON-NLS-1$
 		try {
 			Map/*<ICompilationUnit,Set<ConstraintVariable>>*/ relevantVarsByUnit=
@@ -470,10 +463,6 @@ public class ChangeTypeRefactoring extends Refactoring {
 				pm.worked(1);
 			}
 			return topLevelChange;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}

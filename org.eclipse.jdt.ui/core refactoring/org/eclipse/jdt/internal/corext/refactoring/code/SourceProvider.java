@@ -28,7 +28,6 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -102,7 +101,7 @@ public class SourceProvider {
 		fReturnExpressions= new ArrayList();
 	}
 	
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation() throws JavaModelException {
 		return fAnalyzer.checkActivation();
 	}
 	

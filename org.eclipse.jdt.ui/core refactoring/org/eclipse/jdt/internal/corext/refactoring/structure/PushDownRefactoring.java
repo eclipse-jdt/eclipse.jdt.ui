@@ -69,7 +69,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -311,7 +311,7 @@ public class PushDownRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
@@ -489,8 +489,8 @@ public class PushDownRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.creating_preview"), 5); //$NON-NLS-1$
 			clearCaches();
 						
@@ -510,10 +510,6 @@ public class PushDownRefactoring extends Refactoring {
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){	
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
@@ -711,7 +707,7 @@ public class PushDownRefactoring extends Refactoring {
 			for (int j= 0; j < refNodes.length; j++) {
 				ASTNode node= refNodes[j];
 				if ((node instanceof ClassInstanceCreation) || ConstructorReferenceFinder.isImplicitConstructorReferenceNodeInClassCreations(node)){
-					Context context= JavaStatusContext.create(cu, node);
+					RefactoringStatusContext context= JavaStatusContext.create(cu, node);
 					result.addError(msg, context);
 				}
 			}
@@ -764,10 +760,10 @@ public class PushDownRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
+		try {
 			return new CompositeChange("Push down", fChangeManager.getAllChanges()); //$NON-NLS-1$
-		} finally{
+		} finally {
 			pm.done();
 			clearCaches();
 		}
@@ -1112,7 +1108,7 @@ public class PushDownRefactoring extends Refactoring {
 		return getHierarchyOfDeclaringClass(pm).getSubclasses(getDeclaringClass());
 	}
 
-	public ITypeHierarchy getHierarchyOfDeclaringClass(IProgressMonitor pm) throws JavaModelException {
+	private ITypeHierarchy getHierarchyOfDeclaringClass(IProgressMonitor pm) throws JavaModelException {
 		try{
 			if (fCachedClassHierarchy != null)
 				return fCachedClassHierarchy;

@@ -116,7 +116,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 					IntroduceFactoryInputPage.this.setPageComplete(nameOk);
 					IntroduceFactoryInputPage.this.setErrorMessage(nameOk ?
 						"" : //$NON-NLS-1$
-						status.getFirstMessage(RefactoringStatus.ERROR));
+						status.getMessageMatchingSeverity(RefactoringStatus.ERROR));
 				}
 			});
 		protectCtorCB.addSelectionListener(new SelectionAdapter()
@@ -138,7 +138,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 
 				IntroduceFactoryInputPage.this.setPageComplete(nameOk);
 				IntroduceFactoryInputPage.this.setErrorMessage(nameOk ? "" : //$NON-NLS-1$
-															   status.getFirstMessage(RefactoringStatus.ERROR));
+															   status.getMessageMatchingSeverity(RefactoringStatus.ERROR));
 			}
 		});
 		browseTypes.addSelectionListener(new SelectionAdapter() {
@@ -154,7 +154,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 				factoryTypeName.setText(factoryType.getFullyQualifiedName());
 				IntroduceFactoryInputPage.this.setPageComplete(nameOk);
 				IntroduceFactoryInputPage.this.setErrorMessage(nameOk ? "" : //$NON-NLS-1$
-															   status.getFirstMessage(RefactoringStatus.ERROR));
+															   status.getMessageMatchingSeverity(RefactoringStatus.ERROR));
 			}
 		});
 

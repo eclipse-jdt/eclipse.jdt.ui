@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
@@ -55,7 +55,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			
 			for (int i= 0; i < hierarchyMethods.length; i++) {
 				IMethod hierarchyMethod= hierarchyMethods[i];
-				Context context= JavaStatusContext.create(hierarchyMethod);
+				RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
 				if (Checks.compareParamTypes(getMethod().getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 					String message= RefactoringCoreMessages.getFormattedString(
 						"RenamePrivateMethodRefactoring.hierarchy_defines", //$NON-NLS-1$

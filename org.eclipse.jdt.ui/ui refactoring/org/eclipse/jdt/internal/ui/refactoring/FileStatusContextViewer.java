@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -20,13 +22,13 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.FileStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
-public class TextStatusContextViewer extends SourceContextViewer {
+public class FileStatusContextViewer extends TextContextViewer {
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.IStatusContextViewer#createControl(org.eclipse.swt.widgets.Composite)
@@ -39,14 +41,16 @@ public class TextStatusContextViewer extends SourceContextViewer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.IStatusContextViewer#setInput(java.lang.Object)
 	 */
-	public void setInput(Context context) {
+	public void setInput(RefactoringStatusContext context) {
 		FileStatusContext fc= (FileStatusContext)context;
-		IEditorInput editorInput= new FileEditorInput(fc.getFile());
+		IFile file= fc.getFile();
+		updateTitle(file);
+		IEditorInput editorInput= new FileEditorInput(file);
 		IDocument document= getDocument(JavaPlugin.getDefault().getCompilationUnitDocumentProvider(), editorInput);
-		setInput(document, fc.getSourceRange());
+		setInput(document, fc.getTextRegion());
 	}
 	
 	protected SourceViewer createSourceViewer(Composite parent) {
 	    return new SourceViewer(parent, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
-	}    
+	}	
 }

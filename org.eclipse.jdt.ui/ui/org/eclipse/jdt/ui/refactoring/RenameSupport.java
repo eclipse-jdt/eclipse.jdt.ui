@@ -31,6 +31,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
@@ -72,7 +73,7 @@ public class RenameSupport {
 	public IStatus preCheck() throws CoreException {
 		ensureChecked();
 		if (fPreCheckStatus.hasFatalError())
-			return fPreCheckStatus.getFirstEntry(RefactoringStatus.FATAL).asStatus();
+			return asStatus(fPreCheckStatus.getEntryMatchingSeverity(RefactoringStatus.FATAL));
 		else
 			return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 	}
@@ -336,7 +337,30 @@ public class RenameSupport {
 	}
 	
 	private void showInformation(Shell parent, RefactoringStatus status) {
-		String message= status.getFirstMessage(RefactoringStatus.FATAL);
+		String message= status.getMessageMatchingSeverity(RefactoringStatus.FATAL);
 		MessageDialog.openInformation(parent, "Rename", message);
+	}
+	
+	private static IStatus asStatus(RefactoringStatusEntry entry) {
+		int statusSeverity= IStatus.ERROR;
+		switch (entry.getSeverity()) {
+			case RefactoringStatus.OK :
+				statusSeverity= IStatus.OK;
+				break;
+			case RefactoringStatus.INFO :
+				statusSeverity= IStatus.INFO;
+				break;
+			case RefactoringStatus.WARNING :
+			case RefactoringStatus.ERROR :
+				statusSeverity= IStatus.WARNING;
+				break;
+		}
+		String pluginId= entry.getPluginId();
+		int code= entry.getCode();
+		if (pluginId == null) {
+			pluginId= JavaPlugin.getPluginId();
+			code= IStatus.ERROR;
+		}
+		return new Status(statusSeverity, pluginId, code, entry.getMessage(), null);
 	}
 }

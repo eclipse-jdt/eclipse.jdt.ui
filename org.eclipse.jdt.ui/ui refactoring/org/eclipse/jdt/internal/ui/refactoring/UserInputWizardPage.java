@@ -51,14 +51,14 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 		int severity= status.getSeverity();
 		if (severity == RefactoringStatus.FATAL){
 			setPageComplete(false);
-			setErrorMessage(status.getFirstMessage(severity));	
+			setErrorMessage(status.getMessageMatchingSeverity(severity));	
 		} else {
 			setPageComplete(true);
 			setErrorMessage(null);
 			if (severity == RefactoringStatus.OK)
 				setMessage(null, NONE);
 			else	
-				setMessage(status.getFirstMessage(severity), getCorrespondingIStatusSeverity(severity));	
+				setMessage(status.getMessageMatchingSeverity(severity), getCorrespondingIStatusSeverity(severity));	
 		}
 	}
 	

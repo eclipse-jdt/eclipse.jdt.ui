@@ -168,23 +168,19 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-        try {
-            RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
-            if (result.hasFatalError())
-                return result;
+    public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+        RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
+		if (result.hasFatalError())
+		    return result;
 
-            initAST();
+		initAST();
 
-            if (fAnonymousInnerClassNode == null)
-                return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.place_caret")); //$NON-NLS-1$
-            initializeDefaults();
-            if (getSuperConstructorBinding() == null)
-                return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.compile_errors")); //$NON-NLS-1$
-            return new RefactoringStatus();
-        } finally {
-            pm.done();
-        }
+		if (fAnonymousInnerClassNode == null)
+		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.place_caret")); //$NON-NLS-1$
+		initializeDefaults();
+		if (getSuperConstructorBinding() == null)
+		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.compile_errors")); //$NON-NLS-1$
+		return new RefactoringStatus();
     }
 
     private void initializeDefaults() {
@@ -331,7 +327,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+    public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
         try {
             RefactoringStatus status= validateInput();
             if (accessesAnonymousFields())
@@ -345,17 +341,13 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+    public IChange createChange(IProgressMonitor pm) throws CoreException {
         pm.beginTask("", 1); //$NON-NLS-1$
         try {
             ASTRewrite rewrite= new ASTRewrite(fCompilationUnitNode);
             addNestedClass(rewrite);
             modifyConstructorCall(rewrite);
             return createChange(rewrite);
-        } catch (JavaModelException e) {
-            throw e;
-        } catch (CoreException e) {
-            throw new JavaModelException(e);
         } finally {
             pm.done();
         }

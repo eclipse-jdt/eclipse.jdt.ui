@@ -80,7 +80,7 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -423,7 +423,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask("", 2); //$NON-NLS-1$
 			RefactoringStatus result= Checks.checkIfCuBroken(fMethod);
@@ -484,8 +484,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 7); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			clearManagers();
@@ -529,11 +529,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 			result.merge(validateModifiesFiles());
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){	
-			throw new JavaModelException(e);
-		} finally{
+		} finally {
 			pm.done();
 		}
 	}
@@ -656,7 +652,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) decl.parameters().get(info.getOldIndex());
 					ASTNode[] paramRefs= TempOccurrenceFinder.findTempOccurrenceNodes(paramDecl, true, false);
 					if (paramRefs.length > 0){
-						Context context= JavaStatusContext.create(cu, paramRefs[0]);
+						RefactoringStatusContext context= JavaStatusContext.create(cu, paramRefs[0]);
 						Object[] keys= new String[]{paramDecl.getName().getIdentifier(),
 													decl.getName().getIdentifier(),
 													typeName};
@@ -877,7 +873,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (newParameterNames.contains(paramNames[j])){
 					String[] args= new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), paramNames[j]};
 					String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.already_has", args); //$NON-NLS-1$
-					Context context= JavaStatusContext.create(fRippleMethods[i].getCompilationUnit(), fRippleMethods[i].getNameRange());
+					RefactoringStatusContext context= JavaStatusContext.create(fRippleMethods[i].getCompilationUnit(), fRippleMethods[i].getNameRange());
 					result.addError(msg, context);
 				}	
 			}
@@ -932,7 +928,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	//--  changes ----
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new CompositeChange(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.restructure_parameters"), fChangeManager.getAllChanges()); //$NON-NLS-1$

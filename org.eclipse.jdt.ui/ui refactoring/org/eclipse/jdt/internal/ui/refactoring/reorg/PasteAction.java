@@ -564,34 +564,28 @@ public class PasteAction extends SelectionDispatchAction{
 				return sources != null && sources.length > 0;
 			}
 
-			public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+			public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 				return new RefactoringStatus();
 			}
 
-			public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+			public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 				RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{getDestinationCu()}));
 				return result;
 			}
 
-			public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-				try {
-					CompilationUnit cuNode= AST.parseCompilationUnit(getDestinationCu(), false);
-					ASTRewrite rewrite= new ASTRewrite(cuNode);
-					for (int i= 0; i < fSources.length; i++) {
-						pasteSource(fSources[i], rewrite, cuNode);
-					}
-					TextBuffer textBuffer= TextBuffer.create(getDestinationCu().getBuffer().getContents());
-					TextEdit rootEdit= new MultiTextEdit();
-					rewrite.rewriteNode(textBuffer, rootEdit);
-					CompilationUnitChange change= new CompilationUnitChange("name", getDestinationCu());
-					change.setSave(!getDestinationCu().isWorkingCopy());
-					change.addTextEdit("paste elements", rootEdit);
-					return change;
-				} catch (JavaModelException e) {
-					throw e;
-				} catch (CoreException e) {
-					throw new JavaModelException(e);
+			public IChange createChange(IProgressMonitor pm) throws CoreException {
+				CompilationUnit cuNode= AST.parseCompilationUnit(getDestinationCu(), false);
+				ASTRewrite rewrite= new ASTRewrite(cuNode);
+				for (int i= 0; i < fSources.length; i++) {
+					pasteSource(fSources[i], rewrite, cuNode);
 				}
+				TextBuffer textBuffer= TextBuffer.create(getDestinationCu().getBuffer().getContents());
+				TextEdit rootEdit= new MultiTextEdit();
+				rewrite.rewriteNode(textBuffer, rootEdit);
+				CompilationUnitChange change= new CompilationUnitChange("name", getDestinationCu());
+				change.setSave(!getDestinationCu().isWorkingCopy());
+				change.addTextEdit("paste elements", rootEdit);
+				return change;
 			}
 			
 			private void pasteSource(TypedSource source, ASTRewrite rewrite, CompilationUnit cuNode) throws CoreException {

@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -98,7 +98,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 				IMethod[] relatedMethods= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 4), getMethod(), getNewElementName());
 				for (int i= 0; i < relatedMethods.length; i++) {
 					IMethod relatedMethod= relatedMethods[i];
-					Context context= JavaStatusContext.create(relatedMethod);
+					RefactoringStatusContext context= JavaStatusContext.create(relatedMethod);
 					result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.already_defined"), context); //$NON-NLS-1$
 				}
 			} else {
@@ -111,7 +111,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 				IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), getMethod(), getNewElementName());
 				for (int i= 0; i < hierarchyMethods.length; i++) {
 					IMethod hierarchyMethod= hierarchyMethods[i];
-					Context context= JavaStatusContext.create(hierarchyMethod);
+					RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
 					if (Checks.compareParamTypes(getMethod().getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 						result.addError(RefactoringCoreMessages.getFormattedString(
 							"RenameVirtualMethodRefactoring.hierarchy_declares2", //$NON-NLS-1$

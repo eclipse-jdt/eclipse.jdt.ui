@@ -17,6 +17,7 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -93,7 +94,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		performTest(unit, refactoring, mode, out);
 	}	
 	
-	protected RefactoringStatus checkPreconditions(Refactoring refactoring, IProgressMonitor pm) throws JavaModelException {
+	protected RefactoringStatus checkPreconditions(Refactoring refactoring, IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= refactoring.checkActivation(pm);
 		if (result.hasFatalError())
 			return result;

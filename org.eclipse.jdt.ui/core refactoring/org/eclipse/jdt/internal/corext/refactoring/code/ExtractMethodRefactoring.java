@@ -203,36 +203,30 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @param pm a progress monitor to report progress during activation checking.
 	 * @return the refactoring status describing the result of the activation check.	 
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		try{
-			pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_selection"), 1); //$NON-NLS-1$
-			RefactoringStatus result= new RefactoringStatus();
-			
-			if (fSelectionStart < 0 || fSelectionLength == 0)
-				return mergeTextSelectionStatus(result);
-			
-			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit})));
-			if (result.hasFatalError())
-				return result;
-			
-			CompilationUnit root= AST.parseCompilationUnit(fCUnit, true);
-			fAST= root.getAST();
-			root.accept(createVisitor());
-			
-			result.merge(fAnalyzer.checkActivation());
-			if (result.hasFatalError())
-				return result;
-			if (fVisibility == -1) {
-				setVisibility(Modifier.PRIVATE);
-			}
-			initializeParameterInfos();
-			initializeUsedNames();
-			initializeDuplicates();
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
+		
+		if (fSelectionStart < 0 || fSelectionLength == 0)
+			return mergeTextSelectionStatus(result);
+		
+		result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit})));
+		if (result.hasFatalError())
 			return result;
-		} finally {
-			pm.worked(1);
-			pm.done();
+		
+		CompilationUnit root= AST.parseCompilationUnit(fCUnit, true);
+		fAST= root.getAST();
+		root.accept(createVisitor());
+		
+		result.merge(fAnalyzer.checkActivation());
+		if (result.hasFatalError())
+			return result;
+		if (fVisibility == -1) {
+			setVisibility(Modifier.PRIVATE);
 		}
+		initializeParameterInfos();
+		initializeUsedNames();
+		initializeDuplicates();
+		return result;
 	}
 	
 	private ASTVisitor createVisitor() throws JavaModelException {
@@ -342,7 +336,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	/* (non-Javadoc)
 	 * Method declared in Refactoring
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_new_name"), 2); //$NON-NLS-1$
 		pm.subTask(EMPTY);
 		
@@ -362,7 +356,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	/* (non-Javadoc)
 	 * Method declared in IRefactoring
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		if (fMethodName == null)
 			return null;
 		
@@ -375,72 +369,66 @@ public class ExtractMethodRefactoring extends Refactoring {
 			: "";
 		
 		CompilationUnitChange result= null;
-		try {
-			result= new CompilationUnitChange(
-				RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.change_name", new String[]{fMethodName, sourceMethodName}),  //$NON-NLS-1$
-				fCUnit);
 		
-			MultiTextEdit root= new MultiTextEdit();
-			result.setEdit(root);
-			TextBuffer buffer= null;
+		result= new CompilationUnitChange(
+			RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.change_name", new String[]{fMethodName, sourceMethodName}),  //$NON-NLS-1$
+			fCUnit);
+	
+		MultiTextEdit root= new MultiTextEdit();
+		result.setEdit(root);
+		TextBuffer buffer= null;
+		try {
+			// This is cheap since the compilation unit is already open in a editor.
+			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCUnit).getResource());
 			
-			try {
-				// This is cheap since the compilation unit is already open in a editor.
-				buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCUnit).getResource());
-				
-				ASTNode[] selectedNodes= fAnalyzer.getSelectedNodes();
-				ASTNodes.expandRange(selectedNodes, buffer, fSelectionStart, fSelectionLength);
-				ASTNode target= getTargetNode(selectedNodes);
-				
-				MethodDeclaration mm= createNewMethod(fMethodName, true, target, buffer.getLineDelimiter());
-
-				GroupDescription insertDesc= new GroupDescription(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
-				result.addGroupDescription(insertDesc);
-				
-				fRewriter.markAsInserted(mm, insertDesc);
-				List container= ASTNodes.getContainingList(declaration);
-				container.add(container.indexOf(declaration) + 1, mm);
-				
-				GroupDescription description= new GroupDescription(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName)); //$NON-NLS-1$
-				result.addGroupDescription(description);
-				
-				ASTNode[] callNodes= createCallNodes(null);
-				fRewriter.markAsReplaced(target, callNodes[0], description);
-				if (callNodes.length > 1) {
-					container= ASTNodes.getContainingList(target);
-					int index= container.indexOf(target);
-					for (int i= 1; i < callNodes.length; i++) {
-						ASTNode node= callNodes[i];
-						container.add(index + i, node);
-
-						fRewriter.markAsInserted(node, description);
-					}
-				}
-				
-				replaceDuplicates(result);
+			ASTNode[] selectedNodes= fAnalyzer.getSelectedNodes();
+			ASTNodes.expandRange(selectedNodes, buffer, fSelectionStart, fSelectionLength);
+			ASTNode target= getTargetNode(selectedNodes);
 			
-				if (!fImportRewriter.isEmpty()) {
-					TextEdit edit= fImportRewriter.createEdit(buffer);
-					root.addChild(edit);
-					result.addGroupDescription(new GroupDescription(
-						RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), //$NON-NLS-1$
-						new TextEdit[] {edit}
-					));
-				}
-				
+			MethodDeclaration mm= createNewMethod(fMethodName, true, target, buffer.getLineDelimiter());
 
-				MultiTextEdit changes= new MultiTextEdit();
-				fRewriter.rewriteNode(buffer, changes);
-				root.addChild(changes);
-				
-				fRewriter.removeModifications();
-			} finally {
-				TextBuffer.release(buffer);
+			GroupDescription insertDesc= new GroupDescription(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
+			result.addGroupDescription(insertDesc);
+			
+			fRewriter.markAsInserted(mm, insertDesc);
+			List container= ASTNodes.getContainingList(declaration);
+			container.add(container.indexOf(declaration) + 1, mm);
+			
+			GroupDescription description= new GroupDescription(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName)); //$NON-NLS-1$
+			result.addGroupDescription(description);
+			
+			ASTNode[] callNodes= createCallNodes(null);
+			fRewriter.markAsReplaced(target, callNodes[0], description);
+			if (callNodes.length > 1) {
+				container= ASTNodes.getContainingList(target);
+				int index= container.indexOf(target);
+				for (int i= 1; i < callNodes.length; i++) {
+					ASTNode node= callNodes[i];
+					container.add(index + i, node);
+
+					fRewriter.markAsInserted(node, description);
+				}
 			}
-		} catch (JavaModelException e){
-			throw e;			
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
+			
+			replaceDuplicates(result);
+		
+			if (!fImportRewriter.isEmpty()) {
+				TextEdit edit= fImportRewriter.createEdit(buffer);
+				root.addChild(edit);
+				result.addGroupDescription(new GroupDescription(
+					RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), //$NON-NLS-1$
+					new TextEdit[] {edit}
+				));
+			}
+			
+
+			MultiTextEdit changes= new MultiTextEdit();
+			fRewriter.rewriteNode(buffer, changes);
+			root.addChild(changes);
+			
+			fRewriter.removeModifications();
+		} finally {
+			TextBuffer.release(buffer);
 		}
 		return result;
 	}

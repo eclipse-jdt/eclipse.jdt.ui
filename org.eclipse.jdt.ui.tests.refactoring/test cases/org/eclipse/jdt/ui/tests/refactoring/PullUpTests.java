@@ -18,7 +18,9 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -26,9 +28,11 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class PullUpTests extends RefactoringTest {
@@ -189,7 +193,7 @@ public class PullUpTests extends RefactoringTest {
 						String[][] signaturesOfMethodsToPullUp, 
 						String[] namesOfFieldsToPullUp, String[] namesOfTypesToPullUp, 
 						String[] namesOfMethodsToDeclareAbstract, String[][] signaturesOfMethodsToDeclareAbstract, 
-						boolean deleteAllPulledUpMethods, boolean deleteAllMatchingMethods, int targetClassIndex, ICompilationUnit cu) throws JavaModelException {
+						boolean deleteAllPulledUpMethods, boolean deleteAllMatchingMethods, int targetClassIndex, ICompilationUnit cu) throws CoreException {
 		IType type= getType(cu, "B");
 		IMethod[] selectedMethods= getMethods(type, selectedMethodNames, selectedMethodSignatures);
 		IField[] selectedFields= getFields(type, selectedFieldNames);

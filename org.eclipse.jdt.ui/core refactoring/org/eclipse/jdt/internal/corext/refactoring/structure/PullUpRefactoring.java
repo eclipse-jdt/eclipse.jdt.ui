@@ -92,7 +92,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -649,11 +649,11 @@ public class PullUpRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm)	throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm)	throws CoreException {
 		try {
 			pm.beginTask("", 3); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-
+	
 			fMembersToPullUp= WorkingCopyUtil.getOriginals(fMembersToPullUp);
 						
 			result.merge(checkDeclaringType(new SubProgressMonitor(pm, 1)));
@@ -700,8 +700,8 @@ public class PullUpRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask(RefactoringCoreMessages.getString("PullUpRefactoring.preview"), 7); //$NON-NLS-1$
 			clearCaches();
 
@@ -722,10 +722,6 @@ public class PullUpRefactoring extends Refactoring {
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){	
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
@@ -760,7 +756,7 @@ public class PullUpRefactoring extends Refactoring {
 			for (int j= 0; j < refNodes.length; j++) {
 				ASTNode node= refNodes[j];
 				if ((node instanceof ClassInstanceCreation) || ConstructorReferenceFinder.isImplicitConstructorReferenceNodeInClassCreations(node)){
-					Context context= JavaStatusContext.create(cu, node);
+					RefactoringStatusContext context= JavaStatusContext.create(cu, node);
 					result.addError(msg, context);
 				}
 			}
@@ -804,7 +800,7 @@ public class PullUpRefactoring extends Refactoring {
 			return null;
 		String[] keys= {createTypeLabel(typeInType), createTypeLabel(type)};
 		String msg= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.Type_declared_in_class", keys); //$NON-NLS-1$
-		Context context= JavaStatusContext.create(typeInType);
+		RefactoringStatusContext context= JavaStatusContext.create(typeInType);
 		return RefactoringStatus.createWarningStatus(msg, context);
 	}
 
@@ -814,7 +810,7 @@ public class PullUpRefactoring extends Refactoring {
 			return null;
 		String[] keys= {createFieldLabel(fieldInType), createTypeLabel(type)};
 		String msg= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.Field_declared_in_class", keys); //$NON-NLS-1$
-		Context context= JavaStatusContext.create(fieldInType);
+		RefactoringStatusContext context= JavaStatusContext.create(fieldInType);
 		return RefactoringStatus.createWarningStatus(msg, context);
 	}
 	
@@ -824,7 +820,7 @@ public class PullUpRefactoring extends Refactoring {
 			return null;
 		String[] keys= {createMethodLabel(methodInType), createTypeLabel(type)};
 		String msg= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.methodis_declared_in_class", keys); //$NON-NLS-1$
-		Context context= JavaStatusContext.create(methodInType);
+		RefactoringStatusContext context= JavaStatusContext.create(methodInType);
 		return RefactoringStatus.createWarningStatus(msg, context);
 	}
 
@@ -849,7 +845,6 @@ public class PullUpRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus checkDeclaringType(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 3); //$NON-NLS-1$
 		IType declaringType= getDeclaringType();
 				
 		if (declaringType.isInterface()) //for now
@@ -857,10 +852,10 @@ public class PullUpRefactoring extends Refactoring {
 		
 		if (JavaModelUtil.getFullyQualifiedName(declaringType).equals("java.lang.Object")) //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_java.lang.Object"));	 //$NON-NLS-1$
-
+	
 		if (declaringType.isBinary())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_binary_types"));	 //$NON-NLS-1$
-
+	
 		if (declaringType.isReadOnly())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_read_only_types"));	 //$NON-NLS-1$
 		
@@ -892,7 +887,7 @@ public class PullUpRefactoring extends Refactoring {
 		for (int i= 0; i < fMembersToPullUp.length; i++) {
 			IMember member= fMembersToPullUp[i];
 			if (member.getElementType() == IJavaElement.FIELD && ! JdtFlags.isStatic(member) && JdtFlags.isFinal(member)){
-				Context context= JavaStatusContext.create(member);
+				RefactoringStatusContext context= JavaStatusContext.create(member);
 				result.addWarning(RefactoringCoreMessages.getString("PullUpRefactoring.final_fields"), context); //$NON-NLS-1$
 			}
 			pm.worked(1);
@@ -1090,7 +1085,7 @@ public class PullUpRefactoring extends Refactoring {
 				String[] keys= {createMethodLabel(matchingMethod), createTypeLabel(matchingMethod.getDeclaringType())};	
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.different_method_return_type", //$NON-NLS-1$
 					keys);
-				Context context= JavaStatusContext.create(matchingMethod.getCompilationUnit(), matchingMethod.getNameRange());
+				RefactoringStatusContext context= JavaStatusContext.create(matchingMethod.getCompilationUnit(), matchingMethod.getNameRange());
 				result.addError(message, context);	
 			}
 		}
@@ -1114,7 +1109,7 @@ public class PullUpRefactoring extends Refactoring {
 				String[] keys= {createFieldLabel(matchingField), createTypeLabel(matchingField.getDeclaringType())};
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.different_field_type", //$NON-NLS-1$
 					keys);
-				Context context= JavaStatusContext.create(matchingField.getCompilationUnit(), matchingField.getSourceRange());					 
+				RefactoringStatusContext context= JavaStatusContext.create(matchingField.getCompilationUnit(), matchingField.getSourceRange());					 
 				result.addError(message, context);	
 			}
 		}
@@ -1135,7 +1130,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private void checkMethodAccessModifiers(RefactoringStatus result, IMethod method) throws JavaModelException {
-		Context errorContext= JavaStatusContext.create(method);
+		RefactoringStatusContext errorContext= JavaStatusContext.create(method);
 		
 		if (JdtFlags.isStatic(method)){
 				String[] keys= {createMethodLabel(method), createTypeLabel(method.getDeclaringType())};
@@ -1185,10 +1180,10 @@ public class PullUpRefactoring extends Refactoring {
 	/*
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
+		try {
 			return new CompositeChange(RefactoringCoreMessages.getString("PullUpRefactoring.Pull_Up"), fChangeManager.getAllChanges()); //$NON-NLS-1$
-		} finally{
+		} finally {
 			pm.done();
 			clearCaches();
 		}

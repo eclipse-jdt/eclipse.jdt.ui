@@ -69,7 +69,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -285,8 +285,10 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	
 	//---- Activation checking ------------------------------------
 
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		try{
+	//---- Activation checking ------------------------------------
+	
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkDeclaringType());
@@ -304,7 +306,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			}
 			fMemberDeclarations= getASTMembers(result);
 			return result;
-		} finally{
+		} finally {
 			pm.done();
 		}	
 	}
@@ -334,8 +336,8 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	
 	//---- Input checking ------------------------------------
 
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask(RefactoringCoreMessages.getString("MoveMembersRefactoring.Checking_preconditions"), 10); //$NON-NLS-1$
 			
 			RefactoringStatus result= new RefactoringStatus();	
@@ -369,11 +371,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			
 			createChange(result, new SubProgressMonitor(pm, 7));
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);	
-		} finally{
+		} finally {
 			pm.done();
 		}	
 	}
@@ -429,7 +427,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 				String message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.inside", //$NON-NLS-1$
 						new String[] {JavaModelUtil.getFullyQualifiedName(type),
 								JavaModelUtil.getFullyQualifiedName(fDestinationType)});
-				Context context= JavaStatusContext.create(fDestinationType.getCompilationUnit(), fDestinationType.getNameRange());
+				RefactoringStatusContext context= JavaStatusContext.create(fDestinationType.getCompilationUnit(), fDestinationType.getNameRange());
 				result.addFatalError(message, context);
 				return result;
 			}
@@ -738,7 +736,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	/*
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.done();
 		return fChange;
 	}

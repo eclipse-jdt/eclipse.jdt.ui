@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -31,7 +29,7 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
  * A Java element context that can be used to annotate a </code>RefactoringStatusEntry<code> 
  * with detailed information about an error detected in an <code>IJavaElement</code>.
  */
-public abstract class JavaStatusContext extends Context {
+public abstract class JavaStatusContext extends RefactoringStatusContext {
 
 	private static class MemberSourceContext extends JavaStatusContext {
 		private IMember fMember;
@@ -110,7 +108,7 @@ public abstract class JavaStatusContext extends Context {
 	 * @return the status entry context or <code>null</code> if the
 	 * 	context cannot be created
 	 */
-	public static Context create(IMember member) {
+	public static RefactoringStatusContext create(IMember member) {
 		if (member == null || !member.exists())
 			return null;
 		return new MemberSourceContext(member);
@@ -124,7 +122,7 @@ public abstract class JavaStatusContext extends Context {
 	 * @return the status entry context or <code>null</code> if the
 	 * 	context cannot be created
 	 */
-	public static Context create(IImportDeclaration declaration) {
+	public static RefactoringStatusContext create(IImportDeclaration declaration) {
 		if (declaration == null || !declaration.exists())
 			return null;
 		return new ImportDeclarationSourceContext(declaration);
@@ -139,7 +137,7 @@ public abstract class JavaStatusContext extends Context {
 	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
 	 * 	context cannot be created
 	 */
-	public static Context create(IMethodBinding method, IJavaProject scope) {
+	public static RefactoringStatusContext create(IMethodBinding method, IJavaProject scope) {
 		IMethod mr= null;
 		try {
 			mr= Bindings.findMethod(method, scope);
@@ -156,7 +154,7 @@ public abstract class JavaStatusContext extends Context {
 	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
 	 * 	context cannot be created
 	 */
-	public static Context create(ICompilationUnit cunit) {
+	public static RefactoringStatusContext create(ICompilationUnit cunit) {
 		return create(cunit, (ISourceRange)null);
 	}
 
@@ -169,7 +167,7 @@ public abstract class JavaStatusContext extends Context {
 	 * @return the status entry context or <code>null</code> if the
 	 * 	context cannot be created
 	 */
-	public static Context create(ICompilationUnit cunit, ISourceRange range) {
+	public static RefactoringStatusContext create(ICompilationUnit cunit, ISourceRange range) {
 		if (cunit == null)
 			return null;
 		return new CompilationUnitSourceContext(cunit, range);
@@ -184,7 +182,7 @@ public abstract class JavaStatusContext extends Context {
 	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
 	 * 	context cannot be created
 	 */
-	public static Context create(ICompilationUnit cunit, ASTNode node) {
+	public static RefactoringStatusContext create(ICompilationUnit cunit, ASTNode node) {
 		ISourceRange range= null;
 		if (node != null)
 			range= new SourceRange(node.getStartPosition(), node.getLength());
@@ -200,7 +198,7 @@ public abstract class JavaStatusContext extends Context {
 	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
 	 * 	context cannot be created
 	 */
-	public static Context create(ICompilationUnit cunit, Selection selection) {
+	public static RefactoringStatusContext create(ICompilationUnit cunit, Selection selection) {
 		ISourceRange range= null;
 		if (selection != null)
 			range= new SourceRange(selection.getOffset(), selection.getLength());
@@ -241,7 +239,7 @@ public abstract class JavaStatusContext extends Context {
 	/* (non-Javadoc)
 	 * Method declared on Context.
 	 */
-	public IAdaptable getCorrespondingElement() {
+	public Object getCorrespondingElement() {
 		if (isBinary())
 			return getClassFile();
 		else

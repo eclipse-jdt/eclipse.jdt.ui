@@ -85,7 +85,7 @@ public class MoveTest extends RefactoringTest {
 			status= ref.setDestination((IJavaElement)destination);
 		else assertTrue(false);
 		
-		assertEquals("destination was expected to be valid: " + status.getFirstMessage(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
+		assertEquals("destination was expected to be valid: " + status.getMessageMatchingSeverity(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
 	}
 
 	private void verifyInvalidDestination(MoveRefactoring ref, Object destination) throws Exception {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,235 +10,225 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * An immutable tuple (message, severity) representing an entry in the list in 
- * <code>RefactoringStatus</code>.
- * <p>
- * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
- * and expected to change significantly before reaching stability. It is being made available at 
- * this early stage to solicit feedback from pioneering adopters on the understanding that any 
- * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
+ * An immutable object representing an entry in the list in <code>RefactoringStatus</code>.
+ * A refactoring status entry consists of a severity, a message, a problem code
+ * (represented by a tuple(plug-in identifier and code number)), a context object and a
+ * generic data pointer. The context object is used to provide context information for
+ * the problem itself. An example context is a tuple consisting of the resource that contains
+ * the problem and a corresponding line number.
+ * <p> 
+ * Note: this class is not intented to be subclassed by clients.
+ * </p>
+ * 
+ * @since 3.0
  */
-public class RefactoringStatusEntry{
+public class RefactoringStatusEntry {
 	
-	private final String fMessage;
+	/** 
+	 * A special problem code indicating that no problem code is provided. If 
+	 * <code>NO_CODE</code> is used then the plug-in identifier can be <code>
+	 * null</code>
+	 */
+	public static final int NO_CODE= -1;
+
+	/** The severity */
 	private final int fSeverity;
-	private final Context fContext;
-	private final Object fData;
+
+	/** The message */
+	private final String fMessage;
+
+	/** A plug-in specific problem code */
 	private final int fCode;
 	
-	public RefactoringStatusEntry(String msg, int severity, Context context, Object data, int code){
-		Assert.isTrue(severity == RefactoringStatus.INFO 
-				   || severity == RefactoringStatus.WARNING
-				   || severity == RefactoringStatus.ERROR
-				   || severity == RefactoringStatus.FATAL);
+	/** A plug-in identifier to make the problem code unique */
+	private final String fPluginId;
+
+	/** A context providing detailed information of where the problem occurred */
+	private final RefactoringStatusContext fContext;
+
+	/** A generic data pointer */
+	private final Object fData;
+
+	/**
+	 * Creates a new refactoring status entry. The context is set to <code>
+	 * null</code> the problem code is set to <code>NO_CODE</code>, the 
+	 * plug-in identifier is set to <code>null</code> and the data pointer 
+	 * is set to <code>null</code> as well.
+	 * 
+	 * @param severity the severity
+	 * @param msg the message
+	 */
+	public RefactoringStatusEntry(int severity, String msg) {
+		this(severity, msg, null);
+	}
+
+	/**
+	 * Creates a new refactoring status entry. The problem code is set to <code>
+	 * NO_CODE</code>, the plug-in identifier is set to <code>null</code> and
+	 * the data pointer is set to <code>null</code> as well.
+	 * 
+	 * @param severity the severity
+	 * @param msg the message
+	 * @param context the context. Can be <code>null</code>
+	 */
+	public RefactoringStatusEntry(int severity, String msg, RefactoringStatusContext context) {
+		this(severity, msg, context, null, NO_CODE, null);
+	}
+
+	/**
+	 * Creates a new refactoring status entry.
+	 * 
+	 * @param severity the severity
+	 * @param msg the message
+	 * @param context the context. Can be <code>null</code>
+	 * @param pluginId the plug-in identifier. Can be <code>null</code> if argument <code>
+	 *  code</code> equals <code>NO_CODE</code>
+	 * @param code the problem code. Must be either <code>NO_CODE</code> or equals or greater
+	 *  than zero
+	 */
+	public RefactoringStatusEntry(int severity, String msg, RefactoringStatusContext context, String pluginId, int code) {
+		this(severity, msg, context, pluginId, code, null);
+	}
+
+	/**
+	 * Creates a new refactoring status entry.
+	 * 
+	 * @param severity the severity
+	 * @param msg the message
+	 * @param context the context. Can be <code>null</code>
+	 * @param pluginId the plug-in identifier. Can be <code>null</code> if argument <code>
+	 *  code</code> equals <code>NO_CODE</code>
+	 * @param code the problem code. Must be either <code>NO_CODE</code> or equals or greater
+	 *  than zero
+	 * @param data application specific data
+	 */
+	public RefactoringStatusEntry(int severity, String msg, RefactoringStatusContext context, String pluginId, int code, Object data) {
+		Assert.isTrue(severity == RefactoringStatus.INFO || severity == RefactoringStatus.WARNING
+			|| severity == RefactoringStatus.ERROR || severity == RefactoringStatus.FATAL);
 		Assert.isNotNull(msg);
+		Assert.isTrue(code == NO_CODE || code >= 0);
+		if (code != NO_CODE) Assert.isTrue(pluginId != null);
 		fMessage= msg;
 		fSeverity= severity;
 		fContext= context;
-		fData= data;
+		fPluginId= pluginId;
 		fCode= code;
+		fData= data;
 	}
 
 	/**
-	 * Creates an entry with the given severity.
-	 * @param msg message
-	 * @param severity severity
-	 * @param context a context which can be used to show more detailed information
-	 * 	about this error in the UI
-	 */
-	public RefactoringStatusEntry(String msg, int severity, Context context){
-		this(msg, severity, context, null, RefactoringStatusCodes.NONE);
-	}
-	
-	/**
-	 * Creates an entry with the given severity. The corresponding resource and source range are set to <code>null</code>.
-	 * @param severity severity
-	 * @param msg message
-	 */
-	public RefactoringStatusEntry(String msg, int severity) {
-		this(msg, severity, null);
-	}
-	
-	/**
-	 * Creates an entry with <code>RefactoringStatus.INFO</code> status.
-	 * @param msg message
-	 */
-	public static RefactoringStatusEntry createInfo(String msg) {
-		return new RefactoringStatusEntry(msg, RefactoringStatus.INFO);
-	}
-	
-	/**
-	 * Creates an entry with <code>RefactoringStatus.INFO</code> status.
-	 * @param msg message
-	 */
-	public static RefactoringStatusEntry createInfo(String msg, Context context) {
-		return new RefactoringStatusEntry(msg, RefactoringStatus.INFO, context);
-	}
-
-	/**
-	 * Creates an entry with <code>RefactoringStatus.WARNING</code> status.
-	 * @param msg message
-	 */	
-	public static RefactoringStatusEntry createWarning(String msg) {
-		return new RefactoringStatusEntry(msg, RefactoringStatus.WARNING);
-	}
-
-	/**
-	 * Creates an entry with <code>RefactoringStatus.WARNING</code> status.
-	 * @param msg message
-	 */	
-	public static RefactoringStatusEntry createWarning(String msg, Context context) {
-		return new RefactoringStatusEntry(msg, RefactoringStatus.WARNING, context);
-	}
-	
-	/**
-	 * Creates an entry with <code>RefactoringStatus.ERROR</code> status.
-	 * @param msg message
-	 */	
-	public static RefactoringStatusEntry createError(String msg) {
-		return new RefactoringStatusEntry(msg, RefactoringStatus.ERROR);
-	}
-
-	/**
-	 * Creates an entry with <code>RefactoringStatus.ERROR</code> status.
-	 * @param msg message
-	 */		
-	public static RefactoringStatusEntry createError(String msg, Context context) {
-		return new RefactoringStatusEntry(msg, RefactoringStatus.ERROR, context);
-	}
-	
-	/**
-	 * Creates an entry with <code>RefactoringStatus.FATAL</code> status.
-	 * @param msg message
-	 */	
-	public static RefactoringStatusEntry createFatal(String msg) {
-		return new RefactoringStatusEntry(msg, RefactoringStatus.FATAL);
-	}
-
-	/**
-	 * Creates an entry with <code>RefactoringStatus.FATAL</code> status.
-	 * @param msg message
-	 */	
-	public static RefactoringStatusEntry createFatal(String msg, Context context) {
-		return new RefactoringStatusEntry(msg, RefactoringStatus.FATAL, context);
-	}
-	
-	/**
-	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.FATAL</code>).
-	 */
-	public boolean isFatalError() {
-		return fSeverity == RefactoringStatus.FATAL;
-	}
-	
-	/**
-	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.ERROR</code>).
-	 */
-	public boolean isError() {
-		return fSeverity == RefactoringStatus.ERROR;
-	}
-	
-	/**
-	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.WARNING</code>).
-	 */
-	public boolean isWarning() {
-		return fSeverity == RefactoringStatus.WARNING;
-	}
-	
-	/**
-	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.INFO</code>).
-	 */
-	public boolean isInfo() {
-		return fSeverity == RefactoringStatus.INFO;
-	}
-
-	/**
-	 * @return message.
+	 * Returns the message of the status entry.
+	 * 
+	 * @return the message
 	 */
 	public String getMessage() {
 		return fMessage;
 	}
 
 	/**
-	 * @return severity level.
+	 * Returns the severity level.
+	 * 
+	 * @return the severity level
+	 * 
 	 * @see RefactoringStatus#INFO
 	 * @see RefactoringStatus#WARNING
 	 * @see RefactoringStatus#ERROR
 	 * @see RefactoringStatus#FATAL
-	 */	
+	 */
 	public int getSeverity() {
 		return fSeverity;
 	}
 
 	/**
-	 * Returns the context which can be used to show more detailed information
-	 * regarding this status entry in the UI. The method may return <code>null
-	 * </code> indicating that no context is available.
+	 * Returns the context which can be used to show more detailed information regarding
+	 * this status entry in the UI. The method may return <code>null</code> indicating
+	 * that no context is available.
 	 * 
 	 * @return the status entry's context
 	 */
-	public Context getContext() {
+	public RefactoringStatusContext getContext() {
 		return fContext;
 	}
 
-	public Object getData() {
-		return fData;
+	/**
+	 * Returns the plug-in identifier associated with the
+	 * problem code. Might return <code>null</code> if the
+	 * problem code equals <code>NO_CODE</code>.
+	 * 
+	 * @return the plug-in identifier
+	 */
+	public String getPluginId() {
+		return fPluginId;
 	}
-
+	
+	/**
+	 * Returns the problem code.
+	 * 
+	 * @return the problem code
+	 */
 	public int getCode() {
 		return fCode;
 	}
 	
 	/**
-	 * Converts this <tt>RefactoringStatusEntry</tt> into an <tt>IStatus</tt>.
-	 * The mapping is done as follows: 
-	 * <ul>
-	 *   <li>Fatal entries are mapped to <code>IStatus.ERROR</code>.
-	 *   </li>
-	 *   <li>Error and warning entries are mapped to <code>IStatus.WARNING</code>.
-	 *   </li>
-	 *   <li>Information entries are mapped to <code>IStatus.INFO</code>.</li>
-	 * </ul>
-	 * @return IStatus
+	 * Returns the application defined entry data associated
+	 * with the receiver, or <code>null</code> if it has not 
+	 * been set.
+	 * 
+	 * @return the entry data
 	 */
-	public IStatus asStatus () {
-		int statusSeverity= IStatus.ERROR;
-		switch (fSeverity) {
-			case RefactoringStatus.OK:
-				statusSeverity= IStatus.OK;
-				break;
-			case RefactoringStatus.INFO:
-				statusSeverity= IStatus.INFO;
-				break;
-			case RefactoringStatus.WARNING:
-			case RefactoringStatus.ERROR:
-				statusSeverity= IStatus.WARNING;
-				break; 
-		}
-		return new Status(statusSeverity, JavaPlugin.getPluginId(), fCode, fMessage, null);
+	public Object getData() {
+		return fData;
 	}
-	
-	/* non java-doc
-	 * for debugging only
+
+	/**
+	 * Returns whether the entry represents a fatal error or not.
+	 * 
+	 * @return <code>true</code> iff (severity ==<code>RefactoringStatus.FATAL</code>)
+	 */
+	public boolean isFatalError() {
+		return fSeverity == RefactoringStatus.FATAL;
+	}
+
+	/**
+	 * Returns whether the entry represents an error or not.
+	 * 
+	 * @return <code>true</code> iff (severity ==<code>RefactoringStatus.ERROR</code>).
+	 */
+	public boolean isError() {
+		return fSeverity == RefactoringStatus.ERROR;
+	}
+
+	/**
+	 * Returns whether the entry represents a warning or not.
+	 * 
+	 * @return <code>true</code> iff (severity ==<code>RefactoringStatus.WARNING</code>).
+	 */
+	public boolean isWarning() {
+		return fSeverity == RefactoringStatus.WARNING;
+	}
+
+	/**
+	 * Returns whether the entry represents an information or not.
+	 * 
+	 * @return <code>true</code> iff (severity ==<code>RefactoringStatus.INFO</code>).
+	 */
+	public boolean isInfo() {
+		return fSeverity == RefactoringStatus.INFO;
+	}
+
+	/*
+	 * non java-doc for debugging only
 	 */
 	public String toString() {
-		String contextString= fContext == null ? "<Unspecified context>": fContext.toString(); //$NON-NLS-1$
-		return 	"\n" //$NON-NLS-1$
-				+ RefactoringStatus.getSeverityString(fSeverity) 
-				+ ": "  //$NON-NLS-1$
-				+ fMessage 
-				+ "\nContext: " //$NON-NLS-1$
-				+ contextString
-				+ "\nData: "  //$NON-NLS-1$
-				+ getData()
-				+"\ncode: "  //$NON-NLS-1$
-				+ fCode
-				+ "\n";  //$NON-NLS-1$
+		String contextString= fContext == null ? "<Unspecified context>" : fContext.toString(); //$NON-NLS-1$
+		return "\n" //$NON-NLS-1$
+			+ RefactoringStatus.getSeverityString(fSeverity) + ": " + fMessage + //$NON-NLS-1$
+			"\nContext: " + contextString + //$NON-NLS-1$
+			(fCode == NO_CODE ? "\ncode: none" : "\nplug-in id: " + fPluginId + "code: " + fCode) +  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"\nData: " + fData;  //$NON-NLS-1$
 	}
 }

@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -51,7 +51,7 @@ class MemberCheckUtil {
 		IMethod[] destinationTypeMethods= destinationType.getMethods();
 		IMethod found= findMethod(method, destinationTypeMethods);
 		if (found != null){
-			Context context= JavaStatusContext.create(destinationType.getCompilationUnit(), found.getSourceRange());
+			RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), found.getSourceRange());
 			String message= RefactoringCoreMessages.getFormattedString("MemberCheckUtil.signature_exists", //$NON-NLS-1$
 					new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
 			result.addError(message, context);
@@ -60,7 +60,7 @@ class MemberCheckUtil {
 			if (similar != null){
 				String message= RefactoringCoreMessages.getFormattedString("MemberCheckUtil.same_param_count",//$NON-NLS-1$
 						 new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
-				Context context= JavaStatusContext.create(destinationType.getCompilationUnit(), similar.getSourceRange());
+				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), similar.getSourceRange());
 				result.addWarning(message, context);
 			}										
 		}	
@@ -72,7 +72,7 @@ class MemberCheckUtil {
 			return;
 		String message= RefactoringCoreMessages.getFormattedString("MemberCheckUtil.field_exists", //$NON-NLS-1$
 				new String[]{field.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
-		Context context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationTypeField.getSourceRange());
+		RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationTypeField.getSourceRange());
 		result.addError(message, context);
 	}
 	
@@ -82,20 +82,20 @@ class MemberCheckUtil {
 		if (destinationTypeType.exists()){
 			String message= MessageFormat.format(RefactoringCoreMessages.getString("MemberCheckUtil.type_name_conflict0"),  //$NON-NLS-1$
 					new String[]{typeName, JavaModelUtil.getFullyQualifiedName(destinationType)});
-			Context context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationTypeType.getNameRange());
+			RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationTypeType.getNameRange());
 			result.addError(message, context);
 		} else {
 			//need to check the hierarchy of enclosing and enclosed types
 			if (destinationType.getElementName().equals(typeName)){
 				String message= MessageFormat.format(RefactoringCoreMessages.getString("MemberCheckUtil.type_name_conflict1"),  //$NON-NLS-1$
 						new String[]{JavaModelUtil.getFullyQualifiedName(type)});
-				Context context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
+				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
 			if (typeNameExistsInEnclosingTypeChain(destinationType, typeName)){
 				String message= MessageFormat.format(RefactoringCoreMessages.getString("MemberCheckUtil.type_name_conflict2"),  //$NON-NLS-1$
 						new String[]{JavaModelUtil.getFullyQualifiedName(type)});
-				Context context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
+				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
 			checkHierarchyOfEnclosedTypes(destinationType, result, type);
@@ -109,13 +109,13 @@ class MemberCheckUtil {
 			if (destinationType.getElementName().equals(enclosedType.getElementName())){
 				String message= MessageFormat.format(RefactoringCoreMessages.getString("MemberCheckUtil.type_name_conflict3"),  //$NON-NLS-1$
 						new String[]{JavaModelUtil.getFullyQualifiedName(enclosedType), JavaModelUtil.getFullyQualifiedName(type)});
-				Context context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
+				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
 			if (typeNameExistsInEnclosingTypeChain(destinationType, enclosedType.getElementName())){
 				String message= MessageFormat.format(RefactoringCoreMessages.getString("MemberCheckUtil.type_name_conflict4"),  //$NON-NLS-1$
 						new String[]{JavaModelUtil.getFullyQualifiedName(enclosedType), JavaModelUtil.getFullyQualifiedName(type)});
-				Context context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
+				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
 		}

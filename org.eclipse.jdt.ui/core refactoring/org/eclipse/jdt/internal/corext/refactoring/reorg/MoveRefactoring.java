@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
@@ -70,7 +71,7 @@ public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdati
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
 			RefactoringStatus result= new RefactoringStatus();
@@ -111,7 +112,7 @@ public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdati
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		try{
 			Assert.isNotNull(fReorgQueries);
 			fWasCanceled= false;
@@ -125,7 +126,7 @@ public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdati
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() == null || fMovePolicy.getResourceDestination() == null);
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null);		
 		try {

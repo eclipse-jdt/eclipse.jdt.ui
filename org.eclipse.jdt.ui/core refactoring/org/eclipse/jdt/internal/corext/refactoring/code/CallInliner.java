@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
@@ -60,9 +63,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -299,8 +301,8 @@ public class CallInliner {
 		// if constructor is invoked from another constructor then we can inline such invocation
 		if (fInvocation.getNodeType() != ASTNode.CONSTRUCTOR_INVOCATION && methodDeclaration.isConstructor()) {
 			result.addEntry(new RefactoringStatusEntry(
-				RefactoringCoreMessages.getString("CallInliner.constructors"),  //$NON-NLS-1$
-				severity, JavaStatusContext.create(fCUnit, fInvocation)));
+				severity,  //$NON-NLS-1$
+				RefactoringCoreMessages.getString("CallInliner.constructors"), JavaStatusContext.create(fCUnit, fInvocation)));
 		}
 	}
 
@@ -412,9 +414,10 @@ public class CallInliner {
 	
 	private void addEntry(RefactoringStatus result, String message, int code, int severity) {
 		result.addEntry(new RefactoringStatusEntry(
-			message, severity, 
+			severity, message, 
 			JavaStatusContext.create(fCUnit, fInvocation),
-			null, code));
+			Corext.getPluginId(),
+			code, null));
 	}
 
 	private void flowAnalysis() {

@@ -10,35 +10,35 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * A file context can be used to annotate a </code>RefactoringStatusEntry<code> with
- * detailed information about an error detected in an <code>IFile</code>.
+ * detailed information about a problem detected in an <code>IFile</code>.
+ * 
+ * @since 3.0
  */
-public class FileStatusContext extends Context {
+public class FileStatusContext extends RefactoringStatusContext {
 
 	private IFile fFile;
-	private ISourceRange fSourceRange;
+	private IRegion fSourceRegion;
 
 	/**
-	 * Creates an status entry context for the given file and source range
+	 * Creates an status entry context for the given file and source region.
 	 * 
-	 * @param file the file that has caused the error. Must not be <code>
+	 * @param file the file that has caused the problem. Must not be <code>
 	 *  null</code>
-	 * @param range the source range of the error inside the given file or
-	 *  <code>null</code> if now source range is known
+	 * @param region the source region of the problem inside the given file or
+	 *  <code>null</code> if now source region is known
 	 */
-	public FileStatusContext(IFile file, ISourceRange range) {
+	public FileStatusContext(IFile file, IRegion region) {
 		Assert.isNotNull(file);
 		fFile= file;
-		fSourceRange= range;
+		fSourceRegion= region;
 	}
 
 	/**
@@ -51,18 +51,18 @@ public class FileStatusContext extends Context {
 	}
 	
 	/**
-	 * Returns the context's source range
+	 * Returns the context's source region
 	 * 
-	 * @return the context's source range
+	 * @return the context's source region
 	 */
-	public ISourceRange getSourceRange() {
-		return fSourceRange;
+	public IRegion getTextRegion() {
+		return fSourceRegion;
 	}
 	
 	/* (non-Javadoc)
-	 * Method declared on Context.
+	 * Method declared on RefactoringStatusContext.
 	 */
-	public IAdaptable getCorrespondingElement() {
+	public Object getCorrespondingElement() {
 		return getFile();
 	}	
 }

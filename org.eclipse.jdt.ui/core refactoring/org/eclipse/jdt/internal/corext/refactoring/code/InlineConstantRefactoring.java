@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -69,7 +70,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -166,7 +167,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				public ClassQualificationCannotBePerformed(String message) {
 					super(message);	
 				}
-				public void fillInStatus(RefactoringStatus status, Context context) {
+				public void fillInStatus(RefactoringStatus status, RefactoringStatusContext context) {
 					status.addInfo(getMessage(), context);
 				}
 			}
@@ -668,7 +669,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			if(fUnit.getSource() == null) {
 				String[] keys= {fUnit.getElementName()};
 				String msg= RefactoringCoreMessages.getFormattedString("InlineConstantRefactoring.source_code_unavailable", keys); //$NON-NLS-1$
-				fEditProblems.merge(RefactoringStatus.createStatus(RefactoringStatus.INFO, msg, null, null, RefactoringStatusCodes.REFERENCE_IN_CLASSFILE));
+				fEditProblems.merge(RefactoringStatus.createStatus(RefactoringStatus.INFO, msg, null, Corext.getPluginId(), RefactoringStatusCodes.REFERENCE_IN_CLASSFILE, null));
 			} else {
 				for(int i= 0; i < fReferences.length; i++)
 					addEditsToInline(fReferences[i]);
@@ -841,19 +842,19 @@ public class InlineConstantRefactoring extends Refactoring {
 			Assert.isTrue(fReplaceAllReferences);
 	}
 
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 4); //$NON-NLS-1$
-
+	
 			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[] { fCu }));
 			if (result.hasFatalError())
 				return result;
 			pm.worked(1);
-
+	
 			if (!fCu.isStructureKnown())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.syntax_errors"), null, null, RefactoringStatusCodes.SYNTAX_ERRORS); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.syntax_errors"), null, Corext.getPluginId(), RefactoringStatusCodes.SYNTAX_ERRORS, null); //$NON-NLS-1$
 			pm.worked(1);
-
+	
 			return checkSelection(new SubProgressMonitor(pm, 2));
 		} finally {
 			pm.done();
@@ -864,21 +865,21 @@ public class InlineConstantRefactoring extends Refactoring {
 		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
 	}
 
-	private RefactoringStatus checkSelection(SubProgressMonitor subProgressMonitor) throws JavaModelException {
+	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try {
 			RefactoringStatus result= checkStaticFinalConstantNameSelected();
 			if(result.hasFatalError())
 				return result;
-			subProgressMonitor.worked(1);
-
+			pm.worked(1);
+	
 			/* For now, we don't perform the inline if getField() == null.
 			 * XXX: Handle constants with no IField f for which f.exists():
 			 */
 			if(getField()  == null)
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.local_anonymous_unsupported"), null, null, RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED); //$NON-NLS-1$
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.local_anonymous_unsupported"), null, Corext.getPluginId(), RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED, null); //$NON-NLS-1$
 		
 			checkDeclarationSelected();
-
+	
 			result.merge(findInitializer());
 			if(result.hasFatalError())
 				return result;			
@@ -886,11 +887,11 @@ public class InlineConstantRefactoring extends Refactoring {
 			result.merge(checkInitializer());
 			if(result.hasFatalError())
 				return result;
-			subProgressMonitor.worked(1);
+			pm.worked(1);
 		
 			return result;
 		} finally {
-			subProgressMonitor.done();	
+			pm.done();	
 		}
 	}
 	
@@ -898,7 +899,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		initializeAST();
 
 		if(getConstantNameNode() == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.static_final_field"), null, null, RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED); //$NON-NLS-1$
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.static_final_field"), null, Corext.getPluginId(), RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED, null); //$NON-NLS-1$
 		
 		return new RefactoringStatus();
 	}
@@ -906,7 +907,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	private RefactoringStatus checkInitializer() throws JavaModelException {
 		Expression initializer= getInitializer();
 		if(initializer == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.blank_finals"), null, null, RefactoringStatusCodes.CANNOT_INLINE_BLANK_FINAL); //$NON-NLS-1$
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.blank_finals"), null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_INLINE_BLANK_FINAL, null); //$NON-NLS-1$
 		
 		fInitializerAllStaticFinal= ConstantChecks.isStaticFinalConstant((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(initializer));
 		fInitializerChecked= true;
@@ -954,7 +955,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	private RefactoringStatus findInitializer() throws JavaModelException {
 		VariableDeclarationFragment declaration= getDeclaration();
 		if(declaration == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.binary_file"), null, null, RefactoringStatusCodes.DECLARED_IN_CLASSFILE); //$NON-NLS-1$
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.binary_file"), null, Corext.getPluginId(), RefactoringStatusCodes.DECLARED_IN_CLASSFILE, null); //$NON-NLS-1$
 
 		fInitializer= declaration.getInitializer();
 		fInitializerFound= true;
@@ -1042,26 +1043,20 @@ public class InlineConstantRefactoring extends Refactoring {
 			return null;
 	}
 	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		try {
-			RefactoringStatus result= new RefactoringStatus();
-			fTargetCompilationUnits= InlineTargetCompilationUnit.prepareTargets(this, pm, result);
-			if(result.hasFatalError())
-				return result;
-			
-			for(int i= 0; i < fTargetCompilationUnits.length; i++)
-				fTargetCompilationUnits[i].checkReferences(result);
-			
-			
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
+		fTargetCompilationUnits= InlineTargetCompilationUnit.prepareTargets(this, pm, result);
+		if(result.hasFatalError())
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		}
+		
+		for(int i= 0; i < fTargetCompilationUnits.length; i++)
+			fTargetCompilationUnits[i].checkReferences(result);
+		
+		
+		return result;
 	}
 
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			//XXX:  fix progress meter
 			pm.beginTask(RefactoringCoreMessages.getString("InlineConstantRefactoring.preview"), 2); //$NON-NLS-1$
@@ -1071,10 +1066,6 @@ public class InlineConstantRefactoring extends Refactoring {
 			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("InlineConstantRefactoring.inline")); //$NON-NLS-1$
 			composite.addAll(cuChanges);
 			return composite;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}

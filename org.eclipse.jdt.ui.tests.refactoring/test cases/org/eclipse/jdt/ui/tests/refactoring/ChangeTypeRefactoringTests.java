@@ -76,23 +76,23 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		ISourceRange		selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ChangeTypeRefactoring		ref= ChangeTypeRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 												   selectedTypeName);
-
+	
 		// TODO Set parameters on your refactoring instance from arguments...
-
+	
 		RefactoringStatus	activationResult= ref.checkActivation(new NullProgressMonitor());	
-
+	
 		assertTrue("activation was supposed to be successful:" + activationResult.toString(), activationResult.isOK());																
-
+	
 		RefactoringStatus	checkInputResult= ref.checkInput(new NullProgressMonitor());
-
+	
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
-
+	
 		performChange(ref.createChange(new NullProgressMonitor()));	
 		
 		String newSource= cu.getSource();
-
+	
 		assertEqualLines(getName() + ": ", newSource, getFileContents(getTestFileName(true, false)));
-
+	
 		
 		return ref;
 	}

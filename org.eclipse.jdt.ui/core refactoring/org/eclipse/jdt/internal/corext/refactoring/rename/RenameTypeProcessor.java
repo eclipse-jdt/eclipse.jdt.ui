@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -503,7 +503,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 					return true;
 		
 				if (fNewElementName.equals(node.getName().getIdentifier())){
-					Context	context= JavaStatusContext.create(fType.getCompilationUnit(), node);
+					RefactoringStatusContext	context= JavaStatusContext.create(fType.getCompilationUnit(), node);
 					String msg= null;
 					if (node.isLocalTypeDeclaration()){
 						msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type", //$NON-NLS-1$
@@ -520,7 +520,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 				MethodDeclaration[] methods= node.getMethods();
 				for (int i= 0; i < methods.length; i++) {
 					if (Modifier.isNative(methods[i].getModifiers())){
-						Context	context= JavaStatusContext.create(fType.getCompilationUnit(), methods[i]);
+						RefactoringStatusContext	context= JavaStatusContext.create(fType.getCompilationUnit(), methods[i]);
 						String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_native", node.getName().getIdentifier());//$NON-NLS-1$
 						result.addWarning(msg, context); 
 					}	
@@ -619,7 +619,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < intersection.length; i++) {
-			Context context= JavaStatusContext.create(intersection[i]);
+			RefactoringStatusContext context= JavaStatusContext.create(intersection[i]);
 			String message= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.another_type", //$NON-NLS-1$
 				new String[]{fNewElementName, intersection[i].getElementName()});
 			result.addError(message, context);

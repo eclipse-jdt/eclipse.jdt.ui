@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.util.List;
+import org.eclipse.compare.CompareUI;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -28,7 +27,6 @@ import org.eclipse.swt.widgets.TableColumn;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -38,17 +36,11 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
-import org.eclipse.compare.CompareUI;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.part.PageBook;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -65,7 +57,7 @@ class RefactoringStatusViewer extends SashForm {
 			fLabel= new Label(parent, SWT.CENTER | SWT.FLAT);
 			fLabel.setText(RefactoringMessages.getString("ErrorWizardPage.no_context_information_available")); //$NON-NLS-1$
 		}
-		public void setInput(Context input) {
+		public void setInput(RefactoringStatusContext input) {
 			// do nothing
 		}
 		public Control getControl() {
@@ -86,10 +78,10 @@ class RefactoringStatusViewer extends SashForm {
 		}
 		public void update() {
 			boolean enabled= false;
-			List entries= null;
-			if (fStatus != null && !(entries= fStatus.getEntries()).isEmpty()) {
+			if (fStatus != null && fStatus.hasEntries()) {
+				RefactoringStatusEntry[] entries= fStatus.getEntries();
 				int index= fTableViewer.getTable().getSelectionIndex();
-				enabled= index == -1 || index < entries.size() - 1;
+				enabled= index == -1 || index < entries.length - 1;
 			}
 			setEnabled(enabled);
 		}
@@ -108,7 +100,7 @@ class RefactoringStatusViewer extends SashForm {
 		}
 		public void update() {
 			boolean enabled= false;
-			if (fStatus != null && !fStatus.getEntries().isEmpty()) {
+			if (fStatus != null && fStatus.hasEntries()) {
 				int index= fTableViewer.getTable().getSelectionIndex();
 				enabled= index == -1 || index > 0;
 			}
@@ -132,8 +124,6 @@ class RefactoringStatusViewer extends SashForm {
 	private RefactoringStatus fStatus;
 	private TableViewer fTableViewer;
 	private PageBook fContextViewerContainer;
-	private ViewerPane fContextViewerPane;
-	private Image fPaneImage;
 	private StatusContextViewerDescriptor fCurrentDescriptor;
 	private IStatusContextViewer fCurrentContextViewer;
 	private NullContextViewer fNullContextViewer;
@@ -198,26 +188,15 @@ class RefactoringStatusViewer extends SashForm {
 		createTableViewer(contextPane);
 		contextPane.setContent(fTableViewer.getControl());
 		
-		fContextViewerPane= new ViewerPane(this, SWT.BORDER | SWT.FLAT);
-		fContextViewerContainer= new PageBook(fContextViewerPane, SWT.NONE);
+		fContextViewerContainer= new PageBook(this, SWT.NONE);
 		fNullContextViewer= new NullContextViewer();
 		fNullContextViewer.createControl(fContextViewerContainer);
 		fContextViewerContainer.showPage(fNullContextViewer.getControl());
 		fCurrentContextViewer= fNullContextViewer;
-		fContextViewerPane.setContent(fContextViewerContainer);
 		fCurrentContextViewer= fNullContextViewer;
 		fCurrentDescriptor= null;	
 		
-		setWeights(new int[]{35, 65});
-		
-		addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				if (fPaneImage != null) {
-					fPaneImage.dispose();
-					fPaneImage= null;
-				}
-			}
-		});
+		setWeights(new int[]{35, 65});		
 	}
 	
 	private  void createTableViewer(Composite parent) {
@@ -250,43 +229,11 @@ class RefactoringStatusViewer extends SashForm {
 			return;
 		
 		RefactoringStatusEntry entry= (RefactoringStatusEntry)first;
-		updateTitle(entry);	
 		showContextViewer(entry);
 	}
 
-	private void updateTitle(RefactoringStatusEntry first) {
-		IAdaptable element= getCorrespondingElement(first);
-		String title= null;
-		ImageDescriptor imageDescriptor= null;
-		if (element != null) {
-			IWorkbenchAdapter adapter= (IWorkbenchAdapter)element.getAdapter(IWorkbenchAdapter.class);
-			if (adapter != null) {
-				title= adapter.getLabel(element);
-				imageDescriptor= adapter.getImageDescriptor(element);
-			}
-		}
-		if (title == null || title.length() == 0)
-			title= RefactoringMessages.getString("RefactoringStatusViewer.Problem_context"); //$NON-NLS-1$
-		fContextViewerPane.setText(title);
-		if (imageDescriptor != null) {
-			if (fPaneImage != null) {
-				fPaneImage.dispose();
-				fPaneImage= null;
-			}
-			fPaneImage= imageDescriptor.createImage(fContextViewerPane.getDisplay());
-			fContextViewerPane.setImage(fPaneImage);
-		}
-	}
-
-	private static IAdaptable getCorrespondingElement(RefactoringStatusEntry first){
-		if (first.getContext() == null)
-			return null;
-		else	
-			return first.getContext().getCorrespondingElement();
-	}
-
 	private void showContextViewer(RefactoringStatusEntry entry) {
-		Context context= entry.getContext();
+		RefactoringStatusContext context= entry.getContext();
 		if (context == null) {
 			showNullContextViewer();
 		} else {
@@ -323,19 +270,19 @@ class RefactoringStatusViewer extends SashForm {
 	
 	//---- Helpers ----------------------------------------------------------------------------------------
 	
-	private RefactoringStatusEntry getFirstEntry(){
-		if (fStatus == null || fStatus.getEntries().isEmpty())
+	private RefactoringStatusEntry getFirstEntry() {
+		if (fStatus == null || !fStatus.hasEntries())
 			return null;
-		return (RefactoringStatusEntry)fStatus.getEntries().get(0);
+		return (RefactoringStatusEntry)fStatus.getEntryAt(0);
 	}
 		
 	private void revealElement(boolean next) {
-		List entries= fStatus.getEntries();
-		if (entries.isEmpty()) {
+		RefactoringStatusEntry[] entries= fStatus.getEntries();
+		if (entries.length == 0) {
 			return;
 		}
 		int index= fTableViewer.getTable().getSelectionIndex();
-		int last= entries.size() - 1;
+		int last= entries.length - 1;
 		boolean doIt= true;
 		if (index == -1) {
 			index= 0;
@@ -347,7 +294,7 @@ class RefactoringStatusViewer extends SashForm {
 			doIt= false;
 		}
 		if (doIt)	
-			fTableViewer.setSelection(new StructuredSelection(entries.get(index)));
+			fTableViewer.setSelection(new StructuredSelection(entries[index]));
 	}
 
 }

@@ -163,7 +163,7 @@ public class NewNameQueries implements INewNameQueries {
 					return INVALID_NAME_NO_MESSAGE;
 				}
 				if (refStatus.hasFatalError())
-					return refStatus.getFirstMessage(RefactoringStatus.FATAL);
+					return refStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL);
 
 				if (cu.getElementName().equalsIgnoreCase(newCuName))
 					return ReorgMessages.getString("ReorgQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$

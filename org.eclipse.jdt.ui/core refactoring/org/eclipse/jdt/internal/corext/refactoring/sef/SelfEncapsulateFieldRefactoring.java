@@ -173,7 +173,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		fVisibility= (fField.getFlags() & (Flags.AccPublic | Flags.AccProtected | Flags.AccPrivate));
 		RefactoringStatus result=  new RefactoringStatus();
 		
@@ -252,74 +252,68 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	/*
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		try {
-			RefactoringStatus result= new RefactoringStatus();
-			fChangeManager.clear();
-			pm.beginTask(NO_NAME, 11);
-			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.checking_preconditions")); //$NON-NLS-1$
-			result.merge(checkMethodNames());
-			pm.worked(1);
-			if (result.hasFatalError())
-				return result;
-			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.searching_for_cunits")); //$NON-NLS-1$
-			ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
-				new SubProgressMonitor(pm, 5), RefactoringScopeFactory.create(fField),
-				SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES));
-			
-			checkInHierarchy(result);
-			if (result.hasFatalError())
-				return result;
-				
-			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.analyzing"));	 //$NON-NLS-1$
-			IProgressMonitor sub= new SubProgressMonitor(pm, 5);
-			sub.beginTask(NO_NAME, affectedCUs.length);
-			IVariableBinding fieldIdentifier= fFieldDeclaration.resolveBinding();
-			ITypeBinding declaringClass= 
-				((TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class)).resolveBinding();
-			List ownerDescriptions= new ArrayList();
-			ICompilationUnit owner= fField.getCompilationUnit();
-			for (int i= 0; i < affectedCUs.length; i++) {
-				ICompilationUnit unit= affectedCUs[i];
-				sub.subTask(unit.getElementName());
-				CompilationUnit root= null;
-				ASTRewrite rewriter= null;
-				List descriptions;
-				if (owner.equals(unit)) {
-					root= fRoot;
-					rewriter= fRewriter;
-					descriptions= ownerDescriptions;
-				} else {
-					root= AST.parseCompilationUnit(unit, true);
-					rewriter= new ASTRewrite(root);
-					descriptions= new ArrayList();
-				}
-				checkCompileErrors(result, root, unit);
-				AccessAnalyzer analyzer= new AccessAnalyzer(this, unit, fieldIdentifier, declaringClass, rewriter);
-				root.accept(analyzer);
-				result.merge(analyzer.getStatus());
-				if (!fSetterMustReturnValue) 
-					fSetterMustReturnValue= analyzer.getSetterMustReturnValue();
-				if (result.hasFatalError()) {
-					fChangeManager.clear();
-					return result;
-				}
-				descriptions.addAll(analyzer.getGroupDescriptions());
-				if (!owner.equals(unit))
-					createEdits(unit, rewriter, descriptions);
-				sub.worked(1);
-			}
-				
-			ownerDescriptions.addAll(addGetterSetterChanges(fRoot, fRewriter));
-			createEdits(owner, fRewriter, ownerDescriptions);			
-			sub.done();
-			result.merge(validateModifiesFiles());
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
+		fChangeManager.clear();
+		pm.beginTask(NO_NAME, 11);
+		pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.checking_preconditions")); //$NON-NLS-1$
+		result.merge(checkMethodNames());
+		pm.worked(1);
+		if (result.hasFatalError())
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
+		pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.searching_for_cunits")); //$NON-NLS-1$
+		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
+			new SubProgressMonitor(pm, 5), RefactoringScopeFactory.create(fField),
+			SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES));
+		
+		checkInHierarchy(result);
+		if (result.hasFatalError())
+			return result;
+			
+		pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.analyzing"));	 //$NON-NLS-1$
+		IProgressMonitor sub= new SubProgressMonitor(pm, 5);
+		sub.beginTask(NO_NAME, affectedCUs.length);
+		IVariableBinding fieldIdentifier= fFieldDeclaration.resolveBinding();
+		ITypeBinding declaringClass= 
+			((TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class)).resolveBinding();
+		List ownerDescriptions= new ArrayList();
+		ICompilationUnit owner= fField.getCompilationUnit();
+		for (int i= 0; i < affectedCUs.length; i++) {
+			ICompilationUnit unit= affectedCUs[i];
+			sub.subTask(unit.getElementName());
+			CompilationUnit root= null;
+			ASTRewrite rewriter= null;
+			List descriptions;
+			if (owner.equals(unit)) {
+				root= fRoot;
+				rewriter= fRewriter;
+				descriptions= ownerDescriptions;
+			} else {
+				root= AST.parseCompilationUnit(unit, true);
+				rewriter= new ASTRewrite(root);
+				descriptions= new ArrayList();
+			}
+			checkCompileErrors(result, root, unit);
+			AccessAnalyzer analyzer= new AccessAnalyzer(this, unit, fieldIdentifier, declaringClass, rewriter);
+			root.accept(analyzer);
+			result.merge(analyzer.getStatus());
+			if (!fSetterMustReturnValue) 
+				fSetterMustReturnValue= analyzer.getSetterMustReturnValue();
+			if (result.hasFatalError()) {
+				fChangeManager.clear();
+				return result;
+			}
+			descriptions.addAll(analyzer.getGroupDescriptions());
+			if (!owner.equals(unit))
+				createEdits(unit, rewriter, descriptions);
+			sub.worked(1);
 		}
+			
+		ownerDescriptions.addAll(addGetterSetterChanges(fRoot, fRewriter));
+		createEdits(owner, fRewriter, ownerDescriptions);			
+		sub.done();
+		result.merge(validateModifiesFiles());
+		return result;
 	}
 
 	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups) throws CoreException {
@@ -338,7 +332,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	/*
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		CompositeChange result= new CompositeChange(getName());
 		TextChange[] changes= fChangeManager.getAllChanges();
 		pm.beginTask(NO_NAME, changes.length);

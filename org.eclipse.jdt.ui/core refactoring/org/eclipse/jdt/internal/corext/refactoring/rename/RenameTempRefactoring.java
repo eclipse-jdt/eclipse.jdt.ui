@@ -206,7 +206,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws CoreException {
 		initAST();
 		if (fTempDeclarationNode == null || fTempDeclarationNode.resolveBinding() == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.must_select_local")); //$NON-NLS-1$
@@ -240,8 +240,8 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	/* non java-doc
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm)	throws JavaModelException {
-		try{
+	public RefactoringStatus checkInput(IProgressMonitor pm)	throws CoreException {
+		try {
 			pm.beginTask("", 1);	 //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();			
 			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu})));
@@ -253,7 +253,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 				return result;
 			result.merge(analyzeAST());
 			return result;
-		} finally{
+		} finally {
 			pm.done();
 		}	
 	}
@@ -321,8 +321,8 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	/* non java-doc
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		try{
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
+		try {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			pm.worked(1);
 			
@@ -336,11 +336,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			}
 			
 			return change;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);
-		} finally{
+		} finally {
 			pm.done();
 		}	
 	}

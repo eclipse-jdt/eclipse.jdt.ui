@@ -13,13 +13,13 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.base.UndoManagerAdapter;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
@@ -159,13 +160,13 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 			RefactoringMessages.getString("UndoManagerAction.unsaved_filed"), //$NON-NLS-1$
 			null);
 		String id= JavaPlugin.getPluginId();
-		for (Iterator iter= fPreflightStatus.getEntries().iterator(); iter.hasNext(); ) {
-			RefactoringStatusEntry entry= (RefactoringStatusEntry)iter.next();
+		RefactoringStatusEntry[] entries= fPreflightStatus.getEntries();
+		for (int i= 0; i < entries.length; i++) {
 			status.merge(new Status(
 				IStatus.ERROR,
 				id,
 				IStatus.ERROR,
-				entry.getMessage(),
+				entries[i].getMessage(),
 				null));
 		}
 		return status;
