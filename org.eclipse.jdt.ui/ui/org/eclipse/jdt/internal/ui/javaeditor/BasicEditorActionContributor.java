@@ -10,14 +10,9 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import java.util.ResourceBundle;
-
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.text.ITextOperationTarget;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.Separator;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -27,13 +22,9 @@ import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
-import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class BasicEditorActionContributor extends BasicTextEditorActionContributor {
 	

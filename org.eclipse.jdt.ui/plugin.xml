@@ -914,6 +914,7 @@ JavaStructureDiffViewerCreator
       	</menu>
       	
       	<!-- undo/redo group  -->		
+      	
 		<action id="RedoAction"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
 			label="%Refactoring.redoAction.label"
@@ -923,20 +924,11 @@ JavaStructureDiffViewerCreator
 			label="%Refactoring.undoAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.UndoRefactoringAction"/>
 				
-		<!-- reorg group  -->		
-		<action id="org.eclipse.jdt.ui.actions.Move"
-      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
-      		label="%Refactoring.moveAction.label"
-			retarget="true" />
-			
+		<!-- reorg group  -->
+				
 		<action id="org.eclipse.jdt.ui.actions.ModifyParameters"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.modifyParametersAction.label"
-			retarget="true" />
-			
-		<action id="org.eclipse.jdt.ui.actions.Rename"
-      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
-      		label="%Refactoring.renameAction.label"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.PullUp"
@@ -944,11 +936,17 @@ JavaStructureDiffViewerCreator
       		label="%Refactoring.pullUpAction.label"
 			retarget="true" />
 		
-		<!-- coding group  -->	
-		<action id="org.eclipse.jdt.ui.actions.ExtractMethod"
-      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
-      		label="%Refactoring.extractMethodAction.label"
+		<action id="org.eclipse.jdt.ui.actions.Move"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+      		label="%Refactoring.moveAction.label"
 			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.Rename"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+      		label="%Refactoring.renameAction.label"
+			retarget="true" />
+			
+		<!-- coding group  -->
 			
 		<action id="org.eclipse.jdt.ui.actions.SelfEncapsulateField"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
@@ -965,6 +963,11 @@ JavaStructureDiffViewerCreator
       		label="%Refactoring.extractTempAction.label"
 			retarget="true" />
 
+		<action id="org.eclipse.jdt.ui.actions.ExtractMethod"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+      		label="%Refactoring.extractMethodAction.label"
+			retarget="true" />
+			
 		<!-- =========================================================================== -->
 		<!-- Source Menu                                                                 -->
 		<!-- =========================================================================== -->

@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -42,6 +43,7 @@ public class RefactorActionGroup extends ActionGroup {
 
 	private IWorkbenchSite fSite;
 	private boolean fIsEditorOwner;
+	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
 
  	private SelectionDispatchAction fSelfEncapsulateField;
  	private SelectionDispatchAction fMoveAction;
@@ -78,9 +80,10 @@ public class RefactorActionGroup extends ActionGroup {
 	 * 
 	 * @param editor the editor that owns this action group
 	 */
-	public RefactorActionGroup(CompilationUnitEditor editor) {
+	public RefactorActionGroup(CompilationUnitEditor editor, String groupName) {
 		fSite= editor.getEditorSite();
 		fIsEditorOwner= true;
+		fGroupName= groupName;
 		ISelectionProvider provider= editor.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		
@@ -186,17 +189,21 @@ public class RefactorActionGroup extends ActionGroup {
 	
 	private void addRefactorSubmenu(IMenuManager menu) {
 		IMenuManager refactorSubmenu= new MenuManager(ActionMessages.getString("RefactorMenu.label"));  //$NON-NLS-1$
-		addAction(refactorSubmenu, fMoveAction);
 		addAction(refactorSubmenu, fRenameAction);
-		addAction(refactorSubmenu, fModifyParametersAction);
+		addAction(refactorSubmenu, fMoveAction);
 		addAction(refactorSubmenu, fPullUpAction);
+		addAction(refactorSubmenu, fModifyParametersAction);
+		refactorSubmenu.add(new Separator());
+		addAction(refactorSubmenu, fExtractMethodAction);
+		addAction(refactorSubmenu, fExtractTempAction);
+		addAction(refactorSubmenu, fInlineTempAction);
 		addAction(refactorSubmenu, fSelfEncapsulateField);
 		if (!refactorSubmenu.isEmpty())
-			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactorSubmenu);
+			menu.appendToGroup(fGroupName, refactorSubmenu);
 	}
 	
 	private void addAction(IMenuManager menu, IAction action) {
-		if (action.isEnabled())
+		if (action != null && action.isEnabled())
 			menu.add(action);
 	}
 }

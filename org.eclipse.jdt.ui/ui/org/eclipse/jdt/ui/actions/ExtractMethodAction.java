@@ -24,6 +24,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 
 	public ExtractMethodAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
+		setText(RefactoringMessages.getString("ExtractMethodAction.label"));//$NON-NLS-1$
 		fEditor= editor;
 		fDialogMessageTitle= RefactoringMessages.getString("ExtractMethodAction.dialog.title");//$NON-NLS-1$
 	}

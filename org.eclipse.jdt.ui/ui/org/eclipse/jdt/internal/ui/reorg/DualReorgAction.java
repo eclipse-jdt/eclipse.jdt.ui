@@ -2,6 +2,7 @@ package org.eclipse.jdt.internal.ui.reorg;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
@@ -20,7 +21,7 @@ class DualReorgAction extends SelectionDispatchAction {
 		setDescription(description);
 		fResourceAction= resourceAction;
 		fSourceReferenceAction= sourceReferenceAction;
-		update();
+		update(getSelection());
 	}
 
 	/*
@@ -45,9 +46,9 @@ class DualReorgAction extends SelectionDispatchAction {
 	/*
 	 * @see IUpdate#update()
 	 */
-	public void update() {
-		fResourceAction.update();
-		fSourceReferenceAction.update();
+	public void update(ISelection selection) {
+		fResourceAction.update(selection);
+		fSourceReferenceAction.update(selection);
 		setEnabled(computeEnabledState());
 	}
 	

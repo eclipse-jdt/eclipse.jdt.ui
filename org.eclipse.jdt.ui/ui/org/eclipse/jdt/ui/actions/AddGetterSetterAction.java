@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.core.runtime.CoreException;
@@ -28,6 +29,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -39,7 +41,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -58,6 +62,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  * @since 2.0
  */
 public class AddGetterSetterAction extends SelectionDispatchAction {
+	
+	private CompilationUnitEditor fEditor;
 
 	/**
 	 * Creates a new <code>AddGetterSetterAction</code>.
@@ -73,6 +79,19 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GETTERSETTER_ACTION);
 	}
 
+	/**
+	 * Creates a new <code>AddGetterSetterAction</code>.
+	 * <p>
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * </p>
+	 */
+	public AddGetterSetterAction(CompilationUnitEditor editor) {
+		this(editor.getEditorSite());
+		fEditor= editor;
+	}
+	
+	//---- Structured Viewer -----------------------------------------------------------
+	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -122,13 +141,49 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					workingCopyFields[i]= workingCopyField;
 				}
 			}
+			run(workingCopyFields, editor);
+		} catch (CoreException e) {
+			JavaPlugin.log(e.getStatus());
+			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
+		}
+	}
+	
+	//---- Java Editior --------------------------------------------------------------
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
+	protected void selectionChanged(ITextSelection selection) {
+		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
+	protected void run(ITextSelection selection) {
+		try {
+			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
+			if (elements.length == 0 || elements.length > 1 || !(elements[0] instanceof IField)) {
+				MessageDialog.openInformation(getShell(), getDialogTitle(), 
+					ActionMessages.getString("AddGetterSetterAction.not_applicable")); //$NON-NLS-1$
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e.getStatus());
+			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
+		}
+	}
+	
+	//---- Helpers -------------------------------------------------------------------
+	
+	private void run(IField[] fields, IEditorPart editor) {
+		try{
 			IRequestQuery skipSetterForFinalQuery= skipSetterForFinalQuery();
 			IRequestQuery skipReplaceQuery= skipReplaceQuery();
 			String[] prefixes= CodeGenerationPreferencePage.getGetterStetterPrefixes();
 			String[] suffixes= CodeGenerationPreferencePage.getGetterStetterSuffixes();
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		
-			AddGetterSetterOperation op= new AddGetterSetterOperation(workingCopyFields, prefixes, suffixes, settings, skipSetterForFinalQuery, skipReplaceQuery);
+			AddGetterSetterOperation op= new AddGetterSetterOperation(fields, prefixes, suffixes, settings, skipSetterForFinalQuery, skipReplaceQuery);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 			dialog.run(false, true, new WorkbenchRunnableAdapter(op));
 		
@@ -139,14 +194,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		} catch (InvocationTargetException e) {
 			JavaPlugin.log(e);
 			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
-		} catch (CoreException e) {
-			JavaPlugin.log(e.getStatus());
-			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
-			return;
 		} catch (InterruptedException e) {
 			// operation cancelled
 		}
-		
 	}
 	
 	private IRequestQuery skipSetterForFinalQuery() {

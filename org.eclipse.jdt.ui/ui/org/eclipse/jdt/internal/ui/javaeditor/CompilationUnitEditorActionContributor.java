@@ -9,11 +9,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.actions.JdtActionConstants;
-
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -21,6 +16,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -28,7 +24,12 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
-import org.eclipse.ui.texteditor.TextOperationAction;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 public class CompilationUnitEditorActionContributor extends BasicEditorActionContributor {
 	
@@ -191,8 +192,6 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor) part;
 
-		
-
 		fTogglePresentation.setEditor(textEditor);
 		fToggleTextHover.setEditor(textEditor);
 		fPreviousError.setEditor(textEditor);
@@ -210,15 +209,11 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		bars.setGlobalActionHandler(JdtActionConstants.UNCOMMENT, getAction(textEditor, "Uncomment")); //$NON-NLS-1$
 		bars.setGlobalActionHandler(JdtActionConstants.FORMAT, getAction(textEditor, "Format")); //$NON-NLS-1$
 
-		bars.setGlobalActionHandler(JdtActionConstants.ADD_IMPORT, getAction(textEditor, "AddImportOnSelection")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, getAction(textEditor, "OrganizeImports")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_CATCH, getAction(textEditor, "SurroundWithTryCatch")); //$NON-NLS-1$
-		
 		// Navigate menu
 	
 		if (part instanceof CompilationUnitEditor) {
 			CompilationUnitEditor cuEditor= (CompilationUnitEditor)part;
-			cuEditor.getStandardActionGroup().fillActionBars(bars);
+			cuEditor.getActionGroup().fillActionBars(bars);
 		}
 	}
 	

@@ -95,7 +95,7 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 			return false;
 		
 		SelectionDispatchAction ca= ReorgActionFactory.createDnDCopyAction(selection.toList(), ClipboardActionUtil.getFirstResource(selection));
-		ca.update();
+		ca.update(ca.getSelection());
 		return ca.isEnabled();
 	}
 	

@@ -146,7 +146,7 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		if (copySelection == null)
 			return; 
 		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(copySelection), fClipboard);
-		copyAction.update();
+		copyAction.update(copyAction.getSelection());
 		assertTrue("copy not enabled", copyAction.isEnabled());
 		copyAction.run();
 	}
@@ -154,14 +154,14 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	private void checkEnabled(Object[] copySelection, Object[] pasteSelection) {
 		doCopy(copySelection);		
 		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(pasteSelection), fClipboard);
-		pasteAction.update();
+		pasteAction.update(pasteAction.getSelection());
 		assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 	}
 	
 	private void checkDisabled(Object[] copySelection, Object[] pasteSelection) {
 		doCopy(copySelection);		
 		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(pasteSelection), fClipboard);
-		pasteAction.update();
+		pasteAction.update(pasteAction.getSelection());
 		assertTrue("paste incorrectly enabled", ! pasteAction.isEnabled());
 	}
 

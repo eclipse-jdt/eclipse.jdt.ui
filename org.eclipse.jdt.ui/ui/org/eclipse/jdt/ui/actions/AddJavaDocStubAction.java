@@ -16,12 +16,14 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -32,7 +34,9 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -49,6 +53,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  */
 public class AddJavaDocStubAction extends SelectionDispatchAction {
 
+	private CompilationUnitEditor fEditor;
+
 	/**
 	 * Creates a new <code>AddJavaDocStubAction</code>.
 	 * 
@@ -61,6 +67,19 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		setToolTipText(ActionMessages.getString("AddJavaDocStubAction.tooltip")); //$NON-NLS-1$
 	}
 
+	/**
+	 * Creates a new <code>AddJavaDocStubAction</code>.
+	 * <p>
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * </p>
+	 */
+	public AddJavaDocStubAction(CompilationUnitEditor editor) {
+		this(editor.getEditorSite());
+		fEditor= editor;
+	}
+
+	//---- Structured Viewer -----------------------------------------------------------
+	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -112,22 +131,65 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 				}
 			}
 			
+			run(workingCopyMembers);
+			EditorUtility.revealInEditor(editor, members[0]);
+			
+		} catch (CoreException e) {
+			JavaPlugin.log(e.getStatus());
+			showError(ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
+		}
+	}
+	
+	//---- Java Editior --------------------------------------------------------------
+	
+	/* package */ void editorStateChanged() {
+		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
+	protected void selectionChanged(ITextSelection selection) {
+		// do nothing
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
+	protected void run(ITextSelection selection) {
+		try {
+			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+			int type= element != null ? element.getElementType() : -1;
+			if (type != IJavaElement.METHOD && type != IJavaElement.TYPE) {
+		 		element= SelectionConverter.getTypeAtOffset(fEditor);
+		 		if (element == null) {
+					MessageDialog.openInformation(getShell(), getDialogTitle(), 
+						ActionMessages.getString("AddJavaDocStubsAction.not_applicable")); //$NON-NLS-1$
+					return;
+		 		}
+			}
+			run(new IMember[] { (IMember)element });
+			EditorUtility.revealInEditor(fEditor, element);
+		} catch (CoreException e) {
+			JavaPlugin.log(e.getStatus());
+			showError(ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
+		}
+	}
+
+	//---- Helpers -------------------------------------------------------------------
+	
+	private void run(IMember[] members) {
+		try {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 
-			AddJavaDocStubOperation op= new AddJavaDocStubOperation(workingCopyMembers, settings);
+			AddJavaDocStubOperation op= new AddJavaDocStubOperation(members, settings);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
-			dialog.run(false, true, new WorkbenchRunnableAdapter(op));
-					
-			EditorUtility.revealInEditor(editor, members[0]);	
+			dialog.run(false, true, new WorkbenchRunnableAdapter(op));					
 		} catch (InvocationTargetException e) {
 			JavaPlugin.log(e);
 			showError(ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// operation cancelled
-		} catch (CoreException e) {
-			JavaPlugin.log(e.getStatus());
-			showError(ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
-			return;
 		}
 	}
 	

@@ -11,17 +11,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
@@ -61,10 +50,22 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
@@ -84,19 +85,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
-import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
-import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
-import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.SelectionHistory;
@@ -109,6 +97,11 @@ import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
 
 /**
@@ -443,7 +436,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private SelectionHistory fSelectionHistory;
 	
 	/** The standard action groups added to the menu */
-	private CompositeActionGroup fStandardActionGroups;
+	private GenerateActionGroup fGenerateActionGroup;
+	private CompositeActionGroup fContextMenuGroup;
 	
 	/**
 	 * Creates a new compilation unit editor.
@@ -460,13 +454,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
 	
-	/**
-	 *  Returns the standard action group of this editor.
-	 */
-	public ActionGroup getStandardActionGroup() {
-		return fStandardActionGroups;
-	} 
-	
 	/*
 	 * @see AbstractTextEditor#createActions()
 	 */
@@ -477,12 +464,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		setAction("CorrectionAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, JavaCorrectionSourceViewer.CORRECTIONASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$		
 		setAction("ContentAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("ContentAssistContextInformation", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION, true));			 //$NON-NLS-1$ //$NON-NLS-2$
-		setAction("AddImportOnSelection", new AddImportOnSelectionAction(this));		 //$NON-NLS-1$
-		setAction("OrganizeImports", new OrganizeImportsAction(this)); //$NON-NLS-1$
 		setAction("Comment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("Uncomment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("Format", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT)); //$NON-NLS-1$ //$NON-NLS-2$
-		setAction("SurroundWithTryCatch", new SurroundWithTryCatchAction(this)); //$NON-NLS-1$
 
 		markAsStateDependentAction("CorrectionAssistProposal", true);
 		markAsStateDependentAction("ContentAssistProposal", true);
@@ -498,14 +482,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		setAction(StructureSelectionAction.HISTORY, historyAction);
 		fSelectionHistory.setHistoryAction(historyAction);		
 
-		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
-			new OpenEditorActionGroup(this), 
-			new OpenViewActionGroup(this), 
-			new ShowActionGroup(this), 
-			new GenerateActionGroup(this),
-			new RefactorActionGroup(this),
-			new JavaSearchActionGroup(this)
-		});		
+		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
+		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
+		
+		fActionGroups.addGroup(rg);
+		fActionGroups.addGroup(fGenerateActionGroup);
+		
+		// We have to keep the context menu group separate to have better control over positioning
+		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {fGenerateActionGroup, rg});
 	}
 
 	/*
@@ -544,15 +528,15 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
-		super.editorContextMenuAboutToShow(menu);
-		
-		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "AddImportOnSelection"); //$NON-NLS-1$
-		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "OrganizeImports"); //$NON-NLS-1$
-		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "CorrectionAssistProposal"); //$NON-NLS-1$
-		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "SurroundWithTryCatch"); //$NON-NLS-1$
+		super.editorContextMenuAboutToShow(menu);		
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Comment"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Uncomment"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format"); //$NON-NLS-1$
+		
+		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
+		fContextMenuGroup.setContext(context);
+		fContextMenuGroup.fillContextMenu(menu);
+		fContextMenuGroup.setContext(null);
 	}
 	
 	/*
@@ -1096,8 +1080,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			fPaintManager= null;
 		}
 		
-		if (fStandardActionGroups != null)
-			fStandardActionGroups.dispose();
+		if (fActionGroups != null)
+			fActionGroups.dispose();
 		super.dispose();
 	}
 	
@@ -1266,5 +1250,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				});
 			}
 		}
+	}
+	
+	protected void updateStateDependentActions() {
+		super.updateStateDependentActions();
+		fGenerateActionGroup.editorStateChanged();
 	}
 }

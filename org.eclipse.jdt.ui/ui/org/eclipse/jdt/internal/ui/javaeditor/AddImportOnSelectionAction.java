@@ -52,9 +52,9 @@ import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
 public class AddImportOnSelectionAction extends Action implements IUpdate {
 		
-	private ITextEditor fEditor;
+	private CompilationUnitEditor fEditor;
 	
-	public AddImportOnSelectionAction(ITextEditor editor) {	
+	public AddImportOnSelectionAction(CompilationUnitEditor editor) {	
 		super(JavaEditorMessages.getString("AddImportOnSelection.label"));		 //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("AddImportOnSelection.tooltip")); //$NON-NLS-1$
 		setDescription(JavaEditorMessages.getString("AddImportOnSelection.description")); //$NON-NLS-1$
@@ -67,21 +67,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		this(null);
 	}
 	
-	public void setContentEditor(ITextEditor editor) {
-		fEditor= editor;
-	}
-	
 	public void update() {
-		boolean isEnabled= false;
-		try {
-			ISelection selection= fEditor.getSelectionProvider().getSelection();
-			if (selection instanceof ITextSelection) {
-				ICompilationUnit cu= getCompilationUnit();
-				isEnabled= (cu != null) && JavaModelUtil.isEditable(cu);
-			}
-		} catch(JavaModelException e) {
-		}
-		setEnabled(isEnabled);
+		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
 	}	
 			
 	private ICompilationUnit getCompilationUnit () {

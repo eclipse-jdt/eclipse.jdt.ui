@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +43,11 @@ import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandl
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+/**
+ * Action to surround a set of statements with a try/catch block.
+ * 
+ * @since 2.0
+ */
 public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
@@ -48,10 +63,17 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		}
 	}
 
+	/**
+	 * Creates a new <code>SurroundWithTryCatchAction</code>.
+	 * <p>
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * </p>
+	 */
 	public SurroundWithTryCatchAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
 		setText(TITLE);
 		fEditor= editor;
+		setEnabled(!fEditor.isEditorInputReadOnly());
 	}
 
 	protected void run(ITextSelection selection) {
@@ -84,8 +106,12 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		}
 	}
 
+	/* package */ void editorStateChanged() {
+		setEnabled(!fEditor.isEditorInputReadOnly());
+	}
+	
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(selection.getLength() > 0);
+		setEnabled(selection.getLength() > 0 && !fEditor.isEditorInputReadOnly());
 	}
 	
 	private final ICompilationUnit getCompilationUnit() {

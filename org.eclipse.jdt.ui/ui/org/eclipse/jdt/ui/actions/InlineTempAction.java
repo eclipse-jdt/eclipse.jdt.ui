@@ -23,6 +23,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	
 	public InlineTempAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
+		setText(RefactoringMessages.getString("InlineTempAction.label"));//$NON-NLS-1$
 		fEditor= editor;
 		fDialogMessageTitle= RefactoringMessages.getString("InlineTempAction.inline_temp");//$NON-NLS-1$
 	}

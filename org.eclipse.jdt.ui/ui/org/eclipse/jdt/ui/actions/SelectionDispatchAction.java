@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * @since 2.0
  */
-public abstract class SelectionDispatchAction extends Action implements ISelectionChangedListener, IUpdate {
+public abstract class SelectionDispatchAction extends Action implements ISelectionChangedListener {
 	
 	private IWorkbenchSite fSite;
 	
@@ -49,43 +49,104 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 		fSite= site;
 	}
 
+	/**
+	 * Returns the site owning this action.
+	 * 
+	 * @return the site owning this action
+	 */
+	public IWorkbenchSite getSite() {
+		return fSite;
+	}
+
+	/**
+	 * Returns the selection provided by the site owning this action.
+	 * 
+	 * @return the site's selection
+	 */	
+	public ISelection getSelection() {
+		return getSelectionProvider().getSelection();
+	}
+
+	/**
+	 * Returns the shell provided by the site owning this action.
+	 * 
+	 * @return the site's shell	
+	 */
+	public  Shell getShell() {
+		return fSite.getShell();
+	}
+	
+	/**
+	 * Returns the selection provider managed by the site owning this action.
+	 * 
+	 * @return the site's selection provider	
+	 */
+	public ISelectionProvider getSelectionProvider() {
+		return fSite.getSelectionProvider();
+	}
+
+	/**
+	 * Updates the action's enablement state according to the given selection. This
+	 * default implementation calls one of the <code>selectionChanged</code>
+	 * methods depending on the type of the passed selection.
+	 * 
+	 * @param selection the selection this action is working on
+	 */
+	public void update(ISelection selection) {
+		dispatchSelectionChanged(selection);
+	}
+
+	/**
+	 * Notifies this action that the given structured selection has changed. This default
+	 * implementation calls <code>selectionChanged(ISelection selection)</code>.
+	 * 
+	 * @param selection the new selection
+ 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
 		selectionChanged((ISelection)selection);
 	}
-	
-	protected void selectionChanged(ITextSelection selection) {
-		selectionChanged((ISelection)selection);
-	}
-	
-	protected void selectionChanged(ISelection selection) {
-		setEnabled(false);
-	}
-	
+
+	/**
+	 * Executes this actions with the given structured selection. This default implementation
+	 * calls <code>run(ISelection selection)</code>.
+	 */
 	protected void run(IStructuredSelection selection) {
 		run((ISelection)selection);
 	}
 	
+	/**
+	 * Notifies this action that the given text selection has changed.  This default
+	 * implementation calls <code>selectionChanged(ISelection selection)</code>.
+	 * 
+	 * @param selection the new selection
+ 	 */
+	protected void selectionChanged(ITextSelection selection) {
+		selectionChanged((ISelection)selection);
+	}
+	
+	/**
+	 * Executes this actions with the given text selection. This default implementation
+	 * calls <code>run(ISelection selection)</code>.
+	 */
 	protected void run(ITextSelection selection) {
 		run((ISelection)selection);
 	}
 	
+	/**
+	 * Notifies this action that the given selection has changed.  This default
+	 * implementation sets the action's enablement state to <code>false</code>.
+	 * 
+	 * @param selection the new selection
+ 	 */
+	protected void selectionChanged(ISelection selection) {
+		setEnabled(false);
+	}
+	
+	/**
+	 * Executes this actions with the given selection. This default implementation
+	 * does nothing.
+	 */
 	protected void run(ISelection selection) {
-	}
-
-	protected IWorkbenchSite getSite() {
-		return fSite;
-	}
-	
-	protected  Shell getShell() {
-		return fSite.getShell();
-	}
-	
-	protected ISelectionProvider getSelectionProvider() {
-		return fSite.getSelectionProvider();
-	}
-
-	protected ISelection getSelection() {
-		return getSelectionProvider().getSelection();
 	}
 
 	/* (non-Javadoc)
@@ -101,23 +162,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	public void selectionChanged(SelectionChangedEvent event) {
 		dispatchSelectionChanged(event.getSelection());
 	}
-	
-	/* (non-Javadoc)
-	 * Method declared on IUpdate
-	 */
-	public void update() {
-		update(getSelection());
-	}
-	
-	/**
-	 * Updates the action's enablement state according to the given selection.
-	 * 
-	 * @param selection the selection this action is working on
-	 */
-	public void update(ISelection selection) {
-		dispatchSelectionChanged(selection);
-	}
-	
+
 	private void dispatchSelectionChanged(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			selectionChanged((IStructuredSelection)selection);

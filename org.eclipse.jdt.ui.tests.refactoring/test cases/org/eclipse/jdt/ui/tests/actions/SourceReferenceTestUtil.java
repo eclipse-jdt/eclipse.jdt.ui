@@ -35,7 +35,7 @@ class SourceReferenceTestUtil {
 
 	static void delete(Object[] elems) {
 		DeleteSourceReferencesAction deleteAction= createDeleteAction(elems);
-		deleteAction.update();
+		deleteAction.update(deleteAction.getSelection());
 		Assert.assertTrue("delete action incorrectly disabled", deleteAction.isEnabled());
 		deleteAction.run();
 	}
@@ -50,14 +50,14 @@ class SourceReferenceTestUtil {
 
 	static void copy(Object[] elems, Clipboard clipboard) {
 		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elems), clipboard);
-		copyAction.update();
+		copyAction.update(copyAction.getSelection());
 		Assert.assertTrue("copy incorrectly disabled", copyAction.isEnabled());
 		copyAction.run();
 	}	
 
 	static void paste(Object[] elems, Clipboard clipboard) {
 		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(elems), clipboard);
-		pasteAction.update();
+		pasteAction.update(pasteAction.getSelection());
 		Assert.assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 		pasteAction.run();
 	}

@@ -26,6 +26,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 	
 	public ExtractTempAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
+		setText(RefactoringMessages.getString("ExtractTempAction.label")); //$NON-NLS-1$
 		fEditor= editor;
 		fDialogMessageTitle= RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
 	}

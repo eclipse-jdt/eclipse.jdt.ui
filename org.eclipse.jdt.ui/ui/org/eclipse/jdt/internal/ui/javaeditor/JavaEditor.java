@@ -17,14 +17,12 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.CoreException;
-
+import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
-
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -42,10 +40,14 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
@@ -63,21 +65,25 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.actions.OpenExternalJavadocAction;
-import org.eclipse.jdt.ui.actions.OpenSuperImplementationAction;
-import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
-import org.eclipse.jdt.ui.text.IColorManager;
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenExternalJavadocAction;
+import org.eclipse.jdt.ui.actions.OpenSuperImplementationAction;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
+import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
+import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
 
 
@@ -146,7 +152,8 @@ public abstract class JavaEditor extends AbstractTextEditor {
 	/** The line number ruler column */
 	private LineNumberRulerColumn fLineNumberRulerColumn;
 	
-	
+	protected CompositeActionGroup fActionGroups;
+	private CompositeActionGroup fContextMenuGroup;
 		
 	/**
 	 * Returns the most narrow java element including the given offset
@@ -215,20 +222,28 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		fOutlinerContextMenuId= menuId;
 	}
 			
+	/**
+	 *  Returns the standard action group of this editor.
+	 */
+	protected ActionGroup getActionGroup() {
+		return fActionGroups;
+	} 
+	
 	/*
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
+		menu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
+		menu.add(new GroupMarker(IContextMenuConstants.GROUP_SHOW));	
+			
 		super.editorContextMenuAboutToShow(menu);
 		
-		addGroup(menu, ITextEditorActionConstants.GROUP_EDIT, IContextMenuConstants.GROUP_REORGANIZE);
-		addGroup(menu, ITextEditorActionConstants.GROUP_EDIT, IContextMenuConstants.GROUP_GENERATE);
-		addGroup(menu, ITextEditorActionConstants.GROUP_EDIT, IContextMenuConstants.GROUP_NEW);
+		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
+		fContextMenuGroup.setContext(context);
+		fContextMenuGroup.fillContextMenu(menu);
+		fContextMenuGroup.setContext(null);
 		
-		new JavaSearchGroup(false).fill(menu, ITextEditorActionConstants.GROUP_FIND, this);
-		
-		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowInPackageView"); //$NON-NLS-1$
-		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenSuperImplementation"); //$NON-NLS-1$
+		new JavaSearchGroup(false).fill(menu, ITextEditorActionConstants.GROUP_FIND, this);		
 	}			
 	
 	/**
@@ -484,6 +499,15 @@ public abstract class JavaEditor extends AbstractTextEditor {
 	
 	protected void createActions() {
 		super.createActions();
+		
+		ActionGroup oeg, ovg, sg;
+		fActionGroups= new CompositeActionGroup(
+			new ActionGroup[] {
+				oeg= new OpenEditorActionGroup(this),
+				ovg= new OpenViewActionGroup(this),
+				sg= new ShowActionGroup(this),
+				new JavaSearchActionGroup(this)});
+		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg});
 		
 		setAction("ShowJavaDoc", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION)); //$NON-NLS-1$ //$NON-NLS-2$
 		

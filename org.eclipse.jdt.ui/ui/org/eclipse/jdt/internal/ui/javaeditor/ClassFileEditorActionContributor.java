@@ -98,7 +98,7 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 
 		if (classFileEditor != null) {
 			IActionBars bars= getActionBars();
-			classFileEditor.fStandardActionGroups.fillActionBars(bars);
+			classFileEditor.fActionGroups.fillActionBars(bars);
 		}
 
 		

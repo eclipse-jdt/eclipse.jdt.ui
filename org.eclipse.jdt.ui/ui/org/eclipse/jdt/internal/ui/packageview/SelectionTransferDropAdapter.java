@@ -139,7 +139,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				DeleteSourceReferencesAction delete= ReorgActionFactory.createDeleteSourceReferencesAction(getDragableSourceReferences());
 				delete.setAskForDeleteConfirmation(true);
 				delete.setCanDeleteGetterSetter(false);
-				delete.update();
+				delete.update(delete.getSelection());
 				if (delete.isEnabled())
 					delete.run();
 				
@@ -220,7 +220,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 	private void pasteSourceReferences(final Object target, DropTargetEvent event) {
 		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(getDragableSourceReferences(), target);
-		pasteAction.update();
+		pasteAction.update(pasteAction.getSelection());
 		if (!pasteAction.isEnabled()){
 			event.detail= DND.DROP_NONE;
 			return;
@@ -277,7 +277,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (elements.length != fElements.size())
 			return false;
 		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(elements, target);
-		pasteAction.update();
+		pasteAction.update(pasteAction.getSelection());
 		return pasteAction.isEnabled();
 	}
 	

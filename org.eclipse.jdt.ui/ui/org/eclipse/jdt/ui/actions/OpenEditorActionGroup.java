@@ -109,8 +109,8 @@ public class OpenEditorActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
+		appendToGroup(menu, fOpen);
 		if (!fIsEditorOwner) {
-			appendToGroup(menu, fOpen);
 			addOpenWithMenu(menu);
 		}
 	}

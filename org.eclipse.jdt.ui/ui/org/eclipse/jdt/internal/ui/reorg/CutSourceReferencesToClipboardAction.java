@@ -22,7 +22,7 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 		setText(ReorgMessages.getString("CutSourceReferencesToClipboardAction.cut")); //$NON-NLS-1$
 		fCopy= new CopySourceReferencesToClipboardAction(site, clipboard);
 		fDelete= new DeleteSourceReferencesAction(site);
-		update();
+		update(getSelection());
 	}
 	
 	protected void perform(IStructuredSelection selection) throws CoreException {

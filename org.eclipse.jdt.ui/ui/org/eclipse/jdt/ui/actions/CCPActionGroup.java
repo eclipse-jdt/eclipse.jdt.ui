@@ -78,14 +78,16 @@ public class CCPActionGroup extends ActionGroup {
 	}
 
 	private void registerActionsAsSelectionChangeListeners() {
+		ISelectionProvider provider = fSite.getSelectionProvider();
 		for (int i= 0; i < fActions.length; i++) {
-			fSite.getSelectionProvider().addSelectionChangedListener(fActions[i]);
+			provider.addSelectionChangedListener(fActions[i]);
 		}
 	}
 	
 	private void deregisterActionsAsSelectionChangeListeners() {
+		ISelectionProvider provider = fSite.getSelectionProvider();
 		for (int i= 0; i < fActions.length; i++) {
-			fSite.getSelectionProvider().removeSelectionChangedListener(fActions[i]);
+			provider.removeSelectionChangedListener(fActions[i]);
 		}
 	}
 	
@@ -118,7 +120,6 @@ public class CCPActionGroup extends ActionGroup {
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		for (int i= 0; i < fActions.length; i++) {
-			fActions[i].update();
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fActions[i]);
 		}		
 	}		

@@ -99,7 +99,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	public void run(IStructuredSelection selection) {
+	protected void run(IStructuredSelection selection) {
 		Shell shell= getShell();
 		try {
 			IType type= getSelectedType(selection);
@@ -128,7 +128,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	 * Method declared on SelectionDispatchAction
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
+		// do nothing
 	}
 	
 	/* (non-Javadoc)
@@ -146,6 +146,10 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			JavaPlugin.log(e);
 			ErrorDialog.openError(getShell(), getDialogTitle(), null, e.getStatus()); 			
 		}
+	}
+	
+	/* package */ void editorStateChanged() {
+		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
 	}
 	
 	//---- Helpers -------------------------------------------------------------------

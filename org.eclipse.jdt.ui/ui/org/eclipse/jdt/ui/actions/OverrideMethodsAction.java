@@ -126,11 +126,15 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 
 	//---- Java Editior --------------------------------------------------------------
 	
+	/* package */ void editorStateChanged() {
+		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
+	}
+	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
+		// do nothing
 	}
 	
 	/* (non-Javadoc)

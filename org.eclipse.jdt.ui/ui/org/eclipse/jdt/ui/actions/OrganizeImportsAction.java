@@ -102,21 +102,15 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		fEditor= editor;
 	}
 	
+	/* package */ void editorStateChanged() {
+		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
+	}
+	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		boolean isEnabled= false;
-		try {
-			if (fEditor != null) {
-				IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-				ICompilationUnit cu= manager.getWorkingCopy(fEditor.getEditorInput());
-				
-				isEnabled= (cu != null) && JavaModelUtil.isEditable(cu);
-			}
-		} catch (JavaModelException e) {
-		}
-		setEnabled(isEnabled);
+		// do nothing
 	}
 	
 	/* (non-Javadoc)
