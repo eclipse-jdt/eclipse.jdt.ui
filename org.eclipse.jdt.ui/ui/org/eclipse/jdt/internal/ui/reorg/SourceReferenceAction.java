@@ -25,7 +25,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -55,7 +54,7 @@ abstract class SourceReferenceAction extends RefactoringAction {
 				try {
 					perform();
 				} catch (CoreException e) {
-					ExceptionHandler.handle(e, getText(), RefactoringMessages.getString("SourceReferenceAction.exception")); //$NON-NLS-1$
+					ExceptionHandler.handle(e, getText(), ReorgMessages.getString("SourceReferenceAction.exception")); //$NON-NLS-1$
 				}
 			}
 		});
