@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.SharedImages;
 import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
@@ -404,10 +405,12 @@ public final class JavaUI {
 		}
 		if (multipleSelection) {
 			MultiTypeSelectionDialog dialog= new MultiTypeSelectionDialog(parent, context, elementKinds, scope);
+			dialog.setMessage(JavaUIMessages.getString("JavaUI.defaultDialogMessage")); //$NON-NLS-1$
 			dialog.setFilter(filter);
 			return dialog;			
 		} else {
 			TypeSelectionDialog dialog= new TypeSelectionDialog(parent, context, elementKinds, scope);
+			dialog.setMessage(JavaUIMessages.getString("JavaUI.defaultDialogMessage")); //$NON-NLS-1$
 			dialog.setFilter(filter);
 			return dialog;
 		}
