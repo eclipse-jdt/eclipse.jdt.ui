@@ -43,21 +43,23 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	 */ 
 	public RenamePrivateMethodRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IMethod method, String newName){
 		super(changeCreator, scope, method, newName);
-		correctScope(method);
+		correctScope();
 	}
 	
 	public RenamePrivateMethodRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
 		super(changeCreator, method);
-		correctScope(method);
+		correctScope();
 	}
 	
 	/* non java-doc
 	 * narrow down the scope
 	 */ 
-	private void correctScope(IMethod method){
+	private void correctScope(){
+		if (getMethod().isBinary())
+			return;
 		try{
 			//only the declaring compilation unit
-			setScope(SearchEngine.createJavaSearchScope(new IResource[]{getResource(method)}));
+			setScope(SearchEngine.createJavaSearchScope(new IResource[]{getResource(getMethod())}));
 		} catch (JavaModelException e){
 			//do nothing
 		}

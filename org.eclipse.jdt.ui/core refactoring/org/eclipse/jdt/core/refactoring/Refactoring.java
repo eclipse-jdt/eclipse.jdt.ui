@@ -150,6 +150,7 @@ public abstract class Refactoring implements IRefactoring {
 	 * @see #getResource
 	 */
 	protected static IResource getResource(IMember member) throws JavaModelException{
+		Assert.isTrue(!member.isBinary());
 		return getResource(member.getCompilationUnit());
 	}
 	// ----------------------------

@@ -48,7 +48,7 @@ public class RenamePrivateFieldRefactoring extends RenameFieldRefactoring{
 
 	public RenamePrivateFieldRefactoring(ITextBufferChangeCreator changeCreator, IField field){
 		super(changeCreator, field);
-		correctScope(field);
+		correctScope();
 	}
 	
 	/* non java-doc
@@ -57,13 +57,15 @@ public class RenamePrivateFieldRefactoring extends RenameFieldRefactoring{
 	 */ 
 	public RenamePrivateFieldRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IField field, String newName){
 		super(changeCreator, scope, field, newName);
-		correctScope(field);
+		correctScope();
 	}
 	
 	/* non java-doc
 	 * narrow down the scope
 	 */ 
-	private void correctScope(IField method){
+	private void correctScope(){
+		if (getField().isBinary())
+			return;
 		try{
 			//only the declaring compilation unit
 			setScope(SearchEngine.createJavaSearchScope(new IResource[]{getResource(getField())}));
