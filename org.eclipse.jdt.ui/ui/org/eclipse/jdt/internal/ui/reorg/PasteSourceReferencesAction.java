@@ -165,35 +165,43 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 		
 	private static void paste(int style, ISourceReference selected) throws CoreException{
 		TextBuffer tb= TextBuffer.acquire(SourceReferenceUtil.getFile(selected));
-		TextBufferEditor tbe= new TextBufferEditor(tb);
-		TypedSource[] elems= getClipboardContents();
-		
-		IJavaElement element= (IJavaElement)selected;
-		int tabWidth= CodeFormatterPreferencePage.getTabSize();
-		for (int i= 0; i < elems.length; i++) {
-			String[] source= new String[]{elems[i].getSource()};
-			tbe.add(new MemberEdit(element, style, source, tabWidth));
+		try{
+			TextBufferEditor tbe= new TextBufferEditor(tb);
+			TypedSource[] elems= getClipboardContents();
+			
+			IJavaElement element= (IJavaElement)selected;
+			int tabWidth= CodeFormatterPreferencePage.getTabSize();
+			for (int i= 0; i < elems.length; i++) {
+				String[] source= new String[]{elems[i].getSource()};
+				tbe.add(new MemberEdit(element, style, source, tabWidth));
+			}
+			if (! tbe.canPerformEdits())
+				return; ///XXX
+			tbe.performEdits(new NullProgressMonitor());	
+			TextBuffer.commitChanges(tb, false, new NullProgressMonitor());
+		} finally{	
+			if (tb != null)
+				TextBuffer.release(tb);
 		}
-		if (! tbe.canPerformEdits())
-			return; ///XXX
-		tbe.performEdits(new NullProgressMonitor());	
-		TextBuffer.commitChanges(tb, false, new NullProgressMonitor());
-		TextBuffer.release(tb);
 	}
 	
 	private static void pasteInCompilationUnit(ICompilationUnit unit) throws CoreException{
 		TextBuffer tb= TextBuffer.acquire(SourceReferenceUtil.getFile(unit));
-		TextBufferEditor tbe= new TextBufferEditor(tb);
-		TypedSource[] elems= getClipboardContents();
-		
-		for (int i= 0; i < elems.length; i++) {
-			tbe.add(new PasteInCompilationUnitEdit(elems[i].getSource(), elems[i].getType(), unit));
-		}
-		if (! tbe.canPerformEdits())
-			return; ///XXX
-		tbe.performEdits(new NullProgressMonitor());	
-		TextBuffer.commitChanges(tb, false, new NullProgressMonitor());
-		TextBuffer.release(tb);		
+		try{
+			TextBufferEditor tbe= new TextBufferEditor(tb);
+			TypedSource[] elems= getClipboardContents();
+			
+			for (int i= 0; i < elems.length; i++) {
+				tbe.add(new PasteInCompilationUnitEdit(elems[i].getSource(), elems[i].getType(), unit));
+			}
+			if (! tbe.canPerformEdits())
+				return; ///XXX
+			tbe.performEdits(new NullProgressMonitor());	
+			TextBuffer.commitChanges(tb, false, new NullProgressMonitor());
+		} finally{	
+			if (tb != null)
+				TextBuffer.release(tb);		
+		}	
 	}
 	
 	private static boolean canPasteAfter(ISourceReference ref, TypedSource[] elements){
