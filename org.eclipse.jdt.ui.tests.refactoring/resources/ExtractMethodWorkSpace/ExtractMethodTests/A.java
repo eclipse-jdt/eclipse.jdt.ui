@@ -1,8 +1,13 @@
 public class A{
+	public A() {
+		this(5 + 6);
+	}
 	public A(int i) {
 	}
 	
-	public void foo() {
-		A a= new A(10);
+	static class B extends A {
+		public B() {
+			super(5 + 7);
+		}
 	}
 }

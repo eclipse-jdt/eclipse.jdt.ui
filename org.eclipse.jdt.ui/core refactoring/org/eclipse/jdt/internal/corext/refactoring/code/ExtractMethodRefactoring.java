@@ -309,7 +309,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (fVisibility.length() > 0)
 			buffer.append(BLANK);
 			
-		if (Modifier.isStatic(fAnalyzer.getEnclosingMethod().getModifiers())) {
+		if (Modifier.isStatic(fAnalyzer.getEnclosingMethod().getModifiers()) || fAnalyzer.getForceStatic()) {
 			buffer.append(STATIC);
 			buffer.append(BLANK);
 		}

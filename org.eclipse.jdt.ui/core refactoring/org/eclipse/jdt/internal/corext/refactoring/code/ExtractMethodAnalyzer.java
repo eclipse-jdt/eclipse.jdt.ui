@@ -80,7 +80,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	private IVariableBinding fReturnLocal;
 	
 	private ITypeBinding[] fAllExceptions;
-	private ITypeBinding fExpressionBinding;	
+	private ITypeBinding fExpressionBinding;
+
+	private boolean fForceStatic;	
 	
 	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws JavaModelException {
 		super(unit, selection, false);
@@ -133,6 +135,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	
 	public ITypeBinding getExpressionBinding() {
 		return fExpressionBinding;
+	}
+	
+	public boolean getForceStatic() {
+		return fForceStatic;
 	}
 	
 	//---- Activation checking ---------------------------------------------------------------------------
@@ -460,6 +466,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 						break superCall;
 					}
 				}
+				fForceStatic= 
+					ASTNodes.getParent(expression, ASTNode.SUPER_CONSTRUCTOR_INVOCATION) != null ||
+					ASTNodes.getParent(expression, ASTNode.CONSTRUCTOR_INVOCATION) != null;
 			}
 			status.merge(LocalTypeAnalyzer.perform(fEnclosingMethod, getSelection()));
 		}
