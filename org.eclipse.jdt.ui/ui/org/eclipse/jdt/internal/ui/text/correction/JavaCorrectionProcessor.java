@@ -121,7 +121,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					return true;
 				}
 			} catch (CoreException e) {
-				JavaPlugin.log(e);
+				//JavaPlugin.log(e);
 			}
 		}
 		return false;
