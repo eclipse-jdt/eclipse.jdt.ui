@@ -157,16 +157,21 @@ public class ReorgMoveWizard extends RefactoringWizard{
 			GridData gd= (GridData)fQualifiedNameComponent.getLayoutData();
 			gd.horizontalAlignment= GridData.FILL;
 			gd.horizontalIndent= indent;
-			fQualifiedNameComponent.setEnabled(false);
+			updateQualifiedNameUpdating(refactoring, refactoring.getUpdateQualifiedNames());
 
 			fQualifiedNameCheckbox.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					boolean enabled= ((Button)e.widget).getSelection();
-					fQualifiedNameComponent.setEnabled(enabled);
-					refactoring.setUpdateQualifiedNames(enabled);
-					updateUIStatus();
+					updateQualifiedNameUpdating(refactoring, enabled);
 				}
+
 			});
+		}
+		
+		private void updateQualifiedNameUpdating(final MoveRefactoring refactoring, boolean enabled) {
+			fQualifiedNameComponent.setEnabled(enabled);
+			refactoring.setUpdateQualifiedNames(enabled);
+			updateUIStatus();
 		}
 		
 		public void createControl(Composite parent) {
