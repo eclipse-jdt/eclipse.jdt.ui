@@ -216,6 +216,8 @@ class UseSupertypeWherePossibleUtil {
 				nodesToRemove.add(node);	
 		}
 		subPm1.done();
+		if (nodesToRemove.isEmpty())
+			return nodesToRemove;
 
 		IProgressMonitor subPm2= new SubProgressMonitor(pm, 1);
 		subPm2.beginTask("", nodeSet.size() - nodesToRemove.size());
