@@ -161,15 +161,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 		
 	private TextEdit doTextCopy(ASTNode copiedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, String description) {
-		CopyIndentedSourceEdit sourceEdit= (CopyIndentedSourceEdit)fRewrite.getCopySourceEdit(copiedNode);
+		CopyIndentedSourceEdit sourceEdit= (CopyIndentedSourceEdit) fRewrite.getCopySourceEdit(copiedNode);
 		if (sourceEdit == null) {
 			Assert.isTrue(false, "Copy source not annotated" + copiedNode.toString());
 		}
 		sourceEdit.initialize(sourceIndentLevel, destIndentString, tabWidth);
 		
-		CopyTargetEdit targetEdit= new CopyTargetEdit(destOffset);
-		targetEdit.setSourceEdit(sourceEdit);
-		
+		CopyTargetEdit targetEdit= new CopyTargetEdit(destOffset, sourceEdit);
 		fCurrentEdit.add(targetEdit);
 		
 		if (description != null) {

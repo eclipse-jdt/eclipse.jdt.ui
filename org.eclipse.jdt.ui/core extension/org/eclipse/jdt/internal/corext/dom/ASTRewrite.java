@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.CopySourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
@@ -337,13 +336,9 @@ public class ASTRewrite {
 	
 	
 	/* package */ final Object getCopySourceEdit(ASTNode node) {
-		return  node.getProperty(COPYSOURCEKEY);
+		return node.getProperty(COPYSOURCEKEY);
 	}
 
-	private static final class ASTCopySource {
-		public CopySourceEdit copySource;
-	}
-	
 	private static class ASTChange {
 		String description;
 	}		
