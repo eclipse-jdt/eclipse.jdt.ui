@@ -28,7 +28,6 @@ import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRe
 
 public class InferTypeArgumentsTests extends RefactoringTest {
 
-	private static final boolean BUG_83500= true;
 	private static final boolean BUG_84422= true;
 	
 	private static final Class clazz= InferTypeArgumentsTests.class;
@@ -121,10 +120,6 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	}
 	
 	public void testCuSuperAndSub() throws Exception {
-		if (BUG_83500) {
-			printTestDisabledMessage("bug 83500");
-			return;
-		}
 		performCuOK();
 	}
 	
