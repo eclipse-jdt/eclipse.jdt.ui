@@ -1366,7 +1366,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			 * but NOT remove IOException (or a subclass of JavaModelException). */
 			 // if (Bindings.isSuperType(typeToRemove, currentType))
 			if (currentType == null)
-				continue;
+				continue; // newly added or unresolvable type
 			if (Bindings.equals(typeToRemove, currentType))
 				rewrite.markAsRemoved(currentName);
 		}
@@ -1379,7 +1379,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			//XXX: existing superclasses of the added exception are redundant and could be removed
 			ITypeBinding typeBinding= exName.resolveTypeBinding();
 			if (typeBinding == null)
-				continue;
+				continue; // newly added or unresolvable type
 			if (typeBinding.getQualifiedName().equals(fullyQualified))
 				return; // don't add it again
 		}

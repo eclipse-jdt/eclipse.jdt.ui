@@ -372,7 +372,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 			}
 		}
 		for (int i= 0; i < addExceptions.length; i++) {
-//			IType type= JavaModelUtil.findTypeInCompilationUnit(cu, addExceptions[i]);
 			IType type= JavaModelUtil.findType(cu.getJavaProject(), addExceptions[i]);
 			list.add(ExceptionInfo.createInfoForAddedException(type));
 		}
@@ -1225,11 +1224,18 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	public void testException02() throws Exception {
-		helperException(new String[0], new String[0], new String[] {"java.lang.RuntimeException"});
+		String[] add= new String[] {"java.lang.RuntimeException"};
+		helperException(new String[0], new String[0], add);
 	}
 
-	public void testException03() throws Exception {
-		helperException(new String[0], new String[] {"java.lang.RuntimeException"}, new String[0]);
+	public void testException03() throws Exception { //bug 52091
+		String[] remove= new String[] {"java.lang.RuntimeException"};
+		helperException(new String[0], remove, new String[0]);
+	}
+
+	public void testException04() throws Exception { //bug 52058
+		String[] add= new String[] {"java.io.IOException", "java.lang.ClassNotFoundException"};
+		helperException(new String[0], new String[0], add);
 	}
 
 	public void testInStatic01() throws Exception { //bug 47062
