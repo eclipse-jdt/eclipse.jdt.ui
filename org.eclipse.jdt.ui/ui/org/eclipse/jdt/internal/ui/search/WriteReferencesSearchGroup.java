@@ -27,32 +27,32 @@ public class WriteReferencesSearchGroup extends JavaSearchSubGroup  {
 		fEditor= editor;
 	}
 
-	protected ElementSearchAction[] getActions(IWorkbenchSite site) {
-		ArrayList actions= new ArrayList(ElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 3);
+	protected JavaElementSearchAction[] getActions(IWorkbenchSite site) {
+		ArrayList actions= new ArrayList(JavaElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(new FindWriteReferencesAction(site));
 		actions.add(new FindWriteReferencesInHierarchyAction(site));
 		actions.add(new FindWriteReferencesInWorkingSetAction(site));
 
-		Iterator iter= ElementSearchAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= JavaElementSearchAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
 			actions.add(new WorkingSetAction(site, new FindWriteReferencesInWorkingSetAction(site, workingSets), SearchUtil.toString(workingSets)));
 		}
-		return (ElementSearchAction[])actions.toArray(new ElementSearchAction[actions.size()]);
+		return (JavaElementSearchAction[])actions.toArray(new JavaElementSearchAction[actions.size()]);
 	}
 
-	protected ElementSearchAction[] getActions(JavaEditor editor) {
-		ArrayList actions= new ArrayList(ElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 3);
+	protected JavaElementSearchAction[] getActions(JavaEditor editor) {
+		ArrayList actions= new ArrayList(JavaElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(new FindWriteReferencesAction(editor));
 		actions.add(new FindWriteReferencesInHierarchyAction(editor));
 		actions.add(new FindWriteReferencesInWorkingSetAction(editor));
 
-		Iterator iter= ElementSearchAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= JavaElementSearchAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
 			actions.add(new WorkingSetAction(editor, new FindWriteReferencesInWorkingSetAction(editor, workingSets), SearchUtil.toString(workingSets)));
 		}
-		return (ElementSearchAction[])actions.toArray(new ElementSearchAction[actions.size()]);
+		return (JavaElementSearchAction[])actions.toArray(new JavaElementSearchAction[actions.size()]);
 	}
 	
 	protected String getName() {

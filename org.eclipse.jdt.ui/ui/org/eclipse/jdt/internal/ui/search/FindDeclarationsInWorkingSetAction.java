@@ -45,7 +45,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInWorkingSetAction.tooltip")); //$NON-NLS-1$
 	}
 
-	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
+	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
 		IWorkingSet[] workingSets= fWorkingSet;
 		if (fWorkingSet == null) {
 			workingSets= JavaSearchScopeFactory.getInstance().queryWorkingSets();

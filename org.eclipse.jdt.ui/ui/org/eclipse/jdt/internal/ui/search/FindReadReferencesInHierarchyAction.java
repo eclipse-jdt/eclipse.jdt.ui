@@ -23,8 +23,12 @@ public class FindReadReferencesInHierarchyAction extends FindReferencesInHierarc
 		setToolTipText(SearchMessages.getString("Search.FindReadReferencesInHierarchyAction.tooltip")); //$NON-NLS-1$
 	}
 
-	protected int getLimitTo() {
+	int getLimitTo() {
 		return IJavaSearchConstants.READ_ACCESSES;
-	}	
+	}
+	
+	String getOperationUnavailableMessage() {
+		return SearchMessages.getString("JavaElementAction.operationUnavailable.field"); //$NON-NLS-1$
+	}
 }
 

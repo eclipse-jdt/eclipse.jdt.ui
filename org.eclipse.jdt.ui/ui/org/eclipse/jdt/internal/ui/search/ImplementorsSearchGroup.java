@@ -27,30 +27,30 @@ public class ImplementorsSearchGroup extends JavaSearchSubGroup  {
 
 	public static final String GROUP_NAME= SearchMessages.getString("group.implementors"); //$NON-NLS-1$
 
-	protected ElementSearchAction[] getActions(IWorkbenchSite site) {
-		ArrayList actions= new ArrayList(ElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 2);		
+	protected JavaElementSearchAction[] getActions(IWorkbenchSite site) {
+		ArrayList actions= new ArrayList(JavaElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 2);		
 		actions.add(new FindImplementorsAction(site));
 		actions.add(new FindImplementorsInWorkingSetAction(site));
 			
-		Iterator iter= ElementSearchAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= JavaElementSearchAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
 			actions.add(new WorkingSetAction(site, new FindImplementorsInWorkingSetAction(site, workingSets), SearchUtil.toString(workingSets)));
 		}
-		return (ElementSearchAction[])actions.toArray(new ElementSearchAction[actions.size()]);
+		return (JavaElementSearchAction[])actions.toArray(new JavaElementSearchAction[actions.size()]);
 	}
 
-	protected ElementSearchAction[] getActions(JavaEditor editor) {
-		ArrayList actions= new ArrayList(ElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 2);		
+	protected JavaElementSearchAction[] getActions(JavaEditor editor) {
+		ArrayList actions= new ArrayList(JavaElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 2);		
 		actions.add(new FindImplementorsAction(editor));
 		actions.add(new FindImplementorsInWorkingSetAction(editor));
 			
-		Iterator iter= ElementSearchAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= JavaElementSearchAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
 			actions.add(new WorkingSetAction(editor, new FindImplementorsInWorkingSetAction(editor, workingSets), SearchUtil.toString(workingSets)));
 		}
-		return (ElementSearchAction[])actions.toArray(new ElementSearchAction[actions.size()]);
+		return (JavaElementSearchAction[])actions.toArray(new JavaElementSearchAction[actions.size()]);
 	}
 	
 	protected String getName() {

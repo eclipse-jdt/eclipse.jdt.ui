@@ -45,7 +45,7 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 		setToolTipText(SearchMessages.getString("Search.FindImplementorsInWorkingSetAction.tooltip")); //$NON-NLS-1$
 	}
 
-	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
+	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
 		IWorkingSet[] workingSets= fWorkingSets;
 		if (fWorkingSets == null) {
 			workingSets= JavaSearchScopeFactory.getInstance().queryWorkingSets();

@@ -35,13 +35,13 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 		super(editor, label, validTypes);
 	}
 
-	protected IJavaSearchScope getScope(IType type) throws JavaModelException {
+	IJavaSearchScope getScope(IType type) throws JavaModelException {
 		if (type == null)
 			return super.getScope(type);
 		return SearchEngine.createHierarchyScope(type);
 	}
 	
-	protected String getScopeDescription(IType type) {
+	String getScopeDescription(IType type) {
 		String typeName= ""; //$NON-NLS-1$
 		if (type != null)
 			typeName= type.getElementName();

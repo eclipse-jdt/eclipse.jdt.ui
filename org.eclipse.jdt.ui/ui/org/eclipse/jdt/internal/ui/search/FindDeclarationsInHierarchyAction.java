@@ -27,14 +27,14 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.tooltip")); //$NON-NLS-1$
 	}
 	
-	protected IJavaSearchScope getScope(IType type) throws JavaModelException {
+	IJavaSearchScope getScope(IType type) throws JavaModelException {
 		if (type != null)
 			return SearchEngine.createHierarchyScope(type);
 		else
 			return super.getScope(type);
 	}
 	
-	protected String getScopeDescription(IType type) {
+	String getScopeDescription(IType type) {
 		String typeName= ""; //$NON-NLS-1$
 		if (type != null)
 			typeName= type.getElementName();

@@ -21,33 +21,29 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-public class FindReferencesAction extends ElementSearchAction {
+public class FindReferencesAction extends JavaElementSearchAction {
 
 	public FindReferencesAction(IWorkbenchSite site) {
 		this(site, SearchMessages.getString("Search.FindReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindReferencesAction.tooltip")); //$NON-NLS-1$
 	}
 
 	public FindReferencesAction(JavaEditor editor) {
 		this(editor, SearchMessages.getString("Search.FindReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
-		
+		setToolTipText(SearchMessages.getString("Search.FindReferencesAction.tooltip")); //$NON-NLS-1$
 	}
 
 	FindReferencesAction(IWorkbenchSite site, String label, Class[] validTypes) {
 		super(site, label, validTypes);
-		init();
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 	}
 
 	FindReferencesAction(JavaEditor editor, String label, Class[] validTypes) {
 		super(editor, label, validTypes);
-		init();
-	}
-
-	private void init() {
-		setToolTipText(SearchMessages.getString("Search.FindReferencesAction.tooltip")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 	}
-	
-	protected boolean canOperateOn(IJavaElement element) {
+
+	boolean canOperateOn(IJavaElement element) {
 		if (super.canOperateOn(element)) {
 			if (element.getElementType() == IJavaElement.FIELD) {
 				IField field= (IField)element;
@@ -64,7 +60,7 @@ public class FindReferencesAction extends ElementSearchAction {
 		return false;
 	}
 
-	protected int getLimitTo() {
+	int getLimitTo() {
 		return IJavaSearchConstants.REFERENCES;
 	}	
 

@@ -24,15 +24,15 @@ public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
 
 	public static final String GROUP_ID= IContextMenuConstants.GROUP_SEARCH;
 
-	abstract protected ElementSearchAction[] getActions(IWorkbenchSite site);
-	abstract protected ElementSearchAction[] getActions(JavaEditor editor);
+	abstract protected JavaElementSearchAction[] getActions(IWorkbenchSite site);
+	abstract protected JavaElementSearchAction[] getActions(JavaEditor editor);
 
 	IWorkbenchSite fSite;
 	JavaEditor fEditor;
 	
 	abstract protected String getName();
 
-	protected final ElementSearchAction[] getActions() {
+	protected final JavaElementSearchAction[] getActions() {
 		if (fEditor != null)
 			return getActions(fEditor);
 		else if (fSite != null)
@@ -43,10 +43,11 @@ public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
 	public void fill(IMenuManager manager, GroupContext context) {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID);
 		ISelection sel= context.getSelection();
-		ElementSearchAction[] actions= getActions();
+		JavaElementSearchAction[] actions= getActions();
 		for (int i= 0; i < actions.length; i++) {
-			ElementSearchAction action= actions[i];
-			if (!(sel instanceof IStructuredSelection) || action.canOperateOn((IStructuredSelection)sel))
+			JavaElementSearchAction action= actions[i];
+			action.update(sel);
+			if (!(sel instanceof IStructuredSelection) || action.isEnabled())
 				javaSearchMM.add(action);
 		}
 		
@@ -55,11 +56,13 @@ public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
 	}
 	public IMenuManager getMenuManagerForGroup(IStructuredSelection selection) {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID); //$NON-NLS-1$
-		ElementSearchAction[] actions= getActions();
+		JavaElementSearchAction[] actions= getActions();
 		if (!selection.isEmpty()) {
-			for (int i= 0; i < actions.length; i++)
-			if (actions[i].canOperateOn(selection))
-				javaSearchMM.add(actions[i]);
+			for (int i= 0; i < actions.length; i++) {
+				actions[i].update(selection);
+				if (actions[i].isEnabled())
+					javaSearchMM.add(actions[i]);
+			}
 		}
 		return javaSearchMM;
 	}

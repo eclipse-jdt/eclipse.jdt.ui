@@ -23,7 +23,11 @@ public class FindReadReferencesAction extends FindReferencesAction {
 		setToolTipText(SearchMessages.getString("Search.FindReadReferencesAction.tooltip")); //$NON-NLS-1$
 	}
 
-	protected int getLimitTo() {
+	int getLimitTo() {
 		return IJavaSearchConstants.READ_ACCESSES;
 	}	
+
+	String getOperationUnavailableMessage() {
+		return SearchMessages.getString("JavaElementAction.operationUnavailable.field"); //$NON-NLS-1$
+	}
 }

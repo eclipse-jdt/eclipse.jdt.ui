@@ -166,7 +166,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 					return false;
 				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(workingSets)); //$NON-NLS-1$
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets());
-				ElementSearchAction.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
+				JavaElementSearchAction.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		}		
 		
 		JavaSearchResultCollector collector= new JavaSearchResultCollector();
@@ -504,7 +504,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 
 	private SearchPatternData tryStructuredSelection(IStructuredSelection selection) {
-		if (selection == null)
+		if (selection == null || selection.size() > 1)
 			return null;
 
 		Object o= selection.getFirstElement();

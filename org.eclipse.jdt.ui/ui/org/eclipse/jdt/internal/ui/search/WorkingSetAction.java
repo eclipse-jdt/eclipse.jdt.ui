@@ -9,33 +9,36 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.jdt.core.IJavaElement;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-public class WorkingSetAction extends ElementSearchAction {
+public class WorkingSetAction extends JavaElementSearchAction {
 
-	private ElementSearchAction fAction;
+	private JavaElementSearchAction fAction;
 
-	public WorkingSetAction(IWorkbenchSite site, ElementSearchAction action, String workingSetName) {
+	public WorkingSetAction(IWorkbenchSite site, JavaElementSearchAction action, String workingSetName) {
 		super(site, workingSetName, null);
 		Assert.isNotNull(action);
 		fAction= action;
 	}
 
-	public WorkingSetAction(JavaEditor editor, ElementSearchAction action, String workingSetName) {
+	public WorkingSetAction(JavaEditor editor, JavaElementSearchAction action, String workingSetName) {
 		super(editor, workingSetName, null);
 		Assert.isNotNull(action);
 		fAction= action;
+		setToolTipText(action.getToolTipText());
 	}
 
-	public void run() {
-		fAction.run();
+	void run(IJavaElement element) {
+		fAction.run(element);
 	}
 
-	public boolean canOperateOn(IStructuredSelection sel) {
-		return fAction.canOperateOn(sel);
+	boolean canOperateOn(IJavaElement element) {
+		return fAction.canOperateOn(element);
 	}
 
-	protected int getLimitTo() {
+	int getLimitTo() {
 		return -1;
 	}
 }

@@ -32,8 +32,12 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 		super(editor, workingSets, new Class[] {IField.class});
 	}
 
-	protected int getLimitTo() {
+	int getLimitTo() {
 		return IJavaSearchConstants.WRITE_ACCESSES;
-	}	
+	}
+
+	String getOperationUnavailableMessage() {
+		return SearchMessages.getString("JavaElementAction.operationUnavailable.field"); //$NON-NLS-1$
+	}
 }
 

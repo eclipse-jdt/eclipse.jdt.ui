@@ -20,32 +20,29 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-public class FindDeclarationsAction extends ElementSearchAction {
+public class FindDeclarationsAction extends JavaElementSearchAction {
 	
 	public FindDeclarationsAction(IWorkbenchSite site) {
 		this(site, SearchMessages.getString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindDeclarationAction.tooltip")); //$NON-NLS-1$
 	}
 
 	public FindDeclarationsAction(JavaEditor editor) {
 		this(editor, SearchMessages.getString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindDeclarationAction.tooltip")); //$NON-NLS-1$
 	}
 
 	FindDeclarationsAction(IWorkbenchSite site, String label, Class[] validTypes) {
 		super(site, label, validTypes);
-		init();
+		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 	}
 
 	FindDeclarationsAction(JavaEditor editor, String label, Class[] validTypes) {
 		super(editor, label, validTypes);
-		init();
-	}
-
-	private void init() {
-		setToolTipText(SearchMessages.getString("Search.FindDeclarationAction.tooltip")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 	}
 	
-	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
+	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
 		if (element.getElementType() == IJavaElement.METHOD) {
 			IMethod method= (IMethod)element;
 			int searchFor= IJavaSearchConstants.METHOD;
@@ -60,7 +57,7 @@ public class FindDeclarationsAction extends ElementSearchAction {
 			return super.makeOperation(element);
 	}
 
-	protected int getLimitTo() {
+	int getLimitTo() {
 		return IJavaSearchConstants.DECLARATIONS;
 	}
 }

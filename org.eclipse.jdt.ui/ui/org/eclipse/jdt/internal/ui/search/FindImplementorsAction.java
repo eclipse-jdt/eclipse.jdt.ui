@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Defines an action which searches for implementors of Java interfaces.
  */
-public class FindImplementorsAction extends ElementSearchAction {
+public class FindImplementorsAction extends JavaElementSearchAction {
 
 	public FindImplementorsAction(IWorkbenchSite site) {
 		super(site, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {IType.class}); //$NON-NLS-1$
@@ -37,11 +37,10 @@ public class FindImplementorsAction extends ElementSearchAction {
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 	}
 
-	public boolean canOperateOn(IStructuredSelection sel) {
-		if (!super.canOperateOn(sel))
+	boolean canOperateOn(IJavaElement element) {
+		if (!super.canOperateOn(element))
 			return false;
 
-		IJavaElement element= getJavaElement(sel, true);
 		if (element.getElementType() == IJavaElement.TYPE)
 			try {
 				return ((IType) element).isInterface();
@@ -53,9 +52,12 @@ public class FindImplementorsAction extends ElementSearchAction {
 		return false;
 	}
 
-	protected int getLimitTo() {
+	int getLimitTo() {
 		return IJavaSearchConstants.IMPLEMENTORS;
 	}
 
+	String getOperationUnavailableMessage() {
+		return SearchMessages.getString("JavaElementAction.operationUnavailable.interface"); //$NON-NLS-1$
+	}
 }
 
