@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
@@ -45,6 +46,8 @@ import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PartInitException;
@@ -235,6 +238,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 
 	protected void configureTableViewer(TableViewer viewer) {
+		viewer.setUseHashlookup(true);
 		viewer.setLabelProvider(new DecoratingLabelProvider(new SortingLabelProvider(this), PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider=new JavaSearchTableContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
@@ -242,6 +246,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 
 	protected void configureTreeViewer(TreeViewer viewer) {
+		viewer.setUseHashlookup(true);
 		viewer.setSorter(new ViewerSorter());
 		viewer.setLabelProvider(new DecoratingLabelProvider(new PostfixLabelProvider(this), PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider= new LevelTreeContentProvider(this, fCurrentGrouping);
@@ -250,6 +255,37 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	
 	protected TreeViewer createTreeViewer(Composite parent) {
 		return new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+	}
+	
+	class MyProblemTable extends ProblemTableViewer {
+		MyProblemTable(Composite parent, int flags) {
+			super(parent, flags);
+		}
+	
+		protected void internalRefresh(Object element, boolean updateLabels) {
+			if (element == null || equals(element, getRoot())) {
+				// the parent
+
+				// in the code below, it is important to do all disassociates
+				// before any associates, since a later disassociate can undo an earlier associate
+				// e.g. if (a, b) is replaced by (b, a), the disassociate of b to item 1 could undo
+				// the associate of b to item 0.
+				
+				Object[] children = getSortedChildren(getRoot());
+				getTable().removeAll();
+			
+				// add any remaining elements
+				for (int i = 0; i < children.length; ++i) {
+					updateItem(new TableItem(getTable(), SWT.NONE, i), children[i]);
+				}
+			}
+			else {
+				Widget w = findItem(element);
+				if (w != null) {
+					updateItem(w, element);
+				}
+			}
+		}
 	}
 	
 	protected TableViewer createTableViewer(Composite parent) {

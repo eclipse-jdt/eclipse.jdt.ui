@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.swt.custom.BusyIndicator;
 
 
 public class SortAction extends Action {
@@ -24,7 +25,11 @@ public class SortAction extends Action {
 	}
 
 	public void run() {
-		fPage.setSortOrder(fSortOrder);
+		BusyIndicator.showWhile(fPage.getViewer().getControl().getDisplay(), new Runnable() {
+			public void run() {
+				fPage.setSortOrder(fSortOrder);
+			}
+		});
 	}
 
 	public int getSortOrder() {

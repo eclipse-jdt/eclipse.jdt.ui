@@ -29,8 +29,4 @@ public class NameSorter extends ViewerSorter {
 			return ((IResource)element).getName();
 		return ""; //$NON-NLS-1$
 	}
-
-	public boolean isSorterProperty(Object element, String property) {
-		return true;
-	}
 }

@@ -33,6 +33,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 
 public abstract class SearchLabelProvider extends LabelProvider implements IColorProvider, IPropertyChangeListener {
+	public static final String PROPERTY_MATCH_COUNT= "org.eclipse.jdt.search.matchCount"; //$NON-NLS-1$
 
 	private Color fPotentialMatchFgColor;
 	private Map fLabelProviderMap;
@@ -119,6 +120,8 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 	}
 
 	public boolean isLabelProperty(Object element, String property) {
+		if (PROPERTY_MATCH_COUNT.equals(property))
+			return true;
 		return getLabelProvider().isLabelProperty(element, property);
 	}
 

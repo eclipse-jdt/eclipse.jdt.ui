@@ -38,18 +38,25 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider im
 		int addCount= 0;
 		int removeCount= 0;
 		TableViewer viewer= (TableViewer) getPage().getViewer();
+		Set updated= new HashSet();
+		Set added= new HashSet();
+		Set removed= new HashSet();
 		for (int i= 0; i < updatedElements.length; i++) {
 			if (getPage().getDisplayedMatchCount(updatedElements[i]) > 0) {
 				if (viewer.testFindItem(updatedElements[i]) != null)
-					viewer.refresh(updatedElements[i]);
+					updated.add(updatedElements[i]);
 				else
-					viewer.add(updatedElements[i]);
+					added.add(updatedElements[i]);
 				addCount++;
 			} else {
-				viewer.remove(updatedElements[i]);
+				removed.add(updatedElements[i]);
 				removeCount++;
 			}
 		}
+		
+		viewer.add(added.toArray());
+		viewer.update(updated.toArray(), new String[] { SortingLabelProvider.PROPERTY_MATCH_COUNT });
+		viewer.remove(removed.toArray());
 	}
 
 	public void filtersChanged(MatchFilter[] filters) {
