@@ -127,7 +127,10 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		setEnabled(ClipboardActionUtil.canActivate(new DeleteRefactoring(selection.toList())));
+		if (selection.isEmpty())
+			setEnabled(false);
+		else	
+			setEnabled(ClipboardActionUtil.canActivate(new DeleteRefactoring(selection.toList())));
 	}
 	
 	private static boolean confirmDelete(IStructuredSelection selection) {
