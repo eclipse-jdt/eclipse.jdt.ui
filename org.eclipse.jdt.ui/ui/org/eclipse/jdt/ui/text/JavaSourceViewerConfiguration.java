@@ -18,6 +18,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.IAutoIndentStrategy;
@@ -49,13 +50,14 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
 import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
@@ -369,7 +371,15 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getAnnotationHover(ISourceViewer)
 	 */
 	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
-		return new JavaAnnotationHover();
+		return new JavaAnnotationHover(JavaAnnotationHover.VERTICAL_RULER_HOVER);
+	}
+
+	/*
+	 * @see SourceViewerConfiguration#getOverviewRulerAnnotationHover(ISourceViewer)
+	 * @since 3.0
+	 */
+	public IAnnotationHover getOverviewRulerAnnotationHover(ISourceViewer sourceViewer) {
+		return new JavaAnnotationHover(JavaAnnotationHover.OVERVIEW_RULER_HOVER);
 	}
 
 	/*

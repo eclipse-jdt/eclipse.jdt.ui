@@ -16,6 +16,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -24,6 +27,10 @@ import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
+import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 
@@ -33,6 +40,23 @@ import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
  * their messages.
  */
 public class JavaAnnotationHover implements IAnnotationHover {
+
+	private static class JavaAnnotationHoverType {
+	}
+	
+	public static final JavaAnnotationHoverType OVERVIEW_RULER_HOVER= new JavaAnnotationHoverType();
+	public static final JavaAnnotationHoverType TEXT_RULER_HOVER= new JavaAnnotationHoverType();
+	public static final JavaAnnotationHoverType VERTICAL_RULER_HOVER= new JavaAnnotationHoverType();
+	
+	private MarkerAnnotationPreferences fMarkerAnnotationPreferences= new MarkerAnnotationPreferences();
+	private IPreferenceStore fStore= JavaPlugin.getDefault().getPreferenceStore();
+	
+	private JavaAnnotationHoverType fType;
+	
+	public JavaAnnotationHover(JavaAnnotationHoverType type) {
+		Assert.isTrue(OVERVIEW_RULER_HOVER.equals(type) || TEXT_RULER_HOVER.equals(type) || VERTICAL_RULER_HOVER.equals(type));
+		fType= type;
+	}
 	
 	/**
 	 * Returns the distance to the ruler line. 
@@ -81,6 +105,17 @@ public class JavaAnnotationHover implements IAnnotationHover {
 			Object o= e.next();
 			if (o instanceof IJavaAnnotation) {
 				IJavaAnnotation a= (IJavaAnnotation)o;
+
+				if (OVERVIEW_RULER_HOVER.equals(fType)) {				
+					AnnotationPreference preference= getAnnotationPreference(a.getAnnotationType());
+					if (preference == null || !fStore.getBoolean(preference.getOverviewRulerPreferenceKey()))
+						continue;
+				} else if (TEXT_RULER_HOVER.equals(fType)) {				
+					AnnotationPreference preference= getAnnotationPreference(a.getAnnotationType());
+					if (preference == null || !fStore.getBoolean(preference.getTextPreferenceKey()))
+						continue;
+				}
+				
 				if (!a.hasOverlay()) {
 					Position position= model.getPosition((Annotation)a);
 					if (position == null)
@@ -192,5 +227,21 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
+	}
+
+	/**
+	 * Returns the annotation preference for the given marker.
+	 * 
+	 * @param marker
+	 * @return the annotation preference or <code>null</code> if none
+	 */	
+	private AnnotationPreference getAnnotationPreference(String annotationType) {
+		Iterator e= fMarkerAnnotationPreferences.getAnnotationPreferences().iterator();
+		while (e.hasNext()) {
+			AnnotationPreference info= (AnnotationPreference) e.next();
+			if (info.getAnnotationType().equals(annotationType))
+				return info;
+			}
+		return null;
 	}
 }
