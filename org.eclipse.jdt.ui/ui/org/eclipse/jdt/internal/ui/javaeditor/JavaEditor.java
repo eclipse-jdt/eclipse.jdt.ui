@@ -19,12 +19,27 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseTrackListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
@@ -41,7 +56,9 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
@@ -49,6 +66,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.IVerticalRulerColumn;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -77,6 +95,7 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -87,6 +106,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
@@ -99,6 +119,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
@@ -151,38 +172,526 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 	};
 	
-	class MouseClickListener implements MouseListener {		
+	/**
+	 * Link mode.  
+	 */
+	class MouseClickListener implements KeyListener, MouseListener, MouseMoveListener, MouseTrackListener,
+		FocusListener, PaintListener, IPropertyChangeListener {		
+
+		/** The session is active. */
+		private boolean fActive;
+
+		/** The currently active style range. */
+		private IRegion fActiveRegion;
+		
+		/** The hand cursor. */
+		private Cursor fCursor;
+		
+		/** The link color. */
+		private Color fColor;
+
+		public void deactivate() {
+			if (!fActive)
+				return;
+
+			repairRepresentation();			
+			fActive= false;
+		}
+
+		public void install() {
+
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer == null)
+				return;
+				
+			StyledText text= sourceViewer.getTextWidget();			
+			if (text == null || text.isDisposed())
+				return;
+				
+			updateColor(sourceViewer);
+
+			text.addKeyListener(this);
+			text.addMouseListener(this);
+			text.addMouseMoveListener(this);
+			text.addFocusListener(this);
+			text.addPaintListener(this);
+			
+			IPreferenceStore preferenceStore= getPreferenceStore();
+			preferenceStore.addPropertyChangeListener(this);			
+		}
+		
+		public void uninstall() {
+
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer == null)
+				return;
+				
+			StyledText text= sourceViewer.getTextWidget();
+			if (text == null || text.isDisposed())
+				return;
+				
+			text.removeKeyListener(this);
+			text.removeMouseListener(this);
+			text.removeMouseMoveListener(this);
+			text.removeFocusListener(this);
+			text.removePaintListener(this);
+			
+			IPreferenceStore preferenceStore= getPreferenceStore();
+			preferenceStore.removePropertyChangeListener(this);
+			
+			if (fColor != null) {
+				fColor.dispose();
+				fColor= null;
+			}
+				
+			if (fCursor != null) {
+				fCursor.dispose();
+				fCursor= null;
+			}				
+		}
+
+		/*
+		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+		 */
+		public void propertyChange(PropertyChangeEvent event) {
+			if (event.getProperty().equals(JavaEditor.LINK_COLOR)) {
+				ISourceViewer viewer= getSourceViewer();
+				if (viewer != null)	
+					updateColor(viewer);
+			}
+		}
+
+		private void updateColor(ISourceViewer viewer) {
+			if (fColor != null)
+				fColor.dispose();
+	
+			StyledText text= viewer.getTextWidget();
+			if (text == null || text.isDisposed())
+				return;
+
+			Display display= text.getDisplay();
+			fColor= createColor(getPreferenceStore(), JavaEditor.LINK_COLOR, display);
+		}
+
+		/**
+		 * Creates a color from the information stored in the given preference store.
+		 * Returns <code>null</code> if there is no such information available.
+		 */
+		private Color createColor(IPreferenceStore store, String key, Display display) {
+		
+			RGB rgb= null;		
+			
+			if (store.contains(key)) {
+				
+				if (store.isDefault(key))
+					rgb= PreferenceConverter.getDefaultColor(store, key);
+				else
+					rgb= PreferenceConverter.getColor(store, key);
+			
+				if (rgb != null)
+					return new Color(display, rgb);
+			}
+			
+			return null;
+		}		
+	
+		private void repairRepresentation() {			
+
+			if (fActiveRegion == null)
+				return;
+			
+			ISourceViewer viewer= getSourceViewer();
+			if (viewer != null) {
+				resetCursor(viewer);
+
+				int offset= fActiveRegion.getOffset();
+				int length= fActiveRegion.getLength();
+
+				// remove style
+				if (viewer instanceof ITextViewerExtension2)
+					((ITextViewerExtension2) viewer).invalidateTextPresentation(offset, length);
+				else
+					viewer.invalidateTextPresentation();
+
+				// remove underline				
+				offset -= viewer.getVisibleRegion().getOffset();
+				StyledText text= viewer.getTextWidget();
+				text.redrawRange(offset, length, true);					
+			}
+
+			fActiveRegion= null;
+		}
+
+		private IJavaElement getInput(JavaEditor editor) {
+			if (editor == null)
+				return null;
+			IEditorInput input= editor.getEditorInput();
+			if (input instanceof IClassFileEditorInput)
+				return ((IClassFileEditorInput)input).getClassFile();
+			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
+			return manager.getWorkingCopy(input);			
+		}
+
+
+		// will eventually be replaced by a method provided by jdt.core		
+		private IRegion selectWord(IDocument document, int anchor) {
+		
+			try {		
+				int offset= anchor;
+				char c;
+	
+				while (offset >= 0) {
+					c= document.getChar(offset);
+					if (!Character.isJavaIdentifierPart(c))
+						break;
+					--offset;
+				}
+	
+				int start= offset;
+	
+				offset= anchor;
+				int length= document.getLength();
+	
+				while (offset < length) {
+					c= document.getChar(offset);
+					if (!Character.isJavaIdentifierPart(c))
+						break;
+					++offset;
+				}
+				
+				int end= offset;
+				
+				if (start == end)
+					return new Region(start, 0);
+				else
+					return new Region(start + 1, end - start - 1);
+				
+			} catch (BadLocationException x) {
+				return null;
+			}
+		}
+
+		IRegion getCurrentTextRegion(ISourceViewer viewer) {
+
+			int offset= getCurrentTextOffset(viewer);				
+			if (offset == -1)
+				return null;
+
+			IJavaElement input= SelectionConverter.getInput(JavaEditor.this);
+			if (input == null)
+				return null;
+
+			try {
+				IJavaElement[] elements= ((ICodeAssist) input).codeSelect(offset, 0);
+				if (elements == null || elements.length == 0)
+					return null;
+					
+				return selectWord(viewer.getDocument(), offset);
+					
+			} catch (JavaModelException e) {
+				return null;	
+			}
+		}
+
+		private int getCurrentTextOffset(ISourceViewer viewer) {
+
+			try {					
+				StyledText text= viewer.getTextWidget();			
+				if (text == null || text.isDisposed())
+					return -1;
+
+				Display display= text.getDisplay();				
+				Point absolutePosition= display.getCursorLocation();
+				Point relativePosition= text.toControl(absolutePosition);
+				
+				return text.getOffsetAtLocation(relativePosition) + viewer.getVisibleRegion().getOffset();
+
+			} catch (IllegalArgumentException e) {
+				return -1;
+			}			
+		}
+
+		private void highlightRegion(ISourceViewer viewer, IRegion region) {
+
+			if (region.equals(fActiveRegion))
+				return;
+
+			repairRepresentation();
+
+			StyledText text= viewer.getTextWidget();
+			if (text == null || text.isDisposed())
+				return;
+
+			// highlight region
+			int offset= region.getOffset() - viewer.getVisibleRegion().getOffset();
+			int length= region.getLength();
+			StyleRange oldStyleRange= text.getStyleRangeAtOffset(offset);
+			Color foregroundColor= fColor;
+			Color backgroundColor= oldStyleRange.background;
+			StyleRange styleRange= new StyleRange(offset, length, foregroundColor, backgroundColor);
+			text.setStyleRange(styleRange);
+
+			// underline
+			text.redrawRange(offset, length, true);
+
+			fActiveRegion= region;
+		}
+
+		private void activateCursor(ISourceViewer viewer) {
+			StyledText text= viewer.getTextWidget();
+			if (text == null || text.isDisposed())
+				return;
+			Display display= text.getDisplay();
+			if (fCursor == null)
+				fCursor= new Cursor(display, SWT.CURSOR_HAND);
+			text.setCursor(fCursor);
+		}
+		
+		private void resetCursor(ISourceViewer viewer) {
+			StyledText text= viewer.getTextWidget();
+			if (text == null || text.isDisposed())
+				return;
+						
+			text.setCursor(null);
+			if (fCursor != null) {
+				fCursor.dispose();
+				fCursor= null;
+			}
+		}
+
+		/*
+		 * @see org.eclipse.swt.events.KeyListener#keyPressed(org.eclipse.swt.events.KeyEvent)
+		 */
+		public void keyPressed(KeyEvent event) {
+
+			if (fActive) {
+				deactivate();
+				return;	
+			}
+
+			if (event.keyCode != SWT.CTRL) {
+				deactivate();
+				return;
+			}
+			
+			fActive= true;
+
+			ISourceViewer viewer= getSourceViewer();
+			if (viewer == null)
+				return;
+			
+			IRegion region= getCurrentTextRegion(viewer);
+			if (region == null)
+				return;
+			
+			highlightRegion(viewer, region);
+			activateCursor(viewer);												
+		}
+
+		/*
+		 * @see org.eclipse.swt.events.KeyListener#keyReleased(org.eclipse.swt.events.KeyEvent)
+		 */
+		public void keyReleased(KeyEvent event) {
+			
+			if (!fActive)
+				return;
+
+			deactivate();				
+		}
+
 		/*
 		 * @see org.eclipse.swt.events.MouseListener#mouseDoubleClick(org.eclipse.swt.events.MouseEvent)
 		 */
 		public void mouseDoubleClick(MouseEvent e) {}
-		/*
-		 * @see org.eclipse.swt.events.MouseListener#mouseUp(org.eclipse.swt.events.MouseEvent)
-		 */
-		public void mouseUp(MouseEvent e) {}
+
 		/*
 		 * @see org.eclipse.swt.events.MouseListener#mouseDown(org.eclipse.swt.events.MouseEvent)
 		 */
-		public void mouseDown(MouseEvent e) {
+		public void mouseDown(MouseEvent event) {
+			
+			if (!fActive)
+				return;
+				
+			if (event.stateMask != SWT.CTRL) {
+				deactivate();
+				return;	
+			}
+			
+			if (event.button != 1) {
+				deactivate();
+				return;	
+			}			
+		}
 
-			if (e.stateMask != SWT.CTRL)
+		/*
+		 * @see org.eclipse.swt.events.MouseListener#mouseUp(org.eclipse.swt.events.MouseEvent)
+		 */
+		public void mouseUp(MouseEvent e) {
+
+			if (!fActive)
 				return;
-				
-			if (e.button != 1)
+
+			if (e.button != 1) {
+				deactivate();
 				return;
-				
+			}
+
+			deactivate();
+			
 			IAction action= getAction("OpenEditor");  //$NON-NLS-1$
 			if (action == null)
 				return;
 				
-			action.run();			
+			action.run();
 		}
+
+		/*
+		 * @see org.eclipse.swt.events.MouseMoveListener#mouseMove(org.eclipse.swt.events.MouseEvent)
+		 */
+		public void mouseMove(MouseEvent event) {
+			
+			if (!fActive) {
+				if (event.stateMask != SWT.CTRL)
+					return;
+				// Ctrl was already pressed
+				fActive= true;
+			}						
+
+			ISourceViewer viewer= getSourceViewer();
+			if (viewer == null) {
+				deactivate();
+				return;
+			}
+				
+			StyledText text= viewer.getTextWidget();
+			if (text == null || text.isDisposed()) {
+				deactivate();
+				return;
+			}
+				
+			if ((event.stateMask & SWT.BUTTON1) != 0 && text.getSelectionCount() != 0) {
+				deactivate();
+				return;
+			}
+		
+			IRegion region= getCurrentTextRegion(viewer);
+			if (region == null) {
+				repairRepresentation();
+				return;
+			}
+			
+			highlightRegion(viewer, region);	
+			activateCursor(viewer);												
+		}
+
+		/*
+		 * @see org.eclipse.swt.events.MouseTrackListener#mouseEnter(org.eclipse.swt.events.MouseEvent)
+		 */
+		public void mouseEnter(MouseEvent e) {}
+
+		/*
+		 * @see org.eclipse.swt.events.MouseTrackListener#mouseExit(org.eclipse.swt.events.MouseEvent)
+		 */
+		public void mouseExit(MouseEvent e) {
+			repairRepresentation();			
+		}
+
+		/*
+		 * @see org.eclipse.swt.events.MouseTrackListener#mouseHover(org.eclipse.swt.events.MouseEvent)
+		 */
+		public void mouseHover(MouseEvent e) {}
+		
+		/*
+		 * @see org.eclipse.swt.events.FocusListener#focusGained(org.eclipse.swt.events.FocusEvent)
+		 */
+		public void focusGained(FocusEvent e) {}
+
+		/*
+		 * @see org.eclipse.swt.events.FocusListener#focusLost(org.eclipse.swt.events.FocusEvent)
+		 */
+		public void focusLost(FocusEvent event) {
+			deactivate();
+		}
+
+		/*
+		 * @see PaintListener#paintControl(PaintEvent)
+		 */
+		public void paintControl(PaintEvent event) {	
+			if (fActiveRegion == null)
+				return;
+	
+			ISourceViewer viewer= getSourceViewer();
+			if (viewer == null)
+				return;
+				
+			IRegion region= viewer.getVisibleRegion();			
+			if (!includes(region, fActiveRegion))
+			 	return;		    
+
+			StyledText text= viewer.getTextWidget();
+			if (text == null || text.isDisposed())
+				return;
+			
+			int offset= fActiveRegion.getOffset() -  region.getOffset();
+			int length= fActiveRegion.getLength();
+				
+			// support for bidi
+			Point minLocation= getMinimumLocation(text, offset, length);
+			Point maxLocation= getMaximumLocation(text, offset, length);
+	
+			int x1= minLocation.x;
+			int x2= minLocation.x + maxLocation.x - minLocation.x - 1;
+			int y= minLocation.y + text.getLineHeight() - 1;
+			
+			GC gc= event.gc;
+			gc.setForeground(fColor);
+			gc.drawLine(x1, y, x2, y);
+		}
+
+		private boolean includes(IRegion region, IRegion position) {
+			return
+				position.getOffset() >= region.getOffset() &&
+				position.getOffset() + position.getLength() <= region.getOffset() + region.getLength();
+		}
+
+		private Point getMinimumLocation(StyledText text, int offset, int length) {
+			Point minLocation= new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
+	
+			for (int i= 0; i <= length; i++) {
+				Point location= text.getLocationAtOffset(offset + i);
+				
+				if (location.x < minLocation.x)
+					minLocation.x= location.x;			
+				if (location.y < minLocation.y)
+					minLocation.y= location.y;			
+			}	
+			
+			return minLocation;
+		}
+	
+		private Point getMaximumLocation(StyledText text, int offset, int length) {
+			Point maxLocation= new Point(Integer.MIN_VALUE, Integer.MIN_VALUE);
+	
+			for (int i= 0; i <= length; i++) {
+				Point location= text.getLocationAtOffset(offset + i);
+				
+				if (location.x > maxLocation.x)
+					maxLocation.x= location.x;			
+				if (location.y > maxLocation.y)
+					maxLocation.y= location.y;			
+			}	
+			
+			return maxLocation;
+		}
+
 	}
 	
 	/** Preference key for showing the line number ruler */
 	public final static String LINE_NUMBER_RULER= "lineNumberRuler"; //$NON-NLS-1$
 	/** Preference key for the foreground color of the line numbers */
 	public final static String LINE_NUMBER_COLOR= "lineNumberColor"; //$NON-NLS-1$
+	/** Preference key for the link color */
+	public final static String LINK_COLOR= "linkColor"; //$NON-NLS-1$
 	
 	
 	/** The outline page */
@@ -608,19 +1117,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	public void dispose() {
 
-		ISourceViewer sourceViewer= getSourceViewer();
-		if (sourceViewer != null) {
-			StyledText text= sourceViewer.getTextWidget();
-			if (text != null && !text.isDisposed() && fMouseListener != null) {
-				text.removeMouseListener(fMouseListener);
-				fMouseListener= null;
-			}
-			
+		if (fMouseListener != null) {
+			fMouseListener.uninstall();
+			fMouseListener= null;	
 		}
-		
+
 		if (fEncodingSupport != null) {
-				fEncodingSupport.dispose();
-				fEncodingSupport= null;
+			fEncodingSupport.dispose();
+			fEncodingSupport= null;
 		}
 		super.dispose();
 	}
@@ -649,13 +1153,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		fEncodingSupport= new DefaultEncodingSupport();
 		fEncodingSupport.initialize(this);
 		
-		ISourceViewer sourceViewer= getSourceViewer();
-		if (sourceViewer != null) {
-			StyledText text= sourceViewer.getTextWidget();
-			if (text != null && !text.isDisposed()) {
-				fMouseListener= new MouseClickListener();
-				text.addMouseListener(fMouseListener);
-			}
+		if (fMouseListener == null) {
+			fMouseListener= new MouseClickListener();
+			fMouseListener.install();	
 		}
 	}
 	

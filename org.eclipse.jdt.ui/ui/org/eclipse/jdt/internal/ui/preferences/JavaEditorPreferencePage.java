@@ -1,4 +1,4 @@
-/**********************************************************************
+/*
 Copyright (c) 2000, 2002 IBM Corp. and others.
 All rights reserved. This program and the accompanying materials
 are made available under the terms of the Common Public License v1.0
@@ -139,6 +139,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE),
 
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.LINKED_POSITION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.LINK_COLOR),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.ERROR_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ERROR_INDICATION),
@@ -225,6 +226,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColor2"), CompilationUnitEditor.PRINT_MARGIN_COLOR}, //$NON-NLS-1$
 		{JavaUIMessages.getString("JavaEditorPreferencePage.findScopeColor2"), AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE}, //$NON-NLS-1$
 		{JavaUIMessages.getString("JavaEditorPreferencePage.linkedPositionColor2"), CompilationUnitEditor.LINKED_POSITION_COLOR}, //$NON-NLS-1$
+		{JavaUIMessages.getString("JavaEditorPreferencePage.linkColor2"), JavaEditor.LINK_COLOR}, //$NON-NLS-1$
 	};
 	
 	private final String[][] fProblemIndicationColorListModel= new String[][] {
@@ -374,6 +376,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
 
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.LINKED_POSITION_COLOR, new RGB(0, 200 , 100));
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.LINK_COLOR, new RGB(0, 0, 255));
 		
 		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, rgbs[1]);
 		store.setDefault(AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT, true);
@@ -476,7 +479,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		String key= fProblemIndicationColorListModel[i][1];
 		RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
-		fProblemIndicationForegroundColorEditor.setColorValue(rgb);
+		fProblemIndicationForegroundColorEditor.setColorValue(rgb);		
 		
 		key= fProblemIndicationColorListModel[i][2];
 		fShowInTextCheckBox.setSelection(fOverlayStore.getBoolean(key));
@@ -810,7 +813,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return appearanceComposite;
 	}
 	
-	
 	private Control createProblemIndicationPage(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
@@ -818,7 +820,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				
 		String text= "Analyse &problems while typing";
 		addCheckBox(composite, text, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, 0);
-		
+
 		text= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
 		addCheckBox(composite, text, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
 		
@@ -887,7 +889,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
-			
 			public void widgetSelected(SelectionEvent e) {
 				handleProblemIndicationColorListSelection();
 			}
@@ -921,10 +922,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
-			
 			public void widgetSelected(SelectionEvent e) {
 				int i= fProblemIndicationList.getSelectionIndex();
 				String key= fProblemIndicationColorListModel[i][1];
+				
 				PreferenceConverter.setValue(fOverlayStore, key, fProblemIndicationForegroundColorEditor.getColorValue());
 			}
 		});
@@ -1099,9 +1100,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fSyntaxColorList.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				if (fSyntaxColorList != null && !fSyntaxColorList.isDisposed()) {
-					fSyntaxColorList.select(0);
-					handleSyntaxColorListSelection();
-				}
+				fSyntaxColorList.select(0);
+				handleSyntaxColorListSelection();
+			}
 			}
 		});
 		
@@ -1111,9 +1112,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fAppearanceColorList.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				if (fAppearanceColorList != null && !fAppearanceColorList.isDisposed()) {
-					fAppearanceColorList.select(0);
-					handleAppearanceColorListSelection();
-				}
+				fAppearanceColorList.select(0);
+				handleAppearanceColorListSelection();
+			}
 			}
 		});
 		
@@ -1124,8 +1125,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void run() {
 				if (fProblemIndicationList != null && !fProblemIndicationList.isDisposed()) {
 					fProblemIndicationList.select(0);
-					handleProblemIndicationColorListSelection();
-				}
+				handleProblemIndicationColorListSelection();
+			}
 			}
 		});
 	}
