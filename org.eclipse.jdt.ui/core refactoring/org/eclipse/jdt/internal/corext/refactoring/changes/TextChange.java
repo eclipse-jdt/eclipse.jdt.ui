@@ -386,7 +386,7 @@ public abstract class TextChange extends Change {
 		Assert.isTrue(surroundLines >= 0);
 		IDocument document= getDocument();
 		Assert.isTrue(document.getLength() >= region.getOffset() + region.getLength());
-		return getContent(document, region, expandRegionToFullLine, 0);
+		return getContent(document, region, expandRegionToFullLine, surroundLines);
 	}
 
 	//---- Method to access the preview content of the text change ---------
@@ -631,9 +631,16 @@ public abstract class TextChange extends Change {
 		try {
 			if (expandRegionToFullLine) {
 				int startLine= Math.max(document.getLineOfOffset(region.getOffset()) - surroundingLines, 0);
-				int endLine= Math.min(
-					document.getLineOfOffset(region.getOffset() + region.getLength() - 1) + surroundingLines,
-					document.getNumberOfLines() - 1);
+				int endLine;
+				if (region.getLength() == 0) {
+					endLine= Math.min(
+						document.getLineOfOffset(region.getOffset()) + surroundingLines,
+						document.getNumberOfLines() - 1);
+				} else {
+					endLine= Math.min(
+						document.getLineOfOffset(region.getOffset() + region.getLength() - 1) + surroundingLines,
+						document.getNumberOfLines() - 1);
+				}
 				
 				int offset= document.getLineInformation(startLine).getOffset();
 				IRegion endLineRegion= document.getLineInformation(endLine);

@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -374,6 +375,9 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 			}
 		} catch (CoreException e) {
 			showNullPreviewer();
+			ExceptionHandler.handle(e, getShell(),
+						RefactoringMessages.getString("PreviewWizardPage.refactoring"), //$NON-NLS-1$
+						RefactoringMessages.getString("PreviewWizardPage.Internal_error")); //$NON-NLS-1$
 		}
 	}
 	

@@ -22,6 +22,9 @@ import org.eclipse.jdt.internal.corext.Corext;
 /* package */ class Changes {
 	
 	public static CoreException asCoreException(BadLocationException e) {
-		return new CoreException(new Status(IStatus.ERROR, Corext.getPluginId(), StatusCodes.BAD_LOCATION, e.getMessage(), e));
+		String message= e.getMessage();
+		if (message == null)
+			message= "BadLocationException"; //$NON-NLS-1$
+		return new CoreException(new Status(IStatus.ERROR, Corext.getPluginId(), StatusCodes.BAD_LOCATION, message, e));
 	}
 }
