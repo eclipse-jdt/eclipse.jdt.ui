@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * A helper class to convert compiler bindings into corresponding 
@@ -83,6 +84,8 @@ public class Binding2JavaModel {
 			candidate= ((ICompilationUnit)element).getType(typeElements[0]);
 		} else if (element instanceof IClassFile) {
 			candidate= ((IClassFile)element).getType();
+		} else if (element == null){
+			candidate= JavaModelUtil.findType(scope, Bindings.getFullyQualifiedImportName(type));
 		}
 		
 		if (candidate == null || typeElements.length == 1)
@@ -110,7 +113,7 @@ public class Binding2JavaModel {
 		IMethod inThisType= find(method, type);
 		if (inThisType != null)
 			return inThisType;
-		IType[] superTypes= type.newSupertypeHierarchy(pm).getAllSupertypes(type);
+		IType[] superTypes= JavaModelUtil.getAllSuperTypes(type, pm);
 		for (int i= 0; i < superTypes.length; i++) {
 			IMethod m= find(method, superTypes[i]);
 			if (m != null)
@@ -192,7 +195,7 @@ public class Binding2JavaModel {
 				return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
 			} else {
 				String[][] qualifiedCandidates= scope.resolveType(Signature.toString(candidate));
-				if (qualifiedCandidates == null || qualifiedCandidates.length == 0l)
+				if (qualifiedCandidates == null || qualifiedCandidates.length == 0)
 					return false;
 				String packageName= type.getPackage().isUnnamed() ? "" : type.getPackage().getName(); //$NON-NLS-1$
 				String typeName= Bindings.getTypeQualifiedName(type);
