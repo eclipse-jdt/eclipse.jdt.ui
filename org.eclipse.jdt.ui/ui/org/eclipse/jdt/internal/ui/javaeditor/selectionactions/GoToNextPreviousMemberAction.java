@@ -9,10 +9,16 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IInitializer;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -153,12 +159,30 @@ public class GoToNextPreviousMemberAction extends Action {
 	}
 
 	private static int getOffset(IMember iMember) throws JavaModelException {
-		//workaround for bug 23257
+		//special case
+		if (iMember.getElementType() == IJavaElement.INITIALIZER)
+			return firstOpeningBraceOffset((IInitializer)iMember);
+
 		if (iMember.getNameRange() != null && iMember.getNameRange().getOffset() >= 0)
 			return iMember.getNameRange().getOffset();
 		return iMember.getSourceRange().getOffset();
 	}
-	
+
+	private static int firstOpeningBraceOffset(IInitializer iInitializer) throws JavaModelException {
+		try {
+			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+			scanner.setSource(iInitializer.getSource().toCharArray());
+			int token= scanner.getNextToken();
+			while (token != ITerminalSymbols.TokenNameEOF && token != ITerminalSymbols.TokenNameLBRACE)
+				token= scanner.getNextToken();
+			if (token == ITerminalSymbols.TokenNameLBRACE)
+				return iInitializer.getSourceRange().getOffset() + scanner.getCurrentTokenStartPosition() + scanner.getCurrentTokenSource().length;
+			return iInitializer.getSourceRange().getOffset();
+		} catch (InvalidInputException e) {
+			return iInitializer.getSourceRange().getOffset();
+		}
+	}
+
 	//-- private helper methods
 	
 	private static ISourceRange createSourceRange(ITextSelection ts){
