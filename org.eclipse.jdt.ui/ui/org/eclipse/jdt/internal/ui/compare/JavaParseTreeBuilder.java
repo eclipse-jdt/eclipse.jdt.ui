@@ -11,7 +11,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
-
 class JavaParseTreeBuilder extends SourceElementRequestorAdapter implements ICompilationUnit {
 	
 	private static final boolean SHOW_COMPILATIONUNIT= true;
@@ -133,7 +132,13 @@ class JavaParseTreeBuilder extends SourceElementRequestorAdapter implements ICom
 		push(JavaNode.FIELD, new String(name), declarationStart);
 	}
 	
+	/*
+	 * Obsolete: remove in next build.	 */
 	public void exitField(int declarationEnd) {
+		pop(declarationEnd);
+	}
+
+	public void exitField(int initializationStart, int declarationEnd) {
 		pop(declarationEnd);
 	}
 
