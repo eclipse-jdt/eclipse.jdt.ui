@@ -97,9 +97,11 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.ui.text.JavaTextTools;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
 import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
+import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
@@ -558,9 +560,8 @@ public class CompilationUnitEditor extends JavaEditor {
 		page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page)); //$NON-NLS-1$
 		page.setAction("AddEdition", new JavaAddElementFromHistory(this, page)); //$NON-NLS-1$
 		
-//		DeleteISourceManipulationsAction deleteElement= new DeleteISourceManipulationsAction(page);
-//		page.setAction("DeleteElement", deleteElement); //$NON-NLS-1$
-//		page.addSelectionChangedListener(deleteElement);
+		DeleteAction deleteElement= new DeleteAction(page);
+		page.setAction("DeleteElement", deleteElement); //$NON-NLS-1$
 		
 		return page;
 	}
