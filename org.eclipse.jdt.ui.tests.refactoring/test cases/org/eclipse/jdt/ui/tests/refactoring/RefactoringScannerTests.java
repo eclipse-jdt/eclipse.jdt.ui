@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -34,7 +37,7 @@ public class RefactoringScannerTests extends RefactoringTest{
 	
 	protected void setUp() throws Exception {
 		//no need to call super.setUp();
-		fScanner= new RefactoringScanner("TestPattern", "");
+		fScanner= new RefactoringScanner("TestPattern", "org.eclipse");
 	}
 
 	protected void tearDown() throws Exception {
@@ -45,6 +48,18 @@ public class RefactoringScannerTests extends RefactoringTest{
 		String text= getFileContents(getRefactoringPath() + fileName);
 		fScanner.scan(text);
 		assertEquals("results.length", expectedMatchCount, fScanner.getMatches().size());
+	}
+	
+	private void helper2(String fileName, int[] expectedMatches)	throws Exception{
+		String text= getFileContents(getRefactoringPath() + fileName);
+		fScanner.scan(text);
+		
+		ArrayList expectedMatchesList= new ArrayList(expectedMatches.length);
+		for (int i= 0; i < expectedMatches.length; i++)
+			expectedMatchesList.add(new Integer(expectedMatches[i]));
+		ArrayList matchesList= new ArrayList(fScanner.getMatches());
+		Collections.sort(matchesList);
+		assertEquals("results", expectedMatchesList, matchesList);
 	}
 	
 	//-- tests
@@ -58,9 +73,12 @@ public class RefactoringScannerTests extends RefactoringTest{
 		helper("A.java", 8);
 	}
 
-	//---
 	public void testWord1() throws Exception{
 		helper("B.java", 6);
+	}
+	
+	public void testQualifier() throws Exception{
+		helper2("C.java", new int[] { 68, 336 });
 	}
 }
 
