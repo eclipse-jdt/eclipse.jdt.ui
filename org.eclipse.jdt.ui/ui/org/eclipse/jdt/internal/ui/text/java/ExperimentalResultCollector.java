@@ -19,7 +19,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 		JavaCompletionProposal original= super.createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
 		
 		// XXX hack to handle empty code completion
-		if (completionName.length == 0)
+		if ((completionName.length == 0) || ((completionName.length == 1) && completionName[0] == ')'))
 			return original;
 	
 		int count= parameterNames.length;
