@@ -11,10 +11,11 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -498,7 +499,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 		
 		protected static void saveLibraries(List libraries, File file, IProgressMonitor monitor) throws IOException {
-			FileWriter writer= new FileWriter(file);
+			OutputStream stream= new FileOutputStream(file);
 			try {
 				DocumentBuilder docBuilder= null;
 				DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
@@ -548,7 +549,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount","4"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				DOMSource source = new DOMSource(document);
-				StreamResult result = new StreamResult(writer);
+				StreamResult result = new StreamResult(stream);
 				transformer.transform(source, result);	
 			} catch (ParserConfigurationException e) {
 				throw new IOException(e.getMessage());
@@ -556,7 +557,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				throw new IOException(e.getMessage());			
 			} finally {
 				try {
-					writer.close();
+					stream.close();
 				} catch (IOException e) {
 					// ignore
 				}
@@ -567,17 +568,17 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 				
 		private static List loadLibraries(File file) throws IOException {
-			Reader reader= new FileReader(file);
+			InputStream stream= new FileInputStream(file);
 			Element cpElement;
 			try {
 				DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-				cpElement = parser.parse(new InputSource(reader)).getDocumentElement();
+				cpElement = parser.parse(new InputSource(stream)).getDocumentElement();
 			} catch (SAXException e) {
 				throw new IOException(PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.load.badformat")); //$NON-NLS-1$
 			} catch (ParserConfigurationException e) {
 				throw new IOException(PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.load.badformat")); //$NON-NLS-1$
 			} finally {
-				reader.close();
+				stream.close();
 			}
 			
 			if (!cpElement.getNodeName().equalsIgnoreCase(TAG_ROOT)) {

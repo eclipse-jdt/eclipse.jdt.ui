@@ -12,11 +12,11 @@
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,6 +34,13 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
@@ -41,13 +48,6 @@ import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 
 
@@ -141,11 +141,11 @@ public class ProfileStore {
 		if (!file.exists())
 			return null;
 		
-		final Reader reader= new FileReader(file);
+		final InputStream stream= new FileInputStream(file);
 		try {
-			return readProfilesFromStream(reader);
+			return readProfilesFromStream(stream);
 		} finally {
-			reader.close();
+			stream.close();
 		}
 	}
 	
@@ -153,13 +153,13 @@ public class ProfileStore {
 	/**
 	 * Load profiles from a XML stream and add them to a map.
 	 */
-	private static List readProfilesFromStream(Reader reader) throws CoreException {
+	private static List readProfilesFromStream(InputStream stream) throws CoreException {
 		
 		final ProfileDefaultHandler handler= new ProfileDefaultHandler();
 		try {
 		    final SAXParserFactory factory= SAXParserFactory.newInstance();
 			final SAXParser parser= factory.newSAXParser();
-			parser.parse(new InputSource(reader), handler);
+			parser.parse(new InputSource(stream), handler);
 		} catch (Exception ex) {
 			throw createException(ex, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message"));  //$NON-NLS-1$
 		}
@@ -172,7 +172,7 @@ public class ProfileStore {
 	 * Write the available profiles to the internal XML file.
 	 */
 	public static void writeProfilesToFile(Collection profiles, File file) throws IOException, CoreException {
-		final Writer writer= new FileWriter(file);
+		final OutputStream writer= new FileOutputStream(file);
 		try {
 			writeProfilesToStream(profiles, writer);
 		} finally {
@@ -184,7 +184,7 @@ public class ProfileStore {
 	/**
 	 * Save profiles to an XML stream
 	 */
-	private static void writeProfilesToStream(Collection profiles, Writer writer) throws CoreException {
+	private static void writeProfilesToStream(Collection profiles, OutputStream stream) throws CoreException {
 
 		try {
 			final DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
@@ -208,7 +208,7 @@ public class ProfileStore {
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
-			transformer.transform(new DOMSource(document), new StreamResult(writer));
+			transformer.transform(new DOMSource(document), new StreamResult(stream));
 		} catch (Exception e) {
 			throw createException(e, FormatterMessages.getString("CodingStyleConfigurationBlock.error.serializing_xml.message"));  //$NON-NLS-1$
 		}
