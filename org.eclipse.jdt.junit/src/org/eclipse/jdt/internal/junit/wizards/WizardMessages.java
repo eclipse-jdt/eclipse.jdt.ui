@@ -31,7 +31,7 @@ public class WizardMessages {
 		}
 	}
 	
-	/**
+	/*
 	 * Gets a string from the resource bundle and formats it with the argument
 	 * 
 	 * @param key	the string used to get the bundle value, must not be null
@@ -40,7 +40,7 @@ public class WizardMessages {
 		return MessageFormat.format(getString(key), new Object[] { arg });
 	}
 
-	/**
+	/*
 	 * Gets a string from the resource bundle and formats it with arguments
 	 */	
 	public static String getFormattedString(String key, Object[] args) {

@@ -8,17 +8,32 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.junit.wizards;
+package org.eclipse.jdt.junit.wizards;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jdt.core.Flags;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -29,83 +44,71 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.util.SWTUtil;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.junit.wizards.ClassesInSuitContentProvider;
+import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
+import org.eclipse.jdt.internal.junit.wizards.UpdateTestSuite;
+import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 
 /**
- * Wizard page to select the test classes to include
- * in the test suite.
+ * The class <code>NewTestSuiteWizardPage</code> contains controls and validation routines 
+ * for the single page in the 'New JUnit TestSuite Wizard'.
+ * 
+ * Clients can use the page as-is and add it to their own wizard, or extend it to modify
+ * validation or add and remove controls.
+ * 
+ * @since 3.1
  */
-public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
+public class NewTestSuiteWizardPage extends NewTypeWizardPage {
+	
+	/**
+	 * The string used to mark the beginning of the generated code
+	 */
+	public static final String START_MARKER= "//$JUnit-BEGIN$"; //$NON-NLS-1$
+	
+	/**
+	 * The string used to mark the end of the generated code
+	 */
+	public static final String END_MARKER= "//$JUnit-END$"; //$NON-NLS-1$
 
 	private final static String PAGE_NAME= "NewTestSuiteCreationWizardPage"; //$NON-NLS-1$
-	private final static String CLASSES_IN_SUITE= PAGE_NAME + ".classesinsuite"; //$NON-NLS-1$
-	private final static String SUITE_NAME= PAGE_NAME + ".suitename"; //$NON-NLS-1$
-
-	protected final static String STORE_GENERATE_MAIN= PAGE_NAME + ".GENERATE_MAIN"; //$NON-NLS-1$
-	protected final static String STORE_USE_TESTRUNNER= PAGE_NAME + ".USE_TESTRUNNER";	//$NON-NLS-1$
-	protected final static String STORE_TESTRUNNER_TYPE= PAGE_NAME + ".TESTRUNNER_TYPE"; //$NON-NLS-1$
-
-
-	public static final String START_MARKER= "//$JUnit-BEGIN$"; //$NON-NLS-1$
-	public static final String END_MARKER= "//$JUnit-END$"; //$NON-NLS-1$
 	
-	private CheckboxTableViewer fClassesInSuiteTable;	
-	private Button fSelectAllButton;
-	private Button fDeselectAllButton;
+	/** Field ID of the class in suite field. */
+	public final static String CLASSES_IN_SUITE= PAGE_NAME + ".classesinsuite"; //$NON-NLS-1$
+
+	private final static String STORE_GENERATE_MAIN= PAGE_NAME + ".GENERATE_MAIN"; //$NON-NLS-1$
+	private final static String STORE_USE_TESTRUNNER= PAGE_NAME + ".USE_TESTRUNNER";	//$NON-NLS-1$
+	private final static String STORE_TESTRUNNER_TYPE= PAGE_NAME + ".TESTRUNNER_TYPE"; //$NON-NLS-1$
+	
+	private CheckboxTableViewer fClassesInSuiteTable;
+	private IStatus fClassesInSuiteStatus;
+
 	private Label fSelectedClassesLabel;
 
-	private Label fSuiteNameLabel;
-	private Text fSuiteNameText;
-	private String fSuiteNameTextInitialValue;
 	private MethodStubsSelectionButtonGroup fMethodStubsButtons;
 	
 	private boolean fUpdatedExistingClassButton;
 
-	protected IStatus fClassesInSuiteStatus;
-	protected IStatus fSuiteNameStatus;
-	
-	public NewTestSuiteCreationWizardPage() {
+	/**
+	 * Creates a new <code>NewTestSuiteWizardPage</code>.
+	 */
+	public NewTestSuiteWizardPage() {
 		super(true, PAGE_NAME);
-
-		fSuiteNameStatus= new JUnitStatus();
-		fSuiteNameTextInitialValue= ""; //$NON-NLS-1$
 		setTitle(WizardMessages.getString("NewTestSuiteWizPage.title")); //$NON-NLS-1$
 		setDescription(WizardMessages.getString("NewTestSuiteWizPage.description")); //$NON-NLS-1$
 		
 		String[] buttonNames= new String[] {
 			"public static void main(Strin&g[] args)", //$NON-NLS-1$
 			/* Add testrunner statement to main Method */
-			WizardMessages.getString("NewTestClassWizPage.methodStub.testRunner"), //$NON-NLS-1$
+			WizardMessages.getString("NewTestSuiteCreationWizardPage.methodStub.testRunner"), //$NON-NLS-1$
 		};
 		
 		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
@@ -114,8 +117,8 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		fClassesInSuiteStatus= new JUnitStatus();
 	}
 
-	/**
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(Composite)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
@@ -129,10 +132,9 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	
 		createContainerControls(composite, nColumns);	
 		createPackageControls(composite, nColumns);	
-		createSeparator(composite, nColumns);
-		createSuiteNameControl(composite, nColumns);
+		//createSeparator(composite, nColumns);
+		createTypeNameControls(composite, nColumns);
 		setTypeName("AllTests", true); //$NON-NLS-1$
-		createSeparator(composite, nColumns);
 		createClassesInSuiteControl(composite, nColumns);
 		createMethodStubSelectionControls(composite, nColumns);
 		setControl(composite);
@@ -141,6 +143,13 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.NEW_TESTSUITE_WIZARD_PAGE);			
 	}
 
+	/**
+	 * Creates the controls for the method stub selection buttons. Expects a <code>GridLayout</code> with 
+	 * at least 3 columns.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
+	 */	
 	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {
 		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getLabelControl(composite), nColumns);
 		LayoutUtil.createEmptySpace(composite,1);
@@ -149,6 +158,8 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 
 	/**
 	 * Should be called from the wizard with the initial selection.
+	 * 
+	 * @param selection the initial selection
 	 */
 	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= getInitialJavaElement(selection);
@@ -161,21 +172,17 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		fMethodStubsButtons.setEnabled(1, false); //add text
 	}
 	
-	/**
-	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(String)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(java.lang.String)
 	 */
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		if (fieldName.equals(PACKAGE) || fieldName.equals(CONTAINER)) {
-			if (fieldName.equals(PACKAGE))
-				fPackageStatus= packageChanged();
 			updateClassesInSuiteTable();
 		} else if (fieldName.equals(CLASSES_IN_SUITE)) {
 			fClassesInSuiteStatus= classesInSuiteChanged();
-			fSuiteNameStatus= testSuiteChanged(); //must check this one too
+			fTypeNameStatus= typeNameChanged(); //must check this one too
 			updateSelectedClassesLabel();
-		} else if (fieldName.equals(SUITE_NAME)) {
-			fSuiteNameStatus= testSuiteChanged();
 		}
 
 		doStatusUpdate();
@@ -187,7 +194,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		IStatus[] status= new IStatus[] {
 			fContainerStatus,
 			fPackageStatus,
-			fSuiteNameStatus,
+			fTypeNameStatus,
 			fClassesInSuiteStatus			
 		};
 		
@@ -195,8 +202,8 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		updateStatus(status);
 	}
 
-	/**
-	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
@@ -204,6 +211,8 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			setFocus();		
 			updateClassesInSuiteTable();
 			handleAllFieldsChanged();
+		} else {
+			saveWidgetValues();
 		}
 	}
 
@@ -211,7 +220,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		handleFieldChanged(PACKAGE);
 		handleFieldChanged(CONTAINER);
 		handleFieldChanged(CLASSES_IN_SUITE);
-		handleFieldChanged(SUITE_NAME);
+		handleFieldChanged(TYPENAME);
 	}
 
 	protected void updateClassesInSuiteTable() {
@@ -230,6 +239,13 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		}
 	}
 	
+	/**
+	 * Creates the controls for the list of classes in the suite. Expects a <code>GridLayout</code> with 
+	 * at least 3 columns.
+	 * 
+	 * @param parent the parent composite
+	 * @param nColumns number of columns to span
+	 */	
 	protected void createClassesInSuiteControl(Composite parent, int nColumns) {
 		if (fClassesInSuiteTable == null) {
 
@@ -262,24 +278,24 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			buttonLayout.marginHeight= 0;
 			buttonContainer.setLayout(buttonLayout);
 	
-			fSelectAllButton= new Button(buttonContainer, SWT.PUSH);
-			fSelectAllButton.setText(WizardMessages.getString("NewTestSuiteWizPage.selectAll")); //$NON-NLS-1$
+			Button selectAllButton= new Button(buttonContainer, SWT.PUSH);
+			selectAllButton.setText(WizardMessages.getString("NewTestSuiteWizPage.selectAll")); //$NON-NLS-1$
 			GridData bgd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-			bgd.widthHint = SWTUtil.getButtonWidthHint(fSelectAllButton);
-			fSelectAllButton.setLayoutData(bgd);
-			fSelectAllButton.addSelectionListener(new SelectionAdapter() {
+			bgd.widthHint = SWTUtil.getButtonWidthHint(selectAllButton);
+			selectAllButton.setLayoutData(bgd);
+			selectAllButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					fClassesInSuiteTable.setAllChecked(true);
 					handleFieldChanged(CLASSES_IN_SUITE);
 				}
 			});
 	
-			fDeselectAllButton= new Button(buttonContainer, SWT.PUSH);
-			fDeselectAllButton.setText(WizardMessages.getString("NewTestSuiteWizPage.deselectAll")); //$NON-NLS-1$
+			Button deselectAllButton= new Button(buttonContainer, SWT.PUSH);
+			deselectAllButton.setText(WizardMessages.getString("NewTestSuiteWizPage.deselectAll")); //$NON-NLS-1$
 			bgd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-			bgd.widthHint = SWTUtil.getButtonWidthHint(fDeselectAllButton);
-			fDeselectAllButton.setLayoutData(bgd);
-			fDeselectAllButton.addSelectionListener(new SelectionAdapter() {
+			bgd.widthHint = SWTUtil.getButtonWidthHint(deselectAllButton);
+			deselectAllButton.setLayoutData(bgd);
+			deselectAllButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					fClassesInSuiteTable.setAllChecked(false);
 					handleFieldChanged(CLASSES_IN_SUITE);
@@ -295,43 +311,10 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			fSelectedClassesLabel.setLayoutData(gd);
 		}
 	}
+	
 
-	static class ClassesInSuitContentProvider implements IStructuredContentProvider {
-			
-		public Object[] getElements(Object parent) {
-			if (! (parent instanceof IPackageFragment))
-				return new Object[0];
-			IPackageFragment pack= (IPackageFragment) parent;
-			if (! pack.exists())
-				return new Object[0];
-			try {
-				ICompilationUnit[] cuArray= pack.getCompilationUnits();
-				List typesArrayList= new ArrayList();
-				for (int i= 0; i < cuArray.length; i++) {
-					ICompilationUnit cu= cuArray[i];
-					IType[] types= cu.getTypes();
-					for (int j= 0; j < types.length; j++) {
-						IType type= types[j];
-						if (type.isClass() && ! Flags.isAbstract(type.getFlags()) && TestSearchEngine.isTestImplementor(type))	
-							typesArrayList.add(types[j]);
-					}
-				}
-				return typesArrayList.toArray();
-			} catch (JavaModelException e) {
-				JUnitPlugin.log(e);
-				return new Object[0];
-			}
-		}
-		
-		public void dispose() {
-		}
-		
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		}
-	}
-
-	/*
-	 * @see TypePage#evalMethods
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#createTypeMembers(org.eclipse.jdt.core.IType, org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		writeImports(imports);
@@ -340,14 +323,14 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		type.createMethod(getSuiteMethodString(), null, false, null);	
 	}
 
-	protected void createMain(IType type) throws JavaModelException {
+	private void createMain(IType type) throws JavaModelException {
 		type.createMethod(fMethodStubsButtons.getMainMethod(getTypeName()), null, false, null);	
 	}
 
-	/**
+	/*
 	 * Returns the string content for creating a new suite() method.
 	 */
-	public String getSuiteMethodString() {
+	private String getSuiteMethodString() {
 		IPackageFragment pack= getPackageFragment();
 		String packName= pack.getElementName();
 		StringBuffer suite= new StringBuffer("public static Test suite () {TestSuite suite= new TestSuite(\"Test for "+((packName.equals(""))?"default package":packName)+"\");\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -356,67 +339,33 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		return suite.toString();
 	}
 	
-	/**
-	 * Returns the new code to be included in a new suite() or which replaces old code in an existing suite().
-	 */
-	public static String getUpdatableString(Object[] selectedClasses) {
-		StringBuffer suite= new StringBuffer();
-		suite.append(START_MARKER+"\n"); //$NON-NLS-1$
-		for (int i= 0; i < selectedClasses.length; i++) {
-			if (selectedClasses[i] instanceof IType) {
-				IType testType= (IType) selectedClasses[i];
-				IMethod suiteMethod= testType.getMethod("suite", new String[] {}); //$NON-NLS-1$
-				if (!suiteMethod.exists()) {
-					suite.append("suite.addTestSuite("+testType.getElementName()+".class);"); //$NON-NLS-1$ //$NON-NLS-2$
-				} else {
-					suite.append("suite.addTest("+testType.getElementName()+".suite());"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-		}
-		suite.append("\n"+END_MARKER); //$NON-NLS-1$
-		return suite.toString();
-	}
-	
 	private String getUpdatableString() {
-		return getUpdatableString(fClassesInSuiteTable.getCheckedElements());
-	}
-
-	/**
-	 * Runnable for replacing an existing suite() method.
-	 */
-	public IRunnableWithProgress getRunnable() {
-		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				try {
-					if (monitor == null) {
-						monitor= new NullProgressMonitor();
-					}
-					updateExistingClass(monitor);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				} 				
-			}
-		};
+		return UpdateTestSuite.getUpdatableString(fClassesInSuiteTable.getCheckedElements());
 	}
 	
-	protected void updateExistingClass(IProgressMonitor monitor) throws CoreException, InterruptedException {
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#createType(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		IPackageFragment pack= getPackageFragment();
 		ICompilationUnit cu= pack.getCompilationUnit(getTypeName() + ".java"); //$NON-NLS-1$
 		
 		if (!cu.exists()) {
-			createType(monitor);
+			super.createType(monitor);
 			fUpdatedExistingClassButton= false;
-			return;
+		} else {
+			updateExistingType(cu, monitor);
+			fUpdatedExistingClassButton= true;
 		}
-		
+	}
+
+	private void updateExistingType(ICompilationUnit cu, IProgressMonitor monitor) throws JavaModelException {
 		if (! UpdateTestSuite.checkValidateEditStatus(cu, getShell()))
 			return;
-
 		IType suiteType= cu.getType(getTypeName());
 		monitor.beginTask(WizardMessages.getString("NewTestSuiteWizPage.createType.beginTask"), 10); //$NON-NLS-1$
 		IMethod suiteMethod= suiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
 		monitor.worked(1);
-		
 		String lineDelimiter= JUnitStubUtility.getLineDelimiterUsed(cu);
 		if (suiteMethod.exists()) {
 			ISourceRange range= suiteMethod.getSourceRange();
@@ -424,25 +373,18 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 				IBuffer buf= cu.getBuffer();
 				String originalContent= buf.getText(range.getOffset(), range.getLength());
 				StringBuffer source= new StringBuffer(originalContent);
-				//using JDK 1.4
-				//int start= source.toString().indexOf(START_MARKER) --> int start= source.indexOf(START_MARKER);
-				int start= source.toString().indexOf(START_MARKER);
+				int start= source.indexOf(NewTestSuiteWizardPage.START_MARKER);
 				if (start > -1) {
-					//using JDK 1.4
-					//int end= source.toString().indexOf(END_MARKER, start) --> int end= source.indexOf(END_MARKER, start)
-					int end= source.toString().indexOf(END_MARKER, start);
+					int end= source.indexOf(NewTestSuiteWizardPage.END_MARKER, start);
 					if (end > -1) {
 						monitor.subTask(WizardMessages.getString("NewTestSuiteWizPage.createType.updating.suite_method")); //$NON-NLS-1$
 						monitor.worked(1);
-						end += END_MARKER.length();
+						end += NewTestSuiteWizardPage.END_MARKER.length();
 						source.replace(start, end, getUpdatableString());
 						buf.replace(range.getOffset(), range.getLength(), source.toString());
-						cu.reconcile();  
-						originalContent= buf.getText(0, buf.getLength());
 						monitor.worked(1);
-						String formattedContent=
-							JUnitStubUtility.codeFormat(originalContent, 0, lineDelimiter);
-						buf.replace(0, buf.getLength(), formattedContent);
+						String formattedContent= JUnitStubUtility.formatCompilationUnit(cu.getJavaProject(), cu.getSource(), lineDelimiter);
+						buf.setContents(formattedContent);
 						monitor.worked(1);
 						cu.save(new SubProgressMonitor(monitor, 1), false);
 					} else {
@@ -456,22 +398,20 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			}
 		} else {
 			suiteType.createMethod(getSuiteMethodString(), null, true, monitor);
-			ISourceRange range= cu.getSourceRange();
-			IBuffer buf= cu.getBuffer();
-			String originalContent= buf.getText(range.getOffset(), range.getLength());
+			String originalContent= cu.getSource();
 			monitor.worked(2);
-			String formattedContent=
-				JUnitStubUtility.codeFormat(originalContent, 0, lineDelimiter);
-			buf.replace(range.getOffset(), range.getLength(), formattedContent);
+			String formattedContent= JUnitStubUtility.formatCompilationUnit(cu.getJavaProject(), originalContent, lineDelimiter);
+			cu.getBuffer().setContents(formattedContent);
 			monitor.worked(1);
 			cu.save(new SubProgressMonitor(monitor, 1), false);
 		}
 		monitor.done();
-		fUpdatedExistingClassButton= true;
 	}
 
 	/**
 	 * Returns true iff an existing suite() method has been replaced.
+	 * 
+	 * @return <code>true</code> is returned if an existing test suite has been replaced
 	 */
 	public boolean hasUpdatedExistingClass() {
 		return fUpdatedExistingClassButton;
@@ -490,62 +430,11 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		fSelectedClassesLabel.setText(WizardMessages.getFormattedString(key, new Integer(noOfClassesChecked)));
 	}
 
-	protected void createSuiteNameControl(Composite composite, int nColumns) {
-		fSuiteNameLabel= new Label(composite, SWT.LEFT | SWT.WRAP);
-		fSuiteNameLabel.setFont(composite.getFont());
-		fSuiteNameLabel.setText(WizardMessages.getString("NewTestSuiteWizPage.suiteName.text")); //$NON-NLS-1$
-		GridData gd= new GridData();
-		gd.horizontalSpan= 1;
-		fSuiteNameLabel.setLayoutData(gd);
 
-		fSuiteNameText= new Text(composite, SWT.SINGLE | SWT.BORDER);
-		// moved up due to 1GEUNW2
-		fSuiteNameText.setEnabled(true);
-		fSuiteNameText.setFont(composite.getFont());
-		fSuiteNameText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				handleFieldChanged(SUITE_NAME);
-			}
-		});
-		gd= new GridData();
-		gd.horizontalAlignment= GridData.FILL;
-		gd.grabExcessHorizontalSpace= true;
-		gd.horizontalSpan= nColumns - 2;
-		fSuiteNameText.setLayoutData(gd);
-		
-		Label space= new Label(composite, SWT.LEFT);
-		space.setText(" "); //$NON-NLS-1$
-		gd= new GridData();
-		gd.horizontalSpan= 1;
-		space.setLayoutData(gd);		
-	}
-	
-	/**
-	 * Gets the type name.
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#typeNameChanged()
 	 */
-	public String getTypeName() {
-		return (fSuiteNameText==null)?fSuiteNameTextInitialValue:fSuiteNameText.getText();
-	}
-	
-	/**
-	 * Sets the type name.
-	 * @param canBeModified Selects if the type name can be changed by the user
-	 */	
-	public void setTypeName(String name, boolean canBeModified) {
-		if (fSuiteNameText == null) {
-			fSuiteNameTextInitialValue= name;
-		} else {
-			fSuiteNameText.setText(name);
-			fSuiteNameText.setEnabled(canBeModified);
-		}
-	}	
-
-	/**
-	 * Called when the type name has changed.
-	 * The method validates the type name and returns the status of the validation.
-	 * Can be extended to add more validation
-	 */
-	protected IStatus testSuiteChanged() {
+	protected IStatus typeNameChanged() {
 		JUnitStatus status= new JUnitStatus();
 		String typeName= getTypeName();
 		// must not be empty
@@ -566,7 +455,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			// continue checking
 		}		
 
-		JUnitStatus recursiveSuiteInclusionStatus= checkRecursiveTestSuiteInclusion();
+		IStatus recursiveSuiteInclusionStatus= checkRecursiveTestSuiteInclusion();
 		if (! recursiveSuiteInclusionStatus.isOK())
 			return recursiveSuiteInclusionStatus;
 			
@@ -583,7 +472,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		return status;
 	}
 
-	private JUnitStatus checkRecursiveTestSuiteInclusion(){
+	private IStatus checkRecursiveTestSuiteInclusion(){
 		if (fClassesInSuiteTable == null)
 			return new JUnitStatus();
 		String typeName= getTypeName();
@@ -599,23 +488,10 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		return new JUnitStatus();
 	}
 
-	/**
-	 * Sets the focus.
-	 */		
-	protected void setFocus() {
-		fSuiteNameText.setFocus();
-	}
-
-	/**
-	 * Sets the classes in <code>elements</code> as checked.
-	 */	
-	public void setCheckedElements(Object[] elements) {
-		fClassesInSuiteTable.setCheckedElements(elements);
-	}
 	
-	protected void cannotUpdateSuiteError() {
+	private void cannotUpdateSuiteError() {
 		MessageDialog.openError(getShell(), WizardMessages.getString("NewTestSuiteWizPage.cannotUpdateDialog.title"), //$NON-NLS-1$
-			WizardMessages.getFormattedString("NewTestSuiteWizPage.cannotUpdateDialog.message", new String[] {START_MARKER, END_MARKER})); //$NON-NLS-1$
+			WizardMessages.getFormattedString("NewTestSuiteWizPage.cannotUpdateDialog.message", new String[] { NewTestSuiteWizardPage.START_MARKER, NewTestSuiteWizardPage.END_MARKER})); //$NON-NLS-1$
 
 	}
 
@@ -649,7 +525,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	 * 	Since Finish was pressed, write widget values to the dialog store so that they
 	 *	will persist into the next invocation of this wizard page
 	 */
-	void saveWidgetValues() {
+	private void saveWidgetValues() {
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
 			settings.put(STORE_GENERATE_MAIN, fMethodStubsButtons.isSelected(0));

@@ -13,18 +13,23 @@ package org.eclipse.jdt.internal.junit.wizards;
 import java.net.MalformedURLException;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+
 import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageOne;
+import org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageTwo;
+
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
  * A wizard for creating test cases.
  */
 public class NewTestCaseCreationWizard extends JUnitWizard {
 
-	private NewTestCaseCreationWizardPage fPage;
-	private NewTestCaseCreationWizardPage2 fPage2;
+	private NewTestCaseWizardPageOne fPage1;
+	private NewTestCaseWizardPageTwo fPage2;
 
 	public NewTestCaseCreationWizard() {
 		super();
@@ -36,21 +41,20 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		try {
 			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("wizban/newtest_wiz.gif")); //$NON-NLS-1$
 			setDefaultPageImageDescriptor(id);
-	} catch (MalformedURLException e) {
+		} catch (MalformedURLException e) {
 			// Should not happen.  Ignore.
 		}
 	}
-
 
 	/*
 	 * @see Wizard#createPages
 	 */	
 	public void addPages() {
 		super.addPages();
-		fPage= new NewTestCaseCreationWizardPage();
-		fPage2= new NewTestCaseCreationWizardPage2(fPage);
-		addPage(fPage);
-		fPage.init(getSelection(), fPage2);
+		fPage2= new NewTestCaseWizardPageTwo();
+		fPage1= new NewTestCaseWizardPageOne(fPage2);
+		addPage(fPage1);
+		fPage1.init(getSelection());
 		addPage(fPage2);
 	}	
 	
@@ -58,22 +62,14 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
-		if (finishPage(fPage.getRunnable())) {
-			IType newClass= fPage.getCreatedType();
-
-			ICompilationUnit cu= newClass.getCompilationUnit();				
-
-			if (cu.isWorkingCopy()) {
-				cu= (ICompilationUnit)cu.getOriginalElement();
-			}	
-			IResource resource= cu.getResource();
+		if (finishPage(fPage1.getRunnable())) {
+			IType newClass= fPage1.getCreatedType();
+		
+			IResource resource= newClass.getCompilationUnit().getResource();
 			if (resource != null) {
 				selectAndReveal(resource);
 				openResource(resource);
 			}
-			fPage.saveWidgetValues();
-			fPage2.saveWidgetValues();
-			
 			return true;
 		}
 		return false;		

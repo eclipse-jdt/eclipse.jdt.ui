@@ -11,26 +11,16 @@
 package org.eclipse.jdt.internal.junit.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import org.eclipse.core.resources.IFile;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.util.CheckedTableSelectionDialog;
-import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
-import org.eclipse.jdt.internal.junit.util.JUnitStatus;
-import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
-import org.eclipse.jdt.internal.junit.util.Resources;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -40,16 +30,37 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
+
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.CheckedTableSelectionDialog;
+import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
+import org.eclipse.jdt.internal.junit.util.JUnitStatus;
+import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
+import org.eclipse.jdt.internal.junit.util.Resources;
+
 /**
  * An object contribution action that updates existing AllTests classes.
  */
 public class UpdateTestSuite implements IObjectActionDelegate {
+	
 	private Shell fShell;
 	private IPackageFragment fPack;
 	private ICompilationUnit fTestSuite;
@@ -113,7 +124,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	 */
 	public void run(IAction action) {		
 		ILabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		IStructuredContentProvider cprovider= new NewTestSuiteCreationWizardPage.ClassesInSuitContentProvider();
+		IStructuredContentProvider cprovider= new ClassesInSuitContentProvider();
 	
 		/* find TestClasses already in Test Suite */
 		IType testSuiteType= fTestSuite.findPrimaryType();
@@ -124,9 +135,9 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			IBuffer buf= fTestSuite.getBuffer();
 			String originalContent= buf.getText(range.getOffset(), range.getLength());
 			buf.close();
-			int start= originalContent.indexOf(NewTestSuiteCreationWizardPage.START_MARKER);
+			int start= originalContent.indexOf(NewTestSuiteWizardPage.START_MARKER);
 			if (start > -1) {
-				if (originalContent.indexOf(NewTestSuiteCreationWizardPage.END_MARKER, start) > -1) {
+				if (originalContent.indexOf(NewTestSuiteWizardPage.END_MARKER, start) > -1) {
 					CheckedTableSelectionDialog dialog= new CheckedTableSelectionDialog(fShell, lprovider, cprovider);
 					dialog.setValidator(new UpdateAllTestsValidator());
 					dialog.setTitle(WizardMessages.getString("UpdateAllTests.title")); //$NON-NLS-1$
@@ -174,7 +185,6 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	}
 	
 	private void updateTestCasesInSuite(IProgressMonitor monitor) {
-
 		try {
 			monitor.beginTask(WizardMessages.getString("UpdateAllTests.beginTask"), 5); //$NON-NLS-1$
 			if (! checkValidateEditStatus(fTestSuite, fShell))
@@ -186,26 +196,22 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			StringBuffer source= new StringBuffer(originalContent);
 			//using JDK 1.4
 			//int start= source.toString().indexOf(NewTestSuiteCreationWizardPage.startMarker) --> int start= source.indexOf(NewTestSuiteCreationWizardPage.startMarker)
-			int start= source.toString().indexOf(NewTestSuiteCreationWizardPage.START_MARKER);
+			int start= source.toString().indexOf(NewTestSuiteWizardPage.START_MARKER);
 			if (start > -1) {
 				//using JDK 1.4
 				//int end= source.toString().indexOf(NewTestSuiteCreationWizardPage.endMarker, start) --> int end= source.indexOf(NewTestSuiteCreationWizardPage.endMarker, start)
-				int end= source.toString().indexOf(NewTestSuiteCreationWizardPage.END_MARKER, start);
+				int end= source.toString().indexOf(NewTestSuiteWizardPage.END_MARKER, start);
 				if (end > -1) {
 					monitor.worked(1);
-					end += NewTestSuiteCreationWizardPage.END_MARKER.length();
+					end += NewTestSuiteWizardPage.END_MARKER.length();
 					//					String updatableCode= source.substring(start,end+NewTestSuiteCreationWizardPage.endMarker.length());
-					source.replace(start, end, NewTestSuiteCreationWizardPage.getUpdatableString(fSelectedTestCases));
+					source.replace(start, end, getUpdatableString(fSelectedTestCases));
 					buf.replace(range.getOffset(), range.getLength(), source.toString());
 					monitor.worked(1);
 					fTestSuite.reconcile();
 					originalContent= buf.getText(0, buf.getLength());
 					monitor.worked(1);
-					String formattedContent=
-						JUnitStubUtility.codeFormat(
-							originalContent,
-							0,
-							JUnitStubUtility.getLineDelimiterUsed(fTestSuite));
+					String formattedContent= JUnitStubUtility.formatCompilationUnit(fTestSuite.getJavaProject(), originalContent, JUnitStubUtility.getLineDelimiterUsed(fTestSuite));
 					//buf.replace(range.getOffset(), range.getLength(), formattedContent);
 					buf.replace(0, buf.getLength(), formattedContent);
 					monitor.worked(1);
@@ -219,7 +225,29 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		}
 	}
 	
-	static boolean checkValidateEditStatus(ICompilationUnit testSuiteCu, Shell shell){
+	/*
+	 * Returns the new code to be included in a new suite() or which replaces old code in an existing suite().
+	 */
+	public static String getUpdatableString(Object[] selectedClasses) {
+		StringBuffer suite= new StringBuffer();
+		suite.append(NewTestSuiteWizardPage.START_MARKER+"\n"); //$NON-NLS-1$
+		for (int i= 0; i < selectedClasses.length; i++) {
+			if (selectedClasses[i] instanceof IType) {
+				IType testType= (IType) selectedClasses[i];
+				IMethod suiteMethod= testType.getMethod("suite", new String[] {}); //$NON-NLS-1$
+				if (!suiteMethod.exists()) {
+					suite.append("suite.addTestSuite("+testType.getElementName()+".class);"); //$NON-NLS-1$ //$NON-NLS-2$
+				} else {
+					suite.append("suite.addTest("+testType.getElementName()+".suite());"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+		}
+		suite.append("\n"+NewTestSuiteWizardPage.END_MARKER); //$NON-NLS-1$
+		return suite.toString();
+	}
+	
+	
+	public static boolean checkValidateEditStatus(ICompilationUnit testSuiteCu, Shell shell){
 		IStatus status= validateModifiesFiles(getTestSuiteFile(testSuiteCu));
 		if (status.isOK())	
 			return true;
@@ -227,11 +255,8 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		return false;
 	}
 	
-	private static IFile getTestSuiteFile(ICompilationUnit testSuiteCu){
-		if (testSuiteCu.isWorkingCopy())
-			return (IFile)testSuiteCu.getOriginalElement().getResource();
-		else
-			return (IFile)testSuiteCu.getResource();
+	private static IFile getTestSuiteFile(ICompilationUnit testSuiteCu) {
+		return (IFile) testSuiteCu.getResource();
 	}
 	
 	private static IStatus validateModifiesFiles(IFile fileToModify) {
@@ -258,7 +283,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 
 	private void cannotUpdateSuiteError() {
 		MessageDialog.openError(fShell, WizardMessages.getString("UpdateAllTests.cannotUpdate.errorDialog.title"), //$NON-NLS-1$
-			WizardMessages.getFormattedString("UpdateAllTests.cannotUpdate.errorDialog.message", new String[] {NewTestSuiteCreationWizardPage.START_MARKER, NewTestSuiteCreationWizardPage.END_MARKER})); //$NON-NLS-1$
+			WizardMessages.getFormattedString("UpdateAllTests.cannotUpdate.errorDialog.message", new String[] {NewTestSuiteWizardPage.START_MARKER, NewTestSuiteWizardPage.END_MARKER})); //$NON-NLS-1$
 
 	}
 

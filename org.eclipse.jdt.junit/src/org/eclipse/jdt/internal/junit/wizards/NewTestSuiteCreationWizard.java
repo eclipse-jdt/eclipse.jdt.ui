@@ -24,6 +24,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+
+import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -35,7 +38,7 @@ import org.eclipse.ui.PlatformUI;
  */
 public class NewTestSuiteCreationWizard extends JUnitWizard {
 
-	private NewTestSuiteCreationWizardPage fPage;
+	private NewTestSuiteWizardPage fPage;
 	
 	public NewTestSuiteCreationWizard() {
 		super();
@@ -48,7 +51,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	 */	
 	public void addPages() {
 		super.addPages();
-		fPage= new NewTestSuiteCreationWizardPage();
+		fPage= new NewTestSuiteWizardPage();
 		addPage(fPage);
 		fPage.init(getSelection());
 	}	
@@ -83,15 +86,15 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 				ISourceRange range= suiteMethod.getSourceRange();
 				IBuffer buf= cu.getBuffer();
 				String originalContent= buf.getText(range.getOffset(), range.getLength());
-				int start= originalContent.indexOf(NewTestSuiteCreationWizardPage.START_MARKER);
+				int start= originalContent.indexOf(NewTestSuiteWizardPage.START_MARKER);
 				if (start > -1) {
-					int end= originalContent.indexOf(NewTestSuiteCreationWizardPage.END_MARKER, start);
+					int end= originalContent.indexOf(NewTestSuiteWizardPage.END_MARKER, start);
 					if (end < 0) {
-						fPage.cannotUpdateSuiteError();
+						cannotUpdateSuiteError();
 						return false;
 					}
 				} else {
-					fPage.cannotUpdateSuiteError();
+					cannotUpdateSuiteError();
 					return false;
 				}
 				} catch (JavaModelException e) {
@@ -103,12 +106,17 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 		
 		if (finishPage(fPage.getRunnable())) {
 			if (!fPage.hasUpdatedExistingClass())
-				postCreatingType();
-			fPage.saveWidgetValues();				
+				postCreatingType();	
 			return true;
 		}
 
 		return false;		
+	}
+	
+	private void cannotUpdateSuiteError() {
+		MessageDialog.openError(getShell(), WizardMessages.getString("NewTestSuiteWizPage.cannotUpdateDialog.title"), //$NON-NLS-1$
+			WizardMessages.getFormattedString("NewTestSuiteWizPage.cannotUpdateDialog.message", new String[] { NewTestSuiteWizardPage.START_MARKER, NewTestSuiteWizardPage.END_MARKER})); //$NON-NLS-1$
+
 	}
 
 	protected void postCreatingType() {
@@ -116,10 +124,6 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 		if (newClass == null)
 			return;
 		ICompilationUnit cu= newClass.getCompilationUnit();
-		if (cu.isWorkingCopy()) {
-			cu= (ICompilationUnit) cu.getOriginalElement();
-			//added here
-		}
 		IResource resource= cu.getResource();
 		if (resource != null) {
 			selectAndReveal(resource);
@@ -127,7 +131,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 		}
 	}
 
-	public NewTestSuiteCreationWizardPage getPage() {
+	public NewTestSuiteWizardPage getPage() {
 		return fPage;
 	}
 	

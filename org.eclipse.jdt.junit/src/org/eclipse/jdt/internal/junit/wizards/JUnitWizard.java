@@ -15,24 +15,28 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
+
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell; 
+
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
+
+import org.eclipse.ui.ide.IDE;
+
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 
 /**
  * The wizard base class for JUnit creation wizards.
@@ -53,19 +57,12 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 	 */
 	public abstract boolean performFinish();
 
-	/**
+	/*
 	 * Run a runnable
 	 */	
 	protected boolean finishPage(IRunnableWithProgress runnable) {
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
 		try {
-			IWizardPage[] pages= getPages();
-			for (int i= 0; i < pages.length; i++) {
-				IWizardPage page= pages[i];
-				if (page instanceof IAboutToRunOperation) {
-					((IAboutToRunOperation)page).aboutToRunOperation();
-				}
-			}
 			PlatformUI.getWorkbench().getProgressService().runInUI(getContainer(), op, ResourcesPlugin.getWorkspace().getRoot()); 
 			
 		} catch (InvocationTargetException e) {

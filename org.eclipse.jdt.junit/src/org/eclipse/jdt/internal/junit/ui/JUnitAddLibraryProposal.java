@@ -16,22 +16,43 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizardPage;
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+
+import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 
 /**
  * @author egamma
  */
-final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
+public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 	private final IInvocationContext fContext;
 
 	public JUnitAddLibraryProposal(IInvocationContext context) {
@@ -49,7 +70,7 @@ final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 	public void apply(IDocument document) {   
 		IJavaProject project= fContext.getCompilationUnit().getJavaProject();
 		try {
-			NewTestCaseCreationWizardPage.addJUnitToBuildPath(JUnitPlugin.getActiveWorkbenchShell(), project);
+			addJUnitToBuildPath(JUnitPlugin.getActiveWorkbenchShell(), project);
 			// force a reconcile
 			int offset= fContext.getSelectionOffset();
 			int length= fContext.getSelectionLength();
@@ -62,6 +83,58 @@ final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 			//ignore
 		}
 	}
+	
+	
+	public static void addJUnitToBuildPath(Shell shell, IJavaProject project) throws JavaModelException {
+		IProject junitProject= ResourcesPlugin.getWorkspace().getRoot().getProject("org.junit"); //$NON-NLS-1$
+		IClasspathEntry entry;
+		if (junitProject.exists()) {
+			entry= JavaCore.newProjectEntry(junitProject.getFullPath());
+		} else {
+			IPath junitHome= new Path(JUnitPlugin.JUNIT_HOME);
+			IPath sourceHome= new Path("ECLIPSE_HOME"); //$NON-NLS-1$
+			entry= JavaCore.newVariableEntry(
+				junitHome.append("junit.jar"),   //$NON-NLS-1$
+				//TODO: find a better solution than declaring a classpath variable
+				sourceHome.append("plugins/org.eclipse.jdt.source_3.0.0/src/org.junit_3.8.1/junitsrc.zip"),  //$NON-NLS-1$
+				null
+			);
+		}
+		addToClasspath(shell, project, entry);
+	}	
+	
+	private static void addToClasspath(Shell shell, final IJavaProject project, IClasspathEntry entry) throws JavaModelException {
+		IClasspathEntry[] oldEntries= project.getRawClasspath();
+		for (int i= 0; i < oldEntries.length; i++) {
+			if (oldEntries[i].equals(entry)) {
+				return;
+			}
+		}
+		int nEntries= oldEntries.length;
+		final IClasspathEntry[] newEntries= new IClasspathEntry[nEntries + 1];
+		System.arraycopy(oldEntries, 0, newEntries, 0, nEntries);
+		newEntries[nEntries]= entry;
+		// fix for 64974 OCE in New JUnit Test Case wizard while workspace is locked [JUnit] 
+		try {
+			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					try {
+						project.setRawClasspath(newEntries, monitor);
+					} catch (JavaModelException e) {
+						throw new InvocationTargetException(e);
+					}
+				}
+			});
+		} catch (InvocationTargetException e) {
+			Throwable t = e.getTargetException();
+			if (t instanceof CoreException) {	
+				ErrorDialog.openError(shell, WizardMessages.getString("NewTestClassWizPage.cannot_add.title"), WizardMessages.getString("NewTestClassWizPage.cannot_add.message"), ((CoreException)t).getStatus());  //$NON-NLS-1$//$NON-NLS-2$
+			}
+		} catch (InterruptedException e) {
+			return;
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
 	 */

@@ -11,42 +11,123 @@
 
 package org.eclipse.jdt.internal.junit.util;
 
+import java.util.StringTokenizer;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.swt.SWT;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
-import org.eclipse.swt.SWT;
 
 /**
  * Utility methods for code generation.
  * TODO: some methods are duplicated from org.eclipse.jdt.ui
  */
 public class JUnitStubUtility {
+	
+	public static GenStubSettings getCodeGenerationSettings(IJavaProject project) {
+		return new GenStubSettings(project);
+	}
+	
 
-	public static class GenStubSettings extends CodeGenerationSettings {
+	public static class GenStubSettings {
 	
 		public boolean fCallSuper;
 		public boolean fMethodOverwrites;
 		public boolean fNoBody;
 		
-		public GenStubSettings(CodeGenerationSettings settings) {
-			this.createComments= settings.createComments;
+		public final boolean createComments;
+		public final boolean useKeywordThis;
+		
+		public final String[] importOrder;
+		public final int importThreshold;
+		public final boolean importIgnoreLowercase;
+			
+		public final int tabWidth;
+		
+		public GenStubSettings(IJavaProject project) {
+			this.createComments= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue();
+			this.useKeywordThis= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_KEYWORD_THIS, project)).booleanValue();
+			this.importOrder= getImportOrderPreference(project);
+			this.importThreshold= getImportNumberThreshold(project);
+			this.importIgnoreLowercase= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, project)).booleanValue();
+			this.tabWidth= getTabWidth(project);
+		}
+		
+		private static int getImportNumberThreshold(IJavaProject project) {
+			String thresholdStr= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, project);
+			try {
+				int threshold= Integer.parseInt(thresholdStr);
+				if (threshold < 0) {
+					threshold= Integer.MAX_VALUE;
+				}
+				return threshold;
+			} catch (NumberFormatException e) {
+				return Integer.MAX_VALUE;
+			}
+		}
+		
+		private static String[] getImportOrderPreference(IJavaProject project) {
+			String str= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IMPORTORDER, project);
+			if (str != null) {
+				return unpackList(str, ";"); //$NON-NLS-1$
+			}
+			return new String[0];
+		}
+				
+		private static String[] unpackList(String str, String separator) {
+			StringTokenizer tok= new StringTokenizer(str, separator); //$NON-NLS-1$
+			int nTokens= tok.countTokens();
+			String[] res= new String[nTokens];
+			for (int i= 0; i < nTokens; i++) {
+				res[i]= tok.nextToken().trim();
+			}
+			return res;
+		}
+		
+		private static int getTabWidth(IJavaProject project) {
+			String tabSize;
+			if (project != null) {
+				tabSize= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, true);
+			} else {
+				tabSize= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+			}
+			try {
+				return Integer.parseInt(tabSize);
+			} catch (NumberFormatException e) {
+				return 4;
+			}
 		}
 	}
+	
 
 	/**
 	 * Examines a string and returns the first line delimiter found.
+	 * @param elem The element to get the line delimiter for
+	 * @return The line delimiter
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) {
 		try {
@@ -68,15 +149,37 @@ public class JUnitStubUtility {
 					}
 				}
 			}
-			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+
 		} catch (JavaModelException e) {
-			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			// ignore
 		}
+		return getDefaultLineDelimiter();
 	}
 	
-	public static String codeFormat(String sourceString, int initialIndentationLevel, String lineDelim) {
-		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
-		return formatter.format(sourceString, initialIndentationLevel, null, lineDelim);
+	public static String getDefaultLineDelimiter() {
+		return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	public static String formatCompilationUnit(IJavaProject project, String sourceString, String lineDelim) {
+		return codeFormat(project, sourceString, CodeFormatter.K_COMPILATION_UNIT, 0, lineDelim);
+	}
+	
+	
+	public static String codeFormat(IJavaProject project, String sourceString, int kind, int initialIndentationLevel, String lineDelim) {
+		CodeFormatter formatter= ToolFactory.createCodeFormatter(project.getOptions(true));
+		TextEdit edit= formatter.format(kind, sourceString, 0, sourceString.length(), initialIndentationLevel, lineDelim);
+		if (edit != null) {
+			Document doc= new Document(sourceString);
+			try {
+				edit.apply(doc);
+				return doc.get();
+			} catch (MalformedTreeException e) {
+			} catch (BadLocationException e) {
+			}
+		}
+		return sourceString;
+		
+		
 	}
 
 	/**
@@ -86,6 +189,7 @@ public class JUnitStubUtility {
 	 * @param method A method template (method belongs to different type than the parent)
 	 * @param settings Options as defined above (GENSTUB_*)
 	 * @param imports Imports required by the sub are added to the imports structure
+	 * @return The ynformatted stub
 	 * @throws JavaModelException
 	 */
 	public static String genStub(String destTypeName, IMethod method, GenStubSettings settings, ImportsManager imports) throws JavaModelException {
@@ -215,7 +319,7 @@ public class JUnitStubUtility {
 		return buf.toString();
 	}
 
-	/**
+	/*
 	 * Generates a default JavaDoc comment stub for a method.
 	 */
 	private static void genJavaDocStub(String descr, String[] paramNames, String retTypeSig, String[] excTypeSigs, StringBuffer buf) {
@@ -235,7 +339,7 @@ public class JUnitStubUtility {
 		buf.append(" */\n"); //$NON-NLS-1$
 	}
 	
-	/**
+	/*
 	 * Generates a '@see' tag to the defined method.
 	 */
 	public static void genJavaDocSeeTag(String declaringTypeName, String methodName, String[] paramTypes, boolean nonJavaDocComment, boolean isDeprecated, StringBuffer buf) {
@@ -286,11 +390,34 @@ public class JUnitStubUtility {
 			int idx= markers.indexOf(',');
 			if (idx == -1) {
 				return markers;
-			} else {
-				return markers.substring(0, idx);
 			}
+			return markers.substring(0, idx);
 		}
 		return null;
 	}
 
+	/*
+	 * Evaluates if a member (possible from another package) is visible from
+	 * elements in a package.
+	 */
+	public static boolean isVisible(IMember member, IPackageFragment pack) throws JavaModelException {
+		
+		int type= member.getElementType();
+		if  (type == IJavaElement.INITIALIZER ||  (type == IJavaElement.METHOD && member.getElementName().startsWith("<"))) { //$NON-NLS-1$
+			return false;
+		}
+		
+		int otherflags= member.getFlags();
+		IType declaringType= member.getDeclaringType();
+		if (Flags.isPublic(otherflags) || (declaringType != null && declaringType.isInterface())) {
+			return true;
+		} else if (Flags.isPrivate(otherflags)) {
+			return false;
+		}		
+		
+		IPackageFragment otherpack= (IPackageFragment) member.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+		return (pack != null && otherpack != null && pack.getElementName().equals(otherpack.getElementName()));
+	}
+	
+	
 }

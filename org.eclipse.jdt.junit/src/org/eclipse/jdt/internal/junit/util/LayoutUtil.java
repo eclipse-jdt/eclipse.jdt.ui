@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Label;
 
 public class LayoutUtil {
 	
-	/**
+	/*
 	 * Calculates the number of columns needed by field editors
 	 */
 	public static int getNumberOfColumns(MethodStubsSelectionButtonGroup[] editors) {
@@ -31,7 +31,7 @@ public class LayoutUtil {
 		return columnCount;
 	}
 	
-	/**
+	/*
 	 * Creates a composite and fills in the given editors.
 	 * @param labelOnTop Defines if the label of all fields should be on top of the fields
 	 */	
@@ -39,7 +39,7 @@ public class LayoutUtil {
 		doDefaultLayout(parent, editors, labelOnTop, 0, 0, 0, 0);
 	}
 
-	/**
+	/*
 	 * Creates a composite and fills in the given editors.
 	 * @param labelOnTop Defines if the label of all fields should be on top of the fields
 	 * @param minWidth The minimal width of the composite
@@ -48,15 +48,7 @@ public class LayoutUtil {
 	public static void doDefaultLayout(Composite parent, MethodStubsSelectionButtonGroup[] editors, boolean labelOnTop, int minWidth, int minHeight) {
 		doDefaultLayout(parent, editors, labelOnTop, minWidth, minHeight, 0, 0);
 	}
-
-	/**
-	 * Creates a composite and fills in the given editors.
-	 * @param labelOnTop Defines if the label of all fields should be on top of the fields
-	 * @param minWidth The minimal width of the composite
-	 * @param minHeight The minimal height of the composite
-	 * @param marginWidth The margin width to be used by the composite
-	 * @param marginHeight The margin height to be used by the composite
-	 */	
+	
 	public static void doDefaultLayout(Composite parent, MethodStubsSelectionButtonGroup[] editors, boolean labelOnTop, int minWidth, int minHeight, int marginWidth, int marginHeight) {
 		int nCulumns= getNumberOfColumns(editors);
 		Control[][] controls= new Control[editors.length][];
@@ -86,7 +78,7 @@ public class LayoutUtil {
 		}
 	}
 	
-	/**
+	/*
 	 * Sets the span of a control. Assumes that MGridData is used.
 	 */
 	public static void setHorizontalSpan(Control control, int span) {
@@ -100,7 +92,7 @@ public class LayoutUtil {
 		}
 	}	
 
-	/**
+	/*
 	 * Sets the width hint of a control. Assumes that MGridData is used.
 	 */
 	public static void setWidthHint(Control control, int widthHint) {
@@ -110,7 +102,7 @@ public class LayoutUtil {
 		}
 	}
 	
-	/**
+	/*
 	 * Sets the horizontal indent of a control. Assumes that MGridData is used.
 	 */
 	public static void setHorizontalIndent(Control control, int horizontalIndent) {
@@ -120,7 +112,7 @@ public class LayoutUtil {
 		}
 	}
 
-	/**
+	/*
 	 * Creates a spacer control with the given span.
 	 * The composite is assumed to have <code>MGridLayout</code> as
 	 * layout.
