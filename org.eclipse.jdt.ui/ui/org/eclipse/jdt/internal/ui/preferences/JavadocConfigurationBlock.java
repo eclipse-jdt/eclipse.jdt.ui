@@ -166,7 +166,7 @@ public class JavadocConfigurationBlock {
 		}
 	
 		fURLField.doFillIntoGrid(topComp, 2);
-		LayoutUtil.setWidthHint(fURLField.getTextControl(null), converter.convertWidthInCharsToPixels(50));
+		LayoutUtil.setWidthHint(fURLField.getTextControl(null), converter.convertWidthInCharsToPixels(43));
 		LayoutUtil.setHorizontalGrabbing(fURLField.getTextControl(null));		
 
 		fBrowseFolder.doFillIntoGrid(topComp, 1);
@@ -182,7 +182,7 @@ public class JavadocConfigurationBlock {
 	
 			// Add the jar/zip field
 			fArchiveField.doFillIntoGrid(topComp, 2);
-			LayoutUtil.setWidthHint(fArchiveField.getTextControl(null), converter.convertWidthInCharsToPixels(50));
+			LayoutUtil.setWidthHint(fArchiveField.getTextControl(null), converter.convertWidthInCharsToPixels(43));
 			LayoutUtil.setHorizontalGrabbing(fArchiveField.getTextControl(null));		
 
 	
@@ -190,7 +190,7 @@ public class JavadocConfigurationBlock {
 			
 			// Add the path chooser for the jar/zip
 			fArchivePathField.doFillIntoGrid(topComp, 2);
-			LayoutUtil.setWidthHint(fArchivePathField.getTextControl(null), converter.convertWidthInCharsToPixels(50));
+			LayoutUtil.setWidthHint(fArchivePathField.getTextControl(null), converter.convertWidthInCharsToPixels(43));
 			LayoutUtil.setHorizontalGrabbing(fArchivePathField.getTextControl(null));	
 
 			
