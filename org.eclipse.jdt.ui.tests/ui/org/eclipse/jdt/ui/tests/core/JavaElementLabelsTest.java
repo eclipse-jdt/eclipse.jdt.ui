@@ -50,7 +50,10 @@ public class JavaElementLabelsTest extends CoreTests {
 			return new ProjectTestSetup(suite);
 		}	
 	}
-
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
 
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
