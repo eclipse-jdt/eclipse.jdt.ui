@@ -410,9 +410,35 @@
       </command>
       <keyBinding
             string=""
-            scope="org.eclipse.ui.globalScope"
+            contextId="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.junit.ResultView"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
+      
+      <command
+            name="%JUnitShortcut.description.debug"
+            description="%JUnitShortcut.description.debug"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.eclipse.jdt.junit.junitShortcut.debug">
+      </command>
+      <keyBinding
+            keySequence="M3+M2+D T"
+            contextId="org.eclipse.ui.globalScope"
+            commandId="org.eclipse.jdt.junit.junitShortcut.debug"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>      
+      <command
+            name="%JUnitShortcut.description.run"
+            description="%JUnitShortcut.description.run"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.eclipse.jdt.junit.junitShortcut.run">
+      </command>
+      <keyBinding
+            keySequence="M3+M2+X T"
+            contextId="org.eclipse.ui.globalScope"
+            commandId="org.eclipse.jdt.junit.junitShortcut.run"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      
    </extension>
 </plugin>
