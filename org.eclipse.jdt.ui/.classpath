@@ -4,9 +4,9 @@
     <classpathentry kind="src" path="ui refactoring"/>
     <classpathentry kind="src" path="core refactoring"/>
     <classpathentry kind="src" path="core extension"/>
-    <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
-    <classpathentry kind="src" path="/org.eclipse.jdt.debug"/>
-    <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
+    <classpathentry exported="true" kind="src" path="/org.eclipse.jdt.core"/>
+    <classpathentry exported="true" kind="src" path="/org.eclipse.jdt.debug"/>
+    <classpathentry exported="true" kind="src" path="/org.eclipse.jdt.launching"/>
     <classpathentry kind="src" path="/org.eclipse.debug.ui"/>
     <classpathentry kind="src" path="/org.eclipse.debug.core"/>
     <classpathentry kind="src" path="/org.eclipse.ui"/>

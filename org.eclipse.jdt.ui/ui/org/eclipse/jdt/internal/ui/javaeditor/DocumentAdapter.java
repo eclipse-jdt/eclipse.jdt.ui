@@ -38,8 +38,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Adapts <code>IDocument</code> to <code>IBuffer</code>. Uses the
  * same algorithm as the text widget to determine the buffer's line delimiter. 
  * All text inserted into the buffer is converted to this line delimiter.
+ * This class is <code>public</code> for test purposes only.
  */
-class DocumentAdapter implements IBuffer, IDocumentListener {
+public class DocumentAdapter implements IBuffer, IDocumentListener {
 	
 	private IOpenable fOwner;
 	private IDocument fDocument;
@@ -50,10 +51,11 @@ class DocumentAdapter implements IBuffer, IDocumentListener {
 	
 	private List fBufferListeners= new ArrayList(3);
 	
-	
-	DocumentAdapter(IOpenable owner, IDocument document, ILineTracker lineTracker, CompilationUnitDocumentProvider provider, Object providerKey) {
+	/**
+	 * This method is <code>public</code> for test purposes only.
+	 */
+	public DocumentAdapter(IOpenable owner, IDocument document, ILineTracker lineTracker, CompilationUnitDocumentProvider provider, Object providerKey) {
 		
-		Assert.isNotNull(owner);
 		Assert.isNotNull(document);
 		Assert.isNotNull(lineTracker);
 		
@@ -115,8 +117,9 @@ class DocumentAdapter implements IBuffer, IDocumentListener {
 	
 	/**
 	 * Converts the given string to the line delimiter of this buffer.
+	 * This method is <code>public</code> for test purposes only.
 	 */
-	protected String normalize(String text) {
+	public String normalize(String text) {
 		fLineTracker.set(text);
 		
 		int lines= fLineTracker.getNumberOfLines();
@@ -128,9 +131,11 @@ class DocumentAdapter implements IBuffer, IDocumentListener {
 		try {
 			IRegion previous= fLineTracker.getLineInformation(0);
 			for (int i= 1; i < lines; i++) {
-				IRegion current= fLineTracker.getLineInformation(i);
-				buffer.replace(previous.getOffset() + previous.getLength(), current.getOffset(), getLineDelimiter());
-				previous= current;
+				int lastLineEnd= previous.getOffset() + previous.getLength();
+				int lineStart= fLineTracker.getLineInformation(i).getOffset();
+				fLineTracker.replace(lastLineEnd,  lineStart - lastLineEnd, getLineDelimiter());
+				buffer.replace(lastLineEnd, lineStart, getLineDelimiter());
+				previous= fLineTracker.getLineInformation(i);
 			}
 			
 			// last line
