@@ -104,12 +104,15 @@ public class MoveCuUpdateCreator {
 			pm.beginTask("", 1); 
 		  	pm.subTask("searching for references to types in " + movedUnit.getElementName());
 		  	
-		  	//must force this import - otherwise it'd be fitered out
+		  	//must force this import - otherwise it'd be filtered out
 		  	addImport(true, changeManager, getPackage(movedUnit), movedUnit, fSettings);
 			
 			SearchResultGroup[] references = getReferences(movedUnit, pm);
 			for (int i= 0; i < references.length; i++){
-				ICompilationUnit referencingCu= (ICompilationUnit)JavaCore.create(references[i].getResource());
+				IJavaElement el= JavaCore.create(references[i].getResource());
+				if (! (el instanceof ICompilationUnit))
+					continue;
+				ICompilationUnit referencingCu= (ICompilationUnit)el;
 				SearchResult[] results= references[i].getSearchResults();
 				for (int j= 0; j < results.length; j++){
 					if (isQualifiedReference(results[j])){
