@@ -478,6 +478,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					ITypedRegion partition= document.getPartition(offset);
 					if (! IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()) && partition.getOffset() != offset)
 						return;
+						
+					if (!validateEditorInputState())
+						return;
 
 					final char character= event.character;
 					final char closingCharacter= getPeerCharacter(character);		
