@@ -428,11 +428,12 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 				
 				boolean isCanceled= false;
 				boolean temporaryProblemsChanged= false;
-				fPreviouslyOverlaid= fCurrentlyOverlaid;
-				fCurrentlyOverlaid= new ArrayList();
 				
 				synchronized (fAnnotations) {
 					
+					fPreviouslyOverlaid= fCurrentlyOverlaid;
+					fCurrentlyOverlaid= new ArrayList();
+
 					if (fGeneratedAnnotations.size() > 0) {
 						temporaryProblemsChanged= true;	
 						removeAnnotations(fGeneratedAnnotations, false, true);
