@@ -4,38 +4,22 @@
  */
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+
+import org.eclipse.jface.text.*;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IWorkingCopy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.internal.compiler.IProblemFactory;
-import org.eclipse.jdt.internal.compiler.SourceElementParser;
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.compiler.*;
+import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.compare.IEditableContent;
-import org.eclipse.compare.IStreamContentAccessor;
-import org.eclipse.compare.ITypedElement;
-import org.eclipse.compare.structuremergeviewer.*;
+import org.eclipse.compare.*;
 import org.eclipse.compare.internal.DocumentManager;
+import org.eclipse.compare.structuremergeviewer.*;
 
 
 public class JavaStructureCreator implements IStructureCreator {
@@ -242,22 +226,22 @@ public class JavaStructureCreator implements IStructureCreator {
 			
 			// to avoid the trouble when dealing with Unicode
 			// we use the Java scanner to extract non-whitespace and non-comment tokens
-			Scanner scanner= new Scanner(true, true);	// however we request Whitespace and Comments
+			IScanner scanner= ToolFactory.createScanner(true, true, false, false);	// however we request Whitespace and Comments
 			scanner.setSource(b);
 			try {
 				int token;
 				while ((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 					switch (token) {
-					case Scanner.TokenNameWHITESPACE:
-					case Scanner.TokenNameCOMMENT_BLOCK:
-					case Scanner.TokenNameCOMMENT_JAVADOC:
-					case Scanner.TokenNameCOMMENT_LINE:
+					case ITerminalSymbols.TokenNameWHITESPACE:
+					case ITerminalSymbols.TokenNameCOMMENT_BLOCK:
+					case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
+					case ITerminalSymbols.TokenNameCOMMENT_LINE:
 						int l= buf.length();
 						if (l > 0 && buf.charAt(l-1) != ' ')
 							buf.append(' ');
 						break;
 					default:
-						buf.append(b, scanner.startPosition, scanner.currentPosition - scanner.startPosition);
+						buf.append(scanner.getCurrentTokenSource());
 						buf.append(' ');
 						break;
 					}

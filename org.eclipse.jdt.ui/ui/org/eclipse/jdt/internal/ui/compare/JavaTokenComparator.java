@@ -6,9 +6,8 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.*;
 
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.rangedifferencer.IRangeComparator;
@@ -40,14 +39,16 @@ class JavaTokenComparator implements ITokenComparator {
 		fLengths= new int[length];
 		fCount= 0;
 		
-		Scanner scanner= new Scanner(true, true);	// returns comments & whitespace
+		IScanner scanner= ToolFactory.createScanner(true, true, false, false); // returns comments & whitespace
 		scanner.setSource(fText.toCharArray());
 		try {
 			int endPos= 0;
 			while (scanner.getNextToken() != ITerminalSymbols.TokenNameEOF) {
-				fStarts[fCount]= scanner.startPosition;
-				fLengths[fCount]= scanner.currentPosition - scanner.startPosition;
-				endPos= scanner.currentPosition;
+				int start= scanner.getCurrentTokenStartPosition();
+				int end= scanner.getCurrentTokenEndPosition()+1;
+				fStarts[fCount]= start;
+				fLengths[fCount]= end - start;
+				endPos= end;
 				fCount++;
 			}
 			// workaround for #13907
