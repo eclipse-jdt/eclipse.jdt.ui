@@ -318,7 +318,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		
-		Group sourceFolderGroup= new Group(result, SWT.WRAP);
+		Group sourceFolderGroup= new Group(result, SWT.NONE);
 		layout= new GridLayout();
 		layout.numColumns= 2;
 		sourceFolderGroup.setLayout(layout);
