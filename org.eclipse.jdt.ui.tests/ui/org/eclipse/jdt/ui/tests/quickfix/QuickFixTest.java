@@ -31,6 +31,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
@@ -49,7 +51,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(new TestSuite(ModifierCorrectionsQuickFixTest.class));
 		suite.addTest(new TestSuite(AssistQuickFixTest.class));
 		suite.addTest(new TestSuite(MarkerResolutionTest.class));
-		return suite;
+		return new ProjectTestSetup(suite);
 	}
 
 	

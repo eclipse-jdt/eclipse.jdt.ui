@@ -68,7 +68,7 @@ public class ProjectTestSetup extends TestSetup {
 		}
 		
 		long taken= System.currentTimeMillis() -fTimeCreated;
-		System.out.println(getTest().getClass().getName()+ ": " + taken);
+//		System.out.println(getTest().toString() + ": " + taken);
 	}
 
 }
