@@ -38,7 +38,9 @@ public class PatternStrings {
 	
 	public static String getMethodSignature(IMethod method) {
 		StringBuffer buffer= new StringBuffer();
-		buffer.append(JavaElementLabels.getElementLabel(method.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED));
+		buffer.append(JavaElementLabels.getElementLabel(
+			method.getDeclaringType(), 
+			JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED));
 		boolean isConstructor= method.getElementName().equals(method.getDeclaringType().getElementName());
 		if (!isConstructor) {
 			buffer.append('.');
@@ -72,7 +74,8 @@ public class PatternStrings {
 	}
 
 	public static String getTypeSignature(IType field) {
-		return JavaElementLabels.getElementLabel(field, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.T_TYPE_PARAMETERS);
+		return JavaElementLabels.getElementLabel(field, 
+			JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.USE_RESOLVED);
 	}	
 	
 	public static String getFieldSignature(IField field) {
