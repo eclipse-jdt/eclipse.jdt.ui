@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -65,6 +66,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 public class ExtractTempRefactoring extends Refactoring {
 	
 	private static final int DEFAULT_TAB_SIZE= 4;
+	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
 			
 	private final int fSelectionStart;
 	private final int fSelectionLength;
@@ -111,6 +113,30 @@ public class ExtractTempRefactoring extends Refactoring {
 		fReplaceAllOccurrences= replaceAllOccurrences;
 	}
 
+	public String guessTempName() throws JavaModelException{
+		Expression selected= getSelectedExpression();
+		if (selected instanceof MethodInvocation){
+			MethodInvocation mi= (MethodInvocation)selected;
+			for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
+				String proposal= tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], mi.getName().getIdentifier());
+				if (proposal != null)
+					return proposal;
+			}
+		}
+		return fTempName;
+	}
+
+	private static String tryTempNamePrefix(String prefix, String methodName){
+		if (! methodName.startsWith(prefix))
+			return null;
+		if (methodName.length() <= prefix.length())
+			return null;
+		char firstAfterPrefix= methodName.charAt(prefix.length());
+		if (! Character.isUpperCase(firstAfterPrefix))
+			return null;
+		return Character.toLowerCase(firstAfterPrefix) + methodName.substring(prefix.length() + 1);
+	}
+	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("", 7); //$NON-NLS-1$
