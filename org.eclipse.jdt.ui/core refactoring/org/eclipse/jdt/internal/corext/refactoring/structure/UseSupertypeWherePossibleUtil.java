@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
@@ -107,13 +109,16 @@ class UseSupertypeWherePossibleUtil {
 		fReferenceNodeCache= new HashMap();
 		fRippleMethodCache= new HashMap();
 		fSuperTypeToUse= supertypeToUse;
-		fSuperTypeSet= createSuperTypeSet(fSuperTypeToUse);
+		fSuperTypeSet= createSuperTypeSet(fSuperTypeToUse, fInputClass.getJavaProject());
 		fUpdateInstanceOf= updateInstanceOf;
 	}
 
-	private static Set createSuperTypeSet(IType type) throws JavaModelException {
-		if (type == null)
-			return new HashSet(0);
+	private static Set createSuperTypeSet(IType type, IJavaProject project) throws JavaModelException {
+		if (type == null){
+			Set result= new HashSet(1);
+			result.add(project.findType("java.lang.Object"));
+			return result;
+		}	
 		return new HashSet(Arrays.asList(JavaModelUtil.getAllSuperTypes(type, new NullProgressMonitor())));
 	}
 	
@@ -788,6 +793,27 @@ class UseSupertypeWherePossibleUtil {
 					return true;
 			}
 		}
+		if (unparenthesizedParent instanceof Assignment){
+			Assignment assign= (Assignment)unparenthesizedParent;
+			if (parentNode == assign.getRightHandSide()){
+				IType type= findType(assign.getLeftHandSide().resolveTypeBinding());
+				if (type == null)
+					return true;
+					
+				if (!type.equals(fInputClass) && ! fSuperTypeSet.contains(type))	
+					return true;
+			}	
+		}
+		if (unparenthesizedParent instanceof VariableDeclaration){
+			VariableDeclaration vd= (VariableDeclaration)unparenthesizedParent;
+			if (parentNode == vd.getInitializer()){
+				IType type= findType(vd.getName().resolveTypeBinding());
+				if (type == null)
+					return true;
+				if (!type.equals(fInputClass) && ! fSuperTypeSet.contains(type))	
+					return true;
+			}
+		}
 		return false;
 	}
 	
@@ -840,5 +866,9 @@ class UseSupertypeWherePossibleUtil {
 		return (VariableDeclarationFragment[]) fd.fragments().toArray(new VariableDeclarationFragment[fd.fragments().size()]);
 	}
 		
-	
+	private IType findType(ITypeBinding tb) throws JavaModelException{
+		if (tb == null)
+			return null;
+		return Binding2JavaModel.find(tb, fInputClass.getJavaProject());
+	}
 }
