@@ -11,7 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -35,7 +37,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
@@ -207,10 +208,16 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 	private String evaluateParameterNames(List takenNames, Expression argNode, Type type, String key) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		String[] excludedNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
+		
 		String favourite= null;
-		if (argNode instanceof SimpleName) {
-			SimpleName name= (SimpleName) argNode;
-			favourite= StubUtility.suggestArgumentName(project, name.getIdentifier(), excludedNames);
+		HashSet namesTaken= new HashSet();
+		String baseName= ASTResolving.getBaseNameFromExpression(project, argNode);
+		if (baseName != null) {
+			String[] suggestions= StubUtility.getArgumentNameSuggestions(project, baseName, excludedNames);
+			if (suggestions.length > 0) {
+				favourite= suggestions[0];
+			}
+			addNameProposals(key, suggestions, namesTaken);
 		}
 		
 		int dim= 0;
@@ -226,13 +233,21 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		if (favourite == null) {
 			favourite= names[0];
 		}
-		for (int i= 0; i < names.length; i++) {
-			addLinkedPositionProposal(key, names[i], null);
-		}
+		addNameProposals(key, names, namesTaken);
 		
 		takenNames.add(favourite);
 		return favourite;
 	}
+	
+	private void addNameProposals(String key, String[] names, Set namesTaken) {
+		for (int i= 0; i < names.length; i++) {
+			String curr= names[i];
+			if (namesTaken.add(curr)) {
+				addLinkedPositionProposal(key, curr, null);
+			}
+		}
+	}
+	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewExceptions(org.eclipse.jdt.core.dom.AST, java.util.List)
