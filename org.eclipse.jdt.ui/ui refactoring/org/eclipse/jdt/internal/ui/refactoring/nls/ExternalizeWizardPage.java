@@ -54,7 +54,26 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLayoutData;
+import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IFontProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
@@ -525,7 +544,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 	
 	private void updateAccessorFieldLabels() {
-		String accessorClass= JavaModelUtil.concatenateName(fNLSRefactoring.getAccessorPackage().getElementName(), fNLSRefactoring.getAccessorClassName());
+		String accessorClass= JavaModelUtil.concatenateName(fNLSRefactoring.getAccessorClassPackage().getElementName(), fNLSRefactoring.getAccessorClassName());
 		fAccessorClassField.setText(accessorClass);
 		fPropertiesFileField.setText(fNLSRefactoring.getPropertyFilePath().makeRelative().toString());
 	}
@@ -535,7 +554,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private void doConfigureButtonPressed() {
 		NLSAccessorConfigurationDialog dialog= new NLSAccessorConfigurationDialog(getShell(), fNLSRefactoring);
 		if (dialog.open() == Window.OK) {
-			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFile()), fNLSRefactoring.getAccessorClassName());
+			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()), fNLSRefactoring.getAccessorClassName());
 			fTableViewer.refresh(true);
 			updateAccessorFieldLabels();
 		}
@@ -544,7 +563,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private Properties getProperties(IFile propertyFile) {
 		Properties props= new Properties();
 		try {
-			if (propertyFile != null) {
+			if (propertyFile.exists()) {
 				InputStream is= propertyFile.getContents();
 				props.load(is);
 				is.close();

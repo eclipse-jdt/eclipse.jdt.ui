@@ -26,14 +26,14 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialog
 
 class PackageFragmentSelection extends StringButtonStatusDialogField implements SourceChangeListener {
 
-	private final SourceFirstPackageSelectionDialogField field;
+	private final SourceFirstPackageSelectionDialogField fDialogField;
 	private JavaPackageCompletionProcessor fCurrPackageCompletionProcessor;
 	private IDialogFieldListener fUpdateListener;
 
 	public PackageFragmentSelection(SourceFirstPackageSelectionDialogField field, String packageLabel, String browseLabel,
 		String statusHint, IStringButtonAdapter adapter) {
 		super(adapter);
-		this.field= field;
+		fDialogField= field;
 		setLabelText(packageLabel);
 		setButtonLabel(browseLabel);
 		setStatusWidthHint(statusHint);
@@ -75,7 +75,7 @@ class PackageFragmentSelection extends StringButtonStatusDialogField implements 
 	}
 
 	public IPackageFragment getPackageFragment() {
-		return calculateFragment(this.field.fSourceFolderSelection.getRoot());
+		return calculateFragment(fDialogField.getSelectedFragmentRoot());
 	}
 
 	private IPackageFragment calculateFragment(IPackageFragmentRoot root) {

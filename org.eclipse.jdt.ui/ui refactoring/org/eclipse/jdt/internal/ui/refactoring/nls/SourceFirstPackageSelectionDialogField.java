@@ -28,8 +28,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 
 class SourceFirstPackageSelectionDialogField {
 
-	/* package */ SourceFolderSelectionDialogButtonField fSourceFolderSelection;
-	/* package */ PackageFragmentSelection fPackageSelection;
+	private SourceFolderSelectionDialogButtonField fSourceFolderSelection;
+	private PackageFragmentSelection fPackageSelection;
 	private Shell fShell;
 
 	public SourceFirstPackageSelectionDialogField(String sourceLabel, String packageLabel, String browseLabel1,

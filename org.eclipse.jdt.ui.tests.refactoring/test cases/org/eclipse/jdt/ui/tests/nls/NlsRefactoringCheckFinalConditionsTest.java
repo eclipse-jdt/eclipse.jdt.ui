@@ -14,23 +14,27 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSMessages;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 
-	private IPath fPropertyFilePath;
+	//private IPath fPropertyFilePath;
 	private IPackageFragment fAccessorPackage;
 	private String fAccessorClassName;
 	private String fSubstitutionPattern;
@@ -138,7 +142,7 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 	}
 
 	private void initDefaultValues(ICompilationUnit cu) {
-		fPropertyFilePath= fHelper.getFile("/TestSetupProject/src2/p/test.properties").getFullPath(); //$NON-NLS-1$
+		//fPropertyFilePath= fHelper.getFile("/TestSetupProject/src2/p/test.properties").getFullPath(); //$NON-NLS-1$
 		fResourceBundlePackage= fHelper.getPackageFragment("/TestSetupProject/src2/p");
 		fResourceBundleName= "test.properties";
 		fAccessorPackage= fHelper.getPackageFragment("/TestSetupProject/src1/p"); //$NON-NLS-1$
@@ -169,8 +173,8 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 	}
 
 	private void fillInValues(NLSRefactoring refac) {
-		refac.setAccessorPackage(fAccessorPackage);
-		refac.setPropertyFilePath(fPropertyFilePath);
+		refac.setAccessorClassPackage(fAccessorPackage);
+		//refac.setPropertyFilePath(fPropertyFilePath);
 		refac.setResourceBundleName(fResourceBundleName);
 		refac.setResourceBundlePackage(fResourceBundlePackage);
 		refac.setAccessorClassName(fAccessorClassName);

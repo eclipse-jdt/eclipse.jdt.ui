@@ -22,14 +22,14 @@ import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
@@ -41,7 +41,6 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -62,7 +61,7 @@ public class NLSRefactoring extends Refactoring {
 	//private IPath fPropertyFilePath;
 
 	private String fAccessorClassName;
-	private IPackageFragment fAccessorPackage;
+	private IPackageFragment fAccessorClassPackage;
 	private String fResourceBundleName;
 	private IPackageFragment fResourceBundlePackage;
 
@@ -78,10 +77,10 @@ public class NLSRefactoring extends Refactoring {
 		fSubstitutions= NLSHolder.create(cu, nlsInfo);
 		NLSHint nlsHint= new NLSHint(fSubstitutions, cu, nlsInfo);
 
-		fAccessorClassName= nlsHint.getMessageClass();
-		fAccessorPackage= nlsHint.getMessageClassPackage();
-		fResourceBundleName= nlsHint.getResourceBundle();
-		fResourceBundlePackage= nlsHint.getResourceBundlePackage();
+		setAccessorClassName(nlsHint.getAccessorClassName());
+		setAccessorClassPackage(nlsHint.getAccessorClassPackage());
+		setResourceBundleName(nlsHint.getResourceBundleName());
+		setResourceBundlePackage(nlsHint.getResourceBundlePackage());
 
 		fSubstitutionPattern= getDefaultSubstitutionPattern();
 	}
@@ -203,12 +202,12 @@ public class NLSRefactoring extends Refactoring {
 			final DynamicValidationStateChange result= new DynamicValidationStateChange("NLS Refactoring"); //$NON-NLS-1$
 
 			if (willCreateAccessorClass()) {
-				result.add(AccessorClass.create(fCu, fAccessorClassName, getAccessorCUPath(), fAccessorPackage, getPropertyFilePath(), new SubProgressMonitor(pm, 1)));
+				result.add(AccessorClass.create(fCu, fAccessorClassName, getAccessorCUPath(), fAccessorClassPackage, getPropertyFilePath(), new SubProgressMonitor(pm, 1)));
 			}
 			pm.worked(1);
 
 			if (willModifySource()) {
-				result.add(NLSSourceModifier.create(getCu(), fSubstitutions, fSubstitutionPattern, fAccessorPackage, fAccessorClassName));
+				result.add(NLSSourceModifier.create(getCu(), fSubstitutions, fSubstitutionPattern, fAccessorClassPackage, fAccessorClassName));
 			}
 			pm.worked(1);
 
@@ -225,7 +224,7 @@ public class NLSRefactoring extends Refactoring {
 
 	private void checkParameters() {
 		Assert.isNotNull(fSubstitutions);
-		Assert.isNotNull(fAccessorPackage);
+		Assert.isNotNull(fAccessorClassPackage);
 
 		// these values have defaults ...
 		Assert.isNotNull(fAccessorClassName);
@@ -234,22 +233,26 @@ public class NLSRefactoring extends Refactoring {
 
 	private IFile[] getAllFilesToModify() {
 
-		List files= new ArrayList(3);
+		List files= new ArrayList(2);
 		if (willModifySource()) {
-			IFile file= ResourceUtil.getFile(fCu);
-			if (file != null)
-				files.add(file);
+			IResource resource= fCu.getResource();
+			if (resource.exists()) {
+				files.add(resource);
+			}
 		}
 
-		if (willModifyPropertyFile() && propertyFileExists())
-			files.add(getPropertyFile());
+		if (willModifyPropertyFile()) {
+			IFile file= getPropertyFileHandle();
+			if (file.exists()) {
+				files.add(file);
+			}
+		}
 
 		return (IFile[]) files.toArray(new IFile[files.size()]);
 	}
 
-	//TODO: not dry..see NLSPropertyFileModifier
-	public IFile getPropertyFile() {
-		return (IFile) (ResourcesPlugin.getWorkspace().getRoot().findMember(getPropertyFilePath()));
+	public IFile getPropertyFileHandle() {
+		return ResourcesPlugin.getWorkspace().getRoot().getFile(getPropertyFilePath());
 	}
 
 	public IPath getPropertyFilePath() {
@@ -277,7 +280,7 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	private boolean propertyFileExists() {
-		return Checks.resourceExists(getPropertyFilePath());
+		return getPropertyFileHandle().exists();
 	}
 
 	private RefactoringStatus checkSubstitutionPattern() {
@@ -480,7 +483,7 @@ public class NLSRefactoring extends Refactoring {
 			return false;
 		}
 
-		if (typeNameExistsInPackage(fAccessorPackage, fAccessorClassName)) {
+		if (typeNameExistsInPackage(fAccessorClassPackage, fAccessorClassName)) {
 			return false;
 		}
 
@@ -488,7 +491,7 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	private ICompilationUnit getAccessorCu() {
-		return fAccessorPackage.getCompilationUnit(getAccessorCUName());
+		return fAccessorClassPackage.getCompilationUnit(getAccessorCUName());
 	}
 
 	private boolean willModifySource() {
@@ -526,19 +529,11 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	private IPath getAccessorCUPath() {
-		IPath res= fAccessorPackage.getPath().append(getAccessorCUName());
+		IPath res= fAccessorClassPackage.getPath().append(getAccessorCUName());
 		return res;
 	}
 
-	public void setAccessorClassName(String name) {
-		Assert.isNotNull(name);
-		fAccessorClassName= name;
-	}
 
-	public void setAccessorPackage(IPackageFragment packageFragment) {
-		Assert.isNotNull(packageFragment);
-		fAccessorPackage= packageFragment;
-	}
 
 	public NLSSubstitution[] getSubstitutions() {
 		return fSubstitutions;
@@ -555,20 +550,30 @@ public class NLSRefactoring extends Refactoring {
 	public static String getDefaultPropertiesFilename() {
 		return DEFAULT_PROPERTY_FILENAME + PROPERTY_FILE_EXT;
 	}
+	
+	
+	public void setAccessorClassName(String name) {
+		Assert.isNotNull(name);
+		fAccessorClassName= name;
+	}
+
+	public void setAccessorClassPackage(IPackageFragment packageFragment) {
+		Assert.isNotNull(packageFragment);
+		fAccessorClassPackage= packageFragment;
+	}
 
 	public void setResourceBundlePackage(IPackageFragment resourceBundlePackage) {
+		Assert.isNotNull(resourceBundlePackage);
 		fResourceBundlePackage= resourceBundlePackage;
 	}
 
 	public void setResourceBundleName(String resourceBundleName) {
+		Assert.isNotNull(resourceBundleName);
 		fResourceBundleName= resourceBundleName;
 	}
 
-	public void setPropertyFilePath(IPath propertyFilePath) {
-	}
-
-	public IPackageFragment getAccessorPackage() {
-		return fAccessorPackage;
+	public IPackageFragment getAccessorClassPackage() {
+		return fAccessorClassPackage;
 	}
 
 	public IPackageFragment getResourceBundlePackage() {

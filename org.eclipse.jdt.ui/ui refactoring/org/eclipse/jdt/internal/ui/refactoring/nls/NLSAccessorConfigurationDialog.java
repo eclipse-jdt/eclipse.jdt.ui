@@ -97,7 +97,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.dialog.title"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.dialog.message"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.dialog.emtpyMessage"), //$NON-NLS-1$
-				cu, root, updateListener, refactoring.getAccessorPackage());
+				cu, root, updateListener, refactoring.getAccessorClassPackage());
 
 		fAccessorClassName= createStringButtonField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.className"), //$NON-NLS-1$
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse6"), createAccessorFileBrowseAdapter()); //$NON-NLS-1$
@@ -408,7 +408,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	void updateRefactoring() {
 		NLSRefactoring refactoring= fRefactoring;
 
-		refactoring.setAccessorPackage(fAccessorPackage.getSelected());
+		refactoring.setAccessorClassPackage(fAccessorPackage.getSelected());
 		refactoring.setAccessorClassName(fAccessorClassName.getText());
 
 		refactoring.setResourceBundleName(fResourceBundleFile.getText());

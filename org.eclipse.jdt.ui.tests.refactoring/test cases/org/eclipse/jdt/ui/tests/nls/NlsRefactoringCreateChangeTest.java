@@ -63,7 +63,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 
 		NLSRefactoring nls= createDefaultNls(cu);
 		//nls.setSubstitutionPattern(NLSRefactoring.getDefaultSubstitutionPattern());
-		nls.setAccessorPackage(fHelper.getPackageFragment("/TestSetupProject/src2/p2")); //$NON-NLS-1$
+		nls.setAccessorClassPackage(fHelper.getPackageFragment("/TestSetupProject/src2/p2")); //$NON-NLS-1$
 
 		performChange(nls);
 
@@ -97,7 +97,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 
 		NLSRefactoring nls= NLSRefactoring.create(testClass);
 
-		nls.setAccessorPackage(fHelper.getPackageFragment("/TestSetupProject/src1/p"));
+		nls.setAccessorClassPackage(fHelper.getPackageFragment("/TestSetupProject/src1/p"));
 		nls.setResourceBundlePackage(fHelper.getPackageFragment("/TestSetupProject/src2/p"));
 		nls.setResourceBundleName("test.properties");
 		nls.setAccessorClassName("Accessor");
@@ -151,10 +151,10 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 	private NLSRefactoring createDefaultNls(ICompilationUnit cu) {
 		NLSRefactoring nls= NLSRefactoring.create(cu);
 
-		nls.setAccessorPackage(fHelper.getPackageFragment("/TestSetupProject/src1/p")); //$NON-NLS-1$
+		nls.setAccessorClassPackage(fHelper.getPackageFragment("/TestSetupProject/src1/p")); //$NON-NLS-1$
 		nls.setResourceBundlePackage(fHelper.getPackageFragment("/TestSetupProject/src2/p"));
 		nls.setResourceBundleName("test.properties");
-		nls.setPropertyFilePath(fHelper.getFile("/TestSetupProject/src2/p/test.properties").getFullPath()); //$NON-NLS-1$
+		//nls.setPropertyFilePath(fHelper.getFile("/TestSetupProject/src2/p/test.properties").getFullPath()); //$NON-NLS-1$
 		nls.setAccessorClassName("Messages"); //$NON-NLS-1$
 
 		NLSSubstitution[] substitutions= nls.getSubstitutions();

@@ -227,7 +227,7 @@ public class NLSInfo {
 			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 				IPackageFragment packageFragment= root.getPackageFragment(packageString);
 				if (packageFragment.exists()) {
-					Object[] resources= packageFragment.getNonJavaResources();
+					Object[] resources= packageFragment.isDefaultPackage() ? root.getNonJavaResources() : packageFragment.getNonJavaResources();
 					for (int j= 0; j < resources.length; j++) {
 						Object object= resources[j];
 						if (object instanceof IFile) {

@@ -83,7 +83,7 @@ public class NLSHintTest extends TestCase {
 			"}\n";
     	ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
-        assertEquals("Messages", hint.getMessageClass());    		 
+        assertEquals("Messages", hint.getAccessorClassName());    		 
     }
     
     /**
@@ -98,9 +98,9 @@ public class NLSHintTest extends TestCase {
 			"}\n";
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
-        assertEquals("Messages", hint.getMessageClass());
-        assertEquals(pack, hint.getMessageClassPackage());
-        assertEquals("messages.properties", hint.getResourceBundle());
+        assertEquals("Messages", hint.getAccessorClassName());
+        assertEquals(pack, hint.getAccessorClassPackage());
+        assertEquals("messages.properties", hint.getResourceBundleName());
         assertEquals(pack, hint.getResourceBundlePackage());
    }
     
@@ -116,7 +116,7 @@ public class NLSHintTest extends TestCase {
 			"}\n";
     	ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
-        assertEquals("Messages", hint.getMessageClass());    		 
+        assertEquals("Messages", hint.getAccessorClassName());    		 
     }
        
     /**
@@ -139,7 +139,7 @@ public class NLSHintTest extends TestCase {
     	cu= pack.createCompilationUnit("Test.java", klazz, false, null);
     	
         NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
-        assertEquals("Messages", hint.getMessageClass());    		 
+        assertEquals("Messages", hint.getAccessorClassName());    		 
     }
 
     /**
@@ -150,7 +150,7 @@ public class NLSHintTest extends TestCase {
         String klazz = "package test;\n" + TEST_KLAZZ;
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
-        assertEquals("Messages", hint.getMessageClass());
+        assertEquals("Messages", hint.getAccessorClassName());
     }
 
     public void testAccessorClassAndPackageHint() throws Exception {
@@ -162,8 +162,8 @@ public class NLSHintTest extends TestCase {
         pack.createCompilationUnit("TestMessages.java", klazz, false, null);
         
         NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
-        assertEquals("TestMessages", hint.getMessageClass());
-        assertEquals(pack, hint.getMessageClassPackage());
+        assertEquals("TestMessages", hint.getAccessorClassName());
+        assertEquals(pack, hint.getAccessorClassPackage());
     }
     
     public void testPackageHintWithNoPackage() throws Exception {
@@ -173,7 +173,7 @@ public class NLSHintTest extends TestCase {
         pack.createCompilationUnit("TestMessages.java", ACCESSOR_KLAZZ, false, null);        
         
         NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));        
-        assertEquals(pack, hint.getMessageClassPackage());
+        assertEquals(pack, hint.getAccessorClassPackage());
     }
     
     public void testPackageHintWithDifferentPackages() throws Exception {
@@ -189,7 +189,7 @@ public class NLSHintTest extends TestCase {
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null);
                 
         NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
-        assertEquals(fooPackage, hint.getMessageClassPackage());
+        assertEquals(fooPackage, hint.getAccessorClassPackage());
     }    
 
     public void testResourceBundleHint() throws Exception {
@@ -200,7 +200,7 @@ public class NLSHintTest extends TestCase {
         klazz = "package test;\n" +ACCESSOR_KLAZZ;        
         pack.createCompilationUnit("TestMessages.java", klazz, false, null);
         NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
-        assertEquals("test.properties", hint.getResourceBundle());
+        assertEquals("test.properties", hint.getResourceBundleName());
     }
     
     public void testResourceBundleHintWithDifferentPackagesAndClassGetName() throws Exception {
@@ -223,7 +223,7 @@ public class NLSHintTest extends TestCase {
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null);        
         
         NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
-        assertEquals("TestMessages.properties", hint.getResourceBundle());        
+        assertEquals("TestMessages.properties", hint.getResourceBundleName());        
     }
     
     public void testResourceBundlePackageHint() throws Exception {
@@ -266,13 +266,16 @@ public class NLSHintTest extends TestCase {
         assertEquals(fooPackage, hint.getResourceBundlePackage());
     }
     
+    
+    
+    
     public void testPackageHintWithoutPreviousNLSing() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz = "package test;\n" + TEST_KLAZZ;
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
         NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
-        assertEquals(pack, hint.getMessageClassPackage());
+        assertEquals(pack, hint.getAccessorClassPackage());
         assertEquals(pack, hint.getResourceBundlePackage());
     }
     

@@ -40,7 +40,7 @@ class PackageSelectionStringButtonAdapter implements IStringButtonAdapter {
 	}
 
 	public void changeControlPressed(DialogField field) {
-		IPackageFragmentRoot root= fPackageSelectionField.fSourceFolderSelection.getRoot();
+		IPackageFragmentRoot root= fPackageSelectionField.getSelectedFragmentRoot();
 
 		IJavaElement[] packages= null;
 		try {
@@ -71,7 +71,7 @@ class PackageSelectionStringButtonAdapter implements IStringButtonAdapter {
 
 		if (dialog.open() == Window.OK) {
 			IPackageFragment fragment= (IPackageFragment)dialog.getFirstResult();
-			fPackageSelectionField.fPackageSelection.setPackageFragment(fragment);
+			fPackageSelectionField.setSelected(fragment);
 		}
 	}
 }

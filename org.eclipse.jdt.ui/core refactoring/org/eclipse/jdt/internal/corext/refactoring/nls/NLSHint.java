@@ -23,53 +23,46 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
  * - accessor class name, resource bundle name
  */
 public class NLSHint {
-	private ITypeBinding fAccessorClassBinding;
-	private IPackageFragment fPackage;
-	private String fResourceBundle;
+	
+	private String fAccessorName;
+	private IPackageFragment fAccessorPackage;
+	private String fResourceBundleName;
 	private IPackageFragment fResourceBundlePackage;
 
 	public NLSHint(NLSSubstitution[] nlsSubstitution, ICompilationUnit cu, NLSInfo nlsInfo) {
-		IPackageFragment defaultPackage= (IPackageFragment) cu.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
-		fPackage= defaultPackage;
-		fResourceBundlePackage= defaultPackage;
+		IPackageFragment cuPackage= (IPackageFragment) cu.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 
+		fAccessorName= NLSRefactoring.DEFAULT_ACCESSOR_CLASSNAME;
+		fAccessorPackage= cuPackage;
+		fResourceBundleName= NLSRefactoring.getDefaultPropertiesFilename();
+		fResourceBundlePackage= cuPackage;
+		
 		NLSElement nlsElement= findFirstNLSElementForHint(nlsSubstitution);
-
 		if (nlsElement != null) {
-			fAccessorClassBinding= nlsInfo.getAccessorClass(nlsElement);
-			if (fAccessorClassBinding != null) {
+			ITypeBinding accessorClassBinding= nlsInfo.getAccessorClass(nlsElement);
+			if (accessorClassBinding != null) {
+				fAccessorName= accessorClassBinding.getName();
+				
 				try {
-					fPackage= nlsInfo.getPackageOfAccessorClass(fAccessorClassBinding);
-					fResourceBundle= nlsInfo.getResourceBundle(fAccessorClassBinding, fPackage);
-					fResourceBundlePackage= nlsInfo.getResourceBundlePackage(fResourceBundle);
+					IPackageFragment accessorPack= nlsInfo.getPackageOfAccessorClass(accessorClassBinding);
+					if (accessorPack != null) {
+						fAccessorPackage= accessorPack;
+					}
+					
+					String fullBundleName= nlsInfo.getResourceBundle(accessorClassBinding, fAccessorPackage);
+					if (fullBundleName != null) {
+						fResourceBundleName= NLSInfo.getResourceNamePartHelper(fullBundleName);
+						IPackageFragment bundlePack= nlsInfo.getResourceBundlePackage(fullBundleName);
+						if (bundlePack != null) {
+							fResourceBundlePackage= bundlePack;
+						}
+					}
 				} catch (JavaModelException e) {
 				}
 			}
 		}
 	}
-
-	public String getMessageClass() {
-		if (fAccessorClassBinding != null) {
-			return fAccessorClassBinding.getName();
-		}
-		return NLSRefactoring.DEFAULT_ACCESSOR_CLASSNAME;
-	}
-
-	public IPackageFragment getMessageClassPackage() {
-		return fPackage;
-	}
-
-	public String getResourceBundle() {
-		if (fResourceBundle != null) {
-			return NLSInfo.getResourceNamePartHelper(fResourceBundle);
-		}
-		return NLSRefactoring.getDefaultPropertiesFilename();
-	}
-
-	public IPackageFragment getResourceBundlePackage() {
-		return fResourceBundlePackage;
-	}
-
+	
 	private NLSElement findFirstNLSElementForHint(NLSSubstitution[] nlsSubstitutions) {
 		NLSSubstitution substitution;
 		for (int i= 0; i < nlsSubstitutions.length; i++) {
@@ -80,4 +73,23 @@ public class NLSHint {
 		}
 		return null;
 	}
+	
+
+	public String getAccessorClassName() {
+		return fAccessorName;
+	}
+
+	public IPackageFragment getAccessorClassPackage() {
+		return fAccessorPackage;
+	}
+
+	public String getResourceBundleName() {
+		return fResourceBundleName;
+	}
+
+	public IPackageFragment getResourceBundlePackage() {
+		return fResourceBundlePackage;
+	}
+
+
 }
