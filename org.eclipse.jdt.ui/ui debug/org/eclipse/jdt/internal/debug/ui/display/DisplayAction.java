@@ -9,7 +9,9 @@ package org.eclipse.jdt.internal.debug.ui.display;
 import java.text.MessageFormat;
 
 import org.eclipse.debug.core.DebugException;
-import org.eclipse.jdt.debug.core.*;
+import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
+import org.eclipse.jdt.debug.core.IJavaThread;
+import org.eclipse.jdt.debug.core.IJavaValue;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;

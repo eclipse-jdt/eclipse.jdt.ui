@@ -4,10 +4,25 @@ package org.eclipse.jdt.internal.debug.ui.display;
  * All Rights Reserved.
  */
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.model.ISourceLocator;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
+import org.eclipse.jdt.debug.core.IJavaStackFrame;
+import org.eclipse.jdt.internal.core.Openable;
+import org.eclipse.jdt.internal.core.SourceType;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
@@ -20,11 +35,11 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class DisplayCompletionProcessor implements IContentAssistProcessor {
 	
-	private ResultCollector fCollector;
+	private DisplayResultCollector fCollector;
 	private DisplayView fView;
 	
 	public DisplayCompletionProcessor(DisplayView view) {
-		fCollector= new ResultCollector();
+		fCollector= new DisplayResultCollector();
 		fView= view;
 	}
 	
@@ -68,16 +83,77 @@ public class DisplayCompletionProcessor implements IContentAssistProcessor {
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int position) {
 		try {
-			IJavaProject project= fView.findJavaProject();
+			IJavaStackFrame stackFrame= fView.getContext();
+			if (stackFrame == null) {
+				return new ICompletionProposal[0];
+			}
+			
+			IJavaProject project= fView.getJavaProject(stackFrame);
 			if (project != null) {
-				fCollector.reset(project, null);
-				fView.codeComplete(fCollector);
+				ITextSelection selection= (ITextSelection)viewer.getSelectionProvider().getSelection();			
+				ICompilationUnit cu= getCompilationUnit(stackFrame);
+				if (cu == null) {
+					return new ICompletionProposal[0];
+				}
+				IDocument doc = new Document(cu.getSource());
+				int offset = doc.getLineOffset(stackFrame.getLineNumber());	
+				configureResultCollector(project, selection, offset);	
+				IWorkingCopy workingCopy= (IWorkingCopy) cu.getWorkingCopy();
+				IBuffer buffer= ((ICompilationUnit)workingCopy).getBuffer();
+				buffer.replace(offset, 0, fView.getContents());
+				((ICompilationUnit)workingCopy).codeComplete(offset + selection.getOffset(), fCollector);
+				workingCopy.destroy();
 			}
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();
 			ErrorDialog.openError(shell,"Problems during completion", "An exception occurred during code completion", x.getStatus()); 
+		} catch (DebugException de) {
+			Shell shell= viewer.getTextWidget().getShell();
+			ErrorDialog.openError(shell,"Problems during completion", "An exception occurred during code completion", de.getStatus()); 
+		} catch (BadLocationException ble) {
+			Shell shell= viewer.getTextWidget().getShell();
+			IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, ble.getMessage(), ble);
+			ErrorDialog.openError(shell,"Problems during completion", "An exception occurred during code completion", status); 
 		}
 		return fCollector.getResults();
 	}
+	
+	/**
+	 * Configures the display result collection for the current code assist session
+	 */
+	protected void configureResultCollector(IJavaProject project, ITextSelection selection, int editorOffset) {
+		fCollector.reset(project, null);
+		fCollector.setEditorOffset(editorOffset);	
+		if (selection.getLength() != 0) {
+			fCollector.setRegionToReplace(selection.getOffset(), selection.getOffset() + selection.getLength());
+			fCollector.setStart(selection.getOffset());
+			fCollector.setEnd(selection.getOffset() + selection.getLength());
+		} else {
+			//no selection
+			fCollector.setStart(selection.getOffset() - fView.getSnippet().length());
+			fCollector.setEnd(selection.getOffset());
+		}
+	}
+	
+	/**
+	 * Returns the compliation unit associated with this
+	 * Java stack frame.  Returns <code>null</code> for a binary stack
+	 * frame.
+	 */
+	protected ICompilationUnit getCompilationUnit(IJavaStackFrame stackFrame) {
+		// Get the corresponding element.
+		ILaunch launch = stackFrame.getLaunch();
+		if (launch == null) {
+			return null;
+		}
+		ISourceLocator locator= launch.getSourceLocator();
+		if (locator == null) {
+			return null;
+		}
+		Object sourceElement= locator.getSourceElement(stackFrame);
+		if (sourceElement instanceof SourceType) {
+			return (ICompilationUnit)((SourceType)sourceElement).getCompilationUnit();
+		}
+		return null;
+	}
 }
-

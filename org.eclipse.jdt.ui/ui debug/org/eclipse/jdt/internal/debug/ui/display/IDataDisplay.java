@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.debug.ui.display;
 
+import org.eclipse.jface.text.ITextSelection;
+
 public interface IDataDisplay {
 	
 	void clear();
@@ -11,4 +13,6 @@ public interface IDataDisplay {
 	void displayExpression(String expression);
 	
 	void displayExpressionValue(String value);
+	
+	void selectLineForEvaluation(ITextSelection selection);
 }
