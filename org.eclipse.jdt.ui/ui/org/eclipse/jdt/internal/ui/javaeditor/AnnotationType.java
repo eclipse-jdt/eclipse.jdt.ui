@@ -10,9 +10,6 @@ Contributors:
 **********************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-/**
- * MarkerType.java
- */
 public final class AnnotationType {
 	
 	public final static AnnotationType ALL= new AnnotationType();
