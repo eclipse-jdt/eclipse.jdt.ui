@@ -308,7 +308,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 	
 // -----
 	public void testFail0() throws Exception{
-		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=11638");
+		printTestDisabledMessage("fails - must revisit");
 //		helper2("j");
 	}
 	
@@ -333,7 +333,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 	}
 
 	public void testFail6() throws Exception{
-		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=11638");
+		printTestDisabledMessage("fails - must revisit");
 //		helper2("j");
 	}
 
@@ -359,8 +359,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 //	}
 	
 	public void testFail12() throws Exception{
-		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=11638");
-//		helper2("j");
+//		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=11638");
+		helper2("j");
 	}
 	
 	public void testFail13() throws Exception{
