@@ -57,6 +57,7 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 
@@ -388,6 +389,39 @@ public class PackageExplorerPart extends ViewPart
 				return false;
 			}
 			
+			protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
+				IStructuredSelection is= (IStructuredSelection)invalidSelection;
+				List ns= null;
+				if (newSelection instanceof IStructuredSelection) {
+					ns= new ArrayList(((IStructuredSelection)newSelection).toList());
+				} else {
+					ns= new ArrayList();
+				}
+				boolean changed= false;
+				for (Iterator iter= is.iterator(); iter.hasNext();) {
+					Object element= iter.next();
+					if (element instanceof IJavaProject) {
+						IProject project= ((IJavaProject)element).getProject();
+						if (!project.isOpen()) {
+							ns.add(project);
+							changed= true;
+						}
+					} else if (element instanceof IProject) {
+						IProject project= (IProject)element;
+						if (project.isOpen()) {
+							IJavaProject jProject= JavaCore.create(project);
+							if (jProject != null && jProject.exists())
+								ns.add(jProject);
+								changed= true;
+						}
+					}
+				}
+				if (changed) {
+					newSelection= new StructuredSelection(ns);
+					setSelection(newSelection);
+				}
+				super.handleInvalidSelection(invalidSelection, newSelection);
+			}
 		};
 	}
 
@@ -434,7 +468,7 @@ public class PackageExplorerPart extends ViewPart
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		boolean showCUChildren= store.getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
 		boolean reconcile= PreferenceConstants.UPDATE_WHILE_EDITING.equals(store.getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
-		return new PackageExplorerContentProvider(showCUChildren, reconcile);
+		return new PackageExplorerContentProvider(this, showCUChildren, reconcile);
 	}
 	
 	private PackageExplorerLabelProvider createLabelProvider() {
@@ -1133,6 +1167,16 @@ public class PackageExplorerPart extends ViewPart
 			return ((IJavaElement) element).getElementName();
 		} else {
 			return ((ILabelProvider) getTreeViewer().getLabelProvider()).getText(element);
+		}
+	}
+	
+	void projectStateChanged(Object root) {
+		Control ctrl= fViewer.getControl();
+		if (ctrl != null && !ctrl.isDisposed()){
+			fViewer.refresh(root, true);
+			// trigger a syntetic selection change so that action refresh their
+			// enable state.
+			fViewer.setSelection(fViewer.getSelection());
 		}
 	}
 }

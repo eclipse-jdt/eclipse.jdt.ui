@@ -118,7 +118,10 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		 * this is important in the case when a type is copied to the clipboard - we put also its compilation unit
 		 */
 		TypedSource[] typedSource= getClipboardSourceReference();
-		if (selection.getFirstElement() instanceof ICompilationUnit && typedSource != null && typedSource.length != 0)
+		Object firstElement= selection.getFirstElement();
+		if (firstElement instanceof IProject && !((IProject)firstElement).isOpen())
+			return false;
+		if (firstElement instanceof ICompilationUnit && typedSource != null && typedSource.length != 0)
 			return false;
 		
 		if (StructuredSelectionUtil.getResources(selection).length != 1)

@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -92,10 +93,14 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	protected boolean canOperateOn(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return false;
-		if (ClipboardActionUtil.hasOnlyProjects(selection))
-			return selection.size() == 1;
-		else
+		if (ClipboardActionUtil.hasOnlyProjects(selection)) {
+			if (selection.size() != 1)
+				return false;
+			IProject project= (IProject)((IAdaptable)selection.getFirstElement()).getAdapter(IProject.class);
+			return project.isAccessible();
+		} else {
 			return ClipboardActionUtil.canActivate(createRefactoring(selection.toList()));
+		}
 	}
 
 	protected void run(IStructuredSelection selection) {

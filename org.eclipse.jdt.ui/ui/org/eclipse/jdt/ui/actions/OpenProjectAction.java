@@ -57,6 +57,10 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
  */
 public class OpenProjectAction extends SelectionDispatchAction implements IResourceChangeListener {
 	
+	private static final int EMPTY_SELECTION= 1;
+	private static final int ELEMENT_SELECTION= 2;
+	
+	private int fMode;
 	private OpenResourceAction fWorkbenchAction;
 	
 	/**
@@ -80,7 +84,14 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	 */
 	public void resourceChanged(IResourceChangeEvent event) {
 		fWorkbenchAction.resourceChanged(event);
-		internalResourceChanged(event);
+		switch (fMode) {
+			case ELEMENT_SELECTION:
+				setEnabled(fWorkbenchAction.isEnabled());
+				break;
+			case EMPTY_SELECTION:
+				internalResourceChanged(event);
+				break;
+		}
 	}
 	
 	private void internalResourceChanged(IResourceChangeEvent event) {
@@ -104,6 +115,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	 */
 	protected void selectionChanged(ISelection selection) {
 		setEnabled(hasCloseProjects());
+		fMode= EMPTY_SELECTION;
 	}
 	
 	/* (non-Javadoc)
@@ -121,10 +133,12 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	protected void selectionChanged(IStructuredSelection selection) {
 		if (selection.isEmpty()) {
 			setEnabled(hasCloseProjects());
+			fMode= EMPTY_SELECTION;
 			return;
 		}
 		fWorkbenchAction.selectionChanged(selection);
 		setEnabled(fWorkbenchAction.isEnabled());
+		fMode= ELEMENT_SELECTION;
 	}
 
 	

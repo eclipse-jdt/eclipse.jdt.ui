@@ -56,26 +56,22 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
-	protected TreeViewer fViewer;
-	protected Object fInput;
+	private TreeViewer fViewer;
+	private Object fInput;
 
 	private boolean fIsFlatLayout;
 	private PackageFragmentProvider fPackageFragmentProvider= new PackageFragmentProvider();
 	
 	private int fPendingChanges;
+	private PackageExplorerPart fPart;
 
 
 	/**
 	 * Creates a new content provider for Java elements.
 	 */
-	public PackageExplorerContentProvider() {
-	}
-
-	/**
-	 * Creates a new content provider for Java elements.
-	 */
-	public PackageExplorerContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
+	public PackageExplorerContentProvider(PackageExplorerPart part, boolean provideMembers, boolean provideWorkingCopy) {
 		super(provideMembers, provideWorkingCopy);	
+		fPart= part;
 	}
 	
 	/* (non-Javadoc)
@@ -474,7 +470,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		}
 		// open/close state change of a project
 		if ((flags & IResourceDelta.OPEN) != 0) {
-			postRefresh(internalGetParent(parent));
+			postProjectStateChanged(internalGetParent(parent));
 			return true;		
 		}
 		processResourceDeltas(delta.getAffectedChildren(), resource);
@@ -539,6 +535,14 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 				if (ctrl != null && !ctrl.isDisposed()) {
 					fViewer.remove(element);
 				}
+			}
+		});
+	}
+	
+	private void postProjectStateChanged(final Object root) {
+		postRunnable(new Runnable() {
+			public void run() {
+				fPart.projectStateChanged(root);
 			}
 		});
 	}
