@@ -20,6 +20,9 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -217,14 +220,10 @@ public class EditorUtility {
 	 * @return the working copy of the compilation unit, or null if not found
 	 */	
 	public static ICompilationUnit getWorkingCopy(ICompilationUnit cu) throws JavaModelException {
-		if (cu.isWorkingCopy())
-			return cu;
+		if (cu == null)
+			return null;
 			
-		IEditorInput editorInput= getEditorInput(cu);
-		if (editorInput != null)
-			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput);
-		
-		return null;
+		return (ICompilationUnit)cu.findSharedWorkingCopy(JavaUI.getBufferFactory());
 	}
 	
 	/** 
