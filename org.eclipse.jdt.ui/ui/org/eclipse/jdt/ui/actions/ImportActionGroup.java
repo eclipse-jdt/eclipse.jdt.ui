@@ -64,5 +64,14 @@ public class ImportActionGroup extends ActionGroup {
 		menu.appendToGroup(GROUP_IMPORT, fImportAction);
 		menu.appendToGroup(GROUP_IMPORT, fExportAction);
 		super.fillContextMenu(menu);
-	}	
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void dispose() {
+		fImportAction.dispose();
+		fExportAction.dispose();
+		super.dispose();
+	}
 }
