@@ -47,10 +47,12 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.link.contentassist.ContentAssistant2;
 
@@ -444,19 +446,11 @@ public class LinkedUIControl {
 			LinkedPosition position= fEnvironment.findPosition(new LinkedPosition(fCurrentTarget.getViewer().getDocument(), offset, length, LinkedPositionGroup.NO_STOP));
 			if (position != null) {
 
-				ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
-				IRewriteTarget target= extension.getRewriteTarget();
-
 				// if the last position is not the same and there is an open change: close it.
-				if (!position.equals(fPreviousPosition) && fHasOpenCompoundChange) {
-					target.endCompoundChange();
-					fHasOpenCompoundChange= false;
-				}
-				// we are editing - if there is no open change: open one
-				if (!fHasOpenCompoundChange) {
-					target.beginCompoundChange();
-					fHasOpenCompoundChange= true;
-				}
+				if (!position.equals(fPreviousPosition))
+					endCompoundChange();
+
+				beginCompoundChange();
 			}
 
 			fPreviousPosition= position;
@@ -746,23 +740,16 @@ public class LinkedUIControl {
 		if (pos.equals(fFramePosition))
 			return;
 		
-		// mark navigation history
-		JavaPlugin.getActivePage().getNavigationHistory().markLocation(JavaPlugin.getActivePage().getActiveEditor());
+		markNavigationHistory();
 	
 		// undo
-		if (fHasOpenCompoundChange) {
-			ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
-			IRewriteTarget target= extension.getRewriteTarget();
-			target.endCompoundChange();
-			fHasOpenCompoundChange= false;
-		}
+		endCompoundChange();
 	
-		redraw();
+		redraw(); // redraw current position being left - usually not needed
 		IDocument oldDoc= fFramePosition == null ? null : fFramePosition.getDocument();
 		IDocument newDoc= pos.getDocument();
-		if (fCurrentTarget.fAnnotationModel != null)
-			fCurrentTarget.fAnnotationModel.switchToPosition(fEnvironment, pos);
-		switchViewer(oldDoc, newDoc);
+		
+		switchViewer(oldDoc, newDoc, pos);
 		fFramePosition= pos;
 
 		if (select)
@@ -770,7 +757,8 @@ public class LinkedUIControl {
 		if (fFramePosition == fExitPosition && !fIterator.isCycling())
 			leave(ILinkedListener.NONE);
 		else {
-			redraw();
+			redraw(); // redraw new position
+			ensureAnnotationModelInstalled();
 		}
 		if (showProposals)
 			triggerContentAssist();
@@ -778,8 +766,46 @@ public class LinkedUIControl {
 			triggerContextInfo();
 	}
 
-	private void switchViewer(IDocument oldDoc, IDocument newDoc) {
+	/**
+	 * 
+	 */
+	private void markNavigationHistory() {
+		// mark navigation history
+		IWorkbenchWindow win= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (win != null) {
+			IWorkbenchPage page= win.getActivePage();
+			if (page != null) {
+				IEditorPart part= page.getActiveEditor();
+				page.getNavigationHistory().markLocation(part);
+			}
+		}
+	}
+
+	private void ensureAnnotationModelInstalled() {
+		LinkedPositionAnnotations lpa= fCurrentTarget.fAnnotationModel;
+		if (lpa != null) {
+			ITextViewer viewer= fCurrentTarget.getViewer();
+			if (viewer instanceof ISourceViewer) {
+				ISourceViewer sv= (ISourceViewer) viewer;
+				IAnnotationModel model= sv.getAnnotationModel();
+				if (model instanceof IAnnotationModelExtension) {
+					IAnnotationModelExtension ext= (IAnnotationModelExtension) model;
+					IAnnotationModel ourModel= ext.getAnnotationModel(getUniqueKey());
+					if (ourModel == null) {
+						ext.addAnnotationModel(getUniqueKey(), lpa);
+					}
+				}
+			}
+		}
+	}
+
+	private void switchViewer(IDocument oldDoc, IDocument newDoc, LinkedPosition pos) {
 		if (oldDoc != newDoc) {
+			
+			// redraw current document with new position before switching viewer
+			if (fCurrentTarget.fAnnotationModel != null)
+				fCurrentTarget.fAnnotationModel.switchToPosition(fEnvironment, pos);
+			
 			LinkedUITarget target= null;
 			for (int i= 0; i < fTargets.length; i++) {
 				if (fTargets[i].getViewer().getDocument() == newDoc) {
@@ -825,21 +851,7 @@ public class LinkedUIControl {
 		
 		((IPostSelectionProvider) viewer).addPostSelectionChangedListener(fSelectionListener);
 
-		if (viewer instanceof ISourceViewer) {
-			ISourceViewer sv= (ISourceViewer) viewer;
-			IAnnotationModel model= sv.getAnnotationModel();
-			if (model instanceof IAnnotationModelExtension) {
-				IAnnotationModelExtension ext= (IAnnotationModelExtension) model;
-				IAnnotationModel ourModel= ext.getAnnotationModel(getUniqueKey());
-				if (ourModel == null) {
-					LinkedPositionAnnotations lpa= new LinkedPositionAnnotations();
-					lpa.setTargets(fIterator.getPositions());
-					lpa.setExitTarget(fExitPosition);
-					ext.addAnnotationModel(getUniqueKey(), lpa);
-					fCurrentTarget.fAnnotationModel= lpa;
-				}
-			}
-		}
+		createAnnotationModel();
 		fCurrentTarget.fWidget.showSelection();
 		fCurrentTarget.fWidget.addVerifyListener(fCaretListener);
 		fCurrentTarget.fWidget.addModifyListener(fCaretListener);
@@ -850,6 +862,16 @@ public class LinkedUIControl {
 		fCurrentTarget.fShell.addShellListener(fCloser);
 
 		fAssistant.install(viewer);
+	}
+
+	private void createAnnotationModel() {
+		if (fCurrentTarget.fAnnotationModel == null) {
+			LinkedPositionAnnotations lpa= new LinkedPositionAnnotations();
+			lpa.setTargets(fIterator.getPositions());
+			lpa.setExitTarget(fExitPosition);
+			lpa.connect(fCurrentTarget.getViewer().getDocument());
+			fCurrentTarget.fAnnotationModel= lpa;
+		}
 	}
 
 	private String getUniqueKey() {
@@ -880,16 +902,6 @@ public class LinkedUIControl {
 		// don't remove the verify key listener to let it keep its position
 		// in the listener queue
 		fCurrentTarget.fKeyListener.setEnabled(false);
-		fCurrentTarget.fAnnotationModel.removeAllAnnotations();
-		if (viewer instanceof ISourceViewer) {
-			ISourceViewer sv= (ISourceViewer) viewer;
-			IAnnotationModel model= sv.getAnnotationModel();
-			if (model instanceof IAnnotationModelExtension) {
-				IAnnotationModelExtension ext= (IAnnotationModelExtension) model;
-				ext.removeAnnotationModel(getUniqueKey());
-			}
-		}
-
 		
 		((IPostSelectionProvider) viewer).removePostSelectionChangedListener(fSelectionListener);
 
@@ -901,12 +913,7 @@ public class LinkedUIControl {
 			return;
 		fIsActive= false;
 
-		ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
-		IRewriteTarget target= extension.getRewriteTarget();
-		if (fHasOpenCompoundChange) {
-			target.endCompoundChange();
-			fHasOpenCompoundChange= false;
-		}
+		endCompoundChange();
 		
 //		// debug trace
 //		JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "leaving linked mode", null));
@@ -968,6 +975,27 @@ public class LinkedUIControl {
 		}
 
 		fEnvironment.exit(flags);
+	}
+
+	/**
+	 * 
+	 */
+	private void endCompoundChange() {
+		if (fHasOpenCompoundChange) {
+			ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
+			IRewriteTarget target= extension.getRewriteTarget();
+			target.endCompoundChange();
+			fHasOpenCompoundChange= false;
+		}
+	}
+	
+	private void beginCompoundChange() {
+		if (!fHasOpenCompoundChange) {
+			ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
+			IRewriteTarget target= extension.getRewriteTarget();
+			target.beginCompoundChange();
+			fHasOpenCompoundChange= true;
+		}
 	}
 
 	/**
