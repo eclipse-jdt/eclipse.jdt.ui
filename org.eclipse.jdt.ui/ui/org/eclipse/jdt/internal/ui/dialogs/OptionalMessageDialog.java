@@ -39,20 +39,22 @@ public class OptionalMessageDialog extends MessageDialog {
 
 	// Dialog store id constants
 	private static final String STORE_ID= "OptionalMessageDialog.hide."; //$NON-NLS-1$
+
+	public static final int NOT_SHOWN= IDialogConstants.CLIENT_ID + 1;
 	
 	private Button fHideDialogCheckBox;
 	private String fId;
-		
 
 	/**
 	 * Opens the dialog but only if the user hasn't choosen to hide it.
+	 * Returns <code>NOT_SHOWN</code> if the dialog was not shown.
 	 */
-	public static void open(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex) {
+	public static int open(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex) {
 		if (!isDialogEnabled(id))
-			return;
+			return OptionalMessageDialog.NOT_SHOWN;
 		
 		MessageDialog dialog= new OptionalMessageDialog(id, parent, title, titleImage, message, dialogType, buttonLabels, defaultButtonIndex);
-		dialog.open();
+		return dialog.open();
 	}
 
 	private OptionalMessageDialog(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex) {
