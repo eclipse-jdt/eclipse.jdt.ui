@@ -24,6 +24,7 @@ import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;
@@ -70,12 +72,20 @@ public class OpenTypeHierarchyUtil {
 	}
 	
 	public static TypeHierarchyViewPart open(ISelection selection, IWorkbenchWindow window) {
-		IJavaElement[] candidates= getCandidates(getElement(selection));
+		Object element= getElement(selection);
+		if (element instanceof IJavaElement) {
+			return open((IJavaElement)element, window);
+		}
+		return null;
+	}
+	
+	public static TypeHierarchyViewPart open(IJavaElement element, IWorkbenchWindow window) {
+		IJavaElement[] candidates= getCandidates(element);
 		if (candidates != null) {
 			return open(candidates, window);
 		}
 		return null;
-	}
+	}	
 	
 	public static TypeHierarchyViewPart open(IJavaElement[] candidates, IWorkbenchWindow window) {
 		IPreferenceStore store= WorkbenchPlugin.getDefault().getPreferenceStore();
@@ -253,35 +263,36 @@ public class OpenTypeHierarchyUtil {
 		if (!(input instanceof IJavaElement)) {
 			return null;
 		}
-		IJavaElement elem= (IJavaElement) input;
-		switch (elem.getElementType()) {
-			case IJavaElement.INITIALIZER:
-			case IJavaElement.METHOD:
-			case IJavaElement.FIELD:
-			case IJavaElement.TYPE:
-			case IJavaElement.PACKAGE_FRAGMENT:
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-			case IJavaElement.JAVA_PROJECT:
-				return new IJavaElement[] { elem };
-			case IJavaElement.CLASS_FILE:
-				try {
-					IType type= ((IClassFile)input).getType();
-					return new IJavaElement[] { type };
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e.getStatus());
-					return null;
-				}
-			case IJavaElement.COMPILATION_UNIT:
-				try {
-					IType[] types= ((ICompilationUnit)input).getAllTypes();
-					if (types == null || types.length == 0)
-						return null;
-					return types;
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e.getStatus());
-					return null;
-				}
-			default:
+		try {
+			IJavaElement elem= (IJavaElement) input;
+			switch (elem.getElementType()) {
+				case IJavaElement.INITIALIZER:
+				case IJavaElement.METHOD:
+				case IJavaElement.FIELD:
+				case IJavaElement.TYPE:
+				case IJavaElement.PACKAGE_FRAGMENT:
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				case IJavaElement.JAVA_PROJECT:
+					return new IJavaElement[] { elem };
+				case IJavaElement.CLASS_FILE:
+					return new IJavaElement[] { ((IClassFile)input).getType() };				
+				case IJavaElement.COMPILATION_UNIT:
+				case IJavaElement.IMPORT_CONTAINER:
+				case IJavaElement.IMPORT_DECLARATION:
+				case IJavaElement.PACKAGE_DECLARATION: {
+					ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
+					if (cu != null) {
+						IType[] types= cu.getTypes();
+						if (types.length > 0) {
+							return types;
+						}
+					}
+					break;
+				}					
+				default:
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
 		}
 		return null;	
 	}	

@@ -11,6 +11,8 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceReference;
@@ -58,11 +60,7 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 	 * @see AbstractOpenJavaElementAction#open
 	 */
 	protected void open(IJavaElement element) throws JavaModelException, PartInitException {
-		if (element instanceof IMember) {
-			OpenTypeHierarchyUtil.open(new IJavaElement[] { (IMember) element }, fEditor.getSite().getWorkbenchWindow());
-		} else {
-			getShell().getDisplay().beep();
-		}
+		OpenTypeHierarchyUtil.open(element, fEditor.getSite().getWorkbenchWindow());
 	}
 		
 	/**
