@@ -421,12 +421,11 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				int offsetForArg= computeOffsetForFirstArgumentOrParameter(ci.arguments(), getCompilationUnit(first), first.getStartPosition());
 				String src= ci.arguments().isEmpty() ? fEnclosingInstanceFieldName: fEnclosingInstanceFieldName + ", "; //$NON-NLS-1$
 				return SimpleTextEdit.createInsert(offsetForArg, src);
-			} else {			
-				Statement last= (Statement)statements.get(statements.size() - 1);
-				int  indentationLevel= CodeRefactoringUtil.getIndentationLevel(last, ResourceUtil.getFile(getInputTypeCu()));
+			} else {
+				int  indentationLevel= CodeRefactoringUtil.getIndentationLevel(first, ResourceUtil.getFile(getInputTypeCu()));
 				String formattedCode= format(createEnclosingInstanceInitialization(), indentationLevel);
-				return SimpleTextEdit.createInsert(ASTNodes.getExclusiveEnd(last), getLineSeperator() + formattedCode);
-			}	
+				return SimpleTextEdit.createInsert(ASTNodes.getExclusiveEnd(first), getLineSeperator() + formattedCode);
+			} 
 		}
 	}
 
