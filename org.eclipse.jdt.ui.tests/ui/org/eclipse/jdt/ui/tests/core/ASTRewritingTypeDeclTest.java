@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
@@ -82,7 +83,11 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		buf.append("class F implements Runnable {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");		
 		buf.append("}\n");
+		buf.append("class G {\n");
+		buf.append("}\n");		
 		fCU_E= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 	}
 
@@ -91,14 +96,36 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		JavaProjectHelper.delete(fJProject1);
 	}
 	
-
+	private FieldDeclaration newField(AST ast, String name) {
+		VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
+		frag.setName(ast.newSimpleName(name));
+		FieldDeclaration newFieldDecl= ast.newFieldDeclaration(frag);
+		newFieldDecl.setModifiers(Modifier.PRIVATE);
+		newFieldDecl.setType(ast.newPrimitiveType(PrimitiveType.DOUBLE));
+		return newFieldDecl;
+	}
+	
+	private MethodDeclaration newMethod(AST ast, String name) {
+		MethodDeclaration decl= ast.newMethodDeclaration();
+		decl.setName(ast.newSimpleName(name));
+		decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
+		decl.setModifiers(Modifier.PRIVATE);
+		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
+		param.setName(ast.newSimpleName("str"));
+		param.setType(ast.newSimpleType(ast.newSimpleName("String")));
+		decl.parameters().add(param);
+		decl.setBody(ast.newBlock());
+		return decl;
+	}	
 	
 	public void testTypeDeclChanges() throws Exception {
 		ICompilationUnit cu= fCU_E;
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		AST ast= astRoot.getAST();
-		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
-		{ // rename type, rename supertype, rename first interface, replace inner class with field
+		
+		{ 
+			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+			// rename type, rename supertype, rename first interface, replace inner class with field
 			SimpleName name= type.getName();
 			SimpleName newName= ast.newSimpleName("X");
 			
@@ -119,14 +146,20 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", !members.isEmpty());
 			
-			VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
-			frag.setName(ast.newSimpleName("fCount"));
-			FieldDeclaration newFieldDecl= ast.newFieldDeclaration(frag);
-			newFieldDecl.setModifiers(Modifier.PRIVATE);
-			newFieldDecl.setType(ast.newPrimitiveType(PrimitiveType.DOUBLE));
+			FieldDeclaration newFieldDecl= newField(ast, "fCount");
 			
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(0), newFieldDecl);		
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(0), newFieldDecl);
 		}
+		{ // replace method in F
+			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
+			
+			List members= type.bodyDeclarations();
+			assertTrue("Has declarations", members.size() == 1);
+
+			MethodDeclaration methodDecl= newMethod(ast, "newFoo");
+
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(0), methodDecl);
+		}	
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
@@ -147,9 +180,15 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		buf.append("class F implements Runnable {\n");
-		buf.append("}\n");
+		buf.append("    private void newFoo(String str) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");				
+		buf.append("class G {\n");
+		buf.append("}\n");					
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+
+
 	
 	public void testTypeDeclRemoves() throws Exception {
 		ICompilationUnit cu= fCU_E;
@@ -176,13 +215,21 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			MethodDeclaration meth= findMethodDeclaration(type, "hee");
 			ASTRewriteAnalyzer.markAsReplaced(meth, null);
 		}
-		{ // remove interface
+		{ // remove interface & method
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
 			ASTRewriteAnalyzer.markAsReplaced((ASTNode) superInterfaces.get(0), null);
+			
+			List members= type.bodyDeclarations();
+			assertTrue("Has declarations", members.size() == 1);
+
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(0), null);			
 		}			
-		
+		{ // remove class G
+			TypeDeclaration type= findTypeDeclaration(astRoot, "G");
+			ASTRewriteAnalyzer.markAsReplaced(type, null);		
+		}				
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
@@ -203,13 +250,14 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		buf.append("class F {\n");
-		buf.append("}\n");
+		buf.append("}\n");				
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
 	public void testTypeDeclInserts() throws Exception {
 		ICompilationUnit cu= fCU_E;
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		assertTrue("Errors in AST", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		AST ast= astRoot.getAST();
 		{ // add interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -227,14 +275,23 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			assertTrue("Cannot find inner class", members.get(0) instanceof TypeDeclaration);
 			TypeDeclaration innerType= (TypeDeclaration) members.get(0);
 
+/*		bug 22161
 			SimpleName newSuperclass= ast.newSimpleName("Exception");
 			innerType.setSuperclass(newSuperclass);
-			ASTRewriteAnalyzer.markAsInserted(newSuperclass);					
-					
-//			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(1), null);
-//			
-//			MethodDeclaration meth= findMethodDeclaration(type, "hee");
-//			ASTRewriteAnalyzer.markAsReplaced(meth, null);
+			ASTRewriteAnalyzer.markAsInserted(newSuperclass);
+*/
+
+			FieldDeclaration newField= newField(ast, "fCount");
+			
+			List innerMembers= innerType.bodyDeclarations();
+			innerMembers.add(0, newField);
+			
+			ASTRewriteAnalyzer.markAsInserted(newField);
+			
+			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod");
+			members.add(4, newMethodDecl);
+			
+			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);
 		}
 		{ // remove interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
@@ -243,8 +300,34 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			type.setSuperclass(newSuperclass);
 			
 			ASTRewriteAnalyzer.markAsInserted(newSuperclass);
+			
+			List members= type.bodyDeclarations();
+			
+			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod");
+			members.add(newMethodDecl);
+			
+			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);	
 		}			
-		
+		{ // remove interface
+			TypeDeclaration type= findTypeDeclaration(astRoot, "G");
+			
+			SimpleName newSuperclass= ast.newSimpleName("Exception");
+			type.setSuperclass(newSuperclass);
+			
+			ASTRewriteAnalyzer.markAsInserted(newSuperclass);
+			
+			SimpleName newInterface= ast.newSimpleName("Runnable");
+			type.superInterfaces().add(newInterface);
+			
+			ASTRewriteAnalyzer.markAsInserted(newInterface);
+			
+			List members= type.bodyDeclarations();
+			
+			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod");
+			members.add(newMethodDecl);
+			
+			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);
+		}			
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
@@ -254,25 +337,63 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E extends Exception implements Cloneable, Runnable, Serializable {\n");
-		buf.append("    public static class EInner extends Exception {\n");
+		buf.append("    public static class EInner {\n");
+		buf.append("        private double fCount;\n");	
 		buf.append("        public void xee() {\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");		
 		buf.append("    private int i;\n");	
 		buf.append("    private int k;\n");	
 		buf.append("    public E() {\n");
 		buf.append("    }\n");
+		buf.append("    private void newMethod(String str) {\n");
+		buf.append("    }\n");		
 		buf.append("    public void gee() {\n");
 		buf.append("    }\n");
 		buf.append("    public void hee() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		buf.append("class F extends Exception implements Runnable {\n");
-		buf.append("}\n");
-		
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("    private void newMethod(String str) {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");				
+		buf.append("class G extends Exception implements Runnable {\n");
+		buf.append("    private void newMethod(String str) {\n");
+		buf.append("    }\n");			
+		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testBug22161() throws Exception {
+	/*
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class T extends Exception implements Runnable, Serializable {\n");
+		buf.append("    public static class EInner {\n");
+		buf.append("        public void xee() {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);				
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		assertTrue("Errors in AST", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		AST ast= astRoot.getAST();
+		
+		TypeDeclaration type= findTypeDeclaration(astRoot, "T");
+		assertTrue("Outer type not found", type != null);
+		
+		List members= type.bodyDeclarations();
+		assertTrue("Cannot find inner class", members.size() == 1 &&  members.get(0) instanceof TypeDeclaration);
+
+		TypeDeclaration innerType= (TypeDeclaration) members.get(0);
+		
+		SimpleName name= innerType.getName();
+		assertTrue("Name positions not correct", name.getStartPosition() != -1 && name.getLength() > 0);
+		*/
 	}	
-	
-	
 	
 }

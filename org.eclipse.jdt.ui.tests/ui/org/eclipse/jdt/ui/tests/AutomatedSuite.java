@@ -7,6 +7,9 @@ package org.eclipse.jdt.ui.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.ui.tests.core.ASTRewritingMethodDeclTest;
+import org.eclipse.jdt.ui.tests.core.ASTRewritingStatementsTest;
+import org.eclipse.jdt.ui.tests.core.ASTRewritingTypeDeclTest;
 import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
 import org.eclipse.jdt.ui.tests.core.ImportOrganizeTest;
 import org.eclipse.jdt.ui.tests.core.JavaModelUtilTest;
@@ -42,6 +45,10 @@ public class AutomatedSuite extends TestSuite {
 		addTest(TypeHierarchyTest.suite());
 		addTest(HTML2TextReaderTester.suite());
 		addTest(JavaDoc2HTMLTextReaderTester.suite());
+		
+		addTest(ASTRewritingMethodDeclTest.suite());
+		addTest(ASTRewritingStatementsTest.suite());
+		addTest(ASTRewritingTypeDeclTest.suite());
 		
 //disable - fails on motif		
 //		addTest(AllTypesCacheTest.suite());
