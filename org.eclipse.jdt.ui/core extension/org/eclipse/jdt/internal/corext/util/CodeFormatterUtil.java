@@ -39,8 +39,7 @@ public class CodeFormatterUtil {
 	 */
 	public static String createIndentString(int indent) {
 		if (OLD_FORMATTER) {
-			ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
-			return formatter.format("", indent, null, ""); //$NON-NLS-1$ //$NON-NLS-2$
+			return old_format("", indent, null, "", null);  //$NON-NLS-1$//$NON-NLS-2$
 		} else {
 			//TODO
 			return ""; //$NON-NLS-1$
@@ -63,14 +62,15 @@ public class CodeFormatterUtil {
 	
 	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		if (OLD_FORMATTER) {
-			ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(options);
-			return formatter.format(string, indentationLevel, positions, lineSeparator);
+			return old_format(string, indentationLevel, positions, lineSeparator, options);
 		} else {
 			//TODO
 			return string;
 		}	
 	}
 		
+
+
 	public static String format(String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		return format(K_COMPILATION_UNIT, string, start, end, indentationLevel, positions, lineSeparator, options);
 	}
@@ -87,6 +87,11 @@ public class CodeFormatterUtil {
 	}
 	
 	// transition code
+
+	private static String old_format(String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(options);
+		return formatter.format(string, indentationLevel, positions, lineSeparator);
+	}	
 	
 	/*
 	 * emulate the fomat substring with the old formatter
@@ -118,8 +123,7 @@ public class CodeFormatterUtil {
 			}
 		}
 		
-		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(options);
-		String formatted= formatter.format(string, indentationLevel, newPositions, lineSeparator);
+		String formatted= old_format(string, indentationLevel, newPositions, lineSeparator, options);
 		
 		int newStartPos= newPositions[startIndex];
 		int newEndPos= newPositions[endIndex] + 1; // incl. end
@@ -148,8 +152,8 @@ public class CodeFormatterUtil {
 	// common functionality
 	
 	/**
-	 * Format the source corresponding to a ASTNode. The ast node passed is only used for type tests. It can be
-	 * a dummy node with no children.
+	 * Format the source whose kind is described by the passed AST node. This AST node is only used for type tests. It can be
+	 * a dummy node with no content.
 	 */
 	public static String format(ASTNode node, String str, int indentationLevel, int[] positions, String lineSeparator, Map options) {		
 		int code;
@@ -179,8 +183,7 @@ public class CodeFormatterUtil {
 		} else if (node instanceof Javadoc) {
 			if (OLD_FORMATTER) {
 				// fix for bug with positions in old formatter
-				ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(options);
-				return formatter.format(str, indentationLevel, positions, lineSeparator);
+				return old_format(str, indentationLevel, positions, lineSeparator, options);
 			}
 			
 			suffix= "void foo();"; //$NON-NLS-1$
