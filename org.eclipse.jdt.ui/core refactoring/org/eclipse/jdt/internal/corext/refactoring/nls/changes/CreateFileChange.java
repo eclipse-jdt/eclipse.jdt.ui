@@ -105,7 +105,7 @@ public class CreateFileChange extends Change {
 	}
 	
 	protected IFile getOldFile(IProgressMonitor pm){
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 		} finally{
