@@ -240,7 +240,7 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 		if ((bounds.y + bounds.height - coordinates.y) < LOCATION_EPSILON) {
 			return LOCATION_AFTER;
 		}
-		return LOCATION_NONE;
+		return LOCATION_ON;
 	}
 
 	/**
