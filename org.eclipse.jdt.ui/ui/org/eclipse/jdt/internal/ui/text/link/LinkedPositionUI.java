@@ -462,26 +462,8 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 		}
 	}
 	
-	private boolean controlUndoBehavior(int offset1, int length1) {
-		
-		int offset;
-		int length;
-		
-		if (fViewer instanceof ITextViewerExtension3) {
-			ITextViewerExtension3 extension= (ITextViewerExtension3) fViewer;
-			IRegion modelRange= extension.widgetRange2ModelRange(new Region(offset1, length1));
-			if (modelRange == null)
-				return false;
+	private boolean controlUndoBehavior(int offset, int length) {
 				
-			offset= modelRange.getOffset();
-			length= modelRange.getLength();
-				
-		} else {
-			IRegion visibleRegion= fViewer.getVisibleRegion();
-			offset= offset1+ visibleRegion.getOffset();
-			length= length1;
-		}
-		
 		Position position= fManager.getEmbracingPosition(offset, length);
 		if (position != null) {
 			
