@@ -4,10 +4,10 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import java.lang.reflect.InvocationTargetException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +17,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -26,26 +30,22 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 
+import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.dialogs.DialogPage;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
@@ -68,7 +68,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
@@ -112,7 +114,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		SearchMessages.getString("SearchPage.limitTo.writeReferences")}; //$NON-NLS-1$
 
 
-	private class SearchPatternData {
+	private static class SearchPatternData {
 		int			searchFor;
 		int			limitTo;
 		String			pattern;
@@ -121,8 +123,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		int			scope;
 		IWorkingSet[]	 	workingSets;
 		
-		public SearchPatternData(int s, int l, String p, IJavaElement element) {
-			this(s, l, p, fIsCaseSensitive || element != null, element, ISearchPageContainer.WORKSPACE_SCOPE, null);
+		public SearchPatternData(int s, int l, boolean i, String p, IJavaElement element) {
+			this(s, l, p, i, element, ISearchPageContainer.WORKSPACE_SCOPE, null);
 		}
 		
 		public SearchPatternData(int s, int l, String p, boolean i, IJavaElement element, int scope, IWorkingSet[] workingSets) {
@@ -513,7 +515,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			} else {
 				IWorkbenchAdapter adapter= (IWorkbenchAdapter)((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
 				if (adapter != null)
-					return new SearchPatternData(TYPE, REFERENCES, adapter.getLabel(o), null);
+					return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, adapter.getLabel(o), null);
 			}
 		}
 		return null;
@@ -631,7 +633,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				break;
 		}
 		if (searchFor != UNKNOWN && limitTo != UNKNOWN && pattern != null)
-			return new SearchPatternData(searchFor, limitTo, pattern, element);
+			return new SearchPatternData(searchFor, limitTo, true, pattern, element);
 			
 		return null;	
 	}
@@ -648,13 +650,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			} catch (IOException ex) {
 				text= ""; //$NON-NLS-1$
 			}
-			result= new SearchPatternData(TYPE, REFERENCES, text, null);
+			result= new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, text, null);
 		}
 		return result;
 	}
 	
 	private SearchPatternData getDefaultInitValues() {
-		return new SearchPatternData(TYPE, REFERENCES, "", null); //$NON-NLS-1$
+		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null); //$NON-NLS-1$
 	}	
 
 	/*
