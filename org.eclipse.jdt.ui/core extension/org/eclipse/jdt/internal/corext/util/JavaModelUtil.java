@@ -307,6 +307,24 @@ public class JavaModelUtil {
 	}
 	
 	/**
+	 * Concatenates two names. Uses a dot for separation.
+	 * Both strings can be empty or <code>null</code>.
+	 */
+	public static String concatenateName(char[] name1, char[] name2) {
+		StringBuffer buf= new StringBuffer();
+		if (name1 != null && name1.length > 0) {
+			buf.append(name1);
+		}
+		if (name2 != null && name2.length > 0) {
+			if (buf.length() > 0) {
+				buf.append('.');
+			}
+			buf.append(name2);
+		}		
+		return buf.toString();
+	}	
+	
+	/**
 	 * Evaluates if a member (possible from another package) is visible from
 	 * elements in a package.
 	 * @param member The member to test the visibility for
