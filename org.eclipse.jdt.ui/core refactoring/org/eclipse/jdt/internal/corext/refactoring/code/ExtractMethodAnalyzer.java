@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -43,6 +44,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -69,7 +71,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	public static final int RETURN_STATEMENT_VALUE=	4;
 	public static final int MULTIPLE=				5;
 
-	private MethodDeclaration fEnclosingMethod;
+	/** This is either a method declaration or an initializer */
+	private BodyDeclaration fEnclosingBodyDeclaration;
 	private IMethodBinding fEnclosingMethodBinding;
 	private int fMaxVariableId;
 
@@ -96,8 +99,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		super(unit, selection, false);
 	}
 	
-	public MethodDeclaration getEnclosingMethod() {
-		return fEnclosingMethod;
+	public BodyDeclaration getEnclosingBodyDeclaration() {
+		return fEnclosingBodyDeclaration;
 	}
 	
 	public int getReturnKind() {
@@ -158,7 +161,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 			return result;
 			
 		fReturnKind= UNDEFINED;
-		fMaxVariableId= LocalVariableIndex.perform(fEnclosingMethod);
+		fMaxVariableId= LocalVariableIndex.perform(fEnclosingBodyDeclaration);
 		if (analyzeSelection(result).hasFatalError())
 			return result;
 
@@ -192,11 +195,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	}
 	
 	private void initReturnType() {
-		AST ast= fEnclosingMethod.getAST();
+		AST ast= fEnclosingBodyDeclaration.getAST();
 		fReturnType= null;
 		switch (fReturnKind) {
 			case ACCESS_TO_LOCAL:
-				VariableDeclaration declaration= ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingMethod);
+				VariableDeclaration declaration= ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingBodyDeclaration);
 				fReturnType= ASTNodes.getType(ast, declaration);
 				break;
 			case EXPRESSION:
@@ -218,7 +221,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 				}
 				break;	
 			case RETURN_STATEMENT_VALUE:
-				fReturnType= fEnclosingMethod.getReturnType();
+				if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION)
+					fReturnType= ((MethodDeclaration)fEnclosingBodyDeclaration).getReturnType();
 				break;
 			default:
 				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
@@ -231,7 +235,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		
 	public void checkInput(RefactoringStatus status, String methodName, IJavaProject scope, AST ast) {
 		ITypeBinding[] arguments= getArgumentTypes();
-		ITypeBinding type= fEnclosingMethodBinding != null ? fEnclosingMethodBinding.getDeclaringClass() : ast.resolveWellKnownType("void"); //$NON-NLS-1$
+		ITypeBinding type= ASTNodes.getDeclaringType(fEnclosingBodyDeclaration);
 		status.merge(Checks.checkMethodInType(type, methodName, arguments, scope));
 		status.merge(Checks.checkMethodInHierarchy(type.getSuperclass(), methodName, null, arguments, scope));
 	}
@@ -280,8 +284,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	}
 	
 	private boolean isVoidMethod() {
+		// if we have an initializer
+		if (fEnclosingMethodBinding == null)
+			return true;
 		ITypeBinding binding= fEnclosingMethodBinding.getReturnType();
-		if (fEnclosingMethod.getAST().resolveWellKnownType("void").equals(binding)) //$NON-NLS-1$
+		if (fEnclosingBodyDeclaration.getAST().resolveWellKnownType("void").equals(binding)) //$NON-NLS-1$
 			return true;
 		return false;
 	}
@@ -295,7 +302,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		if (nodes.length == 0) {
 			fIsLastStatementSelected= false;
 		} else {
-			List statements= fEnclosingMethod.getBody().statements();
+			Block body= (Block)ASTNodeConstants.getNodeChild(fEnclosingBodyDeclaration, ASTNodeConstants.BODY);
+			List statements= body.statements();
 			fIsLastStatementSelected= nodes[nodes.length - 1] == statements.get(statements.size() - 1);
 		}
 	}
@@ -311,7 +319,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	private void removeSelectedDeclarations(IVariableBinding[] bindings) {
 		Selection selection= getSelection();
 		for (int i= 0; i < bindings.length; i++) {
-			ASTNode decl= ((CompilationUnit)fEnclosingMethod.getRoot()).findDeclaringNode(bindings[i]);
+			ASTNode decl= ((CompilationUnit)fEnclosingBodyDeclaration.getRoot()).findDeclaringNode(bindings[i]);
 			if (selection.covers(decl))
 				bindings[i]= null;
 		}
@@ -327,7 +335,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		
 		int counter= 0;
 		flowContext.setComputeMode(FlowContext.ARGUMENTS);
-		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, getSelection()).perform(fEnclosingMethod);
+		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, getSelection()).perform(fEnclosingBodyDeclaration);
 		IVariableBinding[] reads= argInfo.get(flowContext, FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNKNOWN);
 		outer: for (int i= 0; i < returnValues.length && counter <= 1; i++) {
 			IVariableBinding binding= returnValues[i];
@@ -354,11 +362,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		IVariableBinding[] writes= argInfo.get(flowContext, FlowInfo.WRITE);
 		for (int i= 0; i < writes.length; i++) {
 			IVariableBinding write= writes[i];
-			if (getSelection().covers(ASTNodes.findDeclaration(write, fEnclosingMethod)))
+			if (getSelection().covers(ASTNodes.findDeclaration(write, fEnclosingBodyDeclaration)))
 				callerLocals.add(write);
 		}
 		fCallerLocals= (IVariableBinding[])callerLocals.toArray(new IVariableBinding[callerLocals.size()]);
-		if (fReturnValue != null && getSelection().covers(ASTNodes.findDeclaration(fReturnValue, fEnclosingMethod)))
+		if (fReturnValue != null && getSelection().covers(ASTNodes.findDeclaration(fReturnValue, fEnclosingBodyDeclaration)))
 			fReturnLocal= fReturnValue;
 	}
 	
@@ -424,7 +432,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	}
 	
 	private void computeExceptions() {
-		fAllExceptions= ExceptionAnalyzer.perform(fEnclosingMethod, getSelectedNodes());
+		fAllExceptions= ExceptionAnalyzer.perform(getSelectedNodes());
 	}
 	
 	//---- Special visitor methods ---------------------------------------------------------------------------
@@ -469,12 +477,15 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.only_method_body")); //$NON-NLS-1$
 				break superCall;
 			}
-			fEnclosingMethod= (MethodDeclaration)ASTNodes.getParent(getFirstSelectedNode(), MethodDeclaration.class);
-			if (fEnclosingMethod == null) {
+			fEnclosingBodyDeclaration= (BodyDeclaration)ASTNodes.getParent(getFirstSelectedNode(), BodyDeclaration.class);
+			if (fEnclosingBodyDeclaration == null || 
+				(fEnclosingBodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION && 
+				 fEnclosingBodyDeclaration.getNodeType() != ASTNode.INITIALIZER)) {
 				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.only_method_body")); //$NON-NLS-1$
 				break superCall;
 			} else {
-				fEnclosingMethodBinding= fEnclosingMethod.resolveBinding();
+				if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION)
+					fEnclosingMethodBinding= ((MethodDeclaration)fEnclosingBodyDeclaration).resolveBinding();
 			}
 			if (!isSingleExpressionOrStatementSet()) {
 				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.single_expression_or_set")); //$NON-NLS-1$
@@ -497,7 +508,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 					ASTNodes.getParent(expression, ASTNode.SUPER_CONSTRUCTOR_INVOCATION) != null ||
 					ASTNodes.getParent(expression, ASTNode.CONSTRUCTOR_INVOCATION) != null;
 			}
-			status.merge(LocalTypeAnalyzer.perform(fEnclosingMethod, getSelection()));
+			status.merge(LocalTypeAnalyzer.perform(fEnclosingBodyDeclaration, getSelection()));
 			computeLastStatementSelected();
 		}
 		super.endVisit(node);

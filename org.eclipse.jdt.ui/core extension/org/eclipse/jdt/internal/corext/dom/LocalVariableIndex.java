@@ -19,12 +19,35 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 public class LocalVariableIndex extends ASTVisitor {
 	
 	private int fTopIndex;
 	
-	public static int perform(MethodDeclaration method) {
-		// we have to find the outermost method declaratio since a local or anonymous
+	/**
+	 * Computes the maximum number of local variable declarations in the 
+	 * given body declaration.
+	 *  
+	 * @param declaration the body declaration. Must either be a method
+	 *  declaration or an initializer.
+	 * @return the maximum number of local variables
+	 */
+	public static int perform(BodyDeclaration declaration) {
+		Assert.isTrue(declaration != null);
+		switch (declaration.getNodeType()) {
+			case ASTNode.METHOD_DECLARATION:
+				return internalPerform((MethodDeclaration)declaration);
+			case ASTNode.INITIALIZER:
+				return internalPerform((Initializer)declaration);
+			default:
+				Assert.isTrue(false);
+		}
+		return -1;
+	}
+	
+	private static int internalPerform(MethodDeclaration method) {
+		// we have to find the outermost method declaration since a local or anonymous
 		// type can reference final variables from the outer scope.
 		MethodDeclaration target= method;
 		while (ASTNodes.getParent(target, ASTNode.METHOD_DECLARATION) != null) {
@@ -33,7 +56,7 @@ public class LocalVariableIndex extends ASTVisitor {
 		return doPerform(target);
 	}
 
-	public static int perform(Initializer initializer) {
+	private static int internalPerform(Initializer initializer) {
 		return doPerform(initializer);
 	}
 

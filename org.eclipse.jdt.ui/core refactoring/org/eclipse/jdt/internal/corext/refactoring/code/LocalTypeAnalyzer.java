@@ -15,9 +15,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
@@ -35,9 +35,9 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 
 	//---- Analyzing statements ----------------------------------------------------------------
 	
-	public static RefactoringStatus perform(MethodDeclaration method, Selection selection) {
+	public static RefactoringStatus perform(BodyDeclaration declaration, Selection selection) {
 		LocalTypeAnalyzer analyzer= new LocalTypeAnalyzer(selection);
-		method.accept(analyzer);
+		declaration.accept(analyzer);
 		RefactoringStatus result= new RefactoringStatus();
 		analyzer.check(result);
 		return result;

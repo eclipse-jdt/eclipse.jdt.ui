@@ -47,6 +47,7 @@ public class ExtractMethodTestSetup extends TestSetup {
 	private IPackageFragment fWikiPackage;
 	private IPackageFragment fParameterNamePackage;
 	private IPackageFragment fDuplicatesPackage;
+	private IPackageFragment fInitializerPackage;
 	
 	public ExtractMethodTestSetup(Test test) {
 		super(test);
@@ -84,6 +85,7 @@ public class ExtractMethodTestSetup extends TestSetup {
 		fWikiPackage= getRoot().createPackageFragment("wiki_in", true, null);
 		fParameterNamePackage= getRoot().createPackageFragment("parameterName_in", true, null);
 		fDuplicatesPackage= getRoot().createPackageFragment("duplicates_in", true, null);
+		fInitializerPackage= getRoot().createPackageFragment("initializer_in", true, null);
 		
 		ICompilationUnit cu= fExpressionPackage.createCompilationUnit(
 			"A.java", 
@@ -161,6 +163,10 @@ public class ExtractMethodTestSetup extends TestSetup {
 
 	public IPackageFragment getDuplicatesPackage() {
 		return fDuplicatesPackage;
+	}
+
+	public IPackageFragment getInitializerPackage() {
+		return fInitializerPackage;
 	}
 }
 

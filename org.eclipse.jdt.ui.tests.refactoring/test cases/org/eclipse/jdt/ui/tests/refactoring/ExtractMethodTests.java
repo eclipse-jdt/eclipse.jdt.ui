@@ -167,6 +167,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		performTest(fgTestSetup.getDuplicatesPackage(), "A", COMPARE_WITH_OUTPUT, "duplicates_out");
 	}
 	
+	protected void initializerTest() throws Exception {
+		performTest(fgTestSetup.getInitializerPackage(), "A", COMPARE_WITH_OUTPUT, "initializer_out");
+	}
+	
 	//=====================================================================================
 	// Testing selections
 	//=====================================================================================
@@ -1546,6 +1550,24 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	public void test956() throws Exception {
 		duplicatesTest();
+	}
+	
+	//---- Test code in initializers -----------------------------------------------
+	
+	public void test1000() throws Exception {
+		initializerTest();
+	}
+	
+	public void test1001() throws Exception {
+		initializerTest();
+	}
+	
+	public void test1002() throws Exception {
+		initializerTest();
+	}
+	
+	public void test1003() throws Exception {
+		initializerTest();
 	}
 	
 	//---- Test copied from http://c2.com/cgi/wiki?RefactoringBenchmarksForExtractMethod

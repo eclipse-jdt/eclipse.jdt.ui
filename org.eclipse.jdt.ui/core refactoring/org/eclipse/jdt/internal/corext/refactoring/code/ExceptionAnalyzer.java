@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
@@ -25,11 +24,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 
 /* package */ class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 
-	private ExceptionAnalyzer(MethodDeclaration enclosingMethod) {
-	}
-	
-	public static ITypeBinding[] perform(MethodDeclaration enclosingMethod, ASTNode[] statements) {
-		ExceptionAnalyzer analyzer= new ExceptionAnalyzer(enclosingMethod);
+	public static ITypeBinding[] perform(ASTNode[] statements) {
+		ExceptionAnalyzer analyzer= new ExceptionAnalyzer();
 		for (int i= 0; i < statements.length; i++) {
 			statements[i].accept(analyzer);
 		}

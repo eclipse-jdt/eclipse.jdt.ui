@@ -493,6 +493,20 @@ public class ASTNodes {
 		}
 		return result;
 	}
+	
+	public static ITypeBinding getDeclaringType(BodyDeclaration declaration) {
+		ASTNode node= declaration;
+		while(node != null) {
+			switch(node.getNodeType()) {
+				case ASTNode.TYPE_DECLARATION:
+					return ((TypeDeclaration)node).resolveBinding();
+				case ASTNode.ANONYMOUS_CLASS_DECLARATION:
+					return ((AnonymousClassDeclaration)node).resolveBinding();
+			}
+			node= node.getParent();
+		}
+		return null;
+	}
 
 	/**
 	 * Expands the range of the node passed in <code>nodes</code> to cover all comments
