@@ -43,7 +43,7 @@ public class SelectionProviderMediator implements ISelectionProvider {
 	     * @see FocusListener#focusLost
 	     */
 	    public void focusLost(FocusEvent e) {
-	    	propagateFocusChanged(null);
+	    	fViewerInFocus= null;
 	    }
 	}
 	
