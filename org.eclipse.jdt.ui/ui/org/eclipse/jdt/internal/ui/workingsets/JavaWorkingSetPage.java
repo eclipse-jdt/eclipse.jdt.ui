@@ -40,6 +40,8 @@ import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.wizard.WizardPage;
 
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
@@ -51,11 +53,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -350,12 +355,28 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	}
 
 	private void initializeCheckedState() {
-		if (fWorkingSet == null)
-			return;
 
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 			public void run() {
-				Object[] elements= fWorkingSet.getElements();
+				Object[] elements;
+				if (fWorkingSet == null) {
+					// Use current part's selection for initialization
+					IWorkbenchPage page= JavaPlugin.getActivePage();
+					if (page == null)
+						return;
+					
+					IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
+					if (part == null)
+						return;
+					
+					try {
+						elements= SelectionConverter.getStructuredSelection(part).toArray();
+					} catch (JavaModelException e) {
+						return;
+					}
+				}
+				else
+					elements= fWorkingSet.getElements();
 
 				// Use closed project for elements in closed project
 				for (int i= 0; i < elements.length; i++) {
