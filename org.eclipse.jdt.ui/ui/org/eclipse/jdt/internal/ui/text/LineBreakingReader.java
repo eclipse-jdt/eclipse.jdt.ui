@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.text;import java.io.BufferedReader;import java.io.IOException;import java.io.Reader;import org.eclipse.swt.graphics.GC;
+package org.eclipse.jdt.internal.ui.text;/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */ import java.io.BufferedReader;import java.io.IOException;import java.io.Reader;import org.eclipse.swt.graphics.GC;
 
 /* * Not a real reader. Could change if requested */
 public class LineBreakingReader {

@@ -1,9 +1,8 @@
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 
 import java.io.IOException;import java.io.Reader;import org.eclipse.swt.graphics.GC;import org.eclipse.swt.graphics.Rectangle;import org.eclipse.swt.widgets.Display;import org.eclipse.jface.text.IRegion;import org.eclipse.jface.text.ITextHover;import org.eclipse.jface.text.ITextViewer;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.jdt.core.ICodeAssist;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;import org.eclipse.jdt.internal.ui.text.JavaWordFinder;import org.eclipse.jdt.internal.ui.text.LineBreakingReader;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocTextReader;import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;

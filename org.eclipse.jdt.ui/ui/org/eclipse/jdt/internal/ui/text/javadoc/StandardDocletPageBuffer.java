@@ -1,4 +1,10 @@
 package org.eclipse.jdt.internal.ui.text.javadoc;
+
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
+ 
 import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
 import java.io.BufferedReader;
 import java.io.CharArrayReader;
