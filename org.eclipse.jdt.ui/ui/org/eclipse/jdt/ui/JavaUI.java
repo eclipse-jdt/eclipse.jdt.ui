@@ -137,7 +137,6 @@ public final class JavaUI {
 	 */
 	public final static String ATTR_CMDLINE= JavaPlugin.getPluginId()+".launcher.cmdLine";
 
-	
 	/**
 	 * Returns the shared images for the Java UI.
 	 *
