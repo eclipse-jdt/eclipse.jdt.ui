@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -27,7 +28,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -98,33 +98,44 @@ public class OpenActionUtil {
 		return null;
 	}
 	
-	public static IJavaElement getElementToOpen(IJavaElement element) throws JavaModelException {
+	public static IJavaElement getElementToShow(IJavaElement element) throws JavaModelException {
 		if (element == null)
 			return null;
 		switch (element.getElementType()) {
 			case IJavaElement.PACKAGE_DECLARATION:
 				// select package fragment
-				element= JavaModelUtil.getPackageFragmentRoot(element);
+				element= element.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 				break;
+			default:
+				element= getElementToOpen(element);
+		}
+		return element;
+	}
+	
+	public static IJavaElement getElementToOpen(IJavaElement element) throws JavaModelException {
+		if (element == null)
+			return null;
+		switch (element.getElementType()) {
 			case IJavaElement.IMPORT_DECLARATION:
 				// select referenced element: package fragment or cu/classfile of referenced type
 				IImportDeclaration declaration= (IImportDeclaration) element;
 				if (declaration.isOnDemand()) {
 					element= JavaModelUtil.findTypeContainer(element.getJavaProject(), Signature.getQualifier(element.getElementName()));
 				} else {
-					element= JavaModelUtil.findType(element.getJavaProject(), element.getElementName());
+					element= element.getJavaProject().findType(element.getElementName());
 				}
 				if (element instanceof IType) {
-					element= (IJavaElement) JavaModelUtil.getOpenable(element);
+					element= (IJavaElement)element.getOpenable();
 				}
 				break;
+			case IJavaElement.PACKAGE_DECLARATION:
 			case IJavaElement.IMPORT_CONTAINER:
 			case IJavaElement.TYPE:
 			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
 			case IJavaElement.INITIALIZER:
 				// select parent cu/classfile
-				element= (IJavaElement) JavaModelUtil.getOpenable(element);
+				element= (IJavaElement)element.getOpenable();
 				break;
 			case IJavaElement.JAVA_MODEL:
 				element= null;

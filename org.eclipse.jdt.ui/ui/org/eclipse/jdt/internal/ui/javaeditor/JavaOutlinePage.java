@@ -46,6 +46,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
@@ -56,6 +57,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IMember;
@@ -73,6 +75,7 @@ import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
+import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
@@ -581,7 +584,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 	private ListenerList fSelectionChangedListeners= new ListenerList();
 	private Hashtable fActions= new Hashtable();
-	private ContextMenuGroup[] fActionGroups;
 	
 	private TogglePresentationAction fTogglePresentation;
 	private ToggleTextHoverAction fToggleTextHover;
@@ -589,7 +591,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private GotoErrorAction fNextError;
 	private TextOperationAction fShowJavadoc;
 	
-	private CompositeActionGroup fStandardActionGroups;
+	private OpenAction fOpenAction;
+	private CompositeActionGroup fActionGroups;
 	private CCPActionGroup fCCPActionGroup;
 	
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
@@ -702,11 +705,14 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fMenu= manager.createContextMenu(tree);
 		tree.setMenu(fMenu);
 		
-		getSite().registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer); //$NON-NLS-1$
-		getSite().setSelectionProvider(fOutlineViewer);
+		IPageSite site= getSite();
+		site.registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer); //$NON-NLS-1$
+		site.setSelectionProvider(fOutlineViewer);
 
 		// we must create the groups after we have set the selection provider to the site
-		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
+		fOpenAction= new OpenAction(site);
+		site.getSelectionProvider().addSelectionChangedListener(fOpenAction);
+		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new OpenViewActionGroup(this), 
 				new ShowActionGroup(this), 
 				fCCPActionGroup= new CCPActionGroup(this),
@@ -714,7 +720,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				new GenerateActionGroup(this)});
 				
 		// register global actions
-		IActionBars bars= getSite().getActionBars();
+		IActionBars bars= site.getActionBars();
 		
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_PREVIOUS_PROBLEM, fPreviousError);
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_NEXT_PROBLEM, fNextError);
@@ -722,9 +728,10 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
 		
-		fStandardActionGroups.fillActionBars(bars);
+		fActionGroups.fillActionBars(bars);
+		bars.setGlobalActionHandler(JdtActionConstants.OPEN, fOpenAction);
 
-		IStatusLineManager statusLineManager= getSite().getActionBars().getStatusLineManager();
+		IStatusLineManager statusLineManager= site.getActionBars().getStatusLineManager();
 		if (statusLineManager != null) {
 			StatusBarUpdater updater= new StatusBarUpdater(statusLineManager);
 			fOutlineViewer.addSelectionChangedListener(updater);
@@ -732,8 +739,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		registerToolbarActions();
 				
-		fActionGroups= new ContextMenuGroup[] { new GenerateGroup(), new JavaSearchGroup() };
-		
 		fOutlineViewer.setInput(fInput);	
 		fOutlineViewer.getControl().addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
@@ -825,37 +830,17 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		}
 	}
 	 
-	private void addOpenPerspectiveItem(IMenuManager menu) {
-		ISelection s= getSelection();
-		if (s.isEmpty() || ! (s instanceof IStructuredSelection))
-			return;
-
-		IStructuredSelection selection= (IStructuredSelection)s;
-		if (selection.size() != 1)
-			return;
-			
-		Object element= selection.getFirstElement();
-		if (!(element instanceof IType))
-			return;
-		IType[] input= {(IType)element};
-		IWorkbenchWindow w= getSite().getWorkbenchWindow();
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, new OpenHierarchyAction(w, input));
-	}
-
 	protected void contextMenuAboutToShow(IMenuManager menu) {
 		
 		JavaPlugin.createStandardGroups(menu);
 				
-		addAction(menu, IContextMenuConstants.GROUP_OPEN, "OpenImportDeclaration"); //$NON-NLS-1$
-		addAction(menu, IContextMenuConstants.GROUP_SHOW, "ShowInPackageView"); //$NON-NLS-1$
-				
-		ContextMenuGroup.add(menu, fActionGroups, fOutlineViewer);
-		// XXX fill the show menu. This is a workaround until we have converted all context menus to the
-		// new action groups.
-		fStandardActionGroups.get(1).fillContextMenu(menu);
-		fStandardActionGroups.get(2).fillContextMenu(menu);
-		fStandardActionGroups.get(3).fillContextMenu(menu);
-		addOpenPerspectiveItem(menu);	
+		IStructuredSelection selection= (IStructuredSelection)getSelection();
+		Object element= selection.getFirstElement();
+		if (fOpenAction.isEnabled() && element instanceof IImportDeclaration && !((IImportDeclaration)element).isOnDemand()) {
+			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenAction);
+		}
+		fActionGroups.setContext(new ActionContext(selection));
+		fActionGroups.fillContextMenu(menu);
 	}
 	
 	/*
@@ -896,6 +881,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		if (action != null && action.isEnabled())
 			action.run();
 	}
+	
 	private void initDragAndDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE;
 		Transfer[] transfers= new Transfer[] {

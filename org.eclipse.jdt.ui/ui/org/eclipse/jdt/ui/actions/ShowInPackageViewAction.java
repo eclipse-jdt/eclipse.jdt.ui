@@ -118,7 +118,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		if (element == null)
 			return;
 		try {
-			element= OpenActionUtil.getElementToOpen(element);
+			element= OpenActionUtil.getElementToShow(element);
 			if (element == null)
 				return;
 			PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();

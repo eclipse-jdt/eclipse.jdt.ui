@@ -118,7 +118,14 @@ public class OpenAction extends SelectionDispatchAction {
 	 */
 	protected void run(ITextSelection selection) {
 		try {
-			run(SelectionConverter.codeResolveOrInput(fEditor));
+			IJavaElement[] elements= SelectionConverter.codeResolveOrInput(fEditor);
+			IJavaElement input= SelectionConverter.getInput(fEditor);
+			for (int i= 0; i < elements.length; i++) {
+				int type= elements[i].getElementType();
+				if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT || type == IJavaElement.PACKAGE_FRAGMENT)
+					elements[i]= input;
+			}
+			run(elements);
 		} catch (JavaModelException e) {
 			showError(e);
 		}
@@ -139,6 +146,11 @@ public class OpenAction extends SelectionDispatchAction {
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
 			try {
+				if (element instanceof IJavaElement) {
+					element= OpenActionUtil.getElementToOpen((IJavaElement)element);
+					if (element == null)
+						element= elements[i];
+				}
 				OpenActionUtil.open(element);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
