@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IContainer;
@@ -58,12 +59,13 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 public class JavaProjectHelper {
 	
 	public static final IPath RT_STUBS= new Path("testresources/rtstubs.jar");
+	public static final IPath RT15_STUBS= new Path("testresources/rtstubs.jar"); // TODO: create rt15 stubs
 	public static final IPath JUNIT_SRC= new Path("testresources/junit37-noUI-src.zip");
 	
 	public static final IPath MYLIB= new Path("testresources/mylib.jar");
 	
 	private static final int MAX_RETRY= 5;
-
+		
 	/**
 	 * Creates a IJavaProject.
 	 */	
@@ -101,6 +103,17 @@ public class JavaProjectHelper {
 		jproject.setRawClasspath(new IClasspathEntry[0], null);
 		
 		return jproject;	
+	}
+	
+	/**
+	 * Sets the compiler options to 1.5
+	 * @param options The compiler options to configure
+	 */	
+	public static void set15CompilerOptions(Map options) {
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
 	}
 	
 	/**
@@ -156,11 +169,9 @@ public class JavaProjectHelper {
 
 	public static void performDummySearch() throws JavaModelException {
 		new SearchEngine().searchAllTypeNames(
-		 	ResourcesPlugin.getWorkspace(),
 			null,
 			null,
-			SearchPattern.R_EXACT_MATCH,
-			true,
+			SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
 			IJavaSearchConstants.CLASS,
 			SearchEngine.createJavaSearchScope(new IJavaElement[0]),
 			new Requestor(),
@@ -336,7 +347,7 @@ public class JavaProjectHelper {
 
 	/**
 	 * Adds a library entry pointing to a JRE.
-	 * Can return null, if no JRE installation was found.
+	 * @return Can return null, if no JRE installation was found.
 	 */	
 	public static IPackageFragmentRoot addRTJar(IJavaProject jproject) throws CoreException {
 
@@ -452,19 +463,21 @@ public class JavaProjectHelper {
 				null
 			};
 		}
-		
-		/*
-		IVMInstall vmInstall= JavaRuntime.getDefaultVMInstall();
-		if (vmInstall != null) {
-			LibraryLocation loc= vmInstall.getVMInstallType().getDefaultLibraryLocation(vmInstall.getInstallLocation());
-			if (loc != null) {
-				return new IPath[] {
-           			new Path(loc.getSystemLibrary().getPath()),
-            		new Path(loc.getSystemLibrarySource().getPath()),
-            		loc.getPackageRootPath()
-				};
-			}
-		}*/
+		return null;
+	}
+	
+	/**
+	 * Try to find a 1.5 rt.jar
+	 */
+	public static IPath[] find15RtJar() {
+		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(RT15_STUBS);
+		if (rtStubs != null && rtStubs.exists()) {
+			return new IPath[] {
+				new Path(rtStubs.getPath()),
+				null,
+				null
+			};
+		}
 		return null;
 	}
 		
