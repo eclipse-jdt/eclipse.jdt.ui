@@ -224,6 +224,11 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddJavaDocStub.editorStateChanged();
 		fSurroundWithTryCatch.editorStateChanged();
 		fAddGetterSetter.editorStateChanged();
+		
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=17709
+		fConvertToMac.update();
+		fConvertToUNIX.update();
+		fConvertToWindows.update();
 	}
 
 	/* (non-Javadoc)
