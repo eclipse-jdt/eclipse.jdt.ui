@@ -114,6 +114,8 @@ public class RefactoringAnalyzeUtil {
 		RefactoringStatus subResult= new RefactoringStatus();				
 		Set oldErrorMessages= getOldErrorMessages(edits[0], oldCuNode);
 		MethodDeclaration newMethod= getMethodDeclaration(edits[0], change, newCUNode);
+		if (newMethod == null)
+			return subResult;
 		Message[] newErrorMessages= ASTNodes.getMessages(newMethod, ASTNodes.INCLUDE_ALL_PARENTS);
 		for (int i= 0; i < newErrorMessages.length; i++) {
 			if (! oldErrorMessages.contains(newErrorMessages[i].getMessage())){
@@ -164,6 +166,8 @@ public class RefactoringAnalyzeUtil {
 
 	private static Set getOldErrorMessages(TextEdit edit, CompilationUnit cuNode) {
 		MethodDeclaration oldMethod= getMethodDeclaration(edit, null, cuNode);
+		if (oldMethod == null)
+			return new HashSet(0);
 		Message[] oldMessages= ASTNodes.getMessages(oldMethod, ASTNodes.INCLUDE_ALL_PARENTS);
 		Set messageSet= new HashSet(oldMessages.length);
 		for (int i= 0; i < oldMessages.length; i++) {
