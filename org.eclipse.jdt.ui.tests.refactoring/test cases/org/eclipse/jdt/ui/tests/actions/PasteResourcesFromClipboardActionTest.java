@@ -193,17 +193,6 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 
 	//--- tests --------
 
-	public void testEmpty() throws Exception{
-		checkDisabled(null, new Object[]{getPackageP()});
-		checkDisabled(null, new Object[]{fPackageQ});
-		checkDisabled(null, new Object[]{fSimpleProject});
-		checkDisabled(null, new Object[]{fAnotherProject});
-		checkDisabled(null, new Object[]{MySetup.getProject()});
-		checkDisabled(null, new Object[]{getRoot()});
-		checkDisabled(null, new Object[]{fCuA});
-		checkDisabled(null, new Object[]{faTxt});
-	}
-	
 	public void testProject() throws Exception{
 		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{getPackageP()});
 		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{fPackageQ});
@@ -240,9 +229,9 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	public void testPackage() throws Exception{
 //		checkEnabled(new Object[]{getPackageP()}, new Object[]{fSimpleProject});
 		checkEnabled(new Object[]{getPackageP()}, new Object[]{getRoot()});
+		checkEnabled(new Object[]{getPackageP()}, new Object[]{getPackageP()});
+		checkEnabled(new Object[]{getPackageP()}, new Object[]{fPackageQ});
 		
-		checkDisabled(new Object[]{getPackageP()}, new Object[]{getPackageP()});
-		checkDisabled(new Object[]{getPackageP()}, new Object[]{fPackageQ});
 		checkDisabled(new Object[]{getPackageP()}, new Object[]{fAnotherProject});
 		checkDisabled(new Object[]{getPackageP()}, new Object[]{MySetup.getProject()});		
 		checkDisabled(new Object[]{getPackageP()}, new Object[]{fCuA});
