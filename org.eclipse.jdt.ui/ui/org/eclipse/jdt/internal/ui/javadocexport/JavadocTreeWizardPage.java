@@ -46,17 +46,18 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.launching.JavaRuntime;
-
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+
 import org.eclipse.jdt.internal.ui.jarpackager.CheckboxTreeAndListGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.launching.JavaRuntime;
 
 public class JavadocTreeWizardPage extends JavadocWizardPage {
 
@@ -146,7 +147,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	protected void createInputGroup(Composite composite) {
 
-		Label treeLabel= createLabel(composite, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.checkboxtreeandlistgroup.label"), createGridData(6)); //$NON-NLS-1$
+		createLabel(composite, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.checkboxtreeandlistgroup.label"), createGridData(6)); //$NON-NLS-1$
 		Composite c= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
@@ -209,7 +210,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		visibilityGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 6, 0));
 		visibilityGroup.setLayout(visibilityLayout);
 
-		Label visibilityLabel= createLabel(visibilityGroup, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.visibilitygroup.label"), createGridData(GridData.FILL_HORIZONTAL, 4, 0)); //$NON-NLS-1$
+		createLabel(visibilityGroup, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.visibilitygroup.label"), createGridData(GridData.FILL_HORIZONTAL, 4, 0)); //$NON-NLS-1$
 		fPrivateVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.privatebutton.label"), createGridData(GridData.FILL_HORIZONTAL, 1, 0)); //$NON-NLS-1$
 		fPackageVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.packagebutton.label"), createGridData(GridData.FILL_HORIZONTAL, 1, 0)); //$NON-NLS-1$
 		fProtectedVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.protectedbutton.label"), createGridData(GridData.FILL_HORIZONTAL, 1, 0)); //$NON-NLS-1$
@@ -681,4 +682,4 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		return super.getNextPage();       
 	}
 	
-} //end Class
+}
