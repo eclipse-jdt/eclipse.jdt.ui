@@ -8,6 +8,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -39,11 +44,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -65,10 +65,6 @@ import org.eclipse.ui.actions.RefreshAction;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.internal.OpenNewWindowAction;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.views.internal.framelist.BackAction;
-import org.eclipse.ui.views.internal.framelist.ForwardAction;
-import org.eclipse.ui.views.internal.framelist.GoIntoAction;
-import org.eclipse.ui.views.internal.framelist.UpAction;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -78,12 +74,23 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.OpenActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
+
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -103,15 +110,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.OpenActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
-
-
 
 abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener {
 
@@ -130,14 +128,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private PropertyDialogAction fPropertyDialogAction;
  	private IRefactoringAction fDeleteAction;
  	private RefreshAction fRefreshAction;
- 	private BackAction fBackAction;
-	private ForwardAction fForwardAction;
-	private GoIntoAction fZoomInAction;
-	private UpAction fUpAction;
-//	private GotoTypeAction fGotoTypeAction;
-//	private GotoPackageAction fGotoPackageAction;
 	private IWorkbenchPart fPreviousSelectionProvider;
+	private Object fPreviousSelectedElement;
 	private Image fOriginalTitleImage;
+	private PatchedOpenNewWindowAction fBrowseAction;
 	
 	private ActionGroup fStandardActionGroups;
 		
@@ -213,6 +207,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fContextMenu= menuMgr.createContextMenu(fViewer.getControl());
 		fViewer.getControl().setMenu(fContextMenu);
 		getSite().registerContextMenu(menuMgr, fViewer);
+		getSite().setSelectionProvider(fViewer);
 
 		createActions(); // call before registering for selection changes
 		addKeyListener();		
@@ -242,12 +237,35 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		getViewSite().getWorkbenchWindow().getSelectionService().addSelectionListener(this);
 		getViewSite().getPage().addPartListener(fPartListener);
 		
-		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
-				new OpenActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
-		
-		fStandardActionGroups.fillActionBars(getViewSite().getActionBars());
+		fillActionBars();
 		
 		setHelp();
+	}
+
+	private void fillActionBars() {
+		IActionBars actionBars= getViewSite().getActionBars();
+		IToolBarManager toolBar= actionBars.getToolBarManager();
+		fillToolBar(toolBar);
+
+		actionBars.updateActionBars();
+	
+//		IMenuManager menu= actionBars.getMenuManager();
+//		menu.add(fFilterAction);
+		
+//		menu.add(fShowLibrariesAction);  
+		//menu.add(fShowBinariesAction);
+//		menu.add(fFilterWorkingSetAction); 
+//		menu.add(fRemoveWorkingSetAction); 
+//
+//		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+//		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$
+
+		fStandardActionGroups.fillActionBars(actionBars);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.REFRESH, fRefreshAction);
+//		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BOOKMARK, fAddBookmarkAction);
+		
+		ReorgGroup.addGlobalReorgActions(actionBars, getSelectionProvider());
 	}
 	
 	//---- IWorkbenchPart ------------------------------------------------------
@@ -298,7 +316,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	//---- Adding Action to Toolbar -------------------------------------------
 	
 	protected void fillToolBar(IToolBarManager tbm) {
-//		fViewer.fillToolBar(tbm);
 	}	
 
 //	protected void setContextMenuContributor(final IContextMenuContributor contributor) {
@@ -317,20 +334,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
 		IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
-		int size= selection.size();
+		int size= selection.size();		
 		
 		fPropertyDialogAction.selectionChanged(selection);
 
 		MenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
 		menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
 		new NewWizardMenu(newMenu, getSite().getWorkbenchWindow(), false);
-
-		// updateActions(selection);
-//		Object element= selection.getFirstElement();
-//		if (size == 1 && fViewer.isExpandable(element)) 
-//			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
-//		addGotoMenu(menu);
-//
 
 		// Open menus
 		fOpenCUAction.update();
@@ -363,9 +373,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return;
 		menu.appendToGroup(
 			IContextMenuConstants.GROUP_OPEN, 
-			new OpenNewWindowAction(getSite().getWorkbenchWindow(), (IContainer)element));
+			new PatchedOpenNewWindowAction(getSite().getWorkbenchWindow(), (IContainer)element));
 	}
-
 	private void addRefactoring(IMenuManager menu){
 		MenuManager refactoring= new MenuManager(PackagesMessages.getString("PackageExplorer.refactoringTitle"));  //$NON-NLS-1$
 		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup() }, fViewer);
@@ -385,6 +394,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			new GenerateGroup(),
 			new JavaSearchGroup()
 		};
+
+		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
+				new OpenActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
+
 		
 		fDeleteAction= ReorgGroup.createDeleteAction(provider);
 		fRefreshAction= new RefreshAction(getShell());
@@ -394,18 +407,15 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 //		fFilterWorkingSetAction = new FilterWorkingSetAction(getShell(), this, "Filter Working Set..."); //$NON-NLS-1$
 //		fRemoveWorkingSetAction = new RemoveWorkingSetFilterAction(getShell(), this, "Remove Working Set Filter"); //$NON-NLS-1$
 		
-//		fBackAction= new BackAction(fFrameList);
-//		fForwardAction= new ForwardAction(fFrameList);
-//		fZoomInAction= new GoIntoAction(fFrameList);
-//		fUpAction= new UpAction(fFrameList);
-
-//		fGotoTypeAction= new GotoTypeAction(this);
-//		fGotoPackageAction= new GotoPackageAction(this);
 		IActionBars actionService= getViewSite().getActionBars();
 		actionService.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
 		ReorgGroup.addGlobalReorgActions(actionService, provider);
+		
+//		fBrowseAction= new BrowseAction(this);
 	}
 
+
+	
 	private void addOpenWithMenu(IMenuManager menu, IStructuredSelection selection) {
 		// If one file is selected get it.
 		// Otherwise, do not show the "open with" menu.
@@ -441,7 +451,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	/**
 	 * Returns the selection provider.
 	 */
-	private ISelectionProvider getSelectionProvider() {
+	ISelectionProvider getSelectionProvider() {
 		return fViewer;
 	}
 
@@ -515,9 +525,14 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		if (!fProcessSelectionEvents || part == this || !(selection instanceof IStructuredSelection))
 			return;
-			
+		
 		// Set selection
 		Object selectedElement= getSingleElementFromSelection(selection);
+
+		if (selectedElement != null && part.equals(fPreviousSelectionProvider) && selectedElement.equals(fPreviousSelectedElement))
+			return;
+		fPreviousSelectedElement= selectedElement;
+		
 		Object currentInput= (IJavaElement)getViewer().getInput();
 		if (selectedElement != null && selectedElement.equals(currentInput)) {
 			IJavaElement elementToSelect= findElementToSelect(getSingleElementFromSelection(selection));
@@ -526,7 +541,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			fPreviousSelectionProvider= part;
 			return;
 		}
-
+		
 		// Clear input if needed
 		if (part != fPreviousSelectionProvider && selectedElement != null && !selectedElement.equals(currentInput) && isInputResetBy(selectedElement, currentInput, part)) {
 			if (!isAncestorOf(selectedElement, currentInput))
@@ -658,11 +673,12 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		else {
 			// Use the input of the page
 			input= getSite().getPage().getInput();
-			if (!(input instanceof IJavaElement) && input instanceof IAdaptable)
-				input= ((IAdaptable)input).getAdapter(IJavaElement.class);
-			
-			else
-				return;
+			if (!(input instanceof IJavaElement)) {
+				if (input instanceof IAdaptable)
+					input= ((IAdaptable)input).getAdapter(IJavaElement.class);
+				else
+					return;
+			}
 		}
 		if (findElementToSelect((IJavaElement)input) != null)
 			adjustInputAndSetSelection((IJavaElement)input);
