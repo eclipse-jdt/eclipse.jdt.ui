@@ -148,7 +148,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		viewMenu.add(new Separator("filters")); //$NON-NLS-1$
 		viewMenu.add(new ContributionItem() {
 			public void fill(Menu menu, int index) {
-				MenuItem mi= new MenuItem(menu, SWT.CHECK, index);
+				MenuItem mi= new MenuItem(menu, SWT.NONE, index);
 				mi.setText(FilterMessages.getString("OpenCustomFiltersDialogAction.text")); //$NON-NLS-1$
 				mi.setSelection(areUserDefinedPatternsEnabled() || getEnabledFilterIds().length > 0);
 				mi.addSelectionListener(new SelectionAdapter() {
