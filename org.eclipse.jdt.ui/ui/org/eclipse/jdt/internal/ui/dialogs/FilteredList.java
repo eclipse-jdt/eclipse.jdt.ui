@@ -25,8 +25,9 @@ import org.eclipse.swt.widgets.TableItem;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
-import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
+
+import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * A composite widget which holds a list of elements for user selection.

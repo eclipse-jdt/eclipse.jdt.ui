@@ -5,7 +5,8 @@
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.internal.core.Assert;
+
+import org.eclipse.jdt.internal.corext.Assert;
 
 public final class TextRange {
 

@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocumentListener;
 
-import org.eclipse.jdt.internal.core.Assert;
+import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * A helper class to arrange <code>TextEdit</code>s into a tree to optimize their

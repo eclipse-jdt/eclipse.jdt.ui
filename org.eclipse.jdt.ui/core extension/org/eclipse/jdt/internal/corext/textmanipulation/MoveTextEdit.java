@@ -5,7 +5,8 @@
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.internal.core.Assert;
+
+import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * A text edit that moves text inside a text buffer.
