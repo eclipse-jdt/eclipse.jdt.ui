@@ -1146,8 +1146,14 @@ public class StubUtility {
 	
 	public static String[] suggestArgumentNames(IJavaProject project, String[] paramNames) {
 		String prefixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, true);
+		if (prefixes == null) {
+			prefixes= ""; //$NON-NLS-1$
+		}
 		String suffixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, true);
-		if (prefixes == null || suffixes == null || prefixes.length() + suffixes.length() == 0) {
+		if (suffixes == null) {
+			suffixes= ""; //$NON-NLS-1$
+		}
+		if (prefixes.length() + suffixes.length() == 0) {
 			return paramNames;
 		}
 		
