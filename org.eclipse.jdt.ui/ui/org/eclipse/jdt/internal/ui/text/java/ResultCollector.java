@@ -11,18 +11,26 @@ import java.util.Comparator;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+
 import org.eclipse.core.resources.IMarker;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageDescriptor;
 
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
@@ -50,6 +58,7 @@ public class ResultCollector implements ICompletionRequestor {
 	private IJavaProject fJavaProject;
 	private ICompilationUnit fCompilationUnit;
 	private int fCodeAssistOffset;
+	private ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	
 	private ArrayList[] fResults = new ArrayList[] {
 		fVariables, fFields, fMethods, fTypes, fKeywords, fModifiers, fLabels, fPackages
@@ -67,8 +76,12 @@ public class ResultCollector implements ICompletionRequestor {
 	 * @see ICompletionRequestor#acceptClass
 	 */	
 	public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end) {
+		ImageDescriptor descriptor= JavaPluginImages.DESC_OBJS_CLASS;
+		if (Flags.isDeprecated(modifiers))
+			descriptor= getDeprecatedDescriptor(descriptor);
+
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), info));
+		fTypes.add(createTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info));
 	}
 	
 	/*
@@ -85,15 +98,10 @@ public class ResultCollector implements ICompletionRequestor {
 		char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
 		char[] typePackageName, char[] typeName, char[] completionName,
 		int modifiers, int start, int end) {
-		
-		String iconName= JavaPluginImages.IMG_MISC_DEFAULT;
-		if (Flags.isPublic(modifiers)) {
-			iconName= JavaPluginImages.IMG_MISC_PUBLIC;
-		} else if (Flags.isProtected(modifiers)) {
-			iconName= JavaPluginImages.IMG_MISC_PROTECTED;
-		} else if (Flags.isPrivate(modifiers)) {
-			iconName= JavaPluginImages.IMG_MISC_PRIVATE;
-		}
+
+		ImageDescriptor descriptor= getMemberDescriptor(modifiers);	
+		if (Flags.isDeprecated(modifiers))
+		 	descriptor= getDeprecatedDescriptor(descriptor);	
 		
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(name);
@@ -106,7 +114,7 @@ public class ResultCollector implements ICompletionRequestor {
 			nameBuffer.append(declaringTypeName);
 		}	
 		
-		JavaCompletionProposal proposal= createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString());
+		JavaCompletionProposal proposal= createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString());
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name));
 		
 		fFields.add(proposal);
@@ -116,8 +124,12 @@ public class ResultCollector implements ICompletionRequestor {
 	 * @see ICompletionRequestor#acceptInterface
 	 */	
 	public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end) {
+		ImageDescriptor descriptor= JavaPluginImages.DESC_OBJS_INTERFACE;
+		if (Flags.isDeprecated(modifiers))
+			descriptor= getDeprecatedDescriptor(descriptor);
+
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_INTERFACE, new String(typeName), new String(packageName), info));
+		fTypes.add(createTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info));
 	}
 	
 	/*
@@ -219,7 +231,7 @@ public class ResultCollector implements ICompletionRequestor {
 	 * @see ICompletionRequestor#acceptPackage
 	 */	
 	public void acceptPackage(char[] packageName, char[] completionName, int start, int end) {
-		fPackages.add(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_PACKAGE, new String(packageName)));
+		fPackages.add(createCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_PACKAGE, new String(packageName)));
 	}
 	
 	/*
@@ -227,7 +239,7 @@ public class ResultCollector implements ICompletionRequestor {
 	 */	
 	public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end) {
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), info));
+		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_CLASS, new String(typeName), new String(packageName), info));
 	}
 	
 	/*
@@ -279,14 +291,9 @@ public class ResultCollector implements ICompletionRequestor {
 	}
 
 	protected JavaCompletionProposal createMethodCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
-		String iconName= JavaPluginImages.IMG_MISC_DEFAULT;
-		if (Flags.isPublic(modifiers)) {
-			iconName= JavaPluginImages.IMG_MISC_PUBLIC;
-		} else if (Flags.isProtected(modifiers)) {
-			iconName= JavaPluginImages.IMG_MISC_PROTECTED;
-		} else if (Flags.isPrivate(modifiers)) {
-			iconName= JavaPluginImages.IMG_MISC_PRIVATE;
-		}
+		ImageDescriptor descriptor= getMemberDescriptor(modifiers);
+		if (Flags.isDeprecated(modifiers))
+		 	descriptor= getDeprecatedDescriptor(descriptor);
 
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(name);
@@ -303,7 +310,7 @@ public class ResultCollector implements ICompletionRequestor {
 			nameBuffer.append(" - "); //$NON-NLS-1$
 			nameBuffer.append(declaringTypeName);
 		}
-		return createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString());
+		return createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString());
 	}
 
 	private JavaCompletionProposal createAnonymousTypeCompletion(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int start, int end) {
@@ -330,7 +337,7 @@ public class ResultCollector implements ICompletionRequestor {
 	}
 
 	
-	protected JavaCompletionProposal createTypeCompletion(int start, int end, String completion, String iconName, String typeName, String containerName, ProposalInfo proposalInfo) {
+	protected JavaCompletionProposal createTypeCompletion(int start, int end, String completion, ImageDescriptor descriptor, String typeName, String containerName, ProposalInfo proposalInfo) {
 		IImportDeclaration importDeclaration= null;
 		if (containerName != null && fCompilationUnit != null) {
 			if (completion.equals(JavaModelUtil.concatenateName(containerName, typeName))) {
@@ -345,13 +352,30 @@ public class ResultCollector implements ICompletionRequestor {
 		}
 		String name= buf.toString();
 		
-		JavaCompletionProposal proposal= createCompletion(start, end, completion, iconName, name);
+		JavaCompletionProposal proposal= createCompletion(start, end, completion, descriptor, name);
 		proposal.setImportDeclaration(importDeclaration);
 		proposal.setProposalInfo(proposalInfo);
 		return proposal;
 	}
+
+	protected ImageDescriptor getMemberDescriptor(int modifiers) {
+		if (Flags.isPublic(modifiers)) {
+			return JavaPluginImages.DESC_MISC_PUBLIC;
+		} else if (Flags.isProtected(modifiers)) {
+			return JavaPluginImages.DESC_MISC_PROTECTED;
+		} else if (Flags.isPrivate(modifiers)) {
+			return JavaPluginImages.DESC_MISC_PRIVATE;
+		} else {
+			return JavaPluginImages.DESC_MISC_DEFAULT;
+		}
+	}
 	
-	protected JavaCompletionProposal createCompletion(int start, int end, String completion, String iconName, String name) {
+	protected ImageDescriptor getDeprecatedDescriptor(ImageDescriptor descriptor) {
+		Point size= new Point(16, 16);
+		return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.WARNING, size);	    
+	}
+	
+	protected JavaCompletionProposal createCompletion(int start, int end, String completion, ImageDescriptor descriptor, String name) {
 		int length;
 		if (fUserReplacementLength == -1) {
 			length= fPreventEating ? fCodeAssistOffset - start : end - start;
@@ -362,11 +386,9 @@ public class ResultCollector implements ICompletionRequestor {
 				length+= fCodeAssistOffset - start;
 			}
 		}
-		
-		Image icon= null;
-		if (iconName != null)
-			icon= JavaPluginImages.get(iconName);		
 
+		Image icon= fRegistry.get(descriptor);
+		
 		return new JavaCompletionProposal(completion, start, length, icon, name);
 	}
 		
