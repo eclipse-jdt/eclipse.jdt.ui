@@ -101,7 +101,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		// not called anymore
 	}
 	
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
@@ -268,19 +268,19 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		return new TemplateInformationControlCreator();
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer, boolean)
 	 */
 	public void selected(ITextViewer viewer, boolean smartToggle) {
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
 	 */
 	public void unselected(ITextViewer viewer) {
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
 	 */
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
