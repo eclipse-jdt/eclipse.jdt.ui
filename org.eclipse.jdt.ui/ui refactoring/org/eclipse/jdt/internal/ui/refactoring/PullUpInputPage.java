@@ -252,7 +252,11 @@ public class PullUpInputPage extends UserInputWizardPage {
 	
 	private void createTreeAndSourceViewer(Composite superComposite) {
 		SashForm composite= new SashForm(superComposite, SWT.HORIZONTAL);
-		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		initializeDialogUnits(superComposite);
+		GridData gd = new GridData(GridData.FILL_BOTH);
+		gd.heightHint= convertHeightInCharsToPixels(20);
+		gd.widthHint= convertWidthInCharsToPixels(10);
+		composite.setLayoutData(gd);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2; 
 		layout.marginWidth= 0; 
@@ -261,7 +265,6 @@ public class PullUpInputPage extends UserInputWizardPage {
 		layout.verticalSpacing= 1;
 		composite.setLayout(layout);
 		
-		initializeDialogUnits(composite);
 		
 		createHierarchyTreeComposite(composite);
 		createSourceViewer(composite);
