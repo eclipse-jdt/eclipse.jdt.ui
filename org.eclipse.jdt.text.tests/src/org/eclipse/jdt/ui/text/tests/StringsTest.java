@@ -13,7 +13,6 @@ package org.eclipse.jdt.ui.text.tests;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class StringsTest extends TestCase {

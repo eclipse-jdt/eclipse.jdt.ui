@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.text.tests;
 
 import java.util.Iterator;
 
-import junit.awtui.TestRunner;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -43,11 +42,6 @@ public class JavaColoringTest extends TestCase {
 	
 	public JavaColoringTest(String name) {
 		super(name);
-	}
-	
-	public static void main(String args[]) {
-		String a[] = { "org.eclipse.jdt.ui.text.tests.JavaColoringTest"};
-		TestRunner.main(a);
 	}
 	
 	protected void setUp() {

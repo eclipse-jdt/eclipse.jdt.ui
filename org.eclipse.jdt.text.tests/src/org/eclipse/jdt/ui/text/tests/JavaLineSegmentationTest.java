@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.tests;
 
-import junit.awtui.TestRunner;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.jface.preference.PreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -39,12 +39,6 @@ public class JavaLineSegmentationTest extends TestCase {
 	public JavaLineSegmentationTest(String name) {
 		super(name);
 	}
-	
-	public static void main(String args[]) {
-		String a[] = { "org.eclipse.jdt.ui.text.tests.JavaLineSegmentationTest"};
-		TestRunner.main(a);
-	}
-	
 	
 	public static Test suite() {
 		return new TestSuite(JavaLineSegmentationTest.class); 

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.tests.comments;
 
 import java.util.Map;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.tests.comments;
 
 import java.util.Map;
+
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.Document;
@@ -22,6 +23,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.Assert;
+
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.comment.CommentObjectFactory;

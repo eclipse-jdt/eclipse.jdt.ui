@@ -18,14 +18,16 @@ import java.io.InputStreamReader;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
-import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.IToken;
+
+import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 
 /**
  * Compares two <code>IParitionTokenScanner</code>s for conformance and performance.

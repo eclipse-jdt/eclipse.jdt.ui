@@ -21,6 +21,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 

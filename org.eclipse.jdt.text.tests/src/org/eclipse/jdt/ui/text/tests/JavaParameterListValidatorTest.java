@@ -13,7 +13,6 @@ package org.eclipse.jdt.ui.text.tests;
 
 import java.util.Iterator;
 
-import junit.awtui.TestRunner;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -39,11 +38,6 @@ public class JavaParameterListValidatorTest extends TestCase {
 	
 	public JavaParameterListValidatorTest(String name) {
 		super(name);
-	}
-	
-	public static void main(String args[]) {
-		String a[] = { "org.eclipse.jdt.ui.text.tests.JavaParameterListValidatorTest"};
-		TestRunner.main(a);
 	}
 	
 	protected void setUp() {
