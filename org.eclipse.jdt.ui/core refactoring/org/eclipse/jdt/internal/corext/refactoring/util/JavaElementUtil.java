@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -171,5 +172,19 @@ public class JavaElementUtil {
 
 	public static boolean isDefaultPackage(Object element) {
 		return (element instanceof IPackageFragment) && ((IPackageFragment)element).isDefaultPackage();
+	}
+	
+	public static IMember[] sortByOffset(IMember[] members){
+		Comparator comparator= new Comparator(){
+			public int compare(Object o1, Object o2){
+				try{
+					return ((IMember)o2).getNameRange().getOffset() - ((IMember)o1).getNameRange().getOffset();
+				} catch (JavaModelException e){
+					return o2.hashCode() - o1.hashCode();
+				}	
+			}
+		};
+		Arrays.sort(members, comparator);
+		return members;
 	}
 }
