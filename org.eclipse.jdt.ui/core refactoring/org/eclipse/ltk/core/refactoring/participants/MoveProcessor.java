@@ -31,8 +31,6 @@ public abstract class MoveProcessor extends RefactoringProcessor {
 	private int fStyle;
 	private SharableParticipants fSharedParticipants= new SharableParticipants();
 	
-	private static final RefactoringParticipant[] EMPTY_PARTICIPANT_ARRAY= new RefactoringParticipant[0];
-	
 	protected MoveProcessor() {
 		fStyle= RefactoringStyles.NEEDS_PREVIEW;	
 	}
@@ -70,39 +68,6 @@ public abstract class MoveProcessor extends RefactoringProcessor {
 	 * @throws CoreException if creating or loading of the participants failed
 	 */
 	public abstract MoveParticipant[] loadElementParticipants() throws CoreException;
-	
-	/**
-	 * Returns an array of derived participants. There are two different kinds of 
-	 * derived participants that should be added via this hook method:
-	 * <ul>
-	 *   <li>participants listening to changes of derived elements. For example if
-	 *       a Java field gets renamed corresponding setter and getters methods are 
-	 *       renamed as well. The setter and getter methods are considered as
-	 *       derived elements and the corresponding participants should be added
-	 *       via this hook.</li>
-	 *   <li>participants listening to changes of a domain model different than the
-	 *       one that gets manipulated, but changed as a "side effect" of the
-	 *       refactoring. For example, renaming a package moves all its files to a
-	 *       different folder. If the package contains a HTML file then the rename
-	 *       package processor is supposed to load all move HTML file participants 
-	 *       via this hook.</li>
-	 * </ul>
-	 * <p>
-	 * Implementors are responsible to initialize the created participants with the
-	 * right arguments. The method is called after {@link #checkFinalConditions} has
-	 * been called on the processor itself.
-	 * </p>
-	 * <p>
-	 * This default implementation returns an empty array.
-	 * </p>
-	 * 
-	 * @return an array of derived participants
-	 * 
-	 * @throws CoreException if creating or loading of the participants failed
-	 */
-	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
-		return EMPTY_PARTICIPANT_ARRAY;
-	}
 	
 	/**
 	 * Returns the shared participants. ????

@@ -11,6 +11,7 @@
 package org.eclipse.ltk.core.refactoring.participants;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -51,6 +52,16 @@ public class ValidateEditChecker implements IConditionChecker {
 	public void addFile(IFile file) {
 		Assert.isNotNull(file);
 		fFiles.add(file);
+	}
+	
+	/**
+	 * Adds the given array of files.
+	 * 
+	 * @param files the array of files to add
+	 */
+	public void addFiles(IFile[] files) {
+		Assert.isNotNull(files);
+		fFiles.addAll(Arrays.asList(files));
 	}
 	
 	/**

@@ -14,26 +14,46 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ltk.internal.core.refactoring.Assert;
 
-
+/**
+ * A generic move refactoring. The actual refactoring is done
+ * by the move processor passed to the constructor.
+ * 
+ * @since 3.0
+ */
 public class MoveRefactoring extends ProcessorBasedRefactoring {
 
 	private MoveProcessor fProcessor;
 	private MoveParticipant[] fElementParticipants;
-	private RefactoringParticipant[] fDerivedParticipants;
 
+	/**
+	 * Creates a new move refactoring with the given move processor.
+	 * 
+	 * @param processor the move processor
+	 */
 	public MoveRefactoring(MoveProcessor processor) {
 		Assert.isNotNull(processor);
 		fProcessor= processor; 
 	}
 	
+	/**
+	 * Returns the move processor associated with this move refactoring.
+	 * 
+	 * @return
+	 */
 	public MoveProcessor getMoveProcessor() {
 		return fProcessor;
 	}
 
-	protected RefactoringProcessor getProcessor() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringProcessor getProcessor() {
 		return fProcessor;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	protected RefactoringParticipant[] getElementParticipants(boolean setArguments) throws CoreException {
 		if (fElementParticipants == null)
 			fElementParticipants= fProcessor.loadElementParticipants();
@@ -48,10 +68,4 @@ public class MoveRefactoring extends ProcessorBasedRefactoring {
 		}
 		return result;
 	}
-
-	protected RefactoringParticipant[] getDerivedParticipants() throws CoreException {
-		if (fDerivedParticipants == null)
-			fDerivedParticipants= fProcessor.loadDerivedParticipants();
-		return fDerivedParticipants;
-	}	
 }

@@ -23,15 +23,24 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.internal.core.refactoring.DelegatingValidationStateChange;
 
 public abstract class ProcessorBasedRefactoring extends Refactoring {
+	
+	private RefactoringParticipant[] fDerivedParticipants;
 
-	public ProcessorBasedRefactoring() {
+	/**
+	 * Creates a new processor based refactoring.
+	 */
+	protected ProcessorBasedRefactoring() {
 	}
 	
-	protected abstract RefactoringProcessor getProcessor();
+	/**
+	 * Return the processor associated with this refactoring. The
+	 * method must not return <code>null</code>.
+	 * 
+	 * @return the processor associated with this refactoring
+	 */
+	public abstract RefactoringProcessor getProcessor();
 	
 	protected abstract RefactoringParticipant[] getElementParticipants(boolean setArguments) throws CoreException;
-	
-	protected abstract RefactoringParticipant[] getDerivedParticipants() throws CoreException;
 	
 	public boolean isAvailable() throws CoreException {
 		return getProcessor().isApplicable();
@@ -103,11 +112,11 @@ public abstract class ProcessorBasedRefactoring extends Refactoring {
 			return result;
 		}
 		
-		RefactoringParticipant[] derivedParticipants= getDerivedParticipants();
+		fDerivedParticipants= getProcessor().loadDerivedParticipants();
 		sm= new SubProgressMonitor(pm, 1);
-		sm.beginTask("", derivedParticipants.length); //$NON-NLS-1$
-		for (int i= 0; i < derivedParticipants.length; i++) {
-			result.merge(derivedParticipants[i].checkInitialConditions(new SubProgressMonitor(sm, 1), context));
+		sm.beginTask("", fDerivedParticipants.length); //$NON-NLS-1$
+		for (int i= 0; i < fDerivedParticipants.length; i++) {
+			result.merge(fDerivedParticipants[i].checkInitialConditions(new SubProgressMonitor(sm, 1), context));
 		}
 		sm.done();
 		if (result.hasFatalError()) {
@@ -116,9 +125,9 @@ public abstract class ProcessorBasedRefactoring extends Refactoring {
 		}
 		
 		sm= new SubProgressMonitor(pm, 1);
-		sm.beginTask("", derivedParticipants.length); //$NON-NLS-1$
-		for (int i= 0; i < derivedParticipants.length; i++) {
-			result.merge(derivedParticipants[i].checkFinalConditions(new SubProgressMonitor(sm, 1), context));
+		sm.beginTask("", fDerivedParticipants.length); //$NON-NLS-1$
+		for (int i= 0; i < fDerivedParticipants.length; i++) {
+			result.merge(fDerivedParticipants[i].checkFinalConditions(new SubProgressMonitor(sm, 1), context));
 		}
 		sm.done();
 		if (result.hasFatalError()) {
@@ -136,17 +145,16 @@ public abstract class ProcessorBasedRefactoring extends Refactoring {
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		RefactoringParticipant[] elementParticipants= getElementParticipants(false);
-		RefactoringParticipant[] derivedParticipants= getDerivedParticipants();
 		
-		pm.beginTask("", elementParticipants.length + derivedParticipants.length + 1); //$NON-NLS-1$
+		pm.beginTask("", elementParticipants.length + fDerivedParticipants.length + 1); //$NON-NLS-1$
 		List changes= new ArrayList();
 		changes.add(getProcessor().createChange(new SubProgressMonitor(pm, 1)));
 		
 		for (int i= 0; i < elementParticipants.length; i++) {
 			changes.add(elementParticipants[i].createChange(new SubProgressMonitor(pm, 1)));
 		}
-		for (int i= 0; i < derivedParticipants.length; i++) {
-			changes.add(derivedParticipants[i].createChange(new SubProgressMonitor(pm, 1)));
+		for (int i= 0; i < fDerivedParticipants.length; i++) {
+			changes.add(fDerivedParticipants[i].createChange(new SubProgressMonitor(pm, 1)));
 		}
 		return new DelegatingValidationStateChange((Change[]) changes.toArray(new Change[changes.size()]));		
 	}
