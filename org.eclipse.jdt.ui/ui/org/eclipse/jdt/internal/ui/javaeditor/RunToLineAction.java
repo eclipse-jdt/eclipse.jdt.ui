@@ -6,21 +6,22 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.debug.core.*;
-import org.eclipse.debug.core.model.*;
-import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jdt.core.*;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.debug.core.model.IDebugElement;
+import org.eclipse.debug.core.model.IThread;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
-import org.eclipse.jdt.internal.debug.core.JDIDebugTarget;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
 
@@ -45,9 +46,20 @@ public class RunToLineAction extends Action implements IUpdate {
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.RUN_TO_LINE_ACTION });					
 	}
 
+	protected IJavaDebugTarget getContext() {
+		IDebugElement context = DebugUITools.getDebugContext();
+		if (context != null) {
+			context = context.getDebugTarget();
+			if (context instanceof IJavaDebugTarget) {
+				return (IJavaDebugTarget)context;
+			}
+		}		
+		return null;
+	}
+	
 	public void run() {
 		try {
-			JDIDebugTarget target= getContext();
+			IJavaDebugTarget target = getContext();
 			if (target == null) {
 				fEditor.getSite().getShell().getDisplay().beep();
 				return;
@@ -94,91 +106,6 @@ public class RunToLineAction extends Action implements IUpdate {
 		}
 	}
 
-	/**
-	 * Resolves the debug target context to set the run to line
-	 */
-	protected JDIDebugTarget getContext() throws DebugException{
-		JDIDebugTarget target= getContextFromUI();
-		if (target == null) {
-			target= getContextFromModel();
-		}
-		if (target == null) {
-			return null;
-		}
-		IThread[] threads= target.getThreads();
-		boolean threadSuspended= false;
-		for (int i= 0; i < threads.length; i++) {
-			IThread thread= threads[i];
-			if (thread.canResume()) {
-				threadSuspended=true;
-				break;
-			}
-		}
-		if (threadSuspended) {
-			return target;
-		}
-		return null;
-	}
-
-	/**
-	 * Resolves a debug target context from the model
-	 */
-	protected JDIDebugTarget getContextFromModel() throws DebugException {
-		IDebugTarget[] dts= DebugPlugin.getDefault().getLaunchManager().getDebugTargets();
-		for (int i= 0; i < dts.length; i++) {
-			JDIDebugTarget dt= (JDIDebugTarget)dts[i];
-			if (getContextFromDebugTarget(dt) != null) {
-				return dt;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Resolves a debug target context from the model
-	 */
-	protected JDIDebugTarget getContextFromThread(IThread thread) throws DebugException {
-		if (thread.isSuspended()) {
-			return (JDIDebugTarget) thread.getDebugTarget();
-		}
-		return null;
-	}
-
-	/**
-	 * Resolves a stack frame context from the UI
-	 */
-	protected JDIDebugTarget getContextFromUI() throws DebugException {
-		
-		IWorkbenchPage page= fEditor.getSite().getWorkbenchWindow().getActivePage();
-		if (page == null)
-			return null;
-			
-		IViewPart part= page.findView(IDebugUIConstants.ID_DEBUG_VIEW);
-		if (part == null)
-			return null;
-			
-		ISelectionProvider sp= part.getSite().getSelectionProvider();
-		if (sp != null) {
-			ISelection s= sp.getSelection();
-			if (s instanceof IStructuredSelection) {
-				IStructuredSelection ss= (IStructuredSelection) s;
-				Object item= ss.getFirstElement();
-				if (item instanceof IStackFrame) {
-					return (JDIDebugTarget) ((IStackFrame) item).getDebugTarget();
-				}
-				if (item instanceof IThread) {
-					return getContextFromThread((IThread) item);
-				}
-				if (item instanceof JDIDebugTarget) {
-					return (JDIDebugTarget) item;
-				}
-			}
-		}
-		
-		return null;
-	}
-
-
 	protected void errorDialog(IStatus status) {
 		Shell shell= fEditor.getSite().getShell();
 		ErrorDialog.openError(shell, JavaEditorMessages.getString("RunToLine.error.title1"), JavaEditorMessages.getString("RunToLine.error.message1"), status); //$NON-NLS-1$ //$NON-NLS-2$
@@ -188,29 +115,8 @@ public class RunToLineAction extends Action implements IUpdate {
 	 * @see IUpdate
 	 */
 	public void update() {
-		try {
-			setEnabled(getContext() != null);
-		} catch (DebugException de) {
-			setEnabled(false);
-			JavaPlugin.log(de.getStatus());
-		}
+		setEnabled(getContext() != null);
 	}
 	
-	/**
-	 * Resolves a stack frame context from the model
-	 */
-	protected JDIDebugTarget getContextFromDebugTarget(JDIDebugTarget dt) throws DebugException {
-		if (dt.isTerminated() || dt.isDisconnected()) {
-			return null;
-		}
-		IThread[] threads= dt.getThreads();
-		for (int i= 0; i < threads.length; i++) {
-			IThread thread= threads[i];
-			if (thread.isSuspended()) {
-				return dt;
-			}
-		}
-		return null;
-	}
 }
 
