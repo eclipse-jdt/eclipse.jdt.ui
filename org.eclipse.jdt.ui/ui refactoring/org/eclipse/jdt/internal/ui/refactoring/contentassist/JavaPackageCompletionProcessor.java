@@ -151,7 +151,7 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 				proposals.add(proposal);
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			//fPackageFragmentRoot is not a proper root -> no proposals
 		}
 		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}

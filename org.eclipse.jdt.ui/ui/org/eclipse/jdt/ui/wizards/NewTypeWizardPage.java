@@ -923,7 +923,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected IStatus containerChanged() {
 		IStatus status= super.containerChanged();
 		fCurrPackageCompletionProcessor.setPackageFragmentRoot(getPackageFragmentRoot());
-		fEnclosingTypeCompletionProcessor.setPackageFragment(getPackageFragmentRoot().getPackageFragment("")); //$NON-NLS-1$
+		if (getPackageFragmentRoot() != null)
+			fEnclosingTypeCompletionProcessor.setPackageFragment(getPackageFragmentRoot().getPackageFragment("")); //$NON-NLS-1$
 		return status;
 	}
 	
