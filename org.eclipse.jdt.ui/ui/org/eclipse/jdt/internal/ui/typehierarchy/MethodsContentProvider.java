@@ -164,7 +164,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 		try {
 			if (obj instanceof IJavaElement) {
 				IJavaElement elem= (IJavaElement)obj;
-				return !(elem.exists() && JavaModelUtil.isOnBuildPath(elem));
+				return !(elem.exists() && JavaModelUtil.isOnBuildPath(elem.getJavaProject(), elem));
 			}
 		} catch (JavaModelException e) {
 			// dont handle here

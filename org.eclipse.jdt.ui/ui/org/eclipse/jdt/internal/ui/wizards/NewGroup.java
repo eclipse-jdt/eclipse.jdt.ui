@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
@@ -113,10 +114,11 @@ public class NewGroup extends ContextMenuGroup {
 	static boolean isOnBuildPath(Object obj) {
 		try {
 			if (obj instanceof IJavaElement) {
-				return JavaModelUtil.isOnBuildPath((IJavaElement)obj);
+				IJavaElement elem= (IJavaElement)obj;
+				return JavaModelUtil.isOnBuildPath(elem.getJavaProject(), elem);
 			}
 		} catch (JavaModelException e) {
-			// ignore
+			JavaPlugin.log(e.getStatus());
 		}
 		return false;
 	}

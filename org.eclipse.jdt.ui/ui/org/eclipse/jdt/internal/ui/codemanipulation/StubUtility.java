@@ -210,7 +210,7 @@ public class StubUtility {
 	}
 
 	private static void resolveAndAdd(String refTypeSig, IType declaringType, IImportsStructure imports) throws JavaModelException {
-		String resolvedTypeName= getResolvedTypeName(refTypeSig, declaringType);
+		String resolvedTypeName= JavaModelUtil.getResolvedTypeName(refTypeSig, declaringType);
 		if (resolvedTypeName != null) {
 			imports.addImport(resolvedTypeName);		
 		}
@@ -235,127 +235,25 @@ public class StubUtility {
 		}		
 		buf.append("\t */\n"); //$NON-NLS-1$
 	}
-	
-
-	/**
-	 * Finds a method in a type.
-	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done.
-	 * Constructors are only compared by parameters, not the name.
-	 * @return The first found method or null, if nothing found
-	 */
-	public static IMethod findMethod(IMethod method, IType type) throws JavaModelException {
-		return findMethod(method.getElementName(), method.getParameterTypes(), method.isConstructor(), type.getMethods());
-	}
-
-	/**
-	 * Finds a method in a type.
-	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done.
-	 * Constructors are only compared by parameters, not the name.
-	 * @return The first found method or null, if nothing found
-	 */
-	public static IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type) throws JavaModelException {
-		return findMethod(name, paramTypes, isConstructor, type.getMethods());
-	}
-
-	/**
-	 * Finds a method by name.
-	 * This searches for a method with a name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done.
-	 * Constructors are only compared by parameters, not the name.
-	 * @param name The name of the method to find
-	 * @param paramTypes The parameters of the method to find
-	 * @param isConstructor If the method is a constructor
-	 * @param methods The methods to search in
-	 * @return The found method or null, if nothing found
-	 */
-	public static IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IMethod[] methods) throws JavaModelException {
-		for (int i= methods.length - 1; i >= 0; i--) {
-			IMethod curr= methods[i];
-			if (isConstructor || name.equals(curr.getElementName())) {
-				if (isConstructor == curr.isConstructor()) {
-					if (compareParamTypes(paramTypes, curr.getParameterTypes())) {
-						return curr;
-					}
-				}
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Finds a method in a list of methods.
-	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done.
-	 * Constructors are only compared by parameters, not the name.
 	 * @return The found method or null, if nothing found
 	 */
-	public static IMethod findMethod(IMethod method, List allMethods) throws JavaModelException {
+	private static IMethod findMethod(IMethod method, List allMethods) throws JavaModelException {
 		String name= method.getElementName();
 		String[] paramTypes= method.getParameterTypes();
 		boolean isConstructor= method.isConstructor();
 
 		for (int i= allMethods.size() - 1; i >= 0; i--) {
 			IMethod curr= (IMethod) allMethods.get(i);
-			if (isConstructor || name.equals(curr.getElementName())) {
-				if (isConstructor == curr.isConstructor()) {
-					if (compareParamTypes(paramTypes, curr.getParameterTypes())) {
-						return curr;
-					}
-				}
-			}
+			if (JavaModelUtil.isSameMethodSignature(name, paramTypes, isConstructor, curr)) {
+				return curr;
+			}			
 		}
 		return null;
 	}
 
-	/**
-	 * Finds a method in an array of methods.
-	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done.
-	 * @return The first found method or null, if nothing found
-	 */
-	public static IMethod findMethod(IMethod method, IMethod[] methods) throws JavaModelException {
-		return findMethod(method.getElementName(), method.getParameterTypes(), method.isConstructor(), methods);
-	}
-
-	/**
-	 * Finds a method in a type's hierarchy.
-	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done.
-	 * The input type of the hierarchy is not searched for the method.
-	 * @return The first found method or null, if nothing found
-	 */
-	public static IMethod findInHierarchy(ITypeHierarchy hierarchy, IMethod method) throws JavaModelException {
-		IType curr= hierarchy.getSuperclass(hierarchy.getType());
-		while (curr != null) {
-			IMethod found= StubUtility.findMethod(method, curr);
-			if (found != null) {
-				return found;
-			}
-			curr= hierarchy.getSuperclass(curr);
-		}
-		return null;
-	}
-
-	/**
-	 * Compares two parameter signatures.
-	 */
-	public static boolean compareParamTypes(String[] paramTypes1, String[] paramTypes2) {
-		if (paramTypes1.length == paramTypes2.length) {
-			int i= 0;
-			while (i < paramTypes1.length) {
-				String t1= Signature.getSimpleName(Signature.toString(paramTypes1[i]));
-				String t2= Signature.getSimpleName(Signature.toString(paramTypes2[i]));
-				if (!t1.equals(t2)) {
-					return false;
-				}
-				i++;
-			}
-			return true;
-		}
-		return false;
-	}
 
 	/**
 	 * Creates needed constructors for a type.
@@ -368,7 +266,7 @@ public class StubUtility {
 		IMethod[] methods= supertype.getMethods();
 		for (int i= 0; i < methods.length; i++) {
 			IMethod curr= methods[i];
-			if (curr.isConstructor() && JavaModelUtil.isVisible(type.getPackageFragment(), curr.getFlags(), supertype.getPackageFragment())) {
+			if (curr.isConstructor() && JavaModelUtil.isVisible(curr, type.getPackageFragment())) {
 				String newStub= genStub(type, methods[i], imports);
 				newMethods.add(newStub);
 			}
@@ -436,70 +334,10 @@ public class StubUtility {
 	}
 
 	/**
-	 * Resolves a type name in the context of the declaring type.
-	 * @param refTypeSig the type name in signature notation (for example 'QVector')
-	 *                   this can also be an array type, but dimensions will be ignored.
-	 * @param declaringType the context for resolving (type where the reference was made in)
-	 * @return returns the fully qualified type name or build-in-type name. 
-	 *  			if a unresoved type couldn't be resolved null is returned
-	 */
-	public static String getResolvedTypeName(String refTypeSig, IType declaringType) throws JavaModelException {
-		int arrayCount= Signature.getArrayCount(refTypeSig);
-		char type= refTypeSig.charAt(arrayCount);
-		if (type == Signature.C_UNRESOLVED) {
-			int semi= refTypeSig.indexOf(Signature.C_SEMICOLON, arrayCount + 1);
-			if (semi == -1) {
-				throw new IllegalArgumentException();
-			}
-			String name= refTypeSig.substring(arrayCount + 1, semi);				
-			
-			String[][] resolvedNames= declaringType.resolveType(name);
-			if (resolvedNames != null && resolvedNames.length > 0) {
-				return JavaModelUtil.concatenateName(resolvedNames[0][0], resolvedNames[0][1]);
-			}
-			return null;
-		} else {
-			return Signature.toString(refTypeSig.substring(arrayCount));
-		}
-	}
-
-	/**
-	 * Finds a type by the simple name.
-	 */
-	public static IType[] findAllTypes(String simpleTypeName, IJavaProject jproject, IProgressMonitor monitor) throws JavaModelException, CoreException {
-		SearchEngine searchEngine= new SearchEngine();
-		IProject project= jproject.getProject();
-		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IResource[] { project });
-
-		ArrayList typeRefsFound= new ArrayList(10);
-		ITypeNameRequestor requestor= new TypeInfoRequestor(typeRefsFound);
-
-		searchEngine.searchAllTypeNames(
-			project.getWorkspace(), 
-			null, 
-			simpleTypeName.toCharArray(), 
-			IJavaSearchConstants.EXACT_MATCH, 
-			IJavaSearchConstants.CASE_SENSITIVE, 
-			IJavaSearchConstants.TYPE, 
-			searchScope, 
-			requestor, 
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
-			monitor);
-			
-		int nTypesFound= typeRefsFound.size();
-		IType[] res= new IType[nTypesFound];
-		for (int i= 0; i < nTypesFound; i++) {
-			TypeInfo ref= (TypeInfo) typeRefsFound.get(i);
-			res[i]= ref.resolveType(searchScope);
-		}
-		return res;
-	}
-
-	/**
 	 * Examines a string and returns the first line delimiter found.
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) throws JavaModelException {
-		ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.getParent(elem, IJavaElement.COMPILATION_UNIT);
+		ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
 		if (cu != null) {
 			IBuffer buf= cu.getBuffer();
 			int length= buf.getLength();
@@ -554,7 +392,7 @@ public class StubUtility {
 	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof ISourceReference) {
 			int tabWidth= CodeFormatterPreferencePage.getTabSize();
-			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.getParent(elem, IJavaElement.COMPILATION_UNIT);
+			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				IBuffer buf= cu.getBuffer();
 				int i= ((ISourceReference)elem).getSourceRange().getOffset();

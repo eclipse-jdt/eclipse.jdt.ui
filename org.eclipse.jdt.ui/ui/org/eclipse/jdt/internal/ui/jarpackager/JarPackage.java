@@ -399,7 +399,7 @@ public class JarPackage implements Serializable {
 	 */
 	public boolean isMainClassValid(IRunnableContext context) {
 		if (getMainClassName().length() == 0)
-			return true;					return JavaModelUtil.hasMainMethod(getMainClass());
+			return true;		try {				return JavaModelUtil.hasMainMethod(getMainClass());		} catch (JavaModelException e) {			JavaPlugin.log(e.getStatus());		}		return false;
 	}
 	/**
 	 * Returns the minimal set of packages which contain all the selected Java resources.
@@ -407,7 +407,7 @@ public class JarPackage implements Serializable {
 	 */
 	public Set getPackagesForSelectedResources() {
 		Set packages= new HashSet();
-		for (Iterator iter= getSelectedElements().iterator(); iter.hasNext();) {			Object element= iter.next();			if (element instanceof ICompilationUnit) {				IJavaElement pack= JavaModelUtil.getParent((IJavaElement)element, org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT);				if (pack != null)					packages.add(pack);			}		}		return packages;
+		for (Iterator iter= getSelectedElements().iterator(); iter.hasNext();) {			Object element= iter.next();			if (element instanceof ICompilationUnit) {				IJavaElement pack= JavaModelUtil.findParentOfKind((IJavaElement)element, org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT);				if (pack != null)					packages.add(pack);			}		}		return packages;
 	}	/**	 * Tells whether the given resource (or its children) have compile errors.	 * The method acts on the current build state and does not recompile.	 * 	 * @param resource the resource to check for errors	 * @return <code>true</code> if the resource (and its children) are error free	 * @throws import org.eclipse.core.runtime.CoreException if there's a marker problem	 */	public boolean hasCompileErrors(IResource resource) throws CoreException {		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);		for (int i= 0; i < problemMarkers.length; i++) {			if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR)				return true;		}		return false;	}	/**	 * Tells whether the given resource (or its children) have compile errors.	 * The method acts on the current build state and does not recompile.	 * 	 * @param resource the resource to check for errors	 * @return <code>true</code> if the resource (and its children) are error free	 * @throws import org.eclipse.core.runtime.CoreException if there's a marker problem	 */	public boolean hasCompileWarnings(IResource resource) throws CoreException {		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);		for (int i= 0; i < problemMarkers.length; i++) {			if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_WARNING)				return true;		}		return false;	}	/**
 	 * Checks if the JAR file can be overwritten.
 	 * If the JAR package setting does not allow to overwrite the JAR

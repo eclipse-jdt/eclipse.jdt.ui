@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+
 /**
  * For given fields, method stubs for getters and setters are created.
  */
@@ -163,7 +165,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 			
 			// test if the getter already exists
 			String getterName= "get" + accessorName; //$NON-NLS-1$
-			IMethod existing= StubUtility.findMethod(getterName, new String[0], false, parentType);
+			IMethod existing= JavaModelUtil.findMethod(getterName, new String[0], false, parentType);
 			if (!(existing != null &&  querySkipExistingMethods(existing))) {			
 				// create the getter stub
 				StringBuffer buf= new StringBuffer();
@@ -196,7 +198,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 			
 			// test if the setter already exists or field is final
 			boolean isFinal= Flags.isFinal(field.getFlags());
-			existing= StubUtility.findMethod(setterName, args, false, parentType);
+			existing= JavaModelUtil.findMethod(setterName, args, false, parentType);
 			if (!(isFinal && querySkipFinalSetters(field)) && !(existing != null && querySkipExistingMethods(existing))) {
 				// create the setter stub
 				StringBuffer buf= new StringBuffer();

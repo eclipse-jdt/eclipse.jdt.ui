@@ -5,8 +5,6 @@
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -16,9 +14,13 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Add method stubs to a type (the parent type)
@@ -87,7 +89,7 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 			fOverrideAll= (fOverrideQuery == null);
 			fReplaceAll= (fReplaceQuery == null);
 
-			List existingMethods= Arrays.asList(fType.getMethods());
+			IMethod[] existingMethods= fType.getMethods();
 			
 			ArrayList createdMethods= new ArrayList();
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit());
@@ -101,12 +103,15 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 				try {
 					String content;
 					IMethod curr= fMethods[i];
-					if (StubUtility.findMethod(curr, createdMethods) != null) {
-						// ignore duplicated methods
-						continue;
-					}
+					for (int k= 0; k < createdMethods.size(); k++) {
+						IMethod meth= (IMethod) createdMethods.get(k);
+						if (JavaModelUtil.isSameMethodSignature(meth.getElementName(), meth.getParameterTypes(), meth.isConstructor(), curr)) {
+							// ignore duplicated methods
+							continue;
+						}
+					}			 	
 					
-					IMethod inheritedMethod= StubUtility.findInHierarchy(typeHierarchy, curr);
+					IMethod inheritedMethod= findInHierarchy(typeHierarchy, curr);
 					if (inheritedMethod == null) {
 						// create method without super call
 						content= StubUtility.genStub(fType, curr, false, false, imports);
@@ -120,21 +125,18 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 						}
 						content= StubUtility.genStub(fType, inheritedMethod, imports);	
 					}
-					IMethod sibling= null;
-					IMethod existing= StubUtility.findMethod(curr, existingMethods);
+					IJavaElement sibling= null;
+					IMethod existing= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), existingMethods);
 					if (existing != null) {
 						// ask before replacing a method
 						if (!queryReplaceMethods(existing)) {
 							continue;
-						}					
-						int idx= existingMethods.indexOf(existing) + 1;
-						if (idx < existingMethods.size()) {
-							sibling= (IMethod) existingMethods.get(idx);
-						}
+						}	
+						sibling= StubUtility.findSibling(existing);
 						existing.delete(false, null);
-					} else if (curr.isConstructor() && !existingMethods.isEmpty()) {
+					} else if (curr.isConstructor() && existingMethods.length > 0) {
 						// add constructors at the beginning
-						sibling= (IMethod) existingMethods.get(1);
+						sibling= existingMethods[0];
 					}
 						
 					String formattedContent= StubUtility.codeFormat(content, indent, lineDelim) + lineDelim;				
@@ -156,8 +158,24 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 			}
 		} finally {
 			monitor.done();
-		}
+		}		
 	}
+	
+	/**
+	 * Finds a method in a type's hierarchy.
+	 * @return The first found method or null, if nothing found
+	 */
+	private static IMethod findInHierarchy(ITypeHierarchy hierarchy, IMethod method) throws JavaModelException {
+		IType curr= hierarchy.getSuperclass(hierarchy.getType());
+		while (curr != null) {
+			IMethod found= JavaModelUtil.findMethod(method.getElementName(), method.getParameterTypes(), method.isConstructor(), curr);
+			if (found != null) {
+				return found;
+			}
+			curr= hierarchy.getSuperclass(curr);
+		}
+		return null;
+	}	
 	
 	public IMethod[] getCreatedMethods() {
 		return fCreatedMethods;

@@ -72,7 +72,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 			//1GE8SR2: ITPUI:WIN98 - Task List does not show problems for selection in Hierarchy View
 			// check whether the resource is inside a CU. If yes
 			// return the CU as the resource
-			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.getParent(element, IJavaElement.COMPILATION_UNIT);
+			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.findParentOfKind(element, IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				if (cu.isWorkingCopy())
 					return cu.getOriginalElement().getUnderlyingResource();

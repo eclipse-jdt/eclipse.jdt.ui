@@ -5,7 +5,6 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
  * All Rights Reserved.
  */
  
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
 import java.io.BufferedReader;
 import java.io.CharArrayReader;
 import java.io.IOException;
@@ -26,6 +25,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 
@@ -219,7 +219,7 @@ public class StandardDocletPageBuffer {
 				}
 				String currType= paramTypes[i];
 				int arrayCount= Signature.getArrayCount(currType);
-				String fullTypeName= StubUtility.getResolvedTypeName(currType, member.getDeclaringType());
+				String fullTypeName= JavaModelUtil.getResolvedTypeName(currType, member.getDeclaringType());
 				if (fullTypeName == null) {
 					// take the simple type name
 					fullTypeName= Signature.toString(currType.substring(arrayCount));

@@ -6,18 +6,18 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -65,14 +65,19 @@ public class OpenImportDeclarationAction extends Action implements IUpdate {
 			IStructuredSelection ss= (IStructuredSelection) s;
 			IImportDeclaration declaration= (IImportDeclaration) ss.getFirstElement();
 			try {
-				IJavaElement element= JavaModelUtil.convertFromImportDeclaration(declaration);
+				String containerName;
+				if (declaration.isOnDemand()) {
+					String importName= declaration.getElementName();
+					containerName= importName.substring(0, importName.length() - 2);
+				} else {
+					containerName= declaration.getElementName();
+				}
+				IJavaElement element= JavaModelUtil.findTypeContainer(declaration.getJavaProject(), containerName);
 				EditorUtility.openInEditor(element);
-			} catch (JavaModelException x) {
+			} catch (CoreException x) {
 				Shell shell= JavaPlugin.getActiveWorkbenchShell();
+				JavaPlugin.log(x.getStatus());
 				ErrorDialog.openError(shell, JavaUIMessages.getString("OpenImportDeclarationAction.errorTitle"), JavaUIMessages.getString("OpenImportDeclarationAction.errorMessage"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
-			} catch (PartInitException x) {
-				Shell shell= JavaPlugin.getActiveWorkbenchShell();
-				shell.getDisplay().beep();
 			}
 		}
 	}

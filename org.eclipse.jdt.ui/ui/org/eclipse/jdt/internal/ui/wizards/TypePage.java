@@ -868,7 +868,7 @@ public abstract class TypePage extends ContainerPage {
 					if (Flags.isFinal(flags)) {
 						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.SuperClassIsFinal", sclassName)); //$NON-NLS-1$
 						return status;
-					} else if (!JavaModelUtil.isVisible(getPackageFragment(), flags, type.getPackageFragment())) {
+					} else if (!JavaModelUtil.isVisible(type, getPackageFragment())) {
 						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.SuperClassIsNotVisible", sclassName)); //$NON-NLS-1$
 						return status;
 					}
@@ -945,7 +945,7 @@ public abstract class TypePage extends ContainerPage {
 							status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.InterfaceIsNotInterface", intfname)); //$NON-NLS-1$
 							return status;
 						}
-						if (!JavaModelUtil.isVisible(getPackageFragment(), type.getFlags(), type.getPackageFragment())) {
+						if (!JavaModelUtil.isVisible(type, getPackageFragment())) {
 							status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.InterfaceIsNotVisible", intfname)); //$NON-NLS-1$
 							return status;
 						}
@@ -997,7 +997,7 @@ public abstract class TypePage extends ContainerPage {
 		dialog.setElements(packages);
 
 		if (dialog.open() == dialog.OK) {
-			return (IPackageFragment) dialog.getFirstResult();
+			return (IPackageFragment) dialog.getPrimaryResult();
 		}
 		return null;
 	}
@@ -1039,7 +1039,7 @@ public abstract class TypePage extends ContainerPage {
 		dialog.setMessage(NewWizardMessages.getString("TypePage.SuperClassDialog.message")); //$NON-NLS-1$
 
 		if (dialog.open() == dialog.OK) {
-			return (IType) dialog.getFirstResult();
+			return (IType) dialog.getPrimaryResult();
 		}
 		return null;
 	}

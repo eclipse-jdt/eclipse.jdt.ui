@@ -85,8 +85,12 @@ public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  
 				flags |= JavaOverlayDescriptor.STATIC;
 				
 			if (sourceReference instanceof IType) {
-				if (JavaModelUtil.hasMainMethod((IType)sourceReference))
-					flags |= JavaOverlayDescriptor.RUNNABLE;
+				try {
+					if (JavaModelUtil.hasMainMethod((IType)sourceReference))
+						flags |= JavaOverlayDescriptor.RUNNABLE;
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e.getStatus());
+				}
 			}
 		}
 		return new JavaOverlayDescriptor(baseName, flags);

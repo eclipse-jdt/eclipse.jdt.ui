@@ -15,12 +15,11 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /* non java-doc
  * Utility methods for the Java Model. These methods should be part of
@@ -136,7 +135,7 @@ public class JavaModelUtility {
 				"([Ljava/lang/String;)V".equals(signature)) //$NON-NLS-1$
 				return true;
 			if ("([QString;)V".equals(signature)) { //$NON-NLS-1$
-				String resolvedName= StubUtility.getResolvedTypeName("QString;", method.getDeclaringType()); //$NON-NLS-1$
+				String resolvedName= JavaModelUtil.getResolvedTypeName("QString;", method.getDeclaringType()); //$NON-NLS-1$
 				if ("java.lang.String".equals(resolvedName)) //$NON-NLS-1$
 					return true;
 			}

@@ -326,7 +326,7 @@ public class CompletionEvaluator {
 				// '@see #foo'
 				IJavaElement elem= fCompilationUnit.getElementAt(wordStart);
 				if (elem != null) {
-					parent= (IType)JavaModelUtil.getParent(elem, IJavaElement.TYPE);
+					parent= (IType)JavaModelUtil.findElementOfKind(elem, IJavaElement.TYPE);
 				}
 			}
 				

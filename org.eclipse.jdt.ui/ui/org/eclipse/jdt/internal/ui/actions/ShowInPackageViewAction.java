@@ -64,24 +64,32 @@ public class ShowInPackageViewAction extends Action implements IUpdate {
 		Object o= ((IStructuredSelection)fSelectionProvider.getSelection()).getFirstElement();
 		IJavaElement element= null;
 		if (o instanceof IPackageDeclaration)
-			element= JavaModelUtil.getParent((IJavaElement)o, IJavaElement.PACKAGE_FRAGMENT);
+			element= JavaModelUtil.findParentOfKind((IJavaElement)o, IJavaElement.PACKAGE_FRAGMENT);
 		
 		else if (o instanceof IImportDeclaration) {
 			try {
-				element= JavaModelUtil.convertFromImportDeclaration((IImportDeclaration)o);
+				IImportDeclaration declaration= (IImportDeclaration) o;
+				String containerName;
+				if (declaration.isOnDemand()) {
+					String importName= declaration.getElementName();
+					containerName= importName.substring(0, importName.length() - 2);
+				} else {
+					containerName= declaration.getElementName();
+				}
+				element= JavaModelUtil.findTypeContainer(declaration.getJavaProject(), containerName);
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, JavaUIMessages.getString("ShowInPackageViewAction.errorTitle"), JavaUIMessages.getString("ShowInPackageViewAction.errorMessage")); //$NON-NLS-2$ //$NON-NLS-1$
 			}
 			if (element instanceof IType) {
-				IJavaElement temp= JavaModelUtil.getParent(element, IJavaElement.COMPILATION_UNIT);
+				IJavaElement temp= JavaModelUtil.findParentOfKind(element, IJavaElement.COMPILATION_UNIT);
 				if (temp == null)
-					temp= JavaModelUtil.getParent(element, IJavaElement.CLASS_FILE);
+					temp= JavaModelUtil.findParentOfKind(element, IJavaElement.CLASS_FILE);
 					
 				element= temp;
 			}
 		}
 		else if (o instanceof IType) {
-			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.getParent((IJavaElement)o, IJavaElement.COMPILATION_UNIT);
+			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.findParentOfKind((IJavaElement)o, IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				if (cu.isWorkingCopy())
 					element= cu.getOriginalElement();
@@ -89,7 +97,7 @@ public class ShowInPackageViewAction extends Action implements IUpdate {
 					element= cu;
 			}
 			else {
-				element= JavaModelUtil.getParent((IJavaElement)o, IJavaElement.CLASS_FILE);
+				element= JavaModelUtil.findParentOfKind((IJavaElement)o, IJavaElement.CLASS_FILE);
 			}
 		}
 		

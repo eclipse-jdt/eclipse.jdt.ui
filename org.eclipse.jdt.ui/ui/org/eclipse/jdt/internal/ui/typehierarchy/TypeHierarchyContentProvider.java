@@ -160,7 +160,8 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				if (parent.equals(member.getDeclaringType())) {
 					children.add(member);
 				} else if (member instanceof IMethod) {
-					IMethod meth= StubUtility.findMethod((IMethod)member, methods);
+					IMethod curr= (IMethod)member;
+					IMethod meth= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), methods);
 					if (meth != null) {
 						children.add(meth);
 					}
@@ -194,7 +195,8 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			if (type.equals(member.getDeclaringType())) {
 				return true;
 			} else if (member instanceof IMethod) {
-				IMethod meth= StubUtility.findMethod((IMethod)member, methods);
+				IMethod curr= (IMethod)member;
+				IMethod meth= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), methods);
 				if (meth != null) {
 					return true;
 				}
@@ -234,7 +236,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		try {
 			if (obj instanceof IJavaElement) {
 				IJavaElement elem= (IJavaElement)obj;
-				return !(elem.exists() && JavaModelUtil.isOnBuildPath(elem));
+				return !(elem.exists() && JavaModelUtil.isOnBuildPath(elem.getJavaProject(), elem));
 			}
 		} catch (JavaModelException e) {
 			// dont handle here

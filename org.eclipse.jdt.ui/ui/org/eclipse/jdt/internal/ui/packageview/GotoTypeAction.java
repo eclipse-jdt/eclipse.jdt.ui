@@ -64,7 +64,7 @@ public class GotoTypeAction extends Action {
 	}
 	
 	private void gotoType(IType type) {
-		ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.getParent(type, IJavaElement.COMPILATION_UNIT);
+		ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.findParentOfKind(type, IJavaElement.COMPILATION_UNIT);
 		IJavaElement element= null;
 		
 		if (cu != null) {
@@ -74,7 +74,7 @@ public class GotoTypeAction extends Action {
 				element= cu;
 		}
 		else {
-			element= JavaModelUtil.getParent(type, IJavaElement.CLASS_FILE);
+			element= JavaModelUtil.findParentOfKind(type, IJavaElement.CLASS_FILE);
 		}
 		if (element != null) {
 			PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();

@@ -5,10 +5,14 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -25,8 +29,14 @@ import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.ITypeNameRequestor;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -34,8 +44,9 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.codemanipulation.AddImportsOperation;
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
 
 public class AddImportOnSelectionAction extends Action implements IUpdate {
 		
@@ -74,16 +85,6 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 
 
 	private void addImport(IJavaElement imp, ICompilationUnit cu) {
-		AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { imp }, false);
-		try {
-			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
-			dialog.run(false, true, op);
-		} catch (InvocationTargetException e) {
-			MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
-			JavaPlugin.log(e);
-		} catch (InterruptedException e) {
-			// Do nothing. Operation has been canceled.
-		}
 	}
 	
 	/**
@@ -106,19 +107,29 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					String typeName= Signature.getSimpleName(name);
 					String packName= Signature.getQualifier(name);
 					
-					IType[] types= StubUtility.findAllTypes(typeName, cu.getJavaProject(), null);
+					IType[] types= findAllTypes(typeName, cu.getJavaProject(), null);
 					IType chosen= selectResult(types, packName, getShell());
-					if (chosen != null) {
-						removeQualification(doc, nameStart, chosen);
-						addImport(chosen, cu);
+					if (chosen == null) {
 						return;
 					}
+					removeQualification(doc, nameStart, chosen);
+					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { chosen }, false);
+					ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
+					try {
+						dialog.run(false, true, op);
+					} catch (InvocationTargetException e) {
+						MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
+						JavaPlugin.log(e);
+					} catch (InterruptedException e) {
+						// Do nothing. Operation has been canceled.
+					}
+					return;
 				} catch (CoreException e) {
+					JavaPlugin.log(e);
 					ErrorDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null, e.getStatus()); //$NON-NLS-1$
-					JavaPlugin.log(e);
 				} catch (BadLocationException e) {
-					MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getMessage()); //$NON-NLS-1$
 					JavaPlugin.log(e);
+					MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getMessage()); //$NON-NLS-1$
 				}
 			}
 		}
@@ -151,8 +162,40 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			doc.replace(nameStart, packLen + 1, ""); //$NON-NLS-1$
 		}
 	}	
+
+	/**
+	 * Finds a type by the simple name.
+	 */
+	private static IType[] findAllTypes(String simpleTypeName, IJavaProject jproject, IProgressMonitor monitor) throws JavaModelException, CoreException {
+		SearchEngine searchEngine= new SearchEngine();
+		IProject project= jproject.getProject();
+		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IResource[] { project });
+
+		ArrayList typeRefsFound= new ArrayList(10);
+		ITypeNameRequestor requestor= new TypeInfoRequestor(typeRefsFound);
+
+		searchEngine.searchAllTypeNames(
+			project.getWorkspace(), 
+			null, 
+			simpleTypeName.toCharArray(), 
+			IJavaSearchConstants.EXACT_MATCH, 
+			IJavaSearchConstants.CASE_SENSITIVE, 
+			IJavaSearchConstants.TYPE, 
+			searchScope, 
+			requestor, 
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
+			monitor);
+			
+		int nTypesFound= typeRefsFound.size();
+		IType[] res= new IType[nTypesFound];
+		for (int i= 0; i < nTypesFound; i++) {
+			TypeInfo ref= (TypeInfo) typeRefsFound.get(i);
+			res[i]= ref.resolveType(searchScope);
+		}
+		return res;
+	}
 	
-	protected Shell getShell() {
+	private Shell getShell() {
 		return fEditor.getSite().getShell();
 	}
 		
@@ -175,14 +218,13 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			}
 		}		
 		int flags= (JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(),
-			new JavaElementLabelProvider(flags));
-		dialog.setTitle(			JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(flags));
+		dialog.setTitle(JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JavaEditorMessages.getString("AddImportOnSelection.dialog.message")); //$NON-NLS-1$
 		dialog.setElements(results);
-
-		return (dialog.open() == dialog.OK)
-			? (IType) dialog.getFirstResult()
-			: null;
+		if (dialog.open() == dialog.OK) {
+			return (IType) dialog.getFirstElement();
+		}
+		return null;
 	}
 }

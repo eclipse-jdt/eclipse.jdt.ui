@@ -340,7 +340,11 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				protected boolean mustUpdateParent(IJavaElementDelta delta, IJavaElement element) {
 					if (element instanceof IMethod) {
 						if ((delta.getKind() & IJavaElementDelta.ADDED) != 0) {
-							return JavaModelUtil.isMainMethod((IMethod)element);
+							try {
+								return JavaModelUtil.isMainMethod((IMethod)element);
+							} catch (JavaModelException e) {
+								JavaPlugin.log(e.getStatus());
+							}
 						}
 						return "main".equals(element.getElementName()); //$NON-NLS-1$
 					}

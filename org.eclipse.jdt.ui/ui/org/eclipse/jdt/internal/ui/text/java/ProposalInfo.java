@@ -51,7 +51,7 @@ public class ProposalInfo {
 						for (int i= 0; i < fParameterTypes.length; i++) {
 							paramTypes[i]= getParameterSignature(i);
 						}
-						member= StubUtility.findMethod(name, paramTypes, false, type);
+						member= JavaModelUtil.findMethod(name, paramTypes, false, type);
 					} else {
 						IField field= type.getField(name);
 						if (field.exists()) {
@@ -67,7 +67,7 @@ public class ProposalInfo {
 				}
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.getDefault().log(e.getStatus());
+			JavaPlugin.log(e.getStatus());
 		}
 		return null;
 	}

@@ -53,18 +53,22 @@ public class MainMethodSearchEngine{
 			
 			public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
 				if (enclosingElement instanceof IMethod) { // defensive code
-					IMethod curr= (IMethod) enclosingElement;
-					if (JavaModelUtil.isMainMethod(curr)) {
-						if (!considerExternalJars()) {
-							IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(curr);
-							if (root == null || root.isArchive()) {
+					try {
+						IMethod curr= (IMethod) enclosingElement;
+						if (JavaModelUtil.isMainMethod(curr)) {
+							if (!considerExternalJars()) {
+								IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(curr);
+								if (root == null || root.isArchive()) {
+									return;
+								}
+							}
+							if (!considerBinaries() && curr.isBinary()) {
 								return;
 							}
+							fResult.add(curr.getDeclaringType());
 						}
-						if (!considerBinaries() && curr.isBinary()) {
-							return;
-						}
-						fResult.add(curr.getDeclaringType());
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e.getStatus());
 					}
 				}
 			}

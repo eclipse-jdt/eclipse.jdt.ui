@@ -4,23 +4,13 @@
  */
 package org.eclipse.jdt.internal.ui.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -33,19 +23,16 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
-
 /**
  * Utility methods for the Java Model.
  */
 public class JavaModelUtil {
 
 	/** 
-	 * Finds a type by its qualified type name. (dot separated)
-	 * @param jproject the java project to search in
-	 * @param str the fully qualified name (type name with enclosing type names and package (all separated by dots))
-	 * @return the type found, or null if not existing
+	 * Finds a type by its qualified type name (dot separated).
+	 * @param jproject The java project to search in
+	 * @param str The fully qualified name (type name with enclosing type names and package (all separated by dots))
+	 * @return The type found, or null if not existing
 	 * The method does not find inner types. Waiting for a Java Core solution
 	 */	
 	public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
@@ -94,8 +81,28 @@ public class JavaModelUtil {
 		return null;
 	}
 	
+	/**
+	 * Finds a type container by container name.
+	 * The returned element will be of type <code>IType</code> or a <code>IPackageFragment</code>.
+	 * <code>null</code> is returned if the type container could not be found.
+	 * @param jproject The Java project defining the context to search
+	 * @param typeContainerName A dot separarted name of the type container
+	 * @see #getTypeContainerName()
+	 */
+	public static IJavaElement findTypeContainer(IJavaProject jproject, String typeContainerName) throws JavaModelException {
+		// try to find it as type
+		IJavaElement result= findType(jproject, typeContainerName);
+		if (result != null) {
+			// find it as package
+			IPath path= new Path(typeContainerName.replace('.', '/'));
+			result= jproject.findPackageFragment(path);
+		}
+		return result;
+	}	
+	
 	/** 
-	 * Finds a type in a compilation unit.
+	 * Finds a type in a compilation unit. Typical usage is to find the corresponding
+	 * type in a working copy.
 	 * @param cu the compilation unit to search in
 	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
 	 * @return the type found, or null if not existing
@@ -113,7 +120,7 @@ public class JavaModelUtil {
 	
 	/** 
 	 * Finds a a member in a compilation unit. Typical usage is to find the corresponding
-	 * member in its working copy.
+	 * member in a working copy.
 	 * @param cu the compilation unit (eg. working copy) to search in
 	 * @param member the member (eg. from the original)
 	 * @return the member found, or null if not existing
@@ -130,7 +137,8 @@ public class JavaModelUtil {
 					result= declaringType.getField(member.getElementName());
 					break;
 				case IJavaElement.METHOD:
-					result= StubUtility.findMethod((IMethod)member, declaringType);
+					IMethod meth= (IMethod) member;
+					result= findMethod(meth.getElementName(), meth.getParameterTypes(), meth.isConstructor(), declaringType);
 					break;
 				case IJavaElement.INITIALIZER:
 					result= declaringType.getInitializer(0);
@@ -148,7 +156,7 @@ public class JavaModelUtil {
 	 * Returns the qualified type name of the given type using '.' as separators.
 	 * This is a replace for IType.getTypeQualifiedName()
 	 * which uses '$' as separators. As '$' is also a valid character in an id
-	 * this is ambiguous. Hoping for a fix in JavaCore (1GCFUNT)
+	 * this is ambiguous. JavaCore PR: 1GCFUNT
 	 */
 	public static String getTypeQualifiedName(IType type) {
 		StringBuffer buf= new StringBuffer();
@@ -169,7 +177,7 @@ public class JavaModelUtil {
 	 * Returns the fully qualified name of the given type using '.' as separators.
 	 * This is a replace for IType.getFullyQualifiedTypeName
 	 * which uses '$' as separators. As '$' is also a valid character in an id
-	 * this is ambiguous. Hoping for a fix in JavaCore (1GCFUNT)
+	 * this is ambiguous. JavaCore PR: 1GCFUNT
 	 */
 	public static String getFullyQualifiedName(IType type) {
 		StringBuffer buf= new StringBuffer();
@@ -183,7 +191,7 @@ public class JavaModelUtil {
 	}
 	
 	/**
-	 * Returns the fully qualified name of a type's container. (package name + enclosing type name)
+	 * Returns the fully qualified name of a type's container. (package name or enclosing type name)
 	 */
 	public static String getTypeContainerName(IType type) {
 		IType outerType= type.getDeclaringType();
@@ -207,7 +215,7 @@ public class JavaModelUtil {
 			if (curr.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
 				curr= JavaCore.getResolvedClasspathEntry(curr);
 			}
-			if (curr != null && curr.getEntryKind() == IClasspathEntry.CPE_LIBRARY && path.equals(curr.getPath())) {
+			if (curr != null && curr.getContentKind() == root.getKind() && path.equals(curr.getPath())) {
 				return entries[i];
 			}
 		}
@@ -215,8 +223,8 @@ public class JavaModelUtil {
 	}
 
 	/**
-	 * Concatenates to names. Uses a dot for separation
-	 * Both strings can be empty or null
+	 * Concatenates two names. Uses a dot for separation.
+	 * Both strings can be empty or <code>null</code>.
 	 */
 	public static String concatenateName(String name1, String name2) {
 		StringBuffer buf= new StringBuffer();
@@ -231,110 +239,28 @@ public class JavaModelUtil {
 	}
 	
 	/**
-	 * Evaluate if a package is visible from another package with the given modifiers
+	 * Evaluates if a member (possible from another package) is visible from
+	 * elements in a package.
+	 * @param member The member to test the visibility for
+	 * @param pack The package in focus
 	 */
-	public static boolean isVisible(IPackageFragment ourpack, int otherflags, IPackageFragment otherpack) {
+	public static boolean isVisible(IMember member, IPackageFragment pack) throws JavaModelException {
+		int otherflags= member.getFlags();
+		
 		if (Flags.isPublic(otherflags) || Flags.isProtected(otherflags)) {
 			return true;
-		}
-		if (Flags.isPrivate(otherflags)) {
+		} else if (Flags.isPrivate(otherflags)) {
 			return false;
 		}		
 		
-		return (ourpack != null && ourpack.equals(otherpack));
+		IPackageFragment otherpack= (IPackageFragment) findParentOfKind(member, IJavaElement.PACKAGE_FRAGMENT);
+		return (pack != null && pack.equals(otherpack));
 	}
-	
-	
-	// --------- project dependencies -----------
 		
-	public static void updateRequiredProjects(IJavaProject jproject, String[] prevRequiredProjects, IProgressMonitor monitor) throws CoreException {
-		String[] newRequiredProjects= jproject.getRequiredProjectNames();
-
-		ArrayList prevEntries= new ArrayList(Arrays.asList(prevRequiredProjects));
-		ArrayList newEntries= new ArrayList(Arrays.asList(newRequiredProjects));
-		
-		IProject proj= jproject.getProject();
-		IProjectDescription projDesc= proj.getDescription();  
-		
-		ArrayList newRefs= new ArrayList();
-		IProject[] referencedProjects= projDesc.getReferencedProjects();
-		for (int i= 0; i < referencedProjects.length; i++) {
-			String curr= referencedProjects[i].getName();
-			if (newEntries.remove(curr) || !prevEntries.contains(curr)) {
-				newRefs.add(referencedProjects[i]);
-			}
-		}
-		IWorkspaceRoot root= proj.getWorkspace().getRoot();
-		for (int i= 0; i < newEntries.size(); i++) {
-			String curr= (String) newEntries.get(i);
-			newRefs.add(root.getProject(curr));
-		}		
-		projDesc.setReferencedProjects((IProject[]) newRefs.toArray(new IProject[newRefs.size()]));
-		proj.setDescription(projDesc, monitor);
-	}	
-	
-	/**
-	 * Convert an import declaration into the java element the import declaration
-	 * stands for. An on demand import declaration is converted into a package
-	 * fragement or type depending of the kind of import statement (e.g. p1.p2.*
-	 * versus p1.p2.T1.*). A normal import declaration is converted into the 
-	 * corresponding <code>IType</code>.
-	 */
-	public static IJavaElement convertFromImportDeclaration(IImportDeclaration declaration) throws JavaModelException {
-		if (declaration.isOnDemand()) {
-			String pattern= declaration.getElementName();
-			pattern= pattern.substring(0, pattern.length() - 2);
-			IJavaProject project= declaration.getJavaProject();
-			
-			// XXX: 1GBRLSV: ITPJCORE:WIN2000 - Question: how to I find an inner type
-			// First try if the import statement is of form p1.p2.T1.* which would lead
-			// to a type not to a package.
-			IJavaElement result= findType(project, pattern);
-			if (result != null)
-				return result;
-			
-			return convertToPackageFragment(pattern, project);
-		} else {
-			return convertToType(declaration);	
-		}
-	}
-	
-	private static IPackageFragment convertToPackageFragment(IImportDeclaration declaration) {
-		String pattern= declaration.getElementName();
-		pattern= pattern.substring(0, pattern.length() - 2);
-		return convertToPackageFragment(pattern, declaration.getJavaProject());
-	}	
-		
-	private static IPackageFragment convertToPackageFragment(String pattern, IJavaProject project) {
-		
-		try {
-			// Check the project itself.
-			// XXX: 1GAOLWQ: ITPJCORE:WIN2000 - IJavaProject.findPackageFragment strange semantic
-			IPackageFragment[] packages= project.getPackageFragments();
-			for (int i= 0; i < packages.length; i++) {
-				if (pattern.equals(packages[i].getElementName()))
-					return packages[i];
-			}
-			
-			// Convert to a path and search on the class path.
-			pattern= pattern.replace('.', IPath.SEPARATOR);
-			IPath path= new Path(pattern).makeAbsolute();
-			return project.findPackageFragment(path);
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
-			return null;
-		}	
-	}
-	
-	private static IType convertToType(IImportDeclaration declaration) throws JavaModelException {
-		IJavaProject project= declaration.getJavaProject();
-		return findType(project, declaration.getElementName());
-	}
-	
 	/**
 	 * Returns true if the element is on the build path of the given project
 	 */	
-	public static boolean isOnBuildPath(IJavaElement element, IJavaProject jproject) throws JavaModelException {
+	public static boolean isOnBuildPath(IJavaProject jproject, IJavaElement element) throws JavaModelException {
 		IPath rootPath;
 		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
 			rootPath= ((IJavaProject)element).getProject().getFullPath();
@@ -348,13 +274,6 @@ public class JavaModelUtil {
 		return jproject.findPackageFragmentRoot(rootPath) != null;
 	}
 	
-	/**
-	 * Returns true if the element is on the build path of its project
-	 * Not correct in general.
-	 */	
-	public static boolean isOnBuildPath(IJavaElement element) throws JavaModelException {
-		return isOnBuildPath(element, element.getJavaProject());
-	}
 	
 	/**
 	 * Returns the package fragment root of <code>IJavaElement</code>. If the given
@@ -365,16 +284,6 @@ public class JavaModelUtil {
 	}
 
 	/**
-	 * Returns the parent of the supplied java element that conforms to the given 
-	 * parent type or <code>null</code>, if such a parent doesn't exit.
-	 */
-	public static IJavaElement getParent(IJavaElement element, int kind) {
-		if (element == null)
-			return null;
-		return findElementOfKind(element.getParent(), kind);	
-	}
-	
-	/**
 	 * Returns the first openable parent. If the given element is openable, the element
 	 * itself is returned.
 	 */
@@ -382,66 +291,153 @@ public class JavaModelUtil {
 		while (element != null && !(element instanceof IOpenable)) {
 			element= element.getParent();
 		}
-		return (IOpenable)element;	
-	}	
+		return (IOpenable) element;	
+	}		
+	
+	
+	/**
+	 * Returns the parent of the supplied java element that conforms to the given 
+	 * parent type or <code>null</code>, if such a parent doesn't exit.
+	 */
+	public static IJavaElement findParentOfKind(IJavaElement element, int kind) {
+		if (element == null)
+			return null;
+		return findElementOfKind(element.getParent(), kind);	
+	}
 	
 	/**
 	 * Returns the first java element that conforms to the given type walking the
 	 * java element's parent relationship. If the given element alrady conforms to
 	 * the given kind, the element is returned.
+	 * Returns <code>null</code> if no such element exits.
 	 */
 	public static IJavaElement findElementOfKind(IJavaElement element, int kind) {
 		while (element != null && element.getElementType() != kind)
 			element= element.getParent();
 		return element;				
 	}
-	
-	private static final String SIG1= Signature.createArraySignature(Signature.createTypeSignature("String", false), 1); //$NON-NLS-1$
-	private static final String SIG2= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", false), 1); //$NON-NLS-1$
-	private static final String SIG3= Signature.createArraySignature(Signature.createTypeSignature("java.lang.String", true), 1); //$NON-NLS-1$
 
 	/**
-	 * Checks whether the given IType has a main method or not.
+	 * Finds a method in a type.
+	 * This searches for a method with the same name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * Constructors are only compared by parameters, not the name.
+	 * @param name The name of the method to find
+	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
+	 * @param isConstructor If the method is a constructor
+	 * @return The first found method or <code>null</code>, if nothing found
 	 */
-	public static boolean hasMainMethod(IType type) {
-		if (isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG1 })) ||  //$NON-NLS-1$
-			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG2 })) ||  //$NON-NLS-1$
-			isStaticPublicVoidMethod(type.getMethod("main", new String[] { SIG3 }))) { //$NON-NLS-1$
-				return true;
-		}
-		
-		return false;
+	public static IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type) throws JavaModelException {
+		return findMethod(name, paramTypes, isConstructor, type.getMethods());
 	}
-	
-	public static boolean isMainMethod(IMethod method) {
-		try {			
-			if (!isStaticPublicVoidMethod(method))
-				return false;
-			String signature= method.getSignature();
-			if ("([Qjava.lang.String;)V".equals(signature) || //$NON-NLS-1$
-				"([Ljava/lang/String;)V".equals(signature)) //$NON-NLS-1$
-				return true;
-			if ("([QString;)V".equals(signature)) { //$NON-NLS-1$
-				String[][] resolvedNames= method.getDeclaringType().resolveType("String"); //$NON-NLS-1$
-				if (resolvedNames != null && resolvedNames.length > 0 
-					&& "java.lang".equals(resolvedNames[0][0]) && "String".equals(resolvedNames[0][1])) //$NON-NLS-1$ //$NON-NLS-2$
-					return true;
+
+	/**
+	 * Finds a method by name.
+	 * This searches for a method with a name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * Constructors are only compared by parameters, not the name.
+	 * @param name The name of the method to find
+	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
+	 * @param isConstructor If the method is a constructor
+	 * @param methods The methods to search in
+	 * @return The found method or <code>null</code>, if nothing found
+	 */
+	public static IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IMethod[] methods) throws JavaModelException {
+		for (int i= methods.length - 1; i >= 0; i--) {
+			if (isSameMethodSignature(name, paramTypes, isConstructor, methods[i])) {
+				return methods[i];
 			}
-			return false;
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
+		}
+		return null;
+	}
+	
+	/**
+	 * Tests if a method equals to teh give signature.
+	 * Parameter types are only compared by the simple name, no resolving for
+	 * the fully qualified type name is done. Constructors are only compared by
+	 * parameters, not the name.
+	 * @param Name of the method
+	 * @param The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
+	 * @param Specifies if the method is a constructor
+	 * @return Returns <code>true</code> if the method has the given name and parameter types and constructor state.
+	 */
+	public static boolean isSameMethodSignature(String name, String[] paramTypes, boolean isConstructor, IMethod curr) throws JavaModelException {
+		if (isConstructor || name.equals(curr.getElementName())) {
+			if (isConstructor == curr.isConstructor()) {
+				String[] currParamTypes= curr.getParameterTypes();
+				if (paramTypes.length == currParamTypes.length) {
+					for (int i= 0; i < paramTypes.length; i++) {
+						String t1= Signature.getSimpleName(Signature.toString(paramTypes[i]));
+						String t2= Signature.getSimpleName(Signature.toString(currParamTypes[i]));
+						if (!t1.equals(t2)) {
+							return false;
+						}
+					}
+					return true;
+				}
+			}
 		}
 		return false;
 	}
 	
-	private static boolean isStaticPublicVoidMethod(IMethod m) {
-		try {
-			return m.exists() && "V".equals(m.getReturnType()) && Flags.isStatic(m.getFlags()) && Flags.isPublic(m.getFlags()); //$NON-NLS-1$
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
-			return false;
+	/**
+	 * Checks whether the given type has a main method or not.
+	 */
+	public static boolean hasMainMethod(IType type) throws JavaModelException {
+		String[] paramSignature=  { Signature.createArraySignature(Signature.createTypeSignature("String", false), 1) };
+		IMethod method= findMethod("main", paramSignature, false, type);
+		if (method != null) {
+			int flags= method.getFlags();
+			return Flags.isStatic(flags) && Flags.isPublic(flags) && Signature.SIG_VOID.equals(method.getReturnType());
 		}
+		return false;		
 	}
 	
+	/**
+	 * Tests if a method is a main method. Does not resolve the parameter types.
+	 * Method must exist.
+	 */
+	public static boolean isMainMethod(IMethod method) throws JavaModelException {
+		if ("main".equals(method.getElementName()) && Signature.SIG_VOID.equals(method.getReturnType())) { //$NON-NLS-1$
+			int flags= method.getFlags();
+			if (Flags.isStatic(flags) && Flags.isPublic(flags)) {
+				String[] paramTypes= method.getParameterTypes();
+				if (paramTypes.length == 1) {
+					String name=  Signature.toString(paramTypes[0]);
+					return "String[]".equals(Signature.getSimpleName(name)); //$NON-NLS-1$
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Resolves a type name in the context of the declaring type.
+	 * @param refTypeSig the type name in signature notation (for example 'QVector')
+	 *                   this can also be an array type, but dimensions will be ignored.
+	 * @param declaringType the context for resolving (type where the reference was made in)
+	 * @return returns the fully qualified type name or build-in-type name. 
+	 *  			if a unresoved type couldn't be resolved null is returned
+	 */
+	public static String getResolvedTypeName(String refTypeSig, IType declaringType) throws JavaModelException {
+		int arrayCount= Signature.getArrayCount(refTypeSig);
+		char type= refTypeSig.charAt(arrayCount);
+		if (type == Signature.C_UNRESOLVED) {
+			int semi= refTypeSig.indexOf(Signature.C_SEMICOLON, arrayCount + 1);
+			if (semi == -1) {
+				throw new IllegalArgumentException();
+			}
+			String name= refTypeSig.substring(arrayCount + 1, semi);				
+			
+			String[][] resolvedNames= declaringType.resolveType(name);
+			if (resolvedNames != null && resolvedNames.length > 0) {
+				return JavaModelUtil.concatenateName(resolvedNames[0][0], resolvedNames[0][1]);
+			}
+			return null;
+		} else {
+			return Signature.toString(refTypeSig.substring(arrayCount));
+		}
+	}
+
 	
 }

@@ -54,7 +54,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	private StringButtonDialogField fContainerDialogField;
 	
 	/*
-	 * package fragment root corresponding to the inout type (can be null)
+	 * package fragment root corresponding to the input type (can be null)
 	 */
 	private IPackageFragmentRoot fCurrRoot;
 	
@@ -194,7 +194,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 						status.setWarning(NewWizardMessages.getString("ContainerPage.warning.NotAJavaProject")); //$NON-NLS-1$
 					}
 					try {
-						if (!JavaModelUtil.isOnBuildPath(fCurrRoot, jproject)) {
+						if (!JavaModelUtil.isOnBuildPath(jproject, fCurrRoot)) {
 							status.setWarning(NewWizardMessages.getFormattedString("ContainerPage.warning.NotOnClassPath", str)); //$NON-NLS-1$
 						}		
 					} catch (JavaModelException e) {
@@ -249,7 +249,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	}
 
 	/**
-	 * Returns the text of the container field
+	 * Returns the text of the container field.
 	 */ 	
 	public String getContainerText() {
 		return fContainerDialogField.getText();
@@ -257,7 +257,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	
 	
 	/**
-	 * Sets the current PackageFragmentRoot (model and text field)
+	 * Sets the current PackageFragmentRoot (model and text field).
 	 * @param canBeModified Selects if the container field can be changed by the user
 	 */ 
 	public void setPackageFragmentRoot(IPackageFragmentRoot root, boolean canBeModified) {
