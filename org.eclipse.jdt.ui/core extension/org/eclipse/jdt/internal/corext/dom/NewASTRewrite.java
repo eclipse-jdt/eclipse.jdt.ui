@@ -91,7 +91,7 @@ public class NewASTRewrite {
 			fEventStore.markMovedNodesRemoved();
 			try {
 				CompilationUnit astRoot= (CompilationUnit) rootNode.getRoot();
-				ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(document, astRoot, result, fEventStore, fNodeStore);
+				ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(document, astRoot, result, fEventStore, fNodeStore, options);
 				rootNode.accept(visitor);
 			} catch (RewriteRuntimeException e) {
 				throw new RewriteException(e.getCause());

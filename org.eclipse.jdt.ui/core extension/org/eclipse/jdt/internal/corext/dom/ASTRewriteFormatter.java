@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.text.edits.TextEdit;
 
@@ -109,10 +109,18 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	
 	protected NodeInfoStore fPlaceholders;
 	private RewriteEventStore fEventStore;
+
+	private Map fOptions;
 	
-	public ASTRewriteFormatter(NodeInfoStore placeholders, RewriteEventStore eventStore, String lineDelimiter) {
+	public ASTRewriteFormatter(NodeInfoStore placeholders, RewriteEventStore eventStore, Map options, String lineDelimiter) {
 		fPlaceholders= placeholders;
 		fEventStore= eventStore;
+
+		if (options == null) {
+			options= JavaCore.getOptions();
+		}
+		fOptions= options;
+		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, String.valueOf(9999));
 
 		fLineDelimiter= lineDelimiter;
 	}
@@ -136,10 +144,8 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			resultingMarkers.add(markers[i]); // add to result
 		}		
 		
-		Hashtable map= JavaCore.getOptions();
-		map.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, String.valueOf(9999));
 		String unformatted= flattener.getResult();
-		TextEdit edit= CodeFormatterUtil.format2(node, unformatted, initialIndentationLevel, fLineDelimiter, map);
+		TextEdit edit= CodeFormatterUtil.format2(node, unformatted, initialIndentationLevel, fLineDelimiter, fOptions);
 		if (edit == null) {
 			return unformatted;
 		}
@@ -167,7 +173,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		}
 	}
 	
-	private static class FormattingPrefix implements Prefix {
+	private class FormattingPrefix implements Prefix {
 		private int fKind;
 		private String fString;
 		private int fStart;
@@ -183,7 +189,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		public String getPrefix(int indent, String lineDelim) {
 			Position pos= new Position(fStart, fLength);
 			String str= fString;
-			TextEdit res= CodeFormatterUtil.format2(fKind, str, indent, lineDelim, null);
+			TextEdit res= CodeFormatterUtil.format2(fKind, str, indent, lineDelim, fOptions);
 			if (res != null) {
 				str= CodeFormatterUtil.evaluateFormatterEdit(str, res, new Position[] { pos });
 			}
@@ -191,7 +197,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		}
 	}
 
-	private static class BlockFormattingPrefix implements BlockContext {
+	private class BlockFormattingPrefix implements BlockContext {
 		private String fPrefix;
 		private int fStart;
 		
@@ -205,7 +211,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			String str= fPrefix + nodeString;
 			Position pos= new Position(fStart, fPrefix.length() + 1 - fStart);
 
-			TextEdit res= CodeFormatterUtil.format2(CodeFormatter.K_STATEMENTS, str, indent, lineDelim, null);
+			TextEdit res= CodeFormatterUtil.format2(CodeFormatter.K_STATEMENTS, str, indent, lineDelim, fOptions);
 			if (res != null) {
 				str= CodeFormatterUtil.evaluateFormatterEdit(str, res, new Position[] { pos });
 			}
@@ -213,7 +219,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		}
 	}
 	
-	private static class BlockFormattingPrefixSuffix implements BlockContext {
+	private class BlockFormattingPrefixSuffix implements BlockContext {
 		private String fPrefix;
 		private String fSuffix;
 		private int fStart;
@@ -234,7 +240,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			Position pos1= new Position(fStart, nodeStart + 1 - fStart);
 			Position pos2= new Position(nodeEnd, 2);
 
-			TextEdit res= CodeFormatterUtil.format2(CodeFormatter.K_STATEMENTS, str, indent, lineDelim, null);
+			TextEdit res= CodeFormatterUtil.format2(CodeFormatter.K_STATEMENTS, str, indent, lineDelim, fOptions);
 			if (res != null) {
 				str= CodeFormatterUtil.evaluateFormatterEdit(str, res, new Position[] { pos1, pos2 });
 			}
@@ -249,18 +255,18 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	public final static Prefix SPACE= new ConstPrefix(" "); //$NON-NLS-1$
 	public final static Prefix ASSERT_COMMENT= new ConstPrefix(" : "); //$NON-NLS-1$
 	
-	public final static Prefix VAR_INITIALIZER= new FormattingPrefix("A a={};", "a={" , CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static Prefix METHOD_BODY= new FormattingPrefix("void a() {}", ") {" , CodeFormatter.K_CLASS_BODY_DECLARATIONS); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static Prefix FINALLY_BLOCK= new FormattingPrefix("try {} finally {}", "} finally {", CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch(Exception e) {}", "} c" , CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+	public final Prefix VAR_INITIALIZER= new FormattingPrefix("A a={};", "a={" , CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+	public final Prefix METHOD_BODY= new FormattingPrefix("void a() {}", ") {" , CodeFormatter.K_CLASS_BODY_DECLARATIONS); //$NON-NLS-1$ //$NON-NLS-2$
+	public final Prefix FINALLY_BLOCK= new FormattingPrefix("try {} finally {}", "} finally {", CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+	public final Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch(Exception e) {}", "} c" , CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
 
-	public final static BlockContext IF_BLOCK_WITH_ELSE= new BlockFormattingPrefixSuffix("if (true)", "else{}", 8); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext IF_BLOCK_NO_ELSE= new BlockFormattingPrefix("if (true)", 8); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext ELSE_AFTER_STATEMENT= new BlockFormattingPrefix("if (true) foo(); else ", 15); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext ELSE_AFTER_BLOCK= new BlockFormattingPrefix("if (true) {} else ", 11); //$NON-NLS-1$ //$NON-NLS-2$
+	public final BlockContext IF_BLOCK_WITH_ELSE= new BlockFormattingPrefixSuffix("if (true)", "else{}", 8); //$NON-NLS-1$ //$NON-NLS-2$
+	public final BlockContext IF_BLOCK_NO_ELSE= new BlockFormattingPrefix("if (true)", 8); //$NON-NLS-1$ //$NON-NLS-2$
+	public final BlockContext ELSE_AFTER_STATEMENT= new BlockFormattingPrefix("if (true) foo(); else ", 15); //$NON-NLS-1$ //$NON-NLS-2$
+	public final BlockContext ELSE_AFTER_BLOCK= new BlockFormattingPrefix("if (true) {} else ", 11); //$NON-NLS-1$ //$NON-NLS-2$
 
-	public final static BlockContext FOR_BLOCK= new BlockFormattingPrefix("for (;;) ", 7); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext WHILE_BLOCK= new BlockFormattingPrefix("while (true)", 11); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext DO_BLOCK= new BlockFormattingPrefixSuffix("do ", "while (true);", 1); //$NON-NLS-1$ //$NON-NLS-2$
+	public final BlockContext FOR_BLOCK= new BlockFormattingPrefix("for (;;) ", 7); //$NON-NLS-1$ //$NON-NLS-2$
+	public final BlockContext WHILE_BLOCK= new BlockFormattingPrefix("while (true)", 11); //$NON-NLS-1$ //$NON-NLS-2$
+	public final BlockContext DO_BLOCK= new BlockFormattingPrefixSuffix("do ", "while (true);", 1); //$NON-NLS-1$ //$NON-NLS-2$
 
 }
