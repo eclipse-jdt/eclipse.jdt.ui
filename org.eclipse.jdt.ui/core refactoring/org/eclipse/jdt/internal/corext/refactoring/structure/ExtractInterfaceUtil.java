@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.WorkingCopyOwner;
@@ -62,8 +61,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -97,10 +94,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstrain
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -438,7 +431,7 @@ class ExtractInterfaceUtil {
 	}
 	
 	private ICompilationUnit[] fieldAndMethodReferringCus(IType theType, SearchResultGroup[] typeReferences, ICompilationUnit[] wcs, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-		SearchPattern pattern= createPatternForReferencingFieldsAndMethods(typeReferences);
+		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(getReferencingFieldsAndMethods(typeReferences), IJavaSearchConstants.ALL_OCCURRENCES);
 		if (pattern == null)
 			return new ICompilationUnit[0];
 		IJavaSearchScope scope= RefactoringScopeFactory.create(theType);
@@ -462,10 +455,6 @@ class ExtractInterfaceUtil {
 
 	private static boolean proceeds(ICompilationUnit wc, ICompilationUnit unit) {
 		return wc.getResource() == null || wc.getResource().equals(unit.getResource());			
-	}
-
-	private SearchPattern createPatternForReferencingFieldsAndMethods(SearchResultGroup[] typeReferences) throws JavaModelException {
-		return RefactoringSearchEngine.createOrPattern(getReferencingFieldsAndMethods(typeReferences), IJavaSearchConstants.ALL_OCCURRENCES);		
 	}
 
 	private IMethod[] getReferencingMethods(ASTNode[] typeReferenceNodes) throws JavaModelException {
@@ -562,44 +551,17 @@ class ExtractInterfaceUtil {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu != null)
-				result.add(WorkingCopyUtil.getWorkingCopyIfExists(cu));
+				result.add(cu);
 		}
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
 	private static ICompilationUnit[] getWorkingCopies(ICompilationUnit precedingWC1, ICompilationUnit precedingWC2) {
-		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			ArrayList result= new ArrayList(2);
-			if (precedingWC1 != null && precedingWC1.isWorkingCopy()) {
-				result.add(precedingWC1);
-			}
-			if (precedingWC2 != null && precedingWC2.isWorkingCopy()) {
-				result.add(precedingWC2);
-			}
-			return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
-		}
-		
-		
-		// XXX: This is a layer breaker - should not access jdt.ui
-		IWorkingCopy[] copies= JavaUI.getSharedWorkingCopiesOnClasspath();
-		Set result= new HashSet(copies.length);
-		ICompilationUnit original1= null, original2= null;
-		if (precedingWC1 != null && precedingWC1.isWorkingCopy()) {
+		ArrayList result= new ArrayList(2);
+		if (precedingWC1 != null && precedingWC1.isWorkingCopy())
 			result.add(precedingWC1);
-			original1= precedingWC1.getPrimary();
-		}
-		if (precedingWC2 != null && precedingWC2.isWorkingCopy()) {
+		if (precedingWC2 != null && precedingWC2.isWorkingCopy())
 			result.add(precedingWC2);
-			original2= precedingWC2.getPrimary();
-		}
-		for (int i= 0; i < copies.length; i++) {
-			IWorkingCopy copy= copies[i];
-			if (copy.isWorkingCopy() && copy instanceof ICompilationUnit){
-				IJavaElement original= copy.getOriginalElement();
-				if (!original.equals(original1) && !original.equals(original2))
-					result.add(copy);
-			}
-		}
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
