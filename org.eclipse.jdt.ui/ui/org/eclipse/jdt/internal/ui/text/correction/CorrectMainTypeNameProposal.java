@@ -18,12 +18,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.SimpleNameRenamer;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -55,14 +56,18 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 		char[] content= getCompilationUnit().getBuffer().getCharacters();
 		CompilationUnit astRoot= AST.parseCompilationUnit(content, fOldName + ".java", getCompilationUnit().getJavaProject()); //$NON-NLS-1$
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
 		TypeDeclaration decl= findTypeDeclaration(astRoot.types(), fOldName);
 		if (decl != null) {
 			IBinding binding= decl.resolveBinding();
 			if (binding != null) {
-				SimpleNameRenamer.perform(rewrite, new IBinding[] { binding }, new String[] { fNewName }, astRoot);
+				ASTNode[] sameNodes= LinkedNodeFinder.perform(astRoot, binding);
+				for (int i= 0; i < sameNodes.length; i++) {
+					rewrite.markAsReplaced(sameNodes[i], ast.newSimpleName(fNewName));
+				}
 			} else {
 				// no binding: only rename type
-				rewrite.markAsReplaced(decl.getName(), astRoot.getAST().newSimpleName(fNewName));
+				rewrite.markAsReplaced(decl.getName(), ast.newSimpleName(fNewName));
 			}
 		}
 		return rewrite;

@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 
-import java.util.ArrayList;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -25,15 +23,9 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
@@ -47,63 +39,6 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	private SimpleName fNode;
 	private IRegion fSelectedRegion; // initialized by apply()
 			
-	private static class LinkedNodeFinder extends ASTVisitor {
-		private IBinding fBinding;
-		private ArrayList fResult;
-		
-		public LinkedNodeFinder(IBinding binding, ArrayList result) {
-			fBinding= binding;
-			fResult= result;
-		}
-		
-		public boolean visit(MethodDeclaration node) {
-			if (node.isConstructor() && fBinding.getKind() == IBinding.TYPE) {
-				ASTNode typeNode= node.getParent();
-				if (typeNode instanceof TypeDeclaration) {
-					if (fBinding == ((TypeDeclaration) typeNode).resolveBinding()) {
-						fResult.add(node.getName());
-					}
-				}
-			}
-			return true;
-		}
-		
-		public boolean visit(TypeDeclaration node) {
-			if (fBinding.getKind() == IBinding.METHOD) {
-				IMethodBinding binding= (IMethodBinding) fBinding;
-				if (binding.isConstructor() && binding.getDeclaringClass() == node.resolveBinding()) {
-					fResult.add(node.getName());
-				}
-			}
-			return true;
-		}		
-		
-		public boolean visit(SimpleName node) {
-			IBinding binding= node.resolveBinding();
-			
-			if (fBinding == binding) {
-				fResult.add(node);
-			} else if (binding != null && binding.getKind() == fBinding.getKind() && binding.getKind() == IBinding.METHOD) {
-				if (isConnectedMethod((IMethodBinding) binding, (IMethodBinding) fBinding)) {
-					fResult.add(node);
-				}
-			}
-			return false;
-		}
-		
-		private boolean isConnectedMethod(IMethodBinding meth1, IMethodBinding meth2) {
-			if (Bindings.isEqualMethod(meth1, meth2.getName(), meth2.getParameterTypes())) {
-				ITypeBinding type1= meth1.getDeclaringClass();
-				ITypeBinding type2= meth2.getDeclaringClass();
-				if (Bindings.isSuperType(type2, type1) || Bindings.isSuperType(type1, type2)) {
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
-
 	public LinkedNamesAssistProposal(SimpleName node) {
 		fNode= node;
 	}
@@ -113,15 +48,13 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
-			ArrayList sameNodes= new ArrayList();
-			LinkedNodeFinder finder= new LinkedNodeFinder(fNode.resolveBinding(), sameNodes);
-			ASTResolving.findParentCompilationUnit(fNode).accept(finder);
+			ASTNode[] sameNodes= LinkedNodeFinder.perform(fNode.getRoot(), fNode.resolveBinding());
 			
 			IDocument document= viewer.getDocument();
 			LinkedPositionManager manager= new LinkedPositionManager(document);
 			
-			for (int i= 0; i < sameNodes.size(); i++) {
-				ASTNode elem= (ASTNode) sameNodes.get(i);
+			for (int i= 0; i < sameNodes.length; i++) {
+				ASTNode elem= sameNodes[i];
 				manager.addPosition(elem.getStartPosition(), elem.getLength());
 			}
 			
