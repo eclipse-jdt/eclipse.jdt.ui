@@ -225,7 +225,7 @@ public class JavadocCheckboxTreeAndListGroup implements ICheckStateListener, ISe
 	 *	Creates this group's list viewer.
 	 */
 	protected void createListViewer(Composite parent, int width, int height) {
-		fListViewer= new CheckboxTableViewer(parent, SWT.BORDER);
+		fListViewer= CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
 		fListViewer.setUseHashlookup(true);
 		GridData data= new GridData(GridData.FILL_BOTH);
 		data.widthHint= width;

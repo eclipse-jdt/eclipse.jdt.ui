@@ -56,7 +56,6 @@ public class JavadocMemberContentProvider implements ITreeContentProvider {
 	 */
 	public Object[] getElements(Object inputElement) {
 		try {
-			ArrayList primaries= new ArrayList();
 			if (inputElement instanceof IPackageFragment) {
 				ICompilationUnit[] cu= ((IPackageFragment) inputElement).getCompilationUnits();
 				return cu;

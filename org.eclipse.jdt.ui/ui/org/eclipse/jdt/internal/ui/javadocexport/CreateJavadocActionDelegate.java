@@ -38,7 +38,6 @@ public class CreateJavadocActionDelegate implements IObjectActionDelegate {
 
 		if (fCurrentSelection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) fCurrentSelection;
-			List selectedElements= new ArrayList(structuredSelection.size());
 			Iterator iter= structuredSelection.iterator();
 			if (iter.hasNext()) {
 				Object res= iter.next();
