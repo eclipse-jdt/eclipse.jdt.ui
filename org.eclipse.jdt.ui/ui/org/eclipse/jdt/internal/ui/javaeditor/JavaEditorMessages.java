@@ -21,7 +21,7 @@ public class JavaEditorMessages {
 		try {
 			return fgResourceBundle.getString(key);
 		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
+			return '!' + key + '!';
 		}
 	}
 	
@@ -34,5 +34,12 @@ public class JavaEditorMessages {
 	 */	
 	public static String getFormattedString(String key, Object[] args) {
 		return MessageFormat.format(getString(key), args);
+	}
+	
+	/**
+	 * Gets a string from the resource bundle and formats it with arguments
+	 */	
+	public static String getFormattedString(String key, Object arg) {
+		return MessageFormat.format(getString(key), new Object[] { arg } );
 	}	
 }

@@ -63,6 +63,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private ArrayList fAllTypes;
 		private boolean fIgnoreLowerCaseNames;
 		
+		
 		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, ImportsStructure impStructure, boolean ignoreLowerCaseNames, IProgressMonitor monitor) throws JavaModelException {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
@@ -276,7 +277,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	private IChooseImportQuery fChooseImportQuery;
 	
 	// return variable: set to null if no error
-	private IProblem fParsingError;	
+	private IProblem fParsingError;
+	private int fNumberOfImportsAdded;
 		
 	public OrganizeImportsOperation(ICompilationUnit cu, String[] importOrder, int importThreshold, boolean ignoreLowerCaseNames, boolean save, IChooseImportQuery chooseImportQuery) {
 		super();
@@ -289,6 +291,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		fChooseImportQuery= chooseImportQuery;
 		
 		fParsingError= null;
+		fNumberOfImportsAdded= 0;
 	}
 
 	/**
@@ -301,6 +304,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				monitor= new NullProgressMonitor();
 			}			
 			fParsingError= null;
+			fNumberOfImportsAdded= 0;
 			
 			monitor.beginTask(CodeGenerationMessages.getString("OrganizeImportsOperation.description"), 3); //$NON-NLS-1$
 			
@@ -363,6 +367,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}				
 			}
 			impStructure.create(fDoSave, new SubProgressMonitor(monitor, 1));
+			
+			fNumberOfImportsAdded= impStructure.getNumberOfImportsCreated() - decls.length;
 		} finally {
 			monitor.done();
 		}
@@ -374,6 +380,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	 */
 	public IProblem getParsingError() {
 		return fParsingError;
+	}
+	
+	public int getNumberOfImportsAdded() {
+		return fNumberOfImportsAdded;
 	}
 
 }

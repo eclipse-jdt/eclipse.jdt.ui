@@ -40,6 +40,8 @@ public class ImportsStructure implements IImportsStructure {
 	private boolean fRestoreExistingImports;
 	private boolean fFilterImplicitImports;
 	
+	private int fNumberOfImportsCreated;
+	
 	/**
 	 * Creates an ImportsStructure for a compilation unit with existing
 	 * imports. New imports are added next to the existing import that
@@ -94,6 +96,8 @@ public class ImportsStructure implements IImportsStructure {
 		}	
 		
 		addPreferenceOrderHolders(preferenceOrder);
+		
+		fNumberOfImportsCreated= 0;
 	}
 	
 	
@@ -496,6 +500,8 @@ public class ImportsStructure implements IImportsStructure {
 				buf.setLength(pos);
 			}
 		}
+		fNumberOfImportsCreated= nCreated;
+		
 		String newContent= buf.toString();
 		if (hasChanged(textBuffer, importsStart, importsLen, newContent)) {
 			return newContent;
@@ -724,5 +730,14 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		
 	}	
+
+	/**
+	 * Gets the number of imports created.
+	 * @return Returns a int
+	 */
+	public int getNumberOfImportsCreated() {
+		return fNumberOfImportsCreated;
+	}
+
 
 }

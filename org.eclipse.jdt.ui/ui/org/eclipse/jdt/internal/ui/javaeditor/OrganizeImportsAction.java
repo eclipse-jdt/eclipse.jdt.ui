@@ -9,13 +9,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -77,6 +80,14 @@ public class OrganizeImportsAction extends Action {
 			try {
 				BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 				context.run(false, true, new WorkbenchRunnableAdapter(op));
+				int nImportsAdded= op.getNumberOfImportsAdded();
+				String message;
+				if (nImportsAdded >= 0) {
+					message= JavaEditorMessages.getFormattedString("OrganizeImportsAction.summary_added", String.valueOf(nImportsAdded));
+				} else {
+					message= JavaEditorMessages.getFormattedString("OrganizeImportsAction.summary_removed", String.valueOf(-nImportsAdded));
+				}
+				setStatusBarMessage(message);
 			} catch (InvocationTargetException e) {
 				JavaPlugin.log(e);
 				MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaEditorMessages.getString("OrganizeImportsAction.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
@@ -144,7 +155,6 @@ public class OrganizeImportsAction extends Action {
 		}
 	}
 	
-	
 	public void setContentEditor(ITextEditor editor) {
 		fEditor= editor;
 		setEnabled(editor != null && fEditor.isEditable());
@@ -156,4 +166,13 @@ public class OrganizeImportsAction extends Action {
 		String message= JavaEditorMessages.getFormattedString("OrganizeImportsAction.error.parsing.message", args);
 		MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), title, message);
 	}
+	
+	private void setStatusBarMessage(String message) {
+		IEditorActionBarContributor contributor= fEditor.getEditorSite().getActionBarContributor();
+		if (contributor instanceof EditorActionBarContributor) {
+			IStatusLineManager manager= ((EditorActionBarContributor) contributor).getActionBars().getStatusLineManager();
+			manager.setMessage(message);
+		}
+	}
+	
 }
