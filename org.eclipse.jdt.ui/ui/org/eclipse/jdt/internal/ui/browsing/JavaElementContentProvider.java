@@ -254,7 +254,10 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 			
 			return;
 		}
-		if (kind == IJavaElementDelta.ADDED && delta.getMovedFromElement() == null) {
+		if (kind == IJavaElementDelta.ADDED && delta.getMovedFromElement() != null && element instanceof ICompilationUnit)
+			return;
+		
+		if (kind == IJavaElementDelta.ADDED) {
 			if (fBrowsingPart.isValidElement(element)) {
 				Object parent= internalGetParent(element);				
 				if (element instanceof IClassFile) {
