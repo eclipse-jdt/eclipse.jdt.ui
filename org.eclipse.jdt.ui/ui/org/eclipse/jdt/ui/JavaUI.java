@@ -256,7 +256,7 @@ public final class JavaUI {
 	 *   <code>IJavaElementSearchConstants.CONSIDER_REQUIRED_PROJECTS</code>, indicating that
 	 *   packages from required projects should be included as well.
 	 * @param filter the initial pattern to filter the set of packages. For example "com" shows 
-	 * all packages starting with "com". The meta characters '?' representing any character and 
+	 * all packages starting with "com". The meta character '?' representing any character and 
 	 * '*' representing any string are supported. Clients can pass an empty string if no filtering 
 	 * is required.
 	 * @return a new selection dialog
@@ -336,7 +336,7 @@ public final class JavaUI {
 	 * @param parent the parent shell of the dialog to be created
 	 * @param root the package fragment root
 	 * @param filter the initial pattern to filter the set of packages. For example "com" shows 
-	 * all packages starting with "com". The meta characters '?' representing any character and 
+	 * all packages starting with "com". The meta character '?' representing any character and 
 	 * '*' representing any string are supported. Clients can pass an empty string if no filtering 
 	 * is required.
 	 * @return a new selection dialog
@@ -384,7 +384,7 @@ public final class JavaUI {
 	 *   (equivalent to <code>CONSIDER_TYPES</code>)
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 * @param filter the initial pattern to filter the set of types. For example "Abstract" shows 
-	 * all types starting with "abstract". The meta characters '?' representing any character and 
+	 * all types starting with "abstract". The meta character '?' representing any character and 
 	 * '*' representing any string are supported. Clients can pass an empty string if no filtering 
 	 * is required.
 	 * @exception JavaModelException if the selection dialog could not be opened
@@ -451,7 +451,7 @@ public final class JavaUI {
 	 *   <code>CONSIDER_EXTERNAL_JARS</code>, or their bitwise OR, or <code>0</code>
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 * @param filter the initial pattern to filter the set of types containg a main method. For 
-	 * example "App" shows all types starting with "app". The meta characters '?' representing 
+	 * example "App" shows all types starting with "app". The meta character '?' representing 
 	 * any character and '*' representing any string are supported. Clients can pass an empty 
 	 * string if no filtering is required.
 	 * @return a new selection dialog
