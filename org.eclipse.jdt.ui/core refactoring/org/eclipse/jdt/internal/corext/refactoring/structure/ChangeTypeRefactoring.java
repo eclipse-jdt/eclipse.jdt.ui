@@ -19,17 +19,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -60,12 +54,11 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -94,10 +87,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 /**
  * @author tip
@@ -237,6 +232,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}
 		if (returnType == null || PrimitiveType.toCode(Signature.toString(returnType)) != null)
 			return false;
+		
 		return true;
 	}
 	
@@ -244,8 +240,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength);
 	}
 	
-	public static ChangeTypeRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, String selectedTypeName){
-		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength, selectedTypeName);
+	public static ChangeTypeRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, IType selectedType){
+		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength, selectedType);
 	}
 
 	private ChangeTypeRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
@@ -255,7 +251,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/**
 	 * Constructor for ChangeTypeRefactoring (invoked from tests only)
 	 */
-	private ChangeTypeRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, String selectedTypeName) {
+	private ChangeTypeRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, IType selectedType) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
@@ -268,8 +264,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 		
 		fCu= cu;
 
-		if (selectedTypeName != null)
-			setSelectedType(selectedTypeName);
+		if (selectedType != null)
+			setSelectedType(selectedType);
 		
 		fConstraintCache= new HashMap();
 		fValidTypes= new HashSet();
@@ -336,6 +332,13 @@ public class ChangeTypeRefactoring extends Refactoring {
 					System.out.println("invalid selection: " + selectionValid); //$NON-NLS-1$
 				}
 				return RefactoringStatus.createFatalErrorStatus(selectionValid);
+			}
+			
+			if (fMethodBinding != null) {
+				IMethod selectedMethod= Bindings.findMethod(fMethodBinding, fCu.getJavaProject());
+				if (selectedMethod == null){
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeAction.exception")); //$NON-NLS-1$
+				}
 			}
 
 			pm.worked(1);
@@ -440,7 +443,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 			if (DEBUG)
 				printCollection("valid types:", getValidTypeNames()); //$NON-NLS-1$
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			JavaPlugin.logErrorMessage("Error occurred during computation of valid types: " + e.toString()); //$NON-NLS-1$ 
+			fValidTypes.clear(); // error occurred during computation of valid types
 		}
 		
 		pm.done();
@@ -796,7 +800,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}
 		subMonitor.done();
 		pm.done();
-		throw new Error(RefactoringCoreMessages.getString("ChangeTypeRefactoring.noMatchingConstraintVariable")); //$NON-NLS-1$
+		Assert.isTrue(false, RefactoringCoreMessages.getString("ChangeTypeRefactoring.noMatchingConstraintVariable")); //$NON-NLS-1$
+		return null;
 	}
 
 	/**
@@ -980,7 +985,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * types, which makes performance unacceptably slow.
 	 */
 	private ITypeHierarchy getTypeHierarchy(IType originalType, IProgressMonitor pm, IJavaProject project) throws JavaModelException {
-		if (!originalType.getFullyQualifiedName().equals("java.lang.Object")) //$NON-NLS-1$
+		if (fRelevantConstraints == null ||
+			!originalType.getFullyQualifiedName().equals("java.lang.Object")) //$NON-NLS-1$
 			return originalType.newTypeHierarchy(project, pm);
 		for (Iterator it= fRelevantConstraints.iterator(); it.hasNext(); ){
 			ITypeConstraint tc= (ITypeConstraint)it.next();
@@ -1190,8 +1196,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 				
 				
 				IMethod selectedMethod= Bindings.findMethod(fMethodBinding, project);
-				if (selectedMethod == null){
-					throw new Error(RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_method")); //$NON-NLS-1$
+				if (selectedMethod == null) {
+					// can't happens since we checked it upfront in check initial conditions
+					Assert.isTrue(false, RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_method")); //$NON-NLS-1$
 				}
 				
 				// the following code fragment appears to be the source of a memory leak, when
@@ -1225,22 +1232,19 @@ public class ChangeTypeRefactoring extends Refactoring {
 				fAffectedUnits= getCus(groups);
 			}
 		} else if (fFieldBinding != null) {
-			try {
-				IField iField= Bindings.findField(fFieldBinding, fCu.getJavaProject());
-				if (iField == null){
-					throw new Error(RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_filed")); //$NON-NLS-1$
-				}
-				ISearchPattern pattern=
-					SearchEngine.createSearchPattern(iField,
-													 IJavaSearchConstants.ALL_OCCURRENCES);
-				IJavaSearchScope scope= RefactoringScopeFactory.create(iField);
-				ICompilationUnit[] workingCopies= null;
-				SearchResultGroup[] groups=
-					RefactoringSearchEngine.search(new SubProgressMonitor(pm, 100), scope, pattern, workingCopies);
-				fAffectedUnits= getCus(groups);
-			} catch (JavaModelException e) {
-				throw new Error(RefactoringCoreMessages.getString("ChangeTypeRefactoring.unhandledSearchException") + e); //$NON-NLS-1$
+			IField iField= Bindings.findField(fFieldBinding, fCu.getJavaProject());
+			if (iField == null) {
+				// can't happens since we checked it upfront in check initial conditions
+				Assert.isTrue(false, RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_filed")); //$NON-NLS-1$
 			}
+			ISearchPattern pattern=
+				SearchEngine.createSearchPattern(iField,
+												 IJavaSearchConstants.ALL_OCCURRENCES);
+			IJavaSearchScope scope= RefactoringScopeFactory.create(iField);
+			ICompilationUnit[] workingCopies= null;
+			SearchResultGroup[] groups=
+				RefactoringSearchEngine.search(new SubProgressMonitor(pm, 100), scope, pattern, workingCopies);
+			fAffectedUnits= getCus(groups);
 		} else {
 			// otherwise, selection was a local variable and we only have to search the CU
 			// containing the selection
@@ -1254,17 +1258,6 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}
 		pm.done();	
 		return fAffectedUnits;
-	}
-
-	/**
-	 * Store the selected new type (invoked from tests only)
-	 */
-	public void setSelectedType(String fullyQualifiedName) {
-		try {
-			fSelectedType= JavaModelUtil.findType(fCu.getJavaProject(), fullyQualifiedName);
-		} catch (JavaModelException e) {
-			throw new Error(RefactoringCoreMessages.getString("ChangeTypeRefactoring.failedToSelectType") + fullyQualifiedName); //$NON-NLS-1$
-		}
 	}
 
 	/**
@@ -1317,8 +1310,6 @@ public class ChangeTypeRefactoring extends Refactoring {
     	if (type2.getFullyQualifiedName().equals("java.lang.Object")) return true; //$NON-NLS-1$
 		if (type1.equals(type2))
 			return true;	
-		if (type2.getFullyQualifiedName().equals(RefactoringCoreMessages.getString("ChangeTypeRefactoring.javaLangObject"))) // workaround for bug #46052 //$NON-NLS-1$
-			return true;
 		
 		IType[] superTypes= fTypeHierarchy.getAllSupertypes(type1);
 		for (int i= 0; i < superTypes.length; i++) {

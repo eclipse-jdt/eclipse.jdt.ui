@@ -11,21 +11,18 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Collection;
-
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
-
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
-
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
@@ -71,12 +68,14 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		return createCU(pack, fileName + ".java", getFileContents(fullName));
 	}
 
-	ChangeTypeRefactoring helper1(int startLine, int startColumn, int endLine, int endColumn, String selectedTypeName)
+	private ChangeTypeRefactoring helper1(int startLine, int startColumn, int endLine, int endColumn, String selectedTypeName)
 		throws Exception {
 		ICompilationUnit	cu= createCUfromTestFile(getPackageP(), true, true);
+		IType selectedType= getType(selectedTypeName, cu);
+		
 		ISourceRange		selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ChangeTypeRefactoring		ref= ChangeTypeRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-												   selectedTypeName);
+												   selectedType);
 	
 		// TODO Set parameters on your refactoring instance from arguments...
 	
@@ -99,8 +98,9 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	}
 
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn,
-							 int expectedStatus, String selectedType) throws Exception {
+							 int expectedStatus, String selectedTypeName) throws Exception {
 		ICompilationUnit	cu= createCUfromTestFile(getPackageP(), false, true);
+		IType selectedType= getType(selectedTypeName, cu);
 		ISourceRange		selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ChangeTypeRefactoring	ref= ChangeTypeRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 												   selectedType);
@@ -113,6 +113,11 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 
 		assertEqualLines(cu.getSource(), getFileContents(canonAfterSrcName));
 	}	
+	
+
+	public IType getType(String fullyQualifiedName, ICompilationUnit icu) throws JavaModelException {
+		return JavaModelUtil.findType(icu.getJavaProject(), fullyQualifiedName);
+	}
 
 	//--- TESTS
 	public void testLocalVarName() throws Exception {
@@ -311,7 +316,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Assert.assertTrue(types.contains("p.A"));
 	}
 	public void testImport() throws Exception {
-		System.out.println("running testInterfaceTypes()");
+		System.out.println("running testImport()");
 		Collection types= helper1(11, 9, 11, 17, "java.util.List").getValidTypeNames();
 		Assert.assertTrue(types.size() == 7);
 		Assert.assertTrue(types.contains("java.io.Serializable"));
@@ -357,5 +362,9 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	public void testFieldOfLocalType() throws Exception {
 		System.out.println("running testFieldOfLocalType()");
 		failHelper1(5, 21, 5, 45, 4, "java.lang.Object");
+	}
+	public void testObjectReturnType() throws Exception {
+		System.out.println("running testObjectReturnType()");
+		failHelper1(3, 17, 3, 22, 4, "java.lang.Object");
 	}
 }
