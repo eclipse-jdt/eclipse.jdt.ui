@@ -2140,7 +2140,7 @@
 		description= "%HideInnerClassFiles.description"
 		pattern= "*$*.class"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
-		enabled = "false">
+		enabled = "true">
 	</filter>
 	<filter
 		id= "org.eclipse.jdt.internal.ui.PackageExplorer.EmptyPackageFilter"
@@ -2196,7 +2196,7 @@
 		description= "%HideImportDeclaration.description"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		class= "org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
-		enabled= "false">
+		enabled= "true">
 	</filter>
 	<filter
 		id= "org.eclipse.jdt.ui.PackageExplorer.NonJavaProjectsFilter"
