@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * Copyright (c) 2000, 2003 International Business Machines Corp. and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v0.5 
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v05.html
  * 
  * Contributors:
- *   Julien Ruaux: jruaux@octo.com
- * 	 Vincent Massol: vmassol@octo.com
+ *   Julien Ruaux: jruaux@octo.com see bug 25324 Ability to know when tests are finished [junit]
+ * 	 Vincent Massol: vmassol@octo.com 25324 Ability to know when tests are finished [junit]
  ******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -101,7 +101,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	 * Map storing TestInfos for each executed test keyed by
 	 * the test name.
 	 */
-	private Map fTestInfos = new HashMap();
+	private Map fTestInfos= new HashMap();
 	/**
 	 * The first failure of a test run. Used to reveal the
 	 * first failed tests at the end of a run.
@@ -279,6 +279,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	public void reset(){
 		reset(0);
 		setViewPartTitle(null);
+		clearStatus();
 		resetViewIcon();
 	}
 
@@ -298,8 +299,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 				if(isDisposed()) 
 					return;	
 				if (fFirstFailure != null) {
-					fActiveRunView.setSelectedTest(fFirstFailure.fTestName);
-					handleTestSelected(fFirstFailure.fTestName);
+					fActiveRunView.setSelectedTest(fFirstFailure.fTestId);
+					handleTestSelected(fFirstFailure.fTestId);
 				}
 				updateViewIcon();
 				if (fDirtyListener == null) {
@@ -363,32 +364,32 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	/*
 	 * @see ITestRunListener#testStarted
 	 */
-	public void testStarted(String testName) {
+	public void testStarted(String testId, String testName) {
 		// reveal the part when the first test starts
 		if (!fShowOnErrorOnly && fExecutedTests == 1) 
 			postShowTestResultsView();
 			
 		postInfo(JUnitMessages.getFormattedString("TestRunnerViewPart.message.started", testName)); //$NON-NLS-1$
-		TestRunInfo testInfo= getTestInfo(testName);
+		TestRunInfo testInfo= getTestInfo(testId);
 		if (testInfo == null) 
-			fTestInfos.put(testName, new TestRunInfo(testName));
+			fTestInfos.put(testId, new TestRunInfo(testId, testName));
 	}
 
 	/*
 	 * @see ITestRunListener#testEnded
 	 */
-	public void testEnded(String testName){
-		postEndTest(testName);
+	public void testEnded(String testId, String testName){
+		postEndTest(testId, testName);
 		fExecutedTests++;
 	}
 
 	/*
 	 * @see ITestRunListener#testFailed
 	 */
-	public void testFailed(int status, String testName, String trace){
-		TestRunInfo testInfo= getTestInfo(testName);
+	public void testFailed(int status, String testId, String testName, String trace){
+		TestRunInfo testInfo= getTestInfo(testId);
 		if (testInfo == null) {
-			testInfo= new TestRunInfo(testName);
+			testInfo= new TestRunInfo(testId, testName);
 			fTestInfos.put(testName, testInfo);
 		}
 		testInfo.fTrace= trace;
@@ -407,7 +408,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	/*
 	 * @see ITestRunListener#testReran
 	 */
-	public void testReran(String className, String testName, int status, String trace) {
+	public void testReran(String testId, String className, String testName, int status, String trace) {
 		if (status == ITestRunListener.STATUS_ERROR) {
 			String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.error", new String[]{testName, className}); //$NON-NLS-1$
 			postError(msg); 
@@ -418,8 +419,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 			String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.success", new String[]{testName, className}); //$NON-NLS-1$
 			postInfo(msg);
 		}
-		String test= testName+"("+className+")"; //$NON-NLS-1$ //$NON-NLS-2$
-		TestRunInfo info= getTestInfo(test);
+		TestRunInfo info= getTestInfo(testId);
 		updateTest(info, status);
 		if (info.fTrace == null || !info.fTrace.equals(trace)) {
 			info.fTrace= trace;
@@ -524,32 +524,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		firePropertyChange(IWorkbenchPart.PROP_TITLE);
 	}
 
-	public void rerunTest(String className, String testName) {
-		DebugUITools.saveAndBuildBeforeLaunch();
-		if (fTestRunnerClient != null && fTestRunnerClient.isRunning() && ILaunchManager.DEBUG_MODE.equals(fLaunchMode))
-			fTestRunnerClient.rerunTest(className, testName);
-		else if (fLastLaunch != null) {
-			// run the selected test using the previous launch configuration
-			ILaunchConfiguration launchConfiguration= fLastLaunch.getLaunchConfiguration();
-			if (launchConfiguration != null) {
-				try {
-					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy("Rerun "+testName); //$NON-NLS-1$
-					tmp.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);
-					tmp.launch(fLastLaunch.getLaunchMode(), null);	
-					return;	
-				} catch (CoreException e) {
-					ErrorDialog.openError(getSite().getShell(), 
-						JUnitMessages.getString("TestRunnerViewPart.error.cannotrerun"), e.getMessage(), e.getStatus() //$NON-NLS-1$
-					);
-				}
-			}
-			MessageDialog.openInformation(getSite().getShell(), 
-				JUnitMessages.getString("TestRunnerViewPart.cannotrerun.title"),  //$NON-NLS-1$
-				JUnitMessages.getString("TestRunnerViewPart.cannotrerurn.message") //$NON-NLS-1$
- 			); 
-		}
-	}
-
 	public synchronized void dispose(){
 		fIsDisposed= true;
 		stopTest();
@@ -598,7 +572,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		});
 	}
 
-	private void postEndTest(final String testName) {
+	private void postEndTest(final String testId, final String testName) {
 		postSyncRunnable(new Runnable() {
 			public void run() {
 				if(isDisposed()) 
@@ -606,7 +580,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 				handleEndTest();
 				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
 					ITestRunView v= (ITestRunView) e.nextElement();
-					v.endTest(testName);
+					v.endTest(testId);
 				}
 			}
 		});	
@@ -628,6 +602,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fCounterPanel.setErrorValue(fErrors);
 		fCounterPanel.setFailureValue(fFailures);
 		fCounterPanel.setRunValue(fExecutedTests);
+		fProgressBar.refresh(fErrors+fFailures> 0);
 	}
 
 	protected void postShowTestResultsView() {
@@ -718,7 +693,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
 			ITestRunView v= (ITestRunView) e.nextElement();
 			if (((CTabFolder) event.widget).getSelection().getText() == v.getName()){
-				v.setSelectedTest(fActiveRunView.getTestName());
+				v.setSelectedTest(fActiveRunView.getSelectedTestId());
 				fActiveRunView= v;
 				fActiveRunView.activate();
 			}
@@ -847,14 +822,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		return composite;
 	}
 
-	public TestRunInfo getTestInfo(String testName) {
-		if (testName == null)
+	public TestRunInfo getTestInfo(String testId) {
+		if (testId == null)
 			return null;
-		return (TestRunInfo) fTestInfos.get(testName);
+		return (TestRunInfo) fTestInfos.get(testId);
 	}
 
-	public void handleTestSelected(String testName) {
-		TestRunInfo testInfo= getTestInfo(testName);
+	public void handleTestSelected(String testId) {
+		TestRunInfo testInfo= getTestInfo(testId);
 
 		if (testInfo == null) {
 			showFailure(""); //$NON-NLS-1$
@@ -941,5 +916,31 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	
 	boolean isCreated() {
 		return fCounterPanel != null;
+	}
+
+	public void rerunTest(String testId, String className, String testName) {
+		DebugUITools.saveAndBuildBeforeLaunch();
+		if (fTestRunnerClient != null && fTestRunnerClient.isRunning() && ILaunchManager.DEBUG_MODE.equals(fLaunchMode))
+			fTestRunnerClient.rerunTest(testId, className, testName);
+		else if (fLastLaunch != null) {
+			// run the selected test using the previous launch configuration
+			ILaunchConfiguration launchConfiguration= fLastLaunch.getLaunchConfiguration();
+			if (launchConfiguration != null) {
+				try {
+					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy("Rerun "+testName); //$NON-NLS-1$
+					tmp.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);
+					tmp.launch(fLastLaunch.getLaunchMode(), null);	
+					return;	
+				} catch (CoreException e) {
+					ErrorDialog.openError(getSite().getShell(), 
+						JUnitMessages.getString("TestRunnerViewPart.error.cannotrerun"), e.getMessage(), e.getStatus() //$NON-NLS-1$
+					);
+				}
+			}
+			MessageDialog.openInformation(getSite().getShell(), 
+				JUnitMessages.getString("TestRunnerViewPart.cannotrerun.title"),  //$NON-NLS-1$
+				JUnitMessages.getString("TestRunnerViewPart.cannotrerurn.message") //$NON-NLS-1$
+			); 
+		}
 	}
 }

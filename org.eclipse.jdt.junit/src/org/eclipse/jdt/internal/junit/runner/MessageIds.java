@@ -45,23 +45,23 @@ public class MessageIds {
 	public static final String TEST_RUN_START=  "%TESTC  "; //$NON-NLS-1$
 	/**
 	 * Notification that a test has started.
-	 * MessageIds.TEST_START + testName
+	 * MessageIds.TEST_START + testID + "," + testName
 	 */
 	public static final String TEST_START=  "%TESTS  ";		 //$NON-NLS-1$
 	/**
 	 * Notification that a test has started.
-	 * TEST_END + testName
+	 * TEST_END + testID + "," + testName
 	 */
 	public static final String TEST_END=    "%TESTE  ";		 //$NON-NLS-1$
 	/**
 	 * Notification that a test had a error.
-	 * TEST_ERROR + testName.
+	 * TEST_ERROR + testID + "," + testName.
 	 * After the notification follows the stack trace.
 	 */
 	public static final String TEST_ERROR=  "%ERROR  ";		 //$NON-NLS-1$
 	/**
 	 * Notification that a test had a failure.
-	 * TEST_FAILED + testName.
+	 * TEST_FAILED + testID + "," + testName.
 	 * After the notification follows the stack trace.
 	 */
 	public static final String TEST_FAILED= "%FAILED ";	 //$NON-NLS-1$
@@ -76,13 +76,13 @@ public class MessageIds {
 	public static final String TEST_STOPPED="%TSTSTP "; //$NON-NLS-1$
 	/**
 	 * Notification that a test was reran.
-	 * TEST_RERAN+testClass+" "+testName+STATUS.
+	 * TEST_RERAN+testId+" "+testClass+" "+testName+STATUS.
 	 * Status = "OK" or "FAILURE".
 	 */ 
 	public static final String TEST_RERAN=  "%TSTRERN"; //$NON-NLS-1$
 	/**
 	 * Notification about a test inside the test suite.
-	 * TEST_TREE+testName","isSuite","testcount
+	 * TEST_TREE+ testId"," + testName","isSuite","testcount
 	 * isSuite = "true" or "false"
 	 */ 
 	public static final String TEST_TREE="%TSTTREE"; //$NON-NLS-1$
@@ -92,7 +92,7 @@ public class MessageIds {
 	public static final String TEST_STOP=	">STOP   "; //$NON-NLS-1$
 	/**
 	 * Request to rerun a test.
-	 * TEST_RERUN+ClassName+" "+testName
+	 * TEST_RERUN+testId+" "+ClassName+" "+testName
 	 */
 	public static final String TEST_RERUN=	">RERUN  "; //$NON-NLS-1$
 }

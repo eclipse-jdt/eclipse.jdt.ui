@@ -8,26 +8,28 @@ package org.eclipse.jdt.internal.junit.ui;
  * Store information about an executed test.
  */
 public class TestRunInfo extends Object {
+	public String fTestId;
 	public String fTestName;
 	public String fTrace;
 	public int fStatus;
 
-	public TestRunInfo(String testName){
+	public TestRunInfo(String testId, String testName){
 		fTestName= testName;
+		fTestId= testId;
 	}	
 	
 	/*
 	 * @see Object#hashCode()
 	 */
 	public int hashCode() {
-		return fTestName.hashCode();
+		return fTestId.hashCode();
 	}
 
 	/*
 	 * @see Object#equals(Object)
 	 */
 	public boolean equals(Object obj) {
-		return fTestName.equals(obj);
+		return fTestId.equals(obj);
 	}
 }
 

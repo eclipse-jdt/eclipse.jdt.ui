@@ -38,11 +38,14 @@ public class RemoteTestRunner implements TestListener {
 	private static class RerunRequest {
 		String fClassName;
 		String fTestName;
+		int fTestId;
 		
-		public RerunRequest(String className, String testName) {
+		public RerunRequest(int testId, String className, String testName) {
+			fTestId= testId;
 			fClassName= className;
 			fTestName= testName;
 		}
+
 	}
 	
 	private static final String SUITE_METHODNAME= "suite";	 //$NON-NLS-1$
@@ -121,9 +124,15 @@ public class RemoteTestRunner implements TestListener {
 						
 						else if (message.startsWith(MessageIds.TEST_RERUN)) {
 							String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
-							int c= arg.indexOf(" "); //$NON-NLS-1$
+							//format: testId className testName
+							int c0= arg.indexOf(' '); //$NON-NLS-1$
+							int c1= arg.indexOf(' ', c0+1);
+							String s= arg.substring(0, c0);
+							int testId= Integer.parseInt(s);
+							String className= arg.substring(c0+1, c1);
+							String testName= arg.substring(c1+1, arg.length());
 							synchronized(RemoteTestRunner.this) {
-								fRerunRequests.add(new RerunRequest(arg.substring(0, c), arg.substring(c+1)));
+								fRerunRequests.add(new RerunRequest(testId, className, testName));
 								RemoteTestRunner.this.notifyAll();
 							}
 						}
@@ -281,7 +290,7 @@ public class RemoteTestRunner implements TestListener {
 				wait();
 				if (!fStopped && fRerunRequests.size() > 0) {
 					RerunRequest r= (RerunRequest)fRerunRequests.remove(0);
-					rerunTest(r.fClassName, r.fTestName);
+					rerunTest(r.fTestId, r.fClassName, r.fTestName);
 				}
 			} catch (InterruptedException e) {
 			}
@@ -396,7 +405,7 @@ public class RemoteTestRunner implements TestListener {
 	 * Reruns a test as defined by the fully qualified class name and
 	 * the name of the test.
 	 */
-	public void rerunTest(String className, String testName) {
+	public void rerunTest(int testId, String className, String testName) {
 		Test reloadedTest= null;
 		try {
 			Class reloadedTestClass= getClassLoader().loadClass(className);
@@ -406,7 +415,7 @@ public class RemoteTestRunner implements TestListener {
 		}
 		TestResult result= new TestResult();
 		reloadedTest.run(result);
-		notifyTestReran(result, className, testName);
+		notifyTestReran(result, Integer.toString(testId), className, testName);
 	}
 
 	/**
@@ -451,28 +460,28 @@ public class RemoteTestRunner implements TestListener {
 	 * @see TestListener#addError(Test, Throwable)
 	 */
 	public final void addError(Test test, Throwable throwable) {
-		notifyTestFailed(MessageIds.TEST_ERROR, test.toString(), getTrace(throwable));
+		notifyTestFailed(test, MessageIds.TEST_ERROR, getTrace(throwable));
 	}
 
 	/*
 	 * @see TestListener#addFailure(Test, AssertionFailedError)
 	 */
 	public final void addFailure(Test test, AssertionFailedError assertionFailedError) {
-		notifyTestFailed(MessageIds.TEST_FAILED, test.toString(), getTrace(assertionFailedError));
+		notifyTestFailed(test, MessageIds.TEST_FAILED, getTrace(assertionFailedError));
 	}
 
 	/*
 	 * @see TestListener#endTest(Test)
 	 */
 	public void endTest(Test test) {
-		notifyTestEnded(test.toString());
+		notifyTestEnded(test);
 	}
 
 	/*
 	 * @see TestListener#startTest(Test)
 	 */
 	public void startTest(Test test) {
-		notifyTestStarted(test.toString());
+		notifyTestStarted(test);
 	}
 	
 	private void sendTree(Test test){
@@ -482,14 +491,22 @@ public class RemoteTestRunner implements TestListener {
 		}
 		else if(test instanceof TestSuite){
 			TestSuite suite= (TestSuite) test;
-			notifyTestTreeEntry(suite.toString().trim() + ',' + true + ',' + suite.testCount());
+			notifyTestTreeEntry(getTestId(test)+','+suite.toString().trim() + ',' + true + ',' + suite.testCount());
 			for(int i=0; i < suite.testCount(); i++){	
 				sendTree(suite.testAt(i));		
 			}				
 		}
 		else {
-			notifyTestTreeEntry(test.toString().trim() + ',' + false + ',' +  test.countTestCases());
+			notifyTestTreeEntry(getTestId(test)+ ',' + getTestName(test).trim() + ',' + false + ',' +  test.countTestCases());
 		}
+	}
+	
+	private String getTestId(Test test) {
+		return Integer.toString(System.identityHashCode(test));
+	}
+	
+	private String getTestName(Test test) {
+		return test.toString();
 	}
 	
 	/**
@@ -595,17 +612,17 @@ public class RemoteTestRunner implements TestListener {
 		//shutDown();
 	}
 
-	private void notifyTestStarted(String testName) {
-		sendMessage(MessageIds.TEST_START + testName);
+	private void notifyTestStarted(Test test) {
+		sendMessage(MessageIds.TEST_START + getTestId(test) + ','+test.toString());
 		fWriter.flush();
 	}
 
-	private void notifyTestEnded(String testName) {
-		sendMessage(MessageIds.TEST_END + testName);
+	private void notifyTestEnded(Test test) {
+		sendMessage(MessageIds.TEST_END + getTestId(test)+','+getTestName(test));
 	}
 
-	private void notifyTestFailed(String status, String testName, String trace) {
-		sendMessage(status + testName);
+	private void notifyTestFailed(Test test, String status, String trace) {
+		sendMessage(status + getTestId(test) + ',' + getTestName(test));
 		sendMessage(MessageIds.TRACE_START);
 		sendMessage(trace);
 		sendMessage(MessageIds.TRACE_END);
@@ -616,7 +633,7 @@ public class RemoteTestRunner implements TestListener {
 		sendMessage(MessageIds.TEST_TREE + treeEntry);
 	}
 	
-	private void notifyTestReran(TestResult result, String testClass, String testName) {
+	private void notifyTestReran(TestResult result, String testId, String testClass, String testName) {
 		TestFailure failure= null;
 		if (result.errorCount() > 0) {
 			failure= (TestFailure)result.errors().nextElement();
@@ -638,7 +655,7 @@ public class RemoteTestRunner implements TestListener {
 		else if (result.failureCount() > 0)
 			status= "FAILURE"; //$NON-NLS-1$
 		if (fPort != -1) {
-			sendMessage(MessageIds.TEST_RERAN + testClass+" "+testName+" "+status); //$NON-NLS-1$ //$NON-NLS-2$
+			sendMessage(MessageIds.TEST_RERAN + testId+ " "+testClass+" "+testName+" "+status); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			fWriter.flush();
 		}
 	}

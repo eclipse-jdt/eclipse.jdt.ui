@@ -4,12 +4,14 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.eclipse.jdt.junit.ITestRunListener;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -26,12 +28,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
-
-import org.eclipse.jdt.junit.ITestRunListener;
 
 /*
  * A view that shows the contents of a test suite
@@ -61,10 +57,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	 */
 	private Vector fSuiteInfos= new Vector();
 	/**
-	 * Maps test names to TreeItems. 
-	 * If there is one treeItem for a test then the
-	 * value of the map corresponds to the item, otherwise
-	 * there is a list of tree items.
+	 * Maps test Ids to TreeItems. 
 	 */
 	private Map fTreeItemMap= new HashMap();
 	
@@ -106,7 +99,6 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		addListeners();
 	}
 
-
 	void disposeIcons() {
 		fErrorIcon.dispose();
 		fFailureIcon.dispose();
@@ -140,20 +132,20 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		return ((TestRunInfo)treeItems[0].getData());
 	}	
 	
-	public String getClassName() {
+	private String getClassName() {
 		TestRunInfo testInfo= getTestInfo();
 		if (testInfo == null) 
 			return null;
 		return extractClassName(testInfo.fTestName);
 	}
 	
-	public String getTestName() {
+	public String getSelectedTestId() {
 		TestRunInfo testInfo= getTestInfo();
 		if (testInfo == null) 
 			return null;
-		return testInfo.fTestName;
+		return testInfo.fTestId;
 	}
-	
+		
 	private String extractClassName(String testNameString) {
 		if (testNameString == null) 
 			return null;
@@ -168,19 +160,19 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		return JUnitMessages.getString("HierarchyRunView.tab.title"); //$NON-NLS-1$
 	}
 	
-	public void setSelectedTest(String testName) {
-		TreeItem treeItem= findFirstItem(testName);
+	public void setSelectedTest(String testId) {
+		TreeItem treeItem= findTreeItem(testId);
 		if (treeItem != null)
 			fTree.setSelection(new TreeItem[]{treeItem});
 	}
 	
-	public void endTest(String testName) {	
-		TreeItem treeItem= findFirstNotRunItem(testName);
+	public void endTest(String testId) {	
+		TreeItem treeItem= findTreeItem(testId);
 		// workaround for bug 8657
 		if (treeItem == null)  
 			return;
 			
-		TestRunInfo testInfo= fTestRunnerPart.getTestInfo(testName);
+		TestRunInfo testInfo= fTestRunnerPart.getTestInfo(testId);
 			
 		updateItem(treeItem, testInfo);
 			
@@ -235,7 +227,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	}
 	
 	protected void testSelected() {
-		fTestRunnerPart.handleTestSelected(getTestName());
+		fTestRunnerPart.handleTestSelected(getSelectedTestId());
 	}
 	
 	public void menuAboutToShow(IMenuManager manager) {
@@ -250,7 +242,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 				manager.add(new OpenTestAction(fTestRunnerPart, className));
 			} else {
 				manager.add(new OpenTestAction(fTestRunnerPart, getClassName(), getTestLabel()));
-				manager.add(new RerunAction(fTestRunnerPart, getClassName(), getTestLabel()));
+				manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), getTestLabel()));
 			}
 		}
 	}	
@@ -296,25 +288,28 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	}
 	
 	public void newTreeEntry(String treeEntry) {
+		// format: testId","testName","isSuite","testcount
 		int index0= treeEntry.indexOf(',');
-		int index1= treeEntry.lastIndexOf(',');
-		String label= treeEntry.substring(0, index0).trim();
-		TestRunInfo testInfo= new TestRunInfo(label);
+		int index1= treeEntry.indexOf(',', index0+1);
+		int index2= treeEntry.indexOf(',', index1+1);
+		String label= treeEntry.substring(index0+1, index1).trim();
+		String id= treeEntry.substring(0, index0);
+		TestRunInfo testInfo= new TestRunInfo(id, label);
 		//fTestInfo.addElement(testInfo);
-		int index2;
-		if((index2= label.indexOf('(')) > 0)
-			label= label.substring(0, index2);
-		if((index2= label.indexOf('@')) > 0)
-			label= label.substring(0, index2);
+		int index3;
+		if((index3= label.indexOf('(')) > 0)
+			label= label.substring(0, index3);
+		if((index3= label.indexOf('@')) > 0)
+			label= label.substring(0, index3);
 		
-		String isSuite= treeEntry.substring(index0+1, index1);
-		int testCount= Integer.parseInt(treeEntry.substring(index1+1));
+		String isSuite= treeEntry.substring(index1+1, index2);
+		int testCount= Integer.parseInt(treeEntry.substring(index2+1));
 		TreeItem treeItem;
 	
 		while((fSuiteInfos.size() > 0) && (((SuiteInfo) fSuiteInfos.lastElement()).fTestCount == 0))	{
 			fSuiteInfos.removeElementAt(fSuiteInfos.size()-1);
 		}
-
+	
 		if(fSuiteInfos.size() == 0){
 			testInfo.fStatus= IS_SUITE;
 			treeItem= new TreeItem(fTree, SWT.NONE);
@@ -337,62 +332,24 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	}
 	
 	private void mapTest(TestRunInfo info, TreeItem item) {
-		String test= info.fTestName;
-		Object o= fTreeItemMap.get(test);
-		if (o == null) {
-			fTreeItemMap.put(test, item);
-			return;
-		}
-		if (o instanceof TreeItem) {
-			List list= new ArrayList();
-			list.add(o);
-			list.add(item);
-			fTreeItemMap.put(test, list);
-			return;
-		}
-		if (o instanceof List) {
-			((List)o).add(item);
-		}
+		fTreeItemMap.put(info.fTestId, item);
 	}
 	
-	private TreeItem findFirstNotRunItem(String testName) {
-		Object o= fTreeItemMap.get(testName);
+	private TreeItem findTreeItem(String testId) {
+		Object o= fTreeItemMap.get(testId);
 		if (o instanceof TreeItem) 
 			return (TreeItem)o;
-		if (o instanceof List) {
-			List l= (List)o;
-			for (int i= 0; i < l.size(); i++) {
-				TreeItem item= (TreeItem)l.get(i);
-				if (item.getImage() == fTestIcon)
-					return item;
-			}
-			return null;
-		}
 		return null;
 	}
 	
-	private TreeItem findFirstItem(String testName) {
-		Object o= fTreeItemMap.get(testName);
-		if (o instanceof TreeItem) 
-			return (TreeItem)o;
-		if (o instanceof List) {
-			return (TreeItem)((List)o).get(0);
-		}
-		return null;
-	}
 	/*
 	 * @see ITestRunView#testStatusChanged(TestRunInfo, int)
 	 */
 	public void testStatusChanged(TestRunInfo newInfo) {
-		Object o= fTreeItemMap.get(newInfo.fTestName);
+		Object o= fTreeItemMap.get(newInfo.fTestId);
 		if (o instanceof TreeItem) {
 			updateItem((TreeItem)o, newInfo);
 			return;
 		}
-		if (o instanceof List) {
-			List l= (List)o;
-			for (int i= 0; i < l.size(); i++) 
-				updateItem((TreeItem)l.get(i), newInfo);
-		}		
 	}
 }

@@ -41,7 +41,6 @@ public class JUnitStubUtility {
 		
 		public GenStubSettings(CodeGenerationSettings settings) {
 			this.createComments= settings.createComments;
-			this.createNonJavadocComments= settings.createNonJavadocComments;		
 		}
 	}
 

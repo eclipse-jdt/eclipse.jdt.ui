@@ -89,11 +89,11 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		return JUnitMessages.getString("FailureRunView.tab.title"); //$NON-NLS-1$
 	}
 	
-	public String getTestName() {
+	public String getSelectedTestId() {
 		int index= fTable.getSelectionIndex();
 		if (index == -1)
 			return null;
-		return fTable.getItem(index).getText();
+		return getTestInfo(fTable.getItem(index)).fTestId;
 	}
 	
 	private String getClassName() {
@@ -124,7 +124,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 			String methodName= getMethodName();
 			if (className != null) {
 				manager.add(new OpenTestAction(fRunnerViewPart, className, methodName));
-				manager.add(new RerunAction(fRunnerViewPart, className, methodName));
+				manager.add(new RerunAction(fRunnerViewPart, getSelectedTestId(), className, methodName));
 			}
 		}
 	}		
@@ -136,24 +136,29 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		return fTable.getItem(index).getText();
 	}
 	
-	public void setSelectedTest(String testName){
+	public void setSelectedTest(String testId){
 		TableItem[] items= fTable.getItems();
 		for (int i= 0; i < items.length; i++) {
-			TableItem tableItem= items[i]; 			
-			if (tableItem.getText().equals(testName)){
+			TableItem tableItem= items[i];
+			TestRunInfo info= getTestInfo(tableItem);		
+			if (info.fTestId.equals(testId)){
 				fTable.setSelection(new TableItem[] { tableItem });
 				fTable.showItem(tableItem);
 				return;
 			}
 		}
 	}
+
+	private TestRunInfo getTestInfo(TableItem item) {
+		return (TestRunInfo)item.getData(); 	
+	}
 	
 	public void setFocus() {
 		fTable.setFocus();
 	}
 	
-	public void endTest(String testName){
-		TestRunInfo testInfo= fRunnerViewPart.getTestInfo(testName);
+	public void endTest(String testId){
+		TestRunInfo testInfo= fRunnerViewPart.getTestInfo(testId);
 		if(testInfo == null || testInfo.fStatus == ITestRunListener.STATUS_OK) 
 			return;
 
@@ -171,10 +176,11 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		tableItem.setData(testInfo);
 	}
 
-	private TableItem findItemByTest(String testName) {
+	private TableItem findItem(String testId) {
 		TableItem[] items= fTable.getItems();
 		for (int i= 0; i < items.length; i++) {
-			if (items[i].getText().equals(testName))
+			TestRunInfo info= getTestInfo(items[i]);
+			if (info.fTestId.equals(testId))
 				return items[i];
 		}
 		return null;
@@ -189,7 +195,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	}
 
 	protected void testSelected() {
-		fRunnerViewPart.handleTestSelected(getTestName());
+		fRunnerViewPart.handleTestSelected(getSelectedTestId());
 	}
 	
 	protected void addListeners() {
@@ -233,7 +239,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	 * @see ITestRunView#testStatusChanged(TestRunInfo)
 	 */
 	public void testStatusChanged(TestRunInfo info) {
-		TableItem item= findItemByTest(info.fTestName);
+		TableItem item= findItem(info.fTestId);
 		if (item != null) {
 			if (info.fStatus == ITestRunListener.STATUS_OK) {
 				item.dispose();

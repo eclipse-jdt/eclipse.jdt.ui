@@ -125,5 +125,10 @@ public class JUnitProgressBar extends Canvas {
 			fColorBarWidth= getClientArea().width-1;
 		paintStep(x, fColorBarWidth);
 	}
+
+	public void refresh(boolean hasErrors) {
+		fError= hasErrors;
+		redraw();
+	}
 	
 }

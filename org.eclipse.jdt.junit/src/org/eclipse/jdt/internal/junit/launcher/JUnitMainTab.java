@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/cpl-v05.html
  * 
  * Contributors:
- *   Sebastian Davids: sdavids@gmx.de
+ *   Sebastian Davids: sdavids@gmx.de bug: 26293, 27889 
  ******************************************************************************/
 package org.eclipse.jdt.internal.junit.launcher;
 
@@ -162,6 +162,13 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	public void createKeepAliveGroup(Composite comp) {
 		GridData gd;
 		fKeepRunning = new Button(comp, SWT.CHECK);
+		fKeepRunning.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				updateLaunchConfigurationDialog();
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
 		fKeepRunning.setText(JUnitMessages.getString("JUnitMainTab.label.keeprunning")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.FILL;

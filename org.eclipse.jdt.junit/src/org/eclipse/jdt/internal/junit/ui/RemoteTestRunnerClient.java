@@ -62,6 +62,10 @@ public class RemoteTestRunnerClient {
 	 */
 	private String fFailedTest;
 	/**
+	 * The Id of the failed test
+	 */
+	private String fFailedTestId;
+	/**
 	 * The failed trace that is currently reported from the RemoteTestRunner
 	 */
 	private String fFailedTrace;
@@ -127,16 +131,6 @@ public class RemoteTestRunnerClient {
 	public synchronized void stopTest() {
 		if (isRunning()) {
 			fWriter.println(MessageIds.TEST_STOP);
-			fWriter.flush();
-		}
-	}
-
-	/**
-	 * Requests to rerun a test
-	 */
-	public synchronized void rerunTest(String className, String testName) {
-		if (isRunning()) {
-			fWriter.println(MessageIds.TEST_RERUN+className+" "+testName); //$NON-NLS-1$
 			fWriter.flush();
 		}
 	}
@@ -228,13 +222,11 @@ public class RemoteTestRunnerClient {
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_ERROR)) {
-			fFailedTest= arg;
-			fFailureKind= ITestRunListener.STATUS_ERROR;
+			extractFailure(arg, ITestRunListener.STATUS_ERROR);
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_FAILED)) {
-			fFailedTest= arg;
-			fFailureKind= ITestRunListener.STATUS_FAILURE;
+			extractFailure(arg, ITestRunListener.STATUS_FAILURE);
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_RUN_END)) {
@@ -254,11 +246,13 @@ public class RemoteTestRunnerClient {
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_RERAN)) {
-			// format: className" "testName" "status
+			// format: testId" "className" "testName" "status
 			// status: FAILURE, ERROR, OK
-			int c= arg.indexOf(" "); //$NON-NLS-1$
-			int t= arg.indexOf(" ", c+1); //$NON-NLS-1$
-			String className= arg.substring(0, c);
+			int i= arg.indexOf(' ');
+			int c= arg.indexOf(' ', i+1); //$NON-NLS-1$
+			int t= arg.indexOf(' ', c+1); //$NON-NLS-1$
+			String testId= arg.substring(0, i);
+			String className= arg.substring(i+1, c);
 			String testName= arg.substring(c+1, t);
 			String status= arg.substring(t+1);
 			int statusCode= ITestRunListener.STATUS_OK;
@@ -271,16 +265,34 @@ public class RemoteTestRunnerClient {
 			if (statusCode != ITestRunListener.STATUS_OK)
 				trace = fFailedRerunTrace;
 			// assumption a rerun trace was sent before
-			notifyTestReran(className, testName, statusCode, trace);
+			notifyTestReran(testId, className, testName, statusCode, trace);
 		}
 	}
 
-	private void notifyTestReran(final String className, final String testName, final int statusCode, final String trace) {
+	private void extractFailure(String arg, int status) {
+		String s[]= extractTestId(arg);
+		fFailedTestId= s[0];
+		fFailedTest= s[1];
+		fFailureKind= status;
+	}
+
+	/**
+	 * Returns an array with two elements. The first one is the testId, the second one the testName.
+	 */
+	String[] extractTestId(String arg) {
+		int i= arg.indexOf(',');
+		String[] result= new String[2];
+		result[0]= arg.substring(0, i);
+		result[1]= arg.substring(i+1, arg.length());
+		return result;
+	}
+	
+	private void notifyTestReran(final String testId, final String className, final String testName, final int statusCode, final String trace) {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
 				public void run() {
-					listener.testReran(className, testName, statusCode, trace);
+					listener.testReran(testId, className, testName, statusCode, trace);
 				}
 			});
 		}
@@ -322,7 +334,8 @@ public class RemoteTestRunnerClient {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
 				public void run() {
-					listener.testEnded(test);
+					String s[]= extractTestId(test);
+					listener.testEnded(s[0], s[1]);
 				}
 			});
 		}
@@ -333,7 +346,8 @@ public class RemoteTestRunnerClient {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
 				public void run() {
-					listener.testStarted(test);
+					String s[]= extractTestId(test);
+					listener.testStarted(s[0], s[1]);
 				}
 			});
 		}
@@ -355,7 +369,7 @@ public class RemoteTestRunnerClient {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
 				public void run() {
-					listener.testFailed(fFailureKind, fFailedTest, fFailedTrace);
+					listener.testFailed(fFailureKind, fFailedTestId, fFailedTest, fFailedTrace);
 				}
 			});
 		}
@@ -369,6 +383,13 @@ public class RemoteTestRunnerClient {
 					listener.testRunTerminated();
 				}
 			});
+		}
+	}
+
+	public void rerunTest(String testId, String className, String testName) {
+		if (isRunning()) {
+			fWriter.println(MessageIds.TEST_RERUN+testId+" "+className+" "+testName); //$NON-NLS-1$ //$NON-NLS-2$
+			fWriter.flush();
 		}
 	}
 }

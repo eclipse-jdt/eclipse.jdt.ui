@@ -14,7 +14,7 @@ interface ITestRunView {
 	/**
 	 * Returns the name of the currently selected Test in the View
 	 */
-	public String getTestName();
+	public String getSelectedTestId();
 
 	/**
 	 * Activates the TestRunView
@@ -39,12 +39,12 @@ interface ITestRunView {
 	/**
 	 * Sets the current Test in the View
 	 */
-	public void setSelectedTest(String testName);
+	public void setSelectedTest(String testId);
 	
 	/**
 	 * A test has ended
 	 */
-	public void endTest(String testName);
+	public void endTest(String testId);
 	
 	/**
 	 * The status of a test has changed
