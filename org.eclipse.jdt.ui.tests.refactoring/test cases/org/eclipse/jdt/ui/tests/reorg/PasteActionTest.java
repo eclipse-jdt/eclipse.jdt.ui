@@ -251,7 +251,7 @@ public class PasteActionTest extends RefactoringTest{
 		}
 	}
 	
-	private void copyAndPasteTypeResources(IJavaElement[] elemsForClipboard, IJavaElement[] pasteSelectedJavaElements, boolean pasteEnabled) throws CoreException {
+	private void copyAndPasteTypedSources(IJavaElement[] elemsForClipboard, IJavaElement[] pasteSelectedJavaElements, boolean pasteEnabled) throws CoreException {
 		setClipboardContents(TypedSource.createTypedSources(elemsForClipboard), 0);
 		PasteAction pasteAction= new PasteAction(new MockWorkbenchSite(pasteSelectedJavaElements), fClipboard);
 		pasteAction.update(pasteAction.getSelection());
@@ -267,7 +267,7 @@ public class PasteActionTest extends RefactoringTest{
 			IJavaElement[] elemsForClipboard= {methodM};
 			IJavaElement[] pasteSelectedJavaElements= {methodM};
 			boolean enabled= true;
-			copyAndPasteTypeResources(elemsForClipboard, pasteSelectedJavaElements, enabled);
+			copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
 			compareContents("A");
 		} finally{
 			delete(cuA);
@@ -282,7 +282,7 @@ public class PasteActionTest extends RefactoringTest{
 			IJavaElement[] elemsForClipboard= {fieldF};
 			IJavaElement[] pasteSelectedJavaElements= {typeA};
 			boolean enabled= true;
-			copyAndPasteTypeResources(elemsForClipboard, pasteSelectedJavaElements, enabled);
+			copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
 			compareContents("A");
 		} finally{
 			delete(cuA);
@@ -297,7 +297,7 @@ public class PasteActionTest extends RefactoringTest{
 			IJavaElement[] elemsForClipboard= {fieldF};
 			IJavaElement[] pasteSelectedJavaElements= {typeA};
 			boolean enabled= true;
-			copyAndPasteTypeResources(elemsForClipboard, pasteSelectedJavaElements, enabled);
+			copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
 			compareContents("A");
 		} finally{
 			delete(cuA);
@@ -313,7 +313,7 @@ public class PasteActionTest extends RefactoringTest{
 			IJavaElement[] elemsForClipboard= {fieldF, fieldG};
 			IJavaElement[] pasteSelectedJavaElements= {typeA};
 			boolean enabled= true;
-			copyAndPasteTypeResources(elemsForClipboard, pasteSelectedJavaElements, enabled);
+			copyAndPasteTypedSources(elemsForClipboard, pasteSelectedJavaElements, enabled);
 			compareContents("A");
 		} finally{
 			delete(cuA);
