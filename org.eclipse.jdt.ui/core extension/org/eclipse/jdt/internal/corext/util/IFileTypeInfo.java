@@ -54,7 +54,7 @@ public class IFileTypeInfo extends TypeInfo {
 		return new Path(buffer.toString());
 	}
 		
-	protected String getPath() {
+	public String getPath() {
 		StringBuffer result= new StringBuffer(fProject);
 		result.append(TypeInfo.SEPARATOR);
 		if (fFolder != null && fFolder.length() > 0) {

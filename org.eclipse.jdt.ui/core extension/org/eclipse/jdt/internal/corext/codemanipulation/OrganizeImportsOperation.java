@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.UnresolvedTypeInfo;
+import org.eclipse.jdt.internal.corext.util.UnresolvableTypeInfo;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
@@ -422,7 +422,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return;
 			}
 			TypeInfo[] allTypes= AllTypesCache.getAllTypes(null); // all types in workspace, sorted by type name
-			TypeInfo key= new UnresolvedTypeInfo("", simpleTypeName, null, true, null);
+			TypeInfo key= new UnresolvableTypeInfo("", simpleTypeName, null, true, null);
 			int index= Arrays.binarySearch(allTypes, key, AllTypesCache.getTypeNameComperator());
 			if (index >= 0 && index < allTypes.length) {
 				for (int i= index - 1; i>= 0; i--) {

@@ -114,10 +114,11 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 		if (result != null) {
 			for (int i= 0; i < size; i++) {
 				try {
-					IType type= ((TypeInfo)selection.get(i)).resolveType(fScope);
+					TypeInfo typeInfo= (TypeInfo)selection.get(i);
+					IType type= typeInfo.resolveType(fScope);
 					if (type == null) {
 						String title= JavaUIMessages.getString("MultiTypeSelectionDialog.dialogTitle"); //$NON-NLS-1$
-						String message= JavaUIMessages.getString("MultiTypeSelectionDialog.dialogMessage"); //$NON-NLS-1$
+						String message= JavaUIMessages.getFormattedString("MultiTypeSelectionDialog.dialogMessage", typeInfo.getPath()); //$NON-NLS-1$
 						MessageDialog.openError(getShell(), title, message);
 					} else {
 						result.add(type);

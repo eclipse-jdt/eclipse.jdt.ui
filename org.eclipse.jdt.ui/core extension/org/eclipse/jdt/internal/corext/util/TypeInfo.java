@@ -26,7 +26,7 @@ public abstract class TypeInfo {
 	final char[][] fEnclosingNames;
 	final boolean fIsInterface;
 	
-	public static final int DEFAULT_TYPE_INFO= 1;
+	public static final int UNRESOLVABLE_TYPE_INFO= 1;
 	public static final int JAR_FILE_ENTRY_TYPE_INFO= 2;
 	public static final int IFILE_TYPE_INFO= 3;
 	
@@ -53,7 +53,7 @@ public abstract class TypeInfo {
 	 * 
 	 * @return the path of the type info
 	 */
-	protected abstract String getPath();
+	public abstract String getPath();
 	
 	/**
 	 * Returns the <tt>IJavaElement</tt> this type info stands for.

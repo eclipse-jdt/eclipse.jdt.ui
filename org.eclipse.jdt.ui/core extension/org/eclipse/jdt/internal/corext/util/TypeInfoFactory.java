@@ -52,7 +52,7 @@ public class TypeInfoFactory {
 			}
 		}
 		if (result == null) {
-			result= new UnresolvedTypeInfo(pn, tn, enclosingName, isInterface, path);
+			result= new UnresolvableTypeInfo(pn, tn, enclosingName, isInterface, path);
 		} else {
 			fLast= result;
 		}
@@ -112,6 +112,8 @@ public class TypeInfoFactory {
 	private TypeInfo createIFileTypeInfo(String packageName, String typeName, char[][] enclosingName, boolean isInterface, String path, IFileTypeInfo last, String project) {
 		String rest= path.substring(project.length() + 1); // the first slashes.
 		int index= rest.lastIndexOf(TypeInfo.SEPARATOR);
+		if (index == -1)
+			return null;
 		String middle= rest.substring(0, index);
 		rest= rest.substring(index + 1);
 		index= rest.lastIndexOf(TypeInfo.EXTENSION_SEPARATOR);

@@ -218,7 +218,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			if (type == null) {
 				// not a class file or compilation unit
 				String title= JavaUIMessages.getString("TypeSelectionDialog.errorTitle"); //$NON-NLS-1$
-				String message= JavaUIMessages.getString("TypeSelectionDialog.errorMessage"); //$NON-NLS-1$
+				String message= JavaUIMessages.getFormattedString("TypeSelectionDialog.dialogMessage", ref.getPath()); //$NON-NLS-1$
 				MessageDialog.openError(getShell(), title, message);
 				setResult(null);
 			} else {

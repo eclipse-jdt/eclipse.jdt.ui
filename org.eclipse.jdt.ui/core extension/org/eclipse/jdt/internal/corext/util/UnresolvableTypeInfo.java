@@ -20,20 +20,20 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
  * A type info element that represent an unresolveable type. This can happen if
  * the search engine reports a type name that doesn't exist in the workspace.
  */
-public class UnresolvedTypeInfo extends TypeInfo {
+public class UnresolvableTypeInfo extends TypeInfo {
 	
 	private final String fPath;
 	
-	public UnresolvedTypeInfo(String pkg, String name, char[][] enclosingTypes, boolean isInterface, String path) {
+	public UnresolvableTypeInfo(String pkg, String name, char[][] enclosingTypes, boolean isInterface, String path) {
 		super(pkg, name, enclosingTypes, isInterface);
 		fPath= path;
 	}
 	
 	public int getElementType() {
-		return TypeInfo.DEFAULT_TYPE_INFO;
+		return TypeInfo.UNRESOLVABLE_TYPE_INFO;
 	}
 	
-	protected String getPath() {
+	public String getPath() {
 		return fPath;
 	}
 	

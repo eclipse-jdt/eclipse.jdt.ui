@@ -90,7 +90,7 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 		return new Path(fJar);
 	}
 		
-	protected String getPath() {
+	public String getPath() {
 		StringBuffer result= new StringBuffer(fJar);
 		result.append(IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR);
 		getElementPath(result);
