@@ -10,6 +10,7 @@ import java.util.HashMap;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -55,13 +56,13 @@ public class CPListElement {
 		
 		switch (entryKind) {
 			case IClasspathEntry.CPE_SOURCE:
-				createAttributeElement(OUTPUT);
-				createAttributeElement(EXCLUSION);
+				createAttributeElement(OUTPUT, null);
+				createAttributeElement(EXCLUSION, new Path[0]);
 				break;
 			case IClasspathEntry.CPE_LIBRARY:
 			case IClasspathEntry.CPE_VARIABLE:
-				createAttributeElement(SOURCEATTACHMENT);
-				createAttributeElement(JAVADOC);
+				createAttributeElement(SOURCEATTACHMENT, null);
+				createAttributeElement(JAVADOC, null);
 				break;
 			case IClasspathEntry.CPE_PROJECT:
 			case IClasspathEntry.CPE_CONTAINER:
@@ -141,10 +142,10 @@ public class CPListElement {
 		return null;
 	}
 	
-	private CPListElementAttribute createAttributeElement(String key) {
+	private CPListElementAttribute createAttributeElement(String key, Object value) {
 		CPListElementAttribute attribute= (CPListElementAttribute) fAttributes.get(key);
 		if (attribute == null) {
-			attribute= new CPListElementAttribute(this, key, null);
+			attribute= new CPListElementAttribute(this, key, value);
 			fAttributes.put(key, attribute);
 		}
 		return attribute;
@@ -297,7 +298,7 @@ public class CPListElement {
 		elem.setAttribute(SOURCEATTACHMENT, curr.getSourceAttachmentPath());
 		elem.setAttribute(JAVADOC, javaDocLocation);
 		elem.setAttribute(OUTPUT, curr.getOutputLocation());
-		elem.setAttribute(EXCLUSION, curr.getExclusionPatterns());
+		elem.setAttribute(EXCLUSION, curr.getExclusionPatterns()); 
 
 		if (project.exists()) {
 			elem.setIsMissing(isMissing);

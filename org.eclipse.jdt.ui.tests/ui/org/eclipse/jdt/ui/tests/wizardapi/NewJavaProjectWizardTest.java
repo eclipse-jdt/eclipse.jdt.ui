@@ -22,9 +22,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
-
-import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 
 public class NewJavaProjectWizardTest extends TestCase {
 	
@@ -48,7 +47,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		/**
 		 * @see NewJavaProjectWizardPage#getLocationPath()
 		 */
-		protected IPath getLocationPath() {
+		protected IPath getLocationPath() { 
 			return null;
 		}
 
@@ -114,7 +113,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		assertNotNull("b", classpath);
 		assertTrue("c", classpath.length == 2);
 		
-		if (NewJavaProjectPreferencePage.useSrcAndBinFolders()) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ)) {
 			assertEquals("d", outputLocation, project.getFolder("bin").getFullPath());
 			assertEquals("e", classpath[0].getPath(), project.getFolder("src").getFullPath());
 		} else {
