@@ -45,6 +45,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -58,6 +59,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -103,6 +105,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 
@@ -355,6 +358,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private Action fRefreshAction;
 	private Action fUseReconcilerAction;
 	private Action fCreateBindingsAction;
+	private Action fResolveBindingKeyAction;
 	private Action fCollapseAction;
 	private Action fExpandAction;
 	private Action fClearAction;
@@ -490,6 +494,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			fTray.setInput(fTrayRoots);
 		setASTUptoDate(root != null);
 		fClearAction.setEnabled(root != null);
+		fResolveBindingKeyAction.setEnabled(root != null);
 	}
 	
 	private CompilationUnit createAST(IOpenable input, int astLevel) throws JavaModelException, CoreException {
@@ -705,6 +710,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		manager.add(fUseReconcilerAction);
 		manager.add(fCreateBindingsAction);
 		manager.add(new Separator());
+		manager.add(fResolveBindingKeyAction);
+		manager.add(new Separator());
 		manager.add(fLinkWithEditor);
 	}
 
@@ -780,6 +787,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fCreateBindingsAction.setToolTipText("Create Bindings"); //$NON-NLS-1$
 		fCreateBindingsAction.setEnabled(true);
 
+		fResolveBindingKeyAction= new Action("&Resolve Binding Key...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
+			public void run() {
+				performResolveBindingKey();
+			}
+		};
+		fResolveBindingKeyAction.setToolTipText("Resolve Binding Key..."); //$NON-NLS-1$
+		fResolveBindingKeyAction.setEnabled(false);
+		
 		fFocusAction = new Action() {
 			public void run() {
 				performSetFocus();
@@ -1061,6 +1076,35 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fCreateBindings= fCreateBindingsAction.isChecked();
 		fDialogSettings.put(SETTINGS_NO_BINDINGS, !fCreateBindings);
 		performRefresh();
+	}
+	
+	protected void performResolveBindingKey() {
+		InputDialog dialog= new InputDialog(getSite().getShell(), "Resolve Binding Key", "Key: (optionally surrounded by <KEY: '> and <'>)", "", null);
+		if (dialog.open() != Window.OK)
+			return;
+
+		String key= dialog.getValue();
+		if (key.startsWith("KEY: '") && key.endsWith("'"))
+			key= key.substring(6, key.length() - 1);
+		ASTParser parser= ASTParser.newParser(fCurrentASTLevel);
+		parser.setResolveBindings(true);
+		if (fOpenable instanceof IJavaElement) {
+			parser.setProject(((IJavaElement) fOpenable).getJavaProject());
+			class MyASTRequestor extends ASTRequestor {
+				String fBindingKey;
+				IBinding fBinding;
+				public void acceptBinding(String bindingKey, IBinding binding) {
+					fBindingKey= bindingKey;
+					fBinding= binding;
+				}
+			}
+			MyASTRequestor requestor= new MyASTRequestor();
+			parser.createASTs(new ICompilationUnit[0], new String[] {key}, requestor, null);
+			Object viewerInput= fViewer.getInput();
+			Binding binding= new Binding(viewerInput, requestor.fBindingKey, requestor.fBinding, true);
+			fViewer.add(viewerInput, binding);
+			fViewer.setSelection(new StructuredSelection(binding), true);
+		}
 	}
 	
 	protected void performDoubleClick() {
