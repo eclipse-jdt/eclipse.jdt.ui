@@ -55,6 +55,6 @@ public class JUnitSourceSetup extends TestSetup {
 	 * @see junit.extensions.TestSetup#tearDown()
 	 */
 	protected void tearDown() throws Exception {
-		fProject.getProject().delete(true, true, null);
+		JavaProjectHelper.delete(fProject);
 	}
 }
