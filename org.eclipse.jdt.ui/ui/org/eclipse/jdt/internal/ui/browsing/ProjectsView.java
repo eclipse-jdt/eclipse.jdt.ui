@@ -118,11 +118,5 @@ public class ProjectsView extends JavaBrowsingPart {
 			super.setInput(input);
 		else
 			getViewer().setSelection(null);
-	}
-	
-	protected void fillActionBars() {
-		super.fillActionBars();
-		IActionBars bars= getViewSite().getActionBars();
-		bars.setGlobalActionHandler(IWorkbenchActionConstants.PROPERTIES, fPropertyDialogAction);
 	}	
 }

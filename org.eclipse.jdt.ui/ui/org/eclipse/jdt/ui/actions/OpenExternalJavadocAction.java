@@ -14,8 +14,6 @@ import java.io.File;
 import java.net.URL;
 import java.text.MessageFormat;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -23,10 +21,10 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.help.IHelp;
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -35,6 +33,7 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -82,22 +81,6 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	public OpenExternalJavadocAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
-	}
-	
-	/**
-	 * Opens the given URL in a Browser.
-	 * 
-	 * <p>
-	 * Note: This method is for internal use only. Clients should not call this method.
-	 * </p>
-	 */
-	public static void openInBrowser(final URL url, final Shell shell) {
-		IHelp help= WorkbenchHelp.getHelpSupport();
-		if (help != null) {
-			WorkbenchHelp.getHelpSupport().displayHelpResource(url.toExternalForm());
-		} else {
-			showMessage(shell, ActionMessages.getString("OpenExternalJavadocAction.help_not_available"), false); //$NON-NLS-1$
-		}
 	}
 	
 	/* (non-Javadoc)
@@ -178,7 +161,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		
 			URL url= JavaDocLocations.getJavaDocLocation(element, true);
 			if (url != null) {
-				openInBrowser(url, shell);
+				OpenBrowserUtil.open(url, shell, getTitle());
 			} 		
 		} catch (CoreException e) {
 			JavaPlugin.log(e);

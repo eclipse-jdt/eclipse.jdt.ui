@@ -10,7 +10,6 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;

@@ -14,6 +14,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
@@ -82,7 +83,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * </p>
 	 * 
-	 * @param ediitor the editor that owns this action group
+	 * @param editor the editor that owns this action group
 	 */
 	public RefactorActionGroup(CompilationUnitEditor editor) {
 		fSite= editor.getEditorSite();
@@ -174,15 +175,20 @@ public class RefactorActionGroup extends ActionGroup {
 	 */
 	public void dispose() {
 		ISelectionProvider provider= fSite.getSelectionProvider();
-		provider.removeSelectionChangedListener(fSelfEncapsulateField);
-		provider.removeSelectionChangedListener(fMoveAction);
-		provider.removeSelectionChangedListener(fRenameAction);
-		provider.removeSelectionChangedListener(fModifyParametersAction);
-		provider.removeSelectionChangedListener(fPullUpAction);
-		provider.removeSelectionChangedListener(fInlineTempAction);
-		provider.removeSelectionChangedListener(fExtractTempAction);
-		provider.removeSelectionChangedListener(fExtractMethodAction);
+		disposeAction(fSelfEncapsulateField, provider);
+		disposeAction(fMoveAction, provider);
+		disposeAction(fRenameAction, provider);
+		disposeAction(fModifyParametersAction, provider);
+		disposeAction(fPullUpAction, provider);
+		disposeAction(fInlineTempAction, provider);
+		disposeAction(fExtractTempAction, provider);
+		disposeAction(fExtractMethodAction, provider);
 		super.dispose();
+	}
+	
+	private void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) {
+		if (action != null)
+			provider.removeSelectionChangedListener(action);
 	}
 	
 	private void addRefactorSubmenu(IMenuManager menu) {

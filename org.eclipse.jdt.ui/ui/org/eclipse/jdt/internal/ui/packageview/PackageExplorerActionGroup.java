@@ -205,16 +205,6 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		
 		if (size == 1 && fPart.getViewer().isExpandable(element) && isGoIntoTarget(element)) 
 			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
-		
-		/*	
-		MenuManager gotoMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.gotoTitle")); //$NON-NLS-1$
-		menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, gotoMenu);
-		gotoMenu.add(fBackAction);
-		gotoMenu.add(fForwardAction);
-		gotoMenu.add(fUpAction);
-		gotoMenu.add(fGotoTypeAction);
-		gotoMenu.add(fGotoPackageAction);
-		*/
 	}
 	
 	private boolean isNewTarget(IJavaElement element) {

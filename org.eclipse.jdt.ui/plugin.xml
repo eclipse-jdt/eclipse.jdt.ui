@@ -866,7 +866,8 @@ JavaStructureDiffViewerCreator
       		label="%OpenAction.label"
 			tooltip="%OpenAction.tooltip"
 			description="%OpenAction.description"
-			retarget="true" />
+			retarget="true" 
+			allowLabelUpdate="true"/>
 			
 		<action id="org.eclipse.jdt.ui.actions.ShowInNaviagtorView"
       		menubarPath="navigate/showGroup"

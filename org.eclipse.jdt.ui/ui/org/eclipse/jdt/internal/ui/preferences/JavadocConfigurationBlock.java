@@ -34,6 +34,7 @@ import org.eclipse.jdt.ui.actions.OpenExternalJavadocAction;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -192,7 +193,7 @@ public class JavadocConfigurationBlock {
 		}
 
 		public void spawnInBrowser(URL url) {
-				OpenExternalJavadocAction.openInBrowser(url, fShell);
+				OpenBrowserUtil.open(url, fShell, title);
 		}
 
 		private void validateURL(URL indexURL, URL packagelistURL) {

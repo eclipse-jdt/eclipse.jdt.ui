@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -69,6 +70,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenWithMenu;
@@ -91,8 +93,11 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.ImportActionGroup;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
@@ -141,22 +146,15 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private JavaElementTypeComparator fTypeComparator;
 	
 	// Actions
-	private BuildGroup fBuildGroup;
-	private ContextMenuGroup[] fStandardGroups;
+	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
+	private CCPActionGroup fCCPActionGroup;
+	private BuildActionGroup fBuildActionGroup;
 	private CompositeActionGroup fStandardActionGroups;
-	private OpenAction fOpenAction;
-	private Action fOpenToAction;
-	private Action fShowNavigatorAction;
-	protected PropertyDialogAction fPropertyDialogAction;
- 	private RefreshAction fRefreshAction;
-
+	
 	private Menu fContextMenu;		
 	private IWorkbenchPart fPreviousSelectionProvider;
 	private Object fPreviousSelectedElement;
 	private Image fOriginalTitleImage;
-	
-	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
-	private CCPActionGroup fCCPActionGroup;
 			
 	/*
 	 * Ensure selection changed events being processed only if
@@ -322,11 +320,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 //		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$
 
 		fStandardActionGroups.fillActionBars(actionBars);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.REFRESH, fRefreshAction);
-//		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BOOKMARK, fAddBookmarkAction);
-		
-		fBuildGroup.fillActionBars(actionBars);
-		
 	}
 	
 	//---- IWorkbenchPart ------------------------------------------------------
@@ -364,14 +357,15 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return;		
 		
 		int key= event.keyCode;
+		IAction action;
 		if (key == SWT.F5) {
-			fRefreshAction.selectionChanged(
-				(IStructuredSelection) fViewer.getSelection());
-			if (fRefreshAction.isEnabled())
-				fRefreshAction.run();
+			action= fBuildActionGroup.getRefreshAction();
+			if (action.isEnabled())
+				action.run();
 		} if (event.character == SWT.DEL) {
-			if (fCCPActionGroup.getDeleteAction().isEnabled())
-				fCCPActionGroup.getDeleteAction().run();
+			action= fCCPActionGroup.getDeleteAction();
+			if (action.isEnabled())
+				action.run();
 		}
 	}
 	
@@ -386,38 +380,33 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 */
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
+		
 		IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
 		int size= selection.size();		
+		Object element= selection.getFirstElement();
+		IJavaElement jElement= element instanceof IJavaElement ? (IJavaElement)element : null;
 		
-		fPropertyDialogAction.selectionChanged(selection);
+		if (size == 1 && isNewTarget(jElement)) {
+			MenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
+			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
+			new NewWizardMenu(newMenu, getSite().getWorkbenchWindow(), false);
+		}
 
-		MenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
-		menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
-		new NewWizardMenu(newMenu, getSite().getWorkbenchWindow(), false);
-
-		// Open menus
-		fOpenAction.update();
-		if (fOpenAction.isEnabled())
-			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenAction);
-		addOpenWithMenu(menu, selection);
 		if (size == 1)
-			addOpenNewWindowAction(menu, selection.getFirstElement());
-
-		ContextMenuGroup.add(menu, fStandardGroups, fViewer);
-		
-		menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
-		fRefreshAction.selectionChanged(selection);
-
-		// XXX workaround until we have fully converted the code to use the new action groups
-		fStandardActionGroups.get(2).fillContextMenu(menu);
-		fStandardActionGroups.get(3).fillContextMenu(menu);
-		fStandardActionGroups.get(4).fillContextMenu(menu);
-		
-		menu.add(new Separator());
-		if (fPropertyDialogAction.isApplicableForSelection())
-			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fPropertyDialogAction);	
+			addOpenNewWindowAction(menu, element);
+		fStandardActionGroups.setContext(new ActionContext(selection));
+		fStandardActionGroups.fillContextMenu(menu);		
 	}
 
+	private boolean isNewTarget(IJavaElement element) {
+		if (element == null)
+			return false;
+		int type= element.getElementType();
+		return type == IJavaElement.JAVA_PROJECT ||
+			type == IJavaElement.PACKAGE_FRAGMENT_ROOT || 
+			type == IJavaElement.PACKAGE_FRAGMENT;
+	}
+	
 	private void addOpenNewWindowAction(IMenuManager menu, Object element) {
 		if (element instanceof IJavaElement) {
 			try {
@@ -432,29 +421,17 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			new PatchedOpenInNewWindowAction(getSite().getWorkbenchWindow(), (IContainer)element));
 	}
 
-	private void createActions() {
-		ISelectionProvider provider= getSelectionProvider();
-		fOpenAction= new OpenAction(getViewSite());
-		fPropertyDialogAction= new PropertyDialogAction(getShell(), provider);
-		fShowNavigatorAction= new ShowInNavigatorViewAction(getViewSite());
-		
-		fBuildGroup= new BuildGroup(this, true);
-		fStandardGroups= new ContextMenuGroup[] {
-			fBuildGroup,
-			new GenerateGroup(),
-			new JavaSearchGroup()
-		};
-
+	private void createActions() {		
 		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new OpenEditorActionGroup(this), 
 				new OpenViewActionGroup(this), 
 				new ShowActionGroup(this), 
 				fCCPActionGroup= new CCPActionGroup(this), 
-				new RefactorActionGroup(this), 
-				new GenerateActionGroup(this)});
-
-		
-		fRefreshAction= new RefreshAction(getShell());
+				new RefactorActionGroup(this),
+				new ImportActionGroup(this),
+				new GenerateActionGroup(this),
+				fBuildActionGroup= new BuildActionGroup(this),
+				new JavaSearchActionGroup(this, getViewer())});
 
 		String viewId= getConfigurationElement().getAttribute("id"); //$NON-NLS-1$
 		Assert.isNotNull(viewId);
@@ -469,26 +446,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(fViewer, viewId, getShell(), titleUpdater);
 	}
 	
-	private void addOpenWithMenu(IMenuManager menu, IStructuredSelection selection) {
-		// If one file is selected get it.
-		// Otherwise, do not show the "open with" menu.
-		if (selection.size() != 1)
-			return;
-
-		IAdaptable element= (IAdaptable)selection.getFirstElement();
-		Object resource= element.getAdapter(IResource.class);
-		if (!(resource instanceof IFile))
-			return; 
-
-		// Create a menu flyout.
-		MenuManager submenu= new MenuManager(PackagesMessages.getString("PackageExplorer.openWith")); //$NON-NLS-1$
-		submenu.add(new OpenWithMenu(getSite().getPage(), (IFile) resource));
-
-		// Add the submenu.
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
-
-	}
-
 	/**
 	 * Returns the shell to use for opening dialogs.
 	 * Used in this class, and in the actions.

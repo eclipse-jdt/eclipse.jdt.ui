@@ -63,7 +63,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction;
+import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.jarpackager.ConfirmSaveModifiedResourcesDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -397,7 +397,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			try {
 				IPath indexFile= fDestination.append("index.html"); //$NON-NLS-1$
 				URL url= indexFile.toFile().toURL();
-				OpenExternalJavadocAction.openInBrowser(url, getShell());
+				OpenBrowserUtil.open(url, getShell(), getWindowTitle());
 			} catch (MalformedURLException e) {
 				JavaPlugin.log(e);
 			}

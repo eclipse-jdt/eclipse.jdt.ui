@@ -112,11 +112,5 @@ public class PackagesView extends JavaBrowsingPart {
 			default:
 				return findElementToSelect(je.getParent());
 		}
-	}
-	
-	protected void fillActionBars() {
-		super.fillActionBars();
-		IActionBars bars= getViewSite().getActionBars();
-		bars.setGlobalActionHandler(IWorkbenchActionConstants.PROPERTIES, fPropertyDialogAction);
 	}	
 }

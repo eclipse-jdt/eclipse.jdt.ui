@@ -15,6 +15,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -164,15 +165,20 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void dispose() {
 		ISelectionProvider provider= fSite.getSelectionProvider();
-		provider.removeSelectionChangedListener(fOverrideMethods);
-		provider.removeSelectionChangedListener(fAddGetterSetter);
-		provider.removeSelectionChangedListener(fAddUnimplementedConstructors);
-		provider.removeSelectionChangedListener(fAddJavaDocStub);
-		provider.removeSelectionChangedListener(fAddBookmark);
-		provider.removeSelectionChangedListener(fExternalizeStrings);
-		provider.removeSelectionChangedListener(fFindStringsToExternalize);
-		provider.removeSelectionChangedListener(fOrganizeImports);
+		disposeAction(fOverrideMethods, provider);
+		disposeAction(fAddGetterSetter, provider);
+		disposeAction(fAddUnimplementedConstructors, provider);
+		disposeAction(fAddJavaDocStub, provider);
+		disposeAction(fAddBookmark, provider);
+		disposeAction(fExternalizeStrings, provider);
+		disposeAction(fFindStringsToExternalize, provider);
+		disposeAction(fOrganizeImports, provider);
 		super.dispose();
+	}
+	
+	private void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) {
+		if (action != null)
+			provider.removeSelectionChangedListener(action);
 	}
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {

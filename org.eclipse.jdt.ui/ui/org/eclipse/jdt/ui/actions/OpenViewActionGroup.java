@@ -90,7 +90,7 @@ public class OpenViewActionGroup extends ActionGroup {
 		fOpenSuperImplementation= new OpenSuperImplementationAction(part);
 		fOpenExternalJavadoc= new OpenExternalJavadocAction(part);
 		fOpenTypeHierarchy= new OpenTypeHierarchyAction(part);
-		initialize(part.getEditorSite().getSelectionProvider());
+		initialize(part.getEditorSite());
 	}
 
 	private void createSiteActions(IWorkbenchSite site) {
@@ -99,10 +99,12 @@ public class OpenViewActionGroup extends ActionGroup {
 		fOpenExternalJavadoc= new OpenExternalJavadocAction(site);
 		fOpenTypeHierarchy= new OpenTypeHierarchyAction(site);
 		fOpenPropertiesDialog= new PropertyDialogAction(site.getShell(), site.getSelectionProvider());
-		initialize(site.getSelectionProvider());
+		initialize(site);
 	}
 	
-	private void initialize(ISelectionProvider provider) {
+	private void initialize(IWorkbenchSite site) {
+		fSite= site;
+		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		fOpenSuperImplementation.update(selection);
 		fOpenExternalJavadoc.update(selection);
