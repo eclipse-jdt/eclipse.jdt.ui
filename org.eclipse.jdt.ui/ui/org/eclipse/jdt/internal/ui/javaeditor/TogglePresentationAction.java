@@ -19,11 +19,12 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IClassFile;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -34,7 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 /**
- * A toolbar action which toggles the presentation model of the
+ * A tool bar action which toggles the presentation model of the
  * connected text editor. The editor shows either the highlight range
  * only or always the whole document.
  */
@@ -84,12 +85,19 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 		ITextEditor editor= getTextEditor();
 		boolean checked= (editor != null && editor.showsHighlightRangeOnly());
 		setChecked(checked);
-		ICompilationUnit cu= null;
-		if (editor != null) {
+		if (editor instanceof CompilationUnitEditor) {
 			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-			cu= manager.getWorkingCopy(editor.getEditorInput());
-		}
-		setEnabled(cu != null);
+			setEnabled(manager.getWorkingCopy(editor.getEditorInput()) != null);
+		} else if (editor instanceof ClassFileEditor) {
+			IEditorInput input= editor.getEditorInput();
+			IClassFile cf= null;
+			if (input instanceof IClassFileEditorInput) {
+				IClassFileEditorInput cfi= (IClassFileEditorInput)input;
+				cf= cfi.getClassFile();
+			}
+			setEnabled(cf != null && cf.exists());
+		} else
+			setEnabled(editor != null);
 	}
 	
 	/*
@@ -117,6 +125,8 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 	
 	/**
 	 * Synchronizes the appearance of the editor with what the preference store tells him.
+	 * 
+	 * @param editor the text editor
 	 */
 	private void synchronizeWithPreference(ITextEditor editor) {
 		
