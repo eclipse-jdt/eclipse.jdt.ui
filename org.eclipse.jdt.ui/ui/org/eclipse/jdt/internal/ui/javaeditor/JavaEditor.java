@@ -1822,10 +1822,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return;
 			
 			final ISourceViewer viewer= getSourceViewer();
-			final int caret= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+			final int caret, length;
+			Point selection= viewer.getSelectedRange();
+			if (selection.y != 0) {
+				caret= selection.x;
+				length= selection.y;
+			} else {
+				caret= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+				length= position - caret;
+			}
 
 			try {
-				viewer.getDocument().replace(caret, position - caret, ""); //$NON-NLS-1$
+				viewer.getDocument().replace(caret, length, ""); //$NON-NLS-1$
 			} catch (BadLocationException exception) {
 				// Should not happen
 			}
@@ -1990,15 +1998,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.PreviousSubWordAction#setCaretPosition(int)
 		 */
-		protected void setCaretPosition(final int position) {
+		protected void setCaretPosition(int position) {
 			if (!validateEditorInputState())
 				return;
 			
+			final int length;
 			final ISourceViewer viewer= getSourceViewer();
-			final int caret= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+			Point selection= viewer.getSelectedRange();
+			if (selection.y != 0) {
+				position= selection.x;
+				length= selection.y;
+			} else {
+				length= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset()) - position;
+			}
 
 			try {
-				viewer.getDocument().replace(position, caret - position, ""); //$NON-NLS-1$
+				viewer.getDocument().replace(position, length, ""); //$NON-NLS-1$
 			} catch (BadLocationException exception) {
 				// Should not happen
 			}
