@@ -19,6 +19,9 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -33,7 +36,9 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.template.Template;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
+import org.eclipse.jdt.internal.ui.text.template.TemplateInterpolator;
 import org.eclipse.jdt.internal.ui.text.template.TemplateMessages;
+import org.eclipse.jdt.internal.ui.text.template.VariableEvaluator;
 
 /**
  * Dialog to edit a template.
@@ -54,6 +59,46 @@ public class EditTemplateDialog extends StatusDialog {
 		}	
 	}
 
+	private static class TemplateVerifier implements VariableEvaluator {		
+		private String fErrorMessage;
+		private boolean fHasAdjacentVariables;
+		private boolean fEndsWithVariable;
+		
+		public void reset() {
+			fErrorMessage= null;
+			fHasAdjacentVariables= false;
+			fEndsWithVariable= false;
+		}
+
+		public void acceptError(String message) {
+			if (fErrorMessage == null)
+				fErrorMessage= message;
+		}
+
+		public void acceptText(String text) {
+			if (text.length() > 0)
+				fEndsWithVariable= false;
+		}
+		
+		public void acceptVariable(String variable) {
+			if (fEndsWithVariable)
+				fHasAdjacentVariables= true;
+			
+			fEndsWithVariable= true;
+		}
+
+		public boolean hasErrors() {
+			return fHasAdjacentVariables || (fErrorMessage != null);	
+		}
+		
+		public String getErrorMessage() {
+			if (fHasAdjacentVariables)
+				return TemplateMessages.getString("EditTemplateDialog.error.adjacent.variables"); //$NON-NLS-1$
+
+			return fErrorMessage;
+		}
+	}
+
 	private Template fTemplate;
 
 	private Text fNameText;
@@ -63,6 +108,9 @@ public class EditTemplateDialog extends StatusDialog {
 	
 //	private Button fAddVariableButton;
 
+	private TemplateInterpolator fInterpolator= new TemplateInterpolator();
+	private TemplateVerifier fVerifier= new TemplateVerifier();
+	
 	private boolean fSuppressError= true; // #4354
 		
 	public EditTemplateDialog(Shell parent, Template template, boolean edit) {
@@ -143,7 +191,18 @@ public class EditTemplateDialog extends StatusDialog {
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null));
 		viewer.setEditable(true);
-		viewer.setDocument(new Document());
+		
+		IDocument document= new Document();
+		document.addDocumentListener(new IDocumentListener() {
+			public void documentAboutToBeChanged(DocumentEvent event) {}
+
+			public void documentChanged(DocumentEvent event) {
+				fInterpolator.interpolate(event.getDocument().get(), fVerifier);
+
+				updateButtons();
+			}
+		});
+		viewer.setDocument(document);
 	
 		Font font= JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
@@ -186,6 +245,8 @@ public class EditTemplateDialog extends StatusDialog {
 				status.setError(""); //$NON-NLS-1$							
 			else
 				status.setError(TemplateMessages.getString("EditTemplateDialog.error.noname")); //$NON-NLS-1$
+ 		} else if (fVerifier.hasErrors()) {
+ 			status.setError(fVerifier.getErrorMessage());	
 		}
 
 		updateStatus(status);

@@ -62,7 +62,13 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 	}
 
 	/*
-	 * @see VariableEvaluator#acceptText(String, int)
+	 * @see VariableEvaluator#acceptError(String)
+	 */
+	public void acceptError(String message) {
+	}
+
+	/*
+	 * @see VariableEvaluator#acceptText(String)
 	 */
 	public void acceptText(String text) {
 		try {
@@ -75,7 +81,7 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 	}
 
 	/*
-	 * @see VariableEvaluator#acceptVariable(String, int)
+	 * @see VariableEvaluator#acceptVariable(String)
 	 */
 	public void acceptVariable(String variable) {
 		try {

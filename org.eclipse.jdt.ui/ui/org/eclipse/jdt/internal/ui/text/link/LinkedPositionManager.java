@@ -133,13 +133,13 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		if (positions != null) {
 			for (int i = 0; i < positions.length; i++)
 				if (collides(positions[i], offset, length))
-					throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.position.collision"))); //$NON-NLS-1$
+					throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.error.position.collision"))); //$NON-NLS-1$
 		}
 		
 		String type= fDocument.get(offset, length);		
 
 		if (containsLineDelimiters(type))
-			throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.contains.line.delimiters"))); //$NON-NLS-1$
+			throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.error.contains.line.delimiters"))); //$NON-NLS-1$
 
 		try {
 			fDocument.addPosition(LINKED_POSITION, new TypedPosition(offset, length, type));

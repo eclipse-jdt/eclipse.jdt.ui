@@ -15,6 +15,13 @@ public interface VariableEvaluator {
 	void reset();
 
 	/**
+	 * Accepts an error .
+	 * 
+	 * @param message a message describing the error.
+	 */
+	void acceptError(String message);
+
+	/**
 	 * Accepts a non-variable text.
 	 * 
 	 * @param text the text to accept.

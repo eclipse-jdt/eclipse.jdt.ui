@@ -67,7 +67,8 @@ public class TemplateInterpolator {
 					break;
 					
 				default:
-					// XXX grammar would not allow occurence of single escape characters
+					// illegal single escape character, but be tolerant
+					evaluator.acceptError(TemplateMessages.getString("TemplateInterpolator.error.incomplete.variable")); //$NON-NLS-1$
 					text.append(ESCAPE_CHARACTER);
 					text.append(ch);
 					state= TEXT;
@@ -87,6 +88,13 @@ public class TemplateInterpolator {
 					break;
 				
 				default:
+					if (!Character.isUnicodeIdentifierStart(ch) &&
+						!Character.isUnicodeIdentifierPart(ch))
+					{
+						// illegal identifier character
+						evaluator.acceptError(TemplateMessages.getString("TemplateInterpolator.error.invalid.identifier")); //$NON-NLS-1$
+					}
+				
 					text.append(ch);
 					break;
 				}
@@ -101,12 +109,14 @@ public class TemplateInterpolator {
 		
 		// illegal, but be tolerant
 		case ESCAPE:
+			evaluator.acceptError(TemplateMessages.getString("TemplateInterpolator.error.incomplete.variable")); //$NON-NLS-1$
 			text.append(ESCAPE_CHARACTER);
 			evaluator.acceptText(text.toString());
 			break;
 				
 		// illegal, but be tolerant
 		case IDENTIFIER:
+			evaluator.acceptError(TemplateMessages.getString("TemplateInterpolator.error.incomplete.variable")); //$NON-NLS-1$
 			text.append(ESCAPE_CHARACTER);
 			evaluator.acceptText(text.toString());
 			break;		
