@@ -8,7 +8,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.FieldEditor;import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 
@@ -26,6 +26,7 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(RefactoringPreferences.PREF_ERROR_PAGE_SEVERITY_THRESHOLD, RefactoringPreferences.ERROR_SEVERITY);
 		store.setDefault(RefactoringPreferences.PREF_JAVA_STYLE_GUIDE_CONFORM, true);
+		store.setDefault(RefactoringPreferences.PREF_SAVE_ALL_EDITORS, false);
 	}
 
 	protected IPreferenceStore doGetPreferenceStore() {
@@ -34,9 +35,13 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 
 	public void createFieldEditors() {
 		Composite parent= getFieldEditorParent();
-		
-		String prefix= "RefactoringPreferencePage.errorPage.severity.";
-		RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
+		addField(createSeverityLevelField(parent));
+		addField(createSaveAllField(parent));
+	}
+	
+	private FieldEditor createSeverityLevelField(Composite parent){
+			String prefix= "RefactoringPreferencePage.errorPage.severity.";
+			RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
 			RefactoringPreferences.PREF_ERROR_PAGE_SEVERITY_THRESHOLD,
 			getResourceString(prefix + "label"),
 			2,
@@ -48,7 +53,17 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 			},
 			parent
 			);
-		addField(editor);
+		return editor;	
+	}
+	
+	private FieldEditor createSaveAllField(Composite parent){
+		String prefix= "RefactoringPreferencePage.savealleditors.";
+		BooleanFieldEditor editor= new BooleanFieldEditor(
+		RefactoringPreferences.PREF_SAVE_ALL_EDITORS,
+			getResourceString(prefix + "label"),
+			BooleanFieldEditor.DEFAULT,
+			parent);
+		return editor;
 	}
 	
 	public void init(IWorkbench workbench) {

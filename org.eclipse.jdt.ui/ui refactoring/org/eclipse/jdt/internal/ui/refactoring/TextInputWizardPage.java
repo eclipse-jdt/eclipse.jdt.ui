@@ -9,12 +9,16 @@ import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jface.util.Assert;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jface.util.Assert;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;
 
-public abstract class TextInputWizardPage extends EditorSavingWizardPage {
+public abstract class TextInputWizardPage extends UserInputWizardPage{
 
 	private StringDialogField fStringInput;
 	private String fInitialSetting;
+	
+	
+	public static final String PAGE_NAME= "TextInputPage";
+	private static final String PREFIX= PAGE_NAME + ".";
 	
 	/**
 	 * Creates a new text input page.
@@ -32,7 +36,7 @@ public abstract class TextInputWizardPage extends EditorSavingWizardPage {
 	 * @param initialSetting the initialSetting.
 	 */
 	public TextInputWizardPage(boolean isLastUserPage, String initialSetting) {
-		super(isLastUserPage);
+		super(PAGE_NAME, isLastUserPage);
 		Assert.isNotNull(initialSetting);
 		fInitialSetting= initialSetting;
 	}
@@ -116,6 +120,16 @@ public abstract class TextInputWizardPage extends EditorSavingWizardPage {
 			fStringInput.setFocus();
 		}
 	}
+	
+	/* (non-JavaDoc)
+	 * Method defined in IWizardPage
+	 */
+	public void createControl(Composite parent) {
+		Composite composite= new Composite(parent, SWT.NONE);
+		DialogField[] fields= createDialogFields();	
+		LayoutUtil.doDefaultLayout(composite, fields, true);
+		setControl(composite);
+	}
 
 	public String getNewName() {
 		return fStringInput.getText();
@@ -133,7 +147,7 @@ public abstract class TextInputWizardPage extends EditorSavingWizardPage {
 	 * Method declared in EditorSavingWizardPage.
 	 */
 	protected DialogField[] createDialogFields() {
-		return new DialogField[] { createStringDialogField(), getEditorList() };
+		return new DialogField[] { createStringDialogField()};
 	}
 	
 	/**

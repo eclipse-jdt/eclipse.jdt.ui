@@ -50,7 +50,7 @@ public class RefactoringWizard extends Wizard {
 	 * adds an <code>EditorSavingWizardPage</code> to the wizard.
 	 */
 	protected void addUserInputPages(){
-		addPage(new EditorSavingWizardPage(true));
+		//addPage(new EditorSavingWizardPage(true));
 	}
 	
 	/**
@@ -217,7 +217,6 @@ public class RefactoringWizard extends Wizard {
 	 *  if <code>false</code> no status updating is performed.
 	 */
 	IChange createChange(int style, int checkPassedSeverity, boolean updateStatus){
-		saveOpenEditors();
 		CreateChangeOperation op= new CreateChangeOperation(fRefactoring, style);
 		op.setCheckPassedSeverity(checkPassedSeverity); 
 
@@ -245,7 +244,6 @@ public class RefactoringWizard extends Wizard {
 	}
 
 	public boolean performFinish(PerformChangeOperation op) {
-		saveOpenEditors();
 		ChangeContext context= new ChangeContext(new ChangeExceptionHandler());
 		try{
 			op.setChangeContext(context);
@@ -325,7 +323,6 @@ public class RefactoringWizard extends Wizard {
 	 * @see CheckPreconditionsOperation
 	 */
 	protected RefactoringStatus internalCheckCondition(IRunnableContext context, int style) {
-		saveOpenEditors();
 		
 		CheckConditionsOperation op= new CheckConditionsOperation(fRefactoring, style); 
 
@@ -369,19 +366,6 @@ public class RefactoringWizard extends Wizard {
 			setInputStatus(status);
 	}
 
-	//---- Save open editors -------------------------------------------------------------
-	
-	/**
-	 * Save open editors to make sure the java search and AST is working correctly.
-	 */
-	private boolean saveOpenEditors() {
-		EditorSavingWizardPage page= (EditorSavingWizardPage)getPage(EditorSavingWizardPage.PAGE_NAME);
-		if (page != null) {
-			return page.saveEditors();	
-		}
-		
-		return true;
-	}
 	
 	//---- Reimplementation of Wizard methods --------------------------------------------
 

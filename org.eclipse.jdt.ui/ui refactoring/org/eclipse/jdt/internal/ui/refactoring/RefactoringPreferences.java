@@ -21,6 +21,7 @@ public class RefactoringPreferences {
 		
 	public static final String PREF_ERROR_PAGE_SEVERITY_THRESHOLD= "Refactoring.ErrorPage.severityThreshold";
 	public static final String PREF_JAVA_STYLE_GUIDE_CONFORM= "Refactoring.javaStyleGuideConform";
+	public static final String PREF_SAVE_ALL_EDITORS= "Refactoring.savealleditors";
 
 	static public int getCheckPassedSeverity() {	
 		String value= JavaPlugin.getDefault().getPreferenceStore().getString(PREF_ERROR_PAGE_SEVERITY_THRESHOLD);
@@ -36,4 +37,9 @@ public class RefactoringPreferences {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(PREF_JAVA_STYLE_GUIDE_CONFORM);
 	}
+	
+	static public boolean getSaveAllEditors() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(PREF_SAVE_ALL_EDITORS);
+	}	
 }
