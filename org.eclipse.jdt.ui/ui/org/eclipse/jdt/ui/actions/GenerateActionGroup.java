@@ -68,7 +68,8 @@ public class GenerateActionGroup extends ActionGroup {
 	private ExternalizeStringsAction fExternalizeStrings;
 	private FindStringsToExternalizeAction fFindStringsToExternalize;
 	private SurroundWithTryCatchAction fSurroundWithTryCatch;
-	private AddJARToClasspathAction fAddJARToClasspathAction;
+	private AddToClasspathAction fAddToClasspathAction;
+	private RemoveFromClasspathAction fRemoveFromClasspathAction;
 	
 	private OrganizeImportsAction fOrganizeImports;
 
@@ -164,7 +165,8 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(site);
 		fAddJavaDocStub= new AddJavaDocStubAction(site);
 		fAddBookmark= new AddBookmarkAction(site.getShell());
-		fAddJARToClasspathAction= new AddJARToClasspathAction(site);
+		fAddToClasspathAction= new AddToClasspathAction(site);
+		fRemoveFromClasspathAction= new RemoveFromClasspathAction(site);
 		fAddTaskAction= new AddTaskAction(site);
 		fExternalizeStrings= new ExternalizeStringsAction(site);
 		fFindStringsToExternalize= new FindStringsToExternalizeAction(site);
@@ -190,7 +192,8 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fAddUnimplementedConstructors);
 		registerSelectionListener(provider, fAddJavaDocStub);
 		registerSelectionListener(provider, fAddBookmark);
-		registerSelectionListener(provider, fAddJARToClasspathAction);
+		registerSelectionListener(provider, fAddToClasspathAction);
+		registerSelectionListener(provider, fRemoveFromClasspathAction);
 		registerSelectionListener(provider, fExternalizeStrings);
 		registerSelectionListener(provider, fFindStringsToExternalize);
 		registerSelectionListener(provider, fOrganizeImports);
@@ -245,7 +248,8 @@ public class GenerateActionGroup extends ActionGroup {
 			appendToGroup(menu, fAddUnimplementedConstructors);
 			appendToGroup(menu, fAddJavaDocStub);
 			appendToGroup(menu, fAddBookmark);
-			appendToGroup(menu, fAddJARToClasspathAction);
+			appendToGroup(menu, fAddToClasspathAction);
+			appendToGroup(menu, fRemoveFromClasspathAction);
 		}
 	}
 	

@@ -21,12 +21,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -50,20 +51,20 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
  * 
  * @since 2.1
  */
-public class AddJARToClasspathAction extends SelectionDispatchAction {
+public class AddToClasspathAction extends SelectionDispatchAction {
 
 	/**
-	 * Creates a new <code>RefreshAction</code>. The action requires
-	 * that the selection provided by the site's selection provider is of type <code>
+	 * Creates a new <code>AddToClasspathAction</code>. The action requires that
+	 * the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public AddJARToClasspathAction(IWorkbenchSite site) {
+	public AddToClasspathAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("AddJARToClasspathAction.label")); //$NON-NLS-1$
-		setToolTipText(ActionMessages.getString("AddJARToClasspathAction.toolTip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADDJAR_ACTION);
+		setText(ActionMessages.getString("AddToClasspathAction.label")); //$NON-NLS-1$
+		setToolTipText(ActionMessages.getString("AddToClasspathAction.toolTip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_TO_CLASSPATH_ACTION);
 	}
 	
 	/* (non-Javadoc)
@@ -112,7 +113,7 @@ public class AddJARToClasspathAction extends SelectionDispatchAction {
 		IWorkspaceRunnable operation= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
 				IFile[] files= getJARFiles(selection);
-				monitor.beginTask(ActionMessages.getString("AddJARToClasspathAction.progressMessage"), files.length); //$NON-NLS-1$
+				monitor.beginTask(ActionMessages.getString("AddToClasspathAction.progressMessage"), files.length); //$NON-NLS-1$
 				for (int i= 0; i < files.length; i++) {
 					monitor.subTask(files[i].getFullPath().toString());
 					IJavaProject project= JavaCore.create(files[i].getProject());
@@ -121,6 +122,8 @@ public class AddJARToClasspathAction extends SelectionDispatchAction {
 			}
 			
 			private void addToClassPath(IJavaProject project, IPath jarPath, IProgressMonitor monitor) throws JavaModelException {
+				if (monitor.isCanceled())
+					throw new OperationCanceledException();
 				IClasspathEntry[] entries= project.getRawClasspath();
 				IClasspathEntry[] newEntries= new IClasspathEntry[entries.length + 1];
 				System.arraycopy(entries, 0, newEntries, 0, entries.length);
@@ -130,11 +133,11 @@ public class AddJARToClasspathAction extends SelectionDispatchAction {
 		};
 		
 		try {
-			new ProgressMonitorDialog(getShell()).run(true, true, new WorkbenchRunnableAdapter(operation));
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(operation));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), 
-				ActionMessages.getString("AddJARToClasspathAction.error.title"),  //$NON-NLS-1$
-				ActionMessages.getString("AddJARToClasspathAction.error.message")); //$NON-NLS-1$
+				ActionMessages.getString("AddToClasspathAction.error.title"),  //$NON-NLS-1$
+				ActionMessages.getString("AddToClasspathAction.error.message")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// canceled
 		}
