@@ -38,7 +38,7 @@ abstract class  MatchFilter {
 	private static final MatchFilter JAVADOC_FILTER= new JavadocFilter(); 
 	private static final MatchFilter READ_FILTER= new ReadFilter(); 
 	private static final MatchFilter WRITE_FILTER= new WriteFilter(); 
-	private static final MatchFilter UNEXACT_FILTER= new UnexactMatchFilter(); 
+	private static final MatchFilter UNEXACT_FILTER= new InexactMatchFilter(); 
 	private static final MatchFilter ERASURE_FILTER= new ErasureMatchFilter(); 
 	
 	private static final MatchFilter[] ALL_FILTERS= new MatchFilter[] {
@@ -183,7 +183,7 @@ abstract class GenericTypeFilter extends MatchFilter {
 
 class ErasureMatchFilter extends GenericTypeFilter {
 	public boolean filters(JavaElementMatch match) {
-		return (match.getMatchRule() & SearchPattern.R_ERASURE_MATCH) != 0;
+		return (match.getMatchRule() & (SearchPattern.R_FULL_MATCH | SearchPattern.R_EQUIVALENT_MATCH)) == 0;
 	}
 	public String getName() {
 		return SearchMessages.getString("MatchFilter.ErasureFilter.name"); //$NON-NLS-1$
@@ -199,21 +199,21 @@ class ErasureMatchFilter extends GenericTypeFilter {
 	}
 }
 
-class UnexactMatchFilter extends GenericTypeFilter {
+class InexactMatchFilter extends GenericTypeFilter {
 	public boolean filters(JavaElementMatch match) {
-		return (match.getMatchRule() & (SearchPattern.R_EQUIVALENT_MATCH | SearchPattern.R_ERASURE_MATCH)) != 0;
+		return (match.getMatchRule() & (SearchPattern.R_FULL_MATCH)) == 0;
 	}
 	public String getName() {
-		return SearchMessages.getString("MatchFilter.UnexactFilter.name"); //$NON-NLS-1$
+		return SearchMessages.getString("MatchFilter.InexactFilter.name"); //$NON-NLS-1$
 	}
 	public String getActionLabel() {
-		return SearchMessages.getString("MatchFilter.UnexactFilter.actionLabel"); //$NON-NLS-1$
+		return SearchMessages.getString("MatchFilter.InexactFilter.actionLabel"); //$NON-NLS-1$
 	}
 	public String getDescription() {
-		return SearchMessages.getString("MatchFilter.UnexactFilter.description"); //$NON-NLS-1$
+		return SearchMessages.getString("MatchFilter.InexactFilter.description"); //$NON-NLS-1$
 	}
 	public String getID() {
-		return "filter_unexact"; //$NON-NLS-1$
+		return "filter_inexact"; //$NON-NLS-1$
 	}
 }
 
