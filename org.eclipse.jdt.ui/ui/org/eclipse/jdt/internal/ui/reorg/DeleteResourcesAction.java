@@ -136,15 +136,48 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 	private static boolean confirmDelete(IStructuredSelection selection) {
 		Assert.isTrue(ClipboardActionUtil.getSelectedProjects(selection).isEmpty());
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
-		String label;
-		if (selection.size() == 1){
-			String pattern= "Are you sure you want to delete ''{0}''?";
-			label= MessageFormat.format(pattern, new String[]{getName(selection.getFirstElement())});
-		} else {
-			String pattern= "Are you sure you want to delete these {0} resources?";
-			label= MessageFormat.format(pattern, new String[]{String.valueOf(selection.size())});
-		}
+		String label= createConfirmationString(selection);
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, label);
+	}
+	
+	private static String createConfirmationString(IStructuredSelection selection) {
+		if (selection.size() == 1){
+			Object firstElement= selection.getFirstElement();
+			String pattern= createConfirmationStringForSingleElement(firstElement);
+			return  MessageFormat.format(pattern, new String[]{getName(firstElement)});
+		} else {
+			String pattern= createConfirmationStringForMultipleElements(selection);
+			return MessageFormat.format(pattern, new String[]{String.valueOf(selection.size())});
+		}
+	}
+	
+	private static String createConfirmationStringForSingleElement(Object firstElement) {
+		if (isLinkedResource(firstElement))
+			return "Are you sure you want to delete linked resource ''{0}''?\n" +
+							"Only the workspace link will be deleted. Link target will remain unchanged.";
+		else
+			return "Are you sure you want to delete ''{0}''?";
+	}
+	
+	private static String createConfirmationStringForMultipleElements(IStructuredSelection selection) {
+		if (containsLinkedResources(selection))
+			return "Are you sure you want to delete these {0} resources?\n\n" +
+							"Selection contains linked resources\n" +
+							"Only the workspace links will be deleted. Link targets will remain unchanged.";
+		else	
+			return "Are you sure you want to delete these {0} resources?";
+	}
+	
+	private static boolean containsLinkedResources(IStructuredSelection selection) {
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			if (isLinkedResource(iter.next()))
+				return true;
+		}
+		return false;
+	}
+	
+	private static boolean isLinkedResource(Object element) {
+		return (element instanceof IResource) && ((IResource)element).isLinked();
 	}
 	
 	private static String getName(Object element){
