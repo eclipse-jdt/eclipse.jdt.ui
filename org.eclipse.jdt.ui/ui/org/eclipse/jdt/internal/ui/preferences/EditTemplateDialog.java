@@ -169,14 +169,15 @@ public class EditTemplateDialog extends StatusDialog {
 		fTemplate= template;
 		fIsNameModifiable= isNameModifiable;
 		
-		String delim= new Document().getLegalLineDelimiters()[0];
+		// XXX workaround for bug 63313 - disabling prefix until fixed.
+//		String delim= new Document().getLegalLineDelimiters()[0];
 		
 		List contexts= new ArrayList();
 		for (Iterator it= registry.contextTypes(); it.hasNext();) {
 			TemplateContextType type= (TemplateContextType) it.next();
-			if (type.getId().equals("javadoc")) //$NON-NLS-1$
-				contexts.add(new String[] { type.getId(), type.getName(), "/**" + delim }); //$NON-NLS-1$
-			else
+//			if (type.getId().equals("javadoc")) //$NON-NLS-1$
+//				contexts.add(new String[] { type.getId(), type.getName(), "/**" + delim }); //$NON-NLS-1$
+//			else
 				contexts.add(new String[] { type.getId(), type.getName(), "" }); //$NON-NLS-1$
 		}
 		fContextTypes= (String[][]) contexts.toArray(new String[contexts.size()][]);
@@ -272,7 +273,7 @@ public class EditTemplateDialog extends StatusDialog {
 		}
 		initializeActions();
 
-		applyDialogFont(parent);		
+		applyDialogFont(parent);
 		return composite;
 	}
 	
@@ -357,7 +358,9 @@ public class EditTemplateDialog extends StatusDialog {
 		TemplateEditorSourceViewerConfiguration configuration= new TemplateEditorSourceViewerConfiguration(tools.getColorManager(), store, null, fTemplateProcessor);
 		viewer.configure(configuration);
 		viewer.setEditable(true);
-		viewer.setDocument(document, prefix.length(), document.getLength() - prefix.length());
+		// XXX workaround for bug 63313 - disabling prefix until fixed.
+//		viewer.setDocument(document, prefix.length(), document.getLength() - prefix.length());
+		viewer.setDocument(document);
 		
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);

@@ -254,6 +254,28 @@ public class PackageExplorerPart extends ViewPart
 			}
 			return list.toArray();
 		}
+		/*
+		 * @see AbstractTreeViewer#isExpandable(java.lang.Object)
+		 */
+		public boolean isExpandable(Object parent) {
+			if (isFlatLayout())
+				return super.isExpandable(parent);
+			
+			List list= new ArrayList();
+			ViewerFilter[] filters= fViewer.getFilters();
+			Object[] children= ((ITreeContentProvider) fViewer.getContentProvider()).getChildren(parent);
+			for (int i = 0; i < children.length; i++) {
+				Object object= children[i];
+				
+				if (isEssential(object))
+					return true;
+				
+				object= filter(object, parent, filters);
+				if (object != null)
+					return true;
+			}
+			return false;
+		}
 		
 		// Sends the object through the given filters
 		private Object filter(Object object, Object parent, ViewerFilter[] filters) {

@@ -125,7 +125,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	
 	public List perform() {
 		fStart.accept(this);
-		if (fSelectedName != null) {
+		if (fResult.size() > 0 && fSelectedName != null) {
 			fResult.add(fSelectedName);
 		}
 		return fResult;

@@ -176,6 +176,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	private int fCurrentOrientation;
 	int fOrientation= VIEW_ORIENTATION_AUTOMATIC;
+	boolean fInComputeOrientation= false;
+	
 	private boolean fLinkingEnabled;
 	private boolean fSelectInEditor;
 	
@@ -870,19 +872,29 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 
 	void computeOrientation() {
-		if (fOrientation != VIEW_ORIENTATION_AUTOMATIC) {
-			setOrientation(fOrientation);
+		// fix for bug: 63268 error while activating view 
+		// avoid recursive calls of compute orientation 
+		if (fInComputeOrientation) {
+			return;
 		}
-		else {
-			if (fOrientation == VIEW_ORIENTATION_SINGLE)
-				return;
-			Point size= fParent.getSize();
-			if (size.x != 0 && size.y != 0) {
-				if (size.x > size.y) 
-					setOrientation(VIEW_ORIENTATION_HORIZONTAL);
-				else 
-					setOrientation(VIEW_ORIENTATION_VERTICAL);
+		fInComputeOrientation= true;
+		try {
+			if (fOrientation != VIEW_ORIENTATION_AUTOMATIC) {
+				setOrientation(fOrientation);
 			}
+			else {
+				if (fOrientation == VIEW_ORIENTATION_SINGLE)
+					return;
+				Point size= fParent.getSize();
+				if (size.x != 0 && size.y != 0) {
+					if (size.x > size.y) 
+						setOrientation(VIEW_ORIENTATION_HORIZONTAL);
+					else 
+						setOrientation(VIEW_ORIENTATION_VERTICAL);
+				}
+			}
+		} finally {
+			fInComputeOrientation= false;
 		}
 	}
 

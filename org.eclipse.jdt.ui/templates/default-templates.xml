@@ -148,7 +148,7 @@ return ${name};</template>
 	${cursor} 
 }</template>
 
-<template name="nls" description="%Templates.non-nls" id="org.eclipse.jdt.ui.templates.non-nls" context="java" enabled="true">//$$NON-NLS$$-${N}</template>
+<template name="nls" description="%Templates.non-nls" id="org.eclipse.jdt.ui.templates.non-nls" context="java" enabled="true">//$$NON-NLS-${N}$$</template>
 
 <template name="synchronized" description="%Templates.synchronized" id="org.eclipse.jdt.ui.templates.synchronized" context="java" enabled="true">synchronized (${mutex}) {
 	${line_selection}
