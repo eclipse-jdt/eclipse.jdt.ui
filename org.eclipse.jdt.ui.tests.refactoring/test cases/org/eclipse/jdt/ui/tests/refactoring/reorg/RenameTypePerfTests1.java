@@ -14,27 +14,27 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
 
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
-public class RenameMethodPerfTests1 extends RefactoringPerformanceTestCase {
+public class RenameTypePerfTests1 extends RefactoringPerformanceTestCase {
 
 	private TestProject fTestProject;
 	
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
-		TestSuite suite= new TestSuite("RenameTypePerfAcceptanceTests1");
-		suite.addTest(new RenameMethodPerfTests1("testCold_10_10"));
-		suite.addTest(new RenameMethodPerfTests1("test_10_10"));
-		suite.addTest(new RenameMethodPerfTests1("test_100_10"));
-		suite.addTest(new RenameMethodPerfTests1("test_1000_10"));
+		TestSuite suite= new TestSuite("RenameTypePerfTests1");
+		suite.addTest(new RenameTypePerfTests1("testCold_10_10"));
+		suite.addTest(new RenameTypePerfTests1("test_10_10"));
+		suite.addTest(new RenameTypePerfTests1("test_100_10"));
+		suite.addTest(new RenameTypePerfTests1("test_1000_10"));
 		return new AbstractRefactoringTestSetup(suite);
 	}
 
@@ -42,7 +42,7 @@ public class RenameMethodPerfTests1 extends RefactoringPerformanceTestCase {
 		return new AbstractRefactoringTestSetup(someTest);
 	}
 
-	public RenameMethodPerfTests1(String name) {
+	public RenameTypePerfTests1(String name) {
 		super(name);
 	}
 	
@@ -73,9 +73,9 @@ public class RenameMethodPerfTests1 extends RefactoringPerformanceTestCase {
 	}
 
 	private void executeRefactoring(ICompilationUnit cunit) throws Exception {
-		IMethod method= cunit.findPrimaryType().getMethod("foo", new String[0]);
-		RenameVirtualMethodProcessor processor= new RenameVirtualMethodProcessor(method);
-		processor.setNewElementName("foo2");
+		IType type= cunit.findPrimaryType();
+		RenameTypeProcessor processor= new RenameTypeProcessor(type);
+		processor.setNewElementName("B");
 		executeRefactoring(new RenameRefactoring(processor));
 	}
 
@@ -84,8 +84,6 @@ public class RenameMethodPerfTests1 extends RefactoringPerformanceTestCase {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package def;\n");
 		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit result= definition.createCompilationUnit("A.java", buf.toString(), false, null);
 	
@@ -101,11 +99,9 @@ public class RenameMethodPerfTests1 extends RefactoringPerformanceTestCase {
 		buf.append("package " + pack.getElementName() + ";\n");
 		buf.append("import def.A;\n");
 		buf.append("public class Ref" + index + " {\n");
-		buf.append("    public void ref(A a) {\n");
-		for (int i= 0; i < numberOfRefs; i++) {
-			buf.append("        a.foo();\n");
+		for (int i= 0; i < numberOfRefs - 1; i++) {
+			buf.append("    A field" + i +";\n");
 		}
-		buf.append("    }\n");
 		buf.append("}\n");
 		pack.createCompilationUnit("Ref" + index + ".java", buf.toString(), false, null);
 	}

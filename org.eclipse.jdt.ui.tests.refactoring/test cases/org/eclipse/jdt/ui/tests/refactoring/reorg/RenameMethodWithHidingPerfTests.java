@@ -15,25 +15,25 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
-public class RenameMethodPerfTests2 extends RefactoringPerformanceTestCase {
+public class RenameMethodWithHidingPerfTests extends RefactoringPerformanceTestCase {
 
 	private TestProject fTestProject;
 	
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
-		TestSuite suite= new TestSuite("RenameTypePerfAcceptanceTests2");
-		suite.addTest(new RenameMethodPerfTests2("testCold_10_10"));
-		suite.addTest(new RenameMethodPerfTests2("test_10_10"));
-		suite.addTest(new RenameMethodPerfTests2("test_10_100"));
-		suite.addTest(new RenameMethodPerfTests2("test_10_1000"));
+		TestSuite suite= new TestSuite("RenameMethodWithHidingPerfTests");
+		suite.addTest(new RenameMethodWithHidingPerfTests("testCold_10_10"));
+		suite.addTest(new RenameMethodWithHidingPerfTests("test_10_10"));
 		return new AbstractRefactoringTestSetup(suite);
 	}
 
@@ -41,7 +41,7 @@ public class RenameMethodPerfTests2 extends RefactoringPerformanceTestCase {
 		return new AbstractRefactoringTestSetup(someTest);
 	}
 
-	public RenameMethodPerfTests2(String name) {
+	public RenameMethodWithHidingPerfTests(String name) {
 		super(name);
 	}
 	
@@ -57,25 +57,36 @@ public class RenameMethodPerfTests2 extends RefactoringPerformanceTestCase {
 	
 	public void testCold_10_10() throws Exception {
 		// 100 referencing CUs each containing 10 references
-		executeRefactoring(RenameMethodPerfTests1.generateSources(fTestProject, 10, 10));
+		executeRefactoring(generateSources(fTestProject));
 	}
 	
 	public void test_10_10() throws Exception {
-		executeRefactoring(RenameMethodPerfTests1.generateSources(fTestProject, 10, 10));
+		executeRefactoring(generateSources(fTestProject));
 	}
 	
-	public void test_10_100() throws Exception {
-		executeRefactoring(RenameMethodPerfTests1.generateSources(fTestProject, 10, 100));
-	}
-	
-	public void test_10_1000() throws Exception {
-		executeRefactoring(RenameMethodPerfTests1.generateSources(fTestProject, 10, 1000));
-	}
-
 	private void executeRefactoring(ICompilationUnit cunit) throws Exception {
-		IMethod method= cunit.findPrimaryType().getMethod("foo", new String[0]);
+		IMethod method= cunit.findPrimaryType().getMethod("setString", new String[] {"QString;"});
 		RenameVirtualMethodProcessor processor= new RenameVirtualMethodProcessor(method);
-		processor.setNewElementName("foo2");
-		executeRefactoring(new RenameRefactoring(processor));
+		processor.setNewElementName("set");
+		executeRefactoring(new RenameRefactoring(processor), RefactoringStatus.ERROR);
+	}
+	
+	private static ICompilationUnit generateSources(TestProject testProject) throws Exception {
+		IPackageFragment definition= testProject.getSourceFolder().createPackageFragment("def", false, null); 
+		StringBuffer buf= new StringBuffer();
+		buf.append("package def;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void setString(String s) {\n");
+		buf.append("    }\n");
+		buf.append("    public class Defines {\n");
+		buf.append("        public void set(String s) {}\n");
+		buf.append("    }\n");
+		buf.append("    public class Ref extends Defines {\n");
+		buf.append("        public void ref() {\n");
+		buf.append("            setString(\"Eclipse\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		return definition.createCompilationUnit("A.java", buf.toString(), false, null);
 	}
 }

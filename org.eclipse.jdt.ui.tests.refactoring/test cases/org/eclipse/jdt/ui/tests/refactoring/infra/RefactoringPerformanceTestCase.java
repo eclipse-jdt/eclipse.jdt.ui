@@ -18,6 +18,7 @@ import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RefactoringPerformanceTestCase extends JdtPerformanceTestCase {
 	
@@ -30,6 +31,10 @@ public class RefactoringPerformanceTestCase extends JdtPerformanceTestCase {
 	}
 	
 	protected void executeRefactoring(Refactoring refactoring) throws Exception {
+		executeRefactoring(refactoring, RefactoringStatus.WARNING);
+	}
+	
+	protected void executeRefactoring(Refactoring refactoring, int maxSeverity) throws Exception {
 		PerformRefactoringOperation operation= new PerformRefactoringOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
 		joinBackgroudJobs();
 		System.gc();
@@ -38,7 +43,7 @@ public class RefactoringPerformanceTestCase extends JdtPerformanceTestCase {
 		stopMeasuring();
 		commitMeasurements();
 		assertPerformance();
-		assertEquals(true, operation.getConditionStatus().isOK());
+		assertEquals(true, operation.getConditionStatus().getSeverity() <= maxSeverity);
 		assertEquals(true, operation.getValidationStatus().isOK());
 		assertNotNull(operation.getUndoChange());
 		RefactoringCore.getUndoManager().flush();
