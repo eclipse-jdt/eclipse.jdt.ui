@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -466,7 +467,10 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 	private IRunnableWithProgress createSaveModifiedResourcesRunnable(final IFile[] dirtyFiles) {
 		return new IRunnableWithProgress() {
-			public void run(final IProgressMonitor pm) {
+			public void run(IProgressMonitor pm) {
+				if (pm == null) {
+					pm= new NullProgressMonitor();
+				}
 				IEditorPart[] editorsToSave= JavaPlugin.getDirtyEditors();
 				String name= JavadocExportMessages.getString("JavadocWizard.savetask.name"); //$NON-NLS-1$
 				pm.beginTask(name, editorsToSave.length);
