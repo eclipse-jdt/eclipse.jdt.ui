@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -281,7 +282,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 
 		RowLayouter layouter= new RowLayouter(layout.numColumns);
 		gd= new GridData();
-		gd.horizontalAlignment= gd.FILL;
+		gd.horizontalAlignment= GridData.FILL;
 		layouter.setDefaultGridData(gd, 0);
 		layouter.setDefaultGridData(gd, 1);
 		layouter.setDefaultSpan();
@@ -644,7 +645,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		dialog.setTitle(NLSSearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NLSSearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
 		dialog.setElements(openChoices);
-		if (dialog.open() == dialog.OK)
+		if (dialog.open() == Window.OK)
 			return (IJavaElement)dialog.getFirstResult();
 		return null;
 	}
@@ -698,7 +699,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	protected void handleBrowsePropertiesButtonPressed() {
 		ElementTreeSelectionDialog dialog= createWorkspaceFileSelectionDialog(NLSSearchMessages.getString("NLSSearchPage.propertiesFileSelectionDialog.title"), NLSSearchMessages.getString("NLSSearchPage.propertiesFileSelectionDialog.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		dialog.setInitialSelections(new String[] { fPropertyFileText.getText()});
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == Window.OK) {
 			Object[] resources= dialog.getResult();
 			if (resources.length == 1)
 				fPropertyFileText.setText(((IResource) resources[0]).getFullPath().toString());
@@ -728,7 +729,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		dialog.setTitle(title);
 		dialog.setMessage(message);
 		dialog.setStatusLineAboveButtons(true);
-		dialog.setInput(JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()));
+		dialog.setInput(JavaCore.create(JavaPlugin.getWorkspace().getRoot()));
 		return dialog;
 	}
 	/**

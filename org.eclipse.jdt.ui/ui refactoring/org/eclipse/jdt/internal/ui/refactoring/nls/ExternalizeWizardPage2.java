@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
@@ -315,7 +316,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		dialog.setUpperListLabel(NLSUIMessages.getString("wizardPage2.Matching_classes")); //$NON-NLS-1$
 		String guessTypeName= fNewImport.getText().substring(fNewImport.getText().lastIndexOf(".") + 1); //$NON-NLS-1$
 		dialog.setFilter(guessTypeName);
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == Window.OK) {
 			IType type= (IType) dialog.getFirstResult();
 			if (type != null)
 				fNewImport.setText(JavaModelUtil.getFullyQualifiedName(type));	

@@ -32,7 +32,7 @@ class PerformRefactoringUtil {
 	public static boolean performRefactoring(PerformChangeOperation op, Refactoring refactoring) {
 		ChangeContext context= new ChangeContext(new ChangeExceptionHandler());
 		boolean success= false;
-		IUndoManager undoManager= refactoring.getUndoManager();
+		IUndoManager undoManager= Refactoring.getUndoManager();
 		try{
 			op.setChangeContext(context);
 			undoManager.aboutToPerformRefactoring();
