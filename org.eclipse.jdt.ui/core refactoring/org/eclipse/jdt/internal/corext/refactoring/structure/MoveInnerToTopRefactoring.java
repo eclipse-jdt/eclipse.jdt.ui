@@ -627,12 +627,30 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			declaration= findTypeDeclaration(enclosing, declarations);
 			Assert.isNotNull(declaration);
 			if (declaration instanceof TypeDeclaration)
-				declarations= ((TypeDeclaration) declaration).getTypes();
+				declarations= getAbstractTypeDeclarations(declaration);
 			else
 				declarations= new AbstractTypeDeclaration[] {};
 		}
 		Assert.isNotNull(declaration);
 		return declaration;
+	}
+
+	public static AbstractTypeDeclaration[] getAbstractTypeDeclarations(final AbstractTypeDeclaration declaration) {
+		int typeCount= 0;
+		for (Iterator iterator= declaration.bodyDeclarations().listIterator(); iterator.hasNext();) {
+			if (iterator.next() instanceof AbstractTypeDeclaration) {
+				typeCount++;
+			}
+		}
+		AbstractTypeDeclaration[] declarations= new AbstractTypeDeclaration[typeCount];
+		int next= 0;
+		for (final Iterator iterator= declaration.bodyDeclarations().listIterator(); iterator.hasNext();) {
+			Object object= iterator.next();
+			if (object instanceof AbstractTypeDeclaration) {
+				declarations[next++]= (AbstractTypeDeclaration) object;
+			}
+		}
+		return declarations;
 	}
 
 	private static AbstractTypeDeclaration findTypeDeclaration(IType enclosing, AbstractTypeDeclaration[] declarations) {
