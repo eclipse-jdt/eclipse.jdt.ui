@@ -87,15 +87,7 @@ public final class StubUtility2 {
 			typeParameters.add(newTypeParam);
 		}
 
-		List parameters= decl.parameters();
-		ITypeBinding[] params= binding.getParameterTypes();
-		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), binding);
-		for (int i= 0; i < params.length; i++) {
-			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-			var.setType(imports.addImport(params[i], ast));
-			var.setName(ast.newSimpleName(paramNames[i]));
-			parameters.add(var);
-		}
+		List parameters= createParameters(unit, imports, ast, binding, decl);
 
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
@@ -126,7 +118,7 @@ public final class StubUtility2 {
 		}
 
 		if (settings != null && settings.createComments) {
-			String string= CodeGeneration.getMethodComment(unit, type, decl, binding, delimiter);
+			String string= getMethodComment(unit, type, decl, binding, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
@@ -159,6 +151,8 @@ public final class StubUtility2 {
 				}
 				typeParameters.add(newTypeParam);
 			}
+
+			createParameters(unit, imports, ast, superConstructor, decl);
 
 			ITypeBinding[] params= superConstructor.getParameterTypes();
 			String[] paramNames= suggestArgumentNames(unit.getJavaProject(), superConstructor);
@@ -218,7 +212,7 @@ public final class StubUtility2 {
 		}
 
 		if (settings != null && settings.createComments) {
-			String string= CodeGeneration.getMethodComment(unit, typeBinding.getName(), decl, superConstructor, delimiter);
+			String string= getMethodComment(unit, typeBinding.getName(), decl, superConstructor, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
@@ -267,8 +261,16 @@ public final class StubUtility2 {
 			SingleVariableDeclaration varDecl= ast.newSingleVariableDeclaration();
 			if (params[i].isWildcardType() && !params[i].isUpperbound())
 				varDecl.setType(imports.addImport(params[i].getBound(), ast));
-			else
-				varDecl.setType(imports.addImport(params[i], ast));
+			else {
+				if (methodBinding.isVarargs() && params[i].isArray() && i == params.length - 1) {
+					StringBuffer buffer= new StringBuffer(imports.addImport(params[i].getElementType()));
+					for (int dim= 1; dim < params[i].getDimensions(); dim++)
+						buffer.append("[]"); //$NON-NLS-1$
+					varDecl.setType(ASTNodeFactory.newType(ast, buffer.toString()));
+					varDecl.setVarargs(true);
+				} else
+					varDecl.setType(imports.addImport(params[i], ast));
+			}
 			varDecl.setName(ast.newSimpleName(paramNames[i]));
 			parameters.add(varDecl);
 		}
@@ -322,7 +324,7 @@ public final class StubUtility2 {
 		}
 
 		if (settings != null && settings.createComments) {
-			String string= CodeGeneration.getMethodComment(unit, qualifiedName, decl, methodBinding, delimiter);
+			String string= getMethodComment(unit, qualifiedName, decl, methodBinding, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
@@ -357,15 +359,7 @@ public final class StubUtility2 {
 
 		decl.setReturnType2(imports.addImport(binding.getReturnType(), ast));
 
-		List parameters= decl.parameters();
-		ITypeBinding[] params= binding.getParameterTypes();
-		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), binding);
-		for (int i= 0; i < params.length; i++) {
-			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-			var.setType(imports.addImport(params[i], ast));
-			var.setName(ast.newSimpleName(paramNames[i]));
-			parameters.add(var);
-		}
+		List parameters= createParameters(unit, imports, ast, binding, decl);
 
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
@@ -414,7 +408,7 @@ public final class StubUtility2 {
 		}
 
 		if (settings != null && settings.createComments) {
-			String string= CodeGeneration.getMethodComment(unit, type, decl, binding, delimiter);
+			String string= getMethodComment(unit, type, decl, binding, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
@@ -454,15 +448,7 @@ public final class StubUtility2 {
 
 		decl.setReturnType2(structure.addImport(binding.getReturnType(), ast));
 
-		List parameters= decl.parameters();
-		ITypeBinding[] params= binding.getParameterTypes();
-		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), binding);
-		for (int i= 0; i < params.length; i++) {
-			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-			var.setType(structure.addImport(params[i], ast));
-			var.setName(ast.newSimpleName(paramNames[i]));
-			parameters.add(var);
-		}
+		List parameters= createParameters(unit, structure, ast, binding, decl);
 
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
@@ -511,7 +497,7 @@ public final class StubUtility2 {
 		}
 
 		if (settings != null && settings.createComments) {
-			String string= CodeGeneration.getMethodComment(unit, type, decl, binding, delimiter);
+			String string= getMethodComment(unit, type, decl, binding, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
@@ -523,6 +509,46 @@ public final class StubUtility2 {
 			rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(marker, null);
 		}
 		return decl;
+	}
+
+	private static List createParameters(ICompilationUnit unit, ImportRewrite imports, AST ast, IMethodBinding binding, MethodDeclaration decl) {
+		List parameters= decl.parameters();
+		ITypeBinding[] params= binding.getParameterTypes();
+		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), binding);
+		for (int i= 0; i < params.length; i++) {
+			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
+			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {
+				StringBuffer buffer= new StringBuffer(imports.addImport(params[i].getElementType()));
+				for (int dim= 1; dim < params[i].getDimensions(); dim++)
+					buffer.append("[]"); //$NON-NLS-1$
+				var.setType(ASTNodeFactory.newType(ast, buffer.toString()));
+				var.setVarargs(true);
+			} else
+				var.setType(imports.addImport(params[i], ast));
+			var.setName(ast.newSimpleName(paramNames[i]));
+			parameters.add(var);
+		}
+		return parameters;
+	}
+
+	private static List createParameters(ICompilationUnit unit, ImportsStructure imports, AST ast, IMethodBinding binding, MethodDeclaration decl) {
+		List parameters= decl.parameters();
+		ITypeBinding[] params= binding.getParameterTypes();
+		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), binding);
+		for (int i= 0; i < params.length; i++) {
+			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
+			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {
+				StringBuffer buffer= new StringBuffer(imports.addImport(params[i].getElementType()));
+				for (int dim= 1; dim < params[i].getDimensions(); dim++)
+					buffer.append("[]"); //$NON-NLS-1$
+				var.setType(ASTNodeFactory.newType(ast, buffer.toString()));
+				var.setVarargs(true);
+			} else
+				var.setType(imports.addImport(params[i], ast));
+			var.setName(ast.newSimpleName(paramNames[i]));
+			parameters.add(var);
+		}
+		return parameters;
 	}
 
 	private static IMethodBinding findMethodBinding(IMethodBinding method, List allMethods) {
@@ -608,31 +634,15 @@ public final class StubUtility2 {
 		return (IMethodBinding[]) allMethods.toArray(new IMethodBinding[allMethods.size()]);
 	}
 
-	public static IMethodBinding[] getOverridableConstructors(ITypeBinding binding) {
-		List constructorMethods= new ArrayList();
-		ITypeBinding superType= binding.getSuperclass();
-		if (superType == null)
-			return new IMethodBinding[0];
-		IMethodBinding[] superMethods= superType.getDeclaredMethods();
-		boolean constuctorFound= false;
-		IMethodBinding[] methods= binding.getDeclaredMethods();
-		for (int index= 0; index < superMethods.length; index++) {
-			IMethodBinding method= superMethods[index];
-			if (method.isConstructor()) {
-				constuctorFound= true;
-				if (Bindings.isVisibleInHierarchy(method, binding.getPackage()) && !Bindings.containsSignatureEquivalentConstructor(methods, method))
-					constructorMethods.add(method);
-			}
+	private static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
+		if (overridden != null) {
+			overridden= overridden.getMethodDeclaration();
+			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
+			String[] parameterTypesQualifiedNames= getParameterTypesQualifiedNames(overridden);
+			return StubUtility.getMethodComment(cu, typeName, decl, true, overridden.isDeprecated(), declaringClassQualifiedName, parameterTypesQualifiedNames, lineDelimiter);
+		} else {
+			return StubUtility.getMethodComment(cu, typeName, decl, false, false, null, null, lineDelimiter);
 		}
-		if (!constuctorFound) {
-			superType= binding;
-			while (superType.getSuperclass() != null)
-				superType= superType.getSuperclass();
-			IMethodBinding method= Bindings.findMethodInType(superType, "Object", new ITypeBinding[0]); //$NON-NLS-1$
-			if (!Bindings.containsOverridingMethod(methods, method))
-				constructorMethods.add(method);
-		}
-		return (IMethodBinding[]) constructorMethods.toArray(new IMethodBinding[constructorMethods.size()]);
 	}
 
 	public static IMethodBinding[] getOverridableMethods(ITypeBinding typeBinding, boolean isSubType) {
@@ -680,6 +690,26 @@ public final class StubUtility2 {
 				allMethods.remove(index);
 		}
 		return (IMethodBinding[]) allMethods.toArray(new IMethodBinding[allMethods.size()]);
+	}
+
+	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
+		ITypeBinding[] typeBindings= binding.getParameterTypes();
+		String[] result= new String[typeBindings.length];
+		for (int i= 0; i < result.length; i++) {
+			if (typeBindings[i].isTypeVariable())
+				result[i]= typeBindings[i].getName();
+			else {
+				if (binding.isVarargs() && typeBindings[i].isArray() && i == typeBindings.length - 1) {
+					StringBuffer buffer= new StringBuffer(typeBindings[i].getElementType().getQualifiedName());
+					for (int dim= 1; dim < typeBindings[i].getDimensions(); dim++)
+						buffer.append("[]"); //$NON-NLS-1$
+					buffer.append("..."); //$NON-NLS-1$
+					result[i]= buffer.toString();
+				} else
+					result[i]= typeBindings[i].getTypeDeclaration().getQualifiedName();
+			}
+		}
+		return result;
 	}
 
 	public static IMethodBinding[] getUnimplementedMethods(ITypeBinding typeBinding) {
@@ -730,6 +760,33 @@ public final class StubUtility2 {
 		}
 
 		return (IMethodBinding[]) toImplement.toArray(new IMethodBinding[toImplement.size()]);
+	}
+
+	public static IMethodBinding[] getVisibleConstructors(ITypeBinding binding) {
+		List constructorMethods= new ArrayList();
+		ITypeBinding superType= binding.getSuperclass();
+		if (superType == null)
+			return new IMethodBinding[0];
+		IMethodBinding[] superMethods= superType.getDeclaredMethods();
+		boolean constuctorFound= false;
+		IMethodBinding[] methods= binding.getDeclaredMethods();
+		for (int index= 0; index < superMethods.length; index++) {
+			IMethodBinding method= superMethods[index];
+			if (method.isConstructor()) {
+				constuctorFound= true;
+				if (Bindings.isVisibleInHierarchy(method, binding.getPackage()) && !Bindings.containsSignatureEquivalentConstructor(methods, method))
+					constructorMethods.add(method);
+			}
+		}
+		if (!constuctorFound) {
+			superType= binding;
+			while (superType.getSuperclass() != null)
+				superType= superType.getSuperclass();
+			IMethodBinding method= Bindings.findMethodInType(superType, "Object", new ITypeBinding[0]); //$NON-NLS-1$
+			if (!Bindings.containsOverridingMethod(methods, method))
+				constructorMethods.add(method);
+		}
+		return (IMethodBinding[]) constructorMethods.toArray(new IMethodBinding[constructorMethods.size()]);
 	}
 
 	private static String[] suggestArgumentNames(IJavaProject project, IMethodBinding binding) {
