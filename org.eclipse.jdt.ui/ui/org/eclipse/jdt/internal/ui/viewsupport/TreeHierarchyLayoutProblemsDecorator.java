@@ -104,15 +104,26 @@ public class TreeHierarchyLayoutProblemsDecorator implements ILabelDecorator {
 		}
 		return image;
 	}
-
+	
+	
 	/**
-	 * Computes the adornment for a resource based on the most severe
-	 * marker of its children.
-	 * 
-	 * @param resource is the IResource on which adornment is being calculated
+	 * Computes the adornment for the given package fragment based on the most
+	 * severe marker of its children.
+	 * <p>
+	 * The default package gets no adornment.
+	 * </p>
+	 *
+	 * @param fragment the package fragment on which adornment is being calculated
 	 * @return int the adornment flag value
 	 */
-	public int computeAdornmentFlags(IResource resource) {
+	public int computeAdornmentFlags(IPackageFragment fragment) throws JavaModelException {
+		if (fragment.isDefaultPackage())
+			return NO_ADORNMENT;
+			
+		return computeAdornmentFlags(fragment.getUnderlyingResource());
+	}
+
+	private int computeAdornmentFlags(IResource resource) {
 		if (resource == null || !resource.isAccessible()) {
 			return NO_ADORNMENT;
 		}
