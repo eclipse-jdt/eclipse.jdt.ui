@@ -144,9 +144,9 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 			RefactoringStatus result2= new RefactoringStatus();
 			result2.merge(Checks.checkCompilationUnitNewName(getCu(), fNewName));
 			if (result2.hasFatalError())
-				result1.addError(getCu().getElementName() + " cannot not be parsed correctly.");
+				result1.addError(getCu().getElementName() + " cannot be parsed correctly.");
 			else 
-				result1.addError(getCu().getElementName() + " cannot not be parsed correctly. No references will be updated if you proceed");
+				result1.addError(getCu().getElementName() + " cannot be parsed correctly. No references will be updated if you proceed");
 			result1.merge(result2);			
 		}	
 		

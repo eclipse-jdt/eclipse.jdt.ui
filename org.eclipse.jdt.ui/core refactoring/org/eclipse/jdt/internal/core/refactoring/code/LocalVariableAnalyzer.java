@@ -290,7 +290,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 					isHardReturnDeclaration= isUsedAfterSelection;
 				} else {
 					if (isHardReturnDeclaration) {
-						status.addFatalError("Ambigious return value: selected block contains more than one assignment to local variable.");
+						status.addFatalError("Ambiguous return value: selected block contains more than one assignment to local variable.");
 						return;
 					} else if (isUsedAfterSelection) {
 						returnBinding= binding;
@@ -317,7 +317,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 			if (fStatementAnalyzer.isSelected(binding.declaration)) {
 				count++;
 				if (count > 1) {
-					status.addFatalError("Ambigious return value: more than one reference to selected local declaration found.");
+					status.addFatalError("Ambiguous return value: more than one reference to selected local declaration found.");
 					return;
 				} else {
 					returnBinding= binding;
@@ -330,7 +330,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 				computeReturnType(returnBinding, true, status);
 				fLocalDeclaration= makeDeclaration(returnBinding);
 			} else {
-				status.addFatalError("Ambigious return value: assignment to local variable and reference to a selected local declaration found.");
+				status.addFatalError("Ambiguous return value: assignment to local variable and reference to a selected local declaration found.");
 			}
 		}
 	}
@@ -338,7 +338,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	private void checkReturnStatement(RefactoringStatus status) {
 		if (fExtractedReturnStatement != null && fReturnStatementBinding != null && 
 				!isSameLocalVaraibleBinding(fExtractedReturnStatement, fReturnStatementBinding)) {
-			status.addFatalError("Ambigious return value: selection contains return statement and a value must be returned from the extracted method.");
+			status.addFatalError("Ambiguous return value: selection contains return statement and a value must be returned from the extracted method.");
 		}	
 	}
 	
@@ -355,7 +355,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	
 	private void computeReturnType(LocalVariableBinding binding, boolean isHardReturnType, RefactoringStatus status) {
 		if (isHardReturnType && fExpressionReturnType != null) {
-			status.addFatalError("Ambigious return value: expression has return type and a value must be returned from extracted method.");
+			status.addFatalError("Ambiguous return value: expression has return type and a value must be returned from extracted method.");
 		}
 		LocalDeclaration declaration= binding.declaration;
 		TypeReference typeRef= declaration.type;

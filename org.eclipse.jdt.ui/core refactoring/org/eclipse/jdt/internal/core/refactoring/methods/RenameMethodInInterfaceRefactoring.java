@@ -50,7 +50,7 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 		result.merge(super.checkInput(new SubProgressMonitor(pm, 6)));
 		pm.subTask("analyzing hierarchy");
 		if (isSpecialCase())
-			result.addError("Cannot rename this method - it is a special case (see the spec. 9.2)");
+			result.addError("Cannot rename this method because it is a special case (see the language specification section 9.2 for details)");
 		pm.worked(1);
 		pm.subTask("analyzing hierarchy");
 		if (relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 3), getMethod(), getNewName()))

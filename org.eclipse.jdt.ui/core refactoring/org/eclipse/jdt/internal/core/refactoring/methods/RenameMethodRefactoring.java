@@ -179,7 +179,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 			if (method.isReadOnly())
 				result.addFatalError(computeErrorMessage(method, " is read-only. Refactoring cannot be performed."));
 			if (Flags.isNative(method.getFlags()))
-				result.addError(computeErrorMessage(method, " is native. Refactoring can cause an UnasisfiedLinkError on run-time."));
+				result.addError(computeErrorMessage(method, " is native. Renaming will cause UnsatisfiedLinkError on runtime."));
 			}
 		return result;	
 	}

@@ -41,7 +41,7 @@ public class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 		pm.worked(1);
 		pm.subTask("analyzing hierachy");
 		if (hierarchyDeclaresMethodName(pm, getMethod(), getNewName()))
-			result.addError("Hierarchy declares a method named " + getNewName() + " with the same number of paramters.");
+			result.addError("Hierarchy declares a method named " + getNewName() + " with the same number of parameters.");
 		pm.done();
 		return result;
 	}

@@ -136,7 +136,7 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		if (Checks.isAlreadyNamed(getField(), getNewName()))
 			result.addFatalError("Choose another name.");
 		if (getField().getDeclaringType().getField(getNewName()).exists())
-			result.addError("Field with this name already defined");
+			result.addError("Field with this name is already defined.");
 		return result;
 	}
 	

@@ -168,7 +168,7 @@ public class Checks {
 			if (Flags.isNative(methods[i].getFlags()))
 				result.addError("Method " + methods[i].getDeclaringType().getFullyQualifiedName() 
 							+ "::" + methods[i].getElementName() 
-							+ " is native. Running the modified program can cause UnsatisfiedLinkError on runtime.");
+							+ " is native. Running the modified program will cause UnsatisfiedLinkError.");
 		}
 		return result;
 	}

@@ -217,7 +217,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				result.addError("Type " + fNewName + " already exists in \"" + cu.getElementName() +"\"");
 		} else {
 			if (getType().getDeclaringType().getType(fNewName).exists())
-				result.addError("Another member type " + fNewName + " already exists in " + getType().getDeclaringType().getFullyQualifiedName());
+				result.addError("Another member type named " + fNewName + " already exists in " + getType().getDeclaringType().getFullyQualifiedName());
 		}
 		return result;
 	}
@@ -298,7 +298,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		for (int i= 0; i < types.length; i++) {
 			//could this be a problem (same package imports)?
 			if (Flags.isPublic(types[i].getFlags()) && types[i].getElementName().equals(fNewName)){
-				result.addError("Name conflict with type" + types[i].getFullyQualifiedName() + " in " + getFullPath(getCompilationUnit(imp)));
+				result.addError("Name conflict with type " + types[i].getFullyQualifiedName() + " in " + getFullPath(getCompilationUnit(imp)));
 			}
 		}
 	}
@@ -310,9 +310,9 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			IType importedType= (IType)JavaModelUtility.convertFromImportDeclaration(imp);
 			if (name.substring(name.lastIndexOf(".") + 1).equals(fNewName)){
 				if (importedType != null)
-					result.addError("Name conflict with type" + importedType.getFullyQualifiedName() + " in "+ getFullPath(getCompilationUnit(imp)));
+					result.addError("Name conflict with type " + importedType.getFullyQualifiedName() + " in "+ getFullPath(getCompilationUnit(imp)));
 				else
-					result.addError("Name conflict with type" + name + " in "+ getFullPath(getCompilationUnit(imp)));
+					result.addError("Name conflict with type " + name + " in "+ getFullPath(getCompilationUnit(imp)));
 			}	
 			return;
 		}
