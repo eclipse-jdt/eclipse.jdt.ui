@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.reorg;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.cus.RenameCompilationUnitRefactoring;import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageRefactoring;import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
+package org.eclipse.jdt.internal.ui.reorg;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.cus.RenameCompilationUnitRefactoring;import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageRefactoring;import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 
 public class RefactoringSupportFactory {
 
@@ -50,7 +50,9 @@ public class RefactoringSupportFactory {
 		}
 		
 		protected RefactoringWizard createWizard() {
-			return new RenameRefactoringWizard("Refactoring.RenamePackage", IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE, IJavaHelpContextIds.RENAME_PACKAGE_ERROR_WIZARD_PAGE); 
+			RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenamePackage", IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE, IJavaHelpContextIds.RENAME_PACKAGE_ERROR_WIZARD_PAGE); 
+			w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PACKAGE);
+			return w;
 		}
 	}
 
@@ -60,7 +62,9 @@ public class RefactoringSupportFactory {
 		}
 		
 		protected RefactoringWizard createWizard() {
-			return new RenameRefactoringWizard("Refactoring.RenameCompilationUnit", IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE, IJavaHelpContextIds.RENAME_CU_ERROR_WIZARD_PAGE); 
+			RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameCompilationUnit", IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE, IJavaHelpContextIds.RENAME_CU_ERROR_WIZARD_PAGE); 
+			w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
+			return w;
 		}
 	}
 
