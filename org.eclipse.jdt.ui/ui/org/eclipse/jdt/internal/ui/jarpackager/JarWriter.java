@@ -4,12 +4,11 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.BufferedInputStream;import java.io.ByteArrayOutputStream;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
@@ -104,7 +103,15 @@ public class JarWriter {
 				contentStream.close();
 		}
 
-		write(destinationPath, output.toByteArray());
+		try {
+			write(destinationPath, output.toByteArray());
+		} catch (IOException ex) {
+			// Ensure full path is visible
+			String message= JarPackagerMessages.getFormattedString("JarWriter.writeProblem", resource.getFullPath()); //$NON-NLS-1$
+			if (ex.getMessage() != null)
+				message += ": " + ex.getMessage();  //$NON-NLS-1$
+			throw new IOException(message);
+		}		
 	}
 	/**
 	 * Creates a new JarEntry with the passed pathname and contents, and write it
