@@ -158,7 +158,7 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 				if (desc != null)
 					return desc.getContentType();
 			} catch (CoreException x) {
-				JavaPlugin.log(x.getStatus());
+				JavaPlugin.log(x);
 			}
 		}
 		return null;
