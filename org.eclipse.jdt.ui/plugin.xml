@@ -397,11 +397,6 @@
 	<objectContribution
 		id="org.eclipse.jdt.ui.actions.OpenExternalJavadocAction"
 		objectClass="org.eclipse.jdt.core.IJavaElement">
-		<visibility> 
-              <not> 
-                  <objectClass name="org.eclipse.jdt.core.IJavaProject"/> 
-              </not> 
-        </visibility>		
 		<action
 			id="org.eclipse.jdt.ui.actions.OpenExternalJavadocAction"
 			label="%OpenExternalJavadocAction.label"

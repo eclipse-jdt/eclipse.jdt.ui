@@ -22,8 +22,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
 
+import org.eclipse.help.IHelp;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
@@ -84,40 +86,40 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 			return;
 		}
 		
-		IJavaElement jelem= (IJavaElement) selected;
+		IJavaElement element= (IJavaElement) selected;
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		try {
-			String labelName= JavaElementLabels.getElementLabel(jelem, JavaElementLabels.M_PARAMETER_TYPES);
+			String labelName= JavaElementLabels.getElementLabel(element, JavaElementLabels.M_PARAMETER_TYPES);
 			
-			URL baseURL= JavaDocLocations.getJavadocBaseLocation(jelem);
+			URL baseURL= JavaDocLocations.getJavadocBaseLocation(element);
 			if (baseURL == null) {
-				IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(jelem);
+				IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
 				if (root != null && root.getKind() == IPackageFragmentRoot.K_BINARY) {
 					String message= "The documentation location for ''{0}'' has not been configured. For elements from libraries specify the Javadoc location URL on the property page of the parent JAR (''{1}'').";	
-					showError(shell, MessageFormat.format(message, new String[] { labelName, root.getElementName() }));
+					showMessage(shell, MessageFormat.format(message, new String[] { labelName, root.getElementName() }), false);
 				} else {
-					IJavaElement annotatedElement= jelem.getJavaProject();
+					IJavaElement annotatedElement= element.getJavaProject();
 					String message= "The documentation location for ''{0}'' has not been configured. For elements from source specify the Javadoc location URL on the property page of the parent project (''{1}'').";	
-					showError(shell, MessageFormat.format(message, new String[] { labelName, annotatedElement.getElementName() }));
+					showMessage(shell, MessageFormat.format(message, new String[] { labelName, annotatedElement.getElementName() }), false);
 				}
 				return;
 			}
 			if ("file".equals(baseURL.getProtocol())) {
-				URL noRefURL= JavaDocLocations.getJavaDocLocation(jelem, false);
+				URL noRefURL= JavaDocLocations.getJavaDocLocation(element, false);
 				if (!(new File(noRefURL.getFile())).isFile()) {
-					String message= "No documentation available for ''{0}'' in ''{1}''.";
-					showError(shell, MessageFormat.format(message, new String[] { labelName, baseURL.toExternalForm() }));
+					String message= "The documentation does not contain an entry for ''{0}''.\n(File ''{1}'' does not exist.).";
+					showMessage(shell, MessageFormat.format(message, new String[] { labelName, noRefURL.toExternalForm() }), false);
 					return;
 				}
 			}
 		
-			URL url= JavaDocLocations.getJavaDocLocation(jelem, true);
+			URL url= JavaDocLocations.getJavaDocLocation(element, true);
 			if (url != null) {
 				openInBrowser(url, shell);
 			} 		
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			showError(shell, "Opening Javadoc failed. See log for details.");
+			showMessage(shell, "Opening Javadoc failed. See log for details.", true);
 		}
 	}
 	
@@ -148,14 +150,23 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 	 * Copied from AboutPluginsDialog.openMoreInfo
 	 */
 	public static void openInBrowser(final URL url, final Shell shell) {
-		OpenExternalJavadocAction.openInBrowser(url, shell);
+		IHelp help= WorkbenchHelp.getHelpSupport();
+		if (help != null) {
+			WorkbenchHelp.getHelpSupport().displayHelpResource(url.toExternalForm());
+		} else {
+			showMessage(shell, "Help support not available", false);
+		}
 	}
 
 	
-	private static void showError(final Shell shell, final String message) {
+	private static void showMessage(final Shell shell, final String message, final boolean isError) {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				MessageDialog.openError(shell, "Open External Javadoc", message);
+				if (isError) {
+					MessageDialog.openError(shell, "Open External Javadoc", message);
+				} else {
+					MessageDialog.openInformation(shell, "Open External Javadoc", message);
+				}
 			}
 		});
 	}
