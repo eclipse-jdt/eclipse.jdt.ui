@@ -267,7 +267,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	private void initDragAndDrop() {
-		int ops= DND.DROP_COPY | DND.DROP_MOVE;
+		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
 		Transfer[] transfers= new Transfer[] {
 			LocalSelectionTransfer.getInstance(), 
 			ResourceTransfer.getInstance()};

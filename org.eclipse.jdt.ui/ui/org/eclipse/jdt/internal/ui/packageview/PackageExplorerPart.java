@@ -448,7 +448,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	//---- Event handling ----------------------------------------------------------
 	
 	private void initDragAndDrop() {
-		int ops= DND.DROP_COPY | DND.DROP_MOVE;
+		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
 		final LocalSelectionTransfer lt= LocalSelectionTransfer.getInstance();
 		Transfer[] transfers= new Transfer[] {
 			lt, 
