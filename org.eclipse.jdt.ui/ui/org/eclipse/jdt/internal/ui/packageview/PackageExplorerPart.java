@@ -141,8 +141,8 @@ import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
  * the active editor page. Similarly when a resource is selected in the packages
  * view the corresponding editor is activated. 
  */
-
-public class PackageExplorerPart extends ViewPart 
+ 
+public class PackageExplorerPart extends ViewPart  
 	implements ISetSelectionTarget, IMenuListener,
 		IShowInTarget,
 		IPackagesViewPart,  IPropertyChangeListener, 
@@ -1052,6 +1052,8 @@ public class PackageExplorerPart extends ViewPart
 			return;
 		if (!inputIsSelected(editor.getEditorInput()))
 			showInput(input);
+		else
+			getTreeViewer().getTree().showSelection();
 	}
 
 	private boolean inputIsSelected(IEditorInput input) {
