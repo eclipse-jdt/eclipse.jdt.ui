@@ -457,9 +457,15 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	public void acceptProblem(IProblem problem) {
 		if (problem.isWarning())
 			return;
-			
+		
+		// Fix for 1GEJYAJ: ITPJCORE:WIN2000 - Compiler - Binding of QualifiedNameReference is null	
+		if (problem.getID() == org.eclipse.jdt.internal.compiler.problem.ProblemIrritants.NonConstantExpression)
+			return;	
+		
+		RefactoringStatus current= fStatus;	
 		reset();
 		fCursorPosition= Integer.MAX_VALUE;
+		fStatus= current;
 		fStatus.addFatalError(RefactoringCoreMessages.getFormattedString("StatementAnalyzer.compilation_error",  //$NON-NLS-1$
 								new Object[]{new Integer(problem.getSourceLineNumber()), problem.getMessage()}));
 		fCompileErrorFound= true;
