@@ -52,7 +52,8 @@ public class ReorderParametersRefactoring extends Refactoring {
 		Assert.isNotNull(method);
 		fMethod= method;
 		setOldParameterNames();
-		setNewParameterOrder(fOldParameterNames, false);
+		if (fOldParameterNames != null)
+			setNewParameterOrder(fOldParameterNames, false);
 	}
 	
 	/*
