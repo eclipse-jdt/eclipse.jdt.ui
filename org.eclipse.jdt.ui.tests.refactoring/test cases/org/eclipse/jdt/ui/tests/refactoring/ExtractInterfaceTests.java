@@ -12,6 +12,9 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ExtractInterfaceTests extends RefactoringTest {
@@ -77,7 +80,8 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		}
 
 		ICompilationUnit interfaceCu= clas.getPackageFragment().getCompilationUnit(newInterfaceName + ".java");
-		assertEquals("incorrect interface created", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
+//		assertEquals("incorrect interface created", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
+		AbstractCUTestCase.compareSource(interfaceCu.getSource(), getFileContents(getOutputTestFileName(newInterfaceName)));
 	}
 	
 	private void validatePassingTest(String className, String newInterfaceName, boolean extractAll, boolean replaceOccurrences) throws Exception {
@@ -437,10 +441,10 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test72() throws Exception{
-		printTestDisabledMessage("bug 23705");		
-//		String[] names= new String[]{"m"};
-//		String[][] signatures= new String[][]{new String[]{"QA;"}};
-//		validatePassingTest("A", new String[]{"A", "As"}, "I", names, signatures, true);
+//		printTestDisabledMessage("bug 23705");		
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[]{"QA;"}};
+		validatePassingTest("A", new String[]{"A", "As"}, "I", names, signatures, true);
 	}
 
 	public void test73() throws Exception{
@@ -476,6 +480,13 @@ public class ExtractInterfaceTests extends RefactoringTest {
 //		String[] names= new String[]{"amount"};
 //		String[][] signatures= new String[][]{new String[0]};
 //		validatePassingTest("A.Inner", new String[]{"A", "B"}, "I", names, signatures, true);
+	}
+
+	public void test78() throws Exception{
+//		printTestDisabledMessage("bug 23705");		
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[]{"QA;"}};
+		validatePassingTest("A", new String[]{"A"}, "I", names, signatures, true);
 	}
 
 	public void testFail0() throws Exception{

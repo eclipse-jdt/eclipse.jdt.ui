@@ -62,6 +62,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private IMember[] fExtractedMembers;
 	private boolean fReplaceOccurrences= false;
 	private TextChangeManager fChangeManager;
+    private Set fUpdatedTypeReferenceNodes; //Set of ASTNodes
 	
 	public ExtractInterfaceRefactoring(IType clazz, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(clazz);
@@ -273,7 +274,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private void updateReferences(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException, CoreException {
-		UseSupertypeWherePossibleUtil.updateReferences(manager, fExtractedMembers, fNewInterfaceName, fInputClass, fCodeGenerationSettings, fASTMappingManager, pm);
+		fUpdatedTypeReferenceNodes= UseSupertypeWherePossibleUtil.updateReferences(manager, fExtractedMembers, fNewInterfaceName, fInputClass, fCodeGenerationSettings, fASTMappingManager, pm);
 	}
 	
 	private boolean areAllExtractableMembersOfClass(IMember[] extractedMembers) throws JavaModelException {
@@ -385,9 +386,6 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			if (analyzer.getFirstSelectedNode().getParent() instanceof TypeDeclaration)
 				return (TypeDeclaration)analyzer.getFirstSelectedNode().getParent();
 		}
-		//XXX workaround for 21757
-		if (analyzer.getLastCoveringNode() instanceof TypeDeclaration)
-			return (TypeDeclaration) analyzer.getLastCoveringNode();
 		return null;	
 	}
 
@@ -461,14 +459,29 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (methodDeclaration == null)
 			return ""; 
 	
-		int offset= methodDeclaration.getReturnType().getStartPosition();
+		int methodDeclarationOffset= methodDeclaration.getReturnType().getStartPosition();
 		int length= getMethodDeclarationLength(iMethod, methodDeclaration);
-		String methodDeclarationSource= iMethod.getCompilationUnit().getBuffer().getText(offset, length);
-		if (methodDeclaration.getBody() == null)
-			return methodDeclarationSource;
-		else
-			return methodDeclarationSource + ";";
+		StringBuffer methodDeclarationSource= new StringBuffer(iMethod.getCompilationUnit().getBuffer().getText(methodDeclarationOffset, length));
+		
+		if (methodDeclaration.getBody() != null)
+			methodDeclarationSource.append(";");
+		
+		if (fUpdatedTypeReferenceNodes != null)
+	        replaceReferencesInMethodDeclaration(methodDeclaration, methodDeclarationOffset, methodDeclarationSource);
+		return methodDeclarationSource.toString();		
 	}
+    private void replaceReferencesInMethodDeclaration(MethodDeclaration methodDeclaration, int methodDeclarationOffset, StringBuffer methodDeclarationSource) {
+        SingleVariableDeclaration[] params= (SingleVariableDeclaration[]) methodDeclaration.parameters().toArray(new SingleVariableDeclaration[methodDeclaration.parameters().size()]);
+        for (int i= params.length - 1; i >= 0; i--) {//iterate backwards to preserve indices
+            SingleVariableDeclaration declaration= params[i];
+            replaceReferencesIfUpdated(methodDeclarationOffset, methodDeclarationSource, declaration.getType());
+        }
+        replaceReferencesIfUpdated(methodDeclarationOffset, methodDeclarationSource, methodDeclaration.getReturnType());
+    }
+    private void replaceReferencesIfUpdated(int methodDeclarationOffset, StringBuffer methodDeclarationSource, ASTNode node) {
+        if (fUpdatedTypeReferenceNodes.contains(node))
+        	methodDeclarationSource.replace(node.getStartPosition() - methodDeclarationOffset, ASTNodes.getExclusiveEnd(node) - methodDeclarationOffset, fNewInterfaceName);
+    }
 	
 	private static int getMethodDeclarationLength(IMethod iMethod, MethodDeclaration methodDeclaration) throws JavaModelException{
 		int preDeclarationSourceLength= methodDeclaration.getReturnType().getStartPosition() - iMethod.getSourceRange().getOffset();
@@ -487,7 +500,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		ITypeBinding[] typesUsed= getTypesUsedInExtractedMemberDeclarations();
 		for (int i= 0; i < typesUsed.length; i++) {
 			ITypeBinding binding= typesUsed[i];
-			if (binding != null && ! binding.isPrimitive()){
+			if (shouldBeImported(binding)){
 				buff.append("import ");//$NON-NLS-1$
 				buff.append(Bindings.getFullyQualifiedImportName(binding));
 				buff.append(";");//$NON-NLS-1$
@@ -495,6 +508,22 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}
 		return buff.toString();
 	}
+	
+    private boolean shouldBeImported(ITypeBinding binding) {
+    	if (binding == null)
+    		return false;
+    	if (binding.isPrimitive())	
+    		return false;
+    	if (binding.isArray())	
+    		return shouldBeImported(binding.getElementType());
+    	if (binding.getPackage().isUnnamed())	
+   			return false;
+   		if (binding.getPackage().getName().equals("java.lang"))
+   			return false;
+		if (binding.getPackage().getName().equals(getInputClassPackage().getElementName()))
+   			return false;
+    	return true;	
+    }
 
 	private ITypeBinding[] getTypesUsedInExtractedMemberDeclarations() throws JavaModelException{
 		Set typesUsed= new HashSet();

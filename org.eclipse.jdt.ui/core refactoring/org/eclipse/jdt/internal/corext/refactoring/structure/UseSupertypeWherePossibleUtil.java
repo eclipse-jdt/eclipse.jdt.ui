@@ -115,6 +115,25 @@ class UseSupertypeWherePossibleUtil {
 		fUpdateInstanceOf= updateInstanceOf;
 	}
 
+	/*
+	 * Fills the <code>TextChangeManager</code> with edits, returns the nodes that are updated.
+	 */
+	static Set updateReferences(TextChangeManager manager, IMember[] extractedMembers, String superTypeName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IProgressMonitor pm, IType supertypeToUse, boolean updateInstanceOf) throws CoreException{
+		UseSupertypeWherePossibleUtil inst= new UseSupertypeWherePossibleUtil(manager, extractedMembers, superTypeName, inputClass, codeGenerationSettings, astManager, supertypeToUse, updateInstanceOf);
+		pm.beginTask("", 4);//$NON-NLS-1$
+		SearchResultGroup[] referenceGroups= getMemberReferences(inputClass, new SubProgressMonitor(pm, 1));
+		Set replacedNodes= inst.addReferenceUpdatesAndImports(manager, new SubProgressMonitor(pm, 3), referenceGroups);
+		pm.done();
+		return replacedNodes;
+	}
+
+	/*
+	 * Fills the <code>TextChangeManager</code> with edits, returns the nodes that are updated.
+	 */
+	static Set updateReferences(TextChangeManager manager, IMember[] extractedMembers, String superTypeName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IProgressMonitor pm) throws CoreException{
+	    return updateReferences(manager, extractedMembers, superTypeName, inputClass, codeGenerationSettings, astManager, pm, null, true);
+	}
+
 	private static Set createSuperTypeSet(IType type, IJavaProject project) throws JavaModelException {
 		if (type == null){
 			Set result= new HashSet(1);
@@ -124,25 +143,14 @@ class UseSupertypeWherePossibleUtil {
 		return new HashSet(Arrays.asList(JavaModelUtil.getAllSuperTypes(type, new NullProgressMonitor())));
 	}
 	
-	static void updateReferences(TextChangeManager manager, IMember[] extractedMembers, String superTypeName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IProgressMonitor pm, IType supertypeToUse, boolean updateInstanceOf) throws CoreException{
-		UseSupertypeWherePossibleUtil inst= new UseSupertypeWherePossibleUtil(manager, extractedMembers, superTypeName, inputClass, codeGenerationSettings, astManager, supertypeToUse, updateInstanceOf);
-		pm.beginTask("", 4);//$NON-NLS-1$
-		SearchResultGroup[] referenceGroups= getMemberReferences(inputClass, new SubProgressMonitor(pm, 1));
-		inst.addReferenceUpdatesAndImports(manager, new SubProgressMonitor(pm, 3), referenceGroups);
-		pm.done();
-	}
-
-	static void updateReferences(TextChangeManager manager, IMember[] extractedMembers, String superTypeName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IProgressMonitor pm) throws CoreException{
-	    updateReferences(manager, extractedMembers, superTypeName, inputClass, codeGenerationSettings, astManager, pm, null, true);
-	}
-	
 	private static SearchResultGroup[] getMemberReferences(IMember member, IProgressMonitor pm) throws JavaModelException{
 		ISearchPattern pattern= SearchEngine.createSearchPattern(member, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
 		return RefactoringSearchEngine.search(pm, scope, pattern);
 	}
 	
-	private void addReferenceUpdatesAndImports(TextChangeManager manager, IProgressMonitor pm, SearchResultGroup[] resultGroups) throws CoreException {
+	//returns the set of replaced ast nodes
+	private Set addReferenceUpdatesAndImports(TextChangeManager manager, IProgressMonitor pm, SearchResultGroup[] resultGroups) throws CoreException {
 		Set nodeSet= getNodesToUpdate(resultGroups, pm); //ASTNodes
 		Set updatedCus= new HashSet(0);
 		for (Iterator iter= nodeSet.iterator(); iter.hasNext();) {
@@ -156,6 +164,7 @@ class UseSupertypeWherePossibleUtil {
 			if (needsImport(cu))
 				addSupertypeImport(manager, cu);			
 		}
+		return nodeSet;
 	}
 
 	private boolean needsImport(ICompilationUnit cu) {
@@ -845,7 +854,7 @@ class UseSupertypeWherePossibleUtil {
 	}
 
 	//maybe generally useful
-	public static IType getMethodParameterType(IMethod method, int parameterIndex) throws JavaModelException{
+	private static IType getMethodParameterType(IMethod method, int parameterIndex) throws JavaModelException{
 		Assert.isTrue(parameterIndex >=0);
 		if (method.getNumberOfParameters() < parameterIndex)
 			return null;
