@@ -37,6 +37,7 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.core.JavaConventions;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -44,6 +45,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -69,14 +71,56 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		return new Key[] {
 			PREF_IMPORTORDER, PREF_ONDEMANDTHRESHOLD, PREF_IGNORELOWERCASE
 		};	
-	}	
+	}
+	
+	public static class ImportOrderEntry {
+		
+		public final String name;
+		public final boolean isStatic;
+		
+		public ImportOrderEntry(String name, boolean isStatic) {
+			this.name= name;
+			this.isStatic= isStatic;
+		}
+		
+		public String serialize() {
+			return isStatic ? '#' + name : name;
+		}
+		
+		public static ImportOrderEntry fromSerialized(String str) {
+			if (str.length() > 0 && str.charAt(0) == '#') {
+				return new ImportOrderEntry(str.substring(1), true);
+			}
+			return new ImportOrderEntry(str, false);
+		}
+		
+	}
+	
 	
 	private static class ImportOrganizeLabelProvider extends LabelProvider {
 		
-		private static final Image PCK_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKAGE);
+		private final Image PCK_ICON;
+		private final Image STATIC_CLASS_ICON;
 
+		public ImportOrganizeLabelProvider() {
+			PCK_ICON= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKAGE);
+			STATIC_CLASS_ICON= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
+		}
+		
 		public Image getImage(Object element) {
-			return PCK_ICON;
+			return ((ImportOrderEntry) element).isStatic ? STATIC_CLASS_ICON : PCK_ICON;
+		}
+
+		public String getText(Object element) {
+			ImportOrderEntry entry= (ImportOrderEntry) element;
+			String name= entry.name;
+			if (name.length() > 0) {
+				return name;
+			}
+			if (entry.isStatic) {
+				return PreferencesMessages.getString("ImportOrganizeConfigurationBlock.other_static"); //$NON-NLS-1$
+			}
+			return PreferencesMessages.getString("ImportOrganizeConfigurationBlock.other_normal"); //$NON-NLS-1$
 		}
 	}
 	
@@ -218,13 +262,13 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			if (selected.isEmpty()) {
 				return;
 			}
-			String editedEntry= (String) selected.get(0);
+			ImportOrderEntry editedEntry= (ImportOrderEntry) selected.get(0);
 			
 			List existing= fOrderListField.getElements();
 			existing.remove(editedEntry);
 			
 			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing);
-			dialog.setInitialString(editedEntry);
+			dialog.setInitialSelection(editedEntry);
 			if (dialog.open() == Window.OK) {
 				fOrderListField.replaceElement(editedEntry, dialog.getResult());
 			}
@@ -249,7 +293,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		for (int i= 0 ; i < nEntries; i++) {
 			String curr= properties.getProperty(String.valueOf(i));
 			if (curr != null) {
-				if (!JavaConventions.validatePackageName(curr).matches(IStatus.ERROR)) {
+				ImportOrderEntry entry= ImportOrderEntry.fromSerialized(curr);
+				if (!JavaConventions.validatePackageName(entry.name).matches(IStatus.ERROR)) {
 					res.add(curr);
 				} else {
 					return null;
@@ -315,7 +360,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			
 			Properties properties= new Properties();
 			for (int i= 0; i < elements.size(); i++) {
-				properties.setProperty(String.valueOf(i), (String) elements.get(i));
+				ImportOrderEntry entry= (ImportOrderEntry) elements.get(i);
+				properties.setProperty(String.valueOf(i), entry.serialize());
 			}
 			FileOutputStream fos= null;
 			try {
@@ -349,7 +395,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
 	 */
 	protected void updateControls() {
-		String[] importOrder= getImportOrderPreference();
+		ImportOrderEntry[] importOrder= getImportOrderPreference();
 		int threshold= getImportNumberThreshold();
 		boolean ignoreLowerCase= Boolean.valueOf(getValue(PREF_IGNORELOWERCASE)).booleanValue();
 		
@@ -363,6 +409,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	
 	
 	protected final void updateModel(DialogField field) {
+		// set values in working copy
 		if (field == fOrderListField) {
 	  		setValue(PREF_IMPORTORDER, packOrderList(fOrderListField.getElements()));
 		} else if (field == fThresholdField) {
@@ -383,12 +430,12 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		return null; // no build required
 	}
 
-	private static String[] unpackOrderList(String str) {
+	private static ImportOrderEntry[] unpackOrderList(String str) {
 		StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
 		int nTokens= tok.countTokens();
-		String[] res= new String[nTokens];
+		ImportOrderEntry[] res= new ImportOrderEntry[nTokens];
 		for (int i= 0; i < nTokens; i++) {
-			res[i]= tok.nextToken();
+			res[i]= ImportOrderEntry.fromSerialized(tok.nextToken());
 		}
 		return res;
 	}
@@ -396,18 +443,19 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private static String packOrderList(List orderList) {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < orderList.size(); i++) {
-			buf.append((String) orderList.get(i));
+			ImportOrderEntry entry= (ImportOrderEntry) orderList.get(i);
+			buf.append(entry.serialize());
 			buf.append(';');
 		}
 		return buf.toString();
 	}
 	
-	private String[] getImportOrderPreference() {
+	private ImportOrderEntry[] getImportOrderPreference() {
 		String str= getValue(PREF_IMPORTORDER);
 		if (str != null) {
 			return unpackOrderList(str);
 		}
-		return new String[0];
+		return new ImportOrderEntry[0];
 	}
 	
 	private int getImportNumberThreshold() {

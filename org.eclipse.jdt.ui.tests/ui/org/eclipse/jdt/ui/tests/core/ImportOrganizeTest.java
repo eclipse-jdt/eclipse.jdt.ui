@@ -42,7 +42,6 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 public class ImportOrganizeTest extends CoreTests {
 	
 	private static final Class THIS= ImportOrganizeTest.class;
-	private static final boolean BUG_82140= true;
 	
 	private IJavaProject fJProject1;
 
@@ -1794,7 +1793,7 @@ public class ImportOrganizeTest extends CoreTests {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 
 
-		String[] order= new String[] { "java", "pack" };
+		String[] order= new String[] { "java", "pack", "#java" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
 		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
@@ -1804,6 +1803,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.io.File;\n");
+		buf.append("\n");	
 		buf.append("import static java.lang.System.out;\n");
 		buf.append("\n");	
 		buf.append("public class C {\n");
@@ -1832,7 +1832,7 @@ public class ImportOrganizeTest extends CoreTests {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 
 
-		String[] order= new String[] { "java", "pack" };
+		String[] order= new String[] { "#java.io.File", "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
 		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
@@ -1841,9 +1841,10 @@ public class ImportOrganizeTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
 		buf.append("\n");
-		buf.append("import java.io.File;\n");
 		buf.append("import static java.io.File.pathSeparator;\n");
 		buf.append("import static java.io.File.separator;\n");
+		buf.append("\n");	
+		buf.append("import java.io.File;\n");
 		buf.append("\n");	
 		buf.append("public class C {\n");
 		buf.append("    public String foo() {\n");
@@ -2280,7 +2281,7 @@ public class ImportOrganizeTest extends CoreTests {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 
 
-		String[] order= new String[] { "java", "pack" };
+		String[] order= new String[] { "java", "pack", "#" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
 		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
@@ -2289,9 +2290,10 @@ public class ImportOrganizeTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
 		buf.append("\n");
-		buf.append("import static java.io.File.pathSeparator;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("import java.util.HashMap;\n");
+		buf.append("\n");
+		buf.append("import static java.io.File.pathSeparator;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    public void foo() {\n");
@@ -2384,7 +2386,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("Test2.java", buf.toString(), false, null);
 
-		String[] order= new String[] {};
+		String[] order= new String[] { "", "#"};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
 
 		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
@@ -2394,6 +2396,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import pack0.MyEnum;\n");
+		buf.append("\n");
 		buf.append("import static pack0.MyEnum.A;\n");
 		buf.append("\n");
 		buf.append("public class Test2 {\n");
@@ -2403,10 +2406,6 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	public void testAnnotationImports1() throws Exception {
-		if (BUG_82140) {
-			return;
-		}
-		
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
@@ -2456,7 +2455,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("\n");
 		buf.append("@MyAnnot3 public class Test2 {\n");
 		buf.append("    @MyAnnot1 Object e;\n");
-		buf.append("    @MyAnnot2 void foo() {\n");
+		buf.append("    @MyAnnot2(1) void foo() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());

@@ -10,40 +10,45 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.preferences.ImportOrganizeConfigurationBlock.ImportOrderEntry;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 /**
@@ -56,54 +61,111 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		 * @see IDialogFieldListener#dialogFieldChanged(DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
-			doValidation();
+			doDialogFieldChanged(field);
 		}			
+
 		/**
 		 * @see IStringButtonAdapter#changeControlPressed(DialogField)
 		 */
 		public void changeControlPressed(DialogField field) {
-			doButtonPressed();
+			doBrowsePackages();
 		}
 	}
 	
+	private SelectionButtonDialogField fNameGroup;
+	private SelectionButtonDialogField fOtherGroup;
+	private SelectionButtonDialogField fOtherStaticGroup;
+	
 	private StringButtonDialogField fNameDialogField;
+	private SelectionButtonDialogField fBrowseTypeButton;
+	private SelectionButtonDialogField fIsStatic;
 	private List fExistingEntries;
 		
-	public ImportOrganizeInputDialog(Shell parent, List existingEntries) {
+	public ImportOrganizeInputDialog(Shell parent, List/*<ImportOrderEntry>*/ existingEntries) {
 		super(parent);
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		fExistingEntries= existingEntries;
 		
 		setTitle(PreferencesMessages.getString("ImportOrganizeInputDialog.title")); //$NON-NLS-1$
 
 		ImportOrganizeInputAdapter adapter= new ImportOrganizeInputAdapter();
+		
+		fIsStatic= new SelectionButtonDialogField(SWT.CHECK);
+		fIsStatic.setLabelText(PreferencesMessages.getString("ImportOrganizeInputDialog.static.label")); //$NON-NLS-1$
+		fIsStatic.setDialogFieldListener(adapter);
+		
+		fNameGroup= new SelectionButtonDialogField(SWT.RADIO);
+		fNameGroup.setLabelText(PreferencesMessages.getString("ImportOrganizeInputDialog.name_group.label")); //$NON-NLS-1$
+		fNameGroup.setDialogFieldListener(adapter);
 
 		fNameDialogField= new StringButtonDialogField(adapter);
 		fNameDialogField.setLabelText(PreferencesMessages.getString("ImportOrganizeInputDialog.message")); //$NON-NLS-1$
-		fNameDialogField.setButtonLabel(PreferencesMessages.getString("ImportOrganizeInputDialog.browse.button")); //$NON-NLS-1$
+		fNameDialogField.setButtonLabel(PreferencesMessages.getString("ImportOrganizeInputDialog.browse_packages.button")); //$NON-NLS-1$
 		fNameDialogField.setDialogFieldListener(adapter);
 		
-		fNameDialogField.setText("");		 //$NON-NLS-1$
+		fBrowseTypeButton= new SelectionButtonDialogField(SWT.PUSH);
+		fBrowseTypeButton.setLabelText(PreferencesMessages.getString("ImportOrganizeInputDialog.browse_types.label")); //$NON-NLS-1$
+		fBrowseTypeButton.setDialogFieldListener(adapter);
+		
+		fOtherGroup= new SelectionButtonDialogField(SWT.RADIO);
+		fOtherGroup.setLabelText(PreferencesMessages.getString("ImportOrganizeInputDialog.other_group.label")); //$NON-NLS-1$
+		fOtherGroup.setDialogFieldListener(adapter);
+		
+		fOtherStaticGroup= new SelectionButtonDialogField(SWT.RADIO);
+		fOtherStaticGroup.setLabelText(PreferencesMessages.getString("ImportOrganizeInputDialog.other_static_group.label")); //$NON-NLS-1$
+		fOtherStaticGroup.setDialogFieldListener(adapter);
+		
+		fNameGroup.attachDialogFields(new DialogField[] { fNameDialogField, fBrowseTypeButton, fIsStatic });
+		
+	}
+		
+	public void setInitialSelection(ImportOrderEntry editedEntry) {
+		Assert.isNotNull(editedEntry);
+		if (editedEntry.name.length() == 0) {
+			if (editedEntry.isStatic) {
+				fOtherStaticGroup.setSelection(true);
+			} else {
+				fOtherGroup.setSelection(true);
+			}
+		} else {
+			fNameDialogField.setText(editedEntry.name);
+			fIsStatic.setSelection(editedEntry.isStatic);
+		}
 	}
 	
-	public void setInitialString(String input) {
-		Assert.isNotNull(input);
-		fNameDialogField.setText(input);
+	public ImportOrderEntry getResult() {
+		if (fNameGroup.isSelected()) {
+			return new ImportOrderEntry(fNameDialogField.getText(), fIsStatic.isSelected());
+		} else {
+			return new ImportOrderEntry("", fOtherStaticGroup.isSelected()); //$NON-NLS-1$
+		}
 	}
-	
-	public Object getResult() {
-		return fNameDialogField.getText();
-	}
-	
+		
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 		
-		Composite inner= new Composite(composite, SWT.NONE);
-		LayoutUtil.doDefaultLayout(inner, new DialogField[] { fNameDialogField }, true, 0, 0);
+		GridLayout layout= new GridLayout(3, false);
+		composite.setLayout(layout);
 		
-		int fieldWidthHint= convertWidthInCharsToPixels(60);
+
+		fNameGroup.doFillIntoGrid(composite, 3);
+		
+		fNameDialogField.doFillIntoGrid(composite, 3);
+		
+		int indent= convertWidthInCharsToPixels(4);
+		LayoutUtil.setHorizontalIndent(fNameDialogField.getLabelControl(null), indent);
+		
+		int fieldWidthHint= convertWidthInCharsToPixels(50);
 		LayoutUtil.setWidthHint(fNameDialogField.getTextControl(null), fieldWidthHint);
 		LayoutUtil.setHorizontalGrabbing(fNameDialogField.getTextControl(null));
+		
+		DialogField.createEmptySpace(composite, 1);
+		fIsStatic.doFillIntoGrid(composite, 1);
+		fBrowseTypeButton.doFillIntoGrid(composite, 1);
+		
+		fOtherGroup.doFillIntoGrid(composite, 3);
+		fOtherStaticGroup.doFillIntoGrid(composite, 3);
 		
 		fNameDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		
@@ -111,61 +173,85 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		return composite;
 	}
 	
-	private void doButtonPressed() {
-		HashMap allPackages= new HashMap();
-		// no duplicate entries
-		try {
-			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-			IJavaProject[] projects= JavaCore.create(root).getJavaProjects();
-			for (int i= 0; i < projects.length; i++) {
-				IPackageFragment[] packs= projects[i].getPackageFragments();
-				for (int k=0; k < packs.length; k++) {
-					IPackageFragment curr= packs[k];
-					// filter out default package and resource folders
-					if (!curr.isDefaultPackage() && (curr.hasChildren() || curr.getNonJavaResources().length == 0)) {
-						allPackages.put(curr.getElementName(), curr);
-					}
-				}
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
-		}
-		Object initialSelection= allPackages.get(fNameDialogField.getText());
-		
-			
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
+	final void doBrowsePackages() {
+		IRunnableContext context= new BusyIndicatorRunnableContext();
+		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
+		int style= PackageSelectionDialog.F_REMOVE_DUPLICATES | PackageSelectionDialog.F_SHOW_PARENTS | PackageSelectionDialog.F_HIDE_DEFAULT_PACKAGE;
+		PackageSelectionDialog dialog= new PackageSelectionDialog(getShell(), context, style, scope);
+		dialog.setFilter(fNameDialogField.getText());
 		dialog.setIgnoreCase(false);
 		dialog.setTitle(PreferencesMessages.getString("ImportOrganizeInputDialog.ChoosePackageDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(PreferencesMessages.getString("ImportOrganizeInputDialog.ChoosePackageDialog.description")); //$NON-NLS-1$
 		dialog.setEmptyListMessage(PreferencesMessages.getString("ImportOrganizeInputDialog.ChoosePackageDialog.empty")); //$NON-NLS-1$
-		dialog.setElements(allPackages.values().toArray());
-		if (initialSelection != null) {
-			dialog.setInitialSelections(new Object[] { initialSelection });
-		}
-		
 		if (dialog.open() == Window.OK) {
 			IPackageFragment res= (IPackageFragment) dialog.getFirstResult();
 			fNameDialogField.setText(res.getElementName());
 		}
 	}
 	
+	private void doBrowseTypes() {		
+		IRunnableContext context= new BusyIndicatorRunnableContext();
+		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
+		int style= IJavaElementSearchConstants.CONSIDER_TYPES;
+		try {
+			SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), context, scope, style, false, fNameDialogField.getText());
+			dialog.setTitle(PreferencesMessages.getString("ImportOrganizeInputDialog.ChooseTypeDialog.title")); //$NON-NLS-1$
+			dialog.setMessage(PreferencesMessages.getString("ImportOrganizeInputDialog.ChooseTypeDialog.description")); //$NON-NLS-1$
+			if (dialog.open() == Window.OK) {
+				IType res= (IType) dialog.getResult()[0];
+				fNameDialogField.setText(res.getFullyQualifiedName('.'));
+			}
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, getShell(), PreferencesMessages.getString("ImportOrganizeInputDialog.ChooseTypeDialog.title"), PreferencesMessages.getString("ImportOrganizeInputDialog.ChooseTypeDialog.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
+		}
+	}
+	
+	/**
+	 * @param field
+	 */
+	final void doDialogFieldChanged(DialogField field) {
+		if (field == fBrowseTypeButton) {
+			doBrowseTypes();
+		} else {
+			doValidation();
+		}
+	}
+	
+	
 	private void doValidation() {
 		StatusInfo status= new StatusInfo();
-		String newText= fNameDialogField.getText();
-		if (newText.length() == 0) {
-			status.setError(PreferencesMessages.getString("ImportOrganizeInputDialog.error.enterName")); //$NON-NLS-1$
-		} else {
-			IStatus val= JavaConventions.validatePackageName(newText);
-			if (val.matches(IStatus.ERROR)) {
-				status.setError(PreferencesMessages.getFormattedString("ImportOrganizeInputDialog.error.invalidName", val.getMessage())); //$NON-NLS-1$
+		if (fNameGroup.isSelected()) {
+			String newText= fNameDialogField.getText();
+			if (newText.length() == 0) {
+				status.setError(PreferencesMessages.getString("ImportOrganizeInputDialog.error.enterName")); //$NON-NLS-1$
 			} else {
-				if (fExistingEntries.contains(newText)) {
-					status.setError(PreferencesMessages.getString("ImportOrganizeInputDialog.error.entryExists")); //$NON-NLS-1$
+				IStatus val= JavaConventions.validatePackageName(newText);
+				if (val.matches(IStatus.ERROR)) {
+					status.setError(PreferencesMessages.getFormattedString("ImportOrganizeInputDialog.error.invalidName", val.getMessage())); //$NON-NLS-1$
+				} else {
+					if (doesExist(newText, fIsStatic.isSelected())) {
+						status.setError(PreferencesMessages.getString("ImportOrganizeInputDialog.error.entryExists")); //$NON-NLS-1$
+					}
 				}
+			}
+		} else {
+			if (doesExist("", fOtherStaticGroup.isSelected())) { //$NON-NLS-1$
+				status.setError(PreferencesMessages.getString("ImportOrganizeInputDialog.error.entryExists")); //$NON-NLS-1$
 			}
 		}
 		updateStatus(status);
 	}
+	
+	private boolean doesExist(String name, boolean isStatic) {
+		for (int i= 0; i < fExistingEntries.size(); i++) {
+			ImportOrderEntry entry= (ImportOrderEntry) fExistingEntries.get(i);
+			if (name.equals(entry.name) && isStatic == entry.isStatic) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
@@ -174,4 +260,6 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		super.configureShell(newShell);
 		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.IMPORT_ORGANIZE_INPUT_DIALOG);
 	}
+
+
 }

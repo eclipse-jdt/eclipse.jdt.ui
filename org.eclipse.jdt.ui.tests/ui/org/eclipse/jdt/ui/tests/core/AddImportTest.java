@@ -305,7 +305,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 
-		String[] order= new String[] { "java" };
+		String[] order= new String[] { "#", "java" };
 
 		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
 		imports.addStaticImport("java.lang.Math", "min", true);
@@ -319,8 +319,9 @@ public class AddImportTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import static java.lang.Math.max;\n");
 		buf.append("import static java.lang.Math.min;\n");
+		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
@@ -339,7 +340,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 
-		String[] order= new String[] { "java" };
+		String[] order= new String[] { "#", "java" };
 
 		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
 		imports.addStaticImport("xx.MyConstants", "SIZE", true);
@@ -351,11 +352,12 @@ public class AddImportTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
 		buf.append("\n");
+		buf.append("import static xx.MyConstants.SIZE;\n");
+		buf.append("import static xy.MyConstants.*;\n");
+		buf.append("\n");
 		buf.append("import java.lang.System;\n");
 		buf.append("\n");
-		buf.append("import static xx.MyConstants.SIZE;\n");
 		buf.append("import xy.MyConstants;\n");
-		buf.append("import static xy.MyConstants.*;\n");
 		buf.append("\n");		
 		buf.append("public class C {\n");
 		buf.append("}\n");
@@ -511,6 +513,7 @@ public class AddImportTest extends CoreTests {
 			buf.append("package pack1;\n");
 			buf.append("\n");
 			buf.append("import static java.io.File.separator;\n");
+			buf.append("\n");
 			buf.append("import java.lang.System;\n");
 			buf.append("\n");		
 			buf.append("public class C {\n");
