@@ -209,9 +209,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		try {
 			new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell()).run(false, false, r);
 		} catch (InvocationTargetException e) {
-			if (!ExceptionHandler.handle(e.getTargetException(), actionName, ReorgMessages.getString("ReorgAction.exception.saving"))) { //$NON-NLS-1$
-				MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("ReorgAction.error.title"), e.getMessage()); //$NON-NLS-1$
-			}
+			ExceptionHandler.handle(e, actionName, ReorgMessages.getString("ReorgAction.exception.saving")); //$NON-NLS-1$
 			return false;
 		} catch (InterruptedException e) {
 		}

@@ -93,9 +93,7 @@ public class FileTransferDropAdapter extends JdtTreeViewerDropAdapter implements
 			} catch (InvocationTargetException e) {
 				String title= PackagesMessages.getString("DropAdapter.errorTitle"); //$NON-NLS-1$
 				String message= PackagesMessages.getString("DropAdapter.errorMessage"); //$NON-NLS-1$
-				if (!ExceptionHandler.handle(e, title, message)) {
-					ExceptionHandler.log(e, message);
-				}
+				ExceptionHandler.handle(e, title, message);
 				return;
 			} catch (InterruptedException e) {
 				return;

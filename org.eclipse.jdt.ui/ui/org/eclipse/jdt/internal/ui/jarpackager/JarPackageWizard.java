@@ -177,8 +177,8 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		} catch (InterruptedException e) {
 			return false;
 		} catch (InvocationTargetException ex) {
-			if (ExceptionHandler.handle(ex, getShell(), JarPackagerMessages.getString("JarPackageWizard.jarExportError.title"), JarPackagerMessages.getString("JarPackageWizard.jarExportError.message"))) //$NON-NLS-2$ //$NON-NLS-1$
-				return false;
+			ExceptionHandler.handle(ex, getShell(), JarPackagerMessages.getString("JarPackageWizard.jarExportError.title"), JarPackagerMessages.getString("JarPackageWizard.jarExportError.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			return false;
 		}
 		IStatus status= op.getStatus();
 		if (!status.isOK()) {

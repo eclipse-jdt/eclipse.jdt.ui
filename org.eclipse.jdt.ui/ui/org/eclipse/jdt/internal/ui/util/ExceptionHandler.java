@@ -35,104 +35,57 @@ public class ExceptionHandler {
 	private static ExceptionHandler fgInstance= new ExceptionHandler();
 	
 	/**
-	 * Shows an error dialog for exceptions that contain an <code>IStatus</code>.
-	 * This method appends "title" and "message" to the given resource prefix to fetch the
-	 * title and message parameters for the error dialog.
-	 * Example: resourcePrefix= "org.eclipse.jdt.ui.copy.error." -> "org.eclipse.jdt.ui.copy.error.title".
-	 * 
-	 * @deprecated Use handle(Throwable, String, String) instead
-	 */
-	public static boolean handle(Throwable t, ResourceBundle bundle, String resourcePrefix) {
-		return handle(t, JavaPlugin.getActiveWorkbenchShell(), bundle, resourcePrefix); 
-	}
-	
-	/**
-	 * Shows an error dialog for exceptions that contain an <code>IStatus</code>.
-	 * This method appends "title" and "message" to the given resource prefix to fetch the
-	 * title and message parameters for the error dialog.
-	 * Example: resourcePrefix= "org.eclipse.jdt.ui.copy.error." -> "org.eclipse.jdt.ui.copy.error.title".
-	 * 
-	 * @deprecated Use handle(Throwable, Shell, String, String) instead	 * 
-	 */
-	public static boolean handle(Throwable t, Shell shell, ResourceBundle bundle, String resourcePrefix) {
-		return handle(t, shell, getResourceString(bundle, resourcePrefix+"title"), getResourceString(bundle, resourcePrefix+"message"));  //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	
-	/**
-	 * Shows an error dialog for exceptions that contain an <code>IStatus</code>.
-	 */
-	public static boolean handle(Throwable t, String title, String message) {
-		return handle(t, JavaPlugin.getActiveWorkbenchShell(), title, message);	
-	}
-	
-	/**
-	 * Shows an error dialog for exceptions that contain an <code>IStatus</code>.
-	 */
-	public static boolean handle(Throwable t, Shell shell, String title, String message) {
-		if (fgInstance == null)
-			return false;
-		return fgInstance.perform(t, shell, title, message);	
-	}
-	
-	/**
-	 * Logs the given exception using the platforms logging mechanism.
-	 * This method appends "message" to the given resource prefix to fetch the
-	 * message parameter for logging.
-	 * 
-	 * @deprecated Use log(Throwable, String) instead
-	 */
-	public static void log(Throwable t, ResourceBundle bundle, String prefix) {
-		log(t, getResourceString(bundle, prefix+"message"));  //$NON-NLS-1$
-	}
-	
-	/**
-	 * Logs the given exception using the platforms logging mechanism.
+	 * Logs the given exception using the platforms logging mechanism. The exception is
+	 * looged as an error with the error code <code>JavaStatusConstants.INTERNAL_ERROR</code>.
 	 */
 	public static void log(Throwable t, String message) {
 		JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
 			JavaStatusConstants.INTERNAL_ERROR, message, t));
 	}
 	
-	/**
-	 * Actually displays the error message. Subclasses may override the method to
-	 * perform their own error handling.
-	 */
-	public boolean perform(Throwable t, Shell shell, String title, String message) {
-		if (t instanceof InvocationTargetException) {
-			t= ((InvocationTargetException)t).getTargetException();
-		}
-		if (handleCoreException(t, shell, title, message)) {
-			return true;
-		}
-		return handleCriticalExceptions(t, shell, title, message);
-	}
-
-	protected boolean handleCoreException(Throwable t, Shell shell, String title, String message) {
-		IStatus status= null;
-		if (t instanceof CoreException) {
-			status= ((CoreException)t).getStatus();
-			if (status != null)
-				ErrorDialog.openError(shell, title, message, status);
-			else
-				displayMessageDialog(t, shell, title, message);
-			return true;
-		}
-		return false;
+	public static void handle(CoreException e, String title, String message) {
+		handle(e, JavaPlugin.getActiveWorkbenchShell(), title, message);
 	}
 	
-	protected boolean handleCriticalExceptions(Throwable t, Shell shell, String title, String message) {
-		if (t instanceof RuntimeException || t instanceof Error) {
-			log(t, message);
-			displayMessageDialog(t, shell, title, message);
-			return true;
-		}
-		return false;	
+	public static void handle(CoreException e, Shell shell, String title, String message) {
+		fgInstance.perform(e, shell, title, message);
+	}
+	
+	public static void handle(InvocationTargetException e, String title, String message) {
+		handle(e, JavaPlugin.getActiveWorkbenchShell(), title, message);
+	}
+	
+	public static void handle(InvocationTargetException e, Shell shell, String title, String message) {
+		fgInstance.perform(e, shell, title, message);
 	}
 
-	/**
-	 * Shows the error in a message dialog
-	 */
-	protected void displayMessageDialog(Throwable t, Shell shell, String title, String message) {
+	//---- Hooks for subclasses to control exception handling ------------------------------------
+	
+	protected void perform(CoreException e, Shell shell, String title, String message) {
+		IStatus status= e.getStatus();
+		if (status != null) {
+			ErrorDialog.openError(shell, title, message, status);
+		} else {
+			displayMessageDialog(e, shell, title, message);
+		}
+	}
+
+	protected void perform(InvocationTargetException e, Shell shell, String title, String message) {
+		Throwable target= e.getTargetException();
+		if (target instanceof CoreException) {
+			perform((CoreException)target, shell, title, message);
+		} else {
+			if (e.getMessage() != null && e.getMessage().length() > 0) {
+				displayMessageDialog(e, shell, title, message);
+			} else {
+				displayMessageDialog(target, shell, title, message);
+			}
+		}
+	}
+
+	//---- Helper methods -----------------------------------------------------------------------
+	
+	private void displayMessageDialog(Throwable t, Shell shell, String title, String message) {
 		StringWriter msg= new StringWriter();
 		if (message != null) {
 			msg.write(message);
@@ -145,15 +98,6 @@ public class ExceptionHandler {
 		MessageDialog.openError(shell, title, msg.toString());			
 	}
 	
-	/**
-	 * Shows a dialog containing the stack trace of the exception
-	 */
-	public static void showStackTraceDialog(Throwable t, Shell shell, String title) {
-		StringWriter writer= new StringWriter();
-		t.printStackTrace(new PrintWriter(writer));
-		MessageDialog.openError(shell, title, writer.toString());
-	}	
-		
 	private static String getResourceString(ResourceBundle bundle, String key) {
 		try {
 			return bundle.getString(key);

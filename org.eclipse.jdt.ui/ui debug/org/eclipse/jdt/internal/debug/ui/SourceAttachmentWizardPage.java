@@ -116,7 +116,7 @@ public class SourceAttachmentWizardPage extends NewElementWizardPage {
 	 * Sets the source attachment for the jar.
 	 */
 	public boolean performFinish() {
-		if (fSourceAttachmentBlock != null) {			try {				IRunnableWithProgress runnable= fSourceAttachmentBlock.getRunnable(fJarRoot.getJavaProject(), getShell());						new ProgressMonitorDialog(getShell()).run(true, true, runnable);									} catch (InvocationTargetException e) {				String title= DebugUIUtils.getResourceString(ERROR_TITLE);				String message= DebugUIUtils.getResourceString(ERROR_MESSAGE);				if (!ExceptionHandler.handle(e, getShell(), title, message)) {					MessageDialog.openError(getShell(), title, message);				}				return false;			} catch (InterruptedException e) {				// cancelled				return false;			}		}		return true;
+		if (fSourceAttachmentBlock != null) {			try {				IRunnableWithProgress runnable= fSourceAttachmentBlock.getRunnable(fJarRoot.getJavaProject(), getShell());						new ProgressMonitorDialog(getShell()).run(true, true, runnable);									} catch (InvocationTargetException e) {				String title= DebugUIUtils.getResourceString(ERROR_TITLE);				String message= DebugUIUtils.getResourceString(ERROR_MESSAGE);				ExceptionHandler.handle(e, getShell(), title, message);				return false;			} catch (InterruptedException e) {				// cancelled				return false;			}		}		return true;
 	}
 
 }

@@ -468,9 +468,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 				Shell shell= getShell();
 				String title= NewWizardMessages.getString("NewPackageRootCreationWizardPage.op_error.title"); //$NON-NLS-1$
 				String message= NewWizardMessages.getString("NewPackageRootCreationWizardPage.op_error.message");				 //$NON-NLS-1$
-				if (!ExceptionHandler.handle(e, shell, title, message)) {
-					MessageDialog.openError(shell, title, e.getTargetException().getMessage());
-				}
+				ExceptionHandler.handle(e, shell, title, message);
 				return false;
 			} catch  (InterruptedException e) {
 				return false;

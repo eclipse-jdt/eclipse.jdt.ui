@@ -18,8 +18,8 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
 			dialog.run(true, true, op);
 		} catch (InvocationTargetException ex) {
-			if (ExceptionHandler.handle(ex, shell, JarPackagerMessages.getString("CreateJarActionDelegate.jarExportError.title"), JarPackagerMessages.getString("CreateJarActionDelegate.jarExportError.message"))) //$NON-NLS-2$ //$NON-NLS-1$
-				return;
+			ExceptionHandler.handle(ex, shell, JarPackagerMessages.getString("CreateJarActionDelegate.jarExportError.title"), JarPackagerMessages.getString("CreateJarActionDelegate.jarExportError.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			return;
 		} catch (InterruptedException e) {
 			// do nothing on cancel
 			return;

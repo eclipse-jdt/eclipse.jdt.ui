@@ -223,8 +223,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		} catch (InvocationTargetException e) {
 			String message= PackagesMessages.getString("DragAdapter.problem"); //$NON-NLS-1$
 			String title= PackagesMessages.getString("DragAdapter.problemTitle"); //$NON-NLS-1$
-			if (!ExceptionHandler.handle(e, title, message))
-				ExceptionHandler.log(e, message);
+			ExceptionHandler.handle(e, title, message);
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.
 		}

@@ -91,10 +91,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 			} catch (InvocationTargetException e) {
 				String title= JavaUIMessages.getString("SourceAttachmentPropertyPage.error.title"); //$NON-NLS-1$
 				String message= JavaUIMessages.getString("SourceAttachmentPropertyPage.error.message"); //$NON-NLS-1$
-				if (!ExceptionHandler.handle(e, getShell(), title, message)) {
-					JavaPlugin.log(e);
-					MessageDialog.openError(getShell(), title, message);
-				}
+				ExceptionHandler.handle(e, getShell(), title, message);
 				return false;
 			} catch (InterruptedException e) {
 				// cancelled

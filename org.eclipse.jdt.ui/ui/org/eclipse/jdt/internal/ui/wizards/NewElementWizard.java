@@ -51,9 +51,7 @@ public abstract class NewElementWizard extends BasicNewResourceWizard implements
 			Shell shell= getShell();
 			String title= NewWizardMessages.getString("NewElementWizard.op_error.title"); //$NON-NLS-1$
 			String message= NewWizardMessages.getString("NewElementWizard.op_error.message"); //$NON-NLS-1$
-			if (!ExceptionHandler.handle(e.getTargetException(), shell, title, message)) {
-				MessageDialog.openError(shell, title, e.getTargetException().getMessage());
-			}
+			ExceptionHandler.handle(e, shell, title, message);
 			return false;
 		} catch  (InterruptedException e) {
 			return false;

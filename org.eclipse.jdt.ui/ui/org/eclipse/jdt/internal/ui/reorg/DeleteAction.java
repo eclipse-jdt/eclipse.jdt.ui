@@ -52,7 +52,7 @@ public class DeleteAction extends ReorgAction {
 		try{
 			MultiStatus status= perform(refactoring);
 			if (!status.isOK()) {
-				Throwable t= new JavaUIException(status);
+				JavaUIException t= new JavaUIException(status);
 				ExceptionHandler.handle(t, "Delete", "Unexpected exception. See log for details.");
 			}
 		} catch (JavaModelException e){

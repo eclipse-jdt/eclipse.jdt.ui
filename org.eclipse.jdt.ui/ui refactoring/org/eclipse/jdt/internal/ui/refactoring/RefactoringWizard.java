@@ -252,7 +252,7 @@ public class RefactoringWizard extends Wizard {
 		CreateChangeOperation op= new CreateChangeOperation(fRefactoring, style);
 		op.setCheckPassedSeverity(checkPassedSeverity); 
 
-		Exception exception= null;
+		InvocationTargetException exception= null;
 		try {
 			getContainer().run(true, true, op);
 		} catch (InterruptedException e) {

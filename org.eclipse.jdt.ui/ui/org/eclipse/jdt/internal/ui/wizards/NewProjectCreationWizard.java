@@ -64,9 +64,7 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 		} catch (InvocationTargetException e) {
 			String title= NewWizardMessages.getString("NewProjectCreationWizard.op_error.title"); //$NON-NLS-1$
 			String message= NewWizardMessages.getString("NewProjectCreationWizard.op_error.message");			 //$NON-NLS-1$
-			if (!ExceptionHandler.handle(e.getTargetException(), getShell(), title, message)) {
-				MessageDialog.openError(getShell(), title, e.getTargetException().getMessage());
-			}
+			ExceptionHandler.handle(e, getShell(), title, message);
 			return false;
 		} catch  (InterruptedException e) {
 			return false;

@@ -133,10 +133,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			} catch (InvocationTargetException e) {
 				String title= JavaUIMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
 				String message= JavaUIMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$
-				if (!ExceptionHandler.handle(e.getTargetException(), shell, title, message)) {
-					JavaPlugin.log(e);
-					MessageDialog.openError(shell, title, e.getMessage());
-				}
+				ExceptionHandler.handle(e, shell, title, message);
 				return false;
 			} catch (InterruptedException e) {
 				// cancelled
