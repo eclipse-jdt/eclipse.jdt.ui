@@ -530,6 +530,9 @@ public class Checks {
 		if (res == null)
 			return true;
 		IProject definingProject= res.getProject();
+		if (res.getParent() != null && pkgRoot.isArchive() && ! res.getParent().equals(definingProject))
+			return true;
+		
 		IProject occurringProject= pkgRoot.getJavaProject().getProject();
 		return !definingProject.equals(occurringProject);
 	}
