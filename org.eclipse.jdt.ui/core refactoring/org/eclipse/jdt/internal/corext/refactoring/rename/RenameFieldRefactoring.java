@@ -221,7 +221,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 
 	public String getNewSetterName() throws JavaModelException {
-		return NamingConventions.suggestSetterName(fField.getJavaProject(), fNewName, fField.getFlags(), null);
+		return NamingConventions.suggestSetterName(fField.getJavaProject(), fNewName, fField.getFlags(), isBoolean(fField), null);
 	}
 
 	private static boolean isBoolean(IField field) throws JavaModelException{

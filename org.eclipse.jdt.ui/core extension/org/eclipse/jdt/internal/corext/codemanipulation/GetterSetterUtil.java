@@ -31,20 +31,23 @@ public class GetterSetterUtil {
 	}
 	
 	public static String getGetterName(IField field, String[] excludedNames) throws JavaModelException {
-		boolean isBoolean=	field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
 		if (excludedNames == null) {
 			excludedNames= empty;
 		}
-		return NamingConventions.suggestGetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), isBoolean, excludedNames);
+		return NamingConventions.suggestGetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), isBoolean(field), excludedNames);
 	}
-	
+
 	public static String getSetterName(IField field, String[] excludedNames) throws JavaModelException {
 		if (excludedNames == null) {
 			excludedNames= empty;
 		}		
-		return NamingConventions.suggestSetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), excludedNames);
+		return NamingConventions.suggestSetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), isBoolean(field), excludedNames);
 	}	
-	
+
+	private static boolean isBoolean(IField field) throws JavaModelException {
+		return field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
+	}
+		
 	public static IMethod getGetter(IField field) throws JavaModelException{
 		return JavaModelUtil.findMethod(getGetterName(field, empty), new String[0], false, field.getDeclaringType());
 	}
