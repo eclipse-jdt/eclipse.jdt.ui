@@ -258,6 +258,11 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				if (res == null || res.length == 0) {
 					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.error.nothing_found")); //$NON-NLS-1$
 				} else if (editor != null) {
+					if (res[0].getCompilationUnit().isWorkingCopy())  {
+						synchronized(res[0].getCompilationUnit())  {
+							res[0].getCompilationUnit().reconcile();
+						}
+					}
 					EditorUtility.revealInEditor(editor, res[0]);
 				}
 			} catch (InvocationTargetException e) {
