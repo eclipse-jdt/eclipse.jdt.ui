@@ -1235,7 +1235,7 @@
       		label="%AddConstructorFromSuperclassAction.label"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"
 			retarget="true" />
-			
+
 		<action id="org.eclipse.jdt.ui.actions.GenerateConstructorUsingFields"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
       		label="%GenerateConstructorUsingFieldsAction.label"
@@ -3179,7 +3179,7 @@
 			label="%quickdiff.toggle.enable"
 			style="push"
 			helpContextId="quickdiff.toggle"
-			class="org.eclipse.ui.editors.quickdiff.QuickDiffToggleAction"
+			class="org.eclipse.ui.texteditor.quickdiff.QuickDiffToggleAction"
 			menubarPath="quickdiff"
 			id="quickdiff.toggle">
 		</action>
@@ -3195,8 +3195,8 @@
 		<action
 			definitionId="org.eclipse.quickdiff.toggle"
 			label="%quickdiff.toggle.enable"
-			class="org.eclipse.ui.editors.quickdiff.QuickDiffToggleAction"
-			id="org.eclipse.ui.editors.quickdiff.QuickDiffToggleAction">
+			class="org.eclipse.ui.texteditor.quickdiff.QuickDiffToggleAction"
+			id="org.eclipse.ui.texteditor.quickdiff.QuickDiffToggleAction">
 		</action>
 	</editorContribution>
 <!-- compilation unit editor -->
@@ -3206,8 +3206,8 @@
 		<action
 			definitionId="org.eclipse.quickdiff.toggle"
 			label="%quickdiff.toggle.enable"
-			class="org.eclipse.ui.editors.quickdiff.QuickDiffToggleAction"
-			id="org.eclipse.ui.editors.quickdiff.QuickDiffToggleAction">
+			class="org.eclipse.ui.texteditor.quickdiff.QuickDiffToggleAction"
+			id="org.eclipse.ui.texteditor.quickdiff.QuickDiffToggleAction">
 		</action>
 	</editorContribution>
 </extension>
