@@ -36,12 +36,11 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		fProblemPosition= problemPos;
 	}
 
-	/*
-	 * @see CUCorrectionProposal#addEdits(CompilationUnitChange)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(String, ICompilationUnit, TextEdit)
 	 */
-	protected void addEdits(CompilationUnitChange change) throws CoreException {
-		ICompilationUnit cu= change.getCompilationUnit();
-		TextEdit root= change.getEdit();
+	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit root) throws CoreException {
+		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, root);
 		
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
 		IPackageDeclaration[] decls= cu.getPackageDeclarations();
@@ -51,17 +50,18 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 				ISourceRange range= decls[i].getSourceRange();
 				root.add(SimpleTextEdit.createDelete(range.getOffset(), range.getLength()));
 			}
-			return;
+			return change;
 		}
 		if (!parentPack.isDefaultPackage() && decls.length == 0) {
 			String lineDelim= StubUtility.getLineDelimiterUsed(cu);
 			String str= "package " + parentPack.getElementName() + ";" + lineDelim + lineDelim; //$NON-NLS-1$ //$NON-NLS-2$
 			root.add(SimpleTextEdit.createInsert(0, str));
-			return;
+			return change;
 		}
 		
 		ProblemPosition pos= fProblemPosition;
 		root.add(SimpleTextEdit.createReplace(pos.getOffset(), pos.getLength(), parentPack.getElementName()));
+		return change;
 	}
 	
 	/*

@@ -202,6 +202,23 @@ public class ASTResolving {
 		return (BodyDeclaration) node;
 	}
 	
+	public static CompilationUnit findParentCompilationUnit(ASTNode node) {
+		while ((node != null) && (node.getNodeType() != ASTNode.COMPILATION_UNIT)) {
+			node= node.getParent();
+		}
+		return (CompilationUnit) node;
+	}
+	
+	/**
+	 * Returns either a TypeDeclaration or an AnonymousTypeDeclaration	 * @param node	 * @return CompilationUnit	 */
+	public static ASTNode findParentType(ASTNode node) {
+		while ((node != null) && (node.getNodeType() != ASTNode.TYPE_DECLARATION) && (node.getNodeType() != ASTNode.ANONYMOUS_CLASS_DECLARATION)) {
+			node= node.getParent();
+		}
+		return node;
+	}		
+	
+	
 	public static Statement findParentStatement(ASTNode node) {
 		while ((node != null) && (!(node instanceof Statement))) {
 			node= node.getParent();
@@ -310,7 +327,36 @@ public class ASTResolving {
 		return null;
 	}
 	
+	public static Expression getInitExpression(Type type) {
+		if (type.isPrimitiveType()) {
+			if (((PrimitiveType)type).getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
+				return type.getAST().newBooleanLiteral(false);
+			} else {
+				return type.getAST().newNumberLiteral("0");
+			}
+		}
+		return type.getAST().newNullLiteral();
+	}
+	
+	private static class NodeFoundException extends RuntimeException {
+		public ASTNode node;
+	}
 	
 	
-
+	public static ASTNode findClonedNode(ASTNode cloneRoot, final ASTNode node) {
+		try {
+			cloneRoot.accept(new ASTVisitor() {
+				public void preVisit(ASTNode curr) {
+					if (curr.getNodeType() == node.getNodeType() && curr.getStartPosition() == node.getStartPosition() && curr.getLength() == node.getLength()) {
+						NodeFoundException exc= new NodeFoundException();
+						exc.node= curr;
+						throw exc;
+					}
+				}
+			});
+		} catch (NodeFoundException e) {
+			return e.node;
+		}
+		return null;
+	}
 }

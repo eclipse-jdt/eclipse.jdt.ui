@@ -21,6 +21,7 @@ import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
@@ -35,29 +36,28 @@ import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 
 public class CUCorrectionProposal extends ChangeCorrectionProposal {
 
-	private boolean fIsInitialized;
+	private ICompilationUnit fCompilationUnit;
+	private TextEdit fRootEdit;
 
-	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance) throws CoreException {
+	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance) {
 		this(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 	
-	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) throws CoreException {
-		super(name, createCompilationUnitChange(name, cu, false), relevance, image);
-		fIsInitialized= false;
+	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) {
+		super(name, null, relevance, image);
+		fRootEdit= new MultiTextEdit();
+		fCompilationUnit= cu;
 	}
 	
-	public CUCorrectionProposal(String name, CompilationUnitChange change, int relevance) throws CoreException {
-		super(name, change, relevance);
-		//change.setKeepExecutedTextEdits(true);
-		fIsInitialized= true;
-		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+	public CUCorrectionProposal(String name, CompilationUnitChange change, int relevance, Image image) {
+		super(name, change, relevance, image);
+		fCompilationUnit= change.getCompilationUnit();
 	}	
 	
-	private static Change createCompilationUnitChange(String name, ICompilationUnit cu, boolean doSave) throws CoreException {
+	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit rootEdit) throws CoreException {
 		CompilationUnitChange change= new CompilationUnitChange(name, cu);
-		//change.setKeepExecutedTextEdits(true);
-		change.setSave(doSave);
-		change.setEdit(new MultiTextEdit());
+		change.setEdit(rootEdit);
+		change.setSave(false);
 		return change;
 	}
 
@@ -66,14 +66,14 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 	 */
 	protected Change getChange() throws CoreException {
 		Change change= super.getChange();
-		if (!fIsInitialized) {
-			fIsInitialized= true;
-			addEdits((CompilationUnitChange) change);
+		if (change == null) {
+			change= createCompilationUnitChange(getDisplayString(), fCompilationUnit, fRootEdit);
+			setChange(change);
 		}
 		return change;
 	}
 	
-	protected void addEdits(CompilationUnitChange change) throws CoreException {
+	protected final void addEdits(CompilationUnitChange change) throws CoreException {
 	}
 	
 	/*
@@ -165,7 +165,16 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 	/**
 	 * @return Returns the root text edit
 	 */
-	public TextEdit getRootTextEdit() throws CoreException {
-		return getCompilationUnitChange().getEdit();
+	public TextEdit getRootTextEdit() {
+		return fRootEdit;
 	}
+	
+	/**
+	 * Returns the compilationUnit.
+	 * @return ICompilationUnit
+	 */
+	public ICompilationUnit getCompilationUnit() {
+		return fCompilationUnit;
+	}
+
 }

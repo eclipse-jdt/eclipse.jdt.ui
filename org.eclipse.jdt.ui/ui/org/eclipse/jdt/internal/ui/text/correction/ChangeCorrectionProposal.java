@@ -133,6 +133,14 @@ public class ChangeCorrectionProposal implements ICompletionProposal {
 	protected Change getChange() throws CoreException {
 		return fChange;
 	}
+	
+	/**
+	 * Sets the change element.
+	 * @param 
+	 */
+	protected void setChange(Change change) throws CoreException {
+		fChange= change;
+	}	
 
 	/**
 	 * Sets the display name.

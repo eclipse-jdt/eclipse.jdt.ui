@@ -44,15 +44,13 @@ public class ASTRewrite {
 	 * @param groupDescription All resulting GroupDescription will be added to this collection.
 	 * <code>null</code> can be passed, if no descriptions should be collected.
 	 */
-	public TextEdit rewriteNode(TextBuffer textBuffer, Collection resultingGroupDescription) {
-		MultiTextEdit rootEdit= new MultiTextEdit();
+	public void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit, Collection resultingGroupDescription) {
 		HashMap descriptions= resultingGroupDescription == null ? null : new HashMap(5);
 		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(textBuffer, rootEdit, this, descriptions);
 		fRootNode.accept(visitor); 
 		if (resultingGroupDescription != null) {
 			resultingGroupDescription.addAll(descriptions.values());
 		}
-		return rootEdit;
 	}
 	
 	/**

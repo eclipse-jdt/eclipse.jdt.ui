@@ -67,15 +67,14 @@ public class NewConstructorCompletionProposal extends CUCorrectionProposal {
 	}
 	
 	
-	/*
-	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(String, ICompilationUnit, TextEdit)
 	 */
-	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-		ICompilationUnit changedCU= changeElement.getCompilationUnit();
-		TextEdit root= changeElement.getEdit();	
+	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit root) throws CoreException {
+		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, root);
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		ImportEdit importEdit= new ImportEdit(changedCU, settings);
+		ImportEdit importEdit= new ImportEdit(cu, settings);
 
 		String content= generateStub(importEdit, settings);
 
@@ -98,6 +97,7 @@ public class NewConstructorCompletionProposal extends CUCorrectionProposal {
 			root.add( importEdit); //$NON-NLS-1$
 		}
 		root.add(fMemberEdit); //$NON-NLS-1$
+		return change;
 	}
 	
 	

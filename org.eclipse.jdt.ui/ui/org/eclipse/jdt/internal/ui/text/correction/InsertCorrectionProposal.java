@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.text.Position;
-
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -35,12 +33,14 @@ public class InsertCorrectionProposal extends CUCorrectionProposal {
 		fOffset= offset;
 	}
 
-	/*
-	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(String, ICompilationUnit, TextEdit)
 	 */
-	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
+	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit root) throws CoreException {
+		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, root);
 		TextEdit edit= SimpleTextEdit.createInsert(fOffset, fInsertionString);
-		changeElement.getEdit().add(edit);
+		root.add(edit);
+		return change;
 	}
 	
 	public static int moveBack(int offset, int start, String ignoreCharacters, ICompilationUnit cu) {

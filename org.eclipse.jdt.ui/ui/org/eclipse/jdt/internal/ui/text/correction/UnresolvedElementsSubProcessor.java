@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -120,27 +121,44 @@ public class UnresolvedElementsSubProcessor {
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", curr.getName()); //$NON-NLS-1$
 			proposals.add(new ReplaceCorrectionProposal(label, problemPos.getCompilationUnit(), node.getStartPosition(), node.getLength(), curr.getName(), 3));
 		}
+
+		// new variables
+		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
+		if (bodyDeclaration != null) {
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", node.getIdentifier()); //$NON-NLS-1$
+			proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.FIELD, node, 2));
+		}
+		
+		int type= bodyDeclaration.getNodeType();
+		if (type == ASTNode.METHOD_DECLARATION) {
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", node.getIdentifier()); //$NON-NLS-1$
+			proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.PARAM, node, 1));
+		}
+		if (type == ASTNode.METHOD_DECLARATION || type == ASTNode.INITIALIZER) {
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", node.getIdentifier()); //$NON-NLS-1$
+			proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.LOCAL, node, 1));
+		}
 		
 		// new field
-		IJavaElement elem= cu.getElementAt(node.getStartPosition());
-		if (elem instanceof IMember) {
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", node.getIdentifier()); //$NON-NLS-1$
-			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.FIELD, node, (IMember) elem, 2));
-		}
-		if (elem instanceof IMethod) {
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", node.getIdentifier()); //$NON-NLS-1$
-			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.LOCAL, node, (IMember) elem, 1));
-		
-			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", node.getIdentifier()); //$NON-NLS-1$
-			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.PARAM, node, (IMember) elem, 1));
-		}			
-		
-		if (node.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
-			MethodInvocation invocation= (MethodInvocation) node.getParent();
-			if (node.equals(invocation.getExpression())) {
-				getTypeProposals(problemPos, SimilarElementsRequestor.REF_TYPES, proposals);
-			}
-		}
+//		IJavaElement elem= cu.getElementAt(node.getStartPosition());
+//		if (bodyDeclaration.getNodeType() == ASTNode.FIELD_DECLARATION) {
+//			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", node.getIdentifier()); //$NON-NLS-1$
+//			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.FIELD, node, bodyDeclaration, 2));
+//		}
+//		if (elem instanceof IMethod) {
+//			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", node.getIdentifier()); //$NON-NLS-1$
+//			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.LOCAL, node, bodyDeclaration, 1));
+//		
+//			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", node.getIdentifier()); //$NON-NLS-1$
+//			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.PARAM, node, bodyDeclaration, 1));
+//		}			
+//		
+//		if (node.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
+//			MethodInvocation invocation= (MethodInvocation) node.getParent();
+//			if (node.equals(invocation.getExpression())) {
+//				getTypeProposals(problemPos, SimilarElementsRequestor.REF_TYPES, proposals);
+//			}
+//		}
 	}
 	
 	public static void getTypeProposals(ProblemPosition problemPos, int kind, ArrayList proposals) throws CoreException {

@@ -903,7 +903,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 				fResult.append(", ");//$NON-NLS-1$
 			}
 		}
-		fResult.append(";");//$NON-NLS-1$
 		return false;
 	}
 

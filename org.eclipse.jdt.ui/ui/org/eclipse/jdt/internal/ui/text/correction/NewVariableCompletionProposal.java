@@ -14,275 +14,188 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public final class NewVariableCompletionProposal extends CUCorrectionProposal {
-	
-	private final static class AddLocalVariableEdit extends SimpleTextEdit {
-		private String fContent;
-		private ASTNode fAstRoot;
-		private int fTabSize;
-
-		public AddLocalVariableEdit(ASTNode astRoot, String content, int tabSize) {
-			fAstRoot= astRoot;
-			fContent= content;
-			fTabSize= tabSize;
-		}
-		
-		/* non Java-doc
-		 * @see TextEdit#copy0
-		 */
-		protected TextEdit copy0(TextEditCopier copier) {
-			return new AddLocalVariableEdit(fAstRoot, fContent, fTabSize);
-		}
-		
-		/* non Java-doc
-		 * @see TextEdit#connect
-		 */
-		public void connect(TextBuffer buffer) throws CoreException {
-			if (fAstRoot == null) {
-				return;
-			}
-			
-			int offset= 0;
-			String insertString= null;
-			
-			ASTNode curr= fAstRoot;
-			while (curr != null && !(curr instanceof Block)) {
-				curr= curr.getParent();
-			}
-			if (curr != null) {
-				Block block= (Block) curr;
-				List statements= block.statements();
-				if (!statements.isEmpty()) {
-					ASTNode statement= (ASTNode) statements.get(0);
-					if (statement instanceof SuperConstructorInvocation || statement instanceof ConstructorInvocation ) {
-						if (!fAstRoot.equals(statement) && statements.size() > 1) {
-							statement= (ASTNode) statements.get(1);
-						}
-					}	
-					offset= statement.getStartPosition();
-					int startLine= buffer.getLineOfOffset(offset);
-					String indentString= CodeFormatterUtil.createIndentString(buffer.getLineIndent(startLine, fTabSize));
-					String lineDelim= buffer.getLineDelimiter();
-					insertString= StubUtility.codeFormat(fContent, 0, lineDelim) +  lineDelim + indentString;
-				}
-			}
-			setTextRange(new TextRange(offset, 0));
-			setText(insertString);
-			super.connect(buffer);
-		}	
-	}
-	
-	private final static class AddParameterEdit extends SimpleTextEdit {
-		private String fContent;
-		private ASTNode fAstRoot;
-		private ICompilationUnit fCompilationUnit;
-
-		public AddParameterEdit(ICompilationUnit cu, ASTNode astRoot, String content) {
-			fAstRoot= astRoot;
-			fContent= content;
-			fCompilationUnit= cu;
-		}
-		
-		/* non Java-doc
-		 * @see TextEdit#copy0
-		 */
-		protected TextEdit copy0(TextEditCopier copier) {
-			return new AddParameterEdit(fCompilationUnit, fAstRoot, fContent);
-		}
-		
-		/* non Java-doc
-		 * @see TextEdit#connect
-		 */
-		public void connect(TextBuffer buffer) throws CoreException {
-			if (fAstRoot == null) {
-				return;
-			}
-			
-			int offset= 0;
-			String insertString= ""; //$NON-NLS-1$
-			
-			ASTNode curr= fAstRoot;
-			while (curr != null && !(curr instanceof MethodDeclaration)) {
-				curr= curr.getParent();
-			}
-			if (curr != null) {
-				MethodDeclaration declaration= (MethodDeclaration) curr;
-				List params= declaration.parameters();
-				if (!params.isEmpty()) {
-					ASTNode p= (ASTNode) params.get(params.size() - 1);
-					offset= p.getStartPosition() + p.getLength();
-					insertString= ", " + fContent; //$NON-NLS-1$
-				} else {
-					SimpleName name= declaration.getName();
-					try {
-						IScanner scanner= ASTResolving.createScanner(fCompilationUnit, name.getStartPosition());
-						int nextNoken= scanner.getNextToken();
-						while (nextNoken != ITerminalSymbols.TokenNameLPAREN) {
-							nextNoken= scanner.getNextToken();
-							if (nextNoken == ITerminalSymbols.TokenNameEOF) {
-								throw new CoreException(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, "Unexpected EOF while scanning", null)); //$NON-NLS-1$
-							}
-						}
-						offset= scanner.getCurrentTokenEndPosition() + 1;
-					} catch (InvalidInputException e) {
-						throw new CoreException(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, "Exception while scanning", e)); //$NON-NLS-1$
-					}					
-					insertString= fContent;
-				}
-			}
-			setTextRange(new TextRange(offset, 0));
-			setText(insertString);
-			super.connect(buffer);
-		}	
-	}	
+public final class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal {
 
 	public static final int LOCAL= 1;
 	public static final int FIELD= 2;
 	public static final int PARAM= 3;
 
 	private int  fVariableKind;
-	private SimpleName fNode;
-	private IMember fParentMember;
+	private SimpleName fOriginalNode;
 
-	public NewVariableCompletionProposal(String label, int variableKind, SimpleName node, IMember parentMember, int relevance) throws CoreException {
-		super(label, parentMember.getCompilationUnit(), relevance, null);
+	public NewVariableCompletionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, int relevance) throws CoreException {
+		super(label, cu, null, relevance, null);
 	
 		fVariableKind= variableKind;
-		fNode= node;
-		fParentMember= parentMember;
+		fOriginalNode= node;
 		if (variableKind == FIELD) {
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
 		} else {
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL));
 		}
 	}
-
-	/*
-	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
-	 */
-	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-		ICompilationUnit cu= changeElement.getCompilationUnit();
-		TextEdit root= changeElement.getEdit();
 		
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		ImportEdit importEdit= new ImportEdit(cu, settings);
+	protected ASTRewrite getRewrite() {
+		AST ast= new AST();
+		CompilationUnit origCU= ASTResolving.findParentCompilationUnit(fOriginalNode);
+		
+		ASTCloner cloner= new ASTCloner(ast, origCU);
 
-		String content= generateStub(importEdit, fNode);
-		if (!importEdit.isEmpty()) {
-			root.add(importEdit);
-		}		
+		CompilationUnit cu= (CompilationUnit) cloner.getClonedRoot();
+		SimpleName node= (SimpleName) cloner.getCloned(fOriginalNode);
+		
+		cloner= null;
 
-		if (fVariableKind == LOCAL) {
-			// new local variable
-			root.add(new AddLocalVariableEdit(fNode, content, settings.tabWidth));
+		ASTRewrite rewrite= new ASTRewrite(cu);
+		
+		if (fVariableKind == PARAM) {
+			doAddParam(ast, node, rewrite);
 		} else if (fVariableKind == FIELD) {
-			// new field
-			root.add(createFieldEdit(content, settings.tabWidth));
-		} else if (fVariableKind == PARAM) {
-			// new parameter
-			root.add(new AddParameterEdit(cu, fNode, content));
+			doAddField(ast, node, rewrite);
+		} else if (fVariableKind == LOCAL) {
+			doAddLocal(ast, node, rewrite);
+		}
+		return rewrite;
+	}
+
+	private void doAddParam(AST ast, SimpleName node, ASTRewrite rewrite) {
+		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
+		if (decl instanceof MethodDeclaration) {
+			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
+			newDecl.setType(evaluateVariableType(ast));
+			newDecl.setName(ast.newSimpleName(node.getIdentifier()));
+			
+			rewrite.markAsInserted(newDecl);
+			((MethodDeclaration)decl).parameters().add(newDecl);
+		}
+	}
+
+	private void doAddLocal(AST ast, SimpleName node, ASTRewrite rewrite) {
+		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
+		if (decl instanceof MethodDeclaration || decl instanceof Initializer) {
+			
+			VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
+			VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
+			
+			Type type= evaluateVariableType(ast);
+			newDecl.setType(type);
+			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
+			newDeclFrag.setInitializer(ASTResolving.getInitExpression(type));
+			
+			ASTNode parent= node.getParent();
+			if (parent.getNodeType() == ASTNode.ASSIGNMENT) {
+				Assignment assignment= (Assignment) parent;
+				if (node.equals(assignment.getLeftHandSide())) {
+					int parentParentKind= parent.getParent().getNodeType();
+					if (parentParentKind == ASTNode.EXPRESSION_STATEMENT) {
+						Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
+						newDeclFrag.setInitializer(placeholder);
+				
+						rewrite.markAsReplaced(assignment.getParent(), newDecl);
+						return;
+					} else if (parentParentKind == ASTNode.FOR_STATEMENT) {
+						ForStatement forStatement= (ForStatement) parent.getParent();
+						if (forStatement.initializers().size() == 1 && assignment.equals(forStatement.initializers().get(0))) {
+							VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
+							VariableDeclarationExpression expression= ast.newVariableDeclarationExpression(frag);
+							frag.setName(ast.newSimpleName(node.getIdentifier()));
+							Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
+							frag.setInitializer(placeholder);
+							expression.setType(evaluateVariableType(ast));
+							
+							rewrite.markAsReplaced(assignment, expression);
+							return;
+						}			
+					}			
+				}
+			} else if (parent.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+				rewrite.markAsReplaced(parent, newDecl);
+				return;
+			}
+			Statement statement= ASTResolving.findParentStatement(node);
+			if (statement != null && statement.getParent() instanceof Block) {
+				Block block= (Block) statement.getParent();
+				List statements= block.statements();
+				statements.add(0, newDecl);
+				
+				rewrite.markAsInserted(newDecl);
+			}
+		}
+	}
+
+	private void doAddField(AST ast, SimpleName node, ASTRewrite rewrite) {
+		ASTNode parentType= ASTResolving.findParentType(node);
+		if (parentType != null) {
+			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
+			fragment.setName(ast.newSimpleName(node.getIdentifier()));
+			
+			FieldDeclaration newDecl= ast.newFieldDeclaration(fragment);
+			newDecl.setType(evaluateVariableType(ast));
+			
+			int modifiers= Modifier.PRIVATE;
+			if (ASTResolving.isInStaticContext(node)) {
+				modifiers |= Modifier.STATIC;
+			}
+			
+			newDecl.setModifiers(modifiers);
+		
+			boolean isAnonymous= parentType.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
+			List decls= isAnonymous ?  ((AnonymousClassDeclaration) parentType).bodyDeclarations() :  ((TypeDeclaration) parentType).bodyDeclarations();
+							
+			decls.add(findInsertIndex(decls, node.getStartPosition()), newDecl);
+			
+			rewrite.markAsInserted(newDecl);
 		}
 	}
 	
-	private TextEdit createFieldEdit(String content, int tabWidth) throws CoreException {
-		boolean parentIsType= (fParentMember.getElementType() ==  IJavaElement.TYPE);
-		
-		IType type= parentIsType ? (IType) fParentMember : fParentMember.getDeclaringType();
-
-		int insertPos= MemberEdit.ADD_AT_BEGINNING;
-		IJavaElement anchor= type;
-		if (!parentIsType && fParentMember.getElementType() != IJavaElement.FIELD) {
-			IField[] fields= type.getFields();
-			if (fields.length > 0) {
-				anchor= fields[fields.length - 1];
-				insertPos= MemberEdit.INSERT_AFTER;
+	private int findInsertIndex(List decls, int currPos) {
+		for (int i= decls.size() - 1; i >= 0; i--) {
+			ASTNode curr= (ASTNode) decls.get(i);
+			if (curr instanceof FieldDeclaration && currPos > curr.getStartPosition() + curr.getLength()) {
+				return i + 1;
 			}
 		}
-
-		MemberEdit memberEdit= new MemberEdit(anchor, insertPos, new String[] { content }, tabWidth);
-		memberEdit.setUseFormatter(true);
-		
-		return memberEdit;
-	}	
-
-
-	private String generateStub(ImportEdit importEdit, SimpleName selectedNode) throws CoreException {
-		StringBuffer buf= new StringBuffer();
-		ITypeBinding varType= evaluateVariableType(importEdit, selectedNode);
-				
-		if (fVariableKind == FIELD) {
-			buf.append("private "); //$NON-NLS-1$
-			if (ASTResolving.isInStaticContext(selectedNode)) {
-				buf.append("static "); //$NON-NLS-1$
-			}			
-		}
-		
-		buf.append(varType != null ? varType.getName() : "Object"); //$NON-NLS-1$
-		buf.append(' ');
-		buf.append(selectedNode.getIdentifier());
-		if (fVariableKind == LOCAL) {
-			if (varType == null || !varType.isPrimitive()) {
-				buf.append("= null"); //$NON-NLS-1$
-			} else if (varType.getName().equals("boolean")) { //$NON-NLS-1$
-				buf.append("= false"); //$NON-NLS-1$
-			} else {
-				buf.append("= 0"); //$NON-NLS-1$
-			}
-		}
-		if (fVariableKind != PARAM) {
-			buf.append(";"); //$NON-NLS-1$
-		}
-			
-		return buf.toString();
+		return 0;
 	}
 		
-	private ITypeBinding evaluateVariableType(ImportEdit importEdit, ASTNode selectedNode) {
-		if (selectedNode != null) {
-			ITypeBinding binding= ASTResolving.getTypeBinding(selectedNode);
-			if (binding != null) {
-				ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
-				if (!baseType.isPrimitive()) {
-					importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
-				}
-				return binding;
+	private Type evaluateVariableType(AST ast) {
+		ITypeBinding binding= ASTResolving.getTypeBinding(fOriginalNode);
+		if (binding != null) {
+			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
+			if (!baseType.isPrimitive()) {
+				addImport(Bindings.getFullyQualifiedName(baseType));
 			}
+			return ASTResolving.getTypeFromTypeBinding(ast, binding);
 		}
-		return null;
+		return ast.newSimpleType(ast.newSimpleName("Object"));
 	}
 
 

@@ -152,9 +152,8 @@ public class LocalCorrectionsSubProcessor {
 			refactoring.setSaveChanges(false);
 			if (refactoring.checkActivationBasics(astRoot, null).isOK()) {
 				String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.surroundwith.description"); //$NON-NLS-1$
-
-				CUCorrectionProposal proposal= new CUCorrectionProposal(label, (CompilationUnitChange) refactoring.createChange(null), 0);
-				proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION));
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+				CUCorrectionProposal proposal= new CUCorrectionProposal(label, (CompilationUnitChange) refactoring.createChange(null), 0, image);
 				proposals.add(proposal);
 			}
 		}
@@ -175,8 +174,7 @@ public class LocalCorrectionsSubProcessor {
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addthrows.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
-
-			addImportToProposal(cu, uncaughtName, proposal);
+			proposal.addImport(uncaughtName);
             
 			proposals.add(proposal);
 		}

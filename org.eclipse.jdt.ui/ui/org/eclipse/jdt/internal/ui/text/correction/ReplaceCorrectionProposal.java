@@ -36,12 +36,14 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 		fLength= length;
 	}	
 
-	/*
-	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(String, ICompilationUnit, TextEdit)
 	 */
-	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
+	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit root) throws CoreException {
+		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, root);
 		TextEdit edit= SimpleTextEdit.createReplace(fOffset, fLength, fReplacementString);
-		changeElement.getEdit().add(edit);
+		root.add(edit);
+		return change;
 	}
 	
 }

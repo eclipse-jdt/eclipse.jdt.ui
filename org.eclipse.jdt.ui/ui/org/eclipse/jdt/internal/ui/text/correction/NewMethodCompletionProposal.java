@@ -74,22 +74,21 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	}
 	
 	
-	/*
-	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(String, ICompilationUnit, TextEdit)
 	 */
-	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-		ICompilationUnit changedCU= changeElement.getCompilationUnit();
-		TextEdit root= changeElement.getEdit();
-		
+	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit root) throws CoreException {
+		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, root);
+			
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		ImportEdit importEdit= new ImportEdit(changedCU, settings);
+		ImportEdit importEdit= new ImportEdit(cu, settings);
 
 		String content= generateStub(importEdit, settings);
 		
 		int insertPos= MemberEdit.ADD_AT_END;
 		IJavaElement anchor= fDestType;
 		if (isLocalChange()) {
-			IJavaElement elem= changedCU.getElementAt(fNode.getStartPosition());
+			IJavaElement elem= cu.getElementAt(fNode.getStartPosition());
 			if (elem != null && elem.getElementType() == IJavaElement.METHOD) {
 				anchor= elem;
 				insertPos= MemberEdit.INSERT_AFTER;
@@ -103,6 +102,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 			root.add( importEdit); //$NON-NLS-1$
 		}
 		root.add( fMemberEdit); //$NON-NLS-1$
+		return null;
 	}
 	
 	
