@@ -136,7 +136,7 @@ public class TemporaryAnnotation extends Annotation implements IAnnotationExtens
 		Iterator e= fMarkerAnnotationPreferences.getAnnotationPreferences().iterator();
 		while (e.hasNext()) {
 			AnnotationPreference info= (AnnotationPreference) e.next();
-			if (info.getMarkerType() == IMarker.PROBLEM && fSeverity == info.getSeverity())
+			if (IMarker.PROBLEM.equals(info.getMarkerType()) && fSeverity == info.getSeverity())
 				return info;
 		}
 			
