@@ -298,27 +298,23 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
     
     private List getAllEnclosingAnonymousTypesField() {
-        final List ans = new ArrayList();
-        final TypeDeclaration typeDeclaration = getTypeDeclaration();
-        AnonymousClassDeclaration current = (AnonymousClassDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, ASTNode.ANONYMOUS_CLASS_DECLARATION);
-        while(current != null)
-        {
-            if(ASTNodes.isParent(current, typeDeclaration))
-            {
-                ITypeBinding binding = current.resolveBinding();
-                if(binding != null)
-                {
-                    ans.addAll(Arrays.asList(binding.getDeclaredFields()));
-                }
-            }
-            else
-            {
-                break;
-            }
-            current = (AnonymousClassDeclaration) ASTNodes.getParent(current, ASTNode.ANONYMOUS_CLASS_DECLARATION);
-        }
-        return ans;
-    }
+		final List ans= new ArrayList();
+		final TypeDeclaration typeDeclaration= getTypeDeclaration();
+		AnonymousClassDeclaration current= (AnonymousClassDeclaration)ASTNodes.getParent(fAnonymousInnerClassNode,
+			ASTNode.ANONYMOUS_CLASS_DECLARATION);
+		while (current != null) {
+			if (ASTNodes.isParent(current, typeDeclaration)) {
+				ITypeBinding binding= current.resolveBinding();
+				if (binding != null) {
+					ans.addAll(Arrays.asList(binding.getDeclaredFields()));
+				}
+			} else {
+				break;
+			}
+			current= (AnonymousClassDeclaration)ASTNodes.getParent(current, ASTNode.ANONYMOUS_CLASS_DECLARATION);
+		}
+		return ans;
+	}
 
     private boolean classNameHidesEnclosingType() {
         ITypeBinding type= getTypeDeclaration().resolveBinding();
