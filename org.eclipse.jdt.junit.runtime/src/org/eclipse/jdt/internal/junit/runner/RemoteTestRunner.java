@@ -576,12 +576,13 @@ public class RemoteTestRunner implements TestListener {
 	private void sendTree(Test test){
 		if(test instanceof TestDecorator){
 			TestDecorator decorator= (TestDecorator) test;
+			notifyTestTreeEntry(getTestId(test)+','+escapeComma(decorator.getClass().getName()) + ',' + true + ',' + 1);
 			sendTree(decorator.getTest());		
 		}
 		else if(test instanceof TestSuite){
 			TestSuite suite= (TestSuite) test;
 			notifyTestTreeEntry(getTestId(test)+','+escapeComma(suite.toString().trim()) + ',' + true + ',' + suite.testCount());
-			for(int i=0; i < suite.testCount(); i++){	
+			for(int i= 0; i < suite.testCount(); i++){	
 				sendTree(suite.testAt(i));		
 			}				
 		}
