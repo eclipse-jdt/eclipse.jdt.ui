@@ -840,13 +840,13 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideFields.", new FieldFilter());
 		action.setImageDescriptors("lcl16", "fields_co.gif");
 		toolBarManager.add(action);
+				
+		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideStaticMembers.", new VisibilityFilter(VisibilityFilter.NOT_STATIC));		
+		action.setImageDescriptors("lcl16", "static_co.gif");
+		toolBarManager.add(action);
 		
 		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideNonePublicMembers.", new VisibilityFilter(VisibilityFilter.PUBLIC));		
 		action.setImageDescriptors("lcl16", "public_co.gif");
-		toolBarManager.add(action);
-		
-		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideStaticMembers.", new VisibilityFilter(VisibilityFilter.NOT_STATIC));		
-		action.setImageDescriptors("lcl16", "static_co.gif");
 		toolBarManager.add(action);
 	}	
 	
