@@ -84,7 +84,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  * The content outline page of the Java editor. The viewer implements a proprietary
  * update mechanism based on Java model deltas. It does not react on domain changes.
  * It is specified to show the content of ICompilationUnits and IClassFiles.
- * Pulishes its context menu under <code>JavaPlugin.getDefault().getPluginId() + ".outliner"</code>.
  */
 class JavaOutlinePage extends Page implements IContentOutlinePage {
 	
@@ -810,7 +809,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fMenu= manager.createContextMenu(tree);
 		tree.setMenu(fMenu);
 		
-		getSite().registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer);
+		// Pulishs its context menu under <code>JavaPlugin.getDefault().getPluginId() + ".outliner"</code>.
+		// getSite().registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer);
 		getSite().setSelectionProvider(fOutlineViewer);
 		
 		IStatusLineManager statusLineManager= getSite().getActionBars().getStatusLineManager();
