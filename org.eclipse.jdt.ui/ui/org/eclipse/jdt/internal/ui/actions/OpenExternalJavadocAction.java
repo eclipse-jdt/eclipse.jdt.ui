@@ -26,13 +26,12 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 
 /**
@@ -68,7 +67,7 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 		return false;
 	}
 	
-	private IJavaElement getDocumentedElement() {
+	private Object getSelectedElement() {
 		if (fSelectionProvider == null) {
 			return null;
 		}
@@ -76,8 +75,13 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 		IStructuredSelection selection= fSelectionProvider.getSelection(StructuredSelectionProvider.FLAGS_DO_CODERESOLVE | StructuredSelectionProvider.FLAGS_GET_EDITOR_INPUT);
 		if (selection.size() != 1)
 			return null;
-		
-		Object obj= selection.getFirstElement();
+			
+		return selection.getFirstElement();
+	}
+	
+	
+	private IJavaElement getDocumentedElement() {
+		Object obj= getSelectedElement();
 		if (obj instanceof IJavaElement) {
 			IJavaElement elem= (IJavaElement) obj;
 			int type= elem.getElementType();
@@ -96,15 +100,34 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 	}
 	
 	public void run() {
-		IJavaElement element= getDocumentedElement();
-		if (element == null) {
+		Object selected= getSelectedElement();
+		if (!(selected instanceof IJavaElement)) {
 			return;
 		}
-		try {
+		
+		
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		try {	
+		
+			IJavaElement element= getDocumentedElement();
+			if (element == null) {
+				IJavaElement jelem= (IJavaElement) selected;
+				IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(jelem);
+				String labelName= JavaElementLabels.getElementLabel(jelem, JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES);
+				if (root == null) {
+					return;
+				} else if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+					MessageDialog.openInformation(shell, "Open External Javadoc", "Could not open documentation for '" + labelName + "'. Open external Javadoc is currently only supported for elements in libraries.");
+				} else {
+					MessageDialog.openInformation(shell, "Open External Javadoc", "The documentation location for '" + labelName + "' has not been configured. Specify the Javadoc location URL on the source attachment property page of the parent JAR.");	
+				}
+				return;
+			}
+		
 			URL url= JavaDocLocations.getJavaDocLocation(element);
 			if (url != null) {
-				openInBrowser(url, JavaPlugin.getActiveWorkbenchShell());
-			}
+				openInBrowser(url, shell);
+			} 		
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			String title= "Open External Javadoc";
@@ -141,7 +164,9 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 		//System.out.println("Opening " + url.toExternalForm());
 		
 		if (SWT.getPlatform().equals("win32")) {	//$NON-NLS-1$
-			Program.launch(url.toString());
+			if (!Program.launch(url.toString())) {
+				MessageDialog.openError(shell, "Open External Javadoc", "Opening '" + url.toString() + "' with external editor failed.");
+			}
 		} else {
 			Thread launcher = new Thread("External Javadoc Launcher") {	//$NON-NLS-1$
 				public void run() {
