@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.test.performance.Dimension;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -61,6 +63,7 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 	}
 	
 	public void testWarm() throws Exception {
+		tagAsGlobalSummary("Rename of Control", new Dimension[] {Dimension.CPU_TIME, Dimension.USED_JAVA_HEAP});
 		IType control= fProject.findType("org.eclipse.swt.widgets.Control2");
 		RenameTypeProcessor processor= new RenameTypeProcessor(control);
 		processor.setNewElementName("Control");
