@@ -13,7 +13,6 @@ package org.eclipse.jdt.ui.tests.core;
 import java.util.List;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -37,10 +36,11 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
-public class PrimaryWorkingCopyTest extends TestCase {
+public class PrimaryWorkingCopyTest extends CoreTests {
 	
 	private static final Class THIS= PrimaryWorkingCopyTest.class;
 	
@@ -183,7 +183,7 @@ public class PrimaryWorkingCopyTest extends TestCase {
 			workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
 			result= doSearchForReferences("A", workingCopies);
 			assertTrue("Should contain 2 references, contains: " + result.size(), result.size() == 2);
-			
+					
 			ICompilationUnit wcopy= (ICompilationUnit) cu2.getWorkingCopy(); // create sand box working copy
 			try {
 				String source= wcopy.getSource();
@@ -213,8 +213,8 @@ public class PrimaryWorkingCopyTest extends TestCase {
 		assertTrue("Should contain 1 references, contains: " + result.size(), result.size() == 1);
 	}
 	
+
 	private static boolean BUG_43300= true;
-	
 	
 	private List doSearchForReferences(String ref, IWorkingCopy[] workingCopies) throws JavaModelException {
 		SearchEngine engine= new SearchEngine(workingCopies);
@@ -230,5 +230,145 @@ public class PrimaryWorkingCopyTest extends TestCase {
 		return collector.getResults();
 	}
 	
+	public void testWorkingCopyOfWorkingCopy() throws Exception {
+	
+		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
+		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    //Here\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", buf.toString(), true, null);
+
+		IEditorPart part= EditorUtility.openInEditor(cu1);
+		try {
+			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			String replacedString= "//Here";
+			
+			int offset= document.search(0, replacedString, true, true, false);
+			
+			document.replace(offset, replacedString.length(), "A a;");
+			
+			cu1= JavaModelUtil.toWorkingCopy(cu1); // no-op when USE_WORKING_COPY_OWNERS is true
+
+			buf= new StringBuffer();
+			buf.append("package pack1;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    A a;\n");
+			buf.append("}\n");
+			String expected= buf.toString();
+			
+			assertEqualString(cu1.getSource(), expected);
+			
+			ICompilationUnit wcopy= (ICompilationUnit) cu1.getWorkingCopy(); // create sand box working copy
+			try {
+				assertEqualString(wcopy.getSource(), expected);			
+				// no save
+			} finally {
+				wcopy.destroy();
+			}
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
+	
+	public void testLineDelimiterConsistency1() throws Exception {
+		// mixed line delimiters
+		
+		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
+		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    //Here\r\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", buf.toString(), true, null);
+
+		IEditorPart part= EditorUtility.openInEditor(cu1);
+		try {
+			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			String replacedString= "//Here";
+			
+			int offset= document.search(0, replacedString, true, true, false);
+			
+			document.replace(offset, replacedString.length(), "A a;");
+			
+			cu1= JavaModelUtil.toWorkingCopy(cu1); // no-op when USE_WORKING_COPY_OWNERS is true
+
+			buf= new StringBuffer();
+			buf.append("package pack1;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    A a;\r\n");
+			buf.append("}\n");
+			String expected= buf.toString();
+			
+			assertEqualString(cu1.getSource(), expected);
+			
+			ICompilationUnit wcopy= (ICompilationUnit) cu1.getWorkingCopy(); // create sand box working copy
+			try {
+				assertEqualString(wcopy.getSource(), expected);			
+				// no save
+			} finally {
+				wcopy.destroy();
+			}
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
+	
+	public void testLineDelimiterConsistency2() throws Exception {
+		// mixed line delimiters
+		
+		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
+		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    //Here\r\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", buf.toString(), true, null);
+
+		IEditorPart part= EditorUtility.openInEditor(cu1);
+		try {
+			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			String replacedString= "//Here";
+			
+			int offset= document.search(0, replacedString, true, true, false);
+			
+			document.replace(offset, replacedString.length(), "A a;");
+					
+			
+			cu1= JavaModelUtil.toWorkingCopy(cu1); // no-op when USE_WORKING_COPY_OWNERS is true
+
+			buf= new StringBuffer();
+			buf.append("package pack1;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    A a;\r\n");
+			buf.append("}\n");
+			String expected= buf.toString();
+			
+			assertEqualString(cu1.getSource(), expected);
+			
+			part.doSave(null);
+			
+			assertEqualString(cu1.getSource(), expected);
+			
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+		
+		
+	}
+		
 	
 }
