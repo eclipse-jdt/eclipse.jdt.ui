@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
@@ -39,11 +41,12 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 
 class JavaBrowsingContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener {
@@ -447,5 +450,38 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				fBrowsingPart.setProcessSelectionEvents(true);
 			}
 		}
+	}
+
+	/**
+	 * Returns the parent for the element.
+	 * <p>
+	 * Note: This method will return a working copy if the
+	 * parent is a working copy. The super class implementation
+	 * returns the original element instead.
+	 * </p>
+	 */	
+	protected Object internalGetParent(Object element) {
+		if (element instanceof IJavaProject) {
+			return ((IJavaProject)element).getJavaModel();
+		}
+		// try to map resources to the containing package fragment
+		if (element instanceof IResource) {
+			IResource parent= ((IResource)element).getParent();
+			Object jParent= JavaCore.create(parent);
+			if (jParent != null) 
+				return jParent;
+			return parent;
+		}
+
+		// for package fragments that are contained in a project package fragment
+		// we have to skip the package fragment root as the parent.
+		if (element instanceof IPackageFragment) {
+			IPackageFragmentRoot parent= (IPackageFragmentRoot)((IPackageFragment)element).getParent();
+			return skipProjectPackageFragmentRoot(parent);
+		}
+		if (element instanceof IJavaElement)
+			return ((IJavaElement)element).getParent();
+
+		return null;
 	}
 }
