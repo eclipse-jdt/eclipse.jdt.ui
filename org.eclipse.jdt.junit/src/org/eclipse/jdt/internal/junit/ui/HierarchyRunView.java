@@ -7,7 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Sebastian Davids - sdavids@gmx.de bug 26754 
+ *     Sebastian Davids - sdavids@gmx.de bugs 26754, 41228
 *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -275,11 +275,13 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			if (parentImage == fSuiteErrorIcon || parentImage == fSuiteFailIcon) 
 				return;
 			parent.setImage(fSuiteFailIcon);
+			getTestRunInfo(parent).setStatus(ITestRunListener.STATUS_FAILURE);
 			testRunInfo.setStatus(ITestRunListener.STATUS_FAILURE);
 		} else {
 			if (parentImage == fSuiteErrorIcon) 
 				return;
 			parent.setImage(fSuiteErrorIcon);
+			getTestRunInfo(parent).setStatus(ITestRunListener.STATUS_ERROR);
 			testRunInfo.setStatus(ITestRunListener.STATUS_ERROR);
 		}
 		propagateStatus(parent, status);
