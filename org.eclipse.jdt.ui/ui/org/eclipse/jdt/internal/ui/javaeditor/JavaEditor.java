@@ -12,6 +12,7 @@ Contributors:
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -134,7 +135,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
@@ -142,6 +142,10 @@ import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
+
+
+
+
 
 
 /**
@@ -190,20 +194,22 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 	};
 	
-	/**
+		/*
 	 * Link mode.  
 	 */
 	class MouseClickListener implements KeyListener, MouseListener, MouseMoveListener,
-		FocusListener, PaintListener, IPropertyChangeListener, IDocumentListener, ITextInputListener {
+		FocusListener, PaintListener, IPropertyChangeListener, IDocumentListener, ITextInputListener {		
 
 		/** The session is active. */
 		private boolean fActive;
+
 		/** The currently active style range. */
 		private IRegion fActiveRegion;
 		/** The currently active style range as position. */
 		private Position fRememberedPosition;
 		/** The hand cursor. */
 		private Cursor fCursor;
+		
 		/** The link color. */
 		private Color fColor;
 
@@ -230,7 +236,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				return;
 				
 			updateColor(sourceViewer);
-			
+
 			sourceViewer.addTextInputListener(this);
 			
 			IDocument document= sourceViewer.getDocument();
@@ -248,7 +254,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 		
 		public void uninstall() {
-			
+
 			if (fColor != null) {
 				fColor.dispose();
 				fColor= null;
@@ -264,11 +270,11 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				return;
 				
 			sourceViewer.removeTextInputListener(this);
-			
+
 			IDocument document= sourceViewer.getDocument();
 			if (document != null)
 				document.removeDocumentListener(this);
-			
+				
 			IPreferenceStore preferenceStore= getPreferenceStore();
 			if (preferenceStore != null)
 				preferenceStore.removePropertyChangeListener(this);
@@ -281,9 +287,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			text.removeMouseListener(this);
 			text.removeMouseMoveListener(this);
 			text.removeFocusListener(this);
-			text.removePaintListener(this);			
-		}
-
+			text.removePaintListener(this);
+			}
+				
 		/*
 		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 		 */
@@ -327,12 +333,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 			
 			return null;
-		}
-
-		private void repairRepresentation() {
+		}		
+	
+		private void repairRepresentation() {			
 			repairRepresentation(false);
 		}
-		
+
 		private void repairRepresentation(boolean redrawAll) {			
 
 			if (fActiveRegion == null)
@@ -356,7 +362,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
 					offset= extension.modelOffset2WidgetOffset(offset);
 				} else {
-					offset -= viewer.getVisibleRegion().getOffset();
+				offset -= viewer.getVisibleRegion().getOffset();
 				}
 				
 				StyledText text= viewer.getTextWidget();
@@ -365,7 +371,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 			fActiveRegion= null;
 		}
-		
+
 		private IJavaElement getInput(JavaEditor editor) {
 			if (editor == null)
 				return null;
@@ -516,7 +522,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			StyledText text= viewer.getTextWidget();
 			if (text != null && !text.isDisposed())
 				text.setCursor(null);
-			
+						
 			if (fCursor != null) {
 				fCursor.dispose();
 				fCursor= null;
@@ -539,8 +545,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 			
 			fActive= true;
-			
-//			removed for #25871
+
+//			removed for #25871			
 //
 //			ISourceViewer viewer= getSourceViewer();
 //			if (viewer == null)
@@ -569,7 +575,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		 * @see org.eclipse.swt.events.MouseListener#mouseDoubleClick(org.eclipse.swt.events.MouseEvent)
 		 */
 		public void mouseDoubleClick(MouseEvent e) {}
-
 		/*
 		 * @see org.eclipse.swt.events.MouseListener#mouseDown(org.eclipse.swt.events.MouseEvent)
 		 */
@@ -596,26 +601,26 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 			if (!fActive)
 				return;
-
+				
 			if (e.button != 1) {
 				deactivate();
 				return;
 			}
-
+				
 			deactivate();
 			
 			IAction action= getAction("OpenEditor");  //$NON-NLS-1$
 			if (action == null)
 				return;
 				
-			action.run();
+			action.run();			
 		}
 
 		/*
 		 * @see org.eclipse.swt.events.MouseMoveListener#mouseMove(org.eclipse.swt.events.MouseEvent)
 		 */
 		public void mouseMove(MouseEvent event) {
-
+			
 			if (event.widget instanceof Control && !((Control) event.widget).isFocusControl()) {
 				deactivate();
 				return;
@@ -626,8 +631,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					return;
 				// Ctrl was already pressed
 				fActive= true;
-			}						
-
+	}
+	
 			ISourceViewer viewer= getSourceViewer();
 			if (viewer == null) {
 				deactivate();
@@ -654,7 +659,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			highlightRegion(viewer, region);	
 			activateCursor(viewer);												
 		}
-	
+
 		/*
 		 * @see org.eclipse.swt.events.FocusListener#focusGained(org.eclipse.swt.events.FocusEvent)
 		 */
@@ -677,7 +682,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					event.getDocument().addPosition(fRememberedPosition);
 				} catch (BadLocationException x) {
 					fRememberedPosition= null;
-				}
+		}
 			}
 		}
 
@@ -688,9 +693,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (fRememberedPosition != null && !fRememberedPosition.isDeleted()) {
 				event.getDocument().removePosition(fRememberedPosition);
 				fActiveRegion= new Region(fRememberedPosition.getOffset(), fRememberedPosition.getLength());
-			}
+		}
 			fRememberedPosition= null;
-			
+
 			ISourceViewer viewer= getSourceViewer();
 			if (viewer != null) {
 				StyledText widget= viewer.getTextWidget();
@@ -772,7 +777,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			
 			GC gc= event.gc;
 			if (fColor != null && !fColor.isDisposed())
-				gc.setForeground(fColor);
+			gc.setForeground(fColor);
 			gc.drawLine(x1, y, x2, y);
 		}
 
@@ -812,8 +817,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			return maxLocation;
 		}
 
-	}
-
+	}	
+	
 	/**
 	 * This action dispatches into two behaviours: If there is no current text
 	 * hover, the javadoc is displayed using information presenter. If there is
@@ -934,7 +939,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	private final static String LINE_NUMBER_COLOR= PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR;
 	/** Preference key for the link color */
 	private final static String LINK_COLOR= PreferenceConstants.EDITOR_LINK_COLOR;
-
+	
 //	/** Preference key for the default hover */
 //	private static final String DEFAULT_HOVER= PreferenceConstants.EDITOR_DEFAULT_HOVER;
 //	/** Preference key for hover while no modifier is pressed */
@@ -1389,9 +1394,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 		if (fMouseListener != null) {
 			fMouseListener.uninstall();
-			fMouseListener= null;
-		}
-		
+				fMouseListener= null;
+			}
+			
 		if (fEncodingSupport != null) {
 				fEncodingSupport.dispose();
 				fEncodingSupport= null;
@@ -1409,16 +1414,16 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 		ActionGroup oeg, ovg, sg, jsg;
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
-			oeg= new OpenEditorActionGroup(this),
-			ovg= new OpenViewActionGroup(this),
-			sg= new ShowActionGroup(this),
+				oeg= new OpenEditorActionGroup(this),
+				ovg= new OpenViewActionGroup(this),
+				sg= new ShowActionGroup(this),
 			jsg= new JavaSearchActionGroup(this)
 		});
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
 		
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$				
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
 		action= new InformationDispatchAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", (TextOperationAction) action); //$NON-NLS-1$
- 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		setAction("ShowJavaDoc", action); //$NON-NLS-1$
 	
 		fEncodingSupport= new DefaultEncodingSupport();
@@ -1427,8 +1432,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		if (fMouseListener == null) {
 				fMouseListener= new MouseClickListener();
 				fMouseListener.install();	
-		}
 	}
+		}
 	
 	private boolean isTextSelectionEmpty() {
 		ISelection selection= getSelectionProvider().getSelection();
@@ -1479,7 +1484,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					
 					initializeLineNumberRulerColumn(fLineNumberRulerColumn);
 			}
-
+				
 			if (isJavaEditorHoverProperty(property)) {
 				updateHoverBehavior();
 			}				
@@ -1488,7 +1493,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			super.handlePreferenceStoreChanged(event);
 		}
 	}
-
+	
 	private boolean isJavaEditorHoverProperty(String property) {
 		return	PreferenceConstants.EDITOR_DEFAULT_HOVER.equals(property)
 			|| PreferenceConstants.EDITOR_NONE_HOVER.equals(property)
@@ -1615,7 +1620,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		if (!isEditingScriptRunning() && fUpdater != null)
 			fUpdater.post();
 	}
-	
+ 
 	/**
 	 * Initializes the given line number ruler column from the preference store.
 	 * @param rulerColumn the ruler column to be initialized
@@ -1732,7 +1737,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
-		
+
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				boolean cutDown= false;

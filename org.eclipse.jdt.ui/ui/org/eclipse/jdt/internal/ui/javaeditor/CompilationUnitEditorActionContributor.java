@@ -12,6 +12,7 @@ Contributors:
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,14 +37,14 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
-
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
+
 
 
 
@@ -127,15 +128,17 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	private RetargetTextEditorAction fStructureSelectNextAction;
 	private RetargetTextEditorAction fStructureSelectPreviousAction;
 	private RetargetTextEditorAction fStructureSelectHistoryAction;	
+	private RetargetTextEditorAction fShowReferencesAction;	
 	private RetargetTextEditorAction fGotoNextMemberAction;	
 	private RetargetTextEditorAction fGotoPreviousMemberAction;	
 	private RetargetTextEditorAction fGotoMatchingBracket;	
 	private RetargetTextEditorAction fShowOutline;
 	private RetargetTextEditorAction fOpenStructure;
-		
+	
 	protected TogglePresentationAction fTogglePresentation;
 	protected GotoErrorAction fPreviousError;
 	protected GotoErrorAction fNextError;
+	
 	
 	public CompilationUnitEditorActionContributor() {
 		super();
@@ -148,8 +151,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		JavaPluginImages.setToolImageDescriptors(a, "segment_edit.gif"); //$NON-NLS-1$
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
-		
-		a= new RetargetToolbarAction(b, "NextError.", IJavaEditorActionConstants.NEXT_ERROR, false); //$NON-NLS-1$
+				a= new RetargetToolbarAction(b, "NextError.", IJavaEditorActionConstants.NEXT_ERROR, false); //$NON-NLS-1$
 		a.setActionDefinitionId("org.eclipse.ui.navigate.next"); 
 		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		fRetargetToolbarActions.add(a);
@@ -175,7 +177,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fGotoPreviousMemberAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
 		fGotoMatchingBracket.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
-
+		
 		fShowOutline= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowOutline."); //$NON-NLS-1$
 		fShowOutline.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
 		fOpenStructure= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "OpenStructure."); //$NON-NLS-1$
@@ -189,6 +191,10 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
 		fNextError.setActionDefinitionId("org.eclipse.ui.navigate.next");
 		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
+
+		fShowReferencesAction= new RetargetTextEditorAction(b, "ShowReferencesInFile."); //$NON-NLS-1$
+		fShowReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_REFERENCES);
+
 	}
 	
 	public void init(IActionBars bars) {
@@ -225,6 +231,12 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		if (navigateMenu != null) {
 			navigateMenu.appendToGroup("open.ext", fOpenStructure); //$NON-NLS-1$
 		}
+		IMenuManager searchMenu= menu.findMenuUsingPath("org.eclipse.search.menu");
+		if (searchMenu != null) {
+			// TODO check whether the search menu provides an extension group slot
+			searchMenu.add(new Separator());
+			searchMenu.add(fShowReferencesAction);
+		}
 	}
 	
 	/*
@@ -250,7 +262,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fTogglePresentation.setEditor(textEditor);
 		fPreviousError.setEditor(textEditor);
 		fNextError.setEditor(textEditor);
-		
+		 
 		fStructureSelectEnclosingAction.setAction(getAction(textEditor, StructureSelectionAction.ENCLOSING));
 		fStructureSelectNextAction.setAction(getAction(textEditor, StructureSelectionAction.NEXT));
 		fStructureSelectPreviousAction.setAction(getAction(textEditor, StructureSelectionAction.PREVIOUS));
@@ -260,6 +272,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
 		fShowOutline.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
 		fOpenStructure.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_STRUCTURE));
+
+		fShowReferencesAction.setAction(getAction(textEditor, SearchUsagesInFileAction.SHOWREFERENCES));
 
 		IActionBars bars= getActionBars();		
 		

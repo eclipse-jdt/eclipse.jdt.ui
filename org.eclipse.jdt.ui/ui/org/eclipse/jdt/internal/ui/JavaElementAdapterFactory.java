@@ -131,7 +131,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	private void updateLazyLoadedAdapters() {
 		if (fSearchPageScoreComputer == null && SearchUtil.isSearchPlugInActivated())
 			createSearchPageScoreComputer();
-	}
+}
 
 	private void createSearchPageScoreComputer() {
 		fSearchPageScoreComputer= new JavaSearchPageScoreComputer();

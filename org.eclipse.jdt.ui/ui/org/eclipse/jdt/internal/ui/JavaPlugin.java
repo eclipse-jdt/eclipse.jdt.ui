@@ -52,7 +52,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
-
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -65,7 +64,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
  * of the plugin such as document providers and find-replace-dialogs.
  */
 public class JavaPlugin extends AbstractUIPlugin {
-
+		
 	// TODO: Evaluate if we should move these ID's to JavaUI
 	/**
 	 * The id of the best match hover contributed for extension point
@@ -244,7 +243,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (PreferenceConstants.EDITOR_TEXT_FONT.equals(event.getProperty()))
 					PreferenceConverter.setValue(getPreferenceStore(), JFaceResources.TEXT_FONT, JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT).getFontData());
-			}
+	}
 		};
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
 	}
@@ -263,7 +262,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		if (fImageDescriptorRegistry != null)
 			fImageDescriptorRegistry.dispose();
-
+		
 		unregisterAdapters();
 		
 		super.shutdown();
@@ -282,7 +281,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
 	}
-	
+		
 	private IWorkbenchPage internalGetActivePage() {
 		IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
 		if (window == null)
@@ -317,7 +316,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fJavaTextTools= new JavaTextTools(getPreferenceStore());
 		return fJavaTextTools;
 	}
-	
+		
 	public synchronized MembersOrderPreferenceCache getMemberOrderPreferenceCache() {
 		if (fMembersOrderPreferenceCache == null)
 			fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
@@ -370,8 +369,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		manager.registerAdapters(fMarkerAdapterFactory, IMarker.class);
 		manager.registerAdapters(fEditorInputAdapterFactory, IEditorInput.class);
 		manager.registerAdapters(fResourceAdapterFactory, IResource.class);
-	}
-
+}
 	private void unregisterAdapters() {
 		IAdapterManager manager= Platform.getAdapterManager();
 		manager.unregisterAdapters(fJavaElementAdapterFactory);

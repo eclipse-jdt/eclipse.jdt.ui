@@ -124,6 +124,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNe
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
+import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
@@ -740,6 +741,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		action= new StructureSelectPreviousAction(this, fSelectionHistory);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_PREVIOUS);
 		setAction(StructureSelectionAction.PREVIOUS, action);
+
+		action= new SearchUsagesInFileAction(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_REFERENCES);
+		setAction(SearchUsagesInFileAction.SHOWREFERENCES, action);
 
 		StructureSelectHistoryAction historyAction= new StructureSelectHistoryAction(this, fSelectionHistory);
 		historyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_LAST);		

@@ -14,6 +14,7 @@ public interface IJavaEditorActionConstants {
 	 */
 	public static final String TOGGLE_PRESENTATION= "togglePresentation"; //$NON-NLS-1$
 
+	
 	/**
 	 * ID of the toolbar action to go to the previous error.
 	 */

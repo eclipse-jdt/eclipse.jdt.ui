@@ -54,7 +54,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>: if <code>true</code> override 
 	 * indicators are rendered
 	 * </p>
-     */
+	 */
 	public static final String APPEARANCE_OVERRIDE_INDICATOR= "org.eclipse.jdt.ui.overrideindicator";//$NON-NLS-1$
 
 	/**
@@ -1508,6 +1508,7 @@ public class PreferenceConstants {
 	 */	
 	public static final String TEMPLATES_USE_CODEFORMATTER= "org.eclipse.jdt.ui.template.format"; //$NON-NLS-1$
 
+
 	
 	
 	public static void initializeDefaultValues(IPreferenceStore store) {
@@ -1542,7 +1543,7 @@ public class PreferenceConstants {
 		
 		// RefactoringPreferencePage
 		store.setDefault(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, PreferenceConstants.REFACTOR_ERROR_SEVERITY);
-		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);
+		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);		
 		store.setDefault("RefactoringUI", "dialog");		
 
 		// TemplatePreferencePage
@@ -1561,7 +1562,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, "T,SI,SF,SM,I,F,C,M"); //$NON-NLS-1$
 		// must add here to guarantee that it is the first in the listener list
 		store.addPropertyChangeListener(JavaPlugin.getDefault().getMemberOrderPreferenceCache());
-
 
 		// JavaEditorPreferencePage
 		/*
@@ -1665,7 +1665,7 @@ public class PreferenceConstants {
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR, new RGB(63, 95, 191));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_DEFAULT_BOLD, false);
-		
+
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 500);
 
@@ -1704,7 +1704,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_CTRL_ALT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
 		store.setDefault(PreferenceConstants.EDITOR_ALT_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
 		store.setDefault(PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
-		
+
 		// do more complicated stuff
 		NewJavaProjectPreferencePage.initDefaults(store);	
 	}

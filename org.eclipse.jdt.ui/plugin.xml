@@ -527,6 +527,15 @@
 		icon="icons/full/clcl16/search_sortmatch.gif"
 		class="org.eclipse.jdt.internal.ui.search.PathNameSorter">
 	</sorter>
+		<sorter
+		id="org.eclipse.search.internal.ui.MatchPositionSorter"
+		pageId="org.eclipse.jdt.ui.JavaFileSearch"
+		label="%PositionSorter.label"
+		tooltip="%PositionSorter.tooltip"
+		icon="icons/full/clcl16/search_sortmatch.gif"
+		class="org.eclipse.jdt.internal.ui.search.MatchPositionSorter">
+	</sorter>
+	
 </extension>
 
 <!-- =========================================================================== -->
@@ -1511,6 +1520,11 @@
 		description="%ActionDefinition.selectLast.description"
 	/>
 	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
+		name= "%ActionDefinition.searchOccurrences.name"
+		description="%ActionDefinition.searchOccurrences.description"
+	/>
+	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals"
 		name= "%ActionDefinition.contentAssistProposals.name"
 		description="%ActionDefinition.contentAssistProposals.description"
@@ -1873,6 +1887,7 @@
 
 		<!-- search -->
 		<accelerator key="Ctrl+Shift+G" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
+		<accelerator key="Ctrl+Shift+U" id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace" />
@@ -1955,6 +1970,7 @@
 
 		<!-- search -->
 		<accelerator key="Ctrl+Shift+G" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
+		<accelerator key="Ctrl+Shift+U" id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace" />
