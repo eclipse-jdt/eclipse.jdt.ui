@@ -707,7 +707,45 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());	
 	}		
 	
-	
+	public void testAssignParamToFieldInGeneric() throws Exception {
+		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
+		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    public  E(int count, Vector<String>[] vec) {\n");
+		buf.append("        super();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+				
+		int offset= buf.toString().indexOf("vec");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    private final Vector<String>[] fVec;\n");
+		buf.append("\n");
+		buf.append("    public  E(int count, Vector<String>[] vec) {\n");
+		buf.append("        super();\n");
+		buf.append("        fVec = vec;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}
 	
 	public void testAssignToLocal2CursorAtEnd() throws Exception {	
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -2482,5 +2520,76 @@ public class AssistQuickFixTest extends QuickFixTest {
 			assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 
 		}
+	
+	public void testCreateInSuperInGeneric() throws Exception {
+		
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A<T> {\n");
+			buf.append("}\n");
+			pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public interface IB<T> {\n");
+			buf.append("}\n");
+			pack1.createCompilationUnit("IB.java", buf.toString(), false, null);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.IOException;\n");
+			buf.append("import java.util.Vector;\n");
+			buf.append("public class E extends A<String> implements IB<String> {\n");
+			buf.append("    public Vector<String> foo(int count) throws IOException {\n");
+			buf.append("        return null;\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			
+			String str= "foo";
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+			List proposals= collectAssists(context, false);
+			
+			assertNumberOfProposals(proposals, 2);
+			assertCorrectLabels(proposals);
+			
+			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+			String preview1= getPreviewContent(proposal);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.io.IOException;\n");
+			buf.append("import java.util.Vector;\n");
+			buf.append("\n");
+			buf.append("public interface IB<T> {\n");
+			buf.append("\n");
+			buf.append("    Vector<String> foo(int count) throws IOException;\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+			
+			proposal= (CUCorrectionProposal) proposals.get(1);
+			String preview2= getPreviewContent(proposal);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.io.IOException;\n");
+			buf.append("import java.util.Vector;\n");
+			buf.append("\n");
+			buf.append("public class A<T> {\n");
+			buf.append("\n");
+			buf.append("    public Vector<String> foo(int count) throws IOException {\n");
+			buf.append("        //TODO\n");
+			buf.append("        return null;\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected2= buf.toString();
+					
+			assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+
+		}
+
     
 }

@@ -920,10 +920,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (curr.isFromSource()) {
 				IMethodBinding method= Bindings.findMethodInType(curr, methodName, paramTypes);
 				if (method == null) {
-					ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, curr);
+					ITypeBinding typeDecl= curr.getTypeDeclaration();
+					ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, typeDecl);
 					if (targetCU != null) {
 						String label= CorrectionMessages.getFormattedString("QuickAssistProcessor.createmethodinsuper.description", curr.getName()); //$NON-NLS-1$
-						resultingCollections.add(new NewDefiningMethodProposal(label, targetCU, astRoot, curr, binding, paramNames, 6));
+						resultingCollections.add(new NewDefiningMethodProposal(label, targetCU, astRoot, typeDecl, binding, paramNames, 6));
 					}
 				}
 			}

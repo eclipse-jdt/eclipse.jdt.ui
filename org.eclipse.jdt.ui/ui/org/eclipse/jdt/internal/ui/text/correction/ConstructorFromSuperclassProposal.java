@@ -180,7 +180,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 				
 		SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 		var.setType(getImportRewrite().addImport(enclosingInstance, ast));
-		String[] enclosingArgNames= StubUtility.getArgumentNameSuggestions(getCompilationUnit().getJavaProject(), enclosingInstance.getName(), 0, paramNames);
+		String[] enclosingArgNames= StubUtility.getArgumentNameSuggestions(getCompilationUnit().getJavaProject(), enclosingInstance.getTypeDeclaration().getName(), 0, paramNames);
 		String firstName= enclosingArgNames[0];
 		var.setName(ast.newSimpleName(firstName));
 		parameters.add(var);
@@ -224,12 +224,12 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		if (binding == null) {
 			return new String[0];
 		}
-		
+		IMethodBinding methodDecl= binding.getMethodDeclaration();
 		int nParams= binding.getParameterTypes().length;
 		if (nParams > 0) {
 			try {
 				IJavaProject project= getCompilationUnit().getJavaProject();
-				IMethod method= Bindings.findMethod(binding, project);
+				IMethod method= Bindings.findMethod(methodDecl, project);
 				if (method != null) {
 					return StubUtility.suggestArgumentNames(project, method.getParameterNames());
 				}

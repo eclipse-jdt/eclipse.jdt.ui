@@ -1214,7 +1214,7 @@ public class Bindings {
 	/**
 	 * Get field declaration. See bug 83100
 	 */
-	public static IBinding getVariableDeclaration(IVariableBinding var) {
+	public static IVariableBinding getVariableDeclaration(IVariableBinding var) {
 		ITypeBinding declaringClass= var.getDeclaringClass();
 		if (declaringClass == null) {
 			return var;

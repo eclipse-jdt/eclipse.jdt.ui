@@ -1534,5 +1534,6 @@ public class UnresolvedElementsSubProcessor {
 		proposals.add(new RenameNodeCompletionProposal(label, context.getCompilationUnit(), offset, length, lengthId, 7));
 	}
 
+
 	
 }

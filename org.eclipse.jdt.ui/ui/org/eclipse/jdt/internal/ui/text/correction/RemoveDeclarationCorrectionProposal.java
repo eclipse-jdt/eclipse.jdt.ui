@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -108,8 +109,14 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		IBinding binding= fName.resolveBinding();
 		CompilationUnit root= (CompilationUnit) fName.getRoot();
 		ASTRewrite rewrite;
-		if (binding.getKind() != IBinding.VARIABLE) {
-			ASTNode declaration= root.findDeclaringNode(binding);
+		if (binding.getKind() == IBinding.METHOD) {
+			IMethodBinding decl= ((IMethodBinding) binding).getMethodDeclaration();
+			ASTNode declaration= root.findDeclaringNode(decl);
+			rewrite= ASTRewrite.create(root.getAST());
+			rewrite.remove(declaration, null);
+		} else if (binding.getKind() == IBinding.TYPE) {
+			ITypeBinding decl= ((ITypeBinding) binding).getTypeDeclaration();
+			ASTNode declaration= root.findDeclaringNode(decl);
 			rewrite= ASTRewrite.create(root.getAST());
 			rewrite.remove(declaration, null);
 		} else { // variable
@@ -124,7 +131,8 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 				removeVariableReferences(rewrite, references[i]);
 			}
 			
-			ASTNode declaringNode= completeRoot.findDeclaringNode(nameNode.resolveBinding());
+			IVariableBinding bindingDecl= Bindings.getVariableDeclaration((IVariableBinding) nameNode.resolveBinding());
+			ASTNode declaringNode= completeRoot.findDeclaringNode(bindingDecl);
 			if (declaringNode instanceof SingleVariableDeclaration) {
 				removeParamTag(rewrite, (SingleVariableDeclaration) declaringNode);
 			}

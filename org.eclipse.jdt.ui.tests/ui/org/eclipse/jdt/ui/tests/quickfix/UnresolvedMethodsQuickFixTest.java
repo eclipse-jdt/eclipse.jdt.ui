@@ -16,9 +16,6 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -26,18 +23,21 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.NewMethodCompletionProposal;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 	private static final Class THIS= UnresolvedMethodsQuickFixTest.class;
@@ -103,7 +103,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -138,7 +138,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -172,7 +172,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -205,7 +205,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -242,7 +242,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -283,7 +283,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -327,7 +327,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -374,7 +374,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -422,7 +422,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -471,7 +471,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -513,7 +513,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -3759,7 +3759,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();

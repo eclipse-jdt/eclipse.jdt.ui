@@ -246,7 +246,8 @@ public class ModifierCorrectionSubProcessor {
 		if (binding != null) {
 			String methodName= binding.getName();
 			String label;
-			if (problem.getProblemId() == IProblem.CannotHideAnInstanceMethodWithAStaticMethod) {
+			int problemId= problem.getProblemId();
+			if (problemId == IProblem.CannotHideAnInstanceMethodWithAStaticMethod || problemId == IProblem.UnexpectedStaticModifierForMethod) {
 				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemethodtononstatic.description", methodName); //$NON-NLS-1$
 			} else {
 				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.removeinvalidmodifiers.description", methodName); //$NON-NLS-1$				
@@ -255,8 +256,9 @@ public class ModifierCorrectionSubProcessor {
 			int excludedModifiers= 0;
 			int includedModifiers= 0;	
 			
-			switch (problem.getProblemId()) {
-			case IProblem.CannotHideAnInstanceMethodWithAStaticMethod:
+			switch (problemId) {
+				case IProblem.CannotHideAnInstanceMethodWithAStaticMethod:
+				case IProblem.UnexpectedStaticModifierForMethod:
 					excludedModifiers= Modifier.STATIC;
 					break;
 				case IProblem.IllegalModifierForInterfaceMethod:

@@ -464,7 +464,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
-			assertVariables(res, new String[] { "A", "B", "C", "e"});
+			assertVariables(res, new String[] { "A", "B", "C"});
 		}
 		{
 			String str= "break;";

@@ -122,6 +122,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.OverridingNonVisibleMethod:
 			case IProblem.CannotOverrideAStaticMethodWithAnInstanceMethod:
 			case IProblem.CannotHideAnInstanceMethodWithAStaticMethod:
+			case IProblem.UnexpectedStaticModifierForMethod:
 			case IProblem.LocalVariableHidingLocalVariable:
 			case IProblem.LocalVariableHidingField:
 			case IProblem.FieldHidingLocalVariable:
@@ -160,6 +161,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidUsageOfVarargs:
 			case IProblem.InvalidUsageOfAnnotations:
 			case IProblem.InvalidUsageOfAnnotationDeclarations:
+			//case IProblem.NonGenericType:
 				return true;
 			default:
 				return false;
@@ -325,6 +327,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForMethod:
 			case IProblem.IllegalModifierForVariable:
 			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
+			case IProblem.UnexpectedStaticModifierForMethod:
 				ModifierCorrectionSubProcessor.addRemoveInvalidModfiersProposal(context, problem, proposals, 5); 
 				break;
 			case IProblem.NotVisibleMethod:
@@ -447,6 +450,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidUsageOfAnnotations:
 			case IProblem.InvalidUsageOfAnnotationDeclarations:
 				ReorgCorrectionsSubProcessor.getNeed50ComplianceProposals(context, problem, proposals);
+				break;
+			case IProblem.NonGenericType:
+				TypeParameterMismatchSubProcessor.getTypeParameterMismatchProposals(context, problem, proposals);
 				break;
 			default:
 		}
