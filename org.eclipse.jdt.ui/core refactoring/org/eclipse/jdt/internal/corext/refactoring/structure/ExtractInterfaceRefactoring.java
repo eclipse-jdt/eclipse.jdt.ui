@@ -807,7 +807,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		StringBuffer buffer= new StringBuffer();
 		if (fCodeGenerationSettings.createFileComments)
 			buffer.append(TemplateUtil.createFileCommentsSource(newCu));
-		buffer.append(createPackageDeclarationSource());
+		if (! getInputClassPackage().isDefaultPackage())	
+			buffer.append(createPackageDeclarationSource());
 		buffer.append(createImportsSource());
 		if (fCodeGenerationSettings.createComments){
 			buffer.append(getLineSeperator());
