@@ -46,6 +46,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
+import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
@@ -234,6 +236,14 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 						element,
 						cuc.getCurrentContent(),
 						cuc.getPreviewContent(),
+						type);
+				} else if (change instanceof CreateTextFileChange){
+					CreateTextFileChange ctfc= (CreateTextFileChange)change;
+					String type= ctfc.isJavaFile() ? ComparePreviewer.JAVA_TYPE: ComparePreviewer.TEXT_TYPE;
+					return createCompareInput(
+						element,
+						ctfc.getCurrentContent(),
+						ctfc.getPreview(),
 						type);
 				}
 			} else if (element instanceof TextEditChangeElement) {
