@@ -52,7 +52,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
 import org.eclipse.jdt.internal.ui.actions.AddWatchpointAction;
 import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
+import org.eclipse.jdt.internal.ui.actions.OpenSuperImplementationAction;
 import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 
 
@@ -133,6 +135,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		MenuManager search= new JavaSearchGroup().getMenuManagerForGroup(isTextSelectionEmpty());
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, search);
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowJavaDoc");
+		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenSuperImplementation");
 		
 		addAction(menu, "Inspect"); //$NON-NLS-1$
 		addAction(menu, "Display"); //$NON-NLS-1$
@@ -155,7 +158,8 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		page.setAction("ShowInPackageView", new ShowInPackageViewAction(getSite(), page)); //$NON-NLS-1$
 		page.setAction("AddMethodEntryBreakpoint", new AddMethodEntryBreakpointAction(page)); //$NON-NLS-1$
 		page.setAction("AddWatchpoint", new AddWatchpointAction(page)); // $NON-NLS-1$
-	
+		StructuredSelectionProvider selectionProvider= StructuredSelectionProvider.createFrom(page);
+		page.setAction("OpenSuperImplementation", new OpenSuperImplementationAction(selectionProvider)); // $NON-NLS-1$
 		return page;
 	}
 	
@@ -337,6 +341,8 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		setAction("Display", new EditorDisplayAction(this, true)); //$NON-NLS-1$
 		setAction("RunToLine", new RunToLineAction(this)); //$NON-NLS-1$
 		setAction("Inspect", new InspectAction(this, true)); //$NON-NLS-1$
+		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(getSite().getWorkbenchWindow().getSelectionService());
+		setAction("OpenSuperImplementation", new OpenSuperImplementationAction(provider)); //$NON-NLS-1$
 	}
 	
 	private boolean isTextSelectionEmpty() {
