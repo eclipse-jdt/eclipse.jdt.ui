@@ -11,6 +11,9 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.eclipse.ui.PartInitException;
 
 /**
@@ -25,6 +28,8 @@ import org.eclipse.ui.PartInitException;
  */
 public class OpenTextEditorTest extends OpenEditorTest {
 
+	private static final Class THIS= OpenTextEditorTest.class;
+	
 	public static final int N_OF_COPIES= 20;
 	
 	public static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
@@ -34,6 +39,10 @@ public class OpenTextEditorTest extends OpenEditorTest {
 	public static final String FILE_SUFFIX= ".txt";
 	
 	public static final String ORIG_FILE= PATH + FILE_PREFIX + ".java";
+
+	public static Test suite() {
+		return new PerformanceTestSetup(new OpenTextEditorTestSetup(new TestSuite(THIS)));
+	}
 	
 	protected void setUp() {
 		EditorTestHelper.runEventQueue();

@@ -22,25 +22,45 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 
 public class ResourceTestHelper {
 
-	public static void replicate(String src, String destPrefix, String destSuffix, int n) throws CoreException {
+	public static final int FAIL_IF_EXISITS= 0;
+	
+	public static final int OVERWRITE_IF_EXISTS= 1;
+	
+	public static final int SKIP_IF_EXISTS= 2;
+
+	public static void replicate(String src, String destPrefix, String destSuffix, int n, int ifExists) throws CoreException {
 		for (int i= 0; i < n; i++)
-			copy(src, destPrefix + i + destSuffix);
+			copy(src, destPrefix + i + destSuffix, ifExists);
 	}
 
 	public static void copy(String src, String dest) throws CoreException {
-		IFile file= getFile(src);
-		file.copy(new Path(dest), true, null);
+		copy(src, dest, FAIL_IF_EXISITS);
+	}
+
+	public static void copy(String src, String dest, int ifExists) throws CoreException {
+		IFile destFile= getFile(dest);
+		switch (ifExists) {
+			case OVERWRITE_IF_EXISTS:
+				if (destFile.exists())
+					destFile.delete(true, null);
+				break;
+			case SKIP_IF_EXISTS:
+				if (destFile.exists())
+					return;
+				break;
+		}
+		IFile srcFile= getFile(src);
+		srcFile.copy(new Path(dest), true, null);
 	}
 
 	private static IFile getFile(String path) {
