@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
@@ -587,7 +588,7 @@ public class ExtractTempRefactoring extends Refactoring {
 					return null;
 			}
 		}
-		final ITypeBinding type= expression.resolveTypeBinding();
+		ITypeBinding type= expression.resolveTypeBinding();
 		if (type.isPrimitive())
 			return null;
 		if (type.isArray() && type.getElementType().isPrimitive())
@@ -597,6 +598,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (pack != null && declarations.length > 0 && pack.getName().equals(declarations[0].getElementName()))
 			return null;
 		final ImportRewrite rewrite= new ImportRewrite(fCu);
+		if (type.isMember())
+			type= Bindings.getTopLevelType(type);
 		rewrite.addImport(type);
 		if (rewrite.isEmpty())
 			return null;
