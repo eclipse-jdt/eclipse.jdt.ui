@@ -30,9 +30,25 @@ import org.eclipse.jdt.internal.corext.Assert;
 public class Binding2JavaModel {
 	
 	private Binding2JavaModel(){}
+
+	/**
+	 * Converts the given <code>IVariableBinding</code> into a <code>IField</code>
+	 * using the classpath defined by the given Java project. Returns <code>null</code>
+	 * if the conversion isn't possible.
+	 */
+	public static IField find(IVariableBinding field, IJavaProject in) throws JavaModelException {
+		Assert.isTrue(field.isField());
+		IType declaringClass = find(field.getDeclaringClass(), in);
+		if (declaringClass == null)
+			return null;
+	    IField foundField= declaringClass.getField(field.getName());
+	    if (! foundField.exists())
+	    	return null;
+		return foundField;
+	}
 	
 	/**
-	 * Converts the given <code>ReferenceBinding</code> into a <code>IType</code>
+	 * Converts the given <code>ITypeBinding</code> into a <code>IType</code>
 	 * using the classpath defined by the given Java project. Returns <code>null</code>
 	 * if the conversion isn't possible.
 	 */
@@ -55,7 +71,7 @@ public class Binding2JavaModel {
 	}
 
 	/**
-	 * Finds the given <code>MethodBinding</code> in the given <code>IType</code>. Returns
+	 * Finds the given <code>IMethodBinding</code> in the given <code>IType</code>. Returns
 	 * <code>null</code> if the type doesn't contain a corresponding method.
 	 */
 	public static IMethod find(IMethodBinding method, IType type) throws JavaModelException {
@@ -69,10 +85,6 @@ public class Binding2JavaModel {
 		return null;
 	}
 
-//	public static IMethod lookupIMethod(IMethodBinding method, IType type) throws JavaModelException {
-//		return find(method, type);
-//	}
-	
 	public static IMethod find(IMethodBinding method, IJavaProject scope) throws JavaModelException {
 		IType type= find(method.getDeclaringClass(), scope);
 		if (type == null)
@@ -170,68 +182,5 @@ public class Binding2JavaModel {
 		int arrayCount= Signature.getArrayCount(s);
 		return s.charAt(arrayCount) == Signature.C_RESOLVED;
 	}	
-
-//----
-	public static IField lookupIField(IVariableBinding field, IJavaProject in) throws JavaModelException {
-		Assert.isTrue(field.isField());
-		IType declaringClass = lookupIType(field.getDeclaringClass(), in);
-		if (declaringClass == null)
-			return null;
-	    return declaringClass.getField(field.getName());
-	}
-//
-//  public static IMethod lookupIMethod(IMethodBinding method, IJavaProject in) throws JavaModelException {
-//     IType declaringClass= lookupIType(method.getDeclaringClass(), in);
-//     if (declaringClass == null) 
-//     	return null;
-//	return declaringClass.getMethod(method.getName(), getParameterTypeSignatures(method));
-//  }
-//
-	private static IType lookupIType(ITypeBinding type, IJavaProject in) throws JavaModelException {
-	    String fullyQualifiedName= getFullyQualifiedName(type);
-	    if (fullyQualifiedName == null)
-	    	return null;
-	     return in.findType(fullyQualifiedName);
-	}
-
-	private static String getFullyQualifiedName(ITypeBinding type) {
-	    if (type.isAnonymous()) 
-	      return null;
-	    StringBuffer buff=  new StringBuffer();
-	    buff.append(getPackageName(type))
-	    	 .append(getTypeQualifiedName(type))
-	    	 .append(type.getName());
-	    return buff.toString();
-	}
-
-	private static String getTypeQualifiedName(ITypeBinding type){
-		StringBuffer buff= new StringBuffer();
-	    ITypeBinding declaringType = type;
-	    while (declaringType.isNested()) {
-	      declaringType = declaringType.getDeclaringClass();
-	      buff.append(declaringType.getName()).append(".");
-	    }
-	    return buff.toString();
-	}
-	
-	private static ITypeBinding getBaseType(ITypeBinding type) {
-		return (type.isArray() ? type.getElementType() : type);
-	}
-	
-	private static String getPackageName(ITypeBinding type){
-	    IPackageBinding typePackage = getBaseType(type).getPackage();
-	    if (typePackage == null || typePackage.isUnnamed())
-	    	return "";
-		return typePackage.getName() + ".";
-	}
-
-//	private static String[] getParameterTypeSignatures(IMethodBinding method){
-//		String[] parameterTypeSignatures = new String[method.getParameterTypes().length];
-//		for (int i = 0; i < parameterTypeSignatures.length; i++) {
-//			parameterTypeSignatures[i]= Signature.createTypeSignature(getFullyQualifiedName(method.getParameterTypes()[i]), true);
-//		}
-//		return parameterTypeSignatures;
-//	}
-//
 }
 
