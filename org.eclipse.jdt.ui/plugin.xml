@@ -775,7 +775,7 @@
 	   id="org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard"
 	   name="JAR file"
 	   class="org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard"
-	   icon="icons/full/obj16/jar_pack_obj.gif">
+	   icon="icons/full/ctool16/exportjar_wiz.gif">
 	   <description>Package resources into a JAR file on the local file system</description>
 	   <selection class="org.eclipse.core.resources.IResource"/>
 	</wizard>
