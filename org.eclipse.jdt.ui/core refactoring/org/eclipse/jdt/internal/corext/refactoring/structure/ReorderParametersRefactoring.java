@@ -105,7 +105,7 @@ class ReorderParametersRefactoring extends Refactoring {
 
 			RefactoringStatus result= new RefactoringStatus();
 			
-			fRippleMethods= RippleMethodFinder.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1));
+			fRippleMethods= RippleMethodFinder.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1), null);
 			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 1));			
 			fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
 			if (result.hasFatalError())
