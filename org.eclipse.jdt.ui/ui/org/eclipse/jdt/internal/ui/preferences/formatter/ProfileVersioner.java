@@ -521,7 +521,7 @@ public class ProfileVersioner {
 	
 	private static void version6to7(Map oldSettings) {
 		checkAndReplace(oldSettings,
-			"org.eclipse.jdt.core.formatter.formatter.tabulation.size", //$NON-NLS-1$
+			"org.eclipse.jdt.core.formatter.tabulation.size", //$NON-NLS-1$
 			new String[] {
 					DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH,
 					DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE
