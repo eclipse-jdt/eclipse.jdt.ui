@@ -102,4 +102,12 @@ public class JavaChangeHover extends LineChangeHover  {
 		}
 		return IDocument.DEFAULT_CONTENT_TYPE;
 	}
+	
+	
+	/*
+	 * @see org.eclipse.jface.text.source.LineChangeHover#getTabReplacement()
+	 */
+	protected String getTabReplacement() {
+		return Character.toString('\t');
+	}
 }
