@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -386,13 +388,13 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 		return fIndexBinding;
 	}
 
-	protected ASTRewrite getRewrite() {
+	protected ASTRewrite getRewrite() throws CoreException {
 		ASTRewrite rewrite= ASTRewrite.create(fAst);
 		doConvert(rewrite);
 		return rewrite;
 	}
 
-	private void doConvert(ASTRewrite rewrite) {
+	private void doConvert(ASTRewrite rewrite) throws CoreException {
 		doInferCollection();
 		doInferElement();
 		doFindAndReplaceInBody(rewrite);
@@ -527,7 +529,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 		}
 	}
 
-	private void doInferElement() {
+	private void doInferElement() throws CoreException {
 		if (fCollectionName == null) {
 			createDefaultParameter();
 		} else {
@@ -536,8 +538,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 				fParameterDeclaration= fAst.newSingleVariableDeclaration();
 				SimpleName name= fAst.newSimpleName(ELEMENT_KEY_REFERENCE);
 				fParameterDeclaration.setName(name);
-				Type theType= null;
-				theType= ASTNodeFactory.newType(getAst(), elementType, false);
+				Type theType= getImportRewrite().addImport(elementType, fAst);
 				if (fOldCollectionTypeBinding.getDimensions() != 1) {
 					theType= fAst.newArrayType(theType, fOldCollectionTypeBinding.getDimensions() - 1);
 				}

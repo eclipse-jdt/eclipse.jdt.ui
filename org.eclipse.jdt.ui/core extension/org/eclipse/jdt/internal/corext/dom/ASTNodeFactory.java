@@ -55,9 +55,9 @@ public class ASTNodeFactory {
 		return result;
 	}
 	
-	public static Name newName(AST ast, String name) {
-		//TODO (after I20050315: replace by: return ast.newName(name);
-		StringTokenizer tok= new StringTokenizer(name, "."); //$NON-NLS-1$
+	public static Name newName(AST ast, String qualifiedName) {
+		//TODO (after I20050315): replace by: return ast.newName(name);
+		StringTokenizer tok= new StringTokenizer(qualifiedName, "."); //$NON-NLS-1$
 		Name res= null;
 		while (tok.hasMoreTokens()) {
 			SimpleName curr= ast.newSimpleName(tok.nextToken());
@@ -103,19 +103,53 @@ public class ASTNodeFactory {
 		return (Type)result;
 	}
 	
+	/**
+	 * @deprecated use import rewrite or ASTNode.copySubtree(..)
+	 */
 	public static Type newType(AST ast, ITypeBinding binding, boolean fullyQualify) {
 		if (binding.isPrimitive()) {
-			String name= binding.getName();
-			return ast.newPrimitiveType(PrimitiveType.toCode(name));
-		} else if (binding.isArray()) {
-			Type elementType= newType(ast, binding.getElementType(), fullyQualify);
-			return ast.newArrayType(elementType, binding.getDimensions());
-		} else {
-			if (fullyQualify)
-				return ast.newSimpleType(ast.newName(Bindings.getAllNameComponents(binding)));
-			else
-				return ast.newSimpleType(ast.newName(Bindings.getNameComponents(binding)));	
+			return ast.newPrimitiveType(PrimitiveType.toCode(binding.getName()));
 		}
+		
+		ITypeBinding normalizedBinding= Bindings.normalizeTypeBinding(binding);
+		if (normalizedBinding == null) {
+			return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
+		}
+		
+		if (normalizedBinding.isTypeVariable()) {
+			return ast.newSimpleType(ast.newSimpleName(binding.getName()));
+		}
+		if (normalizedBinding.isWildcardType()) {
+			WildcardType wcType= ast.newWildcardType();
+			ITypeBinding bound= normalizedBinding.getBound();
+			if (bound != null) {
+				Type boundType= newType(ast, bound, false);
+				wcType.setBound(boundType, normalizedBinding.isUpperbound());
+			}
+			return wcType;
+		}
+		
+		if (normalizedBinding.isArray()) {
+			Type elementType= newType(ast, normalizedBinding.getElementType(), false);
+			return ast.newArrayType(elementType, normalizedBinding.getDimensions());
+		}
+		
+		String qualifiedName= Bindings.getRawQualifiedName(normalizedBinding);
+		if (qualifiedName.length() > 0) {
+			String res= fullyQualify ? qualifiedName : Bindings.getRawName(normalizedBinding);
+			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
+			if (typeArguments.length > 0) {
+				Type erasureType= ast.newSimpleType(newName(ast, res));
+				ParameterizedType paramType= ast.newParameterizedType(erasureType);
+				List arguments= paramType.typeArguments();
+				for (int i= 0; i < typeArguments.length; i++) {
+					arguments.add(newType(ast, typeArguments[i], false));
+				}
+				return paramType;
+			}
+			return ast.newSimpleType(newName(ast, res));
+		}
+		return ast.newSimpleType(ASTNodeFactory.newName(ast, Bindings.getRawName(normalizedBinding)));
 	}
 	
 	/**
